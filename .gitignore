@@ -348,3 +348,14 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# WEEVIL
+
+# Prevent user from accidentally overwriting the configuration:
+[aA]pp.config
+
+# We require log files for testing purposes (logs were previously blocked by global gitignore):
+!*.log
+
+# This directory temporarily holds data used by the automated tests:
+*~ZIP/
