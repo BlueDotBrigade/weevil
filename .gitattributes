@@ -1,0 +1,41 @@
+# LFS
+# There are multiple entries for the same file extension because
+# some tools are case sensitive.
+
+# Images
+
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.Bmp filter=lfs diff=lfs merge=lfs -text
+*.BMP filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.Jpg filter=lfs diff=lfs merge=lfs -text
+*.JPG filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.Jpeg filter=lfs diff=lfs merge=lfs -text
+*.JPEG filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.Png filter=lfs diff=lfs merge=lfs -text
+*.PNG filter=lfs diff=lfs merge=lfs -text
+
+# Documents 
+
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.Pdf filter=lfs diff=lfs merge=lfs -text
+*.PDF filter=lfs diff=lfs merge=lfs -text
+*.doc filter=lfs diff=lfs merge=lfs -text
+*.Doc filter=lfs diff=lfs merge=lfs -text
+*.DOC filter=lfs diff=lfs merge=lfs -text
+*.docx filter=lfs diff=lfs merge=lfs -text
+*.Docx filter=lfs diff=lfs merge=lfs -text
+*.DOCX filter=lfs diff=lfs merge=lfs -text
+
+# Compressed Files
+
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.Zip filter=lfs diff=lfs merge=lfs -text
+*.ZIP filter=lfs diff=lfs merge=lfs -text
+*.rar filter=lfs diff=lfs merge=lfs -text
+*.Rar filter=lfs diff=lfs merge=lfs -text
+*.RAR filter=lfs diff=lfs merge=lfs -text
+*.7z filter=lfs diff=lfs merge=lfs -text
+*.7Z filter=lfs diff=lfs merge=lfs -text
