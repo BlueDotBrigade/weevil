@@ -1,0 +1,75 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.Resources">
+
+	<!--#region Progress Bar -->
+
+	<!-- https://stackoverflow.com/questions/8604991/progressbar-theme-with-diagonal-lines-decorator -->
+	<LinearGradientBrush x:Key="ProgressBarBorderBrush"
+                             EndPoint="0,1"
+                             StartPoint="0,0">
+		<LinearGradientBrush.GradientStops>
+			<GradientStop Color="#B2B2B2"
+		                      Offset="0"/>
+			<GradientStop Color="#8C8C8C"
+		                      Offset="1"/>
+		</LinearGradientBrush.GradientStops>
+	</LinearGradientBrush>
+	<LinearGradientBrush x:Key="ProgressBarBackground"
+                             EndPoint="1,0"
+                             StartPoint="0,0">
+		<LinearGradientBrush.GradientStops>
+			<GradientStop Color="#BABABA"
+		                      Offset="0"/>
+			<GradientStop Color="#C7C7C7"
+		                      Offset="0.5"/>
+			<GradientStop Color="#BABABA"
+		                      Offset="1"/>
+		</LinearGradientBrush.GradientStops>
+	</LinearGradientBrush>
+	<SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="Gray" />
+	<SolidColorBrush x:Key="ProgressBarTrackBackgroundBrush" Color="#3498db" />
+   <Style x:Key="{x:Type ProgressBar}" TargetType="{x:Type ProgressBar}">
+      <Setter Property="Template">
+         <Setter.Value>
+            <ControlTemplate TargetType="{x:Type ProgressBar}">
+               <Border x:Name="BorderBackground" CornerRadius="3" BorderThickness="2" BorderBrush="{StaticResource ProgressBarTrackBackgroundBrush}" Background="{StaticResource ProgressBarTrackBackgroundBrush}">
+                  <Grid>
+                     <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="CommonStates">
+                           <VisualState x:Name="Determinate" />
+                           <VisualState x:Name="Indeterminate" />
+                        </VisualStateGroup>
+                     </VisualStateManager.VisualStateGroups>
+                     <Border x:Name="PART_Track" Margin="0" BorderThickness="0" CornerRadius="2" BorderBrush="Orange" />
+                     <Border x:Name="PART_Indicator" Margin="0" BorderThickness="0" CornerRadius="2" Background="{StaticResource ProgressBarTrackBackgroundBrush}" HorizontalAlignment="Left" ClipToBounds="True">
+                        <Border x:Name="DiagonalDecorator" Width="5000">
+                           <Border.Background>
+                              <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,25,25" ViewportUnits="Absolute">
+                                 <DrawingBrush.RelativeTransform>
+                                    <TranslateTransform X="0" Y="0" />
+                                 </DrawingBrush.RelativeTransform>
+                                 <DrawingBrush.Drawing>
+                                    <GeometryDrawing Brush="#20FFFFFF" Geometry="M10,0 22,0 12,25 0,22 Z" />
+                                 </DrawingBrush.Drawing>
+                              </DrawingBrush>
+                           </Border.Background>
+                           <Border.Triggers>
+                              <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                 <BeginStoryboard>
+                                    <Storyboard>
+                                       <DoubleAnimation Storyboard.TargetProperty="(Border.Background).(DrawingBrush.RelativeTransform).(TranslateTransform.X)" From="0" To=".1" RepeatBehavior="Forever" Duration="0:0:15" />
+                                    </Storyboard>
+                                 </BeginStoryboard>
+                              </EventTrigger>
+                           </Border.Triggers>
+                        </Border>
+                     </Border>
+                  </Grid>
+               </Border>
+            </ControlTemplate>
+         </Setter.Value>
+      </Setter>
+   </Style>
+   <!--#endregion-->
+</ResourceDictionary>

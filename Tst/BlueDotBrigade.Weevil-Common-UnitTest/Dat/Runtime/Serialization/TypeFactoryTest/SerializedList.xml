@@ -1,0 +1,16 @@
+<TypeFactoryTest.Mammal xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Common.Runtime.Serialization" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <Dogs>
+    <TypeFactoryTest.Dog>
+      <Age>1</Age>
+      <Name>Pavlov</Name>
+    </TypeFactoryTest.Dog>
+    <TypeFactoryTest.Dog>
+      <Age>2</Age>
+      <Name>Lassie</Name>
+    </TypeFactoryTest.Dog>
+    <TypeFactoryTest.Dog>
+      <Age>3</Age>
+      <Name>Littlest Hobo</Name>
+    </TypeFactoryTest.Dog>
+  </Dogs>
+</TypeFactoryTest.Mammal>
