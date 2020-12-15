@@ -1,0 +1,284 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{47080835-A553-44BE-A6FD-13B592C5D048}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>BlueDotBrigade.Weevil.Gui</RootNamespace>
+    <AssemblyName>WeevilGui</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>false</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controls\NamespaceDoc.cs" />
+    <Compile Include="Converters\ContextConverter.cs" />
+    <Compile Include="Converters\FilterCommandParameterConverter.cs" />
+    <Compile Include="Converters\FilterMultiValueConverter.cs" />
+    <Compile Include="Converters\FilterConverter.cs" />
+    <Compile Include="Converters\UserCommentToColorConverter.cs" />
+    <Compile Include="Converters\SeverityToBackgroundConverter.cs" />
+    <Compile Include="Converters\SeverityToForegroundConverter.cs" />
+    <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="Filter\FilterExtensions.cs" />
+    <Compile Include="Input\UiBoundCommand.cs" />
+    <Compile Include="IO\SelectFileView.xaml.cs">
+      <DependentUpon>SelectFileView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="IO\SelectFileViewModel.cs" />
+    <Compile Include="IO\UserPromptDialog.xaml.cs">
+      <DependentUpon>UserPromptDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\GlobalSuppressions.cs" />
+    <Compile Include="IO\IDialogBoxService.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="IO\DialogBoxService.cs" />
+    <Compile Include="Resources\NamespaceDoc.cs" />
+    <Compile Include="UriHelper.cs" />
+    <Compile Include="DragAndDropViewModel.cs" />
+    <Compile Include="DroppedFileEventArgs.cs" />
+    <Compile Include="Filter\FilterResultsViewModel.Commands.cs">
+      <DependentUpon>FilterResultsViewModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Filter\FilterResultsViewModel.cs" />
+    <Compile Include="MainWindowModel.cs" />
+    <Compile Include="Filter\FilterResultsView.xaml.cs">
+      <DependentUpon>FilterResultsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ClipboardHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="App.config" />
+    <None Include="App.config.Template" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="WeevilGui.exe.nlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
+      <Link>Properties\DomainSpecificTerminology.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Themes\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Filter\FilterResultsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="IO\SelectFileView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="IO\UserPromptDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\ApplicationStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Blend.Interactivity.Wpf">
+      <Version>1.0.1340</Version>
+    </PackageReference>
+    <PackageReference Include="gong-wpf-dragdrop">
+      <Version>2.3.2</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>12.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="NLog">
+      <Version>4.7.0</Version>
+    </PackageReference>
+    <PackageReference Include="PostSharp.Patterns.Model">
+      <Version>4.3.23</Version>
+    </PackageReference>
+    <PackageReference Include="Prism.Mvvm">
+      <Version>1.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Collections.Immutable">
+      <Version>5.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BlueDotBrigade-Common\BlueDotBrigade-Common.csproj">
+      <Project>{11f33a56-9f45-4e0f-a584-8840f177c6cc}</Project>
+      <Name>BlueDotBrigade-Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj">
+      <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
+      <Name>BlueDotBrigade.Weevil-Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Wpf\BlueDotBrigade.Weevil.Wpf.csproj">
+      <Project>{35af40b9-ba74-4fa7-8f52-c60e23921e85}</Project>
+      <Name>BlueDotBrigade.Weevil.Wpf</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil\BlueDotBrigade.Weevil.csproj">
+      <Project>{29bd191a-f2d0-4769-b325-6afe68c3e7cf}</Project>
+      <Name>BlueDotBrigade.Weevil</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Help.png" />
+    <Resource Include="Resources\Icons\LogEntry-Error.png" />
+    <Resource Include="Resources\Icons\LogEntry-Fatal.png" />
+    <Resource Include="Resources\Icons\LogEntry-FatalMissing.png" />
+    <Resource Include="Resources\Icons\LogEntry-Information.png" />
+    <Resource Include="Resources\Icons\LogEntry-Warning.png" />
+    <Resource Include="Resources\Icons\NewReleaseAvailable.png" />
+    <Resource Include="Resources\Icons\OpenDocument.png" />
+    <Resource Include="Resources\Icons\Records-OnDisk.png" />
+    <Resource Include="Resources\Icons\Records-Pinned.png" />
+    <Resource Include="Resources\Icons\Records-Selected.png" />
+    <Resource Include="Resources\Icons\Records-Visible.png" />
+    <Resource Include="Resources\Icons\TimeElapsed.png" />
+    <Resource Include="Resources\Icons\Ui-Unresponsive.png" />
+    <Resource Include="Resources\Icons\VersionIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\Weevil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\NewReleaseAvailable_256x256.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Filter-24.png" />
+    <Resource Include="Resources\Icons\FilterCancel-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Filter-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Help-24.png" />
+    <Resource Include="Resources\Icons\Help-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Flagged-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Weevil.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...
+COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
