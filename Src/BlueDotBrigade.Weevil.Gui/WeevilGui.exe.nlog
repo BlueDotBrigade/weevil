@@ -9,6 +9,7 @@
     <target name="AsyncLogger" xsi:type="AsyncWrapper" overflowAction="Grow">
       <target name="Logger" xsi:type="File"
               fileName="C:\ProgramData\BlueDotBrigade\Weevil\Logs\WeevilGui.log"
+              CreateDirs="true"
               archiveFileName="C:\ProgramData\BlueDotBrigade\Weevil\Logs\WeevilGui-{#}.log"
               archiveEvery="Day"
               archiveNumbering="Date"

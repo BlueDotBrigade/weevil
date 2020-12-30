@@ -97,7 +97,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="App.config.Template" />
-    <None Include="WeevilCli.exe.nlog" />
+    <None Include="WeevilCli.exe.nlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
