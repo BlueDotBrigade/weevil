@@ -9,7 +9,7 @@
 	using Diagnostics;
 	using IO;
 	using Navigation;
-	using BlueDotBrigade.Collections.Generic;
+	using BlueDotBrigade.Weevil.Collections.Generic;
 	using Weevil.Collections.Immutable;
 	using Runtime.Serialization;
 

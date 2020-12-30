@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
-	using BlueDotBrigade.Collections.Generic;
+	using BlueDotBrigade.Weevil.Collections.Generic;
 
 	[DebuggerDisplay("Include={this.Include}, Exclude={this.Exclude}, Configuration={this.Configuration.Count}")]
 	public class FilterCriteria : IFilterCriteria, IEquatable<FilterCriteria>

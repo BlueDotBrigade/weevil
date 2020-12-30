@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-IntegrationTests", "Tst\BlueDotBrigade.Weevil-IntegrationTest\BlueDotBrigade.Weevil-IntegrationTests.csproj", "{D52FD49C-67D4-4D57-9B8E-806514B69E51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-Common", "Src\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil-Common", "Src\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-UnitTest", "Tst\BlueDotBrigade.Weevil-UnitTest\BlueDotBrigade.Weevil-UnitTest.csproj", "{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}"
 EndProject
@@ -32,8 +32,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-Common-UnitTests", "Tst\BlueDotBrigade.Weevil-Common-UnitTest\BlueDotBrigade.Weevil-Common-UnitTests.csproj", "{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade-Common", "Src\BlueDotBrigade-Common\BlueDotBrigade-Common.csproj", "{11F33A56-9F45-4E0F-A584-8840F177C6CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Interface", "User Interface", "{0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}"
 EndProject
@@ -119,14 +117,6 @@ Global
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Release|x64.ActiveCfg = Release|x64
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Release|x64.Build.0 = Release|x64
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Debug|x64.ActiveCfg = Debug|x64
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Debug|x64.Build.0 = Debug|x64
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Release|x64.ActiveCfg = Release|x64
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -138,7 +128,6 @@ Global
 		{B50F9FCD-32DE-4609-B3D2-E0509B483793} = {E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}
 		{5482DA9A-4ADD-4837-BC9D-92B303BD075F} = {0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9} = {E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}
-		{11F33A56-9F45-4E0F-A584-8840F177C6CC} = {E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACD62972-31F1-402F-B3FC-272C2A336038}

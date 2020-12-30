@@ -5,12 +5,12 @@
 	using System.Collections.Immutable;
 	using System.IO;
 	using System.Linq;
-	using BlueDotBrigade.IO;
+	using BlueDotBrigade.Weevil.Collections.Generic;
+	using BlueDotBrigade.Weevil.IO;
 	using Configuration.Sidecar;
 	using Data;
 	using Diagnostics;
 	using Navigation;
-	using BlueDotBrigade.Collections.Generic;
 
 	internal partial class CoreEngine
 	{

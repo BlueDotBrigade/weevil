@@ -88,10 +88,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Src\BlueDotBrigade-Common\BlueDotBrigade-Common.csproj">
-      <Project>{11F33A56-9F45-4E0F-A584-8840F177C6CC}</Project>
-      <Name>BlueDotBrigade-Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj">
       <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
       <Name>BlueDotBrigade.Weevil-Common</Name>
