@@ -3,13 +3,13 @@
     <TargetFramework>netstandard2.0</TargetFramework>
 	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.5.0</Version>
+    <Version>2.6.0</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
     <Description>This library has types, interfaces, and utilities that are referenced by the Weevil core engine and it's extensions.</Description>
     <IsPackable>true</IsPackable>
-	<PackageReleaseNotes>None.</PackageReleaseNotes>
+	<PackageReleaseNotes>This libary is currently a work in progress (WIP). As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
 	<PackageTags>BlueDotBrigade</PackageTags>
 	<RepositoryType>git</RepositoryType>
 	<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
