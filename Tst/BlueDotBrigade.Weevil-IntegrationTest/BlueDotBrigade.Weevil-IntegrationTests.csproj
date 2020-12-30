@@ -63,7 +63,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\BenchmarkConfig.cs" />
+    <Compile Include="Configuration\BenchmarkConfiguration.cs" />
     <Compile Include="FilterHistoryShould.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
