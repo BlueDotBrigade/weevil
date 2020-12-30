@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Collections.Generic
+﻿namespace BlueDotBrigade.Weevil.Collections.Generic
 {
 	using System.Collections.Generic;
 	using System.Linq;

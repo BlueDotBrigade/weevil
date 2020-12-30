@@ -44,7 +44,7 @@
 			{
 				Application.Current.DispatcherUnhandledException += OnDispatcherUnhandledException;
 
-				Log.Default.Write(LogSeverityType.Information, "Log Viewer application is starting...");
+				Log.Default.Write(LogSeverityType.Information, "Weevil application is starting...");
 				Log.Register(new NLogWriter());
 				Log.Default.Write(LogSeverityType.Debug, $"The logging library has been registered. Type={nameof(NLogWriter)}");
 			}
@@ -52,7 +52,7 @@
 			{
 				Log.Default.Write(
 					LogSeverityType.Information,
-					$"Log Viewer application has started. Arguments={e.Args.Length}");
+					$"Weevil application has started. Arguments={e.Args.Length}");
 			}
 		}
 
@@ -60,7 +60,7 @@
 		{
 			Log.Default.Write(
 				LogSeverityType.Information,
-				"Log Viewer application is closing...");
+				"Weevil application is closing...");
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade
+﻿namespace BlueDotBrigade.Weevil
 {
 	using System.Diagnostics;
 

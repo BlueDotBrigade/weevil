@@ -40,7 +40,7 @@
 				Log.Default.Write(
 					LogSeverityType.Error,
 					e,
-					"Sidecar data could not be loaded. The file format may not be compatible with this version of Log Viewer.");
+					"Sidecar data could not be loaded. The file format may not be compatible with this version of Weevil.");
 			}
 
 			return canLoad;

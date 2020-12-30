@@ -22,11 +22,11 @@
 
 			try
 			{
-				Log.Default.Write(LogSeverityType.Debug, "Log Viewer console application is starting...");
+				Log.Default.Write(LogSeverityType.Debug, "Weevil console application is starting...");
 
 				Log.Register(new NLogWriter());
 
-				Log.Default.Write($"Log Viewer console application has started. Arguments={args.Length}");
+				Log.Default.Write($"Weevil console application has started. Arguments={args.Length}");
 
 				if (args.Length >= 2)
 				{

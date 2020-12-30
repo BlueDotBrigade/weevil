@@ -9,7 +9,7 @@
 	using Diagnostics;
 	using IO;
 	using Navigation;
-	using BlueDotBrigade.Collections.Generic;
+	using BlueDotBrigade.Weevil.Collections.Generic;
 	using Weevil.Collections.Immutable;
 	using Runtime.Serialization;
 
@@ -49,7 +49,7 @@
 				Log.Default.Write(
 					LogSeverityType.Error,
 					e,
-					"Sidecar data could not be loaded. The file format may not be compatible with this version of Log Viewer.");
+					"Sidecar data could not be loaded. The file format may not be compatible with this version of Weevil.");
 			}
 
 			return canLoad;

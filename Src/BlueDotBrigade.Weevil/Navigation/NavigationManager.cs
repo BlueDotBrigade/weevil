@@ -3,8 +3,9 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
-	using BlueDotBrigade.IO;
+	using BlueDotBrigade.Weevil.IO;
 	using Data;
+	using File = System.IO.File;
 
 	[DebuggerDisplay("ActiveIndex={_pinNavigator.ActiveIndex}")]
 	internal class NavigationManager : INavigate

@@ -10,8 +10,6 @@
 	[DebuggerDisplay("Expression={_expressionValue}")]
 	public class RegularExpression : IExpression
 	{
-		private const string Delimiter = "__";
-
 		private readonly Regex _expression;
 		private readonly string _expressionValue;
 
@@ -59,7 +57,6 @@
 		{
 			return _expression.IsMatch(record.Content);
 		}
-
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record)
 		{
 			var results = new Dictionary<string, string>();
@@ -69,11 +66,14 @@
 			var unnamedGroups = 0;
 			var namedGroups = 0;
 
+			var groupNames = _expression.GetGroupNames();
+
 			foreach (Match match in matches)
 			{
-				for (var i = 1; i < match.Groups.Count; i++)
+				foreach (var groupName in groupNames)
 				{
-					if (int.TryParse(match.Groups[i].Name, out var groupNumber))
+					var groupValue = match.Groups[groupName].Value;
+					if (int.TryParse(groupValue, out var groupNumber))
 					{
 						unnamedGroups++;
 						// For now, we only care about named groups.
@@ -83,19 +83,17 @@
 					{
 						namedGroups++;
 
-						var key = $"{match.Groups[i].Name}{Delimiter}{match.Name}";
-
-						if (results.ContainsKey(key))
+						if (results.ContainsKey(groupName))
 						{
 							throw new InvalidExpressionException(
 								_expressionValue,
-								$"A named group should only return one matching value. Key={match.Groups[i].Name}"
+								$"A named group should only return one matching value. Key={groupName}"
 							);
 
 						}
 						else
 						{
-							results.Add(key, match.Groups[i].Value);
+							results.Add(groupName, groupValue);
 						}
 					}
 				}
@@ -113,14 +111,7 @@
 
 		public static string GetFriendlyParameterName(string key)
 		{
-			var result = string.Empty;
-
-			if (!string.IsNullOrWhiteSpace(key))
-			{
-				result = key.Substring(0, key.IndexOf(Delimiter, StringComparison.InvariantCultureIgnoreCase));
-			}
-
-			return result;
+			return key;
 		}
 	}
 }

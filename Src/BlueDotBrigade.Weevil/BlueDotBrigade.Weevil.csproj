@@ -131,7 +131,6 @@
     <Compile Include="Data\MultilineRecordParser.cs" />
     <Compile Include="Filter\Expressions\Monikers\UserCommentExpression.cs" />
     <Compile Include="Filter\Filter.cs" />
-    <Compile Include="Filter\FilterCriteria.cs" />
     <Compile Include="Filter\FilterManager.cs" />
     <Compile Include="Filter\FilterMapReduceState.cs" />
     <Compile Include="Filter\Expressions\Monikers\PinnedExpression.cs" />
@@ -151,10 +150,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BlueDotBrigade-Common\BlueDotBrigade-Common.csproj">
-      <Project>{11F33A56-9F45-4E0F-A584-8840F177C6CC}</Project>
-      <Name>BlueDotBrigade-Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj">
       <Project>{B50F9FCD-32DE-4609-B3D2-E0509B483793}</Project>
       <Name>BlueDotBrigade.Weevil-Common</Name>
@@ -175,7 +170,7 @@
       <Version>12.0.3</Version>
     </PackageReference>
     <PackageReference Include="NLog">
-      <Version>4.7.0</Version>
+      <Version>4.7.6</Version>
     </PackageReference>
     <PackageReference Include="System.Collections.Immutable">
       <Version>5.0.0</Version>

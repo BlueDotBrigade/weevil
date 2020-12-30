@@ -14,8 +14,6 @@
 	{
 		public FilterResultsView()
 		{
-			InitializeComponent();
-
 			DataContextChanged += (sender, args) =>
 			{
 				if (args.OldValue != null)
@@ -29,6 +27,8 @@
 			};
 
 			this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, Application.Current.Dispatcher);
+
+			InitializeComponent();
 
 			Loaded += OnControlLoaded;
 		}

@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.IO
+﻿namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
 	using System.Diagnostics;
@@ -14,7 +14,7 @@
 			var filePath = Path.Combine(directoryPath, Path.GetRandomFileName());
 			try
 			{
-				using (FileStream fs = File.Create(filePath, 1, FileOptions.DeleteOnClose))
+				using (FileStream fs = System.IO.File.Create(filePath, 1, FileOptions.DeleteOnClose))
 				{
 					isWritable = true;
 				}

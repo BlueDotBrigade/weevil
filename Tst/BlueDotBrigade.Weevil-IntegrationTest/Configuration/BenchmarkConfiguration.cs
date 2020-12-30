@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Config
+﻿namespace BlueDotBrigade.Weevil.Configuration
 {
 	using BenchmarkDotNet.Configs;
 	using BenchmarkDotNet.Engines;
