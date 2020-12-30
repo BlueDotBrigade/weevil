@@ -131,7 +131,6 @@
     <Compile Include="Data\MultilineRecordParser.cs" />
     <Compile Include="Filter\Expressions\Monikers\UserCommentExpression.cs" />
     <Compile Include="Filter\Filter.cs" />
-    <Compile Include="Filter\FilterCriteria.cs" />
     <Compile Include="Filter\FilterManager.cs" />
     <Compile Include="Filter\FilterMapReduceState.cs" />
     <Compile Include="Filter\Expressions\Monikers\PinnedExpression.cs" />

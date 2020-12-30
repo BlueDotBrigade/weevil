@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
-	using BlueDotBrigade.Weevil.Collections.Generic;
+	using BlueDotBrigade.Weevil.Collections.Generic; //using System.Diagnostics;
 
 	[DebuggerDisplay("Include={this.Include}, Exclude={this.Exclude}, Configuration={this.Configuration.Count}")]
 	public class FilterCriteria : IFilterCriteria, IEquatable<FilterCriteria>
@@ -22,7 +22,7 @@
 		/// Records that match the <paramref name="include"/> filter will be returned.
 		/// </summary>
 		public FilterCriteria(string include)
-			 : this(include, string.Empty, None.Configuration)
+			 : this(include, string.Empty, (IReadOnlyDictionary<string, object>) None.Configuration)
 		{
 			// nothing to do
 		}
@@ -34,13 +34,13 @@
 		/// In the event that both the <paramref name="include"/> and <paramref name="exclude"/> parameters are <see cref="string.Empty">, all records will be returned.</see>
 		/// </remarks>
 		public FilterCriteria(string include, string exclude)
-			 : this(include, exclude, None.Configuration)
+			 : this(include, exclude, (IReadOnlyDictionary<string, object>) None.Configuration)
 		{
 			// nothing to do
 		}
 
 		public FilterCriteria(string include, string exclude, Dictionary<string, object> configuration)
-			 : this(include, exclude, new ReadOnlyDictionary<string, object>(configuration))
+			 : this(include, exclude, (IReadOnlyDictionary<string, object>) new ReadOnlyDictionary<string, object>(configuration))
 		{
 			// nothing to do
 		}
@@ -60,12 +60,12 @@
 
 		public bool Equals(FilterCriteria other)
 		{
-			if (ReferenceEquals(null, other))
+			if (Object.ReferenceEquals(null, other))
 			{
 				return false;
 			}
 
-			if (ReferenceEquals(this, other))
+			if (Object.ReferenceEquals(this, other))
 			{
 				return true;
 			}
@@ -95,12 +95,12 @@
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj))
+			if (Object.ReferenceEquals(null, obj))
 			{
 				return false;
 			}
 
-			if (ReferenceEquals(this, obj))
+			if (Object.ReferenceEquals(this, obj))
 			{
 				return true;
 			}
@@ -126,12 +126,12 @@
 
 		public static bool operator ==(FilterCriteria left, FilterCriteria right)
 		{
-			return Equals(left, right);
+			return Object.Equals(left, right);
 		}
 
 		public static bool operator !=(FilterCriteria left, FilterCriteria right)
 		{
-			return !Equals(left, right);
+			return !Object.Equals(left, right);
 		}
 
 		public override string ToString()
@@ -139,7 +139,7 @@
 			var include = (string.IsNullOrWhiteSpace(this.Include)) ? "(not specified)" : this.Include;
 			var exclude = (string.IsNullOrWhiteSpace(this.Exclude)) ? "(not specified)" : this.Exclude;
 
-			var configuration = this.Configuration.ToString("=", ";");
+			var configuration = DictionaryExtensions.ToString<string, object>(this.Configuration, "=", ";");
 			configuration = (string.IsNullOrWhiteSpace(configuration)) ? "(none)" : this.Exclude;
 
 			return $"{nameof(this.Include)}: {include}, {nameof(this.Exclude)}: {exclude}, {nameof(this.Configuration)}: {configuration}";
