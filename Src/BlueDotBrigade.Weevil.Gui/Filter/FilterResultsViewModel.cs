@@ -681,27 +681,32 @@
 
 		private void RefreshStatusBar()
 		{
-			this.Metrics = _engine.Filter.GetMetrics();
-
-			this.IsSameAsDisk = _engine.IsSameAsDisk;
-
-			this.AreRecordsSelected = _engine.Selector.IsTimePeriodSelected;
-
-			if (_engine.Selector.IsTimePeriodSelected)
+			_uiDispatcher.Invoke(() =>
 			{
-				this.ElapsedTime = _engine.Selector.TimePeriodOfInterest;
-			}
-			else
-			{
-				if (_engine.Count == _engine.Filter.Results.Length)
+				RaisePropertyChanged(nameof(this.SourceFilePath));
+
+				this.Metrics = _engine.Filter.GetMetrics();
+
+				this.IsSameAsDisk = _engine.IsSameAsDisk;
+
+				this.AreRecordsSelected = _engine.Selector.IsTimePeriodSelected;
+
+				if (_engine.Selector.IsTimePeriodSelected)
 				{
-					this.ElapsedTime = _engine.Metrics.RecordAndMetadataLoadDuration;
+					this.ElapsedTime = _engine.Selector.TimePeriodOfInterest;
 				}
 				else
 				{
-					this.ElapsedTime = _engine.Filter.FilterExecutionTime;
+					if (_engine.Count == _engine.Filter.Results.Length)
+					{
+						this.ElapsedTime = _engine.Metrics.RecordAndMetadataLoadDuration;
+					}
+					else
+					{
+						this.ElapsedTime = _engine.Filter.FilterExecutionTime;
+					}
 				}
-			}
+			});
 		}
 
 		private void SaveSelected(FileFormatType fileFormatType)
@@ -1110,12 +1115,15 @@
 			_inclusiveFilter = _engine.Filter.Criteria.Include;
 			_exclusiveFilter = _engine.Filter.Criteria.Exclude;
 
-			// Note: We can't set the property directly, because we would trigger the filter operation again. 
-			RaisePropertyChanged(nameof(this.InclusiveFilter));
-			RaisePropertyChanged(nameof(this.ExclusiveFilter));
+			_uiDispatcher.Invoke(() =>
+			{
+				// Note: We can't set the property directly, because we would trigger the filter operation again. 
+				RaisePropertyChanged(nameof(this.InclusiveFilter));
+				RaisePropertyChanged(nameof(this.ExclusiveFilter));
 
-			this.VisibleItems = _engine.Filter.Results;
-			RaisePropertyChanged(nameof(this.VisibleItems));
+				this.VisibleItems = _engine.Filter.Results;
+				RaisePropertyChanged(nameof(this.VisibleItems));
+			});
 
 			RefreshStatusBar();
 		}
