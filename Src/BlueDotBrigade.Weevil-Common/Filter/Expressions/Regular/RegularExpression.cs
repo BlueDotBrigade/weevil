@@ -60,6 +60,28 @@
 			return _expression.IsMatch(record.Content);
 		}
 
+
+		private void Test()
+		{
+			string pattern = @"\b(?<FirstWord>\w+)\s?((\w+)\s)*(?<LastWord>\w+)?(?<Punctuation>\p{Po})";
+			string input = "The cow jumped over the moon.";
+			Regex rgx = new Regex(pattern);
+			Match match = rgx.Match(input);
+			if (match.Success)
+				ShowMatches(rgx, match);
+		}
+
+		private static void ShowMatches(Regex r, Match m)
+		{
+			string[] names = r.GetGroupNames();
+			Console.WriteLine("Named Groups:");
+			foreach (var name in names)
+			{
+				Group grp = m.Groups[name];
+				Console.WriteLine("   {0}: '{1}'", name, grp.Value);
+			}
+		}
+
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record)
 		{
 			var results = new Dictionary<string, string>();
@@ -69,11 +91,14 @@
 			var unnamedGroups = 0;
 			var namedGroups = 0;
 
+			var groupNames = _expression.GetGroupNames();
+
 			foreach (Match match in matches)
 			{
-				for (var i = 1; i < match.Groups.Count; i++)
+				foreach (var groupName in groupNames)
 				{
-					if (int.TryParse(match.Groups[i].Name, out var groupNumber))
+					var groupValue = match.Groups[groupName].Value;
+					if (int.TryParse(groupValue, out var groupNumber))
 					{
 						unnamedGroups++;
 						// For now, we only care about named groups.
@@ -83,19 +108,19 @@
 					{
 						namedGroups++;
 
-						var key = $"{match.Groups[i].Name}{Delimiter}{match.Name}";
+						var key = groupName; //$"{groupName}{Delimiter}{match.Name}";
 
 						if (results.ContainsKey(key))
 						{
 							throw new InvalidExpressionException(
 								_expressionValue,
-								$"A named group should only return one matching value. Key={match.Groups[i].Name}"
+								$"A named group should only return one matching value. Key={groupName}"
 							);
 
 						}
 						else
 						{
-							results.Add(key, match.Groups[i].Value);
+							results.Add(key, groupValue);
 						}
 					}
 				}

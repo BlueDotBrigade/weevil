@@ -3,7 +3,7 @@
 	using System.IO;
 	using System.Runtime.Serialization;
 	using System.Xml;
-	using BlueDotBrigade.IO;
+	using BlueDotBrigade.Weevil.IO;
 
 	public class TypeFactory
 	{

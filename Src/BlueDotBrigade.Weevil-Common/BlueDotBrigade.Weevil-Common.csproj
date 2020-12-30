@@ -1,186 +1,41 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B50F9FCD-32DE-4609-B3D2-E0509B483793}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <AssemblyName>BlueDotBrigade.Weevil-Common</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>false</Deterministic>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
-    <CodeAnalysisRuleSet>
-    </CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>CODE_ANALYSIS;TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Version>2.5.0</Version>
+    <Authors>BlueDotBrigade;</Authors>
+	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
+	<Owners>Blue Dot Brigade</Owners>
+    <Description>This library has types, interfaces, and utilities that are referenced by the Weevil core engine and it's extensions.</Description>
+    <IsPackable>true</IsPackable>
+	<PackageReleaseNotes>None.</PackageReleaseNotes>
+	<PackageTags>BlueDotBrigade</PackageTags>
+	<RepositoryType>git</RepositoryType>
+	<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageIcon>Weevil.png</PackageIcon>
+	<ApplicationIcon></ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <Compile Remove="Resources\Icons\**" />
+    <EmbeddedResource Remove="Resources\Icons\**" />
+    <None Remove="Resources\Icons\**" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analysis\AnalysisType.cs" />
-    <Compile Include="Analysis\FileFormatType.cs" />
-    <Compile Include="Analysis\IAnalyze.cs" />
-    <Compile Include="Analysis\IRecordCollectionAnalyzer.cs" />
-    <Compile Include="Analysis\IRecordAnalyzer.cs" />
-    <Compile Include="Analysis\Metrics.cs" />
-    <Compile Include="Collections\Immutable\ImmutableArrayExtensions.cs" />
-    <Compile Include="ContextDictionary.cs" />
-    <Compile Include="Data\ClearRecordsOperation.cs" />
-    <Compile Include="Data\IRecord.cs" />
-    <Compile Include="Data\IRecordParser.cs" />
-    <Compile Include="Data\Metadata.cs" />
-    <Compile Include="Data\MetadataType.cs" />
-    <Compile Include="Data\Record.cs" />
-    <Compile Include="Data\RecordUserCommentComparer.cs" />
-    <Compile Include="Data\RecordIsPinnedComparer.cs" />
-    <Compile Include="Data\RecordLineNumberComparer.cs" />
-    <Compile Include="Data\SeverityTypeHelpers.cs" />
-    <Compile Include="Data\SeverityType.cs" />
-    <Compile Include="Diagnostics\DefaultLogWriter.cs" />
-    <Compile Include="Diagnostics\DictionaryExtensions.cs" />
-    <Compile Include="Diagnostics\IEnumerableExtensions.cs" />
-    <Compile Include="Diagnostics\Log.cs" />
-    <Compile Include="Diagnostics\ILogWriter.cs" />
-    <Compile Include="Diagnostics\LogSeverityType.cs" />
-    <Compile Include="Diagnostics\WindowsProcess.cs" />
-    <Compile Include="Diagnostics\WindowsProcessType.cs" />
-    <Compile Include="EnvironmentHelper.cs" />
-    <Compile Include="Executor.cs" />
-    <Compile Include="Executor_1.cs" />
-    <Compile Include="Filter\Expressions\LogicalOrOperation.cs" />
-    <Compile Include="Filter\Expressions\ExpressionHelper.cs" />
-    <Compile Include="Filter\Expressions\IExpression.cs" />
-    <Compile Include="Filter\Expressions\IExpressionFactory.cs" />
-    <Compile Include="Filter\Expressions\InvalidExpressionException.cs" />
-    <Compile Include="Filter\Expressions\Moniker.cs" />
-    <Compile Include="Filter\Expressions\MonikerActivator.cs" />
-    <Compile Include="Filter\Expressions\Regular\RegularExpression.cs" />
-    <Compile Include="Filter\Expressions\SurrogateExpression.cs" />
-    <Compile Include="Filter\FilterType.cs" />
-    <Compile Include="Filter\HistoryChangedEventArgs.cs" />
-    <Compile Include="Filter\HistoryChangeType.cs" />
-    <Compile Include="Filter\IFilterBehaviors.cs" />
-    <Compile Include="Filter\IFilterCriteria.cs" />
-    <Compile Include="Filter\IFilter.cs" />
-    <Compile Include="Filter\IFilterStrategy.cs" />
-    <Compile Include="Filter\IFilterTraits.cs" />
-    <Compile Include="Filter\IStaticAliasExpander.cs" />
-    <Compile Include="Filter\ResultsChangedEventArgs.cs" />
-    <Compile Include="IAnalysisFactory.cs" />
-    <Compile Include="ICoreEngine.cs" />
-    <Compile Include="IEngineBuilder.cs" />
-    <Compile Include="IExecute.cs" />
-    <Compile Include="IEngine.cs" />
-    <Compile Include="IO\Directory.cs" />
-    <Compile Include="IO\File.cs" />
-    <Compile Include="IO\IDirectory.cs" />
-    <Compile Include="IO\IFile.cs" />
-    <Compile Include="IO\IWrite.cs" />
-    <Compile Include="IO\OpenAsResult.cs" />
-    <Compile Include="IPlugin.cs" />
-    <Compile Include="ISelect.cs" />
-    <Compile Include="ICoreExtension.cs" />
-    <Compile Include="LogFileMetrics.cs" />
-    <Compile Include="Navigation\INavigate.cs" />
-    <Compile Include="Navigation\IPinNavigator.cs" />
-    <Compile Include="Navigation\ISection.cs" />
-    <Compile Include="Navigation\ITableOfContents.cs" />
-    <Compile Include="Navigation\Section.cs" />
-    <Compile Include="Navigation\TableOfContents.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\AssemblyHelper.cs" />
-    <Compile Include="Reports\IReport.cs" />
-    <Compile Include="Reports\ReportType.cs" />
-    <Compile Include="Runtime\Serialization\TypeFactory.cs" />
+    <None Remove="Resources\Images\Weevil.png" Pack="true" PackagePath="" />
   </ItemGroup>
+
   <ItemGroup>
-    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-      <Link>Properties\DomainSpecificTerminology.xml</Link>
-    </CodeAnalysisDictionary>
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Folder Include="Collections\Generic\" />
-    <Folder Include="Configuration\" />
-    <Folder Include="Filter\Expressions\Monikers\" />
-    <Folder Include="Filter\Expressions\PlainText\" />
+    <Resource Include="Resources\Images\Weevil.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </Resource>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
-      <Version>2.9.8</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="System.Collections.Immutable">
-      <Version>5.0.0</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BlueDotBrigade-Common\BlueDotBrigade-Common.csproj">
-      <Project>{11F33A56-9F45-4E0F-A584-8840F177C6CC}</Project>
-      <Name>BlueDotBrigade-Common</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

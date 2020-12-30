@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.IO
+﻿namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
 	using System.Diagnostics;
@@ -88,7 +88,7 @@
 			{
 				try
 				{
-					stream = File.Open(path, mode, access, share);
+					stream = System.IO.File.Open(path, mode, access, share);
 				}
 				catch (IOException e)
 				{

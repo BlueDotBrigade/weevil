@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Linq
+﻿namespace BlueDotBrigade.Weevil.Linq
 {
 	using System;
 	using System.Collections.Generic;
