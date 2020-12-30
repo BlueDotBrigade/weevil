@@ -215,10 +215,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BlueDotBrigade-Common\BlueDotBrigade-Common.csproj">
-      <Project>{11f33a56-9f45-4e0f-a584-8840f177c6cc}</Project>
-      <Name>BlueDotBrigade-Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj">
       <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
       <Name>BlueDotBrigade.Weevil-Common</Name>
@@ -271,6 +267,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Weevil.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Document-24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
