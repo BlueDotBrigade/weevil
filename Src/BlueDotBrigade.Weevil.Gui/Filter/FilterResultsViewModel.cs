@@ -753,7 +753,7 @@
 		public void ShowAbout()
 		{
 			var message =
-				"Log Viewer version: " + this.CurrentVersion + Environment.NewLine +
+				"Weevil version: " + this.CurrentVersion + Environment.NewLine +
 				"" + Environment.NewLine +
 				"Licenses:" + Environment.NewLine +
 				"  - Icons by: Icons8.com";

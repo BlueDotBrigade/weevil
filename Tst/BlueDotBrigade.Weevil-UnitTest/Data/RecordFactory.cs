@@ -13,7 +13,7 @@
 		};
 
 		/// <summary>
-		/// In order to avoid creating dependencies on other Log Viewer classes,
+		/// In order to avoid creating dependencies on other Weevil classes,
 		/// this method should be used to deserialize text into instances of <see cref="IRecord"/>.
 		/// </summary>
 		/// <param name="serializedData">Contains the records to be deserialized.</param>
