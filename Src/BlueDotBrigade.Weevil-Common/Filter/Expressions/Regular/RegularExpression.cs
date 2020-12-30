@@ -57,29 +57,6 @@
 		{
 			return _expression.IsMatch(record.Content);
 		}
-
-
-		private void Test()
-		{
-			string pattern = @"\b(?<FirstWord>\w+)\s?((\w+)\s)*(?<LastWord>\w+)?(?<Punctuation>\p{Po})";
-			string input = "The cow jumped over the moon.";
-			Regex rgx = new Regex(pattern);
-			Match match = rgx.Match(input);
-			if (match.Success)
-				ShowMatches(rgx, match);
-		}
-
-		private static void ShowMatches(Regex r, Match m)
-		{
-			string[] names = r.GetGroupNames();
-			Console.WriteLine("Named Groups:");
-			foreach (var name in names)
-			{
-				Group grp = m.Groups[name];
-				Console.WriteLine("   {0}: '{1}'", name, grp.Value);
-			}
-		}
-
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record)
 		{
 			var results = new Dictionary<string, string>();
