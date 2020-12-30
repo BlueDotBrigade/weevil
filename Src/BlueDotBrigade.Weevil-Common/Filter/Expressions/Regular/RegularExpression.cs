@@ -10,8 +10,6 @@
 	[DebuggerDisplay("Expression={_expressionValue}")]
 	public class RegularExpression : IExpression
 	{
-		private const string Delimiter = "__";
-
 		private readonly Regex _expression;
 		private readonly string _expressionValue;
 
@@ -108,9 +106,7 @@
 					{
 						namedGroups++;
 
-						var key = groupName; //$"{groupName}{Delimiter}{match.Name}";
-
-						if (results.ContainsKey(key))
+						if (results.ContainsKey(groupName))
 						{
 							throw new InvalidExpressionException(
 								_expressionValue,
@@ -120,7 +116,7 @@
 						}
 						else
 						{
-							results.Add(key, groupValue);
+							results.Add(groupName, groupValue);
 						}
 					}
 				}
@@ -138,14 +134,7 @@
 
 		public static string GetFriendlyParameterName(string key)
 		{
-			var result = string.Empty;
-
-			if (!string.IsNullOrWhiteSpace(key))
-			{
-				result = key.Substring(0, key.IndexOf(Delimiter, StringComparison.InvariantCultureIgnoreCase));
-			}
-
-			return result;
+			return key;
 		}
 	}
 }
