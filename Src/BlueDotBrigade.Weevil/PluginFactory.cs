@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel.Composition.Hosting;
 	using System.IO;
-	using Diagnostics;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	public class PluginFactory
 	{
@@ -59,6 +59,19 @@
 						}
 					}
 				}
+
+				if (plugins.Count == 0)
+				{
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						"Unable to load any plugins.  The plugin directory is either empty, or there is a 32/64 bit mismatch.");
+				}
+			}
+			else
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					"Plugin directory is missing.");
 			}
 
 			return plugins;
