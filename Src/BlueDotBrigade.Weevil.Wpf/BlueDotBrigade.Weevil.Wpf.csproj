@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
+	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.Wpf</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
     <Version>2.5.0</Version>
@@ -18,12 +19,6 @@
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageIcon>Weevil.png</PackageIcon>
 	<ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Icons\Weevil.ico" />
