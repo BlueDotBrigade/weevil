@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<Platforms>x64</Platforms>
+    <RootNamespace>Notes</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>BlueDotBrigade;</Authors>
+	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
+	<Owners>Blue Dot Brigade</Owners>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Link="Release\Licenses\LICENSE" />
+  </ItemGroup>
+</Project>

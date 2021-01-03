@@ -1,0 +1,14 @@
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+Do Not Translate or Localize
+
+Weevil incorporates components from the Open Source Software below. 
+The original copyright notices and the licenses under which Blue Dot Brigade 
+received such components are set forth below for informational purposes. 
+
+---
+
+# Third Party Licenses
+
+## Icons8
+
+MacOS and Windows applications should have the link to https://icons8.com in the About dialog.
