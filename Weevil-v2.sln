@@ -13,6 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Gui",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{E077F400-8783-488E-AA5F-5382C52141CF}"
 	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
 		ReadMe.md = ReadMe.md
 	EndProjectSection
 EndProject
@@ -36,6 +37,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Interface", "User Interface", "{0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Code", "Shared Code", "{E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notes", "Doc\Notes\Notes.csproj", "{D368EE3A-0874-4C23-8ABA-5B935B29882E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +82,8 @@ Global
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Debug|x64.Build.0 = Debug|x64
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Release|x64.ActiveCfg = Release|x64
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Release|x64.Build.0 = Release|x64
+		{D368EE3A-0874-4C23-8ABA-5B935B29882E}.Debug|x64.ActiveCfg = Debug|x64
+		{D368EE3A-0874-4C23-8ABA-5B935B29882E}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +95,7 @@ Global
 		{B50F9FCD-32DE-4609-B3D2-E0509B483793} = {E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}
 		{5482DA9A-4ADD-4837-BC9D-92B303BD075F} = {0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9} = {E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}
+		{D368EE3A-0874-4C23-8ABA-5B935B29882E} = {E077F400-8783-488E-AA5F-5382C52141CF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACD62972-31F1-402F-B3FC-272C2A336038}
