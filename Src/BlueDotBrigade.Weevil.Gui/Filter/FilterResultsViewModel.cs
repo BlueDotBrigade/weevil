@@ -24,6 +24,7 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
+	using BlueDotBrigade.Weevil.Gui.Help;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Navigation;
@@ -40,7 +41,8 @@
 		private const string NewReleaseDetailsPath = @"ReleasedVersion.xml";
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
-		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"..\Doc\Help.html");
+		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Doc\Help.html");
+		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Licenses\ThirdPartyNoticesAndInformation.txt");
 
 		private static readonly string ApplicationLogFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
 
@@ -752,13 +754,22 @@
 
 		public void ShowAbout()
 		{
-			var message =
-				"Weevil version: " + this.CurrentVersion + Environment.NewLine +
-				"" + Environment.NewLine +
-				"Licenses:" + Environment.NewLine +
-				"  - Icons by: Icons8.com";
+			try
+			{
+				var dialog = new AboutDialog(this.CurrentVersion, ThirdPartyNoticesPath, ThirdPartyNoticesPath)
+				{
+					Owner = _mainWindow,
+				};
 
-			MessageBox.Show(message, "About", MessageBoxButton.OK, MessageBoxImage.Information);
+				dialog.ShowDialog();
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(
+					LogSeverityType.Information,
+					e);
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
 		private void SplitCurrentLog()

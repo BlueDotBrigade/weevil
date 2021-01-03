@@ -103,6 +103,9 @@
     <Compile Include="Converters\SeverityToForegroundConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
     <Compile Include="Filter\FilterExtensions.cs" />
+    <Compile Include="Help\AboutDialog.xaml.cs">
+      <DependentUpon>AboutDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Input\UiBoundCommand.cs" />
     <Compile Include="IO\SelectFileView.xaml.cs">
       <DependentUpon>SelectFileView.xaml</DependentUpon>
@@ -173,6 +176,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Filter\FilterResultsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Help\AboutDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -251,7 +258,7 @@
     <Resource Include="Resources\Icons\VersionIcon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Images\Weevil.png" />
+    <Resource Include="Resources\Images\Weevil-48.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\NewReleaseAvailable_256x256.png" />
@@ -276,17 +283,24 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\Document-24.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\Weevil-100.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...
 COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>IF "%25WEEVIL_PLUGINS_PATH%25"==""  (
+    <PostBuildEvent>XCOPY /F /R /Y /I "$(SolutionDir)LICENSE" "$(TargetDir)Doc\\"
+
+XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)Licenses"  /D /I /E /Y
+
+IF "%25WEEVIL_PLUGINS_PATH%25"==""  (
    ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS
 ) else (
    ECHO Copying plugins to Bin directory...
-   XCOPY "%25WEEVIL_PLUGINS_PATH%25" "$(TargetDir)/Plugins"  /D /I /E /Y
+   XCOPY "%25WEEVIL_PLUGINS_PATH%25" "$(TargetDir)Plugins"  /D /I /E /Y
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>
