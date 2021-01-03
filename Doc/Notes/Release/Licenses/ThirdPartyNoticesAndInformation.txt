@@ -7,7 +7,7 @@ received such components are set forth below for informational purposes.
 
 ---
 
-# Third Pary Licenses
+# Third Party Licenses
 
 ## Icons8
 
