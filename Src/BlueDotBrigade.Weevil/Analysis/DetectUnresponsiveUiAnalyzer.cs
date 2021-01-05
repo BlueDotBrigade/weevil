@@ -7,7 +7,7 @@
 	using Data;
 	using Diagnostics;
 
-	public class UiResponsivenessAnalyzer : IRecordAnalyzer
+	public class DetectUnresponsiveUiAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultUiResponsivenessPeriod = TimeSpan.FromSeconds(1);
 
@@ -33,7 +33,7 @@
 
 		private readonly object _problemsDetectedPadlock;
 
-		public UiResponsivenessAnalyzer()
+		public DetectUnresponsiveUiAnalyzer()
 		{
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_problemsDetected = -1;

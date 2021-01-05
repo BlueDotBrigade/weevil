@@ -9,7 +9,7 @@
 	using Moq;
 
 	[TestClass]
-	public class UiResponsivenessAnalyzerTest
+	public class DetectUnresponsiveUiAnalyzerTest
 	{
 		private ImmutableArray<IRecord> _records;
 
@@ -49,7 +49,7 @@
 		[TestMethod]
 		public void Analyze_NoPrecedingRecord_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -59,7 +59,7 @@
 		[TestMethod]
 		public void Analyze_ApplicationInitializing_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -69,7 +69,7 @@
 		[TestMethod]
 		public void Analyze_PrecedingRecordWasInitialing_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -79,7 +79,7 @@
 		[TestMethod]
 		public void Analyze_LongPeriodBetweenUiRecords_RecordFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -89,7 +89,7 @@
 		[TestMethod]
 		public void Analyze_ShortPeriodBetweenUiRecords_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -99,7 +99,7 @@
 		[TestMethod]
 		public void Analyze_RecordWasNotWrittenByUiThread_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -109,7 +109,7 @@
 		[TestMethod]
 		public void Analyze_MixedUiAndNotUiRecords_RecordFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -119,7 +119,7 @@
 		[TestMethod]
 		public void Analyze_ApplicationTerminatingMessage_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
@@ -129,7 +129,7 @@
 		[TestMethod]
 		public void Analyze_PrecedingRecordWasApplicationTerminating_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer();
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
