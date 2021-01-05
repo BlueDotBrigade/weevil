@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
@@ -50,6 +51,8 @@
 		}
 
 		public IRecord this[int index] => _coreEngine[index];
+
+		public ImmutableArray<IRecord> AllRecords => _coreEngine.AllRecords;
 
 		public LogFileMetrics Metrics => _coreEngine.Metrics;
 

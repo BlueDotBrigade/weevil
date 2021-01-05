@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
+	using System.Collections.Immutable;
 	using Analysis;
 	using Data;
 	using Filter;
@@ -9,7 +10,7 @@
 	public interface ICoreEngine
 	{
 		IRecord this[int index] { get; }
-
+		ImmutableArray<IRecord> AllRecords { get; }
 		LogFileMetrics Metrics { get; }
 		IFilter Filter { get; }
 		INavigate Navigator { get; }
