@@ -114,6 +114,7 @@
     <Compile Include="IO\UserPromptDialog.xaml.cs">
       <DependentUpon>UserPromptDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MenuItemViewModel.cs" />
     <Compile Include="Properties\GlobalSuppressions.cs" />
     <Compile Include="IO\IDialogBoxService.cs" />
     <Compile Include="Properties\Annotations.cs" />
@@ -292,7 +293,7 @@
 COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>XCOPY /F /R /Y /I "$(SolutionDir)LICENSE" "$(TargetDir)Doc\\"
+    <PostBuildEvent>COPY /A /Y "$(SolutionDir)LICENSE" "$(TargetDir)Licenses\\License.txt"
 
 XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)Licenses"  /D /I /E /Y
 

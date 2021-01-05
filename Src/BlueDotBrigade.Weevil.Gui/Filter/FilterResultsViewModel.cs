@@ -42,11 +42,10 @@
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Doc\Help.html");
+		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Licenses\License.txt");
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Licenses\ThirdPartyNoticesAndInformation.txt");
 
 		private static readonly string ApplicationLogFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
-
-		private static readonly TimeSpan DefaultUiResponsivenessPeriod = TimeSpan.FromSeconds(1);
 
 		#region Fields & Object Lifetime
 
@@ -756,7 +755,7 @@
 		{
 			try
 			{
-				var dialog = new AboutDialog(this.CurrentVersion, ThirdPartyNoticesPath, ThirdPartyNoticesPath)
+				var dialog = new AboutDialog(this.CurrentVersion, LicensePath, ThirdPartyNoticesPath)
 				{
 					Owner = _mainWindow,
 				};
@@ -953,7 +952,6 @@
 		{
 			_engine.Selector.ToggleIsPinned();
 		}
-
 		public void UnpinAll()
 		{
 			_engine.Analyzer.UnpinAll();
