@@ -28,16 +28,13 @@
 
 		public static readonly TimeSpan CutoffPeriod = TimeSpan.FromMinutes(15);
 
-		private readonly ImmutableArray<IRecord> _records;
 		private TimeSpan _maximumPeriodDetected;
 		private int _problemsDetected;
 
 		private readonly object _problemsDetectedPadlock;
 
-		public UiResponsivenessAnalyzer(ImmutableArray<IRecord> records)
+		public UiResponsivenessAnalyzer()
 		{
-			_records = records;
-
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_problemsDetected = -1;
 
@@ -64,18 +61,18 @@
 
 			if (TryGetTolerance(user, out TimeSpan maximumAllowedPeriod))
 			{
-				IRecord previousRecord = _records.FirstOrDefault(record => record.Metadata.WasGeneratedByUi);
+				IRecord previousRecord = records.FirstOrDefault(record => record.Metadata.WasGeneratedByUi);
 
 				if (Record.IsDummyOrNull(previousRecord))
 				{
-					foreach (IRecord record in _records)
+					foreach (IRecord record in records)
 					{
 						record.Metadata.IsFlagged = false;
 					}
 				}
 				else
 				{
-					foreach (IRecord currentRecord in _records)
+					foreach (IRecord currentRecord in records)
 					{
 						currentRecord.Metadata.IsFlagged = false;
 

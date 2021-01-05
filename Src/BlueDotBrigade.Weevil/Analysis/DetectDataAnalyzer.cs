@@ -10,12 +10,10 @@
 	internal class DetectDataAnalyzer : IRecordCollectionAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
-		private readonly ImmutableArray<IRecord> _records;
 
-		public DetectDataAnalyzer(FilterStrategy filterStrategy, ImmutableArray<IRecord> records)
+		public DetectDataAnalyzer(FilterStrategy filterStrategy)
 		{
 			_filterStrategy = filterStrategy;
-			_records = records;
 		}
 
 		public string Key => AnalysisType.DetectData.ToString();
@@ -36,7 +34,7 @@
 				{
 					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
 
-					foreach (IRecord record in _records)
+					foreach (IRecord record in records)
 					{
 						record.Metadata.IsFlagged = false;
 

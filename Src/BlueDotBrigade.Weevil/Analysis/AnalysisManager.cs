@@ -60,10 +60,10 @@
 			{
 				analyzers.AddRange(new List<IRecordCollectionAnalyzer>()
 				{
-					new UiResponsivenessAnalyzer(_coreEngine.Filter.Results),
-					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results),
-					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results),
-					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results),
+					new UiResponsivenessAnalyzer(),
+					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
 				});
 			}
 
@@ -82,28 +82,8 @@
 
 		public IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType)
 		{
-			IRecordCollectionAnalyzer analyzer = null;
-
-			switch (analysisType)
-			{
-				case AnalysisType.DetectUnresponsiveUi:
-					analyzer = new UiResponsivenessAnalyzer(_coreEngine.Filter.Results);
-					break;
-
-				case AnalysisType.DetectData:
-					analyzer = new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
-					break;
-
-				case AnalysisType.DetectDataTransition:
-					analyzer = new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
-					break;
-
-				case AnalysisType.DetectFallingEdges:
-					analyzer = new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
-					break;
-			}
-
-			return analyzer;
+			var analysisKey = analysisType.ToString();
+			return GetAnalyzers(ComponentType.Core).First(x => x.Key == analysisKey);
 		}
 	}
 }

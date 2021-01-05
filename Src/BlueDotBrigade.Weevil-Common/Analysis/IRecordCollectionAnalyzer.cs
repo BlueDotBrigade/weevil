@@ -6,8 +6,6 @@
 
 	public interface IRecordCollectionAnalyzer
 	{
-		//int Analyze(params object[] userParameters);
-
 		string Key { get; }
 
 		string DisplayName { get; }

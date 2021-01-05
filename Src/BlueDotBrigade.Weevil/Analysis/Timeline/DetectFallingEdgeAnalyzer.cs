@@ -10,12 +10,10 @@
 	internal class DetectFallingEdgeAnalyzer : IRecordCollectionAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
-		private readonly ImmutableArray<IRecord> _records;
 
-		public DetectFallingEdgeAnalyzer(FilterStrategy filterStrategy, ImmutableArray<IRecord> records)
+		public DetectFallingEdgeAnalyzer(FilterStrategy filterStrategy)
 		{
 			_filterStrategy = filterStrategy;
-			_records = records;
 		}
 
 		public string Key => AnalysisType.DetectFallingEdges.ToString();
@@ -42,7 +40,7 @@
 					var previous = new Dictionary<string, string>();
 					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
 
-					foreach (IRecord record in _records)
+					foreach (IRecord record in records)
 					{
 						record.Metadata.IsFlagged = false;
 
