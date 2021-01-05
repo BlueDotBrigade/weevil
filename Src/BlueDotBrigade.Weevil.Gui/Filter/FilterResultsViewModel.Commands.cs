@@ -150,8 +150,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			try
 			{
-				var analyzerKey = parameters[0].ToString();
-				Analyze(analyzerKey);
+				var customAnalyzerKey = parameters[0].ToString();
+				Analyze(customAnalyzerKey);
 			}
 			catch (Exception e)
 			{

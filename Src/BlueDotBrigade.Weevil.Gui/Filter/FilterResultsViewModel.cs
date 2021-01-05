@@ -927,10 +927,8 @@
 			_engine.GenerateReport(ReportType.CommentSummary, destinationFolder);
 		}
 
-		public void Analyze(string analyzerKey)
+		public void Analyze(IRecordCollectionAnalyzer analyzer)
 		{
-			var analyzer = _engine.Analyzer.GetAnalyzer(analyzerKey);
-
 			var records = _engine.Selector.IsTimePeriodSelected
 				? _engine.Selector.GetSelected()
 				: _engine.Filter.Results;
@@ -941,7 +939,7 @@
 			{
 				this.FlaggedRecordCount = analyzer.Analyze(
 					records,
-					outputDirectory, 
+					outputDirectory,
 					_dialogBox);
 			}
 			catch (Exception e)
@@ -950,32 +948,29 @@
 			}
 		}
 
+		public void Analyze(string customAnalyzerKey)
+		{
+			Analyze(_engine.Analyzer.GetAnalyzer(customAnalyzerKey));
+		}
+
 		public void AnalyzeUiResponsiveness()
 		{
-			// delete me
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectUnresponsiveUi));
 		}
 
 		public void DetectData()
 		{
-			//IDictionary<string, object> results = _engine.Analyzer.GetAnalyzer(AnalysisType.ExtractRegExKvp).Analyze();
-			//this.FlaggedRecordCount = int.Parse(results["KeysFound"].ToString());
-			//RefreshFilterResults();
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectData));
 		}
 
 		public void AnalyzeDataTransitions()
 		{
-			//IDictionary<string, object> results = _engine.Analyzer.GetAnalyzer(AnalysisType.DataTransition).Analyze();
-			//this.FlaggedRecordCount = int.Parse(results["TransitionCount"].ToString());
-
-			//RefreshFilterResults();
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectDataTransition));
 		}
 
 		public void AnalyzeDataTransitionsFallingEdge()
 		{
-			//IDictionary<string, object> results = _engine.Analyzer.GetAnalyzer(AnalysisType.DataTransitionFallingEdge).Analyze();
-			//this.FlaggedRecordCount = int.Parse(results["TransitionCount"].ToString());
-
-			//RefreshFilterResults();
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectFallingEdges));
 		}
 
 		private void ToggleIsPinned()
