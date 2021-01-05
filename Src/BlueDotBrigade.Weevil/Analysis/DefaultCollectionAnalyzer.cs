@@ -5,7 +5,7 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 
-	internal class DefaultCollectionAnalyzer : IRecordCollectionAnalyzer
+	internal class DefaultCollectionAnalyzer : IRecordAnalyzer
 	{
 		private static readonly IDictionary<string, object> NoMetadataFound = new Dictionary<string, object>();
 

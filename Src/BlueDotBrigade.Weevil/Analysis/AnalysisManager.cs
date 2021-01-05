@@ -52,13 +52,13 @@
 			}
 		}
 
-		public IList<IRecordCollectionAnalyzer> GetAnalyzers(ComponentType componentType)
+		public IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType)
 		{
-			var analyzers = new List<IRecordCollectionAnalyzer>();
+			var analyzers = new List<IRecordAnalyzer>();
 
 			if ((componentType & ComponentType.Core) == ComponentType.Core)
 			{
-				analyzers.AddRange(new List<IRecordCollectionAnalyzer>()
+				analyzers.AddRange(new List<IRecordAnalyzer>()
 				{
 					new UiResponsivenessAnalyzer(),
 					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
@@ -75,12 +75,12 @@
 			return analyzers;
 		}
 
-		public IRecordCollectionAnalyzer GetAnalyzer(string analyzerKey)
+		public IRecordAnalyzer GetAnalyzer(string analyzerKey)
 		{
 			return GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
 		}
 
-		public IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType)
+		public IRecordAnalyzer GetAnalyzer(AnalysisType analysisType)
 		{
 			var analysisKey = analysisType.ToString();
 			return GetAnalyzers(ComponentType.Core).First(x => x.Key == analysisKey);

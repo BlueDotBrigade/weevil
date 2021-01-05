@@ -15,7 +15,7 @@
 		private readonly IRecordParser _recordParser;
 		private readonly IStaticAliasExpander _staticAliasExpander;
 		private readonly List<IRecordCounter> _recordAnalyzers;
-		private readonly IRecordCollectionAnalyzer _recordCollectionAnalyzer;
+		private readonly IRecordAnalyzer _recordCollectionAnalyzer;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
 
@@ -44,17 +44,17 @@
 			return _context;
 		}
 
-		public IList<IRecordCollectionAnalyzer> GetAnalyzers()
+		public IList<IRecordAnalyzer> GetAnalyzers()
 		{
-			return new List<IRecordCollectionAnalyzer>();
+			return new List<IRecordAnalyzer>();
 		}
 
-		public IRecordCollectionAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords)
+		public IRecordAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords)
 		{
 			return _recordCollectionAnalyzer;
 		}
 
-		public IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType, ICoreEngine coreEngine,
+		public IRecordAnalyzer GetAnalyzer(AnalysisType analysisType, ICoreEngine coreEngine,
 			ImmutableArray<IRecord> allRecords)
 		{
 			return _recordCollectionAnalyzer;

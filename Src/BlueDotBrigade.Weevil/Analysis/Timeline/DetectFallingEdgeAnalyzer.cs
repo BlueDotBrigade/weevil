@@ -7,7 +7,7 @@
 	using Filter;
 	using Filter.Expressions.Regular;
 
-	internal class DetectFallingEdgeAnalyzer : IRecordCollectionAnalyzer
+	internal class DetectFallingEdgeAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
 

@@ -20,8 +20,8 @@
 
 		ContextDictionary DetermineContext(ImmutableArray<IRecord> allRecords);
 
-		IList<IRecordCollectionAnalyzer> GetAnalyzers();
-		IRecordCollectionAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords);
+		IList<IRecordAnalyzer> GetAnalyzers();
+		IRecordAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords);
 		IList<IRecordCounter> GetRecordAnalyzers(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
 		IStaticAliasExpander GetStaticAliasExpander(ContextDictionary context);

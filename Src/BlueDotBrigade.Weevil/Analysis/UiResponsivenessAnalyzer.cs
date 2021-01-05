@@ -7,7 +7,7 @@
 	using Data;
 	using Diagnostics;
 
-	public class UiResponsivenessAnalyzer : IRecordCollectionAnalyzer
+	public class UiResponsivenessAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultUiResponsivenessPeriod = TimeSpan.FromSeconds(1);
 

@@ -493,7 +493,7 @@
 
 						this.CustomAnalyzerCommands.Clear();
 
-						foreach (IRecordCollectionAnalyzer analyzer in analyzers)
+						foreach (IRecordAnalyzer analyzer in analyzers)
 						{
 							var menuItem = new MenuItemViewModel(
 								analyzer.Key,
@@ -927,7 +927,7 @@
 			_engine.GenerateReport(ReportType.CommentSummary, destinationFolder);
 		}
 
-		public void Analyze(IRecordCollectionAnalyzer analyzer)
+		public void Analyze(IRecordAnalyzer analyzer)
 		{
 			var records = _engine.Selector.IsTimePeriodSelected
 				? _engine.Selector.GetSelected()

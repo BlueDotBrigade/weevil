@@ -8,10 +8,10 @@
 		void RemoveAllFlags();
 		void RemoveComments(bool clearAll);
 
-		IList<IRecordCollectionAnalyzer> GetAnalyzers(ComponentType componentType);
+		IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType);
 
-		IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType);
+		IRecordAnalyzer GetAnalyzer(AnalysisType analysisType);
 
-		IRecordCollectionAnalyzer GetAnalyzer(string analyzerKey);
+		IRecordAnalyzer GetAnalyzer(string analyzerKey);
 	}
 }

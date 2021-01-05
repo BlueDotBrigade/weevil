@@ -7,7 +7,7 @@
 	using Filter;
 	using Filter.Expressions.Regular;
 
-	internal class DataTransitionAnalyzer : IRecordCollectionAnalyzer
+	internal class DataTransitionAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
 
