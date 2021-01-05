@@ -14,12 +14,12 @@
 			record.Setup(x => x.Severity).Returns(SeverityType.Information);
 
 			var metricsA = new SeverityMetrics();
-			metricsA.Analyze(record.Object); // Information=1
-			metricsA.Analyze(record.Object); // Information=2
-			metricsA.Analyze(record.Object); // Information=3
+			metricsA.Count(record.Object); // Information=1
+			metricsA.Count(record.Object); // Information=2
+			metricsA.Count(record.Object); // Information=3
 
 			var metricsB = new SeverityMetrics();
-			metricsB.Analyze(record.Object); // Information=1
+			metricsB.Count(record.Object); // Information=1
 
 			SeverityMetrics result = metricsA + metricsB;
 

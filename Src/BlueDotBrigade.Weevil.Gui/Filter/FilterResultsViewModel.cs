@@ -42,11 +42,10 @@
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Doc\Help.html");
+		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Licenses\License.txt");
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Licenses\ThirdPartyNoticesAndInformation.txt");
 
 		private static readonly string ApplicationLogFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
-
-		private static readonly TimeSpan DefaultUiResponsivenessPeriod = TimeSpan.FromSeconds(1);
 
 		#region Fields & Object Lifetime
 
@@ -128,6 +127,8 @@
 			_tableOfContents = new TableOfContents();
 
 			this.IsIndeterminate = true;
+
+			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -297,6 +298,8 @@
 		public TimeSpan ElapsedTime { get; private set; }
 
 		public string CurrentHeading { get; private set; }
+
+		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
 		public Action<object, EventArgs> ResultsChanged { get; internal set; }
 		#endregion
@@ -481,6 +484,24 @@
 
 						this.InclusiveFilterEnabled = true;
 						this.ExclusiveFilterEnabled = true;
+
+						var analyzers = _engine
+							.Analyzer
+							.GetAnalyzers(ComponentType.Extension)
+							.OrderBy(x => x.DisplayName)
+							.ToArray();
+
+						this.CustomAnalyzerCommands.Clear();
+
+						foreach (IRecordAnalyzer analyzer in analyzers)
+						{
+							var menuItem = new MenuItemViewModel(
+								analyzer.Key,
+								analyzer.DisplayName,
+								this.CustomAnalyzerCommand);
+
+							this.CustomAnalyzerCommands.Add(menuItem);
+						}
 
 						Log.Default.Write(
 							LogSeverityType.Information,
@@ -756,7 +777,7 @@
 		{
 			try
 			{
-				var dialog = new AboutDialog(this.CurrentVersion, ThirdPartyNoticesPath, ThirdPartyNoticesPath)
+				var dialog = new AboutDialog(this.CurrentVersion, LicensePath, ThirdPartyNoticesPath)
 				{
 					Owner = _mainWindow,
 				};
@@ -906,54 +927,56 @@
 			_engine.GenerateReport(ReportType.CommentSummary, destinationFolder);
 		}
 
+		public void Analyze(IRecordAnalyzer analyzer)
+		{
+			var records = _engine.Selector.IsTimePeriodSelected
+				? _engine.Selector.GetSelected()
+				: _engine.Filter.Results;
+
+			var outputDirectory = Path.GetDirectoryName(_engine.SourceFilePath);
+
+			try
+			{
+				this.FlaggedRecordCount = analyzer.Analyze(
+					records,
+					outputDirectory,
+					_dialogBox);
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		public void Analyze(string customAnalyzerKey)
+		{
+			Analyze(_engine.Analyzer.GetAnalyzer(customAnalyzerKey));
+		}
+
 		public void AnalyzeUiResponsiveness()
 		{
-			var userInput = _dialogBox.ShowUserPrompt(
-				"Input Required",
-				"Elapsed greater than (ms):",
-				DefaultUiResponsivenessPeriod.TotalMilliseconds.ToString("0.#"));
-
-			if (int.TryParse(userInput, out var timePeriodInMs))
-			{
-				IDictionary<string, object> results = _engine.Analyzer.GetAnalyzer(AnalysisType.UiResponsiveness).Analyze(timePeriodInMs);
-				this.FlaggedRecordCount = int.Parse(results["UnresponsiveUiCount"].ToString());
-
-				RefreshFilterResults();
-			}
-			else
-			{
-				MessageBox.Show("Elapsed time is expected to be greater than zero(0).", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectUnresponsiveUi));
 		}
 
 		public void DetectData()
 		{
-			IDictionary<string, object> results = _engine.Analyzer.GetAnalyzer(AnalysisType.ExtractRegExKvp).Analyze();
-			this.FlaggedRecordCount = int.Parse(results["KeysFound"].ToString());
-			RefreshFilterResults();
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectData));
 		}
 
 		public void AnalyzeDataTransitions()
 		{
-			IDictionary<string, object> results = _engine.Analyzer.GetAnalyzer(AnalysisType.DataTransition).Analyze();
-			this.FlaggedRecordCount = int.Parse(results["TransitionCount"].ToString());
-
-			RefreshFilterResults();
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectDataTransition));
 		}
 
 		public void AnalyzeDataTransitionsFallingEdge()
 		{
-			IDictionary<string, object> results = _engine.Analyzer.GetAnalyzer(AnalysisType.DataTransitionFallingEdge).Analyze();
-			this.FlaggedRecordCount = int.Parse(results["TransitionCount"].ToString());
-
-			RefreshFilterResults();
+			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectFallingEdges));
 		}
 
 		private void ToggleIsPinned()
 		{
 			_engine.Selector.ToggleIsPinned();
 		}
-
 		public void UnpinAll()
 		{
 			_engine.Analyzer.UnpinAll();

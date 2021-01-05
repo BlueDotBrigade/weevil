@@ -15,6 +15,21 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>false</Deterministic>
     <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -114,6 +129,7 @@
     <Compile Include="IO\UserPromptDialog.xaml.cs">
       <DependentUpon>UserPromptDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MenuItemViewModel.cs" />
     <Compile Include="Properties\GlobalSuppressions.cs" />
     <Compile Include="IO\IDialogBoxService.cs" />
     <Compile Include="Properties\Annotations.cs" />
@@ -286,21 +302,34 @@
   <ItemGroup>
     <Resource Include="Resources\Images\Weevil-100.png" />
   </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...
 COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>XCOPY /F /R /Y /I "$(SolutionDir)LICENSE" "$(TargetDir)Doc\\"
-
+    <PostBuildEvent>REM Create directory and copy third-party licenses
 XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)Licenses"  /D /I /E /Y
+
+COPY /A /Y "$(SolutionDir)LICENSE" "$(TargetDir)Licenses\\License.txt"
 
 IF "%25WEEVIL_PLUGINS_PATH%25"==""  (
    ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS
 ) else (
    ECHO Copying plugins to Bin directory...
-   XCOPY "%25WEEVIL_PLUGINS_PATH%25" "$(TargetDir)Plugins"  /D /I /E /Y
+   REM XCOPY "%25WEEVIL_PLUGINS_PATH%25" "$(TargetDir)Plugins"  /D /I /E /Y
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>

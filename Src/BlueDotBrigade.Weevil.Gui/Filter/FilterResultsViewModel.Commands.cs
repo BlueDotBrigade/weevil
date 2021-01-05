@@ -144,6 +144,26 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand RemoveSelectedCommentsCommand => new UiBoundCommand(() => RemoveComments(false), () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand UnpinAllCommand => new UiBoundCommand(UnpinAll, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public DelegateCommand<object[]> CustomAnalyzerCommand => new DelegateCommand<object[]>(parameters =>
+		{
+			try
+			{
+				var customAnalyzerKey = parameters[0].ToString();
+				Analyze(customAnalyzerKey);
+			}
+			catch (Exception e)
+			{
+				var message =
+					$"Unable to perform the requested operation. CommandName={nameof(this.FilterOrCancelCommand)}";
+				Log.Default.Write(
+					LogSeverityType.Information,
+					e,
+					message);
+				MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		});
 		#endregion
 
 		#region Commands: Selection

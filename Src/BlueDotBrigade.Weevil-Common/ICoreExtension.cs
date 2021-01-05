@@ -20,8 +20,9 @@
 
 		ContextDictionary DetermineContext(ImmutableArray<IRecord> allRecords);
 
-		IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords);
-		IList<IRecordAnalyzer> GetRecordAnalyzers(ContextDictionary context);
+		IList<IRecordAnalyzer> GetAnalyzers();
+		IRecordAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords);
+		IList<IRecordCounter> GetRecordAnalyzers(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
 		IStaticAliasExpander GetStaticAliasExpander(ContextDictionary context);
 		TableOfContents BuildTableOfContents(StreamReader logFileReader);

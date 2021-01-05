@@ -4,7 +4,7 @@
 	using System.Threading;
 	using Data;
 
-	internal class SeverityMetrics : IRecordAnalyzer
+	internal class SeverityMetrics : IRecordCounter
 	{
 		#region Fields
 		private int _information;
@@ -32,7 +32,7 @@
 		#region Event Handlers
 		#endregion
 
-		public void Analyze(IRecord record)
+		public void Count(IRecord record)
 		{
 			switch (record.Severity)
 			{

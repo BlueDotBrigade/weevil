@@ -83,7 +83,7 @@
     <Compile Include="Analysis\SeverityMetrics.cs" />
     <Compile Include="Analysis\Timeline\DetectFallingEdgeAnalyzer.cs" />
     <Compile Include="Analysis\Timeline\DataTransitionAnalyzer.cs" />
-    <Compile Include="Analysis\UiResponsivenessAnalyzer.cs" />
+    <Compile Include="Analysis\DetectUnresponsiveUiAnalyzer.cs" />
     <Compile Include="Configuration\Sidecar\IPersist.cs" />
     <Compile Include="Configuration\Sidecar\ISidecarLoader.cs" />
     <Compile Include="Configuration\Sidecar\SidecarData.cs" />

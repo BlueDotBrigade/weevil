@@ -3,11 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
+	using Moq;
 
 	[TestClass]
-	public class UiResponsivenessAnalyzerTest
+	public class DetectUnresponsiveUiAnalyzerTest
 	{
 		private ImmutableArray<IRecord> _records;
 
@@ -47,9 +49,9 @@
 		[TestMethod]
 		public void Analyze_NoPrecedingRecord_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsFalse(_records[0].Metadata.IsFlagged);
 		}
@@ -57,9 +59,9 @@
 		[TestMethod]
 		public void Analyze_ApplicationInitializing_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsFalse(_records[1].Metadata.IsFlagged);
 		}
@@ -67,9 +69,9 @@
 		[TestMethod]
 		public void Analyze_PrecedingRecordWasInitialing_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsFalse(_records[2].Metadata.IsFlagged);
 		}
@@ -77,9 +79,9 @@
 		[TestMethod]
 		public void Analyze_LongPeriodBetweenUiRecords_RecordFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsTrue(_records[3].Metadata.IsFlagged);
 		}
@@ -87,9 +89,9 @@
 		[TestMethod]
 		public void Analyze_ShortPeriodBetweenUiRecords_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsFalse(_records[4].Metadata.IsFlagged);
 		}
@@ -97,9 +99,9 @@
 		[TestMethod]
 		public void Analyze_RecordWasNotWrittenByUiThread_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsFalse(_records[5].Metadata.IsFlagged);
 		}
@@ -107,9 +109,9 @@
 		[TestMethod]
 		public void Analyze_MixedUiAndNotUiRecords_RecordFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsTrue(_records[6].Metadata.IsFlagged);
 		}
@@ -117,9 +119,9 @@
 		[TestMethod]
 		public void Analyze_ApplicationTerminatingMessage_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsFalse(_records[7].Metadata.IsFlagged);
 		}
@@ -127,9 +129,9 @@
 		[TestMethod]
 		public void Analyze_PrecedingRecordWasApplicationTerminating_RecordNotFlagged()
 		{
-			var analyzer = new UiResponsivenessAnalyzer(_records);
+			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze();
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
 
 			Assert.IsFalse(_records[8].Metadata.IsFlagged);
 		}

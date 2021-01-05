@@ -1,6 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using Timeline;
 
@@ -17,17 +19,17 @@
 
 		public void UnpinAll()
 		{
-			Parallel.For(0, _coreEngine.AllRecords.Length - 1, i =>
+			Parallel.For(0, _coreEngine.Records.Length - 1, i =>
 			{
-				_coreEngine.AllRecords[i].Metadata.IsPinned = false;
+				_coreEngine.Records[i].Metadata.IsPinned = false;
 			});
 		}
 
 		public void RemoveAllFlags()
 		{
-			Parallel.For(0, _coreEngine.AllRecords.Length - 1, i =>
+			Parallel.For(0, _coreEngine.Records.Length - 1, i =>
 			{
-				_coreEngine.AllRecords[i].Metadata.IsFlagged = false;
+				_coreEngine.Records[i].Metadata.IsFlagged = false;
 			});
 		}
 
@@ -35,9 +37,9 @@
 		{
 			if (clearAll)
 			{
-				Parallel.For(0, _coreEngine.AllRecords.Length, i =>
+				Parallel.For(0, _coreEngine.Records.Length, i =>
 				{
-					_coreEngine.AllRecords[i].Metadata.Comment = string.Empty;
+					_coreEngine.Records[i].Metadata.Comment = string.Empty;
 				});
 			}
 			else
@@ -50,34 +52,38 @@
 			}
 		}
 
-		public IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType)
+		public IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType)
 		{
-			IRecordCollectionAnalyzer analyzer = null;
+			var analyzers = new List<IRecordAnalyzer>();
 
-			switch (analysisType)
+			if ((componentType & ComponentType.Core) == ComponentType.Core)
 			{
-				case AnalysisType.UiResponsiveness:
-					analyzer = new UiResponsivenessAnalyzer(_coreEngine.Filter.Results);
-					break;
-
-				case AnalysisType.ExtractRegExKvp:
-					analyzer = new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
-					break;
-
-				case AnalysisType.DataTransition:
-					analyzer = new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
-					break;
-
-				case AnalysisType.DataTransitionFallingEdge:
-					analyzer = new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
-					break;
-
-				//default:
-				//	analyzer = _coreExtension.GetAnalyzer(analysisType, _coreEngine, _coreEngine.AllRecords);
-				//	break;
+				analyzers.AddRange(new List<IRecordAnalyzer>()
+				{
+					new DetectUnresponsiveUiAnalyzer(),
+					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
+				});
 			}
 
-			return analyzer;
+			if ((componentType & ComponentType.Extension) == ComponentType.Extension)
+			{
+				analyzers.AddRange(_coreExtension.GetAnalyzers());
+			}
+
+			return analyzers;
+		}
+
+		public IRecordAnalyzer GetAnalyzer(string analyzerKey)
+		{
+			return GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
+		}
+
+		public IRecordAnalyzer GetAnalyzer(AnalysisType analysisType)
+		{
+			var analysisKey = analysisType.ToString();
+			return GetAnalyzers(ComponentType.Core).First(x => x.Key == analysisKey);
 		}
 	}
 }

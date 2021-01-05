@@ -1,14 +1,22 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
-	using System.Collections.Generic;
-	using Data;
+	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.IO;
 
 	public interface IRecordAnalyzer
 	{
-		void Analyze(IRecord record);
+		string Key { get; }
 
-		void Reset();
+		string DisplayName { get; }
 
-		IDictionary<string, object> GetResults();
+		/// <summary>
+		/// Looks for trends within the provided <see cref="IRecord"/> collection.
+		/// </summary>
+		/// <param name="user">Enables the analyzer to prompt the user for additional context.</param>
+		/// <param name="outputDirectory">Path to where analysis results can be saved.</param>
+		/// <param name="records">List of records to be analyzed.</param>
+		/// <returns>The number of records that fit the trend.</returns>
+		int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog user);
 	}
 }
