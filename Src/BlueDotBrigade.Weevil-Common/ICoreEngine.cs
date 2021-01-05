@@ -10,7 +10,15 @@
 	public interface ICoreEngine
 	{
 		IRecord this[int index] { get; }
-		ImmutableArray<IRecord> AllRecords { get; }
+		/// <summary>
+		/// Represents all of the records that have been loaded from the <see cref="SourceFilePath"/>.
+		/// </summary>
+		/// <remarks>
+		/// This property is intended to provide readonly access to the records via LINQ queries.
+		///
+		/// Coupling business logic to the <see cref="Records"/> property is strongly discouraged.
+		/// </remarks>
+		ImmutableArray<IRecord> Records { get; }
 		LogFileMetrics Metrics { get; }
 		IFilter Filter { get; }
 		INavigate Navigator { get; }

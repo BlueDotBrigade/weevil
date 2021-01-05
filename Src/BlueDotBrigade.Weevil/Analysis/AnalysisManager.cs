@@ -19,17 +19,17 @@
 
 		public void UnpinAll()
 		{
-			Parallel.For(0, _coreEngine.AllRecords.Length - 1, i =>
+			Parallel.For(0, _coreEngine.Records.Length - 1, i =>
 			{
-				_coreEngine.AllRecords[i].Metadata.IsPinned = false;
+				_coreEngine.Records[i].Metadata.IsPinned = false;
 			});
 		}
 
 		public void RemoveAllFlags()
 		{
-			Parallel.For(0, _coreEngine.AllRecords.Length - 1, i =>
+			Parallel.For(0, _coreEngine.Records.Length - 1, i =>
 			{
-				_coreEngine.AllRecords[i].Metadata.IsFlagged = false;
+				_coreEngine.Records[i].Metadata.IsFlagged = false;
 			});
 		}
 
@@ -37,9 +37,9 @@
 		{
 			if (clearAll)
 			{
-				Parallel.For(0, _coreEngine.AllRecords.Length, i =>
+				Parallel.For(0, _coreEngine.Records.Length, i =>
 				{
-					_coreEngine.AllRecords[i].Metadata.Comment = string.Empty;
+					_coreEngine.Records[i].Metadata.Comment = string.Empty;
 				});
 			}
 			else

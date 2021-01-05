@@ -207,14 +207,7 @@
 
 		public IAnalyze Analyzer => _analysisManager;
 
-		/// <summary>
-		/// Represents all of the log file records that have been loaded from disk.
-		/// </summary>
-		/// <remarks>
-		/// This property should not be accessible outside of this assembly,
-		/// to ensure that business logic does not spill over into the user interface.
-		/// </remarks>
-		public ImmutableArray<IRecord> AllRecords => _allRecords;
+		public ImmutableArray<IRecord> Records => _allRecords;
 
 		public int Count => _allRecords.Length;
 

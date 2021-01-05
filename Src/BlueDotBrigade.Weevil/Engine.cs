@@ -52,7 +52,7 @@
 
 		public IRecord this[int index] => _coreEngine[index];
 
-		public ImmutableArray<IRecord> AllRecords => _coreEngine.AllRecords;
+		public ImmutableArray<IRecord> Records => _coreEngine.Records;
 
 		public LogFileMetrics Metrics => _coreEngine.Metrics;
 
