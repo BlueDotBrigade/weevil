@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
 	using Filter.Expressions.Regular;
@@ -17,6 +18,10 @@
 			_records = records;
 		}
 
+		public string Key => AnalysisType.DetectFallingEdges.ToString();
+
+		public string DisplayName => "Detect Falling Edges";
+
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
 		/// </summary>
@@ -26,9 +31,9 @@
 		/// 2. an appropriate comment is added to the record
 		/// </remarks>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public IDictionary<string, object> Analyze(params object[] userParameters)
+		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog user)
 		{
-			var transitionCount = 0;
+			var flaggedRecords = 0;
 
 			if (_filterStrategy != FilterStrategy.KeepAllRecords)
 			{
@@ -60,7 +65,7 @@
 												{
 													var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
-													transitionCount++;
+													flaggedRecords++;
 													record.Metadata.IsFlagged = true;
 													record.Metadata.UpdateUserComment($"{parameterName}: {previous[current.Key]} => {current.Value}");
 												}
@@ -71,7 +76,7 @@
 										{
 											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
-											transitionCount++;
+											flaggedRecords++;
 											record.Metadata.IsFlagged = true;
 											record.Metadata.UpdateUserComment($"{parameterName}: {current.Value}");
 											previous.Add(current.Key, current.Value);
@@ -84,10 +89,7 @@
 				}
 			}
 
-			return new Dictionary<string, object>
-			{
-				{ "TransitionCount", transitionCount},
-			};
+			return flaggedRecords;
 		}
 
 		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)

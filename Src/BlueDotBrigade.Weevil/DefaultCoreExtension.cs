@@ -44,6 +44,16 @@
 			return _context;
 		}
 
+		public IList<IRecordCollectionAnalyzer> GetAnalyzers()
+		{
+			return new List<IRecordCollectionAnalyzer>();
+		}
+
+		public IRecordCollectionAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords)
+		{
+			return _recordCollectionAnalyzer;
+		}
+
 		public IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType, ICoreEngine coreEngine,
 			ImmutableArray<IRecord> allRecords)
 		{

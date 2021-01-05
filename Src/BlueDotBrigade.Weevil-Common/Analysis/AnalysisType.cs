@@ -2,9 +2,9 @@
 {
 	public enum AnalysisType
 	{
-		ExtractRegExKvp,
-		DataTransition,
-		DataTransitionFallingEdge,
-		UiResponsiveness,
+		DetectData,
+		DetectDataTransition,
+		DetectFallingEdges,
+		DetectUnresponsiveUi,
 	}
 }

@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
 	using Filter.Expressions.Regular;
@@ -17,13 +18,17 @@
 			_records = records;
 		}
 
+		public string Key => AnalysisType.DetectData.ToString();
+
+		public string DisplayName => "Detect Data";
+
 		/// <summary>
 		/// Extracts key/value pairs defined by regular expression "groups", and then updates the corresponding <see cref="Metadata.Comment"/>.
 		/// </summary>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public IDictionary<string, object> Analyze(params object[] userParameters)
+		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog user)
 		{
-			var count = 0;
+			var flaggedRecords = 0;
 
 			if (_filterStrategy != FilterStrategy.KeepAllRecords)
 			{
@@ -49,7 +54,7 @@
 										record.Metadata.IsFlagged = true;
 										record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
 
-										count++;
+										flaggedRecords++;
 									}
 								}
 							}
@@ -58,10 +63,7 @@
 				}
 			}
 
-			return new Dictionary<string, object>
-			{
-				{ "KeysFound", count },
-			};
+			return flaggedRecords;
 		}
 
 		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)

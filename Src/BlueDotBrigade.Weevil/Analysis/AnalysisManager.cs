@@ -1,6 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using Timeline;
 
@@ -50,31 +52,55 @@
 			}
 		}
 
+		public IList<IRecordCollectionAnalyzer> GetAnalyzers(ComponentType componentType)
+		{
+			var analyzers = new List<IRecordCollectionAnalyzer>();
+
+			if ((componentType & ComponentType.Core) == ComponentType.Core)
+			{
+				analyzers.AddRange(new List<IRecordCollectionAnalyzer>()
+				{
+					new UiResponsivenessAnalyzer(_coreEngine.Filter.Results),
+					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results),
+					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results),
+					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results),
+				});
+			}
+
+			if ((componentType & ComponentType.Extension) == ComponentType.Extension)
+			{
+				analyzers.AddRange(_coreExtension.GetAnalyzers());
+			}
+
+			return analyzers;
+		}
+
+		public IRecordCollectionAnalyzer GetAnalyzer(string analyzerKey)
+		{
+			return GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
+		}
+
 		public IRecordCollectionAnalyzer GetAnalyzer(AnalysisType analysisType)
 		{
 			IRecordCollectionAnalyzer analyzer = null;
 
 			switch (analysisType)
 			{
-				case AnalysisType.UiResponsiveness:
+				case AnalysisType.DetectUnresponsiveUi:
 					analyzer = new UiResponsivenessAnalyzer(_coreEngine.Filter.Results);
 					break;
 
-				case AnalysisType.ExtractRegExKvp:
+				case AnalysisType.DetectData:
 					analyzer = new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
 					break;
 
-				case AnalysisType.DataTransition:
+				case AnalysisType.DetectDataTransition:
 					analyzer = new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
 					break;
 
-				case AnalysisType.DataTransitionFallingEdge:
+				case AnalysisType.DetectFallingEdges:
 					analyzer = new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy, _coreEngine.Filter.Results);
 					break;
-
-				//default:
-				//	analyzer = _coreExtension.GetAnalyzer(analysisType, _coreEngine, _coreEngine.AllRecords);
-				//	break;
 			}
 
 			return analyzer;
