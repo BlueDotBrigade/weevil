@@ -240,9 +240,9 @@
 
 		#region Private Methods
 
-		private ImmutableArray<IRecordAnalyzer> GetRecordAnalyzers()
+		private ImmutableArray<IRecordCounter> GetRecordAnalyzers()
 		{
-			IList<IRecordAnalyzer> analyzers = _coreExtension.GetRecordAnalyzers(_context);
+			IList<IRecordCounter> analyzers = _coreExtension.GetRecordAnalyzers(_context);
 			analyzers.Add(new SeverityMetrics());
 			return analyzers.ToImmutableArray();
 		}

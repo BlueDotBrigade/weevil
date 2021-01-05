@@ -14,7 +14,7 @@
 		private readonly ContextDictionary _context;
 		private readonly IRecordParser _recordParser;
 		private readonly IStaticAliasExpander _staticAliasExpander;
-		private readonly List<IRecordAnalyzer> _recordAnalyzers;
+		private readonly List<IRecordCounter> _recordAnalyzers;
 		private readonly IRecordCollectionAnalyzer _recordCollectionAnalyzer;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
@@ -26,7 +26,7 @@
 			_context = context;
 			_recordParser = new TsvRecordParser();
 			_staticAliasExpander = new DefaultAliasExpander();
-			_recordAnalyzers = new List<IRecordAnalyzer>();
+			_recordAnalyzers = new List<IRecordCounter>();
 			_recordCollectionAnalyzer = new DefaultCollectionAnalyzer();
 			_monikerActivators = new List<MonikerActivator>();
 			_tableOfContents = new TableOfContents();
@@ -60,7 +60,7 @@
 			return _recordCollectionAnalyzer;
 		}
 
-		public IList<IRecordAnalyzer> GetRecordAnalyzers(ContextDictionary context)
+		public IList<IRecordCounter> GetRecordAnalyzers(ContextDictionary context)
 		{
 			return _recordAnalyzers;
 		}

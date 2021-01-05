@@ -3,9 +3,9 @@
 	using System.Collections.Generic;
 	using Data;
 
-	public interface IRecordAnalyzer
+	public interface IRecordCounter
 	{
-		void Analyze(IRecord record);
+		void Count(IRecord record);
 
 		void Reset();
 
