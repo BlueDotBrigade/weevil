@@ -73,7 +73,7 @@
 				foreach (var groupName in groupNames)
 				{
 					var groupValue = match.Groups[groupName].Value;
-					if (int.TryParse(groupValue, out var groupNumber))
+					if (int.TryParse(groupName, out var groupNumber))
 					{
 						unnamedGroups++;
 						// For now, we only care about named groups.
