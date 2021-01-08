@@ -240,9 +240,9 @@
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Open" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
-                    <MenuItem Header="Save...">
-                       <MenuItem Header="Selected Records (raw)" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
-                       <MenuItem Header="Selected Records (with metadata)" Command="{Binding SaveSelectedAsTsvCommand}" />
+                    <MenuItem Header="Save Selected Records...">
+                       <MenuItem Header="Raw Data" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
+                       <MenuItem Header="With Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
                        <Separator/>
                        <MenuItem Header="Comment Summary" Command="{Binding SaveCommentSummaryCommand}" />
                     </MenuItem>
