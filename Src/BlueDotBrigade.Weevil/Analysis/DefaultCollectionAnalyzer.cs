@@ -13,7 +13,7 @@
 
 		public string DisplayName => string.Empty;
 
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog user)
+		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog)
 		{
 			const int flaggedRecords = 0;
 			return flaggedRecords;

@@ -24,7 +24,7 @@
 		/// Extracts key/value pairs defined by regular expression "groups", and then updates the corresponding <see cref="Metadata.Comment"/>.
 		/// </summary>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog user)
+		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog)
 		{
 			var flaggedRecords = 0;
 
