@@ -60,7 +60,7 @@
 			return _recordCollectionAnalyzer;
 		}
 
-		public IList<IRecordCounter> GetRecordAnalyzers(ContextDictionary context)
+		public IList<IRecordCounter> GetRecordCounters(ContextDictionary context)
 		{
 			return _recordAnalyzers;
 		}

@@ -22,7 +22,7 @@
 
 		IList<IRecordAnalyzer> GetAnalyzers();
 		IRecordAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords);
-		IList<IRecordCounter> GetRecordAnalyzers(ContextDictionary context);
+		IList<IRecordCounter> GetRecordCounters(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
 		IStaticAliasExpander GetStaticAliasExpander(ContextDictionary context);
 		TableOfContents BuildTableOfContents(StreamReader logFileReader);
