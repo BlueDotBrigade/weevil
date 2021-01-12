@@ -114,7 +114,7 @@
 		{
 			var userInput = user.ShowUserPrompt(
 				"Input Required",
-				"Elapsed greater than (ms):",
+				"Maximum delay (ms):",
 				DefaultUiResponsivenessPeriod.TotalMilliseconds.ToString("0.#"));
 
 			var wasSuccessful = int.TryParse(userInput, out var timePeriodInMs);
