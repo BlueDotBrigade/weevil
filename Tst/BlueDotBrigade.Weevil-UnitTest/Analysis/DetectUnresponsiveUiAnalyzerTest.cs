@@ -13,6 +13,21 @@
 	{
 		private ImmutableArray<IRecord> _records;
 
+		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
+		{
+			var userDialog = new Mock<IUserDialog>();
+
+			// Only the plugin knows what to ask the user. That said, the unit test has know idea about the implementation details
+			// ... Were 2 parameters passed in? Were 3?
+			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
+			userDialog.Setup(x => x.ShowUserPrompt(
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>())).Returns(msBeforeFlaggedRaised.ToString);
+
+			return userDialog.Object;
+		}
+
 		[TestInitialize]
 		public void PreTest()
 		{
@@ -21,15 +36,15 @@
 
 			var records = new List<IRecord>
 			{
-				new Record(0, now.AddMinutes(0), severity, "content", new Metadata { WasGeneratedByUi = true }), // Should be flagged false; no timestamps for comparison
-				new Record(1, DateTime.MaxValue, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // Should be flagged false; 
-				new Record(2, now.AddMinutes(2), severity, "content", new Metadata { WasGeneratedByUi = true }), // Should be flagged false; no timestamps for comparison
-				new Record(3, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // Should be flagged true; 
-				new Record(4, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // Should be flagged false; not enough time since last record
-				new Record(5, now.AddMinutes(5), severity, "content", new Metadata { WasGeneratedByUi = false }), // Should be flagged false; record not from UI thread
-				new Record(6, now.AddMinutes(6), severity, "content", new Metadata { WasGeneratedByUi = true }), // Should be flagged true; lots of time between two UI records
-				new Record(7, DateTime.MaxValue, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // Should be flagged false;
-				new Record(8, now.AddMinutes(8), severity, "content", new Metadata { WasGeneratedByUi = true }), // Should be flagged false; nothing to reference
+				new Record(0, now.AddMinutes(0), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no record to compare against
+				new Record(1, DateTime.MaxValue, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
+				new Record(2, now.AddMinutes(2), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no timestamps for comparison
+				new Record(3, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 
+				new Record(4, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; not enough time since last record
+				new Record(5, now.AddMinutes(5), severity, "content", new Metadata { WasGeneratedByUi = false }), // IsFlagged=false; record not from UI thread
+				new Record(6, now.AddMinutes(6), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; lots of time between two UI records
+				new Record(7, DateTime.MaxValue, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
+				new Record(8, now.AddMinutes(8), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; nothing to reference
 			};
 
 			_records = ImmutableArray.Create(records.ToArray());
@@ -51,7 +66,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsFalse(_records[0].Metadata.IsFlagged);
 		}
@@ -61,7 +76,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsFalse(_records[1].Metadata.IsFlagged);
 		}
@@ -71,7 +86,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsFalse(_records[2].Metadata.IsFlagged);
 		}
@@ -81,9 +96,9 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
-			Assert.IsTrue(_records[3].Metadata.IsFlagged);
+			Assert.IsTrue(_records[3].Metadata.IsFlagged); // here
 		}
 
 		[TestMethod]
@@ -91,7 +106,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsFalse(_records[4].Metadata.IsFlagged);
 		}
@@ -101,7 +116,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsFalse(_records[5].Metadata.IsFlagged);
 		}
@@ -111,7 +126,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsTrue(_records[6].Metadata.IsFlagged);
 		}
@@ -121,7 +136,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsFalse(_records[7].Metadata.IsFlagged);
 		}
@@ -131,7 +146,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), new Mock<IUserDialog>().Object);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
 
 			Assert.IsFalse(_records[8].Metadata.IsFlagged);
 		}
