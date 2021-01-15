@@ -127,7 +127,7 @@
 				_context,
 				staticAliasExpander,
 				_allRecords,
-				GetRecordAnalyzers());
+				GetRecordCounters());
 
 			_filterManager.Apply(FilterType.PlainText, FilterCriteria.None);
 			_filterManager.ResultsChanged += OnResultsChanged;
@@ -240,11 +240,11 @@
 
 		#region Private Methods
 
-		private ImmutableArray<IRecordCounter> GetRecordAnalyzers()
+		private ImmutableArray<IRecordCounter> GetRecordCounters()
 		{
-			IList<IRecordCounter> analyzers = _coreExtension.GetRecordAnalyzers(_context);
-			analyzers.Add(new SeverityMetrics());
-			return analyzers.ToImmutableArray();
+			IList<IRecordCounter> recordCounters = _coreExtension.GetRecordCounters(_context);
+			recordCounters.Add(new SeverityMetrics());
+			return recordCounters.ToImmutableArray();
 		}
 
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)

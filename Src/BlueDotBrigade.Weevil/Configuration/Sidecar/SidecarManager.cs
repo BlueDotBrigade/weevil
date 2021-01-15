@@ -71,7 +71,7 @@
 
 				if (sidecarLoaded == false)
 				{
-					var message = "The file's sidecar is not compatible with this version of the application.";
+					var message = "This file's sidecar is not compatible with this version of the application.";
 					Log.Default.Write(
 						LogSeverityType.Warning,
 						message);

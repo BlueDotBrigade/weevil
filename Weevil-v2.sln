@@ -36,7 +36,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-Commo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Interface", "User Interface", "{0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Code", "Shared Code", "{E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet Packages", "NuGet Packages", "{E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notes", "Doc\Notes\Notes.csproj", "{D368EE3A-0874-4C23-8ABA-5B935B29882E}"
 EndProject
