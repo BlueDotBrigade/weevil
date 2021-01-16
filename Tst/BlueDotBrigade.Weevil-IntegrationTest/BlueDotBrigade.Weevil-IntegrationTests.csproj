@@ -64,14 +64,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\BenchmarkConfiguration.cs" />
-    <Compile Include="FilterHistoryShould.cs" />
+    <Compile Include="Filter\FilterHistoryShould.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestEnvironment.cs" />
     <Compile Include="ClearingShould.cs" />
     <Compile Include="SidecarDataShould.cs" />
     <Compile Include="OpeningFileShould.cs" />
-    <Compile Include="NavigationShould.cs" />
+    <Compile Include="Navigation\NavigationShould.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet">
