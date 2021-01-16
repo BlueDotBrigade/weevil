@@ -9,6 +9,7 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using System.Net;
 	using System.Reflection;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -19,7 +20,7 @@
 	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Analysis.LogSplitter;
-	using BlueDotBrigade.Weevil.Configuration.Software;
+	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -38,14 +39,15 @@
 	[NotifyPropertyChanged()]
 	internal partial class FilterResultsViewModel : IDropTarget, INotifyPropertyChanged
 	{
-		private const string NewReleaseDetailsPath = @"ReleasedVersion.xml";
+		private static readonly Uri NewReleaseUrl =
+			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/ReleaseNotes.xml");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Doc\Help.html");
 		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Licenses\License.txt");
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\Licenses\ThirdPartyNoticesAndInformation.txt");
 
-		private static readonly string ApplicationLogFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
+		private static readonly string NewReleaseFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
 
 		#region Fields & Object Lifetime
 
@@ -135,16 +137,17 @@
 		{
 			ApplicationInfo result = ApplicationInfo.NotSpecified;
 
-			var applicationInfoPath = NewReleaseDetailsPath;
+			Stream newReleaseStream = null;
 
 #if DEBUG
-			applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Dep\Runtime\Debug\ReleaseNotes.xml");
+			var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\ReleaseNotes.xml");
+			newReleaseStream = FileHelper.Open(applicationInfoPath);
+#else
+			newReleaseStream = new WebClient().OpenRead(NewReleaseUrl);
 #endif
 			try
 			{
-				result = TypeFactory.LoadFromXml<ApplicationInfo>(applicationInfoPath);
-				result.ChangeLogPath = Path.GetFullPath(result.ChangeLogPath);
-				result.InstallerPath = Path.GetFullPath(result.InstallerPath);
+				result = TypeFactory.LoadFromXml<ApplicationInfo>(newReleaseStream);
 			}
 			catch (IOException e)
 			{
@@ -171,18 +174,23 @@
 		public int SelectedRecordCount { get; set; }
 
 		[SafeForDependencyAnalysis]
-		public bool IsUpdateAvailable =>
-				//Depends.On(this.NewReleaseDetails);
+		public bool IsUpdateAvailable
+		{
+			get
+			{
+				Depends.On(this.NewReleaseDetails);
 
-				//var isUpdateAvailable = false;
+				var isUpdateAvailable = false;
 
-				//if (NewReleaseDetails != null)
-				//{
-				//	isUpdateAvailable = NewReleaseDetails.Version > this.CurrentVersion;
-				//}
+				if (this.NewReleaseDetails != null)
+				{
+					isUpdateAvailable = this.NewReleaseDetails.Version > this.CurrentVersion;
+				}
 
-				//return isUpdateAvailable;
-				false;
+				return isUpdateAvailable;
+			}
+		}
+
 		public Version CurrentVersion { get; private set; }
 
 		[SafeForDependencyAnalysis]
@@ -762,7 +770,7 @@
 
 		public void ShowApplicationLogFile()
 		{
-			WindowsProcess.Start(WindowsProcessType.FileExplorer, ApplicationLogFilePath);
+			WindowsProcess.Start(WindowsProcessType.FileExplorer, NewReleaseFilePath);
 		}
 
 		public void ShowHelp()

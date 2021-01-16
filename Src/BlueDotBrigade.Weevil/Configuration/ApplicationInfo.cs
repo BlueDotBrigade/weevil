@@ -1,14 +1,32 @@
-﻿namespace BlueDotBrigade.Weevil.Configuration.Software
+﻿namespace BlueDotBrigade.Weevil.Configuration
 {
 	using System;
+	using System.Runtime.Serialization;
 
+	/// <summary>
+	/// Message is used to inform the user when a new version of the application has been released.
+	/// </summary>
+	/// <remarks>
+	/// In order for deserialization to work properly, the <see cref="ApplicationInfo"/> properties must be in the same order
+	/// as they appear in the XML.
+	/// </remarks>
+	[Serializable]
+	[DataContract(Namespace = "")]
 	public class ApplicationInfo
 	{
 		public static readonly ApplicationInfo NotSpecified = new ApplicationInfo();
 
-		public Version Version { get; set; }
+		[DataMember]
+		public string InstallerUrl { get; set; }
+
+		[DataMember]
+		public string ChangeLogUrl { get; set; }
+
+
+		[DataMember]
 		public string Description { get; set; }
-		public string InstallerPath { get; set; }
-		public string ChangeLogPath { get; set; }
+
+		[DataMember]
+		public Version Version { get; set; }
 	}
 }

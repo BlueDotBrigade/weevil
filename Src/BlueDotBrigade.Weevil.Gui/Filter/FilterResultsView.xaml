@@ -533,7 +533,7 @@
                     <ToggleButton Name="button" ToolTip="New version available, click icon for details." >
                         <ToggleButton.Template>
                             <ControlTemplate TargetType="ToggleButton">
-                                <Image Height="24" Width="24" Source="/Resources/Icons/NewReleaseAvailable.png"/>
+                        <Image Height="24" Width="24" Source="/Resources/Icons/NewReleaseAvailable-24.png"/>
                             </ControlTemplate>
                         </ToggleButton.Template>
                     </ToggleButton>
@@ -553,7 +553,7 @@
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300">
                               Version
-                           <Hyperlink NavigateUri="{Binding NewReleaseDetails.ChangeLogPath}" documents:HyperlinkBehavior.OpenInBrowser="True">
+                           <Hyperlink NavigateUri="{Binding NewReleaseDetails.InstallerUrl}" documents:HyperlinkBehavior.OpenInBrowser="True">
                                  <TextBlock Text="{Binding NewReleaseDetails.Version}"/>
                               </Hyperlink>
                            has been released!
@@ -567,13 +567,10 @@
                                 </TextBlock>
                                 <Separator Grid.Column="0" Grid.Row="2"/>
                                 <TextBlock Grid.Column="0" Grid.Row="3" TextWrapping="Wrap" MaxWidth="300">
-                           Click 
-                           <Hyperlink NavigateUri="{Binding NewReleaseDetails.InstallerPath}" documents:HyperlinkBehavior.OpenInBrowser="True">
-                              <TextBlock Text="here"/>
+                           For more information please see: 
+                           <Hyperlink NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}" documents:HyperlinkBehavior.OpenInBrowser="True">
+                              <TextBlock Text="Change Log"/>
                            </Hyperlink>
-                           <TextBlock>
-                              to upgrade.
-                           </TextBlock>
                         </TextBlock>
                             </Grid>
                         </Border>

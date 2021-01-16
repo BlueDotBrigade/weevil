@@ -263,7 +263,6 @@
     <Resource Include="Resources\Icons\LogEntry-FatalMissing.png" />
     <Resource Include="Resources\Icons\LogEntry-Information.png" />
     <Resource Include="Resources\Icons\LogEntry-Warning.png" />
-    <Resource Include="Resources\Icons\NewReleaseAvailable.png" />
     <Resource Include="Resources\Icons\OpenDocument.png" />
     <Resource Include="Resources\Icons\Records-OnDisk.png" />
     <Resource Include="Resources\Icons\Records-Pinned.png" />
@@ -275,9 +274,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\Weevil-48.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\NewReleaseAvailable_256x256.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Filter-24.png" />
@@ -313,6 +309,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\NewReleaseAvailable-24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
