@@ -66,6 +66,7 @@
     <Compile Include="Analysis\AnalysisShould.cs" />
     <Compile Include="Configuration\BenchmarkConfiguration.cs" />
     <Compile Include="Filter\FilterHistoryShould.cs" />
+    <Compile Include="Filter\FilteringShould.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestEnvironment.cs" />
