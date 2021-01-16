@@ -128,14 +128,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#region Commands: Analysis
 		[SafeForDependencyAnalysis]
 		public ICommand SaveCommentSummaryCommand => new UiBoundCommand(SaveCommentSummary, () => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
-		public ICommand DetectUnresponsiveUiCommand => new UiBoundCommand(AnalyzeUiResponsiveness, () => this.IsMenuEnabled);
+		public ICommand DetectUnresponsiveUiCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectUnresponsiveUi), 
+			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
-		public ICommand DetectDataCommand => new UiBoundCommand(DetectData, () => this.IsMenuEnabled);
+		public ICommand DetectDataCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectData),
+			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
-		public ICommand DetectDataTransitionsCommand => new UiBoundCommand(AnalyzeDataTransitions, () => this.IsMenuEnabled);
+		public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectDataTransition),
+			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
-		public ICommand DataTransitionsFallingEdgeCommand => new UiBoundCommand(AnalyzeDataTransitionsFallingEdge, () => this.IsMenuEnabled);
+		public ICommand DataTransitionsFallingEdgeCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectFallingEdges),
+			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllFlagsCommand => new UiBoundCommand(RemoveAllFlags, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
