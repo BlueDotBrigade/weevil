@@ -15,7 +15,6 @@
 		private readonly IRecordParser _recordParser;
 		private readonly IStaticAliasExpander _staticAliasExpander;
 		private readonly List<IRecordCounter> _recordCounters;
-		private readonly IRecordAnalyzer _recordCollectionAnalyzer;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
 
@@ -27,7 +26,6 @@
 			_recordParser = new DefaultRecordParser();
 			_staticAliasExpander = new DefaultAliasExpander();
 			_recordCounters = new List<IRecordCounter>();
-			_recordCollectionAnalyzer = new DefaultCollectionAnalyzer();
 			_monikerActivators = new List<MonikerActivator>();
 			_tableOfContents = new TableOfContents();
 		}
@@ -47,17 +45,6 @@
 		public IList<IRecordAnalyzer> GetAnalyzers()
 		{
 			return new List<IRecordAnalyzer>();
-		}
-
-		public IRecordAnalyzer GetAnalyzer(string analyzerKey, ICoreEngine coreEngine, ImmutableArray<IRecord> allRecords)
-		{
-			return _recordCollectionAnalyzer;
-		}
-
-		public IRecordAnalyzer GetAnalyzer(AnalysisType analysisType, ICoreEngine coreEngine,
-			ImmutableArray<IRecord> allRecords)
-		{
-			return _recordCollectionAnalyzer;
 		}
 
 		public IList<IRecordCounter> GetRecordCounters(ContextDictionary context)

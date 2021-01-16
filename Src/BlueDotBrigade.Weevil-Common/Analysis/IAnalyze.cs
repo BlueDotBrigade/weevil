@@ -1,17 +1,19 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.IO;
 
 	public interface IAnalyze
 	{
 		void UnpinAll();
+
 		void RemoveAllFlags();
 		void RemoveComments(bool clearAll);
 
 		IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType);
 
-		IRecordAnalyzer GetAnalyzer(AnalysisType analysisType);
+		void Analyze(AnalysisType analysisType, IUserDialog userDialog);
 
-		IRecordAnalyzer GetAnalyzer(string analyzerKey);
+		void Analyze(string analyzerKey, IUserDialog userDialog);
 	}
 }
