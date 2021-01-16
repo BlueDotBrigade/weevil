@@ -9,6 +9,17 @@
 	public class FilteringShould
 	{
 		[TestMethod]
+		public void CountNumberOfInformationalMessages()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			var actualErrors = int.Parse(engine.Filter.GetMetrics()["Information"].ToString());
+			Assert.AreEqual(512, actualErrors);
+		}
+
+		[TestMethod]
 		public void SupportFindingRecordsWithComments()
 		{
 			IEngine engine = Engine
