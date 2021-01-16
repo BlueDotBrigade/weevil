@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Reflection;
 	using System.Threading;
 	using Analysis;
@@ -216,6 +217,8 @@
 		public ContextDictionary Context => _context;
 
 		public string SourceFilePath => _sourceFilePath;
+
+		public string SourceDirectory => Path.GetDirectoryName(_sourceFilePath);
 
 		public int InstanceId => _instanceId;
 		#endregion

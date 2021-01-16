@@ -28,6 +28,7 @@
 		bool IsSameAsDisk { get; }
 		ContextDictionary Context { get; }
 		string SourceFilePath { get; }
+		string SourceDirectory { get; }
 		/// <summary>
 		/// Metadata related to the open file is persisted to disk.
 		/// </summary>
