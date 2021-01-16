@@ -64,8 +64,13 @@
 		public int Count => _coreEngine.Count;
 
 		public ContextDictionary Context => _coreEngine.Context;
+
 		public string SourceFilePath => Engine.IsRealInstance(this)
 			? _coreEngine.SourceFilePath
+			: string.Empty;
+
+		public string SourceDirectory => Engine.IsRealInstance(this)
+			? _coreEngine.SourceDirectory
 			: string.Empty;
 
 		public bool IsSameAsDisk => _coreEngine.IsSameAsDisk;

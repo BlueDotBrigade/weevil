@@ -4,6 +4,8 @@
 	using System.Collections.Immutable;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.IO;
 	using Timeline;
 
 	internal class AnalysisManager : IAnalyze
@@ -75,15 +77,24 @@
 			return analyzers;
 		}
 
-		public IRecordAnalyzer GetAnalyzer(string analyzerKey)
+		public void Analyze(AnalysisType analysisType, IUserDialog userDialog)
 		{
-			return GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
+			var analyzerKey = analysisType.ToString();
+			Analyze(analyzerKey, userDialog);
 		}
 
-		public IRecordAnalyzer GetAnalyzer(AnalysisType analysisType)
+		public void Analyze(string analyzerKey, IUserDialog userDialog)
 		{
-			var analysisKey = analysisType.ToString();
-			return GetAnalyzers(ComponentType.Core).First(x => x.Key == analysisKey);
+			ImmutableArray<IRecord> records = _coreEngine.Selector.IsTimePeriodSelected
+				? _coreEngine.Selector.GetSelected()
+				: _coreEngine.Filter.Results;
+
+			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.Core).First(x => x.Key == analyzerKey);
+
+			analyzer.Analyze(
+				records,
+				_coreEngine.SourceDirectory,
+				userDialog);
 		}
 	}
 }

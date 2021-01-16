@@ -1,0 +1,14 @@
+<ApplicationInfo>
+	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil</ChangeLogUrl>
+	<Description>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+	1. Lorem
+	2. Ipsum
+	3. Dolor</Description>
+	<InstallerUrl>https://github.com/BlueDotBrigade/weevil</InstallerUrl>
+	<Version xmlns:a="http://schemas.datacontract.org/2004/07/System">
+		<a:_Build>512</a:_Build>
+		<a:_Major>128</a:_Major>
+		<a:_Minor>256</a:_Minor>
+		<a:_Revision>1024</a:_Revision>
+	</Version>
+</ApplicationInfo>

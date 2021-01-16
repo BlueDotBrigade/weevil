@@ -927,20 +927,11 @@
 			_engine.GenerateReport(ReportType.CommentSummary, destinationFolder);
 		}
 
-		public void Analyze(IRecordAnalyzer analyzer)
+		public void Analyze(AnalysisType analysisType)
 		{
-			var records = _engine.Selector.IsTimePeriodSelected
-				? _engine.Selector.GetSelected()
-				: _engine.Filter.Results;
-
-			var outputDirectory = Path.GetDirectoryName(_engine.SourceFilePath);
-
 			try
 			{
-				this.FlaggedRecordCount = analyzer.Analyze(
-					records,
-					outputDirectory,
-					_dialogBox);
+				_engine.Analyzer.Analyze(analysisType, _dialogBox);
 			}
 			catch (Exception e)
 			{
@@ -950,28 +941,16 @@
 
 		public void Analyze(string customAnalyzerKey)
 		{
-			Analyze(_engine.Analyzer.GetAnalyzer(customAnalyzerKey));
+			try
+			{
+				_engine.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
-		public void AnalyzeUiResponsiveness()
-		{
-			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectUnresponsiveUi));
-		}
-
-		public void DetectData()
-		{
-			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectData));
-		}
-
-		public void AnalyzeDataTransitions()
-		{
-			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectDataTransition));
-		}
-
-		public void AnalyzeDataTransitionsFallingEdge()
-		{
-			Analyze(_engine.Analyzer.GetAnalyzer(AnalysisType.DetectFallingEdges));
-		}
 
 		private void ToggleIsPinned()
 		{
