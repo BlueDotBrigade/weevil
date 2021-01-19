@@ -6,7 +6,13 @@
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Wpf.Controls;assembly=BlueDotBrigade.Weevil.Wpf"
         mc:Ignorable="d"
         Title="About" Height="480" Width="640" 
-        ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="11"
+        FontFamily="{materialDesign:MaterialDesignFont}">
    <Grid >
       <Grid.RowDefinitions>
          <RowDefinition Height="100" />
@@ -18,7 +24,7 @@
          <ColumnDefinition Width="6*" />
          <ColumnDefinition Width="0.5*" />
       </Grid.ColumnDefinitions>
-      <Rectangle Grid.Row="0" Grid.Column="0" Fill="LightGray" />
+      <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource PrimaryHueDarkBrush}" />
       <Label Grid.Row="0" Grid.Column="0"
              HorizontalAlignment="Right" Content="Details:"/>
       <Grid Grid.Row="0" Grid.Column="1">
@@ -36,15 +42,16 @@
                   controls:TextBoxBehavior.AutoSelectEnabled="True"/>
          <Image Grid.Row="0" Grid.Column="1" Source="/Resources/Images/Weevil-100.png" Height="100" Width="100"/>
       </Grid>
-      <Rectangle Grid.Row="1" Grid.Column="0" Fill="LightGray" />
+      <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource PrimaryHueDarkBrush}" />
       <Label Grid.Row="1" Grid.Column="0" 
              HorizontalAlignment="Right" Content="Weevil License:"/>
       <TextBox Grid.Row="1" Grid.Column="1"
                IsReadOnly="True" TextWrapping="Wrap" Margin="5,5,5,5"
                Text="{Binding License}"
                VerticalScrollBarVisibility="Visible"
-               controls:TextBoxBehavior.AutoSelectEnabled="True"/>
-      <Rectangle Grid.Row="2" Grid.Column="0" Fill="LightGray" />
+               controls:TextBoxBehavior.AutoSelectEnabled="True"
+               Style="{StaticResource MaterialDesignTextBox}"/>
+      <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource PrimaryHueDarkBrush}"/>
       <Label Grid.Row="2" Grid.Column="0" 
              HorizontalAlignment="Right" Content="Third-Party Licenses:"/>
       <TextBlock Grid.Row="2" Grid.Column="1" 

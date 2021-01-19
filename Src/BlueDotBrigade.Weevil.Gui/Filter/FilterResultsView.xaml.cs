@@ -65,11 +65,11 @@
 				// to the new results when the are available.  This in itself creates some challenges:
 				// - now we have to have code-behind that directly manipulates the `View`
 				// - it is harder to create an automated test for the `ViewModel` to ensure selected records feature is working
-				ListView.SelectedItems.Clear();
+				//ListView.SelectedItems.Clear();
 
 				foreach (IRecord record in this.ViewModel.SelectedItems)
 				{
-					ListView.SelectedItems.Add(record);
+					//ListView.SelectedItems.Add(record);
 				}
 			}
 			catch (Exception exception)

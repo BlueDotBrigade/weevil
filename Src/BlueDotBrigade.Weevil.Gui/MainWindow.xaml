@@ -6,8 +6,15 @@
         xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.Filter"
         mc:Ignorable="d"
         Title="Weevil" Height="450" Width="800"
-		  WindowStartupLocation="CenterScreen" WindowState="Maximized">
-    <Grid>
+		  WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="11"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        materialDesign:TransitionAssist.DisableTransitions="True">
+   <Grid>
 		<local:FilterResultsView />
 	</Grid>
 </Window>

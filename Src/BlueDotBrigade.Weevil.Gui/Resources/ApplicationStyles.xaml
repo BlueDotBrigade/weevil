@@ -28,7 +28,7 @@
 		</LinearGradientBrush.GradientStops>
 	</LinearGradientBrush>
 	<SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="Gray" />
-	<SolidColorBrush x:Key="ProgressBarTrackBackgroundBrush" Color="#3498db" />
+   <SolidColorBrush x:Key="ProgressBarTrackBackgroundBrush" Color="#900A22" />
    <Style x:Key="{x:Type ProgressBar}" TargetType="{x:Type ProgressBar}">
       <Setter Property="Template">
          <Setter.Value>

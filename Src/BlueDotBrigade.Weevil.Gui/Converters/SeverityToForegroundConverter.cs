@@ -12,8 +12,8 @@
 	{
 		private static readonly SolidColorBrush DarkGrey = new BrushConverter().ConvertFrom("#666666") as SolidColorBrush;
 		private static readonly SolidColorBrush DarkYellow = new BrushConverter().ConvertFrom("#9C6500") as SolidColorBrush;
-		private static readonly SolidColorBrush DarkRed = new BrushConverter().ConvertFrom("#664f52") as SolidColorBrush;
-		private static readonly SolidColorBrush White = Brushes.White;
+		private static readonly SolidColorBrush DarkRed = new BrushConverter().ConvertFrom("#900A22") as SolidColorBrush;
+		private static readonly SolidColorBrush White = Brushes.WhiteSmoke;
 
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
@@ -43,7 +43,7 @@
 							break;
 
 						default:
-							result = Brushes.Black;
+							result = Brushes.WhiteSmoke;
 							break;
 					}
 				}

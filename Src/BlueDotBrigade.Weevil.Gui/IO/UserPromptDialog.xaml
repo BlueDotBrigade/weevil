@@ -9,7 +9,13 @@
 		  ResizeMode="CanResizeWithGrip"
 			ShowInTaskbar="False"
 		   WindowStartupLocation="CenterOwner"
-		   Focusable="True" FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
+		   Focusable="True" FocusManager.FocusedElement="{Binding ElementName=InputTextBox}"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="11"
+        FontFamily="{materialDesign:MaterialDesignFont}">
 	<Window.Resources>
 		<Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}" />
 	</Window.Resources>
@@ -27,6 +33,7 @@
 		</Grid.ColumnDefinitions>
 		<Label Grid.Row="1" Grid.Column="0" Content="{Binding UserPrompt}" Height="30"  HorizontalAlignment="Right" Margin="0,19,0,18" />
 		<TextBox Name="InputTextBox" Grid.Row="1" Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Height="30" Margin="0,19,0,18" />
-		<Button Grid.Row="1" Grid.Column="2" Height="30"  Width="100" HorizontalAlignment="Left" Content="Ok" Margin="0,19,0,18" Click="OnOkClicked" IsDefault="True"/>
+		<Button Grid.Row="1" Grid.Column="2" Height="30"  Width="100" HorizontalAlignment="Left" Content="Ok" Margin="0,19,0,18" Click="OnOkClicked" IsDefault="True"
+              Style="{StaticResource MaterialDesignActionToggleButton}"/>
 	</Grid>
 </Window>
