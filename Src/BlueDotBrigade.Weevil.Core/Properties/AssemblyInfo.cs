@@ -38,5 +38,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("2.5.0.*")]
 [assembly: AssemblyFileVersion("2.5.0.0")]
 
-[assembly: InternalsVisibleTo("BlueDotBrigade.Weevil-UnitTests")]
-[assembly: InternalsVisibleTo("BlueDotBrigade.Weevil-IntegrationTests")]
+[assembly: InternalsVisibleTo("BlueDotBrigade.Weevil.Core-UnitTests")]
+[assembly: InternalsVisibleTo("BlueDotBrigade.Weevil.Core-IntegrationTests")]

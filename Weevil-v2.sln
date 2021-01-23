@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Common", "Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-UnitTest", "Tst\BlueDotBrigade.Weevil-UnitTest\BlueDotBrigade.Weevil-UnitTest.csproj", "{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core-UnitTests", "Tst\BlueDotBrigade.Weevil.Core-UnitTests\BlueDotBrigade.Weevil.Core-UnitTests.csproj", "{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Gui-UiTests", "Tst\BlueDotBrigade.Weevil.Windows-UiTest\BlueDotBrigade.Weevil.Gui-UiTests.csproj", "{5482DA9A-4ADD-4837-BC9D-92B303BD075F}"
 EndProject
