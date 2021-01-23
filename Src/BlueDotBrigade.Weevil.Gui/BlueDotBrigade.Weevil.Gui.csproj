@@ -251,9 +251,9 @@
       <Project>{35af40b9-ba74-4fa7-8f52-c60e23921e85}</Project>
       <Name>BlueDotBrigade.Weevil.Wpf</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BlueDotBrigade.Weevil\BlueDotBrigade.Weevil.csproj">
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj">
       <Project>{29bd191a-f2d0-4769-b325-6afe68c3e7cf}</Project>
-      <Name>BlueDotBrigade.Weevil</Name>
+      <Name>BlueDotBrigade.Weevil.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

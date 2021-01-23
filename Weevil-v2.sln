@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Cli", "Src\BlueDotBrigade.Weevil.Cli\BlueDotBrigade.Weevil.Cli.csproj", "{50A43F1B-83FB-4160-8FBA-F8799E4BE3D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil", "Src\BlueDotBrigade.Weevil\BlueDotBrigade.Weevil.csproj", "{29BD191A-F2D0-4769-B325-6AFE68C3E7CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core", "Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj", "{29BD191A-F2D0-4769-B325-6AFE68C3E7CF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Wpf", "Src\BlueDotBrigade.Weevil.Wpf\BlueDotBrigade.Weevil.Wpf.csproj", "{35AF40B9-BA74-4FA7-8F52-C60E23921E85}"
 EndProject
