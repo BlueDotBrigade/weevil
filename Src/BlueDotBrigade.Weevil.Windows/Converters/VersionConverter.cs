@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Wpf.Converters
+﻿namespace BlueDotBrigade.Weevil.Windows.Converters
 {
 	using System;
 	using System.Globalization;

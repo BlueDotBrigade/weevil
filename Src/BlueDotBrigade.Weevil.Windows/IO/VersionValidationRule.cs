@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Wpf.IO
+﻿namespace BlueDotBrigade.Weevil.Windows.IO
 {
 	using System;
 	using System.Globalization;

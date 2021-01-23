@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Cli",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core", "Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj", "{29BD191A-F2D0-4769-B325-6AFE68C3E7CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Wpf", "Src\BlueDotBrigade.Weevil.Wpf\BlueDotBrigade.Weevil.Wpf.csproj", "{35AF40B9-BA74-4FA7-8F52-C60E23921E85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Windows", "Src\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj", "{35AF40B9-BA74-4FA7-8F52-C60E23921E85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Gui", "Src\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj", "{47080835-A553-44BE-A6FD-13B592C5D048}"
 EndProject
