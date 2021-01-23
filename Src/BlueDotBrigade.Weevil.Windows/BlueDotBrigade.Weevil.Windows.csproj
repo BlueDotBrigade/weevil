@@ -20,6 +20,7 @@
 	<PackageIcon>Weevil.png</PackageIcon>
 	<ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
 	<AssemblyName>BlueDotBrigade.Weevil.Windows</AssemblyName>
+	<Company>Blue Dot Brigade</Company>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Icons\Weevil.ico" />
