@@ -4,11 +4,11 @@
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.9.0</Version>
+    <Version>2.10.0</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
-    <Description>This library has types, interfaces, and utilities that are referenced by the Weevil core engine and it's extensions.</Description>
+    <Description>Includes types, interfaces, and utilities that are shared by all of the Weevil assemblies.</Description>
     <IsPackable>true</IsPackable>
 	<PackageReleaseNotes>This libary is currently a work in progress (WIP). As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
 	<PackageTags>BlueDotBrigade</PackageTags>
