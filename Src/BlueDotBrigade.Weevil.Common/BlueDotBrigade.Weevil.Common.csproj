@@ -19,6 +19,7 @@
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageIcon>Weevil.png</PackageIcon>
 	<ApplicationIcon></ApplicationIcon>
+	<AssemblyName>BlueDotBrigade.Weevil.Common</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Resources\Icons\**" />

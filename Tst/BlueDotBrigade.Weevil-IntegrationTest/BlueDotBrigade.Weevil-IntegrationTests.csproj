@@ -93,9 +93,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj">
+    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj">
       <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
-      <Name>BlueDotBrigade.Weevil-Common</Name>
+      <Name>BlueDotBrigade.Weevil.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil\BlueDotBrigade.Weevil.csproj">
       <Project>{29bd191a-f2d0-4769-b325-6afe68c3e7cf}</Project>
