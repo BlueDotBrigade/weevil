@@ -32,7 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 		Weevil.ruleset = Weevil.ruleset
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-Common-UnitTests", "Tst\BlueDotBrigade.Weevil-Common-UnitTest\BlueDotBrigade.Weevil-Common-UnitTests.csproj", "{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Common-UnitTests", "Tst\BlueDotBrigade.Weevil.Common-UnitTest\BlueDotBrigade.Weevil.Common-UnitTests.csproj", "{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Interface", "User Interface", "{0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}"
 EndProject
