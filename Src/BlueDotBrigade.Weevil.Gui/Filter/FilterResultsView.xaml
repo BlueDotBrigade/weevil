@@ -4,11 +4,11 @@
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
             xmlns:dd="urn:gong-wpf-dragdrop"
-            xmlns:documents="clr-namespace:BlueDotBrigade.Weevil.Wpf.Documents;assembly=BlueDotBrigade.Weevil.Wpf"
+            xmlns:documents="clr-namespace:BlueDotBrigade.Weevil.Windows.Documents;assembly=BlueDotBrigade.Weevil.Windows"
             xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
-            xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Wpf.Controls;assembly=BlueDotBrigade.Weevil.Wpf"
+            xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
             xmlns:system="clr-namespace:System;assembly=mscorlib"
-            xmlns:converters1="clr-namespace:BlueDotBrigade.Weevil.Wpf.Converters;assembly=BlueDotBrigade.Weevil.Wpf"
+            xmlns:converters1="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
             mc:Ignorable="d"
             d:DesignHeight="200" d:DesignWidth="900">
     <UserControl.Resources>

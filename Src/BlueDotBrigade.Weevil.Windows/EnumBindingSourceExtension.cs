@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Wpf
+﻿namespace BlueDotBrigade.Weevil.Windows
 {
 	using System;
 	using System.Windows.Markup;

@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Cli", "Src\BlueDotBrigade.Weevil.Cli\BlueDotBrigade.Weevil.Cli.csproj", "{50A43F1B-83FB-4160-8FBA-F8799E4BE3D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil", "Src\BlueDotBrigade.Weevil\BlueDotBrigade.Weevil.csproj", "{29BD191A-F2D0-4769-B325-6AFE68C3E7CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core", "Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj", "{29BD191A-F2D0-4769-B325-6AFE68C3E7CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Wpf", "Src\BlueDotBrigade.Weevil.Wpf\BlueDotBrigade.Weevil.Wpf.csproj", "{35AF40B9-BA74-4FA7-8F52-C60E23921E85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Windows", "Src\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj", "{35AF40B9-BA74-4FA7-8F52-C60E23921E85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Gui", "Src\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj", "{47080835-A553-44BE-A6FD-13B592C5D048}"
 EndProject
@@ -17,13 +17,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		ReadMe.md = ReadMe.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-IntegrationTests", "Tst\BlueDotBrigade.Weevil-IntegrationTest\BlueDotBrigade.Weevil-IntegrationTests.csproj", "{D52FD49C-67D4-4D57-9B8E-806514B69E51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core-IntegrationTests", "Tst\BlueDotBrigade.Weevil.Core-IntegrationTests\BlueDotBrigade.Weevil.Core-IntegrationTests.csproj", "{D52FD49C-67D4-4D57-9B8E-806514B69E51}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil-Common", "Src\BlueDotBrigade.Weevil-Common\BlueDotBrigade.Weevil-Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Common", "Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-UnitTest", "Tst\BlueDotBrigade.Weevil-UnitTest\BlueDotBrigade.Weevil-UnitTest.csproj", "{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core-UnitTests", "Tst\BlueDotBrigade.Weevil.Core-UnitTests\BlueDotBrigade.Weevil.Core-UnitTests.csproj", "{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Gui-UiTests", "Tst\BlueDotBrigade.Weevil.Windows-UiTest\BlueDotBrigade.Weevil.Gui-UiTests.csproj", "{5482DA9A-4ADD-4837-BC9D-92B303BD075F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Gui-UiTests", "Tst\BlueDotBrigade.Weevil.Gui-UiTests\BlueDotBrigade.Weevil.Gui-UiTests.csproj", "{5482DA9A-4ADD-4837-BC9D-92B303BD075F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{E39761F1-1D1C-460E-8A2A-A3E7EE13E928}"
 	ProjectSection(SolutionItems) = preProject
@@ -32,11 +32,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 		Weevil.ruleset = Weevil.ruleset
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-Common-UnitTests", "Tst\BlueDotBrigade.Weevil-Common-UnitTest\BlueDotBrigade.Weevil-Common-UnitTests.csproj", "{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Common-UnitTests", "Tst\BlueDotBrigade.Weevil.Common-UnitTests\BlueDotBrigade.Weevil.Common-UnitTests.csproj", "{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Interface", "User Interface", "{0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet Packages", "NuGet Packages", "{E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Code", "Shared Code", "{E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notes", "Doc\Notes\Notes.csproj", "{D368EE3A-0874-4C23-8ABA-5B935B29882E}"
 EndProject

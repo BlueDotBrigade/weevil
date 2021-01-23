@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Wpf.Documents
+﻿namespace BlueDotBrigade.Weevil.Windows.Documents
 {
 	using System.Diagnostics;
 	using System.Windows;

@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Wpf.Controls
+﻿namespace BlueDotBrigade.Weevil.Windows.Controls
 {
 	using System.Windows;
 	using System.Windows.Controls;
