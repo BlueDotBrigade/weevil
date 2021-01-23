@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<Platforms>x64</Platforms>
+	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
+    <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
+    <Version>2.10.0</Version>
+    <Authors>BlueDotBrigade;</Authors>
+	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
+	<Owners>Blue Dot Brigade</Owners>
+    <Description>Includes types, interfaces, and utilities that are shared by all of the Weevil assemblies.</Description>
+    <IsPackable>true</IsPackable>
+	<PackageReleaseNotes>This libary is currently a work in progress (WIP). As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
+	<PackageTags>BlueDotBrigade</PackageTags>
+	<RepositoryType>git</RepositoryType>
+	<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageIcon>Weevil.png</PackageIcon>
+	<ApplicationIcon></ApplicationIcon>
+	<AssemblyName>BlueDotBrigade.Weevil.Common</AssemblyName>
+	<Company>Blue Dot Brigade</Company>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Resources\Icons\**" />
+    <EmbeddedResource Remove="Resources\Icons\**" />
+    <None Remove="Resources\Icons\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\Images\Weevil.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\Weevil.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </Resource>
+  </ItemGroup>
+</Project>
