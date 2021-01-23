@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		ReadMe.md = ReadMe.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil-IntegrationTests", "Tst\BlueDotBrigade.Weevil-IntegrationTest\BlueDotBrigade.Weevil-IntegrationTests.csproj", "{D52FD49C-67D4-4D57-9B8E-806514B69E51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core-IntegrationTests", "Tst\BlueDotBrigade.Weevil.Core-IntegrationTests\BlueDotBrigade.Weevil.Core-IntegrationTests.csproj", "{D52FD49C-67D4-4D57-9B8E-806514B69E51}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Common", "Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
 EndProject
