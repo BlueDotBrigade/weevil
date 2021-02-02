@@ -25,10 +25,6 @@
 				{
 					switch (severity)
 					{
-						case SeverityType.Verbose:
-						case SeverityType.Debug:
-							result = DarkGrey;
-							break;
 
 						case SeverityType.Warning:
 							result = DarkYellow;
@@ -43,7 +39,7 @@
 							break;
 
 						default:
-							result = Brushes.WhiteSmoke;
+							result = DependencyProperty.UnsetValue;
 							break;
 					}
 				}

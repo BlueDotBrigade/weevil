@@ -8,12 +8,13 @@
         Title="Weevil" Height="450" Width="800"
 		  WindowStartupLocation="CenterScreen" WindowState="Maximized"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.Foreground="WhiteSmoke"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="{StaticResource FontSize}"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.FontWeight="Medium"
-        TextElement.FontSize="11"
-        FontFamily="{materialDesign:MaterialDesignFont}"
-        materialDesign:TransitionAssist.DisableTransitions="True">
+        FontFamily="{DynamicResource MaterialDesignFont}">
    <Grid>
 		<local:FilterResultsView />
 	</Grid>
