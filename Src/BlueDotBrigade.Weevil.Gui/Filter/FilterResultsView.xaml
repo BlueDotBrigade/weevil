@@ -41,7 +41,7 @@
       <KeyBinding Key="V" Modifiers="Control" Command="{Binding ClipboardPasteCommand}" />
       <KeyBinding Key="V" Modifiers="Control+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
       <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
-      <KeyBinding Key="D" Modifiers="Control" Command="{Binding ToggleDetailsVisibilityCommand}" />
+      <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleDetailsVisibilityCommand}" />
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
       <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowSourceFileCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
@@ -132,7 +132,7 @@
                </KeyBinding>
             </ComboBox.InputBindings>
          </ComboBox>
-         <ToggleButton  Name="FilterOptionsButton" Grid.Column="3" ToolTip="Show filter options... (Ctrl+D)" 
+         <ToggleButton  Name="FilterOptionsButton" Grid.Column="3" ToolTip="Show filter options... (Ctrl+Shift+O)" 
                         IsChecked="{Binding AreDetailsVisible, Mode=TwoWay}"/>
          <Button Grid.Column="4"
                  Command="{Binding FilterOrCancelCommand}"
@@ -363,7 +363,9 @@
                       IsIndeterminate="{Binding IsIndeterminate, Mode=OneWay}"  />
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
-      <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" Visibility="{Binding AreDetailsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
+      <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" 
+                  IsEnabled="{Binding AreDetailsVisible}"
+                  Visibility="{Binding AreDetailsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
             <CheckBox
                IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="Always include pinned records in filter results?">
                <AccessText Text="Include _Pinned"></AccessText>
