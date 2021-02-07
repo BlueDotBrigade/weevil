@@ -24,7 +24,7 @@
          <ColumnDefinition Width="6*" />
          <ColumnDefinition Width="0.5*" />
       </Grid.ColumnDefinitions>
-      <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource PrimaryHueDarkBrush}" />
+      <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
       <Label Grid.Row="0" Grid.Column="0"
              HorizontalAlignment="Right" Content="Details:"/>
       <Grid Grid.Row="0" Grid.Column="1">
@@ -42,7 +42,7 @@
                   controls:TextBoxBehavior.AutoSelectEnabled="True"/>
          <Image Grid.Row="0" Grid.Column="1" Source="/Resources/Images/Weevil-100.png" Height="100" Width="100"/>
       </Grid>
-      <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource PrimaryHueDarkBrush}" />
+      <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
       <Label Grid.Row="1" Grid.Column="0" 
              HorizontalAlignment="Right" Content="Weevil License:"/>
       <TextBox Grid.Row="1" Grid.Column="1"
@@ -51,7 +51,7 @@
                VerticalScrollBarVisibility="Visible"
                controls:TextBoxBehavior.AutoSelectEnabled="True"
                Style="{StaticResource MaterialDesignTextBox}"/>
-      <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource PrimaryHueDarkBrush}"/>
+      <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}"/>
       <Label Grid.Row="2" Grid.Column="0" 
              HorizontalAlignment="Right" Content="Third-Party Licenses:"/>
       <TextBlock Grid.Row="2" Grid.Column="1" 
