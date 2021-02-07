@@ -74,7 +74,7 @@
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
-      <Grid Grid.Row="0" x:Name="ToolbarLayout">
+      <Grid x:Name="FilterToolboxLayout" Grid.Row="0" >
          <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
          </Grid.RowDefinitions>
@@ -580,7 +580,6 @@
                      </Button>
                   </Grid>
                </materialDesign:PopupBox>
-               
             </StackPanel>
          </StatusBarItem>
       </StatusBar>
