@@ -84,13 +84,12 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
          </Grid.ColumnDefinitions>
 
          <Button x:Name="OpenButton" Grid.Column="0"
                  Command="{Binding OpenCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
-            Style="{StaticResource  MaterialDesignRaisedAccentButton}"
+            Style="{StaticResource  MaterialDesignRaisedButton}"
             Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
          </Button>
@@ -133,16 +132,10 @@
             </ComboBox.InputBindings>
          </ComboBox>
          <Button Grid.Column="3"
-                 ToolTip="Open"
-                 Style="{StaticResource  MaterialDesignRaisedAccentButton}"
-                 Margin="{StaticResource ButtonMargin}">
-            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
-         </Button>
-         <Button Grid.Column="4"
                  Command="{Binding FilterOrCancelCommand}"
-                 Style="{StaticResource  MaterialDesignRaisedAccentButton}"
+                 Style="{StaticResource  MaterialDesignRaisedButton}"
                  Margin="{StaticResource ButtonMargin}">
-            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
+            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/Filter-24.png"/>
             <Button.CommandParameter>
                <MultiBinding Converter="{StaticResource FiltersMultiValueConverter}">
                   <Binding ElementName="InclusiveFilter" Path="Text" />
@@ -452,7 +445,19 @@
                              ToolTip="Warning Messages"
                              controls:TextBoxBehavior.AutoSelectEnabled="True"
                              VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
-               <Image Source="/Resources/Icons/LogEntry-Error.png" ToolTip="Error Messages" />
+               <Image>
+                  <Image.Style>
+                     <Style TargetType="{x:Type Image}">
+                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-ErrorFound.png" />
+                        <Setter Property="ToolTip" Value="Error Messages"/>
+                        <Style.Triggers>
+                           <DataTrigger Binding="{Binding Metrics[Errors], FallbackValue=0, Mode=OneWay}" Value="0">
+                              <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error.png"/>
+                           </DataTrigger>
+                        </Style.Triggers>
+                     </Style>
+                  </Image.Style>
+               </Image>
                <TextBox Text="{Binding Metrics[Errors], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Error Messages"
                              controls:TextBoxBehavior.AutoSelectEnabled="True"
@@ -495,7 +500,7 @@
                              controls:TextBoxBehavior.AutoSelectEnabled="True"
                              VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent">
                   <TextBox.Style>
-                     <Style TargetType="{x:Type TextBox}">
+                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                         <Setter Property="FontWeight" Value="Normal" />
                         <Setter Property="ToolTip" Value="Total Records On Disk" />
                         <Style.Triggers>

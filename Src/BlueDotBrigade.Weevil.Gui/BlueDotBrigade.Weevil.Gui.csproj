@@ -314,6 +314,9 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\NewReleaseAvailable-24.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...
