@@ -14,7 +14,6 @@
             d:DesignHeight="200" d:DesignWidth="900">
    <UserControl.Resources>
       <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-      <converters:UserCommentToColorConverter x:Key="UserCommentToColorConverter" />
       <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter" />
       <converters:SeverityToForegroundConverter x:Key="SeverityForegroundConverter" />
       <converters:TimeSpanConverter x:Key="TimeSpanConverter" />

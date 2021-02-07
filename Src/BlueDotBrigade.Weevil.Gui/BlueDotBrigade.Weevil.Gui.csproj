@@ -111,7 +111,6 @@
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\ContextConverter.cs" />
     <Compile Include="Converters\FilterMultiValueConverter.cs" />
-    <Compile Include="Converters\UserCommentToColorConverter.cs" />
     <Compile Include="Converters\SeverityToBackgroundConverter.cs" />
     <Compile Include="Converters\SeverityToForegroundConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
