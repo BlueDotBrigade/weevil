@@ -522,51 +522,65 @@
          </StatusBarItem>
          <StatusBarItem Grid.Column="16" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
-               <ToggleButton Name="button" ToolTip="New version available, click icon for details." >
+               <ToggleButton Name="NewReleaseButton" ToolTip="New version is available! Click for details." >
                   <ToggleButton.Template>
                      <ControlTemplate TargetType="ToggleButton">
                         <Image Height="24" Width="24" Source="/Resources/Icons/NewReleaseAvailable-24.png"/>
                      </ControlTemplate>
                   </ToggleButton.Template>
                </ToggleButton>
-               <Popup IsOpen="{Binding IsChecked, ElementName=button}" StaysOpen="False">
-                  <Border Background="LightYellow" 
-                                BorderBrush="LightYellow" 
-                                BorderThickness="8" MaxWidth="300" Width="300">
-                     <Grid Background="LightYellow">
-                        <Grid.ColumnDefinitions>
-                           <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                           <RowDefinition Height="20"/>
-                           <RowDefinition Height="auto"/>
-                           <RowDefinition Height="10"/>
-                           <RowDefinition Height="auto"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300">
-                              Version
-                           <Hyperlink NavigateUri="{Binding NewReleaseDetails.InstallerUrl}" documents:HyperlinkBehavior.OpenInBrowser="True">
-                                 <TextBlock Text="{Binding NewReleaseDetails.Version}"/>
-                              </Hyperlink>
-                           has been released!
-                        </TextBlock>
-                        <TextBlock Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" MaxWidth="300">
-                           <TextBlock.Text>
-                              <MultiBinding StringFormat="{}{0}">
-                                 <Binding Path="NewReleaseDetails.Description" />
-                              </MultiBinding>
-                           </TextBlock.Text>
-                        </TextBlock>
-                        <Separator Grid.Column="0" Grid.Row="2"/>
-                        <TextBlock Grid.Column="0" Grid.Row="3" TextWrapping="Wrap" MaxWidth="300">
-                           For more information please see: 
-                           <Hyperlink NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}" documents:HyperlinkBehavior.OpenInBrowser="True">
-                              <TextBlock Text="Change Log"/>
-                           </Hyperlink>
-                        </TextBlock>
-                     </Grid>
-                  </Border>
-               </Popup>
+               <materialDesign:PopupBox
+                  StaysOpen="True"
+                  IsPopupOpen="{Binding IsChecked, ElementName=NewReleaseButton, Mode=TwoWay}">
+                  <Grid Margin="20">
+                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                     </Grid.ColumnDefinitions>
+                     <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                     </Grid.RowDefinitions>
+                     <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300">
+                        Version
+                        <Hyperlink 
+                           NavigateUri="{Binding NewReleaseDetails.InstallerUrl}" 
+                           documents:HyperlinkBehavior.OpenInBrowser="True"
+                           Foreground="{StaticResource MaterialDesignDarkForeground}">
+                           <TextBlock Text="{Binding NewReleaseDetails.Version}"/>
+                        </Hyperlink>
+                        has been released!
+                     </TextBlock>
+                     <TextBlock Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" MaxWidth="300">
+                        <TextBlock.Text>
+                           <MultiBinding StringFormat="{}{0}">
+                              <Binding Path="NewReleaseDetails.Description" />
+                           </MultiBinding>
+                        </TextBlock.Text>
+                     </TextBlock>
+                     <Separator Grid.Column="0" Grid.Row="2"/>
+                     <TextBlock Grid.Column="0" Grid.Row="3" TextWrapping="Wrap" MaxWidth="300">
+                        For more information please see: 
+                        <Hyperlink 
+                           NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}"
+                           documents:HyperlinkBehavior.OpenInBrowser="True"
+                           Foreground="{StaticResource MaterialDesignDarkForeground}">
+                           <TextBlock Text="Change Log"/>
+                        </Hyperlink>
+                     </TextBlock>
+                     <Button Grid.Row="5"
+                        Command="{x:Static materialDesign:PopupBox.ClosePopupCommand}"
+                        Style="{StaticResource  MaterialDesignRaisedButton}"
+                        Margin="{StaticResource ButtonMargin}"
+                        Width="{StaticResource ButtonWidth}">
+                        Close
+                     </Button>
+                  </Grid>
+               </materialDesign:PopupBox>
+               
             </StackPanel>
          </StatusBarItem>
       </StatusBar>
