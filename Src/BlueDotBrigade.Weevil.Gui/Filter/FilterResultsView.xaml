@@ -35,6 +35,7 @@
       <KeyBinding Key="F1" Modifiers="Control" Command="{Binding ShowAboutCommand}" />
       <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveStateCommand}" />
       <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
+      <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
 
       <KeyBinding Key="C" Modifiers="Control" Command="{Binding ClipboardCopyRawCommand}" />
       <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding ClipboardCopyCommentCommand}" />

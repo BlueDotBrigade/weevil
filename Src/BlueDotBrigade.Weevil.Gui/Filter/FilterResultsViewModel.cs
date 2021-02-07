@@ -805,6 +805,11 @@
 		{
 			new LogFileSplitter(_engine.SourceFilePath).Run(_engine.Filter.Results);
 		}
+
+		private void ForceGarbageCollection()
+		{
+			GC.Collect(3, GCCollectionMode.Forced, true, true);
+		}
 		#endregion
 
 		#region Commands: Filtering

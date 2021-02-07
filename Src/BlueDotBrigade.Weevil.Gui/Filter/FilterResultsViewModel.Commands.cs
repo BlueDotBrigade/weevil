@@ -48,6 +48,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ShowApplicationLogFileCommand => new UiBoundCommand(ShowApplicationLogFile);
 		[SafeForDependencyAnalysis]
 		public ICommand SplitCurrentLogCommand => new UiBoundCommand(SplitCurrentLog, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand ForceGarbageCollectionCommand => new UiBoundCommand(ForceGarbageCollection, () => this.IsMenuEnabled);
+
 		#endregion
 
 		#region Commands: Filtering
