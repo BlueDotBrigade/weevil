@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Configuration
 {
 	using System;
+	using System.Diagnostics;
 	using System.Runtime.Serialization;
 
 	/// <summary>
@@ -12,6 +13,7 @@
 	/// </remarks>
 	[Serializable]
 	[DataContract(Namespace = "")]
+	[DebuggerDisplay("Version={" + nameof(Version) + "}")]
 	public class ApplicationInfo
 	{
 		public static readonly ApplicationInfo NotSpecified = new ApplicationInfo();
