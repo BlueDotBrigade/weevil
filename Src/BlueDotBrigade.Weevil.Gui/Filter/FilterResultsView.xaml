@@ -41,7 +41,7 @@
       <KeyBinding Key="V" Modifiers="Control" Command="{Binding ClipboardPasteCommand}" />
       <KeyBinding Key="V" Modifiers="Control+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
       <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
-      <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleDetailsVisibilityCommand}" />
+      <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
       <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowSourceFileCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
@@ -374,11 +374,11 @@
                <AccessText Text="_Manual Filtering"></AccessText>
             </CheckBox>
          <Button 
-              Content="Hide"
+              Content="_Hide"
               Style="{StaticResource  MaterialDesignRaisedButton}"
               Margin="{StaticResource ButtonMargin}"
               Width="{StaticResource ButtonWidth}"
-              Command="{Binding ToggleDetailsVisibilityCommand}"/>
+              Command="{Binding ToggleFilterOptionsVisibilityCommand}"/>
       </StackPanel>
       <StatusBar Grid.Row="4" Height="32"
                  Background="{StaticResource MaterialDesignPaper}" 
