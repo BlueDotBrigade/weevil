@@ -1,11 +1,11 @@
 <ApplicationInfo>
-	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil</ChangeLogUrl>
+	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/blob/main/Doc/Notes/Release/ChangeLog.md</ChangeLogUrl>
 	<Description>Represents the first version of Weevil to be released after being ported over to GitHub.</Description>
 	<InstallerUrl>https://github.com/BlueDotBrigade/weevil</InstallerUrl>
 	<Version xmlns:a="http://schemas.datacontract.org/2004/07/System">
 		<a:_Build>0</a:_Build>
 		<a:_Major>2</a:_Major>
-		<a:_Minor>5</a:_Minor>
+		<a:_Minor>6</a:_Minor>
 		<a:_Revision>-1</a:_Revision>
 	</Version>
 </ApplicationInfo>

@@ -37,7 +37,7 @@
 							break;
 
 						default:
-							result = Brushes.Transparent;
+							result = DependencyProperty.UnsetValue;
 							break;
 					}
 				}
