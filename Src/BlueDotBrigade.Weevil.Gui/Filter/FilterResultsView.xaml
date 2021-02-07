@@ -70,6 +70,7 @@
          <RowDefinition Height="*" />
          <RowDefinition Height="Auto" />
          <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="*" />
@@ -82,6 +83,7 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
          </Grid.ColumnDefinitions>
 
@@ -130,7 +132,9 @@
                </KeyBinding>
             </ComboBox.InputBindings>
          </ComboBox>
-         <Button Grid.Column="3"
+         <ToggleButton  Name="FilterOptionsButton" Grid.Column="3" ToolTip="Show filter options... (Ctrl+D)" 
+                        IsChecked="{Binding AreDetailsVisible, Mode=TwoWay}"/>
+         <Button Grid.Column="4"
                  Command="{Binding FilterOrCancelCommand}"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
                  Margin="{StaticResource ButtonMargin}">
@@ -359,7 +363,22 @@
                       IsIndeterminate="{Binding IsIndeterminate, Mode=OneWay}"  />
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
-      <StatusBar Grid.Row="3" Height="32"
+      <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" Visibility="{Binding AreDetailsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
+            <CheckBox
+               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="Always include pinned records in filter results?">
+               <AccessText Text="Include _Pinned"></AccessText>
+            </CheckBox>
+            <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="Require user to press `Enter` to apply filter?">
+               <AccessText Text="_Manual Filtering"></AccessText>
+            </CheckBox>
+         <Button 
+              Content="Hide"
+              Style="{StaticResource  MaterialDesignRaisedButton}"
+              Margin="{StaticResource ButtonMargin}"
+              Width="{StaticResource ButtonWidth}"
+              Command="{Binding ToggleDetailsVisibilityCommand}"/>
+      </StackPanel>
+      <StatusBar Grid.Row="4" Height="32"
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"
