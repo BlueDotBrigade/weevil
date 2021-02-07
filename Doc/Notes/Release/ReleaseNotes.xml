@@ -1,11 +1,7 @@
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/blob/main/Doc/Notes/Release/ChangeLog.md</ChangeLogUrl>
-	<Description>Represents the first version of Weevil to be released after being ported over to GitHub.</Description>
+	<CodeName>The Weeknd</CodeName>
+	<Description>Countless hours of personal time have been invested into bringing you the latest version of Weevil!  Thank you to all who have contributed.</Description>
 	<InstallerUrl>https://github.com/BlueDotBrigade/weevil</InstallerUrl>
-	<Version xmlns:a="http://schemas.datacontract.org/2004/07/System">
-		<a:_Build>0</a:_Build>
-		<a:_Major>2</a:_Major>
-		<a:_Minor>6</a:_Minor>
-		<a:_Revision>-1</a:_Revision>
-	</Version>
+	<LatestRelease>2.5.0</LatestRelease>
 </ApplicationInfo>

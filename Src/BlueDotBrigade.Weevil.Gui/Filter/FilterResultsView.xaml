@@ -565,15 +565,16 @@
                         <RowDefinition Height="20"/>
                         <RowDefinition Height="Auto"/>
                      </Grid.RowDefinitions>
-                     <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300">
-                        Version
+                     <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300" FontSize="14">
                         <Hyperlink 
                            NavigateUri="{Binding NewReleaseDetails.InstallerUrl}" 
                            documents:HyperlinkBehavior.OpenInBrowser="True"
                            Foreground="{StaticResource MaterialDesignDarkForeground}">
-                           <TextBlock Text="{Binding NewReleaseDetails.Version}"/>
+                           <TextBlock Text="{Binding NewReleaseDetails.LatestReleaseVersion}"/>
                         </Hyperlink>
-                        has been released!
+                        (&quot;
+                        <TextBlock Text="{Binding NewReleaseDetails.CodeName}"/>
+                        &quot;)
                      </TextBlock>
                      <TextBlock Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" MaxWidth="300">
                         <TextBlock.Text>

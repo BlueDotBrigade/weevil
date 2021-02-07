@@ -184,7 +184,7 @@
 
 				if (this.NewReleaseDetails != null)
 				{
-					isUpdateAvailable = this.NewReleaseDetails.Version > this.CurrentVersion;
+					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.CurrentVersion;
 				}
 
 				return isUpdateAvailable;
