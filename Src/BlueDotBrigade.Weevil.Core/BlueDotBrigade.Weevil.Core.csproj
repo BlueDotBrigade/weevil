@@ -22,6 +22,11 @@
 	<AssemblyName>BlueDotBrigade.Weevil.Core</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Resources\Icons\Weevil.ico" />
     <None Remove="Resources\Images\Weevil.png" />
   </ItemGroup>
@@ -38,9 +43,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 	<PropertyGroup>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
