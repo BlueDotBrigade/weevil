@@ -322,7 +322,10 @@
 COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>REM Create directory and copy third-party licenses
+    <PostBuildEvent>XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Help.html" "$(TargetDir)Doc\\"  /D /Y
+
+
+REM Create directory and copy third-party licenses
 XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)Licenses"  /D /I /E /Y
 
 COPY /A /Y "$(SolutionDir)LICENSE" "$(TargetDir)Licenses\\License.txt"
