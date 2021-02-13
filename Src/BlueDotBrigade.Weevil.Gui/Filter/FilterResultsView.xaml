@@ -139,7 +139,22 @@
                  Command="{Binding FilterOrCancelCommand}"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
                  Margin="{StaticResource ButtonMargin}">
-            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/Filter-24.png"/>
+            <StackPanel>
+               <Image Height="24">
+                  <Image.Style>
+                     <Style TargetType="{x:Type Image}">
+                        <Setter Property="ToolTip" Value="Apply inclusive &amp; exclusive filters."/>
+                        <Setter Property="Source" Value="/Resources/Icons/Filter-24.png"/>
+                        <Style.Triggers>
+                           <DataTrigger Binding="{Binding IsProcessingLongOperation}" Value="true">
+                              <Setter Property="ToolTip" Value="Cancel filter operation. (Esc)"/>
+                              <Setter Property="Source" Value="/Resources/Icons/FilterCancel-24.png"/>
+                           </DataTrigger>
+                        </Style.Triggers>
+                     </Style>
+                  </Image.Style>
+               </Image>
+            </StackPanel>
             <Button.CommandParameter>
                <MultiBinding Converter="{StaticResource FiltersMultiValueConverter}">
                   <Binding ElementName="InclusiveFilter" Path="Text" />
