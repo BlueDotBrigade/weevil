@@ -25,7 +25,7 @@
 		ISelect Selector { get; }
 		IAnalyze Analyzer { get; }
 		int Count { get; }
-		bool IsSameAsDisk { get; }
+		bool IsOriginalRecords { get; }
 		ContextDictionary Context { get; }
 		string SourceFilePath { get; }
 		string SourceDirectory { get; }

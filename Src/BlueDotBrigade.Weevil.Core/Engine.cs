@@ -73,7 +73,7 @@
 			? _coreEngine.SourceDirectory
 			: string.Empty;
 
-		public bool IsSameAsDisk => _coreEngine.IsSameAsDisk;
+		public bool IsOriginalRecords => _coreEngine.IsOriginalRecords;
 
 		public void Save()
 		{

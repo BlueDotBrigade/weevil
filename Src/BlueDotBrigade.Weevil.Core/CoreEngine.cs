@@ -37,7 +37,7 @@
 
 		private readonly int _originalRecordCount;
 
-		private readonly bool _wasLoadedFromDisk;
+		private readonly bool _isOriginalRecords;
 
 		private static int _instancesCreated;
 		private readonly int _instanceId;
@@ -73,6 +73,7 @@
 			ContextDictionary context,
 			SidecarManager sidecarManager,
 			ImmutableArray<IRecord> records,
+			bool isOriginalRecords,
 			TableOfContents tableOfContents)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -89,7 +90,7 @@
 
 			_sourceFilePath = sourceFilePath;
 			_allRecords = records;
-			_wasLoadedFromDisk = true;
+			_isOriginalRecords = isOriginalRecords;
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
@@ -212,7 +213,7 @@
 
 		public int Count => _allRecords.Length;
 
-		public bool IsSameAsDisk => _wasLoadedFromDisk;
+		public bool IsOriginalRecords => _isOriginalRecords;
 
 		public ContextDictionary Context => _context;
 
