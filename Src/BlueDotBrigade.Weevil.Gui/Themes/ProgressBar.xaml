@@ -2,13 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
-   <SolidColorBrush  x:Key="TextForeground" Color="WhiteSmoke" />
-   <SolidColorBrush  x:Key="TextAccentForeground" Color="DodgerBlue" />
-   <system:Double x:Key="ButtonWidth">100</system:Double>
-   <system:Double x:Key="FontSize">11</system:Double>
-   <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>
-   <Thickness x:Key="ComboBoxMargin" Left="4" Top="4" Right="4" Bottom="4"/>
-
    <!--#region Progress Bar -->
 
    <!-- https://stackoverflow.com/questions/8604991/progressbar-theme-with-diagonal-lines-decorator -->

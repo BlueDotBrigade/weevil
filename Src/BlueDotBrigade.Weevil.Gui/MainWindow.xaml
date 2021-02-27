@@ -10,7 +10,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="WhiteSmoke"
         TextElement.FontWeight="Regular"
-        TextElement.FontSize="{StaticResource FontSize}"
+        TextElement.FontSize="{StaticResource TextFontSize}"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
