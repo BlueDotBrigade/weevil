@@ -370,7 +370,7 @@
       <StackPanel Grid.Row="1"
                   Visibility="{Binding IsProcessingLongOperation, Converter={StaticResource BooleanToVisibilityConverter}}"
                   VerticalAlignment="Center" HorizontalAlignment="Center" >
-         <TextBlock Text="Processing..." />
+         <TextBlock Text="Boring log file for tasty bytes..." />
          <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
                       Value="{Binding LongOperationProgress, Mode=OneWay}" 
                       Maximum="{Binding MaxProgress, Mode=OneWay}"
