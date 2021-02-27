@@ -99,7 +99,6 @@
 			this.IsCommandExecuting = false;
 
 			this.IncludePinned = true;
-			this.IsSameAsDisk = true;
 
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
@@ -217,7 +216,7 @@
 		public bool IsCommandExecuting { get; private set; }
 
 		public int FlaggedRecordCount { get; private set; }
-		public bool IsSameAsDisk { get; private set; }
+		public bool IsOriginalRecords => _engine.IsOriginalRecords;
 		public bool IncludePinned { get; set; }
 		public IDictionary<string, object> Metrics { get; set; }
 
@@ -718,8 +717,6 @@
 
 				this.Metrics = _engine.Filter.GetMetrics();
 
-				this.IsSameAsDisk = _engine.IsSameAsDisk;
-
 				this.AreRecordsSelected = _engine.Selector.IsTimePeriodSelected;
 
 				if (_engine.Selector.IsTimePeriodSelected)
@@ -1155,6 +1152,8 @@
 
 				this.VisibleItems = _engine.Filter.Results;
 				RaisePropertyChanged(nameof(this.VisibleItems));
+				RaisePropertyChanged(nameof(this.AllRecordCount));
+				RaisePropertyChanged(nameof(this.IsOriginalRecords));
 			});
 
 			RefreshStatusBar();
