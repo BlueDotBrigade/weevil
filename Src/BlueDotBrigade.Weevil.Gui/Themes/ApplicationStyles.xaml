@@ -1,0 +1,15 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+   <Color x:Key="PrimaryColor">#900A22</Color>
+   <Color x:Key="SecondaryColor">DodgerBlue</Color>
+
+   <SolidColorBrush  x:Key="TextForeground" Color="WhiteSmoke" />
+
+   <system:Double x:Key="ButtonWidth">100</system:Double>
+   <system:Double x:Key="TextFontSize">11</system:Double>
+   <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>
+
+   <Thickness x:Key="ComboBoxMargin" Left="4" Top="4" Right="4" Bottom="4"/>
+</ResourceDictionary>

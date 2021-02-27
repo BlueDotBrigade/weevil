@@ -89,7 +89,7 @@
 				? _coreEngine.Selector.GetSelected()
 				: _coreEngine.Filter.Results;
 
-			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.Core).First(x => x.Key == analyzerKey);
+			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
 
 			analyzer.Analyze(
 				records,

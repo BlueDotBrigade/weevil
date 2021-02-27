@@ -775,10 +775,16 @@
 
 		public void ShowHelp()
 		{
-			var helpUrl = new Uri("file:///" + HelpFilePath);
-
-			Debug.WriteLine(helpUrl);
-			Process.Start("\"" + HelpFilePath + "\"");
+			if (File.Exists(HelpFilePath))
+			{
+				var helpUrl = new Uri("file:///" + HelpFilePath);
+				Debug.WriteLine(helpUrl);
+				Process.Start("\"" + HelpFilePath + "\"");
+			}
+			else
+			{
+				MessageBox.Show("Unable to locate the requested help file.");
+			}
 		}
 
 		public void ShowAbout()
