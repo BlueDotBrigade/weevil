@@ -305,7 +305,7 @@
          </ListView.ItemContainerStyle>
          <ListView.View>
             <GridView>
-               <GridViewColumn  Width="90" DisplayMemberBinding="{Binding LineNumber, StringFormat='{}{0:###,###,##0}'}">
+               <GridViewColumn  Width="60" DisplayMemberBinding="{Binding LineNumber, StringFormat='{}{0:###,###,##0}'}">
                   <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate>
@@ -313,7 +313,7 @@
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
                </GridViewColumn>
-               <GridViewColumn  Width="60">
+               <GridViewColumn  Width="55">
                   <GridViewColumnHeader Content="Flagged" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate>
@@ -321,7 +321,7 @@
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
                </GridViewColumn>
-               <GridViewColumn Width="60">
+               <GridViewColumn Width="50">
                   <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate>
@@ -329,14 +329,12 @@
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
                </GridViewColumn>
-               <GridViewColumn  Width="200">
+               <GridViewColumn  Width="170">
                   <GridViewColumnHeader Content="Comment" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate>
-                        <!--Margin="0" BorderThickness="0"-->
                         <TextBox 
                                     Text="{Binding Path=Metadata.Comment, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
-                                   
                                     IsEnabled="True" 
                                     MinWidth="150"
                                     TextWrapping="Wrap" 
@@ -345,7 +343,7 @@
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
                </GridViewColumn>
-               <GridViewColumn  Width="100px">
+               <GridViewColumn  Width="55">
                   <GridViewColumnHeader Content="Elapsed" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate>
