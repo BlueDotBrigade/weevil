@@ -164,7 +164,7 @@
          </Button>
       </Grid>
       <ListView Grid.Row="1"
-                FontSize="{StaticResource FontSize}"
+                FontSize="{StaticResource TextFontSize}"
                 ItemsSource="{Binding VisibleItems}"
                              SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
                              AlternationCount="2"
@@ -398,7 +398,7 @@
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"
-                 TextElement.FontSize="{StaticResource FontSize}"
+                 TextElement.FontSize="{StaticResource TextFontSize}"
                  TextOptions.TextFormattingMode="Ideal"
                  TextOptions.TextRenderingMode="Auto">
          <StatusBar.ItemsPanel>
