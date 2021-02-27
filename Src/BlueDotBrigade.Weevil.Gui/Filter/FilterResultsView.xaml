@@ -429,25 +429,23 @@
          <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
                <Image Source="/Resources/Icons/Document-24.png" ToolTip="Current Document"/>
-               <TextBox Text="{Binding SourceFilePath, Mode=OneWay}" VerticalAlignment="Center" IsReadOnly="True" controls:TextBoxBehavior.AutoSelectEnabled="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+               <TextBox Text="{Binding SourceFilePath, Mode=OneWay}" Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
          <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
                <Image Source="/Resources/Icons/TimeElapsed.png" ToolTip="Time elapsed between selected records."/>
                <TextBox Text="{Binding Path=ElapsedTime, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
-                          ToolTip="Elapsed time."
-                                  controls:TextBoxBehavior.AutoSelectEnabled="True"
-                          VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                        ToolTip="Elapsed time."
+                        controls:TextBoxBehavior.AutoSelectEnabled="True"
+                        VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
             </StackPanel>
          </StatusBarItem>
          <Separator Grid.Column="2" />
          <StatusBarItem Grid.Column="3" VerticalAlignment="Center">
             <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
                         ToolTip="Source file context."
-                        controls:TextBoxBehavior.AutoSelectEnabled="True"
-                        Foreground="WhiteSmoke"
-                        VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                        Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
          <StatusBarItem Grid.Column="5" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
@@ -462,8 +460,7 @@
                <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Number of flagged records."/>
                <TextBox Text="{Binding FlaggedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                            ToolTip="Number of flagged records."
-                           controls:TextBoxBehavior.AutoSelectEnabled="True"
-                           VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                           Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
          <Separator Grid.Column="10" />
@@ -472,13 +469,11 @@
                <Image Source="/Resources/Icons/LogEntry-Information.png" ToolTip="Informational Messages" />
                <TextBox Text="{Binding Metrics[Information], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Informational Messages"
-                             controls:TextBoxBehavior.AutoSelectEnabled="True"
-                             VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                             Style="{StaticResource StatusBarTextBox}"/>
                <Image Source="/Resources/Icons/LogEntry-Warning.png" ToolTip="Warning Messages" />
                <TextBox Text="{Binding Metrics[Warnings], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Warning Messages"
-                             controls:TextBoxBehavior.AutoSelectEnabled="True"
-                             VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                             Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
@@ -494,8 +489,7 @@
                </Image>
                <TextBox Text="{Binding Metrics[Errors], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Error Messages"
-                             controls:TextBoxBehavior.AutoSelectEnabled="True"
-                             VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                             Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
@@ -511,8 +505,7 @@
                </Image>
                <TextBox Text="{Binding Metrics[Fatals], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Fatal Messages"
-                             controls:TextBoxBehavior.AutoSelectEnabled="True"
-                             VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                             Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
          <Separator Grid.Column="12" />
@@ -521,20 +514,16 @@
                <Image Source="/Resources/Icons/Records-Selected.png" ToolTip="Selected AllRecords"/>
                <TextBox Text="{Binding SelectedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Selected Record Count"
-                             controls:TextBoxBehavior.AutoSelectEnabled="True"
-                             VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                             Style="{StaticResource StatusBarTextBox}"/>
                <Image Source="/Resources/Icons/Records-Visible.png" ToolTip="Visible AllRecords"/>
                <TextBox Text="{Binding VisibleRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Visible Record Count"
-                             controls:TextBoxBehavior.AutoSelectEnabled="True"
-                             VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
-               <Image Source="/Resources/Icons/Records-OnDisk.png" ToolTip="AllRecords On Disk"/>
+                             Style="{StaticResource StatusBarTextBox}"/>
+               <Image Source="/Resources/Icons/Records-OnDisk.png" ToolTip="Number of records loaded from source."/>
                <TextBox Text="{Binding AllRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                             ToolTip="Total Record Count"
-                             controls:TextBoxBehavior.AutoSelectEnabled="True"
-                             VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent">
+                        ToolTip="Total Record Count">
                   <TextBox.Style>
-                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
                         <Setter Property="FontWeight" Value="Normal" />
                         <Setter Property="ToolTip" Value="Total Records On Disk" />
                         <Style.Triggers>
@@ -552,8 +541,7 @@
          <StatusBarItem Grid.Column="15">
             <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
                      ToolTip="TOC heading related to selected record."
-                     controls:TextBoxBehavior.AutoSelectEnabled="True"
-                     VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                     Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
          <StatusBarItem Grid.Column="16" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>

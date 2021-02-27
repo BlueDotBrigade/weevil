@@ -8,6 +8,7 @@
          <ResourceDictionary.MergedDictionaries>
             <materialDesign:CustomColorTheme BaseTheme="Dark" PrimaryColor="#900A22" SecondaryColor="DodgerBlue" />
             <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+            <ResourceDictionary Source="pack://application:,,,/Themes/StatusBarTextBox.xaml" />
             <ResourceDictionary Source="pack://application:,,,/Resources/ApplicationStyles.xaml" />
          </ResourceDictionary.MergedDictionaries>
       </ResourceDictionary>

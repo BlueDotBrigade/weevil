@@ -184,9 +184,7 @@
       <Link>Properties\DomainSpecificTerminology.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Themes\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Page Include="Filter\FilterResultsView.xaml">
       <SubType>Designer</SubType>
@@ -205,6 +203,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\StatusBarTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
