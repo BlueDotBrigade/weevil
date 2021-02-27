@@ -520,16 +520,16 @@
                              ToolTip="Visible Record Count"
                              Style="{StaticResource StatusBarTextBox}"/>
                <Image Source="/Resources/Icons/Records-OnDisk.png" ToolTip="Number of records loaded from source."/>
-               <TextBox Text="{Binding AllRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                        ToolTip="Total Record Count">
+               <TextBox Text="{Binding AllRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
                   <TextBox.Style>
                      <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
                         <Setter Property="FontWeight" Value="Normal" />
-                        <Setter Property="ToolTip" Value="Total Records On Disk" />
+                        <Setter Property="ToolTip" Value="Number of records loaded from source." />
                         <Style.Triggers>
-                           <DataTrigger Binding="{Binding IsSameAsDisk}" Value="false">
+                           <DataTrigger Binding="{Binding IsOriginalRecords}" Value="False">
                               <Setter Property="FontWeight" Value="Bold"/>
-                              <Setter Property="ToolTip" Value="Record count no longer represents what is on disk."/>
+                              <Setter Property="Foreground" Value="{StaticResource TextAccentForeground}"/>
+                              <Setter Property="ToolTip" Value="Record count represents subset of original file."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
