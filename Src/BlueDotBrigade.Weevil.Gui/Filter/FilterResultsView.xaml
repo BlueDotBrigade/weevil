@@ -306,7 +306,7 @@
          <ListView.View>
             <GridView>
                <GridViewColumn  Width="90" DisplayMemberBinding="{Binding LineNumber, StringFormat='{}{0:###,###,##0}'}">
-                  <GridViewColumnHeader Content="Line Number" Padding="{StaticResource ColumnHeaderPadding}"/>
+                  <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate>
                         <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
