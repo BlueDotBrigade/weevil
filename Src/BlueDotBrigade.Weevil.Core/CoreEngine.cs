@@ -37,7 +37,7 @@
 
 		private readonly int _originalRecordCount;
 
-		private readonly bool _isOriginalRecords;
+		private readonly bool _hasBeenCleared;
 
 		private static int _instancesCreated;
 		private readonly int _instanceId;
@@ -73,7 +73,7 @@
 			ContextDictionary context,
 			SidecarManager sidecarManager,
 			ImmutableArray<IRecord> records,
-			bool isOriginalRecords,
+			bool hasBeenCleared,
 			TableOfContents tableOfContents)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -90,7 +90,7 @@
 
 			_sourceFilePath = sourceFilePath;
 			_allRecords = records;
-			_isOriginalRecords = isOriginalRecords;
+			_hasBeenCleared = hasBeenCleared;
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
@@ -213,7 +213,7 @@
 
 		public int Count => _allRecords.Length;
 
-		public bool IsOriginalRecords => _isOriginalRecords;
+		public bool HasBeenCleared => _hasBeenCleared;
 
 		public ContextDictionary Context => _context;
 

@@ -526,7 +526,7 @@
                         <Setter Property="FontWeight" Value="Normal" />
                         <Setter Property="ToolTip" Value="Number of records loaded from source." />
                         <Style.Triggers>
-                           <DataTrigger Binding="{Binding IsOriginalRecords}" Value="False">
+                           <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
                               <Setter Property="FontWeight" Value="Bold"/>
                               <Setter Property="Foreground" Value="{StaticResource TextAccentForeground}"/>
                               <Setter Property="ToolTip" Value="Record count represents subset of original file."/>

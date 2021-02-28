@@ -216,7 +216,7 @@
 		public bool IsCommandExecuting { get; private set; }
 
 		public int FlaggedRecordCount { get; private set; }
-		public bool IsOriginalRecords => _engine.IsOriginalRecords;
+		public bool HasBeenCleared => _engine.HasBeenCleared;
 		public bool IncludePinned { get; set; }
 		public IDictionary<string, object> Metrics { get; set; }
 
@@ -1153,7 +1153,7 @@
 				this.VisibleItems = _engine.Filter.Results;
 				RaisePropertyChanged(nameof(this.VisibleItems));
 				RaisePropertyChanged(nameof(this.AllRecordCount));
-				RaisePropertyChanged(nameof(this.IsOriginalRecords));
+				RaisePropertyChanged(nameof(this.HasBeenCleared));
 			});
 
 			RefreshStatusBar();

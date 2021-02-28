@@ -25,7 +25,7 @@
 		ISelect Selector { get; }
 		IAnalyze Analyzer { get; }
 		int Count { get; }
-		bool IsOriginalRecords { get; }
+		bool HasBeenCleared { get; }
 		ContextDictionary Context { get; }
 		string SourceFilePath { get; }
 		string SourceDirectory { get; }
