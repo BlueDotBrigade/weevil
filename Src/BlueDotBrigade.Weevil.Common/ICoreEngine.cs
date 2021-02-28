@@ -25,6 +25,10 @@
 		ISelect Selector { get; }
 		IAnalyze Analyzer { get; }
 		int Count { get; }
+		/// <summary>
+		/// Returns <see langword="True"/> when at least one clear operation
+		/// has been performed since the records were loaded from the <see cref="SourceFilePath"/>.
+		/// </summary>
 		bool HasBeenCleared { get; }
 		ContextDictionary Context { get; }
 		string SourceFilePath { get; }
