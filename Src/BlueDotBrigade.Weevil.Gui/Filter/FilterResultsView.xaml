@@ -10,6 +10,7 @@
             xmlns:system="clr-namespace:System;assembly=mscorlib"
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+            xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
             mc:Ignorable="d"
             d:DesignHeight="200" d:DesignWidth="900">
    <UserControl.Resources>
@@ -95,14 +96,18 @@
             Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
          </Button>
-         <ComboBox x:Name="InclusiveFilter" Grid.Column="1" IsEditable="True"  
+         <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
+                      Margin="{StaticResource ComboBoxMargin}"
                       ItemsSource="{Binding InclusiveFilterHistory}"
                       Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
                       SelectedValue="{Binding InclusiveFilter}" 
-                      IsTextSearchEnabled="False"
                       IsEnabled="{Binding InclusiveFilterEnabled}"
-                      Margin="{StaticResource ComboBoxMargin}"
-                      materialDesign:HintAssist.Hint="(Inclusive filter...)">
+                      IsEditable="True"
+                      IsTextSearchEnabled="False"
+                      StaysOpenOnEdit="False"
+                      guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                      materialDesign:HintAssist.Hint="(Inclusive filter...)"
+                      materialDesign:TextFieldAssist.HasClearButton="True">
             <ComboBox.InputBindings>
                <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                   <KeyBinding.CommandParameter>
@@ -114,14 +119,18 @@
                </KeyBinding>
             </ComboBox.InputBindings>
          </ComboBox>
-         <ComboBox x:Name="ExclusiveFilter" Grid.Column="2" IsEditable="True"  
+         <ComboBox x:Name="ExclusiveFilter" Grid.Column="2"   
+                   Margin="{StaticResource ComboBoxMargin}"
                    ItemsSource="{Binding ExclusiveFilterHistory}"
                    Text="{Binding ExclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
                    SelectedValue="{Binding ExclusiveFilter}" 
-                   IsTextSearchEnabled="False"
                    IsEnabled="{Binding ExclusiveFilterEnabled}"
-                   Margin="{StaticResource ComboBoxMargin}"
-                   materialDesign:HintAssist.Hint="(Exclusive filter...)">
+                   IsEditable="True"
+                   IsTextSearchEnabled="False"
+                   StaysOpenOnEdit="False"
+                   guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                   materialDesign:HintAssist.Hint="(Exclusive filter...)"
+                   materialDesign:TextFieldAssist.HasClearButton="True">
             <ComboBox.InputBindings>
                <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                   <KeyBinding.CommandParameter>
