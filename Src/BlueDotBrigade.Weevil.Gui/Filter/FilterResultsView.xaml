@@ -523,10 +523,11 @@
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
                         <Setter Property="Source" Value="/Resources/Icons/Records-OnDisk.png" />
-                        <Setter Property="ToolTip" Value="Number of records loaded from source."/>
+                        <Setter Property="ToolTip" Value="Total record count."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
                               <Setter Property="Source" Value="/Resources/Icons/Records-OnDiskChanged.png"/>
+                              <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -535,13 +536,10 @@
                <TextBox Text="{Binding AllRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
                   <TextBox.Style>
                      <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
-                        <Setter Property="FontWeight" Value="Normal" />
-                        <Setter Property="ToolTip" Value="Number of records loaded from source." />
+                        <Setter Property="ToolTip" Value="Total record count." />
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
-                              <Setter Property="FontWeight" Value="Bold"/>
-                              <Setter Property="Foreground" Value="{StaticResource TextAccentForeground}"/>
-                              <Setter Property="ToolTip" Value="Record count represents subset of original file."/>
+                              <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
