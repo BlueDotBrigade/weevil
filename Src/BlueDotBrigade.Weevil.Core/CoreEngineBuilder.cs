@@ -37,7 +37,7 @@
 			private readonly int _startAtLineNumber;
 
 			private readonly ClearRecordsOperation _clearOperation;
-			private readonly bool _isClearOperation;
+			private readonly bool _hasBeenCleared;
 
 			private bool _isUsingUserDefinedContext;
 			private ContextDictionary _userDefinedContext;
@@ -54,7 +54,7 @@
 			{
 				_sourceFilePath = sourceFilePath;
 				_startAtLineNumber = lineNumber;
-				_isClearOperation = false;
+				_hasBeenCleared = false;
 
 				_userDefinedContext = new ContextDictionary();
 
@@ -70,7 +70,7 @@
 			{
 				_sourceInstance = source;
 				_clearOperation = clearOperation;
-				_isClearOperation = true;
+				_hasBeenCleared = true;
 
 				_startAtLineNumber = NotSet;
 
@@ -228,7 +228,7 @@
 					context,
 					sidecarManager,
 					records,
-					!_isClearOperation,
+					_hasBeenCleared,
 					new TableOfContents(tableOfContents));
 
 				if (inclusiveFilterHistory.Count > 0)

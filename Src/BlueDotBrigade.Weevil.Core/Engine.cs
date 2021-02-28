@@ -73,7 +73,7 @@
 			? _coreEngine.SourceDirectory
 			: string.Empty;
 
-		public bool IsOriginalRecords => _coreEngine.IsOriginalRecords;
+		public bool HasBeenCleared => _coreEngine.HasBeenCleared;
 
 		public void Save()
 		{
