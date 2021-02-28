@@ -519,7 +519,19 @@
                <TextBox Text="{Binding VisibleRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Visible Record Count"
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image Source="/Resources/Icons/Records-OnDisk.png" ToolTip="Number of records loaded from source."/>
+               <Image>
+                  <Image.Style>
+                     <Style TargetType="{x:Type Image}">
+                        <Setter Property="Source" Value="/Resources/Icons/Records-OnDisk.png" />
+                        <Setter Property="ToolTip" Value="Number of records loaded from source."/>
+                        <Style.Triggers>
+                           <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
+                              <Setter Property="Source" Value="/Resources/Icons/Records-OnDiskChanged.png"/>
+                           </DataTrigger>
+                        </Style.Triggers>
+                     </Style>
+                  </Image.Style>
+               </Image>
                <TextBox Text="{Binding AllRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
                   <TextBox.Style>
                      <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">

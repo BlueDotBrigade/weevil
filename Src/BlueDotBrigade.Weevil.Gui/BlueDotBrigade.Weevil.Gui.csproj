@@ -184,7 +184,9 @@
       <Link>Properties\DomainSpecificTerminology.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Records-OnDiskChanged.png" />
+  </ItemGroup>
   <ItemGroup>
     <Page Include="Filter\FilterResultsView.xaml">
       <SubType>Designer</SubType>
