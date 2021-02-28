@@ -108,6 +108,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Controls\MdixComboBoxBehavior.cs" />
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\ContextConverter.cs" />
     <Compile Include="Converters\FilterMultiValueConverter.cs" />
