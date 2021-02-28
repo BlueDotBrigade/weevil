@@ -135,5 +135,21 @@
 			Assert.AreEqual(1, engine.Filter.Results.First().LineNumber);
 			Assert.AreEqual(9, engine.Filter.Results.Last().LineNumber);
 		}
+
+		[TestMethod]
+		public void FlagWhenClearOperationHasBeenPerformed()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			engine
+				.Selector
+				.Select(lineNumber: 9);
+
+			Assert.IsFalse(engine.HasBeenCleared);
+			engine.Clear(ClearRecordsOperation.AfterSelected);
+			Assert.IsTrue(engine.HasBeenCleared);
+		}
 	}
 }
