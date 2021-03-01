@@ -136,19 +136,18 @@
 		{
 			ApplicationInfo result = ApplicationInfo.NotSpecified;
 
-			Stream newReleaseStream = null;
-
-#if DEBUG
-			var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\ReleaseNotes.xml");
-			newReleaseStream = FileHelper.Open(applicationInfoPath);
-#else
-			newReleaseStream = new WebClient().OpenRead(NewReleaseUrl);
-#endif
 			try
 			{
+#if DEBUG
+				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\ReleaseNotes.xml");
+				Stream newReleaseStream = FileHelper.Open(applicationInfoPath);
+#else
+				Stream newReleaseStream = new WebClient().OpenRead(NewReleaseUrl);
+#endif
+
 				result = TypeFactory.LoadFromXml<ApplicationInfo>(newReleaseStream);
 			}
-			catch (IOException e)
+			catch (Exception e) 
 			{
 				var message = $"Unable to determine the latest official release. Reason=`{e.Message}`";
 				Log.Default.Write(LogSeverityType.Warning, message);
