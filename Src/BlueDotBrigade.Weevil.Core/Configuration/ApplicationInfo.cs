@@ -17,7 +17,14 @@
 	[DebuggerDisplay("Version={" + nameof(LatestReleaseVersion) + ("}, CodeName={" + nameof(CodeName) + "}"))]
 	public class ApplicationInfo
 	{
-		public static readonly ApplicationInfo NotSpecified = new ApplicationInfo();
+		public static readonly ApplicationInfo NotSpecified = new ApplicationInfo
+		{
+			ChangeLogUrl = string.Empty,
+			CodeName = string.Empty,
+			Description = string.Empty,
+			InstallerUrl = string.Empty,
+			LatestRelease = "0.0.0.0",
+		};
 
 		[DataMember]
 		public string ChangeLogUrl { get; set; }
