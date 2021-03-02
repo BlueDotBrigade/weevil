@@ -9,7 +9,7 @@ Released on March 4th, 2021
 - Weevil now has a "Dark Theme".
 - The `Content` column now automatically wraps to fit within the window.
 - Added an `About` dialog box (#6)
-- `Alt+I` and `Alt+E` keyboard shorcuts will move curor to the inclusive/exclusive filter `ComboBoxes`. (#36)
+- `Alt+I` and `Alt+E` keyboard shortcuts will move cursor to the inclusive/exclusive filter `ComboBoxes`. (#36)
 
 #### Bug Fixes
 
