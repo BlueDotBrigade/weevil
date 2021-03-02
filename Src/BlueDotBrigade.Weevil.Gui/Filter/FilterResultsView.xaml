@@ -96,8 +96,9 @@
             Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
          </Button>
-         <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
-                      Margin="{StaticResource ComboBoxMargin}"
+         <Label Grid.Column="1" Target="{Binding ElementName=InclusiveFilter}" Content="AccessKey hack for: _Inclusive ComboBox" Width="0"/>
+            <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
+                   Margin="{StaticResource ComboBoxMargin}"
                       ItemsSource="{Binding InclusiveFilterHistory}"
                       Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
                       SelectedValue="{Binding InclusiveFilter}" 
@@ -106,7 +107,7 @@
                       IsTextSearchEnabled="False"
                       StaysOpenOnEdit="False"
                       guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                      materialDesign:HintAssist.Hint="(Inclusive filter...)"
+                      materialDesign:HintAssist.Hint="Inclusive Filter (Alt+I)"
                       materialDesign:TextFieldAssist.HasClearButton="True">
             <ComboBox.InputBindings>
                <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
@@ -119,6 +120,7 @@
                </KeyBinding>
             </ComboBox.InputBindings>
          </ComboBox>
+         <Label Grid.Column="1" Target="{Binding ElementName=ExclusiveFilter}" Content="AccessKey hack for: _Exclusive ComboBox" Width="0"/>
          <ComboBox x:Name="ExclusiveFilter" Grid.Column="2"   
                    Margin="{StaticResource ComboBoxMargin}"
                    ItemsSource="{Binding ExclusiveFilterHistory}"
@@ -129,7 +131,7 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   materialDesign:HintAssist.Hint="(Exclusive filter...)"
+                   materialDesign:HintAssist.Hint="Exclusive filter (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True">
             <ComboBox.InputBindings>
                <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
