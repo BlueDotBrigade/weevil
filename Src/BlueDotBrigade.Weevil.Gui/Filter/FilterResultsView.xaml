@@ -66,7 +66,8 @@
       <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
       <KeyBinding Key="OemPlus" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
    </UserControl.InputBindings>
-   <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}">
+   <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
+         FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto"/>
          <RowDefinition Height="*" />
