@@ -6,7 +6,7 @@ Released on March 4th, 2021
 
 #### What's New?
 
-- Weevil now has a "Dark Theme".
+- Weevil now has a "Dark Theme". (#11)
 - The `Content` column now automatically wraps to fit within the window.
 - Added an `About` dialog box (#6)
 - `Alt+I` and `Alt+E` keyboard shortcuts will move cursor to the inclusive/exclusive filter `ComboBoxes`. (#36)
