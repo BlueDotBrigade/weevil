@@ -1,4 +1,4 @@
-﻿# Weevil : Change Log
+# Weevil : Change Log
 
 ### Version 2.5.0
 
