@@ -15,7 +15,7 @@ Find all log entries that have a user comment that mentions the word `suspect`:
 
 ```CSharp
 
-// Monikers like `@Comment` support quering of metadata collected by Weevil.
+// Monikers like `@Comment` support querying of metadata collected by Weevil.
 var filter = Engine
    .UsingPath(@"C:\Temp\application.log")
    .Open()
