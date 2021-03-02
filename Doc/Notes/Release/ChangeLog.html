@@ -29,11 +29,15 @@
 </ul>
 </li>
 <li>Weevil can now open any plain text file.</li>
+<li>Resource usage report now includes a <code>WorkingSet64</code> column.</li>
 </ul>
 <h4 id="bug-fixes-1">Bug Fixes</h4>
 <ul>
 <li>Weevil would crash when using &quot;Detect Data&quot; and the same key/value pair was detected more than once.</li>
 <li>Files locked by another process can now be opened.</li>
+<li>Weevil was unable to find the <code>Plugins</code> directory, if the application was moved to a different directory.</li>
+<li>The log's sidecar (e.g. user comments) were not saved if you clicked &quot;Close&quot; (<code>X</code>) in the application's title bar.</li>
+<li>Record <code>Comment</code> was not saved, if the record was removed from memory as the result of a <code>Clear</code> operation.</li>
 </ul>
 
 
