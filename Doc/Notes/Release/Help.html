@@ -1,12 +1,153 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Weevil: Help</title>
+    <title>Weevil : Help</title>
 </head>
 <body>
 
-    <h1 id="weevil-help">Weevil: Help</h1>
-<p>TBD</p>
+    <h1 id="weevil-help">Weevil : Help</h1>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#examples">Examples</a>
+<ul>
+<li><a href="#sample-input">Sample Input</a></li>
+<li><a href="#sample-expressions">Sample Expressions</a></li>
+</ul>
+</li>
+<li><a href="#data-analysis">Data Analysis</a>
+<ul>
+<li><a href="#identifying-transitions">Identifying Transitions</a></li>
+</ul>
+</li>
+<li><a href="#appendices">Appendices</a>
+<ul>
+<li><a href="#appendix-a-additional-reading">Appendix A: Additional Reading</a></li>
+<li><a href="#appendix-e-excel">Appendix E: Excel</a></li>
+<li><a href="#appendix-p-performance-tips">Appendix P: Performance Tips</a></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>A filter represents one or more expressions - separated by a double pipe (<code>||</code>) character - than can be used to identify records of interest within a log file.</p>
+<p>The supported filter types include:</p>
+<ol>
+<li><em>regular expressions</em> : A sophisticated pattern matching language that can be used to find content.</li>
+<li><em>expression aliases</em> : To save time, aliases can be used to reference built-in regular expressions.</li>
+<li><em>Monikers</em> : Are used to query metadata that has been collected by the <em>Weevil</em> application.</li>
+</ol>
+<p>For example:</p>
+<p><code>#Fatal||@Comment=suspect</code></p>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Expression Type</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#Fatal</code></td>
+<td><em>expression alias</em></td>
+<td>Identifies records related to application crashes.</td>
+</tr>
+<tr>
+<td><code>@Comment=suspect</code></td>
+<td><em>expression monkier</em></td>
+<td>Records that include the word <code>suspect</code> in the user defined comments column.</td>
+</tr>
+</tbody>
+</table>
+<p>When using <em>Weevil</em>, it is worth noting that all operations are (include <code>Clear</code>) are non-destructive.  In other words, the original log file will remain unchanged.</p>
+<h2 id="examples">Examples</h2>
+<h3 id="sample-input">Sample Input</h3>
+<p>Assume a log file contained the following:</p>
+<pre><code class="language-Dos">01: A quick brown fox jumps over the lazy dog.
+02: The five boxing wizards jump quickly.
+03: How quickly daft jumping zebras vex!
+</code></pre>
+<h3 id="sample-expressions">Sample Expressions</h3>
+<ul>
+<li>Performing a case-sensitive search:
+<ul>
+<li>Filter: <code>H</code></li>
+<li>Returns: line 3</li>
+</ul>
+</li>
+<li>Performing a case-insensitive search:
+<ul>
+<li>Filter: <code>(?i)THE</code></li>
+<li>Returns: line 2</li>
+</ul>
+</li>
+<li>Searching for multiple values:
+<ul>
+<li>Filter: <code>dog|zebra</code></li>
+<li>Returns: line 1 &amp; 3</li>
+</ul>
+</li>
+<li>Searching for a pattern that begins &amp; ends with:
+<ul>
+<li>Filter: <code>quick.*jump</code></li>
+<li>Returns: line 1 &amp; 3</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="data-analysis">Data Analysis</h2>
+<h3 id="identifying-transitions">Identifying Transitions</h3>
+<p>To identify records where a value has changed over time:</p>
+<ol>
+<li>Filter using a regular expression with a named group.
+<ul>
+<li>For example:  <code>Key=(?&lt;Value&gt;[a-zA-Z0-9]+)</code></li>
+</ul>
+</li>
+<li>Use Weevil's <code>Detect Data Transitions</code> option.</li>
+</ol>
+<p>Result: Weevil will chronologically flag records where the <code>Value</code> changes.</p>
+<hr />
+<h2 id="appendices">Appendices</h2>
+<h3 id="appendix-a-additional-reading">Appendix A: Additional Reading</h3>
+<ul>
+<li>Regular expression <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference">quick reference</a>
+<ul>
+<li>Provides an overview of the RegEx syntax.</li>
+</ul>
+</li>
+<li><a href="https://regex101.com">Regular Expression 101</a> utility
+<ul>
+<li>Useful for trying different regular expressions.</li>
+</ul>
+</li>
+</ul>
+<h3 id="appendix-e-excel">Appendix E: Excel</h3>
+<ul>
+<li>The <em>Microsoft Excel</em> installer no longer associates the application with <em>Tab Separated Value</em> (<code>*.tsv</code>) files.  This can be resolved by:
+<ol>
+<li>executing the following command: <code>reg add &quot;HKEY_LOCAL_MACHINE\SOFTWARE\Clients\Spreadsheet\Microsoft Excel\Capabilities\FileAssociations&quot; /v &quot;.tsv&quot; /t REG_SZ /d &quot;Excel.SLK&quot; /f</code></li>
+<li>Right click a <code>*.tsv</code> file and select &quot;Open With&quot;</li>
+<li>For more information, see: <a href="https://superuser.com/a/1381871/166002">File Association .tsv to excel</a></li>
+</ol>
+</li>
+<li>If opening a file in <em>Excel</em> does not work, then try the following:
+<ol>
+<li>create an empty worksheet</li>
+<li>Excel =&gt; Data tab =&gt; Get from Text/CSV</li>
+</ol>
+</li>
+</ul>
+<h3 id="appendix-p-performance-tips">Appendix P: Performance Tips</h3>
+<ul>
+<li>The bigger the log file, the longer it will take to apply a new filter.</li>
+<li>The <em>Clear</em> commands improve performance be removing portions of the log file that are not needed.
+<ul>
+<li><em>Clear Before</em> removes all log file records from memory before the highlighted row in Log Viewer.</li>
+<li><em>Clear After</em> removes all log file records from memory before the highlighted row in Log Viewer.</li>
+</ul>
+</li>
+</ul>
 
 
 </body>
