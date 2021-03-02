@@ -14,6 +14,8 @@
 Find all log entries that have a user comment that mentions the word `suspect`:
 
 ```CSharp
+
+// Monikers like `@Comment` support quering of metadata collected by Weevil.
 var filter = Engine
    .UsingPath(@"C:\Temp\application.log")
    .Open()
@@ -28,16 +30,15 @@ foreach (var record in filter.Results)
 Search the first 1000 records in the log file looking for serial numbers:
 
 ```CSharp
-var engine = Engine
+
+// Weevil's fluent API helps to capture the developer's intent within the code base.
+var filter = Engine
    .UsingPath(@"C:\Temp\application.log")
    .UsingLimit(maxRecords: 1000)
    .Open();
+   .Filter.Apply(FilterType.RegularExpression, new FilterCriteria("SerialNumber=(?<Value>[a-zA-Z0-9]+)"));
 
-var results = engine.Filter
-   .Apply(FilterType.RegularExpression, new FilterCriteria("SerialNumber=(?<Value>[a-zA-Z0-9]+)"))
-   .Results;
-
-foreach (var record in results)
+foreach (var record in filter.results)
 {
    Console.WriteLine($"{record.CreatedAt} : {record.Content}");
 }
