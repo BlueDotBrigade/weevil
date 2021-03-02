@@ -8,21 +8,38 @@
 
 ## For Developers
 
-The following prints log entries that include a serial number (up to a maximum of 128 records):
+
+### Sample Code
+
+Find all log entries that have a user comment that mentions the word `suspect`:
+
+```CSharp
+var filter = Engine
+   .UsingPath(@"C:\Temp\application.log")
+   .Open()
+   .Filter.Apply(FilterType.PlainText, new FilterCriteria("@Comment=Suspect"));
+
+foreach (var record in filter.Results)
+{
+   Console.WriteLine($"{record.LineNumber} : {record.Metadata.Comment}");
+}
+```
+
+Search the first 1000 records in the log file looking for serial numbers:
 
 ```CSharp
 var engine = Engine
-   .UsingPath("C:\Temp\application.log")
-   .UsingLimit(maxRecords: 128)
+   .UsingPath(@"C:\Temp\application.log")
+   .UsingLimit(maxRecords: 1000)
    .Open();
 
-var results = engine
-   .Filter.Apply(FilterType.RegularExpression, new FilterCriteria("SerialNumber=(?<Value>[a-zA-Z0-9]+)"))
+var results = engine.Filter
+   .Apply(FilterType.RegularExpression, new FilterCriteria("SerialNumber=(?<Value>[a-zA-Z0-9]+)"))
    .Results;
 
 foreach (var record in results)
 {
-   Console.WriteLine($"{record.LineNumber}: {record.Content}");
+   Console.WriteLine($"{record.CreatedAt} : {record.Content}");
 }
 ```
 
