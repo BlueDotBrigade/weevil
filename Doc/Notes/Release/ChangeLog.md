@@ -2,7 +2,7 @@
 
 ### Version 2.5.0
 
-Release on March 4th, 2021
+Released on March 4th, 2021
 
 #### What's New?
 
