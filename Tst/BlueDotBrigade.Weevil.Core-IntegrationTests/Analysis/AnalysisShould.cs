@@ -29,7 +29,7 @@
 
 			engine
 				.Analyzer
-				.Analyze(AnalysisType.DetectDataTransition, GetUserDialog());
+				.Analyze(AnalysisType.DetectDataTransition);
 
 			foreach (IRecord record in engine.Filter.Results)
 			{
