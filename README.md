@@ -1,6 +1,6 @@
 # Weevil
 
-| Package | Latest Release | Downloads |
+| NuGet Package | Latest Release | Downloads |
 | --- | --- | --- |
 | BlueDotBrigade.Weevil.Common | [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Common)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Common) | [![downloads](https://img.shields.io/nuget/dt/BlueDotBrigade.Weevil.Common)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Common) |
 | BlueDotBrigade.Weevil.Core | [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Core)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Core) | [![downloads](https://img.shields.io/nuget/dt/BlueDotBrigade.Weevil.Core)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Core) |
@@ -47,7 +47,7 @@ Determine when equipment was changed in production.
 
 ```CSharp
 var engine = Engine
-	.UsingPath(InputData.GetFilePath(@"C:\Temp\hardware.log"))
+	.UsingPath(@"C:\Temp\hardware.log")
 	.Open();
 
 // The following regular expression includes a named group called: `SerialNumber`.
