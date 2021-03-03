@@ -58,13 +58,13 @@ engine
 
 // In this case the analysis uses the named group to:
 // 1. identify serial numbers in the log file,
-// 2. flag records when the serial number changs, and 
+// 2. flag records when the serial number changes, and 
 // 3. make note of the new serial number in the user comment field.
 engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
 
 foreach (var record in engine.Filter.Results.Where(x => x.Metadata.IsFlagged == true))
 {
-	Console.WriteLine($"{record.CreatedAt {record.Metadata.Comment}");
+	Console.WriteLine($"{record.CreatedAt} {record.Metadata.Comment}");
 }
 ```
 
