@@ -77,6 +77,12 @@
 			return analyzers;
 		}
 
+		public void Analyze(AnalysisType analysisType)
+		{
+			var analyzerKey = analysisType.ToString();
+			Analyze(analyzerKey, new UserDialogNotRequired());
+		}
+
 		public void Analyze(AnalysisType analysisType, IUserDialog userDialog)
 		{
 			var analyzerKey = analysisType.ToString();
