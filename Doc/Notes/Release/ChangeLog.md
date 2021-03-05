@@ -14,6 +14,7 @@ Released on March 4th, 2021
 #### Bug Fixes
 
 - Icon in the status bar reminds the user when a `Clear` operation has been performed (#29)
+- The "new release available" notification works again.
 
 ### Version 2.4.0
 
