@@ -1,5 +1,18 @@
 # Weevil : Change Log
 
+### Version 2.5.1
+
+Released on March 4th, 2021
+
+#### What's New?
+
+- No new features.
+
+#### Bug Fixes
+
+- Fixed an unexpected validation error that prevented a record from being unpinned. (#58)
+  - > Value could not be converted.
+
 ### Version 2.5.0
 
 Released on March 4th, 2021
