@@ -20,6 +20,7 @@
       <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
       <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
       <converters:ContextConverter x:Key="ContextConverter" />
+      <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
       <Style x:Key="CommandMenuItemStyle"
                TargetType="{x:Type MenuItem}">
          <Setter Property="Header"
@@ -337,7 +338,7 @@
                   <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate>
-                        <CheckBox IsChecked="{Binding Path=Metadata.IsPinned, TargetNullValue=false}"  HorizontalAlignment="Center"/>
+                        <CheckBox IsChecked="{Binding Path=Metadata.IsPinned, TargetNullValue=false, Converter={StaticResource CheckBoxValidationErrorConverter}}"  HorizontalAlignment="Center"/>
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
                </GridViewColumn>
