@@ -5,7 +5,7 @@
 	using System.Windows.Data;
 
 	// This class is being used as a quick hack to address an unexpected validation error.
-	// For more information, see: https://github.com/BlueDotBrigade/weevil/issues/57
+	// For more information, see: https://github.com/BlueDotBrigade/weevil/issues/58
 	class CheckBoxValidationErrorConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
