@@ -75,6 +75,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_1212D17BE7F44376B0BCA65583226981"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_125F6C169A4C6188387A90904CF98C1D"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
         "MsmSig" = "8:_UNDEFINED"
@@ -136,12 +142,6 @@
         "Entry"
         {
         "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
-        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
         "OwnerKey" = "8:_7DAD4727C989DCC855DDC812AFB1181F"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -149,6 +149,12 @@
         {
         "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
+        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -413,6 +419,12 @@
         {
         "MsmKey" = "8:_6D6F3181E3BCA247C9F63A20AE3D64B8"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6D80370BB5C84E26BA35DD20806B5454"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1061,18 +1073,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1EB6C9703AD3928A63524A9E642F096C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1870,6 +1870,18 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_1EB6C9703AD3928A63524A9E642F096C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_737634FD64C51950580846995424508A"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2293,6 +2305,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1212D17BE7F44376B0BCA65583226981"
+            {
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Cli\\WeevilCli.exe.nlog"
+            "TargetName" = "8:WeevilCli.exe.nlog"
+            "Tag" = "8:"
+            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_125F6C169A4C6188387A90904CF98C1D"
@@ -3872,6 +3904,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6D80370BB5C84E26BA35DD20806B5454"
+            {
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\WeevilGui.exe.nlog"
+            "TargetName" = "8:WeevilGui.exe.nlog"
+            "Tag" = "8:"
+            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_71781BB8B2E0465C1F73A7B49D648ECB"
@@ -6666,7 +6718,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_CAE002457DC9402C99D288B6D124A641"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFiles64Folder]BlueDotBrigade\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -6736,15 +6788,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Weevil"
-        "ProductCode" = "8:{CDF04180-82C7-4807-8731-36461D66FEC5}"
-        "PackageCode" = "8:{D928D6D2-931A-4715-B8C9-05566493E462}"
+        "ProductCode" = "8:{90426B25-E5DF-4DC8-AC6C-17FC3D269016}"
+        "PackageCode" = "8:{415F40C0-0B60-4580-BC1A-B05BBB679949}"
         "UpgradeCode" = "8:{41DF7DC3-3176-4A07-81F7-F993241E8CE7}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.0"
+        "ProductVersion" = "8:2.5.2"
         "Manufacturer" = "8:Blue Dot Brigade"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/BlueDotBrigade/weevil"
@@ -6753,7 +6805,7 @@
         "ARPCONTACT" = "8:Blue Dot Brigade"
         "Keywords" = "8:Weevil; Blue Dot Brigade; Log; Log Viewer;"
         "ARPCOMMENTS" = "8:Boring log files for tasty bytes."
-        "ARPURLINFOABOUT" = "8:https://github.com/BlueDotBrigade/weevil"
+        "ARPURLINFOABOUT" = "8:http://Weevil.BlueDotBrigade.com"
         "ARPPRODUCTICON" = "8:_D217956C78A84FD2909941E37147E443"
         "ARPIconIndex" = "3:32512"
         "SearchPath" = "8:"
