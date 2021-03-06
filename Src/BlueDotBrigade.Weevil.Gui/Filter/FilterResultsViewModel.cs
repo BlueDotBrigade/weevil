@@ -165,7 +165,7 @@
 
 		public IList<IRecord> VisibleItems { get; private set; }
 
-		public int AllRecordCount => _engine.Filter.Results.Length;
+		public int AllRecordCount => _engine.Count;
 
 		public int VisibleRecordCount => this.VisibleItems?.Count ?? 0;
 
