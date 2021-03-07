@@ -1,5 +1,23 @@
 # Weevil : Change Log
 
+## Releases
+
+The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
+
+### Version 2.5.2
+
+Released on March 7th, 2021
+
+#### What's New?
+
+- No changes.
+
+#### Bug Fixes
+
+- Fixed a record selection bug that resulted in unexpected results during `Clear Before & After` operation. (#66)
+- The `TotalRecordCount` in the status bar now shows the correct value. (#62)
+- Added the missing NLog configuration that was preventing Weevil from writing to it's own log file. (#64)
+
 ### Version 2.5.1
 
 Released on March 4th, 2021
