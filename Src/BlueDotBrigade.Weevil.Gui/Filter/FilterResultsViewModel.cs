@@ -169,7 +169,7 @@
 
 		public int VisibleRecordCount => this.VisibleItems?.Count ?? 0;
 
-		public int SelectedRecordCount { get; set; }
+		public int SelectedRecordCount => _engine.Selector.Selected.Count;
 
 		[SafeForDependencyAnalysis]
 		public bool IsUpdateAvailable
@@ -674,7 +674,6 @@
 					this.CurrentHeading = _tableOfContents.GetSection(records[0].LineNumber);
 
 					_engine.Selector.Select(records);
-					this.SelectedRecordCount = _engine.Selector.Selected.Count;
 					RefreshStatusBar();
 				}
 			}
@@ -685,7 +684,6 @@
 			if (!this.IsCommandExecuting)
 			{
 				_engine.Selector.Unselect(records);
-				this.SelectedRecordCount = _engine.Selector.Selected.Count;
 				RefreshStatusBar();
 			}
 		}
@@ -713,6 +711,7 @@
 			_uiDispatcher.Invoke(() =>
 			{
 				RaisePropertyChanged(nameof(this.SourceFilePath));
+				RaisePropertyChanged(nameof(this.SelectedRecordCount));
 
 				this.Metrics = _engine.Filter.GetMetrics();
 
@@ -1150,6 +1149,7 @@
 				RaisePropertyChanged(nameof(this.ExclusiveFilter));
 
 				this.VisibleItems = _engine.Filter.Results;
+
 				RaisePropertyChanged(nameof(this.VisibleItems));
 				RaisePropertyChanged(nameof(this.AllRecordCount));
 				RaisePropertyChanged(nameof(this.HasBeenCleared));
