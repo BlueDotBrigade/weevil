@@ -176,7 +176,8 @@
             </Button.CommandParameter>
          </Button>
       </Grid>
-      <ListView Grid.Row="1"
+      <ListView x:Name="ListView"
+                Grid.Row="1"
                 FontSize="{StaticResource TextFontSize}"
                 ItemsSource="{Binding VisibleItems}"
                              SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"

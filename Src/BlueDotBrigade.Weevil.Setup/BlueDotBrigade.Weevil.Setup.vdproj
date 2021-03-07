@@ -75,6 +75,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_1212D17BE7F44376B0BCA65583226981"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_125F6C169A4C6188387A90904CF98C1D"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
         "MsmSig" = "8:_UNDEFINED"
@@ -99,12 +105,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1EB6C9703AD3928A63524A9E642F096C"
-        "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_2419B158E8F042C884A17B0BBFE86A2B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -112,12 +112,6 @@
         "Entry"
         {
         "MsmKey" = "8:_26A329C2BDE260B82A860B0349B8E8F2"
-        "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_27DC4B09175557FC2419446E389AA53B"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -136,13 +130,13 @@
         "Entry"
         {
         "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
-        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
+        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
-        "OwnerKey" = "8:_7DAD4727C989DCC855DDC812AFB1181F"
+        "OwnerKey" = "8:_5DCC6258A65E60E9DFACE8BF072E03A0"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -345,6 +339,24 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_5BDD6E8A1A6B539014B54DB9EB36ADAA"
+        "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_5DCC6258A65E60E9DFACE8BF072E03A0"
+        "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_5DCC6258A65E60E9DFACE8BF072E03A0"
+        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_5EDF60D6AE9FDED33A547771C6AC832D"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
         "MsmSig" = "8:_UNDEFINED"
@@ -417,6 +429,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_6D80370BB5C84E26BA35DD20806B5454"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_71781BB8B2E0465C1F73A7B49D648ECB"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
         "MsmSig" = "8:_UNDEFINED"
@@ -436,7 +454,7 @@
         "Entry"
         {
         "MsmKey" = "8:_737634FD64C51950580846995424508A"
-        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
+        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -473,18 +491,6 @@
         {
         "MsmKey" = "8:_7D55632F9256CD3914DA5C097B6AF00B"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7DAD4727C989DCC855DDC812AFB1181F"
-        "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7DAD4727C989DCC855DDC812AFB1181F"
-        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -825,6 +831,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
+        "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_C88F694E7C043E88E8EFB94C332445EE"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
         "MsmSig" = "8:_UNDEFINED"
@@ -1036,7 +1048,7 @@
         "Entry"
         {
         "MsmKey" = "8:_FC70C3F5F14D3A12BF1EFF1D51AFA000"
-        "OwnerKey" = "8:_7DAD4727C989DCC855DDC812AFB1181F"
+        "OwnerKey" = "8:_5DCC6258A65E60E9DFACE8BF072E03A0"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1066,13 +1078,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1EB6C9703AD3928A63524A9E642F096C"
+        "OwnerKey" = "8:_5BDD6E8A1A6B539014B54DB9EB36ADAA"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_27DC4B09175557FC2419446E389AA53B"
+        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2295,6 +2307,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1212D17BE7F44376B0BCA65583226981"
+            {
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Cli\\WeevilCli.exe.nlog"
+            "TargetName" = "8:WeevilCli.exe.nlog"
+            "Tag" = "8:"
+            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_125F6C169A4C6188387A90904CF98C1D"
             {
             "AssemblyRegister" = "3:1"
@@ -2408,37 +2440,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1EB6C9703AD3928A63524A9E642F096C"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Windows, Version=2.6.0.0, Culture=neutral, processorArchitecture=AMD64"
-                "ScatterAssemblies"
-                {
-                    "_1EB6C9703AD3928A63524A9E642F096C"
-                    {
-                    "Name" = "8:BlueDotBrigade.Weevil.Windows.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:BlueDotBrigade.Weevil.Windows.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2419B158E8F042C884A17B0BBFE86A2B"
             {
             "SourcePath" = "8:..\\..\\Doc\\Notes\\Release\\Licenses\\ThirdPartyNoticesAndInformation.txt"
@@ -2473,37 +2474,6 @@
                     }
                 }
             "SourcePath" = "8:System.Threading.Thread.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_27DC4B09175557FC2419446E389AA53B"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Core, Version=2.5.0.0, Culture=neutral, processorArchitecture=AMD64"
-                "ScatterAssemblies"
-                {
-                    "_27DC4B09175557FC2419446E389AA53B"
-                    {
-                    "Name" = "8:BlueDotBrigade.Weevil.Core.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:BlueDotBrigade.Weevil.Core.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
@@ -3564,6 +3534,68 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5BDD6E8A1A6B539014B54DB9EB36ADAA"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Windows, Version=2.6.0.0, Culture=neutral, processorArchitecture=AMD64"
+                "ScatterAssemblies"
+                {
+                    "_5BDD6E8A1A6B539014B54DB9EB36ADAA"
+                    {
+                    "Name" = "8:BlueDotBrigade.Weevil.Windows.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:BlueDotBrigade.Weevil.Windows.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5DCC6258A65E60E9DFACE8BF072E03A0"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Common, Version=2.10.0.0, Culture=neutral, processorArchitecture=AMD64"
+                "ScatterAssemblies"
+                {
+                    "_5DCC6258A65E60E9DFACE8BF072E03A0"
+                    {
+                    "Name" = "8:BlueDotBrigade.Weevil.Common.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:BlueDotBrigade.Weevil.Common.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5EDF60D6AE9FDED33A547771C6AC832D"
             {
             "AssemblyRegister" = "3:1"
@@ -3874,6 +3906,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6D80370BB5C84E26BA35DD20806B5454"
+            {
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\WeevilGui.exe.nlog"
+            "TargetName" = "8:WeevilGui.exe.nlog"
+            "Tag" = "8:"
+            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_71781BB8B2E0465C1F73A7B49D648ECB"
             {
             "AssemblyRegister" = "3:1"
@@ -4105,37 +4157,6 @@
                     }
                 }
             "SourcePath" = "8:System.Security.Cryptography.X509Certificates.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7DAD4727C989DCC855DDC812AFB1181F"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Common, Version=2.10.0.0, Culture=neutral, processorArchitecture=AMD64"
-                "ScatterAssemblies"
-                {
-                    "_7DAD4727C989DCC855DDC812AFB1181F"
-                    {
-                    "Name" = "8:BlueDotBrigade.Weevil.Common.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:BlueDotBrigade.Weevil.Common.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
@@ -5692,6 +5713,37 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C87AE6FB58A87262F564718AAFB9F3C9"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Core, Version=2.5.0.0, Culture=neutral, processorArchitecture=AMD64"
+                "ScatterAssemblies"
+                {
+                    "_C87AE6FB58A87262F564718AAFB9F3C9"
+                    {
+                    "Name" = "8:BlueDotBrigade.Weevil.Core.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:BlueDotBrigade.Weevil.Core.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C88F694E7C043E88E8EFB94C332445EE"
             {
             "AssemblyRegister" = "3:1"
@@ -6666,7 +6718,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_CAE002457DC9402C99D288B6D124A641"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFiles64Folder]BlueDotBrigade\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -6736,15 +6788,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Weevil"
-        "ProductCode" = "8:{CDF04180-82C7-4807-8731-36461D66FEC5}"
-        "PackageCode" = "8:{D928D6D2-931A-4715-B8C9-05566493E462}"
+        "ProductCode" = "8:{90426B25-E5DF-4DC8-AC6C-17FC3D269016}"
+        "PackageCode" = "8:{327076DA-609F-49FB-8BC5-77DCCAA1BD2D}"
         "UpgradeCode" = "8:{41DF7DC3-3176-4A07-81F7-F993241E8CE7}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.0"
+        "ProductVersion" = "8:2.5.2"
         "Manufacturer" = "8:Blue Dot Brigade"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/BlueDotBrigade/weevil"
@@ -6752,8 +6804,8 @@
         "Subject" = "8:"
         "ARPCONTACT" = "8:Blue Dot Brigade"
         "Keywords" = "8:Weevil; Blue Dot Brigade; Log; Log Viewer;"
-        "ARPCOMMENTS" = "8:Boring log files for tasty bytes."
-        "ARPURLINFOABOUT" = "8:https://github.com/BlueDotBrigade/weevil"
+        "ARPCOMMENTS" = "8:Facilitates the parsing, filtering and analysis of log files."
+        "ARPURLINFOABOUT" = "8:http://Weevil.BlueDotBrigade.com"
         "ARPPRODUCTICON" = "8:_D217956C78A84FD2909941E37147E443"
         "ARPIconIndex" = "3:32512"
         "SearchPath" = "8:"
@@ -7384,7 +7436,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D217956C78A84FD2909941E37147E443"
             {
-            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\obj\\x64\\Release\\WeevilGui.exe"
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\obj\\x64\\Debug\\WeevilGui.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_1E3E202EE10A437693C7340373989FEB"
