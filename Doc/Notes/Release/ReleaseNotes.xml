@@ -1,7 +1,7 @@
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/blob/main/Doc/Notes/Release/ChangeLog.md</ChangeLogUrl>
 	<CodeName>The Weeknd</CodeName>
-	<Description>Fixed an unexpected validation error that prevented a record from being unpinned.</Description>
+	<Description>Fixed a record selection bug that resulted in unexpected results during `Clear Before & After` operation.</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.5.1</LatestRelease>
+	<LatestRelease>2.5.2</LatestRelease>
 </ApplicationInfo>
