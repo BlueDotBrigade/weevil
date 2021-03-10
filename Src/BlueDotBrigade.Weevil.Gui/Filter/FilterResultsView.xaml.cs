@@ -87,8 +87,17 @@
 
 		private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			this.ViewModel.Select(e.AddedItems.Cast<IRecord>().ToList());
-			this.ViewModel.UnSelect(e.RemovedItems.Cast<IRecord>().ToList());
+			var added = e.AddedItems.Cast<IRecord>().ToList();
+			if (added.Count > 0)
+			{
+				this.ViewModel.Select(added);
+			}
+
+			var removed = e.RemovedItems.Cast<IRecord>().ToList();
+			if (removed.Count > 0)
+			{
+				this.ViewModel.UnSelect(removed);
+			}
 		}
 	}
 }
