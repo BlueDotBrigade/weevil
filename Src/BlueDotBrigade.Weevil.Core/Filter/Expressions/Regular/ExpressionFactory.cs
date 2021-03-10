@@ -4,9 +4,23 @@
 
 	internal class ExpressionFactory : IExpressionFactory
 	{
-		public ExpressionFactory(IFilterCriteria criteria)
+		public const string IsCaseSensitiveParameter = "IsCaseSensitive";
+
+		private readonly bool _isCaseSensitive;
+
+		public ExpressionFactory(IFilterCriteria filterCriteria)
 		{
-			// nothing to do
+			// When no configuration is provided 
+			// ... Default: case sensitive filtering
+			_isCaseSensitive = true;
+
+			if (filterCriteria.Configuration.ContainsKey(IsCaseSensitiveParameter))
+			{
+				if (bool.TryParse(filterCriteria.Configuration[IsCaseSensitiveParameter].ToString(), out var userConfigurationValue))
+				{
+					_isCaseSensitive = userConfigurationValue;
+				}
+			}
 		}
 
 		public bool TryGetExpression(string serializedExpression, out IExpression result)
@@ -15,7 +29,17 @@
 
 			if (!string.IsNullOrEmpty(serializedExpression))
 			{
-				result = new RegularExpression(serializedExpression, RegexOptions.Compiled);
+				var regexOptions = RegexOptions.Compiled;
+
+				if (_isCaseSensitive)
+				{
+					// use RegEx default: case sensitive search
+				}
+				else
+				{
+					regexOptions |= RegexOptions.IgnoreCase;
+				}
+				result = new RegularExpression(serializedExpression, regexOptions);
 			}
 
 			return SurrogateExpression.IsReal(result);

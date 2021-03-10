@@ -9,7 +9,6 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
-	using System.Net;
 	using System.Reflection;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -106,6 +105,7 @@
 			_concurrentFilterCount = 0;
 
 			this.IsManualFilter = false;
+			this.IsFilterCaseSensitive = true;
 			this.AreDetailsVisible = false;
 
 			this.InclusiveFilterEnabled = false;
@@ -217,11 +217,14 @@
 		public int FlaggedRecordCount { get; private set; }
 		public bool HasBeenCleared => _engine.HasBeenCleared;
 		public bool IncludePinned { get; set; }
+
 		public IDictionary<string, object> Metrics { get; set; }
 
 		public ContextDictionary Context { get; set; }
 
 		public bool IsManualFilter { get; set; }
+
+		public bool IsFilterCaseSensitive { get; set; }
 
 		public bool IsFilterInProgress => _concurrentFilterCount >= 1;
 
@@ -1165,6 +1168,11 @@
 			if (this.IncludePinned)
 			{
 				configuration.Add("IncludePinned", this.IncludePinned);
+			}
+
+			if (this.IsFilterCaseSensitive)
+			{
+				configuration.Add("IsCaseSensitive", this.IncludePinned);
 			}
 
 			if (this.AlwaysHideDebugRecords)
