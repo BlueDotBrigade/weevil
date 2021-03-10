@@ -395,11 +395,14 @@
                   IsEnabled="{Binding AreDetailsVisible}"
                   Visibility="{Binding AreDetailsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
             <CheckBox
-               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="Always include pinned records in filter results?">
+               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records will always be included in filter results.">
                <AccessText Text="Include _Pinned"></AccessText>
             </CheckBox>
-            <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="Require user to press `Enter` to apply filter?">
+            <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
                <AccessText Text="_Manual Filtering"></AccessText>
+            </CheckBox>
+         <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
+               <AccessText Text="Is _Case Sensitive"></AccessText>
             </CheckBox>
          <Button 
               Content="_Hide"
