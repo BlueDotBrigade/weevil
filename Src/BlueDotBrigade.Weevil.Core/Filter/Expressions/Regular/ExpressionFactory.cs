@@ -4,15 +4,19 @@
 
 	internal class ExpressionFactory : IExpressionFactory
 	{
-		private const string IsCaseSensitive = "IsCaseSensitive";
+		public const string IsCaseSensitiveParameter = "IsCaseSensitive";
 
 		private readonly bool _isCaseSensitive;
 
 		public ExpressionFactory(IFilterCriteria filterCriteria)
 		{
-			if (filterCriteria.Configuration.ContainsKey(IsCaseSensitive))
+			// When no configuration is provided 
+			// ... Default: case sensitive filtering
+			_isCaseSensitive = true;
+
+			if (filterCriteria.Configuration.ContainsKey(IsCaseSensitiveParameter))
 			{
-				if (bool.TryParse(filterCriteria.Configuration[IsCaseSensitive].ToString(), out var userConfigurationValue))
+				if (bool.TryParse(filterCriteria.Configuration[IsCaseSensitiveParameter].ToString(), out var userConfigurationValue))
 				{
 					_isCaseSensitive = userConfigurationValue;
 				}
