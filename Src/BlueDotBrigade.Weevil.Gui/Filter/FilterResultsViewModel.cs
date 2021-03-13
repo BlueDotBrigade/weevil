@@ -293,8 +293,8 @@
 		public bool AlwaysHideTraceRecords { get; set; }
 
 		public bool IsProcessingLongOperation { get; private set; }
-		public int MaxProgress { get; private set; }
-		public int LongOperationProgress { get; private set; }
+		public int LongOperationCurrentValue { get; private set; }
+		public int LongOperationMaxValue { get; private set; }
 		public bool IsIndeterminate { get; private set; }
 
 		public bool CanChangeFilter => true;

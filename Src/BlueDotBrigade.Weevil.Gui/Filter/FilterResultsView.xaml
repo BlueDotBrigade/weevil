@@ -386,8 +386,8 @@
                   VerticalAlignment="Center" HorizontalAlignment="Center" >
          <TextBlock Text="Boring log file for tasty bytes..." />
          <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
-                      Value="{Binding LongOperationProgress, Mode=OneWay}" 
-                      Maximum="{Binding MaxProgress, Mode=OneWay}"
+                      Value="{Binding LongOperationCurrentValue, Mode=OneWay}" 
+                      Maximum="{Binding LongOperationMaxValue, Mode=OneWay}"
                       IsIndeterminate="{Binding IsIndeterminate, Mode=OneWay}"  />
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
