@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -56,3 +57,8 @@ using System.Windows;
 [assembly: AssemblyVersion("2.5.2.*")]
 [assembly: AssemblyFileVersion("2.5.2.0")]
 [assembly: NeutralResourcesLanguage("en")]
+
+#if DEBUG
+[assembly: InternalsVisibleTo("BlueDotBrigade.Weevil.Gui-UiTests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // required by Moq
+#endif
