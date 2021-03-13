@@ -6,6 +6,7 @@
 	using System.Windows.Controls;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Threading;
 
 	/// <summary>
 	/// Interaction logic for FilterResultsView.xaml
@@ -26,7 +27,8 @@
 				}
 			};
 
-			this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, Application.Current.Dispatcher);
+			var uiDispatcher = new UiDispatcher(Application.Current.Dispatcher);
+			this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, uiDispatcher);
 
 			InitializeComponent();
 

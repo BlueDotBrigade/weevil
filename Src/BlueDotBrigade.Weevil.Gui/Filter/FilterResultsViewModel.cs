@@ -31,6 +31,7 @@
 	using BlueDotBrigade.Weevil.Reports;
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Gui.Properties;
+	using BlueDotBrigade.Weevil.Gui.Threading;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
@@ -63,7 +64,7 @@
 		/// Furthermore, there is no guarantee as to when the <see cref="Dispatcher.BeginInvoke"/> will executed the queued action.
 		/// </remarks>
 		/// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.threading.dispatcher">MSDN: Dispatcher</seealso>
-		private readonly Dispatcher _uiDispatcher;
+		private readonly IUiDispatcher _uiDispatcher;
 
 		private readonly DispatcherTimer initializationTimer;
 
@@ -84,7 +85,7 @@
 
 		private ITableOfContents _tableOfContents;
 
-		public FilterResultsViewModel(Window mainWindow, Dispatcher uiDispatcher)
+		public FilterResultsViewModel(Window mainWindow, IUiDispatcher uiDispatcher)
 		{
 			_mainWindow = mainWindow;
 			_uiDispatcher = uiDispatcher;
@@ -114,8 +115,7 @@
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
 
-			// ReSharper disable once PossibleNullReferenceException
-			this.CurrentVersion = Assembly.GetEntryAssembly().GetName().Version;
+			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
 			initializationTimer = new DispatcherTimer();
 			initializationTimer.Tick += (sender, args) => OnInitialize();
