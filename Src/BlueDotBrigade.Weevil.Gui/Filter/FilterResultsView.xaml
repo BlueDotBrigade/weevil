@@ -407,12 +407,6 @@
          <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
                <AccessText Text="Is _Case Sensitive"></AccessText>
             </CheckBox>
-         <Button 
-              Content="_Hide"
-              Style="{StaticResource  MaterialDesignRaisedButton}"
-              Margin="{StaticResource ButtonMargin}"
-              Width="{StaticResource ButtonWidth}"
-              Command="{Binding ToggleFilterOptionsVisibilityCommand}"/>
       </StackPanel>
       <StatusBar Grid.Row="4" Height="32"
                  Background="{StaticResource MaterialDesignPaper}" 
