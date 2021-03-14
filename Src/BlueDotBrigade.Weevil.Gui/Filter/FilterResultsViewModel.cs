@@ -496,6 +496,8 @@
 							.OrderBy(x => x.DisplayName)
 							.ToArray();
 
+						_uiDispatcher.Invoke(() =>
+						{
 							this.CustomAnalyzerCommands.Clear();
 
 							foreach (IRecordAnalyzer analyzer in analyzers)
@@ -507,6 +509,7 @@
 
 								this.CustomAnalyzerCommands.Add(menuItem);
 							}
+						});
 
 						this.IsFilterToolboxEnabled = true;
 
