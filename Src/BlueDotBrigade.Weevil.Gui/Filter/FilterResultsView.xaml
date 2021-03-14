@@ -95,7 +95,7 @@
          <Button x:Name="OpenButton" Grid.Column="0"
                  Command="{Binding OpenCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
-            Style="{StaticResource  MaterialDesignRaisedButton}"
+                 Style="{StaticResource  MaterialDesignRaisedButton}"
             Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
          </Button>
@@ -105,7 +105,7 @@
                       ItemsSource="{Binding InclusiveFilterHistory}"
                       Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
                       SelectedValue="{Binding InclusiveFilter}" 
-                      IsEnabled="{Binding InclusiveFilterEnabled}"
+                      IsEnabled="{Binding IsFilterToolboxEnabled}" 
                       IsEditable="True"
                       IsTextSearchEnabled="False"
                       StaysOpenOnEdit="False"
@@ -129,7 +129,7 @@
                    ItemsSource="{Binding ExclusiveFilterHistory}"
                    Text="{Binding ExclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
                    SelectedValue="{Binding ExclusiveFilter}" 
-                   IsEnabled="{Binding ExclusiveFilterEnabled}"
+                   IsEnabled="{Binding IsFilterToolboxEnabled}" 
                    IsEditable="True"
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
@@ -148,11 +148,13 @@
             </ComboBox.InputBindings>
          </ComboBox>
          <ToggleButton  Name="FilterOptionsButton" Grid.Column="3" ToolTip="Show filter options... (Ctrl+Shift+O)" 
-                        IsChecked="{Binding AreDetailsVisible, Mode=TwoWay}"/>
+                        IsChecked="{Binding AreDetailsVisible, Mode=TwoWay}"
+                        IsEnabled="{Binding IsFilterToolboxEnabled}" />
          <Button Grid.Column="4"
                  Command="{Binding FilterOrCancelCommand}"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
-                 Margin="{StaticResource ButtonMargin}">
+                 Margin="{StaticResource ButtonMargin}"
+                 IsEnabled="{Binding IsFilterToolboxEnabled}" >
             <StackPanel>
                <Image Height="24">
                   <Image.Style>
@@ -393,7 +395,7 @@
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
       <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" 
-                  IsEnabled="{Binding AreDetailsVisible}"
+                  IsEnabled="{Binding IsFilterToolboxEnabled}"
                   Visibility="{Binding AreDetailsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
             <CheckBox
                IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records will always be included in filter results.">
