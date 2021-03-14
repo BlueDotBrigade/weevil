@@ -636,6 +636,9 @@
 					_engine.Save();
 					_engine.Reload();
 
+					_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
+					_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
+
 					var newRecordSelection = _engine.Filter.Results
 						.Where(a => oldRecordSelection.Any(b => b.LineNumber == a.LineNumber)).ToList();
 					_engine.Selector.Select(newRecordSelection);
