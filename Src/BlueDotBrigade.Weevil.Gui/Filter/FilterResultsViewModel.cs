@@ -107,7 +107,7 @@
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
-			this.AreDetailsVisible = false;
+			this.AreFilterOptionsVisible = false;
 
 			this.IsFilterToolboxEnabled = false;
 
@@ -225,7 +225,7 @@
 
 		public bool IsFilterInProgress => _concurrentFilterCount >= 1;
 
-		public bool AreDetailsVisible { get; set; }
+		public bool AreFilterOptionsVisible { get; set; }
 
 		public bool IsFilterToolboxEnabled { get; private set; }
 
