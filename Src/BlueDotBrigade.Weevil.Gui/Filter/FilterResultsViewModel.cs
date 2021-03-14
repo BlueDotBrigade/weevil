@@ -303,7 +303,8 @@
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
-		public Action<object, EventArgs> ResultsChanged { get; internal set; }
+		public event EventHandler ResultsChanged;
+
 		#endregion
 
 		#region Event Handlers
@@ -641,7 +642,7 @@
 
 					RefreshFilterResults();
 
-					this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+					RaiseResultsChanged();
 				}
 				finally
 				{
@@ -830,7 +831,7 @@
 			_engine.Clear(ClearRecordsOperation.Selected);
 
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -841,7 +842,7 @@
 			_engine.Clear(ClearRecordsOperation.Unselected);
 
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -851,7 +852,7 @@
 		{
 			_engine.Clear(ClearRecordsOperation.AfterSelected);
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -861,7 +862,7 @@
 		{
 			_engine.Clear(ClearRecordsOperation.BeforeAndAfterSelected);
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -871,7 +872,7 @@
 		{
 			_engine.Clear(ClearRecordsOperation.BeforeSelected);
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -1015,6 +1016,26 @@
 
 		#endregion
 
+		protected virtual void RaiseResultsChanged()
+		{
+			EventHandler threadSafeHandler = this.ResultsChanged;
+
+			if (threadSafeHandler != null)
+			{
+				try
+				{
+					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+				}
+				catch (Exception exception)
+				{
+					Log.Default.Write(
+						LogSeverityType.Error,
+						exception,
+						$"An unexpected error occured while raising the {nameof(ResultsChanged)} event.");
+				}
+			}
+		}
+
 		/// <summary>
 		/// Applies the appropriate filter while managing UI updates. 
 		/// </summary>
@@ -1108,7 +1129,7 @@
 						_uiDispatcher.Invoke(() =>
 						{
 							RefreshFilterResults();
-							this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+							RaiseResultsChanged();
 						});
 					}
 					else
