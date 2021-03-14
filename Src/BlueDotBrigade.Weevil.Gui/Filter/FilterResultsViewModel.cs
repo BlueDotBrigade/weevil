@@ -127,8 +127,6 @@
 
 			_tableOfContents = new TableOfContents();
 
-			this.IsIndeterminate = true;
-
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
 		}
 
@@ -293,9 +291,6 @@
 		public bool AlwaysHideTraceRecords { get; set; }
 
 		public bool IsProcessingLongOperation { get; private set; }
-		public int LongOperationCurrentValue { get; private set; }
-		public int LongOperationMaxValue { get; private set; }
-		public bool IsIndeterminate { get; private set; }
 
 		public bool CanChangeFilter => true;
 

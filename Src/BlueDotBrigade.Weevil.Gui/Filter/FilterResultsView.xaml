@@ -386,9 +386,9 @@
                   VerticalAlignment="Center" HorizontalAlignment="Center" >
          <TextBlock Text="Boring log file for tasty bytes..." />
          <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
-                      Value="{Binding LongOperationCurrentValue, Mode=OneWay}" 
-                      Maximum="{Binding LongOperationMaxValue, Mode=OneWay}"
-                      IsIndeterminate="{Binding IsIndeterminate, Mode=OneWay}"  />
+                      Value="0" 
+                      Maximum="100"
+                      IsIndeterminate="True"  />
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
       <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" 
