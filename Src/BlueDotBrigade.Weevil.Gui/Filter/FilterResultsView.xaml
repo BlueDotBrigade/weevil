@@ -11,6 +11,7 @@
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
+            xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
             mc:Ignorable="d"
             d:DesignHeight="200" d:DesignWidth="900">
    <UserControl.Resources>
@@ -322,7 +323,7 @@
                <GridViewColumn  Width="60" DisplayMemberBinding="{Binding LineNumber, StringFormat='{}{0:###,###,##0}'}">
                   <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
@@ -330,7 +331,7 @@
                <GridViewColumn  Width="55">
                   <GridViewColumnHeader Content="Flagged" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <CheckBox IsChecked="{Binding Path=Metadata.IsFlagged, TargetNullValue=false}" IsEnabled="False" HorizontalAlignment="Center"/>
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
@@ -338,7 +339,7 @@
                <GridViewColumn Width="50">
                   <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <CheckBox IsChecked="{Binding Path=Metadata.IsPinned, TargetNullValue=false, Converter={StaticResource CheckBoxValidationErrorConverter}}"  HorizontalAlignment="Center"/>
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
@@ -346,7 +347,7 @@
                <GridViewColumn  Width="170">
                   <GridViewColumnHeader Content="Comment" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBox 
                                     Text="{Binding Path=Metadata.Comment, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
                                     IsEnabled="True" 
@@ -360,7 +361,7 @@
                <GridViewColumn  Width="55">
                   <GridViewColumnHeader Content="Elapsed" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBlock 
                                     Text="{Binding Metadata.ElapsedTime, Converter={StaticResource TimeSpanConverter}}"
                                     TextAlignment="Right">
@@ -371,7 +372,7 @@
                <GridViewColumn  Width="1100">
                   <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Right"
                                     Text="{Binding Path=Content, Mode=OneWay}">
                         </TextBlock>
