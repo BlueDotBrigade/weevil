@@ -479,7 +479,7 @@
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
 						RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
 
-						// BUG: where is un-register `HistoryChanged`?
+						_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 						_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 
 						this.Context = _engine.Context;
@@ -834,6 +834,7 @@
 			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
+			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
@@ -845,6 +846,7 @@
 			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
+			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
@@ -855,6 +857,7 @@
 			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
+			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
@@ -865,6 +868,7 @@
 			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
+			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
@@ -875,6 +879,7 @@
 			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
+			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
