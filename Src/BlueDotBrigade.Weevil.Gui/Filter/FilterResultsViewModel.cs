@@ -81,6 +81,9 @@
 
 		private FilterCriteria _previousFilterCriteria;
 
+		private FilterType _currentfilterType;
+		private FilterCriteria _currentfilterCriteria;
+
 		private int _concurrentFilterCount;
 
 		private ITableOfContents _tableOfContents;
@@ -493,17 +496,17 @@
 							.OrderBy(x => x.DisplayName)
 							.ToArray();
 
-						this.CustomAnalyzerCommands.Clear();
+							this.CustomAnalyzerCommands.Clear();
 
-						foreach (IRecordAnalyzer analyzer in analyzers)
-						{
-							var menuItem = new MenuItemViewModel(
-								analyzer.Key,
-								analyzer.DisplayName,
-								this.CustomAnalyzerCommand);
+							foreach (IRecordAnalyzer analyzer in analyzers)
+							{
+								var menuItem = new MenuItemViewModel(
+									analyzer.Key,
+									analyzer.DisplayName,
+									this.CustomAnalyzerCommand);
 
-							this.CustomAnalyzerCommands.Add(menuItem);
-						}
+								this.CustomAnalyzerCommands.Add(menuItem);
+							}
 
 						this.IsFilterToolboxEnabled = true;
 
@@ -829,55 +832,11 @@
 
 		#region Commands: Filtering
 
-		public void ClearSelectedRecords()
+		public void ClearRecords(ClearRecordsOperation operation)
 		{
-			_engine.Clear(ClearRecordsOperation.Selected);
+			_engine.Clear(operation);
+			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
 
-			RefreshFilterResults();
-			RaiseResultsChanged();
-
-			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
-			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
-		}
-
-		public void ClearUnselectedRecords()
-		{
-			_engine.Clear(ClearRecordsOperation.Unselected);
-
-			RefreshFilterResults();
-			RaiseResultsChanged();
-
-			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
-			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
-		}
-
-		public void ClearAfterSelectedRecord()
-		{
-			_engine.Clear(ClearRecordsOperation.AfterSelected);
-			RefreshFilterResults();
-			RaiseResultsChanged();
-
-			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
-			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
-		}
-
-		public void ClearBeforeAndAfterSelection()
-		{
-			_engine.Clear(ClearRecordsOperation.BeforeAndAfterSelected);
-			RefreshFilterResults();
-			RaiseResultsChanged();
-
-			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
-			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
-		}
-
-		public void ClearBeforeSelectedRecord()
-		{
-			_engine.Clear(ClearRecordsOperation.BeforeSelected);
 			RefreshFilterResults();
 			RaiseResultsChanged();
 
@@ -1130,6 +1089,9 @@
 					// ... if not, then display the original 
 					if (wasFilterApplied)
 					{
+						_currentfilterType = filterType;
+						_currentfilterCriteria = filterCriteria;
+
 						Log.Default.Write(
 							LogSeverityType.Information,
 							$"Filter operation is displaying the filter results.");

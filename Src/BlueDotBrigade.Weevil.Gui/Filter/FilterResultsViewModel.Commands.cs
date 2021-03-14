@@ -12,6 +12,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using Microsoft.Practices.Prism.Commands;
 	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
 
@@ -56,15 +57,25 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		#region Commands: Filtering
 		[SafeForDependencyAnalysis]
-		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(ClearBeforeSelectedRecord, () => this.IsMenuEnabled);
+		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.BeforeSelected), 
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(ClearAfterSelectedRecord, () => this.IsMenuEnabled);
+		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.AfterSelected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(ClearBeforeAndAfterSelection, () => this.IsMenuEnabled);
+		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(ClearSelectedRecords, () => this.IsMenuEnabled);
+		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.Selected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(ClearUnselectedRecords, () => this.IsMenuEnabled);
+		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.Unselected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public DelegateCommand<object[]> FilterOrCancelCommand => new DelegateCommand<object[]>(parameters =>
 		{
