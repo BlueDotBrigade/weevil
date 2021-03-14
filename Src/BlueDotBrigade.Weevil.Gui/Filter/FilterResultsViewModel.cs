@@ -81,6 +81,9 @@
 
 		private FilterCriteria _previousFilterCriteria;
 
+		private FilterType _currentfilterType;
+		private FilterCriteria _currentfilterCriteria;
+
 		private int _concurrentFilterCount;
 
 		private ITableOfContents _tableOfContents;
@@ -493,17 +496,17 @@
 							.OrderBy(x => x.DisplayName)
 							.ToArray();
 
-						this.CustomAnalyzerCommands.Clear();
+							this.CustomAnalyzerCommands.Clear();
 
-						foreach (IRecordAnalyzer analyzer in analyzers)
-						{
-							var menuItem = new MenuItemViewModel(
-								analyzer.Key,
-								analyzer.DisplayName,
-								this.CustomAnalyzerCommand);
+							foreach (IRecordAnalyzer analyzer in analyzers)
+							{
+								var menuItem = new MenuItemViewModel(
+									analyzer.Key,
+									analyzer.DisplayName,
+									this.CustomAnalyzerCommand);
 
-							this.CustomAnalyzerCommands.Add(menuItem);
-						}
+								this.CustomAnalyzerCommands.Add(menuItem);
+							}
 
 						this.IsFilterToolboxEnabled = true;
 
@@ -878,6 +881,8 @@
 		public void ClearBeforeSelectedRecord()
 		{
 			_engine.Clear(ClearRecordsOperation.BeforeSelected);
+			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
+
 			RefreshFilterResults();
 			RaiseResultsChanged();
 
@@ -1130,6 +1135,9 @@
 					// ... if not, then display the original 
 					if (wasFilterApplied)
 					{
+						_currentfilterType = filterType;
+						_currentfilterCriteria = filterCriteria;
+
 						Log.Default.Write(
 							LogSeverityType.Information,
 							$"Filter operation is displaying the filter results.");
