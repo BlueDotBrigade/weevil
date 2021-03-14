@@ -107,10 +107,9 @@
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
-			this.AreDetailsVisible = false;
+			this.AreFilterOptionsVisible = false;
 
-			this.InclusiveFilterEnabled = false;
-			this.ExclusiveFilterEnabled = false;
+			this.IsFilterToolboxEnabled = false;
 
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
@@ -126,8 +125,6 @@
 			_dragAndDrop.DroppedFile += OnFileDropped;
 
 			_tableOfContents = new TableOfContents();
-
-			this.IsIndeterminate = true;
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
 		}
@@ -228,10 +225,9 @@
 
 		public bool IsFilterInProgress => _concurrentFilterCount >= 1;
 
-		public bool AreDetailsVisible { get; set; }
+		public bool AreFilterOptionsVisible { get; set; }
 
-		public bool InclusiveFilterEnabled { get; private set; }
-		public bool ExclusiveFilterEnabled { get; private set; }
+		public bool IsFilterToolboxEnabled { get; private set; }
 
 		public string InclusiveFilter
 		{
@@ -293,9 +289,6 @@
 		public bool AlwaysHideTraceRecords { get; set; }
 
 		public bool IsProcessingLongOperation { get; private set; }
-		public int MaxProgress { get; private set; }
-		public int LongOperationProgress { get; private set; }
-		public bool IsIndeterminate { get; private set; }
 
 		public bool CanChangeFilter => true;
 
@@ -310,7 +303,8 @@
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
-		public Action<object, EventArgs> ResultsChanged { get; internal set; }
+		public event EventHandler ResultsChanged;
+
 		#endregion
 
 		#region Event Handlers
@@ -428,6 +422,7 @@
 		public async Task OpenAsync(string sourceFilePath)
 		{
 			this.IsProcessingLongOperation = true;
+			this.IsFilterToolboxEnabled = false;
 
 			var openAsResult = new OpenAsResult();
 			var wasFileOpened = false;
@@ -491,8 +486,6 @@
 
 						RefreshFilterResults();
 
-						this.InclusiveFilterEnabled = true;
-						this.ExclusiveFilterEnabled = true;
 
 						var analyzers = _engine
 							.Analyzer
@@ -511,6 +504,8 @@
 
 							this.CustomAnalyzerCommands.Add(menuItem);
 						}
+
+						this.IsFilterToolboxEnabled = true;
 
 						Log.Default.Write(
 							LogSeverityType.Information,
@@ -625,27 +620,40 @@
 
 		public void Reload()
 		{
-			try
+			this.IsCommandExecuting = true;
+			this.IsProcessingLongOperation = true;
+			this.IsFilterToolboxEnabled = false;
+
+			// Creating a background thread for processing.
+			// ... Risk: any events raised by the Weevil library will execute on a background thead,
+			// ... and not the UI thread which is required in order update/change the UI.
+			Task.Run(async () =>
 			{
-				this.IsCommandExecuting = true;
+				try
+				{
+					ImmutableArray<IRecord> oldRecordSelection = _engine.Selector.ClearAll();
 
+					_engine.Save();
+					_engine.Reload();
 
-				ImmutableArray<IRecord> oldRecordSelection = _engine.Selector.ClearAll();
+					var newRecordSelection = _engine.Filter.Results
+						.Where(a => oldRecordSelection.Any(b => b.LineNumber == a.LineNumber)).ToList();
+					_engine.Selector.Select(newRecordSelection);
 
-				_engine.Save();
-				_engine.Reload();
+					RefreshFilterResults();
 
-				var newRecordSelection = _engine.Filter.Results.Where(a => oldRecordSelection.Any(b => b.LineNumber == a.LineNumber)).ToList();
-				_engine.Selector.Select(newRecordSelection);
-
-				RefreshFilterResults();
-			}
-			finally
-			{
-				this.IsCommandExecuting = false;
-			}
-
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+					RaiseResultsChanged();
+				}
+				finally
+				{
+					_uiDispatcher.Invoke(() =>
+					{
+						this.IsCommandExecuting = false;
+						this.IsProcessingLongOperation = false;
+						this.IsFilterToolboxEnabled = true;
+					});
+				}
+			});
 		}
 
 		public void ClipboardCopyRaw()
@@ -823,7 +831,7 @@
 			_engine.Clear(ClearRecordsOperation.Selected);
 
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -834,7 +842,7 @@
 			_engine.Clear(ClearRecordsOperation.Unselected);
 
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -844,7 +852,7 @@
 		{
 			_engine.Clear(ClearRecordsOperation.AfterSelected);
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -854,7 +862,7 @@
 		{
 			_engine.Clear(ClearRecordsOperation.BeforeAndAfterSelected);
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -864,7 +872,7 @@
 		{
 			_engine.Clear(ClearRecordsOperation.BeforeSelected);
 			RefreshFilterResults();
-			this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+			RaiseResultsChanged();
 
 			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -1008,6 +1016,26 @@
 
 		#endregion
 
+		protected virtual void RaiseResultsChanged()
+		{
+			EventHandler threadSafeHandler = this.ResultsChanged;
+
+			if (threadSafeHandler != null)
+			{
+				try
+				{
+					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+				}
+				catch (Exception exception)
+				{
+					Log.Default.Write(
+						LogSeverityType.Error,
+						exception,
+						$"An unexpected error occured while raising the {nameof(ResultsChanged)} event.");
+				}
+			}
+		}
+
 		/// <summary>
 		/// Applies the appropriate filter while managing UI updates. 
 		/// </summary>
@@ -1101,7 +1129,7 @@
 						_uiDispatcher.Invoke(() =>
 						{
 							RefreshFilterResults();
-							this.ResultsChanged?.Invoke(this, EventArgs.Empty);
+							RaiseResultsChanged();
 						});
 					}
 					else

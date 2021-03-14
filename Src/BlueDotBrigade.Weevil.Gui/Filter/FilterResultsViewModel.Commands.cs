@@ -119,7 +119,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress);
 
 		[SafeForDependencyAnalysis]
-		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreDetailsVisible = !this.AreDetailsVisible);
+		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreFilterOptionsVisible = !this.AreFilterOptionsVisible, () => this.IsFilterToolboxEnabled);
 		#endregion
 
 		#region Commands: Navigation

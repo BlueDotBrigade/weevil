@@ -11,6 +11,7 @@
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
+            xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
             mc:Ignorable="d"
             d:DesignHeight="200" d:DesignWidth="900">
    <UserControl.Resources>
@@ -94,7 +95,7 @@
          <Button x:Name="OpenButton" Grid.Column="0"
                  Command="{Binding OpenCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
-            Style="{StaticResource  MaterialDesignRaisedButton}"
+                 Style="{StaticResource  MaterialDesignRaisedButton}"
             Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
          </Button>
@@ -104,7 +105,7 @@
                       ItemsSource="{Binding InclusiveFilterHistory}"
                       Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
                       SelectedValue="{Binding InclusiveFilter}" 
-                      IsEnabled="{Binding InclusiveFilterEnabled}"
+                      IsEnabled="{Binding IsFilterToolboxEnabled}" 
                       IsEditable="True"
                       IsTextSearchEnabled="False"
                       StaysOpenOnEdit="False"
@@ -128,7 +129,7 @@
                    ItemsSource="{Binding ExclusiveFilterHistory}"
                    Text="{Binding ExclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
                    SelectedValue="{Binding ExclusiveFilter}" 
-                   IsEnabled="{Binding ExclusiveFilterEnabled}"
+                   IsEnabled="{Binding IsFilterToolboxEnabled}" 
                    IsEditable="True"
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
@@ -147,11 +148,13 @@
             </ComboBox.InputBindings>
          </ComboBox>
          <ToggleButton  Name="FilterOptionsButton" Grid.Column="3" ToolTip="Show filter options... (Ctrl+Shift+O)" 
-                        IsChecked="{Binding AreDetailsVisible, Mode=TwoWay}"/>
+                        IsChecked="{Binding AreFilterOptionsVisible, Mode=TwoWay}"
+                        IsEnabled="{Binding IsFilterToolboxEnabled}" />
          <Button Grid.Column="4"
                  Command="{Binding FilterOrCancelCommand}"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
-                 Margin="{StaticResource ButtonMargin}">
+                 Margin="{StaticResource ButtonMargin}"
+                 IsEnabled="{Binding IsFilterToolboxEnabled}" >
             <StackPanel>
                <Image Height="24">
                   <Image.Style>
@@ -322,7 +325,7 @@
                <GridViewColumn  Width="60" DisplayMemberBinding="{Binding LineNumber, StringFormat='{}{0:###,###,##0}'}">
                   <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
@@ -330,7 +333,7 @@
                <GridViewColumn  Width="55">
                   <GridViewColumnHeader Content="Flagged" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <CheckBox IsChecked="{Binding Path=Metadata.IsFlagged, TargetNullValue=false}" IsEnabled="False" HorizontalAlignment="Center"/>
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
@@ -338,7 +341,7 @@
                <GridViewColumn Width="50">
                   <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <CheckBox IsChecked="{Binding Path=Metadata.IsPinned, TargetNullValue=false, Converter={StaticResource CheckBoxValidationErrorConverter}}"  HorizontalAlignment="Center"/>
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
@@ -346,7 +349,7 @@
                <GridViewColumn  Width="170">
                   <GridViewColumnHeader Content="Comment" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBox 
                                     Text="{Binding Path=Metadata.Comment, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
                                     IsEnabled="True" 
@@ -360,7 +363,7 @@
                <GridViewColumn  Width="55">
                   <GridViewColumnHeader Content="Elapsed" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBlock 
                                     Text="{Binding Metadata.ElapsedTime, Converter={StaticResource TimeSpanConverter}}"
                                     TextAlignment="Right">
@@ -371,7 +374,7 @@
                <GridViewColumn  Width="1100">
                   <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
-                     <DataTemplate>
+                     <DataTemplate DataType="data:IRecord">
                         <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Right"
                                     Text="{Binding Path=Content, Mode=OneWay}">
                         </TextBlock>
@@ -386,14 +389,14 @@
                   VerticalAlignment="Center" HorizontalAlignment="Center" >
          <TextBlock Text="Boring log file for tasty bytes..." />
          <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
-                      Value="{Binding LongOperationProgress, Mode=OneWay}" 
-                      Maximum="{Binding MaxProgress, Mode=OneWay}"
-                      IsIndeterminate="{Binding IsIndeterminate, Mode=OneWay}"  />
+                      Value="0" 
+                      Maximum="100"
+                      IsIndeterminate="True"  />
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
       <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" 
-                  IsEnabled="{Binding AreDetailsVisible}"
-                  Visibility="{Binding AreDetailsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
+                  IsEnabled="{Binding IsFilterToolboxEnabled}"
+                  Visibility="{Binding AreFilterOptionsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
             <CheckBox
                IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records will always be included in filter results.">
                <AccessText Text="Include _Pinned"></AccessText>
@@ -404,12 +407,6 @@
          <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
                <AccessText Text="Is _Case Sensitive"></AccessText>
             </CheckBox>
-         <Button 
-              Content="_Hide"
-              Style="{StaticResource  MaterialDesignRaisedButton}"
-              Margin="{StaticResource ButtonMargin}"
-              Width="{StaticResource ButtonWidth}"
-              Command="{Binding ToggleFilterOptionsVisibilityCommand}"/>
       </StackPanel>
       <StatusBar Grid.Row="4" Height="32"
                  Background="{StaticResource MaterialDesignPaper}" 
