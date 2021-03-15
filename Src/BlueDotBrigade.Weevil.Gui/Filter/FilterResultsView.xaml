@@ -20,6 +20,7 @@
       <converters:SeverityToForegroundConverter x:Key="SeverityForegroundConverter" />
       <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
       <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
+      <converters:ContentConverter x:Key="ContentConverter" />
       <converters:ContextConverter x:Key="ContextConverter" />
       <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
       <Style x:Key="CommandMenuItemStyle"
@@ -376,7 +377,7 @@
                   <GridViewColumn.CellTemplate>
                      <DataTemplate DataType="data:IRecord">
                         <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Right"
-                                    Text="{Binding Path=Content, Mode=OneWay}">
+                                    Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}">
                         </TextBlock>
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
