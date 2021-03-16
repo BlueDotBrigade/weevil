@@ -52,7 +52,7 @@
 			{
 				if (record is IRecord concreteRecord)
 				{
-					if (TryTruncateCallStack(concreteRecord.Content, concreteRecord.Metadata.IsMultiLine, out var smallerCallStack))
+					if (TrySimplifyCallstack(concreteRecord.Content, concreteRecord.Metadata.IsMultiLine, out var smallerCallStack))
 					{
 						// further processing is not required
 						result = smallerCallStack;
@@ -67,7 +67,7 @@
 			return result;
 		}
 
-		internal static bool TryTruncateCallStack(string content, bool isMultiLine, out string newContent)
+		internal static bool TrySimplifyCallstack(string content, bool isMultiLine, out string newContent)
 		{
 			newContent = content;
 

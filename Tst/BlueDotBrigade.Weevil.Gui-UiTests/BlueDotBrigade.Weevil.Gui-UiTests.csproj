@@ -89,6 +89,10 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj">
+      <Project>{B50F9FCD-32DE-4609-B3D2-E0509B483793}</Project>
+      <Name>BlueDotBrigade.Weevil.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj">
       <Project>{47080835-a553-44be-a6fd-13b592c5d048}</Project>
       <Name>BlueDotBrigade.Weevil.Gui</Name>

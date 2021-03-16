@@ -1,6 +1,9 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Converters
 {
+	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
+	using Moq;
 
 	[TestClass]
 	public class ContentConverterTests
@@ -45,6 +48,51 @@
 			Assert.AreEqual(
 				"The quick brown fox jumps over the lazy dog.",
 				result);
+		}
+
+		[TestMethod]
+		public void TrySimplifyCallStack_SimpleCallStack_ReturnsContentWithoutSystemNamespaces()
+		{
+			var record = new Mock<IRecord>();
+			record.Setup(x => x.Content).Returns(InputData.GetAsString());
+
+			var wasSuccessful = ContentConverter.TrySimplifyCallstack(
+				content: record.Object.Content,
+				isMultiLine: true,
+				out var actualResult);
+
+			Assert.AreEqual(
+				"Debug 2021-15-21 12:59:59 AcmeAssembly.dll Something bad happened. System.ObjectDisposedException: Cannot access a disposed object.\r\n" +
+				"   at Company.Product.Component.DataCollector.Fetch()",
+				actualResult);
+		}
+
+		[TestMethod]
+		public void TrySimplifyCallStack_SimpleCallStack_ReturnsTrue()
+		{
+			var record = new Mock<IRecord>();
+			record.Setup(x => x.Content).Returns(InputData.GetAsString());
+
+			var wasContentChanged = ContentConverter.TrySimplifyCallstack(
+				content: record.Object.Content,
+				isMultiLine: true,
+				out var actualResult);
+
+			Assert.IsTrue(wasContentChanged);
+		}
+
+		[TestMethod]
+		public void TrySimplifyCallStack_NoCallStack_ReturnsFalse()
+		{
+			var record = new Mock<IRecord>();
+			record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog.");
+
+			var wasContentChanged = ContentConverter.TrySimplifyCallstack(
+				content: record.Object.Content,
+				isMultiLine: true,
+				out var ignoredOutput);
+
+			Assert.IsFalse(wasContentChanged);
 		}
 	}
 }
