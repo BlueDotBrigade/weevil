@@ -8,13 +8,27 @@
     <h1 id="weevil-change-log">Weevil : Change Log</h1>
 <h2 id="releases">Releases</h2>
 <p>The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features &amp; bug fixes.</p>
+<h3 id="version-2.6.0">Version 2.6.0</h3>
+<p>Released on March XX, 2021</p>
+<h4 id="whats-new">What's New?</h4>
+<ul>
+<li>&quot;Filtered&quot; results are now visible after a <code>Clear()</code> operation (#78)</li>
+<li>Can now see the progress bar during <code>Reload()</code>, so that I know the application is responding to my request. (#77)</li>
+<li>Simplified Weevil's context menu. (#91)</li>
+</ul>
+<h4 id="bug-fixes">Bug Fixes</h4>
+<ul>
+<li>Filter history stopped working after log file <code>Reload()</code>. (#76)</li>
+<li>Exceptionally long content (e.g. a base64 encoded image) is now automatically truncated and a midline eclipse will be added to the end of the line. (#87)</li>
+<li>Previously an exception thrown when switching between different types of log files. (#85)</li>
+</ul>
 <h3 id="version-2.5.2">Version 2.5.2</h3>
 <p>Released on March 7th, 2021</p>
-<h4 id="whats-new">What's New?</h4>
+<h4 id="whats-new-1">What's New?</h4>
 <ul>
 <li>No changes.</li>
 </ul>
-<h4 id="bug-fixes">Bug Fixes</h4>
+<h4 id="bug-fixes-1">Bug Fixes</h4>
 <ul>
 <li>Fixed a record selection bug that resulted in unexpected results during <code>Clear Before &amp; After</code> operation. (#66)</li>
 <li>The <code>TotalRecordCount</code> in the status bar now shows the correct value. (#62)</li>
@@ -22,11 +36,11 @@
 </ul>
 <h3 id="version-2.5.1">Version 2.5.1</h3>
 <p>Released on March 4th, 2021</p>
-<h4 id="whats-new-1">What's New?</h4>
+<h4 id="whats-new-2">What's New?</h4>
 <ul>
 <li>No new features.</li>
 </ul>
-<h4 id="bug-fixes-1">Bug Fixes</h4>
+<h4 id="bug-fixes-2">Bug Fixes</h4>
 <ul>
 <li>Fixed an unexpected validation error that prevented a record from being unpinned. (#58)
 <ul>
@@ -40,21 +54,21 @@
 </ul>
 <h3 id="version-2.5.0">Version 2.5.0</h3>
 <p>Released on March 4th, 2021</p>
-<h4 id="whats-new-2">What's New?</h4>
+<h4 id="whats-new-3">What's New?</h4>
 <ul>
 <li>Weevil now has a &quot;Dark Theme&quot;. (#11)</li>
 <li>The <code>Content</code> column now automatically wraps to fit within the window.</li>
 <li>Added an <code>About</code> dialog box (#6)</li>
 <li><code>Alt+I</code> and <code>Alt+E</code> keyboard shortcuts will move cursor to the inclusive/exclusive filter <code>ComboBoxes</code>. (#36)</li>
 </ul>
-<h4 id="bug-fixes-2">Bug Fixes</h4>
+<h4 id="bug-fixes-3">Bug Fixes</h4>
 <ul>
 <li>Icon in the status bar reminds the user when a <code>Clear</code> operation has been performed (#29)</li>
 <li>The &quot;new release available&quot; notification works again.</li>
 </ul>
 <h3 id="version-2.4.0">Version 2.4.0</h3>
 <p>This version was not officially released.</p>
-<h4 id="whats-new-3">What's New?</h4>
+<h4 id="whats-new-4">What's New?</h4>
 <ul>
 <li><code>Open As</code> dialog box can be used to load only a portion of a log file.
 <ul>
@@ -64,7 +78,7 @@
 <li>Weevil can now open any plain text file.</li>
 <li>Resource usage report now includes a <code>WorkingSet64</code> column.</li>
 </ul>
-<h4 id="bug-fixes-3">Bug Fixes</h4>
+<h4 id="bug-fixes-4">Bug Fixes</h4>
 <ul>
 <li>Weevil would crash when using &quot;Detect Data&quot; and the same key/value pair was detected more than once.</li>
 <li>Files locked by another process can now be opened.</li>
