@@ -9,10 +9,12 @@ The following summarizes the changes that have been made to Weevil's core engine
 Released on March XX, 2021
 
 #### What's New?
+
 - "Filtered" results are now visible after a `Clear()` operation (#78)
 - Can now see the progress bar during `Reload()`, so that I know the application is responding to my request. (#77)
 - Simplified Weevil's context menu. (#91)
 - A .NET callstack within a `IRecord` will be simplified to a more human readable form. (#88)
+- Case-insensitive filtering is now supported. (#57)
 
 #### Bug Fixes
 
