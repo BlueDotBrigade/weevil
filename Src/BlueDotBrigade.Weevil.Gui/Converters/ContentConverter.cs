@@ -1,8 +1,11 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Converters
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Text;
+	using System.Text.RegularExpressions;
 	using System.Windows;
 	using System.Windows.Data;
 	using BlueDotBrigade.Weevil.Data;
@@ -15,9 +18,24 @@
 
 		internal static readonly string EndOfLine = "\u22EF";
 
+		private static readonly Regex[] CallStackPatterns;
+
 		static ContentConverter()
 		{
 			Debug.Assert(MaximumLength > TrimmedLength);
+
+			var options = RegexOptions.Compiled | RegexOptions.Multiline;
+
+			// Note: The "end of line assertion" ($) in .NET does not consume the carriage return & line feed (\r\n).
+			// https://stackoverflow.com/a/8618642/949681
+			var patterns = new List<Regex>()
+			{
+				new Regex(@"^\s+at System\..*\r?\n?", options),
+				new Regex(@"^\s+at Microsoft\..*\r?\n?", options),
+				new Regex(@"^.*--- End of inner exception stack trace ---.*\r?\n?", options),
+				new Regex(@"^.*--- End of stack trace from previous location where exception was thrown ---.*\r?\n?", options),
+			};
+			CallStackPatterns = patterns.ToArray();
 		}
 
 		/// <summary>
@@ -34,11 +52,34 @@
 			{
 				if (record is IRecord concreteRecord)
 				{
-					result = TruncateIf(concreteRecord.Content, !concreteRecord.Metadata.IsMultiLine, MaximumLength, TrimmedLength);
+					if (TryTruncateCallStack(concreteRecord.Content, concreteRecord.Metadata.IsMultiLine, out var smallerCallStack))
+					{
+						// further processing is not required
+						result = smallerCallStack;
+					}
+					else
+					{
+						result = TruncateIf(concreteRecord.Content, !concreteRecord.Metadata.IsMultiLine, MaximumLength, TrimmedLength);
+					}
 				}
 			}
 
 			return result;
+		}
+
+		internal static bool TryTruncateCallStack(string content, bool isMultiLine, out string newContent)
+		{
+			newContent = content;
+
+			if (isMultiLine)
+			{
+				foreach (var pattern in CallStackPatterns)
+				{
+					newContent = pattern.Replace(newContent, string.Empty);
+				}
+			}
+
+			return newContent.Length < content.Length;
 		}
 
 		internal static object TruncateIf(string content, bool isSingleLine, int maximumLength, int truncatedLength)
