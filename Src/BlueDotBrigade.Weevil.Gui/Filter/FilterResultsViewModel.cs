@@ -9,6 +9,7 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using System.Net;
 	using System.Reflection;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -1171,10 +1172,7 @@
 				configuration.Add("IncludePinned", this.IncludePinned);
 			}
 
-			if (this.IsFilterCaseSensitive)
-			{
-				configuration.Add("IsCaseSensitive", this.IncludePinned);
-			}
+			configuration.Add("IsCaseSensitive", this.IsFilterCaseSensitive);
 
 			if (this.AlwaysHideDebugRecords)
 			{
