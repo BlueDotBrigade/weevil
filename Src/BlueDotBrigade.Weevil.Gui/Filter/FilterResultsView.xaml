@@ -206,7 +206,7 @@
             </Style>
          </ListView.Style>
          <ListView.ContextMenu>
-            <ContextMenu>
+            <ContextMenu  FontSize="{StaticResource TextFontSize}">
                <MenuItem Header="Open" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
                <MenuItem Header="Save State" Command="{Binding SaveStateCommand}" InputGestureText="Ctrl+S"/>
                <MenuItem Header="Save Records...">
