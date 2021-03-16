@@ -12,6 +12,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using Microsoft.Practices.Prism.Commands;
 	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
 
@@ -43,7 +44,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand ShowAboutCommand => new UiBoundCommand(ShowAbout);
 		[SafeForDependencyAnalysis]
-		public ICommand ShowSourceFileCommand => new UiBoundCommand(ShowSourceFile, () => this.IsMenuEnabled);
+		public ICommand ShowFileExplorerCommand => new UiBoundCommand(ShowFileExplorer, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ShowApplicationLogFileCommand => new UiBoundCommand(ShowApplicationLogFile);
 		[SafeForDependencyAnalysis]
@@ -56,15 +57,25 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		#region Commands: Filtering
 		[SafeForDependencyAnalysis]
-		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(ClearBeforeSelectedRecord, () => this.IsMenuEnabled);
+		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.BeforeSelected), 
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(ClearAfterSelectedRecord, () => this.IsMenuEnabled);
+		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.AfterSelected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(ClearBeforeAndAfterSelection, () => this.IsMenuEnabled);
+		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(ClearSelectedRecords, () => this.IsMenuEnabled);
+		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.Selected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(ClearUnselectedRecords, () => this.IsMenuEnabled);
+		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.Unselected),
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public DelegateCommand<object[]> FilterOrCancelCommand => new DelegateCommand<object[]>(parameters =>
 		{
@@ -119,7 +130,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress);
 
 		[SafeForDependencyAnalysis]
-		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreDetailsVisible = !this.AreDetailsVisible);
+		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreFilterOptionsVisible = !this.AreFilterOptionsVisible, () => this.IsFilterToolboxEnabled);
 		#endregion
 
 		#region Commands: Navigation

@@ -111,6 +111,7 @@
     <Compile Include="Controls\MdixComboBoxBehavior.cs" />
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\CheckBoxValidationErrorConverter.cs" />
+    <Compile Include="Converters\ContentConverter.cs" />
     <Compile Include="Converters\ContextConverter.cs" />
     <Compile Include="Converters\FilterMultiValueConverter.cs" />
     <Compile Include="Converters\SeverityToBackgroundConverter.cs" />
@@ -134,6 +135,8 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="IO\DialogBoxService.cs" />
     <Compile Include="Resources\NamespaceDoc.cs" />
+    <Compile Include="Threading\IUiDispatcher.cs" />
+    <Compile Include="Threading\UiDispatcher.cs" />
     <Compile Include="UriHelper.cs" />
     <Compile Include="DragAndDropViewModel.cs" />
     <Compile Include="DroppedFileEventArgs.cs" />
@@ -326,6 +329,7 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...

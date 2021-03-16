@@ -4,6 +4,22 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+### Version 2.6.0
+
+Released on March XX, 2021
+
+#### What's New?
+- "Filtered" results are now visible after a `Clear()` operation (#78)
+- Can now see the progress bar during `Reload()`, so that I know the application is responding to my request. (#77)
+- Simplified Weevil's context menu. (#91)
+- A .NET callstack within a `IRecord` will be simplified to a more human readable form. (#88)
+
+#### Bug Fixes
+
+- Filter history stopped working after log file `Reload()`. (#76)
+- Exceptionally long content (e.g. a base64 encoded image) is now automatically truncated and a midline eclipse will be added to the end of the line. (#87)
+- Previously an exception thrown when switching between different types of log files. (#85)
+
 ### Version 2.5.2
 
 Released on March 7th, 2021

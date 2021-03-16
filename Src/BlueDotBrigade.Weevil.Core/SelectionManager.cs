@@ -7,6 +7,7 @@
 	using System.IO;
 	using System.Linq;
 	using Analysis;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using Data;
 	using IO;
 	using Navigation;
@@ -109,14 +110,24 @@
 
 			IRecord firstRecord = Record.Dummy;
 
+			var added = 0;
+			var count = -1;
+
 			lock (_selectedRecordsPadlock)
 			{
 				if (!_selectedRecords.ContainsKey(record.LineNumber))
 				{
+					added++;
 					_selectedRecords.Add(record.LineNumber, record);
 					firstRecord = record;
 				}
+
+				count = _selectedRecords.Count;
 			}
+
+			Log.Default.Write(
+				LogSeverityType.Trace,
+				$"The number of selected records has changed. Added={added}, Current={count}");
 
 			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
 
@@ -136,6 +147,8 @@
 			}
 
 			IRecord firstRecord = Record.Dummy;
+			var added = 0;
+			var count = -1;
 
 			lock (_selectedRecordsPadlock)
 			{
@@ -143,6 +156,7 @@
 				{
 					if (!_selectedRecords.ContainsKey(record.LineNumber))
 					{
+						added++;
 						_selectedRecords.Add(record.LineNumber, record);
 
 						if (Record.IsDummyOrNull(firstRecord))
@@ -151,7 +165,13 @@
 						}
 					}
 				}
+
+				count = _selectedRecords.Count;
 			}
+
+			Log.Default.Write(
+				LogSeverityType.Trace,
+				$"The number of selected records has changed. Added={added}, Current={count}");
 
 			if (!Record.IsDummyOrNull(firstRecord))
 			{
@@ -182,13 +202,23 @@
 				throw new ArgumentNullException(nameof(record));
 			}
 
+			var removed = 0;
+			var count = -1;
+
 			lock (_selectedRecordsPadlock)
 			{
 				if (_selectedRecords.ContainsKey(record.LineNumber))
 				{
+					removed++;
 					_selectedRecords.Remove(record.LineNumber);
 				}
+
+				count = _selectedRecords.Count;
 			}
+
+			Log.Default.Write(
+				LogSeverityType.Trace,
+				$"The number of selected records has changed. Removed={removed}, Current={count}");
 
 			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
 
@@ -202,16 +232,26 @@
 				throw new ArgumentNullException(nameof(records));
 			}
 
+			var removed = 0;
+			var count = -1;
+
 			lock (_selectedRecordsPadlock)
 			{
 				foreach (IRecord record in records)
 				{
 					if (_selectedRecords.ContainsKey(record.LineNumber))
 					{
+						removed++;
 						_selectedRecords.Remove(record.LineNumber);
 					}
 				}
+
+				count = _selectedRecords.Count;
 			}
+
+			Log.Default.Write(
+				LogSeverityType.Trace,
+				$"The number of selected records has changed. Removed={removed}, Current={count}");
 
 			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
 
@@ -235,9 +275,17 @@
 				sortedRecords = ImmutableArray.Create(sortedSelection);
 			}
 
+			Log.Default.Write(
+				LogSeverityType.Debug,
+				$"Selected records are being saved to disk...");
+
 			if (sortedRecords != null)
 			{
 				new DiskWriter(destinationFilePath, fileFormatType).Write(sortedRecords);
+
+				Log.Default.Write(
+					LogSeverityType.Trace,
+					$"Selected records have been saved to disk. Count={sortedRecords.Length}");
 			}
 
 			return this;
@@ -254,6 +302,10 @@
 				_selectedRecords.Clear();
 			}
 
+			Log.Default.Write(
+				LogSeverityType.Information,
+				$"The number of selected records has changed. Previous={clearedRecords.Length}, Current=0");
+
 			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
 
 			return ImmutableArray.Create(clearedRecords);
@@ -267,6 +319,10 @@
 			{
 				selectedRecords = _selectedRecords.Values.ToArray();
 			}
+
+			Log.Default.Write(
+				LogSeverityType.Debug,
+				$"The selected records have been requsted. Selected={selectedRecords.Length}");
 
 			return ImmutableArray.Create(selectedRecords);
 		}
@@ -282,6 +338,10 @@
 				{
 					record.Metadata.IsPinned = isPinned;
 				}
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"Changing record state. IsPinned={isPinned}, RecordsAffected={selectedRecords.Length}");
 			}
 		}
 	}
