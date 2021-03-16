@@ -778,7 +778,7 @@
 		}
 
 
-		public void ShowSourceFile()
+		public void ShowFileExplorer()
 		{
 			WindowsProcess.Start(WindowsProcessType.FileExplorer, Path.GetDirectoryName(_engine.SourceFilePath));
 		}

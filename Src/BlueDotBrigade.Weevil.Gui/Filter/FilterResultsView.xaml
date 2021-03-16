@@ -9,7 +9,6 @@
             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
             xmlns:system="clr-namespace:System;assembly=mscorlib"
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-            xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
             xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
             mc:Ignorable="d"
@@ -48,7 +47,7 @@
       <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
       <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
-      <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowSourceFileCommand}" />
+      <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
       <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
       <!--<KeyBinding Key="Delete" Command="{Binding ClearSelectedRecordsCommand}" />-->
@@ -207,20 +206,37 @@
             </Style>
          </ListView.Style>
          <ListView.ContextMenu>
-            <ContextMenu>
+            <ContextMenu  FontSize="{StaticResource TextFontSize}">
                <MenuItem Header="Open" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
-               <MenuItem Header="Save Selected Records...">
+               <MenuItem Header="Save State" Command="{Binding SaveStateCommand}" InputGestureText="Ctrl+S"/>
+               <MenuItem Header="Save Records...">
                   <MenuItem Header="Raw Data" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
                   <MenuItem Header="With Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
                   <Separator/>
                   <MenuItem Header="Comment Summary" Command="{Binding SaveCommentSummaryCommand}" />
                </MenuItem>
-               <MenuItem Header="Save State" Command="{Binding SaveStateCommand}" InputGestureText="Ctrl+S"/>
+               <Separator/>
+               <MenuItem Header="Show...">
+                  <MenuItem Header="File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
+               </MenuItem>
+               <Separator/>
+               <MenuItem Header="Copy &amp; Paste...">
+                  <MenuItem Header="Copy Record" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C" />
+                  <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
+                  <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
+                  <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
+               </MenuItem>
+               <Separator/>
+               <MenuItem Header="Filtering...">
+                  <MenuItem Header="Toggle Filters On/Off" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+T" />
+                  <Separator/>
+                  <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
+                  <Separator/>
+                  <MenuItem Header="Always Hide: Debug Records" IsCheckable="True" IsChecked="{Binding AlwaysHideDebugRecords}"/>
+                  <MenuItem Header ="Always Hide: Trace Records" IsCheckable="True" IsChecked="{Binding AlwaysHideTraceRecords}"/>
+               </MenuItem>
                <Separator/>
                <MenuItem Header="Clear...">
-                  <!--<MenuItem Header="Selected Records" Command="{Binding ClearSelectedRecordsCommand}" InputGestureText="Delete" />
-                       <MenuItem Header="Unselected Records" Command="{Binding ClearUnselectedRecordsCommand}" />
-                       <Separator/>-->
                   <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
                   <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
                   <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
@@ -229,10 +245,14 @@
                   <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>
                </MenuItem>
                <Separator/>
-               <MenuItem Header="Toggle Filters On/Off" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+T" />
-               <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
+               <MenuItem Header="Reload " Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
                <Separator/>
-               <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
+               <MenuItem Header="Navigation...">
+                  <MenuItem Header="Previous Pinned Item" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
+                  <MenuItem Header="Next Pinned Item" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
+                  <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
+                  <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
+               </MenuItem>
                <Separator/>
                <MenuItem Header="Analyzers...">
                   <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
@@ -258,23 +278,6 @@
                   </MenuItem.Style>
                </MenuItem>
                <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
-               <Separator/>
-               <MenuItem Header="Navigation...">
-                  <MenuItem Header="Previous Pinned Item" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
-                  <MenuItem Header="Next Pinned Item" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
-                  <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
-                  <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
-               </MenuItem>
-               <Separator/>
-               <MenuItem Header="Show In Explorer" Command="{Binding ShowSourceFileCommand}" InputGestureText="Ctrl+E" />
-               <Separator/>
-               <MenuItem Header="Always Hide: Debug Records" IsCheckable="True" IsChecked="{Binding AlwaysHideDebugRecords}"/>
-               <MenuItem Header ="Always Hide: Trace Records" IsCheckable="True" IsChecked="{Binding AlwaysHideTraceRecords}"/>
-               <Separator/>
-               <MenuItem Header="Copy Record" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C" />
-               <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
-               <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
-               <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
                <Separator/>
                <MenuItem Header="Help" Command="{Binding ShowHelpCommand}" InputGestureText="F1" />
                <MenuItem Header="About" Command="{Binding ShowAboutCommand}" InputGestureText="Ctrl+F1" />
