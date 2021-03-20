@@ -56,7 +56,6 @@
 			return result;
 		}
 
-
 		private string ExpandExpression(string expression)
 		{
 			var expandedFilter = expression;
@@ -65,17 +64,9 @@
 			{
 				foreach (KeyValuePair<string, string> alias in _staticAliases)
 				{
-					// Is this expression an known alias?
-					if (expression.IndexOf(alias.Key, StringComparison.InvariantCultureIgnoreCase) >= 0)
+					if (string.Equals(expression.Trim(), alias.Key.Trim(), StringComparison.InvariantCultureIgnoreCase))
 					{
-						// Case insensitive find & replace
-						// https://stackoverflow.com/a/24580455/949681
-						expandedFilter = Regex.Replace(expression,
-							Regex.Escape(alias.Key),
-							Regex.Replace(alias.Value, "\\$[0-9]+", @"$$$0"),
-							RegexOptions.IgnoreCase);
-
-						break; // alias found, exit!
+						expandedFilter = alias.Value;
 					}
 				}
 			}
