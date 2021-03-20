@@ -23,7 +23,7 @@
 		IList<IRecordAnalyzer> GetAnalyzers();
 		IList<IRecordCounter> GetRecordCounters(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
-		IStaticAliasExpander GetStaticAliasExpander(ContextDictionary context);
+		IDictionary<string, string> GetStaticAliases(ContextDictionary context);
 		TableOfContents BuildTableOfContents(StreamReader logFileReader);
 	}
 }

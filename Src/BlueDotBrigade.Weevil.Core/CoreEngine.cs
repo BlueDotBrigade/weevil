@@ -122,7 +122,8 @@
 
 			_analysisManager = new AnalysisManager(this, _coreExtension);
 
-			IStaticAliasExpander staticAliasExpander = _coreExtension.GetStaticAliasExpander(_context);
+			var staticAliases = _coreExtension.GetStaticAliases(_context);
+			var staticAliasExpander = new StaticAliasExpander(staticAliases);
 
 			_filterManager = new FilterManager(
 				_coreExtension,
