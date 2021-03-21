@@ -597,7 +597,7 @@
                      </Grid.RowDefinitions>
                      <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300" FontSize="14">
                         <Hyperlink 
-                           NavigateUri="{Binding NewReleaseDetails.InstallerUrl}" 
+                           NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}" 
                            documents:HyperlinkBehavior.OpenInBrowser="True"
                            Foreground="{StaticResource MaterialDesignDarkForeground}">
                            <TextBlock Text="{Binding NewReleaseDetails.LatestReleaseVersion}"/>
@@ -615,13 +615,13 @@
                      </TextBlock>
                      <Separator Grid.Column="0" Grid.Row="2"/>
                      <TextBlock Grid.Column="0" Grid.Row="3" TextWrapping="Wrap" MaxWidth="300">
-                        For more information please see: 
                         <Hyperlink 
-                           NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}"
+                           NavigateUri="{Binding NewReleaseDetails.InstallerUrl}"
                            documents:HyperlinkBehavior.OpenInBrowser="True"
                            Foreground="{StaticResource MaterialDesignDarkForeground}">
-                           <TextBlock Text="Change Log"/>
+                           <TextBlock Text="Download"/>
                         </Hyperlink>
+                         the latest version now!
                      </TextBlock>
                      <Button Grid.Row="5"
                         Command="{x:Static materialDesign:PopupBox.ClosePopupCommand}"
