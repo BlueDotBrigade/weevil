@@ -17,6 +17,8 @@
 	[DebuggerDisplay("Version={" + nameof(LatestReleaseVersion) + ("}, CodeName={" + nameof(CodeName) + "}"))]
 	public class ApplicationInfo
 	{
+		private static readonly string InstallerUrlOverride = string.Empty;
+
 		public static readonly ApplicationInfo NotSpecified = new ApplicationInfo
 		{
 			ChangeLogUrl = string.Empty,
@@ -25,6 +27,8 @@
 			InstallerUrl = string.Empty,
 			LatestRelease = "0.0.0.0",
 		};
+
+		private string _installerUrl;
 
 		[DataMember]
 		public string ChangeLogUrl { get; set; }
@@ -36,7 +40,11 @@
 		public string Description { get; set; }
 
 		[DataMember]
-		public string InstallerUrl { get; set; }
+		public string InstallerUrl
+		{
+			get => string.IsNullOrWhiteSpace(InstallerUrlOverride) ? _installerUrl : InstallerUrlOverride;
+			set => _installerUrl = value;
+		}
 
 		[DataMember]
 		public string LatestRelease { get; set; }
