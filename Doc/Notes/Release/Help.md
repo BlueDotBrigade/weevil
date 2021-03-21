@@ -2,14 +2,15 @@
 
 - [Introduction](#introduction)
 - [Examples](#examples)
-	- [Sample Input](#sample-input)
-	- [Sample Expressions](#sample-expressions)
+  - [Sample Input](#sample-input)
+  - [Sample Expressions](#sample-expressions)
 - [Data Analysis](#data-analysis)
-	- [Identifying Transitions](#identifying-transitions)
+  - [Detecting When Data Changes](#detecting-when-data-changes)
+  - [Detecting an Unresponsive UI](#detecting-an-unresponsive-ui)
 - [Appendices](#appendices)
-	- [Appendix A: Additional Reading](#appendix-a-additional-reading)
-	- [Appendix E: Excel](#appendix-e-excel)
-	- [Appendix P: Performance Tips](#appendix-p-performance-tips)
+  - [Appendix A: Additional Reading](#appendix-a-additional-reading)
+  - [Appendix E: Excel](#appendix-e-excel)
+  - [Appendix P: Performance Tips](#appendix-p-performance-tips)
 
 ---
 
@@ -65,7 +66,7 @@ Assume a log file contained the following:
 
 ## Data Analysis
 
-### Identifying Transitions
+### Detecting When Data Changes
 
 To identify records where a value has changed over time:
 
@@ -74,6 +75,23 @@ To identify records where a value has changed over time:
 2. Use Weevil's `Detect Data Transitions` option.
 
 Result: Weevil will chronologically flag records where the `Value` changes.
+
+### Detecting an Unresponsive UI
+
+This analyzer is useful for applications that:
+- perform a lot of logging from the UI thread, and
+- do not explicitly measure UI responsiveness.
+
+Begin by:
+
+1. Selecting the records you wish to analyze.
+   - Alternatively, select a single record and Weevil will assume that all records that satisfy the current filter criteria should be analyzed.
+2. Analyzers => Detect Unresponsive UI
+3. Enter the threshold that will determine whe the UI is considered unresponsive.
+   - For reference, you would use the following thresholds if an application closely monitored it's UI responsiveness:
+     - ~250ms for simple operations (e.g. button clicks)
+     - ~500ms for "easy" tasks
+   - Given the indirect nature of this analysis, a threshold of 1s (1000ms) is recommended.
 
 ---
 

@@ -6,14 +6,24 @@ The following summarizes the changes that have been made to Weevil's core engine
 
 ### Version 2.6.0
 
-Released on March XX, 2021
+Released on March XXth, 2021
+
+#### What's New?
+
+#### Bug Fixes
+
+- Static aliases do not resolve properly when multiple aliases start with the same text. (#98)
+
+### Version 2.6.0
+
+Released on March 15th, 2021
 
 #### What's New?
 
 - "Filtered" results are now visible after a `Clear()` operation (#78)
 - Can now see the progress bar during `Reload()`, so that I know the application is responding to my request. (#77)
-- Simplified Weevil's context menu. (#91)
-- A .NET callstack within a `IRecord` will be simplified to a more human readable form. (#88)
+- Simplified Weevil's context menu. (#89)
+- If Record content includes a .NET callstack, the callstack will be automatically simplified to a more readable form. (#88)
 - Case-insensitive filtering is now supported. (#57)
 
 #### Bug Fixes
