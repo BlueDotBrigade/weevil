@@ -1,6 +1,6 @@
 <!-- Reminder: don't forget to escape characters like ampersand .-->
 <ApplicationInfo>
-	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/blob/main/Doc/Notes/Release/ChangeLog.md</ChangeLogUrl>
+	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
 	<CodeName>The Weeknd</CodeName>
 	<Description>Fixed a record selection bug that resulted in unexpected results during `Clear Before and After` operation.</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
