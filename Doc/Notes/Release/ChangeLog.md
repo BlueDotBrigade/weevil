@@ -4,11 +4,13 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
-### Version 2.6.0
+### Version 2.6.1
 
 Released on March XXth, 2021
 
 #### What's New?
+
+- The "New Release" notification now includes a "Download" hyperlink.
 
 #### Bug Fixes
 
