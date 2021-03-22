@@ -414,7 +414,7 @@
                <AccessText Text="_Manual Filtering"></AccessText>
             </CheckBox>
          <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
-               <AccessText Text="Is _Case Sensitive"></AccessText>
+               <AccessText Text="_Case Sensitive Filtering"></AccessText>
             </CheckBox>
       </StackPanel>
       <StatusBar Grid.Row="4" Height="32"
