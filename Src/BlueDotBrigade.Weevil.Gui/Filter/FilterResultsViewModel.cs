@@ -9,7 +9,6 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
-	using System.Net;
 	using System.Reflection;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -112,6 +111,8 @@
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
 			this.AreFilterOptionsVisible = false;
+			this.IncludeDebugRecords = true;
+			this.IncludeTraceRecords = true;
 
 			this.IsFilterToolboxEnabled = false;
 
@@ -288,9 +289,9 @@
 
 		public int ActiveRecordIndex { get; set; }
 
-		public bool AlwaysHideDebugRecords { get; set; }
+		public bool IncludeDebugRecords { get; set; }
 
-		public bool AlwaysHideTraceRecords { get; set; }
+		public bool IncludeTraceRecords { get; set; }
 
 		public bool IsProcessingLongOperation { get; private set; }
 
@@ -1174,14 +1175,14 @@
 
 			configuration.Add("IsCaseSensitive", this.IsFilterCaseSensitive);
 
-			if (this.AlwaysHideDebugRecords)
+			if (!this.IncludeDebugRecords)
 			{
-				configuration.Add("HideDebugRecords", this.AlwaysHideDebugRecords);
+				configuration.Add("HideDebugRecords", true);
 			}
 
-			if (this.AlwaysHideTraceRecords)
+			if (!this.IncludeTraceRecords)
 			{
-				configuration.Add("HideTraceRecords", this.AlwaysHideTraceRecords);
+				configuration.Add("HideTraceRecords", true);
 			}
 
 			return configuration;
