@@ -399,16 +399,16 @@
                   IsEnabled="{Binding IsFilterToolboxEnabled}"
                   Visibility="{Binding AreFilterOptionsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
          <CheckBox
-            IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, `Debug` records will be included in the results if they satisfy the filter criteria.">
-            <AccessText Text="Include _Debug"></AccessText>
+            IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
+            <AccessText Text="Can Include _Debug"></AccessText>
          </CheckBox>
          <CheckBox
-            IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, `Trace` records will be included in the results if they satisfy the filter criteria.">
-            <AccessText Text="Include _Trace"></AccessText>
+            IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
+            <AccessText Text="Can Include _Trace"></AccessText>
          </CheckBox>
          <CheckBox
-               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records will always be included in filter results.">
-               <AccessText Text="Always Include _Pinned"></AccessText>
+               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
+               <AccessText Text="Must Include _Pinned"></AccessText>
             </CheckBox>
             <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
                <AccessText Text="_Manual Filtering"></AccessText>
