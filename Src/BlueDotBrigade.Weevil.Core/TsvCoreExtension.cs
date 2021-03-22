@@ -13,7 +13,7 @@
 	{
 		private readonly ContextDictionary _context;
 		private readonly IRecordParser _recordParser;
-		private readonly IStaticAliasExpander _staticAliasExpander;
+		private readonly IDictionary<string, string> _staticAliases;
 		private readonly List<IRecordCounter> _recordAnalyzers;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
@@ -24,7 +24,7 @@
 
 			_context = context;
 			_recordParser = new TsvRecordParser();
-			_staticAliasExpander = new DefaultAliasExpander();
+			_staticAliases = new Dictionary<string, string>();
 			_recordAnalyzers = new List<IRecordCounter>();
 			_monikerActivators = new List<MonikerActivator>();
 			_tableOfContents = new TableOfContents();
@@ -57,9 +57,9 @@
 			return _monikerActivators;
 		}
 
-		public IStaticAliasExpander GetStaticAliasExpander(ContextDictionary context)
+		public IDictionary<string, string> GetStaticAliases(ContextDictionary context)
 		{
-			return _staticAliasExpander;
+			return _staticAliases;
 		}
 
 		public TableOfContents BuildTableOfContents(StreamReader logFileReader)

@@ -231,9 +231,6 @@
                   <MenuItem Header="Toggle Filters On/Off" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+T" />
                   <Separator/>
                   <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
-                  <Separator/>
-                  <MenuItem Header="Always Hide: Debug Records" IsCheckable="True" IsChecked="{Binding AlwaysHideDebugRecords}"/>
-                  <MenuItem Header ="Always Hide: Trace Records" IsCheckable="True" IsChecked="{Binding AlwaysHideTraceRecords}"/>
                </MenuItem>
                <Separator/>
                <MenuItem Header="Clear...">
@@ -401,15 +398,23 @@
       <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" 
                   IsEnabled="{Binding IsFilterToolboxEnabled}"
                   Visibility="{Binding AreFilterOptionsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
-            <CheckBox
-               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records will always be included in filter results.">
-               <AccessText Text="Include _Pinned"></AccessText>
+         <CheckBox
+            IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
+            <AccessText Text="Can Include _Debug"></AccessText>
+         </CheckBox>
+         <CheckBox
+            IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
+            <AccessText Text="Can Include _Trace"></AccessText>
+         </CheckBox>
+         <CheckBox
+               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
+               <AccessText Text="Must Include _Pinned"></AccessText>
             </CheckBox>
             <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
                <AccessText Text="_Manual Filtering"></AccessText>
             </CheckBox>
          <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
-               <AccessText Text="Is _Case Sensitive"></AccessText>
+               <AccessText Text="_Case Sensitive Filtering"></AccessText>
             </CheckBox>
       </StackPanel>
       <StatusBar Grid.Row="4" Height="32"
@@ -446,8 +451,20 @@
          </StatusBar.ItemsPanel>
          <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/Resources/Icons/Document-24.png" ToolTip="Current Document"/>
-               <TextBox Text="{Binding SourceFilePath, Mode=OneWay}" Style="{StaticResource StatusBarTextBox}"/>
+               <Image Source="/Resources/Icons/Document-24.png" ToolTip="Path of the open document."/>
+               <TextBox>
+                  <TextBox.Style>
+                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
+                        <Setter Property="Text" Value="{Binding SourceFilePath, Mode=OneWay}" />
+                        <Setter Property="ToolTip" Value="Path of the open document."/>
+                        <Style.Triggers>
+                           <DataTrigger Binding="{Binding SourceFilePath, Mode=OneWay}" Value="">
+                              <Setter Property="Text" Value="To begin, please open (Ctrl+O) a document."/>
+                           </DataTrigger>
+                        </Style.Triggers>
+                     </Style>
+                  </TextBox.Style>
+               </TextBox>
             </StackPanel>
          </StatusBarItem>
          <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
@@ -597,7 +614,7 @@
                      </Grid.RowDefinitions>
                      <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300" FontSize="14">
                         <Hyperlink 
-                           NavigateUri="{Binding NewReleaseDetails.InstallerUrl}" 
+                           NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}" 
                            documents:HyperlinkBehavior.OpenInBrowser="True"
                            Foreground="{StaticResource MaterialDesignDarkForeground}">
                            <TextBlock Text="{Binding NewReleaseDetails.LatestReleaseVersion}"/>
@@ -615,13 +632,13 @@
                      </TextBlock>
                      <Separator Grid.Column="0" Grid.Row="2"/>
                      <TextBlock Grid.Column="0" Grid.Row="3" TextWrapping="Wrap" MaxWidth="300">
-                        For more information please see: 
                         <Hyperlink 
-                           NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}"
+                           NavigateUri="{Binding NewReleaseDetails.InstallerUrl}"
                            documents:HyperlinkBehavior.OpenInBrowser="True"
                            Foreground="{StaticResource MaterialDesignDarkForeground}">
-                           <TextBlock Text="Change Log"/>
+                           <TextBlock Text="Download"/>
                         </Hyperlink>
+                         the latest version now!
                      </TextBlock>
                      <Button Grid.Row="5"
                         Command="{x:Static materialDesign:PopupBox.ClosePopupCommand}"

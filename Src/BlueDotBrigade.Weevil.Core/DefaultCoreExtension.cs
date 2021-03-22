@@ -5,7 +5,6 @@
 	using System.IO;
 	using Analysis;
 	using Data;
-	using Filter;
 	using Filter.Expressions;
 	using Navigation;
 
@@ -13,7 +12,7 @@
 	{
 		private readonly ContextDictionary _context;
 		private readonly IRecordParser _recordParser;
-		private readonly IStaticAliasExpander _staticAliasExpander;
+		private readonly IDictionary<string, string> _staticAliases;
 		private readonly List<IRecordCounter> _recordCounters;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
@@ -24,7 +23,7 @@
 
 			_context = context;
 			_recordParser = new DefaultRecordParser();
-			_staticAliasExpander = new DefaultAliasExpander();
+			_staticAliases = new Dictionary<string, string>();
 			_recordCounters = new List<IRecordCounter>();
 			_monikerActivators = new List<MonikerActivator>();
 			_tableOfContents = new TableOfContents();
@@ -57,9 +56,9 @@
 			return _monikerActivators;
 		}
 
-		public IStaticAliasExpander GetStaticAliasExpander(ContextDictionary context)
+		public IDictionary<string, string> GetStaticAliases(ContextDictionary context)
 		{
-			return _staticAliasExpander;
+			return _staticAliases;
 		}
 
 		public TableOfContents BuildTableOfContents(StreamReader logFileReader)

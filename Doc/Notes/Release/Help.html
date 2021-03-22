@@ -16,7 +16,8 @@
 </li>
 <li><a href="#data-analysis">Data Analysis</a>
 <ul>
-<li><a href="#identifying-transitions">Identifying Transitions</a></li>
+<li><a href="#detecting-when-data-changes">Detecting When Data Changes</a></li>
+<li><a href="#detecting-an-unresponsive-ui">Detecting an Unresponsive UI</a></li>
 </ul>
 </li>
 <li><a href="#appendices">Appendices</a>
@@ -96,7 +97,7 @@
 </ul>
 <hr />
 <h2 id="data-analysis">Data Analysis</h2>
-<h3 id="identifying-transitions">Identifying Transitions</h3>
+<h3 id="detecting-when-data-changes">Detecting When Data Changes</h3>
 <p>To identify records where a value has changed over time:</p>
 <ol>
 <li>Filter using a regular expression with a named group.
@@ -107,6 +108,32 @@
 <li>Use Weevil's <code>Detect Data Transitions</code> option.</li>
 </ol>
 <p>Result: Weevil will chronologically flag records where the <code>Value</code> changes.</p>
+<h3 id="detecting-an-unresponsive-ui">Detecting an Unresponsive UI</h3>
+<p>This analyzer is useful for applications that:</p>
+<ul>
+<li>perform a lot of logging from the UI thread, and</li>
+<li>do not explicitly measure UI responsiveness.</li>
+</ul>
+<p>Begin by:</p>
+<ol>
+<li>Selecting the records you wish to analyze.
+<ul>
+<li>Alternatively, select a single record and Weevil will assume that all records that satisfy the current filter criteria should be analyzed.</li>
+</ul>
+</li>
+<li>Analyzers =&gt; Detect Unresponsive UI</li>
+<li>Enter the threshold that will determine whe the UI is considered unresponsive.
+<ul>
+<li>For reference, you would use the following thresholds if an application closely monitored it's UI responsiveness:
+<ul>
+<li>~250ms for simple operations (e.g. button clicks)</li>
+<li>~500ms for &quot;easy&quot; tasks</li>
+</ul>
+</li>
+<li>Given the indirect nature of this analysis, a threshold of 1s (1000ms) is recommended.</li>
+</ul>
+</li>
+</ol>
 <hr />
 <h2 id="appendices">Appendices</h2>
 <h3 id="appendix-a-additional-reading">Appendix A: Additional Reading</h3>

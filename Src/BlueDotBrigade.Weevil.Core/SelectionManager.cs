@@ -322,7 +322,7 @@
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
-				$"The selected records have been requsted. Selected={selectedRecords.Length}");
+				$"The selected records have been requested. Selected={selectedRecords.Length}");
 
 			return ImmutableArray.Create(selectedRecords);
 		}
