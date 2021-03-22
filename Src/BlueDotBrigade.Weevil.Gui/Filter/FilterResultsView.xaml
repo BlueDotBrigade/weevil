@@ -231,9 +231,6 @@
                   <MenuItem Header="Toggle Filters On/Off" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+T" />
                   <Separator/>
                   <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
-                  <Separator/>
-                  <MenuItem Header="Always Hide: Debug Records" IsCheckable="True" IsChecked="{Binding AlwaysHideDebugRecords}"/>
-                  <MenuItem Header ="Always Hide: Trace Records" IsCheckable="True" IsChecked="{Binding AlwaysHideTraceRecords}"/>
                </MenuItem>
                <Separator/>
                <MenuItem Header="Clear...">
@@ -401,9 +398,17 @@
       <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" 
                   IsEnabled="{Binding IsFilterToolboxEnabled}"
                   Visibility="{Binding AreFilterOptionsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
-            <CheckBox
+         <CheckBox
+            IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, `Debug` records will be included in the results if they satisfy the filter criteria.">
+            <AccessText Text="Include _Debug"></AccessText>
+         </CheckBox>
+         <CheckBox
+            IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, `Trace` records will be included in the results if they satisfy the filter criteria.">
+            <AccessText Text="Include _Trace"></AccessText>
+         </CheckBox>
+         <CheckBox
                IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records will always be included in filter results.">
-               <AccessText Text="Include _Pinned"></AccessText>
+               <AccessText Text="Always Include _Pinned"></AccessText>
             </CheckBox>
             <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
                <AccessText Text="_Manual Filtering"></AccessText>
