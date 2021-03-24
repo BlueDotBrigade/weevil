@@ -47,6 +47,7 @@
       <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
       <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
+      <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
       <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
       <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
@@ -217,6 +218,7 @@
                </MenuItem>
                <Separator/>
                <MenuItem Header="Show...">
+                  <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
                   <MenuItem Header="File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
                </MenuItem>
                <Separator/>
@@ -417,7 +419,7 @@
                <AccessText Text="_Case Sensitive Filtering"></AccessText>
             </CheckBox>
       </StackPanel>
-      <StatusBar Grid.Row="4" Height="32"
+      <StatusBar Grid.Row="4" Height="40"
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"
@@ -429,6 +431,7 @@
                <Grid>
                   <Grid.ColumnDefinitions>
                      <ColumnDefinition Width="*" />
+                     <ColumnDefinition Width="Auto" />
                      <ColumnDefinition Width="Auto" />
                      <ColumnDefinition Width="Auto" />
                      <ColumnDefinition Width="Auto" />
@@ -588,7 +591,23 @@
                      ToolTip="TOC heading related to selected record."
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="16" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+         <StatusBarItem Grid.Column="16">
+            <Image>
+               <Image.Style>
+                  <Style TargetType="{x:Type Image}">
+                     <Setter Property="Source" Value="/Resources/Icons/Insight-Normal-24.png" />
+                     <Setter Property="ToolTip" Value="Weevil does not have insight at this time."/>
+                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasImportantInsight}" Value="True">
+                           <Setter Property="Source" Value="/Resources/Icons/Insight-Important-24.png"/>
+                           <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight on the current document.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
+                        </DataTrigger>
+                     </Style.Triggers>
+                  </Style>
+               </Image.Style>
+            </Image>
+         </StatusBarItem>
+         <StatusBarItem Grid.Column="17" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
                <ToggleButton Name="NewReleaseButton" ToolTip="New version is available! Click for details." >
                   <ToggleButton.Template>

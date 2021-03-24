@@ -25,6 +25,7 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
+	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Help;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.IO;
@@ -49,6 +50,8 @@
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\ThirdPartyNoticesAndInformation.txt");
 
 		private static readonly string NewReleaseFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
+
+		private static readonly ImmutableArray<IInsight> NoInsight = ImmutableArray.Create(new IInsight[0]);
 
 		#region Fields & Object Lifetime
 
@@ -89,6 +92,8 @@
 
 		private ITableOfContents _tableOfContents;
 
+		private ImmutableArray<IInsight> _insights;
+
 		public FilterResultsViewModel(Window mainWindow, IUiDispatcher uiDispatcher)
 		{
 			_mainWindow = mainWindow;
@@ -120,6 +125,8 @@
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
 
+			this.HasImportantInsight = false;
+
 			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
 			initializationTimer = new DispatcherTimer();
@@ -133,6 +140,8 @@
 			_tableOfContents = new TableOfContents();
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
+
+			_insights = NoInsight;
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -173,6 +182,9 @@
 		public int VisibleRecordCount => this.VisibleItems?.Count ?? 0;
 
 		public int SelectedRecordCount => _engine.Selector.Selected.Count;
+
+		[SafeForDependencyAnalysis]
+		public bool HasImportantInsight { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public bool IsUpdateAvailable
@@ -546,6 +558,12 @@
 
 						_tableOfContents = _engine.Navigator.TableOfContents;
 					}
+				).ContinueWith((x) =>
+					{
+						_insights = _engine.Analyzer.GetInsights();
+
+						this.HasImportantInsight = _insights.Any(i => i.IsAttentionRequired);
+					}
 				);
 			}
 			else
@@ -828,6 +846,11 @@
 		private void SplitCurrentLog()
 		{
 			new LogFileSplitter(_engine.SourceFilePath).Run(_engine.Filter.Results);
+		}
+
+		private void ShowDashboard()
+		{
+			_dialogBox.ShowDashboard(_insights, _engine);
 		}
 
 		private void ForceGarbageCollection()

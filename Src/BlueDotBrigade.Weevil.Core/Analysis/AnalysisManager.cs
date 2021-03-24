@@ -77,6 +77,23 @@
 			return analyzers;
 		}
 
+		public ImmutableArray<IInsight> GetInsights()
+		{
+			var insights = new List<IInsight>();
+
+			insights.AddRange(_coreExtension.GetInsights());
+
+			insights.Add(new CriticalErrorsInsight());
+			insights.Add(new UiResponsivenessInsight());
+
+			foreach (var insight in insights)
+			{
+				insight.Refresh(_coreEngine.Records);
+			}
+
+			return ImmutableArray.Create(insights.ToArray());
+		}
+
 		public void Analyze(AnalysisType analysisType)
 		{
 			var analyzerKey = analysisType.ToString();

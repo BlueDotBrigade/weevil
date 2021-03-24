@@ -3,9 +3,10 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
    <Color x:Key="PrimaryColor">#900A22</Color>
-   <Color x:Key="SecondaryColor">DodgerBlue</Color>
+   <Color x:Key="SecondaryColor">Gray</Color>
+   <Color x:Key="TextColor">WhiteSmoke</Color>
 
-   <SolidColorBrush  x:Key="TextForeground" Color="WhiteSmoke" />
+   <SolidColorBrush  x:Key="TextForeground" Color="{StaticResource TextColor}" />
    <SolidColorBrush  x:Key="TextAccentForeground" Color="DodgerBlue" />
 
    <system:Double x:Key="ButtonWidth">100</system:Double>
