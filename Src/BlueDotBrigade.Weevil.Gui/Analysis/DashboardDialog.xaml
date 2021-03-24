@@ -1,0 +1,47 @@
+﻿<Window x:Class="BlueDotBrigade.Weevil.Gui.Analysis.DashboardDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.Analysis"
+        mc:Ignorable="d"
+        Title="Dashboard" Height="600" Width="800"
+        WindowStartupLocation="CenterOwner"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="11"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+   <Window.Resources>
+      <!--<DataTemplate x:Key="GameBoardView_Item">
+         <Image Source="{Binding Path=ImageUri}" />
+      </DataTemplate>-->
+   </Window.Resources>
+
+   <Grid>
+      <Grid.RowDefinitions>
+         <RowDefinition Height="4*"/>
+         <RowDefinition Height="1*"/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <ItemsControl Grid.Row="0" ItemsSource="{Binding Insights}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+         <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+               <WrapPanel Orientation="Horizontal" Width="768"/>
+            </ItemsPanelTemplate>
+         </ItemsControl.ItemsPanel>
+         <ItemsControl.ItemTemplate>
+            <DataTemplate>
+               <local:InsightControl Value="{Binding}"/>
+            </DataTemplate>
+         </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <StackPanel Grid.Row="1" Grid.Column="0"  Orientation="Horizontal">
+         <Button Content="Refresh" Click="OnRefresh"/>
+      </StackPanel>
+   </Grid>
+</Window>

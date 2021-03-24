@@ -104,6 +104,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Analysis\DashboardDialog.xaml.cs">
+      <DependentUpon>DashboardDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Analysis\InsightControl.xaml.cs">
+      <DependentUpon>InsightControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -193,6 +199,14 @@
     <Resource Include="Resources\Icons\Records-OnDiskChanged.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Analysis\DashboardDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Analysis\InsightControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Filter\FilterResultsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -329,7 +343,18 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Insight-Important-24.png" />
+    <Resource Include="Resources\Icons\Insight-Normal-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Alarms-Inactive-32.png" />
+    <Resource Include="Resources\Icons\CriticalErrors-Inactive-32.png" />
+    <Resource Include="Resources\Icons\UnresponsiveUi-Inactive-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\CriticalErrors-Active-32.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...
