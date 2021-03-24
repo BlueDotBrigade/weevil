@@ -528,22 +528,6 @@
                <TextBox Text="{Binding Metrics[Errors], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Error Messages"
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image>
-                  <Image.Style>
-                     <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-Fatal.png" />
-                        <Setter Property="ToolTip" Value="Fatal Messages"/>
-                        <Style.Triggers>
-                           <DataTrigger Binding="{Binding Metrics[Fatals], FallbackValue=0, Mode=OneWay}" Value="0">
-                              <Setter Property="Source" Value="/Resources/Icons/LogEntry-FatalMissing.png"/>
-                           </DataTrigger>
-                        </Style.Triggers>
-                     </Style>
-                  </Image.Style>
-               </Image>
-               <TextBox Text="{Binding Metrics[Fatals], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                             ToolTip="Fatal Messages"
-                             Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
          <Separator Grid.Column="12" />
