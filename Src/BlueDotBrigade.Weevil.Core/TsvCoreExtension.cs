@@ -47,6 +47,11 @@
 			return new List<IRecordAnalyzer>();
 		}
 
+		public ImmutableArray<IInsight> GetInsights()
+		{
+			throw new System.NotImplementedException();
+		}
+
 		public IList<IRecordCounter> GetRecordCounters(ContextDictionary context)
 		{
 			return _recordAnalyzers;
