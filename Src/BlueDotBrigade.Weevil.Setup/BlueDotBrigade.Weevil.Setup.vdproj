@@ -130,12 +130,6 @@
         "Entry"
         {
         "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
-        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
         "OwnerKey" = "8:_5DCC6258A65E60E9DFACE8BF072E03A0"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -143,6 +137,12 @@
         {
         "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
         "OwnerKey" = "8:_D217956C78A84FD2909941E37147E443"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_34273A94A5737FD8EB658445A5CF27BE"
+        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1078,18 +1078,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_5BDD6E8A1A6B539014B54DB9EB36ADAA"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_DED6A5260468B439CACD6BB8BA283B85"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1877,6 +1865,18 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_DD62BF5CC5BA5CD61C1CEBFC806EC0ED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_5BDD6E8A1A6B539014B54DB9EB36ADAA"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_C87AE6FB58A87262F564718AAFB9F3C9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -3569,7 +3569,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Common, Version=2.10.0.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Common, Version=2.10.2.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_5DCC6258A65E60E9DFACE8BF072E03A0"
@@ -5717,7 +5717,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Core, Version=2.5.0.0, Culture=neutral, processorArchitecture=AMD64"
+            "AssemblyAsmDisplayName" = "8:BlueDotBrigade.Weevil.Core, Version=2.7.0.0, Culture=neutral, processorArchitecture=AMD64"
                 "ScatterAssemblies"
                 {
                     "_C87AE6FB58A87262F564718AAFB9F3C9"
@@ -6788,15 +6788,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Weevil"
-        "ProductCode" = "8:{90426B25-E5DF-4DC8-AC6C-17FC3D269016}"
-        "PackageCode" = "8:{327076DA-609F-49FB-8BC5-77DCCAA1BD2D}"
+        "ProductCode" = "8:{754332DA-F671-4F41-9AB9-98942011B3D2}"
+        "PackageCode" = "8:{DEACD4FC-C158-44B9-ABB1-755794E7C11F}"
         "UpgradeCode" = "8:{41DF7DC3-3176-4A07-81F7-F993241E8CE7}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.2"
+        "ProductVersion" = "8:2.6.1"
         "Manufacturer" = "8:Blue Dot Brigade"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/BlueDotBrigade/weevil"
