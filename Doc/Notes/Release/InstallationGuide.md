@@ -18,6 +18,12 @@
 
 ### Compressed Binary Files
 
-- Decompress the `*.zip` file, and copy the output to the following directory.
-  - `C:\Program Files\BlueDotBrigade\Weevil`
-- Failure to do so may result in errors when trying to open external dependencies (e.g. the `Help` file).
+- Copy the `*.zip` file to the target computer, and decompress the files.
+- The Weevil application assumes the following directory structure at run-time:
+
+```
+C:\Program Files\BlueDotBrigade\Weevil
+   \Bin\WeevilGui.exe
+   \Doc
+   \Licenses
+```
