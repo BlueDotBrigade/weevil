@@ -32,6 +32,8 @@
 			{
 				new Regex(@"^\s+at System\..*\r?\n?", options),
 				new Regex(@"^\s+at Microsoft\..*\r?\n?", options),
+				new Regex(@"^\s+at MS.Win32\..*\r?\n?", options),
+				new Regex(@"^\s+at MS.Internal\..*\r?\n?", options),
 				new Regex(@"^.*--- End of inner exception stack trace ---.*\r?\n?", options),
 				new Regex(@"^.*--- End of stack trace from previous location where exception was thrown ---.*\r?\n?", options),
 			};

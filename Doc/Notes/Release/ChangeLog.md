@@ -6,11 +6,12 @@ The following summarizes the changes that have been made to Weevil's core engine
 
 ### Version 2.6.1
 
-Released on March XXth, 2021
+Released on March 27th, 2021
 
 #### What's New?
 
-- The "New Release" notification now includes a "Download" hyperlink.
+- The "New Release" notification now includes a "Download" hyperlink. (#92)
+- The "Include Debug" & "Include Trace" menu options have been moved to the filter options. (#101, #104)
 
 #### Bug Fixes
 
@@ -22,16 +23,16 @@ Released on March 15th, 2021
 
 #### What's New?
 
-- "Filtered" results are now visible after a `Clear()` operation (#78)
-- Can now see the progress bar during `Reload()`, so that I know the application is responding to my request. (#77)
-- Simplified Weevil's context menu. (#89)
-- If Record content includes a .NET callstack, the callstack will be automatically simplified to a more readable form. (#88)
 - Case-insensitive filtering is now supported. (#57)
+- "Filtered" results are now displayed after a `Clear()` operation (#78)
+- Can now see the progress bar during `Reload()`, so that I know the application is responding to my request. (#77)
+- Simplified Weevil's context menu. (#89, #91)
+- If Record content includes a .NET callstack, the callstack will be automatically simplified to a more readable form. (#88)
+- Exceptionally long content (e.g. a base64 encoded image) is now automatically truncated and a midline eclipse will be added to the end of the line. (#87)
 
 #### Bug Fixes
 
 - Filter history stopped working after log file `Reload()`. (#76)
-- Exceptionally long content (e.g. a base64 encoded image) is now automatically truncated and a midline eclipse will be added to the end of the line. (#87)
 - Previously an exception thrown when switching between different types of log files. (#85)
 
 ### Version 2.5.2
