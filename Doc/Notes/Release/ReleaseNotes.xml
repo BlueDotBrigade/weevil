@@ -1,8 +1,8 @@
 <!-- Reminder: don't forget to escape characters like ampersand .-->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
-	<CodeName>The Weeknd</CodeName>
-	<Description>Fixed a record selection bug that resulted in unexpected results during `Clear Before and After` operation.</Description>
+	<CodeName>Over and Over</CodeName>
+	<Description>Case-insensitive filtering, .NET call stacks in plain English, filter history bug fix... and much more!</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.5.2</LatestRelease>
+	<LatestRelease>2.6.1</LatestRelease>
 </ApplicationInfo>
