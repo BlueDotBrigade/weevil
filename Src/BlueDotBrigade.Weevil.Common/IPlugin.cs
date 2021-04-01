@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Analysis;
 	using IO;
 
 	public interface IPlugin
@@ -12,6 +13,10 @@
 		bool CanOpenAs { get; }
 
 		(bool, OpenAsResult) ShowOpenAs(object parentWindow, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
+
+		bool CanShowDashboard { get; }
+
+		void ShowDashboard(object parentWindow, IEngine engine, IInsight[] insights);
 
 		ICoreExtension GetExtension(string sourceFilePath);
 
