@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Immutable;
 	using System.Linq;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
-	using Data;
-	using Diagnostics;
 
 	public class DetectUnresponsiveUiAnalyzer : IRecordAnalyzer
 	{

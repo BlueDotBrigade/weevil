@@ -4,7 +4,7 @@
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
-	internal class UiResponsivenessInsight : InsightBase
+	public class UiResponsivenessInsight : InsightBase
 	{
 		public UiResponsivenessInsight() : base(
 			"Unresponsive UI",
