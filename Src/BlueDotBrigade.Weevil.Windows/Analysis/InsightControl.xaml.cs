@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Analysis
+﻿namespace BlueDotBrigade.Weevil.Windows.Analysis
 {
 	using System.Windows;
 	using System.Windows.Controls;
@@ -18,7 +18,7 @@
 		public IInsight Value
 		{
 			get => (IInsight)GetValue(ValueProperty);
-			set => SetValue(ValueProperty, value);
+			set => SetValue(ValueProperty, (object) value);
 		}
 
 		public InsightControl()

@@ -107,9 +107,6 @@
     <Compile Include="Analysis\DashboardDialog.xaml.cs">
       <DependentUpon>DashboardDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Analysis\InsightControl.xaml.cs">
-      <DependentUpon>InsightControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -200,10 +197,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Analysis\DashboardDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Analysis\InsightControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -23,8 +23,12 @@
 	<Company>Blue Dot Brigade</Company>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Analysis\InsightControl.xaml" />
     <None Remove="Resources\Icons\Weevil.ico" />
     <None Remove="Resources\Images\Weevil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -38,5 +42,19 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Analysis\InsightControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Analysis\InsightControl.xaml.cs">
+      <DependentUpon>InsightControl.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

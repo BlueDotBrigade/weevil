@@ -8,18 +8,13 @@
         Title="Dashboard" Height="600" Width="800"
         WindowStartupLocation="CenterOwner"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="11"
         FontFamily="{materialDesign:MaterialDesignFont}"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
-   <Window.Resources>
-      <!--<DataTemplate x:Key="GameBoardView_Item">
-         <Image Source="{Binding Path=ImageUri}" />
-      </DataTemplate>-->
-   </Window.Resources>
-
    <Grid>
       <Grid.RowDefinitions>
          <RowDefinition Height="4*"/>
@@ -36,7 +31,7 @@
          </ItemsControl.ItemsPanel>
          <ItemsControl.ItemTemplate>
             <DataTemplate>
-               <local:InsightControl Value="{Binding}"/>
+               <analysis:InsightControl Value="{Binding}"/>
             </DataTemplate>
          </ItemsControl.ItemTemplate>
       </ItemsControl>
