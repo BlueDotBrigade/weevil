@@ -3,7 +3,7 @@
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
-	internal class CriticalErrorsInsight : InsightBase
+	public class CriticalErrorsInsight : InsightBase
 	{
 		public CriticalErrorsInsight() : base(
 			"Critical Errors",

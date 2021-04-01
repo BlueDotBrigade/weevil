@@ -1,11 +1,10 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
-	using System;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 
-	internal class CriticalErrorsAnalyzer : IRecordAnalyzer
+	public class CriticalErrorsAnalyzer : IRecordAnalyzer
 	{
 		public string Key { get; }
 		public string DisplayName { get; }
