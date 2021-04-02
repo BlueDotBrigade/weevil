@@ -115,7 +115,6 @@
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\CheckBoxValidationErrorConverter.cs" />
     <Compile Include="Converters\ContentConverter.cs" />
-    <Compile Include="Converters\ContextConverter.cs" />
     <Compile Include="Converters\FilterMultiValueConverter.cs" />
     <Compile Include="Converters\SeverityToBackgroundConverter.cs" />
     <Compile Include="Converters\SeverityToForegroundConverter.cs" />
@@ -267,13 +266,13 @@
       <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
       <Name>BlueDotBrigade.Weevil.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj">
-      <Project>{35af40b9-ba74-4fa7-8f52-c60e23921e85}</Project>
-      <Name>BlueDotBrigade.Weevil.Windows</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj">
       <Project>{29bd191a-f2d0-4769-b325-6afe68c3e7cf}</Project>
       <Name>BlueDotBrigade.Weevil.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj">
+      <Project>{35af40b9-ba74-4fa7-8f52-c60e23921e85}</Project>
+      <Name>BlueDotBrigade.Weevil.Windows</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

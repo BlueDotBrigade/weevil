@@ -1,10 +1,9 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Converters
+﻿namespace BlueDotBrigade.Weevil.Windows.Converters
 {
 	using System;
 	using System.Globalization;
 	using System.Windows;
 	using System.Windows.Data;
-	using BlueDotBrigade.Weevil;
 
 	[ValueConversion(typeof(ContextDictionary), typeof(string))]
 	public class ContextConverter : IValueConverter

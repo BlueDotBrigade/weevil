@@ -11,6 +11,7 @@
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
             xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
+            xmlns:converters1="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
             mc:Ignorable="d"
             d:DesignHeight="200" d:DesignWidth="900">
    <UserControl.Resources>
@@ -20,7 +21,7 @@
       <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
       <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
       <converters:ContentConverter x:Key="ContentConverter" />
-      <converters:ContextConverter x:Key="ContextConverter" />
+      <converters1:ContextConverter x:Key="ContextConverter" />
       <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
       <Style x:Key="CommandMenuItemStyle"
                TargetType="{x:Type MenuItem}">
