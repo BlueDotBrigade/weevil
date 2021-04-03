@@ -83,8 +83,11 @@
 
 			insights.AddRange(_coreExtension.GetInsights());
 
-			insights.Add(new CriticalErrorsInsight());
-			insights.Add(new UiResponsivenessInsight());
+			if (insights.Count == 0)
+			{
+				insights.Add(new CriticalErrorsInsight());
+				insights.Add(new UiResponsivenessInsight());
+			}
 
 			foreach (var insight in insights)
 			{
