@@ -57,10 +57,9 @@
 
 		public void ShowDashboard(ImmutableArray<IInsight> insights, IEngine engine)
 		{
-			var dialog = new DashboardDialog()
+			var dialog = new DashboardDialog(engine)
 			{
 				Insights = insights.ToArray(),
-				Engine = engine,
 			};
 
 			dialog.Show();

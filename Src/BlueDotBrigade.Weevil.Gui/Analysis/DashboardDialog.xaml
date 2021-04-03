@@ -9,16 +9,27 @@
         WindowStartupLocation="CenterOwner"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
+        xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="11"
         FontFamily="{materialDesign:MaterialDesignFont}"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
+   <Window.Resources>
+      <ResourceDictionary>
+         <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="../Themes/StatusBarTextBox.xaml" />
+         </ResourceDictionary.MergedDictionaries>
+         <converters:ContextConverter x:Key="ContextConverter" />
+      </ResourceDictionary>
+   </Window.Resources>
    <Grid>
       <Grid.RowDefinitions>
-         <RowDefinition Height="4*"/>
-         <RowDefinition Height="1*"/>
+         <RowDefinition Height="*" />
+         <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
+         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="*" />
@@ -26,7 +37,7 @@
       <ItemsControl Grid.Row="0" ItemsSource="{Binding Insights}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
          <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-               <WrapPanel Orientation="Horizontal" Width="768"/>
+               <WrapPanel Orientation="Horizontal"/>
             </ItemsPanelTemplate>
          </ItemsControl.ItemsPanel>
          <ItemsControl.ItemTemplate>
@@ -35,8 +46,48 @@
             </DataTemplate>
          </ItemsControl.ItemTemplate>
       </ItemsControl>
-      <StackPanel Grid.Row="1" Grid.Column="0"  Orientation="Horizontal">
+      <StackPanel Grid.Row="1" Orientation="Horizontal">
          <Button Content="Refresh" Click="OnRefresh"/>
+         <Button Content="Copy" Click="OnCopy"/>
       </StackPanel>
+      <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
+      <StatusBar Grid.Row="3" Height="40"
+                 Background="{StaticResource MaterialDesignPaper}" 
+                 Foreground="{StaticResource TextForeground}"
+                 TextElement.FontWeight="Regular"
+                 TextElement.FontSize="{StaticResource TextFontSize}"
+                 TextOptions.TextFormattingMode="Ideal"
+                 TextOptions.TextRenderingMode="Auto">
+         <StatusBar.ItemsPanel>
+            <ItemsPanelTemplate>
+               <Grid>
+                  <Grid.ColumnDefinitions>
+                     <ColumnDefinition Width="*" />
+                     <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+               </Grid>
+            </ItemsPanelTemplate>
+         </StatusBar.ItemsPanel>
+         <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
+            <TextBox>
+               <TextBox.Text>
+                  <MultiBinding Mode="OneWay" FallbackValue="" StringFormat="{}Insight is provided for: {0} to {1}">
+                     <Binding Path="From" />
+                     <Binding Path="To" />
+                  </MultiBinding>
+               </TextBox.Text>
+               <TextBox.Style>
+                  <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>
+               </TextBox.Style>
+            </TextBox>
+         </StatusBarItem>
+         <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
+            <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}">
+               <TextBox.Style>
+                  <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>
+               </TextBox.Style>
+            </TextBox>
+         </StatusBarItem>
+      </StatusBar>
    </Grid>
 </Window>
