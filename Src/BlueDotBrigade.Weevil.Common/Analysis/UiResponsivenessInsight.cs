@@ -6,19 +6,28 @@
 
 	public class UiResponsivenessInsight : InsightBase
 	{
-		public UiResponsivenessInsight() : base(
+		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(1);
+
+		private readonly TimeSpan _threshold;
+
+		public UiResponsivenessInsight() : this(DefaultThreshold)
+		{
+			// nothing to do
+		}
+
+		public UiResponsivenessInsight(TimeSpan threshold) : base(
 			"Unresponsive UI",
 			"sec",
 			"0",
 			"Indicates how often the user interface took longer than 1s to respond to a user request.")
 		{
-			// nothing to do
+			_threshold = threshold;
 		}
 
 		protected override void OnRefresh(ImmutableArray<IRecord> records)
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
-			analyzer.Analyze(records, TimeSpan.FromSeconds(1));
+			analyzer.Analyze(records, _threshold);
 
 			if (analyzer.UnresponsiveUiCount > 0)
 			{
