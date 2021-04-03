@@ -850,7 +850,16 @@
 
 		private void ShowDashboard()
 		{
-			_dialogBox.ShowDashboard(_insights, _engine);
+			IPlugin plugin = new PluginFactory().Create(_engine.SourceFilePath);
+
+			if (plugin.CanShowDashboard)
+			{
+				plugin.ShowDashboard(_mainWindow, _engine, _insights.ToArray());
+			}
+			else
+			{
+				_dialogBox.ShowDashboard(_insights, _engine);
+			}
 		}
 
 		private void ForceGarbageCollection()
