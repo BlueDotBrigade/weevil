@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Collections.Immutable
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using Data;
@@ -85,6 +86,28 @@
 		public static IRecord Last(this ImmutableArray<IRecord> array)
 		{
 			return array[array.Length - 1];
+		}
+
+		public static (DateTime from, DateTime to) GetRange(this ImmutableArray<IRecord> records)
+		{
+			var from = DateTime.MaxValue;
+			var to = DateTime.MaxValue;
+
+			if (records.Length > 0)
+			{
+				if (records.Length == 1)
+				{
+					from = records[0].CreatedAt;
+					to = records[0].CreatedAt;
+				}
+				else
+				{
+					from = records[0].CreatedAt;
+					to = records[records.Length - 1].CreatedAt;
+				}
+			}
+
+			return (from, to);
 		}
 	}
 }
