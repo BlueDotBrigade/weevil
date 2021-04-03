@@ -48,9 +48,14 @@
 
 		public ImmutableArray<IInsight> GetInsights()
 		{
-			throw new System.NotImplementedException();
-		}
+			var insights = new List<IInsight>()
+			{
+				new CriticalErrorsInsight(),
+				new UiResponsivenessInsight(),
+			};
 
+			return insights.ToImmutableArray();
+		}
 
 		public IList<IRecordCounter> GetRecordCounters(ContextDictionary context)
 		{
