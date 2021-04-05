@@ -5,6 +5,7 @@
 		DetectData,
 		DetectDataTransition,
 		DetectFallingEdges,
+		DetectRisingEdges,
 		DetectUnresponsiveUi,
 	}
 }
