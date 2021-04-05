@@ -257,6 +257,7 @@
                <MenuItem Header="Analyzers...">
                   <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                   <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
+                  <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
                   <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
                   <Separator/>
                   <MenuItem Header="Detect Unresponsive UI" Command="{Binding DetectUnresponsiveUiCommand}" InputGestureText="F10" />

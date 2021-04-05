@@ -65,6 +65,7 @@
 					new DetectUnresponsiveUiAnalyzer(),
 					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
 				});
 			}

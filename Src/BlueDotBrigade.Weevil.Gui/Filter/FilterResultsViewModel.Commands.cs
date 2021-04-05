@@ -167,6 +167,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
+		public ICommand DataTransitionsRisingEdgeCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectRisingEdges),
+			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllFlagsCommand => new UiBoundCommand(RemoveAllFlags, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllCommentsCommand => new UiBoundCommand(() => RemoveComments(true), () => this.IsMenuEnabled);
