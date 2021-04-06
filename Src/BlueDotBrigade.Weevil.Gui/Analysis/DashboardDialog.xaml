@@ -10,7 +10,6 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
         xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
-        xmlns:analysis1="clr-namespace:BlueDotBrigade.Weevil.Analysis;assembly=BlueDotBrigade.Weevil.Common"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
@@ -20,10 +19,9 @@
    <Window.Resources>
       <ResourceDictionary>
          <ResourceDictionary.MergedDictionaries>
-            <ResourceDictionary Source="../Themes/StatusBarTextBox.xaml" />
+            <ResourceDictionary Source="../Themes/DashboardInsightStyle.xaml" />
          </ResourceDictionary.MergedDictionaries>
          <converters:ContextConverter x:Key="ContextConverter" />
-         <converters:ObjectToTypeConverter x:Key="ObjectToTypeConverter" />
       </ResourceDictionary>
    </Window.Resources>
    <Grid>
@@ -44,26 +42,7 @@
          </ItemsControl.ItemsPanel>
          <ItemsControl.ItemTemplate>
             <DataTemplate>
-               <analysis:InsightControl Value="{Binding}">
-                  <analysis:InsightControl.Style>
-                     <Style TargetType="{x:Type analysis:InsightControl}">
-                        <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Images/Dashboard-Insight-48.png"/>
-
-                        <Style.Triggers>
-                           <DataTrigger Binding="{Binding 
-                              Converter={StaticResource ObjectToTypeConverter}}" 
-                              Value="{x:Type analysis1:CriticalErrorsInsight}">
-                              <Setter Property="Image" Value="/Resources/Icons/CriticalErrors-Inactive-32.png" />
-                           </DataTrigger>
-                           <DataTrigger Binding="{Binding 
-                              Converter={StaticResource ObjectToTypeConverter}}" 
-                                        Value="{x:Type analysis1:UiResponsivenessInsight}">
-                              <Setter Property="Image" Value="/Resources/Icons/UiUnresponsive-48.png" />
-                           </DataTrigger>
-                        </Style.Triggers>
-                     </Style>
-                  </analysis:InsightControl.Style>
-               </analysis:InsightControl>
+               <analysis:InsightControl Value="{Binding}" Style="{StaticResource DashboardInsightStyle}"/>
             </DataTemplate>
          </ItemsControl.ItemTemplate>
       </ItemsControl>

@@ -1,0 +1,24 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:analysis1="clr-namespace:BlueDotBrigade.Weevil.Analysis;assembly=BlueDotBrigade.Weevil.Common"
+                    xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
+                    xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows">
+   <converters:ObjectToTypeConverter x:Key="ObjectToTypeConverter" />
+
+   <Style x:Key="DashboardInsightStyle" TargetType="{x:Type analysis:InsightControl}">
+      <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Images/Dashboard-Insight-48.png"/>
+
+      <Style.Triggers>
+         <DataTrigger Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                      Value="{x:Type analysis1:CriticalErrorsInsight}">
+            <Setter Property="Image" Value="/Resources/Icons/CriticalErrors-Inactive-32.png" />
+         </DataTrigger>
+         <DataTrigger Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                      Value="{x:Type analysis1:UiResponsivenessInsight}">
+            <Setter Property="Image" Value="/Resources/Icons/UiUnresponsive-48.png" />
+         </DataTrigger>
+      </Style.Triggers>
+   </Style>
+</ResourceDictionary>
