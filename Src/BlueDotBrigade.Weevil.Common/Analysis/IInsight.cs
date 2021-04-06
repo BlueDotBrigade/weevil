@@ -13,7 +13,7 @@
 
 		 string Details { get; }
 
-		 bool IsAttentionRequired { get; }
+		 bool IsAttentionNeeded { get; }
 
 		 void Refresh(ImmutableArray<IRecord> records);
 	}

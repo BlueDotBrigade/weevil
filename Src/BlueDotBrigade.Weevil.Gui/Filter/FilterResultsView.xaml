@@ -597,7 +597,7 @@
                               <Condition Binding="{Binding HasInsight}" Value="True" />
                               <Condition Binding="{Binding HasInsightRequiringAttention}" Value="True" />
                            </MultiDataTrigger.Conditions>
-                           <Setter Property="Source" Value="/Resources/Icons/Insight-NeedsAttention-24.png" />
+                           <Setter Property="Source" Value="/Resources/Icons/Insight-AttentionNeeded-24.png" />
                            <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight that requires the user&apos;s attention.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
                         </MultiDataTrigger>
                      </Style.Triggers>

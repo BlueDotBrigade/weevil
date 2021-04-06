@@ -339,7 +339,7 @@
     <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\Insight-NeedsAttention-24.png" />
+    <Resource Include="Resources\Icons\Insight-AttentionNeeded-24.png" />
     <Resource Include="Resources\Icons\Insight-24.png" />
   </ItemGroup>
   <ItemGroup>

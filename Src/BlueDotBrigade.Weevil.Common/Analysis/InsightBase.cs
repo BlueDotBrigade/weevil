@@ -14,7 +14,7 @@
 			_defaultMetricValue = metricValue ?? throw new ArgumentNullException(nameof(metricValue));
 			_defaultDetails = details ?? throw new ArgumentNullException(nameof(details));
 
-			this.IsAttentionRequired = false;
+			this.IsAttentionNeeded = false;
 			this.Title = title ?? throw new ArgumentNullException(nameof(title));
 			this.MetricUnit = metricUnit ?? throw new ArgumentNullException(nameof(metricUnit));
 			this.MetricValue = _defaultMetricValue;
@@ -25,10 +25,10 @@
 		public string MetricValue { get; protected set;}
 		public string MetricUnit { get; }
 		public string Details { get; protected set; }
-		public bool IsAttentionRequired { get; protected set; }
+		public bool IsAttentionNeeded { get; protected set; }
 		public void Refresh(ImmutableArray<IRecord> records)
 		{
-			this.IsAttentionRequired = false;
+			this.IsAttentionNeeded = false;
 			this.MetricValue = _defaultMetricValue;
 			this.Details = _defaultDetails;
 

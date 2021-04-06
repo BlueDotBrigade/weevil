@@ -10,6 +10,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
         xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
+        xmlns:analysis1="clr-namespace:BlueDotBrigade.Weevil.Analysis;assembly=BlueDotBrigade.Weevil.Common"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
@@ -22,6 +23,7 @@
             <ResourceDictionary Source="../Themes/StatusBarTextBox.xaml" />
          </ResourceDictionary.MergedDictionaries>
          <converters:ContextConverter x:Key="ContextConverter" />
+         <converters:ObjectToTypeConverter x:Key="ObjectToTypeConverter" />
       </ResourceDictionary>
    </Window.Resources>
    <Grid>
@@ -42,7 +44,26 @@
          </ItemsControl.ItemsPanel>
          <ItemsControl.ItemTemplate>
             <DataTemplate>
-               <analysis:InsightControl Value="{Binding}"/>
+               <analysis:InsightControl Value="{Binding}">
+                  <analysis:InsightControl.Style>
+                     <Style TargetType="{x:Type analysis:InsightControl}">
+                        <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Images/Dashboard-Insight-48.png"/>
+
+                        <Style.Triggers>
+                           <DataTrigger Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                              Value="{x:Type analysis1:CriticalErrorsInsight}">
+                              <Setter Property="Image" Value="/Resources/Icons/CriticalErrors-Inactive-32.png" />
+                           </DataTrigger>
+                           <DataTrigger Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                                        Value="{x:Type analysis1:UiResponsivenessInsight}">
+                              <Setter Property="Image" Value="/Resources/Icons/UiUnresponsive-48.png" />
+                           </DataTrigger>
+                        </Style.Triggers>
+                     </Style>
+                  </analysis:InsightControl.Style>
+               </analysis:InsightControl>
             </DataTemplate>
          </ItemsControl.ItemTemplate>
       </ItemsControl>
@@ -82,7 +103,7 @@
             </TextBox>
          </StatusBarItem>
          <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
-            <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}">
+            <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='', Mode=OneWay}">
                <TextBox.Style>
                   <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>
                </TextBox.Style>

@@ -32,7 +32,7 @@
 			if (analyzer.UnresponsiveUiCount > 0)
 			{
 				this.MetricValue = analyzer.MaximumPeriodDetected.TotalSeconds.ToString("###.0");
-				this.IsAttentionRequired = true;
+				this.IsAttentionNeeded = true;
 				this.Details = $"The user interface may have been unresponsive {analyzer.UnresponsiveUiCount} time(s). " +
 				               $"The worst case scenario occurred at {analyzer.FirstOccurrenceAt.ToString("HH:mm:ss")}.";
 			}

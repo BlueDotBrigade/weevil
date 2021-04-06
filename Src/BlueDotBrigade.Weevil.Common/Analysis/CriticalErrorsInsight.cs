@@ -24,7 +24,7 @@
 				this.MetricValue = analyzer.Count.ToString();
 				this.Details =
 					$"Critical/fatal errors have been detected, with the first occurrence at: {analyzer.FirstOccurrence.CreatedAt:HH:mm:ss}.";
-				this.IsAttentionRequired = true;
+				this.IsAttentionNeeded = true;
 			}
 		}
 	}

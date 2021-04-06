@@ -9,10 +9,9 @@
              xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls"
              mc:Ignorable="d">
    <StackPanel DataContext="{Binding 
-               RelativeSource={RelativeSource AncestorType={x:Type analysis:InsightControl}}, 
-               Path=Value}">
+               RelativeSource={RelativeSource AncestorType={x:Type analysis:InsightControl}}}">
       <GroupBox
-         Header="{Binding Title}"
+         Header="{Binding Value.Title}"
          Typography.Capitals="SmallCaps"
          Margin="16, 16, 8, 16"
          materialDesign:ColorZoneAssist.Mode="SecondaryMid"
@@ -34,33 +33,33 @@
                   <ColumnDefinition Width="1*" />
                </Grid.ColumnDefinitions>
                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0, 5">
-                  <TextBox Text="{Binding MetricValue, Mode=OneWay}" 
+                  <TextBox Text="{Binding Value.MetricValue, Mode=OneWay}" 
                              FontSize="32" FontWeight="Bold"  
                              VerticalAlignment="Center" TextAlignment="Justify"
                              controls:TextBoxBehavior.AutoSelectEnabled="True"/>
                   <TextBlock Text=" "/>
-                  <TextBlock Text="{Binding MetricUnit}" 
+                  <TextBlock Text="{Binding Value.MetricUnit}" 
                              VerticalAlignment="Bottom" TextAlignment="Justify"/>
                </StackPanel>
                <Image Grid.Row="0" Grid.Column="1" 
                       Height="48" Width="48"
-                      HorizontalAlignment="Right">
+                      HorizontalAlignment="Right"
+                      Source="{Binding Image}">
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/UiUnresponsive-48.png" />
-                        <Setter Property="ToolTip" Value="Total record count."/>
+                        <Setter Property="ToolTip" Value=""/>
                         <Style.Triggers>
-                           <DataTrigger Binding="{Binding IsAttentionRequired}" Value="True">
-                              <Setter Property="Source" Value="/Resources/Icons/UiUnresponsive-AttentionNeeded-48.png"/>
-                              <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
+                           <DataTrigger Binding="{Binding Value.IsAttentionNeeded}" Value="True">
+                              <Setter Property="ToolTip" Value="This insight requires user attention."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
                   </Image.Style>
                </Image>
             </Grid>
-            <TextBlock Grid.Row="1" Text="{Binding Details}" 
-                          TextWrapping="Wrap"  TextAlignment="Justify"/>
+            <TextBlock Grid.Row="1" Text="{Binding Value.Details}" 
+                          TextWrapping="Wrap"
+                          TextAlignment="Justify"/>
          </Grid>
       </GroupBox>
    </StackPanel>

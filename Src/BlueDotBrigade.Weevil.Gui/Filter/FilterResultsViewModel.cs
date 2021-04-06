@@ -570,7 +570,7 @@
 						_insights = _engine.Analyzer.GetInsights();
 
 						this.HasInsight = _insights.Length > 0;
-						this.HasInsightRequiringAttention = _insights.Any(i => i.IsAttentionRequired);
+						this.HasInsightRequiringAttention = _insights.Any(i => i.IsAttentionNeeded);
 					}
 				);
 			}
