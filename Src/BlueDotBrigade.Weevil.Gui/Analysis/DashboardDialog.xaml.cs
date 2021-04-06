@@ -82,7 +82,6 @@
 			this.To = range.to;
 		}
 
-
 		private void OnCopy(object sender, RoutedEventArgs e)
 		{
 			var report = new InsightReportGenerator().Generate(

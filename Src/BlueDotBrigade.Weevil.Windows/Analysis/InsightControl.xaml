@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis"
+             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls"
              mc:Ignorable="d">
    <StackPanel DataContext="{Binding 
                RelativeSource={RelativeSource AncestorType={x:Type analysis:InsightControl}}, 
@@ -32,22 +33,25 @@
                   <ColumnDefinition Width="2*" />
                   <ColumnDefinition Width="1*" />
                </Grid.ColumnDefinitions>
-               <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                  <TextBlock Text="{Binding MetricValue, Mode=OneWay}" 
-                             FontSize="32" FontWeight="Bold"  TextAlignment="Justify"/>
+               <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0, 5">
+                  <TextBox Text="{Binding MetricValue, Mode=OneWay}" 
+                             FontSize="32" FontWeight="Bold"  
+                             VerticalAlignment="Center" TextAlignment="Justify"
+                             controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                  <TextBlock Text=" "/>
                   <TextBlock Text="{Binding MetricUnit}" 
                              VerticalAlignment="Bottom" TextAlignment="Justify"/>
                </StackPanel>
                <Image Grid.Row="0" Grid.Column="1" 
-                      Height="32" Width="32"
+                      Height="48" Width="48"
                       HorizontalAlignment="Right">
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/CriticalErrors-Inactive-32.png" />
+                        <Setter Property="Source" Value="/Resources/Icons/UiUnresponsive-48.png" />
                         <Setter Property="ToolTip" Value="Total record count."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding IsAttentionRequired}" Value="True">
-                              <Setter Property="Source" Value="/Resources/Icons/CriticalErrors-Active-32.png"/>
+                              <Setter Property="Source" Value="/Resources/Icons/UiUnresponsive-AttentionNeeded-48.png"/>
                               <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
                            </DataTrigger>
                         </Style.Triggers>

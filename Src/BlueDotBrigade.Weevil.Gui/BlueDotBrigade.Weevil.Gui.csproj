@@ -107,6 +107,7 @@
     <Compile Include="Analysis\DashboardDialog.xaml.cs">
       <DependentUpon>DashboardDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Analysis\DashboardInsight.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -227,6 +228,8 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Resource Include="Resources\Icons\UiUnresponsive-64.png" />
+    <Resource Include="Resources\Icons\UiUnresponsive-AttentionNeeded-64.png" />
     <Resource Include="Themes\ProgressBar.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -349,6 +352,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Insight-Available-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\UiUnresponsive-48.png" />
+    <Resource Include="Resources\Icons\UiUnresponsive-AttentionNeeded-48.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
