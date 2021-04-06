@@ -10,6 +10,7 @@
 		/// <summary>
 		/// Returns the the <see cref="Type"/> of the given <paramref name="value"/>.
 		/// </summary>
+		/// <seealso href="https://stackoverflow.com/a/4965683/949681">StackOverflow: WPF Trigger based on Object Type</seealso>
 		public object Convert(object value, Type targetType, object parameter,
 			CultureInfo culture)
 		{
