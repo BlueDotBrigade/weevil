@@ -336,8 +336,8 @@
     <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\Insight-Important-24.png" />
-    <Resource Include="Resources\Icons\Insight-Normal-24.png" />
+    <Resource Include="Resources\Icons\Insight-NeedsAttention-24.png" />
+    <Resource Include="Resources\Icons\Insight-24.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Alarms-Inactive-32.png" />
@@ -346,6 +346,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\CriticalErrors-Active-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Insight-Available-24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

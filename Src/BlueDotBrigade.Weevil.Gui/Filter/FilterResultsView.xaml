@@ -581,13 +581,25 @@
             <Image>
                <Image.Style>
                   <Style TargetType="{x:Type Image}">
-                     <Setter Property="Source" Value="/Resources/Icons/Insight-Normal-24.png" />
+                     <Setter Property="Source" Value="/Resources/Icons/Insight-24.png" />
                      <Setter Property="ToolTip" Value="Weevil does not have insight at this time."/>
                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding HasImportantInsight}" Value="True">
-                           <Setter Property="Source" Value="/Resources/Icons/Insight-Important-24.png"/>
+                        <MultiDataTrigger>
+                           <MultiDataTrigger.Conditions>
+                              <Condition Binding="{Binding HasInsight}" Value="True" />
+                              <Condition Binding="{Binding HasInsightRequiringAttention}" Value="False" />
+                           </MultiDataTrigger.Conditions>
+                           <Setter Property="Source" Value="/Resources/Icons/Insight-Available-24.png" />
                            <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight on the current document.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
-                        </DataTrigger>
+                     </MultiDataTrigger>
+                        <MultiDataTrigger>
+                           <MultiDataTrigger.Conditions>
+                              <Condition Binding="{Binding HasInsight}" Value="True" />
+                              <Condition Binding="{Binding HasInsightRequiringAttention}" Value="True" />
+                           </MultiDataTrigger.Conditions>
+                           <Setter Property="Source" Value="/Resources/Icons/Insight-NeedsAttention-24.png" />
+                           <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight that requires the user&apos;s attention.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
+                        </MultiDataTrigger>
                      </Style.Triggers>
                   </Style>
                </Image.Style>

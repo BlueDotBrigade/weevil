@@ -125,7 +125,8 @@
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
 
-			this.HasImportantInsight = false;
+			this.HasInsight = false;
+			this.HasInsightRequiringAttention = false;
 
 			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
@@ -184,7 +185,10 @@
 		public int SelectedRecordCount => _engine.Selector.Selected.Count;
 
 		[SafeForDependencyAnalysis]
-		public bool HasImportantInsight { get; private set; }
+		public bool HasInsight { get; private set; }
+
+		[SafeForDependencyAnalysis]
+		public bool HasInsightRequiringAttention { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public bool IsUpdateAvailable
@@ -442,6 +446,9 @@
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
 
+			this.HasInsight = false;
+			this.HasInsightRequiringAttention = false;
+
 			var openAsResult = new OpenAsResult();
 			var wasFileOpened = false;
 
@@ -562,7 +569,8 @@
 					{
 						_insights = _engine.Analyzer.GetInsights();
 
-						this.HasImportantInsight = _insights.Any(i => i.IsAttentionRequired);
+						this.HasInsight = _insights.Length > 0;
+						this.HasInsightRequiringAttention = _insights.Any(i => i.IsAttentionRequired);
 					}
 				);
 			}
