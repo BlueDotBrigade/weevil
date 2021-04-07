@@ -578,32 +578,44 @@
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
          <StatusBarItem Grid.Column="16">
-            <Image>
-               <Image.Style>
-                  <Style TargetType="{x:Type Image}">
-                     <Setter Property="Source" Value="/Resources/Icons/Insight-24.png" />
-                     <Setter Property="ToolTip" Value="Weevil does not have insight at this time."/>
+            <materialDesign:Badged Margin="5,5,10,5">
+               <materialDesign:Badged.Style>
+                  <Style TargetType="{x:Type materialDesign:Badged}">
+                     <Setter Property="Badge" Value=""/>
                      <Style.Triggers>
-                        <MultiDataTrigger>
-                           <MultiDataTrigger.Conditions>
-                              <Condition Binding="{Binding HasInsight}" Value="True" />
-                              <Condition Binding="{Binding HasInsightRequiringAttention}" Value="False" />
-                           </MultiDataTrigger.Conditions>
-                           <Setter Property="Source" Value="/Resources/Icons/Insight-Available-24.png" />
-                           <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight on the current document.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
-                     </MultiDataTrigger>
-                        <MultiDataTrigger>
-                           <MultiDataTrigger.Conditions>
-                              <Condition Binding="{Binding HasInsight}" Value="True" />
-                              <Condition Binding="{Binding HasInsightRequiringAttention}" Value="True" />
-                           </MultiDataTrigger.Conditions>
-                           <Setter Property="Source" Value="/Resources/Icons/Insight-AttentionNeeded-24.png" />
-                           <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight that requires the user&apos;s attention.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
-                        </MultiDataTrigger>
+                        <DataTrigger Binding="{Binding HasInsightNeedingAttention}" Value="true">
+                           <Setter Property="Badge" Value="{Binding InsightNeedingAttention}"/>
+                        </DataTrigger>
                      </Style.Triggers>
                   </Style>
-               </Image.Style>
-            </Image>
+               </materialDesign:Badged.Style>
+               <Image>
+                  <Image.Style>
+                     <Style TargetType="{x:Type Image}">
+                        <Setter Property="Source" Value="/Resources/Icons/Insight-24.png" />
+                        <Setter Property="ToolTip" Value="Weevil does not have insight at this time."/>
+                        <Style.Triggers>
+                           <MultiDataTrigger>
+                              <MultiDataTrigger.Conditions>
+                                 <Condition Binding="{Binding HasInsight}" Value="True" />
+                                 <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
+                              </MultiDataTrigger.Conditions>
+                              <Setter Property="Source" Value="/Resources/Icons/Insight-Available-24.png" />
+                              <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight on the current document.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
+                           </MultiDataTrigger>
+                           <MultiDataTrigger>
+                              <MultiDataTrigger.Conditions>
+                                 <Condition Binding="{Binding HasInsight}" Value="True" />
+                                 <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
+                              </MultiDataTrigger.Conditions>
+                              <Setter Property="Source" Value="/Resources/Icons/Insight-AttentionNeeded-24.png" />
+                              <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight that requires the user&apos;s attention.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
+                           </MultiDataTrigger>
+                        </Style.Triggers>
+                     </Style>
+                  </Image.Style>
+               </Image>
+            </materialDesign:Badged>
          </StatusBarItem>
          <StatusBarItem Grid.Column="17" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>

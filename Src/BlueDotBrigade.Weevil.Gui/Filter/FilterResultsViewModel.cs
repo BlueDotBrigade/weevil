@@ -25,7 +25,6 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
-	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Help;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.IO;
@@ -126,7 +125,8 @@
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
 
 			this.HasInsight = false;
-			this.HasInsightRequiringAttention = false;
+			this.HasInsightNeedingAttention = false;
+			this.InsightNeedingAttention = 0;
 
 			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
@@ -188,7 +188,10 @@
 		public bool HasInsight { get; private set; }
 
 		[SafeForDependencyAnalysis]
-		public bool HasInsightRequiringAttention { get; private set; }
+		public bool HasInsightNeedingAttention { get; private set; }
+
+		[SafeForDependencyAnalysis]
+		public int InsightNeedingAttention { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public bool IsUpdateAvailable
@@ -447,7 +450,8 @@
 			this.IsFilterToolboxEnabled = false;
 
 			this.HasInsight = false;
-			this.HasInsightRequiringAttention = false;
+			this.HasInsightNeedingAttention = false;
+			this.InsightNeedingAttention = 0;
 
 			var openAsResult = new OpenAsResult();
 			var wasFileOpened = false;
@@ -570,7 +574,8 @@
 						_insights = _engine.Analyzer.GetInsights();
 
 						this.HasInsight = _insights.Length > 0;
-						this.HasInsightRequiringAttention = _insights.Any(i => i.IsAttentionNeeded);
+						this.InsightNeedingAttention = _insights.Count(i => i.IsAttentionNeeded);
+						this.HasInsightNeedingAttention = this.InsightNeedingAttention > 0;
 					}
 				);
 			}
