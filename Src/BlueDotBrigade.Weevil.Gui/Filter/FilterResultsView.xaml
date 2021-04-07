@@ -578,7 +578,7 @@
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
          <StatusBarItem Grid.Column="16">
-            <materialDesign:Badged Margin="5,5,10,5">
+            <materialDesign:Badged Margin="10, 0">
                <materialDesign:Badged.Style>
                   <Style TargetType="{x:Type materialDesign:Badged}">
                      <Setter Property="Badge" Value=""/>
