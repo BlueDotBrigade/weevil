@@ -293,7 +293,6 @@
                <Setter Property="Template">
                   <Setter.Value>
                      <ControlTemplate TargetType="ListBoxItem">
-                        <!--Padding="{Binding RelativeSource={RelativeSource Self}, Path=(wpf:ListViewAssist.ListViewItemPadding)}"-->
                         <Border x:Name="Border"
                             
                                 Background="{TemplateBinding Background}"

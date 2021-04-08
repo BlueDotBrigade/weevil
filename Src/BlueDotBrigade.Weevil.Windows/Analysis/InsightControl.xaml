@@ -7,6 +7,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis"
              xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls"
+             xmlns:analysis1="clr-namespace:BlueDotBrigade.Weevil.Analysis;assembly=BlueDotBrigade.Weevil.Common"
              mc:Ignorable="d">
    <StackPanel DataContext="{Binding 
                RelativeSource={RelativeSource AncestorType={x:Type analysis:InsightControl}}}">
@@ -15,7 +16,7 @@
          Typography.Capitals="SmallCaps"
          Margin="16, 16, 8, 16"
          materialDesign:ColorZoneAssist.Mode="SecondaryMid"
-         Width="200" Height="150">
+         Width="200" Height="160">
          <Grid Typography.Capitals="Normal">
             <Grid.RowDefinitions>
                <RowDefinition Height="Auto" />
