@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:analysis1="clr-namespace:BlueDotBrigade.Weevil.Analysis;assembly=BlueDotBrigade.Weevil.Common"
                     xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
                     xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows">
@@ -9,16 +10,43 @@
       <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Images/Dashboard-Insight-48.png"/>
 
       <Style.Triggers>
-         <DataTrigger Binding="{Binding 
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
                               Converter={StaticResource ObjectToTypeConverter}}" 
-                      Value="{x:Type analysis1:CriticalErrorsInsight}">
+                          Value="{x:Type analysis1:CriticalErrorsInsight}" />
+               <Condition Binding="{Binding IsAttentionNeeded}" Value="False" />
+            </MultiDataTrigger.Conditions>
             <Setter Property="Image" Value="/Resources/Icons/CriticalErrors-Inactive-32.png" />
-         </DataTrigger>
-         <DataTrigger Binding="{Binding 
+         </MultiDataTrigger>
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
                               Converter={StaticResource ObjectToTypeConverter}}" 
-                      Value="{x:Type analysis1:UiResponsivenessInsight}">
+                          Value="{x:Type analysis1:CriticalErrorsInsight}" />
+               <Condition Binding="{Binding IsAttentionNeeded}" Value="True" />
+            </MultiDataTrigger.Conditions>
+            <Setter Property="Image" Value="/Resources/Icons/CriticalErrors-Active-32.png" />
+         </MultiDataTrigger>
+
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                          Value="{x:Type analysis1:UiResponsivenessInsight}" />
+               <Condition Binding="{Binding IsAttentionNeeded}" Value="False" />
+            </MultiDataTrigger.Conditions>
             <Setter Property="Image" Value="/Resources/Icons/UiUnresponsive-48.png" />
-         </DataTrigger>
+         </MultiDataTrigger>
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                          Value="{x:Type analysis1:UiResponsivenessInsight}" />
+               <Condition Binding="{Binding IsAttentionNeeded}" Value="True" />
+            </MultiDataTrigger.Conditions>
+            <Setter Property="Image" Value="/Resources/Icons/UiUnresponsive-AttentionNeeded-48.png" />
+         </MultiDataTrigger>
       </Style.Triggers>
    </Style>
 </ResourceDictionary>
