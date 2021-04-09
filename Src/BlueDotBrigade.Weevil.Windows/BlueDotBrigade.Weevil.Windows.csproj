@@ -24,6 +24,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Analysis\InsightControl.xaml" />
+    <None Remove="Resources\Icons\Insight\CriticalErrors-Data-48.png" />
+    <None Remove="Resources\Icons\Insight\CriticalErrors-DataRequiresAttention-48.png" />
+    <None Remove="Resources\Icons\Insight\GenericMetric-Data-48.png" />
+    <None Remove="Resources\Icons\Insight\GenericMetric-DataRequiresAttention-48.png" />
+    <None Remove="Resources\Icons\Insight\UiUnresponsive-Data-48.png" />
+    <None Remove="Resources\Icons\Insight\UiUnresponsive-DataRequiresAttention-48.png" />
     <None Remove="Resources\Icons\Weevil.ico" />
     <None Remove="Resources\Images\Dashboard-Insight-48.png" />
     <None Remove="Resources\Images\Dashboard-Insight-AttentionNeeded-48.png" />
@@ -39,9 +45,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons\Insight\CriticalErrors-Data-48.png" />
+    <Resource Include="Resources\Icons\Insight\CriticalErrors-DataRequiresAttention-48.png" />
+    <Resource Include="Resources\Icons\Insight\GenericMetric-Data-48.png" />
+    <Resource Include="Resources\Icons\Insight\GenericMetric-DataRequiresAttention-48.png" />
+    <Resource Include="Resources\Icons\Insight\UiUnresponsive-Data-48.png" />
+    <Resource Include="Resources\Icons\Insight\UiUnresponsive-DataRequiresAttention-48.png" />
     <Resource Include="Resources\Icons\Weevil.ico" />
-    <Resource Include="Resources\Images\Dashboard-Insight-48.png" />
-    <Resource Include="Resources\Images\Dashboard-Insight-AttentionNeeded-48.png" />
     <Resource Include="Resources\Images\Weevil.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>

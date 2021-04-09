@@ -55,7 +55,7 @@
 			output.AppendLine($"");
 			foreach (IInsight insight in insights)
 			{
-				if (insight.IsAttentionNeeded)
+				if (insight.IsAttentionRequired)
 				{
 					output.AppendLine(ToMarkdown(insight));
 				}
@@ -64,7 +64,7 @@
 			output.AppendLine($"");
 			foreach (IInsight insight in insights)
 			{
-				if (!insight.IsAttentionNeeded)
+				if (!insight.IsAttentionRequired)
 				{
 					output.AppendLine(ToMarkdown(insight));
 				}

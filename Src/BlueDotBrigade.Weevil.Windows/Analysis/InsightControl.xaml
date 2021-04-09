@@ -15,7 +15,7 @@
          Header="{Binding Value.Title}"
          Typography.Capitals="SmallCaps"
          Margin="16, 16, 8, 16"
-         materialDesign:ColorZoneAssist.Mode="SecondaryMid"
+         materialDesign:ColorZoneAssist.Mode="SecondaryDark"
          Width="200" Height="160">
          <Grid Typography.Capitals="Normal">
             <Grid.RowDefinitions>
@@ -50,7 +50,7 @@
                      <Style TargetType="{x:Type Image}">
                         <Setter Property="ToolTip" Value=""/>
                         <Style.Triggers>
-                           <DataTrigger Binding="{Binding Value.IsAttentionNeeded}" Value="True">
+                           <DataTrigger Binding="{Binding Value.IsAttentionRequired}" Value="True">
                               <Setter Property="ToolTip" Value="This insight requires user attention."/>
                            </DataTrigger>
                         </Style.Triggers>

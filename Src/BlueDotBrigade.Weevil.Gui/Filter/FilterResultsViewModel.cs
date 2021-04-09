@@ -574,7 +574,7 @@
 						_insights = _engine.Analyzer.GetInsights();
 
 						this.HasInsight = _insights.Length > 0;
-						this.InsightNeedingAttention = _insights.Count(i => i.IsAttentionNeeded);
+						this.InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired);
 						this.HasInsightNeedingAttention = this.InsightNeedingAttention > 0;
 					}
 				);

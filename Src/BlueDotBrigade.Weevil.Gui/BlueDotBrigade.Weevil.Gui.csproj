@@ -232,8 +232,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Resource Include="Resources\Icons\UiUnresponsive-64.png" />
-    <Resource Include="Resources\Icons\UiUnresponsive-AttentionNeeded-64.png" />
     <Resource Include="Themes\ProgressBar.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -295,7 +293,6 @@
     <Resource Include="Resources\Icons\Records-Selected.png" />
     <Resource Include="Resources\Icons\Records-Visible.png" />
     <Resource Include="Resources\Icons\TimeElapsed.png" />
-    <Resource Include="Resources\Icons\Ui-Unresponsive.png" />
     <Resource Include="Resources\Icons\VersionIcon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -343,23 +340,14 @@
     <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\Insight-AttentionNeeded-24.png" />
-    <Resource Include="Resources\Icons\Insight-24.png" />
+    <Resource Include="Resources\Icons\Insight\Insight-DataRequiresAttention-24.png" />
+    <Resource Include="Resources\Icons\Insight\Insight-NoData-24.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Alarms-Inactive-32.png" />
-    <Resource Include="Resources\Icons\CriticalErrors-Inactive-32.png" />
-    <Resource Include="Resources\Icons\UnresponsiveUi-Inactive-32.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\CriticalErrors-Active-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Insight-Available-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\UiUnresponsive-48.png" />
-    <Resource Include="Resources\Icons\UiUnresponsive-AttentionNeeded-48.png" />
+    <Resource Include="Resources\Icons\Insight\Insight-Data-24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
