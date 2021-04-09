@@ -5,7 +5,6 @@
 	using System.IO;
 	using Analysis;
 	using Data;
-	using Filter;
 	using Filter.Expressions;
 	using Navigation;
 
@@ -21,7 +20,7 @@
 		ContextDictionary DetermineContext(ImmutableArray<IRecord> allRecords);
 
 		IList<IRecordAnalyzer> GetAnalyzers();
-		ImmutableArray<IInsight> GetInsights();
+		ImmutableArray<IInsight> GetInsights(ContextDictionary context);
 		IList<IRecordCounter> GetRecordCounters(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
 		IDictionary<string, string> GetStaticAliases(ContextDictionary context);

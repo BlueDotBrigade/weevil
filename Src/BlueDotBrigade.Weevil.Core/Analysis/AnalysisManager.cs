@@ -82,9 +82,9 @@
 		{
 			var insights = new List<IInsight>();
 
-			insights.AddRange(_coreExtension.GetInsights());
+			insights.AddRange(_coreExtension.GetInsights(_coreEngine.Context));
 
-			foreach (var insight in insights)
+			foreach (IInsight insight in insights)
 			{
 				insight.Refresh(_coreEngine.Records);
 			}

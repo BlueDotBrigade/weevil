@@ -47,7 +47,7 @@
 			return new List<IRecordAnalyzer>();
 		}
 
-		public ImmutableArray<IInsight> GetInsights()
+		public ImmutableArray<IInsight> GetInsights(ContextDictionary context)
 		{
 			var insights = new List<IInsight>()
 			{
