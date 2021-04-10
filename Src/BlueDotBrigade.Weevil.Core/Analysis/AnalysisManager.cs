@@ -115,7 +115,8 @@
 			analyzer.Analyze(
 				records,
 				_coreEngine.SourceDirectory,
-				userDialog);
+				userDialog,
+				true);
 		}
 	}
 }

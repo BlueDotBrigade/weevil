@@ -27,7 +27,7 @@
 		protected override void OnRefresh(ImmutableArray<IRecord> records)
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
-			analyzer.Analyze(records, _threshold);
+			analyzer.Analyze(records, _threshold, false);
 
 			if (analyzer.UnresponsiveUiCount > 0)
 			{
