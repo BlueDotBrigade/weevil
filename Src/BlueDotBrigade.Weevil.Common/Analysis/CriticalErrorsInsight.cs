@@ -16,14 +16,18 @@
 
 		protected override void OnRefresh(ImmutableArray<IRecord> records)
 		{
-			var analyzer = new CriticalErrorsAnalyzer();
-			analyzer.Analyze(records, string.Empty, null);
+			var analyzer = new SeverityMetrics();
 
-			if (analyzer.Count > 0)
+			foreach (var record in records)
 			{
-				this.MetricValue = analyzer.Count.ToString();
+				analyzer.Count(record);
+			}
+
+			if (analyzer.Fatals > 0)
+			{
+				this.MetricValue = analyzer.Fatals.ToString();
 				this.Details =
-					$"Critical/fatal errors have been detected, with the first occurrence at: {analyzer.FirstOccurrence.CreatedAt:HH:mm:ss}.";
+					$"Fatal and/or critical errors have been detected, with the first occurrence at: {analyzer.FatalFirstOccurredAt.CreatedAt:HH:mm:ss}.";
 				this.IsAttentionRequired = true;
 			}
 		}
