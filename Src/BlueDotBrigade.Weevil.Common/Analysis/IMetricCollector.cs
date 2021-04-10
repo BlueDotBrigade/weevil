@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using Data;
 
-	public interface IRecordCounter
+	public interface IMetricCollector
 	{
 		void Count(IRecord record);
 

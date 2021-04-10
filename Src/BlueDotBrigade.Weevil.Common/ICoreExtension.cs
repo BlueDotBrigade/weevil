@@ -21,7 +21,7 @@
 
 		IList<IRecordAnalyzer> GetAnalyzers();
 		ImmutableArray<IInsight> GetInsights(ContextDictionary context);
-		IList<IRecordCounter> GetRecordCounters(ContextDictionary context);
+		IList<IMetricCollector> GetRecordCounters(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
 		IDictionary<string, string> GetStaticAliases(ContextDictionary context);
 		TableOfContents BuildTableOfContents(StreamReader logFileReader);

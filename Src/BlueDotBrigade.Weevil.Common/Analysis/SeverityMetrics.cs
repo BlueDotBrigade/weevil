@@ -4,7 +4,7 @@
 	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
 
-	public class SeverityMetrics : IRecordCounter
+	public class SeverityMetrics : IMetricCollector
 	{
 		#region Fields
 		private int _information;
