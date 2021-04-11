@@ -486,15 +486,12 @@
                         ToolTip="Source file context."
                         Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="5" VerticalAlignment="Center">
+         <StatusBarItem Grid.Column="4" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="6" />
-         <StatusBarItem Grid.Column="7" VerticalAlignment="Center">
-         </StatusBarItem>
-         <Separator Grid.Column="8" />
-         <StatusBarItem Grid.Column="9" VerticalAlignment="Center">
+         <Separator Grid.Column="5" />
+         <StatusBarItem Grid.Column="6" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
                <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Number of flagged records."/>
                <TextBox Text="{Binding FlaggedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
@@ -502,8 +499,8 @@
                            Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="10" />
-         <StatusBarItem Grid.Column="11" VerticalAlignment="Center">
+         <Separator Grid.Column="7" />
+         <StatusBarItem Grid.Column="8" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
                <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Informational Messages" />
                <TextBox Text="{Binding Metrics[Information], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
@@ -531,8 +528,8 @@
                              Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="12" />
-         <StatusBarItem Grid.Column="13">
+         <Separator Grid.Column="9" />
+         <StatusBarItem Grid.Column="10">
             <StackPanel Orientation="Horizontal" >
                <Image Source="/Resources/Icons/RecordsSelected-Data-24.png" ToolTip="Selected AllRecords"/>
                <TextBox Text="{Binding SelectedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
@@ -570,13 +567,13 @@
                </TextBox>
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="14" />
-         <StatusBarItem Grid.Column="15">
+         <Separator Grid.Column="11" />
+         <StatusBarItem Grid.Column="12">
             <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
                      ToolTip="TOC heading related to selected record."
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="16">
+         <StatusBarItem Grid.Column="13">
             <materialDesign:Badged Margin="10, 0">
                <materialDesign:Badged.Style>
                   <Style TargetType="{x:Type materialDesign:Badged}">
@@ -616,7 +613,7 @@
                </Image>
             </materialDesign:Badged>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="17" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+         <StatusBarItem Grid.Column="14" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
                <ToggleButton Name="NewReleaseButton" ToolTip="New version is available! Click for details." >
                   <ToggleButton.Template>
