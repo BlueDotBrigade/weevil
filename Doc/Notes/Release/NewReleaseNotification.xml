@@ -1,5 +1,8 @@
-<!-- OBSOLETE : This XML message will be deleted when Weevil 2.8 is released. -->
-<!-- Don't forget to escape characters like ampersand. -->
+<!-- 
+	Implementation notes:
+	- For proper deserialization, elements must be listed in alphabetical order.
+	- Don't forget to escape characters like ampersand.
+-->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
 	<CodeName>Over and Over</CodeName>

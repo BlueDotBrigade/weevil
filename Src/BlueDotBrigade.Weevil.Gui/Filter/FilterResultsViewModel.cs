@@ -41,7 +41,7 @@
 	internal partial class FilterResultsViewModel : IDropTarget, INotifyPropertyChanged
 	{
 		private static readonly Uri NewReleaseUrl =
-			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/ReleaseNotes.xml");
+			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
@@ -152,7 +152,7 @@
 			try
 			{
 #if DEBUG
-				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\ReleaseNotes.xml");
+				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\NewReleaseNotification.xml");
 				Stream newReleaseStream = FileHelper.Open(applicationInfoPath);
 #else
 				Stream newReleaseStream = new WebClient().OpenRead(NewReleaseUrl);
