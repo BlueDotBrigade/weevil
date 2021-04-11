@@ -26,8 +26,8 @@
 
 			output.AppendLine($"{insight.Title}");
 			output.AppendLine($"");
-			output.AppendLine($"- {insight.MetricValue} {insight.MetricUnit}");
-			output.AppendLine($"- {insight.Details}");
+			output.AppendLine($"- Key Metric: {insight.MetricValue} {insight.MetricUnit}");
+			output.AppendLine($"- Details: {insight.Details}");
 
 			return output.ToString();
 		}
