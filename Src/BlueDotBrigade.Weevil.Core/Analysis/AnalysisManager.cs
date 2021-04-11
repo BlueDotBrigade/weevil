@@ -2,9 +2,11 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using Timeline;
 
@@ -80,7 +82,11 @@
 
 		public ImmutableArray<IInsight> GetInsights()
 		{
+			Log.Default.Write(LogSeverityType.Debug, "Insight is being gathered from the recordset...");
+
 			var insights = new List<IInsight>();
+
+			var stopwatch = Stopwatch.StartNew();
 
 			insights.AddRange(_coreExtension.GetInsights(_coreEngine.Context));
 
@@ -88,6 +94,12 @@
 			{
 				insight.Refresh(_coreEngine.Records);
 			}
+				
+			stopwatch.Stop();
+
+			var attentionRequiredCount = insights.Count(x => x.IsAttentionRequired);
+
+			Log.Default.Write(LogSeverityType.Information, $"Insight has been gathered. Records={_coreEngine.Records.Length:###,###,###,###}, Insights={insights.Count}, AttentionRequired={attentionRequiredCount}, ExecutionTime={stopwatch.Elapsed.ToHumanReadable()}");
 
 			return ImmutableArray.Create(insights.ToArray());
 		}

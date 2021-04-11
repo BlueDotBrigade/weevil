@@ -71,7 +71,7 @@
 		/// </remarks>
 		public int Analyze(ImmutableArray<IRecord> records, TimeSpan maximumAllowedPeriod, bool canUpdateComments)
 		{
-			Log.Default.Write(LogSeverityType.Debug, "User interface responsivenesss is being analyzed...");
+			Log.Default.Write(LogSeverityType.Debug, "Analysis of records for UI responsiveness is starting...");
 
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_problemsDetected = 0;
@@ -125,7 +125,7 @@
 				}
 
 				LogSeverityType severityType = _problemsDetected > 0 ? LogSeverityType.Warning : LogSeverityType.Information;
-				Log.Default.Write(severityType, $"User interface responsivenesss analysis is complete. ProblemsDetected={_problemsDetected}, MaximumPeriodDetected={_maximumPeriodDetected}, MaximumAllowedPeriod={maximumAllowedPeriod}");
+				Log.Default.Write(severityType, $"Analysis of records for UI responsiveness is complete. ProblemsDetected={_problemsDetected}, MaximumPeriodDetected={_maximumPeriodDetected}, MaximumAllowedPeriod={maximumAllowedPeriod}");
 			}
 
 			return this.UnresponsiveUiCount;
