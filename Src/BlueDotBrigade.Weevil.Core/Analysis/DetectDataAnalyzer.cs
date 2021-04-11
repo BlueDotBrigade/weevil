@@ -36,7 +36,10 @@
 
 					foreach (IRecord record in records)
 					{
-						record.Metadata.IsFlagged = false;
+						if (canUpdateMetadata)
+						{
+							record.Metadata.IsFlagged = false;
+						}
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -49,8 +52,12 @@
 									if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
 									{
 										var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
-										record.Metadata.IsFlagged = true;
-										record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
+
+										if (canUpdateMetadata)
+										{
+											record.Metadata.IsFlagged = true;
+											record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
+										}
 
 										flaggedRecords++;
 									}

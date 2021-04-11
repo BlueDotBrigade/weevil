@@ -42,7 +42,10 @@
 
 					foreach (IRecord record in records)
 					{
-						record.Metadata.IsFlagged = false;
+						if (canUpdateMetadata)
+						{
+							record.Metadata.IsFlagged = false;
+						}
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -61,8 +64,13 @@
 												var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
 												flaggedRecords++;
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+
+												if (canUpdateMetadata)
+												{
+													record.Metadata.IsFlagged = true;
+													record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+												}
+
 												previousState[currentState.Key] = currentState.Value;
 											}
 										}
@@ -71,8 +79,14 @@
 											var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
 											flaggedRecords++;
-											record.Metadata.IsFlagged = true;
-											record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+
+											if (canUpdateMetadata)
+											{
+												record.Metadata.IsFlagged = true;
+												record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+											}
+
+
 											previousState.Add(currentState.Key, currentState.Value);
 										}
 									}
