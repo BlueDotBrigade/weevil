@@ -99,7 +99,7 @@
                  ToolTip="Open a new document. (Ctrl+O)"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
             Margin="{StaticResource ButtonMargin}">
-            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
+            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument-Button-24.png"/>
          </Button>
          <Label Grid.Column="1" Target="{Binding ElementName=InclusiveFilter}" Content="AccessKey hack for: _Inclusive ComboBox" Width="0"/>
             <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
@@ -455,7 +455,7 @@
          </StatusBar.ItemsPanel>
          <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Document-24.png" ToolTip="Document&apos;s path."/>
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Document&apos;s path."/>
                <TextBox>
                   <TextBox.Style>
                      <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">

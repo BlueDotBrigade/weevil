@@ -279,7 +279,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\LogEntry-Fatal.png" />
-    <Resource Include="Resources\Icons\OpenDocument.png" />
     <Resource Include="Resources\Icons\Records-Pinned.png" />
   </ItemGroup>
   <ItemGroup>
@@ -346,6 +345,9 @@
     <Resource Include="Resources\Icons\TimeElapsed-Data-24.png" />
     <Resource Include="Resources\Icons\TimeElapsed-DataRequiresAttention-24.png" />
     <Resource Include="Resources\Icons\TimeElapsed-NoData-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
