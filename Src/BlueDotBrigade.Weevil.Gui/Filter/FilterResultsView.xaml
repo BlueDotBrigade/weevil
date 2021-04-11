@@ -473,7 +473,7 @@
          </StatusBarItem>
          <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/Resources/Icons/TimeElapsed.png" ToolTip="Time elapsed between selected records."/>
+               <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Time elapsed between selected records."/>
                <TextBox Text="{Binding Path=ElapsedTime, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
                         ToolTip="Elapsed time."
                         controls:TextBoxBehavior.AutoSelectEnabled="True"
@@ -505,22 +505,22 @@
          <Separator Grid.Column="10" />
          <StatusBarItem Grid.Column="11" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/Resources/Icons/LogEntry-Information.png" ToolTip="Informational Messages" />
+               <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Informational Messages" />
                <TextBox Text="{Binding Metrics[Information], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Informational Messages"
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image Source="/Resources/Icons/LogEntry-Warning.png" ToolTip="Warning Messages" />
+               <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Warning Messages" />
                <TextBox Text="{Binding Metrics[Warnings], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Warning Messages"
                              Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-ErrorFound.png" />
+                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-DataRequiresAttention-24.png" />
                         <Setter Property="ToolTip" Value="Error Messages"/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding Metrics[Errors], FallbackValue=0, Mode=OneWay}" Value="0">
-                              <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error.png"/>
+                              <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-Data-24.png"/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -534,22 +534,22 @@
          <Separator Grid.Column="12" />
          <StatusBarItem Grid.Column="13">
             <StackPanel Orientation="Horizontal" >
-               <Image Source="/Resources/Icons/Records-Selected.png" ToolTip="Selected AllRecords"/>
+               <Image Source="/Resources/Icons/RecordsSelected-Data-24.png" ToolTip="Selected AllRecords"/>
                <TextBox Text="{Binding SelectedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Selected Record Count"
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image Source="/Resources/Icons/Records-Visible.png" ToolTip="Visible AllRecords"/>
+               <Image Source="/Resources/Icons/RecordsVisible-Data-24.png" ToolTip="Visible AllRecords"/>
                <TextBox Text="{Binding VisibleRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Visible Record Count"
                              Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/Records-OnDisk.png" />
+                        <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-Data-24.png" />
                         <Setter Property="ToolTip" Value="Total record count."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
-                              <Setter Property="Source" Value="/Resources/Icons/Records-OnDiskChanged.png"/>
+                              <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-DataRequiresAttention-24.png"/>
                               <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
                            </DataTrigger>
                         </Style.Triggers>

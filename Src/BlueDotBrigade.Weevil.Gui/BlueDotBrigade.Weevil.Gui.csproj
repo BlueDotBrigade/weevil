@@ -193,9 +193,6 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\Records-OnDiskChanged.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="Analysis\DashboardDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -281,18 +278,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\Help.png" />
-    <Resource Include="Resources\Icons\LogEntry-Error.png" />
     <Resource Include="Resources\Icons\LogEntry-Fatal.png" />
-    <Resource Include="Resources\Icons\LogEntry-FatalMissing.png" />
-    <Resource Include="Resources\Icons\LogEntry-Warning.png" />
     <Resource Include="Resources\Icons\OpenDocument.png" />
-    <Resource Include="Resources\Icons\Records-OnDisk.png" />
     <Resource Include="Resources\Icons\Records-Pinned.png" />
-    <Resource Include="Resources\Icons\Records-Selected.png" />
-    <Resource Include="Resources\Icons\Records-Visible.png" />
-    <Resource Include="Resources\Icons\TimeElapsed.png" />
-    <Resource Include="Resources\Icons\VersionIcon.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\Weevil-48.png" />
@@ -303,10 +291,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Filter-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Help-24.png" />
-    <Resource Include="Resources\Icons\Help-32.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Flagged-24.png" />
@@ -333,9 +317,6 @@
     <Resource Include="Resources\Icons\NewReleaseAvailable-24.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Icons\Insight\Insight-DataRequiresAttention-24.png" />
     <Resource Include="Resources\Icons\Insight\Insight-NoData-24.png" />
   </ItemGroup>
@@ -346,7 +327,25 @@
     <Resource Include="Resources\Icons\Insight\Insight-Data-24.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\LogEntry-Information.png" />
+    <Resource Include="Resources\Icons\LogEntry-Information-Data-24.png" />
+    <Resource Include="Resources\Icons\LogEntry-Information-NoData-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\LogEntry-Error-Data-24.png" />
+    <Resource Include="Resources\Icons\LogEntry-Error-DataRequiresAttention-24.png" />
+    <Resource Include="Resources\Icons\LogEntry-Error-NoData-24.png" />
+    <Resource Include="Resources\Icons\LogEntry-Warning-Data-24.png" />
+    <Resource Include="Resources\Icons\LogEntry-Warning-NoData-24.png" />
+    <Resource Include="Resources\Icons\RecordsOnDisk-Data-24.png" />
+    <Resource Include="Resources\Icons\RecordsOnDisk-DataRequiresAttention-24.png" />
+    <Resource Include="Resources\Icons\RecordsOnDisk-NoData-24.png" />
+    <Resource Include="Resources\Icons\RecordsSelected-Data-24.png" />
+    <Resource Include="Resources\Icons\RecordsSelected-NoData-24.png" />
+    <Resource Include="Resources\Icons\RecordsVisible-Data-24.png" />
+    <Resource Include="Resources\Icons\RecordsVisible-NoData-24.png" />
+    <Resource Include="Resources\Icons\TimeElapsed-Data-24.png" />
+    <Resource Include="Resources\Icons\TimeElapsed-DataRequiresAttention-24.png" />
+    <Resource Include="Resources\Icons\TimeElapsed-NoData-24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
