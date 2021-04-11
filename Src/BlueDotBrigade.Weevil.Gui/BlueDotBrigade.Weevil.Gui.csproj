@@ -107,6 +107,7 @@
     <Compile Include="Analysis\DashboardDialog.xaml.cs">
       <DependentUpon>DashboardDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Analysis\UiResponsivenessMonitor.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -146,7 +147,7 @@
       <DependentUpon>FilterResultsViewModel.cs</DependentUpon>
     </Compile>
     <Compile Include="Filter\FilterResultsViewModel.cs" />
-    <Compile Include="MainWindowModel.cs" />
+    <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="Filter\FilterResultsView.xaml.cs">
       <DependentUpon>FilterResultsView.xaml</DependentUpon>
     </Compile>
