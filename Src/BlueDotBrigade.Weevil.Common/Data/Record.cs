@@ -61,7 +61,7 @@
 		/// <summary>
 		/// Returns <see langword="true"/> if it is known when the record was created.
 		/// </summary>
-		public static bool ValidateCreationTime(Record record)
+		public static bool ValidateCreationTime(IRecord record)
 		{
 			if (record is null)
 			{
