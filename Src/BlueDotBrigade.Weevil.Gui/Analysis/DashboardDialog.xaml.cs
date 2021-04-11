@@ -77,9 +77,9 @@
 			this.DataContext = this;
 			this.SourceFilePath = engine.SourceFilePath;
 
-			var range = _engine.Records.GetRange();
-			this.From = range.from;
-			this.To = range.to;
+			var range = _engine.Records.GetEstimatedRange();
+			this.From = range.From;
+			this.To = range.To;
 		}
 
 		private void OnRefresh(object sender, RoutedEventArgs e)
@@ -89,9 +89,9 @@
 				insight.Refresh(_engine.Filter.Results);
 			}
 
-			var range = _engine.Filter.Results.GetRange();
-			this.From = range.from;
-			this.To = range.to;
+			var range = _engine.Filter.Results.GetEstimatedRange();
+			this.From = range.From;
+			this.To = range.To;
 		}
 
 		private void OnCopy(object sender, RoutedEventArgs e)
