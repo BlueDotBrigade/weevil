@@ -85,7 +85,7 @@
 		private FilterCriteria _previousFilterCriteria;
 
 		private FilterType _currentfilterType;
-		private FilterCriteria _currentfilterCriteria;
+		private IFilterCriteria _currentfilterCriteria;
 
 		private int _concurrentFilterCount;
 
@@ -101,8 +101,6 @@
 
 			_engine = Engine.Surrogate;
 
-			_previousFilterCriteria = FilterCriteria.None;
-
 			this.IsLogFileOpen = Engine.IsRealInstance(_engine);
 			this.IsCommandExecuting = false;
 
@@ -112,6 +110,8 @@
 			_exclusiveFilter = string.Empty;
 
 			_concurrentFilterCount = 0;
+			_currentfilterCriteria = FilterCriteria.None;
+			_previousFilterCriteria = FilterCriteria.None;
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
@@ -1068,7 +1068,7 @@
 		/// In this case, work is being deferred to a background thread. As a result,
 		/// the transition the UI & background threads has to be managed.
 		/// </remarks>
-		private void FilterAsynchronously(FilterType filterType, FilterCriteria filterCriteria)
+		private void FilterAsynchronously(FilterType filterType, IFilterCriteria filterCriteria)
 		{
 			Log.Default.Write(
 				LogSeverityType.Debug,

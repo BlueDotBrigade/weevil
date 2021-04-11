@@ -11,7 +11,7 @@
 	internal static class FilterExtensions
 	{
 		internal static Task<bool> FilterAsync(this IEngine engine, FilterType filterType,
-			FilterCriteria filterCriteria, CancellationToken cancellationToken)
+			IFilterCriteria filterCriteria, CancellationToken cancellationToken)
 		{
 			return Task.Run(() =>
 			{
