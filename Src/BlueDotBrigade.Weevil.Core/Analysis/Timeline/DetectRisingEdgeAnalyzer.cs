@@ -31,7 +31,7 @@
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
 		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var flaggedRecords = 0;
+			var count = 0;
 
 			if (_filterStrategy != FilterStrategy.KeepAllRecords)
 			{
@@ -66,7 +66,7 @@
 												{
 													var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
-													flaggedRecords++;
+													count++;
 
 													if (canUpdateMetadata)
 													{
@@ -81,7 +81,7 @@
 										{
 											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
-											flaggedRecords++;
+											count++;
 
 											if (canUpdateMetadata)
 											{
@@ -99,7 +99,7 @@
 				}
 			}
 
-			return flaggedRecords;
+			return count;
 		}
 
 		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)
