@@ -52,11 +52,11 @@
 
 		public DateTime FirstOccurrenceAt => _firstOccurrenceAt;
 
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateComments)
+		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			if (TryGetTolerance(userDialog, out TimeSpan maximumAllowedPeriod))
 			{
-				Analyze(records, maximumAllowedPeriod, canUpdateComments);
+				Analyze(records, maximumAllowedPeriod, canUpdateMetadata);
 			}
 
 			return this.UnresponsiveUiCount;
