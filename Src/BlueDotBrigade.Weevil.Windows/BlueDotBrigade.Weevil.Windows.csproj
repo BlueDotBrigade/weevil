@@ -24,6 +24,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Analysis\InsightControl.xaml" />
+    <None Remove="Resources\Icons\Document-24.png" />
+    <None Remove="Resources\Icons\FilterResults-24.png" />
+    <None Remove="Resources\Icons\FilterResults-32.png" />
+    <None Remove="Resources\Icons\FilterResults-48.png" />
     <None Remove="Resources\Icons\Insight\CriticalErrors-Data-48.png" />
     <None Remove="Resources\Icons\Insight\CriticalErrors-DataRequiresAttention-48.png" />
     <None Remove="Resources\Icons\Insight\GenericMetric-Data-48.png" />
@@ -45,6 +49,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons\Document-24.png" />
+    <Resource Include="Resources\Icons\FilterResults-24.png" />
     <Resource Include="Resources\Icons\Insight\CriticalErrors-Data-48.png" />
     <Resource Include="Resources\Icons\Insight\CriticalErrors-DataRequiresAttention-48.png" />
     <Resource Include="Resources\Icons\Insight\GenericMetric-Data-48.png" />

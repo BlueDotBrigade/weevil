@@ -10,6 +10,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
         xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
@@ -64,24 +65,48 @@
                   <Grid.ColumnDefinitions>
                      <ColumnDefinition Width="*" />
                      <ColumnDefinition Width="Auto" />
+                     <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
                </Grid>
             </ItemsPanelTemplate>
          </StatusBar.ItemsPanel>
          <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
-            <TextBox>
-               <TextBox.Text>
-                  <MultiBinding Mode="OneWay" FallbackValue="" StringFormat="{}Insight is provided for: {0} to {1}">
-                     <Binding Path="From" />
-                     <Binding Path="To" />
-                  </MultiBinding>
-               </TextBox.Text>
-               <TextBox.Style>
-                  <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>
-               </TextBox.Style>
-            </TextBox>
+            <StackPanel Orientation="Horizontal">
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Document-24.png" ToolTip="Source file path."/>
+               <TextBox Text="{Binding SourceFilePath}"
+                        ToolTip="Source file path."
+                        Style="{StaticResource StatusBarTextBox}">
+               </TextBox>
+            </StackPanel>
          </StatusBarItem>
          <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
+            <StatusBarItem.Style>
+               <Style TargetType="{x:Type StatusBarItem}">
+                  <Setter Property="Visibility" Value="Visible"/>
+                  <Style.Triggers>
+                     <DataTrigger Binding="{Binding From}" Value="{x:Static system:DateTime.MaxValue}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                     </DataTrigger>
+                  </Style.Triggers>
+               </Style>
+            </StatusBarItem.Style>
+            <StackPanel Orientation="Horizontal">
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/FilterResults-24.png" 
+                      ToolTip="Filter results timespan."/>
+               <TextBox ToolTip="Filter results timespan.">
+                  <TextBox.Text>
+                     <MultiBinding Mode="OneWay" FallbackValue="" StringFormat="{}{0} to {1}">
+                        <Binding Path="From" />
+                        <Binding Path="To" />
+                     </MultiBinding>
+                  </TextBox.Text>
+                  <TextBox.Style>
+                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>
+                  </TextBox.Style>
+               </TextBox>
+            </StackPanel>
+         </StatusBarItem>
+         <StatusBarItem Grid.Column="2" VerticalAlignment="Center">
             <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='', Mode=OneWay}">
                <TextBox.Style>
                   <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>

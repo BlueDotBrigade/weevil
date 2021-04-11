@@ -107,7 +107,6 @@
     <Compile Include="Analysis\DashboardDialog.xaml.cs">
       <DependentUpon>DashboardDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Analysis\DashboardInsight.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -314,9 +313,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Weevil.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Document-24.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\Weevil-100.png" />

@@ -31,6 +31,11 @@
 				nameof(Context), typeof(ContextDictionary),
 				typeof(DashboardDialog));
 
+		public static readonly DependencyProperty SourceFilePathProperty =
+			DependencyProperty.Register(
+				nameof(SourceFilePath), typeof(string),
+				typeof(DashboardDialog));
+
 		private readonly IEngine _engine;
 
 		public IInsight[] Insights
@@ -51,6 +56,12 @@
 			set => SetValue(ToProperty, value);
 		}
 
+		public string SourceFilePath
+		{
+			get => (string)GetValue(SourceFilePathProperty);
+			set => SetValue(SourceFilePathProperty, value);
+		}
+
 		public ContextDictionary Context
 		{
 			get => (ContextDictionary)GetValue(ContextProperty);
@@ -64,6 +75,7 @@
 			InitializeComponent();
 
 			this.DataContext = this;
+			this.SourceFilePath = engine.SourceFilePath;
 
 			var range = _engine.Records.GetRange();
 			this.From = range.from;
