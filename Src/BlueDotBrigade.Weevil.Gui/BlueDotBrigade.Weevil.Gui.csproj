@@ -284,7 +284,6 @@
     <Resource Include="Resources\Icons\LogEntry-Error.png" />
     <Resource Include="Resources\Icons\LogEntry-Fatal.png" />
     <Resource Include="Resources\Icons\LogEntry-FatalMissing.png" />
-    <Resource Include="Resources\Icons\LogEntry-Information.png" />
     <Resource Include="Resources\Icons\LogEntry-Warning.png" />
     <Resource Include="Resources\Icons\OpenDocument.png" />
     <Resource Include="Resources\Icons\Records-OnDisk.png" />
@@ -344,6 +343,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Insight\Insight-Data-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\LogEntry-Information-24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

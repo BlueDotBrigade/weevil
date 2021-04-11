@@ -420,7 +420,7 @@
                <AccessText Text="_Case Sensitive Filtering"></AccessText>
             </CheckBox>
       </StackPanel>
-      <StatusBar Grid.Row="4" Height="40"
+      <StatusBar Grid.Row="4"
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"

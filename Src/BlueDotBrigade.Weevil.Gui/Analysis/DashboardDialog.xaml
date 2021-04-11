@@ -52,7 +52,7 @@
          <Button Content="Copy" Click="OnCopy"/>
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
-      <StatusBar Grid.Row="3" Height="40"
+      <StatusBar Grid.Row="3"
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"
