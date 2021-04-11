@@ -103,7 +103,7 @@
 				this.Insights.ToImmutableArray(),
 				this.From,
 				this.To);
-			Clipboard.SetData(DataFormats.Text, report);
+			Clipboard.SetData(DataFormats.UnicodeText, report);
 		}
 	}
 }
