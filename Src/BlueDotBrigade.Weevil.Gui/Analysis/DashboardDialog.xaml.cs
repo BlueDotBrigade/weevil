@@ -75,6 +75,8 @@
 			InitializeComponent();
 
 			this.DataContext = this;
+
+			this.Context = engine.Context;
 			this.SourceFilePath = engine.SourceFilePath;
 
 			var range = _engine.Records.GetEstimatedRange();

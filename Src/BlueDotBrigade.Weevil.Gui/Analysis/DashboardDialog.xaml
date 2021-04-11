@@ -84,6 +84,28 @@
                <Style TargetType="{x:Type StatusBarItem}">
                   <Setter Property="Visibility" Value="Visible"/>
                   <Style.Triggers>
+                     <DataTrigger Binding="{Binding Context.Count}" Value="0">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                     </DataTrigger>
+                  </Style.Triggers>
+               </Style>
+            </StatusBarItem.Style>
+            <StackPanel Orientation="Horizontal">
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Context-Data-24.png" 
+                      ToolTip="Context"/>
+               <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='', Mode=OneWay}"
+                        ToolTip="Context">
+                  <TextBox.Style>
+                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>
+                  </TextBox.Style>
+               </TextBox>
+            </StackPanel>
+         </StatusBarItem>
+         <StatusBarItem Grid.Column="2" VerticalAlignment="Center">
+            <StatusBarItem.Style>
+               <Style TargetType="{x:Type StatusBarItem}">
+                  <Setter Property="Visibility" Value="Visible"/>
+                  <Style.Triggers>
                      <DataTrigger Binding="{Binding From}" Value="{x:Static system:DateTime.MaxValue}">
                         <Setter Property="Visibility" Value="Collapsed"/>
                      </DataTrigger>
@@ -91,7 +113,7 @@
                </Style>
             </StatusBarItem.Style>
             <StackPanel Orientation="Horizontal">
-               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/FilterResults-24.png" 
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/DateRange-24.png" 
                       ToolTip="Filter results timespan."/>
                <TextBox ToolTip="Filter results timespan.">
                   <TextBox.Text>
@@ -105,13 +127,6 @@
                   </TextBox.Style>
                </TextBox>
             </StackPanel>
-         </StatusBarItem>
-         <StatusBarItem Grid.Column="2" VerticalAlignment="Center">
-            <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='', Mode=OneWay}">
-               <TextBox.Style>
-                  <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}"/>
-               </TextBox.Style>
-            </TextBox>
          </StatusBarItem>
       </StatusBar>
    </Grid>
