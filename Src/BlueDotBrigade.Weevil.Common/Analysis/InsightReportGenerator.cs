@@ -15,12 +15,10 @@
 			output.AppendLine($"- [General](#general)");
 			output.AppendLine($"- [Insight](#insight)");
 			output.AppendLine($"   - [Problem Areas](#problem-areas)");
-			output.AppendLine($"   - [Additional Information](#additional-information)");
+			output.AppendLine($"   - [More Information](#more-information)");
 
 			return output.ToString();
 		}
-
-
 
 		private static string ToMarkdown(IInsight insight)
 		{
@@ -46,8 +44,8 @@
 			output.AppendLine(GetTableOfContents());
 			output.AppendLine($"## General");
 			output.AppendLine($"");
-			output.AppendLine($" - Insight is for: {from} to {to}");
 			output.AppendLine($" - Context: {context}");
+			output.AppendLine($" - Time period analyzed: {from} to {to}");
 			output.AppendLine($"");
 			output.AppendLine($"## Insight");
 			output.AppendLine($"");
@@ -60,7 +58,7 @@
 					output.AppendLine(ToMarkdown(insight));
 				}
 			}
-			output.AppendLine($"### Additional Information");
+			output.AppendLine($"### More Information");
 			output.AppendLine($"");
 			foreach (IInsight insight in insights)
 			{
