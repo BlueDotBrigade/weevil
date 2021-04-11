@@ -974,7 +974,10 @@
 		{
 			try
 			{
-				_engine.Analyzer.Analyze(analysisType, _dialogBox);
+				this.FlaggedRecordCount = -1;
+				this.FlaggedRecordCount = _engine
+					.Analyzer.Analyze(analysisType, _dialogBox);
+				RaisePropertyChanged(nameof(this.FlaggedRecordCount));
 			}
 			catch (Exception e)
 			{
@@ -986,7 +989,10 @@
 		{
 			try
 			{
-				_engine.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
+				this.FlaggedRecordCount = -1;
+				this.FlaggedRecordCount = _engine
+					.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
+				RaisePropertyChanged(nameof(this.FlaggedRecordCount));
 			}
 			catch (Exception e)
 			{

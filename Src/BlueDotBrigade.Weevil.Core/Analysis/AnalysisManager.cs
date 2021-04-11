@@ -98,13 +98,13 @@
 			Analyze(analyzerKey, new UserDialogNotRequired());
 		}
 
-		public void Analyze(AnalysisType analysisType, IUserDialog userDialog)
+		public int  Analyze(AnalysisType analysisType, IUserDialog userDialog)
 		{
 			var analyzerKey = analysisType.ToString();
-			Analyze(analyzerKey, userDialog);
+			return Analyze(analyzerKey, userDialog);
 		}
 
-		public void Analyze(string analyzerKey, IUserDialog userDialog)
+		public int Analyze(string analyzerKey, IUserDialog userDialog)
 		{
 			ImmutableArray<IRecord> records = _coreEngine.Selector.IsTimePeriodSelected
 				? _coreEngine.Selector.GetSelected()
@@ -112,11 +112,13 @@
 
 			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
 
-			analyzer.Analyze(
+			var recordCount = analyzer.Analyze(
 				records,
 				_coreEngine.SourceDirectory,
 				userDialog,
 				true);
+
+			return recordCount;
 		}
 	}
 }
