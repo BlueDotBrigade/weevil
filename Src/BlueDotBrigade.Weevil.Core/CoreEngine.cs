@@ -245,9 +245,9 @@
 
 		#region Private Methods
 
-		private ImmutableArray<IRecordCounter> GetRecordCounters()
+		private ImmutableArray<IMetricCollector> GetRecordCounters()
 		{
-			IList<IRecordCounter> recordCounters = _coreExtension.GetRecordCounters(_context);
+			IList<IMetricCollector> recordCounters = _coreExtension.GetRecordCounters(_context);
 			recordCounters.Add(new SeverityMetrics());
 			return recordCounters.ToImmutableArray();
 		}

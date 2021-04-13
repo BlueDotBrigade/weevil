@@ -2,15 +2,17 @@
 {
 	using System.Collections.Generic;
 	using System.Threading;
-	using Data;
+	using BlueDotBrigade.Weevil.Data;
 
-	internal class SeverityMetrics : IRecordCounter
+	public class SeverityMetrics : IMetricCollector
 	{
 		#region Fields
 		private int _information;
 		private int _warning;
 		private int _error;
 		private int _fatal;
+
+		private IRecord _fatalFirstOccurredAt;
 		#endregion
 
 		#region Object Lifetime
@@ -24,6 +26,8 @@
 		public int Errors => _error;
 
 		public int Fatals => _fatal;
+
+		public IRecord FatalFirstOccurredAt => _fatalFirstOccurredAt;
 		#endregion
 
 		#region Private Methods
@@ -49,7 +53,11 @@
 					break;
 
 				case SeverityType.Critical:
-					Interlocked.Increment(ref _fatal);
+					var count = Interlocked.Increment(ref _fatal);
+					if (count == 1)
+					{
+						_fatalFirstOccurredAt = record;
+					}
 					break;
 			}
 		}

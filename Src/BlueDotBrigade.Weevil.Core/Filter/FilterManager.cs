@@ -22,7 +22,7 @@
 		private readonly ContextDictionary _context;
 		private readonly IStaticAliasExpander _staticAliasExpander;
 		private readonly ImmutableArray<IRecord> _allRecords;
-		private readonly ImmutableArray<IRecordCounter> _recordAnalyzers;
+		private readonly ImmutableArray<IMetricCollector> _recordAnalyzers;
 
 		private FilterStrategy _latestFilterStrategy;
 		private ImmutableArray<IRecord> _latestFilterResults;
@@ -44,7 +44,7 @@
 			ContextDictionary context,
 			IStaticAliasExpander staticAliasExpander,
 			ImmutableArray<IRecord> allRecords,
-			ImmutableArray<IRecordCounter> recordAnalyzers)
+			ImmutableArray<IMetricCollector> recordAnalyzers)
 		{
 			_coreExtension = coreExtension;
 			_context = context;
@@ -95,7 +95,7 @@
 		{
 			_abortFilterOperation = false;
 
-			foreach (IRecordCounter analyzer in _recordAnalyzers)
+			foreach (IMetricCollector analyzer in _recordAnalyzers)
 			{
 				analyzer.Reset();
 			}
@@ -129,7 +129,7 @@
 							  resultsCache[index] = record;
 							  results.Count++;
 
-							  foreach (IRecordCounter analyzer in _recordAnalyzers)
+							  foreach (IMetricCollector analyzer in _recordAnalyzers)
 							  {
 								  analyzer.Count(record);
 							  }
@@ -343,7 +343,7 @@
 		{
 			var metrics = new Dictionary<string, object>();
 
-			foreach (IRecordCounter collector in _recordAnalyzers)
+			foreach (IMetricCollector collector in _recordAnalyzers)
 			{
 				foreach (KeyValuePair<string, object> result in collector.GetResults())
 				{

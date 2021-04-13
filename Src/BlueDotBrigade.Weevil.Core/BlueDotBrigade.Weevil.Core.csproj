@@ -4,7 +4,7 @@
 		<Platforms>x64</Platforms>
 		<PackageId>BlueDotBrigade.Weevil.Core</PackageId>
 		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-		<Version>2.5.0</Version>
+		<Version>2.7.0</Version>
 		<Authors>BlueDotBrigade;</Authors>
 		<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
 		<Owners>Blue Dot Brigade</Owners>

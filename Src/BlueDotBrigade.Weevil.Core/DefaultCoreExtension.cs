@@ -13,7 +13,7 @@
 		private readonly ContextDictionary _context;
 		private readonly IRecordParser _recordParser;
 		private readonly IDictionary<string, string> _staticAliases;
-		private readonly List<IRecordCounter> _recordCounters;
+		private readonly List<IMetricCollector> _recordCounters;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
 
@@ -24,7 +24,7 @@
 			_context = context;
 			_recordParser = new DefaultRecordParser();
 			_staticAliases = new Dictionary<string, string>();
-			_recordCounters = new List<IRecordCounter>();
+			_recordCounters = new List<IMetricCollector>();
 			_monikerActivators = new List<MonikerActivator>();
 			_tableOfContents = new TableOfContents();
 		}
@@ -46,7 +46,18 @@
 			return new List<IRecordAnalyzer>();
 		}
 
-		public IList<IRecordCounter> GetRecordCounters(ContextDictionary context)
+		public ImmutableArray<IInsight> GetInsights(ContextDictionary context)
+		{
+			var insights = new List<IInsight>()
+			{
+				new CriticalErrorsInsight(),
+				new UiResponsivenessInsight(),
+			};
+
+			return insights.ToImmutableArray();
+		}
+
+		public IList<IMetricCollector> GetRecordCounters(ContextDictionary context)
 		{
 			return _recordCounters;
 		}

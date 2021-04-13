@@ -104,6 +104,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Analysis\DashboardDialog.xaml.cs">
+      <DependentUpon>DashboardDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -112,7 +115,6 @@
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\CheckBoxValidationErrorConverter.cs" />
     <Compile Include="Converters\ContentConverter.cs" />
-    <Compile Include="Converters\ContextConverter.cs" />
     <Compile Include="Converters\FilterMultiValueConverter.cs" />
     <Compile Include="Converters\SeverityToBackgroundConverter.cs" />
     <Compile Include="Converters\SeverityToForegroundConverter.cs" />
@@ -193,6 +195,10 @@
     <Resource Include="Resources\Icons\Records-OnDiskChanged.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Analysis\DashboardDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Filter\FilterResultsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -214,6 +220,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\ApplicationStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\DashboardInsightStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -260,13 +270,13 @@
       <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
       <Name>BlueDotBrigade.Weevil.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj">
-      <Project>{35af40b9-ba74-4fa7-8f52-c60e23921e85}</Project>
-      <Name>BlueDotBrigade.Weevil.Windows</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj">
       <Project>{29bd191a-f2d0-4769-b325-6afe68c3e7cf}</Project>
       <Name>BlueDotBrigade.Weevil.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj">
+      <Project>{35af40b9-ba74-4fa7-8f52-c60e23921e85}</Project>
+      <Name>BlueDotBrigade.Weevil.Windows</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -274,7 +284,6 @@
     <Resource Include="Resources\Icons\LogEntry-Error.png" />
     <Resource Include="Resources\Icons\LogEntry-Fatal.png" />
     <Resource Include="Resources\Icons\LogEntry-FatalMissing.png" />
-    <Resource Include="Resources\Icons\LogEntry-Information.png" />
     <Resource Include="Resources\Icons\LogEntry-Warning.png" />
     <Resource Include="Resources\Icons\OpenDocument.png" />
     <Resource Include="Resources\Icons\Records-OnDisk.png" />
@@ -282,7 +291,6 @@
     <Resource Include="Resources\Icons\Records-Selected.png" />
     <Resource Include="Resources\Icons\Records-Visible.png" />
     <Resource Include="Resources\Icons\TimeElapsed.png" />
-    <Resource Include="Resources\Icons\Ui-Unresponsive.png" />
     <Resource Include="Resources\Icons\VersionIcon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -306,9 +314,6 @@
     <Resource Include="Resources\Icons\Weevil.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\Document-24.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Images\Weevil-100.png" />
   </ItemGroup>
   <ItemGroup>
@@ -329,7 +334,19 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\LogEntry-ErrorFound.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Insight\Insight-DataRequiresAttention-24.png" />
+    <Resource Include="Resources\Icons\Insight\Insight-NoData-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Alarms-Inactive-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Insight\Insight-Data-24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\LogEntry-Information-24.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...

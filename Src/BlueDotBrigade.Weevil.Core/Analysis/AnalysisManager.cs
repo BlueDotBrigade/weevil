@@ -78,6 +78,20 @@
 			return analyzers;
 		}
 
+		public ImmutableArray<IInsight> GetInsights()
+		{
+			var insights = new List<IInsight>();
+
+			insights.AddRange(_coreExtension.GetInsights(_coreEngine.Context));
+
+			foreach (IInsight insight in insights)
+			{
+				insight.Refresh(_coreEngine.Records);
+			}
+
+			return ImmutableArray.Create(insights.ToArray());
+		}
+
 		public void Analyze(AnalysisType analysisType)
 		{
 			var analyzerKey = analysisType.ToString();
@@ -101,7 +115,8 @@
 			analyzer.Analyze(
 				records,
 				_coreEngine.SourceDirectory,
-				userDialog);
+				userDialog,
+				true);
 		}
 	}
 }

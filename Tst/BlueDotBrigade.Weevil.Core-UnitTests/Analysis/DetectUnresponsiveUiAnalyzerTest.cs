@@ -66,7 +66,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsFalse(_records[0].Metadata.IsFlagged);
 		}
@@ -76,7 +76,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsFalse(_records[1].Metadata.IsFlagged);
 		}
@@ -86,7 +86,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsFalse(_records[2].Metadata.IsFlagged);
 		}
@@ -96,7 +96,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsTrue(_records[3].Metadata.IsFlagged); // here
 		}
@@ -106,7 +106,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsFalse(_records[4].Metadata.IsFlagged);
 		}
@@ -116,7 +116,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsFalse(_records[5].Metadata.IsFlagged);
 		}
@@ -126,7 +126,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsTrue(_records[6].Metadata.IsFlagged);
 		}
@@ -136,7 +136,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsFalse(_records[7].Metadata.IsFlagged);
 		}
@@ -146,7 +146,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000));
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
 			Assert.IsFalse(_records[8].Metadata.IsFlagged);
 		}
