@@ -345,7 +345,7 @@
     <Resource Include="Resources\Icons\Insight\Insight-Data-24.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons\LogEntry-Information-24.png" />
+    <Resource Include="Resources\Icons\LogEntry-Information.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
