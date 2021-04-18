@@ -19,8 +19,8 @@
 
 		ContextDictionary DetermineContext(ImmutableArray<IRecord> allRecords);
 
-		IList<IRecordAnalyzer> GetAnalyzers();
-		ImmutableArray<IInsight> GetInsights(ContextDictionary context);
+		IList<IRecordAnalyzer> GetAnalyzers(ContextDictionary context, ITableOfContents tableOfContents);
+		ImmutableArray<IInsight> GetInsights(ContextDictionary context, ITableOfContents tableOfContents);
 		IList<IMetricCollector> GetRecordCounters(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
 		IDictionary<string, string> GetStaticAliases(ContextDictionary context);
