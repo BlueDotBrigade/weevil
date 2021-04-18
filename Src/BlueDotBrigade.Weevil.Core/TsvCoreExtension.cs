@@ -42,12 +42,12 @@
 			return _context;
 		}
 
-		public IList<IRecordAnalyzer> GetAnalyzers()
+		public IList<IRecordAnalyzer> GetAnalyzers(ContextDictionary context, ITableOfContents tableOfContents)
 		{
 			return new List<IRecordAnalyzer>();
 		}
 
-		public ImmutableArray<IInsight> GetInsights(ContextDictionary context)
+		public ImmutableArray<IInsight> GetInsights(ContextDictionary context, ITableOfContents tableOfContents)
 		{
 			var insights = new List<IInsight>()
 			{

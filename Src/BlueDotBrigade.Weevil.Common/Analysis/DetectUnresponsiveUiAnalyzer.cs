@@ -42,9 +42,9 @@
 
 			_problemsDetectedPadlock = new object();
 		}
-		public string Key => AnalysisType.DetectUnresponsiveUi.ToString();
+		public virtual string Key => AnalysisType.DetectUnresponsiveUi.ToString();
 
-		public string DisplayName => "Detect Unresponsive UI";
+		public virtual string DisplayName => "Detect Unresponsive UI";
 
 		public TimeSpan MaximumPeriodDetected => _maximumPeriodDetected;
 
@@ -99,37 +99,7 @@
 
 					if (currentRecord.Metadata.WasGeneratedByUi)
 					{
-						TimeSpan timePeriodBetweenUiMessages = currentRecord.CreatedAt - previousRecord.CreatedAt;
-
-						if (timePeriodBetweenUiMessages > CutoffPeriod)
-						{
-							// assume the application was restarted
-						}
-						else
-						{
-							_maximumPeriodDetected = timePeriodBetweenUiMessages > _maximumPeriodDetected ? timePeriodBetweenUiMessages : _maximumPeriodDetected;
-
-							if (timePeriodBetweenUiMessages > maximumAllowedPeriod)
-							{
-								Log.Default.Write(LogSeverityType.Warning, $"User interface appears to be unresponsive. Line={currentRecord.LineNumber}, Delay={timePeriodBetweenUiMessages}");
-								_problemsDetected++;
-
-								if (canUpdateMetadata)
-								{
-									currentRecord.Metadata.IsFlagged = true;
-								}
-
-								if (_problemsDetected == 1)
-								{
-									_firstOccurrenceAt = currentRecord.CreatedAt;
-								}
-
-								if (canUpdateMetadata)
-								{
-									currentRecord.Metadata.UpdateUserComment($"Unresponsive UI: {TimeSpanExtensions.ToHumanReadable(timePeriodBetweenUiMessages)}");
-								}
-							}
-						}
+						CheckIfProblemExists(currentRecord, previousRecord, maximumAllowedPeriod, canUpdateMetadata);
 
 						previousRecord = currentRecord;
 					}
@@ -142,7 +112,43 @@
 			return this.UnresponsiveUiCount;
 		}
 
-		private static bool TryGetTolerance(IUserDialog user, out TimeSpan unresponsivenessPeriod)
+		protected virtual void CheckIfProblemExists(IRecord currentRecord, IRecord previousRecord, TimeSpan maximumAllowedPeriod,
+			bool canUpdateMetadata)
+		{
+			TimeSpan timePeriodBetweenUiMessages = currentRecord.CreatedAt - previousRecord.CreatedAt;
+
+			if (timePeriodBetweenUiMessages > CutoffPeriod)
+			{
+				// assume the application was restarted
+			}
+			else
+			{
+				_maximumPeriodDetected = timePeriodBetweenUiMessages > _maximumPeriodDetected
+					? timePeriodBetweenUiMessages
+					: _maximumPeriodDetected;
+
+				if (timePeriodBetweenUiMessages > maximumAllowedPeriod)
+				{
+					Log.Default.Write(LogSeverityType.Warning,
+						$"User interface appears to be unresponsive. Line={currentRecord.LineNumber}, Delay={timePeriodBetweenUiMessages}");
+					_problemsDetected++;
+
+					if (_problemsDetected == 1)
+					{
+						_firstOccurrenceAt = currentRecord.CreatedAt;
+					}
+
+					if (canUpdateMetadata)
+					{
+						currentRecord.Metadata.IsFlagged = true;
+						currentRecord.Metadata.UpdateUserComment(
+							$"Unresponsive UI: {TimeSpanExtensions.ToHumanReadable(timePeriodBetweenUiMessages)}");
+					}
+				}
+			}
+		}
+
+		protected virtual bool TryGetTolerance(IUserDialog user, out TimeSpan unresponsivenessPeriod)
 		{
 			var userInput = user.ShowUserPrompt(
 				"Input Required",

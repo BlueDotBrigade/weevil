@@ -74,7 +74,9 @@
 
 			if ((componentType & ComponentType.Extension) == ComponentType.Extension)
 			{
-				analyzers.AddRange(_coreExtension.GetAnalyzers());
+				analyzers.AddRange(_coreExtension.GetAnalyzers(
+					_coreEngine.Context,
+					_coreEngine.Navigator.TableOfContents));
 			}
 
 			return analyzers;
@@ -88,7 +90,9 @@
 
 			var stopwatch = Stopwatch.StartNew();
 
-			insights.AddRange(_coreExtension.GetInsights(_coreEngine.Context));
+			insights.AddRange(_coreExtension.GetInsights(
+				_coreEngine.Context,
+				_coreEngine.Navigator.TableOfContents));
 
 			foreach (IInsight insight in insights)
 			{
