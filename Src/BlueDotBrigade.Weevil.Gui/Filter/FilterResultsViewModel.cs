@@ -41,7 +41,7 @@
 	internal partial class FilterResultsViewModel : IDropTarget, INotifyPropertyChanged
 	{
 		private static readonly Uri NewReleaseUrl =
-			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/ReleaseNotes.xml");
+			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
@@ -85,7 +85,7 @@
 		private FilterCriteria _previousFilterCriteria;
 
 		private FilterType _currentfilterType;
-		private FilterCriteria _currentfilterCriteria;
+		private IFilterCriteria _currentfilterCriteria;
 
 		private int _concurrentFilterCount;
 
@@ -101,8 +101,6 @@
 
 			_engine = Engine.Surrogate;
 
-			_previousFilterCriteria = FilterCriteria.None;
-
 			this.IsLogFileOpen = Engine.IsRealInstance(_engine);
 			this.IsCommandExecuting = false;
 
@@ -112,6 +110,8 @@
 			_exclusiveFilter = string.Empty;
 
 			_concurrentFilterCount = 0;
+			_currentfilterCriteria = FilterCriteria.None;
+			_previousFilterCriteria = FilterCriteria.None;
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
@@ -152,7 +152,7 @@
 			try
 			{
 #if DEBUG
-				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\ReleaseNotes.xml");
+				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\NewReleaseNotification.xml");
 				Stream newReleaseStream = FileHelper.Open(applicationInfoPath);
 #else
 				Stream newReleaseStream = new WebClient().OpenRead(NewReleaseUrl);
@@ -1068,7 +1068,7 @@
 		/// In this case, work is being deferred to a background thread. As a result,
 		/// the transition the UI & background threads has to be managed.
 		/// </remarks>
-		private void FilterAsynchronously(FilterType filterType, FilterCriteria filterCriteria)
+		private void FilterAsynchronously(FilterType filterType, IFilterCriteria filterCriteria)
 		{
 			Log.Default.Write(
 				LogSeverityType.Debug,

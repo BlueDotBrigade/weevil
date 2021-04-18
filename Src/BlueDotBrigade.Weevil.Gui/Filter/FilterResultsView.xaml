@@ -99,7 +99,7 @@
                  ToolTip="Open a new document. (Ctrl+O)"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
             Margin="{StaticResource ButtonMargin}">
-            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument.png"/>
+            <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument-Button-24.png"/>
          </Button>
          <Label Grid.Column="1" Target="{Binding ElementName=InclusiveFilter}" Content="AccessKey hack for: _Inclusive ComboBox" Width="0"/>
             <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
@@ -455,15 +455,15 @@
          </StatusBar.ItemsPanel>
          <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Document-24.png" ToolTip="Path of the open document."/>
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Document&apos;s path."/>
                <TextBox>
                   <TextBox.Style>
                      <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
                         <Setter Property="Text" Value="{Binding SourceFilePath, Mode=OneWay}" />
-                        <Setter Property="ToolTip" Value="Path of the open document."/>
+                        <Setter Property="ToolTip" Value="Document&apos;s path."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding SourceFilePath, Mode=OneWay}" Value="">
-                              <Setter Property="Text" Value="To begin, please open (Ctrl+O) a document."/>
+                              <Setter Property="Text" Value="Begin by opening (Ctrl+O) a document."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -473,7 +473,7 @@
          </StatusBarItem>
          <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/Resources/Icons/TimeElapsed.png" ToolTip="Time elapsed between selected records."/>
+               <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Time elapsed between selected records."/>
                <TextBox Text="{Binding Path=ElapsedTime, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
                         ToolTip="Elapsed time."
                         controls:TextBoxBehavior.AutoSelectEnabled="True"
@@ -482,19 +482,20 @@
          </StatusBarItem>
          <Separator Grid.Column="2" />
          <StatusBarItem Grid.Column="3" VerticalAlignment="Center">
-            <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
+            <StackPanel Orientation="Horizontal">
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Context-Data-24.png" 
+                      ToolTip="Context"/>
+               <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
                         ToolTip="Source file context."
                         Style="{StaticResource StatusBarTextBox}"/>
+            </StackPanel>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="5" VerticalAlignment="Center">
+         <StatusBarItem Grid.Column="4" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="6" />
-         <StatusBarItem Grid.Column="7" VerticalAlignment="Center">
-         </StatusBarItem>
-         <Separator Grid.Column="8" />
-         <StatusBarItem Grid.Column="9" VerticalAlignment="Center">
+         <Separator Grid.Column="5" />
+         <StatusBarItem Grid.Column="6" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
                <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Number of flagged records."/>
                <TextBox Text="{Binding FlaggedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
@@ -502,25 +503,25 @@
                            Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="10" />
-         <StatusBarItem Grid.Column="11" VerticalAlignment="Center">
+         <Separator Grid.Column="7" />
+         <StatusBarItem Grid.Column="8" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/Resources/Icons/LogEntry-Information.png" ToolTip="Informational Messages" />
+               <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Informational Messages" />
                <TextBox Text="{Binding Metrics[Information], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Informational Messages"
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image Source="/Resources/Icons/LogEntry-Warning.png" ToolTip="Warning Messages" />
+               <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Warning Messages" />
                <TextBox Text="{Binding Metrics[Warnings], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Warning Messages"
                              Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-ErrorFound.png" />
+                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-DataRequiresAttention-24.png" />
                         <Setter Property="ToolTip" Value="Error Messages"/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding Metrics[Errors], FallbackValue=0, Mode=OneWay}" Value="0">
-                              <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error.png"/>
+                              <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-Data-24.png"/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -531,25 +532,25 @@
                              Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="12" />
-         <StatusBarItem Grid.Column="13">
+         <Separator Grid.Column="9" />
+         <StatusBarItem Grid.Column="10">
             <StackPanel Orientation="Horizontal" >
-               <Image Source="/Resources/Icons/Records-Selected.png" ToolTip="Selected AllRecords"/>
+               <Image Source="/Resources/Icons/RecordsSelected-Data-24.png" ToolTip="Selected AllRecords"/>
                <TextBox Text="{Binding SelectedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Selected Record Count"
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image Source="/Resources/Icons/Records-Visible.png" ToolTip="Visible AllRecords"/>
+               <Image Source="/Resources/Icons/RecordsVisible-Data-24.png" ToolTip="Visible AllRecords"/>
                <TextBox Text="{Binding VisibleRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Visible Record Count"
                              Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/Records-OnDisk.png" />
+                        <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-Data-24.png" />
                         <Setter Property="ToolTip" Value="Total record count."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
-                              <Setter Property="Source" Value="/Resources/Icons/Records-OnDiskChanged.png"/>
+                              <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-DataRequiresAttention-24.png"/>
                               <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
                            </DataTrigger>
                         </Style.Triggers>
@@ -570,13 +571,13 @@
                </TextBox>
             </StackPanel>
          </StatusBarItem>
-         <Separator Grid.Column="14" />
-         <StatusBarItem Grid.Column="15">
+         <Separator Grid.Column="11" />
+         <StatusBarItem Grid.Column="12">
             <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
                      ToolTip="TOC heading related to selected record."
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="16">
+         <StatusBarItem Grid.Column="13">
             <materialDesign:Badged Margin="10, 0">
                <materialDesign:Badged.Style>
                   <Style TargetType="{x:Type materialDesign:Badged}">
@@ -616,7 +617,7 @@
                </Image>
             </materialDesign:Badged>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="17" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+         <StatusBarItem Grid.Column="14" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
                <ToggleButton Name="NewReleaseButton" ToolTip="New version is available! Click for details." >
                   <ToggleButton.Template>

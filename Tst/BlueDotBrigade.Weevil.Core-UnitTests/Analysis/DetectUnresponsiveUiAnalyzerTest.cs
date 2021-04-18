@@ -96,7 +96,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), true);
 
 			Assert.IsTrue(_records[3].Metadata.IsFlagged); // here
 		}
@@ -126,7 +126,7 @@
 		{
 			var analyzer = new DetectUnresponsiveUiAnalyzer();
 
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
+			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), true);
 
 			Assert.IsTrue(_records[6].Metadata.IsFlagged);
 		}

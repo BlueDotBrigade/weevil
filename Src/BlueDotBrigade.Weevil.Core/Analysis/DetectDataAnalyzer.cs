@@ -24,9 +24,9 @@
 		/// Extracts key/value pairs defined by regular expression "groups", and then updates the corresponding <see cref="Metadata.Comment"/>.
 		/// </summary>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateComments)
+		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var flaggedRecords = 0;
+			var count = 0;
 
 			if (_filterStrategy != FilterStrategy.KeepAllRecords)
 			{
@@ -36,7 +36,10 @@
 
 					foreach (IRecord record in records)
 					{
-						record.Metadata.IsFlagged = false;
+						if (canUpdateMetadata)
+						{
+							record.Metadata.IsFlagged = false;
+						}
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -49,10 +52,14 @@
 									if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
 									{
 										var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
-										record.Metadata.IsFlagged = true;
-										record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
 
-										flaggedRecords++;
+										if (canUpdateMetadata)
+										{
+											record.Metadata.IsFlagged = true;
+											record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
+										}
+
+										count++;
 									}
 								}
 							}
@@ -61,7 +68,7 @@
 				}
 			}
 
-			return flaggedRecords;
+			return count;
 		}
 
 		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)
