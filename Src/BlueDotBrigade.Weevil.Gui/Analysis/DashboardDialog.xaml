@@ -35,18 +35,20 @@
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
-      <ItemsControl Grid.Row="0" ItemsSource="{Binding Insights}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-         <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-               <WrapPanel Orientation="Horizontal"/>
-            </ItemsPanelTemplate>
-         </ItemsControl.ItemsPanel>
-         <ItemsControl.ItemTemplate>
-            <DataTemplate>
-               <analysis:InsightControl Value="{Binding}" Style="{StaticResource DashboardInsightStyle}"/>
-            </DataTemplate>
-         </ItemsControl.ItemTemplate>
-      </ItemsControl>
+      <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+         <ItemsControl ItemsSource="{Binding Insights}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl.ItemsPanel>
+               <ItemsPanelTemplate>
+                  <WrapPanel Orientation="Horizontal"/>
+               </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+               <DataTemplate>
+                  <analysis:InsightControl Value="{Binding}" Style="{StaticResource DashboardInsightStyle}"/>
+               </DataTemplate>
+            </ItemsControl.ItemTemplate>
+         </ItemsControl>
+      </ScrollViewer>
       <StackPanel Grid.Row="1" Orientation="Horizontal">
          <Button Content="Refresh" Click="OnRefresh"/>
          <Button Content="Copy" Click="OnCopy"/>
