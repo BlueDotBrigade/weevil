@@ -449,6 +449,7 @@
                      <ColumnDefinition Width="Auto" />
                      <ColumnDefinition Width="Auto" />
                      <ColumnDefinition Width="Auto" />
+                     <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
                </Grid>
             </ItemsPanelTemplate>
@@ -573,11 +574,6 @@
          </StatusBarItem>
          <Separator Grid.Column="11" />
          <StatusBarItem Grid.Column="12">
-            <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
-                     ToolTip="TOC heading related to selected record."
-                     Style="{StaticResource StatusBarTextBox}"/>
-         </StatusBarItem>
-         <StatusBarItem Grid.Column="13">
             <materialDesign:Badged Margin="10, 0">
                <materialDesign:Badged.Style>
                   <Style TargetType="{x:Type materialDesign:Badged}">
@@ -617,7 +613,13 @@
                </Image>
             </materialDesign:Badged>
          </StatusBarItem>
-         <StatusBarItem Grid.Column="14" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+         <Separator Grid.Column="13" />
+         <StatusBarItem Grid.Column="14">
+            <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
+                     ToolTip="TOC heading related to selected record."
+                     Style="{StaticResource StatusBarTextBox}"/>
+         </StatusBarItem>
+         <StatusBarItem Grid.Column="15" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
                <ToggleButton Name="NewReleaseButton" ToolTip="New version is available! Click for details." >
                   <ToggleButton.Template>
