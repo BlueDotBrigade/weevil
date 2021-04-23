@@ -552,7 +552,7 @@
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
                               <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-DataRequiresAttention-24.png"/>
-                              <Setter Property="ToolTip" Value="Total number of records is no longer reflective of the original document.&#x0d;&#x0a;A clear operation has been performed."/>
+                              <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -564,7 +564,7 @@
                         <Setter Property="ToolTip" Value="Total number of records in the original document." />
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
-                              <Setter Property="ToolTip" Value="Total number of records is no longer reflective of the original document.&#x0d;&#x0a;A clear operation has been performed."/>
+                              <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
