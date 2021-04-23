@@ -621,16 +621,14 @@
          </StatusBarItem>
          <StatusBarItem Grid.Column="15" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
-               <ToggleButton Name="NewReleaseButton" ToolTip="New version is available! Click for details." >
-                  <ToggleButton.Template>
-                     <ControlTemplate TargetType="ToggleButton">
-                        <Image Height="24" Width="24" Source="/Resources/Icons/NewReleaseAvailable-24.png"/>
-                     </ControlTemplate>
-                  </ToggleButton.Template>
-               </ToggleButton>
                <materialDesign:PopupBox
                   StaysOpen="True"
                   IsPopupOpen="{Binding IsChecked, ElementName=NewReleaseButton, Mode=TwoWay}">
+                  <materialDesign:PopupBox.ToggleContent>
+                     <Image Height="24" Width="24" 
+                            Source="/Resources/Icons/NewReleaseAvailable-24.png"
+                            ToolTip="New version is available! Click for details."/>
+                  </materialDesign:PopupBox.ToggleContent>
                   <Grid Margin="20">
                      <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
