@@ -574,55 +574,49 @@
          </StatusBarItem>
          <Separator Grid.Column="11" />
          <StatusBarItem Grid.Column="12">
-            <materialDesign:Badged Margin="10, 0">
-               <materialDesign:Badged.Style>
-                  <Style TargetType="{x:Type materialDesign:Badged}">
-                     <Setter Property="Badge" Value=""/>
-                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding HasInsightNeedingAttention}" Value="true">
-                           <Setter Property="Badge" Value="{Binding InsightNeedingAttention}"/>
-                        </DataTrigger>
-                     </Style.Triggers>
-                  </Style>
-               </materialDesign:Badged.Style>
-               <Image>
-                  <Image.Style>
-                     <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
-                        <Setter Property="ToolTip" Value="Weevil does not have insight at this time."/>
+            <StackPanel Orientation="Horizontal">
+               <materialDesign:Badged Margin="10, 0">
+                  <materialDesign:Badged.Style>
+                     <Style TargetType="{x:Type materialDesign:Badged}">
+                        <Setter Property="Badge" Value=""/>
                         <Style.Triggers>
-                           <MultiDataTrigger>
-                              <MultiDataTrigger.Conditions>
-                                 <Condition Binding="{Binding HasInsight}" Value="True" />
-                                 <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
-                              </MultiDataTrigger.Conditions>
-                              <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                              <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight on the current document.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
-                           </MultiDataTrigger>
-                           <MultiDataTrigger>
-                              <MultiDataTrigger.Conditions>
-                                 <Condition Binding="{Binding HasInsight}" Value="True" />
-                                 <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
-                              </MultiDataTrigger.Conditions>
-                              <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                              <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight that requires the user&apos;s attention.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
-                           </MultiDataTrigger>
+                           <DataTrigger Binding="{Binding HasInsightNeedingAttention}" Value="true">
+                              <Setter Property="Badge" Value="{Binding InsightNeedingAttention}"/>
+                           </DataTrigger>
                         </Style.Triggers>
                      </Style>
-                  </Image.Style>
-               </Image>
-            </materialDesign:Badged>
-         </StatusBarItem>
-         <Separator Grid.Column="13" />
-         <StatusBarItem Grid.Column="14">
-            <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
-                     ToolTip="TOC heading related to selected record."
-                     Style="{StaticResource StatusBarTextBox}"/>
-         </StatusBarItem>
-         <StatusBarItem Grid.Column="15" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StackPanel>
+                  </materialDesign:Badged.Style>
+                  <Image>
+                     <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                           <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+                           <Setter Property="ToolTip" Value="Weevil does not have insight at this time."/>
+                           <Style.Triggers>
+                              <MultiDataTrigger>
+                                 <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasInsight}" Value="True" />
+                                    <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
+                                 </MultiDataTrigger.Conditions>
+                                 <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight on the current document.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
+                           </MultiDataTrigger>
+                              <MultiDataTrigger>
+                                 <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasInsight}" Value="True" />
+                                    <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
+                                 </MultiDataTrigger.Conditions>
+                                 <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight that requires the user&apos;s attention.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
+                           </MultiDataTrigger>
+                           </Style.Triggers>
+                        </Style>
+                     </Image.Style>
+                  </Image>
+               </materialDesign:Badged>
                <materialDesign:PopupBox
                   StaysOpen="True"
+                  Cursor="Hand" 
+                  Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"
                   IsPopupOpen="{Binding IsChecked, ElementName=NewReleaseButton, Mode=TwoWay}">
                   <materialDesign:PopupBox.ToggleContent>
                      <Image Height="24" Width="24" 
@@ -679,6 +673,12 @@
                   </Grid>
                </materialDesign:PopupBox>
             </StackPanel>
+         </StatusBarItem>
+         <Separator Grid.Column="13" />
+         <StatusBarItem Grid.Column="14">
+            <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
+                     ToolTip="TOC heading related to selected record."
+                     Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
       </StatusBar>
    </Grid>
