@@ -52,7 +52,7 @@
       </ScrollViewer>
       <StackPanel Grid.Row="1" Orientation="Horizontal">
          <Button Content="Refresh" Click="OnRefresh"/>
-         <Button Content="Copy" Click="OnCopy"/>
+         <Button Content="Copy All" Click="OnCopy"/>
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
       <StatusBar Grid.Row="3"
