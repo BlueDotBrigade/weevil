@@ -15,7 +15,13 @@
 	internal class UiResponsivenessMonitor
 	{
 		public static readonly TimeSpan TooSlowThreshold = TimeSpan.FromMilliseconds(1000);
-		private static readonly TimeSpan ReportingPeriod = TimeSpan.FromMinutes(1);
+
+		private static readonly TimeSpan SamplingPeriod = TimeSpan.FromMilliseconds(500);
+
+		/// <summary>
+		/// Indicates how much time must elapse before another log entry can be generated.
+		/// </summary>
+		private static readonly TimeSpan LoggingInterval = TimeSpan.FromMinutes(1);
 
 		private readonly DispatcherTimer _dispatcherTimer;
 
@@ -25,7 +31,7 @@
 		public UiResponsivenessMonitor()
 		{
 			_dispatcherTimer = new DispatcherTimer();
-			_dispatcherTimer.Interval = TimeSpan.FromMilliseconds(500);
+			_dispatcherTimer.Interval = SamplingPeriod;
 			_dispatcherTimer.Tick += OnDispatcherTimerTick;
 
 			_stopwatch = new Stopwatch();
@@ -40,7 +46,7 @@
 		{
 			if (_stopwatch.Elapsed > TooSlowThreshold)
 			{
-				if (DateTime.Now.Subtract(_problemLastDetectedAt) > ReportingPeriod)
+				if (DateTime.Now.Subtract(_problemLastDetectedAt) > LoggingInterval)
 				{
 					Log.Default.Write(
 						LogSeverityType.Warning, 
