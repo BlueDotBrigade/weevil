@@ -11,6 +11,7 @@
 	public static class ClipboardHelper
 	{
 		private const string Delimiter = " === ";
+		private const string NoTimestampPlaceholder = @"--:--:--.----";
 
 		public static void CopyRawFromSelected(IEngine engine, bool addLineNumberPrefix)
 		{
@@ -62,7 +63,7 @@
 					{
 						var timestamp = record.HasCreationTime
 							? record.CreatedAt.ToString("HH:mm:ss.ffff", CultureInfo.InvariantCulture)
-							: string.Empty;
+							: NoTimestampPlaceholder;
 
 						if (addLineNumberPrefix)
 						{
