@@ -326,11 +326,11 @@
          </ListView.ItemContainerStyle>
          <ListView.View>
             <GridView>
-               <GridViewColumn  Width="60" DisplayMemberBinding="{Binding LineNumber, StringFormat='{}{0:###,###,##0}'}">
+               <GridViewColumn Width="70">
                   <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate DataType="data:IRecord">
-                        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                        <TextBlock Text="{Binding LineNumber, StringFormat={}{0:###,###,##0}}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
                </GridViewColumn>
