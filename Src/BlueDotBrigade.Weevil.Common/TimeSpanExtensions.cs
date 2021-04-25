@@ -7,13 +7,15 @@
 		private static readonly TimeSpan OneMinute = TimeSpan.FromMinutes(1);
 		private static readonly TimeSpan OneDay = TimeSpan.FromDays(1);
 
+		private static readonly string NotSpecifiedFormat = @"--.---";
+
 		public static string ToHumanReadable(this TimeSpan value)
 		{
-			var result = string.Empty;
+			var result = NotSpecifiedFormat;
 
 			if (value < TimeSpan.Zero)
 			{
-				result = string.Empty;
+				result = NotSpecifiedFormat;
 			}
 			else
 			{

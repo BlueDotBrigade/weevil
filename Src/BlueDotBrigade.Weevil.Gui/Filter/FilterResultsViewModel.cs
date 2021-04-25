@@ -777,14 +777,7 @@
 				}
 				else
 				{
-					if (_engine.Count == _engine.Filter.Results.Length)
-					{
-						this.ElapsedTime = _engine.Metrics.RecordAndMetadataLoadDuration;
-					}
-					else
-					{
-						this.ElapsedTime = _engine.Filter.FilterExecutionTime;
-					}
+					this.ElapsedTime = Metadata.ElapsedTimeUnknown;
 				}
 			});
 		}
