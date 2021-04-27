@@ -14,6 +14,11 @@
 <li><a href="#sample-expressions">Sample Expressions</a></li>
 </ul>
 </li>
+<li><a href="#built-in-expressions">Built-In Expressions</a>
+<ul>
+<li><a href="#monikers">Monikers</a></li>
+</ul>
+</li>
 <li><a href="#data-analysis">Data Analysis</a>
 <ul>
 <li><a href="#detecting-when-data-changes">Detecting When Data Changes</a></li>
@@ -92,6 +97,37 @@
 <ul>
 <li>Filter: <code>quick.*jump</code></li>
 <li>Returns: line 1 &amp; 3</li>
+</ul>
+</li>
+</ul>
+<h2 id="built-in-expressions">Built-In Expressions</h2>
+<h3 id="monikers">Monikers</h3>
+<p>The following expressions can be used to query metadata collected by the Weevil application:</p>
+<ul>
+<li><code>@Comment</code> : identifies all records that have a user comment
+<ul>
+<li><strong>Note</strong>: Be sure to uncheck the &quot;Include Pinned&quot; option before using this moniker.</li>
+<li><code>@Comment=State</code>: performs a case-insensitive search of all user comments for the given value, in this case the word <code>State</code></li>
+</ul>
+</li>
+<li><code>@Elapsed</code> : is used to measure the time period between records
+<ul>
+<li><code>@Elapsed&gt;5000</code> : returns a list of records where there was no logging for the preceding 5 seconds</li>
+</ul>
+</li>
+<li><code>@Flagged</code>: search all records that have been flagged
+<ul>
+<li><code>@Flagged=False</code>: search all records that have not been flagged</li>
+</ul>
+</li>
+<li><code>@Pinned</code> : search for records that have been pinned
+<ul>
+<li><code>@Pinned=False</code> : search for all records that have not been pinned</li>
+</ul>
+</li>
+<li><code>@UiThread</code>: identifies all records that were created by the application's UI thread
+<ul>
+<li><code>@UiThread=False</code>: identifies all records that were not created by the application's UI thread</li>
 </ul>
 </li>
 </ul>
