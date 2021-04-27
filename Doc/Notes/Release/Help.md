@@ -4,6 +4,8 @@
 - [Examples](#examples)
   - [Sample Input](#sample-input)
   - [Sample Expressions](#sample-expressions)
+- [Built-In Expressions](#built-in-expressions)
+  - [Monikers](#monikers)
 - [Data Analysis](#data-analysis)
   - [Detecting When Data Changes](#detecting-when-data-changes)
   - [Detecting an Unresponsive UI](#detecting-an-unresponsive-ui)
@@ -61,6 +63,24 @@ Assume a log file contained the following:
 - Searching for a pattern that begins & ends with: 
     - Filter: `quick.*jump`
     - Returns: line 1 & 3
+
+## Built-In Expressions
+
+### Monikers
+
+The following expressions can be used to query metadata collected by the Weevil application:
+
+- `@Comment` : identifies all records that have a user comment
+  - **Note**: Be sure to uncheck the "Include Pinned" option before using this moniker.
+  - `@Comment=State`: performs a case-insensitive search of all user comments for the given value, in this case the word `State`
+- `@Elapsed` : is used to measure the time period between records
+  - `@Elapsed>5000` : returns a list of records where there was no logging for the preceding 5 seconds
+- `@Flagged`: search all records that have been flagged
+  - `@Flagged=False`: search all records that have not been flagged 
+- `@Pinned` : search for records that have been pinned
+  - `@Pinned=False` : search for all records that have not been pinned
+- `@UiThread`: identifies all records that were created by the application's UI thread
+  - `@UiThread=False`: identifies all records that were not created by the application's UI thread
 
 ---
 
