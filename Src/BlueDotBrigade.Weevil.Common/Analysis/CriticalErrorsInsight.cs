@@ -9,7 +9,7 @@
 			"Critical Errors",
 			"Σ",
 			"0",
-			"Represents the number of critical or fatal errors that have been logged.")
+			"No critical or fatal errors have been detected.")
 		{
 			// nothing to do
 		}
@@ -25,7 +25,7 @@
 
 			if (analyzer.Fatals > 0)
 			{
-				this.MetricValue = analyzer.Fatals.ToString();
+				this.MetricValue = analyzer.Fatals.ToString("#,##0");
 				this.Details =
 					$"Fatal and/or critical errors have been detected, with the first occurrence at: {analyzer.FatalFirstOccurredAt.CreatedAt:HH:mm:ss}.";
 				this.IsAttentionRequired = true;

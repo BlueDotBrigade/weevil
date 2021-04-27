@@ -326,11 +326,11 @@
          </ListView.ItemContainerStyle>
          <ListView.View>
             <GridView>
-               <GridViewColumn  Width="60" DisplayMemberBinding="{Binding LineNumber, StringFormat='{}{0:###,###,##0}'}">
+               <GridViewColumn Width="70">
                   <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
                   <GridViewColumn.CellTemplate>
                      <DataTemplate DataType="data:IRecord">
-                        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                        <TextBlock Text="{Binding LineNumber, StringFormat={}{0:###,###,##0}}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
                </GridViewColumn>
@@ -449,21 +449,22 @@
                      <ColumnDefinition Width="Auto" />
                      <ColumnDefinition Width="Auto" />
                      <ColumnDefinition Width="Auto" />
+                     <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
                </Grid>
             </ItemsPanelTemplate>
          </StatusBar.ItemsPanel>
          <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Document&apos;s path."/>
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Current document&apos;s path."/>
                <TextBox>
                   <TextBox.Style>
                      <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
                         <Setter Property="Text" Value="{Binding SourceFilePath, Mode=OneWay}" />
-                        <Setter Property="ToolTip" Value="Document&apos;s path."/>
+                        <Setter Property="ToolTip" Value="Current document&apos;s path."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding SourceFilePath, Mode=OneWay}" Value="">
-                              <Setter Property="Text" Value="Begin by opening (Ctrl+O) a document."/>
+                              <Setter Property="Text" Value="To begin, open (Ctrl+O) a document."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -475,7 +476,7 @@
             <StackPanel Orientation="Horizontal">
                <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Time elapsed between selected records."/>
                <TextBox Text="{Binding Path=ElapsedTime, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
-                        ToolTip="Elapsed time."
+                        ToolTip="Time elapsed between selected records."
                         controls:TextBoxBehavior.AutoSelectEnabled="True"
                         VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
             </StackPanel>
@@ -484,9 +485,9 @@
          <StatusBarItem Grid.Column="3" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
                <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Context-Data-24.png" 
-                      ToolTip="Context"/>
+                      ToolTip="The current document&apos;s context."/>
                <TextBox Text="{Binding Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
-                        ToolTip="Source file context."
+                        ToolTip="The current document&apos;s context."
                         Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
@@ -497,28 +498,28 @@
          <Separator Grid.Column="5" />
          <StatusBarItem Grid.Column="6" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Number of flagged records."/>
+               <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Records flagged by built-in or custom analyzers."/>
                <TextBox Text="{Binding FlaggedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                           ToolTip="Number of flagged records."
+                           ToolTip="Records flagged by built-in or custom analyzers."
                            Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
          <Separator Grid.Column="7" />
          <StatusBarItem Grid.Column="8" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Informational Messages" />
+               <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Number of informational messages in filter results." />
                <TextBox Text="{Binding Metrics[Information], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                             ToolTip="Informational Messages"
+                             ToolTip="Number of informational messages in filter results"
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Warning Messages" />
+               <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Number of warning messages in filter results." />
                <TextBox Text="{Binding Metrics[Warnings], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                             ToolTip="Warning Messages"
+                             ToolTip="Number of warning messages in filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
                         <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-DataRequiresAttention-24.png" />
-                        <Setter Property="ToolTip" Value="Error Messages"/>
+                        <Setter Property="ToolTip" Value="Number of error messages in filter results."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding Metrics[Errors], FallbackValue=0, Mode=OneWay}" Value="0">
                               <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-Data-24.png"/>
@@ -528,30 +529,30 @@
                   </Image.Style>
                </Image>
                <TextBox Text="{Binding Metrics[Errors], StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                             ToolTip="Error Messages"
+                             ToolTip="Number of error messages in filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
             </StackPanel>
          </StatusBarItem>
          <Separator Grid.Column="9" />
          <StatusBarItem Grid.Column="10">
             <StackPanel Orientation="Horizontal" >
-               <Image Source="/Resources/Icons/RecordsSelected-Data-24.png" ToolTip="Selected AllRecords"/>
+               <Image Source="/Resources/Icons/RecordsSelected-Data-24.png" ToolTip="Number of user selected records."/>
                <TextBox Text="{Binding SelectedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                             ToolTip="Selected Record Count"
+                             ToolTip="Number of user selected records."
                              Style="{StaticResource StatusBarTextBox}"/>
-               <Image Source="/Resources/Icons/RecordsVisible-Data-24.png" ToolTip="Visible AllRecords"/>
+               <Image Source="/Resources/Icons/RecordsVisible-Data-24.png" ToolTip="Number of filter results."/>
                <TextBox Text="{Binding VisibleRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                             ToolTip="Visible Record Count"
+                             ToolTip="Number of filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
                <Image>
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
                         <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-Data-24.png" />
-                        <Setter Property="ToolTip" Value="Total record count."/>
+                        <Setter Property="ToolTip" Value="Total number of records in the original document."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
                               <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-DataRequiresAttention-24.png"/>
-                              <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
+                              <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -560,10 +561,10 @@
                <TextBox Text="{Binding AllRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
                   <TextBox.Style>
                      <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
-                        <Setter Property="ToolTip" Value="Total record count." />
+                        <Setter Property="ToolTip" Value="Total number of records in the original document." />
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding HasBeenCleared}" Value="True">
-                              <Setter Property="ToolTip" Value="Total record count no longer reflects the source."/>
+                              <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -573,62 +574,55 @@
          </StatusBarItem>
          <Separator Grid.Column="11" />
          <StatusBarItem Grid.Column="12">
-            <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
-                     ToolTip="TOC heading related to selected record."
-                     Style="{StaticResource StatusBarTextBox}"/>
-         </StatusBarItem>
-         <StatusBarItem Grid.Column="13">
-            <materialDesign:Badged Margin="10, 0">
-               <materialDesign:Badged.Style>
-                  <Style TargetType="{x:Type materialDesign:Badged}">
-                     <Setter Property="Badge" Value=""/>
-                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding HasInsightNeedingAttention}" Value="true">
-                           <Setter Property="Badge" Value="{Binding InsightNeedingAttention}"/>
-                        </DataTrigger>
-                     </Style.Triggers>
-                  </Style>
-               </materialDesign:Badged.Style>
-               <Image>
-                  <Image.Style>
-                     <Style TargetType="{x:Type Image}">
-                        <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
-                        <Setter Property="ToolTip" Value="Weevil does not have insight at this time."/>
+            <StackPanel Orientation="Horizontal">
+               <materialDesign:Badged Margin="10, 0">
+                  <materialDesign:Badged.Style>
+                     <Style TargetType="{x:Type materialDesign:Badged}">
+                        <Setter Property="Badge" Value=""/>
                         <Style.Triggers>
-                           <MultiDataTrigger>
-                              <MultiDataTrigger.Conditions>
-                                 <Condition Binding="{Binding HasInsight}" Value="True" />
-                                 <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
-                              </MultiDataTrigger.Conditions>
-                              <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                              <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight on the current document.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
-                           </MultiDataTrigger>
-                           <MultiDataTrigger>
-                              <MultiDataTrigger.Conditions>
-                                 <Condition Binding="{Binding HasInsight}" Value="True" />
-                                 <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
-                              </MultiDataTrigger.Conditions>
-                              <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                              <Setter Property="ToolTip" xml:space="preserve" Value="Weevil has insight that requires the user&apos;s attention.&#x0d;&#x0a;For more information, please see the dashboard (`Ctrl+D`)."/>
-                           </MultiDataTrigger>
+                           <DataTrigger Binding="{Binding HasInsightNeedingAttention}" Value="true">
+                              <Setter Property="Badge" Value="{Binding InsightNeedingAttention}"/>
+                           </DataTrigger>
                         </Style.Triggers>
                      </Style>
-                  </Image.Style>
-               </Image>
-            </materialDesign:Badged>
-         </StatusBarItem>
-         <StatusBarItem Grid.Column="14" Cursor="Hand" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StackPanel>
-               <ToggleButton Name="NewReleaseButton" ToolTip="New version is available! Click for details." >
-                  <ToggleButton.Template>
-                     <ControlTemplate TargetType="ToggleButton">
-                        <Image Height="24" Width="24" Source="/Resources/Icons/NewReleaseAvailable-24.png"/>
-                     </ControlTemplate>
-                  </ToggleButton.Template>
-               </ToggleButton>
+                  </materialDesign:Badged.Style>
+                  <Image>
+                     <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                           <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+                           <Setter Property="ToolTip" Value="There is no insight at this time."/>
+                           <Style.Triggers>
+                              <MultiDataTrigger>
+                                 <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasInsight}" Value="True" />
+                                    <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
+                                 </MultiDataTrigger.Conditions>
+                                 <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (`Ctrl+D`) for insight&#x0d;&#x0a;about the current document."/>
+                           </MultiDataTrigger>
+                              <MultiDataTrigger>
+                                 <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasInsight}" Value="True" />
+                                    <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
+                                 </MultiDataTrigger.Conditions>
+                                 <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (`Ctrl+D`)."/>
+                           </MultiDataTrigger>
+                           </Style.Triggers>
+                        </Style>
+                     </Image.Style>
+                  </Image>
+               </materialDesign:Badged>
                <materialDesign:PopupBox
                   StaysOpen="True"
+                  Cursor="Hand" 
+                  Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"
                   IsPopupOpen="{Binding IsChecked, ElementName=NewReleaseButton, Mode=TwoWay}">
+                  <materialDesign:PopupBox.ToggleContent>
+                     <Image Height="24" Width="24" 
+                            Source="/Resources/Icons/NewReleaseAvailable-24.png"
+                            ToolTip="New version is available! Click for details."/>
+                  </materialDesign:PopupBox.ToggleContent>
                   <Grid Margin="20">
                      <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -679,6 +673,12 @@
                   </Grid>
                </materialDesign:PopupBox>
             </StackPanel>
+         </StatusBarItem>
+         <Separator Grid.Column="13" />
+         <StatusBarItem Grid.Column="14">
+            <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
+                     ToolTip="TOC heading related to selected record."
+                     Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
       </StatusBar>
    </Grid>

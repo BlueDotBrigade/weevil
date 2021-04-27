@@ -3,17 +3,15 @@
 	using System;
 	using System.Globalization;
 	using System.Windows.Data;
-	using BlueDotBrigade;
 
+	[ValueConversion(typeof(TimeSpan), typeof(string))]
 	public class TimeSpanConverter : IValueConverter
 	{
-
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
+			TimeSpan timeSpanValue = value is TimeSpan t ? t : TimeSpan.MinValue;
 
-			var timePeriod = (TimeSpan)value;
-
-			return timePeriod.ToHumanReadable();
+			return timeSpanValue.ToHumanReadable();
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

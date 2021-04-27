@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="Dashboard" Height="600" Width="800"
         WindowStartupLocation="CenterOwner"
+        WindowState="Maximized"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
         xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
@@ -35,21 +36,23 @@
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
-      <ItemsControl Grid.Row="0" ItemsSource="{Binding Insights}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-         <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-               <WrapPanel Orientation="Horizontal"/>
-            </ItemsPanelTemplate>
-         </ItemsControl.ItemsPanel>
-         <ItemsControl.ItemTemplate>
-            <DataTemplate>
-               <analysis:InsightControl Value="{Binding}" Style="{StaticResource DashboardInsightStyle}"/>
-            </DataTemplate>
-         </ItemsControl.ItemTemplate>
-      </ItemsControl>
+      <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+         <ItemsControl ItemsSource="{Binding Insights}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl.ItemsPanel>
+               <ItemsPanelTemplate>
+                  <WrapPanel Orientation="Horizontal"/>
+               </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+               <DataTemplate>
+                  <analysis:InsightControl Value="{Binding}" Style="{StaticResource DashboardInsightStyle}"/>
+               </DataTemplate>
+            </ItemsControl.ItemTemplate>
+         </ItemsControl>
+      </ScrollViewer>
       <StackPanel Grid.Row="1" Orientation="Horizontal">
          <Button Content="Refresh" Click="OnRefresh"/>
-         <Button Content="Copy" Click="OnCopy"/>
+         <Button Content="Copy All" Click="OnCopy"/>
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
       <StatusBar Grid.Row="3"
