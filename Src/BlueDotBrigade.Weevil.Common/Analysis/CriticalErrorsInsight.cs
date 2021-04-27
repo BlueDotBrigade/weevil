@@ -9,7 +9,7 @@
 			"Critical Errors",
 			"Σ",
 			"0",
-			"Represents the number of critical or fatal errors that have been logged.")
+			"No critical or fatal errors have been detected.")
 		{
 			// nothing to do
 		}
