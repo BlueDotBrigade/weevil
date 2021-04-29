@@ -6,6 +6,6 @@
 		DetectDataTransition,
 		DetectFallingEdges,
 		DetectRisingEdges,
-		DetectUnresponsiveUi,
+		TimeGapUiOnly,
 	}
 }

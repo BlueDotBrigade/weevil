@@ -33,7 +33,7 @@
             <MultiDataTrigger.Conditions>
                <Condition Binding="{Binding 
                               Converter={StaticResource ObjectToTypeConverter}}" 
-                          Value="{x:Type analysis:UiResponsivenessInsight}" />
+                          Value="{x:Type analysis:TimeGapInsight}" />
                <Condition Binding="{Binding IsAttentionRequired}" Value="False" />
             </MultiDataTrigger.Conditions>
             <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/UiUnresponsive-Data-48.png" />
@@ -42,7 +42,7 @@
             <MultiDataTrigger.Conditions>
                <Condition Binding="{Binding 
                               Converter={StaticResource ObjectToTypeConverter}}" 
-                          Value="{x:Type analysis:UiResponsivenessInsight}" />
+                          Value="{x:Type analysis:TimeGapInsight}" />
                <Condition Binding="{Binding IsAttentionRequired}" Value="True" />
             </MultiDataTrigger.Conditions>
             <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/UiUnresponsive-DataRequiresAttention-48.png" />

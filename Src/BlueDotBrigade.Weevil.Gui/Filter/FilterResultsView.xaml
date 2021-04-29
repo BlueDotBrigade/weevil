@@ -260,7 +260,7 @@
                   <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
                   <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
                   <Separator/>
-                  <MenuItem Header="Detect Unresponsive UI" Command="{Binding DetectUnresponsiveUiCommand}" InputGestureText="F10" />
+                  <MenuItem Header="Detect Time Gap (UI Only)" Command="{Binding DetectTimeGapUiOnlyCommand}" InputGestureText="F10" />
                </MenuItem>
                <MenuItem Header="Custom Analyzers..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"

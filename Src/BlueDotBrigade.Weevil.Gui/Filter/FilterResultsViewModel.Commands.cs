@@ -147,8 +147,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand SaveCommentSummaryCommand => new UiBoundCommand(SaveCommentSummary, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand DetectUnresponsiveUiCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.DetectUnresponsiveUi), 
+		public ICommand DetectTimeGapUiOnlyCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.TimeGapUiOnly), 
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]

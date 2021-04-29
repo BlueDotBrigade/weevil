@@ -7,7 +7,7 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
-	public class DetectUnresponsiveUiAnalyzer : IRecordAnalyzer
+	public class TimeGapAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultUiResponsivenessPeriod = TimeSpan.FromSeconds(1);
 
@@ -34,7 +34,7 @@
 
 		private readonly object _problemsDetectedPadlock;
 
-		public DetectUnresponsiveUiAnalyzer()
+		public TimeGapAnalyzer(bool uiThreadOnly)
 		{
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_problemsDetected = -1;
@@ -42,13 +42,13 @@
 
 			_problemsDetectedPadlock = new object();
 		}
-		public virtual string Key => AnalysisType.DetectUnresponsiveUi.ToString();
+		public virtual string Key => AnalysisType.TimeGapUiOnly.ToString();
 
 		public virtual string DisplayName => "Detect Unresponsive UI";
 
 		public TimeSpan MaximumPeriodDetected => _maximumPeriodDetected;
 
-		public int UnresponsiveUiCount => _problemsDetected;
+		public int Count => _problemsDetected;
 
 		public DateTime FirstOccurrenceAt => _firstOccurrenceAt;
 
@@ -59,7 +59,7 @@
 				Analyze(records, maximumAllowedPeriod, canUpdateMetadata);
 			}
 
-			return this.UnresponsiveUiCount;
+			return this.Count;
 		}
 
 		/// <summary>
@@ -109,7 +109,7 @@
 				Log.Default.Write(severityType, $"Analysis of records for UI responsiveness is complete. ProblemsDetected={_problemsDetected}, MaximumPeriodDetected={_maximumPeriodDetected}, MaximumAllowedPeriod={maximumAllowedPeriod}");
 			}
 
-			return this.UnresponsiveUiCount;
+			return this.Count;
 		}
 
 		protected virtual void CheckIfProblemExists(IRecord currentRecord, IRecord previousRecord, TimeSpan maximumAllowedPeriod,
