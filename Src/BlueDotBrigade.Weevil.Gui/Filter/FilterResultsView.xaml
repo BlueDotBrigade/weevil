@@ -62,7 +62,8 @@
 
       <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
       <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
-      <KeyBinding Key="F10" Command="{Binding DetectUnresponsiveUiCommand}" />
+      <KeyBinding Key="F10" Command="{Binding DetectTimeGapUiOnlyCommand}" />
+      <KeyBinding Key="F11" Command="{Binding DetectTimeGapCommand}" />
 
       <KeyBinding Key="P" Modifiers="Control" Command="{Binding ToggleIsPinnedCommand}"/>
       <KeyBinding Key="Subtract" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
@@ -261,6 +262,7 @@
                   <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
                   <Separator/>
                   <MenuItem Header="Detect Time Gap (UI Only)" Command="{Binding DetectTimeGapUiOnlyCommand}" InputGestureText="F10" />
+                  <MenuItem Header="Detect Time Gap" Command="{Binding DetectTimeGapCommand}" InputGestureText="F11" />
                </MenuItem>
                <MenuItem Header="Custom Analyzers..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"

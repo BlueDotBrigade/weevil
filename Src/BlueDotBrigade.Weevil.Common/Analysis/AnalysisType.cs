@@ -7,5 +7,6 @@
 		DetectFallingEdges,
 		DetectRisingEdges,
 		TimeGapUiOnly,
+		TimeGap,
 	}
 }
