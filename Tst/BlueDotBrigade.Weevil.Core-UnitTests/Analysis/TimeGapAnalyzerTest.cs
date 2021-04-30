@@ -17,8 +17,8 @@
 		{
 			var userDialog = new Mock<IUserDialog>();
 
-			// Only the plugin knows what to ask the user. That said, the unit test has know idea about the implementation details
-			// ... Were 2 parameters passed in? Were 3?
+			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
+			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
 			userDialog.Setup(x => x.ShowUserPrompt(
 				It.IsAny<string>(),
@@ -37,13 +37,13 @@
 			var records = new List<IRecord>
 			{
 				new Record(0, now.AddMinutes(0), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no record to compare against
-				new Record(1, DateTime.MaxValue, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
+				new Record(1, Record.CreationTimeUnknown, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
 				new Record(2, now.AddMinutes(2), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no timestamps for comparison
 				new Record(3, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 
 				new Record(4, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; not enough time since last record
 				new Record(5, now.AddMinutes(5), severity, "content", new Metadata { WasGeneratedByUi = false }), // IsFlagged=false; record not from UI thread
 				new Record(6, now.AddMinutes(6), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; lots of time between two UI records
-				new Record(7, DateTime.MaxValue, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
+				new Record(7, Record.CreationTimeUnknown, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
 				new Record(8, now.AddMinutes(8), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; nothing to reference
 			};
 
@@ -59,6 +59,110 @@
 			}
 
 			_records.Clear();
+		}
+
+		[TestMethod]
+		public void Analyze_CheckUiRecordsForGaps_FlaggedRecord30()
+		{
+			DateTime now = DateTime.Now;
+			SeverityType severity = SeverityType.Debug;
+
+			var records = new List<IRecord>
+			{
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(20, now.AddSeconds(7), severity, "content", new Metadata { WasGeneratedByUi = false }),
+				new Record(30, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
+
+			analyzer.Analyze(
+				records.ToImmutableArray(), 
+				EnvironmentHelper.GetExecutableDirectory(), 
+				GetUserDialog(3000),
+				canUpdateMetadata: true);
+
+			Assert.IsFalse(records[0].Metadata.IsFlagged);
+			Assert.IsFalse(records[1].Metadata.IsFlagged);
+			Assert.IsTrue(records[2].Metadata.IsFlagged);
+		}
+
+
+		[TestMethod]
+		public void Analyze_CheckAllRecordsForGaps_FlaggedRecord20()
+		{
+			DateTime now = DateTime.Now;
+			SeverityType severity = SeverityType.Debug;
+
+			var records = new List<IRecord>
+			{
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(20, now.AddSeconds(7), severity, "content", new Metadata { WasGeneratedByUi = false }),
+				new Record(30, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: false);
+
+			analyzer.Analyze(
+				records.ToImmutableArray(),
+				EnvironmentHelper.GetExecutableDirectory(),
+				GetUserDialog(3000),
+				canUpdateMetadata: true);
+
+			Assert.IsFalse(records[0].Metadata.IsFlagged);
+			Assert.IsTrue(records[1].Metadata.IsFlagged);
+			Assert.IsFalse(records[2].Metadata.IsFlagged);
+		}
+
+		[TestMethod]
+		public void Count_CheckAllRecordsForGaps_ResultMatchesCount()
+		{
+			DateTime now = DateTime.Now;
+			SeverityType severity = SeverityType.Debug;
+
+			var records = new List<IRecord>
+			{
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(20, now.AddSeconds(7), severity, "content", new Metadata { WasGeneratedByUi = false }),
+				new Record(30, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: false);
+
+			var result = analyzer.Analyze(
+				records.ToImmutableArray(),
+				EnvironmentHelper.GetExecutableDirectory(),
+				GetUserDialog(3000),
+				canUpdateMetadata: true);
+
+			Assert.AreEqual(1, result);
+			Assert.AreEqual(1, analyzer.Count);
+		}
+
+		[TestMethod]
+		public void Analyze_RecordWithoutTimestamp_MissingTimestampIsIgnored()
+		{
+			DateTime now = DateTime.Now;
+			SeverityType severity = SeverityType.Debug;
+
+			var records = new List<IRecord>
+			{
+				new Record(0, Record.CreationTimeUnknown, severity, "fake header", new Metadata { WasGeneratedByUi = false }),
+				new Record(1, now.AddSeconds(4), severity, "content", new Metadata { WasGeneratedByUi = false }),
+				new Record(2, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = false }),
+			};
+
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: false);
+
+			analyzer.Analyze(
+				records.ToImmutableArray(),
+				EnvironmentHelper.GetExecutableDirectory(),
+				GetUserDialog(2000),
+				canUpdateMetadata: true);
+
+			Assert.IsFalse(records[0].Metadata.IsFlagged);
+			Assert.IsFalse(records[1].Metadata.IsFlagged);
+			Assert.IsTrue(records[2].Metadata.IsFlagged);
 		}
 
 		[TestMethod]
