@@ -51,7 +51,7 @@
 			var insights = new List<IInsight>()
 			{
 				new CriticalErrorsInsight(),
-				new UiResponsivenessInsight(),
+				new TimeGapInsight(false),
 			};
 
 			return insights.ToImmutableArray();

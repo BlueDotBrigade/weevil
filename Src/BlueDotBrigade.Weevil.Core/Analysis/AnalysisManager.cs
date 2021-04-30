@@ -64,7 +64,7 @@
 			{
 				analyzers.AddRange(new List<IRecordAnalyzer>()
 				{
-					new DetectUnresponsiveUiAnalyzer(),
+					new TimeGapAnalyzer(uiThreadOnly: true),
 					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),

@@ -9,7 +9,7 @@
 	using Moq;
 
 	[TestClass]
-	public class DetectUnresponsiveUiAnalyzerTest
+	public class TimeGapAnalyzerTest
 	{
 		private ImmutableArray<IRecord> _records;
 
@@ -64,7 +64,7 @@
 		[TestMethod]
 		public void Analyze_NoPrecedingRecord_RecordNotFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
@@ -74,7 +74,7 @@
 		[TestMethod]
 		public void Analyze_ApplicationInitializing_RecordNotFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
@@ -84,7 +84,7 @@
 		[TestMethod]
 		public void Analyze_PrecedingRecordWasInitialing_RecordNotFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
@@ -94,7 +94,7 @@
 		[TestMethod]
 		public void Analyze_LongPeriodBetweenUiRecords_RecordFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), true);
 
@@ -104,7 +104,7 @@
 		[TestMethod]
 		public void Analyze_ShortPeriodBetweenUiRecords_RecordNotFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
@@ -114,7 +114,7 @@
 		[TestMethod]
 		public void Analyze_RecordWasNotWrittenByUiThread_RecordNotFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
@@ -124,7 +124,7 @@
 		[TestMethod]
 		public void Analyze_MixedUiAndNotUiRecords_RecordFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), true);
 
@@ -134,7 +134,7 @@
 		[TestMethod]
 		public void Analyze_ApplicationTerminatingMessage_RecordNotFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
@@ -144,7 +144,7 @@
 		[TestMethod]
 		public void Analyze_PrecedingRecordWasApplicationTerminating_RecordNotFlagged()
 		{
-			var analyzer = new DetectUnresponsiveUiAnalyzer();
+			var analyzer = new TimeGapAnalyzer(uiThreadOnly: true);
 
 			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
 
