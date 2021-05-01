@@ -8,6 +8,7 @@
 	using System.Windows;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Management;
 
 	public partial class App : Application
 	{
@@ -116,6 +117,12 @@
 					Log.Default.Write(LogSeverityType.Warning,
 						"Visual Studio debugger is attached to this instance of Weevil.");
 				}
+
+				var computerSnapshot = ComputerSnapshot.Create();
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					computerSnapshot.ToString());
 			}
 			finally
 			{
