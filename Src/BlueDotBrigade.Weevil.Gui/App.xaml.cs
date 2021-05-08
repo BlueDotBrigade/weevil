@@ -120,9 +120,16 @@
 
 				var computerSnapshot = ComputerSnapshot.Create();
 
-				Log.Default.Write(
+				var computerDetails =  
+					$"OsName=`{computerSnapshot.OsName}`, " +
+					$"OsIs64Bit={computerSnapshot.OsIs64Bit}, " +
+					$"CpuName=`{computerSnapshot.CpuName}`, " +
+					$"RamTotalInstalled={computerSnapshot.RamTotalInstalled.GigaBytes:0.00}GB, " +
+					$"RamTotalFree={computerSnapshot.RamTotalFree.GigaBytes:0.00}GB";
+
+		Log.Default.Write(
 					LogSeverityType.Information,
-					computerSnapshot.ToString());
+					computerDetails);
 			}
 			finally
 			{
