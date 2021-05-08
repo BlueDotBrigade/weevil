@@ -102,24 +102,6 @@
 						}
 					}
 				}
-
-				//var ramQuery = new SelectQuery("select * from Win32_PhysicalMemory");
-
-				//using (var searcher = new ManagementObjectSearcher(ramQuery))
-				//{
-				//	using (ManagementObjectCollection memorySticks = searcher.Get())
-				//	{
-				//		snapshot.RamSlotsUsed = (uint)memorySticks.Count;
-
-				//		foreach (ManagementBaseObject memoryStick in memorySticks)
-				//		{
-				//			var managementObject = (ManagementObject)memoryStick;
-
-				//			var capacity = (ulong)managementObject["Capacity"];
-				//			snapshot.RamTotalInstalled += new StorageUnit(capacity);
-				//		}
-				//	}
-				//}
 			}
 			catch (Exception e)
 			{

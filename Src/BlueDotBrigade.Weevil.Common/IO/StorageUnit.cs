@@ -4,9 +4,9 @@
 
 	public struct StorageUnit
 	{
-		public const double BytesPerKilobyte = 1024;
-		public const double BytesPerMegabyte = 1024 * BytesPerKilobyte;
-		public const double BytesPerGigabyte = 1024 * BytesPerMegabyte;
+		public const ulong BytesPerKilobyte = 1024;
+		public const ulong BytesPerMegabyte = 1024 * BytesPerKilobyte;
+		public const ulong BytesPerGigabyte = 1024 * BytesPerMegabyte;
 
 		public static readonly StorageUnit Zero = new StorageUnit(0);
 
@@ -52,11 +52,11 @@
 
 		public ulong Bytes { get { return _bytes; } }
 
-		public double KiloBytes => (_bytes / BytesPerKilobyte);
+		public double KiloBytes => (_bytes / (double)BytesPerKilobyte);
 
-		public double MetaBytes => (_bytes / BytesPerMegabyte);
+		public double MetaBytes => (_bytes / (double)BytesPerMegabyte);
 
-		public double GigaBytes => (_bytes / BytesPerGigabyte);
+		public double GigaBytes => (_bytes / (double)BytesPerGigabyte);
 
 		#endregion
 
