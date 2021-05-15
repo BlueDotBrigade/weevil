@@ -52,7 +52,7 @@
 			var insights = new List<IInsight>()
 			{
 				new CriticalErrorsInsight(),
-				new TimeGapInsight(false),
+				new TimeGapInsight(),
 			};
 
 			return insights.ToImmutableArray();

@@ -6,38 +6,35 @@
 
 	public class TimeGapInsight : InsightBase
 	{
-		private readonly bool _uiThreadOnly;
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(1);
 
 		private readonly TimeSpan _threshold;
 
-		public TimeGapInsight(bool uiThreadOnly) : this(
-			uiThreadOnly, 
+		public TimeGapInsight() : this(
 			DefaultThreshold,
 			"Time Gap",
-			$"Using a threshold of {DefaultThreshold.ToHumanReadable()}, there are no gaps in time.")
+			$"No gaps in logging were detected when using a threshold of {DefaultThreshold.ToHumanReadable()}.")
 		{
 			// nothing to do
 		}
 
-		public TimeGapInsight(bool uiThreadOnly, TimeSpan threshold, string title, string details) : base(
+		public TimeGapInsight(TimeSpan threshold, string title, string details) : base(
 			title,
 			"sec",
-			"0",
+			"Σ",
 			details)
 		{
-			_uiThreadOnly = uiThreadOnly;
 			_threshold = threshold;
 		}
 
 		protected override void OnRefresh(ImmutableArray<IRecord> records)
 		{
-			var analyzer = new TimeGapAnalyzer(_uiThreadOnly);
+			var analyzer = new TimeGapUiAnalyzer();
 			analyzer.Analyze(records, _threshold, false);
 
 			if (analyzer.Count > 0)
 			{
-				this.MetricValue = analyzer.MaximumPeriodDetected.TotalSeconds.ToString("#,##0.0");
+				this.MetricValue = analyzer.Count.ToString("#,##0.0");
 				this.IsAttentionRequired = true;
 				this.Details = $"A threshold of {_threshold.ToHumanReadable()}, resulted in {analyzer.Count} unexpected gaps in time. " +
 				               $"The longest gap occurred at {analyzer.FirstOccurrenceAt.ToString("HH:mm:ss")}.";

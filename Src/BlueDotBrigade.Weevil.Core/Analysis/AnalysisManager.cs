@@ -64,8 +64,8 @@
 			{
 				analyzers.AddRange(new List<IRecordAnalyzer>()
 				{
-					new TimeGapAnalyzer(uiThreadOnly: true),
-					new TimeGapAnalyzer(uiThreadOnly: false),
+					new TimeGapAnalyzer(),
+					new TimeGapUiAnalyzer(),
 					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
