@@ -9,11 +9,10 @@
 	/// <summary>
 	/// Analyzes a file looking for time periods where logging appears to have stopped.
 	/// </summary>
-	public class TimeGapAnalyzer : IRecordAnalyzer
+	public class TimeGapUiAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(60);
-
-		private const string CommentLabel = "TimeGap";
+		private const string CommentLabel = "TimeGapUi";
 
 		private const int UnknownIndex = -1;
 
@@ -21,15 +20,16 @@
 		private int _count;
 		private DateTime _firstOccurrenceAt;
 
-		public TimeGapAnalyzer()
+		public TimeGapUiAnalyzer()
 		{
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = -1;
 			_firstOccurrenceAt = DateTime.MaxValue;
 		}
-		public virtual string Key => AnalysisType.TimeGap.ToString();
 
-		public virtual string DisplayName => "Detect Time Gap";
+		public virtual string Key => AnalysisType.TimeGapUiOnly.ToString();
+
+		public virtual string DisplayName => "Detect Time Gap (UI Only)";
 
 		public TimeSpan MaximumPeriodDetected => _maximumPeriodDetected;
 
@@ -53,7 +53,7 @@
 
 			for (var i = 0; i < records.Length; i++)
 			{
-				if (records[i].HasCreationTime)
+				if (records[i].HasCreationTime && records[i].Metadata.WasGeneratedByUi)
 				{
 					result = i;
 					break;
@@ -72,7 +72,7 @@
 		/// </remarks>
 		public int Analyze(ImmutableArray<IRecord> records, TimeSpan maximumAllowedPeriod, bool canUpdateMetadata)
 		{
-			Log.Default.Write(LogSeverityType.Debug, "Time gap analysis is starting...");
+			Log.Default.Write(LogSeverityType.Debug, "Time gap analysis for records logged by the UI thread is starting...");
 
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = 0;
@@ -106,17 +106,11 @@
 
 						previous = current;
 					}
-					else
-					{
-						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
-
-						previous = current;
-					}
 				}
 			}
 
 			LogSeverityType severityType = _count > 0 ? LogSeverityType.Warning : LogSeverityType.Information;
-			Log.Default.Write(severityType, $"Time gap analysis is complete. ProblemsDetected={_count}, MaximumPeriodDetected={_maximumPeriodDetected}, MaximumAllowedPeriod={maximumAllowedPeriod}");
+			Log.Default.Write(severityType, $"Time gap analysis for records logged by the UI thread is complete. ProblemsDetected={_count}, MaximumPeriodDetected={_maximumPeriodDetected}, MaximumAllowedPeriod={maximumAllowedPeriod}");
 
 			return _count;
 		}
@@ -152,8 +146,8 @@
 		protected virtual bool TryGetTolerance(IUserDialog user, out TimeSpan unresponsivenessPeriod)
 		{
 			var userInput = user.ShowUserPrompt(
-				"Time Gap Detection",
-				"Threshold (ms):",
+				"Input Required",
+				"Maximum delay (ms):",
 				DefaultThreshold.TotalMilliseconds.ToString("0.#"));
 
 			var wasSuccessful = int.TryParse(userInput, out var timePeriodInMs);
