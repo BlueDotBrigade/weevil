@@ -14,10 +14,15 @@
 			this.CpuName = DefaultString;
 			this.CpuProcessors = 0;
 			this.CpuCores = 0;
+
 			this.OsName = DefaultString;
-			this.CpuName = DefaultString;
-			this.CpuName = DefaultString;
+			this.OsVersion = DefaultString;
+			this.OsIs64Bit = false;
+			this.OsInstalledAt = DateTime.MaxValue;
+			this.OsBootedAt = DateTime.MaxValue;
+			
 			this.RamTotalInstalled = new StorageUnit();
+			this.RamTotalFree = new StorageUnit();
 		}
 
 		public string CpuName { get; private set; }
@@ -30,6 +35,9 @@
 		public bool OsIs64Bit { get; private set; }
 		public DateTime OsInstalledAt { get; private set; }
 		public DateTime OsBootedAt { get; private set; }
+		public TimeSpan OsUptime => this.OsBootedAt == DateTime.MaxValue 
+			? TimeSpan.Zero 
+			: DateTime.Now - this.OsBootedAt;
 
 		/// <summary>
 		/// Total amount of physical memory available to the operating system.
@@ -42,8 +50,6 @@
 		/// Represents the amount of physical memory that is not currently in use.
 		/// </summary>
 		public StorageUnit RamTotalFree { get; private set; }
-
-		public uint RamSlotsUsed { get; private set;}
 
 		public static ComputerSnapshot Create()
 		{
