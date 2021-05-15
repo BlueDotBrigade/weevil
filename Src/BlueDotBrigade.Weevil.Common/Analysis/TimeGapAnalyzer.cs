@@ -7,48 +7,39 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
+	/// <summary>
+	/// Analyzes a file looking for time periods where logging appears to have stopped.
+	/// </summary>
 	public class TimeGapAnalyzer : IRecordAnalyzer
 	{
-		private static readonly TimeSpan DefaultUiResponsivenessPeriod = TimeSpan.FromSeconds(1);
+		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(60);
 
-		/// <summary>
-		/// A user interface that is unresponsive for this length of time suggests
-		/// that the application's business logic may be creeping into the user interface.
-		/// </summary>
-		/// <remarks>
-		/// When this occurs, consider deferring processing to a background thread.
-		/// </remarks>
-		public static readonly TimeSpan Sluggish = TimeSpan.FromMilliseconds(250);
+		private const int UnknownIndex = -1;
 
-		/// <summary>
-		/// A user interface that is unresponsive for this length of time
-		/// indicates that there are serious problems that need to be addressed immediately.
-		/// </summary>
-		public static readonly TimeSpan NotResponsive = TimeSpan.FromMilliseconds(1000);
-
-		public static readonly TimeSpan CutoffPeriod = TimeSpan.FromMinutes(15);
-
+		private readonly bool _uiThreadOnly;
+		
 		private TimeSpan _maximumPeriodDetected;
-		private int _problemsDetected;
+		private int _count;
 		private DateTime _firstOccurrenceAt;
-
-		private readonly object _problemsDetectedPadlock;
 
 		public TimeGapAnalyzer(bool uiThreadOnly)
 		{
+			_uiThreadOnly = uiThreadOnly;
 			_maximumPeriodDetected = TimeSpan.Zero;
-			_problemsDetected = -1;
+			_count = -1;
 			_firstOccurrenceAt = DateTime.MaxValue;
-
-			_problemsDetectedPadlock = new object();
 		}
-		public virtual string Key => AnalysisType.TimeGapUiOnly.ToString();
+		public virtual string Key => _uiThreadOnly
+			? AnalysisType.TimeGapUiOnly.ToString()
+			: AnalysisType.TimeGap.ToString();
 
-		public virtual string DisplayName => "Detect Unresponsive UI";
+		public virtual string DisplayName => _uiThreadOnly
+			? "Detect Time Gap (UI Only)"
+			: "Detect Time Gap";
 
 		public TimeSpan MaximumPeriodDetected => _maximumPeriodDetected;
 
-		public int Count => _problemsDetected;
+		public int Count => _count;
 
 		public DateTime FirstOccurrenceAt => _firstOccurrenceAt;
 
@@ -62,8 +53,36 @@
 			return this.Count;
 		}
 
+		private static int IndexOfFirstTimestamp(ImmutableArray<IRecord> records, bool uiThreadOnly)
+		{
+			var result = UnknownIndex;
+
+			for (var i = 0; i < records.Length; i++)
+			{
+				if (uiThreadOnly)
+				{
+					if (records[i].HasCreationTime && records[i].Metadata.WasGeneratedByUi)
+					{
+						result = i;
+						break;
+					}
+				}
+				else
+				{
+					if (records[i].HasCreationTime)
+					{
+						result = i;
+						break;
+					}
+				}
+
+			}
+
+			return result;
+		}
+
 		/// <summary>
-		/// Compares log file messages that were written by the UI thread, looking for unusually long gaps.
+		/// Analyzes the <paramref name="records"/> looking for time periods where logging appears to have stopped.
 		/// </summary>
 		/// <remarks>
 		/// The analysis is performed using actual <see cref="Record.CreatedAt"/> timestamps, 
@@ -71,14 +90,14 @@
 		/// </remarks>
 		public int Analyze(ImmutableArray<IRecord> records, TimeSpan maximumAllowedPeriod, bool canUpdateMetadata)
 		{
-			Log.Default.Write(LogSeverityType.Debug, "Analysis of records for UI responsiveness is starting...");
+			Log.Default.Write(LogSeverityType.Debug, "Time gap analysis is starting...");
 
 			_maximumPeriodDetected = TimeSpan.Zero;
-			_problemsDetected = 0;
+			_count = 0;
 
-			IRecord previousRecord = records.FirstOrDefault(record => record.Metadata.WasGeneratedByUi);
+			var previous = IndexOfFirstTimestamp(records, _uiThreadOnly);
 
-			if (Record.IsDummyOrNull(previousRecord))
+			if (previous == UnknownIndex)
 			{
 				if (canUpdateMetadata)
 				{
@@ -90,60 +109,65 @@
 			}
 			else
 			{
-				foreach (IRecord currentRecord in records)
+				for (var current = previous; current < records.Length; current++)
 				{
+					IRecord currentRecord = records[current];
+
 					if (canUpdateMetadata)
 					{
 						currentRecord.Metadata.IsFlagged = false;
 					}
 
-					if (currentRecord.Metadata.WasGeneratedByUi)
+					if (_uiThreadOnly)
 					{
-						CheckIfProblemExists(currentRecord, previousRecord, maximumAllowedPeriod, canUpdateMetadata);
+						if (currentRecord.Metadata.WasGeneratedByUi)
+						{
+							CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
 
-						previousRecord = currentRecord;
+							previous = current;
+						}
+					}
+					else
+					{
+						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
+
+						previous = current;
 					}
 				}
-
-				LogSeverityType severityType = _problemsDetected > 0 ? LogSeverityType.Warning : LogSeverityType.Information;
-				Log.Default.Write(severityType, $"Analysis of records for UI responsiveness is complete. ProblemsDetected={_problemsDetected}, MaximumPeriodDetected={_maximumPeriodDetected}, MaximumAllowedPeriod={maximumAllowedPeriod}");
 			}
 
-			return this.Count;
+			LogSeverityType severityType = _count > 0 ? LogSeverityType.Warning : LogSeverityType.Information;
+			Log.Default.Write(severityType, $"Time gap analysis is complete. UiThreadOnly={_uiThreadOnly}, ProblemsDetected={_count}, MaximumPeriodDetected={_maximumPeriodDetected}, MaximumAllowedPeriod={maximumAllowedPeriod}");
+
+			return _count;
 		}
 
-		protected virtual void CheckIfProblemExists(IRecord currentRecord, IRecord previousRecord, TimeSpan maximumAllowedPeriod,
+		protected virtual void CheckForTimeGap(IRecord currentRecord, IRecord previousRecord, TimeSpan maximumAllowedPeriod,
 			bool canUpdateMetadata)
 		{
-			TimeSpan timePeriodBetweenUiMessages = currentRecord.CreatedAt - previousRecord.CreatedAt;
+			TimeSpan elapsedTime = currentRecord.CreatedAt - previousRecord.CreatedAt;
 
-			if (timePeriodBetweenUiMessages > CutoffPeriod)
-			{
-				// assume the application was restarted
-			}
-			else
-			{
-				_maximumPeriodDetected = timePeriodBetweenUiMessages > _maximumPeriodDetected
-					? timePeriodBetweenUiMessages
-					: _maximumPeriodDetected;
+			_maximumPeriodDetected = elapsedTime > _maximumPeriodDetected
+				? elapsedTime
+				: _maximumPeriodDetected;
 
-				if (timePeriodBetweenUiMessages > maximumAllowedPeriod)
+			if (elapsedTime > maximumAllowedPeriod)
+			{
+				_count++;
+
+				if (_count == 1)
 				{
-					Log.Default.Write(LogSeverityType.Warning,
-						$"User interface appears to be unresponsive. Line={currentRecord.LineNumber}, Delay={timePeriodBetweenUiMessages}");
-					_problemsDetected++;
+					_firstOccurrenceAt = currentRecord.CreatedAt;
+				}
 
-					if (_problemsDetected == 1)
-					{
-						_firstOccurrenceAt = currentRecord.CreatedAt;
-					}
+				if (canUpdateMetadata)
+				{
+					currentRecord.Metadata.IsFlagged = true;
 
-					if (canUpdateMetadata)
-					{
-						currentRecord.Metadata.IsFlagged = true;
-						currentRecord.Metadata.UpdateUserComment(
-							$"Unresponsive UI: {TimeSpanExtensions.ToHumanReadable(timePeriodBetweenUiMessages)}");
-					}
+					var commentLabel = _uiThreadOnly ? "UiTimeGap" : "TimeGap";
+
+					currentRecord.Metadata.UpdateUserComment(
+						$"{commentLabel}: {TimeSpanExtensions.ToHumanReadable(elapsedTime)}");
 				}
 			}
 		}
@@ -153,7 +177,7 @@
 			var userInput = user.ShowUserPrompt(
 				"Input Required",
 				"Maximum delay (ms):",
-				DefaultUiResponsivenessPeriod.TotalMilliseconds.ToString("0.#"));
+				DefaultThreshold.TotalMilliseconds.ToString("0.#"));
 
 			var wasSuccessful = int.TryParse(userInput, out var timePeriodInMs);
 

@@ -152,6 +152,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
+		public ICommand DetectTimeGapCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.TimeGap),
+			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
 		public ICommand DetectDataCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectData),
 			() => this.IsMenuEnabled);
