@@ -15,7 +15,7 @@
         FontFamily="{materialDesign:MaterialDesignFont}">
    <Grid >
       <Grid.RowDefinitions>
-         <RowDefinition Height="100" />
+         <RowDefinition Height="Auto" />
          <RowDefinition Height="1*" />
          <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
@@ -29,7 +29,7 @@
              HorizontalAlignment="Right" Content="Details:"/>
       <Grid Grid.Row="0" Grid.Column="1">
          <Grid.RowDefinitions>
-            <RowDefinition Height="100" />
+            <RowDefinition Height="Auto" />
          </Grid.RowDefinitions>
          <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -40,7 +40,8 @@
                   Margin="5,5,5,5"
                   IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"
                   controls:TextBoxBehavior.AutoSelectEnabled="True"/>
-         <Image Grid.Row="0" Grid.Column="1" Source="/Resources/Images/Weevil-100.png" Height="100" Width="100"/>
+         <Image Grid.Row="0" Grid.Column="1" Source="/Resources/Images/Weevil-100.png" Height="100" Width="100"
+                VerticalAlignment="Top"/>
       </Grid>
       <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
       <Label Grid.Row="1" Grid.Column="0" 
