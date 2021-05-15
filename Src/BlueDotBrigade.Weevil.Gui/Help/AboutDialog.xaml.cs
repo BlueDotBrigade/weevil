@@ -36,7 +36,7 @@
 				$"CPU: {computerSnapshot.CpuName}" + Environment.NewLine +
 				$"RAM Free: {computerSnapshot.RamTotalFree.GigaBytes:0.00}GB" + Environment.NewLine +
 				Environment.NewLine +
-				$"Open source software powered by Blue Dot Brigade.";
+				$"Weevil's core engine is powered by open source software.";
 
 			this.License = new File().ReadAllText(licensePath);
 
