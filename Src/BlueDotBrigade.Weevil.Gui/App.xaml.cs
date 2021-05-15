@@ -8,6 +8,7 @@
 	using System.Windows;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Management;
 
 	public partial class App : Application
 	{
@@ -116,6 +117,19 @@
 					Log.Default.Write(LogSeverityType.Warning,
 						"Visual Studio debugger is attached to this instance of Weevil.");
 				}
+
+				var computerSnapshot = ComputerSnapshot.Create();
+
+				var computerDetails =  
+					$"OsName=`{computerSnapshot.OsName}`, " +
+					$"OsIs64Bit={computerSnapshot.OsIs64Bit}, " +
+					$"CpuName=`{computerSnapshot.CpuName}`, " +
+					$"RamTotalInstalled={computerSnapshot.RamTotalInstalled.GigaBytes:0.00}GB, " +
+					$"RamTotalFree={computerSnapshot.RamTotalFree.GigaBytes:0.00}GB";
+
+		Log.Default.Write(
+					LogSeverityType.Information,
+					computerDetails);
 			}
 			finally
 			{
