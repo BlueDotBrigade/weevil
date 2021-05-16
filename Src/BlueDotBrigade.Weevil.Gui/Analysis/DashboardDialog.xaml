@@ -75,7 +75,7 @@
          </StatusBar.ItemsPanel>
          <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Document-24.png" ToolTip="Source file path."/>
+               <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Source file path."/>
                <TextBox Text="{Binding SourceFilePath}"
                         ToolTip="Source file path."
                         Style="{StaticResource StatusBarTextBox}">
