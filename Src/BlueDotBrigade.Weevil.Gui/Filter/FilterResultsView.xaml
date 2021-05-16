@@ -221,12 +221,13 @@
                <Separator/>
                <MenuItem Header="Show...">
                   <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
-                  <MenuItem Header="File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
+                  <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
                </MenuItem>
                <Separator/>
                <MenuItem Header="Copy &amp; Paste...">
-                  <MenuItem Header="Copy Record" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C" />
+                  <MenuItem Header="Copy Records (Raw)" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C" />
                   <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
+                  <Separator/>
                   <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
                   <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
                </MenuItem>
