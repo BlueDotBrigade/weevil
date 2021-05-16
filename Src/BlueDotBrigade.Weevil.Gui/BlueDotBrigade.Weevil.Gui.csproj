@@ -370,7 +370,8 @@ IF "%25WEEVIL_PLUGINS_PATH%25"==""  (
    ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS
 ) else (
    ECHO Copying plugins to Bin directory...
-   XCOPY "%25WEEVIL_PLUGINS_PATH%25" "$(TargetDir)Plugins"  /D /I /E /Y
+   XCOPY "%25WEEVIL_PLUGINS_PATH%25\\*.dll" "$(TargetDir)Plugins"  /D /I /E /Y
+   XCOPY "%25WEEVIL_PLUGINS_PATH%25\\*.pdb" "$(TargetDir)Plugins"  /D /I /E /Y
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>
