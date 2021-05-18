@@ -9,6 +9,10 @@
 	/// <summary>
 	/// Analyzes a file looking for time periods where logging appears to have stopped.
 	/// </summary>
+	/// <remarks>
+	/// If a <see cref="IRecord"/> does not have a timestamp,
+	/// the analyzer will treat it as though it didn't exist.
+	/// </remarks>
 	public class TimeGapAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(60);
@@ -21,6 +25,13 @@
 		private int _count;
 		private DateTime _firstOccurrenceAt;
 
+		/// <summary>
+		/// Analyzes a file looking for time periods where logging appears to have stopped.
+		/// </summary>
+		/// <remarks>
+		/// If a <see cref="IRecord"/> does not have a timestamp,
+		/// the analyzer will treat it as though it didn't exist.
+		/// </remarks>
 		public TimeGapAnalyzer()
 		{
 			_maximumPeriodDetected = TimeSpan.Zero;
@@ -47,11 +58,11 @@
 			return this.Count;
 		}
 
-		private static int IndexOfFirstTimestamp(ImmutableArray<IRecord> records)
+		private static int GetIndexOfNextTimestamp(ImmutableArray<IRecord> records, int startingIndex)
 		{
 			var result = UnknownIndex;
 
-			for (var i = 0; i < records.Length; i++)
+			for (var i = startingIndex; i < records.Length; i++)
 			{
 				if (records[i].HasCreationTime)
 				{
@@ -77,7 +88,7 @@
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = 0;
 
-			var previous = IndexOfFirstTimestamp(records);
+			var previous = GetIndexOfNextTimestamp(records,0);
 
 			if (previous == UnknownIndex)
 			{
@@ -100,16 +111,16 @@
 						currentRecord.Metadata.IsFlagged = false;
 					}
 
-					if (currentRecord.Metadata.WasGeneratedByUi)
+					if (records[current].HasCreationTime)
 					{
-						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
-
-						previous = current;
-					}
-					else
-					{
-						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
-
+						if (currentRecord.Metadata.WasGeneratedByUi)
+						{
+							CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
+						}
+						else
+						{
+							CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
+						}
 						previous = current;
 					}
 				}
