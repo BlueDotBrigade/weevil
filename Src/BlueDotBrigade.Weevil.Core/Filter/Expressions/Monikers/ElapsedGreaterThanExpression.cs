@@ -5,7 +5,7 @@
 
 	internal class ElapsedGreaterThanExpression : IExpression
 	{
-		private static readonly TimeSpan DefaultElapsedTime = TimeSpan.FromMilliseconds(2000);
+		private static readonly TimeSpan DefaultElapsedTime = TimeSpan.FromSeconds(3);
 		public static readonly Moniker Moniker = new Moniker("@Elapsed");
 
 		private readonly TimeSpan _userSpecifiedValue;
