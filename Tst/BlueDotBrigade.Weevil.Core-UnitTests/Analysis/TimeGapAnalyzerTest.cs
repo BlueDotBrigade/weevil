@@ -88,6 +88,35 @@
 		}
 
 		[TestMethod]
+		[WorkItem(135)]
+		public void Analyze_RecordMissingTimestamp_MissingTimestampShouldBeIgnored()
+		{
+			DateTime now = DateTime.Now;
+			SeverityType severity = SeverityType.Debug;
+
+			var records = new List<IRecord>
+			{
+				new Record(10, now.AddSeconds(0), severity, "Index=0"),
+				new Record(20, now.AddSeconds(1), severity, "Index=1"),
+				new Record(30, Record.CreationTimeUnknown, severity, "Index=2"),
+				new Record(40, now.AddSeconds(3), severity, "Index=3"),
+				new Record(50, now.AddSeconds(4), severity, "Index=4"),
+			};
+
+			var analyzer = new TimeGapAnalyzer();
+
+			analyzer.Analyze(
+				records.ToImmutableArray(),
+				EnvironmentHelper.GetExecutableDirectory(),
+				GetUserDialog(500),
+				canUpdateMetadata: true);
+
+			Assert.IsFalse(records[2].Metadata.IsFlagged);
+			Assert.IsTrue(records[3].Metadata.IsFlagged);
+			Assert.IsTrue(records[4].Metadata.IsFlagged);
+		}
+
+		[TestMethod]
 		public void Count_CheckAllRecordsForGaps_ResultMatchesCount()
 		{
 			DateTime now = DateTime.Now;
