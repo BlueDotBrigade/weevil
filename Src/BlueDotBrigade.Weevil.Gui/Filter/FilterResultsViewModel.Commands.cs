@@ -32,7 +32,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand ExitCommand => new UiBoundCommand(Exit, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClipboardCopyRawCommand => new UiBoundCommand(ClipboardCopyRaw, () => this.IsMenuEnabled);
+		public ICommand ClipboardCopySimpleCallStackCommand => new UiBoundCommand(
+			() => ClipboardCopyRaw(true), 
+			() => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand ClipboardCopyRawCommand => new UiBoundCommand(
+			() => ClipboardCopyRaw(false), 
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClipboardCopyCommentCommand => new UiBoundCommand(ClipboardCopyComment, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
