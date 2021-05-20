@@ -80,14 +80,12 @@
 					MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
 			}, canExecuteMethod);
-			_command.CanExecuteChanged += OnCanExecuteChanged;
 		}
 
-		public event EventHandler CanExecuteChanged;
-
-		private void OnCanExecuteChanged(object sender, EventArgs e)
+		public event EventHandler CanExecuteChanged
 		{
-			CanExecuteChanged?.Invoke(sender, e);
+			add { CommandManager.RequerySuggested += value; }
+			remove { CommandManager.RequerySuggested -= value; }
 		}
 
 		bool ICommand.CanExecute(object parameter)
