@@ -41,7 +41,7 @@
       <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
       <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
 
-      <KeyBinding Key="C" Modifiers="Control" Command="{Binding ClipboardCopyRawCommand}" />
+      <KeyBinding Key="C" Modifiers="Control" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
       <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
       <KeyBinding Key="V" Modifiers="Control" Command="{Binding ClipboardPasteCommand}" />
       <KeyBinding Key="V" Modifiers="Control+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
@@ -225,7 +225,8 @@
                </MenuItem>
                <Separator/>
                <MenuItem Header="Copy &amp; Paste...">
-                  <MenuItem Header="Copy Records (Raw)" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C" />
+                  <MenuItem Header="Copy Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+C" />
+                  <MenuItem Header="Copy Records (Raw)" Command="{Binding ClipboardCopyRawCommand}" />
                   <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
                   <Separator/>
                   <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
