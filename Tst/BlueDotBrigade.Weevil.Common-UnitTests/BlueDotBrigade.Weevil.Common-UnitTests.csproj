@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\Immutable\ImmutableArrayExtensionsTests.cs" />
+    <Compile Include="SimpleCallStackFormatterTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runtime\Serialization\TypeFactoryTest.cs" />
@@ -72,6 +73,9 @@
   <ItemGroup>
     <PackageReference Include="BlueDotBrigade.DatenLokator">
       <Version>1.2.3</Version>
+    </PackageReference>
+    <PackageReference Include="Moq">
+      <Version>4.16.1</Version>
     </PackageReference>
     <PackageReference Include="MSTest.TestAdapter">
       <Version>2.2.3</Version>

@@ -699,9 +699,13 @@
 			});
 		}
 
-		public void ClipboardCopyRaw()
+		public void ClipboardCopyRaw(bool readableCallstack)
 		{
-			ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix);
+			IRecordFormatter formatter = readableCallstack
+				? new SimpleCallStackFormatter() as IRecordFormatter
+				: new RawRecordFormatter() as IRecordFormatter;
+
+			ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
 		}
 
 		public void ClipboardCopyComment()

@@ -41,4 +41,10 @@
       <PackagePath></PackagePath>
     </Resource>
   </ItemGroup>
+  
+  	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>BlueDotBrigade.Weevil.Common-UnitTests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Converters
+﻿namespace BlueDotBrigade.Weevil.Common
 {
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Data;
@@ -6,47 +6,47 @@
 	using Moq;
 
 	[TestClass]
-	public class ContentConverterTests
+	public class SimpleCallStackFormatterTests
 	{
 		[TestMethod]
 		public void TruncateIf_ContentIsNotTooLong_ReturnsContent()
 		{
-			var result = ContentConverter.TruncateIf(
+			var result = SimpleCallStackFormatter.TruncateIf(
 				content: "The quick brown fox jumps over the lazy dog.",
 				isSingleLine: true,
 				maximumLength: 45,
 				truncatedLength: 19);
 
 			Assert.AreEqual(
-				"The quick brown fox jumps over the lazy dog.",
+				(object) "The quick brown fox jumps over the lazy dog.",
 				result);
 		}
 
 		[TestMethod]
 		public void TruncateIf_ContentIsTooLong_ReturnsShortenedString()
 		{
-			var result = ContentConverter.TruncateIf(
+			var result = SimpleCallStackFormatter.TruncateIf(
 				content: "The quick brown fox jumps over the lazy dog.",
 				isSingleLine:true,
 				maximumLength: 44,
 				truncatedLength:19);
 
 			Assert.AreEqual(
-				"The quick brown fox" + ContentConverter.EndOfLine,
+				(object) ("The quick brown fox" + SimpleCallStackFormatter.EndOfLine),
 				result);
 		}
 
 		[TestMethod]
 		public void TruncateIf_MultiLineContentIsTooLong_ReturnsContent()
 		{
-			var result = ContentConverter.TruncateIf(
+			var result = SimpleCallStackFormatter.TruncateIf(
 				content: "The quick brown fox jumps over the lazy dog.",
 				isSingleLine: false,
 				maximumLength: 44,
 				truncatedLength: 19);
 
 			Assert.AreEqual(
-				"The quick brown fox jumps over the lazy dog.",
+				(object) "The quick brown fox jumps over the lazy dog.",
 				result);
 		}
 
@@ -56,12 +56,12 @@
 			var record = new Mock<IRecord>();
 			record.Setup(x => x.Content).Returns(InputData.GetAsString());
 
-			var wasSuccessful = ContentConverter.TrySimplifyCallstack(
+			var wasSuccessful = SimpleCallStackFormatter.TrySimplifyCallstack(
 				content: record.Object.Content,
 				isMultiLine: true,
 				out var actualResult);
 
-			Assert.AreEqual(
+			Assert.AreEqual<string>(
 				"Debug 2021-15-21 12:59:59 AcmeAssembly.dll Something bad happened. System.ObjectDisposedException: Cannot access a disposed object.\r\n" +
 				"   at Company.Product.Component.DataCollector.Fetch()",
 				actualResult);
@@ -73,12 +73,12 @@
 			var record = new Mock<IRecord>();
 			record.Setup(x => x.Content).Returns(InputData.GetAsString());
 
-			var wasContentChanged = ContentConverter.TrySimplifyCallstack(
+			var wasContentChanged = SimpleCallStackFormatter.TrySimplifyCallstack(
 				content: record.Object.Content,
 				isMultiLine: true,
 				out var actualResult);
 
-			Assert.IsTrue(wasContentChanged);
+			Assert.IsTrue((bool) wasContentChanged);
 		}
 
 		[TestMethod]
@@ -87,12 +87,12 @@
 			var record = new Mock<IRecord>();
 			record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog.");
 
-			var wasContentChanged = ContentConverter.TrySimplifyCallstack(
+			var wasContentChanged = SimpleCallStackFormatter.TrySimplifyCallstack(
 				content: record.Object.Content,
 				isMultiLine: true,
 				out var ignoredOutput);
 
-			Assert.IsFalse(wasContentChanged);
+			Assert.IsFalse((bool) wasContentChanged);
 		}
 	}
 }
