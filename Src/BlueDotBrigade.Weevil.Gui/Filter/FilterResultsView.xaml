@@ -681,7 +681,7 @@
          <Separator Grid.Column="13" />
          <StatusBarItem Grid.Column="14">
             <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
-                     ToolTip="TOC heading related to selected record."
+                     ToolTip="Selected record is in the displayed section."
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
       </StatusBar>
