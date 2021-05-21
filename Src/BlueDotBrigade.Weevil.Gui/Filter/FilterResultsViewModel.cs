@@ -220,12 +220,7 @@
 			{
 				if (Depends.Guard)
 				{
-					Depends.On(this.IsLogFileOpen);
-				}
-
-				if (Depends.Guard)
-				{
-					Depends.On(this.IsCommandExecuting);
+					Depends.On(this.IsLogFileOpen, this.IsCommandExecuting);
 				}
 
 				return this.IsLogFileOpen && !this.IsCommandExecuting;
