@@ -4,7 +4,7 @@
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.Windows</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil.Windows</RootNamespace>
-    <Version>2.7.0</Version>
+    <Version>2.7.1</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
@@ -22,6 +22,11 @@
 	<AssemblyName>BlueDotBrigade.Weevil.Windows</AssemblyName>
 	<Company>Blue Dot Brigade</Company>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resources\Icons\Insight\TimeGap-Data-48.png" />
+    <None Remove="Resources\Icons\Insight\TimeGap-DataRequiresAttention-48.png" />
+    <None Remove="Resources\Icons\Insight\TimeGap-NoData-48.png" />
+  </ItemGroup>
 	<ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
   </ItemGroup>
@@ -40,6 +45,9 @@
     <Resource Include="Resources\Icons\Insight\CriticalErrors-DataRequiresAttention-48.png" />
     <Resource Include="Resources\Icons\Insight\GenericMetric-Data-48.png" />
     <Resource Include="Resources\Icons\Insight\GenericMetric-DataRequiresAttention-48.png" />
+    <Resource Include="Resources\Icons\Insight\TimeGap-Data-48.png" />
+    <Resource Include="Resources\Icons\Insight\TimeGap-DataRequiresAttention-48.png" />
+    <Resource Include="Resources\Icons\Insight\TimeGap-NoData-48.png" />
     <Resource Include="Resources\Icons\Insight\UiUnresponsive-Data-48.png" />
     <Resource Include="Resources\Icons\Insight\UiUnresponsive-DataRequiresAttention-48.png" />
     <Resource Include="Resources\Icons\OpenDocument-Data-24.png" />

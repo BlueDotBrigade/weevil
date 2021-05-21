@@ -1,6 +1,7 @@
 ﻿# Weevil: User Interface Style Guide
 
 - [Color Palette](#color-palette)
+	- [Image Size](#image-size)
 - [Icons](#icons)
 	- [General](#general)
 	- [Icons Having State](#icons-having-state)
@@ -13,9 +14,17 @@
 
 - Dialog box
 	- left side: #3c3c3c (dark grey)
-- Dashboard 
+- Dashboard
 	- Insight
 		- border + title bar: #3c3c3c (dark grey)
+
+### Image Size
+
+| Type       | DPI | Dimensions |
+| ---------- | --- | ---------- |
+| Status Bar | 96  | 24x24      |
+| Insight    | 96  | 48x48      |
+
 
 ## Icons
 
@@ -53,27 +62,28 @@ Many of the Weevil icons have been sourced from [Icons8.com][Icons8] which allow
 
 #### Filter Results Window
 
-| Usage | Source | Notes |
-| --- | --- | --- |
-| Open Documents |Windows Metro →Popular → Documents and Folders→ Document  | |
-| Time Elapsed | Windows Metro →Science → Lab Measurements→ Time | |
-| Context | iOS Filled →Editing → Text Editing→ Table | padding: -10% |
-| Records: Visible | Windows 10 →Messaging → User Status→ Eye | |
-| Records: Selected | iOS Filled →Editing → Image Editing→ Chisel Tip Marker | |
-| Records: On Disk | iOS Glyph →User Interface → Basic Elements→ Save  | |
-| Information | iOS Filled →User Interface → Symbols→ Information | Circle 88%, Icon 60%, Circle #949494, I: #3c3c3c |
-| Warning | IFluent System Filled →Messaging → Message Status→ High Importance | |
-| Error | Material Rounded →Popular → Status→ Cancel | |
-| Insight | Fluent System Filled →Household → Lighting→ Light On  | |
-| New Release Notification | iOS Filled →Messaging→ Megaphone | |
+| Usage                    | Source                                                             | Notes                                            |
+| ------------------------ | ------------------------------------------------------------------ | ------------------------------------------------ |
+| Open Documents           | Windows Metro →Popular → Documents and Folders→ Document           |                                                  |
+| Time Elapsed             | Windows Metro →Science → Lab Measurements→ Time                    |                                                  |
+| Context                  | iOS Filled →Editing → Text Editing→ Table                          | padding: -10%                                    |
+| Records: Visible         | Windows 10 →Messaging → User Status→ Eye                           |                                                  |
+| Records: Selected        | iOS Filled →Editing → Image Editing→ Chisel Tip Marker             |                                                  |
+| Records: On Disk         | iOS Glyph →User Interface → Basic Elements→ Save                   |                                                  |
+| Information              | iOS Filled →User Interface → Symbols→ Information                  | Circle 88%, Icon 60%, Circle #949494, I: #3c3c3c |
+| Warning                  | IFluent System Filled →Messaging → Message Status→ High Importance |                                                  |
+| Error                    | Material Rounded →Popular → Status→ Cancel                         |                                                  |
+| Insight                  | Fluent System Filled →Household → Lighting→ Light On               |                                                  |
+| New Release Notification | iOS Filled →Messaging→ Megaphone                                   |                                                  |
 
 #### Dashboard
 
-| Usage | Source | Notes |
-| --- | --- | --- |
-| Generic Insight | Ice Cream →Data → Charts→ Combo Chart | |
-| Critical Errors | Ice Cream →Industry → Warning Signs→ Radioactive | |
-| UI Responsiveness | iOS Filled →Programming → Coding→ Application Window | Add hourglass overlay. |
-| Selected Range | Fluent System Filled →Time And Date → Dates→ Calendar 31  |  no padding |
+| Usage             | Source                                                   | Notes                  |
+| ----------------- | -------------------------------------------------------- | ---------------------- |
+| Generic Insight   | Ice Cream →Data → Charts→ Combo Chart                    |                        |
+| Critical Errors   | Ice Cream →Industry → Warning Signs→ Radioactive         |                        |
+| UI Responsiveness | iOS Filled →Programming → Coding→ Application Window     | Add hourglass overlay. |
+| Selected Range    | Fluent System Filled →Time And Date → Dates→ Calendar 31 | no padding             |
+| Time Gap          | iOS Filled →Time And Date → Clocks→ Clock    |
 
 [Icons8]: https://icons8.com/icons/
