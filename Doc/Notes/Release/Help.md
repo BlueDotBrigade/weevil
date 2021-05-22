@@ -163,6 +163,7 @@ When a log file is opened, Weevil will silently begin analyzing the data looking
 - The *Clear* commands improve performance be removing portions of the log file that are not needed. 
   - *Clear Before* removes all log file records from memory before the highlighted row in Log Viewer.
   - *Clear After* removes all log file records from memory before the highlighted row in Log Viewer.
+- You can force Weevil to release unused RAM back to the operating system by pressing: `Ctrl+Alt+Shift+F12`
 
 [RegExQuickRef]: https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
 [RegEx101]: https://regex101.com
