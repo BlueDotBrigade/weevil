@@ -2,9 +2,11 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using Timeline;
 
@@ -62,19 +64,49 @@
 			{
 				analyzers.AddRange(new List<IRecordAnalyzer>()
 				{
-					new DetectUnresponsiveUiAnalyzer(),
+					new TimeGapAnalyzer(),
+					new TimeGapUiAnalyzer(),
 					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
 				});
 			}
 
 			if ((componentType & ComponentType.Extension) == ComponentType.Extension)
 			{
-				analyzers.AddRange(_coreExtension.GetAnalyzers());
+				analyzers.AddRange(_coreExtension.GetAnalyzers(
+					_coreEngine.Context,
+					_coreEngine.Navigator.TableOfContents));
 			}
 
 			return analyzers;
+		}
+
+		public ImmutableArray<IInsight> GetInsights()
+		{
+			Log.Default.Write(LogSeverityType.Debug, "Insight is being gathered from the recordset...");
+
+			var insights = new List<IInsight>();
+
+			var stopwatch = Stopwatch.StartNew();
+
+			insights.AddRange(_coreExtension.GetInsights(
+				_coreEngine.Context,
+				_coreEngine.Navigator.TableOfContents));
+
+			foreach (IInsight insight in insights)
+			{
+				insight.Refresh(_coreEngine.Records);
+			}
+				
+			stopwatch.Stop();
+
+			var attentionRequiredCount = insights.Count(x => x.IsAttentionRequired);
+
+			Log.Default.Write(LogSeverityType.Information, $"Insight has been gathered. Records={_coreEngine.Records.Length:###,###,###,###}, Insights={insights.Count}, AttentionRequired={attentionRequiredCount}, ExecutionTime={stopwatch.Elapsed.ToHumanReadable()}");
+
+			return ImmutableArray.Create(insights.ToArray());
 		}
 
 		public void Analyze(AnalysisType analysisType)
@@ -83,13 +115,13 @@
 			Analyze(analyzerKey, new UserDialogNotRequired());
 		}
 
-		public void Analyze(AnalysisType analysisType, IUserDialog userDialog)
+		public int  Analyze(AnalysisType analysisType, IUserDialog userDialog)
 		{
 			var analyzerKey = analysisType.ToString();
-			Analyze(analyzerKey, userDialog);
+			return Analyze(analyzerKey, userDialog);
 		}
 
-		public void Analyze(string analyzerKey, IUserDialog userDialog)
+		public int Analyze(string analyzerKey, IUserDialog userDialog)
 		{
 			ImmutableArray<IRecord> records = _coreEngine.Selector.IsTimePeriodSelected
 				? _coreEngine.Selector.GetSelected()
@@ -97,10 +129,13 @@
 
 			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
 
-			analyzer.Analyze(
+			var recordCount = analyzer.Analyze(
 				records,
 				_coreEngine.SourceDirectory,
-				userDialog);
+				userDialog,
+				true);
+
+			return recordCount;
 		}
 	}
 }

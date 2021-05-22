@@ -41,7 +41,7 @@
 	internal partial class FilterResultsViewModel : IDropTarget, INotifyPropertyChanged
 	{
 		private static readonly Uri NewReleaseUrl =
-			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/ReleaseNotes.xml");
+			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
@@ -49,6 +49,8 @@
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\ThirdPartyNoticesAndInformation.txt");
 
 		private static readonly string NewReleaseFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
+
+		private static readonly ImmutableArray<IInsight> NoInsight = ImmutableArray.Create(new IInsight[0]);
 
 		#region Fields & Object Lifetime
 
@@ -83,11 +85,13 @@
 		private FilterCriteria _previousFilterCriteria;
 
 		private FilterType _currentfilterType;
-		private FilterCriteria _currentfilterCriteria;
+		private IFilterCriteria _currentfilterCriteria;
 
 		private int _concurrentFilterCount;
 
 		private ITableOfContents _tableOfContents;
+
+		private ImmutableArray<IInsight> _insights;
 
 		public FilterResultsViewModel(Window mainWindow, IUiDispatcher uiDispatcher)
 		{
@@ -96,8 +100,6 @@
 			_dialogBox = new DialogBoxService(mainWindow);
 
 			_engine = Engine.Surrogate;
-
-			_previousFilterCriteria = FilterCriteria.None;
 
 			this.IsLogFileOpen = Engine.IsRealInstance(_engine);
 			this.IsCommandExecuting = false;
@@ -108,6 +110,8 @@
 			_exclusiveFilter = string.Empty;
 
 			_concurrentFilterCount = 0;
+			_currentfilterCriteria = FilterCriteria.None;
+			_previousFilterCriteria = FilterCriteria.None;
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
@@ -119,6 +123,10 @@
 
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
+
+			this.HasInsight = false;
+			this.HasInsightNeedingAttention = false;
+			this.InsightNeedingAttention = 0;
 
 			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
@@ -133,6 +141,8 @@
 			_tableOfContents = new TableOfContents();
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
+
+			_insights = NoInsight;
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -142,7 +152,7 @@
 			try
 			{
 #if DEBUG
-				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\ReleaseNotes.xml");
+				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\NewReleaseNotification.xml");
 				Stream newReleaseStream = FileHelper.Open(applicationInfoPath);
 #else
 				Stream newReleaseStream = new WebClient().OpenRead(NewReleaseUrl);
@@ -175,6 +185,15 @@
 		public int SelectedRecordCount => _engine.Selector.Selected.Count;
 
 		[SafeForDependencyAnalysis]
+		public bool HasInsight { get; private set; }
+
+		[SafeForDependencyAnalysis]
+		public bool HasInsightNeedingAttention { get; private set; }
+
+		[SafeForDependencyAnalysis]
+		public int InsightNeedingAttention { get; private set; }
+
+		[SafeForDependencyAnalysis]
 		public bool IsUpdateAvailable
 		{
 			get
@@ -201,12 +220,7 @@
 			{
 				if (Depends.Guard)
 				{
-					Depends.On(this.IsLogFileOpen);
-				}
-
-				if (Depends.Guard)
-				{
-					Depends.On(this.IsCommandExecuting);
+					Depends.On(this.IsLogFileOpen, this.IsCommandExecuting);
 				}
 
 				return this.IsLogFileOpen && !this.IsCommandExecuting;
@@ -430,6 +444,10 @@
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
 
+			this.HasInsight = false;
+			this.HasInsightNeedingAttention = false;
+			this.InsightNeedingAttention = 0;
+
 			var openAsResult = new OpenAsResult();
 			var wasFileOpened = false;
 
@@ -545,6 +563,14 @@
 						}
 
 						_tableOfContents = _engine.Navigator.TableOfContents;
+					}
+				).ContinueWith((x) =>
+					{
+						_insights = _engine.Analyzer.GetInsights();
+
+						this.HasInsight = _insights.Length > 0;
+						this.InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired);
+						this.HasInsightNeedingAttention = this.InsightNeedingAttention > 0;
 					}
 				);
 			}
@@ -668,9 +694,13 @@
 			});
 		}
 
-		public void ClipboardCopyRaw()
+		public void ClipboardCopyRaw(bool readableCallstack)
 		{
-			ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix);
+			IRecordFormatter formatter = readableCallstack
+				? new SimpleCallStackFormatter() as IRecordFormatter
+				: new RawRecordFormatter() as IRecordFormatter;
+
+			ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
 		}
 
 		public void ClipboardCopyComment()
@@ -746,14 +776,7 @@
 				}
 				else
 				{
-					if (_engine.Count == _engine.Filter.Results.Length)
-					{
-						this.ElapsedTime = _engine.Metrics.RecordAndMetadataLoadDuration;
-					}
-					else
-					{
-						this.ElapsedTime = _engine.Filter.FilterExecutionTime;
-					}
+					this.ElapsedTime = Metadata.ElapsedTimeUnknown;
 				}
 			});
 		}
@@ -828,6 +851,20 @@
 		private void SplitCurrentLog()
 		{
 			new LogFileSplitter(_engine.SourceFilePath).Run(_engine.Filter.Results);
+		}
+
+		private void ShowDashboard()
+		{
+			IPlugin plugin = new PluginFactory().Create(_engine.SourceFilePath);
+
+			if (plugin.CanShowDashboard)
+			{
+				plugin.ShowDashboard(_mainWindow, _engine, _insights.ToArray());
+			}
+			else
+			{
+				_dialogBox.ShowDashboard(_insights, _engine);
+			}
 		}
 
 		private void ForceGarbageCollection()
@@ -929,7 +966,10 @@
 		{
 			try
 			{
-				_engine.Analyzer.Analyze(analysisType, _dialogBox);
+				this.FlaggedRecordCount = -1;
+				this.FlaggedRecordCount = _engine
+					.Analyzer.Analyze(analysisType, _dialogBox);
+				RaisePropertyChanged(nameof(this.FlaggedRecordCount));
 			}
 			catch (Exception e)
 			{
@@ -941,7 +981,10 @@
 		{
 			try
 			{
-				_engine.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
+				this.FlaggedRecordCount = -1;
+				this.FlaggedRecordCount = _engine
+					.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
+				RaisePropertyChanged(nameof(this.FlaggedRecordCount));
 			}
 			catch (Exception e)
 			{
@@ -1017,7 +1060,7 @@
 		/// In this case, work is being deferred to a background thread. As a result,
 		/// the transition the UI & background threads has to be managed.
 		/// </remarks>
-		private void FilterAsynchronously(FilterType filterType, FilterCriteria filterCriteria)
+		private void FilterAsynchronously(FilterType filterType, IFilterCriteria filterCriteria)
 		{
 			Log.Default.Write(
 				LogSeverityType.Debug,

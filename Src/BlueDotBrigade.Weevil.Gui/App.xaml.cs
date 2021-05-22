@@ -1,12 +1,14 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System;
+	using System.Diagnostics;
 	using System.Runtime.ExceptionServices;
 	using System.Security;
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Management;
 
 	public partial class App : Application
 	{
@@ -100,9 +102,34 @@
 				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 				TaskScheduler.UnobservedTaskException += OnUnhandledTplException;
 
-				Log.Default.Write(LogSeverityType.Information, "Weevil application is starting...");
+				Log.Default.Write(LogSeverityType.Information, "Weevil application is registering the logginer library...");
 				Log.Register(new NLogWriter());
-				Log.Default.Write(LogSeverityType.Debug, $"The logging library has been registered. Type={nameof(NLogWriter)}");
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					"Weevil application is starting...");
+
+				Log.Default.Write(LogSeverityType.Debug,
+					$"The logging library has been registered. Type={nameof(NLogWriter)}");
+
+				if (Debugger.IsAttached)
+				{
+					Log.Default.Write(LogSeverityType.Warning,
+						"Visual Studio debugger is attached to this instance of Weevil.");
+				}
+
+				var computerSnapshot = ComputerSnapshot.Create();
+
+				var computerDetails =  
+					$"OsName=`{computerSnapshot.OsName}`, " +
+					$"OsIs64Bit={computerSnapshot.OsIs64Bit}, " +
+					$"CpuName=`{computerSnapshot.CpuName}`, " +
+					$"RamTotalInstalled={computerSnapshot.RamTotalInstalled.GigaBytes:0.00}GB, " +
+					$"RamTotalFree={computerSnapshot.RamTotalFree.GigaBytes:0.00}GB";
+
+		Log.Default.Write(
+					LogSeverityType.Information,
+					computerDetails);
 			}
 			finally
 			{

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Analysis;
 	using IO;
 
 	internal class TheDefaultPlugin : IPlugin
@@ -21,6 +22,13 @@
 		public (bool, OpenAsResult) ShowOpenAs(object parentWindow, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
 		{
 			throw new NotSupportedException();
+		}
+
+		public bool CanShowDashboard => false;
+
+		public void ShowDashboard(object parentWindow, IEngine engine, IInsight[] insights)
+		{
+			throw new NotImplementedException();
 		}
 
 		public ICoreExtension GetExtension(string sourceFilePath)

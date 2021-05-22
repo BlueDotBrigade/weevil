@@ -4,7 +4,7 @@
 		<Platforms>x64</Platforms>
 		<PackageId>BlueDotBrigade.Weevil.Core</PackageId>
 		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-		<Version>2.5.0</Version>
+		<Version>2.7.0</Version>
 		<Authors>BlueDotBrigade;</Authors>
 		<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
 		<Owners>Blue Dot Brigade</Owners>
@@ -31,7 +31,7 @@
 		<None Remove="Resources\Images\Weevil.png" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="4.7.6" />
+		<PackageReference Include="NLog" Version="4.7.9" />
 		<PackageReference Include="System.ComponentModel.Composition" Version="5.0.0" />
 	</ItemGroup>
 	<ItemGroup>

@@ -66,7 +66,8 @@
     <Compile Include="Analysis\ElapsedTimeAnalyzerTest.cs" />
     <Compile Include="Analysis\SeverityMetricsTest.cs" />
     <Compile Include="Analysis\Timeline\DataTransitionAnalyzerTest.cs" />
-    <Compile Include="Analysis\DetectUnresponsiveUiAnalyzerTest.cs" />
+    <Compile Include="Analysis\TimeGapAnalyzerTest.cs" />
+    <Compile Include="Analysis\TimeGapUiAnalyzerTests.cs" />
     <Compile Include="Data\RecordFactory.cs" />
     <Compile Include="Data\TsvRecordParserTest.cs" />
     <Compile Include="Data\MultiLineRecordParserTest.cs" />
@@ -84,16 +85,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BlueDotBrigade.DatenLokator">
-      <Version>1.2.0</Version>
+      <Version>1.2.3</Version>
     </PackageReference>
     <PackageReference Include="Moq">
-      <Version>4.15.2</Version>
+      <Version>4.16.1</Version>
     </PackageReference>
     <PackageReference Include="MSTest.TestAdapter">
-      <Version>2.1.2</Version>
+      <Version>2.2.3</Version>
     </PackageReference>
     <PackageReference Include="MSTest.TestFramework">
-      <Version>2.1.2</Version>
+      <Version>2.2.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

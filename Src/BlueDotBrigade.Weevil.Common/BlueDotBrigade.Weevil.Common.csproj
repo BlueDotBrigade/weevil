@@ -4,7 +4,7 @@
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.10.1</Version>
+    <Version>2.10.3</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
@@ -41,4 +41,10 @@
       <PackagePath></PackagePath>
     </Resource>
   </ItemGroup>
+  
+  	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>BlueDotBrigade.Weevil.Common-UnitTests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>

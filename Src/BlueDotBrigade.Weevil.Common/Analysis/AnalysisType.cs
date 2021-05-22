@@ -5,6 +5,8 @@
 		DetectData,
 		DetectDataTransition,
 		DetectFallingEdges,
-		DetectUnresponsiveUi,
+		DetectRisingEdges,
+		TimeGapUiOnly,
+		TimeGap,
 	}
 }

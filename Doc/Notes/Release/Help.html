@@ -7,19 +7,24 @@
 
     <h1 id="weevil-help">Weevil : Help</h1>
 <ul>
-<li><a href="#introduction">Introduction</a></li>
-<li><a href="#examples">Examples</a>
+<li><a href="#what-is-a-filter">What Is A Filter?</a>
 <ul>
-<li><a href="#sample-input">Sample Input</a></li>
-<li><a href="#sample-expressions">Sample Expressions</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#built-in-expressions">Built-In Expressions</a>
+<ul>
+<li><a href="#monikers">Monikers</a></li>
 </ul>
 </li>
-<li><a href="#data-analysis">Data Analysis</a>
+</ul>
+</li>
+<li><a href="#built-in-analyzers">Built-In Analyzers</a>
 <ul>
-<li><a href="#detecting-when-data-changes">Detecting When Data Changes</a></li>
+<li><a href="#detecting-data">Detecting Data</a></li>
 <li><a href="#detecting-an-unresponsive-ui">Detecting an Unresponsive UI</a></li>
+<li><a href="#detecting-gaps-in-logging">Detecting Gaps In Logging</a></li>
 </ul>
 </li>
+<li><a href="#dashboard">Dashboard</a></li>
 <li><a href="#appendices">Appendices</a>
 <ul>
 <li><a href="#appendix-a-additional-reading">Appendix A: Additional Reading</a></li>
@@ -29,7 +34,7 @@
 </li>
 </ul>
 <hr />
-<h2 id="introduction">Introduction</h2>
+<h2 id="what-is-a-filter">What Is A Filter?</h2>
 <p>A filter represents one or more expressions - separated by a double pipe (<code>||</code>) character - than can be used to identify records of interest within a log file.</p>
 <p>The supported filter types include:</p>
 <ol>
@@ -61,22 +66,21 @@
 </tbody>
 </table>
 <p>When using <em>Weevil</em>, it is worth noting that all operations are (include <code>Clear</code>) are non-destructive.  In other words, the original log file will remain unchanged.</p>
-<h2 id="examples">Examples</h2>
-<h3 id="sample-input">Sample Input</h3>
-<p>Assume a log file contained the following:</p>
-<pre><code class="language-Dos">01: A quick brown fox jumps over the lazy dog.
-02: The five boxing wizards jump quickly.
-03: How quickly daft jumping zebras vex!
+<h3 id="examples">Examples</h3>
+<p>If a log file contained the following:</p>
+<pre><code>A quick brown fox jumps over the lazy dog.
+The five boxing wizards jump quickly.
+How quickly daft jumping zebras vex!
 </code></pre>
-<h3 id="sample-expressions">Sample Expressions</h3>
+<p>Then a user could applies these inclusive filters:</p>
 <ul>
-<li>Performing a case-sensitive search:
+<li>Case-sensitive search:
 <ul>
 <li>Filter: <code>H</code></li>
 <li>Returns: line 3</li>
 </ul>
 </li>
-<li>Performing a case-insensitive search:
+<li>Case-insensitive search:
 <ul>
 <li>Filter: <code>(?i)THE</code></li>
 <li>Returns: line 2</li>
@@ -88,24 +92,69 @@
 <li>Returns: line 1 &amp; 3</li>
 </ul>
 </li>
-<li>Searching for a pattern that begins &amp; ends with:
+<li>Searching for text that begins with:
 <ul>
-<li>Filter: <code>quick.*jump</code></li>
+<li>Filter: <code>quick.*</code></li>
 <li>Returns: line 1 &amp; 3</li>
 </ul>
 </li>
 </ul>
+<h3 id="built-in-expressions">Built-In Expressions</h3>
+<h4 id="monikers">Monikers</h4>
+<p>The following expressions can be used to query metadata collected by the Weevil application:</p>
+<ul>
+<li><code>@Comment</code> : identifies all records that have a user comment
+<ul>
+<li><strong>Note</strong>: Be sure to uncheck the &quot;Include Pinned&quot; option before using this moniker.</li>
+<li><code>@Comment=State</code>: performs a case-insensitive search of all user comments for the given value, in this case the word <code>State</code></li>
+</ul>
+</li>
+<li><code>@Elapsed</code> : is used to measure the time period between records
+<ul>
+<li><code>@Elapsed&gt;5000</code> : returns a list of records where there was no logging for the preceding 5 seconds</li>
+</ul>
+</li>
+<li><code>@Flagged</code>: search all records that have been flagged
+<ul>
+<li><code>@Flagged=False</code>: search all records that have not been flagged</li>
+</ul>
+</li>
+<li><code>@Pinned</code> : search for records that have been pinned
+<ul>
+<li><code>@Pinned=False</code> : search for all records that have not been pinned</li>
+</ul>
+</li>
+<li><code>@UiThread</code>: identifies all records that were created by the application's UI thread
+<ul>
+<li><code>@UiThread=False</code>: identifies all records that were not created by the application's UI thread</li>
+</ul>
+</li>
+</ul>
 <hr />
-<h2 id="data-analysis">Data Analysis</h2>
-<h3 id="detecting-when-data-changes">Detecting When Data Changes</h3>
-<p>To identify records where a value has changed over time:</p>
+<h2 id="built-in-analyzers">Built-In Analyzers</h2>
+<h3 id="detecting-data">Detecting Data</h3>
+<p>Weevil has several analyzers that can be used to extract data from a log file, flag relevant records, and copy regular expression &quot;named group&quot; values into the record's comment field:</p>
+<ul>
+<li><code>Detect Data</code>: results are always copied into the comment field</li>
+<li><code>Detect Data Transitions</code>: results are only copied when a value changes</li>
+<li><code>Detect Rising Edges</code>: results are only copied when a numerical value increases</li>
+<li><code>Detect Falling Edges</code>: results are only copied when a numerical value decreases (e.g. hardware's uptime value is reset to zero)</li>
+</ul>
+<p>Steps:</p>
 <ol>
-<li>Filter using a regular expression with a named group.
+<li><p>Filter using a regular expression with a named group.</p>
 <ul>
 <li>For example:  <code>Key=(?&lt;Value&gt;[a-zA-Z0-9]+)</code></li>
 </ul>
 </li>
-<li>Use Weevil's <code>Detect Data Transitions</code> option.</li>
+<li><p>Select an appropriate analyzer.</p>
+</li>
+<li><p>Post-analysis you can view the records of interest by using the following inclusive filter:</p>
+<ul>
+<li><code>@Comment</code> to show all records with a comment, or</li>
+<li><code>@Flagged</code> to show the records that matched the previous analysis</li>
+</ul>
+</li>
 </ol>
 <p>Result: Weevil will chronologically flag records where the <code>Value</code> changes.</p>
 <h3 id="detecting-an-unresponsive-ui">Detecting an Unresponsive UI</h3>
@@ -114,7 +163,7 @@
 <li>perform a lot of logging from the UI thread, and</li>
 <li>do not explicitly measure UI responsiveness.</li>
 </ul>
-<p>Begin by:</p>
+<p>Steps:</p>
 <ol>
 <li>Selecting the records you wish to analyze.
 <ul>
@@ -134,6 +183,14 @@
 </ul>
 </li>
 </ol>
+<h3 id="detecting-gaps-in-logging">Detecting Gaps In Logging</h3>
+<p>Weevil includes analyzers that can be used to detect when an application stopped writing to the log file:</p>
+<ul>
+<li><code>Detect Time Gap</code> : flags records when the time period between records exceeds the given threshold</li>
+<li><code>Detect Time Gap (UI)</code> : unlike <code>Detect Time Gap</code> this analyzer only measures the time period between records generated by the UI (<code>ThreadId=1</code>)</li>
+</ul>
+<h2 id="dashboard">Dashboard</h2>
+<p>When a log file is opened, Weevil will silently begin analyzing the data looking for trends.  A light-bulb icon will appear in the status bar post-analysis informing the user of any insight that may be of interest.</p>
 <hr />
 <h2 id="appendices">Appendices</h2>
 <h3 id="appendix-a-additional-reading">Appendix A: Additional Reading</h3>
@@ -174,6 +231,7 @@
 <li><em>Clear After</em> removes all log file records from memory before the highlighted row in Log Viewer.</li>
 </ul>
 </li>
+<li>You can force Weevil to release unused RAM back to the operating system by pressing: <code>Ctrl+Alt+Shift+F12</code></li>
 </ul>
 
 

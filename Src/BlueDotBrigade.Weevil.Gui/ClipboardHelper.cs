@@ -11,8 +11,9 @@
 	public static class ClipboardHelper
 	{
 		private const string Delimiter = " === ";
+		private const string NoTimestampPlaceholder = @"--:--:--.----";
 
-		public static void CopyRawFromSelected(IEngine engine, bool addLineNumberPrefix)
+		public static void CopyRawFromSelected(IEngine engine, bool addLineNumberPrefix, IRecordFormatter formatter)
 		{
 			IEngine coreEngine = engine;
 			if (coreEngine != null)
@@ -25,7 +26,7 @@
 						.Selector
 						.Selected
 						.Values
-						.Select(r => r.LineNumber + Delimiter + r.Content)
+						.Select(r => r.LineNumber + Delimiter + formatter.Format(r))
 						.ToArray();
 				}
 				else
@@ -34,7 +35,7 @@
 						.Selector
 						.Selected
 						.Values
-						.Select(r => r.Content).ToArray();
+						.Select(r => formatter.Format(r)).ToArray();
 				}
 
 				Clipboard.SetData(
@@ -62,7 +63,7 @@
 					{
 						var timestamp = record.HasCreationTime
 							? record.CreatedAt.ToString("HH:mm:ss.ffff", CultureInfo.InvariantCulture)
-							: string.Empty;
+							: NoTimestampPlaceholder;
 
 						if (addLineNumberPrefix)
 						{

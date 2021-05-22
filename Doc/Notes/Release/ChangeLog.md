@@ -4,6 +4,32 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+### Version 2.7.0
+
+Released on May 22th, 2021
+
+#### What's New?
+
+- A status bar light bulb, and accompanying dashboard has been added to provide insight about the open file. (#20, #117)
+- Updated NuGet package dependencies to the latest version. (#111)
+- A "Detect Rising Edge" `Analyzer` has been added. (#113)
+- A new XML notification message is now used to notify users about new Weevil releases. (#117)
+- The status bar tool tips are now more intuitive (#117)
+- `Copy+Shift+C` operation will result in the following placeholder `--:--:--` being used when no timestamp is available. (#117)
+- Weevil now captures basic hardware information (e.g. CPU & RAM) to facilitate troubleshooting production issues (#125)
+- CPU & RAM details are now fully visible in About dialog. (#117)
+- `@Elapsed` moniker now has a default value of 3 seconds (#135)
+- The existing `@Elapsed` moniker has now been exposed as an `Analyzer` and dashboard `Insight` (#135)
+- A full "Garbage Collection" can now be triggered using `Ctrl+Alt+Shift+F12` to help release RAM back to the OS. (#22)
+- User has the option to copy either the raw record, or a "friendly" version that has a simplified .NET call stack. (#134)
+- Weevil now monitors the responsiveness of it's own user interface. (#110)
+
+#### Bug Fixes
+
+- The status bar now reflects the number of flagged `Record`s post-analysis (#116) (#121)
+- The menu no longer remains disabled when: you view the context menu before loading a file (#139)
+- Fixed: static aliases do not resolve properly when multiple aliases start with the same text. (#98)
+
 ### Version 2.6.1
 
 Released on March 27th, 2021

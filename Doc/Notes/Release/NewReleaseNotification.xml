@@ -1,0 +1,12 @@
+<!-- 
+	Implementation notes:
+	- For proper deserialization, elements must be listed in alphabetical order.
+	- Don't forget to escape characters like ampersand.
+-->
+<ApplicationInfo>
+	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
+	<CodeName>Keep On Looking</CodeName>
+	<Description>New dashboard: when a file is opened Weevil will automatically look for useful insight.</Description>
+	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
+	<LatestRelease>2.7.0</LatestRelease>
+</ApplicationInfo>

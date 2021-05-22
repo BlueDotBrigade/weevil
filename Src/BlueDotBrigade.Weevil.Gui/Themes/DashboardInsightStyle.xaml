@@ -1,0 +1,52 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Analysis;assembly=BlueDotBrigade.Weevil.Common"
+                    xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
+                    xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows">
+   <converters:ObjectToTypeConverter x:Key="ObjectToTypeConverter" />
+
+   <Style x:Key="DashboardInsightStyle" TargetType="{x:Type controls:InsightControl}">
+      <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/GenericMetric-Data-48.png"/>
+
+      <Style.Triggers>
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                          Value="{x:Type analysis:CriticalErrorsInsight}" />
+               <Condition Binding="{Binding IsAttentionRequired}" Value="False" />
+            </MultiDataTrigger.Conditions>
+            <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/CriticalErrors-Data-48.png" />
+         </MultiDataTrigger>
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                          Value="{x:Type analysis:CriticalErrorsInsight}" />
+               <Condition Binding="{Binding IsAttentionRequired}" Value="True" />
+            </MultiDataTrigger.Conditions>
+            <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/CriticalErrors-DataRequiresAttention-48.png" />
+         </MultiDataTrigger>
+
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                          Value="{x:Type analysis:TimeGapInsight}" />
+               <Condition Binding="{Binding IsAttentionRequired}" Value="False" />
+            </MultiDataTrigger.Conditions>
+            <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/UiUnresponsive-Data-48.png" />
+         </MultiDataTrigger>
+         <MultiDataTrigger>
+            <MultiDataTrigger.Conditions>
+               <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                          Value="{x:Type analysis:TimeGapInsight}" />
+               <Condition Binding="{Binding IsAttentionRequired}" Value="True" />
+            </MultiDataTrigger.Conditions>
+            <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/UiUnresponsive-DataRequiresAttention-48.png" />
+         </MultiDataTrigger>
+      </Style.Triggers>
+   </Style>
+</ResourceDictionary>

@@ -1,20 +1,11 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Help
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 	using System.Windows;
-	using System.Windows.Controls;
-	using System.Windows.Data;
-	using System.Windows.Documents;
 	using System.Windows.Input;
-	using System.Windows.Media;
-	using System.Windows.Media.Imaging;
-	using System.Windows.Shapes;
 	using BlueDotBrigade.Weevil.Gui.Input;
+	using BlueDotBrigade.Weevil.Gui.Management;
 	using BlueDotBrigade.Weevil.IO;
 
 	/// <summary>
@@ -36,12 +27,16 @@
 
 		public AboutDialog(Version weevilVersion, string licensePath, string thirdPartyNoticesPath)
 		{
+			var computerSnapshot = ComputerSnapshot.Create();
+
 			this.Details =
 				$"Weevil: {weevilVersion}" + Environment.NewLine +
 				$"Common Language Runtime: {Environment.Version}" + Environment.NewLine +
-				$"Operating System: {Environment.OSVersion}" + Environment.NewLine +
+				$"Operating System: {computerSnapshot.OsName}" + Environment.NewLine +
+				$"CPU: {computerSnapshot.CpuName}" + Environment.NewLine +
+				$"RAM Free: {computerSnapshot.RamTotalFree.GigaBytes:0.00}GB" + Environment.NewLine +
 				Environment.NewLine +
-				$"Open source software powered by Blue Dot Brigade.";
+				$"Weevil's core engine is powered by open source software.";
 
 			this.License = new File().ReadAllText(licensePath);
 

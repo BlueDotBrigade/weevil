@@ -32,7 +32,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand ExitCommand => new UiBoundCommand(Exit, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand ClipboardCopyRawCommand => new UiBoundCommand(ClipboardCopyRaw, () => this.IsMenuEnabled);
+		public ICommand ClipboardCopySimpleCallStackCommand => new UiBoundCommand(
+			() => ClipboardCopyRaw(true), 
+			() => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand ClipboardCopyRawCommand => new UiBoundCommand(
+			() => ClipboardCopyRaw(false), 
+			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClipboardCopyCommentCommand => new UiBoundCommand(ClipboardCopyComment, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
@@ -43,6 +49,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ShowHelpCommand => new UiBoundCommand(ShowHelp);
 		[SafeForDependencyAnalysis]
 		public ICommand ShowAboutCommand => new UiBoundCommand(ShowAbout);
+		[SafeForDependencyAnalysis]
+		public ICommand ShowDashboardCommand => new UiBoundCommand(ShowDashboard, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ShowFileExplorerCommand => new UiBoundCommand(ShowFileExplorer, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
@@ -145,8 +153,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand SaveCommentSummaryCommand => new UiBoundCommand(SaveCommentSummary, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand DetectUnresponsiveUiCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.DetectUnresponsiveUi), 
+		public ICommand DetectTimeGapUiOnlyCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.TimeGapUiOnly), 
+			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand DetectTimeGapCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.TimeGap),
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
@@ -162,6 +175,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand DataTransitionsFallingEdgeCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectFallingEdges),
+			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand DataTransitionsRisingEdgeCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectRisingEdges),
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]

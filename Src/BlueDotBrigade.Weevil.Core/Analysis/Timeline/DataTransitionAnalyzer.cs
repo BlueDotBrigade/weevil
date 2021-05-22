@@ -29,9 +29,9 @@
 		/// 2. an appropriate comment is added to the record
 		/// </remarks>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog)
+		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var flaggedRecords = 0;
+			var count = 0;
 
 			if (_filterStrategy != FilterStrategy.KeepAllRecords)
 			{
@@ -42,7 +42,10 @@
 
 					foreach (IRecord record in records)
 					{
-						record.Metadata.IsFlagged = false;
+						if (canUpdateMetadata)
+						{
+							record.Metadata.IsFlagged = false;
+						}
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -60,9 +63,14 @@
 											{
 												var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
-												flaggedRecords++;
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+												count++;
+
+												if (canUpdateMetadata)
+												{
+													record.Metadata.IsFlagged = true;
+													record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+												}
+
 												previousState[currentState.Key] = currentState.Value;
 											}
 										}
@@ -70,9 +78,15 @@
 										{
 											var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
-											flaggedRecords++;
-											record.Metadata.IsFlagged = true;
-											record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+											count++;
+
+											if (canUpdateMetadata)
+											{
+												record.Metadata.IsFlagged = true;
+												record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
+											}
+
+
 											previousState.Add(currentState.Key, currentState.Value);
 										}
 									}
@@ -83,7 +97,7 @@
 				}
 			}
 
-			return flaggedRecords;
+			return count;
 		}
 
 		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)

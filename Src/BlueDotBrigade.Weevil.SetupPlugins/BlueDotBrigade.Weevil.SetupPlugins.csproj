@@ -22,6 +22,7 @@
 		<WarningLevel>4</WarningLevel>
 	</PropertyGroup>
 	<ItemGroup>
-		<Content Include="$(WEEVIL_PLUGINS_PATH)\**\*" LinkBase="Plugins" CopyToOutputDirectory="PreserveNewest" />
+		<Content Include="$(WEEVIL_PLUGINS_PATH)\**\*.dll" LinkBase="Plugins" CopyToOutputDirectory="PreserveNewest" />
+		<Content Include="$(WEEVIL_PLUGINS_PATH)\**\*.pdb" LinkBase="Plugins" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

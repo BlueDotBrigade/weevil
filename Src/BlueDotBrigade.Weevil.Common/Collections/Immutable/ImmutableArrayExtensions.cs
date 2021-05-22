@@ -1,11 +1,54 @@
 ﻿namespace BlueDotBrigade.Weevil.Collections.Immutable
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using Data;
 
 	public static class ImmutableArrayExtensions
 	{
+		private const int AttemptCount = 16;
+
+		private static DateTime EstimateFirstTimestamp(ImmutableArray<IRecord> records)
+		{
+			var result = Record.CreationTimeUnknown;
+
+			var maxIndex = records.Length < AttemptCount
+				? records.Length
+				: AttemptCount;
+
+			for (var i = 0; i < maxIndex; i++)
+			{
+				if (records[i].HasCreationTime)
+				{
+					result = records[i].CreatedAt;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		private static DateTime EstimateLastTimestamp(ImmutableArray<IRecord> records)
+		{
+			var result = Record.CreationTimeUnknown;
+
+			var minIndex = records.Length > AttemptCount
+				? records.Length - AttemptCount - 1
+				: 0;
+
+			for (var i = records.Length-1; minIndex <= i; i--)
+			{
+				if (records[i].HasCreationTime)
+				{
+					result = records[i].CreatedAt;
+					break;
+				}
+			}
+
+			return result;
+		}
+
 		/// <summary>
 		/// Compresses the size of the array by removing default values (e.g. null).
 		/// </summary>
@@ -85,6 +128,50 @@
 		public static IRecord Last(this ImmutableArray<IRecord> array)
 		{
 			return array[array.Length - 1];
+		}
+
+		public static (DateTime From, DateTime To) GetRange(this ImmutableArray<IRecord> records)
+		{
+			var from = Record.CreationTimeUnknown;
+			var to = Record.CreationTimeUnknown;
+
+			if (records.Length > 0)
+			{
+				if (records.Length == 1)
+				{
+					from = records[0].CreatedAt;
+					to = records[0].CreatedAt;
+				}
+				else
+				{
+					from = records[0].CreatedAt;
+					to = records[records.Length - 1].CreatedAt;
+				}
+			}
+
+			return (from, to);
+		}
+
+		public static (DateTime From, DateTime To) GetEstimatedRange(this ImmutableArray<IRecord> records)
+		{
+			var from = Record.CreationTimeUnknown;
+			var to = Record.CreationTimeUnknown;
+
+			if (records.Length > 0)
+			{
+				if (records.Length == 1)
+				{
+					from = EstimateFirstTimestamp(records);
+					to = from;
+				}
+				else
+				{
+					from = EstimateFirstTimestamp(records);
+					to = EstimateLastTimestamp(records);
+				}
+			}
+
+			return (from, to);
 		}
 	}
 }

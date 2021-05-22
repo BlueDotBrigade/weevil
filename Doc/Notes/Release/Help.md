@@ -1,12 +1,14 @@
 ﻿# Weevil : Help
 
-- [Introduction](#introduction)
-- [Examples](#examples)
-  - [Sample Input](#sample-input)
-  - [Sample Expressions](#sample-expressions)
-- [Data Analysis](#data-analysis)
-  - [Detecting When Data Changes](#detecting-when-data-changes)
+- [What Is A Filter?](#what-is-a-filter)
+  - [Examples](#examples)
+  - [Built-In Expressions](#built-in-expressions)
+    - [Monikers](#monikers)
+- [Built-In Analyzers](#built-in-analyzers)
+  - [Detecting Data](#detecting-data)
   - [Detecting an Unresponsive UI](#detecting-an-unresponsive-ui)
+  - [Detecting Gaps In Logging](#detecting-gaps-in-logging)
+- [Dashboard](#dashboard)
 - [Appendices](#appendices)
   - [Appendix A: Additional Reading](#appendix-a-additional-reading)
   - [Appendix E: Excel](#appendix-e-excel)
@@ -14,7 +16,7 @@
 
 ---
 
-## Introduction
+## What Is A Filter?
 
 A filter represents one or more expressions - separated by a double pipe (`||`) character - than can be used to identify records of interest within a log file.  
 
@@ -35,54 +37,84 @@ For example:
 
 When using *Weevil*, it is worth noting that all operations are (include `Clear`) are non-destructive.  In other words, the original log file will remain unchanged.
 
-## Examples
+### Examples
 
-### Sample Input
+If a log file contained the following:
 
-Assume a log file contained the following:
-
-```Dos
-01: A quick brown fox jumps over the lazy dog.
-02: The five boxing wizards jump quickly.
-03: How quickly daft jumping zebras vex!
+```
+A quick brown fox jumps over the lazy dog.
+The five boxing wizards jump quickly.
+How quickly daft jumping zebras vex!
 ```
 
-### Sample Expressions
+Then a user could applies these inclusive filters:
 
-- Performing a case-sensitive search: 
+- Case-sensitive search:
     - Filter: `H`
     - Returns: line 3
-- Performing a case-insensitive search: 
+- Case-insensitive search:
     - Filter: `(?i)THE`
     - Returns: line 2 
-- Searching for multiple values: 
+- Searching for multiple values:
     - Filter: `dog|zebra`
-    - Returns: line 1 & 3 
-- Searching for a pattern that begins & ends with: 
-    - Filter: `quick.*jump`
     - Returns: line 1 & 3
+- Searching for text that begins with:
+    - Filter: `quick.*`
+    - Returns: line 1 & 3
+
+### Built-In Expressions
+
+#### Monikers
+
+The following expressions can be used to query metadata collected by the Weevil application:
+
+- `@Comment` : identifies all records that have a user comment
+  - **Note**: Be sure to uncheck the "Include Pinned" option before using this moniker.
+  - `@Comment=State`: performs a case-insensitive search of all user comments for the given value, in this case the word `State`
+- `@Elapsed` : is used to measure the time period between records
+  - `@Elapsed>5000` : returns a list of records where there was no logging for the preceding 5 seconds
+- `@Flagged`: search all records that have been flagged
+  - `@Flagged=False`: search all records that have not been flagged 
+- `@Pinned` : search for records that have been pinned
+  - `@Pinned=False` : search for all records that have not been pinned
+- `@UiThread`: identifies all records that were created by the application's UI thread
+  - `@UiThread=False`: identifies all records that were not created by the application's UI thread
 
 ---
 
-## Data Analysis
+## Built-In Analyzers
 
-### Detecting When Data Changes
+### Detecting Data
 
-To identify records where a value has changed over time:
+Weevil has several analyzers that can be used to extract data from a log file, flag relevant records, and copy regular expression "named group" values into the record's comment field:
+
+- `Detect Data`: results are always copied into the comment field
+- `Detect Data Transitions`: results are only copied when a value changes
+- `Detect Rising Edges`: results are only copied when a numerical value increases
+- `Detect Falling Edges`: results are only copied when a numerical value decreases (e.g. hardware's uptime value is reset to zero)
+
+Steps:
 
 1. Filter using a regular expression with a named group.
+
 	- For example:  `Key=(?<Value>[a-zA-Z0-9]+)`
-2. Use Weevil's `Detect Data Transitions` option.
+
+2. Select an appropriate analyzer.
+3. Post-analysis you can view the records of interest by using the following inclusive filter:
+
+   - `@Comment` to show all records with a comment, or
+   - `@Flagged` to show the records that matched the previous analysis 
 
 Result: Weevil will chronologically flag records where the `Value` changes.
 
 ### Detecting an Unresponsive UI
 
 This analyzer is useful for applications that:
+
 - perform a lot of logging from the UI thread, and
 - do not explicitly measure UI responsiveness.
 
-Begin by:
+Steps:
 
 1. Selecting the records you wish to analyze.
    - Alternatively, select a single record and Weevil will assume that all records that satisfy the current filter criteria should be analyzed.
@@ -92,6 +124,17 @@ Begin by:
      - ~250ms for simple operations (e.g. button clicks)
      - ~500ms for "easy" tasks
    - Given the indirect nature of this analysis, a threshold of 1s (1000ms) is recommended.
+
+### Detecting Gaps In Logging
+
+Weevil includes analyzers that can be used to detect when an application stopped writing to the log file:
+
+- `Detect Time Gap` : flags records when the time period between records exceeds the given threshold
+- `Detect Time Gap (UI)` : unlike `Detect Time Gap` this analyzer only measures the time period between records generated by the UI (`ThreadId=1`)
+
+## Dashboard
+
+When a log file is opened, Weevil will silently begin analyzing the data looking for trends.  A light-bulb icon will appear in the status bar post-analysis informing the user of any insight that may be of interest.
 
 ---
 
@@ -120,6 +163,7 @@ Begin by:
 - The *Clear* commands improve performance be removing portions of the log file that are not needed. 
   - *Clear Before* removes all log file records from memory before the highlighted row in Log Viewer.
   - *Clear After* removes all log file records from memory before the highlighted row in Log Viewer.
+- You can force Weevil to release unused RAM back to the operating system by pressing: `Ctrl+Alt+Shift+F12`
 
 [RegExQuickRef]: https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
 [RegEx101]: https://regex101.com
