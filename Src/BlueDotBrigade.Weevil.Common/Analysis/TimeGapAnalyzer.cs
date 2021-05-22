@@ -113,14 +113,7 @@
 
 					if (records[current].HasCreationTime)
 					{
-						if (currentRecord.Metadata.WasGeneratedByUi)
-						{
-							CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
-						}
-						else
-						{
-							CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
-						}
+						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
 						previous = current;
 					}
 				}

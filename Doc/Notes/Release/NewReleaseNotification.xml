@@ -5,8 +5,8 @@
 -->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
-	<CodeName>Over and Over</CodeName>
-	<Description>Case-insensitive filtering, .NET call stacks in plain English, filter history bug fix... and much more!</Description>
+	<CodeName>Keep On Looking</CodeName>
+	<Description>New dashboard: when a file is opened Weevil will automatically look for useful insight.</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.6.1</LatestRelease>
+	<LatestRelease>2.7.0</LatestRelease>
 </ApplicationInfo>
