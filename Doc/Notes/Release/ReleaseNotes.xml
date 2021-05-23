@@ -3,7 +3,7 @@
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
 	<CodeName>Keep On Looking</CodeName>
-	<Description>New dashboard: when a file is opened Weevil will automatically look for useful insight.</Description>
+	<Description>A dashboard has been added which includes insight on the open log file.</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
 	<LatestRelease>2.7.0</LatestRelease>
 </ApplicationInfo>
