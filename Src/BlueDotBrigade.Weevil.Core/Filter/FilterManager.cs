@@ -105,10 +105,9 @@
 			var resultsCache = new IRecord[_allRecords.Length];
 			var resultsCount = 0;
 
-			var parallelOptions = new ParallelOptions
-			{
-				MaxDegreeOfParallelism = 1
-			};
+			// Set `MaxDegreeOfParallelism=1` to force the loop to be executed by only one thread.
+			// ... This can simplify the debugging process.
+			var parallelOptions = new ParallelOptions();
 
 			Parallel.ForEach(
 							 _allRecords,
@@ -251,10 +250,10 @@
 				}
 			}
 		}
-		#endregion
+#endregion
 
-		#region Event Handlers
-		#endregion
+#region Event Handlers
+#endregion
 
 
 		/// <summary>
