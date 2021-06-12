@@ -45,6 +45,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ClipboardPasteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: false), () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClipboardPasteOverwriteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: true), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FindTextCommand => new UiBoundCommand(() => FindText(), () => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand ShowHelpCommand => new UiBoundCommand(ShowHelp);
 		[SafeForDependencyAnalysis]

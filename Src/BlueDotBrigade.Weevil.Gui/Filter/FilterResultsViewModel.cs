@@ -803,6 +803,10 @@
 			}
 		}
 
+		private void FindText()
+		{
+			_dialogBox.ShowUserPrompt("Find", "Search for text");
+		}
 
 		public void ShowFileExplorer()
 		{
