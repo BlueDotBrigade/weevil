@@ -5,17 +5,20 @@
 	public interface IPinNavigator
 	{
 		/// <summary>
-		/// Represents the array index of the active record (think: highlighted).
+		/// Represents the result of the the most recent navigation.
 		/// </summary>
+		/// <returns>
+		/// Returns the index value of the record for the latest filter results.
+		/// </returns>
 		int ActiveIndex { get; }
 
 		/// <summary>
-		/// Navigates through pinned records in ascending order (e.g. lines: 8, 5, 3, 2).
+		/// Navigates through pinned records in descending order (e.g. lines: 8, 5, 3, 2).
 		/// </summary>
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		IRecord GoToPreviousPin();
+		IRecord GoToPrevious();
 
 		/// <summary>
 		/// Navigates through pinned records in ascending order (e.g. lines: 2, 4, 8, 16).
@@ -23,6 +26,6 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		IRecord GoToNextPin();
+		IRecord GoToNext();
 	}
 }

@@ -947,13 +947,13 @@
 
 		public void GoToNextPin()
 		{
-			_engine.Navigator.Pinned.GoToNextPin();
+			_engine.Navigator.Pinned.GoToNext();
 			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
 		}
 
 		public void GoToPreviousPin()
 		{
-			_engine.Navigator.Pinned.GoToPreviousPin();
+			_engine.Navigator.Pinned.GoToPrevious();
 			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
 		}
 

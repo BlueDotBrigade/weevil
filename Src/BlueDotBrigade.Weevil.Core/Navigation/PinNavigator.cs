@@ -5,83 +5,48 @@
 	using Data;
 	using Weevil.Collections.Immutable;
 
-	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
 	internal class PinNavigator : IPinNavigator
 	{
-		private const int IndexUnknown = -1;
-
-		private ImmutableArray<IRecord> _filterResults;
-
-		private IRecord _activeRecord;
-		private int _activeIndex;
+		private readonly GenericNavigator _navigator;
 
 		public PinNavigator(ImmutableArray<IRecord> filterResults)
 		{
-			_filterResults = filterResults;
+			_navigator = new GenericNavigator(filterResults);
+		}
 
-			_activeRecord = Record.Dummy;
-			_activeIndex = IndexUnknown;
+		private bool GetIsPinned(IRecord record)
+		{
+			return record.Metadata.IsPinned;
 		}
 
 		/// <summary>
-		/// Represents the array index of the active record (think: highlighted).
+		/// Represents the result of the the most recent navigation.
 		/// </summary>
-		public int ActiveIndex => _activeIndex;
+		/// <returns>
+		/// Returns the index value of the record for the latest filter results.
+		/// </returns>
+		public int ActiveIndex => _navigator.ActiveIndex;
 
 		internal void SetActiveRecord(int lineNumber)
 		{
-			var index = _filterResults.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
-
-			if (index >= 0)
-			{
-				_activeIndex = index;
-				_activeRecord = _filterResults[index];
-			}
-			else
-			{
-				_activeRecord = Record.Dummy;
-				_activeIndex = IndexUnknown;
-			}
+			_navigator.SetActiveRecord(lineNumber);
 		}
 
 		internal void UpdateDataSource(ImmutableArray<IRecord> newFilterResults)
 		{
-			if (newFilterResults.HasLineNumber(_activeRecord.LineNumber))
-			{
-				// nothing to do
-				// ... we are pointing to a record that still exists
-			}
-			else
-			{
-				_activeRecord = Record.Dummy;
-				_activeIndex = IndexUnknown;
-			}
-
-			_filterResults = newFilterResults;
+			_navigator.UpdateDataSource(newFilterResults);
 		}
 
 		/// <summary>
-		/// Navigates through pinned records in ascending order (e.g. lines: 8, 5, 3, 2).
+		/// Navigates through pinned records in descending order (e.g. lines: 8, 5, 3, 2).
 		/// </summary>
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public IRecord GoToPreviousPin()
+		public IRecord GoToPrevious()
 		{
-			var index = _activeIndex > _filterResults.Length ? 0 : _activeIndex;
-
-			for (var i = 0; i < _filterResults.Length; i++)
-			{
-				index = index - 1 < 0 ? _filterResults.Length - 1 : index - 1;
-
-				if (_filterResults[index].Metadata.IsPinned)
-				{
-					_activeRecord = _filterResults[index];
-					_activeIndex = index;
-					break;
-				}
-			}
-			return _activeRecord;
+			return _navigator.GoToPrevious(GetIsPinned);
 		}
 
 		/// <summary>
@@ -90,23 +55,9 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public IRecord GoToNextPin()
+		public IRecord GoToNext()
 		{
-			var index = _activeIndex > _filterResults.Length ? 0 : _activeIndex;
-
-			for (var i = 0; i < _filterResults.Length; i++)
-			{
-				index = (index + 1) % _filterResults.Length;
-
-				if (_filterResults[index].Metadata.IsPinned)
-				{
-					_activeRecord = _filterResults[index];
-					_activeIndex = index;
-					break;
-				}
-			}
-
-			return _activeRecord;
+			return _navigator.GoToNext(GetIsPinned);
 		}
 	}
 }
