@@ -10,7 +10,7 @@
 	public class PinNavigatorTest
 	{
 		[TestMethod]
-		public void GoToNextPin_NoPinnedRecords_ReturnsEmptyRecord()
+		public void GoToNext_NoPinnedRecords_ReturnsEmptyRecord()
 		{
 			var records = new List<IRecord>();
 			for (var lineNumber = 50; lineNumber < 60; lineNumber++)
@@ -23,11 +23,11 @@
 						string.Empty));
 			}
 
-			Assert.AreEqual(Record.Dummy, new PinNavigator(records.ToImmutableArray()).GoToNextPin());
+			Assert.AreEqual(Record.Dummy, new PinNavigator(records.ToImmutableArray()).GoToNext());
 		}
 
 		[TestMethod]
-		public void GoToNextPin_TwoPinnedRecords_NavigatesToLowestPinnedRecord()
+		public void GoToNext_TwoPinnedRecords_NavigatesToLowestPinnedRecord()
 		{
 			var records = new List<IRecord>();
 			for (var lineNumber = 50; lineNumber <= 60; lineNumber++)
@@ -44,11 +44,11 @@
 			records[8].Metadata.IsPinned = true; // Line: 58 is pinned
 			records[2].Metadata.IsPinned = true; // Line: 52 is pinned
 
-			Assert.AreEqual(52, new PinNavigator(records.ToImmutableArray()).GoToNextPin().LineNumber);
+			Assert.AreEqual(52, new PinNavigator(records.ToImmutableArray()).GoToNext().LineNumber);
 		}
 
 		[TestMethod]
-		public void GoToNextPin_SeveralPinnedRecords_NavigatesInAscendingOrder()
+		public void GoToNext_SeveralPinnedRecords_NavigatesInAscendingOrder()
 		{
 			var records = new List<IRecord>();
 			for (var lineNumber = 50; lineNumber < 60; lineNumber++)
@@ -66,9 +66,9 @@
 
 			var navigator = new PinNavigator(records.ToImmutableArray());
 
-			Assert.AreEqual(52, navigator.GoToNextPin().LineNumber);
-			Assert.AreEqual(58, navigator.GoToNextPin().LineNumber);
-			Assert.AreEqual(52, navigator.GoToNextPin().LineNumber);
+			Assert.AreEqual(52, navigator.GoToNext().LineNumber);
+			Assert.AreEqual(58, navigator.GoToNext().LineNumber);
+			Assert.AreEqual(52, navigator.GoToNext().LineNumber);
 		}
 	}
 }
