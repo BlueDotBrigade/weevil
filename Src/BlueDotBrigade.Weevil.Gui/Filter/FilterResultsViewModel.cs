@@ -803,11 +803,6 @@
 			}
 		}
 
-		private void FindText()
-		{
-			_dialogBox.ShowUserPrompt("Find", "Search for text");
-		}
-
 		public void ShowFileExplorer()
 		{
 			WindowsProcess.Start(WindowsProcessType.FileExplorer, Path.GetDirectoryName(_engine.SourceFilePath));
@@ -944,6 +939,16 @@
 		#endregion
 
 		#region Commands: Navigation
+
+		private void FindText()
+		{
+			var text = _dialogBox.ShowUserPrompt("Find", "Search for text");
+			if (!string.IsNullOrWhiteSpace(text))
+			{
+				_engine.Navigator.Find.GoToNext(text);
+				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+			}
+		}
 
 		public void GoToNextPin()
 		{
