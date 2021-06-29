@@ -946,9 +946,17 @@
 
 		private void FindText()
 		{
-			_findText = _dialogBox.ShowUserPrompt("Find", "Search for text");
-
-			FindNext();
+			if (_dialogBox.TryShowFind(out var findNext, out _findText))
+			{
+				if (findNext)
+				{
+					FindNext();
+				}
+				else
+				{
+					FindPrevious();
+				}
+			}
 		}
 
 		private void FindNext()

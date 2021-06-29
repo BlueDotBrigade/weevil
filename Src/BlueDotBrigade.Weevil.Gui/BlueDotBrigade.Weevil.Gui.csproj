@@ -130,6 +130,9 @@
       <DependentUpon>SelectFileView.xaml</DependentUpon>
     </Compile>
     <Compile Include="IO\SelectFileViewModel.cs" />
+    <Compile Include="IO\FindDialog.xaml.cs">
+      <DependentUpon>FindDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IO\UserPromptDialog.xaml.cs">
       <DependentUpon>UserPromptDialog.xaml</DependentUpon>
     </Compile>
@@ -210,6 +213,10 @@
     <Page Include="IO\SelectFileView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="IO\FindDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="IO\UserPromptDialog.xaml">
       <SubType>Designer</SubType>

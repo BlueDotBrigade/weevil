@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
+	using System;
 	using System.Collections.Immutable;
 	using System.Linq;
 	using System.Windows;
@@ -85,6 +86,28 @@
 				return dialog.UserInput;
 			}
 			return string.Empty;
+		}
+
+		public bool TryShowFind(out bool findNext, out string findText)
+		{
+			var wasSuccessful = false;
+
+			findText = String.Empty;
+			findNext = true;
+
+			var dialog = new FindDialog()
+			{
+				Owner = _parentWindow,
+			};
+
+			if (dialog.ShowDialog() == true)
+			{
+				wasSuccessful = true;
+				findText = dialog.UserInput;
+				findNext = dialog.FindNext;
+			}
+
+			return wasSuccessful;
 		}
 	}
 }
