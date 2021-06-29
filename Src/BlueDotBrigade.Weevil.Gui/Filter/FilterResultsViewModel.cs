@@ -84,6 +84,8 @@
 
 		private FilterCriteria _previousFilterCriteria;
 
+		private string _findText;
+
 		private FilterType _currentfilterType;
 		private IFilterCriteria _currentfilterCriteria;
 
@@ -112,6 +114,8 @@
 			_concurrentFilterCount = 0;
 			_currentfilterCriteria = FilterCriteria.None;
 			_previousFilterCriteria = FilterCriteria.None;
+
+			_findText = string.Empty;
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
@@ -942,10 +946,25 @@
 
 		private void FindText()
 		{
-			var text = _dialogBox.ShowUserPrompt("Find", "Search for text");
-			if (!string.IsNullOrWhiteSpace(text))
+			_findText = _dialogBox.ShowUserPrompt("Find", "Search for text");
+
+			FindNext();
+		}
+
+		private void FindNext()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				_engine.Navigator.Find.GoToNext(text);
+				_engine.Navigator.Find.GoToNext(_findText);
+				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+			}
+		}
+
+		private void FindPrevious()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				_engine.Navigator.Find.GoToPrevious(_findText);
 				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
 			}
 		}

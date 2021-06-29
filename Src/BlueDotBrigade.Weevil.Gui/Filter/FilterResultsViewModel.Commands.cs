@@ -50,6 +50,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand FindTextCommand => new UiBoundCommand(() => FindText(), () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
+		public ICommand FindNextCommand => new UiBoundCommand(() => FindNext(), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FindPreviousCommand => new UiBoundCommand(() => FindPrevious(), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
 		public ICommand ShowHelpCommand => new UiBoundCommand(ShowHelp);
 		[SafeForDependencyAnalysis]
 		public ICommand ShowAboutCommand => new UiBoundCommand(ShowAbout);

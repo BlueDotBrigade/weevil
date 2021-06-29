@@ -42,6 +42,8 @@
       <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
 
       <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
+      <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />
+      <KeyBinding Key="F3" Modifiers="Shift" Command="{Binding FindPreviousCommand}" />
 
       <KeyBinding Key="C" Modifiers="Control" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
       <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
@@ -254,6 +256,8 @@
                <Separator/>
                <MenuItem Header="Navigation...">
                   <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
+                  <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
+                  <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
                   <Separator/>
                   <MenuItem Header="Previous Pinned Item" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
                   <MenuItem Header="Next Pinned Item" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
