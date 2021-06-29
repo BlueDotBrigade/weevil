@@ -35,8 +35,15 @@
 
 		public UserPromptDialog()
 		{
+			this.Loaded += OnDialogLoaded;
+
 			InitializeComponent();
 			this.DataContext = this;
+		}
+
+		private void OnDialogLoaded(object sender, RoutedEventArgs e)
+		{
+			this.InputTextBox.SelectAll();
 		}
 
 		private void OnOkClicked(object sender, RoutedEventArgs e)

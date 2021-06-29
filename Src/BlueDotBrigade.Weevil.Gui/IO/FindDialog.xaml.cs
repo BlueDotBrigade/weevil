@@ -39,11 +39,18 @@
 
 		public FindDialog()
 		{
+			this.Loaded += OnDialogLoaded;
+
 			this.UserInput = string.Empty;
 			this.FindNext = true;
 
 			InitializeComponent();
 			this.DataContext = this;
+		}
+
+		private void OnDialogLoaded(object sender, RoutedEventArgs e)
+		{
+			this.InputTextBox.SelectAll();
 		}
 
 		private void OnPreviousClicked(object sender, RoutedEventArgs e)

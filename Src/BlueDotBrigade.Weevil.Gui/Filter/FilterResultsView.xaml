@@ -476,7 +476,7 @@
                         <Setter Property="ToolTip" Value="Current document&apos;s path."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding SourceFilePath, Mode=OneWay}" Value="">
-                              <Setter Property="Text" Value="To begin, open (Ctrl+O) a document."/>
+                              <Setter Property="Text" Value="To begin, open a document."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
