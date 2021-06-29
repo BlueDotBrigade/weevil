@@ -1,8 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using Data;
+	using BlueDotBrigade.Weevil.Data;
 
-	public interface IPinNavigator
+	public interface IFindNavigator
 	{
 		/// <summary>
 		/// Represents the result of the the most recent navigation.
@@ -18,7 +18,7 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		IRecord GoToPrevious();
+		IRecord GoToPrevious(string value);
 
 		/// <summary>
 		/// Navigates through pinned records in ascending order (e.g. lines: 2, 4, 8, 16).
@@ -26,6 +26,6 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		IRecord GoToNext();
+		IRecord GoToNext(string value);
 	}
 }

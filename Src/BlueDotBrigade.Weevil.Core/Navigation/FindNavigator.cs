@@ -2,22 +2,16 @@
 {
 	using System.Collections.Immutable;
 	using System.Diagnostics;
-	using Data;
-	using Weevil.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
-	internal class PinNavigator : IPinNavigator
+	internal class FindNavigator : IFindNavigator
 	{
 		private readonly GenericNavigator _navigator;
 
-		public PinNavigator(ImmutableArray<IRecord> filterResults)
+		public FindNavigator(ImmutableArray<IRecord> filterResults)
 		{
 			_navigator = new GenericNavigator(filterResults);
-		}
-
-		private bool GetIsPinned(IRecord record)
-		{
-			return record.Metadata.IsPinned;
 		}
 
 		/// <summary>
@@ -44,9 +38,9 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public IRecord GoToPrevious()
+		public IRecord GoToPrevious(string value)
 		{
-			return _navigator.GoToPrevious(GetIsPinned);
+			return _navigator.GoToPrevious(record => record.Content.Contains(value));
 		}
 
 		/// <summary>
@@ -55,9 +49,9 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public IRecord GoToNext()
+		public IRecord GoToNext(string value)
 		{
-			return _navigator.GoToNext(GetIsPinned);
+			return _navigator.GoToNext(record => record.Content.Contains(value));
 		}
 	}
 }

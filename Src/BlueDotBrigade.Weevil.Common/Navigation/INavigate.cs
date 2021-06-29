@@ -2,6 +2,8 @@
 {
 	public interface INavigate
 	{
+		IFindNavigator Find { get; }
+
 		IPinNavigator Pinned { get; }
 
 		ITableOfContents TableOfContents { get; }

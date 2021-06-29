@@ -16,5 +16,10 @@
 		{
 			throw new NotImplementedException();
 		}
+
+		public bool TryShowFind(out bool findNext, out string findText)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

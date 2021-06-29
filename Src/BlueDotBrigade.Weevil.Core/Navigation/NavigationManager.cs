@@ -1,18 +1,18 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using System.Collections.Immutable;
-	using System.Diagnostics;
 	using System.IO;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using File = System.IO.File;
 
-	[DebuggerDisplay("ActiveIndex={_pinNavigator.ActiveIndex}")]
 	internal class NavigationManager : INavigate
 	{
 		private readonly string _sourceFilePath;
 		private readonly ICoreExtension _coreCoreExtension;
 		private readonly ImmutableArray<IRecord> _allRecords;
+
+		private readonly FindNavigator _findNavigator;
 		private readonly PinNavigator _pinNavigator;
 
 		private TableOfContents _tableOfContents;
@@ -22,9 +22,13 @@
 			_sourceFilePath = sourceFilePath;
 			_coreCoreExtension = coreExtension;
 			_allRecords = allRecords;
-			_pinNavigator = new PinNavigator(allRecords);
 			_tableOfContents = tableOfContents;
+
+			_findNavigator = new FindNavigator(allRecords);
+			_pinNavigator = new PinNavigator(allRecords);
 		}
+
+		public IFindNavigator Find => _findNavigator;
 
 		public IPinNavigator Pinned => _pinNavigator;
 
@@ -34,11 +38,13 @@
 
 		internal void SetActiveRecord(int lineNumber)
 		{
+			_findNavigator.SetActiveRecord(lineNumber);
 			_pinNavigator.SetActiveRecord(lineNumber);
 		}
 
 		internal void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
+			_findNavigator.UpdateDataSource(records);
 			_pinNavigator.UpdateDataSource(records);
 		}
 

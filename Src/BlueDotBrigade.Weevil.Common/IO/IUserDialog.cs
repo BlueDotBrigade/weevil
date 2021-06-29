@@ -4,5 +4,7 @@
 	{
 		string ShowUserPrompt(string title, string prompt);
 		string ShowUserPrompt(string title, string prompt, string defaultValue);
+
+		bool TryShowFind(out bool findNext, out string findText);
 	}
 }

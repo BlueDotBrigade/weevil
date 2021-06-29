@@ -18,7 +18,7 @@
 			engine.Filter.Results[9].Metadata.IsPinned = true;
 
 			engine.Selector.Select(1);
-			IRecord pinnedRecord = engine.Navigator.Pinned.GoToNextPin();
+			IRecord pinnedRecord = engine.Navigator.Pinned.GoToNext();
 
 			// Reminder: although they are often similar, the line number and index are NOT the same!
 			Assert.AreEqual(10, pinnedRecord.LineNumber);
@@ -33,7 +33,7 @@
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("ThisWillHidePinnedRecord9"));
 
-			Assert.AreEqual(Record.Dummy, engine.Navigator.Pinned.GoToNextPin());
+			Assert.AreEqual(Record.Dummy, engine.Navigator.Pinned.GoToNext());
 		}
 	}
 }

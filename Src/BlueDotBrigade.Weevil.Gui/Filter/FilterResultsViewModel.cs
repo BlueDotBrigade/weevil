@@ -84,6 +84,8 @@
 
 		private FilterCriteria _previousFilterCriteria;
 
+		private string _findText;
+
 		private FilterType _currentfilterType;
 		private IFilterCriteria _currentfilterCriteria;
 
@@ -112,6 +114,8 @@
 			_concurrentFilterCount = 0;
 			_currentfilterCriteria = FilterCriteria.None;
 			_previousFilterCriteria = FilterCriteria.None;
+
+			_findText = string.Empty;
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
@@ -803,7 +807,6 @@
 			}
 		}
 
-
 		public void ShowFileExplorer()
 		{
 			WindowsProcess.Start(WindowsProcessType.FileExplorer, Path.GetDirectoryName(_engine.SourceFilePath));
@@ -941,15 +944,48 @@
 
 		#region Commands: Navigation
 
+		private void FindText()
+		{
+			if (_dialogBox.TryShowFind(out var findNext, out _findText))
+			{
+				if (findNext)
+				{
+					FindNext();
+				}
+				else
+				{
+					FindPrevious();
+				}
+			}
+		}
+
+		private void FindNext()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				_engine.Navigator.Find.GoToNext(_findText);
+				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+			}
+		}
+
+		private void FindPrevious()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				_engine.Navigator.Find.GoToPrevious(_findText);
+				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+			}
+		}
+
 		public void GoToNextPin()
 		{
-			_engine.Navigator.Pinned.GoToNextPin();
+			_engine.Navigator.Pinned.GoToNext();
 			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
 		}
 
 		public void GoToPreviousPin()
 		{
-			_engine.Navigator.Pinned.GoToPreviousPin();
+			_engine.Navigator.Pinned.GoToPrevious();
 			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
 		}
 
