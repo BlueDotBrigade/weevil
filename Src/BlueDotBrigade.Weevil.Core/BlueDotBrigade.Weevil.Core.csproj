@@ -31,7 +31,7 @@
 		<None Remove="Resources\Images\Weevil.png" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="4.7.9" />
+		<PackageReference Include="NLog" Version="4.7.10" />
 		<PackageReference Include="System.ComponentModel.Composition" Version="5.0.0" />
 	</ItemGroup>
 	<ItemGroup>
