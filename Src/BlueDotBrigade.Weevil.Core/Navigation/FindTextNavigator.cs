@@ -5,11 +5,11 @@
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
-	internal class FindNavigator : IFindNavigator
+	internal class FindTextNavigator : IFindNavigator
 	{
 		private readonly GenericNavigator _navigator;
 
-		public FindNavigator(ImmutableArray<IRecord> filterResults)
+		public FindTextNavigator(ImmutableArray<IRecord> filterResults)
 		{
 			_navigator = new GenericNavigator(filterResults);
 		}

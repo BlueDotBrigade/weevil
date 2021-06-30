@@ -12,7 +12,7 @@
 		private readonly ICoreExtension _coreCoreExtension;
 		private readonly ImmutableArray<IRecord> _allRecords;
 
-		private readonly FindNavigator _findNavigator;
+		private readonly FindTextNavigator _findTextNavigator;
 		private readonly PinNavigator _pinNavigator;
 
 		private TableOfContents _tableOfContents;
@@ -24,11 +24,11 @@
 			_allRecords = allRecords;
 			_tableOfContents = tableOfContents;
 
-			_findNavigator = new FindNavigator(allRecords);
+			_findTextNavigator = new FindTextNavigator(allRecords);
 			_pinNavigator = new PinNavigator(allRecords);
 		}
 
-		public IFindNavigator Find => _findNavigator;
+		public IFindNavigator Find => _findTextNavigator;
 
 		public IPinNavigator Pinned => _pinNavigator;
 
@@ -38,13 +38,13 @@
 
 		internal void SetActiveRecord(int lineNumber)
 		{
-			_findNavigator.SetActiveRecord(lineNumber);
+			_findTextNavigator.SetActiveRecord(lineNumber);
 			_pinNavigator.SetActiveRecord(lineNumber);
 		}
 
 		internal void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
-			_findNavigator.UpdateDataSource(records);
+			_findTextNavigator.UpdateDataSource(records);
 			_pinNavigator.UpdateDataSource(records);
 		}
 
