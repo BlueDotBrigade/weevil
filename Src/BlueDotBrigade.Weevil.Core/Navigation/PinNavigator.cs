@@ -8,11 +8,11 @@
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
 	internal class PinNavigator : IPinNavigator
 	{
-		private readonly GenericNavigator _navigator;
+		private readonly GoToNavigator _navigator;
 
 		public PinNavigator(ImmutableArray<IRecord> filterResults)
 		{
-			_navigator = new GenericNavigator(filterResults);
+			_navigator = new GoToNavigator(filterResults);
 		}
 
 		private bool GetIsPinned(IRecord record)

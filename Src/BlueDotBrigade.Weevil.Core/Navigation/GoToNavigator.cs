@@ -7,7 +7,7 @@
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
-	internal class GenericNavigator
+	internal class GoToNavigator
 	{
 		private const int IndexUnknown = -1;
 
@@ -16,7 +16,7 @@
 		private IRecord _activeRecord;
 		private int _activeIndex;
 
-		public GenericNavigator(ImmutableArray<IRecord> filterResults)
+		public GoToNavigator(ImmutableArray<IRecord> filterResults)
 		{
 			_filterResults = filterResults;
 
