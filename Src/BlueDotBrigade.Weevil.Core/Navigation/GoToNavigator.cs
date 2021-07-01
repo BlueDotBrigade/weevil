@@ -7,7 +7,7 @@
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
-	internal class GoToNavigator
+	internal class GoToNavigator : IFindNavigator
 	{
 		private const int IndexUnknown = -1;
 
@@ -36,6 +36,25 @@
 		/// Returns the index value of the record for the latest filter results.
 		/// </returns>
 		public int ActiveIndex => _activeIndex;
+
+		public IRecord GoToPrevious(string value)
+		{
+			if (int.TryParse(value, out var lineNumber))
+			{
+				SetActiveRecord(lineNumber);
+			}
+			return _activeRecord;
+		}
+
+		public IRecord GoToNext(string value)
+		{
+			if (int.TryParse(value, out var lineNumber))
+			{
+				SetActiveRecord(lineNumber);
+			}
+
+			return _activeRecord;
+		}
 
 		internal void SetActiveRecord(int lineNumber)
 		{

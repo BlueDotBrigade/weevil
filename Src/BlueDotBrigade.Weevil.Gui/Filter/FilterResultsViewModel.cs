@@ -983,6 +983,13 @@
 			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
 		}
 
+		public void GoTo()
+		{
+			var userValue = _dialogBox.ShowUserPrompt("Go To", "Search filter results for:", string.Empty);
+			_engine.Navigator.LineNumber.GoToNext(userValue);
+			this.ActiveRecordIndex = _engine.Navigator.LineNumber.ActiveIndex;
+		}
+
 		public void GoToPreviousPin()
 		{
 			_engine.Navigator.Pinned.GoToPrevious();
