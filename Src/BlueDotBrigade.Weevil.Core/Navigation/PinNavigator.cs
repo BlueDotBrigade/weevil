@@ -3,16 +3,15 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using Data;
-	using Weevil.Collections.Immutable;
 
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
 	internal class PinNavigator : IPinNavigator
 	{
-		private readonly GoToNavigator _navigator;
+		private readonly LineNumberNavigator _navigator;
 
 		public PinNavigator(ImmutableArray<IRecord> filterResults)
 		{
-			_navigator = new GoToNavigator(filterResults);
+			_navigator = new LineNumberNavigator(filterResults);
 		}
 
 		private bool GetIsPinned(IRecord record)

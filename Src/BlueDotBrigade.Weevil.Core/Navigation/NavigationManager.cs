@@ -12,7 +12,7 @@
 		private readonly ICoreExtension _coreCoreExtension;
 		private readonly ImmutableArray<IRecord> _allRecords;
 
-		private readonly GoToNavigator _lineNumberNavigator;
+		private readonly LineNumberNavigator _lineNumberNavigator;
 		private readonly FindTextNavigator _findTextNavigator;
 		private readonly PinNavigator _pinNavigator;
 
@@ -25,14 +25,14 @@
 			_allRecords = allRecords;
 			_tableOfContents = tableOfContents;
 
-			_lineNumberNavigator = new GoToNavigator(allRecords);
+			_lineNumberNavigator = new LineNumberNavigator(allRecords);
 			_findTextNavigator = new FindTextNavigator(allRecords);
 			_pinNavigator = new PinNavigator(allRecords);
 		}
 
-		public IFindNavigator LineNumber => _lineNumberNavigator;
+		public ILineNumberNavigator LineNumber => _lineNumberNavigator;
 
-		public IFindNavigator Find => _findTextNavigator;
+		public IFindTextNavigator Find => _findTextNavigator;
 
 		public IPinNavigator Pinned => _pinNavigator;
 

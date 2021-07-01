@@ -2,9 +2,9 @@
 {
 	public interface INavigate
 	{
-		IFindNavigator LineNumber { get; }
+		ILineNumberNavigator LineNumber { get; }
 
-		IFindNavigator Find { get; }
+		IFindTextNavigator Find { get; }
 
 		IPinNavigator Pinned { get; }
 
