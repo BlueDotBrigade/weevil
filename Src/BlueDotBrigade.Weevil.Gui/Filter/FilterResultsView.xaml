@@ -479,7 +479,7 @@
                         <Setter Property="ToolTip" Value="Current document&apos;s path."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding SourceFilePath, Mode=OneWay}" Value="">
-                              <Setter Property="Text" Value="To begin, open a document."/>
+                              <Setter Property="Text" Value="To begin, open a document &amp; start filtering."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -692,7 +692,7 @@
          <Separator Grid.Column="13" />
          <StatusBarItem Grid.Column="14">
             <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
-                     ToolTip="Selected record is in the displayed section."
+                     ToolTip="Selected record is in this section of the log file."
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
       </StatusBar>
