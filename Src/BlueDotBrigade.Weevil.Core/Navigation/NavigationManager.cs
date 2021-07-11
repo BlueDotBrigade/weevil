@@ -12,7 +12,8 @@
 		private readonly ICoreExtension _coreCoreExtension;
 		private readonly ImmutableArray<IRecord> _allRecords;
 
-		private readonly FindNavigator _findNavigator;
+		private readonly LineNumberNavigator _lineNumberNavigator;
+		private readonly FindTextNavigator _findTextNavigator;
 		private readonly PinNavigator _pinNavigator;
 
 		private TableOfContents _tableOfContents;
@@ -24,11 +25,14 @@
 			_allRecords = allRecords;
 			_tableOfContents = tableOfContents;
 
-			_findNavigator = new FindNavigator(allRecords);
+			_lineNumberNavigator = new LineNumberNavigator(allRecords);
+			_findTextNavigator = new FindTextNavigator(allRecords);
 			_pinNavigator = new PinNavigator(allRecords);
 		}
 
-		public IFindNavigator Find => _findNavigator;
+		public ILineNumberNavigator LineNumber => _lineNumberNavigator;
+
+		public IFindTextNavigator Find => _findTextNavigator;
 
 		public IPinNavigator Pinned => _pinNavigator;
 
@@ -38,14 +42,16 @@
 
 		internal void SetActiveRecord(int lineNumber)
 		{
-			_findNavigator.SetActiveRecord(lineNumber);
+			_lineNumberNavigator.SetActiveRecord(lineNumber);
+			_findTextNavigator.SetActiveRecord(lineNumber);
 			_pinNavigator.SetActiveRecord(lineNumber);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> records)
+		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
-			_findNavigator.UpdateDataSource(records);
-			_pinNavigator.UpdateDataSource(records);
+			_lineNumberNavigator.UpdateDataSource(filterResults);
+			_findTextNavigator.UpdateDataSource(filterResults);
+			_pinNavigator.UpdateDataSource(filterResults);
 		}
 
 		public INavigate RebuildTableOfContents()

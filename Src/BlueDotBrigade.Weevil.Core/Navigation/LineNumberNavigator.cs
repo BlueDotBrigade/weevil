@@ -7,18 +7,18 @@
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
-	internal class GenericNavigator
+	internal class LineNumberNavigator : ILineNumberNavigator
 	{
 		private const int IndexUnknown = -1;
 
-		private ImmutableArray<IRecord> _filterResults;
+		private ImmutableArray<IRecord> _records;
 
 		private IRecord _activeRecord;
 		private int _activeIndex;
 
-		public GenericNavigator(ImmutableArray<IRecord> filterResults)
+		public LineNumberNavigator(ImmutableArray<IRecord> records)
 		{
-			_filterResults = filterResults;
+			_records = records;
 
 			_activeRecord = Record.Dummy;
 			_activeIndex = IndexUnknown;
@@ -37,14 +37,30 @@
 		/// </returns>
 		public int ActiveIndex => _activeIndex;
 
+		public IRecord GoTo(int lineNumber)
+		{
+			SetActiveRecord(lineNumber);
+			return _activeRecord;
+		}
+
+		public IRecord GoTo(string lineNumber)
+		{
+			if (int.TryParse(lineNumber, out var line))
+			{
+				SetActiveRecord(line);
+			}
+
+			return _activeRecord;
+		}
+
 		internal void SetActiveRecord(int lineNumber)
 		{
-			var index = _filterResults.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
+			var index = _records.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
 
 			if (index >= 0)
 			{
 				_activeIndex = index;
-				_activeRecord = _filterResults[index];
+				_activeRecord = _records[index];
 			}
 			else
 			{
@@ -53,9 +69,9 @@
 			}
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> newFilterResults)
+		internal void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
-			if (newFilterResults.HasLineNumber(_activeRecord.LineNumber))
+			if (records.HasLineNumber(_activeRecord.LineNumber))
 			{
 				// nothing to do
 				// ... we are pointing to a record that still exists
@@ -66,7 +82,7 @@
 				_activeIndex = IndexUnknown;
 			}
 
-			_filterResults = newFilterResults;
+			_records = records;
 		}
 
 		/// <summary>
@@ -75,17 +91,17 @@
 		/// <returns>
 		/// Returns a reference to the previous <see cref="Record"/> that matches the search criteria.
 		/// </returns>
-		public IRecord GoToPrevious(Func<IRecord, bool> getIsMatch)
+		internal IRecord GoToPrevious(Func<IRecord, bool> checkIfMatches)
 		{
-			var index = _activeIndex > _filterResults.Length ? 0 : _activeIndex;
+			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
 
-			for (var i = 0; i < _filterResults.Length; i++)
+			for (var i = 0; i < _records.Length; i++)
 			{
-				index = index - 1 < 0 ? _filterResults.Length - 1 : index - 1;
+				index = index - 1 < 0 ? _records.Length - 1 : index - 1;
 
-				if (getIsMatch(_filterResults[index]))
+				if (checkIfMatches(_records[index]))
 				{
-					_activeRecord = _filterResults[index];
+					_activeRecord = _records[index];
 					_activeIndex = index;
 					break;
 				}
@@ -99,17 +115,17 @@
 		/// <returns>
 		/// Returns a reference to the next <see cref="Record"/> that matches the search criteria.
 		/// </returns>
-		public IRecord GoToNext(Func<IRecord, bool> getIsMatch)
+		internal IRecord GoToNext(Func<IRecord, bool> checkIfMatches)
 		{
-			var index = _activeIndex > _filterResults.Length ? 0 : _activeIndex;
+			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
 
-			for (var i = 0; i < _filterResults.Length; i++)
+			for (var i = 0; i < _records.Length; i++)
 			{
-				index = (index + 1) % _filterResults.Length;
+				index = (index + 1) % _records.Length;
 
-				if (getIsMatch(_filterResults[index]))
+				if (checkIfMatches(_records[index]))
 				{
-					_activeRecord = _filterResults[index];
+					_activeRecord = _records[index];
 					_activeIndex = index;
 					break;
 				}

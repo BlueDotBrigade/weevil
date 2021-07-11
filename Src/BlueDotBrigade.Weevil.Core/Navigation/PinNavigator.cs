@@ -3,19 +3,18 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using Data;
-	using Weevil.Collections.Immutable;
 
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
 	internal class PinNavigator : IPinNavigator
 	{
-		private readonly GenericNavigator _navigator;
+		private readonly LineNumberNavigator _navigator;
 
-		public PinNavigator(ImmutableArray<IRecord> filterResults)
+		public PinNavigator(ImmutableArray<IRecord> records)
 		{
-			_navigator = new GenericNavigator(filterResults);
+			_navigator = new LineNumberNavigator(records);
 		}
 
-		private bool GetIsPinned(IRecord record)
+		private bool CheckIsPinned(IRecord record)
 		{
 			return record.Metadata.IsPinned;
 		}
@@ -33,9 +32,9 @@
 			_navigator.SetActiveRecord(lineNumber);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> newFilterResults)
+		internal void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
-			_navigator.UpdateDataSource(newFilterResults);
+			_navigator.UpdateDataSource(records);
 		}
 
 		/// <summary>
@@ -46,7 +45,7 @@
 		/// </returns>
 		public IRecord GoToPrevious()
 		{
-			return _navigator.GoToPrevious(GetIsPinned);
+			return _navigator.GoToPrevious(CheckIsPinned);
 		}
 
 		/// <summary>
@@ -57,7 +56,7 @@
 		/// </returns>
 		public IRecord GoToNext()
 		{
-			return _navigator.GoToNext(GetIsPinned);
+			return _navigator.GoToNext(CheckIsPinned);
 		}
 	}
 }

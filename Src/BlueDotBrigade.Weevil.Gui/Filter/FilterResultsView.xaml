@@ -44,6 +44,7 @@
       <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
       <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />
       <KeyBinding Key="F3" Modifiers="Shift" Command="{Binding FindPreviousCommand}" />
+      <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding GoToCommand}" />
 
       <KeyBinding Key="C" Modifiers="Control" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
       <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
@@ -258,6 +259,8 @@
                   <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
                   <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
                   <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
+                  <Separator/>
+                  <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
                   <Separator/>
                   <MenuItem Header="Previous Pinned Item" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
                   <MenuItem Header="Next Pinned Item" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
@@ -476,7 +479,7 @@
                         <Setter Property="ToolTip" Value="Current document&apos;s path."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding SourceFilePath, Mode=OneWay}" Value="">
-                              <Setter Property="Text" Value="To begin, open a document."/>
+                              <Setter Property="Text" Value="To begin, open a document &amp; start filtering."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -689,7 +692,7 @@
          <Separator Grid.Column="13" />
          <StatusBarItem Grid.Column="14">
             <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
-                     ToolTip="Selected record is in the displayed section."
+                     ToolTip="Selected record is in this section of the log file."
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
       </StatusBar>

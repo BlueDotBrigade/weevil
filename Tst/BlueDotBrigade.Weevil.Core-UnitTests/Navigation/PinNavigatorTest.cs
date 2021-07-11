@@ -20,7 +20,7 @@
 						lineNumber,
 						DateTime.Now,
 						SeverityType.Debug,
-						string.Empty));
+						"Sample log entry."));
 			}
 
 			Assert.AreEqual(Record.Dummy, new PinNavigator(records.ToImmutableArray()).GoToNext());
@@ -37,7 +37,7 @@
 						lineNumber,
 						DateTime.Now,
 						SeverityType.Debug,
-						string.Empty));
+						"Sample log entry."));
 			}
 
 			// Note: the order of pinning should be irrelevant
@@ -58,7 +58,7 @@
 						lineNumber,
 						DateTime.Now,
 						SeverityType.Debug,
-						string.Empty));
+						"Sample log entry."));
 			}
 
 			records[2].Metadata.IsPinned = true;

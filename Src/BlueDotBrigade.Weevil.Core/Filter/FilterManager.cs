@@ -22,13 +22,12 @@
 		private readonly ContextDictionary _context;
 		private readonly IStaticAliasExpander _staticAliasExpander;
 		private readonly ImmutableArray<IRecord> _allRecords;
-		private readonly ImmutableArray<IMetricCollector> _recordAnalyzers;
+		private readonly ImmutableArray<IMetricCollector> _metricCollectors;
 
 		private FilterStrategy _latestFilterStrategy;
 		private ImmutableArray<IRecord> _latestFilterResults;
 
 		private Filter _currentFilter;
-		private Filter _toggledFilter;
 
 		private readonly IList<string> _includeHistory;
 		private readonly IList<string> _excludeHistory;
@@ -44,20 +43,19 @@
 			ContextDictionary context,
 			IStaticAliasExpander staticAliasExpander,
 			ImmutableArray<IRecord> allRecords,
-			ImmutableArray<IMetricCollector> recordAnalyzers)
+			ImmutableArray<IMetricCollector> metricCollectors)
 		{
 			_coreExtension = coreExtension;
 			_context = context;
 			_staticAliasExpander = staticAliasExpander;
 			_allRecords = allRecords;
 
-			_recordAnalyzers = recordAnalyzers;
+			_metricCollectors = metricCollectors;
 
 			_latestFilterStrategy = FilterStrategy.KeepAllRecords;
 			_latestFilterResults = allRecords;
 
 			_currentFilter = new Filter(FilterType.PlainText, FilterCriteria.None);
-			_toggledFilter = new Filter(FilterType.PlainText, FilterCriteria.None);
 
 			_includeHistory = new List<string>();
 			_excludeHistory = new List<string>();
@@ -95,7 +93,7 @@
 		{
 			_abortFilterOperation = false;
 
-			foreach (IMetricCollector analyzer in _recordAnalyzers)
+			foreach (IMetricCollector analyzer in _metricCollectors)
 			{
 				analyzer.Reset();
 			}
@@ -128,9 +126,9 @@
 							  resultsCache[index] = record;
 							  results.Count++;
 
-							  foreach (IMetricCollector analyzer in _recordAnalyzers)
+							  foreach (IMetricCollector collector in _metricCollectors)
 							  {
-								  analyzer.Count(record);
+								  collector.Count(record);
 							  }
 						  }
 						  else
@@ -342,7 +340,7 @@
 		{
 			var metrics = new Dictionary<string, object>();
 
-			foreach (IMetricCollector collector in _recordAnalyzers)
+			foreach (IMetricCollector collector in _metricCollectors)
 			{
 				foreach (KeyValuePair<string, object> result in collector.GetResults())
 				{
