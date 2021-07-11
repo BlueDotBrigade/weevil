@@ -12,24 +12,8 @@
 		/// </returns>
 		int ActiveIndex { get; }
 
-		/// <summary>
-		/// Navigates through records in descending order (e.g. lines: 8, 5, 3, 2).
-		/// </summary>
-		IRecord GoToPrevious(int lineNumber);
+		IRecord GoTo(int lineNumber);
 
-		/// <summary>
-		/// Navigates through records in descending order (e.g. lines: 8, 5, 3, 2).
-		/// </summary>
-		IRecord GoToPrevious(string lineNumber);
-
-		/// <summary>
-		/// Navigates through records in ascending order (e.g. lines: 2, 4, 8, 16).
-		/// </summary>
-		IRecord GoToNext(int lineNumber);
-
-		/// <summary>
-		/// Navigates through records in ascending order (e.g. lines: 2, 4, 8, 16).
-		/// </summary>
-		IRecord GoToNext(string lineNumber);
+		IRecord GoTo(string lineNumber);
 	}
 }
