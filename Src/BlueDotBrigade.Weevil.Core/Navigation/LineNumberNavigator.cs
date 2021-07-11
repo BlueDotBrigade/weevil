@@ -37,20 +37,32 @@
 		/// </returns>
 		public int ActiveIndex => _activeIndex;
 
-		public IRecord GoToPrevious(string value)
+		public IRecord GoToPrevious(int lineNumber)
 		{
-			if (int.TryParse(value, out var lineNumber))
+			SetActiveRecord(lineNumber);
+			return _activeRecord;
+		}
+
+		public IRecord GoToPrevious(string lineNumber)
+		{
+			if (int.TryParse(lineNumber, out var line))
 			{
-				SetActiveRecord(lineNumber);
+				SetActiveRecord(line);
 			}
 			return _activeRecord;
 		}
 
-		public IRecord GoToNext(string value)
+		public IRecord GoToNext(int lineNumber)
 		{
-			if (int.TryParse(value, out var lineNumber))
+			SetActiveRecord(lineNumber);
+			return _activeRecord;
+		}
+
+		public IRecord GoToNext(string lineNumber)
+		{
+			if (int.TryParse(lineNumber, out var line))
 			{
-				SetActiveRecord(lineNumber);
+				SetActiveRecord(line);
 			}
 
 			return _activeRecord;
@@ -94,7 +106,7 @@
 		/// <returns>
 		/// Returns a reference to the previous <see cref="Record"/> that matches the search criteria.
 		/// </returns>
-		public IRecord GoToPrevious(Func<IRecord, bool> getIsMatch)
+		internal IRecord GoToPrevious(Func<IRecord, bool> getIsMatch)
 		{
 			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
 
@@ -118,7 +130,7 @@
 		/// <returns>
 		/// Returns a reference to the next <see cref="Record"/> that matches the search criteria.
 		/// </returns>
-		public IRecord GoToNext(Func<IRecord, bool> getIsMatch)
+		internal IRecord GoToNext(Func<IRecord, bool> getIsMatch)
 		{
 			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
 

@@ -14,7 +14,7 @@
 			_navigator = new LineNumberNavigator(records);
 		}
 
-		private bool GetIsPinned(IRecord record)
+		private bool CheckIsPinned(IRecord record)
 		{
 			return record.Metadata.IsPinned;
 		}
@@ -45,7 +45,7 @@
 		/// </returns>
 		public IRecord GoToPrevious()
 		{
-			return _navigator.GoToPrevious(GetIsPinned);
+			return _navigator.GoToPrevious(CheckIsPinned);
 		}
 
 		/// <summary>
@@ -56,7 +56,7 @@
 		/// </returns>
 		public IRecord GoToNext()
 		{
-			return _navigator.GoToNext(GetIsPinned);
+			return _navigator.GoToNext(CheckIsPinned);
 		}
 	}
 }
