@@ -47,11 +47,11 @@
 			_pinNavigator.SetActiveRecord(lineNumber);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> records)
+		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
-			_lineNumberNavigator.UpdateDataSource(records);
-			_findTextNavigator.UpdateDataSource(records);
-			_pinNavigator.UpdateDataSource(records);
+			_lineNumberNavigator.UpdateDataSource(filterResults);
+			_findTextNavigator.UpdateDataSource(filterResults);
+			_pinNavigator.UpdateDataSource(filterResults);
 		}
 
 		public INavigate RebuildTableOfContents()

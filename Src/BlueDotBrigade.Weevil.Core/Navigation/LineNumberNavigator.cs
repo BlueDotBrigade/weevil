@@ -11,14 +11,14 @@
 	{
 		private const int IndexUnknown = -1;
 
-		private ImmutableArray<IRecord> _filterResults;
+		private ImmutableArray<IRecord> _records;
 
 		private IRecord _activeRecord;
 		private int _activeIndex;
 
-		public LineNumberNavigator(ImmutableArray<IRecord> filterResults)
+		public LineNumberNavigator(ImmutableArray<IRecord> records)
 		{
-			_filterResults = filterResults;
+			_records = records;
 
 			_activeRecord = Record.Dummy;
 			_activeIndex = IndexUnknown;
@@ -58,12 +58,12 @@
 
 		internal void SetActiveRecord(int lineNumber)
 		{
-			var index = _filterResults.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
+			var index = _records.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
 
 			if (index >= 0)
 			{
 				_activeIndex = index;
-				_activeRecord = _filterResults[index];
+				_activeRecord = _records[index];
 			}
 			else
 			{
@@ -72,9 +72,9 @@
 			}
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> newFilterResults)
+		internal void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
-			if (newFilterResults.HasLineNumber(_activeRecord.LineNumber))
+			if (records.HasLineNumber(_activeRecord.LineNumber))
 			{
 				// nothing to do
 				// ... we are pointing to a record that still exists
@@ -85,7 +85,7 @@
 				_activeIndex = IndexUnknown;
 			}
 
-			_filterResults = newFilterResults;
+			_records = records;
 		}
 
 		/// <summary>
@@ -96,15 +96,15 @@
 		/// </returns>
 		public IRecord GoToPrevious(Func<IRecord, bool> getIsMatch)
 		{
-			var index = _activeIndex > _filterResults.Length ? 0 : _activeIndex;
+			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
 
-			for (var i = 0; i < _filterResults.Length; i++)
+			for (var i = 0; i < _records.Length; i++)
 			{
-				index = index - 1 < 0 ? _filterResults.Length - 1 : index - 1;
+				index = index - 1 < 0 ? _records.Length - 1 : index - 1;
 
-				if (getIsMatch(_filterResults[index]))
+				if (getIsMatch(_records[index]))
 				{
-					_activeRecord = _filterResults[index];
+					_activeRecord = _records[index];
 					_activeIndex = index;
 					break;
 				}
@@ -120,15 +120,15 @@
 		/// </returns>
 		public IRecord GoToNext(Func<IRecord, bool> getIsMatch)
 		{
-			var index = _activeIndex > _filterResults.Length ? 0 : _activeIndex;
+			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
 
-			for (var i = 0; i < _filterResults.Length; i++)
+			for (var i = 0; i < _records.Length; i++)
 			{
-				index = (index + 1) % _filterResults.Length;
+				index = (index + 1) % _records.Length;
 
-				if (getIsMatch(_filterResults[index]))
+				if (getIsMatch(_records[index]))
 				{
-					_activeRecord = _filterResults[index];
+					_activeRecord = _records[index];
 					_activeIndex = index;
 					break;
 				}

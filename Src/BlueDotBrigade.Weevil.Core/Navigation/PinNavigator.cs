@@ -9,9 +9,9 @@
 	{
 		private readonly LineNumberNavigator _navigator;
 
-		public PinNavigator(ImmutableArray<IRecord> filterResults)
+		public PinNavigator(ImmutableArray<IRecord> records)
 		{
-			_navigator = new LineNumberNavigator(filterResults);
+			_navigator = new LineNumberNavigator(records);
 		}
 
 		private bool GetIsPinned(IRecord record)
@@ -32,9 +32,9 @@
 			_navigator.SetActiveRecord(lineNumber);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> newFilterResults)
+		internal void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
-			_navigator.UpdateDataSource(newFilterResults);
+			_navigator.UpdateDataSource(records);
 		}
 
 		/// <summary>

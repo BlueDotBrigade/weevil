@@ -9,9 +9,9 @@
 	{
 		private readonly LineNumberNavigator _navigator;
 
-		public FindTextNavigator(ImmutableArray<IRecord> filterResults)
+		public FindTextNavigator(ImmutableArray<IRecord> records)
 		{
-			_navigator = new LineNumberNavigator(filterResults);
+			_navigator = new LineNumberNavigator(records);
 		}
 
 		/// <summary>
@@ -27,9 +27,9 @@
 			_navigator.SetActiveRecord(lineNumber);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> newFilterResults)
+		internal void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
-			_navigator.UpdateDataSource(newFilterResults);
+			_navigator.UpdateDataSource(records);
 		}
 
 		/// <summary>
