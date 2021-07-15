@@ -85,6 +85,24 @@
 			_records = records;
 		}
 
+		internal IRecord GoToFirstMatch(Func<IRecord, bool> checkIfMatches)
+		{
+			_activeRecord = Record.Dummy;
+			_activeIndex = IndexUnknown;
+
+			for (var index = 0; index < _records.Length; index++)
+			{
+				if (checkIfMatches(_records[index]))
+				{
+					_activeRecord = _records[index];
+					_activeIndex = index;
+					break;
+				}
+			}
+
+			return _activeRecord;
+		}
+
 		/// <summary>
 		/// Navigates through records in descending order (e.g. lines: 8, 5, 3, 2).
 		/// </summary>

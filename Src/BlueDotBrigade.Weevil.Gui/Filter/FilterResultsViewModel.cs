@@ -986,8 +986,25 @@
 		public void GoTo()
 		{
 			var userValue = _dialogBox.ShowUserPrompt("Go To", "Search filter results for:", string.Empty);
-			_engine.Navigator.LineNumber.GoTo(userValue);
-			this.ActiveRecordIndex = _engine.Navigator.LineNumber.ActiveIndex;
+
+			if (string.IsNullOrWhiteSpace(userValue))
+			{
+				MessageBox.Show("Please enter a line number, or timestamp to search for.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+			else
+			{
+				// Did the user provide a timestamp?
+				if (userValue.Contains(":"))
+				{
+					_engine.Navigator.Timestamp.GoTo(userValue);
+					this.ActiveRecordIndex = _engine.Navigator.Timestamp.ActiveIndex;
+				}
+				else
+				{
+					_engine.Navigator.LineNumber.GoTo(userValue);
+					this.ActiveRecordIndex = _engine.Navigator.LineNumber.ActiveIndex;
+				}
+			}
 		}
 
 		public void GoToPreviousPin()

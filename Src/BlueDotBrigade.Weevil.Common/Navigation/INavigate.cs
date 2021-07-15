@@ -4,6 +4,8 @@
 	{
 		ILineNumberNavigator LineNumber { get; }
 
+		ITimestampNavigator Timestamp { get; }
+
 		IFindTextNavigator Find { get; }
 
 		IPinNavigator Pinned { get; }

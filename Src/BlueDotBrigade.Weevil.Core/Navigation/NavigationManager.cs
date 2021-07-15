@@ -13,6 +13,7 @@
 		private readonly ImmutableArray<IRecord> _allRecords;
 
 		private readonly LineNumberNavigator _lineNumberNavigator;
+		private readonly TimestampNavigator _timestampNavigator;
 		private readonly FindTextNavigator _findTextNavigator;
 		private readonly PinNavigator _pinNavigator;
 
@@ -26,11 +27,14 @@
 			_tableOfContents = tableOfContents;
 
 			_lineNumberNavigator = new LineNumberNavigator(allRecords);
+			_timestampNavigator = new TimestampNavigator(allRecords);
 			_findTextNavigator = new FindTextNavigator(allRecords);
 			_pinNavigator = new PinNavigator(allRecords);
 		}
 
 		public ILineNumberNavigator LineNumber => _lineNumberNavigator;
+
+		public ITimestampNavigator Timestamp => _timestampNavigator;
 
 		public IFindTextNavigator Find => _findTextNavigator;
 
@@ -43,6 +47,7 @@
 		internal void SetActiveRecord(int lineNumber)
 		{
 			_lineNumberNavigator.SetActiveRecord(lineNumber);
+			_timestampNavigator.SetActiveRecord(lineNumber);
 			_findTextNavigator.SetActiveRecord(lineNumber);
 			_pinNavigator.SetActiveRecord(lineNumber);
 		}
@@ -50,6 +55,7 @@
 		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
 			_lineNumberNavigator.UpdateDataSource(filterResults);
+			_timestampNavigator.UpdateDataSource(filterResults);
 			_findTextNavigator.UpdateDataSource(filterResults);
 			_pinNavigator.UpdateDataSource(filterResults);
 		}
