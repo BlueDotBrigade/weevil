@@ -1,20 +1,10 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using BlueDotBrigade.Weevil.Data;
-
-	public interface ITimestampNavigator
+	public interface ITimestampNavigator : INavigator
 	{
 		/// <summary>
-		/// Represents the result of the the most recent navigation.
+		/// Navigates through records in ascending order (e.g. lines: 1, 2, 3, 4, etc.) looking for the provided timestamp.
 		/// </summary>
-		/// <returns>
-		/// Returns the index value of the record for the latest filter results.
-		/// </returns>
-		int ActiveIndex { get; }
-
-		/// <summary>
-		/// Navigates through records in ascending order (e.g. lines: 2, 4, 8, 16) looking for the provided text.
-		/// </summary>
-		IRecord GoTo(string value);
+		int GoTo(string value);
 	}
 }

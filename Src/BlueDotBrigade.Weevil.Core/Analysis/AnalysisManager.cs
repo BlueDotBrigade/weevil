@@ -77,7 +77,7 @@
 			{
 				analyzers.AddRange(_coreExtension.GetAnalyzers(
 					_coreEngine.Context,
-					_coreEngine.Navigator.TableOfContents));
+					_coreEngine.Navigate.TableOfContents));
 			}
 
 			return analyzers;
@@ -93,7 +93,7 @@
 
 			insights.AddRange(_coreExtension.GetInsights(
 				_coreEngine.Context,
-				_coreEngine.Navigator.TableOfContents));
+				_coreEngine.Navigate.TableOfContents));
 
 			foreach (IInsight insight in insights)
 			{

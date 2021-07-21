@@ -561,12 +561,12 @@
 					}
 				}).ContinueWith((x) =>
 					{
-						if (_engine.Navigator.TableOfContents.Sections.Count == 0)
+						if (_engine.Navigate.TableOfContents.Sections.Count == 0)
 						{
-							_engine.Navigator.RebuildTableOfContents();
+							_engine.Navigate.RebuildTableOfContents();
 						}
 
-						_tableOfContents = _engine.Navigator.TableOfContents;
+						_tableOfContents = _engine.Navigate.TableOfContents;
 					}
 				).ContinueWith((x) =>
 					{
@@ -963,8 +963,10 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				_engine.Navigator.Find.GoToNext(_findText);
-				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.By<ITextNavigator>()
+					.GoToNext(_findText);
 			}
 		}
 
@@ -972,15 +974,19 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				_engine.Navigator.Find.GoToPrevious(_findText);
-				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.By<ITextNavigator>()
+					.GoToPrevious(_findText);
 			}
 		}
 
 		public void GoToNextPin()
 		{
-			_engine.Navigator.Pinned.GoToNext();
-			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.By<IPinNavigator>()
+				.GoToNext();
 		}
 
 		public void GoTo()
@@ -996,21 +1002,34 @@
 				// Did the user provide a timestamp?
 				if (userValue.Contains(":"))
 				{
-					_engine.Navigator.Timestamp.GoTo(userValue);
-					this.ActiveRecordIndex = _engine.Navigator.Timestamp.ActiveIndex;
+					this.ActiveRecordIndex =_engine
+						.Navigate
+						.By<ITimestampNavigator>()
+						.GoTo(userValue);
 				}
 				else
 				{
-					_engine.Navigator.LineNumber.GoTo(userValue);
-					this.ActiveRecordIndex = _engine.Navigator.LineNumber.ActiveIndex;
+					if (int.TryParse(userValue, out var lineNumber))
+					{
+						this.ActiveRecordIndex = _engine
+							.Navigate
+							.By<ILineNumberNavigator>()
+							.GoTo(lineNumber);
+					}
+					else
+					{
+						MessageBox.Show("Go to line number has failed.  Please enter a valid number.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					}
 				}
 			}
 		}
 
 		public void GoToPreviousPin()
 		{
-			_engine.Navigator.Pinned.GoToPrevious();
-			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.By<IPinNavigator>()
+				.GoToPrevious();
 		}
 
 		#endregion

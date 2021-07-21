@@ -1,7 +1,9 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.IO;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using File = System.IO.File;
@@ -10,12 +12,9 @@
 	{
 		private readonly string _sourceFilePath;
 		private readonly ICoreExtension _coreCoreExtension;
-		private readonly ImmutableArray<IRecord> _allRecords;
 
-		private readonly LineNumberNavigator _lineNumberNavigator;
-		private readonly TimestampNavigator _timestampNavigator;
-		private readonly FindTextNavigator _findTextNavigator;
-		private readonly PinNavigator _pinNavigator;
+		private readonly RecordNavigator _recordNavigator;
+		private ImmutableArray<INavigator> _navigators;
 
 		private TableOfContents _tableOfContents;
 
@@ -23,22 +22,23 @@
 		{
 			_sourceFilePath = sourceFilePath;
 			_coreCoreExtension = coreExtension;
-			_allRecords = allRecords;
 			_tableOfContents = tableOfContents;
 
-			_lineNumberNavigator = new LineNumberNavigator(allRecords);
-			_timestampNavigator = new TimestampNavigator(allRecords);
-			_findTextNavigator = new FindTextNavigator(allRecords);
-			_pinNavigator = new PinNavigator(allRecords);
+			_recordNavigator = new RecordNavigator(allRecords);
+
+			_navigators = new List<INavigator>
+			{
+				new LineNumberNavigator(_recordNavigator),
+				new TimestampNavigator(_recordNavigator),
+				new TextNavigator(_recordNavigator),
+				new PinNavigator(_recordNavigator),
+			}.ToImmutableArray();
 		}
 
-		public ILineNumberNavigator LineNumber => _lineNumberNavigator;
-
-		public ITimestampNavigator Timestamp => _timestampNavigator;
-
-		public IFindTextNavigator Find => _findTextNavigator;
-
-		public IPinNavigator Pinned => _pinNavigator;
+		public T By<T>() where T : INavigator
+		{
+			return _navigators.OfType<T>().First();
+		}
 
 		public TableOfContents TableOfContents => _tableOfContents;
 
@@ -46,18 +46,12 @@
 
 		internal void SetActiveRecord(int lineNumber)
 		{
-			_lineNumberNavigator.SetActiveRecord(lineNumber);
-			_timestampNavigator.SetActiveRecord(lineNumber);
-			_findTextNavigator.SetActiveRecord(lineNumber);
-			_pinNavigator.SetActiveRecord(lineNumber);
+			_recordNavigator.SetActiveRecord(lineNumber);
 		}
 
 		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
-			_lineNumberNavigator.UpdateDataSource(filterResults);
-			_timestampNavigator.UpdateDataSource(filterResults);
-			_findTextNavigator.UpdateDataSource(filterResults);
-			_pinNavigator.UpdateDataSource(filterResults);
+			_recordNavigator.UpdateDataSource(filterResults);
 		}
 
 		public INavigate RebuildTableOfContents()

@@ -7,11 +7,11 @@
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
 	internal class PinNavigator : IPinNavigator
 	{
-		private readonly LineNumberNavigator _navigator;
+		private readonly RecordNavigator _navigator;
 
-		public PinNavigator(ImmutableArray<IRecord> records)
+		public PinNavigator(RecordNavigator navigator)
 		{
-			_navigator = new LineNumberNavigator(records);
+			_navigator = navigator;
 		}
 
 		private bool CheckIsPinned(IRecord record)
@@ -19,20 +19,14 @@
 			return record.Metadata.IsPinned;
 		}
 
-		/// <summary>
-		/// Represents the result of the the most recent navigation.
-		/// </summary>
-		/// <returns>
-		/// Returns the index value of the record for the latest filter results.
-		/// </returns>
 		public int ActiveIndex => _navigator.ActiveIndex;
 
-		internal void SetActiveRecord(int lineNumber)
+		public int SetActiveRecord(int lineNumber)
 		{
-			_navigator.SetActiveRecord(lineNumber);
+			return _navigator.SetActiveRecord(lineNumber);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> records)
+		public void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
 			_navigator.UpdateDataSource(records);
 		}
@@ -43,7 +37,7 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public IRecord GoToPrevious()
+		public int GoToPrevious()
 		{
 			return _navigator.GoToPrevious(CheckIsPinned);
 		}
@@ -54,7 +48,7 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public IRecord GoToNext()
+		public int GoToNext()
 		{
 			return _navigator.GoToNext(CheckIsPinned);
 		}

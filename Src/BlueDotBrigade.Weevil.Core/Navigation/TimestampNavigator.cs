@@ -8,47 +8,35 @@
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
 	internal class TimestampNavigator : ITimestampNavigator
 	{
-		private readonly LineNumberNavigator _navigator;
+		private readonly RecordNavigator _navigator;
 
-		public TimestampNavigator(ImmutableArray<IRecord> records)
+		public TimestampNavigator(RecordNavigator navigator)
 		{
-			_navigator = new LineNumberNavigator(records);
+			_navigator = navigator;
 		}
 
-		/// <summary>
-		/// Represents the result of the the most recent navigation.
-		/// </summary>
-		/// <returns>
-		/// Returns the index value of the record for the latest filter results.
-		/// </returns>
 		public int ActiveIndex => _navigator.ActiveIndex;
 
-		internal void SetActiveRecord(int lineNumber)
+		public int SetActiveRecord(int lineNumber)
 		{
-			_navigator.SetActiveRecord(lineNumber);
+			return _navigator.SetActiveRecord(lineNumber);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> records)
+		public void UpdateDataSource(ImmutableArray<IRecord> records)
 		{
 			_navigator.UpdateDataSource(records);
 		}
 
-		/// <summary>
-		/// Navigates through pinned records in ascending order (e.g. lines: 2, 4, 8, 16).
-		/// </summary>
-		/// <returns>
-		/// Returns a reference to the next pinned <see cref="Record"/>.
-		/// </returns>
-		public IRecord GoTo(string value)
+		public int GoTo(string value)
 		{
-			IRecord result = Record.Dummy;
+			var result = -1;
 
-			var requestedTime = ConvertToDateTime(_navigator.ActiveRecord, value);
+			//var requestedTime = ConvertToDateTime(_navigator.ActiveRecord, value);
 
-			if (!string.IsNullOrWhiteSpace(value))
-			{
-				result = _navigator.GoToFirstMatch(record => record.HasCreationTime && record.CreatedAt >= requestedTime);
-			}
+			//if (!string.IsNullOrWhiteSpace(value))
+			//{
+			//	result = _navigator.GoToFirstMatch(record => record.HasCreationTime && record.CreatedAt >= requestedTime);
+			//}
 
 			return result;
 		}
