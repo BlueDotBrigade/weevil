@@ -9,7 +9,9 @@
 - [How to use Weevil?](#how-to-use-weevil)
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
-- [Build & Compile](#build--compile)
+- [Source Code](#source-code)
+   - [Compiling](#compiling)
+   - [Development](#development)
 
 ## What is Weevil?
 
@@ -102,33 +104,37 @@ var engine = Engine
    .UsingPath(@"C:\Temp\hardware.log")
    .Open();
 
-// The `UniqueId` regular expression named group is used to capture serial hardware serial numbers.
+// The `UniqueId` regular expression named group is used to
+// capture serial hardware serial numbers.
 engine.Filter.Apply(
    FilterType.RegularExpression,
    new FilterCriteria(@"Received hardware message. ID=(?<UniqueId>[a-zA-Z0-9]+)"));
 
-// This type of analysis compares the captured serial numbers, 
+// This type of analysis compares the captured serial numbers,
 // and flags the record when a value changes.
 engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
 
 foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == true))
 {
-   Console.WriteLine($"{record.CreatedAt} {record.Metadata.Comment}");
+   Console.WriteLine(
+   $"{record.CreatedAt} {record.Metadata.Comment}");
 }
 ```
 
-## Build & Compile
+## Source Code
 
 | Attribute | Description |
 | --- | --- |
-| [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the repository was last updated. |
-| [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Approximate size of the code base. |
-| [![GitHub Repository Size](https://img.shields.io/github/repo-size/BlueDotBrigade/Weevil)](https://github.com/BlueDotBrigade/Weevil) | Total size of the Git repository. |
-| [![Latest Code](https://img.shields.io/badge/branch-main-blue)](https://github.com/BlueDotBrigade/weevil) | Source code under development. |
-| [![Latest Stable](https://img.shields.io/badge/branch-Releases/2.x-blue)](https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x) | Source code for most recent release. |
 | [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases) | Latest version of *Weevil* to be released to production. |
+| [![Latest Stable](https://img.shields.io/badge/branch-Releases/2.x-blue)](https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x) | Release branch for the most stable version of *Weevil*. |
+| [![Latest Code](https://img.shields.io/badge/branch-main-blue)](https://github.com/BlueDotBrigade/weevil/tree/main) | Development branch for the *Weevil* source code. |
+| [![GitHub Repository Size](https://img.shields.io/github/repo-size/BlueDotBrigade/Weevil)](https://github.com/BlueDotBrigade/Weevil) | Total size of *Weevil*'s Git repository. |
+| [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code. |
+| [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the repository was last updated. |
 
-To compile the application...
+### Compiling
+
+The following steps outline how to build Weevil's WPF application:
 
 1. Download the latest [stable release][StableCode] source code.
 2. If you have implemented a custom *Weevil* plugin:
@@ -136,9 +142,9 @@ To compile the application...
       - `%WEEVIL_PLUGINS_PATH%` which refers to the directory where the Weevil plugin assembly (`*.dll`) can be found.
 3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`.
 
-During development:
+### Development
 
-- Ensure that changes to the WPF application UI follow the [Style Guide][StyleGuide]
+- When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
 
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
 
