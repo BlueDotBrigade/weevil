@@ -561,12 +561,12 @@
 					}
 				}).ContinueWith((x) =>
 					{
-						if (_engine.Navigator.TableOfContents.Sections.Count == 0)
+						if (_engine.Navigate.TableOfContents.Sections.Count == 0)
 						{
-							_engine.Navigator.RebuildTableOfContents();
+							_engine.Navigate.RebuildTableOfContents();
 						}
 
-						_tableOfContents = _engine.Navigator.TableOfContents;
+						_tableOfContents = _engine.Navigate.TableOfContents;
 					}
 				).ContinueWith((x) =>
 					{
@@ -963,8 +963,11 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				_engine.Navigator.Find.GoToNext(_findText);
-				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.Using<ITextNavigator>()
+					.FindNext(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
@@ -972,28 +975,67 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				_engine.Navigator.Find.GoToPrevious(_findText);
-				this.ActiveRecordIndex = _engine.Navigator.Find.ActiveIndex;
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.Using<ITextNavigator>()
+					.FindPrevious(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
 		public void GoToNextPin()
 		{
-			_engine.Navigator.Pinned.GoToNext();
-			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.Using<IPinNavigator>()
+				.FindNext()
+				.ToIndexUsing(_engine.Filter.Results);
 		}
 
 		public void GoTo()
 		{
 			var userValue = _dialogBox.ShowUserPrompt("Go To", "Search filter results for:", string.Empty);
-			_engine.Navigator.LineNumber.GoTo(userValue);
-			this.ActiveRecordIndex = _engine.Navigator.LineNumber.ActiveIndex;
+
+			if (string.IsNullOrWhiteSpace(userValue))
+			{
+				MessageBox.Show("Please enter a line number, or timestamp to search for.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+			else
+			{
+				// Did the user provide a timestamp?
+				if (userValue.Contains(":"))
+				{
+					this.ActiveRecordIndex = _engine
+						.Navigate
+						.Using<ITimestampNavigator>()
+						.Find(userValue)
+						.ToIndexUsing(_engine.Filter.Results);
+				}
+				else
+				{
+					if (int.TryParse(userValue, out var lineNumber))
+					{
+						this.ActiveRecordIndex = _engine
+							.Navigate
+							.Using<ILineNumberNavigator>()
+							.Find(lineNumber)
+							.ToIndexUsing(_engine.Filter.Results);
+					}
+					else
+					{
+						MessageBox.Show("Go to line number has failed.  Please enter a valid number.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					}
+				}
+			}
 		}
 
 		public void GoToPreviousPin()
 		{
-			_engine.Navigator.Pinned.GoToPrevious();
-			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.Using<IPinNavigator>()
+				.FindPrevious()
+				.ToIndexUsing(_engine.Filter.Results);
 		}
 
 		#endregion

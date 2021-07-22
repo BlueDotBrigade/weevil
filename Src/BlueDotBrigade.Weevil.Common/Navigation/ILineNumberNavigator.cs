@@ -2,18 +2,11 @@
 {
 	using BlueDotBrigade.Weevil.Data;
 
-	public interface ILineNumberNavigator
+	public interface ILineNumberNavigator : INavigator
 	{
 		/// <summary>
-		/// Represents the result of the the most recent navigation.
+		/// Returns the index of the <see cref="IRecord"/> that matches the provided line number.
 		/// </summary>
-		/// <returns>
-		/// Returns the index value of the record for the latest filter results.
-		/// </returns>
-		int ActiveIndex { get; }
-
-		IRecord GoTo(int lineNumber);
-
-		IRecord GoTo(string lineNumber);
+		IRecord Find(int lineNumber);
 	}
 }

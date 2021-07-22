@@ -204,7 +204,7 @@
 
 		public FilterManager Filter => _filterManager;
 
-		public NavigationManager Navigator => _navigationManager;
+		public NavigationManager Navigate => _navigationManager;
 
 		public SelectionManager Selector => _selectionManager;
 
@@ -237,7 +237,7 @@
 
 		IFilter ICoreEngine.Filter => this.Filter;
 
-		INavigate ICoreEngine.Navigator => this.Navigator;
+		INavigate ICoreEngine.Navigate => this.Navigate;
 
 		ISelect ICoreEngine.Selector => this.Selector;
 

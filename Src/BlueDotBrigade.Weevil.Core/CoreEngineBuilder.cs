@@ -157,7 +157,7 @@
 
 					knownContext = _sourceInstance._context;
 
-					tableOfContents = _sourceInstance.Navigator.TableOfContents.Sections.ToList();
+					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
 
 					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
 					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);

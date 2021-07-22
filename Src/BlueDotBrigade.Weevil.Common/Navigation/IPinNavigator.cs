@@ -2,30 +2,17 @@
 {
 	using Data;
 
-	public interface IPinNavigator
+
+	public interface IPinNavigator : INavigator
 	{
 		/// <summary>
-		/// Represents the result of the the most recent navigation.
+		/// Navigates through pinned records in descending order (e.g. lines: 4, 3, 2 1).
 		/// </summary>
-		/// <returns>
-		/// Returns the index value of the record for the latest filter results.
-		/// </returns>
-		int ActiveIndex { get; }
+		IRecord FindPrevious();
 
 		/// <summary>
-		/// Navigates through pinned records in descending order (e.g. lines: 8, 5, 3, 2).
+		/// Navigates through pinned records in ascending order (e.g. lines: 1, 2, 3, 4, etc.).
 		/// </summary>
-		/// <returns>
-		/// Returns a reference to the next pinned <see cref="Record"/>.
-		/// </returns>
-		IRecord GoToPrevious();
-
-		/// <summary>
-		/// Navigates through pinned records in ascending order (e.g. lines: 2, 4, 8, 16).
-		/// </summary>
-		/// <returns>
-		/// Returns a reference to the next pinned <see cref="Record"/>.
-		/// </returns>
-		IRecord GoToNext();
+		IRecord FindNext();
 	}
 }

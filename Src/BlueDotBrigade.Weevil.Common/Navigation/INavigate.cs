@@ -2,14 +2,10 @@
 {
 	public interface INavigate
 	{
-		ILineNumberNavigator LineNumber { get; }
-
-		IFindTextNavigator Find { get; }
-
-		IPinNavigator Pinned { get; }
-
 		ITableOfContents TableOfContents { get; }
 
 		INavigate RebuildTableOfContents();
+
+		T Using<T>() where T : INavigator;
 	}
 }
