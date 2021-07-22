@@ -48,7 +48,7 @@
    - Jump to a specific line number.
    - Jump to a specific timestamp.
 3. Pinned Records
-   - Quickly navigate between records records of interest.
+   - Quickly navigate between records of interest.
 
 ### Analysis
 
