@@ -6,6 +6,6 @@
 
 		INavigate RebuildTableOfContents();
 
-		T By<T>() where T : INavigator;
+		T Using<T>() where T : INavigator;
 	}
 }

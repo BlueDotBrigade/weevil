@@ -1,9 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using System;
-	using System.Collections.Immutable;
 	using System.Diagnostics;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
@@ -16,7 +13,7 @@
 			_navigator = navigator;
 		}
 
-		public int GoTo(int lineNumber)
+		public IRecord Find(int lineNumber)
 		{
 			return _navigator.SetActiveRecord(lineNumber);
 		}

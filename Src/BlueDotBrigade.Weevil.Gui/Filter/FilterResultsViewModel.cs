@@ -965,8 +965,9 @@
 			{
 				this.ActiveRecordIndex = _engine
 					.Navigate
-					.By<ITextNavigator>()
-					.GoToNext(_findText);
+					.Using<ITextNavigator>()
+					.FindNext(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
@@ -976,8 +977,9 @@
 			{
 				this.ActiveRecordIndex = _engine
 					.Navigate
-					.By<ITextNavigator>()
-					.GoToPrevious(_findText);
+					.Using<ITextNavigator>()
+					.FindPrevious(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
@@ -985,8 +987,9 @@
 		{
 			this.ActiveRecordIndex = _engine
 				.Navigate
-				.By<IPinNavigator>()
-				.GoToNext();
+				.Using<IPinNavigator>()
+				.FindNext()
+				.ToIndexUsing(_engine.Filter.Results);
 		}
 
 		public void GoTo()
@@ -1002,10 +1005,11 @@
 				// Did the user provide a timestamp?
 				if (userValue.Contains(":"))
 				{
-					this.ActiveRecordIndex =_engine
+					this.ActiveRecordIndex = _engine
 						.Navigate
-						.By<ITimestampNavigator>()
-						.GoTo(userValue);
+						.Using<ITimestampNavigator>()
+						.Find(userValue)
+						.ToIndexUsing(_engine.Filter.Results);
 				}
 				else
 				{
@@ -1013,8 +1017,9 @@
 					{
 						this.ActiveRecordIndex = _engine
 							.Navigate
-							.By<ILineNumberNavigator>()
-							.GoTo(lineNumber);
+							.Using<ILineNumberNavigator>()
+							.Find(lineNumber)
+							.ToIndexUsing(_engine.Filter.Results);
 					}
 					else
 					{
@@ -1028,8 +1033,9 @@
 		{
 			this.ActiveRecordIndex = _engine
 				.Navigate
-				.By<IPinNavigator>()
-				.GoToPrevious();
+				.Using<IPinNavigator>()
+				.FindPrevious()
+				.ToIndexUsing(_engine.Filter.Results);
 		}
 
 		#endregion

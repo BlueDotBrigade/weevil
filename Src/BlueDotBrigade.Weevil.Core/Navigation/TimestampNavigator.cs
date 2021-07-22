@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using System;
-	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using BlueDotBrigade.Weevil.Data;
 
@@ -15,28 +14,16 @@
 			_navigator = navigator;
 		}
 
-		public int ActiveIndex => _navigator.ActiveIndex;
-
-		public int SetActiveRecord(int lineNumber)
+		public IRecord Find(string value)
 		{
-			return _navigator.SetActiveRecord(lineNumber);
-		}
+			IRecord result = Record.Dummy;
 
-		public void UpdateDataSource(ImmutableArray<IRecord> records)
-		{
-			_navigator.UpdateDataSource(records);
-		}
+			var requestedTime = ConvertToDateTime(_navigator.ActiveRecord, value);
 
-		public int GoTo(string value)
-		{
-			var result = -1;
-
-			//var requestedTime = ConvertToDateTime(_navigator.ActiveRecord, value);
-
-			//if (!string.IsNullOrWhiteSpace(value))
-			//{
-			//	result = _navigator.GoToFirstMatch(record => record.HasCreationTime && record.CreatedAt >= requestedTime);
-			//}
+			if (!string.IsNullOrWhiteSpace(value))
+			{
+				result = _navigator.GoToFirstMatch(record => record.HasCreationTime && record.CreatedAt >= requestedTime);
+			}
 
 			return result;
 		}

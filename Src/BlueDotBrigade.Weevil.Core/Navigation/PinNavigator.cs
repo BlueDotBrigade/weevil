@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using Data;
 
@@ -19,25 +18,13 @@
 			return record.Metadata.IsPinned;
 		}
 
-		public int ActiveIndex => _navigator.ActiveIndex;
-
-		public int SetActiveRecord(int lineNumber)
-		{
-			return _navigator.SetActiveRecord(lineNumber);
-		}
-
-		public void UpdateDataSource(ImmutableArray<IRecord> records)
-		{
-			_navigator.UpdateDataSource(records);
-		}
-
 		/// <summary>
 		/// Navigates through pinned records in descending order (e.g. lines: 8, 5, 3, 2).
 		/// </summary>
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public int GoToPrevious()
+		public IRecord FindPrevious()
 		{
 			return _navigator.GoToPrevious(CheckIsPinned);
 		}
@@ -48,7 +35,7 @@
 		/// <returns>
 		/// Returns a reference to the next pinned <see cref="Record"/>.
 		/// </returns>
-		public int GoToNext()
+		public IRecord FindNext()
 		{
 			return _navigator.GoToNext(CheckIsPinned);
 		}

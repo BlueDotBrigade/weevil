@@ -35,7 +35,7 @@
 			}.ToImmutableArray();
 		}
 
-		public T By<T>() where T : INavigator
+		public T Using<T>() where T : INavigator
 		{
 			return _navigators.OfType<T>().First();
 		}
