@@ -39,7 +39,7 @@
 
 			Assert.AreEqual(
 				Record.Dummy,
-				new TimestampNavigator(records.ToImmutableArray()).GoTo(timestamp));
+				new TimestampNavigator(new RecordNavigator(records)).Find(timestamp));
 		}
 
 		[TestMethod]
@@ -56,7 +56,7 @@
 
 			Assert.AreEqual(
 				Record.Dummy,
-				new TimestampNavigator(records.ToImmutableArray()).GoTo(requestedTime));
+				new TimestampNavigator(new RecordNavigator(records)).Find(requestedTime));
 		}
 
 		[TestMethod]
@@ -68,7 +68,7 @@
 
 			Assert.AreEqual(
 				records[8],
-				new TimestampNavigator(records.ToImmutableArray()).GoTo(requestedTime));
+				new TimestampNavigator(new RecordNavigator(records)).Find(requestedTime));
 		}
 
 		[TestMethod]
@@ -79,7 +79,7 @@
 
 			Assert.AreEqual(
 				records[5],
-				new TimestampNavigator(records.ToImmutableArray()).GoTo(requestedTime));
+				new TimestampNavigator(new RecordNavigator(records)).Find(requestedTime));
 		}
 	}
 }

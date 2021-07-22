@@ -2,6 +2,7 @@
 {
 	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.Weevil.Navigation;
 	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,7 +19,7 @@
 			engine.Filter.Results[9].Metadata.IsPinned = true;
 
 			engine.Selector.Select(1);
-			IRecord pinnedRecord = engine.Navigator.Pinned.GoToNext();
+			IRecord pinnedRecord = engine.Navigate.Using<IPinNavigator>().FindNext();
 
 			// Reminder: although they are often similar, the line number and index are NOT the same!
 			Assert.AreEqual(10, pinnedRecord.LineNumber);
@@ -33,7 +34,7 @@
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("ThisWillHidePinnedRecord9"));
 
-			Assert.AreEqual(Record.Dummy, engine.Navigator.Pinned.GoToNext());
+			Assert.AreEqual(Record.Dummy, engine.Navigate.Using<IPinNavigator>().FindNext());
 		}
 	}
 }

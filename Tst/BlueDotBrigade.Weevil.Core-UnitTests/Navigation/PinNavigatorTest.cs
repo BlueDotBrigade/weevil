@@ -23,7 +23,9 @@
 						"Sample log entry."));
 			}
 
-			Assert.AreEqual(Record.Dummy, new PinNavigator(records.ToImmutableArray()).GoToNext());
+			Assert.AreEqual(
+				Record.Dummy, 
+				new PinNavigator(new RecordNavigator(records)).FindNext());
 		}
 
 		[TestMethod]
@@ -44,7 +46,9 @@
 			records[8].Metadata.IsPinned = true; // Line: 58 is pinned
 			records[2].Metadata.IsPinned = true; // Line: 52 is pinned
 
-			Assert.AreEqual(52, new PinNavigator(records.ToImmutableArray()).GoToNext().LineNumber);
+			Assert.AreEqual(
+				52, 
+				new PinNavigator(new RecordNavigator(records)).FindNext().LineNumber);
 		}
 
 		[TestMethod]
@@ -64,11 +68,11 @@
 			records[2].Metadata.IsPinned = true;
 			records[8].Metadata.IsPinned = true;
 
-			var navigator = new PinNavigator(records.ToImmutableArray());
+			var navigator = new PinNavigator(new RecordNavigator(records));
 
-			Assert.AreEqual(52, navigator.GoToNext().LineNumber);
-			Assert.AreEqual(58, navigator.GoToNext().LineNumber);
-			Assert.AreEqual(52, navigator.GoToNext().LineNumber);
+			Assert.AreEqual(52, navigator.FindNext().LineNumber);
+			Assert.AreEqual(58, navigator.FindNext().LineNumber);
+			Assert.AreEqual(52, navigator.FindNext().LineNumber);
 		}
 	}
 }

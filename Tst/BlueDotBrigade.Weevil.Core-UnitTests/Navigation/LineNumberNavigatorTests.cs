@@ -14,7 +14,9 @@
 		{
 			var records = new List<IRecord>();
 
-			Assert.AreEqual(Record.Dummy, new LineNumberNavigator(records.ToImmutableArray()).GoTo(9));
+			Assert.AreEqual(
+				Record.Dummy, 
+				new LineNumberNavigator(new RecordNavigator(records)).Find(9));
 		}
 
 		[TestMethod]
@@ -31,7 +33,9 @@
 						"Sample log entry."));
 			}
 
-			Assert.AreEqual(9, new LineNumberNavigator(records.ToImmutableArray()).GoTo(9).LineNumber);
+			Assert.AreEqual(
+				9, 
+				new LineNumberNavigator(new RecordNavigator(records)).Find(9).LineNumber);
 		}
 	}
 }
