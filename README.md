@@ -97,8 +97,8 @@ For example, one could determine when equipment was changed using the following 
 
 ```CSharp
 var engine = Engine
-	.UsingPath(@"C:\Temp\hardware.log")
-	.Open();
+   .UsingPath(@"C:\Temp\hardware.log")
+   .Open();
 
 // The `UniqueId` regular expression named group is used to capture serial hardware serial numbers.
 engine.Filter.Apply(
@@ -111,7 +111,7 @@ engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
 
 foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == true))
 {
-	Console.WriteLine($"{record.CreatedAt} {record.Metadata.Comment}");
+   Console.WriteLine($"{record.CreatedAt} {record.Metadata.Comment}");
 }
 ```
 
@@ -124,11 +124,11 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | [![GitHub Repository Size](https://img.shields.io/github/repo-size/BlueDotBrigade/Weevil)](https://github.com/BlueDotBrigade/Weevil) | Total size of the Git repository. |
 | [![Latest Code](https://img.shields.io/badge/branch-main-blue)](https://github.com/BlueDotBrigade/weevil) | Source code under development. |
 | [![Latest Stable](https://img.shields.io/badge/branch-Releases/2.x-blue)](https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x) | Source code for most recent release. |
-| [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases) | Latest version of the  |
+| [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases) | Latest version of *Weevil* to be released to production. |
 
 To compile the application...
 
-1. Obtain the source code for the latest [stable release][StableCode] of *Weevil*.
+1. Download the latest [stable release][StableCode] source code.
 2. If you have implemented a custom *Weevil* plugin:
    - Prior to starting Visual Studio, create the following Windows [environment variable][EnvironmentVariable]:
       - `%WEEVIL_PLUGINS_PATH%` which refers to the directory where the Weevil plugin assembly (`*.dll`) can be found.
