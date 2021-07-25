@@ -59,15 +59,20 @@ For a list of the latest features, please see the [change log][ChangeLog].
 [Regular expression][RegEx101] named groups can used to identify key data within the log file.  *Weevil*'s analysis tools can then be used to extract data and/or identify trends.
 
 1. Detect Data
-   - Matching values are extracted and appended to the the `Comments` field.
+   - `Comments` field is updated with values that match the provided named group(s).
+   - `Flagged` field is set to `True` for matching records. 
+   - Example: extracting URLs from a log file.
 2. Detect Data Transitions
    - `Comments` field is updated when the matching value changes.
-   - Example: detecting when
+   - `Flagged` field is set to `True` for matching records.
+   - Example: detecting when hardware serial numbers change. 
 3. Detect Rising Edges
    - `Comments` field is updated when the matching value is higher that the previously detected value.
+   - `Flagged` field is set to `True` for matching records.
    - Example: detecting peek CPU usage in a log file
-4. Detect Falling Edges: results are only copied when a numerical value decreases
+4. Detect Falling Edges:
    - `Comments` field is updated when the matching value is lower that the previously detected value.
+   - `Flagged` field is set to `True` for matching records.
    - Example: firmware's uptime value has reset to zero
 
 ### Plugin Architecture
