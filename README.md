@@ -18,17 +18,17 @@
 [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://GitHub.com/dotnet/BlueDotBrigade/releases/)
 [![GitHub License](https://img.shields.io/github/license/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/Weevil/blob/master/LICENSE)
 
-*Weevil* is an extensible open-source project which provides a set of tools to facilitate log file analysis, and automatically detect known issues.  In other words, "_boring log files for tasty bytes_".  
+*Weevil* is an extensible open-source project which provides tools to facilitate log file analysis. In other words, "_boring log files for tasty bytes_".  
 
 For a list of the latest features, please see the [change log][ChangeLog].
 
 ### General
 
 1. Supports record-level comments.
-2. All operations are non-destructive; the original log file will not be modified.
-3. Persisted State
+2. Persisted State
    - Filter history, user comments, and other metadata is automatically loaded when a log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
+3. All operations are non-destructive; the original log file will not be modified.
 
 ### Filtering
 
