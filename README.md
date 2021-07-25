@@ -18,7 +18,7 @@
 [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://GitHub.com/dotnet/BlueDotBrigade/releases/)
 [![GitHub License](https://img.shields.io/github/license/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/Weevil/blob/master/LICENSE)
 
-*Weevil* is an extensible open-source project which provides tools to facilitate log file analysis. In other words, "_boring log files for tasty bytes_".  
+*Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
 
 For a list of the latest features, please see the [change log][ChangeLog].
 
