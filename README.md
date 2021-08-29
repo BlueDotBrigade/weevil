@@ -36,8 +36,8 @@ For a list of the latest features, please see the [change log][ChangeLog].
    - Is used to select or hide log file records.
 2. Pinned Records
    - Guarantees that specific records always appear in the filter results.
-3. Static Aliases
-   - Long and/or complex filters can be added to *Weevil* as static aliases.
+3. Filter Aliases
+   -  An alias can be added to _Weevil_ to make it easier to reference complex and/or frequently used filters.
 4. Monikers
    - Provides support for querying *Weevil*'s metadata.
    - For example: `@Comment` can be used to retrieve records that have a user comment.
@@ -77,10 +77,10 @@ For a list of the latest features, please see the [change log][ChangeLog].
 
 ### Plugin Architecture
 
-Realize the greatest value by creating a business-domain specific *Weevil* plug-in which extends the application by providing custom:
+Realize the greatest value by creating a business-domain specific *Weevil* plug-in which extends the application by creating custom:
 
-1. static aliases
-2. log file analysis
+1. log file parsers
+2. log file analyzers
 3. dashboard insight
 
 ## How to use Weevil?

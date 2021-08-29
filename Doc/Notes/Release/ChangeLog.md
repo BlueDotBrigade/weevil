@@ -28,7 +28,7 @@ Released on May 22th, 2021
 
 - The status bar now reflects the number of flagged `Record`s post-analysis (#116) (#121)
 - The menu no longer remains disabled when: you view the context menu before loading a file (#139)
-- Fixed: static aliases do not resolve properly when multiple aliases start with the same text. (#98)
+- Fixed: filter aliases do not resolve properly when multiple aliases start with the same text. (#98)
 
 ### Version 2.6.1
 
@@ -41,7 +41,7 @@ Released on March 27th, 2021
 
 #### Bug Fixes
 
-- Static aliases do not resolve properly when multiple aliases start with the same text. (#98)
+- Filter aliases do not resolve properly when multiple aliases start with the same text. (#98)
 
 ### Version 2.6.0
 
