@@ -55,6 +55,7 @@
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
       <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
       <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
+      <KeyBinding Key="R" Modifiers="Control" Command="{Binding ShowRegExToolCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
       <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
       <!--<KeyBinding Key="Delete" Command="{Binding ClearSelectedRecordsCommand}" />-->
@@ -226,6 +227,7 @@
                <Separator/>
                <MenuItem Header="Show...">
                   <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+                  <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
                   <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
                </MenuItem>
                <Separator/>
