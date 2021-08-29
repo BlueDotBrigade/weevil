@@ -108,19 +108,22 @@
             Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument-Button-24.png"/>
          </Button>
+         <!-- 
+         HACK: WPF ComboBoxes do not support access keys. The `Label` is being used to receive focus on behalf of the ComboBox. See: #36
+         -->
          <Label Grid.Column="1" Target="{Binding ElementName=InclusiveFilter}" Content="AccessKey hack for: _Inclusive ComboBox" Width="0"/>
-            <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
+         <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
                    Margin="{StaticResource ComboBoxMargin}"
-                      ItemsSource="{Binding InclusiveFilterHistory}"
-                      Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
-                      SelectedValue="{Binding InclusiveFilter}" 
-                      IsEnabled="{Binding IsFilterToolboxEnabled}" 
-                      IsEditable="True"
-                      IsTextSearchEnabled="False"
-                      StaysOpenOnEdit="False"
-                      guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                      materialDesign:HintAssist.Hint="Inclusive Filter (Alt+I)"
-                      materialDesign:TextFieldAssist.HasClearButton="True">
+                   ItemsSource="{Binding InclusiveFilterHistory}"
+                   Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
+                   SelectedValue="{Binding InclusiveFilter}" 
+                   IsEnabled="{Binding IsFilterToolboxEnabled}" 
+                   IsEditable="True"
+                   IsTextSearchEnabled="False"
+                   StaysOpenOnEdit="False"
+                   guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                   materialDesign:HintAssist.Hint="Inclusive Filter (Alt+I)"
+                   materialDesign:TextFieldAssist.HasClearButton="True">
             <ComboBox.InputBindings>
                <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                   <KeyBinding.CommandParameter>
@@ -132,6 +135,9 @@
                </KeyBinding>
             </ComboBox.InputBindings>
          </ComboBox>
+         <!-- 
+         HACK: WPF ComboBoxes do not support access keys. The `Label` is being used to receive focus on behalf of the ComboBox. See: #36
+         -->
          <Label Grid.Column="1" Target="{Binding ElementName=ExclusiveFilter}" Content="AccessKey hack for: _Exclusive ComboBox" Width="0"/>
          <ComboBox x:Name="ExclusiveFilter" Grid.Column="2"   
                    Margin="{StaticResource ComboBoxMargin}"
