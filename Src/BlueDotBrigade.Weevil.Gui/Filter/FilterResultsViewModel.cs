@@ -42,6 +42,8 @@
 	{
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
+
+		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/EKCf6T/4");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
@@ -810,6 +812,11 @@
 		public void ShowFileExplorer()
 		{
 			WindowsProcess.Start(WindowsProcessType.FileExplorer, Path.GetDirectoryName(_engine.SourceFilePath));
+		}
+
+		public void ShowRegExTool()
+		{
+			Process.Start(RegEx101Url.ToString());
 		}
 
 		public void ShowApplicationLogFile()
