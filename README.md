@@ -15,12 +15,12 @@
 
 ## What is Weevil?
 
-[![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://GitHub.com/dotnet/BlueDotBrigade/releases/)
+[![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
 [![GitHub License](https://img.shields.io/github/license/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/Weevil/blob/master/LICENSE)
 
 *Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
 
-For a list of the latest features, please see the [change log][ChangeLog].
+For a list of the latest features, please see the [change log][https://github.com/BlueDotBrigade/weevil/releases].
 
 ### General
 
@@ -152,8 +152,6 @@ The following steps outline how to build Weevil's WPF application:
 - When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
 
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
-
-[ChangeLog]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/ChangeLog.md
 
 [InstallationGuide]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/InstallationGuide.md
 [Help]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/Help.md
