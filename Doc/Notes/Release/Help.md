@@ -23,7 +23,7 @@ A filter represents one or more expressions - separated by a double pipe (`||`) 
 The supported filter types include:
 
 1. *regular expressions* : A sophisticated pattern matching language that can be used to find content. 
-2. *expression aliases* : To save time, aliases can be used to reference built-in regular expressions.
+2. *filter aliases* : An alias can be added to _Weevil_ to make it easier to reference complex and/or frequently used filters.
 3. *Monikers* : Are used to query metadata that has been collected by the *Weevil* application.
 
 For example:
@@ -32,7 +32,7 @@ For example:
 
 | Expression         | Expression Type      | Returns                                                                      |
 | ------------------ | -------------------- | ---------------------------------------------------------------------------- |
-| `#Fatal`           | *expression alias*   | Identifies records related to application crashes.                           |
+| `#Fatal`           | *filter alias*   | Identifies records related to application crashes.                           |
 | `@Comment=suspect` | *expression monkier* | Records that include the word `suspect` in the user defined comments column. |
 
 When using *Weevil*, it is worth noting that all operations are (include `Clear`) are non-destructive.  In other words, the original log file will remain unchanged.
