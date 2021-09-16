@@ -270,8 +270,8 @@
                   <Separator/>
                   <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
                   <Separator/>
-                  <MenuItem Header="Previous Pinned Item" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
-                  <MenuItem Header="Next Pinned Item" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
+                  <MenuItem Header="Previous Pinned" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
+                  <MenuItem Header="Next Pinned" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
                   <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
                   <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
                </MenuItem>
