@@ -365,13 +365,12 @@
 COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Help.html" "$(TargetDir)Doc\\"  /D /Y
-
+    <PostBuildEvent>XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Help.html" "$(TargetDir)..\Doc\\"  /D /Y
 
 REM Create directory and copy third-party licenses
-XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)Licenses"  /D /I /E /Y
+XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)..\Licenses"  /D /I /E /Y
 
-COPY /A /Y "$(SolutionDir)LICENSE" "$(TargetDir)Licenses\\License.txt"
+COPY /A /Y "$(SolutionDir)LICENSE" "$(TargetDir)..\Licenses\\License.txt"
 
 IF "%25WEEVIL_PLUGINS_PATH%25"==""  (
    ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS
