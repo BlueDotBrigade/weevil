@@ -49,6 +49,10 @@
 				_activeIndex = Unknown;
 				_activeRecord = Record.Dummy;
 				_activeLineNumber = Unknown;
+
+				throw new RecordNotFoundException(
+					lineNumber,
+					$"Unable to find the given line number. Value={lineNumber}");
 			}
 
 			return _activeRecord;
