@@ -27,6 +27,7 @@
 
 			_activeLineNumber = Unknown;
 			_activeIndex = Unknown;
+			_activeRecord = Record.Dummy;
 		}
 
 		public int ActiveIndex => _activeIndex;
