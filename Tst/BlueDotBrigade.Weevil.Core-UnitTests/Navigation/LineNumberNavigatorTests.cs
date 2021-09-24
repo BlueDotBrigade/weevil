@@ -1,8 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using System;
 	using System.Collections.Generic;
-	using BlueDotBrigade.Weevil.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,32 +8,49 @@
 	public class LineNumberNavigatorTests
 	{
 		[TestMethod]
-		public void GoTo_NoRecords_ReturnsEmptyRecord()
+		[ExpectedException(typeof(RecordNotFoundException))]
+		public void GoTo_EmptyRecordCollection_ThrowsRecordNotFound()
 		{
 			var records = new List<IRecord>();
 
-			Assert.AreEqual(
-				Record.Dummy, 
-				new LineNumberNavigator(new RecordNavigator(records)).Find(9));
+			_ = new LineNumberNavigator(new RecordNavigator(records))
+				.Find(8)
+				.LineNumber;
+
+			Assert.Fail("Test shouldn't reach here.");
 		}
 
 		[TestMethod]
-		public void GoTo_SpecificRecordInCollection_ReturnsRequestedRecord()
+		public void GoTo_LineNumberInCollection_ReturnsRequestedRecord()
 		{
-			var records = new List<IRecord>();
-			for (var lineNumber = 1; lineNumber < 10; lineNumber++)
+			var records = new List<IRecord>
 			{
-				records.Add(
-					new Record(
-						lineNumber,
-						DateTime.Now,
-						SeverityType.Debug,
-						"Sample log entry."));
-			}
+				new Record(lineNumber: 7),
+				new Record(lineNumber: 8),
+				new Record(lineNumber: 9),
+			};
 
 			Assert.AreEqual(
-				9, 
-				new LineNumberNavigator(new RecordNavigator(records)).Find(9).LineNumber);
+				8,
+				new LineNumberNavigator(new RecordNavigator(records)).Find(8).LineNumber);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(RecordNotFoundException))]
+		public void GoTo_MissingLineNumber_ThrowsRecordNotFound()
+		{
+			var records = new List<IRecord>
+			{
+				new Record(lineNumber: 7),
+				// new Record(lineNumber: 8),
+				new Record(lineNumber: 9),
+			};
+
+			_ = new LineNumberNavigator(new RecordNavigator(records))
+				.Find(8)
+				.LineNumber;
+
+			Assert.Fail("Test shouldn't reach here.");
 		}
 	}
 }
