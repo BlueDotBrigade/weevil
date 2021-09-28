@@ -24,6 +24,7 @@
 		/// </summary>
 		public static readonly DateTime CreationTimeUnknown = DateTime.MaxValue;
 
+		[Obsolete("To minimize bugs in production, this constructor will be removed in a future release.")]
 		public Record(int lineNumber)
 		: this(lineNumber, DateTime.Now, Dummy.Severity, Dummy.Content, Dummy.Metadata)
 		{

@@ -11,9 +11,9 @@
 		[ExpectedException(typeof(RecordNotFoundException))]
 		public void GoTo_EmptyRecordCollection_ThrowsRecordNotFound()
 		{
-			var records = new List<IRecord>();
+			var emptyRecordCollection = new List<IRecord>();
 
-			_ = new LineNumberNavigator(new RecordNavigator(records))
+			_ = new LineNumberNavigator(new RecordNavigator(emptyRecordCollection))
 				.Find(8)
 				.LineNumber;
 
@@ -25,9 +25,9 @@
 		{
 			var records = new List<IRecord>
 			{
-				new Record(lineNumber: 7),
-				new Record(lineNumber: 8),
-				new Record(lineNumber: 9),
+				R.WithLineNumber(7),
+				R.WithLineNumber(8),
+				R.WithLineNumber(9),
 			};
 
 			Assert.AreEqual(
@@ -41,9 +41,9 @@
 		{
 			var records = new List<IRecord>
 			{
-				new Record(lineNumber: 7),
-				// new Record(lineNumber: 8),
-				new Record(lineNumber: 9),
+				R.WithLineNumber(7),
+				//R.WithLineNumber(8),
+				R.WithLineNumber(9),
 			};
 
 			_ = new LineNumberNavigator(new RecordNavigator(records))
