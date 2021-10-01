@@ -36,7 +36,7 @@
 
 		public IRecord SetActiveRecord(int lineNumber)
 		{
-			var index = _records.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
+			var index = _records.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
 			{

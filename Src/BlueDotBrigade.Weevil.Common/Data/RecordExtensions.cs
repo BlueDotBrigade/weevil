@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Collections.Immutable;
 
 	public static class RecordExtensions
 	{
@@ -12,7 +13,7 @@
 		/// <returns></returns>
 		public static int ToIndexUsing(this IRecord record, ImmutableArray<IRecord> records)
 		{
-			var index = records.BinarySearch(new Record(record.LineNumber), new RecordLineNumberComparer());
+			var index = records.IndexOfLineNumber(record.LineNumber);
 			return index;
 		}
 	}

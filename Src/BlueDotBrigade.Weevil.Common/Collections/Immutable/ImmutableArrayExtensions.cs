@@ -79,6 +79,38 @@
 		}
 
 		/// <summary>
+		/// Attempts to find a record that has the same line number as the provided value.
+		/// </summary>
+		/// <param name="array">The list of records to search.</param>
+		/// <param name="lineNumber">The line number to search for.</param>
+		/// <returns>
+		/// <para>
+		/// The index of the specified <paramref name="lineNumber"/> in the array, if <paramref name="lineNumber"/> is found.
+		/// </para>
+		/// <para>
+		/// If <paramref name="lineNumber"/> is not found and <paramref name="lineNumber"/> is less than one or more elements in array,
+		/// a negative number which is the bitwise complement of the index of the first
+		/// element that is larger than <paramref name="lineNumber"/>.
+		/// </para>
+		/// <para>
+		/// If <paramref name="lineNumber"/> is not found and <paramref name="lineNumber"/> is greater
+		/// than any of the elements in array, a negative number which is the bitwise
+		/// complement of (the index of the last element plus 1).</para>
+		/// </returns>
+		public static int IndexOfLineNumber(this ImmutableArray<IRecord> array, int lineNumber)
+		{
+			var desiredRecord = new Record(
+				lineNumber,
+				Record.CreationTimeUnknown,
+				SeverityType.Debug,
+				$"This record is used to facilitate binary searching for line number: {lineNumber}");
+
+			var index = array.BinarySearch(desiredRecord, new RecordLineNumberComparer());
+
+			return index;
+		}
+
+		/// <summary>
 		/// Determines whether the collection has a result with the provided line number.
 		/// </summary>
 		/// <param name="array">The sorted collection (line number ASC) to search.,</param>
@@ -86,7 +118,13 @@
 		/// <returns>True is returned if the collection has a matching line number.</returns>
 		public static bool HasLineNumber(this ImmutableArray<IRecord> array, int lineNumber)
 		{
-			var index = array.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
+			var desiredRecord = new Record(
+				lineNumber,
+				Record.CreationTimeUnknown,
+				SeverityType.Debug,
+				$"This record is used to facilitate binary searching for line number: {lineNumber}");
+
+			var index = array.BinarySearch(desiredRecord, new RecordLineNumberComparer());
 			var wasFound = index >= 0;
 
 			return wasFound;
@@ -103,7 +141,13 @@
 		{
 			result = Record.Dummy;
 
-			var index = array.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
+			var desiredRecord = new Record(
+				lineNumber,
+				Record.CreationTimeUnknown,
+				SeverityType.Debug,
+				$"This record is used to facilitate binary searching for line number: {lineNumber}");
+
+			var index = array.BinarySearch(desiredRecord, new RecordLineNumberComparer());
 			var wasFound = index >= 0;
 
 			if (wasFound)

@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 
-	public sealed class RecordLineNumberComparer : Comparer<IRecord>
+	internal sealed class RecordLineNumberComparer : Comparer<IRecord>
 	{
 		public override int Compare(IRecord x, IRecord y)
 		{

@@ -7,6 +7,7 @@
 	using System.IO;
 	using System.Linq;
 	using Analysis;
+	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using Data;
 	using IO;
@@ -91,7 +92,7 @@
 
 		public ISelect Select(int lineNumber)
 		{
-			var index = _visibleRecords.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
+			var index = _visibleRecords.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
 			{
@@ -185,7 +186,7 @@
 
 		public ISelect Unselect(int lineNumber)
 		{
-			var index = _visibleRecords.BinarySearch(new Record(lineNumber), new RecordLineNumberComparer());
+			var index = _visibleRecords.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
 			{
