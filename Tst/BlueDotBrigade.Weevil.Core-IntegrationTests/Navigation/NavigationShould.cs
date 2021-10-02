@@ -26,13 +26,13 @@
 		}
 
 		[TestMethod]
-		public void HandleNavigatingWhenThereAreNoPinnedRecords()
+		public void HandleNavigatingWhenPinnedRecordsHidden()
 		{
 			IEngine engine = Engine
 				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
 				.Open();
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("ThisWillHidePinnedRecord9"));
+			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("Nothing Should Match This Filter"));
 
 			Assert.AreEqual(Record.Dummy, engine.Navigate.Using<IPinNavigator>().FindNext());
 		}
