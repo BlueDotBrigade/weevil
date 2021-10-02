@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using Data;
+	using BlueDotBrigade.Weevil.Data;
 
 	public static class ImmutableArrayExtensions
 	{
@@ -81,7 +81,7 @@
 		/// <summary>
 		/// Attempts to find a record that has the same line number as the provided value.
 		/// </summary>
-		/// <param name="array">The list of records to search.</param>
+		/// <param name="sourceRecords">The list of records to search.</param>
 		/// <param name="lineNumber">The line number to search for.</param>
 		/// <returns>
 		/// <para>
@@ -97,65 +97,33 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
-		public static int IndexOfLineNumber(this ImmutableArray<IRecord> array, int lineNumber)
+		public static int IndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, SearchType searchType = SearchType.ExactMatch)
 		{
-			var desiredRecord = new Record(
-				lineNumber,
-				Record.CreationTimeUnknown,
-				SeverityType.Debug,
-				$"This record is used to facilitate binary searching for line number: {lineNumber}");
-
-			var index = array.BinarySearch(desiredRecord, new RecordLineNumberComparer());
-
-			return index;
+			return BinarySearchHelper.IndexOfLineNumber(sourceRecords, lineNumber, searchType);
 		}
 
 		/// <summary>
 		/// Determines whether the collection has a result with the provided line number.
 		/// </summary>
-		/// <param name="array">The sorted collection (line number ASC) to search.,</param>
+		/// <param name="sourceRecords">A record collection sorted by ascending order.</param>
 		/// <param name="lineNumber">The value to search for.</param>
+		/// <param name="index">The position of the record in the <paramref name="sourceRecords"/> with the corresponding <paramref name="lineNumber"/>.</param>
 		/// <returns>True is returned if the collection has a matching line number.</returns>
-		public static bool HasLineNumber(this ImmutableArray<IRecord> array, int lineNumber)
+		public static bool TryGetIndexOf(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
 		{
-			var desiredRecord = new Record(
-				lineNumber,
-				Record.CreationTimeUnknown,
-				SeverityType.Debug,
-				$"This record is used to facilitate binary searching for line number: {lineNumber}");
-
-			var index = array.BinarySearch(desiredRecord, new RecordLineNumberComparer());
-			var wasFound = index >= 0;
-
-			return wasFound;
+			return BinarySearchHelper.TryGetIndexOf(sourceRecords, lineNumber, out index);
 		}
 
 		/// <summary>
 		/// Attempts to find a record that has the same line number as the provided value.
 		/// </summary>
-		/// <param name="array">The list of records to search.</param>
+		/// <param name="sourceRecords">The list of records to search.</param>
 		/// <param name="lineNumber">The line number to search for.</param>
 		/// <param name="result">Returns the matching result, or <see cref="Record.Dummy"/></param>
 		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
-		public static bool TryGetLine(this ImmutableArray<IRecord> array, int lineNumber, out IRecord result)
+		public static bool TryGetLine(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
 		{
-			result = Record.Dummy;
-
-			var desiredRecord = new Record(
-				lineNumber,
-				Record.CreationTimeUnknown,
-				SeverityType.Debug,
-				$"This record is used to facilitate binary searching for line number: {lineNumber}");
-
-			var index = array.BinarySearch(desiredRecord, new RecordLineNumberComparer());
-			var wasFound = index >= 0;
-
-			if (wasFound)
-			{
-				result = array[index];
-			}
-
-			return wasFound;
+			return BinarySearchHelper.TryGetLine(sourceRecords, lineNumber, out result);
 		}
 
 		/// <summary>
@@ -174,44 +142,44 @@
 			return array[array.Length - 1];
 		}
 
-		public static (DateTime From, DateTime To) GetRange(this ImmutableArray<IRecord> records)
+		public static (DateTime From, DateTime To) GetRange(this ImmutableArray<IRecord> sourceRecords)
 		{
 			var from = Record.CreationTimeUnknown;
 			var to = Record.CreationTimeUnknown;
 
-			if (records.Length > 0)
+			if (sourceRecords.Length > 0)
 			{
-				if (records.Length == 1)
+				if (sourceRecords.Length == 1)
 				{
-					from = records[0].CreatedAt;
-					to = records[0].CreatedAt;
+					from = sourceRecords[0].CreatedAt;
+					to = sourceRecords[0].CreatedAt;
 				}
 				else
 				{
-					from = records[0].CreatedAt;
-					to = records[records.Length - 1].CreatedAt;
+					from = sourceRecords[0].CreatedAt;
+					to = sourceRecords[sourceRecords.Length - 1].CreatedAt;
 				}
 			}
 
 			return (from, to);
 		}
 
-		public static (DateTime From, DateTime To) GetEstimatedRange(this ImmutableArray<IRecord> records)
+		public static (DateTime From, DateTime To) GetEstimatedRange(this ImmutableArray<IRecord> sourceRecords)
 		{
 			var from = Record.CreationTimeUnknown;
 			var to = Record.CreationTimeUnknown;
 
-			if (records.Length > 0)
+			if (sourceRecords.Length > 0)
 			{
-				if (records.Length == 1)
+				if (sourceRecords.Length == 1)
 				{
-					from = EstimateFirstTimestamp(records);
+					from = EstimateFirstTimestamp(sourceRecords);
 					to = from;
 				}
 				else
 				{
-					from = EstimateFirstTimestamp(records);
-					to = EstimateLastTimestamp(records);
+					from = EstimateFirstTimestamp(sourceRecords);
+					to = EstimateLastTimestamp(sourceRecords);
 				}
 			}
 
