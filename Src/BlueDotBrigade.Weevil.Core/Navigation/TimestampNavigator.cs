@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Diagnostics;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
@@ -18,46 +19,117 @@
 		{
 			IRecord result = Record.Dummy;
 
-			var requestedTime = ConvertToDateTime(_navigator.ActiveRecord, value);
+			(DateTime referenceTime, TimeSpan tolerance) searchValue =
+				ConvertToDateTime(_navigator.ActiveRecord, value);
+
+			var smallestDelta = TimeSpan.MaxValue;
 
 			if (!string.IsNullOrWhiteSpace(value))
 			{
-				result = _navigator.GoToFirstMatch(record => record.HasCreationTime && record.CreatedAt >= requestedTime);
+				result = _navigator.GoToNext(record =>
+				{
+					var isCloseEnough = false;
+
+					if (record.HasCreationTime)
+					{
+						var currentDelta = record.CreatedAt - searchValue.referenceTime;
+
+						if (currentDelta < smallestDelta)
+						{
+
+						}
+					}
+
+					return isCloseEnough;
+				});
 			}
 
 			return result;
 		}
 
-		// If the day of the month is not provided, then the date defaults to today.
-		private static DateTime ConvertToDateTime(IRecord activeRecord, string value)
+		public IRecord Find_v1(string value)
 		{
-			var result = Record.CreationTimeUnknown;
+			IRecord result = Record.Dummy;
+
+			(DateTime referenceTime, TimeSpan tolerance) searchValue = 
+				ConvertToDateTime(_navigator.ActiveRecord, value);
+
+			if (!string.IsNullOrWhiteSpace(value))
+			{
+				result = _navigator.GoToNext(record =>
+				{
+					var isCloseEnough = false;
+
+					if (record.HasCreationTime)
+					{
+						isCloseEnough =
+							record.CreatedAt >= searchValue.referenceTime &&
+							record.CreatedAt < searchValue.referenceTime.Add(searchValue.tolerance);
+					}
+
+					return isCloseEnough;
+				});
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Convert the string <paramref name="value"/> to a valid <see cref="DateTime"/> value.
+		/// </summary>
+		/// <remarks>
+		/// If the <paramref name="value"/> does not include the day of the month, then assume the selected record's date should be used.
+		/// </remarks>
+		private static (DateTime referenceTime, TimeSpan tolerance) ConvertToDateTime(IRecord activeRecord, string value)
+		{
+			var referenceTime = Record.CreationTimeUnknown;
+			var tolerance = TimeSpan.Zero;
 
 			if (activeRecord.HasCreationTime)
 			{
+				// Search value includes: day of month?
+				// ... yes: use given value
+				// ... no: use day of month from selected record
 				if (value.Contains("/") || value.Contains("-"))
 				{
 					if (DateTime.TryParse(value, out var requestedTime))
 					{
-						result = requestedTime;
+						referenceTime = requestedTime;
+						tolerance = TimeSpan.FromDays(1);
 					}
 				}
 				else
 				{
 					if (DateTime.TryParse(value, out var requestedTime))
 					{
-						result = new DateTime(
+						referenceTime = new DateTime(
 							activeRecord.CreatedAt.Year,
 							activeRecord.CreatedAt.Month,
 							activeRecord.CreatedAt.Day,
 							requestedTime.Hour,
 							requestedTime.Minute,
 							requestedTime.Second);
+
+						if (value.Count(c => c == ':') == 1)
+						{
+							tolerance = TimeSpan.FromMinutes(15); // 11:12
+						}
+						else
+						{
+							if (requestedTime.Millisecond == 0)
+							{
+								tolerance = TimeSpan.FromSeconds(15); // 11:12:13
+							}
+							else
+							{
+								tolerance = TimeSpan.FromSeconds(1); // 11:12:13.1234
+							}
+						}
 					}
 				}
 			}
 
-			return result;
+			return (referenceTime, tolerance);
 		}
 	}
 }

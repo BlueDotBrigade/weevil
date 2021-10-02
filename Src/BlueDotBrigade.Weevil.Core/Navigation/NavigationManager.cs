@@ -44,9 +44,9 @@
 
 		ITableOfContents INavigate.TableOfContents => _tableOfContents;
 
-		internal void SetActiveRecord(int lineNumber)
+		internal void SetActiveLineNumber(int lineNumber)
 		{
-			_recordNavigator.SetActiveRecord(lineNumber);
+			_recordNavigator.SetActiveLineNumber(lineNumber);
 		}
 
 		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
