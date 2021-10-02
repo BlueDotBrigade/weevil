@@ -13,7 +13,6 @@
 		private ImmutableArray<IRecord> _records;
 
 		private int _activeIndex;
-		private int _activeLineNumber;
 		private IRecord _activeRecord;
 
 		public RecordNavigator(IList<IRecord> records) : this (records.ToImmutableArray())
@@ -25,16 +24,15 @@
 		{
 			_records = records;
 
-			_activeLineNumber = Unknown;
-			_activeIndex = Unknown;
-			_activeRecord = Record.Dummy;
+			UpdateDataSource(records);
 		}
 
 		public int ActiveIndex => _activeIndex;
 		public IRecord ActiveRecord => _activeRecord;
 
+		public ImmutableArray<IRecord> Records => _records;
 
-		public IRecord SetActiveRecord(int lineNumber)
+		public IRecord SetActiveLineNumber(int lineNumber)
 		{
 			var index = _records.IndexOfLineNumber(lineNumber);
 
@@ -42,13 +40,11 @@
 			{
 				_activeIndex = index;
 				_activeRecord = _records[index];
-				_activeLineNumber = lineNumber;
 			}
 			else
 			{
 				_activeIndex = Unknown;
 				_activeRecord = Record.Dummy;
-				_activeLineNumber = Unknown;
 
 				throw new RecordNotFoundException(
 					lineNumber,
@@ -58,40 +54,31 @@
 			return _activeRecord;
 		}
 
-		public void UpdateDataSource(ImmutableArray<IRecord> records)
+		public void UpdateDataSource(ImmutableArray<IRecord> newRecordCollection)
 		{
-			if (records.HasLineNumber(_activeLineNumber))
-			{
-				// nothing to do
-				// ... we are pointing to a record that still exists
-			}
-			else
+			if (newRecordCollection.Length == 0)
 			{
 				_activeIndex = Unknown;
 				_activeRecord = Record.Dummy;
-				_activeLineNumber = Unknown;
+				_records = newRecordCollection;
 			}
-
-			_records = records;
-		}
-
-		internal IRecord GoToFirstMatch(Func<IRecord, bool> checkIfMatches)
-		{
-			_activeIndex = Unknown;
-			_activeLineNumber = Unknown;
-
-			for (var index = 0; index < _records.Length; index++)
+			else
 			{
-				if (checkIfMatches(_records[index]))
+				var previousLineNumber = _records[_activeIndex].LineNumber;
+
+				if (_records.TryGetIndexOf(previousLineNumber, out var index))
 				{
+					_records = newRecordCollection;
 					_activeIndex = index;
 					_activeRecord = _records[index];
-					_activeLineNumber = _records[index].LineNumber;
-					break;
+				}
+				else
+				{
+					_records = newRecordCollection;
+					_activeIndex = 0; // default to first record
+					_activeRecord = _records[index];
 				}
 			}
-
-			return _activeRecord;
 		}
 
 		/// <summary>
@@ -100,23 +87,35 @@
 		/// <returns>
 		/// Returns the index of the <see cref="Record"/> that matches the search criteria.
 		/// </returns>
+		/// <exception cref="RecordNotFoundException"/>
 		internal IRecord GoToPrevious(Func<IRecord, bool> checkIfMatches)
 		{
-			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
-
-			for (var i = 0; i < _records.Length; i++)
+			if (_records.Length == 0)
 			{
-				index = index - 1 < 0 ? _records.Length - 1 : index - 1;
-
-				if (checkIfMatches(_records[index]))
-				{
-					_activeIndex = index;
-					_activeRecord = _records[index];
-					_activeLineNumber = _records[index].LineNumber;
-					break;
-				}
+				return Record.Dummy;
 			}
-			return _activeRecord;
+			else
+			{
+				var wasFound = false;
+				var index = _activeIndex;
+
+				for (var i = 0; i < _records.Length; i++)
+				{
+					index = index - 1 < 0 ? _records.Length - 1 : index - 1;
+
+					if (checkIfMatches(_records[index]))
+					{
+						_activeIndex = index;
+						_activeRecord = _records[index];
+						wasFound = true;
+						break;
+					}
+				}
+
+				return wasFound
+					? _activeRecord
+					: throw new RecordNotFoundException(-1);
+			}
 		}
 
 		/// <summary>
@@ -127,22 +126,33 @@
 		/// </returns>
 		internal IRecord GoToNext(Func<IRecord, bool> checkIfMatches)
 		{
-			var index = _activeIndex > _records.Length ? 0 : _activeIndex;
-
-			for (var i = 0; i < _records.Length; i++)
+			if (_records.Length == 0)
 			{
-				index = (index + 1) % _records.Length;
-
-				if (checkIfMatches(_records[index]))
-				{
-					_activeIndex = index;
-					_activeRecord = _records[index];
-					_activeLineNumber = _records[index].LineNumber;
-					break;
-				}
+				return Record.Dummy;
 			}
+			else
+			{
+				var index = _activeIndex;
 
-			return _activeRecord;
+				var wasFound = false;
+
+				for (var i = 0; i < _records.Length; i++)
+				{
+					index = (index + 1) % _records.Length;
+
+					if (checkIfMatches(_records[index]))
+					{
+						_activeIndex = index;
+						_activeRecord = _records[index];
+						wasFound = true;
+						break;
+					}
+				}
+
+				return wasFound
+					? _activeRecord
+					: throw new RecordNotFoundException(-1);
+			}
 		}
 	}
 }

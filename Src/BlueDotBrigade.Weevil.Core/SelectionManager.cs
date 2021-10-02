@@ -134,7 +134,7 @@
 
 			if (!Record.IsDummyOrNull(firstRecord))
 			{
-				_navigationManager.SetActiveRecord(record.LineNumber);
+				_navigationManager.SetActiveLineNumber(record.LineNumber);
 			}
 
 			return this;
@@ -176,7 +176,7 @@
 
 			if (!Record.IsDummyOrNull(firstRecord))
 			{
-				_navigationManager.SetActiveRecord(firstRecord.LineNumber);
+				_navigationManager.SetActiveLineNumber(firstRecord.LineNumber);
 			}
 
 			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
