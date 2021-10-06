@@ -68,7 +68,7 @@
     <Compile Include="Analysis\Timeline\DataTransitionAnalyzerTest.cs" />
     <Compile Include="Analysis\TimeGapAnalyzerTest.cs" />
     <Compile Include="Analysis\TimeGapUiAnalyzerTests.cs" />
-    <Compile Include="Data\RecordFactory.cs" />
+    <Compile Include="Data\R.cs" />
     <Compile Include="Data\TsvRecordParserTest.cs" />
     <Compile Include="Data\MultiLineRecordParserTest.cs" />
     <Compile Include="Filter\Expressions\Monikers\ElapsedGreaterThanExpressionTest.cs" />

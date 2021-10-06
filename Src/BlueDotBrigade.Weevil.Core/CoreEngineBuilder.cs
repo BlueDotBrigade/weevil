@@ -6,6 +6,7 @@
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Collections.Generic;
+	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.IO;
 	using Configuration.Sidecar;
 	using Data;
@@ -176,6 +177,8 @@
 						_clearOperation);
 
 					records = repository.Get(maxRecords);
+
+					selectedRecords = GetVisibleRecordSelection(records, selectedRecords);
 				}
 				else
 				{
@@ -246,6 +249,21 @@
 				coreEngine.Selector.Select(selectedRecords);
 
 				return coreEngine;
+			}
+
+			private ImmutableArray<IRecord> GetVisibleRecordSelection(ImmutableArray<IRecord> visibleRecords, ImmutableArray<IRecord>  selectedRecords)
+			{
+				var result = new List<IRecord>();
+
+				foreach (IRecord record in selectedRecords)
+				{
+					if (visibleRecords.TryGetLine(record.LineNumber, out _))
+					{
+						result.Add(record);
+					}
+				}
+
+				return result.ToImmutableArray();
 			}
 
 			private ContextDictionary GetContext(ICoreExtension extension, ContextDictionary knownContext, ImmutableArray<IRecord> records)

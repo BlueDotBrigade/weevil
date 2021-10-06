@@ -24,12 +24,6 @@
 		/// </summary>
 		public static readonly DateTime CreationTimeUnknown = DateTime.MaxValue;
 
-		public Record(int lineNumber)
-		: this(lineNumber, DateTime.Now, Dummy.Severity, Dummy.Content, Dummy.Metadata)
-		{
-			// nothing to do
-		}
-
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content)
 		: this(lineNumber, createdAt, severity, content, new Metadata())
 		{

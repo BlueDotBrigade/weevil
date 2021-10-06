@@ -1001,7 +1001,7 @@
 
 		public void GoTo()
 		{
-			var userValue = _dialogBox.ShowUserPrompt("Go To", "Search filter results for:", string.Empty);
+			var userValue = _dialogBox.ShowUserPrompt("Go To", "Enter timestamp or line:", string.Empty);
 
 			if (string.IsNullOrWhiteSpace(userValue))
 			{
@@ -1022,15 +1022,32 @@
 				{
 					if (int.TryParse(userValue, out var lineNumber))
 					{
-						this.ActiveRecordIndex = _engine
-							.Navigate
-							.Using<ILineNumberNavigator>()
-							.Find(lineNumber)
-							.ToIndexUsing(_engine.Filter.Results);
+						try
+						{
+							this.ActiveRecordIndex = _engine
+								.Navigate
+								.Using<ILineNumberNavigator>()
+								.Find(lineNumber)
+								.ToIndexUsing(_engine.Filter.Results);
+						}
+						catch (RecordNotFoundException e)
+						{
+							Log.Default.Write(
+								LogSeverityType.Warning,
+								$"Unable to find the given line number. Value={e.LineNumber}");
+
+							MessageBox.Show($"Unable to find the given line number. Value={e.LineNumber}", 
+								"Not Found",
+								MessageBoxButton.OK, 
+								MessageBoxImage.Information);
+						}
 					}
 					else
 					{
-						MessageBox.Show("Go to line number has failed.  Please enter a valid number.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+						MessageBox.Show("Go to line number has failed.  Please enter a valid number.", 
+							"Error", 
+							MessageBoxButton.OK, 
+							MessageBoxImage.Error);
 					}
 				}
 			}

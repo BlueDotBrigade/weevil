@@ -6,12 +6,12 @@
 	public interface IPinNavigator : INavigator
 	{
 		/// <summary>
-		/// Navigates through pinned records in descending order (e.g. lines: 4, 3, 2 1).
+		/// Search backwards for the previous pinned record. Descending order: 4, 3, 2, 1.
 		/// </summary>
 		IRecord FindPrevious();
 
 		/// <summary>
-		/// Navigates through pinned records in ascending order (e.g. lines: 1, 2, 3, 4, etc.).
+		/// Search forward for the next pinned record. Ascending order: 1, 2, 3, 4.
 		/// </summary>
 		IRecord FindNext();
 	}

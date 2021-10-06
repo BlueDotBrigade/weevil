@@ -47,7 +47,7 @@
       </Grid.ColumnDefinitions>
       <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
       <TextBlock Grid.Row="0" Grid.Column="0"
-                 Text="Search filter results for:"
+                 Text="Search content for:"
                  HorizontalAlignment="Right" 
                  TextWrapping="WrapWithOverflow" />
       <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 

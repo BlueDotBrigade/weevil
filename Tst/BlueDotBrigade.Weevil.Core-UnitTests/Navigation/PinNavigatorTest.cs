@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,7 +9,8 @@
 	public class PinNavigatorTest
 	{
 		[TestMethod]
-		public void GoToNext_NoPinnedRecords_ReturnsEmptyRecord()
+		[ExpectedException(typeof(RecordNotFoundException))]
+		public void GoToNext_NoPinnedRecords_Throws()
 		{
 			var records = new List<IRecord>();
 			for (var lineNumber = 50; lineNumber < 60; lineNumber++)

@@ -5,8 +5,13 @@
 	public interface ILineNumberNavigator : INavigator
 	{
 		/// <summary>
-		/// Returns the index of the <see cref="IRecord"/> that matches the provided line number.
+		/// Search for the <see cref="IRecord"/> that matches the provided line number.
 		/// </summary>
 		IRecord Find(int lineNumber);
+
+		/// <summary>
+		/// Search for the <see cref="IRecord"/> that matches the provided line number.
+		/// </summary>
+		IRecord Find(int lineNumber, SearchType searchType);
 	}
 }

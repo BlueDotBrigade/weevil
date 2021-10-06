@@ -5,12 +5,12 @@
 	public interface ITextNavigator : INavigator
 	{
 		/// <summary>
-		/// Navigates through records in descending order (e.g. lines: 4, 3, 2, 1) looking for the provided text.
+		/// Search backwards through record <see cref="Record.Content"/> for the given text. Descending order: 4, 3, 2, 1.
 		/// </summary>
 		IRecord FindPrevious(string value);
 
 		/// <summary>
-		/// Navigates through records in ascending order (e.g. lines: 1, 2, 3, 4, etc.) looking for the provided text.
+		/// Search forward through record <see cref="Record.Content"/> for the given text. Ascending order: 1, 2, 3, 4.
 		/// </summary>
 		IRecord FindNext(string value);
 	}

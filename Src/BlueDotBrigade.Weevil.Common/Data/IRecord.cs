@@ -18,6 +18,12 @@
 
 		bool HasContent { get; }
 
+		/// <summary>
+		/// Indicates which line the record starts on in the source file.
+		/// </summary>
+		/// <remarks>
+		/// This value is always unique and can be treated as a primary key.
+		/// </remarks>
 		int LineNumber { get; }
 
 		Metadata Metadata { get; }
