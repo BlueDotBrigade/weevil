@@ -9,7 +9,13 @@
 	[ValueConversion(typeof(string), typeof(string))]
 	public class ContentConverter : IValueConverter
 	{
-		private static readonly SimpleCallStackFormatter CallstackFormatter = new SimpleCallStackFormatter();
+		private const int MaximumLength = 8 * 1024;
+		private const int TruncatedLength = 1 * 256;
+
+		private static readonly ShortenedRecordFormatter ShortenedRecordFormatter =
+			new ShortenedRecordFormatter(MaximumLength, TruncatedLength);
+
+		private static readonly SimpleCallStackFormatter CallStackFormatter = new SimpleCallStackFormatter();
 
 		/// <summary>
 		/// Ensures that the record content is not exceptionally long.
@@ -23,7 +29,8 @@
 
 			if (record is IRecord concreteRecord)
 			{
-				result = CallstackFormatter.Format(concreteRecord);
+				var content = CallStackFormatter.Format(concreteRecord);
+				result = ShortenedRecordFormatter.Format(content);
 			}
 
 			return result;

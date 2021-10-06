@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Common
 {
+	using System;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,57 +10,12 @@
 	public class SimpleCallStackFormatterTests
 	{
 		[TestMethod]
-		public void TruncateIf_ContentIsNotTooLong_ReturnsContent()
+		public void Format_SimpleCallStack_ReturnsContentWithoutSystemNamespaces()
 		{
-			var result = SimpleCallStackFormatter.TruncateIf(
-				content: "The quick brown fox jumps over the lazy dog.",
-				isSingleLine: true,
-				maximumLength: 45,
-				truncatedLength: 19);
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, InputData.GetAsString());
+			record.Metadata.IsMultiLine = true;
 
-			Assert.AreEqual(
-				(object) "The quick brown fox jumps over the lazy dog.",
-				result);
-		}
-
-		[TestMethod]
-		public void TruncateIf_ContentIsTooLong_ReturnsShortenedString()
-		{
-			var result = SimpleCallStackFormatter.TruncateIf(
-				content: "The quick brown fox jumps over the lazy dog.",
-				isSingleLine:true,
-				maximumLength: 44,
-				truncatedLength:19);
-
-			Assert.AreEqual(
-				(object) ("The quick brown fox" + SimpleCallStackFormatter.EndOfLine),
-				result);
-		}
-
-		[TestMethod]
-		public void TruncateIf_MultiLineContentIsTooLong_ReturnsContent()
-		{
-			var result = SimpleCallStackFormatter.TruncateIf(
-				content: "The quick brown fox jumps over the lazy dog.",
-				isSingleLine: false,
-				maximumLength: 44,
-				truncatedLength: 19);
-
-			Assert.AreEqual(
-				(object) "The quick brown fox jumps over the lazy dog.",
-				result);
-		}
-
-		[TestMethod]
-		public void TrySimplifyCallStack_SimpleCallStack_ReturnsContentWithoutSystemNamespaces()
-		{
-			var record = new Mock<IRecord>();
-			record.Setup(x => x.Content).Returns(InputData.GetAsString());
-
-			var wasSuccessful = SimpleCallStackFormatter.TrySimplifyCallstack(
-				content: record.Object.Content,
-				isMultiLine: true,
-				out var actualResult);
+			var actualResult = new SimpleCallStackFormatter().Format(record);
 
 			Assert.AreEqual<string>(
 				"Debug 2021-15-21 12:59:59 AcmeAssembly.dll Something bad happened. System.ObjectDisposedException: Cannot access a disposed object.\r\n" +
@@ -68,31 +24,27 @@
 		}
 
 		[TestMethod]
-		public void TrySimplifyCallStack_SimpleCallStack_ReturnsTrue()
+		public void Format_SimpleCallStack_ReturnsTrue()
 		{
-			var record = new Mock<IRecord>();
-			record.Setup(x => x.Content).Returns(InputData.GetAsString());
+			var originalContent = InputData.GetAsString();
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
+			record.Metadata.IsMultiLine = true;
 
-			var wasContentChanged = SimpleCallStackFormatter.TrySimplifyCallstack(
-				content: record.Object.Content,
-				isMultiLine: true,
-				out var actualResult);
+			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
-			Assert.IsTrue((bool) wasContentChanged);
+			Assert.IsTrue(originalContent.Length > formattedResult.Length);
 		}
 
 		[TestMethod]
-		public void TrySimplifyCallStack_NoCallStack_ReturnsFalse()
+		public void Format_NoCallStack_ReturnsFalse()
 		{
-			var record = new Mock<IRecord>();
-			record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog.");
+			var originalContent = "The quick brown fox jumps over the lazy dog.";
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
+			record.Metadata.IsMultiLine = true;
 
-			var wasContentChanged = SimpleCallStackFormatter.TrySimplifyCallstack(
-				content: record.Object.Content,
-				isMultiLine: true,
-				out var ignoredOutput);
+			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
-			Assert.IsFalse((bool) wasContentChanged);
+			Assert.IsTrue(originalContent.Length == formattedResult.Length);
 		}
 	}
 }
