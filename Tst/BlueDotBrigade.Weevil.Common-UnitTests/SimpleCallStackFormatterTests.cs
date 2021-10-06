@@ -10,7 +10,7 @@
 	public class SimpleCallStackFormatterTests
 	{
 		[TestMethod]
-		public void TrySimplifyCallStack_SimpleCallStack_ReturnsContentWithoutSystemNamespaces()
+		public void Format_SimpleCallStack_ReturnsContentWithoutSystemNamespaces()
 		{
 			var record = new Record(1, DateTime.Now, SeverityType.Debug, InputData.GetAsString());
 			record.Metadata.IsMultiLine = true;
@@ -24,7 +24,7 @@
 		}
 
 		[TestMethod]
-		public void TrySimplifyCallStack_SimpleCallStack_ReturnsTrue()
+		public void Format_SimpleCallStack_ReturnsTrue()
 		{
 			var originalContent = InputData.GetAsString();
 			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
@@ -36,7 +36,7 @@
 		}
 
 		[TestMethod]
-		public void TrySimplifyCallStack_NoCallStack_ReturnsFalse()
+		public void Format_NoCallStack_ReturnsFalse()
 		{
 			var originalContent = "The quick brown fox jumps over the lazy dog.";
 			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
