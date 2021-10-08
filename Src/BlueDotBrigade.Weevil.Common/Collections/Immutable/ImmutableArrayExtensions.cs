@@ -103,6 +103,30 @@
 		}
 
 		/// <summary>
+		/// Attempts to find a record that has the same line number as the provided value.
+		/// </summary>
+		/// <param name="sourceRecords">The list of records to search.</param>
+		/// <param name="createdAt">The timestamp to search for.</param>
+		/// <returns>
+		/// <para>
+		/// The index of the specified <paramref name="createdAt"/> in the array, if <paramref name="createdAt"/> can be found.
+		/// </para>
+		/// <para>
+		/// If <paramref name="createdAt"/> is not found and <paramref name="createdAt"/> is less than one or more elements in array,
+		/// a negative number which is the bitwise complement of the index of the first
+		/// element that is larger than <paramref name="createdAt"/>.
+		/// </para>
+		/// <para>
+		/// If <paramref name="createdAt"/> is not found and <paramref name="createdAt"/> is greater
+		/// than any of the elements in array, a negative number which is the bitwise
+		/// complement of (the index of the last element plus 1).</para>
+		/// </returns>
+		public static int IndexOfCreatedAt(this ImmutableArray<IRecord> sourceRecords, DateTime createdAt, SearchType searchType = SearchType.ExactMatch)
+		{
+			return BinarySearchHelper.IndexOfCreatedAt(sourceRecords, createdAt, searchType);
+		}
+
+		/// <summary>
 		/// Determines whether the collection has a result with the provided line number.
 		/// </summary>
 		/// <param name="sourceRecords">A record collection sorted by ascending order.</param>
@@ -184,6 +208,22 @@
 			}
 
 			return (from, to);
+		}
+
+		public static IRecord GetFirstCreatedAt(this ImmutableArray<IRecord> sourceRecords)
+		{
+			IRecord result = Record.Dummy;
+
+			for (int i = 0; i < sourceRecords.Length; i++)
+			{
+				if (sourceRecords[i].HasCreationTime)
+				{
+					result = sourceRecords[i];
+					break;
+				}
+			}
+
+			return result;
 		}
 	}
 }

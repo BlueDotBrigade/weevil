@@ -68,6 +68,7 @@
     <Compile Include="Filter\FilterResultsViewModelTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestEnvironment.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BlueDotBrigade.DatenLokator">

@@ -43,11 +43,17 @@
 			_lineNumber++;
 			return WithCreatedAt(_lineNumber, timestamp);
 		}
+
 		public R WithCreatedAt(int lineNumber, string timestamp)
+		{
+			return WithCreatedAt(lineNumber, DateTime.Parse(timestamp));
+		}
+
+		public R WithCreatedAt(int lineNumber, DateTime timestamp)
 		{
 			var record = new Record(
 				lineNumber,
-				DateTime.Parse(timestamp),
+				timestamp,
 				SeverityType.Information,
 				$"Fake record used for testing. Has line number: {_lineNumber}",
 				new Metadata());

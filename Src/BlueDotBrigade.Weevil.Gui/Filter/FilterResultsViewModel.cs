@@ -33,6 +33,7 @@
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
+	using PostSharp.Extensibility;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
@@ -970,11 +971,22 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				this.ActiveRecordIndex = _engine
-					.Navigate
-					.Using<ITextNavigator>()
-					.FindNext(_findText)
-					.ToIndexUsing(_engine.Filter.Results);
+				try
+				{
+					this.ActiveRecordIndex = _engine
+						.Navigate
+						.Using<ITextNavigator>()
+						.FindNext(_findText)
+						.ToIndexUsing(_engine.Filter.Results);
+				}
+				catch (RecordNotFoundException e)
+				{
+					var message = $"Text could not be found in the filter results: {_findText}";
+					Log.Default.Write(LogSeverityType.Warning, message);
+
+					MessageBox.Show(message, "Text Not Found",
+						MessageBoxButton.OK, MessageBoxImage.Warning);
+				}
 			}
 		}
 
@@ -982,11 +994,22 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				this.ActiveRecordIndex = _engine
-					.Navigate
-					.Using<ITextNavigator>()
-					.FindPrevious(_findText)
-					.ToIndexUsing(_engine.Filter.Results);
+				try
+				{
+					this.ActiveRecordIndex = _engine
+						.Navigate
+						.Using<ITextNavigator>()
+						.FindPrevious(_findText)
+						.ToIndexUsing(_engine.Filter.Results);
+				}
+				catch (RecordNotFoundException e)
+				{
+					var message = $"Text could not be found in the filter results: {_findText}";
+					Log.Default.Write(LogSeverityType.Warning, message);
+
+					MessageBox.Show(message, "Text Not Found",
+						MessageBoxButton.OK, MessageBoxImage.Warning);
+				}
 			}
 		}
 
