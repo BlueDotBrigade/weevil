@@ -955,13 +955,28 @@
 		{
 			if (_dialogBox.TryShowFind(out var findNext, out _findText))
 			{
-				if (findNext)
+				try
 				{
-					FindNext();
+					if (findNext)
+					{
+						FindNext();
+					}
+					else
+					{
+						FindPrevious();
+					}
 				}
-				else
+				catch (RecordNotFoundException e)
 				{
-					FindPrevious();
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						e,
+						$"Unable to find the given text. Value={_findText}");
+
+					MessageBox.Show($"Unable to find the given text: {_findText}.\r\nValue might not exist in the filter results.",
+						"Not Found",
+						MessageBoxButton.OK,
+						MessageBoxImage.Information);
 				}
 			}
 		}
@@ -1027,7 +1042,7 @@
 							e,
 							$"Unable to find the given timestamp. Value={userValue}");
 
-						MessageBox.Show($"Unable to find the given line number. Value={userValue}",
+						MessageBox.Show($"Unable to find the given timestamp: {userValue}.\r\nValue might not exist in the filter results.",
 							"Not Found",
 							MessageBoxButton.OK,
 							MessageBoxImage.Information);
@@ -1052,7 +1067,7 @@
 								e,
 								$"Unable to find the given line number. Value={lineNumber}");
 
-							MessageBox.Show($"Unable to find the given line number. Value={lineNumber}", 
+							MessageBox.Show($"Unable to find the given line number: {lineNumber}.\r\nValue might not exist in the filter results.", 
 								"Not Found",
 								MessageBoxButton.OK, 
 								MessageBoxImage.Information);
@@ -1060,7 +1075,7 @@
 					}
 					else
 					{
-						MessageBox.Show("Go to line number has failed.  Please enter a valid number.", 
+						MessageBox.Show("Unable to perform go to operation.  Please enter a valid number.", 
 							"Error", 
 							MessageBoxButton.OK, 
 							MessageBoxImage.Error);
