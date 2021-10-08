@@ -3,6 +3,7 @@
 	using System;
 	using System.Diagnostics;
 	using System.Linq;
+	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
@@ -17,62 +18,32 @@
 
 		public IRecord Find(string value)
 		{
-			IRecord result = Record.Dummy;
+			var firstRecord = _navigator.Records.GetFirstCreatedAt();
+
+			if (Record.IsDummyOrNull(firstRecord))
+			{
+				throw new RecordNotFoundException(-1, "Unable to go timestamp - there must be at least one record with a valid creation time.");
+			}
 
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =
-				ConvertToDateTime(_navigator.ActiveRecord, value);
+				ConvertToDateTime(firstRecord, value);
 
-			var smallestDelta = TimeSpan.MaxValue;
-
-			if (!string.IsNullOrWhiteSpace(value))
+			switch (SearchType.ClosestMatch)
 			{
-				result = _navigator.GoToNext(record =>
-				{
-					var isCloseEnough = false;
+				case SearchType.ExactMatch:
+					// TODO: refactor code... weird we don't get index here
+					return _navigator.SetActiveLineNumber(0);
 
-					if (record.HasCreationTime)
-					{
-						var currentDelta = record.CreatedAt - searchValue.referenceTime;
+				case SearchType.ClosestMatch:
+					var index = _navigator.Records.IndexOfCreatedAt(searchValue.referenceTime, SearchType.ClosestMatch);
+					var closestLineNumber = _navigator.Records[index].LineNumber;
+					return _navigator.SetActiveLineNumber(closestLineNumber);
 
-						if (currentDelta < smallestDelta)
-						{
-
-						}
-					}
-
-					return isCloseEnough;
-				});
+				//default:
+				//	throw new ArgumentOutOfRangeException(nameof(searchType), searchType, null);
 			}
-
-			return result;
 		}
 
-		public IRecord Find_v1(string value)
-		{
-			IRecord result = Record.Dummy;
-
-			(DateTime referenceTime, TimeSpan tolerance) searchValue = 
-				ConvertToDateTime(_navigator.ActiveRecord, value);
-
-			if (!string.IsNullOrWhiteSpace(value))
-			{
-				result = _navigator.GoToNext(record =>
-				{
-					var isCloseEnough = false;
-
-					if (record.HasCreationTime)
-					{
-						isCloseEnough =
-							record.CreatedAt >= searchValue.referenceTime &&
-							record.CreatedAt < searchValue.referenceTime.Add(searchValue.tolerance);
-					}
-
-					return isCloseEnough;
-				});
-			}
-
-			return result;
-		}
 
 		/// <summary>
 		/// Convert the string <paramref name="value"/> to a valid <see cref="DateTime"/> value.
