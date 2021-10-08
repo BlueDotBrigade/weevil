@@ -8,7 +8,7 @@
 
 	internal class RecordNavigator
 	{
-		private const int Unknown = -1;
+		private const int UnknownIndex = -1;
 
 		private ImmutableArray<IRecord> _records;
 
@@ -22,9 +22,14 @@
 
 		public RecordNavigator(ImmutableArray<IRecord> records)
 		{
-			_records = records;
+			if (records.IsDefault)
+			{
+				throw new ArgumentException("Immutable array has not been instantiated. Hint: call `Create()` method.");
+			}
 
-			UpdateDataSource(records);
+			_records = records;
+			_activeIndex = UnknownIndex;
+			_activeRecord = Record.Dummy;
 		}
 
 		public int ActiveIndex => _activeIndex;
@@ -43,7 +48,7 @@
 			}
 			else
 			{
-				_activeIndex = Unknown;
+				_activeIndex = UnknownIndex;
 				_activeRecord = Record.Dummy;
 
 				throw new RecordNotFoundException(
@@ -56,9 +61,14 @@
 
 		public void UpdateDataSource(ImmutableArray<IRecord> newRecordCollection)
 		{
+			if (newRecordCollection.IsDefault)
+			{
+				throw new ArgumentException("Immutable array has not been instantiated. Hint: call `Create()` method.");
+			}
+
 			if (newRecordCollection.Length == 0)
 			{
-				_activeIndex = Unknown;
+				_activeIndex = UnknownIndex;
 				_activeRecord = Record.Dummy;
 				_records = newRecordCollection;
 			}
@@ -66,17 +76,18 @@
 			{
 				var previousLineNumber = _records[_activeIndex].LineNumber;
 
+				_records = newRecordCollection;
+
 				if (_records.TryGetIndexOf(previousLineNumber, out var index))
 				{
-					_records = newRecordCollection;
 					_activeIndex = index;
 					_activeRecord = _records[index];
 				}
 				else
 				{
-					_records = newRecordCollection;
-					_activeIndex = 0; // default to first record
-					_activeRecord = _records[index];
+					// The record of interest does not exist in the new filter results.
+					_activeIndex = UnknownIndex;
+					_activeRecord = Record.Dummy;
 				}
 			}
 		}
