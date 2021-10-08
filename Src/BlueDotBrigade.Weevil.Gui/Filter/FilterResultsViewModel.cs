@@ -33,7 +33,6 @@
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using PostSharp.Extensibility;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
@@ -971,22 +970,11 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				try
-				{
-					this.ActiveRecordIndex = _engine
-						.Navigate
-						.Using<ITextNavigator>()
-						.FindNext(_findText)
-						.ToIndexUsing(_engine.Filter.Results);
-				}
-				catch (RecordNotFoundException e)
-				{
-					var message = $"Text could not be found in the filter results: {_findText}";
-					Log.Default.Write(LogSeverityType.Warning, message);
-
-					MessageBox.Show(message, "Text Not Found",
-						MessageBoxButton.OK, MessageBoxImage.Warning);
-				}
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.Using<ITextNavigator>()
+					.FindNext(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
@@ -994,22 +982,11 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				try
-				{
-					this.ActiveRecordIndex = _engine
-						.Navigate
-						.Using<ITextNavigator>()
-						.FindPrevious(_findText)
-						.ToIndexUsing(_engine.Filter.Results);
-				}
-				catch (RecordNotFoundException e)
-				{
-					var message = $"Text could not be found in the filter results: {_findText}";
-					Log.Default.Write(LogSeverityType.Warning, message);
-
-					MessageBox.Show(message, "Text Not Found",
-						MessageBoxButton.OK, MessageBoxImage.Warning);
-				}
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.Using<ITextNavigator>()
+					.FindPrevious(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
@@ -1035,11 +1012,26 @@
 				// Did the user provide a timestamp?
 				if (userValue.Contains(":"))
 				{
-					this.ActiveRecordIndex = _engine
+					try
+					{
+						this.ActiveRecordIndex = _engine
 						.Navigate
 						.Using<ITimestampNavigator>()
 						.Find(userValue)
 						.ToIndexUsing(_engine.Filter.Results);
+					}
+					catch (RecordNotFoundException e)
+					{
+						Log.Default.Write(
+							LogSeverityType.Warning,
+							e,
+							$"Unable to find the given timestamp. Value={userValue}");
+
+						MessageBox.Show($"Unable to find the given line number. Value={userValue}",
+							"Not Found",
+							MessageBoxButton.OK,
+							MessageBoxImage.Information);
+					}
 				}
 				else
 				{
@@ -1057,9 +1049,10 @@
 						{
 							Log.Default.Write(
 								LogSeverityType.Warning,
-								$"Unable to find the given line number. Value={e.LineNumber}");
+								e,
+								$"Unable to find the given line number. Value={lineNumber}");
 
-							MessageBox.Show($"Unable to find the given line number. Value={e.LineNumber}", 
+							MessageBox.Show($"Unable to find the given line number. Value={lineNumber}", 
 								"Not Found",
 								MessageBoxButton.OK, 
 								MessageBoxImage.Information);
