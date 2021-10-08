@@ -24,7 +24,8 @@
 		{
 			if (records.IsDefault)
 			{
-				throw new ArgumentException("Immutable array has not been instantiated. Hint: call `Create()` method.");
+				throw new ArgumentException(
+					"Immutable array should be initialized - consider calling Create() method.", nameof(records));
 			}
 
 			_records = records;
@@ -63,11 +64,21 @@
 		{
 			if (newRecordCollection.IsDefault)
 			{
-				throw new ArgumentException("Immutable array has not been instantiated. Hint: call `Create()` method.");
+				throw new ArgumentException(
+					"Immutable array should be initialized - consider calling Create() method.", nameof(newRecordCollection));
 			}
 
+			// Is collection empty?
 			if (newRecordCollection.Length == 0)
 			{
+				_activeIndex = UnknownIndex;
+				_activeRecord = Record.Dummy;
+				_records = newRecordCollection;
+			}
+			else if (_activeIndex == UnknownIndex)
+			{
+				// there is nothing to "restore"
+				// ... only thing we can do is keep a reference to the new collection
 				_activeIndex = UnknownIndex;
 				_activeRecord = Record.Dummy;
 				_records = newRecordCollection;
@@ -76,16 +87,16 @@
 			{
 				var previousLineNumber = _records[_activeIndex].LineNumber;
 
-				_records = newRecordCollection;
-
+				// Try to find the "record of interest" in the new collection
 				if (_records.TryGetIndexOf(previousLineNumber, out var index))
 				{
+					_records = newRecordCollection;
 					_activeIndex = index;
 					_activeRecord = _records[index];
 				}
 				else
 				{
-					// The record of interest does not exist in the new filter results.
+					_records = newRecordCollection;
 					_activeIndex = UnknownIndex;
 					_activeRecord = Record.Dummy;
 				}
