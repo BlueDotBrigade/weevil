@@ -29,73 +29,34 @@
 		/// </returns>
 		public static int IndexOfLineNumber(ImmutableArray<IRecord> records, int lineNumber, SearchType searchType = SearchType.ExactMatch)
 		{
-			if (records.Length == 0)
-			{
-				throw new RecordNotFoundException(lineNumber);
-			}
-
 			var desiredRecord = new Record(
 				lineNumber,
 				Record.CreationTimeUnknown,
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching of line number: {lineNumber}");
 
-			var index = records.BinarySearch(desiredRecord, new RecordLineNumberComparer());
-
-			if (searchType == SearchType.ClosestMatch)
-			{
-				// Unable to find exact match?
-				if (index < 0)
-				{
-					if (records.Length == 1)
-					{
-						index = 0; // return the first & only record
-					}
-					// desired value less than first value in array?
-					else if (index == -1)
-					{
-						index = 0;
-					}
-					// Is desired value greater than last value in array?
-					else if (Math.Abs(index) - 1 == records.Length)
-					{
-						index = records.Length - 1;
-					}
-					else
-					{
-						var aboveIndex = Math.Abs(index) - 1;
-						var belowIndex = Math.Abs(aboveIndex) - 1;
-
-						var aboveDelta = Math.Abs(records[aboveIndex].LineNumber - lineNumber);
-						var belowDelta = Math.Abs(records[belowIndex].LineNumber - lineNumber);
-
-						index = belowDelta < aboveDelta ? belowIndex : aboveIndex;
-					}
-				}
-			}
-
-			if (index < 0 || index > records.Length - 1)
-			{
-				throw new RecordNotFoundException(index);
-			}
-
-			return index;
+			return IndexOf(records, desiredRecord, new RecordLineNumberComparer(), searchType);
 		}
 
 		public static int IndexOfCreatedAt(ImmutableArray<IRecord> records, DateTime createdAt, SearchType searchType = SearchType.ExactMatch)
 		{
-			if (records.Length == 0)
-			{
-				throw new RecordNotFoundException(-1);
-			}
-
 			var desiredRecord = new Record(
 				0,
 				createdAt,
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for a record created at: {createdAt}");
 
-			var index = records.BinarySearch(desiredRecord, new RecordCreatedAtComparer());
+			return IndexOf(records, desiredRecord, new RecordCreatedAtComparer(), searchType);
+		}
+
+		private static int IndexOf(ImmutableArray<IRecord> records, IRecord desiredRecord, MagnitudeComparer comparer, SearchType searchType = SearchType.ExactMatch)
+		{
+			if (records.Length == 0)
+			{
+				throw new RecordNotFoundException(-1);
+			}
+
+			var index = records.BinarySearch(desiredRecord, comparer);
 
 			if (searchType == SearchType.ClosestMatch)
 			{
@@ -121,11 +82,11 @@
 						var aboveIndex = Math.Abs(index) - 1;
 						var belowIndex = Math.Abs(aboveIndex) - 1;
 
-						var aboveTimespan = records[aboveIndex].CreatedAt - createdAt;
-						var belowTimespan = records[belowIndex].CreatedAt - createdAt;
+						//var aboveTimespan = records[aboveIndex].CreatedAt - createdAt;
+						//var belowTimespan = records[belowIndex].CreatedAt - createdAt;
 
-						var aboveDelta = Math.Abs(aboveTimespan.TotalMilliseconds);
-						var belowDelta = Math.Abs(belowTimespan.TotalMilliseconds);
+						var aboveDelta = Math.Abs(comparer.CompareMagnitude(records[aboveIndex], desiredRecord));
+						var belowDelta = Math.Abs(comparer.CompareMagnitude(desiredRecord, records[belowIndex]));
 
 						index = belowDelta < aboveDelta ? belowIndex : aboveIndex;
 					}
