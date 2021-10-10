@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.TestingTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]

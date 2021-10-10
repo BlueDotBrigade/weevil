@@ -1,14 +1,15 @@
-﻿namespace BlueDotBrigade.Weevil.Data
+﻿namespace BlueDotBrigade.Weevil.TestingTools.Data
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
 
 	/// <summary>
 	/// A record factory that uses convention over configuration
 	/// to create fake records for testing.
 	/// </summary>
-	internal class R
+	public class R
 	{
 		private int _lineNumber = 0;
 

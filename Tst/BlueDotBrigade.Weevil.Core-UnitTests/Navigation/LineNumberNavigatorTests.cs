@@ -1,8 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using System;
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.TestingTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]

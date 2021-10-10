@@ -44,6 +44,8 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "BlueDotBrigade.Weevil.Setup
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.SetupPlugins", "Src\BlueDotBrigade.Weevil.SetupPlugins\BlueDotBrigade.Weevil.SetupPlugins.csproj", "{3F7706F9-040D-43C6-B137-890E56C04ED2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.TestingTools", "Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj", "{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -179,6 +181,14 @@ Global
 		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Release|x64.ActiveCfg = Release|x64
 		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Release|x64.Build.0 = Release|x64
 		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Release|x86.ActiveCfg = Release|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Debug|x64.ActiveCfg = Debug|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Debug|x64.Build.0 = Debug|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Debug|x86.ActiveCfg = Debug|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Release|Any CPU.ActiveCfg = Release|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Release|x64.ActiveCfg = Release|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Release|x64.Build.0 = Release|x64
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -191,6 +201,7 @@ Global
 		{5482DA9A-4ADD-4837-BC9D-92B303BD075F} = {0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9} = {E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}
 		{D368EE3A-0874-4C23-8ABA-5B935B29882E} = {E077F400-8783-488E-AA5F-5382C52141CF}
+		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700} = {E8C3F5A1-15D4-4093-8EC4-BF9E0E1C6350}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACD62972-31F1-402F-B3FC-272C2A336038}
