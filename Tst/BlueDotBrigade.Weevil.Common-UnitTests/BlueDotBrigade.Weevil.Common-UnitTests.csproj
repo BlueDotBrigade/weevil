@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\Immutable\ImmutableArrayExtensionsTests.cs" />
+    <Compile Include="Data\Comparers\RecordSearchTests.cs" />
     <Compile Include="SimpleCallStackFormatterTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -89,6 +90,10 @@
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj">
       <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
       <Name>BlueDotBrigade.Weevil.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj">
+      <Project>{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}</Project>
+      <Name>BlueDotBrigade.Weevil.TestingTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

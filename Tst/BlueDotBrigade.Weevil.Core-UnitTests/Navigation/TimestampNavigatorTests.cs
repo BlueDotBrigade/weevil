@@ -38,31 +38,6 @@
 			Assert.Fail("Because only a time was provided, and no date, an exception should be thrown.");
 		}
 
-		[TestMethod]
-		[DataRow("9:59", 1)]
-		[DataRow("10:30", 3)]
-		[DataRow("10:31", 3)]
-		[DataRow("10:34", 3)]
-		[DataRow("10:44", 4)]
-		[DataRow("12:00", 5)]
-		public void GoTo_TimeInRecords_ReturnsMatch(string searchValue, int expectedLineNumber)
-		{
-			var records = R.Create()
-				.WithCreatedAt(1, "10:00:00")
-				.WithCreatedAt(2, "10:15:00")
-				.WithCreatedAt(3, "10:30:00")
-				.WithCreatedAt(4, "10:45:00")
-				.WithCreatedAt(5, "11:00:00")
-				.GetRecords();
-
-			var navigator = new RecordNavigator(records);
-
-			Assert.AreEqual(
-				expectedLineNumber,
-				new TimestampNavigator(navigator).Find(searchValue).LineNumber);
-		}
-
-
 		/* RECORDS
 		 * 
 		 * SCENARIOS

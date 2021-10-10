@@ -67,30 +67,5 @@
 				.Find(12, SearchType.ClosestMatch)
 				.LineNumber);
 		}
-
-		[TestMethod]
-		[DataRow(0, 10)]
-		[DataRow(12, 10)]
-		[DataRow(20, 20)]
-		[DataRow(28, 30)]
-		[DataRow(40, 30)]
-		public void GoTo_ClosestLineNumber_ReturnsClosestMatch(int requestedLineNumber, int expectedLineNumber)
-		{
-			var records = new List<IRecord>
-			{
-				R.WithLineNumber(10),
-				R.WithLineNumber(20),
-				R.WithLineNumber(30),
-			};
-
-			var actualLineNumber = new LineNumberNavigator(new RecordNavigator(records))
-				.Find(requestedLineNumber, SearchType.ClosestMatch)
-				.LineNumber;
-
-			Assert.AreEqual(
-				expectedLineNumber,
-				actualLineNumber,
-				$"Requested={requestedLineNumber}, Expected={expectedLineNumber}, Actual={actualLineNumber}");
-		}
 	}
 }
