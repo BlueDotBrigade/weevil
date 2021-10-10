@@ -1016,7 +1016,7 @@
 
 		public void GoTo()
 		{
-			var userValue = _dialogBox.ShowUserPrompt("Go To", "Enter timestamp or line:", string.Empty);
+			var userValue = _dialogBox.ShowGoTo(string.Empty);
 
 			if (string.IsNullOrWhiteSpace(userValue))
 			{
@@ -1057,7 +1057,7 @@
 							this.ActiveRecordIndex = _engine
 								.Navigate
 								.Using<ILineNumberNavigator>()
-								.Find(lineNumber)
+								.Find(lineNumber, SearchType.ClosestMatch)
 								.ToIndexUsing(_engine.Filter.Results);
 						}
 						catch (RecordNotFoundException e)
