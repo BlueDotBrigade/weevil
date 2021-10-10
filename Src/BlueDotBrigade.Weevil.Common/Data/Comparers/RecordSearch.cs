@@ -79,13 +79,21 @@
 					}
 					else
 					{
-						var beforeIndex = Math.Abs(index) - 1;
-						var afterIndex = Math.Abs(beforeIndex) - 1;
+						// The index needs to take into consideration that this is a zero based array.
+						const int ZeroOffsetAdjustment = -1;
 
-						var beforeDelta = Math.Abs(comparer.CompareMagnitude(records[beforeIndex], desiredRecord));
-						var afterDelta = Math.Abs(comparer.CompareMagnitude(desiredRecord, records[afterIndex]));
+						// Consider the following: if the user searched for 10:31 then the closest match would be Record#8.
+						// [Record 8] created at 10:30
+						// [Record 9] created at 11:00
+						var precedingIndex = Math.Abs(index) - 1 + ZeroOffsetAdjustment;
+						var currentIndex = Math.Abs(index) - 0 + ZeroOffsetAdjustment;
 
-						index = afterDelta < beforeDelta ? afterIndex : beforeIndex;
+						var precedingDelta = Math.Abs(comparer.CompareMagnitude(desiredRecord, records[precedingIndex]));
+						var currentDelta = Math.Abs(comparer.CompareMagnitude(records[currentIndex], desiredRecord));
+
+						// Is the desired value (e.g. 10:31) closer to the current record,
+						// ... or the one that preceded it (e.g. Record#8)?
+						index = precedingDelta < currentDelta ? precedingIndex : currentIndex;
 					}
 				}
 			}
