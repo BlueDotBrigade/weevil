@@ -1,8 +1,6 @@
-﻿namespace BlueDotBrigade.Weevil.Data
+﻿namespace BlueDotBrigade.Weevil.Data.Comparers
 {
-	using BlueDotBrigade.Weevil.Data.Comparers;
-
-	internal sealed class RecordCreatedAtComparer : MagnitudeComparer
+	internal sealed class CreatedAtComparer : MagnitudeComparer
 	{
 		private const int GreaterX = 1;
 		private const int EqualTimestamps = 0;

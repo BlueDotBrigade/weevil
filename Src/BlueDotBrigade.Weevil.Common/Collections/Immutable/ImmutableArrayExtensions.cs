@@ -99,7 +99,7 @@
 		/// </returns>
 		public static int IndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, SearchType searchType = SearchType.ExactMatch)
 		{
-			return BinarySearchHelper.IndexOfLineNumber(sourceRecords, lineNumber, searchType);
+			return RecordSearch.IndexOfLineNumber(sourceRecords, lineNumber, searchType);
 		}
 
 		/// <summary>
@@ -123,7 +123,7 @@
 		/// </returns>
 		public static int IndexOfCreatedAt(this ImmutableArray<IRecord> sourceRecords, DateTime createdAt, SearchType searchType = SearchType.ExactMatch)
 		{
-			return BinarySearchHelper.IndexOfCreatedAt(sourceRecords, createdAt, searchType);
+			return RecordSearch.IndexOfCreatedAt(sourceRecords, createdAt, searchType);
 		}
 
 		/// <summary>
@@ -135,7 +135,7 @@
 		/// <returns>True is returned if the collection has a matching line number.</returns>
 		public static bool TryGetIndexOf(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
 		{
-			return BinarySearchHelper.TryGetIndexOf(sourceRecords, lineNumber, out index);
+			return RecordSearch.TryGetIndexOf(sourceRecords, lineNumber, out index);
 		}
 
 		/// <summary>
@@ -147,7 +147,7 @@
 		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
 		public static bool TryGetLine(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
 		{
-			return BinarySearchHelper.TryGetLine(sourceRecords, lineNumber, out result);
+			return RecordSearch.TryGetLine(sourceRecords, lineNumber, out result);
 		}
 
 		/// <summary>

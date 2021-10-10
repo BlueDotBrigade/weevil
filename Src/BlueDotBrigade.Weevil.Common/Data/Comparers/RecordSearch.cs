@@ -1,11 +1,11 @@
-﻿namespace BlueDotBrigade.Weevil
+﻿namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Data.Comparers;
 	using BlueDotBrigade.Weevil.Navigation;
 
-	internal static class BinarySearchHelper
+	internal static class RecordSearch
 	{
 		/// <summary>
 		/// Attempts to find a record that has the same line number as the provided value.
@@ -35,7 +35,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching of line number: {lineNumber}");
 
-			return IndexOf(records, desiredRecord, new RecordLineNumberComparer(), searchType);
+			return IndexOf(records, desiredRecord, new LineNumberComparer(), searchType);
 		}
 
 		public static int IndexOfCreatedAt(ImmutableArray<IRecord> records, DateTime createdAt, SearchType searchType = SearchType.ExactMatch)
@@ -46,7 +46,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for a record created at: {createdAt}");
 
-			return IndexOf(records, desiredRecord, new RecordCreatedAtComparer(), searchType);
+			return IndexOf(records, desiredRecord, new CreatedAtComparer(), searchType);
 		}
 
 		private static int IndexOf(ImmutableArray<IRecord> records, IRecord desiredRecord, MagnitudeComparer comparer, SearchType searchType = SearchType.ExactMatch)
@@ -79,16 +79,13 @@
 					}
 					else
 					{
-						var aboveIndex = Math.Abs(index) - 1;
-						var belowIndex = Math.Abs(aboveIndex) - 1;
+						var beforeIndex = Math.Abs(index) - 1;
+						var afterIndex = Math.Abs(beforeIndex) - 1;
 
-						//var aboveTimespan = records[aboveIndex].CreatedAt - createdAt;
-						//var belowTimespan = records[belowIndex].CreatedAt - createdAt;
+						var beforeDelta = Math.Abs(comparer.CompareMagnitude(records[beforeIndex], desiredRecord));
+						var afterDelta = Math.Abs(comparer.CompareMagnitude(desiredRecord, records[afterIndex]));
 
-						var aboveDelta = Math.Abs(comparer.CompareMagnitude(records[aboveIndex], desiredRecord));
-						var belowDelta = Math.Abs(comparer.CompareMagnitude(desiredRecord, records[belowIndex]));
-
-						index = belowDelta < aboveDelta ? belowIndex : aboveIndex;
+						index = afterDelta < beforeDelta ? afterIndex : beforeIndex;
 					}
 				}
 			}
@@ -116,7 +113,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for line number: {lineNumber}");
 
-			index = sourceRecords.BinarySearch(desiredRecord, new RecordLineNumberComparer());
+			index = sourceRecords.BinarySearch(desiredRecord, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			return wasFound;
@@ -139,7 +136,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for line number: {lineNumber}");
 
-			var index = sourceRecords.BinarySearch(desiredRecord, new RecordLineNumberComparer());
+			var index = sourceRecords.BinarySearch(desiredRecord, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			if (wasFound)
