@@ -88,6 +88,23 @@
 			return string.Empty;
 		}
 
+		public string ShowGoTo(string defaultValue)
+		{
+			var dialog = new GoToDialog()
+			{
+				Owner = _parentWindow,
+				Title = "Go To",
+				UserPrompt = "Enter timestamp or line:",
+				UserInput = defaultValue ?? string.Empty
+			};
+
+			if (dialog.ShowDialog() == true)
+			{
+				return dialog.UserInput;
+			}
+			return string.Empty;
+		}
+
 		public bool TryShowFind(out bool findNext, out string findText)
 		{
 			var wasSuccessful = false;
