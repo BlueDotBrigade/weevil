@@ -8,9 +8,9 @@
 	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
 	internal class LineNumberNavigator : ILineNumberNavigator
 	{
-		private readonly RecordNavigator _navigator;
+		private readonly ActiveRecord _navigator;
 
-		public LineNumberNavigator(RecordNavigator navigator)
+		public LineNumberNavigator(ActiveRecord navigator)
 		{
 			_navigator = navigator;
 		}

@@ -80,7 +80,7 @@
     <Compile Include="Navigation\PinNavigatorTest.cs" />
     <Compile Include="Navigation\LineNumberNavigatorTests.cs" />
     <Compile Include="Navigation\TimestampNavigatorTests.cs" />
-    <Compile Include="Navigation\RecordNavigatorTests.cs" />
+    <Compile Include="Navigation\ActiveRecordTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestEnvironment.cs" />
     <Compile Include="SelectionManagerTest.cs" />

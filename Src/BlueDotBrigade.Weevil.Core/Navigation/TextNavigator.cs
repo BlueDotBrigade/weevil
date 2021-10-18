@@ -3,12 +3,12 @@
 	using System.Diagnostics;
 	using BlueDotBrigade.Weevil.Data;
 
-	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_navigator.Index}, LineNumber={_navigator.Record.LineNumber}")]
 	internal class TextNavigator : ITextNavigator
 	{
-		private readonly RecordNavigator _navigator;
+		private readonly ActiveRecord _navigator;
 
-		public TextNavigator(RecordNavigator navigator)
+		public TextNavigator(ActiveRecord navigator)
 		{
 			_navigator = navigator;
 		}

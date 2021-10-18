@@ -19,7 +19,7 @@
 
 			Assert.AreEqual(
 				Record.Dummy,
-				new TimestampNavigator(new RecordNavigator(records)).Find(timestamp));
+				new TimestampNavigator(new ActiveRecord(records)).Find(timestamp));
 		}
 
 		[TestMethod]
@@ -32,8 +32,8 @@
 				.WithCreatedAt(3, Record.CreationTimeUnknown)
 				.GetRecords();
 
-			var navigator = new RecordNavigator(records);
-			var result = new TimestampNavigator(navigator).Find("10:30:00");
+			var activeRecord = new ActiveRecord(records);
+			var result = new TimestampNavigator(activeRecord).Find("10:30:00");
 
 			Assert.Fail("Because only a time was provided, and no date, an exception should be thrown.");
 		}

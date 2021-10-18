@@ -8,13 +8,13 @@
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
-	public class RecordNavigatorTests
+	public class ActiveRecordTests
 	{
 		[TestMethod]
 		[ExpectedException((typeof(ArgumentException)))]
 		public void Constructor_UninitializedArray_ThrowsArgumentException()
 		{
-			var navigator = new RecordNavigator(new ImmutableArray<IRecord>());
+			var activeRecord = new ActiveRecord(new ImmutableArray<IRecord>());
 
 			Assert.Fail("Uninitialized immutable array should throw exception.");
 		}
@@ -29,12 +29,12 @@
 				R.WithLineNumber(30),
 			};
 
-			var navigator = new RecordNavigator(records);
+			var navigator = new ActiveRecord(records);
 			navigator.GoToNext(record => record.LineNumber > 0);
 
 			Assert.AreEqual(
 				10,
-				navigator.ActiveRecord.LineNumber);
+				navigator.Record.LineNumber);
 		}
 
 		[TestMethod]
@@ -47,13 +47,13 @@
 				R.WithLineNumber(30),
 			};
 
-			var navigator = new RecordNavigator(records);
+			var navigator = new ActiveRecord(records);
 			navigator.GoToNext(record => record.LineNumber > 0);
 			navigator.GoToNext(record => record.LineNumber > 0);
 
 			Assert.AreEqual(
 				20,
-				navigator.ActiveRecord.LineNumber);
+				navigator.Record.LineNumber);
 		}
 
 		[TestMethod]
@@ -66,12 +66,12 @@
 				R.WithLineNumber(30),
 			};
 
-			var navigator = new RecordNavigator(records);
+			var navigator = new ActiveRecord(records);
 			navigator.GoToPrevious(record => record.LineNumber > 0);
 
 			Assert.AreEqual(
 				30,
-				navigator.ActiveRecord.LineNumber);
+				navigator.Record.LineNumber);
 		}
 
 		[TestMethod]
@@ -84,20 +84,20 @@
 				R.WithLineNumber(30),
 			};
 
-			var navigator = new RecordNavigator(records);
+			var navigator = new ActiveRecord(records);
 			navigator.GoToPrevious(record => record.LineNumber > 0);
 			navigator.GoToPrevious(record => record.LineNumber > 0);
 
 			Assert.AreEqual(
 				20,
-				navigator.ActiveRecord.LineNumber);
+				navigator.Record.LineNumber);
 		}
 
 		[TestMethod]
 		[ExpectedException((typeof(ArgumentException)))]
 		public void UpdateDataSource_UninitializedArray_ThrowsArgumentException()
 		{
-			var navigator = new RecordNavigator(new ImmutableArray<IRecord>());
+			var activeRecord = new ActiveRecord(new ImmutableArray<IRecord>());
 
 			Assert.Fail("Uninitialized immutable array should throw exception.");
 		}
@@ -112,14 +112,14 @@
 				R.WithLineNumber(30),
 			};
 
-			var navigator = new RecordNavigator(records);
+			var navigator = new ActiveRecord(records);
 			navigator.SetActiveLineNumber(10);
 
 			navigator.UpdateDataSource(ImmutableArray.Create<IRecord>());
 
 			Assert.AreEqual(
 				Record.Dummy,
-				navigator.ActiveRecord);
+				navigator.Record);
 		}
 	}
 }

@@ -14,7 +14,7 @@
 		{
 			var emptyRecordCollection = new List<IRecord>();
 
-			_ = new LineNumberNavigator(new RecordNavigator(emptyRecordCollection))
+			_ = new LineNumberNavigator(new ActiveRecord(emptyRecordCollection))
 				.Find(8)
 				.LineNumber;
 
@@ -33,7 +33,7 @@
 
 			Assert.AreEqual(
 				8,
-				new LineNumberNavigator(new RecordNavigator(records)).Find(8).LineNumber);
+				new LineNumberNavigator(new ActiveRecord(records)).Find(8).LineNumber);
 		}
 
 		[TestMethod]
@@ -47,7 +47,7 @@
 				R.WithLineNumber(9),
 			};
 
-			_ = new LineNumberNavigator(new RecordNavigator(records))
+			_ = new LineNumberNavigator(new ActiveRecord(records))
 				.Find(8)
 				.LineNumber;
 
@@ -63,7 +63,7 @@
 				R.WithLineNumber(20),
 			};
 
-			Assert.AreEqual(10, new LineNumberNavigator(new RecordNavigator(records))
+			Assert.AreEqual(10, new LineNumberNavigator(new ActiveRecord(records))
 				.Find(12, RecordSearchType.ClosestMatch)
 				.LineNumber);
 		}

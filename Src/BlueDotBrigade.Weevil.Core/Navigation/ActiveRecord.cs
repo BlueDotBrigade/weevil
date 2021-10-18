@@ -6,21 +6,21 @@
 	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
-	internal class RecordNavigator
+	internal class ActiveRecord
 	{
 		private const int UnknownIndex = -1;
 
-		private ImmutableArray<IRecord> _records;
+		private ImmutableArray<IRecord> _activeRecords;
 
 		private int _activeIndex;
 		private IRecord _activeRecord;
 
-		public RecordNavigator(IList<IRecord> records) : this (records.ToImmutableArray())
+		public ActiveRecord(IList<IRecord> records) : this (records.ToImmutableArray())
 		{
 			// nothing to do
 		}
 
-		public RecordNavigator(ImmutableArray<IRecord> records)
+		public ActiveRecord(ImmutableArray<IRecord> records)
 		{
 			if (records.IsDefault)
 			{
@@ -28,29 +28,29 @@
 					"Immutable array should be initialized - consider calling Create() method.", nameof(records));
 			}
 
-			_records = records;
+			_activeRecords = records;
 			_activeIndex = UnknownIndex;
-			_activeRecord = Record.Dummy;
+			_activeRecord = Data.Record.Dummy;
 		}
 
-		public int ActiveIndex => _activeIndex;
-		public IRecord ActiveRecord => _activeRecord;
+		public int Index => _activeIndex;
+		public IRecord Record => _activeRecord;
 
-		public ImmutableArray<IRecord> Records => _records;
+		public ImmutableArray<IRecord> Records => _activeRecords;
 
 		public IRecord SetActiveLineNumber(int lineNumber)
 		{
-			var index = _records.IndexOfLineNumber(lineNumber);
+			var index = _activeRecords.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
 			{
 				_activeIndex = index;
-				_activeRecord = _records[index];
+				_activeRecord = _activeRecords[index];
 			}
 			else
 			{
 				_activeIndex = UnknownIndex;
-				_activeRecord = Record.Dummy;
+				_activeRecord = Data.Record.Dummy;
 
 				throw new RecordNotFoundException(
 					lineNumber,
@@ -72,33 +72,33 @@
 			if (newRecordCollection.Length == 0)
 			{
 				_activeIndex = UnknownIndex;
-				_activeRecord = Record.Dummy;
-				_records = newRecordCollection;
+				_activeRecord = Data.Record.Dummy;
+				_activeRecords = newRecordCollection;
 			}
 			else if (_activeIndex == UnknownIndex)
 			{
 				// there is nothing to "restore"
 				// ... only thing we can do is keep a reference to the new collection
 				_activeIndex = UnknownIndex;
-				_activeRecord = Record.Dummy;
-				_records = newRecordCollection;
+				_activeRecord = Data.Record.Dummy;
+				_activeRecords = newRecordCollection;
 			}
 			else
 			{
-				var previousLineNumber = _records[_activeIndex].LineNumber;
+				var previousLineNumber = _activeRecords[_activeIndex].LineNumber;
 
 				// Try to find the "record of interest" in the new collection
-				if (_records.TryGetIndexOf(previousLineNumber, out var index))
+				if (_activeRecords.TryGetIndexOf(previousLineNumber, out var index))
 				{
-					_records = newRecordCollection;
+					_activeRecords = newRecordCollection;
 					_activeIndex = index;
-					_activeRecord = _records[index];
+					_activeRecord = _activeRecords[index];
 				}
 				else
 				{
-					_records = newRecordCollection;
+					_activeRecords = newRecordCollection;
 					_activeIndex = UnknownIndex;
-					_activeRecord = Record.Dummy;
+					_activeRecord = Data.Record.Dummy;
 				}
 			}
 		}
@@ -107,28 +107,28 @@
 		/// Navigates through records in descending order (e.g. lines: 8, 5, 3, 2).
 		/// </summary>
 		/// <returns>
-		/// Returns the index of the <see cref="Record"/> that matches the search criteria.
+		/// Returns the index of the <see cref="Data.Record"/> that matches the search criteria.
 		/// </returns>
 		/// <exception cref="RecordNotFoundException"/>
 		internal IRecord GoToPrevious(Func<IRecord, bool> checkIfMatches)
 		{
-			if (_records.Length == 0)
+			if (_activeRecords.Length == 0)
 			{
-				return Record.Dummy;
+				return Data.Record.Dummy;
 			}
 			else
 			{
 				var wasFound = false;
 				var index = _activeIndex;
 
-				for (var i = 0; i < _records.Length; i++)
+				for (var i = 0; i < _activeRecords.Length; i++)
 				{
-					index = index - 1 < 0 ? _records.Length - 1 : index - 1;
+					index = index - 1 < 0 ? _activeRecords.Length - 1 : index - 1;
 
-					if (checkIfMatches(_records[index]))
+					if (checkIfMatches(_activeRecords[index]))
 					{
 						_activeIndex = index;
-						_activeRecord = _records[index];
+						_activeRecord = _activeRecords[index];
 						wasFound = true;
 						break;
 					}
@@ -144,13 +144,13 @@
 		/// Navigates through records in ascending order (e.g. lines: 2, 4, 8, 16).
 		/// </summary>
 		/// <returns>
-		/// Returns the index of the <see cref="Record"/> that matches the search criteria.
+		/// Returns the index of the <see cref="Data.Record"/> that matches the search criteria.
 		/// </returns>
 		internal IRecord GoToNext(Func<IRecord, bool> checkIfMatches)
 		{
-			if (_records.Length == 0)
+			if (_activeRecords.Length == 0)
 			{
-				return Record.Dummy;
+				return Data.Record.Dummy;
 			}
 			else
 			{
@@ -158,14 +158,14 @@
 
 				var wasFound = false;
 
-				for (var i = 0; i < _records.Length; i++)
+				for (var i = 0; i < _activeRecords.Length; i++)
 				{
-					index = (index + 1) % _records.Length;
+					index = (index + 1) % _activeRecords.Length;
 
-					if (checkIfMatches(_records[index]))
+					if (checkIfMatches(_activeRecords[index]))
 					{
 						_activeIndex = index;
-						_activeRecord = _records[index];
+						_activeRecord = _activeRecords[index];
 						wasFound = true;
 						break;
 					}

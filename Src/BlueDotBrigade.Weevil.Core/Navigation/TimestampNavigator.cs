@@ -6,12 +6,12 @@
 	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
-	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_navigator.Index}, LineNumber={_navigator.Record.LineNumber}")]
 	internal class TimestampNavigator : ITimestampNavigator
 	{
-		private readonly RecordNavigator _navigator;
+		private readonly ActiveRecord _navigator;
 
-		public TimestampNavigator(RecordNavigator navigator)
+		public TimestampNavigator(ActiveRecord navigator)
 		{
 			_navigator = navigator;
 		}
