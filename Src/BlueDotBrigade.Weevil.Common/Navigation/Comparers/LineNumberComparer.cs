@@ -1,5 +1,7 @@
-﻿namespace BlueDotBrigade.Weevil.Data.Comparers
+﻿namespace BlueDotBrigade.Weevil.Navigation.Comparers
 {
+	using BlueDotBrigade.Weevil.Data;
+
 	internal sealed class LineNumberComparer : MagnitudeComparer
 	{
 		public override int Compare(IRecord x, IRecord y)

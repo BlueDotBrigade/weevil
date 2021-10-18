@@ -1,5 +1,7 @@
-﻿namespace BlueDotBrigade.Weevil.Data.Comparers
+﻿namespace BlueDotBrigade.Weevil.Navigation.Comparers
 {
+	using BlueDotBrigade.Weevil.Data;
+
 	internal sealed class CreatedAtComparer : MagnitudeComparer
 	{
 		private const int GreaterX = 1;

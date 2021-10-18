@@ -1,6 +1,7 @@
-﻿namespace BlueDotBrigade.Weevil.Data.Comparers
+﻿namespace BlueDotBrigade.Weevil.Navigation.Comparers
 {
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Data;
 
 	internal sealed class UserCommentComparer : Comparer<IRecord>
 	{

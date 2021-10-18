@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.Data.Comparers;
+	using BlueDotBrigade.Weevil.Navigation.Comparers;
 
 	internal static class RecordSearch
 	{
