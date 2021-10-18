@@ -28,14 +28,14 @@
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =
 				ConvertToDateTime(firstRecord, value);
 
-			switch (SearchType.ClosestMatch)
+			switch (RecordSearchType.ClosestMatch)
 			{
-				case SearchType.ExactMatch:
+				case RecordSearchType.ExactMatch:
 					// TODO: refactor code... weird we don't get index here
 					return _navigator.SetActiveLineNumber(0);
 
-				case SearchType.ClosestMatch:
-					var index = _navigator.Records.IndexOfCreatedAt(searchValue.referenceTime, SearchType.ClosestMatch);
+				case RecordSearchType.ClosestMatch:
+					var index = _navigator.Records.IndexOfCreatedAt(searchValue.referenceTime, RecordSearchType.ClosestMatch);
 					var closestLineNumber = _navigator.Records[index].LineNumber;
 					return _navigator.SetActiveLineNumber(closestLineNumber);
 

@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Navigation;
 
 	public static class ImmutableArrayExtensions
 	{
@@ -97,7 +98,7 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
-		public static int IndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, SearchType searchType = SearchType.ExactMatch)
+		public static int IndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			return RecordSearch.IndexOfLineNumber(sourceRecords, lineNumber, searchType);
 		}
@@ -121,7 +122,7 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
-		public static int IndexOfCreatedAt(this ImmutableArray<IRecord> sourceRecords, DateTime createdAt, SearchType searchType = SearchType.ExactMatch)
+		public static int IndexOfCreatedAt(this ImmutableArray<IRecord> sourceRecords, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			return RecordSearch.IndexOfCreatedAt(sourceRecords, createdAt, searchType);
 		}

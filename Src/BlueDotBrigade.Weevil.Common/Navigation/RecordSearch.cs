@@ -1,9 +1,9 @@
-﻿namespace BlueDotBrigade.Weevil.Data
+﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using System;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Data.Comparers;
-	using BlueDotBrigade.Weevil.Navigation;
 
 	internal static class RecordSearch
 	{
@@ -27,7 +27,7 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
-		public static int IndexOfLineNumber(ImmutableArray<IRecord> records, int lineNumber, SearchType searchType = SearchType.ExactMatch)
+		public static int IndexOfLineNumber(ImmutableArray<IRecord> records, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			var desiredRecord = new Record(
 				lineNumber,
@@ -38,7 +38,7 @@
 			return IndexOf(records, desiredRecord, new LineNumberComparer(), searchType);
 		}
 
-		public static int IndexOfCreatedAt(ImmutableArray<IRecord> records, DateTime createdAt, SearchType searchType = SearchType.ExactMatch)
+		public static int IndexOfCreatedAt(ImmutableArray<IRecord> records, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			var desiredRecord = new Record(
 				0,
@@ -49,7 +49,7 @@
 			return IndexOf(records, desiredRecord, new CreatedAtComparer(), searchType);
 		}
 
-		private static int IndexOf(ImmutableArray<IRecord> records, IRecord desiredRecord, MagnitudeComparer comparer, SearchType searchType = SearchType.ExactMatch)
+		private static int IndexOf(ImmutableArray<IRecord> records, IRecord desiredRecord, MagnitudeComparer comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			if (records.Length == 0)
 			{
@@ -58,7 +58,7 @@
 
 			var index = records.BinarySearch(desiredRecord, comparer);
 
-			if (searchType == SearchType.ClosestMatch)
+			if (searchType == RecordSearchType.ClosestMatch)
 			{
 				// Unable to find exact match?
 				if (index < 0)

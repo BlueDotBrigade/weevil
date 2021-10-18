@@ -64,7 +64,7 @@
 			};
 
 			Assert.AreEqual(10, new LineNumberNavigator(new RecordNavigator(records))
-				.Find(12, SearchType.ClosestMatch)
+				.Find(12, RecordSearchType.ClosestMatch)
 				.LineNumber);
 		}
 	}

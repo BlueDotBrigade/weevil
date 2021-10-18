@@ -17,19 +17,19 @@
 
 		public IRecord Find(int lineNumber)
 		{
-			return Find(lineNumber, SearchType.ExactMatch);
+			return Find(lineNumber, RecordSearchType.ExactMatch);
 		}
 
-		public IRecord Find(int lineNumber, SearchType searchType)
+		public IRecord Find(int lineNumber, RecordSearchType searchType)
 		{
 			switch (searchType)
 			{
-				case SearchType.ExactMatch:
+				case RecordSearchType.ExactMatch:
 					// TODO: refactor code... weird we don't get index here
 					return _navigator.SetActiveLineNumber(lineNumber);
 
-				case SearchType.ClosestMatch:
-					var index = _navigator.Records.IndexOfLineNumber(lineNumber, SearchType.ClosestMatch);
+				case RecordSearchType.ClosestMatch:
+					var index = _navigator.Records.IndexOfLineNumber(lineNumber, RecordSearchType.ClosestMatch);
 					var closestLineNumber = _navigator.Records[index].LineNumber;
 					return _navigator.SetActiveLineNumber(closestLineNumber);
 

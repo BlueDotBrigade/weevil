@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\Immutable\ImmutableArrayExtensionsTests.cs" />
-    <Compile Include="Data\Comparers\RecordSearchTests.cs" />
+    <Compile Include="Navigation\RecordSearchTests.cs" />
     <Compile Include="SimpleCallStackFormatterTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -101,7 +101,9 @@
       <Link>Properties\DomainSpecificTerminology.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Data\Comparers\" />
+  </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,9 +1,10 @@
-﻿namespace BlueDotBrigade.Weevil.Common.Data.Comparers
+﻿namespace BlueDotBrigade.Weevil.Common.Navigation
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.TestingTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -26,7 +27,7 @@
 			};
 
 			var actualIndex =
-				RecordSearch.IndexOfLineNumber(records.ToImmutableArray(), requestedLineNumber, SearchType.ClosestMatch);
+				RecordSearch.IndexOfLineNumber(records.ToImmutableArray(), requestedLineNumber, RecordSearchType.ClosestMatch);
 
 			Assert.AreEqual(
 				expectedIndex,
@@ -53,7 +54,7 @@
 
 			var createdAtTimestamp = DateTime.Parse(createdAt);
 
-			var actualIndex = RecordSearch.IndexOfCreatedAt(records, createdAtTimestamp, SearchType.ClosestMatch);
+			var actualIndex = RecordSearch.IndexOfCreatedAt(records, createdAtTimestamp, RecordSearchType.ClosestMatch);
 
 			Assert.AreEqual(
 				expectedIndex,

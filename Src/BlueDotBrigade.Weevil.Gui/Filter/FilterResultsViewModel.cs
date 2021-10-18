@@ -1057,7 +1057,7 @@
 							this.ActiveRecordIndex = _engine
 								.Navigate
 								.Using<ILineNumberNavigator>()
-								.Find(lineNumber, SearchType.ClosestMatch)
+								.Find(lineNumber, RecordSearchType.ClosestMatch)
 								.ToIndexUsing(_engine.Filter.Results);
 						}
 						catch (RecordNotFoundException e)
