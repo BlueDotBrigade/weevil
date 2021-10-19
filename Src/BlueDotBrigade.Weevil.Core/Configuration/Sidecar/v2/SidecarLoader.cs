@@ -10,7 +10,6 @@
 	using IO;
 	using Navigation;
 	using BlueDotBrigade.Weevil.Collections.Generic;
-	using Weevil.Collections.Immutable;
 	using Runtime.Serialization;
 
 	internal class SidecarLoader

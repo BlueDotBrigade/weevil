@@ -1,12 +1,11 @@
-﻿namespace BlueDotBrigade.Weevil.Collections.Immutable
+﻿namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Navigation;
 
-	public static class ImmutableArrayExtensions
+	public static class RecordCollectionExtensions
 	{
 		private const int AttemptCount = 16;
 

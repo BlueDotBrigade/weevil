@@ -6,7 +6,6 @@
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Collections.Generic;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.IO;
 	using Configuration.Sidecar;
 	using Data;

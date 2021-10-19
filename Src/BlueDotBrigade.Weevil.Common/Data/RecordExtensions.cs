@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Navigation;
 
 	public static class RecordExtensions

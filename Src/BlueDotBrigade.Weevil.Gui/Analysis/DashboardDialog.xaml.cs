@@ -4,7 +4,7 @@
 	using System.Collections.Immutable;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
 
 	/// <summary>
 	/// Interaction logic for DashboardDialog.xaml

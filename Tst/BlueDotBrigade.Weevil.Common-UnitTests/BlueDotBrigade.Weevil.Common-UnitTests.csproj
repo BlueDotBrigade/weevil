@@ -63,7 +63,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collections\Immutable\ImmutableArrayExtensionsTests.cs" />
+    <Compile Include="Data\RecordCollectionExtensionsTests.cs" />
     <Compile Include="Navigation\RecordSearchTests.cs" />
     <Compile Include="SimpleCallStackFormatterTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -102,6 +102,7 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Collections\Immutable\" />
     <Folder Include="Data\Comparers\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

@@ -1,14 +1,13 @@
-﻿namespace BlueDotBrigade.Weevil.Common.Collections.Immutable
+﻿namespace BlueDotBrigade.Weevil.Common.Data
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
-	public class ImmutableArrayExtensionsTests
+	public class RecordCollectionExtensionsTests
 	{
 		private ImmutableArray<IRecord> GetRecords(IList<DateTime> timestamps)
 		{

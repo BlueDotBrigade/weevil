@@ -6,7 +6,6 @@
 	using Data;
 	using Diagnostics;
 	using IO;
-	using Weevil.Collections.Immutable;
 	using Runtime.Serialization;
 
 	internal class LogMetadataLoader : ISidecarLoader
