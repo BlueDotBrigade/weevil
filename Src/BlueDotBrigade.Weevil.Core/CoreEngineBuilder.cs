@@ -256,7 +256,7 @@
 
 				foreach (IRecord record in selectedRecords)
 				{
-					if (visibleRecords.TryGetLine(record.LineNumber, out _))
+					if (visibleRecords.TryRecordOfLineNumber(record.LineNumber, out _ ))
 					{
 						result.Add(record);
 					}

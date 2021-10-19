@@ -60,7 +60,7 @@
 			{
 				foreach (RecordInfo recordInfo in _sidecar.CommonData.Records)
 				{
-					if (records.TryGetLine(recordInfo.RelatesTo.LineNumber, out IRecord record))
+					if (records.TryRecordOfLineNumber(recordInfo.RelatesTo.LineNumber, out IRecord record))
 					{
 						if (!string.IsNullOrWhiteSpace(record.Metadata.Comment))
 						{
@@ -187,7 +187,7 @@
 				{
 					foreach (RecordInfo oldRecord in oldData.CommonData.Records)
 					{
-						if (newData.Records.TryGetLine(oldRecord.RelatesTo.LineNumber, out IRecord newRecord))
+						if (newData.Records.TryRecordOfLineNumber(oldRecord.RelatesTo.LineNumber, out IRecord newRecord))
 						{
 							if (!string.IsNullOrWhiteSpace(newRecord.Metadata.Comment) ||
 								newRecord.Metadata.IsPinned)

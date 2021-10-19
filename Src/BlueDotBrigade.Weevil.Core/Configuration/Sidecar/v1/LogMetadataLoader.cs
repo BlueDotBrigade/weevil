@@ -49,7 +49,7 @@
 		{
 			foreach (Label label in _metadata.Labels)
 			{
-				if (allRecords.TryGetLine(label.LineNumber, out IRecord record))
+				if (allRecords.TryRecordOfLineNumber(label.LineNumber, out IRecord record))
 				{
 					if (!string.IsNullOrWhiteSpace(record.Metadata.Comment))
 					{

@@ -87,7 +87,7 @@
 				var previousLineNumber = _activeRecords[_activeIndex].LineNumber;
 
 				// Try to find the "record of interest" in the new collection
-				if (_activeRecords.TryGetIndexOf(previousLineNumber, out var index))
+				if (_activeRecords.TryIndexOfLineNumber(previousLineNumber, out var index))
 				{
 					_activeRecords = newRecordCollection;
 					_activeIndex = index;

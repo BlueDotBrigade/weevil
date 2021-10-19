@@ -79,10 +79,11 @@
 		}
 
 		/// <summary>
-		/// Attempts to find a record that has the same line number as the provided value.
+		/// Retrieves the index of the record with a matching line number.
 		/// </summary>
 		/// <param name="sourceRecords">The list of records to search.</param>
 		/// <param name="lineNumber">The line number to search for.</param>
+		/// <param name="searchType">Indicates what is considered an acceptable result.</param>
 		/// <returns>
 		/// <para>
 		/// The index of the specified <paramref name="lineNumber"/> in the array, if <paramref name="lineNumber"/> is found.
@@ -97,9 +98,42 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
+		/// <remarks>
+		/// This method is faster than a sequential search.
+		/// </remarks>
 		public static int IndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			return RecordSearch.IndexOfLineNumber(sourceRecords, lineNumber, searchType);
+		}
+
+		/// <summary>
+		/// Retrieves the index of the record with a matching <paramref name="lineNumber"/>.
+		/// </summary>
+		/// <param name="sourceRecords">A record collection sorted by ascending order.</param>
+		/// <param name="lineNumber">The value to search for.</param>
+		/// <param name="index">The position of the record in the <paramref name="sourceRecords"/> with the corresponding <paramref name="lineNumber"/>.</param>
+		/// <returns>True is returned if the collection has a matching line number.</returns>
+		/// <remarks>
+		/// This method is faster than a sequential search.
+		/// </remarks>
+		public static bool TryIndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
+		{
+			return RecordSearch.TryIndexOfLineNumber(sourceRecords, lineNumber, out index);
+		}
+
+		/// <summary>
+		/// Retrieves a record that has a matching <paramref name="lineNumber"/>.
+		/// </summary>
+		/// <param name="sourceRecords">The list of records to search.</param>
+		/// <param name="lineNumber">The line number to search for.</param>
+		/// <param name="result">Returns the matching result, or <see cref="Record.Dummy"/></param>
+		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
+		/// <remarks>
+		/// This method is faster than a sequential search.
+		/// </remarks>
+		public static bool TryRecordOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
+		{
+			return RecordSearch.TryRecordOfLineNumber(sourceRecords, lineNumber, out result);
 		}
 
 		/// <summary>
@@ -107,6 +141,7 @@
 		/// </summary>
 		/// <param name="sourceRecords">The list of records to search.</param>
 		/// <param name="createdAt">The timestamp to search for.</param>
+		/// <param name="searchType">Indicates what is considered an acceptable result.</param>
 		/// <returns>
 		/// <para>
 		/// The index of the specified <paramref name="createdAt"/> in the array, if <paramref name="createdAt"/> can be found.
@@ -121,33 +156,28 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
+		/// <remarks>
+		/// This method is faster than a sequential search.
+		/// </remarks>
 		public static int IndexOfCreatedAt(this ImmutableArray<IRecord> sourceRecords, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			return RecordSearch.IndexOfCreatedAt(sourceRecords, createdAt, searchType);
 		}
 
-		/// <summary>
-		/// Determines whether the collection has a result with the provided line number.
-		/// </summary>
-		/// <param name="sourceRecords">A record collection sorted by ascending order.</param>
-		/// <param name="lineNumber">The value to search for.</param>
-		/// <param name="index">The position of the record in the <paramref name="sourceRecords"/> with the corresponding <paramref name="lineNumber"/>.</param>
-		/// <returns>True is returned if the collection has a matching line number.</returns>
-		public static bool TryGetIndexOf(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
+		public static IRecord GetFirstCreatedAt(this ImmutableArray<IRecord> sourceRecords)
 		{
-			return RecordSearch.TryGetIndexOf(sourceRecords, lineNumber, out index);
-		}
+			IRecord result = Record.Dummy;
 
-		/// <summary>
-		/// Attempts to find a record that has the same line number as the provided value.
-		/// </summary>
-		/// <param name="sourceRecords">The list of records to search.</param>
-		/// <param name="lineNumber">The line number to search for.</param>
-		/// <param name="result">Returns the matching result, or <see cref="Record.Dummy"/></param>
-		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
-		public static bool TryGetLine(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
-		{
-			return RecordSearch.TryGetIndexOfLine(sourceRecords, lineNumber, out result);
+			for (int i = 0; i < sourceRecords.Length; i++)
+			{
+				if (sourceRecords[i].HasCreationTime)
+				{
+					result = sourceRecords[i];
+					break;
+				}
+			}
+
+			return result;
 		}
 
 		/// <summary>
@@ -208,22 +238,6 @@
 			}
 
 			return (from, to);
-		}
-
-		public static IRecord GetFirstCreatedAt(this ImmutableArray<IRecord> sourceRecords)
-		{
-			IRecord result = Record.Dummy;
-
-			for (int i = 0; i < sourceRecords.Length; i++)
-			{
-				if (sourceRecords[i].HasCreationTime)
-				{
-					result = sourceRecords[i];
-					break;
-				}
-			}
-
-			return result;
 		}
 	}
 }
