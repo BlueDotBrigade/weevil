@@ -63,7 +63,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collections\Immutable\ImmutableArrayExtensionsTests.cs" />
+    <Compile Include="Data\RecordCollectionExtensionsTests.cs" />
+    <Compile Include="Navigation\RecordSearchTests.cs" />
     <Compile Include="SimpleCallStackFormatterTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -90,13 +91,20 @@
       <Project>{b50f9fcd-32de-4609-b3d2-e0509b483793}</Project>
       <Name>BlueDotBrigade.Weevil.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj">
+      <Project>{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}</Project>
+      <Name>BlueDotBrigade.Weevil.TestingTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
       <Link>Properties\DomainSpecificTerminology.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Collections\Immutable\" />
+    <Folder Include="Data\Comparers\" />
+  </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

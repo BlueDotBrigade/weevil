@@ -3,22 +3,21 @@
 	using System;
 	using System.Diagnostics;
 	using System.Linq;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
-	[DebuggerDisplay("ActiveIndex={_navigator.ActiveIndex}, LineNumber={_navigator.ActiveRecord.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_navigator.Record.LineNumber}")]
 	internal class TimestampNavigator : ITimestampNavigator
 	{
-		private readonly RecordNavigator _navigator;
+		private readonly ActiveRecord _activeRecord;
 
-		public TimestampNavigator(RecordNavigator navigator)
+		public TimestampNavigator(ActiveRecord activeRecord)
 		{
-			_navigator = navigator;
+			_activeRecord = activeRecord;
 		}
 
-		public IRecord Find(string value)
+		public IRecord Find(string value, RecordSearchType searchType = RecordSearchType.ClosestMatch)
 		{
-			var firstRecord = _navigator.Records.GetFirstCreatedAt();
+			var firstRecord = _activeRecord.DataSource.GetFirstCreatedAt();
 
 			if (Record.IsDummyOrNull(firstRecord))
 			{
@@ -28,20 +27,8 @@
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =
 				ConvertToDateTime(firstRecord, value);
 
-			switch (SearchType.ClosestMatch)
-			{
-				case SearchType.ExactMatch:
-					// TODO: refactor code... weird we don't get index here
-					return _navigator.SetActiveLineNumber(0);
-
-				case SearchType.ClosestMatch:
-					var index = _navigator.Records.IndexOfCreatedAt(searchValue.referenceTime, SearchType.ClosestMatch);
-					var closestLineNumber = _navigator.Records[index].LineNumber;
-					return _navigator.SetActiveLineNumber(closestLineNumber);
-
-				//default:
-				//	throw new ArgumentOutOfRangeException(nameof(searchType), searchType, null);
-			}
+			var index = _activeRecord.DataSource.IndexOfCreatedAt(searchValue.referenceTime, searchType);
+			return _activeRecord.SetActiveIndex(index);
 		}
 
 

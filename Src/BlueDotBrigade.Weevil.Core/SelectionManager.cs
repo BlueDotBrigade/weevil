@@ -7,7 +7,6 @@
 	using System.IO;
 	using System.Linq;
 	using Analysis;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using Data;
 	using IO;

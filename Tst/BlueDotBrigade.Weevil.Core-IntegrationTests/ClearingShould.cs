@@ -3,7 +3,6 @@
 	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Weevil.Collections.Immutable;
 
 	[TestClass]
 	public class ClearingShould

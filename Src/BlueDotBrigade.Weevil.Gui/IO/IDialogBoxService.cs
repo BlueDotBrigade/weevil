@@ -11,5 +11,7 @@
 		string ShowSaveFile(string targetDirectory, string targetFileName);
 
 		void ShowDashboard(ImmutableArray<IInsight> insights, IEngine engine);
+
+		string ShowGoTo(string defaultValue);
 	}
 }

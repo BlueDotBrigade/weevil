@@ -33,7 +33,6 @@
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using PostSharp.Extensibility;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
@@ -956,13 +955,28 @@
 		{
 			if (_dialogBox.TryShowFind(out var findNext, out _findText))
 			{
-				if (findNext)
+				try
 				{
-					FindNext();
+					if (findNext)
+					{
+						FindNext();
+					}
+					else
+					{
+						FindPrevious();
+					}
 				}
-				else
+				catch (RecordNotFoundException e)
 				{
-					FindPrevious();
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						e,
+						$"Unable to find the given text. Value={_findText}");
+
+					MessageBox.Show($"Unable to find the given text: {_findText}.\r\nValue might not exist in the filter results.",
+						"Not Found",
+						MessageBoxButton.OK,
+						MessageBoxImage.Information);
 				}
 			}
 		}
@@ -971,22 +985,11 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				try
-				{
-					this.ActiveRecordIndex = _engine
-						.Navigate
-						.Using<ITextNavigator>()
-						.FindNext(_findText)
-						.ToIndexUsing(_engine.Filter.Results);
-				}
-				catch (RecordNotFoundException e)
-				{
-					var message = $"Text could not be found in the filter results: {_findText}";
-					Log.Default.Write(LogSeverityType.Warning, message);
-
-					MessageBox.Show(message, "Text Not Found",
-						MessageBoxButton.OK, MessageBoxImage.Warning);
-				}
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.Using<ITextNavigator>()
+					.FindNext(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
@@ -994,22 +997,11 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				try
-				{
-					this.ActiveRecordIndex = _engine
-						.Navigate
-						.Using<ITextNavigator>()
-						.FindPrevious(_findText)
-						.ToIndexUsing(_engine.Filter.Results);
-				}
-				catch (RecordNotFoundException e)
-				{
-					var message = $"Text could not be found in the filter results: {_findText}";
-					Log.Default.Write(LogSeverityType.Warning, message);
-
-					MessageBox.Show(message, "Text Not Found",
-						MessageBoxButton.OK, MessageBoxImage.Warning);
-				}
+				this.ActiveRecordIndex = _engine
+					.Navigate
+					.Using<ITextNavigator>()
+					.FindPrevious(_findText)
+					.ToIndexUsing(_engine.Filter.Results);
 			}
 		}
 
@@ -1024,7 +1016,7 @@
 
 		public void GoTo()
 		{
-			var userValue = _dialogBox.ShowUserPrompt("Go To", "Enter timestamp or line:", string.Empty);
+			var userValue = _dialogBox.ShowGoTo(string.Empty);
 
 			if (string.IsNullOrWhiteSpace(userValue))
 			{
@@ -1035,11 +1027,26 @@
 				// Did the user provide a timestamp?
 				if (userValue.Contains(":"))
 				{
-					this.ActiveRecordIndex = _engine
+					try
+					{
+						this.ActiveRecordIndex = _engine
 						.Navigate
 						.Using<ITimestampNavigator>()
-						.Find(userValue)
+						.Find(userValue, RecordSearchType.ClosestMatch)
 						.ToIndexUsing(_engine.Filter.Results);
+					}
+					catch (RecordNotFoundException e)
+					{
+						Log.Default.Write(
+							LogSeverityType.Warning,
+							e,
+							$"Unable to find the given timestamp. Value={userValue}");
+
+						MessageBox.Show($"Unable to find the given timestamp: {userValue}.\r\nValue might not exist in the filter results.",
+							"Not Found",
+							MessageBoxButton.OK,
+							MessageBoxImage.Information);
+					}
 				}
 				else
 				{
@@ -1050,16 +1057,17 @@
 							this.ActiveRecordIndex = _engine
 								.Navigate
 								.Using<ILineNumberNavigator>()
-								.Find(lineNumber)
+								.Find(lineNumber, RecordSearchType.ClosestMatch)
 								.ToIndexUsing(_engine.Filter.Results);
 						}
 						catch (RecordNotFoundException e)
 						{
 							Log.Default.Write(
 								LogSeverityType.Warning,
-								$"Unable to find the given line number. Value={e.LineNumber}");
+								e,
+								$"Unable to find the given line number. Value={lineNumber}");
 
-							MessageBox.Show($"Unable to find the given line number. Value={e.LineNumber}", 
+							MessageBox.Show($"Unable to find the given line number: {lineNumber}.\r\nValue might not exist in the filter results.", 
 								"Not Found",
 								MessageBoxButton.OK, 
 								MessageBoxImage.Information);
@@ -1067,7 +1075,7 @@
 					}
 					else
 					{
-						MessageBox.Show("Go to line number has failed.  Please enter a valid number.", 
+						MessageBox.Show("Unable to perform go to operation.  Please enter a valid number.", 
 							"Error", 
 							MessageBoxButton.OK, 
 							MessageBoxImage.Error);

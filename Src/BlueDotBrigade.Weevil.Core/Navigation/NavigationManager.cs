@@ -13,7 +13,7 @@
 		private readonly string _sourceFilePath;
 		private readonly ICoreExtension _coreCoreExtension;
 
-		private readonly RecordNavigator _recordNavigator;
+		private readonly ActiveRecord _activeRecord;
 		private ImmutableArray<INavigator> _navigators;
 
 		private TableOfContents _tableOfContents;
@@ -24,14 +24,14 @@
 			_coreCoreExtension = coreExtension;
 			_tableOfContents = tableOfContents;
 
-			_recordNavigator = new RecordNavigator(allRecords);
+			_activeRecord = new ActiveRecord(allRecords);
 
 			_navigators = new List<INavigator>
 			{
-				new LineNumberNavigator(_recordNavigator),
-				new TimestampNavigator(_recordNavigator),
-				new TextNavigator(_recordNavigator),
-				new PinNavigator(_recordNavigator),
+				new LineNumberNavigator(_activeRecord),
+				new TimestampNavigator(_activeRecord),
+				new TextNavigator(_activeRecord),
+				new PinNavigator(_activeRecord),
 			}.ToImmutableArray();
 		}
 
@@ -46,12 +46,13 @@
 
 		internal void SetActiveLineNumber(int lineNumber)
 		{
-			_recordNavigator.SetActiveLineNumber(lineNumber);
+			var index = _activeRecord.DataSource.IndexOfLineNumber(lineNumber);
+			_activeRecord.SetActiveIndex(index);
 		}
 
 		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
-			_recordNavigator.UpdateDataSource(filterResults);
+			_activeRecord.UpdateDataSource(filterResults);
 		}
 
 		public INavigate RebuildTableOfContents()

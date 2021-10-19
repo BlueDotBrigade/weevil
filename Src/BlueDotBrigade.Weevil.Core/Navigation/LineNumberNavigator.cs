@@ -2,40 +2,27 @@
 {
 	using System;
 	using System.Diagnostics;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
 	internal class LineNumberNavigator : ILineNumberNavigator
 	{
-		private readonly RecordNavigator _navigator;
+		private readonly ActiveRecord _activeRecord;
 
-		public LineNumberNavigator(RecordNavigator navigator)
+		public LineNumberNavigator(ActiveRecord activeRecord)
 		{
-			_navigator = navigator;
+			_activeRecord = activeRecord;
 		}
 
 		public IRecord Find(int lineNumber)
 		{
-			return Find(lineNumber, SearchType.ExactMatch);
+			return Find(lineNumber, RecordSearchType.ExactMatch);
 		}
 
-		public IRecord Find(int lineNumber, SearchType searchType)
+		public IRecord Find(int lineNumber, RecordSearchType searchType)
 		{
-			switch (searchType)
-			{
-				case SearchType.ExactMatch:
-					// TODO: refactor code... weird we don't get index here
-					return _navigator.SetActiveLineNumber(lineNumber);
-
-				case SearchType.ClosestMatch:
-					var index = _navigator.Records.IndexOfLineNumber(lineNumber, SearchType.ClosestMatch);
-					var closestLineNumber = _navigator.Records[index].LineNumber;
-					return _navigator.SetActiveLineNumber(closestLineNumber);
-
-				default:
-					throw new ArgumentOutOfRangeException(nameof(searchType), searchType, null);
-			}
+			var index = _activeRecord.DataSource.IndexOfLineNumber(lineNumber, searchType);
+			return _activeRecord.SetActiveIndex(index);
 		}
 	}
 }

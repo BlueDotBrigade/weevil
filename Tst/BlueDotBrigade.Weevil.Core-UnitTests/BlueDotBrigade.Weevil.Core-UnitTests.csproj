@@ -68,7 +68,6 @@
     <Compile Include="Analysis\Timeline\DataTransitionAnalyzerTest.cs" />
     <Compile Include="Analysis\TimeGapAnalyzerTest.cs" />
     <Compile Include="Analysis\TimeGapUiAnalyzerTests.cs" />
-    <Compile Include="Data\R.cs" />
     <Compile Include="Data\TsvRecordParserTest.cs" />
     <Compile Include="Data\MultiLineRecordParserTest.cs" />
     <Compile Include="Filter\Expressions\Monikers\ElapsedGreaterThanExpressionTest.cs" />
@@ -81,7 +80,7 @@
     <Compile Include="Navigation\PinNavigatorTest.cs" />
     <Compile Include="Navigation\LineNumberNavigatorTests.cs" />
     <Compile Include="Navigation\TimestampNavigatorTests.cs" />
-    <Compile Include="Navigation\RecordNavigatorTests.cs" />
+    <Compile Include="Navigation\ActiveRecordTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestEnvironment.cs" />
     <Compile Include="SelectionManagerTest.cs" />
@@ -108,6 +107,10 @@
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj">
       <Project>{29bd191a-f2d0-4769-b325-6afe68c3e7cf}</Project>
       <Name>BlueDotBrigade.Weevil.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj">
+      <Project>{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}</Project>
+      <Name>BlueDotBrigade.Weevil.TestingTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

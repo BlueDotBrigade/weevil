@@ -1,11 +1,11 @@
-﻿namespace BlueDotBrigade.Weevil
+﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using System;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.Navigation;
+	using BlueDotBrigade.Weevil.Navigation.Comparers;
 
-	internal static class BinarySearchHelper
+	internal sealed class RecordSearch
 	{
 		/// <summary>
 		/// Attempts to find a record that has the same line number as the provided value.
@@ -27,77 +27,38 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
-		public static int IndexOfLineNumber(ImmutableArray<IRecord> records, int lineNumber, SearchType searchType = SearchType.ExactMatch)
+		public static int IndexOfLineNumber(ImmutableArray<IRecord> records, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
-			if (records.Length == 0)
-			{
-				throw new RecordNotFoundException(lineNumber);
-			}
-
 			var desiredRecord = new Record(
 				lineNumber,
 				Record.CreationTimeUnknown,
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching of line number: {lineNumber}");
 
-			var index = records.BinarySearch(desiredRecord, new RecordLineNumberComparer());
-
-			if (searchType == SearchType.ClosestMatch)
-			{
-				// Unable to find exact match?
-				if (index < 0)
-				{
-					if (records.Length == 1)
-					{
-						index = 0; // return the first & only record
-					}
-					// desired value less than first value in array?
-					else if (index == -1)
-					{
-						index = 0;
-					}
-					// Is desired value greater than last value in array?
-					else if (Math.Abs(index) - 1 == records.Length)
-					{
-						index = records.Length - 1;
-					}
-					else
-					{
-						var aboveIndex = Math.Abs(index) - 1;
-						var belowIndex = Math.Abs(aboveIndex) - 1;
-
-						var aboveDelta = Math.Abs(records[aboveIndex].LineNumber - lineNumber);
-						var belowDelta = Math.Abs(records[belowIndex].LineNumber - lineNumber);
-
-						index = belowDelta < aboveDelta ? belowIndex : aboveIndex;
-					}
-				}
-			}
-
-			if (index < 0 || index > records.Length - 1)
-			{
-				throw new RecordNotFoundException(index);
-			}
-
-			return index;
+			return IndexOf(records, desiredRecord, new LineNumberComparer(), searchType);
 		}
 
-		public static int IndexOfCreatedAt(ImmutableArray<IRecord> records, DateTime createdAt, SearchType searchType = SearchType.ExactMatch)
+		public static int IndexOfCreatedAt(ImmutableArray<IRecord> records, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
-			if (records.Length == 0)
-			{
-				throw new RecordNotFoundException(-1);
-			}
-
 			var desiredRecord = new Record(
 				0,
 				createdAt,
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for a record created at: {createdAt}");
 
-			var index = records.BinarySearch(desiredRecord, new RecordCreatedAtComparer());
+			return IndexOf(records, desiredRecord, new CreatedAtComparer(), searchType);
+		}
 
-			if (searchType == SearchType.ClosestMatch)
+		private static int IndexOf(ImmutableArray<IRecord> records, IRecord desiredRecord, MagnitudeComparer comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
+		{
+			if (records.Length == 0)
+			{
+				throw new RecordNotFoundException(-1);
+			}
+
+			var index = records.BinarySearch(desiredRecord, comparer);
+
+			if (searchType == RecordSearchType.ClosestMatch)
 			{
 				// Unable to find exact match?
 				if (index < 0)
@@ -118,16 +79,21 @@
 					}
 					else
 					{
-						var aboveIndex = Math.Abs(index) - 1;
-						var belowIndex = Math.Abs(aboveIndex) - 1;
+						// The index needs to take into consideration that this is a zero based array.
+						const int ZeroOffsetAdjustment = -1;
 
-						var aboveTimespan = records[aboveIndex].CreatedAt - createdAt;
-						var belowTimespan = records[belowIndex].CreatedAt - createdAt;
+						// Consider the following: if the user searched for 10:31 then the closest match would be Record#8.
+						// [Record 8] created at 10:30
+						// [Record 9] created at 11:00
+						var precedingIndex = Math.Abs(index) - 1 + ZeroOffsetAdjustment;
+						var currentIndex = Math.Abs(index) - 0 + ZeroOffsetAdjustment;
 
-						var aboveDelta = Math.Abs(aboveTimespan.TotalMilliseconds);
-						var belowDelta = Math.Abs(belowTimespan.TotalMilliseconds);
+						var precedingDelta = Math.Abs(comparer.CompareMagnitude(desiredRecord, records[precedingIndex]));
+						var currentDelta = Math.Abs(comparer.CompareMagnitude(records[currentIndex], desiredRecord));
 
-						index = belowDelta < aboveDelta ? belowIndex : aboveIndex;
+						// Is the desired value (e.g. 10:31) closer to the current record,
+						// ... or the one that preceded it (e.g. Record#8)?
+						index = precedingDelta < currentDelta ? precedingIndex : currentIndex;
 					}
 				}
 			}
@@ -147,7 +113,7 @@
 		/// <param name="lineNumber">The value to search for.</param>
 		/// <param name="index">The position of the record in the <paramref name="sourceRecords"/> with the corresponding <paramref name="lineNumber"/>.</param>
 		/// <returns>True is returned if the collection has a matching line number.</returns>
-		public static bool TryGetIndexOf(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
+		public static bool TryIndexOfLineNumber(ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
 		{
 			var desiredRecord = new Record(
 				lineNumber,
@@ -155,7 +121,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for line number: {lineNumber}");
 
-			index = sourceRecords.BinarySearch(desiredRecord, new RecordLineNumberComparer());
+			index = sourceRecords.BinarySearch(desiredRecord, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			return wasFound;
@@ -168,7 +134,7 @@
 		/// <param name="lineNumber">The line number to search for.</param>
 		/// <param name="result">Returns the matching result, or <see cref="Record.Dummy"/></param>
 		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
-		public static bool TryGetLine(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
+		public static bool TryRecordOfLineNumber(ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
 		{
 			result = Record.Dummy;
 
@@ -178,7 +144,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for line number: {lineNumber}");
 
-			var index = sourceRecords.BinarySearch(desiredRecord, new RecordLineNumberComparer());
+			var index = sourceRecords.BinarySearch(desiredRecord, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			if (wasFound)

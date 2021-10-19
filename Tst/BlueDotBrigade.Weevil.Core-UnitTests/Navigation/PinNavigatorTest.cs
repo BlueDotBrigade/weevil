@@ -25,7 +25,7 @@
 
 			Assert.AreEqual(
 				Record.Dummy, 
-				new PinNavigator(new RecordNavigator(records)).FindNext());
+				new PinNavigator(new ActiveRecord(records)).FindNext());
 		}
 
 		[TestMethod]
@@ -48,7 +48,7 @@
 
 			Assert.AreEqual(
 				52, 
-				new PinNavigator(new RecordNavigator(records)).FindNext().LineNumber);
+				new PinNavigator(new ActiveRecord(records)).FindNext().LineNumber);
 		}
 
 		[TestMethod]
@@ -68,7 +68,7 @@
 			records[2].Metadata.IsPinned = true;
 			records[8].Metadata.IsPinned = true;
 
-			var navigator = new PinNavigator(new RecordNavigator(records));
+			var navigator = new PinNavigator(new ActiveRecord(records));
 
 			Assert.AreEqual(52, navigator.FindNext().LineNumber);
 			Assert.AreEqual(58, navigator.FindNext().LineNumber);

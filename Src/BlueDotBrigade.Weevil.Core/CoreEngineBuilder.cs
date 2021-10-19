@@ -6,7 +6,6 @@
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Collections.Generic;
-	using BlueDotBrigade.Weevil.Collections.Immutable;
 	using BlueDotBrigade.Weevil.IO;
 	using Configuration.Sidecar;
 	using Data;
@@ -257,7 +256,7 @@
 
 				foreach (IRecord record in selectedRecords)
 				{
-					if (visibleRecords.TryGetLine(record.LineNumber, out _))
+					if (visibleRecords.TryRecordOfLineNumber(record.LineNumber, out _ ))
 					{
 						result.Add(record);
 					}

@@ -9,7 +9,6 @@
 	using Analysis;
 	using Data;
 	using Diagnostics;
-	using Weevil.Collections.Immutable;
 
 	[DebuggerDisplay("Results={Results.Length}, InclusiveFilter={_currentFilter.Criteria.Include}")]
 	internal class FilterManager : IClonableInternally<FilterManager>, IFilter
