@@ -148,7 +148,7 @@
 		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
 		public static bool TryGetLine(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
 		{
-			return RecordSearch.TryGetLine(sourceRecords, lineNumber, out result);
+			return RecordSearch.TryGetIndexOfLine(sourceRecords, lineNumber, out result);
 		}
 
 		/// <summary>

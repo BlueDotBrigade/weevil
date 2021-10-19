@@ -5,7 +5,7 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Navigation.Comparers;
 
-	internal static class RecordSearch
+	internal sealed class RecordSearch
 	{
 		/// <summary>
 		/// Attempts to find a record that has the same line number as the provided value.
@@ -113,7 +113,7 @@
 		/// <param name="lineNumber">The value to search for.</param>
 		/// <param name="index">The position of the record in the <paramref name="sourceRecords"/> with the corresponding <paramref name="lineNumber"/>.</param>
 		/// <returns>True is returned if the collection has a matching line number.</returns>
-		public static bool TryGetIndexOf(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
+		public static bool TryGetIndexOf(ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
 		{
 			var desiredRecord = new Record(
 				lineNumber,
@@ -134,7 +134,7 @@
 		/// <param name="lineNumber">The line number to search for.</param>
 		/// <param name="result">Returns the matching result, or <see cref="Record.Dummy"/></param>
 		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
-		public static bool TryGetLine(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
+		public static bool TryGetIndexOfLine(ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
 		{
 			result = Record.Dummy;
 
