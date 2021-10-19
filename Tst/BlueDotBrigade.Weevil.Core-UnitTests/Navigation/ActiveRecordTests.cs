@@ -20,80 +20,6 @@
 		}
 
 		[TestMethod]
-		public void GoToNext_FirstSearch_ReturnsRecord10()
-		{
-			var records = new List<IRecord>
-			{
-				R.WithLineNumber(10),
-				R.WithLineNumber(20),
-				R.WithLineNumber(30),
-			};
-
-			var navigator = new ActiveRecord(records);
-			navigator.GoToNext(record => record.LineNumber > 0);
-
-			Assert.AreEqual(
-				10,
-				navigator.Record.LineNumber);
-		}
-
-		[TestMethod]
-		public void GoToNext_SecondSearch_ReturnsRecord20()
-		{
-			var records = new List<IRecord>
-			{
-				R.WithLineNumber(10),
-				R.WithLineNumber(20),
-				R.WithLineNumber(30),
-			};
-
-			var navigator = new ActiveRecord(records);
-			navigator.GoToNext(record => record.LineNumber > 0);
-			navigator.GoToNext(record => record.LineNumber > 0);
-
-			Assert.AreEqual(
-				20,
-				navigator.Record.LineNumber);
-		}
-
-		[TestMethod]
-		public void GoToPrevious_FirstSearch_ReturnsRecord30()
-		{
-			var records = new List<IRecord>
-			{
-				R.WithLineNumber(10),
-				R.WithLineNumber(20),
-				R.WithLineNumber(30),
-			};
-
-			var navigator = new ActiveRecord(records);
-			navigator.GoToPrevious(record => record.LineNumber > 0);
-
-			Assert.AreEqual(
-				30,
-				navigator.Record.LineNumber);
-		}
-
-		[TestMethod]
-		public void GoToPrevious_SecondSearch_ReturnsRecord30()
-		{
-			var records = new List<IRecord>
-			{
-				R.WithLineNumber(10),
-				R.WithLineNumber(20),
-				R.WithLineNumber(30),
-			};
-
-			var navigator = new ActiveRecord(records);
-			navigator.GoToPrevious(record => record.LineNumber > 0);
-			navigator.GoToPrevious(record => record.LineNumber > 0);
-
-			Assert.AreEqual(
-				20,
-				navigator.Record.LineNumber);
-		}
-
-		[TestMethod]
 		[ExpectedException((typeof(ArgumentException)))]
 		public void UpdateDataSource_UninitializedArray_ThrowsArgumentException()
 		{
@@ -107,13 +33,13 @@
 		{
 			var records = new List<IRecord>
 			{
-				R.WithLineNumber(10),
-				R.WithLineNumber(20),
-				R.WithLineNumber(30),
+				R.WithLineNumber(10), // 0
+				R.WithLineNumber(20), // 1
+				R.WithLineNumber(30), // 2
 			};
 
 			var navigator = new ActiveRecord(records);
-			navigator.SetActiveLineNumber(10);
+			navigator.SetActiveIndex(2);
 
 			navigator.UpdateDataSource(ImmutableArray.Create<IRecord>());
 

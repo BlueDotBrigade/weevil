@@ -6,11 +6,11 @@
 	[DebuggerDisplay("ActiveIndex={_navigator.Index}, LineNumber={_navigator.Record.LineNumber}")]
 	internal class PinNavigator : IPinNavigator
 	{
-		private readonly ActiveRecord _navigator;
+		private readonly ActiveRecord _activeRecord;
 
-		public PinNavigator(ActiveRecord navigator)
+		public PinNavigator(ActiveRecord activeRecord)
 		{
-			_navigator = navigator;
+			_activeRecord = activeRecord;
 		}
 
 		private bool CheckIsPinned(IRecord record)
@@ -26,7 +26,10 @@
 		/// </returns>
 		public IRecord FindPrevious()
 		{
-			return _navigator.GoToPrevious(CheckIsPinned);
+			var resultAt = _activeRecord
+				.DataSource
+				.GoToPrevious(_activeRecord.Index, CheckIsPinned);
+			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
 		/// <summary>
@@ -37,7 +40,10 @@
 		/// </returns>
 		public IRecord FindNext()
 		{
-			return _navigator.GoToNext(CheckIsPinned);
+			var resultAt = _activeRecord
+				.DataSource
+				.GoToNext(_activeRecord.Index, CheckIsPinned);
+			return _activeRecord.SetActiveIndex(resultAt);
 		}
 	}
 }

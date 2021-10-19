@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.TestingTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -79,6 +80,90 @@
 			var range = records.GetEstimatedRange();
 
 			Assert.AreEqual(new DateTime(2021, 04, 12), range.To);
+		}
+
+		[TestMethod]
+		public void GoToNext_UnknownStartingPosition_ReturnsRecord10()
+		{
+			var records = new List<IRecord>
+			{
+				R.WithLineNumber(10), // 0
+				R.WithLineNumber(20), // 1 
+				R.WithLineNumber(30), // 2
+			};
+
+			const int UnknownStartingPosition = -1;
+
+			var indexOfResult = records
+				.ToImmutableArray()
+				.GoToNext(UnknownStartingPosition, record => record.LineNumber > 0);
+
+			Assert.AreEqual(
+				10,
+				records[indexOfResult].LineNumber);
+		}
+
+		[TestMethod]
+		public void GoToNext_StartingAtFirst_ReturnsRecord20()
+		{
+			var records = new List<IRecord>
+			{
+				R.WithLineNumber(10), // 0
+				R.WithLineNumber(20), // 1 
+				R.WithLineNumber(30), // 2
+			};
+
+			const int IndexOfFirstRecord = 0;
+
+			var indexOfResult = records
+				.ToImmutableArray()
+				.GoToNext(IndexOfFirstRecord, record => record.LineNumber > 0);
+
+			Assert.AreEqual(
+				20,
+				records[indexOfResult].LineNumber);
+		}
+
+		[TestMethod]
+		public void GoToPrevious_UnknownStartingPosition_ReturnsRecord30()
+		{
+			var records = new List<IRecord>
+			{
+				R.WithLineNumber(10), // 0
+				R.WithLineNumber(20), // 1 
+				R.WithLineNumber(30), // 2
+			};
+
+			const int UnknownStartingPosition = -1;
+
+			var indexOfResult = records
+				.ToImmutableArray()
+				.GoToPrevious(UnknownStartingPosition, record => record.LineNumber > 0);
+
+			Assert.AreEqual(
+				30,
+				records[indexOfResult].LineNumber);
+		}
+
+		[TestMethod]
+		public void GoToPrevious_StartingAtLast_ReturnsRecord30()
+		{
+			var records = new List<IRecord>
+			{
+				R.WithLineNumber(10), // 0
+				R.WithLineNumber(20), // 1 
+				R.WithLineNumber(30), // 2
+			};
+
+			const int IndexOfLastRecord = 2;
+
+			var indexOfResult = records
+				.ToImmutableArray()
+				.GoToPrevious(IndexOfLastRecord,record => record.LineNumber > 0);
+
+			Assert.AreEqual(
+				20,
+				records[indexOfResult].LineNumber);
 		}
 	}
 }

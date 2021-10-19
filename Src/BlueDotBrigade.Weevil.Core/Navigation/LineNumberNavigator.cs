@@ -7,11 +7,11 @@
 	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
 	internal class LineNumberNavigator : ILineNumberNavigator
 	{
-		private readonly ActiveRecord _navigator;
+		private readonly ActiveRecord _activeRecord;
 
-		public LineNumberNavigator(ActiveRecord navigator)
+		public LineNumberNavigator(ActiveRecord activeRecord)
 		{
-			_navigator = navigator;
+			_activeRecord = activeRecord;
 		}
 
 		public IRecord Find(int lineNumber)
@@ -21,20 +21,8 @@
 
 		public IRecord Find(int lineNumber, RecordSearchType searchType)
 		{
-			switch (searchType)
-			{
-				case RecordSearchType.ExactMatch:
-					// TODO: refactor code... weird we don't get index here
-					return _navigator.SetActiveLineNumber(lineNumber);
-
-				case RecordSearchType.ClosestMatch:
-					var index = _navigator.Records.IndexOfLineNumber(lineNumber, RecordSearchType.ClosestMatch);
-					var closestLineNumber = _navigator.Records[index].LineNumber;
-					return _navigator.SetActiveLineNumber(closestLineNumber);
-
-				default:
-					throw new ArgumentOutOfRangeException(nameof(searchType), searchType, null);
-			}
+			var index = _activeRecord.DataSource.IndexOfLineNumber(lineNumber, searchType);
+			return _activeRecord.SetActiveIndex(index);
 		}
 	}
 }

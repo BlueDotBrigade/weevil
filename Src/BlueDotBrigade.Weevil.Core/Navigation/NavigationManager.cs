@@ -46,7 +46,8 @@
 
 		internal void SetActiveLineNumber(int lineNumber)
 		{
-			_activeRecord.SetActiveLineNumber(lineNumber);
+			var index = _activeRecord.DataSource.IndexOfLineNumber(lineNumber);
+			_activeRecord.SetActiveIndex(index);
 		}
 
 		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)

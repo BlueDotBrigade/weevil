@@ -1032,7 +1032,7 @@
 						this.ActiveRecordIndex = _engine
 						.Navigate
 						.Using<ITimestampNavigator>()
-						.Find(userValue)
+						.Find(userValue, RecordSearchType.ClosestMatch)
 						.ToIndexUsing(_engine.Filter.Results);
 					}
 					catch (RecordNotFoundException e)

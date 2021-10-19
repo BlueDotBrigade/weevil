@@ -3,24 +3,30 @@
 	using System.Diagnostics;
 	using BlueDotBrigade.Weevil.Data;
 
-	[DebuggerDisplay("ActiveIndex={_navigator.Index}, LineNumber={_navigator.Record.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_navigator.Record.LineNumber}")]
 	internal class TextNavigator : ITextNavigator
 	{
-		private readonly ActiveRecord _navigator;
+		private readonly ActiveRecord _activeRecord;
 
-		public TextNavigator(ActiveRecord navigator)
+		public TextNavigator(ActiveRecord activeRecord)
 		{
-			_navigator = navigator;
+			_activeRecord = activeRecord;
 		}
 
 		public IRecord FindPrevious(string value)
 		{
-			return _navigator.GoToPrevious(record => record.Content.Contains(value));
+			var resultAt = _activeRecord
+				.DataSource
+				.GoToPrevious(_activeRecord.Index, record => record.Content.Contains(value));
+			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
 		public IRecord FindNext(string value)
 		{
-			return _navigator.GoToNext(record => record.Content.Contains(value));
+			var resultAt = _activeRecord
+				.DataSource
+				.GoToNext(_activeRecord.Index, record => record.Content.Contains(value));
+			return _activeRecord.SetActiveIndex(resultAt);
 		}
 	}
 }

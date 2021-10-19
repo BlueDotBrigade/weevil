@@ -9,19 +9,19 @@
 	{
 		private const int AttemptCount = 16;
 
-		private static DateTime EstimateFirstTimestamp(ImmutableArray<IRecord> records)
+		private static DateTime EstimateFirstTimestamp(ImmutableArray<IRecord> sourceRecords)
 		{
 			var result = Record.CreationTimeUnknown;
 
-			var maxIndex = records.Length < AttemptCount
-				? records.Length
+			var maxIndex = sourceRecords.Length < AttemptCount
+				? sourceRecords.Length
 				: AttemptCount;
 
 			for (var i = 0; i < maxIndex; i++)
 			{
-				if (records[i].HasCreationTime)
+				if (sourceRecords[i].HasCreationTime)
 				{
-					result = records[i].CreatedAt;
+					result = sourceRecords[i].CreatedAt;
 					break;
 				}
 			}
@@ -29,19 +29,19 @@
 			return result;
 		}
 
-		private static DateTime EstimateLastTimestamp(ImmutableArray<IRecord> records)
+		private static DateTime EstimateLastTimestamp(ImmutableArray<IRecord> sourceRecords)
 		{
 			var result = Record.CreationTimeUnknown;
 
-			var minIndex = records.Length > AttemptCount
-				? records.Length - AttemptCount - 1
+			var minIndex = sourceRecords.Length > AttemptCount
+				? sourceRecords.Length - AttemptCount - 1
 				: 0;
 
-			for (var i = records.Length-1; minIndex <= i; i--)
+			for (var i = sourceRecords.Length-1; minIndex <= i; i--)
 			{
-				if (records[i].HasCreationTime)
+				if (sourceRecords[i].HasCreationTime)
 				{
-					result = records[i].CreatedAt;
+					result = sourceRecords[i].CreatedAt;
 					break;
 				}
 			}
@@ -53,24 +53,24 @@
 		/// Compresses the size of the array by removing default values (e.g. null).
 		/// </summary>
 		/// <typeparam name="T">The array type.</typeparam>
-		/// <param name="source">The array to be compressed.</param>
+		/// <param name="sourceRecords">The array to be compressed.</param>
 		/// <param name="count">The number of non-default items in the array.</param>
 		/// <returns>A new array that does not include default (e.g. `null`) values.</returns>
-		public static ImmutableArray<T> Compact<T>(this ImmutableArray<T> source, int count)
+		public static ImmutableArray<T> Compact<T>(this ImmutableArray<T> sourceRecords, int count)
 		{
 			var compressedResults = new T[count];
 
 			var insertAt = 0;
 
-			for (var i = 0; i < source.Length; i++)
+			for (var i = 0; i < sourceRecords.Length; i++)
 			{
-				if (EqualityComparer<T>.Default.Equals(source[i], default(T)))
+				if (EqualityComparer<T>.Default.Equals(sourceRecords[i], default(T)))
 				{
 					// points to null
 				}
 				else
 				{
-					compressedResults[insertAt] = source[i];
+					compressedResults[insertAt] = sourceRecords[i];
 					insertAt++;
 				}
 			}
@@ -183,17 +183,17 @@
 		/// <summary>
 		/// Returns a reference to the first result.
 		/// </summary>
-		public static IRecord First(this ImmutableArray<IRecord> array)
+		public static IRecord First(this ImmutableArray<IRecord> sourceRecords)
 		{
-			return array[0];
+			return sourceRecords[0];
 		}
 
 		/// <summary>
 		/// Returns a reference to the last result.
 		/// </summary>
-		public static IRecord Last(this ImmutableArray<IRecord> array)
+		public static IRecord Last(this ImmutableArray<IRecord> sourceRecords)
 		{
-			return array[array.Length - 1];
+			return sourceRecords[sourceRecords.Length - 1];
 		}
 
 		public static (DateTime From, DateTime To) GetRange(this ImmutableArray<IRecord> sourceRecords)
@@ -238,6 +238,92 @@
 			}
 
 			return (from, to);
+		}
+
+		/// <summary>
+		/// Navigates through records in descending order (e.g. lines: 8, 5, 3, 2).
+		/// </summary>
+		/// <param name="sourceRecords">The record collection to search.</param>
+		/// <param name="startAt">The index to start searching from. Defaults to zero (0) when <paramref name="startAt"/> is -1.</param>
+		/// <param name="checkIfMatches"></param>
+		/// <returns>
+		/// Returns the <see cref="Data.Record"/> that matches the search criteria.
+		/// </returns>
+		/// <exception cref="RecordNotFoundException"/>
+		public static int GoToPrevious(this ImmutableArray<IRecord> sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
+		{
+			const int UnknownActiveRecord = -1;
+
+			if (sourceRecords.Length == 0)
+			{
+				return UnknownActiveRecord;
+			}
+			else
+			{
+				var wasFound = false;
+				var index = startAt >= 0 ? startAt : UnknownActiveRecord;
+
+				var indexOfResult = UnknownActiveRecord;
+
+				for (var i = 0; i < sourceRecords.Length; i++)
+				{
+					index = index - 1 < 0 ? sourceRecords.Length - 1 : index - 1;
+
+					if (checkIfMatches(sourceRecords[index]))
+					{
+						indexOfResult = index;
+						wasFound = true;
+						break;
+					}
+				}
+
+				return wasFound
+					? indexOfResult
+					: throw new RecordNotFoundException(-1);
+			}
+		}
+
+		/// <summary>
+		/// Navigates through records in ascending order (e.g. lines: 2, 4, 8, 16).
+		/// </summary>
+		/// <param name="sourceRecords">Collection to search.</param>
+		/// <param name="startAt">The index to start searching from. Defaults to zero (0) when <paramref name="startAt"/> is -1.</param>
+		/// <param name="checkIfMatches">The condition used for comparison.</param>
+		/// <returns>
+		/// Returns the <see cref="Data.Record"/> that matches the search criteria.
+		/// </returns>
+		/// <exception cref="RecordNotFoundException"/>
+		public static int GoToNext(this ImmutableArray<IRecord> sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
+		{
+			const int UnknownActiveRecord = -1;
+
+			if (sourceRecords.Length == 0)
+			{
+				return UnknownActiveRecord;
+			}
+			else
+			{
+				var index = startAt >= 0 ? startAt : UnknownActiveRecord;
+				var wasFound = false;
+
+				var indexOfResult = UnknownActiveRecord;
+
+				for (var i = 0; i < sourceRecords.Length; i++)
+				{
+					index = (index + 1) % sourceRecords.Length;
+
+					if (checkIfMatches(sourceRecords[index]))
+					{
+						indexOfResult = index;
+						wasFound = true;
+						break;
+					}
+				}
+
+				return wasFound
+					? indexOfResult
+					: throw new RecordNotFoundException(-1);
+			}
 		}
 	}
 }
