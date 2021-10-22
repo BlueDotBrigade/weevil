@@ -19,7 +19,7 @@
 		private readonly ICoreExtension _coreExtension;
 
 		private readonly ContextDictionary _context;
-		private readonly IStaticAliasExpander _staticAliasExpander;
+		private readonly IFilterAliasExpander _filterAliasExpander;
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IMetricCollector> _metricCollectors;
 
@@ -40,13 +40,13 @@
 		public FilterManager(
 			ICoreExtension coreExtension,
 			ContextDictionary context,
-			IStaticAliasExpander staticAliasExpander,
+			IFilterAliasExpander filterAliasExpander,
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IMetricCollector> metricCollectors)
 		{
 			_coreExtension = coreExtension;
 			_context = context;
-			_staticAliasExpander = staticAliasExpander;
+			_filterAliasExpander = filterAliasExpander;
 			_allRecords = allRecords;
 
 			_metricCollectors = metricCollectors;
@@ -285,7 +285,7 @@
 					});
 
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _staticAliasExpander, filterType, criteria);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();
