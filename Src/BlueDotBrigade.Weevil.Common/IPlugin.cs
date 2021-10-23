@@ -12,7 +12,7 @@
 
 		bool CanOpenAs { get; }
 
-		(bool, OpenAsResult) ShowOpenAs(object parentWindow, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
+		(bool, OpenAsResult) ShowOpenAs(object parentWindow, string licensePath, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
 
 		bool CanShowDashboard { get; }
 

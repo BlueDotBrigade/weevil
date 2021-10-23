@@ -19,7 +19,7 @@
 		/// <inheritdoc />
 		public bool CanOpenAs => false;
 
-		public (bool, OpenAsResult) ShowOpenAs(object parentWindow, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
+		public (bool, OpenAsResult) ShowOpenAs(object parentWindow, string license, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
 		{
 			throw new NotSupportedException();
 		}

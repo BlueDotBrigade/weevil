@@ -465,6 +465,7 @@
 				{
 					(bool, OpenAsResult) result = plugin.ShowOpenAs(
 						_mainWindow,
+						LicensePath,
 						(path) => Engine.UsingPath(path),
 						sourceFilePath);
 
