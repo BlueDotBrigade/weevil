@@ -169,6 +169,16 @@ accepting any such warranty or additional liability.
 
 _END OF TERMS AND CONDITIONS_
 
-Copyright 2018 Blue Dot Brigade
+## APPENDIX: How to apply the Apache License to your work.
 
-[SPDX-License-Identifier: Apache-2.0](https://spdx.org/licenses/Apache-2.0.html)
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+      Copyright [yyyy] [name of copyright owner]
+      SPDX-License-Identifier: Apache-2.0
