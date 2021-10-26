@@ -9,6 +9,6 @@
 	<Owners>Blue Dot Brigade</Owners>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\LICENSE" Link="Release\Licenses\LICENSE" />
+    <None Include="..\..\LICENSE.md" Link="Release\Licenses\LICENSE.md" />
   </ItemGroup>
 </Project>
