@@ -15,7 +15,7 @@
 		public void TryParse_NoRecords_ReturnsEmptyRecord()
 		{
 			var content = InputData.GetAsString();
-			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out Record record);
+			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
 			Assert.IsFalse(wasSuccessful);
 			Assert.AreEqual(Record.Dummy, record);
@@ -26,7 +26,7 @@
 		{
 			var content = InputData.GetAsString();
 
-			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out Record record);
+			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
 			Assert.IsTrue(wasSuccessful);
 			Assert.AreEqual(LineOne, record.LineNumber);
@@ -40,7 +40,7 @@
 		{
 			var content = InputData.GetAsString();
 
-			new TsvRecordParser().TryParse(LineOne, content, out Record record);
+			new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
 			Assert.IsTrue(record.Content.EndsWith("            "));
 		}
@@ -50,7 +50,7 @@
 		{
 			var content = InputData.GetAsString();
 
-			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out Record record);
+			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
 			Assert.IsTrue(wasSuccessful);
 			Assert.AreEqual(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface", record.Content);

@@ -4,7 +4,7 @@
 
 	internal class DefaultRecordParser : IRecordParser
 	{
-		public bool TryParse(int line, string content, out Record record)
+		public bool TryParse(int line, string content, out IRecord record)
 		{
 			record = new Record(line, DateTime.MaxValue, SeverityType.Information, content, new Metadata());
 

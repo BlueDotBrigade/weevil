@@ -24,8 +24,8 @@
 		private readonly bool _isLoggingEnabled;
 		private int _lineNumber;
 
-		private Record _currentRecord;
-		private Record _nextRecord;
+		private IRecord _currentRecord;
+		private IRecord _nextRecord;
 
 		public MultilineRecordParser(StreamReader dataSource, IRecordParser recordParser)
 			: this(dataSource, recordParser, MaximumLinesToSearch, FirstRecordLineNumber, LoggingEnabled)
@@ -54,7 +54,7 @@
 		/// </summary>
 		private bool IsDataAvailable => !_dataSource.EndOfStream;
 
-		public Record GetNext()
+		public IRecord GetNext()
 		{
 			if (BeginReadNext())
 			{
