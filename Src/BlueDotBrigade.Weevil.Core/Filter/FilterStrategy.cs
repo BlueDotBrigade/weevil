@@ -44,7 +44,7 @@
 		public FilterStrategy(
 			ICoreExtension coreExtension,
 			ContextDictionary context,
-			IStaticAliasExpander staticAliasExpander,
+			IFilterAliasExpander filterAliasExpander,
 			FilterType filterType,
 			IFilterCriteria filterCriteria)
 		{
@@ -53,8 +53,8 @@
 
 			var expressionFactory = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria);
 
-			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(staticAliasExpander, expressionFactory, filterCriteria, true);
-			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(staticAliasExpander, expressionFactory, filterCriteria, false);
+			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, true);
+			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, false);
 
 			exclusiveExpressions.AddRange(ConvertConfigurationIntoExpressions(filterCriteria.Configuration));
 
@@ -116,13 +116,13 @@
 			return canKeepRecord;
 		}
 
-		private static List<IExpression> ConvertCriteriaIntoExpressions(IStaticAliasExpander staticAliasExpander, ExpressionBuilder expressionBuilder, IFilterCriteria filterCriteria, bool forInclusiveFilter)
+		private static List<IExpression> ConvertCriteriaIntoExpressions(IFilterAliasExpander filterAliasExpander, ExpressionBuilder expressionBuilder, IFilterCriteria filterCriteria, bool forInclusiveFilter)
 		{
 			var results = new List<IExpression>();
 
 			var filter = forInclusiveFilter ? filterCriteria.Include : filterCriteria.Exclude;
 
-			filter = staticAliasExpander.Expand(filter);
+			filter = filterAliasExpander.Expand(filter);
 
 			var expressions = filter.Split(ExpressionDelimiter, StringSplitOptions.RemoveEmptyEntries);
 

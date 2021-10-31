@@ -23,7 +23,7 @@
 		ImmutableArray<IInsight> GetInsights(ContextDictionary context, ITableOfContents tableOfContents);
 		IList<IMetricCollector> GetRecordCounters(ContextDictionary context);
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
-		IDictionary<string, string> GetStaticAliases(ContextDictionary context);
+		IDictionary<string, string> GetFilterAliases(ContextDictionary context);
 		TableOfContents BuildTableOfContents(StreamReader logFileReader);
 	}
 }

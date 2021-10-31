@@ -122,13 +122,13 @@
 
 			_analysisManager = new AnalysisManager(this, _coreExtension);
 
-			var staticAliases = _coreExtension.GetStaticAliases(_context);
-			var staticAliasExpander = new StaticAliasExpander(staticAliases);
+			var filterAliases = _coreExtension.GetFilterAliases(_context);
+			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
 			_filterManager = new FilterManager(
 				_coreExtension,
 				_context,
-				staticAliasExpander,
+				filterAliasExpander,
 				_allRecords,
 				GetRecordCounters());
 

@@ -65,7 +65,7 @@
 
 			_source.Position = _firstRecordByteOffset;
 
-			Record record = Record.Dummy;
+			IRecord record = Record.Dummy;
 
 			do
 			{

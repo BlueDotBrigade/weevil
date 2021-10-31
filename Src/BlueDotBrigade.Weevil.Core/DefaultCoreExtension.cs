@@ -12,7 +12,7 @@
 	{
 		private readonly ContextDictionary _context;
 		private readonly IRecordParser _recordParser;
-		private readonly IDictionary<string, string> _staticAliases;
+		private readonly IDictionary<string, string> _filterAliases;
 		private readonly List<IMetricCollector> _recordCounters;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
@@ -23,7 +23,7 @@
 
 			_context = context;
 			_recordParser = new DefaultRecordParser();
-			_staticAliases = new Dictionary<string, string>();
+			_filterAliases = new Dictionary<string, string>();
 			_recordCounters = new List<IMetricCollector>();
 			_monikerActivators = new List<MonikerActivator>();
 			_tableOfContents = new TableOfContents();
@@ -67,9 +67,9 @@
 			return _monikerActivators;
 		}
 
-		public IDictionary<string, string> GetStaticAliases(ContextDictionary context)
+		public IDictionary<string, string> GetFilterAliases(ContextDictionary context)
 		{
-			return _staticAliases;
+			return _filterAliases;
 		}
 
 		public TableOfContents BuildTableOfContents(StreamReader logFileReader)

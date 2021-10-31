@@ -12,7 +12,7 @@
 		/// Represents a surrogate that is used when a genuine record is not available.
 		/// </summary>
 		[SuppressMessage("Microsoft.Security", "CA2104")]
-		public static readonly Record Dummy = new Record(
+		public static readonly IRecord Dummy = new Record(
 			-1,
 			CreationTimeUnknown,
 			SeverityType.Verbose,

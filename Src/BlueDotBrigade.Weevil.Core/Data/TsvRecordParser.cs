@@ -8,7 +8,7 @@
 	{
 		private static readonly char[] FieldDelimiter = new[] { '\t' };
 
-		public bool TryParse(int line, string content, out Record record)
+		public bool TryParse(int line, string content, out IRecord record)
 		{
 			var isValidRecord = false;
 

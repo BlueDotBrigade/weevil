@@ -2,17 +2,16 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
 
-	internal class StaticAliasExpander : IStaticAliasExpander
+	internal class FilterAliasExpander : IFilterAliasExpander
 	{
 		private static readonly string[] NoExpressions = Array.Empty<string>();
 
-		private readonly IDictionary<string, string> _staticAliases;
+		private readonly IDictionary<string, string> _filterAliases;
 
-		public StaticAliasExpander(IDictionary<string, string> staticAliases)
+		public FilterAliasExpander(IDictionary<string, string> filterAliases)
 		{
-			_staticAliases = staticAliases ?? throw new ArgumentNullException(nameof(staticAliases));
+			_filterAliases = filterAliases ?? throw new ArgumentNullException(nameof(filterAliases));
 		}
 		/// <summary>
 		/// Replaces known aliases with their fully qualified representation.
@@ -62,7 +61,7 @@
 
 			if (!string.IsNullOrEmpty(expression))
 			{
-				foreach (KeyValuePair<string, string> alias in _staticAliases)
+				foreach (KeyValuePair<string, string> alias in _filterAliases)
 				{
 					if (string.Equals(expression.Trim(), alias.Key.Trim(), StringComparison.InvariantCultureIgnoreCase))
 					{
