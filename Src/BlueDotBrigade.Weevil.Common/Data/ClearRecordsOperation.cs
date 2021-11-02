@@ -4,6 +4,7 @@
 	{
 		BeforeSelected,
 		BeforeAndAfterSelected,
+		BetweenSelected,
 		AfterSelected,
 		Selected,
 		Unselected,

@@ -255,6 +255,7 @@
                <MenuItem Header="Clear...">
                   <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
                   <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
+                  <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
                   <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
                   <Separator/>
                   <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />

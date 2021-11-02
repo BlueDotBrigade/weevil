@@ -131,6 +131,32 @@
 		/// <remarks>
 		/// This method is faster than a sequential search.
 		/// </remarks>
+		public static IRecord RecordAtLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber)
+		{
+			IRecord result = Record.Dummy;
+
+			if (RecordSearch.TryRecordOfLineNumber(sourceRecords, lineNumber, out var record))
+			{
+				result = record;
+			}
+			else
+			{
+				throw new RecordNotFoundException(lineNumber);
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Retrieves a record that has a matching <paramref name="lineNumber"/>.
+		/// </summary>
+		/// <param name="sourceRecords">The list of records to search.</param>
+		/// <param name="lineNumber">The line number to search for.</param>
+		/// <param name="result">Returns the matching result, or <see cref="Record.Dummy"/></param>
+		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
+		/// <remarks>
+		/// This method is faster than a sequential search.
+		/// </remarks>
 		public static bool TryRecordOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
 		{
 			return RecordSearch.TryRecordOfLineNumber(sourceRecords, lineNumber, out result);
