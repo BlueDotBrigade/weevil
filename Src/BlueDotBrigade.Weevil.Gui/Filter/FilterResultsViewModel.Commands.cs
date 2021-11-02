@@ -92,6 +92,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
+		public ICommand ClearBetweenSelectedRecordsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
+			() => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
 		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearRecordsOperation.Selected),
 			() => this.IsMenuEnabled);
