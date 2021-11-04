@@ -19,7 +19,7 @@
 		}
 
 		/// <summary>
-		/// Search backwards for a record with a comment.. Descending order: 4, 3, 2, 1.
+		/// Search backwards for a record with a comment. Descending order: 4, 3, 2, 1.
 		/// </summary>
 		public IRecord FindPrevious()
 		{

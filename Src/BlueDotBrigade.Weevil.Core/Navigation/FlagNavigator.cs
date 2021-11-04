@@ -19,11 +19,9 @@
 		}
 
 		/// <summary>
-		/// Navigates through pinned records in descending order (e.g. lines: 8, 5, 3, 2).
+		/// Search backwards for a record that was flagged by an analyzer. Descending order: 4, 3, 2, 1.
 		/// </summary>
-		/// <returns>
-		/// Returns a reference to the next pinned <see cref="Record"/>.
-		/// </returns>
+		/// <seealso cref="IRecordAnalyzer"/>
 		public IRecord FindPrevious()
 		{
 			var resultAt = _activeRecord
@@ -33,11 +31,9 @@
 		}
 
 		/// <summary>
-		/// Navigates through pinned records in ascending order (e.g. lines: 2, 4, 8, 16).
+		/// Search forward for a record that was flagged by an analzyer. Ascending order: 1, 2, 3, 4.
 		/// </summary>
-		/// <returns>
-		/// Returns a reference to the next pinned <see cref="Record"/>.
-		/// </returns>
+		/// <seealso cref="IRecordAnalyzer"/>
 		public IRecord FindNext()
 		{
 			var resultAt = _activeRecord
