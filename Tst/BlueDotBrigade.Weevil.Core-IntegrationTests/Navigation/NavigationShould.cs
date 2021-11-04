@@ -2,6 +2,7 @@
 {
 	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Navigation;
 	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,7 +11,7 @@
 	public class NavigationShould
 	{
 		[TestMethod]
-		public void SupportNavigatingToPinnedRecord()
+		public void SupportNavigatingToNextPinnedRecord()
 		{
 			IEngine engine = Engine
 				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
@@ -23,6 +24,26 @@
 
 			// Reminder: although they are often similar, the line number and index are NOT the same!
 			Assert.AreEqual(10, pinnedRecord.LineNumber);
+		}
+
+		[TestMethod]
+		public void SupportNavigatingToNextFlaggedRecord()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			engine.Filter.Apply(
+				FilterType.RegularExpression,
+				new FilterCriteria(@"This is a sample log message\. Id=(?<Hundredths>\d)"));
+
+			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
+			
+			IRecord record = engine.Navigate.Using<IFlagNavigator>().FindNext();
+			Assert.AreEqual(1, record.LineNumber);
+
+			record = engine.Navigate.Using<IFlagNavigator>().FindNext();
+			Assert.AreEqual(101, record.LineNumber);
 		}
 
 		[TestMethod]
