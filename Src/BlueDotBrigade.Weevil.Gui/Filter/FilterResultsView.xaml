@@ -76,10 +76,10 @@
         <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
         <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
       <KeyBinding Key="OemPlus" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
-        <KeyBinding Key="Subtract" Modifiers="Control+Shift" Command="{Binding GoToPreviousFlagCommand}" />
-        <KeyBinding Key="Add" Modifiers="Control+Shift" Command="{Binding GoToNextFlagCommand}" />
-        <KeyBinding Key="OemMinus" Modifiers="Control+Shift" Command="{Binding GoToPreviousFlagCommand}" />
-      <KeyBinding Key="OemPlus" Modifiers="Control+Shift" Command="{Binding GoToNextFlagCommand}" />
+        <KeyBinding Key="Subtract" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
+        <KeyBinding Key="Add" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
+        <KeyBinding Key="OemMinus" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
+        <KeyBinding Key="OemPlus" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
     </UserControl.InputBindings>
    <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
          FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
