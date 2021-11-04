@@ -6,13 +6,15 @@
 	public interface IFlagNavigator : INavigator
 	{
 		/// <summary>
-		/// Search backwards for the previous pinned record. Descending order: 4, 3, 2, 1.
+		/// Search backwards for a record that was flagged by an analyzer. Descending order: 4, 3, 2, 1.
 		/// </summary>
+		/// <seealso cref="IRecordAnalyzer"/>
 		IRecord FindPrevious();
 
 		/// <summary>
-		/// Search forward for the next pinned record. Ascending order: 1, 2, 3, 4.
+		/// Search forward for a record that was flagged by an analzyer. Ascending order: 1, 2, 3, 4.
 		/// </summary>
+		/// <seealso cref="IRecordAnalyzer"/>
 		IRecord FindNext();
 	}
 }

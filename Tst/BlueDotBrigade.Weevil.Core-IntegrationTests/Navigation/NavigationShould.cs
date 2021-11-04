@@ -27,6 +27,27 @@
 		}
 
 		[TestMethod]
+		public void SupportNavigatingToNextRecordWithComment()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			engine.Analyzer.RemoveComments(true);
+
+			engine.Records[12].Metadata.Comment = "First";
+			engine.Records[24].Metadata.Comment = "Second";
+
+			engine.Selector.Select(1);
+
+			IRecord record = engine.Navigate.Using<ICommentNavigator>().FindNext();
+			Assert.AreEqual("First", record.Metadata.Comment);
+
+			record = engine.Navigate.Using<ICommentNavigator>().FindNext();
+			Assert.AreEqual("Second", record.Metadata.Comment);
+		}
+
+		[TestMethod]
 		public void SupportNavigatingToNextFlaggedRecord()
 		{
 			IEngine engine = Engine
@@ -38,7 +59,7 @@
 				new FilterCriteria(@"This is a sample log message\. Id=(?<Hundredths>\d)"));
 
 			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
-			
+
 			IRecord record = engine.Navigate.Using<IFlagNavigator>().FindNext();
 			Assert.AreEqual(1, record.LineNumber);
 

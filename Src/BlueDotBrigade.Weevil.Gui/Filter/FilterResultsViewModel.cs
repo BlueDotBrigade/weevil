@@ -1112,6 +1112,24 @@
 				.ToIndexUsing(_engine.Filter.Results);
 		}
 
+		public void GoToPreviousComment()
+		{
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.Using<ICommentNavigator>()
+				.FindPrevious()
+				.ToIndexUsing(_engine.Filter.Results);
+		}
+
+		public void GoToNextComment()
+		{
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.Using<ICommentNavigator>()
+				.FindNext()
+				.ToIndexUsing(_engine.Filter.Results);
+		}
+
 		#endregion
 
 		#region Commands: Analysis
