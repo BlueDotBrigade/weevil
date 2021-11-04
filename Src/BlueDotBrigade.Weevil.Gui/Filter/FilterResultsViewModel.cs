@@ -1006,15 +1006,6 @@
 			}
 		}
 
-		public void GoToNextPin()
-		{
-			this.ActiveRecordIndex = _engine
-				.Navigate
-				.Using<IPinNavigator>()
-				.FindNext()
-				.ToIndexUsing(_engine.Filter.Results);
-		}
-
 		public void GoTo()
 		{
 			var userValue = _dialogBox.ShowGoTo(string.Empty);
@@ -1091,6 +1082,33 @@
 				.Navigate
 				.Using<IPinNavigator>()
 				.FindPrevious()
+				.ToIndexUsing(_engine.Filter.Results);
+		}
+
+		public void GoToNextPin()
+		{
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.Using<IPinNavigator>()
+				.FindNext()
+				.ToIndexUsing(_engine.Filter.Results);
+		}
+
+		public void GoToPreviousFlag()
+		{
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.Using<IFlagNavigator>()
+				.FindPrevious()
+				.ToIndexUsing(_engine.Filter.Results);
+		}
+
+		public void GoToNextFlag()
+		{
+			this.ActiveRecordIndex = _engine
+				.Navigate
+				.Using<IFlagNavigator>()
+				.FindNext()
 				.ToIndexUsing(_engine.Filter.Results);
 		}
 
