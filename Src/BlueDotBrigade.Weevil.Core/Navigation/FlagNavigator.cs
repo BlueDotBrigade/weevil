@@ -4,18 +4,18 @@
 	using Data;
 
 	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_activeRecord.Record.LineNumber}")]
-	internal class PinNavigator : IPinNavigator
+	internal class FlagNavigator : IFlagNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
 
-		public PinNavigator(ActiveRecord activeRecord)
+		public FlagNavigator(ActiveRecord activeRecord)
 		{
 			_activeRecord = activeRecord;
 		}
 
-		private bool CheckIsPinned(IRecord record)
+		private bool CheckIsFlagged(IRecord record)
 		{
-			return record.Metadata.IsPinned;
+			return record.Metadata.IsFlagged;
 		}
 
 		/// <summary>
@@ -28,7 +28,7 @@
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToPrevious(_activeRecord.Index, CheckIsPinned);
+				.GoToPrevious(_activeRecord.Index, CheckIsFlagged);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
@@ -42,7 +42,7 @@
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToNext(_activeRecord.Index, CheckIsPinned);
+				.GoToNext(_activeRecord.Index, CheckIsFlagged);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 	}

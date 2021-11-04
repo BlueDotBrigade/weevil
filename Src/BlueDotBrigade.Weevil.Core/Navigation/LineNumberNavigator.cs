@@ -4,7 +4,7 @@
 	using System.Diagnostics;
 	using BlueDotBrigade.Weevil.Data;
 
-	[DebuggerDisplay("ActiveIndex={_activeIndex}, ActiveLineNumber={_activeRecord.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_activeRecord.Record.LineNumber}")]
 	internal class LineNumberNavigator : ILineNumberNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
