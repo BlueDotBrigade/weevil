@@ -80,6 +80,10 @@
         <KeyBinding Key="Add" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
         <KeyBinding Key="OemMinus" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
         <KeyBinding Key="OemPlus" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
+      <KeyBinding Key="Subtract" Modifiers="Control+Shift" Command="{Binding GoToPreviousCommentCommand}" />
+      <KeyBinding Key="Add" Modifiers="Control+Shift" Command="{Binding GoToNextCommentCommand}" />
+      <KeyBinding Key="OemMinus" Modifiers="Control+Shift" Command="{Binding GoToPreviousCommentCommand}" />
+      <KeyBinding Key="OemPlus" Modifiers="Control+Shift" Command="{Binding GoToNextCommentCommand}" />
     </UserControl.InputBindings>
    <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
          FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
@@ -275,9 +279,12 @@
                   <Separator/>
                   <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
                   <Separator/>
-                  <MenuItem Header="Previous Flag" Command="{Binding GoToPreviousFlagCommand}" InputGestureText="Ctrl+Shift+Minus" />
-                  <MenuItem Header="Next Flag" Command="{Binding GoToNextFlagCommand}" InputGestureText="Ctrl+Shift+Plus" />
+                  <MenuItem Header="Previous Comment" Command="{Binding GoToPreviousCommentCommand}" InputGestureText="Ctrl+Shift+Minus" />
+                  <MenuItem Header="Next Comment" Command="{Binding GoToNextCommentCommand}" InputGestureText="Ctrl+Shift+Plus" />
                   <Separator/>
+                  <MenuItem Header="Previous Flag" Command="{Binding GoToPreviousFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Minus" />
+                <MenuItem Header="Next Flag" Command="{Binding GoToNextFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Plus" />
+                <Separator/>
                   <MenuItem Header="Previous Pinned" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
                   <MenuItem Header="Next Pinned" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
                   <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />

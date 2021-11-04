@@ -161,6 +161,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#endregion
 
 		#region Commands: Navigation
+
+		[SafeForDependencyAnalysis]
+		public ICommand GoToNextCommentCommand => new UiBoundCommand(GoToNextComment, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand GoToPreviousCommentCommand => new UiBoundCommand(GoToPreviousComment, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand GoToNextPinCommand => new UiBoundCommand(GoToNextPin, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]

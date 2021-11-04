@@ -32,6 +32,7 @@
 				new TimestampNavigator(_activeRecord),
 				new TextNavigator(_activeRecord),
 				new PinNavigator(_activeRecord),
+				new CommentNavigator(_activeRecord),
 				new FlagNavigator(_activeRecord),
 			}.ToImmutableArray();
 		}
