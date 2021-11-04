@@ -3,7 +3,7 @@
 	using System.Diagnostics;
 	using Data;
 
-	[DebuggerDisplay("ActiveIndex={_navigator.Index}, LineNumber={_navigator.Record.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_activeRecord.Record.LineNumber}")]
 	internal class PinNavigator : IPinNavigator
 	{
 		private readonly ActiveRecord _activeRecord;

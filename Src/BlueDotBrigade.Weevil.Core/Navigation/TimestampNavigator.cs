@@ -5,7 +5,7 @@
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 
-	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_navigator.Record.LineNumber}")]
+	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_activeRecord.Record.LineNumber}")]
 	internal class TimestampNavigator : ITimestampNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
