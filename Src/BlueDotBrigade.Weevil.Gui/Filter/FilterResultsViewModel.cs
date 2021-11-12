@@ -6,6 +6,7 @@
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
@@ -1028,7 +1029,12 @@
 				}
 				else
 				{
-					if (int.TryParse(userValue, out var lineNumber))
+					var validNumberFormat = 
+						NumberStyles.AllowLeadingWhite |
+						NumberStyles.AllowTrailingWhite |
+						NumberStyles.AllowThousands;
+
+					if (int.TryParse(userValue, validNumberFormat, CultureInfo.InvariantCulture, out var lineNumber))
 					{
 						SearchFilterResults(
 							$"Unable to find the line number in the search results. Value={userValue}",
