@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
+	using System;
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Analysis;
 	using IO;
@@ -16,7 +17,7 @@
 
 		bool CanShowDashboard { get; }
 
-		void ShowDashboard(object parentWindow, IEngine engine, IInsight[] insights);
+		void ShowDashboard(object parentWindow, Version weevilVersion, IEngine engine, IInsight[] insights);
 
 		ICoreExtension GetExtension(string sourceFilePath);
 

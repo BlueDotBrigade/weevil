@@ -136,7 +136,7 @@
 			this.HasInsightNeedingAttention = false;
 			this.InsightNeedingAttention = 0;
 
-			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
+			this.WeevilVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
 			initializationTimer = new DispatcherTimer();
 			initializationTimer.Tick += (sender, args) => OnInitialize();
@@ -212,14 +212,14 @@
 
 				if (this.NewReleaseDetails != null)
 				{
-					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.CurrentVersion;
+					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.WeevilVersion;
 				}
 
 				return isUpdateAvailable;
 			}
 		}
 
-		public Version CurrentVersion { get; private set; }
+		public Version WeevilVersion { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public bool IsMenuEnabled
@@ -845,7 +845,7 @@
 		{
 			try
 			{
-				var dialog = new AboutDialog(this.CurrentVersion, LicensePath, ThirdPartyNoticesPath)
+				var dialog = new AboutDialog(this.WeevilVersion, LicensePath, ThirdPartyNoticesPath)
 				{
 					Owner = _mainWindow,
 				};
@@ -872,11 +872,11 @@
 
 			if (plugin.CanShowDashboard)
 			{
-				plugin.ShowDashboard(_mainWindow, _engine, _insights.ToArray());
+				plugin.ShowDashboard(_mainWindow, this.WeevilVersion, _engine, _insights.ToArray());
 			}
 			else
 			{
-				_dialogBox.ShowDashboard(_insights, _engine);
+				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights);
 			}
 		}
 

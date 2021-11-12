@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
+	using System;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.IO;
@@ -10,7 +11,7 @@
 
 		string ShowSaveFile(string targetDirectory, string targetFileName);
 
-		void ShowDashboard(ImmutableArray<IInsight> insights, IEngine engine);
+		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 
 		string ShowGoTo(string defaultValue);
 	}

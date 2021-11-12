@@ -59,9 +59,9 @@
 			return string.Empty;
 		}
 
-		public void ShowDashboard(ImmutableArray<IInsight> insights, IEngine engine)
+		public void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights)
 		{
-			var dialog = new DashboardDialog(engine)
+			var dialog = new DashboardDialog(weevilVersion, engine)
 			{
 				Insights = insights.ToArray(),
 			};
