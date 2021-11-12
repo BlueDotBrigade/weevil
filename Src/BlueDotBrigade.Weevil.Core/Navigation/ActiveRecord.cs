@@ -78,6 +78,10 @@
 		{
 			if (newRecordCollection.IsDefault)
 			{
+				_activeIndex = UnknownIndex;
+				_activeRecord = Data.Record.Dummy;
+				_dataSource = ImmutableArray<IRecord>.Empty;
+
 				throw new ArgumentException(
 					"Immutable array should be initialized - consider calling Create() method.", nameof(newRecordCollection));
 			}
@@ -102,17 +106,17 @@
 				var previousLineNumber = _dataSource[_activeIndex].LineNumber;
 
 				// Try to find the "record of interest" in the new collection
-				if (_dataSource.TryIndexOfLineNumber(previousLineNumber, out var index))
+				if (newRecordCollection.TryIndexOfLineNumber(previousLineNumber, out var newIndex))
 				{
+					_activeIndex = newIndex;
+					_activeRecord = newRecordCollection[newIndex];
 					_dataSource = newRecordCollection;
-					_activeIndex = index;
-					_activeRecord = _dataSource[index];
 				}
 				else
 				{
-					_dataSource = newRecordCollection;
 					_activeIndex = UnknownIndex;
 					_activeRecord = Data.Record.Dummy;
+					_dataSource = newRecordCollection;
 				}
 			}
 		}
