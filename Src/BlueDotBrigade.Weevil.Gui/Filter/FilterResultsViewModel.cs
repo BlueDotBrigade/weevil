@@ -955,7 +955,7 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(out var findNext, out _findText))
+			if (_dialogBox.TryShowFind(_findText, out var findNext, out _findText))
 			{
 				if (findNext)
 				{

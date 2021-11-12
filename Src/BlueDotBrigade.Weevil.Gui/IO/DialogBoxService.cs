@@ -105,17 +105,14 @@
 			return string.Empty;
 		}
 
-		public bool TryShowFind(out bool findNext, out string findText)
+		public bool TryShowFind(string defaultValue, out bool findNext, out string findText)
 		{
 			var wasSuccessful = false;
 
 			findText = String.Empty;
 			findNext = true;
 
-			var dialog = new FindDialog()
-			{
-				Owner = _parentWindow,
-			};
+			var dialog = new FindDialog(_parentWindow, defaultValue);
 
 			if (dialog.ShowDialog() == true)
 			{

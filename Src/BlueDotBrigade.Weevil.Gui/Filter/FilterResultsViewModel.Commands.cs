@@ -47,15 +47,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ClipboardPasteOverwriteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: true), () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand FindTextCommand => new UiBoundCommand(() => FindText(), () => this.IsMenuEnabled);
-
-		[SafeForDependencyAnalysis]
-		public ICommand FindNextCommand => new UiBoundCommand(() => FindNext(), () => this.IsMenuEnabled);
-
-		[SafeForDependencyAnalysis]
-		public ICommand FindPreviousCommand => new UiBoundCommand(() => FindPrevious(), () => this.IsMenuEnabled);
-
-		[SafeForDependencyAnalysis]
 		public ICommand GoToCommand => new UiBoundCommand(() => GoTo(), () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
@@ -161,6 +152,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#endregion
 
 		#region Commands: Navigation
+		[SafeForDependencyAnalysis]
+		public ICommand FindTextCommand => new UiBoundCommand(() => FindText(), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FindNextCommand => new UiBoundCommand(() => FindNext(), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FindPreviousCommand => new UiBoundCommand(() => FindPrevious(), () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
 		public ICommand GoToNextCommentCommand => new UiBoundCommand(GoToNextComment, () => this.IsMenuEnabled);
