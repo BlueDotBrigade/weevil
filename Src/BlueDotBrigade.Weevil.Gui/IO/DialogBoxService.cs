@@ -27,16 +27,19 @@
 		{
 			_parentWindow = parentWindow;
 		}
+
 		public string ShowOpenFile(string compatibleFileExtensions)
 		{
 			var dialog = new OpenFileDialog
 			{
 				Filter = compatibleFileExtensions
 			};
+
 			if (dialog.ShowDialog() == true)
 			{
 				return dialog.FileName;
 			}
+
 			return string.Empty;
 		}
 
@@ -73,9 +76,8 @@
 
 		public string ShowUserPrompt(string title, string userPrompt, string defaultValue)
 		{
-			var dialog = new UserPromptDialog
+			var dialog = new UserPromptDialog(_parentWindow)
 			{
-				Owner = _parentWindow,
 				Title = title,
 				UserPrompt = userPrompt,
 				UserInput = defaultValue ?? string.Empty
@@ -90,9 +92,8 @@
 
 		public string ShowGoTo(string defaultValue)
 		{
-			var dialog = new GoToDialog()
+			var dialog = new GoToDialog(_parentWindow)
 			{
-				Owner = _parentWindow,
 				Title = "Go To",
 				UserPrompt = "Enter timestamp or line:",
 				UserInput = defaultValue ?? string.Empty
