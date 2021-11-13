@@ -6,9 +6,18 @@
 
 	public class VersionValidationRule : ValidationRule
 	{
+		private const string DefaultMessage = @"Value is expected to be in the format: x.y.z";
+
+		public VersionValidationRule()
+		{
+			this.ErrorMessage = DefaultMessage;
+		}
+
+		public string ErrorMessage { get; set; }
+
 		public override ValidationResult Validate(object value, CultureInfo cultureInfo)
 		{
-			var result = new ValidationResult(false, "Value is expected to be in the format: x.y.z");
+			var result = new ValidationResult(false, this.ErrorMessage);
 
 			if (value != null)
 			{
