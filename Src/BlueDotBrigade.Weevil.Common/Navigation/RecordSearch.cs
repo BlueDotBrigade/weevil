@@ -49,11 +49,29 @@
 			return IndexOf(records, desiredRecord, new CreatedAtComparer(), searchType);
 		}
 
+		/// <summary>
+		/// Returns a zero-based index value of the first <see cref="Record"/> that matches the <paramref name="comparer"/>.
+		/// </summary>
+		/// <param name="records">The sorted <see cref="Record"/> collection to search.</param>
+		/// <param name="desiredRecord"></param>
+		/// <param name="comparer">A comparer that returns the difference between the <paramref name="desiredRecord"/>, and any given <paramref name="records"/> instance.</param>
+		/// <param name="searchType">Indicates what is considered an acceptable result.</param>
+		/// <exception cref="RecordNotFoundException"/>
 		private static int IndexOf(ImmutableArray<IRecord> records, IRecord desiredRecord, MagnitudeComparer comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
+			if (desiredRecord == null)
+			{
+				throw new ArgumentNullException(nameof(desiredRecord));
+			}
+
+			if (comparer == null)
+			{
+				throw new ArgumentNullException(nameof(comparer));
+			}
+
 			if (records.Length == 0)
 			{
-				throw new RecordNotFoundException(-1);
+				throw new RecordNotFoundException($"Unable to find record. LineNumber={desiredRecord.LineNumber}");
 			}
 
 			var index = records.BinarySearch(desiredRecord, comparer);
@@ -100,7 +118,7 @@
 
 			if (index < 0 || index > records.Length - 1)
 			{
-				throw new RecordNotFoundException(index);
+				throw new RecordNotFoundException($"Unable to find record. LineNumber={desiredRecord.LineNumber}");
 			}
 
 			return index;

@@ -3,16 +3,29 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using Analysis;
-	using Data;
+	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Navigation;
+	using BlueDotBrigade.Weevil.Data;
 
 	public interface ISelect
 	{
 		IDictionary<int, IRecord> Selected { get; }
 		bool IsTimePeriodSelected { get; }
 		TimeSpan TimePeriodOfInterest { get; }
+		/// <summary>
+		/// The given <paramref name="lineNumber"/> is added to the "items of interest" list.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException"/>
 		ISelect Select(int lineNumber);
+		/// <summary>
+		/// The given <paramref name="record"/> is added to the "items of interest" list.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException"/>
 		ISelect Select(IRecord record);
+		/// <summary>
+		/// The given <paramref name="records"/> are added to the "items of interest" list.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException"/>
 		ISelect Select(IList<IRecord> records);
 		ISelect Unselect(int lineNumber);
 		ISelect Unselect(IRecord record);

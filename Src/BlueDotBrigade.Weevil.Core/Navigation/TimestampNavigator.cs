@@ -21,7 +21,8 @@
 
 			if (Record.IsDummyOrNull(firstRecord))
 			{
-				throw new RecordNotFoundException(-1, "Unable to go timestamp - there must be at least one record with a valid creation time.");
+				throw new RecordNotFoundException(
+					$"Unable to find record - the collection is empty. Value={value}, SearchType={searchType}");
 			}
 
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =

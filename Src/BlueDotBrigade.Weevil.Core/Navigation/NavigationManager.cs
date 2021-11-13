@@ -46,6 +46,10 @@
 
 		ITableOfContents INavigate.TableOfContents => _tableOfContents;
 
+		/// <summary>
+		/// Sets the focus of the navigation manager to the specified <paramref name="lineNumber"/>.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException"/>
 		internal void SetActiveLineNumber(int lineNumber)
 		{
 			var index = _activeRecord.DataSource.IndexOfLineNumber(lineNumber);

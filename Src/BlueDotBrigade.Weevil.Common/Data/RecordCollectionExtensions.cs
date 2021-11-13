@@ -131,6 +131,7 @@
 		/// <remarks>
 		/// This method is faster than a sequential search.
 		/// </remarks>
+		/// <exception cref="RecordNotFoundException"/>
 		public static IRecord RecordAtLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber)
 		{
 			IRecord result = Record.Dummy;
@@ -141,7 +142,7 @@
 			}
 			else
 			{
-				throw new RecordNotFoundException(lineNumber);
+				throw new RecordNotFoundException($"Unable to find record. LineNumber={lineNumber}");
 			}
 
 			return result;
@@ -305,7 +306,7 @@
 
 				return wasFound
 					? indexOfResult
-					: throw new RecordNotFoundException(-1);
+					: throw new RecordNotFoundException();
 			}
 		}
 
@@ -348,7 +349,7 @@
 
 				return wasFound
 					? indexOfResult
-					: throw new RecordNotFoundException(-1);
+					: throw new RecordNotFoundException();
 			}
 		}
 	}

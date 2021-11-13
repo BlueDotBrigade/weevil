@@ -7,40 +7,37 @@
 	[Serializable]
 	public class RecordNotFoundException : Exception
 	{
-		private static readonly string DefaultMessage = "Record could not be found. LineNumber=`{0}`";
+		private static readonly string DefaultMessage = "Unable to find record.";
 
-		public RecordNotFoundException(int lineNumber)
-			: base(string.Format(DefaultMessage, lineNumber))
+		public RecordNotFoundException()
+			: base(string.Format(DefaultMessage))
 		{
-			this.LineNumber = lineNumber;
+			// nothing to do
 		}
 
-		public RecordNotFoundException(int lineNumber, Exception innerException)
-			: base(string.Format(DefaultMessage, lineNumber), innerException)
+		public RecordNotFoundException(Exception innerException)
+			: base(DefaultMessage, innerException)
 		{
-			this.LineNumber = lineNumber;
+			// nothing to do
 		}
 
-		public RecordNotFoundException(int lineNumber, string message)
+		public RecordNotFoundException(string message)
 			: base(message)
 		{
-			this.LineNumber = lineNumber;
+			// nothing to do
 		}
 
-		public RecordNotFoundException(int lineNumber, string message, Exception innerException)
+		public RecordNotFoundException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			this.LineNumber = lineNumber;
+			// nothing to do
 		}
 
 		protected RecordNotFoundException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			var serializedValue = info.GetString(nameof(this.LineNumber));
-			this.LineNumber = int.Parse(serializedValue);
+			// nothing to do
 		}
-
-		public int LineNumber { get; }
 
 		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -50,13 +47,7 @@
 				throw new ArgumentNullException(nameof(info));
 			}
 
-			info.AddValue(nameof(this.LineNumber), this.LineNumber);
 			base.GetObjectData(info, context);
-		}
-
-		public override string ToString()
-		{
-			return $"{base.ToString()}, {nameof(this.LineNumber)}: {this.LineNumber}";
 		}
 	}
 }

@@ -42,7 +42,7 @@
 		/// </summary>
 		/// <param name="index">The index value to be saved. A value of <see cref="UnknownIndex"/> indicates that there is no active record.</param>
 		/// <returns>Returns the record associated with the provided <paramref name="index"/>.</returns>
-		/// <exception cref="RecordNotFoundException">Thrown when the specified index is invalid.</exception>
+		/// <exception cref="RecordNotFoundException"/>
 		public IRecord SetActiveIndex(int index)
 		{
 			// An active record has not been selected.
@@ -65,9 +65,7 @@
 					_activeIndex = UnknownIndex;
 					_activeRecord = Data.Record.Dummy;
 
-					throw new RecordNotFoundException(
-						index,
-						$"Unable to find the record. Index={index}");
+					throw new RecordNotFoundException($"Unable to find record. Index={index}");
 				}
 			}
 
