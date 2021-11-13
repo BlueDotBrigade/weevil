@@ -32,7 +32,7 @@
 			return output.ToString();
 		}
 
-		public string Generate(IEngine engine, ImmutableArray<IInsight> insights, DateTime from, DateTime to)
+		public string Generate(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, DateTime from, DateTime to)
 		{
 			var output = new StringBuilder();
 
@@ -46,6 +46,7 @@
 			output.AppendLine($"");
 			output.AppendLine($" - Context: {context}");
 			output.AppendLine($" - Time period analyzed: {from} to {to}");
+			output.AppendLine($" - Insight collected by: Weevil {weevilVersion}"); 
 			output.AppendLine($"");
 			output.AppendLine($"## Insight");
 			output.AppendLine($"");

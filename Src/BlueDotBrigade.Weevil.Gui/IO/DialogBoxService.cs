@@ -27,16 +27,19 @@
 		{
 			_parentWindow = parentWindow;
 		}
+
 		public string ShowOpenFile(string compatibleFileExtensions)
 		{
 			var dialog = new OpenFileDialog
 			{
 				Filter = compatibleFileExtensions
 			};
+
 			if (dialog.ShowDialog() == true)
 			{
 				return dialog.FileName;
 			}
+
 			return string.Empty;
 		}
 
@@ -56,9 +59,9 @@
 			return string.Empty;
 		}
 
-		public void ShowDashboard(ImmutableArray<IInsight> insights, IEngine engine)
+		public void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights)
 		{
-			var dialog = new DashboardDialog(engine)
+			var dialog = new DashboardDialog(weevilVersion, engine)
 			{
 				Insights = insights.ToArray(),
 			};
@@ -73,9 +76,8 @@
 
 		public string ShowUserPrompt(string title, string userPrompt, string defaultValue)
 		{
-			var dialog = new UserPromptDialog
+			var dialog = new UserPromptDialog(_parentWindow)
 			{
-				Owner = _parentWindow,
 				Title = title,
 				UserPrompt = userPrompt,
 				UserInput = defaultValue ?? string.Empty
@@ -90,9 +92,8 @@
 
 		public string ShowGoTo(string defaultValue)
 		{
-			var dialog = new GoToDialog()
+			var dialog = new GoToDialog(_parentWindow)
 			{
-				Owner = _parentWindow,
 				Title = "Go To",
 				UserPrompt = "Enter timestamp or line:",
 				UserInput = defaultValue ?? string.Empty
@@ -105,17 +106,14 @@
 			return string.Empty;
 		}
 
-		public bool TryShowFind(out bool findNext, out string findText)
+		public bool TryShowFind(string defaultValue, out bool findNext, out string findText)
 		{
 			var wasSuccessful = false;
 
 			findText = String.Empty;
 			findNext = true;
 
-			var dialog = new FindDialog()
-			{
-				Owner = _parentWindow,
-			};
+			var dialog = new FindDialog(_parentWindow, defaultValue);
 
 			if (dialog.ShowDialog() == true)
 			{

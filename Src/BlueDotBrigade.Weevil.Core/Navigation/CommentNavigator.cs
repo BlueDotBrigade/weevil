@@ -18,9 +18,6 @@
 			return record.Metadata.HasComment;
 		}
 
-		/// <summary>
-		/// Search backwards for a record with a comment. Descending order: 4, 3, 2, 1.
-		/// </summary>
 		public IRecord FindPrevious()
 		{
 			var resultAt = _activeRecord
@@ -29,9 +26,6 @@
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
-		/// <summary>
-		/// Search forward for a record with a comment. Ascending order: 1, 2, 3, 4.
-		/// </summary>
 		public IRecord FindNext()
 		{
 			var resultAt = _activeRecord

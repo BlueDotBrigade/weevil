@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
+	using System;
 	using System.Windows;
 
 	/// <summary>
@@ -33,8 +34,10 @@
 			set => SetValue(UserInputProperty, value);
 		}
 
-		public GoToDialog()
+		public GoToDialog(Window parentWindow)
 		{
+			this.Owner = parentWindow ?? throw new ArgumentNullException(nameof(parentWindow));
+
 			this.Loaded += OnDialogLoaded;
 
 			InitializeComponent();

@@ -11,6 +11,11 @@
 	/// </summary>
 	public partial class DashboardDialog : Window
 	{
+		public static readonly DependencyProperty WeevilVersionProperty =
+			DependencyProperty.Register(
+				nameof(WeevilVersion), typeof(Version),
+				typeof(DashboardDialog));
+
 		public static readonly DependencyProperty InsightsProperty =
 			DependencyProperty.Register(
 				nameof(Insights), typeof(IInsight[]),
@@ -37,6 +42,12 @@
 				typeof(DashboardDialog));
 
 		private readonly IEngine _engine;
+
+		public Version WeevilVersion
+		{
+			get => (Version)GetValue(WeevilVersionProperty);
+			set => SetValue(WeevilVersionProperty, value);
+		}
 
 		public IInsight[] Insights
 		{
@@ -68,11 +79,13 @@
 			set => SetValue(ContextProperty, value);
 		}
 
-		public DashboardDialog(IEngine engine)
+		public DashboardDialog(Version weevilVersion, IEngine engine)
 		{
 			_engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
 			InitializeComponent();
+
+			this.WeevilVersion = weevilVersion;
 
 			this.DataContext = this;
 
@@ -99,6 +112,7 @@
 		private void OnCopy(object sender, RoutedEventArgs e)
 		{
 			var report = new InsightReportGenerator().Generate(
+				this.WeevilVersion,
 				_engine,
 				this.Insights.ToImmutableArray(),
 				this.From,

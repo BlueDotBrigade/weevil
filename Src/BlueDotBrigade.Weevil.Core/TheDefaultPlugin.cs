@@ -26,7 +26,7 @@
 
 		public bool CanShowDashboard => false;
 
-		public void ShowDashboard(object parentWindow, IEngine engine, IInsight[] insights)
+		public void ShowDashboard(object parentWindow, Version weevilVersion, IEngine engine, IInsight[] insights)
 		{
 			throw new NotImplementedException();
 		}

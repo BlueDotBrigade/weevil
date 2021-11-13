@@ -42,7 +42,7 @@
 		/// </summary>
 		/// <param name="index">The index value to be saved. A value of <see cref="UnknownIndex"/> indicates that there is no active record.</param>
 		/// <returns>Returns the record associated with the provided <paramref name="index"/>.</returns>
-		/// <exception cref="RecordNotFoundException">Thrown when the specified index is invalid.</exception>
+		/// <exception cref="RecordNotFoundException"/>
 		public IRecord SetActiveIndex(int index)
 		{
 			// An active record has not been selected.
@@ -65,9 +65,7 @@
 					_activeIndex = UnknownIndex;
 					_activeRecord = Data.Record.Dummy;
 
-					throw new RecordNotFoundException(
-						index,
-						$"Unable to find the record. Index={index}");
+					throw new RecordNotFoundException($"Unable to find record. Index={index}");
 				}
 			}
 
@@ -78,6 +76,10 @@
 		{
 			if (newRecordCollection.IsDefault)
 			{
+				_activeIndex = UnknownIndex;
+				_activeRecord = Data.Record.Dummy;
+				_dataSource = ImmutableArray<IRecord>.Empty;
+
 				throw new ArgumentException(
 					"Immutable array should be initialized - consider calling Create() method.", nameof(newRecordCollection));
 			}
@@ -102,17 +104,17 @@
 				var previousLineNumber = _dataSource[_activeIndex].LineNumber;
 
 				// Try to find the "record of interest" in the new collection
-				if (_dataSource.TryIndexOfLineNumber(previousLineNumber, out var index))
+				if (newRecordCollection.TryIndexOfLineNumber(previousLineNumber, out var newIndex))
 				{
+					_activeIndex = newIndex;
+					_activeRecord = newRecordCollection[newIndex];
 					_dataSource = newRecordCollection;
-					_activeIndex = index;
-					_activeRecord = _dataSource[index];
 				}
 				else
 				{
-					_dataSource = newRecordCollection;
 					_activeIndex = UnknownIndex;
 					_activeRecord = Data.Record.Dummy;
+					_dataSource = newRecordCollection;
 				}
 			}
 		}

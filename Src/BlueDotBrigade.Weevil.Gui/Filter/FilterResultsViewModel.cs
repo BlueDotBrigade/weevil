@@ -6,11 +6,13 @@
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
 	using System.Net;
 	using System.Reflection;
+	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
@@ -134,7 +136,7 @@
 			this.HasInsightNeedingAttention = false;
 			this.InsightNeedingAttention = 0;
 
-			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
+			this.WeevilVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
 			initializationTimer = new DispatcherTimer();
 			initializationTimer.Tick += (sender, args) => OnInitialize();
@@ -210,14 +212,14 @@
 
 				if (this.NewReleaseDetails != null)
 				{
-					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.CurrentVersion;
+					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.WeevilVersion;
 				}
 
 				return isUpdateAvailable;
 			}
 		}
 
-		public Version CurrentVersion { get; private set; }
+		public Version WeevilVersion { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public bool IsMenuEnabled
@@ -843,7 +845,7 @@
 		{
 			try
 			{
-				var dialog = new AboutDialog(this.CurrentVersion, LicensePath, ThirdPartyNoticesPath)
+				var dialog = new AboutDialog(this.WeevilVersion, LicensePath, ThirdPartyNoticesPath)
 				{
 					Owner = _mainWindow,
 				};
@@ -870,11 +872,11 @@
 
 			if (plugin.CanShowDashboard)
 			{
-				plugin.ShowDashboard(_mainWindow, _engine, _insights.ToArray());
+				plugin.ShowDashboard(_mainWindow, this.WeevilVersion, _engine, _insights.ToArray());
 			}
 			else
 			{
-				_dialogBox.ShowDashboard(_insights, _engine);
+				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights);
 			}
 		}
 
@@ -954,30 +956,15 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(out var findNext, out _findText))
+			if (_dialogBox.TryShowFind(_findText, out var findNext, out _findText))
 			{
-				try
+				if (findNext)
 				{
-					if (findNext)
-					{
-						FindNext();
-					}
-					else
-					{
-						FindPrevious();
-					}
+					FindNext();
 				}
-				catch (RecordNotFoundException e)
+				else
 				{
-					Log.Default.Write(
-						LogSeverityType.Warning,
-						e,
-						$"Unable to find the given text. Value={_findText}");
-
-					MessageBox.Show($"Unable to find the given text: {_findText}.\r\nValue might not exist in the filter results.",
-						"Not Found",
-						MessageBoxButton.OK,
-						MessageBoxImage.Information);
+					FindPrevious();
 				}
 			}
 		}
@@ -986,11 +973,13 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				this.ActiveRecordIndex = _engine
-					.Navigate
-					.Using<ITextNavigator>()
-					.FindNext(_findText)
-					.ToIndexUsing(_engine.Filter.Results);
+				SearchFilterResults(
+					$"Unable to find the provided text in the search results. Value={_findText}",
+					() => _engine
+						.Navigate
+						.Using<ITextNavigator>()
+						.FindNext(_findText)
+						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
 
@@ -998,11 +987,13 @@
 		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				this.ActiveRecordIndex = _engine
-					.Navigate
-					.Using<ITextNavigator>()
-					.FindPrevious(_findText)
-					.ToIndexUsing(_engine.Filter.Results);
+				SearchFilterResults(
+					$"Unable to find the provided text in the search results. Value={_findText}",
+					() => _engine
+						.Navigate
+						.Using<ITextNavigator>()
+						.FindPrevious(_findText)
+						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
 
@@ -1012,64 +1003,58 @@
 
 			if (string.IsNullOrWhiteSpace(userValue))
 			{
-				MessageBox.Show("Please enter a line number, or timestamp to search for.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				var message = "A timestamp or line number is needed to perform the GoTo operation.";
+
+				Log.Default.Write(
+					LogSeverityType.Error,
+					message);
+
+				MessageBox.Show(message,
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
 			}
 			else
 			{
 				// Did the user provide a timestamp?
 				if (userValue.Contains(":"))
 				{
-					try
-					{
-						this.ActiveRecordIndex = _engine
-						.Navigate
-						.Using<ITimestampNavigator>()
-						.Find(userValue, RecordSearchType.ClosestMatch)
-						.ToIndexUsing(_engine.Filter.Results);
-					}
-					catch (RecordNotFoundException e)
-					{
-						Log.Default.Write(
-							LogSeverityType.Warning,
-							e,
-							$"Unable to find the given timestamp. Value={userValue}");
-
-						MessageBox.Show($"Unable to find the given timestamp: {userValue}.\r\nValue might not exist in the filter results.",
-							"Not Found",
-							MessageBoxButton.OK,
-							MessageBoxImage.Information);
-					}
+					SearchFilterResults(
+						$"Unable to find the timestamp in the search results. Value={userValue}",
+						() => _engine
+							.Navigate
+							.Using<ITimestampNavigator>()
+							.Find(userValue, RecordSearchType.ClosestMatch)
+							.ToIndexUsing(_engine.Filter.Results));
 				}
 				else
 				{
-					if (int.TryParse(userValue, out var lineNumber))
+					var validNumberFormat = 
+						NumberStyles.AllowLeadingWhite |
+						NumberStyles.AllowTrailingWhite |
+						NumberStyles.AllowThousands;
+
+					if (int.TryParse(userValue, validNumberFormat, CultureInfo.InvariantCulture, out var lineNumber))
 					{
-						try
-						{
-							this.ActiveRecordIndex = _engine
+						SearchFilterResults(
+							$"Unable to find the line number in the search results. Value={userValue}",
+							() => _engine
 								.Navigate
 								.Using<ILineNumberNavigator>()
 								.Find(lineNumber, RecordSearchType.ClosestMatch)
-								.ToIndexUsing(_engine.Filter.Results);
-						}
-						catch (RecordNotFoundException e)
-						{
-							Log.Default.Write(
-								LogSeverityType.Warning,
-								e,
-								$"Unable to find the given line number. Value={lineNumber}");
-
-							MessageBox.Show($"Unable to find the given line number: {lineNumber}.\r\nValue might not exist in the filter results.", 
-								"Not Found",
-								MessageBoxButton.OK, 
-								MessageBoxImage.Information);
-						}
+								.ToIndexUsing(_engine.Filter.Results));
 					}
 					else
 					{
-						MessageBox.Show("Unable to perform go to operation.  Please enter a valid number.", 
-							"Error", 
-							MessageBoxButton.OK, 
+						var message = "Unable to perform the GoTo operation. The provided value is expected to be a timestamp or line number.";
+
+						Log.Default.Write(
+							LogSeverityType.Error,
+							message);
+
+						MessageBox.Show(message,
+							"Error",
+							MessageBoxButton.OK,
 							MessageBoxImage.Error);
 					}
 				}
@@ -1078,56 +1063,68 @@
 
 		public void GoToPreviousPin()
 		{
-			this.ActiveRecordIndex = _engine
-				.Navigate
-				.Using<IPinNavigator>()
-				.FindPrevious()
-				.ToIndexUsing(_engine.Filter.Results);
+			SearchFilterResults(
+				$"Unable to find a pinned record in the search results.",
+				() => _engine
+					.Navigate
+					.Using<IPinNavigator>()
+					.FindPrevious()
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoToNextPin()
 		{
-			this.ActiveRecordIndex = _engine
-				.Navigate
-				.Using<IPinNavigator>()
-				.FindNext()
-				.ToIndexUsing(_engine.Filter.Results);
+			SearchFilterResults(
+				$"Unable to find a pinned record in the search results.",
+				() => _engine
+					.Navigate
+					.Using<IPinNavigator>()
+					.FindNext()
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoToPreviousFlag()
 		{
-			this.ActiveRecordIndex = _engine
-				.Navigate
-				.Using<IFlagNavigator>()
-				.FindPrevious()
-				.ToIndexUsing(_engine.Filter.Results);
+			SearchFilterResults(
+				$"Unable to find a flagged record in the search results.",
+				() => _engine
+					.Navigate
+					.Using<IFlagNavigator>()
+					.FindPrevious()
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoToNextFlag()
 		{
-			this.ActiveRecordIndex = _engine
-				.Navigate
-				.Using<IFlagNavigator>()
-				.FindNext()
-				.ToIndexUsing(_engine.Filter.Results);
+			SearchFilterResults(
+				$"Unable to find a flagged record in the search results.",
+				() => _engine
+					.Navigate
+					.Using<IFlagNavigator>()
+					.FindNext()
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoToPreviousComment()
 		{
-			this.ActiveRecordIndex = _engine
-				.Navigate
-				.Using<ICommentNavigator>()
-				.FindPrevious()
-				.ToIndexUsing(_engine.Filter.Results);
+			SearchFilterResults(
+				$"Unable to find a comment in the search results.",
+				() => _engine
+					.Navigate
+					.Using<ICommentNavigator>()
+					.FindPrevious()
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoToNextComment()
 		{
-			this.ActiveRecordIndex = _engine
-				.Navigate
-				.Using<ICommentNavigator>()
-				.FindNext()
-				.ToIndexUsing(_engine.Filter.Results);
+			SearchFilterResults(
+				$"Unable to find a comment in the search results.",
+				() => _engine
+					.Navigate
+					.Using<ICommentNavigator>()
+					.FindNext()
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		#endregion
@@ -1362,6 +1359,19 @@
 						$"Filter operation is complete. Current filter results will be ignored because another filter operation has started.");
 				}
 			});
+		}
+
+		private void SearchFilterResults(string userMessage, Func<int> search)
+		{
+			try
+			{
+				this.ActiveRecordIndex = search.Invoke();
+			}
+			catch (RecordNotFoundException e)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, userMessage);
+				MessageBox.Show(userMessage, "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
 		}
 
 		private void RefreshFilterResults()

@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
+	using System;
 	using System.Windows;
 
 	/// <summary>
@@ -37,11 +38,13 @@
 			set => SetValue(FindNextProperty, value);
 		}
 
-		public FindDialog()
+		public FindDialog(Window parentWindow, string defaultValue)
 		{
+			this.Owner = parentWindow ?? throw new ArgumentNullException(nameof(parentWindow));
+
 			this.Loaded += OnDialogLoaded;
 
-			this.UserInput = string.Empty;
+			this.UserInput = defaultValue ?? string.Empty;
 			this.FindNext = true;
 
 			InitializeComponent();

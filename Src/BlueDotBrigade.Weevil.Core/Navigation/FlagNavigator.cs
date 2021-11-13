@@ -18,10 +18,6 @@
 			return record.Metadata.IsFlagged;
 		}
 
-		/// <summary>
-		/// Search backwards for a record that was flagged by an analyzer. Descending order: 4, 3, 2, 1.
-		/// </summary>
-		/// <seealso cref="IRecordAnalyzer"/>
 		public IRecord FindPrevious()
 		{
 			var resultAt = _activeRecord
@@ -30,10 +26,6 @@
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
-		/// <summary>
-		/// Search forward for a record that was flagged by an analzyer. Ascending order: 1, 2, 3, 4.
-		/// </summary>
-		/// <seealso cref="IRecordAnalyzer"/>
 		public IRecord FindNext()
 		{
 			var resultAt = _activeRecord
