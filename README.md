@@ -53,6 +53,10 @@ For a list of the latest features, please refer to the [change log](https://gith
    - Jump to a specific timestamp.
 3. Pinned Records
    - Quickly navigate between records of interest.
+4. Flagged Records
+   - Naviggate between records flagged during previous analysis. 
+5. Record Comments
+   - Navigate between records that have a user comment. 
 
 ### Analysis
 
