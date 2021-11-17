@@ -47,7 +47,7 @@ For a list of the latest features, please refer to the [change log](https://gith
 ### Navigation
 
 1. Find
-   - Search filter results for a specific value.
+   - Search for text in filter results.
 2. Go To
    - Jump to a specific line number.
    - Jump to a specific timestamp.
