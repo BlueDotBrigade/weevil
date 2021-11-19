@@ -92,9 +92,9 @@
 		{
 			_abortFilterOperation = false;
 
-			foreach (IMetricCollector analyzer in _metricCollectors)
+			foreach (IMetricCollector collector in _metricCollectors)
 			{
-				analyzer.Reset();
+				collector.Reset();
 			}
 
 			TimeSpan ElapsedTimeUnknown = TimeSpan.MinValue;
