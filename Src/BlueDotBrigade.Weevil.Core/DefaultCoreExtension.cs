@@ -13,7 +13,7 @@
 		private readonly ContextDictionary _context;
 		private readonly IRecordParser _recordParser;
 		private readonly IDictionary<string, string> _filterAliases;
-		private readonly List<IMetricCollector> _recordCounters;
+		private readonly List<IMetricCollector> _metricCollectors;
 		private readonly IList<MonikerActivator> _monikerActivators;
 		private readonly TableOfContents _tableOfContents;
 
@@ -24,7 +24,10 @@
 			_context = context;
 			_recordParser = new DefaultRecordParser();
 			_filterAliases = new Dictionary<string, string>();
-			_recordCounters = new List<IMetricCollector>();
+			_metricCollectors = new List<IMetricCollector>
+			{
+				new SeverityMetrics()
+			};
 			_monikerActivators = new List<MonikerActivator>();
 			_tableOfContents = new TableOfContents();
 		}
@@ -59,7 +62,7 @@
 
 		public IList<IMetricCollector> GetRecordCounters(ContextDictionary context)
 		{
-			return _recordCounters;
+			return _metricCollectors;
 		}
 
 		public IList<MonikerActivator> GetMonikerActivators(ContextDictionary context)
