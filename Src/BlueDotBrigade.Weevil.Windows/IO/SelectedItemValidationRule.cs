@@ -33,7 +33,7 @@
 
 		private const string DefaultMessage = @"A ComboBox item should be selected.";
 
-		private readonly bool _isApplicationRunning;
+		private readonly bool _isInWpfDesigner;
 
 		/// <summary>
 		/// Validation fails when a ComboBox item has not been selected.
@@ -41,7 +41,7 @@
 		public SelectedItemValidationRule()
 		{
 			_errorMessage = DefaultMessage;
-			_isApplicationRunning = (bool)(DesignerProperties.IsInDesignModeProperty.GetMetadata(typeof(DependencyObject)).DefaultValue);
+			_isInWpfDesigner = System.Reflection.Assembly.GetExecutingAssembly().Location.Contains("VisualStudio");
 		}
 
 		public string ErrorMessage
@@ -69,7 +69,8 @@
 			{
 				// HACK: The Visual Studio WPF designer will crash with NullReferenceException when ValidatesOnTargetUpdated=True.
 				// https://stackoverflow.com/questions/45708488/validationrule-validatesontargetupdated-nullreferenceexception-at-design-time
-				base.ValidatesOnTargetUpdated = _isApplicationRunning && value;
+				// https://newbedev.com/is-there-a-designmode-property-in-wpf
+				base.ValidatesOnTargetUpdated = !_isInWpfDesigner && value;
 			}
 		}
 

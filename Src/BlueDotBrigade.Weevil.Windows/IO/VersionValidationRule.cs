@@ -32,12 +32,12 @@
 		private string _errorMessage;
 		private const string DefaultMessage = @"Value is expected to be in the format: x.y.z";
 
-		private readonly bool _isApplicationRunning;
+		private readonly bool _isInWpfDesigner;
 
 		public VersionValidationRule()
 		{
 			_errorMessage = DefaultMessage;
-			_isApplicationRunning = (bool)(DesignerProperties.IsInDesignModeProperty.GetMetadata(typeof(DependencyObject)).DefaultValue);
+			_isInWpfDesigner = System.Reflection.Assembly.GetExecutingAssembly().Location.Contains("VisualStudio");
 		}
 
 		public string ErrorMessage
@@ -65,7 +65,8 @@
 			{
 				// HACK: The Visual Studio WPF designer will crash with NullReferenceException when ValidatesOnTargetUpdated=True.
 				// https://stackoverflow.com/questions/45708488/validationrule-validatesontargetupdated-nullreferenceexception-at-design-time
-				base.ValidatesOnTargetUpdated = _isApplicationRunning && value;
+				// https://newbedev.com/is-there-a-designmode-property-in-wpf
+				base.ValidatesOnTargetUpdated = !_isInWpfDesigner && value;
 			}
 		}
 
