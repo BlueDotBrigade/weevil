@@ -225,6 +225,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			try
 			{
 				var customAnalyzerKey = parameters[0].ToString();
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"A command bound to the user interface is executing. CommandName={customAnalyzerKey}");
+
 				Analyze(customAnalyzerKey);
 			}
 			catch (Exception e)
