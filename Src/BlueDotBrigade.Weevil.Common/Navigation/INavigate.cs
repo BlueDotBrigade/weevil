@@ -8,8 +8,6 @@
 
 		INavigate RebuildTableOfContents();
 
-		T Using<T>() where T : INavigator;
-
 		IRecord GoTo(int lineNumber, RecordSearchType recordSearchType);
 
 		IRecord GoTo(string timestamp, RecordSearchType recordSearchType);

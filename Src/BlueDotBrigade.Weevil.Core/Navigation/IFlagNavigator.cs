@@ -1,10 +1,9 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using BlueDotBrigade.Weevil.Analysis;
-	using Data;
+	using BlueDotBrigade.Weevil.Data;
 
-
-	public interface IFlagNavigator : INavigator
+	internal interface IFlagNavigator : INavigator
 	{
 		/// <summary>
 		/// Search backwards for a record that was flagged by an analyzer. Descending order: 4, 3, 2, 1.

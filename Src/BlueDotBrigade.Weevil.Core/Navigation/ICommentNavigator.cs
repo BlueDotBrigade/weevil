@@ -1,9 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using Data;
+	using BlueDotBrigade.Weevil.Data;
 
-
-	public interface ICommentNavigator : INavigator
+	internal interface ICommentNavigator : INavigator
 	{
 		/// <summary>
 		/// Search backwards for a record with a comment.. Descending order: 4, 3, 2, 1.

@@ -1,9 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using Data;
+	using BlueDotBrigade.Weevil.Data;
 
-
-	public interface IPinNavigator : INavigator
+	internal interface IPinNavigator : INavigator
 	{
 		/// <summary>
 		/// Search backwards for the previous pinned record. Descending order: 4, 3, 2, 1.

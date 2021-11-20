@@ -73,7 +73,7 @@
 			return this;
 		}
 
-		public T Using<T>() where T : INavigator
+		private T Using<T>() where T : INavigator
 		{
 			return _navigators.OfType<T>().First();
 		}
