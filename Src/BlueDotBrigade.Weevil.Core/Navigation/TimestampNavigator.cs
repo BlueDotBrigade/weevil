@@ -15,18 +15,18 @@
 			_activeRecord = activeRecord;
 		}
 
-		public IRecord Find(string value, RecordSearchType searchType = RecordSearchType.ClosestMatch)
+		public IRecord Find(string timestamp, RecordSearchType searchType = RecordSearchType.ClosestMatch)
 		{
 			var firstRecord = _activeRecord.DataSource.GetFirstCreatedAt();
 
 			if (Record.IsDummyOrNull(firstRecord))
 			{
 				throw new RecordNotFoundException(
-					$"Unable to find record - the collection is empty. Value={value}, SearchType={searchType}");
+					$"Unable to find record - the collection is empty. Value={timestamp}, SearchType={searchType}");
 			}
 
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =
-				ConvertToDateTime(firstRecord, value);
+				ConvertToDateTime(firstRecord, timestamp);
 
 			var index = _activeRecord.DataSource.IndexOfCreatedAt(searchValue.referenceTime, searchType);
 			return _activeRecord.SetActiveIndex(index);

@@ -4,11 +4,11 @@
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("ActiveIndex={_activeRecord.Index}, LineNumber={_activeRecord.Record.LineNumber}")]
-	internal class TextNavigator : ITextNavigator
+	internal class ContentNavigator : IContentNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
 
-		public TextNavigator(ActiveRecord activeRecord)
+		public ContentNavigator(ActiveRecord activeRecord)
 		{
 			_activeRecord = activeRecord;
 		}

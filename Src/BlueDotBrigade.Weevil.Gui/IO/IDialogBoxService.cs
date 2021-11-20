@@ -13,6 +13,6 @@
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 
-		string ShowGoTo(string defaultValue);
+		bool TryShowGoTo(string defaultValue, out string userValue);
 	}
 }

@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Windows.IO
 {
-	using System;
 	using System.ComponentModel;
 	using System.Globalization;
 	using System.Windows;
@@ -13,28 +12,33 @@
 	///  The following sample code shows how to use the validator in XAML:
 	/// <code>
 	/// <![CDATA[
-	/// <ComboBox ItemsSource="{Binding ListOfOptions}">
-	///		<ComboBox.SelectedValue>
+	/// <ComboBox ItemsSource="{Binding ListOfOptions}" IsEditable="True">
+	///		<ComboBox.Text>
 	///			<Binding Path = "SelectedOption" UpdateSourceTrigger="PropertyChanged">
 	///				<Binding.ValidationRules>
-	///					<VersionValidationRule
+	///					<SelectedItemValidationRule
 	///						ValidatesOnTargetUpdated = "True"
 	///						ErrorMessage="Custom error message goes here."/>
 	///				</Binding.ValidationRules>
 	///			</Binding>
-	///		</ComboBox.SelectedValue>
+	///		</ComboBox.Text>
 	///	</ComboBox>
 	/// ]]>
 	/// </code>
 	/// </remarks>
-	public class VersionValidationRule : ValidationRule
+	public class SelectedItemValidationRule : ValidationRule
 	{
+		private static readonly object NoItemSelected = null;
 		private string _errorMessage;
-		private const string DefaultMessage = @"Value is expected to be in the format: x.y.z";
+
+		private const string DefaultMessage = @"A ComboBox item should be selected.";
 
 		private readonly bool _isInWpfDesigner;
 
-		public VersionValidationRule()
+		/// <summary>
+		/// Validation fails when a ComboBox item has not been selected.
+		/// </summary>
+		public SelectedItemValidationRule()
 		{
 			_errorMessage = DefaultMessage;
 			_isInWpfDesigner = System.Reflection.Assembly.GetExecutingAssembly().Location.Contains("VisualStudio");
@@ -70,19 +74,20 @@
 			}
 		}
 
-		public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+		/// <summary>
+		/// Returns a validation error when a ComboBox item has not been selected.
+		/// </summary>
+		/// <param name="selectedValue">Bound to the SelectedValue property of a WPF ComboBox.</param>
+		/// <param name="cultureInfo">The culture to use with this rule.</param>
+		/// <returns></returns>
+		/// <seealso cref="ComboBox"/>
+		public override ValidationResult Validate(object selectedValue, CultureInfo cultureInfo)
 		{
-			var result = new ValidationResult(false, this.ErrorMessage);
+			var isItemSelected = selectedValue != NoItemSelected;
 
-			if (value != null)
-			{
-				if (Version.TryParse(value.ToString(), out Version versionValue))
-				{
-					result = new ValidationResult(true, null);
-				}
-			}
-
-			return result;
+			return isItemSelected
+				? new ValidationResult(true, null)
+				: new ValidationResult(false, this.ErrorMessage);
 		}
 	}
 }

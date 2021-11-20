@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.IO;
@@ -30,16 +31,11 @@
 			{
 				new LineNumberNavigator(_activeRecord),
 				new TimestampNavigator(_activeRecord),
-				new TextNavigator(_activeRecord),
+				new ContentNavigator(_activeRecord),
 				new PinNavigator(_activeRecord),
 				new CommentNavigator(_activeRecord),
 				new FlagNavigator(_activeRecord),
 			}.ToImmutableArray();
-		}
-
-		public T Using<T>() where T : INavigator
-		{
-			return _navigators.OfType<T>().First();
 		}
 
 		public TableOfContents TableOfContents => _tableOfContents;
@@ -75,6 +71,91 @@
 			}
 
 			return this;
+		}
+
+		private T Using<T>() where T : INavigator
+		{
+			return _navigators.OfType<T>().First();
+		}
+
+		public IRecord GoTo(int lineNumber, RecordSearchType recordSearchType)
+		{
+			return this
+				.Using<ILineNumberNavigator>()
+				.Find(lineNumber, recordSearchType);
+		}
+
+		public IRecord GoTo(string timestamp, RecordSearchType recordSearchType)
+		{
+			return this
+				.Using<ITimestampNavigator>()
+				.Find(timestamp, recordSearchType);
+		}
+
+		public IRecord PreviousContent(string text)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<IContentNavigator>()
+				.FindPrevious(text);
+		}
+
+		public IRecord NextContent(string text)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<IContentNavigator>()
+				.FindNext(text);
+		}
+
+		public IRecord PreviousPin()
+		{
+			return this
+				.Using<IPinNavigator>()
+				.FindPrevious();
+		}
+
+		public IRecord NextPin()
+		{
+			return this
+				.Using<IPinNavigator>()
+				.FindNext();
+		}
+
+		public IRecord PreviousComment()
+		{
+			return this
+				.Using<ICommentNavigator>()
+				.FindPrevious();
+		}
+
+		public IRecord NextComment()
+		{
+			return this
+				.Using<ICommentNavigator>()
+				.FindNext();
+		}
+
+		public IRecord PreviousFlag()
+		{
+			return this
+				.Using<IFlagNavigator>()
+				.FindPrevious();
+		}
+
+		public IRecord NextFlag()
+		{
+			return this
+				.Using<IFlagNavigator>()
+				.FindNext();
 		}
 	}
 }

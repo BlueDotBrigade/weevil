@@ -13,7 +13,7 @@
 	[DebuggerDisplay("Results={Results.Length}, InclusiveFilter={_currentFilter.Criteria.Include}")]
 	internal class FilterManager : IClonableInternally<FilterManager>, IFilter
 	{
-		public const int MaxFilterHistory = 16;
+		public const int MaxFilterHistory = 20;
 
 		#region Fields
 		private readonly ICoreExtension _coreExtension;
@@ -92,9 +92,9 @@
 		{
 			_abortFilterOperation = false;
 
-			foreach (IMetricCollector analyzer in _metricCollectors)
+			foreach (IMetricCollector collector in _metricCollectors)
 			{
-				analyzer.Reset();
+				collector.Reset();
 			}
 
 			TimeSpan ElapsedTimeUnknown = TimeSpan.MinValue;

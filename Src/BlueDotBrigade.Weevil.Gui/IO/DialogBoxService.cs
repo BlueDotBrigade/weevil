@@ -90,20 +90,24 @@
 			return string.Empty;
 		}
 
-		public string ShowGoTo(string defaultValue)
+		public bool TryShowGoTo(string defaultValue, out string userValue)
 		{
+			userValue = string.Empty;
+			var wasSuccessful = false;
+
 			var dialog = new GoToDialog(_parentWindow)
 			{
 				Title = "Go To",
-				UserPrompt = "Enter timestamp or line:",
+				UserPrompt = "Timestamp or line #:",
 				UserInput = defaultValue ?? string.Empty
 			};
 
 			if (dialog.ShowDialog() == true)
 			{
-				return dialog.UserInput;
+				userValue = dialog.UserInput;
+				wasSuccessful = true;
 			}
-			return string.Empty;
+			return wasSuccessful;
 		}
 
 		public bool TryShowFind(string defaultValue, out bool findNext, out string findText)

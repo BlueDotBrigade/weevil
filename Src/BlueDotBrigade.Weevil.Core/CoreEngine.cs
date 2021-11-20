@@ -247,9 +247,9 @@
 
 		private ImmutableArray<IMetricCollector> GetRecordCounters()
 		{
-			IList<IMetricCollector> recordCounters = _coreExtension.GetRecordCounters(_context);
-			recordCounters.Add(new SeverityMetrics());
-			return recordCounters.ToImmutableArray();
+			return _coreExtension
+				.GetRecordCounters(_context)
+				.ToImmutableArray();
 		}
 
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)

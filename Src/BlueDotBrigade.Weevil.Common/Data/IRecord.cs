@@ -4,6 +4,9 @@
 
 	public interface IRecord
 	{
+		/// <summary>
+		/// Represents a single log file entry, which can sometimes span multiple lines.
+		/// </summary>
 		string Content { get; }
 
 		bool HasCreationTime { get; }

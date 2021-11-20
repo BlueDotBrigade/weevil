@@ -84,7 +84,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBetweenSelectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
+			() => ClearRecords(ClearRecordsOperation.BetweenSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
@@ -94,6 +94,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearRecordsOperation.Unselected),
 			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FilterCommand => new UiBoundCommand(Filter, () => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public DelegateCommand<object[]> FilterOrCancelCommand => new DelegateCommand<object[]>(parameters =>
 		{
@@ -225,6 +229,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			try
 			{
 				var customAnalyzerKey = parameters[0].ToString();
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"A command bound to the user interface is executing. CommandName={customAnalyzerKey}");
+
 				Analyze(customAnalyzerKey);
 			}
 			catch (Exception e)

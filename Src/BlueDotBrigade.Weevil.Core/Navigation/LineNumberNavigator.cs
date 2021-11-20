@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
-	using System;
 	using System.Diagnostics;
 	using BlueDotBrigade.Weevil.Data;
 

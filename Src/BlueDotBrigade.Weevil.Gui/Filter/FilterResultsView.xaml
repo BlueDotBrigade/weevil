@@ -35,6 +35,7 @@
    </UserControl.Resources>
    <UserControl.InputBindings>
       <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenCommand}" />
+      <KeyBinding Key="Enter" Modifiers="Alt" Command="{Binding FilterCommand}"/>
       <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
       <KeyBinding Key="F1" Modifiers="Control" Command="{Binding ShowAboutCommand}" />
       <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveStateCommand}" />
@@ -113,7 +114,7 @@
                  Command="{Binding OpenCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
-            Margin="{StaticResource ButtonMargin}">
+                 Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument-Button-24.png"/>
          </Button>
          <!-- 
@@ -182,7 +183,7 @@
                <Image Height="24">
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="ToolTip" Value="Apply inclusive &amp; exclusive filters."/>
+                        <Setter Property="ToolTip" Value="Apply inclusive &amp; exclusive filters. (Alt+Enter)"/>
                         <Setter Property="Source" Value="/Resources/Icons/Filter-24.png"/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding IsProcessingLongOperation}" Value="true">
@@ -274,8 +275,8 @@
                <Separator/>
                <MenuItem Header="Navigation...">
                   <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
-                  <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
                   <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
+                  <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
                   <Separator/>
                   <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
                   <Separator/>
@@ -636,7 +637,7 @@
                                     <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
                                  </MultiDataTrigger.Conditions>
                                  <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                                 <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (`Ctrl+D`) for insight&#x0d;&#x0a;about the current document."/>
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (Ctrl+D) for insight&#x0d;&#x0a;about the current document."/>
                            </MultiDataTrigger>
                               <MultiDataTrigger>
                                  <MultiDataTrigger.Conditions>
@@ -644,7 +645,7 @@
                                     <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
                                  </MultiDataTrigger.Conditions>
                                  <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                                 <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (`Ctrl+D`)."/>
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (Ctrl+D)."/>
                            </MultiDataTrigger>
                            </Style.Triggers>
                         </Style>
