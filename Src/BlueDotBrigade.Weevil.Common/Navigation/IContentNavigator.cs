@@ -2,7 +2,7 @@
 {
 	using BlueDotBrigade.Weevil.Data;
 
-	public interface ITextNavigator : INavigator
+	public interface IContentNavigator : INavigator
 	{
 		/// <summary>
 		/// Search backwards through record <see cref="Record.Content"/> for the given text. Descending order: 4, 3, 2, 1.

@@ -978,8 +978,7 @@
 					$"Unable to find the provided text in the search results. Value={_findText}",
 					() => _engine
 						.Navigate
-						.Using<ITextNavigator>()
-						.FindNext(_findText)
+						.NextContent(_findText)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
@@ -992,8 +991,7 @@
 					$"Unable to find the provided text in the search results. Value={_findText}",
 					() => _engine
 						.Navigate
-						.Using<ITextNavigator>()
-						.FindPrevious(_findText)
+						.PreviousContent(_findText)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
@@ -1024,8 +1022,7 @@
 							$"Unable to find the timestamp in the search results. Value={userValue}",
 							() => _engine
 								.Navigate
-								.Using<ITimestampNavigator>()
-								.Find(userValue, RecordSearchType.ClosestMatch)
+								.GoTo(userValue, RecordSearchType.ClosestMatch)
 								.ToIndexUsing(_engine.Filter.Results));
 					}
 					else
@@ -1041,8 +1038,7 @@
 								$"Unable to find the line number in the search results. Value={userValue}",
 								() => _engine
 									.Navigate
-									.Using<ILineNumberNavigator>()
-									.Find(lineNumber, RecordSearchType.ClosestMatch)
+									.GoTo(lineNumber, RecordSearchType.ClosestMatch)
 									.ToIndexUsing(_engine.Filter.Results));
 						}
 						else
@@ -1069,8 +1065,7 @@
 				$"Unable to find a pinned record in the search results.",
 				() => _engine
 					.Navigate
-					.Using<IPinNavigator>()
-					.FindPrevious()
+					.PreviousPin()
 					.ToIndexUsing(_engine.Filter.Results));
 		}
 
@@ -1080,8 +1075,7 @@
 				$"Unable to find a pinned record in the search results.",
 				() => _engine
 					.Navigate
-					.Using<IPinNavigator>()
-					.FindNext()
+					.NextPin()
 					.ToIndexUsing(_engine.Filter.Results));
 		}
 
@@ -1091,8 +1085,7 @@
 				$"Unable to find a flagged record in the search results.",
 				() => _engine
 					.Navigate
-					.Using<IFlagNavigator>()
-					.FindPrevious()
+					.PreviousFlag()
 					.ToIndexUsing(_engine.Filter.Results));
 		}
 
@@ -1102,8 +1095,7 @@
 				$"Unable to find a flagged record in the search results.",
 				() => _engine
 					.Navigate
-					.Using<IFlagNavigator>()
-					.FindNext()
+					.NextFlag()
 					.ToIndexUsing(_engine.Filter.Results));
 		}
 
@@ -1113,8 +1105,7 @@
 				$"Unable to find a comment in the search results.",
 				() => _engine
 					.Navigate
-					.Using<ICommentNavigator>()
-					.FindPrevious()
+					.PreviousComment()
 					.ToIndexUsing(_engine.Filter.Results));
 		}
 
@@ -1124,8 +1115,7 @@
 				$"Unable to find a comment in the search results.",
 				() => _engine
 					.Navigate
-					.Using<ICommentNavigator>()
-					.FindNext()
+					.NextComment()
 					.ToIndexUsing(_engine.Filter.Results));
 		}
 
