@@ -20,7 +20,7 @@
 			engine.Filter.Results[9].Metadata.IsPinned = true;
 
 			engine.Selector.Select(1);
-			IRecord pinnedRecord = engine.Navigate.Using<IPinNavigator>().FindNext();
+			IRecord pinnedRecord = engine.Navigate.NextPin();
 
 			// Reminder: although they are often similar, the line number and index are NOT the same!
 			Assert.AreEqual(10, pinnedRecord.LineNumber);
@@ -40,10 +40,10 @@
 
 			engine.Selector.Select(1);
 
-			IRecord record = engine.Navigate.Using<ICommentNavigator>().FindNext();
+			IRecord record = engine.Navigate.NextComment();
 			Assert.AreEqual("First", record.Metadata.Comment);
 
-			record = engine.Navigate.Using<ICommentNavigator>().FindNext();
+			record = engine.Navigate.NextComment();
 			Assert.AreEqual("Second", record.Metadata.Comment);
 		}
 
@@ -60,10 +60,10 @@
 
 			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
 
-			IRecord record = engine.Navigate.Using<IFlagNavigator>().FindNext();
+			IRecord record = engine.Navigate.NextFlag();
 			Assert.AreEqual(1, record.LineNumber);
 
-			record = engine.Navigate.Using<IFlagNavigator>().FindNext();
+			record = engine.Navigate.NextFlag();
 			Assert.AreEqual(101, record.LineNumber);
 		}
 
@@ -76,7 +76,7 @@
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("Nothing Should Match This Filter"));
 
-			Assert.AreEqual(Record.Dummy, engine.Navigate.Using<IPinNavigator>().FindNext());
+			Assert.AreEqual(Record.Dummy, engine.Navigate.NextPin());
 		}
 	}
 }
