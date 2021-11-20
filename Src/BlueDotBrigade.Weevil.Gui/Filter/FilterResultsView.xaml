@@ -275,8 +275,8 @@
                <Separator/>
                <MenuItem Header="Navigation...">
                   <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
-                  <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
                   <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
+                  <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
                   <Separator/>
                   <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
                   <Separator/>

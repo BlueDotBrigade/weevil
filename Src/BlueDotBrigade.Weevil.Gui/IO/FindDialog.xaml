@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Find" 
+        Title="Find Content" 
         Height="150" Width="600"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
@@ -47,7 +47,7 @@
       </Grid.ColumnDefinitions>
       <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
       <TextBlock Grid.Row="0" Grid.Column="0"
-                 Text="Search content for:"
+                 Text="Search for text:"
                  HorizontalAlignment="Right" 
                  TextWrapping="WrapWithOverflow" />
       <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 
