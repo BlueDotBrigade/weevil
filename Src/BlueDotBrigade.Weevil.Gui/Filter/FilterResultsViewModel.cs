@@ -1000,63 +1000,64 @@
 
 		public void GoTo()
 		{
-			var userValue = _dialogBox.ShowGoTo(string.Empty);
-
-			if (string.IsNullOrWhiteSpace(userValue))
+			if (_dialogBox.TryShowGoTo(string.Empty, out var userValue))
 			{
-				var message = "A timestamp or line number is needed to perform the GoTo operation.";
-
-				Log.Default.Write(
-					LogSeverityType.Error,
-					message);
-
-				MessageBox.Show(message,
-					"Error",
-					MessageBoxButton.OK,
-					MessageBoxImage.Error);
-			}
-			else
-			{
-				// Did the user provide a timestamp?
-				if (userValue.Contains(":"))
+				if (string.IsNullOrWhiteSpace(userValue))
 				{
-					SearchFilterResults(
-						$"Unable to find the timestamp in the search results. Value={userValue}",
-						() => _engine
-							.Navigate
-							.Using<ITimestampNavigator>()
-							.Find(userValue, RecordSearchType.ClosestMatch)
-							.ToIndexUsing(_engine.Filter.Results));
+					var message = "A timestamp or line number is needed to perform the GoTo operation.";
+
+					Log.Default.Write(
+						LogSeverityType.Error,
+						message);
+
+					MessageBox.Show(message,
+						"Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
 				}
 				else
 				{
-					var validNumberFormat = 
-						NumberStyles.AllowLeadingWhite |
-						NumberStyles.AllowTrailingWhite |
-						NumberStyles.AllowThousands;
-
-					if (int.TryParse(userValue, validNumberFormat, CultureInfo.InvariantCulture, out var lineNumber))
+					// Did the user provide a timestamp?
+					if (userValue.Contains(":"))
 					{
 						SearchFilterResults(
-							$"Unable to find the line number in the search results. Value={userValue}",
+							$"Unable to find the timestamp in the search results. Value={userValue}",
 							() => _engine
 								.Navigate
-								.Using<ILineNumberNavigator>()
-								.Find(lineNumber, RecordSearchType.ClosestMatch)
+								.Using<ITimestampNavigator>()
+								.Find(userValue, RecordSearchType.ClosestMatch)
 								.ToIndexUsing(_engine.Filter.Results));
 					}
 					else
 					{
-						var message = "Unable to perform the GoTo operation. The provided value is expected to be a timestamp or line number.";
+						var validNumberFormat =
+							NumberStyles.AllowLeadingWhite |
+							NumberStyles.AllowTrailingWhite |
+							NumberStyles.AllowThousands;
 
-						Log.Default.Write(
-							LogSeverityType.Error,
-							message);
+						if (int.TryParse(userValue, validNumberFormat, CultureInfo.InvariantCulture, out var lineNumber))
+						{
+							SearchFilterResults(
+								$"Unable to find the line number in the search results. Value={userValue}",
+								() => _engine
+									.Navigate
+									.Using<ILineNumberNavigator>()
+									.Find(lineNumber, RecordSearchType.ClosestMatch)
+									.ToIndexUsing(_engine.Filter.Results));
+						}
+						else
+						{
+							var message = "Unable to perform the GoTo operation. The provided value is expected to be a timestamp or line number.";
 
-						MessageBox.Show(message,
-							"Error",
-							MessageBoxButton.OK,
-							MessageBoxImage.Error);
+							Log.Default.Write(
+								LogSeverityType.Error,
+								message);
+
+							MessageBox.Show(message,
+								"Error",
+								MessageBoxButton.OK,
+								MessageBoxImage.Error);
+						}
 					}
 				}
 			}

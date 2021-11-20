@@ -637,7 +637,7 @@
                                     <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
                                  </MultiDataTrigger.Conditions>
                                  <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                                 <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (`Ctrl+D`) for insight&#x0d;&#x0a;about the current document."/>
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (Ctrl+D) for insight&#x0d;&#x0a;about the current document."/>
                            </MultiDataTrigger>
                               <MultiDataTrigger>
                                  <MultiDataTrigger.Conditions>
@@ -645,7 +645,7 @@
                                     <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
                                  </MultiDataTrigger.Conditions>
                                  <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                                 <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (`Ctrl+D`)."/>
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (Ctrl+D)."/>
                            </MultiDataTrigger>
                            </Style.Triggers>
                         </Style>
