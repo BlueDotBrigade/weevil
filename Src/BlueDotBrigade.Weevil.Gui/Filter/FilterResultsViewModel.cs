@@ -901,6 +901,12 @@
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
+		public void Filter()
+		{
+			var filters = new object[] { _inclusiveFilter, _exclusiveFilter };
+			FilterManually(filters);
+		}
+
 		public void FilterManually(object[] filters)
 		{
 			_inclusiveFilter = filters[0].ToString();
@@ -919,12 +925,7 @@
 			}
 			else
 			{
-				_inclusiveFilter = filters[0].ToString();
-				_exclusiveFilter = filters[1].ToString();
-
-				var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
-
-				FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
+				FilterManually(filters);
 			}
 		}
 

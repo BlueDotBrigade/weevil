@@ -94,6 +94,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearRecordsOperation.Unselected),
 			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FilterCommand => new UiBoundCommand(Filter, () => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public DelegateCommand<object[]> FilterOrCancelCommand => new DelegateCommand<object[]>(parameters =>
 		{

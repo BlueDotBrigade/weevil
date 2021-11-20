@@ -35,6 +35,7 @@
    </UserControl.Resources>
    <UserControl.InputBindings>
       <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenCommand}" />
+      <KeyBinding Key="Enter" Modifiers="Alt" Command="{Binding FilterCommand}"/>
       <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
       <KeyBinding Key="F1" Modifiers="Control" Command="{Binding ShowAboutCommand}" />
       <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveStateCommand}" />
@@ -113,7 +114,7 @@
                  Command="{Binding OpenCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
-            Margin="{StaticResource ButtonMargin}">
+                 Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument-Button-24.png"/>
          </Button>
          <!-- 
@@ -182,7 +183,7 @@
                <Image Height="24">
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="ToolTip" Value="Apply inclusive &amp; exclusive filters."/>
+                        <Setter Property="ToolTip" Value="Apply inclusive &amp; exclusive filters. (Alt+Enter)"/>
                         <Setter Property="Source" Value="/Resources/Icons/Filter-24.png"/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding IsProcessingLongOperation}" Value="true">
