@@ -5,7 +5,7 @@
 	internal interface ILineNumberNavigator : INavigator
 	{
 		/// <summary>
-		/// Search for the <see cref="IRecord"/> that matches the provided line number.
+		/// Performs a binary search looking for the <see cref="IRecord"/> that has the closest <paramref name="lineNumber"/>.
 		/// </summary>
 		/// <exception cref="RecordNotFoundException"/>
 		IRecord Find(int lineNumber, RecordSearchType searchType);

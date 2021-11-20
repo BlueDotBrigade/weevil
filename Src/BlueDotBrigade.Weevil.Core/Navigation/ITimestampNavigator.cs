@@ -5,9 +5,9 @@
 	internal interface ITimestampNavigator : INavigator
 	{
 		/// <summary>
-		/// Navigates through records in ascending order (e.g. lines: 1, 2, 3, 4, etc.) looking for the provided timestamp.
+		/// Performs a binary search looking for the <see cref="IRecord"/> that matches the provided <paramref name="timestamp"/>.
 		/// </summary>
 		/// <exception cref="RecordNotFoundException"/>
-		IRecord Find(string value, RecordSearchType searchType);
+		IRecord Find(string timestamp, RecordSearchType searchType);
 	}
 }

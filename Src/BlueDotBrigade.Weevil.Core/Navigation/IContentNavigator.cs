@@ -5,13 +5,13 @@
 	internal interface IContentNavigator : INavigator
 	{
 		/// <summary>
-		/// Search backwards through record <see cref="Record.Content"/> for the given text. Descending order: 4, 3, 2, 1.
+		/// Searches backwards through records looking for <see cref="Record.Content"/> with the provided text. Descending order: 4, 3, 2, 1.
 		/// </summary>
 		/// <exception cref="Record"/>
 		IRecord FindPrevious(string value);
 
 		/// <summary>
-		/// Search forward through record <see cref="Record.Content"/> for the given text. Ascending order: 1, 2, 3, 4.
+		/// Searches forward through records looking for <see cref="Record.Content"/> with the provided text. Ascending order: 1, 2, 3, 4.
 		/// </summary>
 		/// <exception cref="Record"/>
 		IRecord FindNext(string value);
