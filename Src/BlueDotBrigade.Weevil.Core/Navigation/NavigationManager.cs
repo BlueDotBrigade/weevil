@@ -1,19 +1,21 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
+	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using System.Diagnostics;
 	using System.IO;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using File = System.IO.File;
 
-	[DebuggerDisplay("ActiveIndex={_pinNavigator.ActiveIndex}")]
 	internal class NavigationManager : INavigate
 	{
 		private readonly string _sourceFilePath;
 		private readonly ICoreExtension _coreCoreExtension;
-		private readonly ImmutableArray<IRecord> _allRecords;
-		private readonly PinNavigator _pinNavigator;
+
+		private readonly ActiveRecord _activeRecord;
+		private ImmutableArray<INavigator> _navigators;
 
 		private TableOfContents _tableOfContents;
 
@@ -21,25 +23,38 @@
 		{
 			_sourceFilePath = sourceFilePath;
 			_coreCoreExtension = coreExtension;
-			_allRecords = allRecords;
-			_pinNavigator = new PinNavigator(allRecords);
 			_tableOfContents = tableOfContents;
-		}
 
-		public IPinNavigator Pinned => _pinNavigator;
+			_activeRecord = new ActiveRecord(allRecords);
+
+			_navigators = new List<INavigator>
+			{
+				new LineNumberNavigator(_activeRecord),
+				new TimestampNavigator(_activeRecord),
+				new ContentNavigator(_activeRecord),
+				new PinNavigator(_activeRecord),
+				new CommentNavigator(_activeRecord),
+				new FlagNavigator(_activeRecord),
+			}.ToImmutableArray();
+		}
 
 		public TableOfContents TableOfContents => _tableOfContents;
 
 		ITableOfContents INavigate.TableOfContents => _tableOfContents;
 
-		internal void SetActiveRecord(int lineNumber)
+		/// <summary>
+		/// Sets the focus of the navigation manager to the specified <paramref name="lineNumber"/>.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException"/>
+		internal void SetActiveLineNumber(int lineNumber)
 		{
-			_pinNavigator.SetActiveRecord(lineNumber);
+			var index = _activeRecord.DataSource.IndexOfLineNumber(lineNumber);
+			_activeRecord.SetActiveIndex(index);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> records)
+		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
-			_pinNavigator.UpdateDataSource(records);
+			_activeRecord.UpdateDataSource(filterResults);
 		}
 
 		public INavigate RebuildTableOfContents()
@@ -56,6 +71,91 @@
 			}
 
 			return this;
+		}
+
+		private T Using<T>() where T : INavigator
+		{
+			return _navigators.OfType<T>().First();
+		}
+
+		public IRecord GoTo(int lineNumber, RecordSearchType recordSearchType)
+		{
+			return this
+				.Using<ILineNumberNavigator>()
+				.Find(lineNumber, recordSearchType);
+		}
+
+		public IRecord GoTo(string timestamp, RecordSearchType recordSearchType)
+		{
+			return this
+				.Using<ITimestampNavigator>()
+				.Find(timestamp, recordSearchType);
+		}
+
+		public IRecord PreviousContent(string text)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<IContentNavigator>()
+				.FindPrevious(text);
+		}
+
+		public IRecord NextContent(string text)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<IContentNavigator>()
+				.FindNext(text);
+		}
+
+		public IRecord PreviousPin()
+		{
+			return this
+				.Using<IPinNavigator>()
+				.FindPrevious();
+		}
+
+		public IRecord NextPin()
+		{
+			return this
+				.Using<IPinNavigator>()
+				.FindNext();
+		}
+
+		public IRecord PreviousComment()
+		{
+			return this
+				.Using<ICommentNavigator>()
+				.FindPrevious();
+		}
+
+		public IRecord NextComment()
+		{
+			return this
+				.Using<ICommentNavigator>()
+				.FindNext();
+		}
+
+		public IRecord PreviousFlag()
+		{
+			return this
+				.Using<IFlagNavigator>()
+				.FindPrevious();
+		}
+
+		public IRecord NextFlag()
+		{
+			return this
+				.Using<IFlagNavigator>()
+				.FindNext();
 		}
 	}
 }

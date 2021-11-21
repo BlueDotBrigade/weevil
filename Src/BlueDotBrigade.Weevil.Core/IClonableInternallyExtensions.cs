@@ -1,7 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	/// <summary>
-	/// Facilitates access to the <see cref="IClonableInternally{T}"/> member methods, by avoid an explicit cast to the inteface type.
+	/// Facilitates access to the <see cref="IClonableInternally{T}"/> member methods, by avoid an explicit cast to the interface type.
 	/// </summary>
 	/// <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/interfaces/explicit-interface-implementation">MSDN: Explicit Interface Implementation</seealso>
 	/// <seealso href="https://alexfranchuk.com/blog/internal-interface-classes-in-csharp/">Alex Franchuk: Internal Interface Classes in C#</seealso>

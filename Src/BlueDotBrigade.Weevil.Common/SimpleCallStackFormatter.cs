@@ -1,23 +1,15 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Text.RegularExpressions;
 	using BlueDotBrigade.Weevil.Data;
 
 	public class SimpleCallStackFormatter : IRecordFormatter
 	{
-		private const int MaximumLength = 8 * 1024;
-		private const int TrimmedLength = 1 * 256;
-
-		internal static readonly string EndOfLine = "\u22EF";
-
 		private static readonly Regex[] CallStackPatterns;
 
 		static SimpleCallStackFormatter()
 		{
-			Debug.Assert(MaximumLength > TrimmedLength);
-
 			var options = RegexOptions.Compiled | RegexOptions.Multiline;
 
 			// Note: The "end of line assertion" ($) in .NET does not consume the carriage return & line feed (\r\n).
@@ -36,54 +28,19 @@
 
 		public string Format(IRecord record)
 		{
-			var result = string.Empty;
+			var result = record.Content;
 
-			if (TrySimplifyCallstack(record.Content, record.Metadata.IsMultiLine, out var smallerCallStack))
-			{
-				// further processing is not required
-				result = smallerCallStack;
-			}
-			else
-			{
-				result = TruncateIf(record.Content, !record.Metadata.IsMultiLine, MaximumLength, TrimmedLength);
-			}
-
-			return result;
-		}
-
-
-		internal static bool TrySimplifyCallstack(string content, bool isMultiLine, out string newContent)
-		{
-			newContent = content;
-
-			if (isMultiLine)
+			if (record.Metadata.IsMultiLine)
 			{
 				foreach (var pattern in CallStackPatterns)
 				{
-					newContent = pattern.Replace(newContent, string.Empty);
+					result = pattern.Replace(result, string.Empty);
 				}
 			}
 
-			return newContent.Length < content.Length;
-		}
-
-		internal static string TruncateIf(string content, bool isSingleLine, int maximumLength, int truncatedLength)
-		{
-			var result = content;
-
-			if (isSingleLine)
-			{
-				if (content.Length >= maximumLength)
-				{
-					var maxLength = content.Length >= maximumLength
-						? truncatedLength
-						: content.Length;
-					result = content.Substring(0, maxLength) + EndOfLine;
-				}
-			}
+			var wasSucessful = result.Length < record.Content.Length;
 
 			return result;
 		}
-
 	}
 }

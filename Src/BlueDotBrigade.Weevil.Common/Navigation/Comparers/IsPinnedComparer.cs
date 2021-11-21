@@ -1,8 +1,9 @@
-﻿namespace BlueDotBrigade.Weevil.Data
+﻿namespace BlueDotBrigade.Weevil.Navigation.Comparers
 {
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Data;
 
-	public sealed class RecordIsPinnedComparer : Comparer<IRecord>
+	internal sealed class IsPinnedComparer : Comparer<IRecord>
 	{
 		public override int Compare(IRecord x, IRecord y)
 		{

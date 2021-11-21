@@ -122,13 +122,13 @@
 
 			_analysisManager = new AnalysisManager(this, _coreExtension);
 
-			var staticAliases = _coreExtension.GetStaticAliases(_context);
-			var staticAliasExpander = new StaticAliasExpander(staticAliases);
+			var filterAliases = _coreExtension.GetFilterAliases(_context);
+			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
 			_filterManager = new FilterManager(
 				_coreExtension,
 				_context,
-				staticAliasExpander,
+				filterAliasExpander,
 				_allRecords,
 				GetRecordCounters());
 
@@ -204,7 +204,7 @@
 
 		public FilterManager Filter => _filterManager;
 
-		public NavigationManager Navigator => _navigationManager;
+		public NavigationManager Navigate => _navigationManager;
 
 		public SelectionManager Selector => _selectionManager;
 
@@ -237,7 +237,7 @@
 
 		IFilter ICoreEngine.Filter => this.Filter;
 
-		INavigate ICoreEngine.Navigator => this.Navigator;
+		INavigate ICoreEngine.Navigate => this.Navigate;
 
 		ISelect ICoreEngine.Selector => this.Selector;
 
@@ -247,9 +247,9 @@
 
 		private ImmutableArray<IMetricCollector> GetRecordCounters()
 		{
-			IList<IMetricCollector> recordCounters = _coreExtension.GetRecordCounters(_context);
-			recordCounters.Add(new SeverityMetrics());
-			return recordCounters.ToImmutableArray();
+			return _coreExtension
+				.GetRecordCounters(_context)
+				.ToImmutableArray();
 		}
 
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)

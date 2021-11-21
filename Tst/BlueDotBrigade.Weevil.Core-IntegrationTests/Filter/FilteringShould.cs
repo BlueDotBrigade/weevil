@@ -107,5 +107,40 @@
 
 			Assert.AreEqual(5, results.Length);
 		}
+
+		[TestMethod]
+		public void HidePinnedRecordsByDefault()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			engine.Records[9].Metadata.IsPinned = true;
+
+			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("NothingWillMatchThisFilter"));
+
+			Assert.AreEqual(0, engine.Filter.Results.Length);
+		}
+
+		[TestMethod]
+		public void ShowPinnedRecordsWhenEnabled()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			engine.Records[9].Metadata.IsPinned = true;
+
+			var filterCriteria = new FilterCriteria(
+				"Nothing Should Match This Filter",
+				string.Empty, new Dictionary<string, object>
+				{
+					{"IncludePinned", true},
+				});
+
+			engine.Filter.Apply(FilterType.RegularExpression, filterCriteria);
+
+			Assert.IsTrue(engine.Filter.Results.Length > 0);
+		}
 	}
 }

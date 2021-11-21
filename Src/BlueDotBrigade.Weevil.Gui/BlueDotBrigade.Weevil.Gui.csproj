@@ -130,6 +130,12 @@
       <DependentUpon>SelectFileView.xaml</DependentUpon>
     </Compile>
     <Compile Include="IO\SelectFileViewModel.cs" />
+    <Compile Include="IO\FindDialog.xaml.cs">
+      <DependentUpon>FindDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="IO\GoToDialog.xaml.cs">
+      <DependentUpon>GoToDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IO\UserPromptDialog.xaml.cs">
       <DependentUpon>UserPromptDialog.xaml</DependentUpon>
     </Compile>
@@ -211,6 +217,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="IO\FindDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="IO\GoToDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="IO\UserPromptDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -250,13 +264,13 @@
       <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="NLog">
-      <Version>4.7.9</Version>
+      <Version>4.7.10</Version>
     </PackageReference>
     <PackageReference Include="PostSharp">
-      <Version>6.9.3</Version>
+      <Version>6.9.6</Version>
     </PackageReference>
     <PackageReference Include="PostSharp.Patterns.Model">
-      <Version>6.9.3</Version>
+      <Version>6.9.6</Version>
     </PackageReference>
     <PackageReference Include="Prism.Mvvm">
       <Version>1.1.1</Version>
@@ -358,13 +372,12 @@
 COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Help.html" "$(TargetDir)Doc\\"  /D /Y
-
+    <PostBuildEvent>XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Help.html" "$(TargetDir)..\Doc\\"  /D /Y
 
 REM Create directory and copy third-party licenses
-XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)Licenses"  /D /I /E /Y
+XCOPY "$(SolutionDir)Doc\\Notes\\Release\\Licenses" "$(TargetDir)..\Licenses"  /D /I /E /Y
 
-COPY /A /Y "$(SolutionDir)LICENSE" "$(TargetDir)Licenses\\License.txt"
+COPY /A /Y "$(SolutionDir)LICENSE.md" "$(TargetDir)..\Licenses\\License.md"
 
 IF "%25WEEVIL_PLUGINS_PATH%25"==""  (
    ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS

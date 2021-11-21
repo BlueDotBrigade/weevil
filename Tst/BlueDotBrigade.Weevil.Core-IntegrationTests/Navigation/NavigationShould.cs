@@ -2,6 +2,8 @@
 {
 	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Navigation;
 	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,7 +11,7 @@
 	public class NavigationShould
 	{
 		[TestMethod]
-		public void SupportNavigatingToPinnedRecord()
+		public void SupportNavigatingToNextPinnedRecord()
 		{
 			IEngine engine = Engine
 				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
@@ -18,22 +20,63 @@
 			engine.Filter.Results[9].Metadata.IsPinned = true;
 
 			engine.Selector.Select(1);
-			IRecord pinnedRecord = engine.Navigator.Pinned.GoToNextPin();
+			IRecord pinnedRecord = engine.Navigate.NextPin();
 
 			// Reminder: although they are often similar, the line number and index are NOT the same!
 			Assert.AreEqual(10, pinnedRecord.LineNumber);
 		}
 
 		[TestMethod]
-		public void HandleNavigatingWhenThereAreNoPinnedRecords()
+		public void SupportNavigatingToNextRecordWithComment()
 		{
 			IEngine engine = Engine
 				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
 				.Open();
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("ThisWillHidePinnedRecord9"));
+			engine.Analyzer.RemoveComments(true);
 
-			Assert.AreEqual(Record.Dummy, engine.Navigator.Pinned.GoToNextPin());
+			engine.Records[12].Metadata.Comment = "First";
+			engine.Records[24].Metadata.Comment = "Second";
+
+			engine.Selector.Select(1);
+
+			IRecord record = engine.Navigate.NextComment();
+			Assert.AreEqual("First", record.Metadata.Comment);
+
+			record = engine.Navigate.NextComment();
+			Assert.AreEqual("Second", record.Metadata.Comment);
+		}
+
+		[TestMethod]
+		public void SupportNavigatingToNextFlaggedRecord()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			engine.Filter.Apply(
+				FilterType.RegularExpression,
+				new FilterCriteria(@"This is a sample log message\. Id=(?<Hundredths>\d)"));
+
+			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
+
+			IRecord record = engine.Navigate.NextFlag();
+			Assert.AreEqual(1, record.LineNumber);
+
+			record = engine.Navigate.NextFlag();
+			Assert.AreEqual(101, record.LineNumber);
+		}
+
+		[TestMethod]
+		public void HandleNavigatingWhenPinnedRecordsHidden()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("Nothing Should Match This Filter"));
+
+			Assert.AreEqual(Record.Dummy, engine.Navigate.NextPin());
 		}
 	}
 }

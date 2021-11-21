@@ -37,7 +37,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.IsTrue(record.Content.StartsWith("2019-12-31 23:59:58"));
 			Assert.IsTrue(record.Content.EndsWith("sapiente alienos esse arbitrantur."));
@@ -50,8 +50,8 @@
 			StreamReader dataSource = InputData.GetAsStreamReader("ReadUntilNextRecord.log");
 			var multilineParser = new MultilineRecordParser(dataSource, new TsvRecordParser());
 
-			Record multilineRecord = multilineParser.GetNext();
-			Record singleLineRecord = multilineParser.GetNext();
+			IRecord multilineRecord = multilineParser.GetNext();
+			IRecord singleLineRecord = multilineParser.GetNext();
 
 			Assert.AreEqual(1, multilineRecord.LineNumber);
 			Assert.AreEqual(4, singleLineRecord.LineNumber);
@@ -63,7 +63,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.IsTrue(record.Content.StartsWith("2019-12-31 23:59:58"));
 			Assert.IsTrue(record.Content.EndsWith("sapiente alienos esse arbitrantur."));
@@ -76,7 +76,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.IsTrue(record.Content.StartsWith("2019-12-31 23:59:58"));
 			Assert.IsTrue(record.Content.EndsWith("sapiente alienos esse arbitrantur."));
@@ -102,7 +102,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.AreEqual(Record.Dummy, record);
 		}
@@ -115,7 +115,7 @@
 
 			// Won't be able to find anything
 			// ... because the parser will give up before the first complete record is found
-			Record record = new MultilineRecordParser(
+			IRecord record = new MultilineRecordParser(
 				dataSource,
 				recordParser,
 				maximumLinesToSearch: 32,
@@ -134,7 +134,7 @@
 
 			// Record is returned
 			// ... because the parser will find it before it reaches the search limit
-			Record record = new MultilineRecordParser(
+			IRecord record = new MultilineRecordParser(
 				dataSource,
 				recordParser,
 				maximumLinesToSearch: 32,
@@ -151,7 +151,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.AreEqual(256, MultilineRecordParser.MaximumLinesToSearch);
 			Assert.AreEqual(MultilineRecordParser.MaximumLinesToSearch, record.LineNumber);
@@ -165,7 +165,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.AreEqual(Record.Dummy, record);
 		}
@@ -176,7 +176,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.IsTrue(Convert.ToBoolean(record.LineNumber));
 		}
@@ -187,7 +187,7 @@
 			StreamReader dataSource = InputData.GetAsStreamReader();
 			var recordParser = new TsvRecordParser();
 
-			Record record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			Assert.IsFalse(record.Metadata.IsMultiLine);
 		}

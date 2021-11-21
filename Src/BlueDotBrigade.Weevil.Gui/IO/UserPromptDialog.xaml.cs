@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
+	using System;
 	using System.Windows;
 
 	/// <summary>
@@ -33,10 +34,19 @@
 			set => SetValue(UserInputProperty, value);
 		}
 
-		public UserPromptDialog()
+		public UserPromptDialog(Window parentWindow)
 		{
+			this.Owner = parentWindow ?? throw new ArgumentNullException(nameof(parentWindow));
+
+			this.Loaded += OnDialogLoaded;
+
 			InitializeComponent();
 			this.DataContext = this;
+		}
+
+		private void OnDialogLoaded(object sender, RoutedEventArgs e)
+		{
+			this.InputTextBox.SelectAll();
 		}
 
 		private void OnOkClicked(object sender, RoutedEventArgs e)

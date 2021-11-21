@@ -6,11 +6,13 @@
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
 	using System.Net;
 	using System.Reflection;
+	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
@@ -42,10 +44,12 @@
 	{
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
+
+		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/EKCf6T/4");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
-		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\License.txt");
+		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\License.md");
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\ThirdPartyNoticesAndInformation.txt");
 
 		private static readonly string NewReleaseFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
@@ -84,6 +88,8 @@
 
 		private FilterCriteria _previousFilterCriteria;
 
+		private string _findText;
+
 		private FilterType _currentfilterType;
 		private IFilterCriteria _currentfilterCriteria;
 
@@ -113,6 +119,8 @@
 			_currentfilterCriteria = FilterCriteria.None;
 			_previousFilterCriteria = FilterCriteria.None;
 
+			_findText = string.Empty;
+
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
 			this.AreFilterOptionsVisible = false;
@@ -128,7 +136,7 @@
 			this.HasInsightNeedingAttention = false;
 			this.InsightNeedingAttention = 0;
 
-			this.CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
+			this.WeevilVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
 			initializationTimer = new DispatcherTimer();
 			initializationTimer.Tick += (sender, args) => OnInitialize();
@@ -204,14 +212,14 @@
 
 				if (this.NewReleaseDetails != null)
 				{
-					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.CurrentVersion;
+					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.WeevilVersion;
 				}
 
 				return isUpdateAvailable;
 			}
 		}
 
-		public Version CurrentVersion { get; private set; }
+		public Version WeevilVersion { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public bool IsMenuEnabled
@@ -459,6 +467,7 @@
 				{
 					(bool, OpenAsResult) result = plugin.ShowOpenAs(
 						_mainWindow,
+						LicensePath,
 						(path) => Engine.UsingPath(path),
 						sourceFilePath);
 
@@ -557,12 +566,12 @@
 					}
 				}).ContinueWith((x) =>
 					{
-						if (_engine.Navigator.TableOfContents.Sections.Count == 0)
+						if (_engine.Navigate.TableOfContents.Sections.Count == 0)
 						{
-							_engine.Navigator.RebuildTableOfContents();
+							_engine.Navigate.RebuildTableOfContents();
 						}
 
-						_tableOfContents = _engine.Navigator.TableOfContents;
+						_tableOfContents = _engine.Navigate.TableOfContents;
 					}
 				).ContinueWith((x) =>
 					{
@@ -803,10 +812,14 @@
 			}
 		}
 
-
 		public void ShowFileExplorer()
 		{
 			WindowsProcess.Start(WindowsProcessType.FileExplorer, Path.GetDirectoryName(_engine.SourceFilePath));
+		}
+
+		public void ShowRegExTool()
+		{
+			Process.Start(RegEx101Url.ToString());
 		}
 
 		public void ShowApplicationLogFile()
@@ -832,7 +845,7 @@
 		{
 			try
 			{
-				var dialog = new AboutDialog(this.CurrentVersion, LicensePath, ThirdPartyNoticesPath)
+				var dialog = new AboutDialog(this.WeevilVersion, LicensePath, ThirdPartyNoticesPath)
 				{
 					Owner = _mainWindow,
 				};
@@ -859,11 +872,11 @@
 
 			if (plugin.CanShowDashboard)
 			{
-				plugin.ShowDashboard(_mainWindow, _engine, _insights.ToArray());
+				plugin.ShowDashboard(_mainWindow, this.WeevilVersion, _engine, _insights.ToArray());
 			}
 			else
 			{
-				_dialogBox.ShowDashboard(_insights, _engine);
+				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights);
 			}
 		}
 
@@ -888,6 +901,12 @@
 			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
+		public void Filter()
+		{
+			var filters = new object[] { _inclusiveFilter, _exclusiveFilter };
+			FilterManually(filters);
+		}
+
 		public void FilterManually(object[] filters)
 		{
 			_inclusiveFilter = filters[0].ToString();
@@ -906,12 +925,7 @@
 			}
 			else
 			{
-				_inclusiveFilter = filters[0].ToString();
-				_exclusiveFilter = filters[1].ToString();
-
-				var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
-
-				FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
+				FilterManually(filters);
 			}
 		}
 
@@ -941,16 +955,168 @@
 
 		#region Commands: Navigation
 
-		public void GoToNextPin()
+		private void FindText()
 		{
-			_engine.Navigator.Pinned.GoToNextPin();
-			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
+			if (_dialogBox.TryShowFind(_findText, out var findNext, out _findText))
+			{
+				if (findNext)
+				{
+					FindNext();
+				}
+				else
+				{
+					FindPrevious();
+				}
+			}
+		}
+
+		private void FindNext()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in the search results. Value={_findText}",
+					() => _engine
+						.Navigate
+						.NextContent(_findText)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		private void FindPrevious()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in the search results. Value={_findText}",
+					() => _engine
+						.Navigate
+						.PreviousContent(_findText)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		public void GoTo()
+		{
+			if (_dialogBox.TryShowGoTo(string.Empty, out var userValue))
+			{
+				if (string.IsNullOrWhiteSpace(userValue))
+				{
+					var message = "A timestamp or line number is needed to perform the GoTo operation.";
+
+					Log.Default.Write(
+						LogSeverityType.Error,
+						message);
+
+					MessageBox.Show(message,
+						"Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+				}
+				else
+				{
+					// Did the user provide a timestamp?
+					if (userValue.Contains(":"))
+					{
+						SearchFilterResults(
+							$"Unable to find the timestamp in the search results. Value={userValue}",
+							() => _engine
+								.Navigate
+								.GoTo(userValue, RecordSearchType.ClosestMatch)
+								.ToIndexUsing(_engine.Filter.Results));
+					}
+					else
+					{
+						var validNumberFormat =
+							NumberStyles.AllowLeadingWhite |
+							NumberStyles.AllowTrailingWhite |
+							NumberStyles.AllowThousands;
+
+						if (int.TryParse(userValue, validNumberFormat, CultureInfo.InvariantCulture, out var lineNumber))
+						{
+							SearchFilterResults(
+								$"Unable to find the line number in the search results. Value={userValue}",
+								() => _engine
+									.Navigate
+									.GoTo(lineNumber, RecordSearchType.ClosestMatch)
+									.ToIndexUsing(_engine.Filter.Results));
+						}
+						else
+						{
+							var message = "Unable to perform the GoTo operation. The provided value is expected to be a timestamp or line number.";
+
+							Log.Default.Write(
+								LogSeverityType.Error,
+								message);
+
+							MessageBox.Show(message,
+								"Error",
+								MessageBoxButton.OK,
+								MessageBoxImage.Error);
+						}
+					}
+				}
+			}
 		}
 
 		public void GoToPreviousPin()
 		{
-			_engine.Navigator.Pinned.GoToPreviousPin();
-			this.ActiveRecordIndex = _engine.Navigator.Pinned.ActiveIndex;
+			SearchFilterResults(
+				$"Unable to find a pinned record in the search results.",
+				() => _engine
+					.Navigate
+					.PreviousPin()
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		public void GoToNextPin()
+		{
+			SearchFilterResults(
+				$"Unable to find a pinned record in the search results.",
+				() => _engine
+					.Navigate
+					.NextPin()
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		public void GoToPreviousFlag()
+		{
+			SearchFilterResults(
+				$"Unable to find a flagged record in the search results.",
+				() => _engine
+					.Navigate
+					.PreviousFlag()
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		public void GoToNextFlag()
+		{
+			SearchFilterResults(
+				$"Unable to find a flagged record in the search results.",
+				() => _engine
+					.Navigate
+					.NextFlag()
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		public void GoToPreviousComment()
+		{
+			SearchFilterResults(
+				$"Unable to find a comment in the search results.",
+				() => _engine
+					.Navigate
+					.PreviousComment()
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		public void GoToNextComment()
+		{
+			SearchFilterResults(
+				$"Unable to find a comment in the search results.",
+				() => _engine
+					.Navigate
+					.NextComment()
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		#endregion
@@ -1185,6 +1351,19 @@
 						$"Filter operation is complete. Current filter results will be ignored because another filter operation has started.");
 				}
 			});
+		}
+
+		private void SearchFilterResults(string userMessage, Func<int> search)
+		{
+			try
+			{
+				this.ActiveRecordIndex = search.Invoke();
+			}
+			catch (RecordNotFoundException e)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, userMessage);
+				MessageBox.Show(userMessage, "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
 		}
 
 		private void RefreshFilterResults()

@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
+	using System;
 	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using Filter;
@@ -44,13 +45,17 @@
 				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
 				.Open();
 
-			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2"));
+			var uniqueFilter = $"Info(?#RegEx comment created at {DateTime.Now.ToLongTimeString()})";
+			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(uniqueFilter));
 
 			engine.Selector.Select(32);
+
+			var filtersBeforeClear = engine.Filter.IncludeHistory.Count;
+
 			engine.Clear(ClearRecordsOperation.BeforeSelected);
 
-			Assert.IsTrue(engine.Filter.IncludeHistory.Count > 0, "The filter history is missing.");
-			Assert.AreEqual("Id=2", engine.Filter.IncludeHistory[0]);
+			Assert.AreEqual(filtersBeforeClear, engine.Filter.IncludeHistory.Count);
+			Assert.AreEqual(uniqueFilter, engine.Filter.IncludeHistory[0]);
 		}
 	}
 }

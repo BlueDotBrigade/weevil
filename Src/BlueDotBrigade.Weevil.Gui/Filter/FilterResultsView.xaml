@@ -35,11 +35,17 @@
    </UserControl.Resources>
    <UserControl.InputBindings>
       <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenCommand}" />
+      <KeyBinding Key="Enter" Modifiers="Alt" Command="{Binding FilterCommand}"/>
       <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
       <KeyBinding Key="F1" Modifiers="Control" Command="{Binding ShowAboutCommand}" />
       <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveStateCommand}" />
       <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
       <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
+
+      <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
+      <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />
+      <KeyBinding Key="F3" Modifiers="Shift" Command="{Binding FindPreviousCommand}" />
+      <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding GoToCommand}" />
 
       <KeyBinding Key="C" Modifiers="Control" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
       <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
@@ -50,6 +56,7 @@
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
       <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
       <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
+      <KeyBinding Key="R" Modifiers="Control" Command="{Binding ShowRegExToolCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
       <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
       <!--<KeyBinding Key="Delete" Command="{Binding ClearSelectedRecordsCommand}" />-->
@@ -67,10 +74,18 @@
 
       <KeyBinding Key="P" Modifiers="Control" Command="{Binding ToggleIsPinnedCommand}"/>
       <KeyBinding Key="Subtract" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
-      <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
-      <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
+        <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
+        <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
       <KeyBinding Key="OemPlus" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
-   </UserControl.InputBindings>
+        <KeyBinding Key="Subtract" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
+        <KeyBinding Key="Add" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
+        <KeyBinding Key="OemMinus" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
+        <KeyBinding Key="OemPlus" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
+      <KeyBinding Key="Subtract" Modifiers="Control+Shift" Command="{Binding GoToPreviousCommentCommand}" />
+      <KeyBinding Key="Add" Modifiers="Control+Shift" Command="{Binding GoToNextCommentCommand}" />
+      <KeyBinding Key="OemMinus" Modifiers="Control+Shift" Command="{Binding GoToPreviousCommentCommand}" />
+      <KeyBinding Key="OemPlus" Modifiers="Control+Shift" Command="{Binding GoToNextCommentCommand}" />
+    </UserControl.InputBindings>
    <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
          FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
       <Grid.RowDefinitions>
@@ -99,22 +114,25 @@
                  Command="{Binding OpenCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
-            Margin="{StaticResource ButtonMargin}">
+                 Margin="{StaticResource ButtonMargin}">
             <Image  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="24" Source="/Resources/Icons/OpenDocument-Button-24.png"/>
          </Button>
+         <!-- 
+         HACK: WPF ComboBoxes do not support access keys. The `Label` is being used to receive focus on behalf of the ComboBox. See: #36
+         -->
          <Label Grid.Column="1" Target="{Binding ElementName=InclusiveFilter}" Content="AccessKey hack for: _Inclusive ComboBox" Width="0"/>
-            <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
+         <ComboBox x:Name="InclusiveFilter" Grid.Column="1" 
                    Margin="{StaticResource ComboBoxMargin}"
-                      ItemsSource="{Binding InclusiveFilterHistory}"
-                      Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
-                      SelectedValue="{Binding InclusiveFilter}" 
-                      IsEnabled="{Binding IsFilterToolboxEnabled}" 
-                      IsEditable="True"
-                      IsTextSearchEnabled="False"
-                      StaysOpenOnEdit="False"
-                      guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                      materialDesign:HintAssist.Hint="Inclusive Filter (Alt+I)"
-                      materialDesign:TextFieldAssist.HasClearButton="True">
+                   ItemsSource="{Binding InclusiveFilterHistory}"
+                   Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
+                   SelectedValue="{Binding InclusiveFilter}" 
+                   IsEnabled="{Binding IsFilterToolboxEnabled}" 
+                   IsEditable="True"
+                   IsTextSearchEnabled="False"
+                   StaysOpenOnEdit="False"
+                   guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                   materialDesign:HintAssist.Hint="Inclusive Filter (Alt+I)"
+                   materialDesign:TextFieldAssist.HasClearButton="True">
             <ComboBox.InputBindings>
                <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                   <KeyBinding.CommandParameter>
@@ -126,6 +144,9 @@
                </KeyBinding>
             </ComboBox.InputBindings>
          </ComboBox>
+         <!-- 
+         HACK: WPF ComboBoxes do not support access keys. The `Label` is being used to receive focus on behalf of the ComboBox. See: #36
+         -->
          <Label Grid.Column="1" Target="{Binding ElementName=ExclusiveFilter}" Content="AccessKey hack for: _Exclusive ComboBox" Width="0"/>
          <ComboBox x:Name="ExclusiveFilter" Grid.Column="2"   
                    Margin="{StaticResource ComboBoxMargin}"
@@ -162,7 +183,7 @@
                <Image Height="24">
                   <Image.Style>
                      <Style TargetType="{x:Type Image}">
-                        <Setter Property="ToolTip" Value="Apply inclusive &amp; exclusive filters."/>
+                        <Setter Property="ToolTip" Value="Apply inclusive &amp; exclusive filters. (Alt+Enter)"/>
                         <Setter Property="Source" Value="/Resources/Icons/Filter-24.png"/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding IsProcessingLongOperation}" Value="true">
@@ -221,6 +242,7 @@
                <Separator/>
                <MenuItem Header="Show...">
                   <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+                  <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
                   <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
                </MenuItem>
                <Separator/>
@@ -242,6 +264,7 @@
                <MenuItem Header="Clear...">
                   <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
                   <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
+                  <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
                   <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
                   <Separator/>
                   <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
@@ -251,8 +274,20 @@
                <MenuItem Header="Reload " Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
                <Separator/>
                <MenuItem Header="Navigation...">
-                  <MenuItem Header="Previous Pinned Item" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
-                  <MenuItem Header="Next Pinned Item" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
+                  <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
+                  <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
+                  <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
+                  <Separator/>
+                  <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
+                  <Separator/>
+                  <MenuItem Header="Previous Comment" Command="{Binding GoToPreviousCommentCommand}" InputGestureText="Ctrl+Shift+Minus" />
+                  <MenuItem Header="Next Comment" Command="{Binding GoToNextCommentCommand}" InputGestureText="Ctrl+Shift+Plus" />
+                  <Separator/>
+                  <MenuItem Header="Previous Flag" Command="{Binding GoToPreviousFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Minus" />
+                <MenuItem Header="Next Flag" Command="{Binding GoToNextFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Plus" />
+                <Separator/>
+                  <MenuItem Header="Previous Pinned" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
+                  <MenuItem Header="Next Pinned" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
                   <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
                   <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
                </MenuItem>
@@ -468,7 +503,7 @@
                         <Setter Property="ToolTip" Value="Current document&apos;s path."/>
                         <Style.Triggers>
                            <DataTrigger Binding="{Binding SourceFilePath, Mode=OneWay}" Value="">
-                              <Setter Property="Text" Value="To begin, open (Ctrl+O) a document."/>
+                              <Setter Property="Text" Value="To begin, open a document &amp; start filtering."/>
                            </DataTrigger>
                         </Style.Triggers>
                      </Style>
@@ -602,7 +637,7 @@
                                     <Condition Binding="{Binding HasInsightNeedingAttention}" Value="False" />
                                  </MultiDataTrigger.Conditions>
                                  <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                                 <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (`Ctrl+D`) for insight&#x0d;&#x0a;about the current document."/>
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (Ctrl+D) for insight&#x0d;&#x0a;about the current document."/>
                            </MultiDataTrigger>
                               <MultiDataTrigger>
                                  <MultiDataTrigger.Conditions>
@@ -610,7 +645,7 @@
                                     <Condition Binding="{Binding HasInsightNeedingAttention}" Value="True" />
                                  </MultiDataTrigger.Conditions>
                                  <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                                 <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (`Ctrl+D`)."/>
+                                 <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (Ctrl+D)."/>
                            </MultiDataTrigger>
                            </Style.Triggers>
                         </Style>
@@ -681,7 +716,7 @@
          <Separator Grid.Column="13" />
          <StatusBarItem Grid.Column="14">
             <TextBox Text="{Binding CurrentHeading, Mode=OneWay}" 
-                     ToolTip="Selected record is in the displayed section."
+                     ToolTip="Selected record is in this section of the log file."
                      Style="{StaticResource StatusBarTextBox}"/>
          </StatusBarItem>
       </StatusBar>

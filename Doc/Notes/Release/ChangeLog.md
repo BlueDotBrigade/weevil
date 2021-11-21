@@ -4,6 +4,28 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+### Version 2.8.0
+
+Released on XXXXX YYth, 2021
+
+#### What's New?
+
+- Navigate between filter results...
+  - Find: Search for text in filter results. (#118)
+  - GoTo: Jump to a specific timestamp. (#119)
+  - GoTo: Jump to a specific line number. (#150)
+  - Flagged Records: Quickly navigate between records of interest. (#211)
+  - Record Comments: Navigate between records that have a user comment. (#212)
+- Clear content between selected records. (#209)
+- Includes a *Regular Expression* tool that can be used to check syntax. (#186)
+- Keyboard focus is now set to the `TextBox` when an input dialog is displayed. (#166)
+- Better handle long log entries (e.g. 2,000,000 characters) (#200)
+
+#### Bug Fixes
+
+- Focus was not properly set after clicking include/exclude ComboBox. (#182)
+- Improved performance by using the default `MaxDegreeOfParallelism`. (#161)
+
 ### Version 2.7.0
 
 Released on May 22th, 2021
@@ -28,7 +50,7 @@ Released on May 22th, 2021
 
 - The status bar now reflects the number of flagged `Record`s post-analysis (#116) (#121)
 - The menu no longer remains disabled when: you view the context menu before loading a file (#139)
-- Fixed: static aliases do not resolve properly when multiple aliases start with the same text. (#98)
+- Fixed: filter aliases do not resolve properly when multiple aliases start with the same text. (#98)
 
 ### Version 2.6.1
 
@@ -41,7 +63,7 @@ Released on March 27th, 2021
 
 #### Bug Fixes
 
-- Static aliases do not resolve properly when multiple aliases start with the same text. (#98)
+- Filter aliases do not resolve properly when multiple aliases start with the same text. (#98)
 
 ### Version 2.6.0
 

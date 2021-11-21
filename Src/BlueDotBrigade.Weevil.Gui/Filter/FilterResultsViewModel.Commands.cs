@@ -45,6 +45,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ClipboardPasteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: false), () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClipboardPasteOverwriteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: true), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand GoToCommand => new UiBoundCommand(() => GoTo(), () => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand ShowHelpCommand => new UiBoundCommand(ShowHelp);
 		[SafeForDependencyAnalysis]
@@ -53,6 +57,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ShowDashboardCommand => new UiBoundCommand(ShowDashboard, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ShowFileExplorerCommand => new UiBoundCommand(ShowFileExplorer, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand ShowRegExToolCommand => new UiBoundCommand(ShowRegExTool);
 		[SafeForDependencyAnalysis]
 		public ICommand ShowApplicationLogFileCommand => new UiBoundCommand(ShowApplicationLogFile);
 		[SafeForDependencyAnalysis]
@@ -77,6 +83,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
+		public ICommand ClearBetweenSelectedRecordsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearRecordsOperation.BetweenSelected),
+			() => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
 		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearRecordsOperation.Selected),
 			() => this.IsMenuEnabled);
@@ -84,6 +94,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearRecordsOperation.Unselected),
 			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FilterCommand => new UiBoundCommand(Filter, () => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public DelegateCommand<object[]> FilterOrCancelCommand => new DelegateCommand<object[]>(parameters =>
 		{
@@ -143,9 +157,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		#region Commands: Navigation
 		[SafeForDependencyAnalysis]
+		public ICommand FindTextCommand => new UiBoundCommand(() => FindText(), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FindNextCommand => new UiBoundCommand(() => FindNext(), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FindPreviousCommand => new UiBoundCommand(() => FindPrevious(), () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand GoToNextCommentCommand => new UiBoundCommand(GoToNextComment, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand GoToPreviousCommentCommand => new UiBoundCommand(GoToPreviousComment, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
 		public ICommand GoToNextPinCommand => new UiBoundCommand(GoToNextPin, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand GoToPreviousPinCommand => new UiBoundCommand(GoToPreviousPin, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand GoToNextFlagCommand => new UiBoundCommand(GoToNextFlag, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand GoToPreviousFlagCommand => new UiBoundCommand(GoToPreviousFlag, () => this.IsMenuEnabled);
 		#endregion
 
 		#region Commands: Analysis
@@ -197,6 +229,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			try
 			{
 				var customAnalyzerKey = parameters[0].ToString();
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"A command bound to the user interface is executing. CommandName={customAnalyzerKey}");
+
 				Analyze(customAnalyzerKey);
 			}
 			catch (Exception e)

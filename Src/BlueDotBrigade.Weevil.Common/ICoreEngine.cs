@@ -21,7 +21,7 @@
 		ImmutableArray<IRecord> Records { get; }
 		LogFileMetrics Metrics { get; }
 		IFilter Filter { get; }
-		INavigate Navigator { get; }
+		INavigate Navigate { get; }
 		ISelect Selector { get; }
 		IAnalyze Analyzer { get; }
 		int Count { get; }

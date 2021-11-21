@@ -1,6 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter
 {
-	public interface IStaticAliasExpander
+	public interface IFilterAliasExpander
 	{
 		/// <summary>
 		/// Replaces known aliases with their fully qualified representation.

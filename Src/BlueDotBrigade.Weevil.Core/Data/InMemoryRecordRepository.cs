@@ -115,7 +115,7 @@
 
 			return results;
 		}
-		
+
 		private static IList<IRecord> ClearBeforeAndAfterSelected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
 		{
 			IList<IRecord> headlessResults = ClearBeforeSelected(records, selectedRecords);
@@ -123,6 +123,29 @@
 			var immutableHeadlessResults = ImmutableArray.Create(headlessResults.ToArray());
 
 			return ClearAfterSelected(immutableHeadlessResults, selectedRecords);
+		}
+
+		private static IList<IRecord> ClearBetweenSelected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
+		{
+			var results = new List<IRecord>();
+
+			if (records.Length >= 2 && selectedRecords.Length >= 2)
+			{
+				var sortedRecords = selectedRecords.OrderBy(x => x.LineNumber);
+
+				var lowestSelectedLine = sortedRecords.First().LineNumber;
+				var highestSelectedLine = sortedRecords.Last().LineNumber;
+
+				foreach (IRecord record in records)
+				{
+					if (record.LineNumber <= lowestSelectedLine || record.LineNumber >= highestSelectedLine)
+					{
+						results.Add(record);
+					}
+				}
+			}
+
+			return results;
 		}
 
 		/// <summary>
@@ -202,6 +225,10 @@
 
 						case ClearRecordsOperation.BeforeAndAfterSelected:
 							results = ClearBeforeAndAfterSelected(_allRecords, _selectedRecords);
+							break;
+
+						case ClearRecordsOperation.BetweenSelected:
+							results = ClearBetweenSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearRecordsOperation.AfterSelected:

@@ -1,9 +1,9 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
+	using System.Collections.Generic;
 	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Weevil.Collections.Immutable;
 
 	[TestClass]
 	public class ClearingShould
@@ -76,6 +76,30 @@
 			Assert.AreEqual(32, engine.Count);
 			Assert.AreEqual(1, engine.Filter.Results.First().LineNumber);
 			Assert.AreEqual(32, engine.Filter.Results.Last().LineNumber);
+		}
+
+		[TestMethod]
+		public void SupportClearingBetweenSelectedRecords()
+		{
+			IEngine engine = Engine
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.Open();
+
+			var selection = new List<IRecord>
+			{
+				engine.Records.RecordAtLineNumber(2),
+				engine.Records.RecordAtLineNumber(511),
+			};
+
+			engine.Selector.Select(selection);
+			
+			engine.Clear(ClearRecordsOperation.BetweenSelected);
+
+			Assert.AreEqual(4, engine.Count);
+			Assert.AreEqual(1, engine.Filter.Results[0].LineNumber);
+			Assert.AreEqual(2, engine.Filter.Results[1].LineNumber);
+			Assert.AreEqual(511, engine.Filter.Results[2].LineNumber);
+			Assert.AreEqual(512, engine.Filter.Results[3].LineNumber);
 		}
 
 		[TestMethod]

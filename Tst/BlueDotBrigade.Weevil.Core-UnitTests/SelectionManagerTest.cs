@@ -1,6 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
+	using System;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.Weevil.Navigation;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -36,17 +38,25 @@
 		}
 
 		[TestMethod]
-		public void Select_NonExistentRecord_NothingSelected()
+		[ExpectedException(typeof(RecordNotFoundException))]
+		public void Select_NonExistentRecord_ThrowsRecordNotFound()
 		{
 			IEngine engine = Engine
 				.UsingPath(InputData.GetFilePath("SampleData.log"))
 				.Open();
 
-			engine.Selector.Select(lineNumber: int.MaxValue);
-
-			System.Collections.Immutable.ImmutableArray<Data.IRecord> selectedRecords = engine.Selector.GetSelected();
-
-			Assert.AreEqual(0, selectedRecords.Length);
+			try
+			{
+				engine.Selector.Select(lineNumber: int.MaxValue);
+			}
+			catch (RecordNotFoundException)
+			{
+				throw;
+			}
+			finally
+			{
+				Assert.AreEqual(0, engine.Selector.Selected.Count);
+			}
 		}
 	}
 }

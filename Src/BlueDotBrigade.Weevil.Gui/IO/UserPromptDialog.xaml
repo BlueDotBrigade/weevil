@@ -10,6 +10,7 @@
         ShowInTaskbar="False"
 		   WindowStartupLocation="CenterOwner"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
@@ -26,13 +27,14 @@
       <Style TargetType="TextBox">
          <Setter Property="Margin" Value="5" />
          <Setter Property="VerticalAlignment" Value="Center" />
+         <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
       </Style>
       <Style TargetType="Button" BasedOn="{StaticResource  MaterialDesignRaisedButton}">
          <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
          <Setter Property="Width" Value="{StaticResource ButtonWidth}" />
       </Style>
    </Window.Resources>
-   <Grid FocusManager.FocusedElement="{Binding ElementName=OpenButton}" >
+   <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}" >
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
          <RowDefinition Height="*" />
@@ -48,7 +50,7 @@
                  Text="{Binding UserPrompt}"
                  HorizontalAlignment="Right" 
                  TextWrapping="WrapWithOverflow" />
-      <TextBox Grid.Row="0" Grid.Column="1" Name="InputTextBox" 
+      <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 
                Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"/>
       <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
       <Button Grid.Row="1" Grid.Column="1" 

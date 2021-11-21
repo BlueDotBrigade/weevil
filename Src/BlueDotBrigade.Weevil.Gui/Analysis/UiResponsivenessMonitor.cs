@@ -63,7 +63,7 @@
 		{
 			Log.Default.Write(
 				LogSeverityType.Information,
-				"Weevil is now monitoring it's user interace (UI) responsiveness.");
+				"Weevil is now monitoring it's user interface (UI) responsiveness.");
 
 			_problemLastDetectedAt = DateTime.MinValue;
 			_stopwatch.Start();
@@ -78,7 +78,7 @@
 
 			Log.Default.Write(
 				LogSeverityType.Information,
-				"Weevil is no longer monitoring it's user interace (UI) responsiveness.");
+				"Weevil is no longer monitoring it's user interface (UI) responsiveness.");
 		}
 	}
 }

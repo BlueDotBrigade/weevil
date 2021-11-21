@@ -19,14 +19,14 @@
 		/// <inheritdoc />
 		public bool CanOpenAs => false;
 
-		public (bool, OpenAsResult) ShowOpenAs(object parentWindow, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
+		public (bool, OpenAsResult) ShowOpenAs(object parentWindow, string license, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
 		{
 			throw new NotSupportedException();
 		}
 
 		public bool CanShowDashboard => false;
 
-		public void ShowDashboard(object parentWindow, IEngine engine, IInsight[] insights)
+		public void ShowDashboard(object parentWindow, Version weevilVersion, IEngine engine, IInsight[] insights)
 		{
 			throw new NotImplementedException();
 		}

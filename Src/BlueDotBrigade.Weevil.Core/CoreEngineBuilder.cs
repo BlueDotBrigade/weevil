@@ -157,7 +157,7 @@
 
 					knownContext = _sourceInstance._context;
 
-					tableOfContents = _sourceInstance.Navigator.TableOfContents.Sections.ToList();
+					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
 
 					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
 					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);
@@ -176,6 +176,8 @@
 						_clearOperation);
 
 					records = repository.Get(maxRecords);
+
+					selectedRecords = GetVisibleRecordSelection(records, selectedRecords);
 				}
 				else
 				{
@@ -246,6 +248,21 @@
 				coreEngine.Selector.Select(selectedRecords);
 
 				return coreEngine;
+			}
+
+			private ImmutableArray<IRecord> GetVisibleRecordSelection(ImmutableArray<IRecord> visibleRecords, ImmutableArray<IRecord>  selectedRecords)
+			{
+				var result = new List<IRecord>();
+
+				foreach (IRecord record in selectedRecords)
+				{
+					if (visibleRecords.TryRecordOfLineNumber(record.LineNumber, out _ ))
+					{
+						result.Add(record);
+					}
+				}
+
+				return result.ToImmutableArray();
 			}
 
 			private ContextDictionary GetContext(ICoreExtension extension, ContextDictionary knownContext, ImmutableArray<IRecord> records)

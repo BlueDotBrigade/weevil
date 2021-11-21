@@ -1,0 +1,21 @@
+﻿namespace BlueDotBrigade.Weevil.Data
+{
+	using System;
+	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Navigation;
+
+	public static class RecordExtensions
+	{
+		/// <summary>
+		/// Determines the index value of the <paramref name="record"/> within the provided collection.
+		/// </summary>
+		/// <param name="record"></param>
+		/// <param name="records"></param>
+		/// <returns></returns>
+		public static int ToIndexUsing(this IRecord record, ImmutableArray<IRecord> records)
+		{
+			var index = records.IndexOfLineNumber(record.LineNumber);
+			return index;
+		}
+	}
+}
