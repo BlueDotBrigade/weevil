@@ -694,13 +694,16 @@
                      </TextBlock>
                      <Separator Grid.Column="0" Grid.Row="2"/>
                      <TextBlock Grid.Column="0" Grid.Row="3" TextWrapping="Wrap" MaxWidth="300">
-                        <Hyperlink 
+                         Previous versions of Weevil are now obsolete. Please 
+                         <Hyperlink 
                            NavigateUri="{Binding NewReleaseDetails.InstallerUrl}"
                            documents:HyperlinkBehavior.OpenInBrowser="True"
                            Foreground="{StaticResource MaterialDesignDarkForeground}">
-                           <TextBlock Text="Download"/>
+                           <TextBlock Text="download"/>
                         </Hyperlink>
-                         the latest version now!
+                         version 
+                         <TextBlock Text="{Binding NewReleaseDetails.LatestReleaseVersion}"/>
+                         now!
                      </TextBlock>
                      <Button Grid.Row="5"
                         Command="{x:Static materialDesign:PopupBox.ClosePopupCommand}"
