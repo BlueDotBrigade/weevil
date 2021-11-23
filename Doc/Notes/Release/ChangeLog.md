@@ -6,7 +6,7 @@ The following summarizes the changes that have been made to Weevil's core engine
 
 ### Version 2.8.0
 
-Released on XXXXX YYth, 2021
+Released on November 22nd, 2021
 
 #### What's New?
 
