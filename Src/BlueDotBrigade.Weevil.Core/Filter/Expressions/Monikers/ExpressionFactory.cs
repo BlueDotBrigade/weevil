@@ -17,6 +17,7 @@
 			{
 				new MonikerActivator(FlagExpression.Moniker, (e) => new FlagExpression(e)),
 				new MonikerActivator(PinnedExpression.Moniker, (e) => new PinnedExpression(e)),
+				new MonikerActivator(IsMultiLineExpression.Moniker, (e) => new IsMultiLineExpression(e)),
 				new MonikerActivator(SeverityTypeExpression.Moniker, (e) => new SeverityTypeExpression(e)),
 				new MonikerActivator(UiThreadExpression.Moniker, (e) => new UiThreadExpression(e)),
 				new MonikerActivator(UserCommentExpression.Moniker, (e) => new UserCommentExpression(e)),
