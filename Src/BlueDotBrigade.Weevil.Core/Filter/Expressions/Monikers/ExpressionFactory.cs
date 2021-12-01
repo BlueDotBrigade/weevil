@@ -21,6 +21,7 @@
 				new MonikerActivator(SeverityTypeExpression.Moniker, (e) => new SeverityTypeExpression(e)),
 				new MonikerActivator(UiThreadExpression.Moniker, (e) => new UiThreadExpression(e)),
 				new MonikerActivator(UserCommentExpression.Moniker, (e) => new UserCommentExpression(e)),
+				new MonikerActivator(ContentLengthExpression.Moniker, (e) => new ContentLengthExpression(e)),
 				new MonikerActivator(ElapsedGreaterThanExpression.Moniker, (e) => new ElapsedGreaterThanExpression(e)),
 			};
 		}
