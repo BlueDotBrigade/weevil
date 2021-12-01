@@ -72,12 +72,14 @@ The following expressions can be used to query metadata collected by the Weevil 
   - **Note**: Be sure to uncheck the "Include Pinned" option before using this moniker.
   - `@Comment=State`: performs a case-insensitive search of all user comments for the given value, in this case the word `State`
 - `@Elapsed` : is used to measure the time period between records
-  - `@Elapsed>5000` : returns a list of records where there was no logging for the preceding 5 seconds
-- `@Flagged`: search all records that have been flagged
-  - `@Flagged=False`: search all records that have not been flagged 
-- `@Pinned` : search for records that have been pinned
-  - `@Pinned=False` : search for all records that have not been pinned
-- `@IsMultiLine` : search for records that span multiple lines (e.g. an exception's callstack)
+  - `@Elapsed>5000` : identify for records with an elapsed time greater than the given value
+  - returns a list of records where there was no logging for the preceding 5 seconds
+- `@Flagged`: identify all records that have been flagged
+  - `@Flagged=False`: identify all records that have not been flagged 
+- `@Pinned` : identify records that have been pinned
+  - `@Pinned=False` : identify all records that have not been pinned
+- `@IsMultiLine` : identify records that span multiple lines (e.g. an exception's callstack)
+- `@ContentLength>128` : identify records longer than the given value
 - `@UiThread`: identifies all records that were created by the application's UI thread
   - `@UiThread=False`: identifies all records that were not created by the application's UI thread
 
