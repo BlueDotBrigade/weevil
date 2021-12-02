@@ -78,7 +78,7 @@ The following expressions can be used to query metadata collected by the Weevil 
   - `@Flagged=False`: identify all records that have not been flagged 
 - `@Pinned` : identify records that have been pinned
   - `@Pinned=False` : identify all records that have not been pinned
-- `@IsMultiLine` : identify records that span multiple lines (e.g. an exception's callstack)
+- `@IsMultiLine` : identify records that span multiple lines (e.g. an exception  callstack)
 - `@ContentLength>128` : identify records longer than the given value
 - `@UiThread`: identifies all records that were created by the application's UI thread
   - `@UiThread=False`: identifies all records that were not created by the application's UI thread
