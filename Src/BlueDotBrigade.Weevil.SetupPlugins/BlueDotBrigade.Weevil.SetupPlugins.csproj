@@ -15,7 +15,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-		<AssemblyVersion>2.8.1.*</AssemblyVersion>
+		<AssemblyVersion>2.8.1.0</AssemblyVersion>
 		<FileVersion>2.8.1.0</FileVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
