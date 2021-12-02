@@ -4,6 +4,20 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+
+### Version 2.8.1
+
+Released on December 1st, 2021
+
+#### What's New?
+
+- `@ContentLength>32` moniker supports identifying records longer than the given length (e.g. 32 characters) #226
+- `@IsMultiline` moniker supports identifying records that span multiple lines (e.g. an exception callstack) #227
+
+#### Bug Fixes
+
+- None
+
 ### Version 2.8.0
 
 Released on November 22nd, 2021
