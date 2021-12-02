@@ -111,19 +111,22 @@ How quickly daft jumping zebras vex!
 </li>
 <li><code>@Elapsed</code> : is used to measure the time period between records
 <ul>
-<li><code>@Elapsed&gt;5000</code> : returns a list of records where there was no logging for the preceding 5 seconds</li>
+<li><code>@Elapsed&gt;5000</code> : identify for records with an elapsed time greater than the given value</li>
+<li>returns a list of records where there was no logging for the preceding 5 seconds</li>
 </ul>
 </li>
-<li><code>@Flagged</code>: search all records that have been flagged
+<li><code>@Flagged</code>: identify all records that have been flagged
 <ul>
-<li><code>@Flagged=False</code>: search all records that have not been flagged</li>
+<li><code>@Flagged=False</code>: identify all records that have not been flagged</li>
 </ul>
 </li>
-<li><code>@Pinned</code> : search for records that have been pinned
+<li><code>@Pinned</code> : identify records that have been pinned
 <ul>
-<li><code>@Pinned=False</code> : search for all records that have not been pinned</li>
+<li><code>@Pinned=False</code> : identify all records that have not been pinned</li>
 </ul>
 </li>
+<li><code>@IsMultiLine</code> : identify records that span multiple lines (e.g. an exception  callstack)</li>
+<li><code>@ContentLength&gt;128</code> : identify records longer than the given value</li>
 <li><code>@UiThread</code>: identifies all records that were created by the application's UI thread
 <ul>
 <li><code>@UiThread=False</code>: identifies all records that were not created by the application's UI thread</li>
