@@ -10,7 +10,7 @@
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
 - [Development](#development)
-   - [General](#general)
+   - [Guidelines](#guidelines)
    - [Compiling](#compiling)
 
 ## What is Weevil?
@@ -141,7 +141,7 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code. |
 | [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the repository was last updated. |
 
-### General
+### Guidelines
 
 - When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
 
