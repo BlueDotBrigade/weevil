@@ -6,12 +6,12 @@
    - [Navigation](#navigation)
    - [Analysis](#analysis)
    - [Plugin Architecture](#plugin-architecture)
-- [How to use Weevil?](#how-to-use-weevil)
+- [Get Started](#get-started)
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
-- [Source Code](#source-code)
+- [Development](#development)
+   - [General](#general)
    - [Compiling](#compiling)
-   - [Development](#development)
 
 ## What is Weevil?
 
@@ -87,7 +87,7 @@ Realize the greatest value by creating a business-domain specific *Weevil* plug-
 2. log file analyzers
 3. dashboard insight
 
-## How to use Weevil?
+## Get Started
 
 ### WPF Application
 
@@ -130,7 +130,7 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 }
 ```
 
-## Source Code
+## Development
 
 | Attribute | Description |
 | --- | --- |
@@ -141,6 +141,10 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code. |
 | [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the repository was last updated. |
 
+### General
+
+- When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
+
 ### Compiling
 
 The following steps outline how to build Weevil's WPF application:
@@ -149,12 +153,7 @@ The following steps outline how to build Weevil's WPF application:
 2. If you have implemented a custom *Weevil* plugin:
    - Prior to starting Visual Studio, create the following Windows [environment variable][EnvironmentVariable]:
       - `%WEEVIL_PLUGINS_PATH%` which refers to the directory where the Weevil plugin assembly (`*.dll`) can be found.
-3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`.
-
-### Development
-
-- When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
-
+3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
 
 [InstallationGuide]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/InstallationGuide.md
