@@ -89,6 +89,7 @@
 		private FilterCriteria _previousFilterCriteria;
 
 		private string _findText;
+		private bool _findIsCaseSensitive;
 
 		private FilterType _currentfilterType;
 		private IFilterCriteria _currentfilterCriteria;
@@ -120,6 +121,7 @@
 			_previousFilterCriteria = FilterCriteria.None;
 
 			_findText = string.Empty;
+			_findIsCaseSensitive = false;
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
@@ -957,7 +959,7 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(_findText, out var findNext, out _findText))
+			if (_dialogBox.TryShowFind(_findText, out _findIsCaseSensitive, out var findNext, out _findText))
 			{
 				if (findNext)
 				{
@@ -978,7 +980,7 @@
 					$"Unable to find the provided text in the search results. Value={_findText}",
 					() => _engine
 						.Navigate
-						.NextContent(_findText)
+						.NextContent(_findText, _findIsCaseSensitive)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
@@ -991,7 +993,7 @@
 					$"Unable to find the provided text in the search results. Value={_findText}",
 					() => _engine
 						.Navigate
-						.PreviousContent(_findText)
+						.PreviousContent(_findText, _findIsCaseSensitive)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
