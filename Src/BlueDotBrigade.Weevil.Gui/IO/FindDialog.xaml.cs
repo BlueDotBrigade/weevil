@@ -8,6 +8,15 @@
 	/// </summary>
 	public partial class FindDialog : Window
 	{
+		public static readonly DependencyProperty IsCaseSensitiveProperty =
+			DependencyProperty.Register(
+				nameof(IsCaseSensitive), typeof(bool),
+				typeof(FindDialog),
+				new FrameworkPropertyMetadata
+				{
+					BindsTwoWayByDefault = true,
+				});
+
 		public static readonly DependencyProperty UserInputProperty =
 			 DependencyProperty.Register(
 			 nameof(UserInput), typeof(string),
@@ -25,6 +34,12 @@
 				{
 					BindsTwoWayByDefault = true,
 				});
+
+		public bool IsCaseSensitive
+		{
+			get => (bool)GetValue(IsCaseSensitiveProperty);
+			set => SetValue(IsCaseSensitiveProperty, value);
+		}
 
 		public string UserInput
 		{
@@ -44,6 +59,7 @@
 
 			this.Loaded += OnDialogLoaded;
 
+			this.IsCaseSensitive = false;
 			this.UserInput = defaultValue ?? string.Empty;
 			this.FindNext = true;
 

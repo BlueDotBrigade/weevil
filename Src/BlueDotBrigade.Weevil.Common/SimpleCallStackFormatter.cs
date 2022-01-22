@@ -1,16 +1,22 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Text.RegularExpressions;
 	using BlueDotBrigade.Weevil.Data;
 
 	public class SimpleCallStackFormatter : IRecordFormatter
 	{
+		private static readonly Regex FilePathPattern;
 		private static readonly Regex[] CallStackPatterns;
 
 		static SimpleCallStackFormatter()
 		{
 			var options = RegexOptions.Compiled | RegexOptions.Multiline;
+
+			FilePathPattern = new Regex(
+				@"in [a-zA-Z]:[\\\/].*\.cs:line",
+				options);
 
 			// Note: The "end of line assertion" ($) in .NET does not consume the carriage return & line feed (\r\n).
 			// https://stackoverflow.com/a/8618642/949681
@@ -35,6 +41,17 @@
 				foreach (var pattern in CallStackPatterns)
 				{
 					result = pattern.Replace(result, string.Empty);
+				}
+
+				var filePaths = FilePathPattern
+					.Matches(result)
+					.Cast<Match>()
+					.Select(m => m.Value)
+					.ToArray();
+
+				foreach (var filePath in filePaths)
+				{
+					result = result.Replace(filePath, "on line");
 				}
 			}
 

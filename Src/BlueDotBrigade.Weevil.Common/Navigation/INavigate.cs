@@ -25,13 +25,13 @@
 		/// Searches backwards through records looking for <see cref="Record.Content"/> with the provided text. Descending order: 4, 3, 2, 1.
 		/// </summary>
 		/// <exception cref="Record"/>
-		IRecord PreviousContent(string text);
+		IRecord PreviousContent(string text, bool isCaseSensitive);
 
 		/// <summary>
 		/// Searches forward through records looking for <see cref="Record.Content"/> with the provided text. Ascending order: 1, 2, 3, 4.
 		/// </summary>
 		/// <exception cref="Record"/>
-		IRecord NextContent(string text);
+		IRecord NextContent(string text, bool isCaseSensitive);
 
 		/// <summary>
 		/// Searches backwards through records looking for a pinned record. Descending order: 4, 3, 2, 1.
