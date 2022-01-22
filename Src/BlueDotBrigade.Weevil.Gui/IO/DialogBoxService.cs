@@ -110,10 +110,11 @@
 			return wasSuccessful;
 		}
 
-		public bool TryShowFind(string defaultValue, out bool findNext, out string findText)
+		public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out string findText)
 		{
 			var wasSuccessful = false;
 
+			isCaseSensitive = false;
 			findText = String.Empty;
 			findNext = true;
 
@@ -121,9 +122,11 @@
 
 			if (dialog.ShowDialog() == true)
 			{
-				wasSuccessful = true;
+				isCaseSensitive = dialog.IsCaseSensitive;
 				findText = dialog.UserInput;
 				findNext = dialog.FindNext;
+
+				wasSuccessful = true;
 			}
 
 			return wasSuccessful;

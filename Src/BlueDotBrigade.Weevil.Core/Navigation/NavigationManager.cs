@@ -92,7 +92,7 @@
 				.Find(timestamp, recordSearchType);
 		}
 
-		public IRecord PreviousContent(string text)
+		public IRecord PreviousContent(string text, bool isCaseSensitive)
 		{
 			if (text == null)
 			{
@@ -101,10 +101,10 @@
 
 			return this
 				.Using<IContentNavigator>()
-				.FindPrevious(text);
+				.FindPrevious(text, isCaseSensitive);
 		}
 
-		public IRecord NextContent(string text)
+		public IRecord NextContent(string text, bool isCaseSensitive)
 		{
 			if (text == null)
 			{
@@ -113,7 +113,7 @@
 
 			return this
 				.Using<IContentNavigator>()
-				.FindNext(text);
+				.FindNext(text, isCaseSensitive);
 		}
 
 		public IRecord PreviousPin()
