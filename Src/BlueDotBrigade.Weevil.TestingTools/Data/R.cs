@@ -64,6 +64,15 @@
 			return this;
 		}
 
+		public R WithContent(string content)
+		{
+			_lineNumber++;
+
+			_records.Add(WithContent(_lineNumber, content));
+
+			return this;
+		}
+
 		/// <summary>
 		/// Creates a fake record with the provided <paramref name="lineNumber"/>.
 		/// </summary>
@@ -74,6 +83,19 @@
 				DateTime.Now.AddSeconds(lineNumber),
 				SeverityType.Information,
 				$"Fake record used for testing. Has line number: {lineNumber}",
+				new Metadata());
+		}
+
+		/// <summary>
+		/// Creates a fake record with the provided <paramref name="content"/>.
+		/// </summary>
+		public static IRecord WithContent(int lineNumber, string content)
+		{
+			return new Record(
+				lineNumber,
+				DateTime.Now.AddSeconds(lineNumber),
+				SeverityType.Information,
+				content,
 				new Metadata());
 		}
 	}
