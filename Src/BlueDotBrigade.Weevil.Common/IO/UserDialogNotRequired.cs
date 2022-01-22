@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
+	using System.IO.Pipes;
 
 	/// <summary>
 	/// Used when input is not required for an analysis.
@@ -17,7 +18,7 @@
 			throw new NotImplementedException();
 		}
 
-		public bool TryShowFind(string defaultValue, out bool findNext, out string findText)
+		public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out string findText)
 		{
 			throw new NotImplementedException();
 		}
