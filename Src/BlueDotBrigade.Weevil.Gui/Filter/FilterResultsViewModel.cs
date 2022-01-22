@@ -977,7 +977,7 @@
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results. Value={_findText}",
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
 					() => _engine
 						.Navigate
 						.NextContent(_findText, _findIsCaseSensitive)
@@ -990,7 +990,7 @@
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results. Value={_findText}",
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
 					() => _engine
 						.Navigate
 						.PreviousContent(_findText, _findIsCaseSensitive)
