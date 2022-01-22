@@ -1,0 +1,4 @@
+Fatal 2022-01-01 10:11:12.1234 56 AcmeCorporation.RocketSkates.OnUnhandledException An exception thrown by the application does not have an appropriate handler. 
+   at AcmeCorporation.RocketSkates.Ignition.<TurnOnPower>d__27.MoveNext() in C:\Code\Acme\skates-master\RocketEngine.cs:line 202
+   at AcmeCorporation.RocketSkates.Ignition.<StartFuelPump>d__23.MoveNext() in C:\Code\Acme\skates-master\RocketEngine.cs:line 157
+   at AcmeCorporation.RocketSkates.Ignition.<Start>d__30.MoveNext() in C:\Code\Acme\skates-master\RocketEngine.cs:line 259
