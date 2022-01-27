@@ -11,8 +11,8 @@
 		   WindowStartupLocation="CenterOwner"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="11"
         FontFamily="{materialDesign:MaterialDesignFont}">

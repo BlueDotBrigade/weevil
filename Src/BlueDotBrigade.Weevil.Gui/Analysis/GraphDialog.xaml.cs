@@ -2,7 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
+	using System.ComponentModel;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using System.Text;
 	using System.Threading.Tasks;
 	using System.Windows;
@@ -13,6 +16,8 @@
 	using System.Windows.Media;
 	using System.Windows.Media.Imaging;
 	using System.Windows.Shapes;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using LiveChartsCore;
 	using LiveChartsCore.SkiaSharpView;
 	using LiveChartsCore.Themes;
@@ -20,7 +25,7 @@
 	/// <summary>
 	/// Interaction logic for GraphDialog.xaml
 	/// </summary>
-	public partial class GraphDialog : Window
+	public partial class GraphDialog : Window, INotifyPropertyChanged
 	{
 		// https://github.com/beto-rodriguez/LiveCharts2/blob/92578602760fa5089ff2f638e52b3508ce57c6b2/samples/ViewModelsSamples/Axes/Shared/ViewModel.cs
 
@@ -46,8 +51,65 @@
 		//	set => SetValue(YAxesProperty, value);
 		//}
 
-		public GraphDialog()
+		public static readonly DependencyProperty RegularExpressionProperty =
+			DependencyProperty.Register(
+				nameof(RegularExpression), typeof(string),
+				typeof(GraphDialog));
+
+		public static readonly DependencyProperty SampleRecordProperty =
+			DependencyProperty.Register(
+				nameof(SampleRecord), typeof(string),
+				typeof(GraphDialog));
+
+		public static readonly DependencyProperty DataDetectedProperty =
+			DependencyProperty.Register(
+				nameof(DataDetected), typeof(string),
+				typeof(GraphDialog));
+
+		public string RegularExpression
 		{
+			get => (string)GetValue(RegularExpressionProperty);
+			set
+			{
+				SetValue(RegularExpressionProperty, value);
+				RaisePropertyChanged(nameof(RegularExpression));
+			}
+		}
+
+		public string SampleRecord
+		{
+			get => (string)GetValue(SampleRecordProperty);
+			set
+			{
+				SetValue(SampleRecordProperty, value);
+				RaisePropertyChanged(nameof(SampleRecord));
+			}
+		}
+
+
+		public string DataDetected
+		{
+			get => (string)GetValue(DataDetectedProperty);
+			private set
+			{
+				SetValue(DataDetectedProperty, value);
+				RaisePropertyChanged(nameof(DataDetected));
+			}
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		private readonly ImmutableArray<IRecord> _records;
+		private ISeries[] _series;
+		private Axis[] _xAxes;
+		private Axis[] _yAxes;
+
+		public GraphDialog(ImmutableArray<IRecord> records)
+		{
+			_records = records;
+			this.RegularExpression = @"\.(?<Value>\d\d\d\d)";
+			this.SampleRecord = records[0].Content;
+
 			//this.XAxes = "X-Axis";
 			//this.YAxes = "Y-Axis";
 
@@ -85,9 +147,82 @@
 			InitializeComponent();
 		}
 
-		public ISeries[] Series { get; set; }
+		private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChangedEventHandler handler = PropertyChanged;
+
+			if (handler != null)
+			{
+				handler.Invoke(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+
+		public ISeries[] Series
+		{
+			get => _series;
+			set
+			{
+				_series = value;
+				RaisePropertyChanged(nameof(Series));
+			}
+		}
+
 		//public ISeries[] SeriesCollection2 { get; set; }
-		public Axis[] XAxes { get; set; }
-		public Axis[] YAxes { get; set; }
+		public Axis[] XAxes
+		{
+			get => _xAxes;
+			set
+			{
+				_xAxes = value;
+				RaisePropertyChanged(nameof(XAxes));
+			}
+		}
+
+		public Axis[] YAxes
+		{
+			get => _yAxes;
+			set
+			{
+				_yAxes = value;
+				RaisePropertyChanged(nameof(YAxes));
+			}
+		}
+
+		private void OnClick(object sender, RoutedEventArgs e)
+		{
+			Weevil.Filter.Expressions.Regular.RegularExpression expression =
+				new RegularExpression(this.RegularExpression);
+
+			var matches = expression.GetKeyValuePairs(_records[0]);
+
+			if (matches.Any())
+			{
+				this.DataDetected = matches.First().Value;
+			}
+		}
+
+		private void OnGraph(object sender, RoutedEventArgs e)
+		{
+			Weevil.Filter.Expressions.Regular.RegularExpression expression =
+				new RegularExpression(this.RegularExpression);
+
+			var values = new List<int>();
+
+			foreach (var record in _records)
+			{
+				var matches = expression.GetKeyValuePairs(record);
+
+				if (matches.Any())
+				{
+					values.Add(int.Parse(matches.First().Value) );
+				}
+			}
+
+			this.Series = new ISeries[] { new LineSeries<int>
+			{
+				Name = "Series 1",
+				Values = values
+			} };
+		}
 	}
 }

@@ -5,6 +5,7 @@
 	using System.Linq;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using Microsoft.Win32;
 
@@ -69,9 +70,9 @@
 			dialog.Show();
 	}
 
-		public void ShowGraph()
+		public void ShowGraph(ImmutableArray<IRecord> records)
 		{
-			var dialog = new GraphDialog();
+			var dialog = new GraphDialog(records);
 			dialog.Show();
 		}
 

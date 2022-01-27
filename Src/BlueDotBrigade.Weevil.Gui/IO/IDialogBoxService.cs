@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 
 	internal interface IDialogBoxService : IUserDialog
@@ -13,7 +14,7 @@
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 
-		void ShowGraph();
+		void ShowGraph(ImmutableArray<IRecord> records);
 
 		bool TryShowGoTo(string defaultValue, out string userValue);
 	}
