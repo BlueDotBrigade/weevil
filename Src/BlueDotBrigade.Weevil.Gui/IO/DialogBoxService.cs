@@ -69,6 +69,12 @@
 			dialog.Show();
 	}
 
+		public void ShowGraph()
+		{
+			var dialog = new GraphDialog();
+			dialog.Show();
+		}
+
 		public string ShowUserPrompt(string title, string userPrompt)
 		{
 			return ShowUserPrompt(title, userPrompt, string.Empty);

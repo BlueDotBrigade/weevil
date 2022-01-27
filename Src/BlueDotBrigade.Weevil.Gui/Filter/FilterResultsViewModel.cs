@@ -882,6 +882,11 @@
 			}
 		}
 
+		private void GraphData()
+		{
+			_dialogBox.ShowGraph();
+		}
+
 		private void ForceGarbageCollection()
 		{
 			GC.Collect(3, GCCollectionMode.Forced, true, true);

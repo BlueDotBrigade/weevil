@@ -54,7 +54,6 @@
       <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
       <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
-      <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
       <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
       <KeyBinding Key="R" Modifiers="Control" Command="{Binding ShowRegExToolCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
@@ -67,6 +66,8 @@
 
       <KeyBinding Key="F5" Modifiers="Control" Command="{Binding ReloadCommand}" />
 
+      <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
+      <KeyBinding Key="G" Modifiers="Control+Shift" Command="{Binding GraphDataCommand}" />
       <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
       <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
       <KeyBinding Key="F10" Command="{Binding DetectTimeGapUiOnlyCommand}" />
@@ -74,8 +75,8 @@
 
       <KeyBinding Key="P" Modifiers="Control" Command="{Binding ToggleIsPinnedCommand}"/>
       <KeyBinding Key="Subtract" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
-        <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
-        <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
+      <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
+      <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
       <KeyBinding Key="OemPlus" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
         <KeyBinding Key="Subtract" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
         <KeyBinding Key="Add" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
@@ -292,6 +293,7 @@
                </MenuItem>
                <Separator/>
                     <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+               <MenuItem Header="Graph Data" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
                     <MenuItem Header="Analyzers...">
                       <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                       <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />

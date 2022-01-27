@@ -1,0 +1,15 @@
+﻿<Window x:Class="BlueDotBrigade.Weevil.Gui.Analysis.GraphDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        mc:Ignorable="d"
+        Title="GraphDialog" Height="450" Width="800">
+    <Grid>
+        <lvc:CartesianChart
+            XAxes="{Binding XAxes}"
+            YAxes="{Binding YAxes}"
+            Series="{Binding Series}"/>
+    </Grid>
+</Window>

@@ -108,6 +108,9 @@
     <Compile Include="Analysis\DashboardDialog.xaml.cs">
       <DependentUpon>DashboardDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Analysis\GraphDialog.xaml.cs">
+      <DependentUpon>GraphDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Analysis\UiResponsivenessMonitor.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -205,6 +208,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Analysis\GraphDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Filter\FilterResultsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -256,6 +263,9 @@
     </PackageReference>
     <PackageReference Include="gong-wpf-dragdrop">
       <Version>2.3.2</Version>
+    </PackageReference>
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF">
+      <Version>2.0.0-beta.90</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
       <Version>4.0.0</Version>
