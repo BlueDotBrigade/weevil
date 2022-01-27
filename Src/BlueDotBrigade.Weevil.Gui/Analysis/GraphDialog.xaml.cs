@@ -51,6 +51,12 @@
 			//this.XAxes = "X-Axis";
 			//this.YAxes = "Y-Axis";
 
+			LiveCharts.Configure(
+				settings => settings
+					.AddDefaultMappers()
+					.AddSkiaSharp()
+					.AddDarkTheme());
+
 			var values1 = new int[50];
 			var values2 = new int[50];
 			var r = new Random();
