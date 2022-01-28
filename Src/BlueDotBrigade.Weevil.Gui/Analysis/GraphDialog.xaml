@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         mc:Ignorable="d"
         Background="{DynamicResource MaterialDesignPaper}"
         Title="GraphDialog" Height="450" Width="800"
@@ -12,8 +13,15 @@
         TextElement.FontWeight="Medium"
         TextElement.FontSize="12"
         FontFamily="{materialDesign:MaterialDesignFont}">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
+        </Style>
+    </Window.Resources>
     <Grid x:Name="GraphWindowLayout" 
-          FocusManager.FocusedElement="{Binding ElementName=Input}">
+          FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -29,18 +37,18 @@
 
         <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
             <StackPanel Orientation="Vertical">
-                <TextBox x:Name="Input" 
+                <TextBox x:Name="InputTextBox" 
                          materialDesign:HintAssist.Hint="Regular Expression" 
                          materialDesign:TextFieldAssist.HasClearButton="True"
-                         Text="{Binding RegularExpression}"/>
-                <TextBox x:Name="SampleData" 
-                         materialDesign:HintAssist.Hint="Sample Record" 
-                         Text="{Binding SampleRecord}"/>
-                <Button Content="Execute" Click="OnClick"/>
-                <TextBox x:Name="Result" 
+                         Text="{Binding Pattern}"/>
+                <TextBox x:Name="SampleDataTextBox" 
+                         materialDesign:HintAssist.Hint="Sample Data" 
+                         Text="{Binding SampleData}"/>
+                <Button Content="Detect Data" Click="OnDetectData"/>
+                <TextBox x:Name="DataDetectedTextBox" 
                          materialDesign:HintAssist.Hint="Data Detected" 
                          IsReadOnly="True"
-                         Text="{Binding DataFound}"/>
+                         Text="{Binding DataDetected}"/>
                 <Button Content="Graph" Click="OnGraph"/>
             </StackPanel>
         </Expander>

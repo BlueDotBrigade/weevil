@@ -4,6 +4,8 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.ComponentModel;
+	using System.Diagnostics.Eventing.Reader;
+	using System.Globalization;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using System.Text;
@@ -17,11 +19,12 @@
 	using System.Windows.Media.Imaging;
 	using System.Windows.Shapes;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using LiveChartsCore;
 	using LiveChartsCore.SkiaSharpView;
 	using LiveChartsCore.Themes;
-
+	
 	/// <summary>
 	/// Interaction logic for GraphDialog.xaml
 	/// </summary>
@@ -51,14 +54,14 @@
 		//	set => SetValue(YAxesProperty, value);
 		//}
 
-		public static readonly DependencyProperty RegularExpressionProperty =
+		public static readonly DependencyProperty PatternProperty =
 			DependencyProperty.Register(
-				nameof(RegularExpression), typeof(string),
+				nameof(Pattern), typeof(string),
 				typeof(GraphDialog));
 
-		public static readonly DependencyProperty SampleRecordProperty =
+		public static readonly DependencyProperty SampleDataProperty =
 			DependencyProperty.Register(
-				nameof(SampleRecord), typeof(string),
+				nameof(SampleData), typeof(string),
 				typeof(GraphDialog));
 
 		public static readonly DependencyProperty DataDetectedProperty =
@@ -66,23 +69,25 @@
 				nameof(DataDetected), typeof(string),
 				typeof(GraphDialog));
 
-		public string RegularExpression
+		public string Pattern
 		{
-			get => (string)GetValue(RegularExpressionProperty);
+			get => (string)GetValue(PatternProperty);
 			set
 			{
-				SetValue(RegularExpressionProperty, value);
-				RaisePropertyChanged(nameof(RegularExpression));
+				value = value ?? string.Empty;
+
+				SetValue(PatternProperty, value);
+				RaisePropertyChanged(nameof(this.Pattern));
 			}
 		}
 
-		public string SampleRecord
+		public string SampleData
 		{
-			get => (string)GetValue(SampleRecordProperty);
+			get => (string)GetValue(SampleDataProperty);
 			set
 			{
-				SetValue(SampleRecordProperty, value);
-				RaisePropertyChanged(nameof(SampleRecord));
+				SetValue(SampleDataProperty, value);
+				RaisePropertyChanged(nameof(SampleData));
 			}
 		}
 
@@ -107,8 +112,8 @@
 		public GraphDialog(ImmutableArray<IRecord> records)
 		{
 			_records = records;
-			this.RegularExpression = @"\.(?<Value>\d\d\d\d)";
-			this.SampleRecord = records[0].Content;
+			this.Pattern = @"\.(?<Value>\d\d\d\d)";
+			this.SampleData = records[0].Content;
 
 			//this.XAxes = "X-Axis";
 			//this.YAxes = "Y-Axis";
@@ -188,25 +193,47 @@
 			}
 		}
 
-		private void OnClick(object sender, RoutedEventArgs e)
+		private void OnDetectData(object sender, RoutedEventArgs e)
 		{
-			Weevil.Filter.Expressions.Regular.RegularExpression expression =
-				new RegularExpression(this.RegularExpression);
-
-			var matches = expression.GetKeyValuePairs(_records[0]);
-
-			if (matches.Any())
+			if (string.IsNullOrEmpty(this.Pattern))
 			{
-				this.DataDetected = matches.First().Value;
+				this.DataDetected = "(missing regular expression)";
+			}
+			else
+			{
+				if (string.IsNullOrEmpty(this.SampleData))
+				{
+					this.DataDetected = "(missing sample data)";
+				}
+				else
+				{
+					var expression = new RegularExpression(this.Pattern);
+
+					var matches = expression.GetKeyValuePairs(this.SampleData);
+
+					if (matches.Any())
+					{
+						this.DataDetected = matches.First().Value;
+					}
+				}
 			}
 		}
 
 		private void OnGraph(object sender, RoutedEventArgs e)
 		{
-			Weevil.Filter.Expressions.Regular.RegularExpression expression =
-				new RegularExpression(this.RegularExpression);
+			var expression = new RegularExpression(this.Pattern);
 
-			var values = new List<int>();
+			var values = new List<float>();
+
+			var parsingError = false;
+
+			var validNumberFormat =
+				NumberStyles.AllowLeadingWhite |
+				NumberStyles.AllowTrailingWhite |
+				NumberStyles.AllowThousands |
+				NumberStyles.Integer |
+				NumberStyles.AllowExponent |
+				NumberStyles.AllowDecimalPoint;
 
 			foreach (var record in _records)
 			{
@@ -214,14 +241,29 @@
 
 				if (matches.Any())
 				{
-					values.Add(int.Parse(matches.First().Value) );
+					if (float.TryParse(matches.First().Value, validNumberFormat, CultureInfo.InvariantCulture, out var value))
+					{
+						values.Add(value);
+					}
+					else
+					{
+						if (!parsingError)
+						{
+							Log.Default.Write(
+								LogSeverityType.Warning,
+								$"Unable to graph the datapoint because the matching value is not a float. {matches.First().Value}");
+							parsingError = true;
+						}
+					}
+
 				}
 			}
 
-			this.Series = new ISeries[] { new LineSeries<int>
+			this.Series = new ISeries[] { new LineSeries<float>
 			{
 				Name = "Series 1",
-				Values = values
+				Values = values,
+				GeometrySize = 10,
 			} };
 		}
 	}
