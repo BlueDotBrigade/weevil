@@ -70,9 +70,12 @@
 			dialog.Show();
 	}
 
-		public void ShowGraph(ImmutableArray<IRecord> records)
+		public void ShowGraph(ImmutableArray<IRecord> records, string regularExpression)
 		{
-			var dialog = new GraphDialog(records);
+			var dialog = new GraphDialog(records)
+			{
+				Pattern = regularExpression,
+			};
 			dialog.Show();
 		}
 

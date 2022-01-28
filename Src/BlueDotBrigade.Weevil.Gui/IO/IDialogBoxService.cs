@@ -14,8 +14,8 @@
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 
-		void ShowGraph(ImmutableArray<IRecord> records);
-
+		void ShowGraph(ImmutableArray<IRecord> records, string pattern);
+		
 		bool TryShowGoTo(string defaultValue, out string userValue);
 	}
 }
