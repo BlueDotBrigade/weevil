@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Collections.ObjectModel;
 	using System.ComponentModel;
 	using System.Diagnostics.Eventing.Reader;
 	using System.Globalization;
@@ -22,6 +23,8 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using LiveChartsCore;
+	using LiveChartsCore.Defaults;
+	using LiveChartsCore.Kernel.Sketches;
 	using LiveChartsCore.SkiaSharpView;
 	using LiveChartsCore.Themes;
 	
@@ -142,7 +145,10 @@
 			this.Series = new ISeries[] { new LineSeries<int> { Values = values1 } };
 			//SeriesCollection2 = new ISeries[] { new ColumnSeries<int> { Values = values2 } };
 
-			XAxes = new Axis[] { new Axis() };
+			XAxes = new Axis[]
+			{
+				new Axis { Labeler = value => new DateTime((long)value).ToString("hh:mm:ss"), LabelsRotation = 15, }
+			};
 			YAxes = new Axis[] { new Axis() };
 
 			XAxes[0].Name = "X-Axis";
@@ -223,7 +229,7 @@
 		{
 			var expression = new RegularExpression(this.Pattern);
 
-			var values = new List<float>();
+			var values = new ObservableCollection<DateTimePoint>();
 
 			var parsingError = false;
 
@@ -243,7 +249,7 @@
 				{
 					if (float.TryParse(matches.First().Value, validNumberFormat, CultureInfo.InvariantCulture, out var value))
 					{
-						values.Add(value);
+						values.Add(new DateTimePoint(record.CreatedAt, value));
 					}
 					else
 					{
@@ -259,7 +265,7 @@
 				}
 			}
 
-			this.Series = new ISeries[] { new LineSeries<float>
+			this.Series = new ISeries[] { new LineSeries<DateTimePoint>
 			{
 				Name = "Series 1",
 				Values = values,
