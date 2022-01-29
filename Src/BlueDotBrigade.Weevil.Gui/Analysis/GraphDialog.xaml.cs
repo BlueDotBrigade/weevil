@@ -5,57 +5,28 @@
 	using System.Collections.Immutable;
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
-	using System.Diagnostics.Eventing.Reader;
 	using System.Globalization;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
-	using System.Text;
-	using System.Threading.Tasks;
 	using System.Windows;
-	using System.Windows.Controls;
-	using System.Windows.Data;
-	using System.Windows.Documents;
-	using System.Windows.Input;
-	using System.Windows.Media;
-	using System.Windows.Media.Imaging;
-	using System.Windows.Shapes;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using LiveChartsCore;
 	using LiveChartsCore.Defaults;
-	using LiveChartsCore.Kernel.Sketches;
 	using LiveChartsCore.SkiaSharpView;
-	using LiveChartsCore.Themes;
-	
-	/// <summary>
-	/// Interaction logic for GraphDialog.xaml
-	/// </summary>
+
 	public partial class GraphDialog : Window, INotifyPropertyChanged
 	{
-		// https://github.com/beto-rodriguez/LiveCharts2/blob/92578602760fa5089ff2f638e52b3508ce57c6b2/samples/ViewModelsSamples/Axes/Shared/ViewModel.cs
-
-		//public static readonly DependencyProperty XAxesProperty =
-		//	DependencyProperty.Register(
-		//		nameof(XAxes), typeof(string),
-		//		typeof(GraphDialog));
-
-		//public static readonly DependencyProperty YAxesProperty =
-		//	DependencyProperty.Register(
-		//		nameof(YAxes), typeof(string),
-		//		typeof(GraphDialog));
-
-		//public string XAxes
-		//{
-		//	get => (string)GetValue(XAxesProperty);
-		//	set => SetValue(XAxesProperty, value);
-		//}
-
-		//public string YAxes
-		//{
-		//	get => (string)GetValue(YAxesProperty);
-		//	set => SetValue(YAxesProperty, value);
-		//}
+		private static readonly string DefaultXAxisLabel = "X-Axis";
+		private static readonly string DefaultYAxisLabel = "Y-Axis";
+		private static readonly NumberStyles ValidNumberStyle =
+			NumberStyles.AllowLeadingWhite |
+			NumberStyles.AllowTrailingWhite |
+			NumberStyles.AllowThousands |
+			NumberStyles.Integer |
+			NumberStyles.AllowExponent |
+			NumberStyles.AllowDecimalPoint;
 
 		public static readonly DependencyProperty PatternSelectedProperty =
 			DependencyProperty.Register(
@@ -76,6 +47,120 @@
 			DependencyProperty.Register(
 				nameof(DataDetected), typeof(string),
 				typeof(GraphDialog));
+
+		private readonly ImmutableArray<IRecord> _records;
+		private ISeries[] _series;
+		private Axis[] _xAxes;
+		private Axis[] _yAxes;
+
+		public GraphDialog(ImmutableArray<IRecord> records)
+		{
+			_records = records;
+			this.PatternSelected = @"\.(?<Value>\d\d\d\d)";
+			this.SampleData = records[0].Content;
+
+			LiveCharts.Configure(
+				settings => settings
+					.AddDefaultMappers()
+					.AddSkiaSharp()
+					.AddDarkTheme());
+
+			var values1 = new int[50];
+			var values2 = new int[50];
+			var r = new Random();
+			var t = 0;
+			var t2 = 0;
+
+			for (var i = 0; i < 50; i++)
+			{
+				t += r.Next(-90, 100);
+				values1[i] = t;
+
+				t2 += r.Next(-90, 100);
+				values2[i] = t2;
+			}
+
+			this.Series = new ISeries[] { new LineSeries<int> { Values = values1 } };
+			//SeriesCollection2 = new ISeries[] { new ColumnSeries<int> { Values = values2 } };
+
+			XAxes = new Axis[]
+			{
+				new Axis
+				{
+					Name = DefaultXAxisLabel,
+					Labeler = value => new DateTime((long)value).ToString("hh:mm:ss"),
+					LabelsRotation = 15,
+				}
+			};
+
+			YAxes = new Axis[]
+			{
+				new Axis
+				{
+					Name = DefaultYAxisLabel,
+				}
+			};
+
+			this.DataContext = this;
+
+			InitializeComponent();
+		}
+
+		public string XAxisLabel
+		{
+			get
+			{
+				if (this.XAxes?.Length > 0)
+				{
+					return this.XAxes[0].Name;
+				}
+				else
+				{
+					return DefaultXAxisLabel;
+				}
+			}
+			set
+			{
+				// You cannot simply update the Axis name
+				// ... LiveGraph only detects changes when the entire Axis is replaced.
+				// ... Be mindful of any settings that might be lost. 
+				this.XAxes = new Axis[]
+				{
+					new Axis
+					{
+						Name = value,
+					},
+				};
+			}
+		}
+
+		public string YAxisLabel
+		{
+			get
+			{
+				if (this.YAxes?.Length > 0)
+				{
+					return this.YAxes[0].Name;
+				}
+				else
+				{
+					return DefaultYAxisLabel;
+				}
+			}
+			set
+			{
+				// You cannot simply update the Axis name
+				// ... LiveGraph only detects changes when the entire Axis is replaced.
+				// ... Be mindful of any settings that might be lost. 
+				this.YAxes = new Axis[]
+				{
+					new Axis
+					{
+						Name = value,
+					},
+				};
+			}
+		}
 
 		public string PatternSelected
 		{
@@ -123,57 +208,6 @@
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
-		
-		private readonly ImmutableArray<IRecord> _records;
-		private ISeries[] _series;
-		private Axis[] _xAxes;
-		private Axis[] _yAxes;
-
-		public GraphDialog(ImmutableArray<IRecord> records)
-		{
-			_records = records;
-			this.PatternSelected = @"\.(?<Value>\d\d\d\d)";
-			this.SampleData = records[0].Content;
-
-			//this.XAxes = "X-Axis";
-			//this.YAxes = "Y-Axis";
-
-			LiveCharts.Configure(
-				settings => settings
-					.AddDefaultMappers()
-					.AddSkiaSharp()
-					.AddDarkTheme());
-
-			var values1 = new int[50];
-			var values2 = new int[50];
-			var r = new Random();
-			var t = 0;
-			var t2 = 0;
-
-			for (var i = 0; i < 50; i++)
-			{
-				t += r.Next(-90, 100);
-				values1[i] = t;
-
-				t2 += r.Next(-90, 100);
-				values2[i] = t2;
-			}
-
-			this.Series = new ISeries[] { new LineSeries<int> { Values = values1 } };
-			//SeriesCollection2 = new ISeries[] { new ColumnSeries<int> { Values = values2 } };
-
-			XAxes = new Axis[]
-			{
-				new Axis { Labeler = value => new DateTime((long)value).ToString("hh:mm:ss"), LabelsRotation = 15, }
-			};
-			YAxes = new Axis[] { new Axis() };
-
-			XAxes[0].Name = "X-Axis";
-			YAxes[0].Name = "Y-Axis";
-			this.DataContext = this;
-
-			InitializeComponent();
-		}
 
 		private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
 		{
@@ -195,7 +229,6 @@
 			}
 		}
 
-		//public ISeries[] SeriesCollection2 { get; set; }
 		public Axis[] XAxes
 		{
 			get => _xAxes;
@@ -242,7 +275,7 @@
 			}
 		}
 
-		private void OnGraph(object sender, RoutedEventArgs e)
+		private void OnUpdate(object sender, RoutedEventArgs e)
 		{
 			var expression = new RegularExpression(this.PatternSelected);
 
@@ -250,21 +283,13 @@
 
 			var parsingError = false;
 
-			var validNumberFormat =
-				NumberStyles.AllowLeadingWhite |
-				NumberStyles.AllowTrailingWhite |
-				NumberStyles.AllowThousands |
-				NumberStyles.Integer |
-				NumberStyles.AllowExponent |
-				NumberStyles.AllowDecimalPoint;
-
 			foreach (var record in _records)
 			{
 				var matches = expression.GetKeyValuePairs(record);
 
 				if (matches.Any())
 				{
-					if (float.TryParse(matches.First().Value, validNumberFormat, CultureInfo.InvariantCulture, out var value))
+					if (float.TryParse(matches.First().Value, ValidNumberStyle, CultureInfo.InvariantCulture, out var value))
 					{
 						values.Add(new DateTimePoint(record.CreatedAt, value));
 					}

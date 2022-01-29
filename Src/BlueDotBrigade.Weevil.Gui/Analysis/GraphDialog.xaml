@@ -31,13 +31,19 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <lvc:CartesianChart Grid.Row="0" Grid.Column="0"
+        <lvc:CartesianChart x:Name="CartesianChart" Grid.Row="0" Grid.Column="0"
             XAxes="{Binding XAxes}"
             YAxes="{Binding YAxes}"
             Series="{Binding Series}"/>
 
         <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
             <StackPanel Orientation="Vertical">
+                <TextBox x:Name="XAxisLabelTextBox" 
+                         materialDesign:HintAssist.Hint="X-Axis" 
+                         Text="{Binding XAxisLabel, Delay=1500, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox x:Name="YAxisLabelTextBox" 
+                         materialDesign:HintAssist.Hint="Y-Axis" 
+                         Text="{Binding YAxisLabel, Delay=1500, UpdateSourceTrigger=PropertyChanged}"/>
                 <ComboBox x:Name="SelectedPattern" Grid.Column="1" 
                           Margin="{StaticResource ComboBoxMargin}"
                           ItemsSource="{Binding PatternOptions}"
@@ -57,7 +63,7 @@
                          materialDesign:HintAssist.Hint="Data Detected" 
                          IsReadOnly="True"
                          Text="{Binding DataDetected}"/>
-                <Button Content="Graph" Click="OnGraph"/>
+                <Button Content="Update" Click="OnUpdate"/>
             </StackPanel>
         </Expander>
     </Grid>
