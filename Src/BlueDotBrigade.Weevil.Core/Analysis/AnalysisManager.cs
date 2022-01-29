@@ -137,5 +137,10 @@
 
 			return recordCount;
 		}
+
+		public IList<string> GetGraphPatternOptions()
+		{
+			return _coreExtension.GetGraphPatternOptions();
+		}
 	}
 }

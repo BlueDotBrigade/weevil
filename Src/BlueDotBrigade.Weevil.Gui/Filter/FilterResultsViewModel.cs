@@ -884,7 +884,10 @@
 
 		private void GraphData()
 		{
-			_dialogBox.ShowGraph(_engine.Selector.GetSelected(), _inclusiveFilter);
+			_dialogBox.ShowGraph(
+				_engine.Selector.GetSelected(), 
+				_inclusiveFilter,
+				_engine.Analyzer.GetGraphPatternOptions());
 		}
 
 		private void ForceGarbageCollection()

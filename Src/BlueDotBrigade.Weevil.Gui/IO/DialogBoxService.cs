@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
 	using System.Windows;
@@ -70,11 +71,12 @@
 			dialog.Show();
 	}
 
-		public void ShowGraph(ImmutableArray<IRecord> records, string regularExpression)
+		public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, IList<string> patternOptions)
 		{
 			var dialog = new GraphDialog(records)
 			{
-				Pattern = regularExpression,
+				PatternSelected = selectedPattern,
+				PatternOptions = patternOptions,
 			};
 			dialog.Show();
 		}

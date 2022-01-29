@@ -6,6 +6,7 @@
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
+        xmlns:controls1="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
         mc:Ignorable="d"
         Background="{DynamicResource MaterialDesignPaper}"
         Title="GraphDialog" Height="450" Width="800"
@@ -37,10 +38,17 @@
 
         <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
             <StackPanel Orientation="Vertical">
-                <TextBox x:Name="InputTextBox" 
-                         materialDesign:HintAssist.Hint="Regular Expression" 
-                         materialDesign:TextFieldAssist.HasClearButton="True"
-                         Text="{Binding Pattern}"/>
+                <ComboBox x:Name="SelectedPattern" Grid.Column="1" 
+                          Margin="{StaticResource ComboBoxMargin}"
+                          ItemsSource="{Binding PatternOptions}"
+                          Text="{Binding PatternSelected}" 
+                          SelectedValue="{Binding PatternSelected}" 
+                          IsEditable="True"
+                          IsTextSearchEnabled="False"
+                          StaysOpenOnEdit="False"
+                          controls1:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                          materialDesign:HintAssist.Hint="Regular Expression"
+                          materialDesign:TextFieldAssist.HasClearButton="True"/>
                 <TextBox x:Name="SampleDataTextBox" 
                          materialDesign:HintAssist.Hint="Sample Data" 
                          Text="{Binding SampleData}"/>

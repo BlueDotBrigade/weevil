@@ -20,5 +20,7 @@
 		int Analyze(AnalysisType analysisType, IUserDialog userDialog);
 
 		int Analyze(string analyzerKey, IUserDialog userDialog);
+
+		IList<string> GetGraphPatternOptions();
 	}
 }

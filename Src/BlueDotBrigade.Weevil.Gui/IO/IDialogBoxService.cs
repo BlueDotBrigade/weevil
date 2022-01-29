@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
@@ -14,7 +15,7 @@
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 
-		void ShowGraph(ImmutableArray<IRecord> records, string pattern);
+		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, IList<string> patternOptions);
 		
 		bool TryShowGoTo(string defaultValue, out string userValue);
 	}

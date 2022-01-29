@@ -57,9 +57,14 @@
 		//	set => SetValue(YAxesProperty, value);
 		//}
 
-		public static readonly DependencyProperty PatternProperty =
+		public static readonly DependencyProperty PatternSelectedProperty =
 			DependencyProperty.Register(
-				nameof(Pattern), typeof(string),
+				nameof(PatternSelected), typeof(string),
+				typeof(GraphDialog));
+
+		public static readonly DependencyProperty PatternOptionsProperty =
+			DependencyProperty.Register(
+				nameof(PatternOptions), typeof(IList<string>),
 				typeof(GraphDialog));
 
 		public static readonly DependencyProperty SampleDataProperty =
@@ -72,15 +77,27 @@
 				nameof(DataDetected), typeof(string),
 				typeof(GraphDialog));
 
-		public string Pattern
+		public string PatternSelected
 		{
-			get => (string)GetValue(PatternProperty);
+			get => (string)GetValue(PatternSelectedProperty);
 			set
 			{
 				value = value ?? string.Empty;
 
-				SetValue(PatternProperty, value);
-				RaisePropertyChanged(nameof(this.Pattern));
+				SetValue(PatternSelectedProperty, value);
+				RaisePropertyChanged(nameof(this.PatternSelected));
+			}
+		}
+
+		public IList<string> PatternOptions
+		{
+			get => (IList<string>)GetValue(PatternOptionsProperty);
+			set
+			{
+				value = value ?? new List<string>();
+
+				SetValue(PatternOptionsProperty, value);
+				RaisePropertyChanged(nameof(this.PatternOptions));
 			}
 		}
 
@@ -115,7 +132,7 @@
 		public GraphDialog(ImmutableArray<IRecord> records)
 		{
 			_records = records;
-			this.Pattern = @"\.(?<Value>\d\d\d\d)";
+			this.PatternSelected = @"\.(?<Value>\d\d\d\d)";
 			this.SampleData = records[0].Content;
 
 			//this.XAxes = "X-Axis";
@@ -201,7 +218,7 @@
 
 		private void OnDetectData(object sender, RoutedEventArgs e)
 		{
-			if (string.IsNullOrEmpty(this.Pattern))
+			if (string.IsNullOrEmpty(this.PatternSelected))
 			{
 				this.DataDetected = "(missing regular expression)";
 			}
@@ -213,7 +230,7 @@
 				}
 				else
 				{
-					var expression = new RegularExpression(this.Pattern);
+					var expression = new RegularExpression(this.PatternSelected);
 
 					var matches = expression.GetKeyValuePairs(this.SampleData);
 
@@ -227,7 +244,7 @@
 
 		private void OnGraph(object sender, RoutedEventArgs e)
 		{
-			var expression = new RegularExpression(this.Pattern);
+			var expression = new RegularExpression(this.PatternSelected);
 
 			var values = new ObservableCollection<DateTimePoint>();
 
