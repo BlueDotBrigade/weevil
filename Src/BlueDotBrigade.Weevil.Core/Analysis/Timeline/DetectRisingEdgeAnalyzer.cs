@@ -1,7 +1,9 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -20,6 +22,24 @@
 
 		public string DisplayName => "Detect Rising Edges";
 
+		private static AnalysisOrder GetAnalysisOrder(IUserDialog userDialog)
+		{
+			var userInput = userDialog.ShowUserPrompt(
+				"Analysis Details",
+				"Analysis order (Ascending/Descending):",
+				"Ascending");
+
+			if (Enum.TryParse(userInput, true, out AnalysisOrder direction))
+			{
+				return direction;
+			}
+
+			throw new ArgumentOutOfRangeException(
+				$"{nameof(direction)}",
+				direction,
+				"Unable to perform operation. The analysis order was expected to be either: Ascending or Descending");
+		}
+
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
 		/// </summary>
@@ -33,6 +53,8 @@
 		{
 			var count = 0;
 
+			var analysisOrder = GetAnalysisOrder(userDialog);
+
 			if (_filterStrategy != FilterStrategy.KeepAllRecords)
 			{
 				if (_filterStrategy.InclusiveFilter.Count > 0)
@@ -40,7 +62,11 @@
 					var previous = new Dictionary<string, string>();
 					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
 
-					foreach (IRecord record in records)
+					var sortedRecords = analysisOrder == AnalysisOrder.Ascending
+						? records
+						: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
+
+					foreach (IRecord record in sortedRecords)
 					{
 						if (canUpdateMetadata)
 						{
