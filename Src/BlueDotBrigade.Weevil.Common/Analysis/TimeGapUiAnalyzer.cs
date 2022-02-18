@@ -12,7 +12,7 @@
 	public class TimeGapUiAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(60);
-		private const string CommentLabel = "TimeGapUi";
+		private const string CommentLabel = "ElapsedTimeUi";
 
 		private const int UnknownIndex = -1;
 
@@ -27,9 +27,9 @@
 			_firstOccurrenceAt = DateTime.MaxValue;
 		}
 
-		public virtual string Key => AnalysisType.TimeGapUiOnly.ToString();
+		public virtual string Key => AnalysisType.ElapsedTimeUiThread.ToString();
 
-		public virtual string DisplayName => "Detect Time Gap (UI Only)";
+		public virtual string DisplayName => "Measure Elapsed Time (UI Only)";
 
 		public TimeSpan MaximumPeriodDetected => _maximumPeriodDetected;
 
