@@ -6,7 +6,7 @@
 		DetectDataTransition,
 		DetectFallingEdges,
 		DetectRisingEdges,
-		TimeGapUiOnly,
-		TimeGap,
+		ElapsedTimeUiThread,
+		ElapsedTime,
 	}
 }
