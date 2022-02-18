@@ -17,7 +17,7 @@
 	{
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(60);
 
-		private const string CommentLabel = "TimeGap";
+		private const string CommentLabel = "ElapsedTime";
 
 		private const int UnknownIndex = -1;
 
@@ -38,9 +38,9 @@
 			_count = -1;
 			_firstOccurrenceAt = DateTime.MaxValue;
 		}
-		public virtual string Key => AnalysisType.TimeGap.ToString();
+		public virtual string Key => AnalysisType.ElapsedTime.ToString();
 
-		public virtual string DisplayName => "Detect Time Gap";
+		public virtual string DisplayName => "Measure Elapsed Time";
 
 		public TimeSpan MaximumPeriodDetected => _maximumPeriodDetected;
 
@@ -156,7 +156,7 @@
 		protected virtual bool TryGetTolerance(IUserDialog user, out TimeSpan unresponsivenessPeriod)
 		{
 			var userInput = user.ShowUserPrompt(
-				"Time Gap Detection",
+				"Elapsed Time",
 				"Threshold (ms):",
 				DefaultThreshold.TotalMilliseconds.ToString("0.#"));
 
