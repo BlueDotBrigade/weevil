@@ -26,7 +26,7 @@ For a list of the latest features, please refer to the [change log](https://gith
 
 1. Supports record-level comments.
 2. Persisted State
-   - Filter history, user comments, and other metadata is automatically loaded when a log file is opened.
+   - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
 3. All operations are non-destructive; the original log file will not be modified.
 
