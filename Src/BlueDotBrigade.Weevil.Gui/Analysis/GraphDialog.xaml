@@ -35,7 +35,8 @@
         <lvc:CartesianChart
             Series="{Binding Series}"
             XAxes="{Binding XAxes}"
-            YAxes="{Binding YAxes}">
+            YAxes="{Binding YAxes}"
+            TooltipPosition="Bottom">
         </lvc:CartesianChart>
 
         <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">

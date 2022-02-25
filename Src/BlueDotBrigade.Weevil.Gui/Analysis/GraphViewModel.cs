@@ -53,10 +53,10 @@
 
 					//// in this case we want our columns with a width of 1 day, we can get that number
 					//// using the following syntax
-					UnitWidth = TimeSpan.FromSeconds(1).Ticks, // mark
+					UnitWidth = TimeSpan.FromSeconds(10).Ticks, // mark
 
 					//// The MinStep property forces the separator to be greater than 1 day.
-					MinStep = TimeSpan.FromSeconds(1).Ticks // mark
+					//MinStep = TimeSpan.FromSeconds(60).Ticks // mark
 
 					// if the difference between our points is in hours then we would:
 					// UnitWidth = TimeSpan.FromHours(1).Ticks,
@@ -117,6 +117,7 @@
 					Name = "Handle Count",
 					Values = values,
 					GeometrySize = 10,
+					TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue:0.000}",
 				}
 			};
 		}
