@@ -5,30 +5,21 @@
 	using System.Runtime.CompilerServices;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Data;
+	using LiveChartsCore;
+	using LiveChartsCore.SkiaSharpView;
 
-	public partial class GraphDialog : Window, INotifyPropertyChanged
+	public partial class GraphDialog : Window
 	{
-		public GraphDialog()
-		{
-			InitializeComponent();
-		}
-
 		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern)
 		{
+			LiveCharts.Configure(
+				settings => settings
+					.AddDefaultMappers()
+					.AddSkiaSharp()
+					.AddDarkTheme());
+
+			this.DataContext = new GraphViewModel(records, regExPattern);
 			InitializeComponent();
-		}
-
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-
-			if (handler != null)
-			{
-				handler.Invoke(this, new PropertyChangedEventArgs(propertyName));
-			}
 		}
 		private void OnDetectData(object sender, RoutedEventArgs e)
 		{

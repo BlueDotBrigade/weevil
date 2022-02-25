@@ -22,9 +22,6 @@
             <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
         </Style>
     </Window.Resources>
-    <Window.DataContext>
-        <analysis:LineViewModel/>
-    </Window.DataContext>
     <Grid x:Name="GraphWindowLayout" 
           FocusManager.FocusedElement="{Binding ElementName=SelectedPattern}">
         <Grid.RowDefinitions>
@@ -37,7 +34,8 @@
 
         <lvc:CartesianChart
             Series="{Binding Series}"
-            XAxes="{Binding XAxes}">
+            XAxes="{Binding XAxes}"
+            YAxes="{Binding YAxes}">
         </lvc:CartesianChart>
 
         <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
