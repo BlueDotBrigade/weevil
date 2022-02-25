@@ -112,6 +112,8 @@
       <DependentUpon>GraphDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Analysis\UiResponsivenessMonitor.cs" />
+    <Compile Include="Analysis\LineViewModel.cs" />
+    <Compile Include="Analysis\ViewModelWorks.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
