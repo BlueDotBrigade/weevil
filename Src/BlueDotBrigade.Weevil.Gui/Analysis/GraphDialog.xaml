@@ -22,7 +22,7 @@
         </Style>
     </Window.Resources>
     <Grid x:Name="GraphWindowLayout" 
-          FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
+          FocusManager.FocusedElement="{Binding ElementName=SelectedPattern}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -34,7 +34,9 @@
         <lvc:CartesianChart x:Name="CartesianChart" Grid.Row="0" Grid.Column="0"
             XAxes="{Binding XAxes}"
             YAxes="{Binding YAxes}"
-            Series="{Binding Series}"/>
+            Series="{Binding Series}"
+            TooltipPosition="Top"
+            Background="LightGreen"/>
 
         <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
             <StackPanel Orientation="Vertical">

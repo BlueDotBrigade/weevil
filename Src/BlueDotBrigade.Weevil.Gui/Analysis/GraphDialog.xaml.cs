@@ -14,12 +14,14 @@
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using LiveChartsCore;
 	using LiveChartsCore.Defaults;
+	using LiveChartsCore.Kernel.Sketches;
 	using LiveChartsCore.SkiaSharpView;
 
 	public partial class GraphDialog : Window, INotifyPropertyChanged
 	{
-		private static readonly string DefaultXAxisLabel = "X-Axis";
-		private static readonly string DefaultYAxisLabel = "Y-Axis";
+		private static readonly string DefaultXAxisLabel = "Time";
+		private static readonly string DefaultYAxisLabel = "Handle Count";
+
 		private static readonly NumberStyles ValidNumberStyle =
 			NumberStyles.AllowLeadingWhite |
 			NumberStyles.AllowTrailingWhite |
@@ -49,11 +51,11 @@
 				typeof(GraphDialog));
 
 		private readonly ImmutableArray<IRecord> _records;
-		private ISeries[] _series;
-		private Axis[] _xAxes;
-		private Axis[] _yAxes;
+		private IEnumerable<ISeries> _series;
+		private IEnumerable<ICartesianAxis> _xAxes;
+		private IEnumerable<ICartesianAxis> _yAxes;
 
-		public GraphDialog(ImmutableArray<IRecord> records)
+		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern)
 		{
 			_records = records;
 			this.PatternSelected = @"\.(?<Value>\d\d\d\d)";
@@ -65,41 +67,11 @@
 					.AddSkiaSharp()
 					.AddDarkTheme());
 
-			var values1 = new int[50];
-			var values2 = new int[50];
-			var r = new Random();
-			var t = 0;
-			var t2 = 0;
+			this.XAxisLabel = DefaultXAxisLabel;
+			this.YAxisLabel = DefaultYAxisLabel;
 
-			for (var i = 0; i < 50; i++)
-			{
-				t += r.Next(-90, 100);
-				values1[i] = t;
-
-				t2 += r.Next(-90, 100);
-				values2[i] = t2;
-			}
-
-			this.Series = new ISeries[] { new LineSeries<int> { Values = values1 } };
-			//SeriesCollection2 = new ISeries[] { new ColumnSeries<int> { Values = values2 } };
-
-			XAxes = new Axis[]
-			{
-				new Axis
-				{
-					Name = DefaultXAxisLabel,
-					Labeler = value => new DateTime((long)value).ToString("hh:mm:ss"),
-					LabelsRotation = 15,
-				}
-			};
-
-			YAxes = new Axis[]
-			{
-				new Axis
-				{
-					Name = DefaultYAxisLabel,
-				}
-			};
+			this.PatternSelected = regExPattern;
+			this.Series = GetSeries(_records, new RegularExpression(this.PatternSelected));
 
 			this.DataContext = this;
 
@@ -110,9 +82,9 @@
 		{
 			get
 			{
-				if (this.XAxes?.Length > 0)
+				if (this.XAxes?.Count() > 0)
 				{
-					return this.XAxes[0].Name;
+					return this.XAxes.First().Name;
 				}
 				else
 				{
@@ -129,7 +101,11 @@
 					new Axis
 					{
 						Name = value,
-					},
+						Labeler = point => new DateTime((long)point).ToString("hh:mm:ss"),
+						LabelsRotation = 15,
+						//UnitWidth = TimeSpan.FromMinutes(15).Ticks,
+						//MinStep = TimeSpan.FromDays(1).Ticks // mark
+					}
 				};
 			}
 		}
@@ -138,9 +114,9 @@
 		{
 			get
 			{
-				if (this.YAxes?.Length > 0)
+				if (this.YAxes?.Count() > 0)
 				{
-					return this.YAxes[0].Name;
+					return this.YAxes.First().Name;
 				}
 				else
 				{
@@ -154,10 +130,7 @@
 				// ... Be mindful of any settings that might be lost. 
 				this.YAxes = new Axis[]
 				{
-					new Axis
-					{
-						Name = value,
-					},
+					new Axis { Name = value, },
 				};
 			}
 		}
@@ -219,7 +192,7 @@
 			}
 		}
 
-		public ISeries[] Series
+		public IEnumerable<ISeries> Series
 		{
 			get => _series;
 			set
@@ -229,7 +202,7 @@
 			}
 		}
 
-		public Axis[] XAxes
+		public IEnumerable<ICartesianAxis> XAxes
 		{
 			get => _xAxes;
 			set
@@ -239,7 +212,7 @@
 			}
 		}
 
-		public Axis[] YAxes
+		public IEnumerable<ICartesianAxis> YAxes
 		{
 			get => _yAxes;
 			set
@@ -277,21 +250,27 @@
 
 		private void OnUpdate(object sender, RoutedEventArgs e)
 		{
-			var expression = new RegularExpression(this.PatternSelected);
+			this.Series = GetSeries(_records, new RegularExpression(this.PatternSelected));
+		}
 
-			var values = new ObservableCollection<DateTimePoint>();
+		private static ISeries[] GetSeries(ImmutableArray<IRecord> records, RegularExpression expression)
+		{
+			//var values = new ObservableCollection<DateTimePoint>();
+			var values = new ObservableCollection<float>();
 
 			var parsingError = false;
 
-			foreach (var record in _records)
+			foreach (var record in records)
 			{
 				var matches = expression.GetKeyValuePairs(record);
 
 				if (matches.Any())
 				{
-					if (float.TryParse(matches.First().Value, ValidNumberStyle, CultureInfo.InvariantCulture, out var value))
+					if (float.TryParse(matches.First().Value, ValidNumberStyle, CultureInfo.InvariantCulture,
+							out var value))
 					{
-						values.Add(new DateTimePoint(record.CreatedAt, value));
+						//values.Add(new DateTimePoint(record.CreatedAt, value));
+						values.Add(value);
 					}
 					else
 					{
@@ -307,12 +286,34 @@
 				}
 			}
 
-			this.Series = new ISeries[] { new LineSeries<DateTimePoint>
+			return new ISeries[]
 			{
-				Name = "Series 1",
-				Values = values,
-				GeometrySize = 10,
-			} };
+				// TOOLTIP displays when mouse over point for `float`, but not for `DateTimePoint`
+				//new LineSeries<DateTimePoint>
+				new LineSeries<float>
+				{
+					Name = "SeriesOne", 
+					Values = values,
+					//GeometrySize = 10,
+					TooltipLabelFormatter = (chartPoint) => $"TOOLTIP: {chartPoint.Context.Series.Name}: {chartPoint.PrimaryValue}",
+					//DataLabelsFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name}: {chartPoint.PrimaryValue}",
+				}
+			};
+
+			// THIS VERSION WORKS
+
+			// Configuration example
+			// https://github.com/beto-rodriguez/LiveCharts2/issues/303
+			//
+			// Specifying target frameworks
+			// https://docs.microsoft.com/en-us/dotnet/standard/frameworks#how-to-specify-a-target-framework
+
+			// https://github.com/beto-rodriguez/LiveCharts2/blob/master/samples/WPFSample/General/TemplatedTooltips/View.xaml
+			// https://github.com/beto-rodriguez/LiveCharts2/blob/a343a3b12445b05fa1c2b19a4a5f4c353a6d4e6d/docs/cartesianChart/tooltips.md
+			// https://github.com/Live-Charts/Live-Charts/blob/master/Examples/Wpf/CartesianChart/DateAxis/DateAxisExample.xaml
+			// https://github.com/beto-rodriguez/LiveCharts2/blob/92578602760fa5089ff2f638e52b3508ce57c6b2/samples/ViewModelsSamples/Axes/DateTimeScaled/ViewModel.cs
+			// https://github.com/beto-rodriguez/LiveCharts2/blob/92578602760fa5089ff2f638e52b3508ce57c6b2/src/LiveChartsCore/Kernel/LiveChartsSettings.cs
+			// https://github.com/beto-rodriguez/LiveCharts2/blob/87045ed72c8ce3b22f885a7c5f22fa4b5c061ac5/samples/WPFSample/General/TemplatedTooltips/View.xaml
 		}
 	}
 }
