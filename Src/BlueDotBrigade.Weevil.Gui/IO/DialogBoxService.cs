@@ -73,7 +73,7 @@
 
 		public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, IList<string> patternOptions)
 		{
-			var dialog = new GraphDialog(records)
+			var dialog = new GraphDialog(records, selectedPattern)
 			{
 				PatternSelected = selectedPattern,
 				PatternOptions = patternOptions,
