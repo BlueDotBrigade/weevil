@@ -187,13 +187,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand SaveCommentSummaryCommand => new UiBoundCommand(SaveCommentSummary, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand DetectTimeGapUiOnlyCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.TimeGapUiOnly), 
+		public ICommand MeasureElapsedTimeUiThreadCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.ElapsedTimeUiThread), 
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand DetectTimeGapCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.TimeGap),
+		public ICommand MeasureElapsedTimeCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.ElapsedTime),
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]

@@ -70,8 +70,8 @@
       <KeyBinding Key="G" Modifiers="Control+Shift" Command="{Binding GraphDataCommand}" />
       <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
       <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
-      <KeyBinding Key="F10" Command="{Binding DetectTimeGapUiOnlyCommand}" />
-      <KeyBinding Key="F11" Command="{Binding DetectTimeGapCommand}" />
+        <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
+        <KeyBinding Key="F11" Command="{Binding MeasureElapsedTimeCommand}" />
 
       <KeyBinding Key="P" Modifiers="Control" Command="{Binding ToggleIsPinnedCommand}"/>
       <KeyBinding Key="Subtract" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
@@ -300,8 +300,8 @@
                       <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
                       <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
                   <Separator/>
-                  <MenuItem Header="Detect Time Gap (UI Only)" Command="{Binding DetectTimeGapUiOnlyCommand}" InputGestureText="F10" />
-                  <MenuItem Header="Detect Time Gap" Command="{Binding DetectTimeGapCommand}" InputGestureText="F11" />
+                        <MenuItem Header="Measure Elapsed Time (UI Thread)" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
+                        <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
                </MenuItem>
                <MenuItem Header="Custom Analyzers..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
