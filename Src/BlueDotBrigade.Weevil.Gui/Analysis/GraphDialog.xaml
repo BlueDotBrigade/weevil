@@ -23,7 +23,7 @@
         </Style>
     </Window.Resources>
     <Grid x:Name="GraphWindowLayout" 
-          FocusManager.FocusedElement="{Binding ElementName=SelectedPattern}">
+          FocusManager.FocusedElement="{Binding ElementName=RegularExpressionTextBox}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -47,16 +47,8 @@
                 <TextBox x:Name="YAxisLabelTextBox" 
                          materialDesign:HintAssist.Hint="Y-Axis" 
                          Text="{Binding YAxisLabel, Delay=1500, UpdateSourceTrigger=PropertyChanged}"/>
-                <ComboBox x:Name="SelectedPattern" Grid.Column="1" 
-                          Margin="{StaticResource ComboBoxMargin}"
-                          ItemsSource="{Binding PatternOptions}"
-                          Text="{Binding PatternSelected}" 
-                          SelectedValue="{Binding PatternSelected}" 
-                          IsEditable="True"
-                          IsTextSearchEnabled="False"
-                          StaysOpenOnEdit="False"
-                          controls1:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                          materialDesign:HintAssist.Hint="Regular Expression"
+                <TextBox x:Name="RegularExpressionTextBox" Grid.Column="1" 
+                         Text="{Binding RegularExpression, Delay=1500, UpdateSourceTrigger=PropertyChanged}"
                           materialDesign:TextFieldAssist.HasClearButton="True"/>
                 <TextBox x:Name="SampleDataTextBox" 
                          materialDesign:HintAssist.Hint="Sample Data" 
