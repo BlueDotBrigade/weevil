@@ -886,8 +886,7 @@
 		{
 			_dialogBox.ShowGraph(
 				_engine.Selector.GetSelected(), 
-				_inclusiveFilter,
-				_engine.Analyzer.GetGraphPatternOptions());
+				_inclusiveFilter);
 		}
 
 		private void ForceGarbageCollection()
