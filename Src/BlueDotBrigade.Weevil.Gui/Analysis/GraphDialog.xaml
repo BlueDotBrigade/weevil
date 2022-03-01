@@ -1,0 +1,78 @@
+﻿<Window x:Class="BlueDotBrigade.Weevil.Gui.Analysis.GraphDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
+        mc:Ignorable="d"
+        Background="{DynamicResource MaterialDesignPaper}"
+        Title="GraphDialog" Height="450" Width="800"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="12"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
+        </Style>
+    </Window.Resources>
+    <Grid x:Name="GraphWindowLayout" 
+          FocusManager.FocusedElement="{Binding ElementName=RegularExpressionTextBox}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <lvc:CartesianChart
+            Series="{Binding Series}"
+            XAxes="{Binding XAxes}"
+            YAxes="{Binding YAxes}"
+            TooltipPosition="Bottom">
+        </lvc:CartesianChart>
+
+        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
+            <StackPanel Orientation="Vertical">
+                <TextBox
+                    x:Name="RegularExpressionTextBox" Grid.Column="1" 
+                    Text="{Binding RegularExpression, Delay=1000, UpdateSourceTrigger=PropertyChanged}"
+                    materialDesign:HintAssist.Hint="Regular Expression"
+                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                    VerticalAlignment="Center" 
+                    materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <TextBox x:Name="SampleDataTextBox" 
+                         Text="{Binding SampleData}"
+                         materialDesign:HintAssist.Hint="Sample Data"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" />
+                <TextBox x:Name="DataDetectedTextBox" 
+                         Text="{Binding DataDetected}"
+                         materialDesign:HintAssist.Hint="Data Detected"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" 
+                         IsReadOnly="True"/>
+                <Separator/>
+                <TextBox x:Name="XAxisLabelTextBox" 
+                         Text="{Binding XAxisLabel}"
+                         materialDesign:HintAssist.Hint="X-Axis"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <TextBox x:Name="YAxisLabelTextBox" 
+                         Text="{Binding YAxisLabel}"
+                         materialDesign:HintAssist.Hint="Y-Axis"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+
+                <Button Content="Update" Command="{Binding UpdateCommand}"/>
+            </StackPanel>
+        </Expander>
+    </Grid>
+</Window>

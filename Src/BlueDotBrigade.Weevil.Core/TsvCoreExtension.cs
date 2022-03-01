@@ -80,5 +80,10 @@
 		{
 			return _tableOfContents;
 		}
+
+		public IList<string> GetGraphPatternOptions()
+		{
+			return new List<string>();
+		}
 	}
 }

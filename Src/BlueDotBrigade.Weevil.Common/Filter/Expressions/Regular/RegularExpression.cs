@@ -57,15 +57,27 @@
 		{
 			return _expression.IsMatch(record.Content);
 		}
+
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record)
 		{
-			var results = new Dictionary<string, string>();
+			var results = GetKeyValuePairs(record.Content);
 
-			MatchCollection matches = _expression.Matches(record.Content);
+			if (results.Count > 0)
+			{
+				Log.Default.Write(
+					LogSeverityType.Trace,
+					$"Data found within record content. {nameof(record.LineNumber)}={record.LineNumber}, TotalMatches={results.Count}");
+			}
 
-			var unnamedGroups = 0;
-			var namedGroups = 0;
+			return results;
+		}
 
+		public IDictionary<string, string> GetKeyValuePairs(string value)
+		{
+				var results = new Dictionary<string, string>();
+
+			MatchCollection matches = _expression.Matches(value);
+			
 			var groupNames = _expression.GetGroupNames();
 
 			foreach (Match match in matches)
@@ -75,19 +87,16 @@
 					var groupValue = match.Groups[groupName].Value;
 					if (int.TryParse(groupName, out var groupNumber))
 					{
-						unnamedGroups++;
 						// For now, we only care about named groups.
 						// ... Ignore numbered groups.
 					}
 					else
 					{
-						namedGroups++;
-
 						if (results.ContainsKey(groupName))
 						{
-							throw new InvalidExpressionException(
+							throw new MatchCountException(
 								_expressionValue,
-								$"A named group should only return one matching value. Key={groupName}"
+								$"The regular expression group should match only one value. GroupName={groupName}"
 							);
 
 						}
@@ -97,13 +106,6 @@
 						}
 					}
 				}
-			}
-
-			if (unnamedGroups + namedGroups > 0)
-			{
-				Log.Default.Write(
-					LogSeverityType.Trace,
-					$"Data found within record content. {nameof(record.LineNumber)}={record.LineNumber}, UnnamedVariables={unnamedGroups}, NamedVariables={namedGroups}, TotalVariables={unnamedGroups + namedGroups}");
 			}
 
 			return results;

@@ -1,10 +1,12 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using Microsoft.Win32;
 
@@ -68,6 +70,16 @@
 
 			dialog.Show();
 	}
+
+		public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, IList<string> patternOptions)
+		{
+			var dialog = new GraphDialog(records, selectedPattern)
+			{
+				//PatternSelected = selectedPattern,
+				//PatternOptions = patternOptions,
+			};
+			dialog.Show();
+		}
 
 		public string ShowUserPrompt(string title, string userPrompt)
 		{
