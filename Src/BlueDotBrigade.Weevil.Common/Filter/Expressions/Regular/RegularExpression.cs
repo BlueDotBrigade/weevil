@@ -94,9 +94,9 @@
 					{
 						if (results.ContainsKey(groupName))
 						{
-							throw new InvalidExpressionException(
+							throw new MatchCountException(
 								_expressionValue,
-								$"A named group should only return one matching value. Key={groupName}"
+								$"The regular expression group should match only one value. GroupName={groupName}"
 							);
 
 						}

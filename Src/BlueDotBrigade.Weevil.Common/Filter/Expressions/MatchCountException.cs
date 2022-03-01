@@ -5,35 +5,35 @@
 	using System.Security.Permissions;
 
 	[Serializable]
-	public class InvalidExpressionException : Exception
+	public class MatchCountException : Exception
 	{
-		private static readonly string DefaultMessage = "The regular expression is not valid. Expression=`{0}`";
+		private static readonly string DefaultMessage = "The provided regular expression does not match the correct number of values. Expression=`{0}`";
 
-		public InvalidExpressionException(string expression)
+		public MatchCountException(string expression)
 			: base(string.Format(DefaultMessage, expression))
 		{
 			this.Expression = expression;
 		}
 
-		public InvalidExpressionException(string expression, Exception innerException)
+		public MatchCountException(string expression, Exception innerException)
 			: base(string.Format(DefaultMessage, expression), innerException)
 		{
 			this.Expression = expression;
 		}
 
-		public InvalidExpressionException(string expression, string message)
+		public MatchCountException(string expression, string message)
 			: base(message)
 		{
 			this.Expression = expression;
 		}
 
-		public InvalidExpressionException(string expression, string message, Exception innerException)
+		public MatchCountException(string expression, string message, Exception innerException)
 			: base(message, innerException)
 		{
 			this.Expression = expression;
 		}
 
-		protected InvalidExpressionException(SerializationInfo info, StreamingContext context)
+		protected MatchCountException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 			this.Expression = info.GetString(nameof(this.Expression));
