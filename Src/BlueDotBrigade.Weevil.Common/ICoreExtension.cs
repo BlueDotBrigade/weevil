@@ -25,7 +25,5 @@
 		IList<MonikerActivator> GetMonikerActivators(ContextDictionary context);
 		IDictionary<string, string> GetFilterAliases(ContextDictionary context);
 		TableOfContents BuildTableOfContents(StreamReader logFileReader);
-
-		IList<string> GetGraphPatternOptions();
 	}
 }

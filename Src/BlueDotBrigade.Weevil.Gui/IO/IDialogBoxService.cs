@@ -15,7 +15,7 @@
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 
-		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, IList<string> patternOptions);
+		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern);
 		
 		bool TryShowGoTo(string defaultValue, out string userValue);
 	}

@@ -71,13 +71,9 @@
 			dialog.Show();
 	}
 
-		public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, IList<string> patternOptions)
+		public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern)
 		{
-			var dialog = new GraphDialog(records, selectedPattern)
-			{
-				//PatternSelected = selectedPattern,
-				//PatternOptions = patternOptions,
-			};
+			var dialog = new GraphDialog(records, selectedPattern);
 			dialog.Show();
 		}
 
