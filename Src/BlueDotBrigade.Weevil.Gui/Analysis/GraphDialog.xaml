@@ -6,8 +6,6 @@
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
-        xmlns:controls1="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
-        xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Gui.Analysis"
         mc:Ignorable="d"
         Background="{DynamicResource MaterialDesignPaper}"
         Title="GraphDialog" Height="450" Width="800"
@@ -41,24 +39,39 @@
 
         <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
             <StackPanel Orientation="Vertical">
-                <TextBox x:Name="XAxisLabelTextBox" 
-                         materialDesign:HintAssist.Hint="X-Axis" 
-                         Text="{Binding XAxisLabel, Delay=1500, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBox x:Name="YAxisLabelTextBox" 
-                         materialDesign:HintAssist.Hint="Y-Axis" 
-                         Text="{Binding YAxisLabel, Delay=1500, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBox x:Name="RegularExpressionTextBox" Grid.Column="1" 
-                         Text="{Binding RegularExpression, Delay=1500, UpdateSourceTrigger=PropertyChanged}"
-                          materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <TextBox
+                    x:Name="RegularExpressionTextBox" Grid.Column="1" 
+                    Text="{Binding RegularExpression, Delay=1000, UpdateSourceTrigger=PropertyChanged}"
+                    materialDesign:HintAssist.Hint="Regular Expression"
+                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                    VerticalAlignment="Center" 
+                    materialDesign:TextFieldAssist.HasClearButton="True"/>
                 <TextBox x:Name="SampleDataTextBox" 
-                         materialDesign:HintAssist.Hint="Sample Data" 
-                         Text="{Binding SampleData}"/>
-                <Button Content="Detect Data" Click="OnDetectData"/>
+                         Text="{Binding SampleData}"
+                         materialDesign:HintAssist.Hint="Sample Data"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" />
                 <TextBox x:Name="DataDetectedTextBox" 
-                         materialDesign:HintAssist.Hint="Data Detected" 
-                         IsReadOnly="True"
-                         Text="{Binding DataDetected}"/>
-                <Button Content="Update" Click="OnUpdate"/>
+                         Text="{Binding DataDetected}"
+                         materialDesign:HintAssist.Hint="Data Detected"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" 
+                         IsReadOnly="True"/>
+                <Separator/>
+                <TextBox x:Name="XAxisLabelTextBox" 
+                         Text="{Binding XAxisLabel}"
+                         materialDesign:HintAssist.Hint="X-Axis"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <TextBox x:Name="YAxisLabelTextBox" 
+                         Text="{Binding YAxisLabel}"
+                         materialDesign:HintAssist.Hint="Y-Axis"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+
+                <Button Content="Update" Command="{Binding UpdateCommand}"/>
             </StackPanel>
         </Expander>
     </Grid>

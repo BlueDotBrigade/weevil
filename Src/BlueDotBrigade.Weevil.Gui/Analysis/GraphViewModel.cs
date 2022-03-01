@@ -5,13 +5,18 @@
 	using System.Collections.Immutable;
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.Globalization;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using System.ServiceModel.PeerResolvers;
 	using System.Windows;
+	using System.Windows.Input;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
+	using BlueDotBrigade.Weevil.Gui.Input;
 	using LiveChartsCore;
 	using LiveChartsCore.Defaults;
 	using LiveChartsCore.Kernel.Sketches;
@@ -20,8 +25,9 @@
 	public class GraphViewModel : INotifyPropertyChanged
 	{
 		private static readonly string DefaultSeriesName = "Series";
-		private static readonly string DefaultXAxisLabel = "Value Recorded At";
+		private static readonly string DefaultXAxisLabel = "Time";
 		private static readonly string DefaultYAxisLabel = "Y-Axis";
+		private static readonly string FloatFormat = "0.000";
 
 		private static readonly NumberStyles NumberStyle =
 			NumberStyles.AllowLeadingWhite |
@@ -37,8 +43,10 @@
 		private IEnumerable<ICartesianAxis> _xAxes;
 		private IEnumerable<ICartesianAxis> _yAxes;
 
-		private string _regularExpression;
+		private string _xAxisLabel;
+		private string _yAxisLabel;
 
+		private string _regularExpression;
 		private string _dataDetected;
 		private string _sampleData;
 
@@ -48,25 +56,16 @@
 
 			this.RegularExpression = regularExpression ?? string.Empty;
 
-			_sampleData = records.Any()
+			this.SampleData = records.Any()
 				? _records[0].Content
 				: string.Empty;
 
-			this.DataDetected = string.Empty;
-			if (records.Any())
-			{
-				IDictionary<string, string> matches = new RegularExpression(this.RegularExpression)
-					.GetKeyValuePairs(records.First());
+			this.DataDetected = GetDetectedData(this.RegularExpression, this.SampleData);
 
-				if (matches.Any())
-				{
-					this.DataDetected = matches.First().Value;
-				}
-			}
+			Update(true);
 
-			this.Series = GetSeries(records, new RegularExpression(this.RegularExpression));
-			this.XAxes = GetXAxes(DefaultXAxisLabel);
-			this.YAxes = GetYAxes(DefaultYAxisLabel);
+			this.XAxisLabel = this.XAxes.First().Name;
+			this.YAxisLabel = this.YAxes.First().Name;
 		}
 
 		public IEnumerable<ISeries> Series
@@ -103,11 +102,15 @@
 		{
 			get
 			{
-				return this.XAxes.First().Name;
+				return _xAxisLabel;
 			}
 			set
 			{
-				this.XAxes = GetXAxes(value);
+				if (_xAxisLabel != value)
+				{
+					_xAxisLabel = value;
+					RaisePropertyChanged(nameof(this.XAxisLabel));
+				}
 			}
 		}
 
@@ -115,11 +118,15 @@
 		{
 			get
 			{
-				return this.YAxes.First().Name;
+				return _yAxisLabel;
 			}
 			set
 			{
-				this.YAxes = GetYAxes(value);
+				if (_yAxisLabel != value)
+				{
+					_yAxisLabel = value;
+					RaisePropertyChanged(nameof(this.YAxisLabel));
+				}
 			}
 		}
 
@@ -128,8 +135,11 @@
 			get => _dataDetected;
 			set
 			{
-				_dataDetected = value;
-				RaisePropertyChanged(nameof(this.DataDetected));
+				if (_dataDetected != value)
+				{
+					_dataDetected = value;
+					RaisePropertyChanged(nameof(this.DataDetected));
+				}
 			}
 		}
 
@@ -138,8 +148,11 @@
 			get => _sampleData;
 			set
 			{
-				_sampleData = value;
-				RaisePropertyChanged(nameof(this.SampleData));
+				if (_sampleData != value)
+				{
+					_sampleData = value;
+					RaisePropertyChanged(nameof(this.SampleData));
+				}
 			}
 		}
 
@@ -148,8 +161,78 @@
 			get => _regularExpression;
 			set
 			{
-				_regularExpression = value;
-				RaisePropertyChanged(nameof(this.RegularExpression));
+				if (_regularExpression != value)
+				{
+					_regularExpression = value;
+					RaisePropertyChanged(nameof(this.RegularExpression));
+
+					this.DataDetected = GetDetectedData(this.RegularExpression, this.SampleData);
+				}
+			}
+		}
+
+		public ICommand UpdateCommand => new UiBoundCommand(() => Update(false));
+
+		private string GetDetectedData(string regularExpression, string inputString)
+		{
+			var result = string.Empty;
+
+			try
+			{
+				if (TryGetMatch(
+					    regularExpression,
+					    inputString,
+					    out var detectedValue))
+				{
+					return detectedValue.ToString(FloatFormat);
+				}
+				else
+				{
+					return string.Empty;
+				}
+			}
+			catch (InvalidExpressionException e)
+			{
+				Log.Default.Write(LogSeverityType.Error, e, "Unexpected error occurred while trying to parse sample data for graph.");
+				result = "(invalid expression)";
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(LogSeverityType.Error, e, "Unexpected error occurred while trying to parse sample data for graph.");
+				result = "(unknown)";
+			}
+
+			return result;
+		}
+
+		private void Update(bool isInitializing)
+		{
+			try
+			{
+				this.Series = GetSeries(_records, this.RegularExpression);
+
+				this.XAxes = GetXAxes(this.XAxisLabel);
+				this.YAxes = GetYAxes(isInitializing ? this.Series.First().Name : this.YAxisLabel);
+			}
+			catch (MatchCountException e)
+			{
+				var message =
+					$"{e.Message}\r\n\r\n" +
+					$"Expression: {e.Expression}";
+				Log.Default.Write(LogSeverityType.Error, message);
+				MessageBox.Show(message, "Regular Expression Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+			catch (InvalidExpressionException e)
+			{
+				var reason = e.InnerException != null
+					? e.InnerException.Message
+					: "Unknown";
+
+				var message =
+					$"{e.Message}\r\n\r\n" +
+					$"Reason: {reason}";
+				Log.Default.Write(LogSeverityType.Error, e, "Unexpected error occurred while trying to parse series.");
+				MessageBox.Show(message, "Parsing Error", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 		}
 
@@ -166,7 +249,7 @@
 			{
 				new Axis
 				{
-					Name = name,
+					Name = name ?? DefaultXAxisLabel,
 					Labeler = point => new DateTime((long)point).ToString("hh:mm:ss"),
 					LabelsRotation = 15,
 
@@ -186,29 +269,35 @@
 			{
 				new Axis
 				{
-					Name = name
+					Name = name ?? DefaultYAxisLabel,
 				}
 			};
 		}
-		private static bool TryGetMatch(RegularExpression expression, IRecord record, out float value)
+
+		private static bool TryGetMatch(string regularExpression, string inputString, out float value)
 		{
 			var wasSuccessful = false;
 			value = float.NaN;
 
-			var matches = expression.GetKeyValuePairs(record);
-
-			if (matches.Any())
+			if (!string.IsNullOrEmpty(regularExpression) &&
+			    !string.IsNullOrEmpty(inputString))
 			{
-				if (float.TryParse(matches.First().Value, NumberStyle, CultureInfo.InvariantCulture, out value))
+				var expression = new RegularExpression(regularExpression);
+				IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
+
+				if (matches.Any())
 				{
-					wasSuccessful = true;
+					if (float.TryParse(matches.First().Value, NumberStyle, CultureInfo.InvariantCulture, out value))
+					{
+						wasSuccessful = true;
+					}
 				}
 			}
 
 			return wasSuccessful;
 		}
 
-		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, RegularExpression expression)
+		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression)
 		{
 			var seriesName = DefaultSeriesName;
 			var values = new ObservableCollection<DateTimePoint>();
@@ -217,17 +306,23 @@
 			{
 				foreach (IRecord record in records)
 				{
-					if (TryGetMatch(expression, record, out var value))
+					try
 					{
-						values.Add(new DateTimePoint(record.CreatedAt, value));
+						if (TryGetMatch(regularExpression, record.Content, out var value))
+						{
+							values.Add(new DateTimePoint(record.CreatedAt, value));
+						}
+					}
+					catch (InvalidExpressionException e)
+					{
+						throw new InvalidExpressionException(
+							e.Expression,
+							$"Cannot parse the record on line {record.LineNumber}.", 
+							e);
 					}
 				}
 
-				var matches = expression.GetKeyValuePairs(records[0]);
-				if (matches.Any())
-				{
-					seriesName = matches.First().Key;
-				}
+				seriesName = GetSeriesName(records.First().Content, new RegularExpression(regularExpression));
 			}
 
 			return new ISeries[]
@@ -237,9 +332,22 @@
 						Name = seriesName,
 						Values = values,
 						GeometrySize = 10,
-						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue:0.000}",
+						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
 					}
 			};
+		}
+
+		private static string GetSeriesName(string inputString, RegularExpression expression)
+		{
+			var seriesName = DefaultSeriesName;
+
+			var matches = expression.GetKeyValuePairs(inputString);
+			if (matches.Any())
+			{
+				seriesName = matches.First().Key;
+			}
+
+			return seriesName;
 		}
 	}
 }
