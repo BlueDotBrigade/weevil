@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;

@@ -45,7 +45,8 @@
                     materialDesign:HintAssist.Hint="Regular Expression"
                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                     VerticalAlignment="Center" 
-                    materialDesign:TextFieldAssist.HasClearButton="True"/>
+                    materialDesign:TextFieldAssist.HasClearButton="True"
+                    controls:TextBoxBehavior.AutoSelectEnabled="True"/>
                 <TextBox x:Name="SampleDataTextBox" 
                          Text="{Binding SampleData}"
                          materialDesign:HintAssist.Hint="Sample Data"
@@ -63,13 +64,15 @@
                          materialDesign:HintAssist.Hint="X-Axis"
                          Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                          VerticalAlignment="Center" 
-                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
                 <TextBox x:Name="YAxisLabelTextBox" 
                          Text="{Binding YAxisLabel}"
                          materialDesign:HintAssist.Hint="Y-Axis"
                          Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                          VerticalAlignment="Center" 
-                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
 
                 <Button Content="Update" Command="{Binding UpdateCommand}"/>
             </StackPanel>
