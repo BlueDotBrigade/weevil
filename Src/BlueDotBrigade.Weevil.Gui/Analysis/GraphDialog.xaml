@@ -7,14 +7,15 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         mc:Ignorable="d"
-        Background="{DynamicResource MaterialDesignPaper}"
-        Title="GraphDialog" Height="450" Width="800"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Title="GraphDialog" 
+        Height="450" Width="800" WindowState="Maximized"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="12"
-        FontFamily="{materialDesign:MaterialDesignFont}">
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        Background="{DynamicResource MaterialDesignPaper}">
     <Window.Resources>
-        <Style TargetType="TextBox">
+        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
             <Setter Property="Margin" Value="5" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
@@ -37,44 +38,47 @@
             TooltipPosition="Bottom">
         </lvc:CartesianChart>
 
-        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Up" IsExpanded="True">
+        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Down" IsExpanded="True">
             <StackPanel Orientation="Vertical">
                 <TextBox
                     x:Name="RegularExpressionTextBox" Grid.Column="1" 
                     Text="{Binding RegularExpression, Delay=1000, UpdateSourceTrigger=PropertyChanged}"
                     materialDesign:HintAssist.Hint="Regular Expression"
-                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                     VerticalAlignment="Center" 
                     materialDesign:TextFieldAssist.HasClearButton="True"
                     controls:TextBoxBehavior.AutoSelectEnabled="True"/>
                 <TextBox x:Name="SampleDataTextBox" 
                          Text="{Binding SampleData}"
                          materialDesign:HintAssist.Hint="Sample Data"
-                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                         VerticalAlignment="Center" />
-                <TextBox x:Name="DataDetectedTextBox" 
-                         Text="{Binding DataDetected}"
-                         materialDesign:HintAssist.Hint="Data Detected"
-                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                          VerticalAlignment="Center" 
-                         IsReadOnly="True"/>
+                         TextWrapping="WrapWithOverflow"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox x:Name="DataDetectedTextBox" 
+                             Width="auto"
+                             Text="{Binding DataDetected}"
+                             materialDesign:HintAssist.Hint="Data Detected"
+                             VerticalAlignment="Center" 
+                             IsReadOnly="True"/>
+                    <TextBox x:Name="UnitWidthTextBox" 
+                             Width="auto"
+                             Text="{Binding TooltipWidth}"
+                             materialDesign:HintAssist.Hint="Tool Tip Width"
+                             VerticalAlignment="Center" />
+                </StackPanel>
                 <Separator/>
                 <TextBox x:Name="XAxisLabelTextBox" 
                          Text="{Binding XAxisLabel}"
                          materialDesign:HintAssist.Hint="X-Axis"
-                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          controls:TextBoxBehavior.AutoSelectEnabled="True"/>
                 <TextBox x:Name="YAxisLabelTextBox" 
                          Text="{Binding YAxisLabel}"
                          materialDesign:HintAssist.Hint="Y-Axis"
-                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                          VerticalAlignment="Center" 
-                         materialDesign:TextFieldAssist.HasClearButton="True"
-                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
 
-                <Button Content="Update" Command="{Binding UpdateCommand}"/>
+                <Button Content="Update" Command="{Binding UpdateCommand}" Margin="5"/>
             </StackPanel>
         </Expander>
     </Grid>
