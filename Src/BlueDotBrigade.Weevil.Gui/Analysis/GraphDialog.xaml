@@ -50,7 +50,8 @@
                 <TextBox x:Name="SampleDataTextBox" 
                          Text="{Binding SampleData}"
                          materialDesign:HintAssist.Hint="Sample Data"
-                         VerticalAlignment="Center" />
+                         VerticalAlignment="Center" 
+                         TextWrapping="WrapWithOverflow"/>
                 <TextBox x:Name="DataDetectedTextBox" 
                          Text="{Binding DataDetected}"
                          materialDesign:HintAssist.Hint="Data Detected"
