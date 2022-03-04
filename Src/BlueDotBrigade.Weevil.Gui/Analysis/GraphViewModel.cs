@@ -49,11 +49,13 @@
 		private string _regularExpression;
 		private string _dataDetected;
 		private string _sampleData;
+		private int _tooltipWidth;
 
 		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression)
 		{
 			_records = records;
 
+			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
 
 			this.SampleData = records.Any()
@@ -156,6 +158,22 @@
 			}
 		}
 
+		public int TooltipWidth
+		{
+			get => _tooltipWidth;
+			set
+			{
+				if (_tooltipWidth != value)
+				{
+					if (value > 0)
+					{
+						_tooltipWidth = value;
+						RaisePropertyChanged(nameof(this.TooltipWidth));
+					}
+				}
+			}
+		}
+
 		public string RegularExpression
 		{
 			get => _regularExpression;
@@ -211,7 +229,7 @@
 			{
 				this.Series = GetSeries(_records, this.RegularExpression);
 
-				this.XAxes = GetXAxes(this.XAxisLabel);
+				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
 				this.YAxes = GetYAxes(isInitializing ? this.Series.First().Name : this.YAxisLabel);
 			}
 			catch (MatchCountException e)
@@ -243,7 +261,7 @@
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		private static IEnumerable<ICartesianAxis> GetXAxes(string name)
+		private static IEnumerable<ICartesianAxis> GetXAxes(string name, TimeSpan unitWidth)
 		{
 			return new Axis[]
 			{
@@ -255,7 +273,7 @@
 
 					//// in this case we want our columns with a width of 1 day, we can get that number
 					//// using the following syntax
-					UnitWidth = TimeSpan.FromSeconds(10).Ticks, // mark
+					UnitWidth = unitWidth.Ticks, // mark
 
 					//// The MinStep property forces the separator to be greater than 1 day.
 					//MinStep = TimeSpan.FromSeconds(60).Ticks // mark

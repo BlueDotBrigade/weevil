@@ -52,11 +52,19 @@
                          materialDesign:HintAssist.Hint="Sample Data"
                          VerticalAlignment="Center" 
                          TextWrapping="WrapWithOverflow"/>
-                <TextBox x:Name="DataDetectedTextBox" 
-                         Text="{Binding DataDetected}"
-                         materialDesign:HintAssist.Hint="Data Detected"
-                         VerticalAlignment="Center" 
-                         IsReadOnly="True"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox x:Name="DataDetectedTextBox" 
+                             Width="auto"
+                             Text="{Binding DataDetected}"
+                             materialDesign:HintAssist.Hint="Data Detected"
+                             VerticalAlignment="Center" 
+                             IsReadOnly="True"/>
+                    <TextBox x:Name="UnitWidthTextBox" 
+                             Width="auto"
+                             Text="{Binding TooltipWidth}"
+                             materialDesign:HintAssist.Hint="Tool Tip Width"
+                             VerticalAlignment="Center" />
+                </StackPanel>
                 <Separator/>
                 <TextBox x:Name="XAxisLabelTextBox" 
                          Text="{Binding XAxisLabel}"
