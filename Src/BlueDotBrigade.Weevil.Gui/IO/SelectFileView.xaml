@@ -4,18 +4,34 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.IO"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="SelectFileView" Height="450" Width="800"
-        d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:SelectFileViewModel}">
+        d:DesignHeight="450" d:DesignWidth="800"
+        d:DataContext="{d:DesignInstance local:SelectFileViewModel}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="12"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        Background="{DynamicResource MaterialDesignPaper}">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
+            <RowDefinition Height="10" />
 			<RowDefinition Height="*" />
 			<RowDefinition Height="40" />
 		</Grid.RowDefinitions>
 		<TextBlock>Select the file you want to open:</TextBlock>
-		<ListView Grid.Row="1" ItemsSource="{Binding Filenames}" SelectedItem="{Binding SelectedFilename}" />
-		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        <ListBox  Grid.Row="2" 
+                  ItemsSource="{Binding Filenames}"
+                  SelectedItem="{Binding SelectedFilename}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding }"></TextBlock>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
 			<StackPanel.Resources>
 				<Style TargetType="Button">
 					<Setter Property="Width" Value="200" />
