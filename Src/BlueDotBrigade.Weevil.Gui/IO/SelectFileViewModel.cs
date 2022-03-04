@@ -1,21 +1,36 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
+	using System.ComponentModel;
+	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using Microsoft.Practices.Prism.Commands;
 	using Microsoft.Practices.Prism.Mvvm;
 
-	public class SelectFileViewModel : BindableBase
+	public class SelectFileViewModel : BindableBase, INotifyPropertyChanged
 	{
 		private DelegateCommand okCommand;
 		private string selectedFilename;
 		private DelegateCommand cancelCommand;
+		private string[] _filenames;
 
 		public SelectFileViewModel(string[] filenames)
 		{
-			this.Filenames = filenames;
+			this.Filenames = filenames ?? throw new ArgumentNullException(nameof(filenames));
 		}
 
-		public string[] Filenames { get; }
+		public string[] Filenames
+		{
+			get
+			{
+				return _filenames;
+			}
+			set
+			{
+				_filenames = value.Where(x => !x.ToUpper().EndsWith(".LOG.XML")).ToArray();
+				RaisePropertyChanged(nameof(Filenames));
+			}
+		}
 
 		public string SelectedFilename
 		{
@@ -29,6 +44,13 @@
 
 		public DelegateCommand OkCommand => okCommand ?? (okCommand = new DelegateCommand(Ok, CanOk));
 		public DelegateCommand CancelCommand => cancelCommand ?? (cancelCommand = new DelegateCommand(Cancel));
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
 
 		private void Cancel()
 		{
