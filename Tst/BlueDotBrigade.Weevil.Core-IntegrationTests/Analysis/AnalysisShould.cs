@@ -11,12 +11,6 @@
 	[TestClass]
 	public class AnalysisShould
 	{
-		private static IUserDialog GetUserDialog()
-		{
-			var userDialog = new Mock<IUserDialog>();
-			return userDialog.Object;
-		}
-
 		[TestMethod]
 		public void FlagRecordsWhenDataTransitionDetected()
 		{
@@ -64,7 +58,7 @@
 
 			engine
 				.Analyzer
-				.Analyze(AnalysisType.DetectDataTransition, GetUserDialog());
+				.Analyze(AnalysisType.DetectDataTransition);
 
 			foreach (IRecord record in engine.Filter.Results)
 			{
@@ -93,7 +87,15 @@
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(dectectMinuteIncreasing));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges);
+			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
+			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
+			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
+			var userDialog = new Mock<IUserDialog>();
+			userDialog.Setup(x => x.ShowUserPrompt(
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>())).Returns("Ascending");
+			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, userDialog.Object);
 
 			var flaggedRecords = engine
 				.Filter.Results
@@ -114,7 +116,15 @@
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectSecondRollover));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges);
+			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
+			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
+			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
+			var userDialog = new Mock<IUserDialog>();
+			userDialog.Setup(x => x.ShowUserPrompt(
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>())).Returns("Ascending"); 
+			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, userDialog.Object);
 
 			var flaggedRecords = engine
 				.Filter.Results
