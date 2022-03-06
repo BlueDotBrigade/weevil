@@ -46,5 +46,17 @@
 
 			Assert.IsTrue(originalContent.Length == formattedResult.Length);
 		}
+
+		[TestMethod]
+		public void Format_CallStackWithPaths_ReturnsCallStackWithoutPaths()
+		{
+			var originalContent = InputData.GetAsString();
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
+			record.Metadata.IsMultiLine = true;
+
+			var formattedResult = new SimpleCallStackFormatter().Format(record);
+
+			Assert.IsTrue(originalContent.Length > formattedResult.Length);
+		}
 	}
 }

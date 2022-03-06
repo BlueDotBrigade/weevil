@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Blue Dot Brigade")]
 [assembly: AssemblyProduct("BlueDotBrigade.Weevil.IntegrationTest")]
-[assembly: AssemblyCopyright("Copyright © 2018")]
+[assembly: AssemblyCopyright("Copyright © 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -14,5 +14,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("d52fd49c-67d4-4d57-9b8e-806514b69e51")]
 
-[assembly: AssemblyVersion("2.8.1.*")]
-[assembly: AssemblyFileVersion("2.8.1")]
+[assembly: AssemblyVersion("2.9.0.*")]
+[assembly: AssemblyFileVersion("2.9.0")]

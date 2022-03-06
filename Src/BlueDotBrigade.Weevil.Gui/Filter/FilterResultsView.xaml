@@ -54,7 +54,6 @@
       <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
       <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
       <KeyBinding Key="T" Modifiers="Control" Command="{Binding ToggleFiltersCommand}" />
-      <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
       <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
       <KeyBinding Key="R" Modifiers="Control" Command="{Binding ShowRegExToolCommand}" />
       <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
@@ -67,15 +66,17 @@
 
       <KeyBinding Key="F5" Modifiers="Control" Command="{Binding ReloadCommand}" />
 
+      <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
+      <KeyBinding Key="G" Modifiers="Control+Shift" Command="{Binding GraphDataCommand}" />
       <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
       <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
-      <KeyBinding Key="F10" Command="{Binding DetectTimeGapUiOnlyCommand}" />
-      <KeyBinding Key="F11" Command="{Binding DetectTimeGapCommand}" />
+        <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
+        <KeyBinding Key="F11" Command="{Binding MeasureElapsedTimeCommand}" />
 
       <KeyBinding Key="P" Modifiers="Control" Command="{Binding ToggleIsPinnedCommand}"/>
       <KeyBinding Key="Subtract" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
-        <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
-        <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
+      <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
+      <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
       <KeyBinding Key="OemPlus" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
         <KeyBinding Key="Subtract" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
         <KeyBinding Key="Add" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
@@ -241,8 +242,7 @@
                </MenuItem>
                <Separator/>
                <MenuItem Header="Show...">
-                  <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
-                  <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
+                   <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
                   <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
                </MenuItem>
                <Separator/>
@@ -292,14 +292,16 @@
                   <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
                </MenuItem>
                <Separator/>
-               <MenuItem Header="Analyzers...">
-                  <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
-                  <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
-                  <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
-                  <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
+                    <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+               <MenuItem Header="Graph Data" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
+                    <MenuItem Header="Analyzers...">
+                      <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
+                      <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
+                      <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
+                      <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
                   <Separator/>
-                  <MenuItem Header="Detect Time Gap (UI Only)" Command="{Binding DetectTimeGapUiOnlyCommand}" InputGestureText="F10" />
-                  <MenuItem Header="Detect Time Gap" Command="{Binding DetectTimeGapCommand}" InputGestureText="F11" />
+                        <MenuItem Header="Measure Elapsed Time (UI Thread)" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
+                        <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
                </MenuItem>
                <MenuItem Header="Custom Analyzers..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
@@ -652,69 +654,67 @@
                      </Image.Style>
                   </Image>
                </materialDesign:Badged>
-               <materialDesign:PopupBox
+                    <materialDesign:PopupBox
                   StaysOpen="True"
                   Cursor="Hand" 
-                  Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"
-                  IsPopupOpen="{Binding IsChecked, ElementName=NewReleaseButton, Mode=TwoWay}">
-                  <materialDesign:PopupBox.ToggleContent>
-                     <Image Height="24" Width="24" 
+                  Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <materialDesign:PopupBox.ToggleContent>
+                            <Image Height="24" Width="24" 
                             Source="/Resources/Icons/NewReleaseAvailable-24.png"
                             ToolTip="New version is available! Click for details."/>
-                  </materialDesign:PopupBox.ToggleContent>
-                  <Grid Margin="20">
-                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                     </Grid.ColumnDefinitions>
-                     <Grid.RowDefinitions>
-                        <RowDefinition Height="20"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="20"/>
-                        <RowDefinition Height="Auto"/>
-                     </Grid.RowDefinitions>
-                     <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300" FontSize="14">
-                        <Hyperlink 
-                           NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}" 
-                           documents:HyperlinkBehavior.OpenInBrowser="True"
-                           Foreground="{StaticResource MaterialDesignDarkForeground}">
-                           <TextBlock Text="{Binding NewReleaseDetails.LatestReleaseVersion}"/>
-                        </Hyperlink>
-                        (&quot;
-                        <TextBlock Text="{Binding NewReleaseDetails.CodeName}"/>
-                        &quot;)
+                        </materialDesign:PopupBox.ToggleContent>
+                        <Grid Margin="20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300" FontSize="16">
+                                New Release Available
+                            </TextBlock>
+                            <TextBlock Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" MaxWidth="300">
+                                 <Run Text="This version of"/>
+                                 <Hyperlink 
+                                    NavigateUri="{Binding NewReleaseDetails.InstallerUrl}" 
+                                    documents:HyperlinkBehavior.OpenInBrowser="True"
+                                    Foreground="{StaticResource MaterialDesignDarkForeground}">
+                                    Weevil
+                                </Hyperlink>
+                                <Run Text="is no longer supported, and should be upgraded to"/>
+                                <TextBlock Text="{Binding NewReleaseDetails.LatestRelease}"/>
+                                (&quot;
+                                <TextBlock Text="{Binding NewReleaseDetails.CodeName}"/>
+                                &quot;).
+                            </TextBlock>
+                            <TextBlock Grid.Column="0" Grid.Row="4" TextWrapping="Wrap" MaxWidth="300">
+                                <Run Text="{Binding NewReleaseDetails.Description}"/>
+                                <TextBlock  TextWrapping="Wrap" MaxWidth="300"/>
+                                <Run Text="For more information, please see the"/>
+                                 <Hyperlink 
+                                     NavigateUri="{Binding NewReleaseDetails.ChangeLogUrl}" 
+                                     documents:HyperlinkBehavior.OpenInBrowser="True"
+                                     Foreground="{StaticResource MaterialDesignDarkForeground}">
+                                     <TextBlock Text="release notes"/>
+                                </Hyperlink>
+                                <Run Text="."/>
                      </TextBlock>
-                     <TextBlock Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" MaxWidth="300">
-                        <TextBlock.Text>
-                           <MultiBinding StringFormat="{}{0}">
-                              <Binding Path="NewReleaseDetails.Description" />
-                           </MultiBinding>
-                        </TextBlock.Text>
-                     </TextBlock>
-                     <Separator Grid.Column="0" Grid.Row="2"/>
-                     <TextBlock Grid.Column="0" Grid.Row="3" TextWrapping="Wrap" MaxWidth="300">
-                         Previous versions of Weevil are now obsolete. Please 
-                         <Hyperlink 
-                           NavigateUri="{Binding NewReleaseDetails.InstallerUrl}"
-                           documents:HyperlinkBehavior.OpenInBrowser="True"
-                           Foreground="{StaticResource MaterialDesignDarkForeground}">
-                           <TextBlock Text="download"/>
-                        </Hyperlink>
-                         version 
-                         <TextBlock Text="{Binding NewReleaseDetails.LatestReleaseVersion}"/>
-                         now!
-                     </TextBlock>
-                     <Button Grid.Row="5"
+                            <Button Grid.Row="6"
                         Command="{x:Static materialDesign:PopupBox.ClosePopupCommand}"
                         Style="{StaticResource  MaterialDesignRaisedButton}"
                         Margin="{StaticResource ButtonMargin}"
                         Width="{StaticResource ButtonWidth}">
-                        Close
-                     </Button>
-                  </Grid>
-               </materialDesign:PopupBox>
-            </StackPanel>
+                                Close
+                            </Button>
+                        </Grid>
+                    </materialDesign:PopupBox>
+                </StackPanel>
          </StatusBarItem>
          <Separator Grid.Column="13" />
          <StatusBarItem Grid.Column="14">

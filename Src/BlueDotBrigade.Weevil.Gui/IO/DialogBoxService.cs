@@ -1,10 +1,12 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using Microsoft.Win32;
 
@@ -69,6 +71,12 @@
 			dialog.Show();
 	}
 
+		public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern)
+		{
+			var dialog = new GraphDialog(records, selectedPattern);
+			dialog.Show();
+		}
+
 		public string ShowUserPrompt(string title, string userPrompt)
 		{
 			return ShowUserPrompt(title, userPrompt, string.Empty);
@@ -110,10 +118,11 @@
 			return wasSuccessful;
 		}
 
-		public bool TryShowFind(string defaultValue, out bool findNext, out string findText)
+		public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out string findText)
 		{
 			var wasSuccessful = false;
 
+			isCaseSensitive = false;
 			findText = String.Empty;
 			findNext = true;
 
@@ -121,9 +130,11 @@
 
 			if (dialog.ShowDialog() == true)
 			{
-				wasSuccessful = true;
+				isCaseSensitive = dialog.IsCaseSensitive;
 				findText = dialog.UserInput;
 				findNext = dialog.FindNext;
+
+				wasSuccessful = true;
 			}
 
 			return wasSuccessful;

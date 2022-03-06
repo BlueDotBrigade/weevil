@@ -89,6 +89,7 @@
 		private FilterCriteria _previousFilterCriteria;
 
 		private string _findText;
+		private bool _findIsCaseSensitive;
 
 		private FilterType _currentfilterType;
 		private IFilterCriteria _currentfilterCriteria;
@@ -120,6 +121,7 @@
 			_previousFilterCriteria = FilterCriteria.None;
 
 			_findText = string.Empty;
+			_findIsCaseSensitive = false;
 
 			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
@@ -880,6 +882,13 @@
 			}
 		}
 
+		private void GraphData()
+		{
+			_dialogBox.ShowGraph(
+				_engine.Selector.GetSelected(), 
+				_inclusiveFilter);
+		}
+
 		private void ForceGarbageCollection()
 		{
 			GC.Collect(3, GCCollectionMode.Forced, true, true);
@@ -957,7 +966,7 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(_findText, out var findNext, out _findText))
+			if (_dialogBox.TryShowFind(_findText, out _findIsCaseSensitive, out var findNext, out _findText))
 			{
 				if (findNext)
 				{
@@ -975,10 +984,10 @@
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results. Value={_findText}",
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
 					() => _engine
 						.Navigate
-						.NextContent(_findText)
+						.NextContent(_findText, _findIsCaseSensitive)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
@@ -988,10 +997,10 @@
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results. Value={_findText}",
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
 					() => _engine
 						.Navigate
-						.PreviousContent(_findText)
+						.PreviousContent(_findText, _findIsCaseSensitive)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}

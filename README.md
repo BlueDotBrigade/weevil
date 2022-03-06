@@ -6,12 +6,12 @@
    - [Navigation](#navigation)
    - [Analysis](#analysis)
    - [Plugin Architecture](#plugin-architecture)
-- [How to use Weevil?](#how-to-use-weevil)
+- [Get Started](#get-started)
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
-- [Source Code](#source-code)
+- [Development](#development)
+   - [Guidelines](#guidelines)
    - [Compiling](#compiling)
-   - [Development](#development)
 
 ## What is Weevil?
 
@@ -26,7 +26,7 @@ For a list of the latest features, please refer to the [change log](https://gith
 
 1. Supports record-level comments.
 2. Persisted State
-   - Filter history, user comments, and other metadata is automatically loaded when a log file is opened.
+   - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
 3. All operations are non-destructive; the original log file will not be modified.
 
@@ -78,6 +78,8 @@ For a list of the latest features, please refer to the [change log](https://gith
    - `Comments` field is updated when the matching value is lower that the previously detected value.
    - `Flagged` field is set to `True` for matching records.
    - Example: firmware's uptime value has reset to zero
+5. Charts:
+   - Regular expression _named groups_ can now be used to create a line graph.
 
 ### Plugin Architecture
 
@@ -87,7 +89,7 @@ Realize the greatest value by creating a business-domain specific *Weevil* plug-
 2. log file analyzers
 3. dashboard insight
 
-## How to use Weevil?
+## Get Started
 
 ### WPF Application
 
@@ -130,7 +132,7 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 }
 ```
 
-## Source Code
+## Development
 
 | Attribute | Description |
 | --- | --- |
@@ -141,6 +143,10 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code. |
 | [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the repository was last updated. |
 
+### Guidelines
+
+- When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
+
 ### Compiling
 
 The following steps outline how to build Weevil's WPF application:
@@ -149,12 +155,7 @@ The following steps outline how to build Weevil's WPF application:
 2. If you have implemented a custom *Weevil* plugin:
    - Prior to starting Visual Studio, create the following Windows [environment variable][EnvironmentVariable]:
       - `%WEEVIL_PLUGINS_PATH%` which refers to the directory where the Weevil plugin assembly (`*.dll`) can be found.
-3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`.
-
-### Development
-
-- When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
-
+3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
 
 [InstallationGuide]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/InstallationGuide.md

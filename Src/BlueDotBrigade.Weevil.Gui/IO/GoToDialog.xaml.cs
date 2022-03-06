@@ -11,12 +11,12 @@
 		public static readonly DependencyProperty UserPromptProperty =
 			 DependencyProperty.Register(
 			 nameof(UserPrompt), typeof(string),
-			 typeof(UserPromptDialog));
+			 typeof(GoToDialog));
 
 		public static readonly DependencyProperty UserInputProperty =
 			 DependencyProperty.Register(
 			 nameof(UserInput), typeof(string),
-			 typeof(UserPromptDialog),
+			 typeof(GoToDialog),
 			new FrameworkPropertyMetadata
 			{
 				BindsTwoWayByDefault = true,
