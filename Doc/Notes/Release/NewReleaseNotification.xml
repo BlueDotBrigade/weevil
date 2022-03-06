@@ -5,8 +5,8 @@
 -->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
-	<CodeName>Sunrise</CodeName>
-	<Description>Find text, goto timestamp and other navigation tools make it easier to search through filter results.</Description>
+	<CodeName>Can&apos;t Hold Us</CodeName>
+	<Description>The latest version supports creating a line graph from selected data.</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.8.1</LatestRelease>
+	<LatestRelease>2.9.0</LatestRelease>
 </ApplicationInfo>

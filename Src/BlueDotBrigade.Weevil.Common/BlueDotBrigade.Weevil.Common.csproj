@@ -6,7 +6,7 @@
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
     <Version>2.10.5</Version>
     <Authors>BlueDotBrigade;</Authors>
-	<Copyright>© 2018 Blue Dot Brigade. All rights reserved.</Copyright>
+	<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
     <Description>Includes types, interfaces, and utilities that are shared by all of the Weevil assemblies.</Description>
     <IsPackable>true</IsPackable>

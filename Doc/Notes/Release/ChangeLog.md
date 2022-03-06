@@ -4,6 +4,24 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+### Version 2.9.0
+
+Released on March 6th, 2022.
+
+#### What's New?
+
+- Line graphs can be created using a regular expression _named group_ to extract data from a log file. #159
+   - Using the [RegEx101][RegEx] online utility, you can practice capturing data. In [this][RegEx] example, you can use a _named group_ to detect the word `Never` in a paragraph.
+      - `(?<NamedGroup>Never)`
+ - The _Detect Time Gap_ analysis tool has been renamed to _Measure Elapsed Time_. #256
+ - The analysis tools now support detecting rising & falling edges in both ascending/descending order. #244
+ - Exception callstacks no longer include file paths, which help to reduce visual noise. #237
+    - The user still has the choice to see the original call stack by using the _copy raw_ feature.
+- The _Find_ operation now supports case insensitive searches. #235
+
+#### Bug Fixes
+
+- Compressed files (`*.zip`) can be easily opened by dragging them on to the Weevil application window.  This feature had stopped working in earlier releases. #266
 
 ### Version 2.8.1
 
