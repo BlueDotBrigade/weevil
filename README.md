@@ -78,6 +78,8 @@ For a list of the latest features, please refer to the [change log](https://gith
    - `Comments` field is updated when the matching value is lower that the previously detected value.
    - `Flagged` field is set to `True` for matching records.
    - Example: firmware's uptime value has reset to zero
+5. Charts:
+   - Regular expression _named groups_ can now be used to create a line graph.
 
 ### Plugin Architecture
 
