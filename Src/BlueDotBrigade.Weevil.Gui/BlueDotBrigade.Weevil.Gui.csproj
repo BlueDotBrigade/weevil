@@ -287,7 +287,7 @@
       <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="System.Collections.Immutable">
-      <Version>5.0.0</Version>
+      <Version>6.0.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
