@@ -275,19 +275,19 @@
       <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="NLog">
-      <Version>4.7.10</Version>
+      <Version>4.7.14</Version>
     </PackageReference>
     <PackageReference Include="PostSharp">
-      <Version>6.9.6</Version>
+      <Version>6.10.8</Version>
     </PackageReference>
     <PackageReference Include="PostSharp.Patterns.Model">
-      <Version>6.9.6</Version>
+      <Version>6.10.8</Version>
     </PackageReference>
     <PackageReference Include="Prism.Mvvm">
       <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="System.Collections.Immutable">
-      <Version>5.0.0</Version>
+      <Version>6.0.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

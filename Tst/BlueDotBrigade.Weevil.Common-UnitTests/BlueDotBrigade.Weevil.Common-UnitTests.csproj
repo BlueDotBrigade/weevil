@@ -77,13 +77,13 @@
       <Version>1.2.3</Version>
     </PackageReference>
     <PackageReference Include="Moq">
-      <Version>4.16.1</Version>
+      <Version>4.17.2</Version>
     </PackageReference>
     <PackageReference Include="MSTest.TestAdapter">
-      <Version>2.2.5</Version>
+      <Version>2.2.8</Version>
     </PackageReference>
     <PackageReference Include="MSTest.TestFramework">
-      <Version>2.2.5</Version>
+      <Version>2.2.8</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
