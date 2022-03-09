@@ -278,10 +278,10 @@
       <Version>4.7.14</Version>
     </PackageReference>
     <PackageReference Include="PostSharp">
-      <Version>6.9.6</Version>
+      <Version>6.10.8</Version>
     </PackageReference>
     <PackageReference Include="PostSharp.Patterns.Model">
-      <Version>6.9.6</Version>
+      <Version>6.10.8</Version>
     </PackageReference>
     <PackageReference Include="Prism.Mvvm">
       <Version>1.1.1</Version>
