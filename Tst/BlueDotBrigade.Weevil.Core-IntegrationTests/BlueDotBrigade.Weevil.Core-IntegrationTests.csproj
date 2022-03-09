@@ -77,7 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet">
-      <Version>0.13.0</Version>
+      <Version>0.13.1</Version>
     </PackageReference>
     <PackageReference Include="BlueDotBrigade.DatenLokator">
       <Version>1.2.3</Version>
