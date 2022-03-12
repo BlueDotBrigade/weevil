@@ -123,7 +123,7 @@
 
 		public int Analyze(string analyzerKey, IUserDialog userDialog)
 		{
-			ImmutableArray<IRecord> records = _coreEngine.Selector.IsTimePeriodSelected
+			ImmutableArray<IRecord> records = _coreEngine.Selector.HasSelectionPeriod
 				? _coreEngine.Selector.GetSelected()
 				: _coreEngine.Filter.Results;
 
