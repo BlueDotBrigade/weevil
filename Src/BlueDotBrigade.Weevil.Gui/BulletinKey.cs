@@ -6,6 +6,12 @@
 	using System.Text;
 	using System.Threading.Tasks;
 
+	/// <credit authors="Dalstroem;MurrayVarey;" href="https://stackoverflow.com/a/68272972/949681">
+	///		<license type="CC BY-SA 4.0" href="https://creativecommons.org/licenses/by-sa/4.0/" />
+	///		<comments>
+	///		This implementation is based on Dalstroem and MurrayVarey's sample code that was found on StackOverflow.
+	///		</comments>
+	/// </credit>
 	internal partial class BulletinMediator
 	{
 		protected class BulletinKey

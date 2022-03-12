@@ -33,7 +33,14 @@
 		public void Subscribe<T>(object recipient, Action<T> callback)
 		{
 			var key = new BulletinKey(recipient, typeof(T));
-			_subscriptions.TryAdd(key, callback);
+			if (_subscriptions.TryAdd(key, callback))
+			{
+				// it worked, nothing more to do
+			}
+			else
+			{
+				throw new DuplicateSubscriptionException();
+			}
 		}
 
 		public void Post<T>(T bulletin)
