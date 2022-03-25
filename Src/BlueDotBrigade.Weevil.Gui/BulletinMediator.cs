@@ -7,7 +7,7 @@
 	using System.Linq;
 
 	/// <summary>
-	/// Facilates the routing of messages between view models.
+	/// Facilitates the routing of messages between view models.
 	/// </summary>
 	/// <seealso href="https://www.dofactory.com/net/mediator-design-pattern">DoFactory: Mediator Pattern</seealso>
 	/// <seealso href="https://stackoverflow.com/a/68272972/949681">StackOverflow: MVVM communication between View Model</seealso>
