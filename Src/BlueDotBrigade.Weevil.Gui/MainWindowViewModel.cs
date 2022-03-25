@@ -1,16 +1,30 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System.Diagnostics;
+	using System.Windows;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
+	using BlueDotBrigade.Weevil.Gui.Filter;
+	using BlueDotBrigade.Weevil.Gui.Threading;
 
 	internal class MainWindowViewModel
 	{
 		private readonly UiResponsivenessMonitor _uiMonitor;
+		private readonly BulletinMediator _bulletinMediator;
 
 		public MainWindowViewModel()
 		{
 			_uiMonitor = new UiResponsivenessMonitor();
+			_bulletinMediator = new BulletinMediator();
+
+			this.CurrrentFilter = new FilterResultsViewModel(
+				Application.Current.MainWindow,
+				new UiDispatcher(Application.Current.Dispatcher),
+				_bulletinMediator);
+
+			this.CurrentStatus = new MainStatusBarViewModel(
+				new UiDispatcher(Application.Current.Dispatcher),
+				_bulletinMediator);
 		}
 
 		public void Start()
@@ -31,5 +45,9 @@
 		{
 			_uiMonitor.Stop();
 		}
+
+		public FilterResultsViewModel CurrrentFilter { get; }
+
+		public MainStatusBarViewModel CurrentStatus { get; }
 	}
 }
