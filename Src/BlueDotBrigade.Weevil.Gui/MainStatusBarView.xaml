@@ -1,0 +1,286 @@
+﻿<UserControl x:Class="BlueDotBrigade.Weevil.Gui.MainStatusBarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
+             xmlns:converters1="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:documents="clr-namespace:BlueDotBrigade.Weevil.Windows.Documents;assembly=BlueDotBrigade.Weevil.Windows"
+             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows" 
+             xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <local:MainStatusBarViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
+        <converters1:ContextConverter x:Key="ContextConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <StatusBar 
+                 Background="{StaticResource MaterialDesignPaper}" 
+                 Foreground="{StaticResource TextForeground}"
+                 TextElement.FontWeight="Regular"
+                 TextElement.FontSize="{StaticResource TextFontSize}"
+                 TextOptions.TextFormattingMode="Ideal"
+                 TextOptions.TextRenderingMode="Auto">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Current document&apos;s path."/>
+                    <TextBox>
+                        <TextBox.Style>
+                            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
+                                <Setter Property="Text" Value="{Binding FileDetails.SourceFilePath, Mode=OneWay}" />
+                                <Setter Property="ToolTip" Value="Current document&apos;s path."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FileDetails.SourceFilePath, Mode=OneWay}" Value="">
+                                        <Setter Property="Text" Value="To begin, open a document &amp; start filtering."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </StackPanel>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Represents the amount of time between the first and last selected records."/>
+                    <TextBox Text="{Binding Path=SelectionDetails.SelectionPeriod, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
+                        ToolTip="Time elapsed between selected records."
+                        controls:TextBoxBehavior.AutoSelectEnabled="True"
+                        VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Grid.Column="2" />
+            <StatusBarItem Grid.Column="3" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Context-Data-24.png" 
+                      ToolTip="The current document&apos;s context."/>
+                    <TextBox Text="{Binding FileDetails.Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
+                        ToolTip="The current document&apos;s context."
+                        Style="{StaticResource StatusBarTextBox}"/>
+                </StackPanel>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="4" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Grid.Column="5" />
+            <StatusBarItem Grid.Column="6" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Records flagged by built-in or custom analyzers."/>
+                    <TextBox Text="{Binding AnalysisDetails.FlaggedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                           ToolTip="Records flagged by built-in or custom analyzers."
+                           Style="{StaticResource StatusBarTextBox}"/>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Grid.Column="7" />
+            <StatusBarItem Grid.Column="8" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Number of informational messages in filter results." />
+                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Information], StringFormat='{}{0:###,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
+                             ToolTip="Number of informational messages in filter results"
+                             Style="{StaticResource StatusBarTextBox}"/>
+                    <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Number of warning messages in filter results." />
+                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Warnings], StringFormat='{}{0:###,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
+                             ToolTip="Number of warning messages in filter results."
+                             Style="{StaticResource StatusBarTextBox}"/>
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-DataRequiresAttention-24.png" />
+                                <Setter Property="ToolTip" Value="Number of error messages in filter results."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FilterDetails.SeverityMetrics[Errors], FallbackValue=0, TargetNullValue=0, Mode=OneWay}" Value="0">
+                                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-Error-Data-24.png"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Errors], StringFormat='{}{0:###,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
+                             ToolTip="Number of error messages in filter results."
+                             Style="{StaticResource StatusBarTextBox}"/>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Grid.Column="9" />
+            <StatusBarItem Grid.Column="10">
+                <StackPanel Orientation="Horizontal" >
+                    <Image Source="/Resources/Icons/RecordsSelected-Data-24.png" ToolTip="Number of user selected records."/>
+                    <TextBox Text="{Binding SelectionDetails.SelectedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                             ToolTip="Number of user selected records."
+                             Style="{StaticResource StatusBarTextBox}"/>
+                    <Image Source="/Resources/Icons/RecordsVisible-Data-24.png" ToolTip="Number of filter results."/>
+                    <TextBox Text="{Binding FilterDetails.VisibleRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                             ToolTip="Number of filter results."
+                             Style="{StaticResource StatusBarTextBox}"/>
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-Data-24.png" />
+                                <Setter Property="ToolTip" Value="Total number of records in the original document."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FileDetails.TotalRecordCountChanged}" Value="True">
+                                        <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-DataRequiresAttention-24.png"/>
+                                        <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <TextBox Text="{Binding FileDetails.TotalRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
+                        <TextBox.Style>
+                            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
+                                <Setter Property="ToolTip" Value="Total number of records in the original document." />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FileDetails.TotalRecordCountChanged}" Value="True">
+                                        <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Grid.Column="11" />
+            <StatusBarItem Grid.Column="12">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:Badged Margin="10, 0">
+                        <materialDesign:Badged.Style>
+                            <Style TargetType="{x:Type materialDesign:Badged}">
+                                <Setter Property="Badge" Value=""/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="true">
+                                        <Setter Property="Badge" Value="{Binding InsightDetails.InsightNeedingAttention}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </materialDesign:Badged.Style>
+                        <Image>
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+                                    <Setter Property="ToolTip" Value="There is no insight at this time."/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                                                <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                                            <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (Ctrl+D) for insight&#x0d;&#x0a;about the current document."/>
+                           </MultiDataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                                                <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                                            <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (Ctrl+D)."/>
+                           </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </materialDesign:Badged>
+                    <materialDesign:PopupBox
+                  StaysOpen="True"
+                  Cursor="Hand" 
+                  Visibility="{Binding SoftwareDetails.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <materialDesign:PopupBox.ToggleContent>
+                            <Image Height="24" Width="24" 
+                            Source="/Resources/Icons/NewReleaseAvailable-24.png"
+                            ToolTip="New version is available! Click for details."/>
+                        </materialDesign:PopupBox.ToggleContent>
+                        <Grid Margin="20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300" FontSize="16">
+                                New Release Available
+                            </TextBlock>
+                            <TextBlock Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" MaxWidth="300">
+                                 <Run Text="This version of"/>
+                                 <Hyperlink 
+                                    NavigateUri="{Binding SoftwareDetails.LatestReleaseDetails.InstallerUrl}" 
+                                    documents:HyperlinkBehavior.OpenInBrowser="True"
+                                    Foreground="{StaticResource MaterialDesignDarkForeground}">
+                                    Weevil
+                                </Hyperlink>
+                                <Run Text="is no longer supported, and should be upgraded to"/>
+                                <TextBlock Text="{Binding SoftwareDetails.LatestReleaseDetails.LatestRelease}"/>
+                                (&quot;
+                                <TextBlock Text="{Binding SoftwareDetails.LatestReleaseDetails.CodeName}"/>
+                                &quot;).
+                            </TextBlock>
+                            <TextBlock Grid.Column="0" Grid.Row="4" TextWrapping="Wrap" MaxWidth="300">
+                                <Run Text="{Binding SoftwareDetails.LatestReleaseDetails.Description}"/>
+                                <TextBlock  TextWrapping="Wrap" MaxWidth="300"/>
+                                <Run Text="For more information, please see the"/>
+                                 <Hyperlink 
+                                     NavigateUri="{Binding SoftwareDetails.LatestReleaseDetails.ChangeLogUrl}" 
+                                     documents:HyperlinkBehavior.OpenInBrowser="True"
+                                     Foreground="{StaticResource MaterialDesignDarkForeground}">
+                                     <TextBlock Text="release notes"/>
+                                </Hyperlink>
+                                <Run Text="."/>
+                     </TextBlock>
+                            <Button Grid.Row="6"
+                        Command="{x:Static materialDesign:PopupBox.ClosePopupCommand}"
+                        Style="{StaticResource  MaterialDesignRaisedButton}"
+                        Margin="{StaticResource ButtonMargin}"
+                        Width="{StaticResource ButtonWidth}">
+                                Close
+                            </Button>
+                        </Grid>
+                    </materialDesign:PopupBox>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Grid.Column="13" />
+            <StatusBarItem Grid.Column="14">
+                <TextBox Text="{Binding SelectionDetails.CurrentSection, Mode=OneWay}" 
+                     ToolTip="Selected record is in this section of the log file."
+                     Style="{StaticResource StatusBarTextBox}"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</UserControl>

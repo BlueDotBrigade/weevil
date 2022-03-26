@@ -112,11 +112,13 @@
       <DependentUpon>GraphDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Analysis\GraphViewModel.cs" />
+    <Compile Include="Analysis\InsightChangedBulletin.cs" />
     <Compile Include="Analysis\UiResponsivenessMonitor.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BulletinKey.cs" />
     <Compile Include="Controls\MdixComboBoxBehavior.cs" />
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\CheckBoxValidationErrorConverter.cs" />
@@ -125,7 +127,17 @@
     <Compile Include="Converters\SeverityToBackgroundConverter.cs" />
     <Compile Include="Converters\SeverityToForegroundConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="DuplicateSubscriptionException.cs" />
+    <Compile Include="Filter\AnalysisCompleteBulletin.cs" />
+    <Compile Include="Filter\FilterChangedBulletin.cs" />
     <Compile Include="Filter\FilterExtensions.cs" />
+    <Compile Include="Filter\FileChangedBulletin.cs" />
+    <Compile Include="Filter\SelectionChangedBulletin.cs" />
+    <Compile Include="IBulletinMediator.cs" />
+    <Compile Include="MainStatusBarView.xaml.cs">
+      <DependentUpon>MainStatusBarView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainStatusBarViewModel.cs" />
     <Compile Include="Help\AboutDialog.xaml.cs">
       <DependentUpon>AboutDialog.xaml</DependentUpon>
     </Compile>
@@ -145,6 +157,8 @@
     </Compile>
     <Compile Include="Management\ComputerSnapshot.cs" />
     <Compile Include="MenuItemViewModel.cs" />
+    <Compile Include="BulletinMediator.cs" />
+    <Compile Include="SoftwareDetailsBulletin.cs" />
     <Compile Include="Properties\GlobalSuppressions.cs" />
     <Compile Include="IO\IDialogBoxService.cs" />
     <Compile Include="Properties\Annotations.cs" />
@@ -214,6 +228,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Filter\FilterResultsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainStatusBarView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

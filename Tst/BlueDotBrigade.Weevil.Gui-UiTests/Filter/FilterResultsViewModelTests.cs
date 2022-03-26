@@ -17,11 +17,18 @@
 		public async Task OpenAsync()
 		{
 			var window = new Mock<Window>();
+			
 			var uiDispatcher = new Mock<IUiDispatcher>();
 			uiDispatcher
 				.Setup(x => x.Invoke(It.IsAny<Action>()))
 				.Callback((Action a) => a.Invoke());
-			var viewModel = new FilterResultsViewModel(window.Object, uiDispatcher.Object);
+
+			var bulletinMediator = new Mock<IBulletinMediator>();
+
+			var viewModel = new FilterResultsViewModel(
+				window.Object, 
+				uiDispatcher.Object,
+				bulletinMediator.Object);
 
 			await viewModel.OpenAsync(InputData.GetFilePath("GenericBaseline.log"));
 
@@ -38,7 +45,7 @@
 				Thread.Sleep(TimeSpan.FromMilliseconds(100));
 			} while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5));
 
-			Assert.AreEqual(512, viewModel.AllRecordCount);
+			Assert.AreEqual(512, viewModel.VisibleItems.Count);
 		}
 	}
 }
