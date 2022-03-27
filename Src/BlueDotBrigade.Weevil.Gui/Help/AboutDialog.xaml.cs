@@ -32,27 +32,45 @@
 		{
 			var sourceFileSize = GetFileSize(sourceFilePath);
 			var computerSnapshot = ComputerSnapshot.Create();
+			var weevilRamUsed = new StorageUnit(Process.GetCurrentProcess().PrivateMemorySize64);
+			var totalRamAvailable = weevilRamUsed + computerSnapshot.RamTotalFree;
+			var percentUsage = ((float)weevilRamUsed.Bytes / (float)totalRamAvailable.Bytes) * 100.0;
 
 			this.Details =
 				$"Weevil: {weevilVersion}" + Environment.NewLine +
 				$"Common Language Runtime: {Environment.Version}" + Environment.NewLine +
 				$"Operating System: {computerSnapshot.OsName}" + Environment.NewLine +
 				$"CPU: {computerSnapshot.CpuName}" + Environment.NewLine +
-				$"RAM Free: {computerSnapshot.RamTotalFree.GigaBytes:0.00}GB" + Environment.NewLine;
+				Environment.NewLine;
 
-			if (sourceFileSize.Bytes > 0)
-			{
-				if (sourceFileSize.MetaBytes < 1)
+				if (sourceFileSize.Bytes > 0)
 				{
-					this.Details += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine;
+					if (sourceFileSize.MetaBytes < 1)
+					{
+						this.Details += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine;
+					}
+					else
+					{
+						this.Details += $"Source File Size: {sourceFileSize.MetaBytes:#,###,##0} MB" + Environment.NewLine;
+					}
+				}
+
+				this.Details +=
+					$"RAM Installed: {computerSnapshot.RamTotalInstalled.GigaBytes:0.00} GB" + Environment.NewLine +
+					$"RAM Available: {computerSnapshot.RamTotalFree.GigaBytes:0.00} GB" + Environment.NewLine;
+
+				if (weevilRamUsed.GigaBytes < 1)
+				{
+					this.Details +=
+						$"RAM Weevil Using: {weevilRamUsed.MetaBytes:#,###,##0} MB ({percentUsage:0.0} %)" + Environment.NewLine;
 				}
 				else
 				{
-					this.Details += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes ({sourceFileSize.MetaBytes:#,###,##0} MB)" + Environment.NewLine;
+					this.Details += 
+						$"RAM Weevil Using: {weevilRamUsed.GigaBytes:#,###,##0} GB ({percentUsage:0.0} %)" + Environment.NewLine;
 				}
-			}
 
-			this.Details += $"Weevil's core engine is powered by open source software.";
+			this.Details += Environment.NewLine + $"Weevil's core engine is powered by open source software.";
 
 			this.License = new File().ReadAllText(licensePath);
 

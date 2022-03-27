@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         mc:Ignorable="d"
-        Title="About" Height="480" Width="640" 
+        Title="About" Height="600" Width="800" 
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -20,7 +20,7 @@
          <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
-         <ColumnDefinition Width="2*" />
+         <ColumnDefinition Width="1*" />
          <ColumnDefinition Width="6*" />
          <ColumnDefinition Width="0.5*" />
       </Grid.ColumnDefinitions>
