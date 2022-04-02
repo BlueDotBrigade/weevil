@@ -14,9 +14,8 @@
 		{
 			InitializeComponent();
 
-			this.DataContext = new MainWindowViewModel();
-
 			_viewModel = new MainWindowViewModel();
+			this.DataContext = _viewModel;
 
 			base.Loaded += OnMainWindowLoaded;
 			base.Closing += OnMainWindowClosing;
