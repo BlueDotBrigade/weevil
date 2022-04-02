@@ -21,7 +21,7 @@
 			{
 				if (value < OneMinute)
 				{
-					result = value.ToString(@"ss\.fff");
+					result = value.ToString(@"ss\.fff\s");
 				}
 				else
 				{
