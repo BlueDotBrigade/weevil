@@ -38,6 +38,11 @@
 
 			this.Details =
 				$"Weevil: {weevilVersion}" + Environment.NewLine +
+				$"Weevil's core engine is powered by open source software." +
+				Environment.NewLine;
+
+			this.Details += 
+				Environment.NewLine +
 				$"Common Language Runtime: {Environment.Version}" + Environment.NewLine +
 				$"Operating System: {computerSnapshot.OsName}" + Environment.NewLine +
 				$"CPU: {computerSnapshot.CpuName}" + Environment.NewLine +
@@ -62,15 +67,15 @@
 				if (weevilRamUsed.GigaBytes < 1)
 				{
 					this.Details +=
-						$"RAM Weevil Using: {weevilRamUsed.MetaBytes:#,###,##0} MB ({percentUsage:0.0} %)" + Environment.NewLine;
+						$"RAM Weevil Using: {weevilRamUsed.MetaBytes:#,###,##0} MB ({percentUsage:0.0} %)";
 				}
 				else
 				{
 					this.Details += 
-						$"RAM Weevil Using: {weevilRamUsed.GigaBytes:#,###,##0} GB ({percentUsage:0.0} %)" + Environment.NewLine;
+						$"RAM Weevil Using: {weevilRamUsed.GigaBytes:#,###,##0} GB ({percentUsage:0.0} %)";
 				}
 
-			this.Details += Environment.NewLine + $"Weevil's core engine is powered by open source software.";
+			
 
 			this.License = new File().ReadAllText(licensePath);
 
