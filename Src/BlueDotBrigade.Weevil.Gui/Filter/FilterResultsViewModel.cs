@@ -1336,7 +1336,8 @@
 			(
 				_engine.Selector.Selected.Count,
 				this.VisibleItems?.Count ?? 0,
-				_engine.Filter.GetMetrics()
+				_engine.Filter.GetMetrics(),
+				_engine.Filter.FilterExecutionTime
 			));
 
 			// Remember: filtering can impact the number of selected records.

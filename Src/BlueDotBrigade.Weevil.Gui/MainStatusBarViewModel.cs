@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Timers;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
@@ -10,6 +12,12 @@
 
 	internal class MainStatusBarViewModel : DependencyObject
 	{
+		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromSeconds(0.5);
+		private static readonly TimeSpan DisplayMetricsDuration = TimeSpan.FromSeconds(8);
+
+		private readonly Timer _timer;
+		private readonly Stopwatch _filterChangedStopwatch;
+
 		private readonly IUiDispatcher _uiDispatcher;
 
 		public static readonly DependencyProperty FileDetailsProperty = DependencyProperty.Register(
@@ -43,10 +51,15 @@
 			typeof(SoftwareDetailsBulletin),
 			typeof(MainStatusBarViewModel));
 
+		public static readonly DependencyProperty StatusMessageProperty = DependencyProperty.Register(
+			nameof(StatusMessage),
+			typeof(string),
+			typeof(MainStatusBarViewModel));
+
 		public MainStatusBarViewModel()
 		{
 			this.FileDetails = new FileChangedBulletin(String.Empty, ContextDictionary.Empty, 0, false);
-			this.FilterDetails = new FilterChangedBulletin(0, 0, new Dictionary<string, object>());
+			this.FilterDetails = new FilterChangedBulletin(0, 0, new Dictionary<string, object>(), TimeSpan.Zero);
 			this.SelectionDetails = new SelectionChangedBulletin(0, Metadata.ElapsedTimeUnknown, string.Empty);
 			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
 			this.InsightDetails = new InsightChangedBulletin(false, 0);
@@ -58,9 +71,29 @@
 			this.FilterDetails.SeverityMetrics["Warnings"] = 0;
 			this.FilterDetails.SeverityMetrics["Errors"] = 0;
 			this.FilterDetails.SeverityMetrics["Fatals"] = 0;
+
+			_filterChangedStopwatch = new Stopwatch();
+
+			_timer = new Timer
+			{
+				Interval = DefaultTimerPeriod.TotalMilliseconds, 
+				AutoReset = true, 
+				Enabled = false,
+			};
+			_timer.Elapsed += OnTimerElapsed;
+			_timer.Start();
 		}
 
-		public MainStatusBarViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
+		private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+		{
+			if (_filterChangedStopwatch.Elapsed >= DisplayMetricsDuration)
+			{
+				_filterChangedStopwatch.Stop();
+				_uiDispatcher.Invoke(() => this.StatusMessage = this.FileDetails.SourceFilePath);
+			}
+		}
+
+		public MainStatusBarViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator) : this()
 		{
 			_uiDispatcher = uiDispatcher;
 
@@ -74,12 +107,21 @@
 
 		private void OnFileChanged(FileChangedBulletin bulletin)
 		{
-			_uiDispatcher.Invoke(() => this.FileDetails = bulletin);
+			_uiDispatcher.Invoke(() =>
+			{
+				this.FileDetails = bulletin;
+				this.StatusMessage = bulletin.SourceFilePath;
+			});
 		}
 
 		private void OnFilterChanged(FilterChangedBulletin bulletin)
 		{
-			_uiDispatcher.Invoke(() => this.FilterDetails = bulletin);
+			_uiDispatcher.Invoke(() =>
+			{
+				this.FilterDetails = bulletin;
+				this.StatusMessage = $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
+			});
+			_filterChangedStopwatch.Restart();
 		}
 
 		private void OnSelectionChanged(SelectionChangedBulletin bulletin)
@@ -134,6 +176,12 @@
 		{
 			get => (SoftwareDetailsBulletin)GetValue(SoftwareDetailsProperty);
 			private set => SetValue(SoftwareDetailsProperty, value);
+		}
+
+		public string StatusMessage
+		{
+			get => (string)GetValue(StatusMessageProperty);
+			private set => SetValue(StatusMessageProperty, value);
 		}
 	}
 }

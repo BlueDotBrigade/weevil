@@ -60,8 +60,7 @@
                     <TextBox>
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
-                                <Setter Property="Text" Value="{Binding FileDetails.SourceFilePath, Mode=OneWay}" />
-                                <Setter Property="ToolTip" Value="Current document&apos;s path."/>
+                                <Setter Property="Text" Value="{Binding StatusMessage, Mode=OneWay}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding FileDetails.SourceFilePath, Mode=OneWay}" Value="">
                                         <Setter Property="Text" Value="To begin, open a document &amp; start filtering."/>
