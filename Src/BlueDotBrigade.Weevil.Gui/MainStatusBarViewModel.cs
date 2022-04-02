@@ -88,7 +88,7 @@
 		{
 			if (_filterChangedStopwatch.Elapsed >= DisplayMetricsDuration)
 			{
-				_filterChangedStopwatch.Stop();
+				_filterChangedStopwatch.Reset();
 				_uiDispatcher.Invoke(() => this.StatusMessage = this.FileDetails.SourceFilePath);
 			}
 		}
@@ -119,9 +119,10 @@
 			_uiDispatcher.Invoke(() =>
 			{
 				this.FilterDetails = bulletin;
+
+				_filterChangedStopwatch.Restart();
 				this.StatusMessage = $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
 			});
-			_filterChangedStopwatch.Restart();
 		}
 
 		private void OnSelectionChanged(SelectionChangedBulletin bulletin)
