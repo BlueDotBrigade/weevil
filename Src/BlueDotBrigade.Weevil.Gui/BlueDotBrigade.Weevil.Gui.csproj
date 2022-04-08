@@ -149,7 +149,7 @@
     <Compile Include="IO\FindDialog.xaml.cs">
       <DependentUpon>FindDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IO\GoToDialog.xaml.cs">
+    <Compile Include="Navigation\GoToDialog.xaml.cs">
       <DependentUpon>GoToDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="IO\UserPromptDialog.xaml.cs">
@@ -247,7 +247,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="IO\GoToDialog.xaml">
+    <Page Include="Navigation\GoToDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

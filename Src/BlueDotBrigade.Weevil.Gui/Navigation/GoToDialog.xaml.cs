@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.IO
+﻿namespace BlueDotBrigade.Weevil.Gui.Navigation
 {
 	using System;
 	using System.Windows;
