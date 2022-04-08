@@ -69,7 +69,7 @@
 		private CoreEngine(
 			string sourceFilePath,
 			long sourceFileLength,
-			TimeSpan recordLoadingPeriod,
+			TimeSpan sourceFileLoadingPeriod,
 			ICoreExtension coreExtension,
 			ContextDictionary context,
 			SidecarManager sidecarManager,
@@ -106,7 +106,7 @@
 				"File loading has retrieved records from disk.",
 				new Dictionary<string, object>
 				{
-					{ "RecordLoadingPeriod", recordLoadingPeriod.TotalSeconds},
+					{ "SourceFileLoadingPeriod", sourceFileLoadingPeriod.TotalSeconds},
 					{ "RecordCount", _allRecords.Length},
 					{ "FileSize", sourceFileLength},
 					{ "SourceFilePath", _sourceFilePath},
@@ -146,12 +146,12 @@
 			_logFileMetrics = new LogFileMetrics(
 				sourceFileLength,
 				_allRecords.Length,
-				recordLoadingPeriod,
+				sourceFileLoadingPeriod,
 				recordAndMetadataLoadingStopwatch.Elapsed);
 
 			var filterDuration =
 				_logFileMetrics.RecordAndMetadataLoadDuration.TotalSeconds -
-				_logFileMetrics.RecordLoadingPeriod.TotalSeconds;
+				_logFileMetrics.SourceFileLoadingPeriod.TotalSeconds;
 
 			Log.Default.Write(
 				LogSeverityType.Information,
@@ -159,7 +159,7 @@
 				new Dictionary<string, object>
 				{
 					{ "RecordAndMetadataLoadDuration", _logFileMetrics.RecordAndMetadataLoadDuration.TotalSeconds },
-					{ "RecordLoadingPeriod", _logFileMetrics.RecordLoadingPeriod.TotalSeconds },
+					{ "SourceFileLoadingPeriod", _logFileMetrics.SourceFileLoadingPeriod.TotalSeconds },
 					{ "FilterDuration", filterDuration },
 					{ "RecordCount", _logFileMetrics.RecordCount },
 					{ "FileSize", _logFileMetrics.FileSize },

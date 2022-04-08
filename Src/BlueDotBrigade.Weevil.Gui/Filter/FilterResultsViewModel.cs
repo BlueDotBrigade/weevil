@@ -457,7 +457,7 @@
 							_engine.Context,
 							_engine.Count,
 							false,
-							_engine.Metrics.RecordLoadingPeriod
+							_engine.Metrics.SourceFileLoadingPeriod
 						));
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
@@ -838,7 +838,7 @@
 				_engine.Context,
 				_engine.Count,
 				true,
-				_engine.Metrics.RecordLoadingPeriod
+				_engine.Metrics.SourceFileLoadingPeriod
 			));
 
 			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);

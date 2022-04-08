@@ -131,7 +131,7 @@
 
 				string sourceFilePath;
 				long sourceFileLength;
-				Stopwatch recordLoadingPeriod = new Stopwatch();
+				Stopwatch sourceFileLoadingPeriod = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
@@ -171,8 +171,6 @@
 						._selectionManager
 						.GetSelected();
 
-					recordLoadingPeriod.Restart();
-
 					var repository = new InMemoryRecordRepository(
 						_sourceInstance._allRecords,
 						_sourceInstance._filterManager.Results,
@@ -180,8 +178,6 @@
 						_clearOperation);
 
 					records = repository.Get(maxRecords);
-
-					recordLoadingPeriod.Stop();
 
 					selectedRecords = GetVisibleRecordSelection(records, selectedRecords);
 				}
@@ -199,7 +195,7 @@
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
 
-						recordLoadingPeriod.Restart();
+						sourceFileLoadingPeriod.Restart();
 
 						var repository = new SerializedRecordRepository(
 							 dataSource,
@@ -210,7 +206,7 @@
 
 						records = repository.Get(range, maxRecords);
 
-						recordLoadingPeriod.Stop();
+						sourceFileLoadingPeriod.Stop();
 
 						sidecarManager.Load(
 							records,
@@ -236,7 +232,7 @@
 				var coreEngine = new CoreEngine(
 					sourceFilePath,
 					sourceFileLength,
-					recordLoadingPeriod.Elapsed,
+					sourceFileLoadingPeriod.Elapsed,
 					coreExtension,
 					context,
 					sidecarManager,

@@ -4,13 +4,13 @@
 
 	internal class FileChangedBulletin
 	{
-		public FileChangedBulletin(string sourceFilePath, ContextDictionary context, int totalRecordCount, bool totalRecordCountChanged, TimeSpan recordLoadingPeriod)
+		public FileChangedBulletin(string sourceFilePath, ContextDictionary context, int totalRecordCount, bool totalRecordCountChanged, TimeSpan sourceFileLoadingPeriod)
 		{
 			this.SourceFilePath = sourceFilePath;
 			this.Context = context;
 			this.TotalRecordCount = totalRecordCount;
 			this.TotalRecordCountChanged = totalRecordCountChanged;
-			this.RecordLoadingPeriod = recordLoadingPeriod;
+			this.SourceFileLoadingPeriod = sourceFileLoadingPeriod;
 		}
 
 		public string SourceFilePath { get; }
@@ -21,6 +21,6 @@
 
 		public bool TotalRecordCountChanged { get; }
 
-		public TimeSpan RecordLoadingPeriod { get; }
+		public TimeSpan SourceFileLoadingPeriod { get; }
 	}
 }

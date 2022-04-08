@@ -124,7 +124,7 @@
 				this.FileDetails = bulletin;
 				this.StatusMessage = bulletin.SourceFilePath;
 
-				this.StatusMessage = $"Record Load Period: {bulletin.RecordLoadingPeriod.ToHumanReadable()}";
+				this.StatusMessage = $"Disk Loading Period: {bulletin.SourceFileLoadingPeriod.ToHumanReadable()}";
 			});
 
 			_filterChangedStopwatch.Restart();
@@ -136,7 +136,7 @@
 			{
 				if (_wasFileJustOpened)
 				{
-					this.StatusMessage = $"Record Load Period: {this.FileDetails.RecordLoadingPeriod.ToHumanReadable()}, ";
+					this.StatusMessage = $"Disk Loading Period: {this.FileDetails.SourceFileLoadingPeriod.ToHumanReadable()}, ";
 					this.StatusMessage += $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
 				}
 				else
