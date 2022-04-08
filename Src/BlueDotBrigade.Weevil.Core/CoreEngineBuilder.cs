@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Collections.Generic;
@@ -130,6 +131,7 @@
 
 				string sourceFilePath;
 				long sourceFileLength;
+				Stopwatch recordLoadingPeriod = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
@@ -169,6 +171,8 @@
 						._selectionManager
 						.GetSelected();
 
+					recordLoadingPeriod.Restart();
+
 					var repository = new InMemoryRecordRepository(
 						_sourceInstance._allRecords,
 						_sourceInstance._filterManager.Results,
@@ -176,6 +180,8 @@
 						_clearOperation);
 
 					records = repository.Get(maxRecords);
+
+					recordLoadingPeriod.Stop();
 
 					selectedRecords = GetVisibleRecordSelection(records, selectedRecords);
 				}
@@ -193,6 +199,8 @@
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
 
+						recordLoadingPeriod.Restart();
+
 						var repository = new SerializedRecordRepository(
 							 dataSource,
 							 coreExtension.GetRecordParser(),
@@ -201,6 +209,8 @@
 							 true);
 
 						records = repository.Get(range, maxRecords);
+
+						recordLoadingPeriod.Stop();
 
 						sidecarManager.Load(
 							records,
@@ -226,6 +236,7 @@
 				var coreEngine = new CoreEngine(
 					sourceFilePath,
 					sourceFileLength,
+					recordLoadingPeriod.Elapsed,
 					coreExtension,
 					context,
 					sidecarManager,

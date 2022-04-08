@@ -4,18 +4,18 @@
 
 	public class LogFileMetrics
 	{
-		public LogFileMetrics(long fileSize, int count, TimeSpan recordLoadTime, TimeSpan recordAndMetadataLoadTime)
+		public LogFileMetrics(long fileSize, int count, TimeSpan recordLoadingPeriod, TimeSpan recordAndMetadataLoadTime)
 		{
 			this.FileSize = fileSize;
 			this.RecordCount = count;
 
-			this.RecordLoadDuration = recordLoadTime;
+			this.RecordLoadingPeriod = recordLoadingPeriod;
 			this.RecordAndMetadataLoadDuration = recordAndMetadataLoadTime;
 		}
 
 		public long FileSize { get; }
 		public int RecordCount { get; }
-		public TimeSpan RecordLoadDuration { get; }
+		public TimeSpan RecordLoadingPeriod { get; }
 		public TimeSpan RecordAndMetadataLoadDuration { get; }
 	}
 }
