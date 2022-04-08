@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Filter
+﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
 

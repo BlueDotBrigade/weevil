@@ -8,6 +8,7 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Filter;
+	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 
 	/// <summary>
