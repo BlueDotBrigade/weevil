@@ -10,44 +10,43 @@
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 
+	/// <summary>
+	/// Listens for application events, and updates the status bar as needed.
+	/// </summary>
 	internal class MainStatusBarViewModel : DependencyObject
 	{
 		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromSeconds(0.5);
 		private static readonly TimeSpan DisplayMetricsDuration = TimeSpan.FromSeconds(8);
 
-		private readonly Timer _timer;
-		private readonly Stopwatch _filterChangedStopwatch;
-
-		private readonly IUiDispatcher _uiDispatcher;
-
+		#region  Dependency Properties
 		public static readonly DependencyProperty FileDetailsProperty = DependencyProperty.Register(
-			nameof(FileDetails), 
+			nameof(FileDetails),
 			typeof(FileChangedBulletin),
 			typeof(MainStatusBarViewModel)
 		);
 
 		public static readonly DependencyProperty FilterDetailsProperty = DependencyProperty.Register(
-			nameof(FilterDetails), 
+			nameof(FilterDetails),
 			typeof(FilterChangedBulletin),
 			typeof(MainStatusBarViewModel));
 
 		public static readonly DependencyProperty SelectionDetailsProperty = DependencyProperty.Register(
-			nameof(SelectionDetails), 
+			nameof(SelectionDetails),
 			typeof(SelectionChangedBulletin),
 			typeof(MainStatusBarViewModel));
 
 		public static readonly DependencyProperty AnalysisDetailsProperty = DependencyProperty.Register(
-			nameof(AnalysisDetails), 
+			nameof(AnalysisDetails),
 			typeof(AnalysisCompleteBulletin),
 			typeof(MainStatusBarViewModel));
 
 		public static readonly DependencyProperty InsightDetailsProperty = DependencyProperty.Register(
-			nameof(InsightDetails), 
+			nameof(InsightDetails),
 			typeof(InsightChangedBulletin),
 			typeof(MainStatusBarViewModel));
 
 		public static readonly DependencyProperty SoftwareDetailsProperty = DependencyProperty.Register(
-			nameof(SoftwareDetails), 
+			nameof(SoftwareDetails),
 			typeof(SoftwareDetailsBulletin),
 			typeof(MainStatusBarViewModel));
 
@@ -55,10 +54,18 @@
 			nameof(StatusMessage),
 			typeof(string),
 			typeof(MainStatusBarViewModel));
+		#endregion
+
+		private readonly Timer _timer;
+		private readonly Stopwatch _filterChangedStopwatch;
+
+		private readonly IUiDispatcher _uiDispatcher;
+
+		private bool _wasFileJustOpened;
 
 		public MainStatusBarViewModel()
 		{
-			this.FileDetails = new FileChangedBulletin(String.Empty, ContextDictionary.Empty, 0, false);
+			this.FileDetails = new FileChangedBulletin(String.Empty, ContextDictionary.Empty, 0, false, TimeSpan.Zero);
 			this.FilterDetails = new FilterChangedBulletin(0, 0, new Dictionary<string, object>(), TimeSpan.Zero);
 			this.SelectionDetails = new SelectionChangedBulletin(0, Metadata.ElapsedTimeUnknown, string.Empty);
 			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
@@ -84,6 +91,20 @@
 			_timer.Start();
 		}
 
+		public MainStatusBarViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator) : this()
+		{
+			_uiDispatcher = uiDispatcher;
+
+			// Note: All dependency property read and write operations must be performed by the UI dispatcher.
+			bulletinMediator.Subscribe<FileChangedBulletin>(this, x => OnFileChanged(x));
+			bulletinMediator.Subscribe<FilterChangedBulletin>(this, x => OnFilterChanged(x));
+			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, x => OnSelectionChanged(x));
+			bulletinMediator.Subscribe<AnalysisCompleteBulletin>(this, x => OnAnalysisComplete(x));
+			bulletinMediator.Subscribe<InsightChangedBulletin>(this, x => OnNewInsight(x));
+			bulletinMediator.Subscribe<SoftwareDetailsBulletin>(this, x => OnSoftwareDetailsReceived(x));
+		}
+
+		#region Event Handlers
 		private void OnTimerElapsed(object sender, ElapsedEventArgs e)
 		{
 			if (_filterChangedStopwatch.Elapsed >= DisplayMetricsDuration)
@@ -93,36 +114,40 @@
 			}
 		}
 
-		public MainStatusBarViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator) : this()
-		{
-			_uiDispatcher = uiDispatcher;
-
-			bulletinMediator.Subscribe<FileChangedBulletin>(this, x => OnFileChanged(x));
-			bulletinMediator.Subscribe<FilterChangedBulletin>(this, x => OnFilterChanged(x));
-			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, x => OnSelectionChanged(x));
-			bulletinMediator.Subscribe<AnalysisCompleteBulletin>(this, x => OnAnalysisComplete(x));
-			bulletinMediator.Subscribe<InsightChangedBulletin>(this, x => OnNewInsight(x));
-			bulletinMediator.Subscribe<SoftwareDetailsBulletin>(this, x => OnSoftwareDetailsReceived(x));
-		}
-
 		private void OnFileChanged(FileChangedBulletin bulletin)
 		{
+			_wasFileJustOpened = true;
+
 			_uiDispatcher.Invoke(() =>
 			{
 				this.FileDetails = bulletin;
 				this.StatusMessage = bulletin.SourceFilePath;
+
+				this.StatusMessage = $"Record Load Period: {bulletin.RecordLoadingPeriod.ToHumanReadable()}";
 			});
+
+			_filterChangedStopwatch.Restart();
 		}
 
 		private void OnFilterChanged(FilterChangedBulletin bulletin)
 		{
 			_uiDispatcher.Invoke(() =>
 			{
-				this.FilterDetails = bulletin;
+				if (_wasFileJustOpened)
+				{
+					this.StatusMessage = $"Record Load Period: {this.FileDetails.RecordLoadingPeriod.ToHumanReadable()}, ";
+					this.StatusMessage += $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
+				}
+				else
+				{
+					this.StatusMessage = $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
+				}
 
-				_filterChangedStopwatch.Restart();
-				this.StatusMessage = $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
+				this.FilterDetails = bulletin;
 			});
+
+			_wasFileJustOpened = false;
+			_filterChangedStopwatch.Restart();
 		}
 
 		private void OnSelectionChanged(SelectionChangedBulletin bulletin)
@@ -134,15 +159,19 @@
 		{
 			_uiDispatcher.Invoke(() => this.AnalysisDetails = bulletin);
 		}
+
 		private void OnNewInsight(InsightChangedBulletin bulletin)
 		{
 			_uiDispatcher.Invoke(() => this.InsightDetails = bulletin);
 		}
+
 		private void OnSoftwareDetailsReceived(SoftwareDetailsBulletin bulletin)
 		{
 			_uiDispatcher.Invoke(() => this.SoftwareDetails = bulletin);
 		}
+		#endregion
 
+		#region Properties
 		public FileChangedBulletin FileDetails
 		{
 			get => (FileChangedBulletin)GetValue(FileDetailsProperty);
@@ -184,5 +213,6 @@
 			get => (string)GetValue(StatusMessageProperty);
 			private set => SetValue(StatusMessageProperty, value);
 		}
+		#endregion
 	}
 }

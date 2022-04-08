@@ -456,7 +456,8 @@
 							_engine.SourceFilePath,
 							_engine.Context,
 							_engine.Count,
-							false
+							false,
+							_engine.Metrics.RecordLoadingPeriod
 						));
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
@@ -836,7 +837,8 @@
 				_engine.SourceFilePath,
 				_engine.Context,
 				_engine.Count,
-				true
+				true,
+				_engine.Metrics.RecordLoadingPeriod
 			));
 
 			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
@@ -1329,8 +1331,6 @@
 
 				RaisePropertyChanged(nameof(this.VisibleItems));
 			});
-
-
 
 			_bulletinMediator.Post(new FilterChangedBulletin
 			(
