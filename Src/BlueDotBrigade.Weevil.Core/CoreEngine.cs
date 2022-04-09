@@ -58,7 +58,7 @@
 		/// Facilitates the creation of a new <see cref="CoreEngine"/> object using a Fluent API and the current instance.
 		/// </summary>
 		/// <param name="clearOperation">Indicates what records will be omitted from the current object, when a new instance is created..</param>
-		internal CoreEngineBuilder FromInstance(ClearRecordsOperation clearOperation)
+		internal CoreEngineBuilder FromInstance(ClearOperation clearOperation)
 		{
 			return new CoreEngineBuilder(this, clearOperation);
 		}

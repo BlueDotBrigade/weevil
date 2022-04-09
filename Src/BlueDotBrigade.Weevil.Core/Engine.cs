@@ -95,7 +95,7 @@
 			return new EngineBuilder(sourceFilePath, lineNumber);
 		}
 
-		public void Clear(ClearRecordsOperation clearOperation)
+		public void Clear(ClearOperation clearOperation)
 		{
 			_coreEngine = _coreEngine.FromInstance(clearOperation).Build();
 		}

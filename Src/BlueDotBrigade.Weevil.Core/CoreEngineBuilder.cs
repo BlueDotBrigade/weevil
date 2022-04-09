@@ -37,7 +37,7 @@
 			private readonly CoreEngine _sourceInstance;
 			private readonly int _startAtLineNumber;
 
-			private readonly ClearRecordsOperation _clearOperation;
+			private readonly ClearOperation _clearOperation;
 			private readonly bool _hasBeenCleared;
 
 			private bool _isUsingUserDefinedContext;
@@ -67,7 +67,7 @@
 				Log.Default.Write(LogSeverityType.Debug, message);
 			}
 
-			internal CoreEngineBuilder(CoreEngine source, ClearRecordsOperation clearOperation)
+			internal CoreEngineBuilder(CoreEngine source, ClearOperation clearOperation)
 			{
 				_sourceInstance = source;
 				_clearOperation = clearOperation;

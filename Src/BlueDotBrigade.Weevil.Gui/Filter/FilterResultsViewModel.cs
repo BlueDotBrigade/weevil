@@ -828,7 +828,7 @@
 
 		#region Commands: Filtering
 
-		public void ClearRecords(ClearRecordsOperation operation)
+		public void ClearRecords(ClearOperation operation)
 		{
 			_engine.Clear(operation);
 
