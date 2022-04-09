@@ -4,7 +4,7 @@
 		<Platforms>x64</Platforms>
 		<PackageId>BlueDotBrigade.Weevil.SetupPlugins</PackageId>
 		<RootNamespace>BlueDotBrigade.Weevil.SetupPlugins</RootNamespace>
-		<Version>2.9.0</Version>
+		<Version>2.10.0</Version>
 		<Authors>BlueDotBrigade;</Authors>
 		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
 		<Owners>Blue Dot Brigade</Owners>
@@ -15,8 +15,8 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-		<AssemblyVersion>2.9.0.0</AssemblyVersion>
-		<FileVersion>2.9.0.0</FileVersion>
+		<AssemblyVersion>2.10.0.0</AssemblyVersion>
+		<FileVersion>2.10.0.0</FileVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<WarningLevel>4</WarningLevel>
