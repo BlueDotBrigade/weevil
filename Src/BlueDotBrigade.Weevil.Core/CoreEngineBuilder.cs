@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Collections.Generic;
@@ -36,7 +37,7 @@
 			private readonly CoreEngine _sourceInstance;
 			private readonly int _startAtLineNumber;
 
-			private readonly ClearRecordsOperation _clearOperation;
+			private readonly ClearOperation _clearOperation;
 			private readonly bool _hasBeenCleared;
 
 			private bool _isUsingUserDefinedContext;
@@ -66,7 +67,7 @@
 				Log.Default.Write(LogSeverityType.Debug, message);
 			}
 
-			internal CoreEngineBuilder(CoreEngine source, ClearRecordsOperation clearOperation)
+			internal CoreEngineBuilder(CoreEngine source, ClearOperation clearOperation)
 			{
 				_sourceInstance = source;
 				_clearOperation = clearOperation;
@@ -130,6 +131,7 @@
 
 				string sourceFilePath;
 				long sourceFileLength;
+				Stopwatch sourceFileLoadingPeriod = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
@@ -193,6 +195,8 @@
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
 
+						sourceFileLoadingPeriod.Restart();
+
 						var repository = new SerializedRecordRepository(
 							 dataSource,
 							 coreExtension.GetRecordParser(),
@@ -201,6 +205,8 @@
 							 true);
 
 						records = repository.Get(range, maxRecords);
+
+						sourceFileLoadingPeriod.Stop();
 
 						sidecarManager.Load(
 							records,
@@ -226,6 +232,7 @@
 				var coreEngine = new CoreEngine(
 					sourceFilePath,
 					sourceFileLength,
+					sourceFileLoadingPeriod.Elapsed,
 					coreExtension,
 					context,
 					sidecarManager,

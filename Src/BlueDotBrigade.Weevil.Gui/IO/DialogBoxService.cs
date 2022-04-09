@@ -1,13 +1,13 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
+	using BlueDotBrigade.Weevil.Gui.Navigation;
 	using Microsoft.Win32;
 
 	internal class DialogBoxService : IDialogBoxService

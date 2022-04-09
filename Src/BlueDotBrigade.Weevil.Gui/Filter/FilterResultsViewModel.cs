@@ -451,12 +451,12 @@
 							.UsingRange(openAsResult.Range)
 							.Open();
 
-						_bulletinMediator.Post(new FileChangedBulletin
+						_bulletinMediator.Post(new SourceFileOpenedBulletin
 						(
 							_engine.SourceFilePath,
+							_engine.Metrics.SourceFileLoadingPeriod,
 							_engine.Context,
-							_engine.Count,
-							false
+							_engine.Count
 						));
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
@@ -640,6 +640,14 @@
 
 					_engine.Save();
 					_engine.Reload();
+
+					_bulletinMediator.Post(new SourceFileOpenedBulletin
+					(
+						_engine.SourceFilePath,
+						_engine.Metrics.SourceFileLoadingPeriod,
+						_engine.Context,
+						_engine.Count
+					));
 
 					_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 					_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -827,16 +835,13 @@
 
 		#region Commands: Filtering
 
-		public void ClearRecords(ClearRecordsOperation operation)
+		public void ClearRecords(ClearOperation operation)
 		{
 			_engine.Clear(operation);
 
-			_bulletinMediator.Post(new FileChangedBulletin
+			_bulletinMediator.Post(new ClearRecordsBulletin
 			(
-				_engine.SourceFilePath,
-				_engine.Context,
-				_engine.Count,
-				true
+				_engine.Count
 			));
 
 			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
@@ -1330,13 +1335,12 @@
 				RaisePropertyChanged(nameof(this.VisibleItems));
 			});
 
-
-
 			_bulletinMediator.Post(new FilterChangedBulletin
 			(
 				_engine.Selector.Selected.Count,
 				this.VisibleItems?.Count ?? 0,
-				_engine.Filter.GetMetrics()
+				_engine.Filter.GetMetrics(),
+				_engine.Filter.FilterExecutionTime
 			));
 
 			// Remember: filtering can impact the number of selected records.

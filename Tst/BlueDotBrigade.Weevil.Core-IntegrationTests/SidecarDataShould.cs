@@ -16,7 +16,7 @@
 
 			engine.Selector.Select(31);
 
-			engine.Clear(ClearRecordsOperation.BeforeSelected);
+			engine.Clear(ClearOperation.BeforeSelected);
 
 			Assert.AreEqual(32, engine.Filter.Results[1].LineNumber);
 			Assert.AreEqual("Index31", engine.Filter.Results[1].Metadata.Comment);
@@ -32,7 +32,7 @@
 			Assert.AreEqual("First", firstEngine[0].Metadata.Comment);
 
 			firstEngine.Selector.Select(5);
-			firstEngine.Clear(ClearRecordsOperation.BeforeSelected);
+			firstEngine.Clear(ClearOperation.BeforeSelected);
 			firstEngine.Save(true);
 			firstEngine = null;
 

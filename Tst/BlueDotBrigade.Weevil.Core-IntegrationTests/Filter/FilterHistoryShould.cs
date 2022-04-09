@@ -52,7 +52,7 @@
 
 			var filtersBeforeClear = engine.Filter.IncludeHistory.Count;
 
-			engine.Clear(ClearRecordsOperation.BeforeSelected);
+			engine.Clear(ClearOperation.BeforeSelected);
 
 			Assert.AreEqual(filtersBeforeClear, engine.Filter.IncludeHistory.Count);
 			Assert.AreEqual(uniqueFilter, engine.Filter.IncludeHistory[0]);

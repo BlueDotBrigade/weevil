@@ -119,6 +119,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BulletinKey.cs" />
+    <Compile Include="ClearRecordsBulletin.cs" />
     <Compile Include="Controls\MdixComboBoxBehavior.cs" />
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\CheckBoxValidationErrorConverter.cs" />
@@ -131,7 +132,7 @@
     <Compile Include="Filter\AnalysisCompleteBulletin.cs" />
     <Compile Include="Filter\FilterChangedBulletin.cs" />
     <Compile Include="Filter\FilterExtensions.cs" />
-    <Compile Include="Filter\FileChangedBulletin.cs" />
+    <Compile Include="IO\SourceFileOpenedBulletin.cs" />
     <Compile Include="Filter\SelectionChangedBulletin.cs" />
     <Compile Include="IBulletinMediator.cs" />
     <Compile Include="MainStatusBarView.xaml.cs">
@@ -149,7 +150,7 @@
     <Compile Include="IO\FindDialog.xaml.cs">
       <DependentUpon>FindDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IO\GoToDialog.xaml.cs">
+    <Compile Include="Navigation\GoToDialog.xaml.cs">
       <DependentUpon>GoToDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="IO\UserPromptDialog.xaml.cs">
@@ -247,7 +248,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="IO\GoToDialog.xaml">
+    <Page Include="Navigation\GoToDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

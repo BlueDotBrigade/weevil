@@ -7,13 +7,10 @@
              xmlns:converters1="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:documents="clr-namespace:BlueDotBrigade.Weevil.Windows.Documents;assembly=BlueDotBrigade.Weevil.Windows"
-             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows" 
+             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
              xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.DataContext>
-        <local:MainStatusBarViewModel/>
-    </UserControl.DataContext>
+             d:DesignHeight="450" d:DesignWidth="800"  d:DataContext="{d:DesignInstance local:MainStatusBarViewModel}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
@@ -60,10 +57,9 @@
                     <TextBox>
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
-                                <Setter Property="Text" Value="{Binding FileDetails.SourceFilePath, Mode=OneWay}" />
-                                <Setter Property="ToolTip" Value="Current document&apos;s path."/>
+                                <Setter Property="Text" Value="{Binding StatusMessage, Mode=OneWay}" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding FileDetails.SourceFilePath, Mode=OneWay}" Value="">
+                                    <DataTrigger Binding="{Binding SourceFileDetails.SourceFilePath, Mode=OneWay}" Value="">
                                         <Setter Property="Text" Value="To begin, open a document &amp; start filtering."/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -86,7 +82,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Context-Data-24.png" 
                       ToolTip="The current document&apos;s context."/>
-                    <TextBox Text="{Binding FileDetails.Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
+                    <TextBox Text="{Binding SourceFileDetails.Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
                         ToolTip="The current document&apos;s context."
                         Style="{StaticResource StatusBarTextBox}"/>
                 </StackPanel>
@@ -150,7 +146,7 @@
                                 <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-Data-24.png" />
                                 <Setter Property="ToolTip" Value="Total number of records in the original document."/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding FileDetails.TotalRecordCountChanged}" Value="True">
+                                    <DataTrigger Binding="{Binding TotalRecordCountChanged}" Value="True">
                                         <Setter Property="Source" Value="/Resources/Icons/RecordsOnDisk-DataRequiresAttention-24.png"/>
                                         <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
                                     </DataTrigger>
@@ -158,12 +154,12 @@
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBox Text="{Binding FileDetails.TotalRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
+                    <TextBox Text="{Binding TotalRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
                                 <Setter Property="ToolTip" Value="Total number of records in the original document." />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding FileDetails.TotalRecordCountChanged}" Value="True">
+                                    <DataTrigger Binding="{Binding TotalRecordCountChanged}" Value="True">
                                         <Setter Property="ToolTip" Value="Total number of records&#x0d;&#x0a;after a `Clear` operation was performed."/>
                                     </DataTrigger>
                                 </Style.Triggers>

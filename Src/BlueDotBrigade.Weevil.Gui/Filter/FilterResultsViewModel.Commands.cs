@@ -74,27 +74,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#region Commands: Filtering
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.BeforeSelected), 
+			() => ClearRecords(ClearOperation.BeforeSelected), 
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.AfterSelected),
+			() => ClearRecords(ClearOperation.AfterSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
+			() => ClearRecords(ClearOperation.BeforeAndAfterSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBetweenSelectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.BetweenSelected),
+			() => ClearRecords(ClearOperation.BetweenSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.Selected),
+			() => ClearRecords(ClearOperation.Selected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.Unselected),
+			() => ClearRecords(ClearOperation.Unselected),
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]

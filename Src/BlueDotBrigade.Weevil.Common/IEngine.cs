@@ -4,7 +4,7 @@
 
 	public interface IEngine : ICoreEngine
 	{
-		void Clear(ClearRecordsOperation clearOperation);
+		void Clear(ClearOperation clearOperation);
 
 		void Reload();
 	}
