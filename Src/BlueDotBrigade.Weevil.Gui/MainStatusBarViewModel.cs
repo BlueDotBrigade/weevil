@@ -22,7 +22,7 @@
 		#region  Dependency Properties
 		public static readonly DependencyProperty SourceFileDetailsProperty = DependencyProperty.Register(
 			nameof(SourceFileDetails),
-			typeof(SourceFileOpendBulletin),
+			typeof(SourceFileOpenedBulletin),
 			typeof(MainStatusBarViewModel)
 		);
 
@@ -76,7 +76,7 @@
 
 		public MainStatusBarViewModel()
 		{
-			this.SourceFileDetails = new SourceFileOpendBulletin(String.Empty, ContextDictionary.Empty, 0, TimeSpan.Zero);
+			this.SourceFileDetails = new SourceFileOpenedBulletin(String.Empty, TimeSpan.Zero, ContextDictionary.Empty, 0);
 			this.FilterDetails = new FilterChangedBulletin(0, 0, new Dictionary<string, object>(), TimeSpan.Zero);
 			this.SelectionDetails = new SelectionChangedBulletin(0, Metadata.ElapsedTimeUnknown, string.Empty);
 			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
@@ -107,7 +107,7 @@
 			_uiDispatcher = uiDispatcher;
 
 			// Note: All dependency property read and write operations must be performed by the UI dispatcher.
-			bulletinMediator.Subscribe<SourceFileOpendBulletin>(this, x => OnFileChanged(x));
+			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnFileChanged(x));
 			bulletinMediator.Subscribe<ClearRecordsBulletin>(this, x => OnClearOperation(x));
 			bulletinMediator.Subscribe<FilterChangedBulletin>(this, x => OnFilterChanged(x));
 			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, x => OnSelectionChanged(x));
@@ -126,7 +126,7 @@
 			}
 		}
 
-		private void OnFileChanged(SourceFileOpendBulletin bulletin)
+		private void OnFileChanged(SourceFileOpenedBulletin bulletin)
 		{
 			_wasFileJustOpened = true;
 
@@ -195,9 +195,9 @@
 		#endregion
 
 		#region Properties
-		public SourceFileOpendBulletin SourceFileDetails
+		public SourceFileOpenedBulletin SourceFileDetails
 		{
-			get => (SourceFileOpendBulletin)GetValue(SourceFileDetailsProperty);
+			get => (SourceFileOpenedBulletin)GetValue(SourceFileDetailsProperty);
 			private set => SetValue(SourceFileDetailsProperty, value);
 		}
 

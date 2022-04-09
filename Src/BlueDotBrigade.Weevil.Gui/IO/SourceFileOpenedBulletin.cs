@@ -2,14 +2,14 @@
 {
 	using System;
 
-	internal class SourceFileOpendBulletin
+	internal class SourceFileOpenedBulletin
 	{
-		public SourceFileOpendBulletin(string sourceFilePath, ContextDictionary context, int totalRecordCount, TimeSpan sourceFileLoadingPeriod)
+		public SourceFileOpenedBulletin(string sourceFilePath, TimeSpan sourceFileLoadingPeriod, ContextDictionary context, int totalRecordCount)
 		{
 			this.SourceFilePath = sourceFilePath;
+			this.SourceFileLoadingPeriod = sourceFileLoadingPeriod;
 			this.Context = context;
 			this.TotalRecordCount = totalRecordCount;
-			this.SourceFileLoadingPeriod = sourceFileLoadingPeriod;
 		}
 
 		public string SourceFilePath { get; }

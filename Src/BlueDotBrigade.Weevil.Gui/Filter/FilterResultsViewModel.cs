@@ -451,12 +451,12 @@
 							.UsingRange(openAsResult.Range)
 							.Open();
 
-						_bulletinMediator.Post(new SourceFileOpendBulletin
+						_bulletinMediator.Post(new SourceFileOpenedBulletin
 						(
 							_engine.SourceFilePath,
+							_engine.Metrics.SourceFileLoadingPeriod,
 							_engine.Context,
-							_engine.Count,
-							_engine.Metrics.SourceFileLoadingPeriod
+							_engine.Count
 						));
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
@@ -640,6 +640,14 @@
 
 					_engine.Save();
 					_engine.Reload();
+
+					_bulletinMediator.Post(new SourceFileOpenedBulletin
+					(
+						_engine.SourceFilePath,
+						_engine.Metrics.SourceFileLoadingPeriod,
+						_engine.Context,
+						_engine.Count
+					));
 
 					_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 					_engine.Filter.HistoryChanged += OnFilterHistoryChanged;

@@ -132,7 +132,7 @@
     <Compile Include="Filter\AnalysisCompleteBulletin.cs" />
     <Compile Include="Filter\FilterChangedBulletin.cs" />
     <Compile Include="Filter\FilterExtensions.cs" />
-    <Compile Include="IO\SourceFileOpendBulletin.cs" />
+    <Compile Include="IO\SourceFileOpenedBulletin.cs" />
     <Compile Include="Filter\SelectionChangedBulletin.cs" />
     <Compile Include="IBulletinMediator.cs" />
     <Compile Include="MainStatusBarView.xaml.cs">
