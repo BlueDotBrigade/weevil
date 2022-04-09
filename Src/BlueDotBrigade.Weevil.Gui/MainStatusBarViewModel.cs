@@ -20,9 +20,9 @@
 		private static readonly TimeSpan DisplayMetricsDuration = TimeSpan.FromSeconds(8);
 
 		#region  Dependency Properties
-		public static readonly DependencyProperty FileDetailsProperty = DependencyProperty.Register(
-			nameof(FileDetails),
-			typeof(FileChangedBulletin),
+		public static readonly DependencyProperty SourceFileDetailsProperty = DependencyProperty.Register(
+			nameof(SourceFileDetails),
+			typeof(SourceFileOpendBulletin),
 			typeof(MainStatusBarViewModel)
 		);
 
@@ -55,6 +55,16 @@
 			nameof(StatusMessage),
 			typeof(string),
 			typeof(MainStatusBarViewModel));
+
+		public static readonly DependencyProperty TotalRecordCountProperty = DependencyProperty.Register(
+			nameof(TotalRecordCount),
+			typeof(int),
+			typeof(MainStatusBarViewModel));
+
+		public static readonly DependencyProperty TotalRecordCountChangedProperty = DependencyProperty.Register(
+			nameof(TotalRecordCountChanged),
+			typeof(bool),
+			typeof(MainStatusBarViewModel));
 		#endregion
 
 		private readonly Timer _timer;
@@ -66,7 +76,7 @@
 
 		public MainStatusBarViewModel()
 		{
-			this.FileDetails = new FileChangedBulletin(String.Empty, ContextDictionary.Empty, 0, false, TimeSpan.Zero);
+			this.SourceFileDetails = new SourceFileOpendBulletin(String.Empty, ContextDictionary.Empty, 0, TimeSpan.Zero);
 			this.FilterDetails = new FilterChangedBulletin(0, 0, new Dictionary<string, object>(), TimeSpan.Zero);
 			this.SelectionDetails = new SelectionChangedBulletin(0, Metadata.ElapsedTimeUnknown, string.Empty);
 			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
@@ -97,7 +107,8 @@
 			_uiDispatcher = uiDispatcher;
 
 			// Note: All dependency property read and write operations must be performed by the UI dispatcher.
-			bulletinMediator.Subscribe<FileChangedBulletin>(this, x => OnFileChanged(x));
+			bulletinMediator.Subscribe<SourceFileOpendBulletin>(this, x => OnFileChanged(x));
+			bulletinMediator.Subscribe<ClearRecordsBulletin>(this, x => OnClearOperation(x));
 			bulletinMediator.Subscribe<FilterChangedBulletin>(this, x => OnFilterChanged(x));
 			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, x => OnSelectionChanged(x));
 			bulletinMediator.Subscribe<AnalysisCompleteBulletin>(this, x => OnAnalysisComplete(x));
@@ -111,23 +122,34 @@
 			if (_filterChangedStopwatch.Elapsed >= DisplayMetricsDuration)
 			{
 				_filterChangedStopwatch.Reset();
-				_uiDispatcher.Invoke(() => this.StatusMessage = this.FileDetails.SourceFilePath);
+				_uiDispatcher.Invoke(() => this.StatusMessage = this.SourceFileDetails.SourceFilePath);
 			}
 		}
 
-		private void OnFileChanged(FileChangedBulletin bulletin)
+		private void OnFileChanged(SourceFileOpendBulletin bulletin)
 		{
 			_wasFileJustOpened = true;
 
 			_uiDispatcher.Invoke(() =>
 			{
-				this.FileDetails = bulletin;
+				this.SourceFileDetails = bulletin;
 				this.StatusMessage = bulletin.SourceFilePath;
+				this.TotalRecordCount = bulletin.TotalRecordCount;
+				this.TotalRecordCountChanged = false;
 
 				this.StatusMessage = $"Disk Loading Period: {bulletin.SourceFileLoadingPeriod.ToHumanReadable()}";
 			});
 
 			_filterChangedStopwatch.Restart();
+		}
+
+		private void OnClearOperation(ClearRecordsBulletin clearRecordsBulletin)
+		{
+			_uiDispatcher.Invoke(() =>
+			{
+				this.TotalRecordCount = clearRecordsBulletin.TotalRecordCount;
+				this.TotalRecordCountChanged = true;
+			});
 		}
 
 		private void OnFilterChanged(FilterChangedBulletin bulletin)
@@ -136,7 +158,7 @@
 			{
 				if (_wasFileJustOpened)
 				{
-					this.StatusMessage = $"Disk Loading Period: {this.FileDetails.SourceFileLoadingPeriod.ToHumanReadable()}, ";
+					this.StatusMessage = $"Disk Loading Period: {this.SourceFileDetails.SourceFileLoadingPeriod.ToHumanReadable()}, ";
 					this.StatusMessage += $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
 				}
 				else
@@ -173,10 +195,10 @@
 		#endregion
 
 		#region Properties
-		public FileChangedBulletin FileDetails
+		public SourceFileOpendBulletin SourceFileDetails
 		{
-			get => (FileChangedBulletin)GetValue(FileDetailsProperty);
-			private set => SetValue(FileDetailsProperty, value);
+			get => (SourceFileOpendBulletin)GetValue(SourceFileDetailsProperty);
+			private set => SetValue(SourceFileDetailsProperty, value);
 		}
 
 		public FilterChangedBulletin FilterDetails
@@ -213,6 +235,18 @@
 		{
 			get => (string)GetValue(StatusMessageProperty);
 			private set => SetValue(StatusMessageProperty, value);
+		}
+
+		public int TotalRecordCount
+		{
+			get => (int)GetValue(TotalRecordCountProperty);
+			private set => SetValue(TotalRecordCountProperty, value);
+		}
+
+		public bool TotalRecordCountChanged
+		{
+			get => (bool)GetValue(TotalRecordCountChangedProperty);
+			private set => SetValue(TotalRecordCountChangedProperty, value);
 		}
 		#endregion
 	}

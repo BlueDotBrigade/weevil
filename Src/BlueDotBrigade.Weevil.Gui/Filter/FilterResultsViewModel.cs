@@ -451,12 +451,11 @@
 							.UsingRange(openAsResult.Range)
 							.Open();
 
-						_bulletinMediator.Post(new FileChangedBulletin
+						_bulletinMediator.Post(new SourceFileOpendBulletin
 						(
 							_engine.SourceFilePath,
 							_engine.Context,
 							_engine.Count,
-							false,
 							_engine.Metrics.SourceFileLoadingPeriod
 						));
 
@@ -832,13 +831,9 @@
 		{
 			_engine.Clear(operation);
 
-			_bulletinMediator.Post(new FileChangedBulletin
+			_bulletinMediator.Post(new ClearRecordsBulletin
 			(
-				_engine.SourceFilePath,
-				_engine.Context,
-				_engine.Count,
-				true,
-				_engine.Metrics.SourceFileLoadingPeriod
+				_engine.Count
 			));
 
 			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);

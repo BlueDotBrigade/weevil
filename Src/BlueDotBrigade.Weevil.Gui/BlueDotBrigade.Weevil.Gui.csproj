@@ -119,6 +119,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BulletinKey.cs" />
+    <Compile Include="ClearRecordsBulletin.cs" />
     <Compile Include="Controls\MdixComboBoxBehavior.cs" />
     <Compile Include="Controls\NamespaceDoc.cs" />
     <Compile Include="Converters\CheckBoxValidationErrorConverter.cs" />
@@ -131,7 +132,7 @@
     <Compile Include="Filter\AnalysisCompleteBulletin.cs" />
     <Compile Include="Filter\FilterChangedBulletin.cs" />
     <Compile Include="Filter\FilterExtensions.cs" />
-    <Compile Include="IO\FileChangedBulletin.cs" />
+    <Compile Include="IO\SourceFileOpendBulletin.cs" />
     <Compile Include="Filter\SelectionChangedBulletin.cs" />
     <Compile Include="IBulletinMediator.cs" />
     <Compile Include="MainStatusBarView.xaml.cs">
