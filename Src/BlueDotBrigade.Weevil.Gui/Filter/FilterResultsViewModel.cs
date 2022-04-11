@@ -785,7 +785,12 @@
 		{
 			try
 			{
-				var dialog = new AboutDialog(this.WeevilVersion, LicensePath, ThirdPartyNoticesPath, _engine.SourceFilePath)
+				var dialog = new AboutDialog(
+					_uiDispatcher, 
+					this.WeevilVersion, 
+					LicensePath, 
+					ThirdPartyNoticesPath, 
+					_engine.SourceFilePath)
 				{
 					Owner = _mainWindow,
 				};

@@ -3,11 +3,14 @@
 	using System;
 	using System.Diagnostics;
 	using System.IO;
+	using System.Timers;
 	using System.Windows;
 	using System.Windows.Input;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
 	using BlueDotBrigade.Weevil.Gui.Management;
+	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.IO;
 	using File = BlueDotBrigade.Weevil.IO.File;
 
@@ -16,6 +19,8 @@
 	/// </summary>
 	public partial class AboutDialog : Window
 	{
+		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromMilliseconds(200);
+
 		internal static readonly DependencyProperty DetailsProperty =
 			DependencyProperty.Register(
 				nameof(Details), typeof(string),
@@ -26,64 +31,49 @@
 				nameof(License), typeof(string),
 				typeof(AboutDialog));
 
+		private readonly IUiDispatcher _uiDispatcher;
+		private readonly Version _weevilVersion;
 		private readonly string _thirdPartyNoticesPath;
+		private readonly string _sourceFilePath;
+		private readonly Timer _timer;
 
-		public AboutDialog(Version weevilVersion, string licensePath, string thirdPartyNoticesPath, string sourceFilePath)
+		internal AboutDialog(
+			IUiDispatcher uiDispatcher,
+			Version weevilVersion, 
+			string licensePath, 
+			string thirdPartyNoticesPath, 
+			string sourceFilePath)
 		{
-			var sourceFileSize = GetFileSize(sourceFilePath);
-			var computerSnapshot = ComputerSnapshot.Create();
-			var weevilRamUsed = new StorageUnit(Process.GetCurrentProcess().PrivateMemorySize64);
-			var totalRamAvailable = weevilRamUsed + computerSnapshot.RamTotalFree;
-			var percentUsage = ((float)weevilRamUsed.Bytes / (float)totalRamAvailable.Bytes) * 100.0;
+			_uiDispatcher = uiDispatcher;
+			_weevilVersion = weevilVersion;
+			_thirdPartyNoticesPath = thirdPartyNoticesPath;
+			_sourceFilePath = sourceFilePath;
 
-			this.Details =
-				$"Weevil: {weevilVersion}" + Environment.NewLine +
-				$"Weevil's core engine is powered by open source software." +
-				Environment.NewLine;
-
-			this.Details += 
-				Environment.NewLine +
-				$"Common Language Runtime: {Environment.Version}" + Environment.NewLine +
-				$"Operating System: {computerSnapshot.OsName}" + Environment.NewLine +
-				$"CPU: {computerSnapshot.CpuName}" + Environment.NewLine +
-				Environment.NewLine;
-
-				if (sourceFileSize.Bytes > 0)
-				{
-					if (sourceFileSize.MetaBytes < 1)
-					{
-						this.Details += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine;
-					}
-					else
-					{
-						this.Details += $"Source File Size: {sourceFileSize.MetaBytes:#,###,##0} MB" + Environment.NewLine;
-					}
-				}
-
-				this.Details +=
-					$"RAM Installed: {computerSnapshot.RamTotalInstalled.GigaBytes:0.00} GB" + Environment.NewLine +
-					$"RAM Available: {computerSnapshot.RamTotalFree.GigaBytes:0.00} GB" + Environment.NewLine;
-
-				if (weevilRamUsed.GigaBytes < 1)
-				{
-					this.Details +=
-						$"RAM Weevil Using: {weevilRamUsed.MetaBytes:#,###,##0} MB ({percentUsage:0.0} %)";
-				}
-				else
-				{
-					this.Details += 
-						$"RAM Weevil Using: {weevilRamUsed.GigaBytes:#,###,##0} GB ({percentUsage:0.0} %)";
-				}
-
-			
+			this.Details = GetHeader(_weevilVersion) + Environment.NewLine +
+			    Environment.NewLine +
+				"Loading metrics...";
 
 			this.License = new File().ReadAllText(licensePath);
-
-			_thirdPartyNoticesPath = thirdPartyNoticesPath;
-
 			this.DataContext = this;
 
 			InitializeComponent();
+
+			_timer = new Timer
+			{
+				Interval = DefaultTimerPeriod.TotalMilliseconds,
+				AutoReset = false,
+			};
+			_timer.Elapsed += OnTimerElapsed;
+			_timer.Start();
+		}
+
+		private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+		{
+			_uiDispatcher.Invoke(() =>
+			{
+				this.Details = GetHeader(_weevilVersion) + Environment.NewLine +
+				               GetMetrics(_sourceFilePath);
+			});
 		}
 
 		internal string Details
@@ -96,6 +86,50 @@
 		{
 			get => (string)GetValue(LicenseProperty);
 			set => SetValue(LicenseProperty, value);
+		}
+
+		private static string GetHeader(Version weevilVersion)
+		{
+			return
+				$"Weevil: {weevilVersion}" + Environment.NewLine +
+				$"Weevil's core engine is powered by open source software." +
+				Environment.NewLine;
+		}
+
+		private static string GetMetrics(string sourceFilePath)
+		{
+			string result = string.Empty;
+
+			var sourceFileSize = GetFileSize(sourceFilePath);
+			var computerSnapshot = ComputerSnapshot.Create();
+			var process = Process.GetCurrentProcess();
+			var weevilRamUsed = TaskManager.GetPrivateWorkingSet(process);
+			var totalRamAvailable = weevilRamUsed + computerSnapshot.RamTotalFree;
+			var percentUsage = ((float)weevilRamUsed.Bytes / (float)totalRamAvailable.Bytes) * 100.0;
+
+			result +=
+				$"Common Language Runtime: {Environment.Version}" + Environment.NewLine +
+				$"Operating System: {computerSnapshot.OsName}" + Environment.NewLine +
+				$"CPU: {computerSnapshot.CpuName}" + Environment.NewLine +
+				Environment.NewLine +
+				$"RAM Installed: {computerSnapshot.RamTotalInstalled.GigaBytes:0.0} GB" + Environment.NewLine +
+				$"RAM Available: {computerSnapshot.RamTotalFree.GigaBytes:0.0} GB" + Environment.NewLine +
+				$"RAM Used {weevilRamUsed.MetaBytes:#,###,##0} MB ({percentUsage:0.0} %) as reported by Task Manager" + Environment.NewLine +
+				Environment.NewLine;
+
+			if (sourceFileSize.Bytes > 0)
+			{
+				if (sourceFileSize.MetaBytes < 1)
+				{
+					result += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine;
+				}
+				else
+				{
+					result += $"Source File Size: {sourceFileSize.MetaBytes:#,###,##0} MB" + Environment.NewLine;
+				}
+			}
+
+			return result;
 		}
 
 		private static StorageUnit GetFileSize(string sourceFilePath)
@@ -115,7 +149,7 @@
 			catch (Exception e)
 			{
 				Log.Default.Write(
-					LogSeverityType.Error, 
+					LogSeverityType.Error,
 					e,
 					"Source file size could not be determined.");
 			}
