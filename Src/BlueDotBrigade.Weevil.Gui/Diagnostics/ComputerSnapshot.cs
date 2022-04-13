@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Management
+﻿namespace BlueDotBrigade.Weevil.Gui.Diagnostics
 {
 	using System;
 	using System.Management;
