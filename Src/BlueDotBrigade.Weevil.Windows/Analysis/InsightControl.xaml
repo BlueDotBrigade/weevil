@@ -9,7 +9,17 @@
              xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls"
              xmlns:analysis1="clr-namespace:BlueDotBrigade.Weevil.Analysis;assembly=BlueDotBrigade.Weevil.Common"
              mc:Ignorable="d">
-   <StackPanel DataContext="{Binding 
+    <UserControl.Resources>
+        <Style x:Key="TextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
+            <Setter Property="TextAlignment" Value="Justify" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+    <StackPanel DataContext="{Binding 
                RelativeSource={RelativeSource AncestorType={x:Type analysis:InsightControl}}}">
       <GroupBox
          Header="{Binding Value.Title}"
@@ -58,9 +68,9 @@
                   </Image.Style>
                </Image>
             </Grid>
-            <TextBlock Grid.Row="1" Text="{Binding Value.Details}" 
-                          TextWrapping="Wrap"
-                          TextAlignment="Justify"/>
+            <TextBox Grid.Row="1" 
+                     Text="{Binding Value.Details, Mode=OneWay}" 
+                     Style="{StaticResource TextBoxStyle}" />
          </Grid>
       </GroupBox>
    </StackPanel>
