@@ -9,7 +9,6 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
-	using BlueDotBrigade.Weevil.Gui.Management;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.IO;
 	using File = BlueDotBrigade.Weevil.IO.File;
@@ -105,30 +104,36 @@
 			var process = Process.GetCurrentProcess();
 			var weevilRamUsed = TaskManager.GetPrivateWorkingSet(process);
 			var totalRamAvailable = weevilRamUsed + computerSnapshot.RamTotalFree;
-			var percentUsage = ((float)weevilRamUsed.Bytes / (float)totalRamAvailable.Bytes) * 100.0;
+			var workingSet = new StorageUnit(process.WorkingSet64);
+			var workingSetPercentUsage = ((float)workingSet.Bytes / (float)totalRamAvailable.Bytes) * 100.0;
+			var privateMemory = new StorageUnit(process.PrivateMemorySize64);
 
 			result +=
 				$"Common Language Runtime: {Environment.Version}" + Environment.NewLine +
 				$"Operating System: {computerSnapshot.OsName}" + Environment.NewLine +
 				$"CPU: {computerSnapshot.CpuName}" + Environment.NewLine +
-				Environment.NewLine +
 				$"RAM Installed: {computerSnapshot.RamTotalInstalled.GigaBytes:0.0} GB" + Environment.NewLine +
+				Environment.NewLine +
 				$"RAM Available: {computerSnapshot.RamTotalFree.GigaBytes:0.0} GB" + Environment.NewLine +
-				$"RAM Used {weevilRamUsed.MetaBytes:#,###,##0} MB ({percentUsage:0.0} %) as reported by Task Manager" + Environment.NewLine +
+				$"RAM Used by Weevil {workingSet.MetaBytes:#,###,##0} MB ({workingSetPercentUsage:0.0} %) " + Environment.NewLine +
+				$"Weevil's Total Memory Footprint: {privateMemory.MetaBytes:#,###,##0} MB " + Environment.NewLine +
 				Environment.NewLine;
 
 			if (sourceFileSize.Bytes > 0)
 			{
 				if (sourceFileSize.MetaBytes < 1)
 				{
-					result += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine;
+					result += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine +
+					          Environment.NewLine;
 				}
 				else
 				{
-					result += $"Source File Size: {sourceFileSize.MetaBytes:#,###,##0} MB" + Environment.NewLine;
+					result += $"Source File Size: {sourceFileSize.MetaBytes:#,###,##0} MB" + Environment.NewLine +
+					          Environment.NewLine;
 				}
 			}
 
+			result += $"Process ID: {process.Id}";
 			return result;
 		}
 
