@@ -1,30 +1,47 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
+	using System;
 	using System.Diagnostics;
+	using System.IO;
+	using System.Reflection;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Filter;
+	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 
-	internal class MainWindowViewModel
+	internal class MainWindowViewModel : DependencyObject
 	{
-		private readonly UiResponsivenessMonitor _uiMonitor;
-		private readonly BulletinMediator _bulletinMediator;
+		private readonly IUiDispatcher _uiDispatcher;
 
-		public MainWindowViewModel()
+		public static readonly DependencyProperty ApplicationTitleProperty = DependencyProperty.Register(
+			nameof(ApplicationTitle),
+			typeof(string),
+			typeof(MainWindowViewModel)
+		);
+
+
+		private readonly UiResponsivenessMonitor _uiMonitor;
+
+		public MainWindowViewModel(IUiDispatcher uiDispatcher, Window mainWindow, BulletinMediator bulletinMediator)
 		{
+			_uiDispatcher = uiDispatcher;
 			_uiMonitor = new UiResponsivenessMonitor();
-			_bulletinMediator = new BulletinMediator();
+
+			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnSourceFileChanged(x));
 
 			this.CurrrentFilter = new FilterResultsViewModel(
-				Application.Current.MainWindow,
-				new UiDispatcher(Application.Current.Dispatcher),
-				_bulletinMediator);
+				mainWindow,
+				uiDispatcher,
+				bulletinMediator);
 
 			this.CurrentStatus = new MainStatusBarViewModel(
-				new UiDispatcher(Application.Current.Dispatcher),
-				_bulletinMediator);
+				uiDispatcher,
+				bulletinMediator);
+
+			Version weevilVersion = Assembly.GetEntryAssembly()?.GetName().Version;
+			this.ApplicationTitle = $"Weevil: v{weevilVersion}";
 		}
 
 		public void Start()
@@ -46,8 +63,21 @@
 			_uiMonitor.Stop();
 		}
 
+		private void OnSourceFileChanged(SourceFileOpenedBulletin bulletin)
+		{
+			var title = $"Weevil: " + Path.GetFileNameWithoutExtension(bulletin.SourceFilePath);
+
+			_uiDispatcher.Invoke(() => this.ApplicationTitle = title);
+		}
+
 		public FilterResultsViewModel CurrrentFilter { get; }
 
 		public MainStatusBarViewModel CurrentStatus { get; }
+
+		public string ApplicationTitle
+		{
+			get => (string)GetValue(ApplicationTitleProperty);
+			private set => SetValue(ApplicationTitleProperty, value);
+		}
 	}
 }

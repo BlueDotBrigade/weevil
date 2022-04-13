@@ -8,7 +8,7 @@
 	using System.Windows;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
-	using BlueDotBrigade.Weevil.Gui.Management;
+	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 
 	public partial class App : Application
 	{

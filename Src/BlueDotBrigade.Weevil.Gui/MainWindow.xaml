@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui"
         xmlns:filter="clr-namespace:BlueDotBrigade.Weevil.Gui.Filter"
         mc:Ignorable="d"
-        Title="Weevil" Height="450" Width="800"
+        Title="{Binding ApplicationTitle}" Height="450" Width="800"
 		  WindowStartupLocation="CenterScreen" WindowState="Maximized"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="WhiteSmoke"
