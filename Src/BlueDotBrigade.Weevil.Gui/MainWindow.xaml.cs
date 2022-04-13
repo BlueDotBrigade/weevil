@@ -2,6 +2,7 @@
 {
 	using System.ComponentModel;
 	using System.Windows;
+	using BlueDotBrigade.Weevil.Gui.Threading;
 
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
@@ -12,9 +13,16 @@
 
 		public MainWindow()
 		{
+			var uiDispatcher = new UiDispatcher(Application.Current.Dispatcher);
+			var bulletinMediator = new BulletinMediator();
+
 			InitializeComponent();
 
-			_viewModel = new MainWindowViewModel();
+			_viewModel = new MainWindowViewModel(
+				uiDispatcher,
+				Application.Current.MainWindow,
+				bulletinMediator);
+
 			this.DataContext = _viewModel;
 
 			base.Loaded += OnMainWindowLoaded;
