@@ -128,6 +128,8 @@
     <Compile Include="Converters\SeverityToBackgroundConverter.cs" />
     <Compile Include="Converters\SeverityToForegroundConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="Diagnostics\PerformanceCounterHelper.cs" />
+    <Compile Include="Diagnostics\TaskManager.cs" />
     <Compile Include="DuplicateSubscriptionException.cs" />
     <Compile Include="Filter\AnalysisCompleteBulletin.cs" />
     <Compile Include="Filter\FilterChangedBulletin.cs" />
@@ -156,7 +158,7 @@
     <Compile Include="IO\UserPromptDialog.xaml.cs">
       <DependentUpon>UserPromptDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Management\ComputerSnapshot.cs" />
+    <Compile Include="Diagnostics\ComputerSnapshot.cs" />
     <Compile Include="MenuItemViewModel.cs" />
     <Compile Include="BulletinMediator.cs" />
     <Compile Include="SoftwareDetailsBulletin.cs" />
@@ -395,7 +397,9 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Management\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...
