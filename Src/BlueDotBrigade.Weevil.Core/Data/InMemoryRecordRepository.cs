@@ -158,7 +158,7 @@
 		{
 			var results = new IRecord[records.Length - selectedRecords.Length];
 
-			var blacklist = selectedRecords.ToHashSet<IRecord>();
+			var blacklist = selectedRecords.ToImmutableHashSet();
 
 			var insertAt = 0;
 
