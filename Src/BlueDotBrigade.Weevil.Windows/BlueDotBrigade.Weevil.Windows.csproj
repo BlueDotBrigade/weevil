@@ -1,40 +1,39 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-	<Platforms>x64</Platforms>
-	<PackageId>BlueDotBrigade.Weevil.Windows</PackageId>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Platforms>x64</Platforms>
+    <PackageId>BlueDotBrigade.Weevil.Windows</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil.Windows</RootNamespace>
     <Version>2.10.0</Version>
     <Authors>BlueDotBrigade;</Authors>
-	<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
-	<Owners>Blue Dot Brigade</Owners>
+    <Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+    <Owners>Blue Dot Brigade</Owners>
     <Description>Includes Windows Presentation Foundation (WPF) base element classes, various classes that support the WPF property system and event logic, and other types that can be consumed by Weevil plugins.</Description>
     <IsPackable>true</IsPackable>
-	<PackageReleaseNotes>This libary is currently a work in progress. As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
-	<PackageTags>BlueDotBrigade</PackageTags>
-	<RepositoryType>git</RepositoryType>
-	<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-	<PackageIcon>Weevil.png</PackageIcon>
-	<ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
-	<AssemblyName>BlueDotBrigade.Weevil.Windows</AssemblyName>
-	<Company>Blue Dot Brigade</Company>
+    <PackageReleaseNotes>This libary is currently a work in progress. As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
+    <PackageTags>BlueDotBrigade</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageIcon>Weevil.png</PackageIcon>
+    <ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
+    <AssemblyName>BlueDotBrigade.Weevil.Windows</AssemblyName>
+    <Company>Blue Dot Brigade</Company>
+    <UseWPF>True</UseWPF>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Icons\Insight\TimeGap-Data-48.png" />
     <None Remove="Resources\Icons\Insight\TimeGap-DataRequiresAttention-48.png" />
     <None Remove="Resources\Icons\Insight\TimeGap-NoData-48.png" />
   </ItemGroup>
-	<ItemGroup>
-    <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
-  </ItemGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
+    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Context-Data-24.png" />
@@ -55,21 +54,11 @@
     <Resource Include="Resources\Icons\Weevil.ico" />
     <Resource Include="Resources\Images\Weevil.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Analysis\InsightControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Analysis\InsightControl.xaml.cs">
-      <DependentUpon>InsightControl.xaml</DependentUpon>
-    </Compile>
   </ItemGroup>
 </Project>
