@@ -43,8 +43,15 @@
 			private bool _isUsingUserDefinedContext;
 			private ContextDictionary _userDefinedContext;
 
+			/// <summary>
+			/// Represents the maximum number of records that will be loaded.
+			/// </summary>
 			private int _maxRecords = int.MaxValue;
-			private System.Range _range = System.Range.All;
+
+			/// <summary>
+			/// Represents the line numbers that will be loaded.
+			/// </summary>
+			private Range _range = Range.All;
 
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
@@ -93,6 +100,10 @@
 				return this;
 			}
 
+			/// <summary>
+			/// During the loading process the total number of records will be limited to the specified value.
+			/// </summary>
+			/// <param name="maxRecords">Represents the maximum number of records that can be returned.</param>
 			public CoreEngineBuilder UsingLimit(int maxRecords)
 			{
 				_maxRecords = maxRecords > 0
@@ -107,9 +118,13 @@
 				return this;
 			}
 
+			/// <summary>
+			/// During the loading process the records whose line number are within range will be loaded.
+			/// </summary>
+			/// <param name="range">Represents the line numbers that will be loaded.</param>
 			public CoreEngineBuilder UsingRange(Range range)
 			{
-				_range = range ?? throw new ArgumentNullException(nameof(range));
+				_range = range;
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
@@ -139,12 +154,6 @@
 				var maxRecords = _maxRecords;
 				ImmutableArray<IRecord> records;
 				ImmutableArray<IRecord> selectedRecords = ImmutableArray<IRecord>.Empty;
-
-				System.Range range = _range;
-				if (_range.IsCompleteRange)
-				{
-					range = new System.Range(1, _range.Maximum);
-				}
 
 				var knownContext = new ContextDictionary();
 
@@ -204,7 +213,7 @@
 							 startAtLineNumber,
 							 true);
 
-						records = repository.Get(range, maxRecords);
+						records = repository.Get(_range, maxRecords);
 
 						sourceFileLoadingPeriod.Stop();
 

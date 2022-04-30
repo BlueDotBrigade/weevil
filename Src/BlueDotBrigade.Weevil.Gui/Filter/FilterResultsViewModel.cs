@@ -446,7 +446,7 @@
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
 
 						_engine = Engine
-							.UsingPath(sourceFilePath, openAsResult.Range.Minimum)
+							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
 							.Open();

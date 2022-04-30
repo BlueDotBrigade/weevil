@@ -278,6 +278,11 @@
 			return ImmutableArray.Create(results.ToArray());
 		}
 
+		public ImmutableArray<IRecord> Get(Range range, int maximumCount)
+		{
+			throw new NotImplementedException();
+		}
+
 		public ImmutableArray<IRecord> GetAll()
 		{
 			return Get(_allRecords.Length);
