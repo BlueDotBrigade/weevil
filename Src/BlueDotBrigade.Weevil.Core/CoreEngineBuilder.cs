@@ -44,7 +44,7 @@
 			private ContextDictionary _userDefinedContext;
 
 			private int _maxRecords = int.MaxValue;
-			private Range _range = Range.Complete;
+			private System.Range _range = System.Range.All;
 
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
@@ -140,10 +140,10 @@
 				ImmutableArray<IRecord> records;
 				ImmutableArray<IRecord> selectedRecords = ImmutableArray<IRecord>.Empty;
 
-				Range range = _range;
+				System.Range range = _range;
 				if (_range.IsCompleteRange)
 				{
-					range = new Range(1, _range.Maximum);
+					range = new System.Range(1, _range.Maximum);
 				}
 
 				var knownContext = new ContextDictionary();
