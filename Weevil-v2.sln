@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		ReadMe.md = ReadMe.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core-IntegrationTests", "Tst\BlueDotBrigade.Weevil.Core-IntegrationTests\BlueDotBrigade.Weevil.Core-IntegrationTests.csproj", "{D52FD49C-67D4-4D57-9B8E-806514B69E51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-IntegrationTests", "Tst\BlueDotBrigade.Weevil.Core-IntegrationTests\BlueDotBrigade.Weevil.Core-IntegrationTests.csproj", "{D52FD49C-67D4-4D57-9B8E-806514B69E51}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Common", "Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
 EndProject
@@ -32,7 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 		Weevil.ruleset = Weevil.ruleset
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Common-UnitTests", "Tst\BlueDotBrigade.Weevil.Common-UnitTests\BlueDotBrigade.Weevil.Common-UnitTests.csproj", "{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Common-UnitTests", "Tst\BlueDotBrigade.Weevil.Common-UnitTests\BlueDotBrigade.Weevil.Common-UnitTests.csproj", "{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Interface", "User Interface", "{0CDD10E7-BB6A-4D5C-BAB7-24094A646A98}"
 EndProject
@@ -84,8 +84,8 @@ Global
 		{47080835-A553-44BE-A6FD-13B592C5D048}.Release|x64.Build.0 = Release|x64
 		{47080835-A553-44BE-A6FD-13B592C5D048}.Release|x86.ActiveCfg = Release|Any CPU
 		{47080835-A553-44BE-A6FD-13B592C5D048}.Release|x86.Build.0 = Release|Any CPU
-		{D52FD49C-67D4-4D57-9B8E-806514B69E51}.Debug|x64.ActiveCfg = Debug|x64
-		{D52FD49C-67D4-4D57-9B8E-806514B69E51}.Debug|x64.Build.0 = Debug|x64
+		{D52FD49C-67D4-4D57-9B8E-806514B69E51}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D52FD49C-67D4-4D57-9B8E-806514B69E51}.Debug|x64.Build.0 = Debug|Any CPU
 		{D52FD49C-67D4-4D57-9B8E-806514B69E51}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{D52FD49C-67D4-4D57-9B8E-806514B69E51}.Debug|x86.Build.0 = Debug|Any CPU
 		{D52FD49C-67D4-4D57-9B8E-806514B69E51}.Release|x64.ActiveCfg = Release|x64
@@ -98,8 +98,8 @@ Global
 		{B50F9FCD-32DE-4609-B3D2-E0509B483793}.Release|x64.ActiveCfg = Release|x64
 		{B50F9FCD-32DE-4609-B3D2-E0509B483793}.Release|x64.Build.0 = Release|x64
 		{B50F9FCD-32DE-4609-B3D2-E0509B483793}.Release|x86.ActiveCfg = Release|x64
-		{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}.Debug|x64.ActiveCfg = Debug|x64
-		{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}.Debug|x64.Build.0 = Debug|x64
+		{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}.Debug|x64.Build.0 = Debug|Any CPU
 		{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}.Debug|x86.Build.0 = Debug|Any CPU
 		{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}.Release|x64.ActiveCfg = Release|x64
@@ -112,8 +112,8 @@ Global
 		{5482DA9A-4ADD-4837-BC9D-92B303BD075F}.Release|x64.ActiveCfg = Release|x64
 		{5482DA9A-4ADD-4837-BC9D-92B303BD075F}.Release|x86.ActiveCfg = Release|Any CPU
 		{5482DA9A-4ADD-4837-BC9D-92B303BD075F}.Release|x86.Build.0 = Release|Any CPU
-		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Debug|x64.ActiveCfg = Debug|x64
-		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Debug|x64.Build.0 = Debug|x64
+		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Debug|x64.Build.0 = Debug|Any CPU
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Debug|x86.Build.0 = Debug|Any CPU
 		{3E870AE8-8E00-4F9C-9C0A-B5E88FFB14B9}.Release|x64.ActiveCfg = Release|x64
