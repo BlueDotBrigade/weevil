@@ -3,7 +3,4 @@
 <!-- Your local configuration file should be based on this template. -->
 <!-- If your local file is missing, simply build the project. -->
 <configuration>
-  <startup>
-	  <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8"/>
-  </startup>
 </configuration>
