@@ -67,17 +67,14 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\Weevil.ico" />
   </ItemGroup>
+  <PropertyGroup />
   <PropertyGroup>
-    <PreBuildEvent>ECHO If missing or newer, copy application's configuration file template...
-COPY /-Y "$(ProjectDir)App.config.Template" "$(ProjectDir)App.config"</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>IF "%25WEEVIL_PLUGINS_PATH%25"==""  (
-   ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS
-) else (
-   ECHO Copying plugins to Bin directory...
-   XCOPY "%25WEEVIL_PLUGINS_PATH%25" "$(TargetDir)/Plugins"  /D /I /E /Y
-)</PostBuildEvent>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;" />
+  </Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS&#xD;&#xA;) else (&#xD;&#xA;   ECHO Copying plugins to Bin directory...&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.dll&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.pdb&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;)" />
+  </Target>
 </Project>
