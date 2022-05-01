@@ -5,6 +5,7 @@
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<PlatformTarget>x64</PlatformTarget>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <OutputPath>bin\x64\Debug\</OutputPath>

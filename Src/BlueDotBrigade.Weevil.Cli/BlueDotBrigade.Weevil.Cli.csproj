@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
+	<Platforms>x64</Platforms>
     <AssemblyName>WeevilCli</AssemblyName>
     <Deterministic>false</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
