@@ -158,7 +158,7 @@
 		{
 			var results = new IRecord[records.Length - selectedRecords.Length];
 
-			var blacklist = selectedRecords.ToHashSet<IRecord>();
+			var blacklist = selectedRecords.ToImmutableHashSet();
 
 			var insertAt = 0;
 
@@ -276,6 +276,11 @@
 			}
 
 			return ImmutableArray.Create(results.ToArray());
+		}
+
+		public ImmutableArray<IRecord> Get(Range range, int maximumCount)
+		{
+			throw new NotImplementedException();
 		}
 
 		public ImmutableArray<IRecord> GetAll()

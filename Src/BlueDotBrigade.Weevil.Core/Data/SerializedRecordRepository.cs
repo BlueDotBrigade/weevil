@@ -56,7 +56,7 @@
 
 		public ImmutableArray<IRecord> Get(int maximumCount)
 		{
-			return Get(new Range(0, int.MaxValue), maximumCount);
+			return Get(Range.All, maximumCount);
 		}
 
 		public ImmutableArray<IRecord> Get(Range range, int maximumCount)
@@ -67,14 +67,19 @@
 
 			IRecord record = Record.Dummy;
 
+			if (range.Equals(Range.All))
+			{
+				range = new Range(1, int.MaxValue);
+			}
+
 			do
 			{
 				record = _recordParser.GetNext();
 
 				if (Record.IsGenuine(record))
 				{
-					if (range.Minimum <= record.LineNumber &&
-						record.LineNumber <= range.Maximum)
+					if (range.Start.Value <= record.LineNumber &&
+					    record.LineNumber <= range.End.Value)
 					{
 						results.Add(record);
 					}

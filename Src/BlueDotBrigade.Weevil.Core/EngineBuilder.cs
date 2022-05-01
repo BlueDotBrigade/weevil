@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
+	using System;
 
 	public class EngineBuilder : IEngineBuilder
 	{
