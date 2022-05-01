@@ -759,7 +759,14 @@
 
 		public void ShowRegExTool()
 		{
-			Process.Start(RegEx101Url.ToString());
+			var processDetails = new ProcessStartInfo
+			{
+				FileName = RegEx101Url.ToString(),
+				// Needed to avoid .NET Core runtime error
+				// ... "The specified executable is not a valid application for this OS platform"
+				UseShellExecute = true,
+			};
+			Process.Start(processDetails);
 		}
 
 		public void ShowApplicationLogFile()
@@ -773,7 +780,16 @@
 			{
 				var helpUrl = new Uri("file:///" + HelpFilePath);
 				Debug.WriteLine(helpUrl);
-				Process.Start("\"" + HelpFilePath + "\"");
+
+				var processDetails = new ProcessStartInfo
+				{
+					WorkingDirectory = Path.GetDirectoryName(HelpFilePath) ?? throw new ArgumentException("Help file directory was expected."),
+					FileName = HelpFilePath ?? throw new ArgumentException("Help file name was expected."),
+					// Needed to avoid .NET Core runtime error
+					// ... "The specified executable is not a valid application for this OS platform"
+					UseShellExecute = true, 
+				};
+				Process.Start(processDetails);
 			}
 			else
 			{
