@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Common", "Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj", "{B50F9FCD-32DE-4609-B3D2-E0509B483793}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueDotBrigade.Weevil.Core-UnitTests", "Tst\BlueDotBrigade.Weevil.Core-UnitTests\BlueDotBrigade.Weevil.Core-UnitTests.csproj", "{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-UnitTests", "Tst\BlueDotBrigade.Weevil.Core-UnitTests\BlueDotBrigade.Weevil.Core-UnitTests.csproj", "{3183E2A5-5F81-4BC8-A2E4-20CC99D95DFB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Gui-UiTests", "Tst\BlueDotBrigade.Weevil.Gui-UiTests\BlueDotBrigade.Weevil.Gui-UiTests.csproj", "{5482DA9A-4ADD-4837-BC9D-92B303BD075F}"
 EndProject
@@ -42,11 +42,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notes", "Doc\Notes\Notes.cs
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "BlueDotBrigade.Weevil.Setup", "Src\BlueDotBrigade.Weevil.Setup\BlueDotBrigade.Weevil.Setup.vdproj", "{632B8FF4-0E87-4FE4-9E25-F9757212D1BF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.SetupPlugins", "Src\BlueDotBrigade.Weevil.SetupPlugins\BlueDotBrigade.Weevil.SetupPlugins.csproj", "{3F7706F9-040D-43C6-B137-890E56C04ED2}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.TestingTools", "Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj", "{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BlueDotBrigade.Weevil.Plugins", "Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.shproj", "{BCC424C0-8D0A-428D-B967-52F0D98856B9}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.projitems*{bcc424c0-8d0a-428d-b967-52f0d98856b9}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
@@ -131,11 +134,6 @@ Global
 		{632B8FF4-0E87-4FE4-9E25-F9757212D1BF}.Release|x64.Build.0 = Release
 		{632B8FF4-0E87-4FE4-9E25-F9757212D1BF}.Release|x86.ActiveCfg = Release
 		{632B8FF4-0E87-4FE4-9E25-F9757212D1BF}.Release|x86.Build.0 = Release
-		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Debug|x64.ActiveCfg = Debug|x64
-		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Debug|x86.ActiveCfg = Debug|x64
-		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Release|x64.ActiveCfg = Release|x64
-		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Release|x64.Build.0 = Release|x64
-		{3F7706F9-040D-43C6-B137-890E56C04ED2}.Release|x86.ActiveCfg = Release|x64
 		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Debug|x64.ActiveCfg = Debug|x64
 		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Debug|x64.Build.0 = Debug|x64
 		{7F4BBC0B-2727-4F6C-AB6A-2F241CEB5700}.Debug|x86.ActiveCfg = Debug|x64
