@@ -1,195 +1,188 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <OutputType>WinExe</OutputType>
-	<Platforms>x64</Platforms>
-    <AssemblyName>WeevilGui</AssemblyName>
-    <Deterministic>false</Deterministic>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Update="Filter\FilterResultsViewModel.Commands.cs">
-      <DependentUpon>FilterResultsViewModel.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="WeevilGui.exe.nlog">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-      <Link>Properties\DomainSpecificTerminology.xml</Link>
-    </CodeAnalysisDictionary>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Blend.Interactivity.Wpf">
-      <Version>1.0.1340</Version>
-    </PackageReference>
-    <PackageReference Include="gong-wpf-dragdrop">
-      <Version>2.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF">
-      <Version>2.0.0-beta.90</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignThemes">
-      <Version>4.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="NLog">
-      <Version>4.7.15</Version>
-    </PackageReference>
-    <PackageReference Include="PostSharp">
-      <Version>6.10.10</Version>
-    </PackageReference>
-    <PackageReference Include="PostSharp.Patterns.Model">
-      <Version>6.10.10</Version>
-    </PackageReference>
-    <PackageReference Include="Prism.Mvvm">
-      <Version>1.1.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Collections.Immutable">
-      <Version>6.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Management" Version="6.0.0" />
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
-    <ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
-    <ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\LogEntry-Fatal.png" />
-    <Resource Include="Resources\Icons\Records-Pinned.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Images\Weevil-48.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Filter-24.png" />
-    <Resource Include="Resources\Icons\FilterCancel-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Filter-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Flagged-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Weevil.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Images\Weevil-100.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\NewReleaseAvailable-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Insight\Insight-DataRequiresAttention-24.png" />
-    <Resource Include="Resources\Icons\Insight\Insight-NoData-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Alarms-Inactive-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\Insight\Insight-Data-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\LogEntry-Information-Data-24.png" />
-    <Resource Include="Resources\Icons\LogEntry-Information-NoData-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\LogEntry-Error-Data-24.png" />
-    <Resource Include="Resources\Icons\LogEntry-Error-DataRequiresAttention-24.png" />
-    <Resource Include="Resources\Icons\LogEntry-Error-NoData-24.png" />
-    <Resource Include="Resources\Icons\LogEntry-Warning-Data-24.png" />
-    <Resource Include="Resources\Icons\LogEntry-Warning-NoData-24.png" />
-    <Resource Include="Resources\Icons\RecordsOnDisk-Data-24.png" />
-    <Resource Include="Resources\Icons\RecordsOnDisk-DataRequiresAttention-24.png" />
-    <Resource Include="Resources\Icons\RecordsOnDisk-NoData-24.png" />
-    <Resource Include="Resources\Icons\RecordsSelected-Data-24.png" />
-    <Resource Include="Resources\Icons\RecordsSelected-NoData-24.png" />
-    <Resource Include="Resources\Icons\RecordsVisible-Data-24.png" />
-    <Resource Include="Resources\Icons\RecordsVisible-NoData-24.png" />
-    <Resource Include="Resources\Icons\TimeElapsed-Data-24.png" />
-    <Resource Include="Resources\Icons\TimeElapsed-DataRequiresAttention-24.png" />
-    <Resource Include="Resources\Icons\TimeElapsed-NoData-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Management\" />
-  </ItemGroup>
-  <PropertyGroup />
-  <PropertyGroup>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;" />
-  </Target>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Help.html&quot; &quot;$(TargetDir)..\Doc\\&quot;  /D /Y&#xD;&#xA;&#xD;&#xA;REM Create directory and copy third-party licenses&#xD;&#xA;XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Licenses&quot; &quot;$(TargetDir)..\Licenses&quot;  /D /I /E /Y&#xD;&#xA;&#xD;&#xA;COPY /A /Y &quot;$(SolutionDir)LICENSE.md&quot; &quot;$(TargetDir)..\Licenses\\License.md&quot;&#xD;&#xA;&#xD;&#xA;REM To minimize coupling, Weevil must NEVER have direct knowledge of the plugins.&#xD;&#xA;REM This is why `BlueDotBrigade.Weevil.Plugins` is not added as a project reference.&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS&#xD;&#xA;) else (&#xD;&#xA;   ECHO Copying plugins to Bin directory...&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.dll&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.dll.config&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.pdb&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;)" />
-  </Target>
+	<PropertyGroup>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<OutputType>WinExe</OutputType>
+		<Platforms>x64</Platforms>
+		<AssemblyName>WeevilGui</AssemblyName>
+		<Deterministic>false</Deterministic>
+		<PublishUrl>publish\</PublishUrl>
+		<Install>true</Install>
+		<InstallFrom>Disk</InstallFrom>
+		<UpdateEnabled>false</UpdateEnabled>
+		<UpdateMode>Foreground</UpdateMode>
+		<UpdateInterval>7</UpdateInterval>
+		<UpdateIntervalUnits>Days</UpdateIntervalUnits>
+		<UpdatePeriodically>false</UpdatePeriodically>
+		<UpdateRequired>false</UpdateRequired>
+		<MapFileExtensions>true</MapFileExtensions>
+		<ApplicationRevision>0</ApplicationRevision>
+		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+		<IsWebBootstrapper>false</IsWebBootstrapper>
+		<UseApplicationTrust>false</UseApplicationTrust>
+		<BootstrapperEnabled>true</BootstrapperEnabled>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseWPF>true</UseWPF>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+	</PropertyGroup>
+	<PropertyGroup>
+		<StartupObject>
+		</StartupObject>
+	</PropertyGroup>
+	<PropertyGroup>
+		<ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+		<OutputPath>bin\x64\Debug\</OutputPath>
+		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+		<OutputPath>bin\x64\Release\</OutputPath>
+		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Update="Filter\FilterResultsViewModel.Commands.cs">
+			<DependentUpon>FilterResultsViewModel.cs</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="WeevilGui.exe.nlog">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<WCFMetadata Include="Connected Services\" />
+	</ItemGroup>
+	<ItemGroup>
+		<CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
+			<Link>Properties\DomainSpecificTerminology.xml</Link>
+		</CodeAnalysisDictionary>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Blend.Interactivity.Wpf">
+			<Version>1.0.1340</Version>
+		</PackageReference>
+		<PackageReference Include="gong-wpf-dragdrop">
+			<Version>2.3.2</Version>
+		</PackageReference>
+		<PackageReference Include="LiveChartsCore.SkiaSharpView.WPF">
+			<Version>2.0.0-beta.90</Version>
+		</PackageReference>
+		<PackageReference Include="MaterialDesignThemes">
+			<Version>4.0.0</Version>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="Newtonsoft.Json">
+			<Version>13.0.1</Version>
+		</PackageReference>
+		<PackageReference Include="NLog">
+			<Version>4.7.15</Version>
+		</PackageReference>
+		<PackageReference Include="PostSharp">
+			<Version>6.10.10</Version>
+		</PackageReference>
+		<PackageReference Include="PostSharp.Patterns.Model">
+			<Version>6.10.10</Version>
+		</PackageReference>
+		<PackageReference Include="Prism.Mvvm">
+			<Version>1.1.1</Version>
+		</PackageReference>
+		<PackageReference Include="System.Collections.Immutable">
+			<Version>6.0.0</Version>
+		</PackageReference>
+		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+		<PackageReference Include="System.Management" Version="6.0.0" />
+		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
+		<ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+		<ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\LogEntry-Fatal.png" />
+		<Resource Include="Resources\Icons\Records-Pinned.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Images\Weevil-48.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\Filter-24.png" />
+		<Resource Include="Resources\Icons\FilterCancel-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\Filter-32.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\Flagged-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\Weevil.ico" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Images\Weevil-100.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<BootstrapperPackage Include=".NETFramework,Version=v4.8">
+			<Visible>False</Visible>
+			<ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+			<Install>true</Install>
+		</BootstrapperPackage>
+		<BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+			<Visible>False</Visible>
+			<ProductName>.NET Framework 3.5 SP1</ProductName>
+			<Install>false</Install>
+		</BootstrapperPackage>
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\NewReleaseAvailable-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\Insight\Insight-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\Insight\Insight-NoData-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\Alarms-Inactive-32.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\Insight\Insight-Data-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\LogEntry-Information-Data-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Information-NoData-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\LogEntry-Error-Data-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Error-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Error-NoData-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Warning-Data-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Warning-NoData-24.png" />
+		<Resource Include="Resources\Icons\RecordsOnDisk-Data-24.png" />
+		<Resource Include="Resources\Icons\RecordsOnDisk-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\RecordsOnDisk-NoData-24.png" />
+		<Resource Include="Resources\Icons\RecordsSelected-Data-24.png" />
+		<Resource Include="Resources\Icons\RecordsSelected-NoData-24.png" />
+		<Resource Include="Resources\Icons\RecordsVisible-Data-24.png" />
+		<Resource Include="Resources\Icons\RecordsVisible-NoData-24.png" />
+		<Resource Include="Resources\Icons\TimeElapsed-Data-24.png" />
+		<Resource Include="Resources\Icons\TimeElapsed-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\TimeElapsed-NoData-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Management\" />
+	</ItemGroup>
+	<PropertyGroup />
+	<PropertyGroup>
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;" />
+	</Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Help.html&quot; &quot;$(TargetDir)..\Doc\\&quot;  /D /Y&#xD;&#xA;&#xD;&#xA;REM Create directory and copy third-party licenses&#xD;&#xA;XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Licenses&quot; &quot;$(TargetDir)..\Licenses&quot;  /D /I /E /Y&#xD;&#xA;&#xD;&#xA;COPY /A /Y &quot;$(SolutionDir)LICENSE.md&quot; &quot;$(TargetDir)..\Licenses\\License.md&quot;&#xD;&#xA;&#xD;&#xA;REM To minimize coupling, Weevil must NEVER have direct knowledge of the plugins.&#xD;&#xA;REM This is why `BlueDotBrigade.Weevil.Plugins` is not added as a project reference.&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: Environment variable is missing. WORKS&#xD;&#xA;) else (&#xD;&#xA;   ECHO Copying plugins to Bin directory...&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.dll&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.dll.config&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.pdb&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;)" />
+	</Target>
 </Project>
