@@ -358,8 +358,7 @@ MigrationBackup/
 # As such, plugins must NEVER be added to the Weevil repository.
 /Src/BlueDotBrigade.Weevil.Plugins/*
 !/Src/BlueDotBrigade.Weevil.Plugins/ReadMe.md
-!/Src/BlueDotBrigade.Weevil.Plugins/BlueDotBrigade.Weevil.Plugins.projitems
-!/Src/BlueDotBrigade.Weevil.Plugins/BlueDotBrigade.Weevil.Plugins.shproj
+!/Src/BlueDotBrigade.Weevil.Plugins/BlueDotBrigade.Weevil.Plugins.csproj
 
 # We require log files for testing purposes (logs were previously blocked by global gitignore):
 !*.log
