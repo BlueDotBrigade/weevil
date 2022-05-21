@@ -1,5 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.PlainText
 {
+	using BlueDotBrigade.Weevil.Filter.Expressions;
+
 	internal class ExpressionFactory : IExpressionFactory
 	{
 		public ExpressionFactory(IFilterCriteria criteria)

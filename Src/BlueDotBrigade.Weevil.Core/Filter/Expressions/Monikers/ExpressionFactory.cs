@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 {
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 
 	internal class ExpressionFactory : IExpressionFactory
 	{

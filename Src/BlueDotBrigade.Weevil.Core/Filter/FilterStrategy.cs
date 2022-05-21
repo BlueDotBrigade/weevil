@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
 	using Diagnostics;
 	using Expressions;
