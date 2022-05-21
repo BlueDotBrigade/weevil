@@ -158,11 +158,22 @@
 
 			try
 			{
+				Stream newReleaseStream = null;
+
 #if DEBUG
-				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\NewReleaseNotification.xml");
-				Stream newReleaseStream = FileHelper.Open(applicationInfoPath);
+				var solutionDirectory = EnvironmentHelper.GetSolutionDirectory();
+				var applicationInfoPath = Path.Combine(solutionDirectory, @"Doc\Notes\Release\NewReleaseNotification.xml");
+
+				if (File.Exists(applicationInfoPath))
+				{
+					newReleaseStream = FileHelper.Open(applicationInfoPath);
+				}
+				else
+				{
+					Debug.Assert(false, $"File not found. Path=`{applicationInfoPath}`");
+				}
 #else
-				Stream newReleaseStream = new System.Net.WebClient().OpenRead(NewReleaseUrl);
+				newReleaseStream = new System.Net.WebClient().OpenRead(NewReleaseUrl);
 #endif
 
 				result = TypeFactory.LoadFromXml<ApplicationInfo>(newReleaseStream);
