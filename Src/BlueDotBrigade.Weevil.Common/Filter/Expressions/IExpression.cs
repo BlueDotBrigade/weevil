@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Filter
+﻿namespace BlueDotBrigade.Weevil.Filter.Expressions
 {
 	using Data;
 

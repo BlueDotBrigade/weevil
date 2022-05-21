@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 {
 	using System;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
 
 	internal class ElapsedGreaterThanExpression : IExpression

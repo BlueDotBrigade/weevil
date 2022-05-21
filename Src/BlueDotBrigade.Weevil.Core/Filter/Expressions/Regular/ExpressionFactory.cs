@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Regular
 {
 	using System.Text.RegularExpressions;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 
 	internal class ExpressionFactory : IExpressionFactory
 	{

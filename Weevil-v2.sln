@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		ReadMe.md = ReadMe.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Code", "Shared Code", "{7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Interface", "User Interface", "{A3271171-1CB7-4632-ABFF-6B45C47A4FFA}"
 EndProject
@@ -43,10 +43,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-UnitTests", "Tst\BlueDotBrigade.Weevil.Core-UnitTests\BlueDotBrigade.Weevil.Core-UnitTests.csproj", "{35DCC175-B682-47E0-A2B8-C0F123A1E2AA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Plugins", "Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.csproj", "{8DD59BAD-4E11-45A9-861D-14A4046C1D96}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.projitems*{bcc424c0-8d0a-428d-b967-52f0d98856b9}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
@@ -91,6 +90,10 @@ Global
 		{35DCC175-B682-47E0-A2B8-C0F123A1E2AA}.Debug|x64.Build.0 = Debug|x64
 		{35DCC175-B682-47E0-A2B8-C0F123A1E2AA}.Release|x64.ActiveCfg = Release|x64
 		{35DCC175-B682-47E0-A2B8-C0F123A1E2AA}.Release|x64.Build.0 = Release|x64
+		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Debug|x64.ActiveCfg = Debug|x64
+		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Debug|x64.Build.0 = Debug|x64
+		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Release|x64.ActiveCfg = Release|x64
+		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,8 +106,12 @@ Global
 		{CBFA74F4-AF15-4B6B-B46A-CB7B8049C879} = {7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}
 		{655E4324-C7C5-4314-87CE-748CDFD20004} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 		{87387C7C-089E-4F58-A4C4-A7ADF2E18E6A} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
+		{8DD59BAD-4E11-45A9-861D-14A4046C1D96} = {7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94508D1B-CE45-43A7-8D41-50927BFA3696}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.projitems*{bcc424c0-8d0a-428d-b967-52f0d98856b9}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

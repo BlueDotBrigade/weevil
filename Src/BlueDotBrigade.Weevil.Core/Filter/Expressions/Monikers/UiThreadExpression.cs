@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 {
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
 
 	internal class UiThreadExpression : IExpression
