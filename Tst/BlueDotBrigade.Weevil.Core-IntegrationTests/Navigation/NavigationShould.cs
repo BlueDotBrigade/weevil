@@ -1,9 +1,8 @@
-﻿namespace BlueDotBrigade.Weevil
+﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Navigation;
 	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 

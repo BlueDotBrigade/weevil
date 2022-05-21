@@ -1,9 +1,7 @@
-﻿namespace BlueDotBrigade.Weevil
+﻿namespace BlueDotBrigade.Weevil.Filter
 {
 	using System;
-	using Data;
 	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
-	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]

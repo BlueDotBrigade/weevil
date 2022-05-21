@@ -19,7 +19,6 @@
 	using GongSolutions.Wpf.DragDrop;
 	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Analysis.LogSplitter;
 	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
@@ -34,6 +33,7 @@
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
+	using BlueDotBrigade.Weevil.Utilities;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;

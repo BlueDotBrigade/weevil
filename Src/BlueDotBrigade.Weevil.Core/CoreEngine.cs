@@ -14,7 +14,6 @@
 	using Filter;
 	using Navigation;
 	using Reports;
-	using Reports.Timeline;
 
 	[DebuggerDisplay("InstanceId={_instanceId}, Records={Count}, Results={Filter.Results.Length}")]
 	internal partial class CoreEngine : ICoreEngine
