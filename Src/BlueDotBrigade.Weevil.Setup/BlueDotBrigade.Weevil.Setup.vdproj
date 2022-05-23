@@ -15,12 +15,6 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_067810465A434DDB93196BD8B05E60D5"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_0A3BC7A196BB4E1CBFE9C3F6D5A3897C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -430,7 +424,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Weevil"
         "ProductCode" = "8:{E8A89882-0897-4035-A4D2-58E48BADADEB}"
-        "PackageCode" = "8:{B12FB0C7-0B68-4CD2-A53E-64C7F5E69800}"
+        "PackageCode" = "8:{E31175DC-B1B7-419F-8B35-021E6CC33918}"
         "UpgradeCode" = "8:{67E64001-DCF2-480F-9E5D-9B8DC5AEB41E}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -1085,35 +1079,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_067810465A434DDB93196BD8B05E60D5"
-            {
-            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Plugins\\obj\\x64\\Release\\net6.0\\BlueDotBrigade.Weevil.Plugins.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_B8D829AE304D4719B554D19C3C08B0E1"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|x64"
-            "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{69A3C95D-7B0F-46C4-B370-AE22CB3AA2DC}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_39A6BD26902A4BE6B5FF8248E429D0B0"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1590BBD7B894424D901C17FDD1342BB9"
             {
             "SourcePath" = "8:"
             "TargetName" = "8:"
@@ -1134,11 +1100,12 @@
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
             "OutputConfiguration" = "8:Release|x64"
-            "OutputGroupCanonicalName" = "8:Symbols"
-            "OutputProjectGuid" = "8:{69A3C95D-7B0F-46C4-B370-AE22CB3AA2DC}"
+            "OutputGroupCanonicalName" = "8:PublishItems"
+            "OutputProjectGuid" = "8:{8DD59BAD-4E11-45A9-861D-14A4046C1D96}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
+                "ExcludeFilter" = "8:BlueDotBrigade.Weevil.Plugins*"
                 }
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4113A22BFE00441D86F13F5030239638"
@@ -1164,34 +1131,6 @@
             "OutputConfiguration" = "8:Release|x64"
             "OutputGroupCanonicalName" = "8:PublishItemsOutputGroup"
             "OutputProjectGuid" = "8:{655E4324-C7C5-4314-87CE-748CDFD20004}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_6EE32F408EDB4C9787EB9E1BD2CE87FF"
-            {
-            "SourcePath" = "8:"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_B8D829AE304D4719B554D19C3C08B0E1"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:"
-            "OutputGroupCanonicalName" = "8:PublishItems"
-            "OutputProjectGuid" = "8:{69A3C95D-7B0F-46C4-B370-AE22CB3AA2DC}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {

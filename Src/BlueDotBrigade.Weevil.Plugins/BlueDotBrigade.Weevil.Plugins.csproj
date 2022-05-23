@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<Platforms>x64</Platforms>
-		<PackageId>BlueDotBrigade.Weevil.Plugins</PackageId>
 		<RootNamespace>BlueDotBrigade.Weevil.Plugins</RootNamespace>
 		<Version>2.10.0</Version>
 		<Authors>BlueDotBrigade;</Authors>
@@ -10,22 +9,23 @@
 		<Owners>Blue Dot Brigade</Owners>
 		<Description>This project dynamically detects the plugin files from %WEEVIL_PLUGINS_PATH%, so that thay can be added to the installation package.</Description>
 		<IsPackable>False</IsPackable>
-		<PackageReleaseNotes></PackageReleaseNotes>
-		<PackageTags>BlueDotBrigade; Weevil; Log Viewer;</PackageTags>
-		<RepositoryType>git</RepositoryType>
-		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
 		<AssemblyVersion>2.10.0.0</AssemblyVersion>
 		<FileVersion>2.10.0.0</FileVersion>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 	</PropertyGroup>
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-	  <Exec Command="IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing.&#xD;&#xA;)" />
-	</Target>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<WarningLevel>4</WarningLevel>
+		<DebugType>none</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<DebugType>none</DebugType>
 	</PropertyGroup>
 	<ItemGroup>
-		<Content Include="$(WEEVIL_PLUGINS_PATH)\**\*.dll" LinkBase="Plugins" CopyToOutputDirectory="PreserveNewest" />
-		<Content Include="$(WEEVIL_PLUGINS_PATH)\**\*.pdb" LinkBase="Plugins" CopyToOutputDirectory="PreserveNewest" />
+		<Content Include="*.dll" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+		<Content Include="*.dll.config" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+		<Content Include="*.pdb" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
 	</ItemGroup>
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	  <Exec Command="IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing&#xD;&#xA;)" />
+	</Target>
 </Project>

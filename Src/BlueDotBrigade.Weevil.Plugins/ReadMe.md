@@ -12,14 +12,14 @@ This project is used as a staging area for Weevil plugins.  With this in mind, i
 Environment setup:
 
 1. Download the Weevil source code from GitHub.
-2. Create a Windows `WEEVIL_PLUGINS_PATH` environment variable which points to the `Staging` subdirectory.
+2. Create a Windows `WEEVIL_PLUGINS_PATH` environment variable that points to the`BlueDotBrigade.Weevil.Plugins` directory.
 
 Modifying third-party plugin:
 
 1. In a separate solution, create a new C# project for a vendor specific Weevil plugin.
 2. Modify the post build step to copy the plugin's assemblies to `WEEVIL_PLUGINS_PATH`.
 3. Add a new feature to the plugin.
-4. Compile the project so that the plugin will be pushed to the staging area.
+4. Compile all third-party plugins so that the appropriate output is copied to `WEEVIL_PLUGINS_PATH`. 
 
 Compiling Weevil:
 
