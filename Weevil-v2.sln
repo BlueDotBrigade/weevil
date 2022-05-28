@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Plugi
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "BlueDotBrigade.Weevil.Setup", "Src\BlueDotBrigade.Weevil.Setup\BlueDotBrigade.Weevil.Setup.vdproj", "{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Gui-UiTests", "Tst\BlueDotBrigade.Weevil.Gui-UiTests\BlueDotBrigade.Weevil.Gui-UiTests.csproj", "{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -98,6 +100,10 @@ Global
 		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Debug|x64.Build.0 = Debug
 		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Release|x64.ActiveCfg = Release
 		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Release|x64.Build.0 = Release
+		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Debug|x64.ActiveCfg = Debug|x64
+		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Debug|x64.Build.0 = Debug|x64
+		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Release|x64.ActiveCfg = Release|x64
+		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,6 +117,7 @@ Global
 		{655E4324-C7C5-4314-87CE-748CDFD20004} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 		{87387C7C-089E-4F58-A4C4-A7ADF2E18E6A} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96} = {7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}
+		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94508D1B-CE45-43A7-8D41-50927BFA3696}

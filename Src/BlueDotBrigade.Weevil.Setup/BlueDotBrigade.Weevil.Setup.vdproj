@@ -27,12 +27,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4113A22BFE00441D86F13F5030239638"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_544977D14E454C0BA99CF7A8DCC598AB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -45,7 +39,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_87F077B42D2D44A097A4CE57196652EF"
+        "MsmKey" = "8:_82B6D891F3D044FB89BFB8F8FCAC8817"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B523477A9EE242FF8C87E84BC3CC2EA9"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -291,7 +291,7 @@
             "IconIndex" = "3:0"
                 "Command"
                 {
-                "Command" = "8:_87F077B42D2D44A097A4CE57196652EF"
+                "Command" = "8:_82B6D891F3D044FB89BFB8F8FCAC8817"
                 }
                 "Verbs"
                 {
@@ -544,7 +544,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_16588574BFB2476CB6DF9B8DBC66E9F6"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_25EC7E7534F24179A07B27E92A8D65FA"
             {
             "Name" = "8:Weevil GUI"
             "Arguments" = "8:"
@@ -552,7 +552,7 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_87F077B42D2D44A097A4CE57196652EF"
+            "Target" = "8:_82B6D891F3D044FB89BFB8F8FCAC8817"
             "Folder" = "8:_D5D1EBC029F84235AD6DF04CE67B29BA"
             "WorkingFolder" = "8:_2CA9D3A88ADF4DB7B0324FFC947E62F9"
             "Icon" = "8:"
@@ -1079,7 +1079,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1590BBD7B894424D901C17FDD1342BB9"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_52CC8490C1A245ACBC5F4ADA8FE643C4"
             {
             "SourcePath" = "8:"
             "TargetName" = "8:"
@@ -1099,72 +1099,15 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|x64"
+            "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:PublishItems"
             "OutputProjectGuid" = "8:{8DD59BAD-4E11-45A9-861D-14A4046C1D96}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
-                "ExcludeFilter" = "8:BlueDotBrigade.Weevil.Plugins*"
                 }
             }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4113A22BFE00441D86F13F5030239638"
-            {
-            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Cli\\obj\\x64\\Release\\net6.0-windows\\apphost.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_2CA9D3A88ADF4DB7B0324FFC947E62F9"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|x64"
-            "OutputGroupCanonicalName" = "8:PublishItemsOutputGroup"
-            "OutputProjectGuid" = "8:{655E4324-C7C5-4314-87CE-748CDFD20004}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_87F077B42D2D44A097A4CE57196652EF"
-            {
-            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\obj\\x64\\Release\\net6.0-windows\\apphost.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_2CA9D3A88ADF4DB7B0324FFC947E62F9"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|x64"
-            "OutputGroupCanonicalName" = "8:PublishItemsOutputGroup"
-            "OutputProjectGuid" = "8:{87387C7C-089E-4F58-A4C4-A7ADF2E18E6A}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B707E88D8F344B1F8598292FB8BB2A8D"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_6399D9FB9352471D8A80623863C4C301"
             {
             "SourcePath" = "8:"
             "TargetName" = "8:"
@@ -1184,9 +1127,65 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|x64"
+            "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Symbols"
             "OutputProjectGuid" = "8:{87387C7C-089E-4F58-A4C4-A7ADF2E18E6A}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_82B6D891F3D044FB89BFB8F8FCAC8817"
+            {
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\obj\\x64\\Debug\\net6.0-windows\\apphost.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_2CA9D3A88ADF4DB7B0324FFC947E62F9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:PublishItemsOutputGroup"
+            "OutputProjectGuid" = "8:{87387C7C-089E-4F58-A4C4-A7ADF2E18E6A}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B523477A9EE242FF8C87E84BC3CC2EA9"
+            {
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Cli\\obj\\x64\\Debug\\net6.0-windows\\apphost.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_2CA9D3A88ADF4DB7B0324FFC947E62F9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:PublishItemsOutputGroup"
+            "OutputProjectGuid" = "8:{655E4324-C7C5-4314-87CE-748CDFD20004}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {

@@ -15,7 +15,7 @@
 
 		private void ReleaseUnmanagedResources()
 		{
-			// TODO release unmanaged resources here
+			// No unmanaged resources to release.
 		}
 
 		public void Dispose()

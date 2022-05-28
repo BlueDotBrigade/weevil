@@ -16,11 +16,11 @@
 		<UpdateRequired>false</UpdateRequired>
 		<MapFileExtensions>true</MapFileExtensions>
 		<ApplicationRevision>0</ApplicationRevision>
-		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+		<Version>2.10.0</Version>
+		<ApplicationVersion>2.10.0</ApplicationVersion>
 		<IsWebBootstrapper>false</IsWebBootstrapper>
 		<UseApplicationTrust>false</UseApplicationTrust>
 		<BootstrapperEnabled>true</BootstrapperEnabled>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseWPF>true</UseWPF>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	</PropertyGroup>
@@ -45,6 +45,10 @@
 		</Compile>
 	</ItemGroup>
 	<ItemGroup>
+		<None Update="Resources\Images\Weevil-100.png">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
 		<None Update="WeevilGui.exe.nlog">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -178,6 +182,15 @@
 	<PropertyGroup />
 	<PropertyGroup>
 		<PlatformTarget>x64</PlatformTarget>
+		<Authors>BlueDotBrigade;</Authors>
+		<Company>Blue Dot Brigade</Company>
+		<Description>An open-source C# library &amp; WPF application that facilitates the analysis of log file data, while automatically detecting known issues.</Description>
+		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+		<PackageIcon>Weevil-100.png</PackageIcon>
+		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
 	</PropertyGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing&#xD;&#xA;)" />
@@ -185,4 +198,13 @@
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Help.html&quot; &quot;$(TargetDir)..\Doc\\&quot;  /D /Y&#xD;&#xA;&#xD;&#xA;REM Create directory and copy third-party licenses&#xD;&#xA;XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Licenses&quot; &quot;$(TargetDir)..\Licenses&quot;  /D /I /E /Y&#xD;&#xA;&#xD;&#xA;COPY /A /Y &quot;$(SolutionDir)LICENSE.md&quot; &quot;$(TargetDir)..\Licenses\\License.md&quot;&#xD;&#xA;&#xD;&#xA;REM To minimize coupling, Weevil must NEVER have direct knowledge of the plugins.&#xD;&#xA;REM This is why `BlueDotBrigade.Weevil.Plugins` is not added as a project reference.&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   REM Nothing more to do.&#xD;&#xA;) else (&#xD;&#xA;   ECHO Copying plugins to Bin directory...&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.*&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;)" />
 	</Target>
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>BlueDotBrigade.Weevil.Gui-UiTests</_Parameter1>
+		</AssemblyAttribute>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<!-- Required by Moq -->
+			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>
