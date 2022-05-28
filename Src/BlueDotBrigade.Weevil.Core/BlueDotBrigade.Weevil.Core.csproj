@@ -11,7 +11,7 @@
     <Description>The Weevil library facilitates the parsing, filtering and analysis of log files.</Description>
     <IsPackable>true</IsPackable>
     <PackageReleaseNotes>This library is currently a work in progress. As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
-    <PackageTags>BlueDotBrigade</PackageTags>
+    <PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
@@ -20,6 +20,7 @@
     <PackageIcon>Weevil.png</PackageIcon>
     <ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
     <AssemblyName>BlueDotBrigade.Weevil.Core</AssemblyName>
+    <Company>Blue Dot Brigade</Company>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Properties\**" />
