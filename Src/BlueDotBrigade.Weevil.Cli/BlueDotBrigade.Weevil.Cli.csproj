@@ -64,6 +64,8 @@
 	<PropertyGroup />
 	<PropertyGroup>
 		<PlatformTarget>x64</PlatformTarget>
+		<Company>Blue Dot Brigade</Company>
+		<Authors>BlueDotBrigade;</Authors>
 	</PropertyGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing.&#xD;&#xA;)" />
