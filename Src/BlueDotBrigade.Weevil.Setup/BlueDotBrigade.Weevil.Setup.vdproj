@@ -425,7 +425,7 @@
         "ProductName" = "8:Weevil"
         "ProductCode" = "8:{E8A89882-0897-4035-A4D2-58E48BADADEB}"
         "PackageCode" = "8:{E31175DC-B1B7-419F-8B35-021E6CC33918}"
-        "UpgradeCode" = "8:{67E64001-DCF2-480F-9E5D-9B8DC5AEB41E}"
+        "UpgradeCode" = "8:{41DF7DC3-3176-4A07-81F7-F993241E8CE7}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
@@ -1137,7 +1137,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_82B6D891F3D044FB89BFB8F8FCAC8817"
             {
-            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\obj\\x64\\Debug\\net6.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Gui\\obj\\x64\\Release\\net6.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_2CA9D3A88ADF4DB7B0324FFC947E62F9"
@@ -1165,7 +1165,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B523477A9EE242FF8C87E84BC3CC2EA9"
             {
-            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Cli\\obj\\x64\\Debug\\net6.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\BlueDotBrigade.Weevil.Cli\\obj\\x64\\Release\\net6.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_2CA9D3A88ADF4DB7B0324FFC947E62F9"
