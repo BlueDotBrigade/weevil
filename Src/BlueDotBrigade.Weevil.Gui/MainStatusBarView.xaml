@@ -47,6 +47,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                     </Grid>
                 </ItemsPanelTemplate>
@@ -85,6 +86,20 @@
                     <TextBox Text="{Binding SourceFileDetails.Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
                         ToolTip="The current document&apos;s context."
                         Style="{StaticResource StatusBarTextBox}"/>
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Resources/Icons/FileRemarks-Data-24.png"/>
+                                <Setter Property="ToolTip" Value="User has not included file level remarks."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasFileRemarks, Mode=OneWay}" Value="True">
+                                        <Setter Property="Source" Value="/Resources/Icons/FileRemarks-DataRequiresAttention-24.png"/>
+                                        <Setter Property="ToolTip" Value="User has included file level remarks."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                 </StackPanel>
             </StatusBarItem>
             <StatusBarItem Grid.Column="4" VerticalAlignment="Center">
