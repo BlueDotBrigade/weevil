@@ -275,6 +275,18 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
+		public string UserRemarks
+		{
+			get
+			{
+				return _engine.UserRemarks;
+			}
+			set
+			{
+				_engine.UserRemarks = value;
+			}
+		}
+
 		public int ActiveRecordIndex { get; set; }
 
 		public bool IncludeDebugRecords { get; set; }
@@ -484,6 +496,11 @@
 						Log.Default.Write("Updating filter history on the UI.");
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
 						RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
+
+						_uiDispatcher.Invoke(() =>
+						{
+							this.UserRemarks = _engine.UserRemarks;
+						});
 
 						_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 						_engine.Filter.HistoryChanged += OnFilterHistoryChanged;

@@ -61,6 +61,7 @@
 			internal CoreEngineBuilder(string sourceFilePath, int lineNumber)
 			{
 				_sourceFilePath = sourceFilePath;
+
 				_startAtLineNumber = lineNumber;
 				_hasBeenCleared = false;
 
@@ -156,6 +157,7 @@
 				ImmutableArray<IRecord> selectedRecords = ImmutableArray<IRecord>.Empty;
 
 				var knownContext = new ContextDictionary();
+				var userRemarks = string.Empty;
 
 				var inclusiveFilterHistory = new List<string>();
 				var exclusiveFilterHistory = new List<string>();
@@ -167,6 +169,7 @@
 					sourceFileLength = _sourceInstance._logFileMetrics.FileSize;
 
 					knownContext = _sourceInstance._context;
+					userRemarks = _sourceInstance._userRemarks;
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
 
@@ -220,6 +223,7 @@
 						sidecarManager.Load(
 							records,
 							out knownContext,
+							out userRemarks,
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
 							out tableOfContents);
@@ -244,6 +248,7 @@
 					sourceFileLoadingPeriod.Elapsed,
 					coreExtension,
 					context,
+					userRemarks,
 					sidecarManager,
 					records,
 					_hasBeenCleared,

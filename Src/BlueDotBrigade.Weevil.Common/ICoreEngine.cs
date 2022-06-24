@@ -31,6 +31,8 @@
 		/// </summary>
 		bool HasBeenCleared { get; }
 		ContextDictionary Context { get; }
+
+		string UserRemarks { get; set; }
 		string SourceFilePath { get; }
 		string SourceDirectory { get; }
 		/// <summary>

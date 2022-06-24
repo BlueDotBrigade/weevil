@@ -398,7 +398,7 @@
                                     IsEnabled="True" 
                                     MinWidth="150"
                                     TextWrapping="Wrap" 
-                                                controls:TextBoxBehavior.AutoSelectEnabled="True">
+                                    controls:TextBoxBehavior.AutoSelectEnabled="True">
                         </TextBox>
                      </DataTemplate>
                   </GridViewColumn.CellTemplate>
@@ -437,27 +437,44 @@
                       IsIndeterminate="True"  />
       </StackPanel>
       <Separator Grid.Row="2" Style="{StaticResource MaterialDesignSeparator}" Margin="0"/>
-      <StackPanel x:Name="FilterOptions" Grid.Row="3" Orientation="Horizontal" 
-                  IsEnabled="{Binding IsFilterToolboxEnabled}"
-                  Visibility="{Binding AreFilterOptionsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }" >
-         <CheckBox
-            IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
-            <AccessText Text="Can Include _Debug"></AccessText>
-         </CheckBox>
-         <CheckBox
-            IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
-            <AccessText Text="Can Include _Trace"></AccessText>
-         </CheckBox>
-         <CheckBox
-               IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
-               <AccessText Text="Must Include _Pinned"></AccessText>
-            </CheckBox>
-            <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
-               <AccessText Text="_Manual Filtering"></AccessText>
-            </CheckBox>
-         <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
-               <AccessText Text="_Case Sensitive Filtering"></AccessText>
-            </CheckBox>
-      </StackPanel>
+        <Grid x:Name="FilterOptions" Grid.Row="3"
+                IsEnabled="{Binding IsFilterToolboxEnabled}"
+                Visibility="{Binding AreFilterOptionsVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter} }">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" Grid.Row="0">
+                    <CheckBox
+                        IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
+                        <AccessText Text="Can Include _Debug"></AccessText>
+                    </CheckBox>
+                    <CheckBox
+                        IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
+                        <AccessText Text="Can Include _Trace"></AccessText>
+                    </CheckBox>
+                    <CheckBox
+                        IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
+                        <AccessText Text="Must Include _Pinned"></AccessText>
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
+                        <AccessText Text="_Manual Filtering"></AccessText>
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
+                        <AccessText Text="_Case Sensitive Filtering"></AccessText>
+                    </CheckBox>
+                </StackPanel>
+            <TextBox Grid.Row="1"
+                     Text="{Binding Path=UserRemarks, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
+                     IsEnabled="True" 
+                     MinWidth="150"
+                     TextWrapping="Wrap" 
+                     controls:TextBoxBehavior.AutoSelectEnabled="True"
+                     materialDesign:HintAssist.Hint="Remarks"
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+        </Grid>
     </Grid>
 </UserControl>

@@ -23,6 +23,7 @@
 
 		private readonly string _sourceFilePath;
 		private readonly ContextDictionary _context;
+		private string _userRemarks;
 
 		private readonly LogFileMetrics _logFileMetrics;
 
@@ -71,6 +72,7 @@
 			TimeSpan sourceFileLoadingPeriod,
 			ICoreExtension coreExtension,
 			ContextDictionary context,
+			string userRemarks,
 			SidecarManager sidecarManager,
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
@@ -87,6 +89,7 @@
 
 			_coreExtension = coreExtension;
 			_context = context;
+			_userRemarks = userRemarks;
 
 			_sourceFilePath = sourceFilePath;
 			_allRecords = records;
@@ -215,6 +218,12 @@
 
 		public ContextDictionary Context => _context;
 
+		public string UserRemarks
+		{
+			get { return _userRemarks ?? String.Empty; }
+			set { _userRemarks = value ?? String.Empty; }
+		}
+
 		public string SourceFilePath => _sourceFilePath;
 
 		public string SourceDirectory => Path.GetDirectoryName(_sourceFilePath);
@@ -265,13 +274,13 @@
 
 		public void Save(bool deleteBackup)
 		{
-
 			var sidecarData = new SidecarData
 			{
 				Records = _allRecords,
 				Context = _context,
 				FilterTraits = _filterManager,
 				TableOfContents = _navigationManager.TableOfContents,
+				UserRemarks = _userRemarks,
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);
