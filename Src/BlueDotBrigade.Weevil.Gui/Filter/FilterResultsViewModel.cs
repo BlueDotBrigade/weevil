@@ -283,7 +283,11 @@
 			}
 			set
 			{
-				_engine.UserRemarks = value;
+				if (value != _engine.UserRemarks)
+				{
+					_engine.UserRemarks = value;
+					_bulletinMediator.Post(new FileRemarksChangedBulletin(_engine.UserRemarks.Any()));
+				}
 			}
 		}
 
@@ -482,6 +486,14 @@
 							_engine.Count
 						));
 
+
+						_uiDispatcher.Invoke(() =>
+						{
+							this.UserRemarks = _engine.UserRemarks;
+						});
+
+						_bulletinMediator.Post(new FileRemarksChangedBulletin(_engine.UserRemarks.Any()));
+
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
 						var currentSection = string.Empty;
 						if (selectedItem != null)
@@ -496,11 +508,6 @@
 						Log.Default.Write("Updating filter history on the UI.");
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
 						RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
-
-						_uiDispatcher.Invoke(() =>
-						{
-							this.UserRemarks = _engine.UserRemarks;
-						});
 
 						_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 						_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
