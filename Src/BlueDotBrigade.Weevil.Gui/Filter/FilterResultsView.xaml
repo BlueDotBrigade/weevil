@@ -271,7 +271,7 @@
                <Separator/>
                <MenuItem Header="Reload " Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
                <Separator/>
-               <MenuItem Header="Navigation...">
+               <MenuItem Header="Navigate">
                   <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
                   <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
                   <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
@@ -292,7 +292,7 @@
                <Separator/>
                     <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
                <MenuItem Header="Graph Data" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
-                    <MenuItem Header="Analyzers...">
+                    <MenuItem Header="Analyze...">
                       <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                       <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
                       <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
@@ -301,7 +301,7 @@
                         <MenuItem Header="Measure Elapsed Time (UI Thread)" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
                         <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
                </MenuItem>
-               <MenuItem Header="Custom Analyzers..."
+                    <MenuItem Header="Analyze Further..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
                               ItemContainerStyle="{StaticResource CommandMenuItemStyle}">
                   <MenuItem.Style>
