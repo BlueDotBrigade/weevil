@@ -65,6 +65,11 @@
 			nameof(TotalRecordCountChanged),
 			typeof(bool),
 			typeof(MainStatusBarViewModel));
+
+		public static readonly DependencyProperty HasFileRemarksProperty = DependencyProperty.Register(
+			nameof(HasFileRemarks),
+			typeof(bool),
+			typeof(MainStatusBarViewModel));
 		#endregion
 
 		private readonly Timer _timer;
@@ -90,6 +95,8 @@
 			this.FilterDetails.SeverityMetrics["Errors"] = 0;
 			this.FilterDetails.SeverityMetrics["Fatals"] = 0;
 
+			this.HasFileRemarks = false;
+
 			_filterChangedStopwatch = new Stopwatch();
 
 			_timer = new Timer
@@ -114,6 +121,7 @@
 			bulletinMediator.Subscribe<AnalysisCompleteBulletin>(this, x => OnAnalysisComplete(x));
 			bulletinMediator.Subscribe<InsightChangedBulletin>(this, x => OnNewInsight(x));
 			bulletinMediator.Subscribe<SoftwareDetailsBulletin>(this, x => OnSoftwareDetailsReceived(x));
+			bulletinMediator.Subscribe<FileRemarksChangedBulletin>(this, x => OnFileRemarksChanged(x));
 		}
 
 		#region Event Handlers
@@ -192,6 +200,11 @@
 		{
 			_uiDispatcher.Invoke(() => this.SoftwareDetails = bulletin);
 		}
+
+		private void OnFileRemarksChanged(FileRemarksChangedBulletin bulletin)
+		{
+			_uiDispatcher.Invoke(() => this.HasFileRemarks = bulletin.HasFileRemarks);
+		}
 		#endregion
 
 		#region Properties
@@ -247,6 +260,12 @@
 		{
 			get => (bool)GetValue(TotalRecordCountChangedProperty);
 			private set => SetValue(TotalRecordCountChangedProperty, value);
+		}
+
+		public bool HasFileRemarks
+		{
+			get => (bool)GetValue(HasFileRemarksProperty);
+			private set => SetValue(HasFileRemarksProperty, value);
 		}
 		#endregion
 	}

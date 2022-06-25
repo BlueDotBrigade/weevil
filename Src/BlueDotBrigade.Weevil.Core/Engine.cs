@@ -65,6 +65,18 @@
 
 		public ContextDictionary Context => _coreEngine.Context;
 
+		public string UserRemarks
+		{
+			get
+			{
+				return _coreEngine.UserRemarks;
+			}
+			set
+			{
+				_coreEngine.UserRemarks = value;
+			}
+		}
+
 		public string SourceFilePath => Engine.IsRealInstance(this)
 			? _coreEngine.SourceFilePath
 			: string.Empty;

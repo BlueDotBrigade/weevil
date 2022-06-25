@@ -275,6 +275,22 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
+		public string UserRemarks
+		{
+			get
+			{
+				return _engine.UserRemarks;
+			}
+			set
+			{
+				if (value != _engine.UserRemarks)
+				{
+					_engine.UserRemarks = value;
+					_bulletinMediator.Post(new FileRemarksChangedBulletin(_engine.UserRemarks.Any()));
+				}
+			}
+		}
+
 		public int ActiveRecordIndex { get; set; }
 
 		public bool IncludeDebugRecords { get; set; }
@@ -469,6 +485,14 @@
 							_engine.Context,
 							_engine.Count
 						));
+
+
+						_uiDispatcher.Invoke(() =>
+						{
+							this.UserRemarks = _engine.UserRemarks;
+						});
+
+						_bulletinMediator.Post(new FileRemarksChangedBulletin(_engine.UserRemarks.Any()));
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
 						var currentSection = string.Empty;

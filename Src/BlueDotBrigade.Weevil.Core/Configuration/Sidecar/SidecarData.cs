@@ -14,5 +14,6 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 		public ContextDictionary Context { get; set; }
 		public IFilterTraits FilterTraits { get; set; }
 		public TableOfContents TableOfContents { get; set; }
+		public string UserRemarks { get; set; }
 	}
 }
