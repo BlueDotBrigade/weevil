@@ -89,11 +89,11 @@
                     <Image>
                         <Image.Style>
                             <Style TargetType="{x:Type Image}">
-                                <Setter Property="Source" Value="/Resources/Icons/FileRemarks-Data-24.png"/>
+                                <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-Data-24.png"/>
                                 <Setter Property="ToolTip" Value="User has not included file level remarks."/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasFileRemarks, Mode=OneWay}" Value="True">
-                                        <Setter Property="Source" Value="/Resources/Icons/FileRemarks-DataRequiresAttention-24.png"/>
+                                    <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
+                                        <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
                                         <Setter Property="ToolTip" Value="User has included file level remarks."/>
                                     </DataTrigger>
                                 </Style.Triggers>

@@ -66,8 +66,8 @@
 			typeof(bool),
 			typeof(MainStatusBarViewModel));
 
-		public static readonly DependencyProperty HasFileRemarksProperty = DependencyProperty.Register(
-			nameof(HasFileRemarks),
+		public static readonly DependencyProperty HasSourceFileRemarksProperty = DependencyProperty.Register(
+			nameof(HasSourceFileRemarks),
 			typeof(bool),
 			typeof(MainStatusBarViewModel));
 		#endregion
@@ -95,7 +95,7 @@
 			this.FilterDetails.SeverityMetrics["Errors"] = 0;
 			this.FilterDetails.SeverityMetrics["Fatals"] = 0;
 
-			this.HasFileRemarks = false;
+			this.HasSourceFileRemarks = false;
 
 			_filterChangedStopwatch = new Stopwatch();
 
@@ -121,7 +121,7 @@
 			bulletinMediator.Subscribe<AnalysisCompleteBulletin>(this, x => OnAnalysisComplete(x));
 			bulletinMediator.Subscribe<InsightChangedBulletin>(this, x => OnNewInsight(x));
 			bulletinMediator.Subscribe<SoftwareDetailsBulletin>(this, x => OnSoftwareDetailsReceived(x));
-			bulletinMediator.Subscribe<FileRemarksChangedBulletin>(this, x => OnFileRemarksChanged(x));
+			bulletinMediator.Subscribe<SourceFileRemarksChangedBulletin>(this, x => OnFileRemarksChanged(x));
 		}
 
 		#region Event Handlers
@@ -201,9 +201,9 @@
 			_uiDispatcher.Invoke(() => this.SoftwareDetails = bulletin);
 		}
 
-		private void OnFileRemarksChanged(FileRemarksChangedBulletin bulletin)
+		private void OnFileRemarksChanged(SourceFileRemarksChangedBulletin bulletin)
 		{
-			_uiDispatcher.Invoke(() => this.HasFileRemarks = bulletin.HasFileRemarks);
+			_uiDispatcher.Invoke(() => this.HasSourceFileRemarks = bulletin.HasSourceFileRemarks);
 		}
 		#endregion
 
@@ -262,10 +262,10 @@
 			private set => SetValue(TotalRecordCountChangedProperty, value);
 		}
 
-		public bool HasFileRemarks
+		public bool HasSourceFileRemarks
 		{
-			get => (bool)GetValue(HasFileRemarksProperty);
-			private set => SetValue(HasFileRemarksProperty, value);
+			get => (bool)GetValue(HasSourceFileRemarksProperty);
+			private set => SetValue(HasSourceFileRemarksProperty, value);
 		}
 		#endregion
 	}

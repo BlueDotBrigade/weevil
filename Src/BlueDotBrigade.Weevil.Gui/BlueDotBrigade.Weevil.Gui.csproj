@@ -105,9 +105,9 @@
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Resource Include="Resources\Icons\FileRemarks-Data-24.png" />
-		<Resource Include="Resources\Icons\FileRemarks-DataRequiresAttention-24.png" />
-		<Resource Include="Resources\Icons\FileRemarks-NoData-24.png" />
+		<Resource Include="Resources\Icons\SourceFileRemarks-Data-24.png" />
+		<Resource Include="Resources\Icons\SourceFileRemarks-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\SourceFileRemarks-NoData-24.png" />
 		<Resource Include="Resources\Icons\LogEntry-Fatal.png" />
 		<Resource Include="Resources\Icons\Records-Pinned.png" />
 	</ItemGroup>
