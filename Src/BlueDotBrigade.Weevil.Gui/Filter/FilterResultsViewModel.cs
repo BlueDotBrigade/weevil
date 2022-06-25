@@ -275,18 +275,18 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
-		public string UserRemarks
+		public string SourceFileRemarks
 		{
 			get
 			{
-				return _engine.UserRemarks;
+				return _engine.SourceFileRemarks;
 			}
 			set
 			{
-				if (value != _engine.UserRemarks)
+				if (value != _engine.SourceFileRemarks)
 				{
-					_engine.UserRemarks = value;
-					_bulletinMediator.Post(new FileRemarksChangedBulletin(_engine.UserRemarks.Any()));
+					_engine.SourceFileRemarks = value;
+					_bulletinMediator.Post(new SourceFileRemarksChangedBulletin(_engine.SourceFileRemarks.Any()));
 				}
 			}
 		}
@@ -489,10 +489,10 @@
 
 						_uiDispatcher.Invoke(() =>
 						{
-							this.UserRemarks = _engine.UserRemarks;
+							this.SourceFileRemarks = _engine.SourceFileRemarks;
 						});
 
-						_bulletinMediator.Post(new FileRemarksChangedBulletin(_engine.UserRemarks.Any()));
+						_bulletinMediator.Post(new SourceFileRemarksChangedBulletin(_engine.SourceFileRemarks.Any()));
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
 						var currentSection = string.Empty;

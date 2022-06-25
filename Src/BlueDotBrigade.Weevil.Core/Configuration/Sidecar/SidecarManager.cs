@@ -26,13 +26,13 @@
 		public void Load(
 			ImmutableArray<IRecord> allRecords,
 			out ContextDictionary context,
-			out string userRemarks,
+			out string sourceFileRemarks,
 			out List<string> inclusiveFilterHistory,
 			out List<string> exclusiveFilterHistory,
 			out List<Section> tableOfContents)
 		{
 			context = new ContextDictionary();
-			userRemarks = string.Empty;
+			sourceFileRemarks = string.Empty;
 			inclusiveFilterHistory = new List<string>();
 			exclusiveFilterHistory = new List<string>();
 			tableOfContents = new List<Section>();
@@ -44,7 +44,7 @@
 				List<string> inclusiveHistory = inclusiveFilterHistory;
 				List<string> exclusiveHistory = exclusiveFilterHistory;
 				ContextDictionary contextProperties = context;
-				string actualUserRemarks = userRemarks;
+				string actualSourceFileRemarks = sourceFileRemarks;
 				List<Section> toc = tableOfContents;
 
 				var loaders = new List<IExecute>
@@ -55,7 +55,7 @@
 						x => x.Apply(
 							allRecords, 
 							contextProperties,
-							out actualUserRemarks, 
+							out actualSourceFileRemarks, 
 							inclusiveHistory, 
 							exclusiveHistory, 
 							toc)),
@@ -80,7 +80,7 @@
 
 				if (sidecarLoaded == true)
 				{
-					userRemarks = actualUserRemarks; // HACK: Remove this hack to get around passing variables to anonymous methods.
+					sourceFileRemarks = actualSourceFileRemarks; // HACK: Remove this hack to get around passing variables to anonymous methods.
 				}
 				else
 				{

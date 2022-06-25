@@ -468,7 +468,7 @@
                     </CheckBox>
                 </StackPanel>
             <TextBox Grid.Row="1"
-                     Text="{Binding Path=UserRemarks, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
+                     Text="{Binding Path=SourceFileRemarks, Mode=TwoWay, Delay=500, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
                      IsEnabled="True" 
                      MinWidth="150"
                      TextWrapping="Wrap" 

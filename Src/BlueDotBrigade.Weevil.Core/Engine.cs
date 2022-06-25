@@ -65,15 +65,15 @@
 
 		public ContextDictionary Context => _coreEngine.Context;
 
-		public string UserRemarks
+		public string SourceFileRemarks
 		{
 			get
 			{
-				return _coreEngine.UserRemarks;
+				return _coreEngine.SourceFileRemarks;
 			}
 			set
 			{
-				_coreEngine.UserRemarks = value;
+				_coreEngine.SourceFileRemarks = value;
 			}
 		}
 

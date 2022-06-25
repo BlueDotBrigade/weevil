@@ -145,6 +145,8 @@
 					LogSeverityType.Debug,
 					"Core engine is being constructed.");
 
+				var sourceFileRemarks = string.Empty;
+
 				string sourceFilePath;
 				long sourceFileLength;
 				Stopwatch sourceFileLoadingPeriod = new Stopwatch();
@@ -157,7 +159,6 @@
 				ImmutableArray<IRecord> selectedRecords = ImmutableArray<IRecord>.Empty;
 
 				var knownContext = new ContextDictionary();
-				var userRemarks = string.Empty;
 
 				var inclusiveFilterHistory = new List<string>();
 				var exclusiveFilterHistory = new List<string>();
@@ -169,7 +170,7 @@
 					sourceFileLength = _sourceInstance._logFileMetrics.FileSize;
 
 					knownContext = _sourceInstance._context;
-					userRemarks = _sourceInstance._userRemarks;
+					sourceFileRemarks = _sourceInstance._sourceFileRemarks;
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
 
@@ -223,7 +224,7 @@
 						sidecarManager.Load(
 							records,
 							out knownContext,
-							out userRemarks,
+							out sourceFileRemarks,
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
 							out tableOfContents);
@@ -248,7 +249,7 @@
 					sourceFileLoadingPeriod.Elapsed,
 					coreExtension,
 					context,
-					userRemarks,
+					sourceFileRemarks,
 					sidecarManager,
 					records,
 					_hasBeenCleared,
