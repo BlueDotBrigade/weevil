@@ -1,20 +1,20 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
+	using BlueDotBrigade.Weevil.Data;
 
 	internal class SelectionChangedBulletin
 	{
-		public SelectionChangedBulletin(int selectedRecordCount, TimeSpan selectionPeriod, string currentSection)
+		public SelectionChangedBulletin()
 		{
-			this.SelectedRecordCount = selectedRecordCount;
-			this.SelectionPeriod = selectionPeriod;
-			this.CurrentSection = currentSection;
+			this.SelectionPeriod = Metadata.ElapsedTimeUnknown;
+			this.SelectedRecordCount = 0;
+			this.CurrentSection = string.Empty;
 		}
+		public TimeSpan SelectionPeriod { get; init; }
 
-		public TimeSpan SelectionPeriod { get; }
+		public int SelectedRecordCount { get; init; }
 
-		public int SelectedRecordCount { get; }
-
-		public string CurrentSection { get; }
+		public string CurrentSection { get; init; }
 	}
 }

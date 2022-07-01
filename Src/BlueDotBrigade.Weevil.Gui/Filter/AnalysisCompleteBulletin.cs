@@ -2,11 +2,11 @@
 {
 	internal class AnalysisCompleteBulletin
 	{
-		public AnalysisCompleteBulletin(int flaggedRecordCount)
+		public AnalysisCompleteBulletin()
 		{
-			this.FlaggedRecordCount = flaggedRecordCount;
+			this.FlaggedRecordCount = 0;
 		}
 
-		public int FlaggedRecordCount { get; }
+		public int FlaggedRecordCount { get; init; }
 	}
 }

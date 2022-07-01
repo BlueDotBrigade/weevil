@@ -5,6 +5,13 @@
 
 	internal class FilterChangedBulletin
 	{
+		public FilterChangedBulletin()
+		{
+			this.SelectedRecordCount = 0;
+			this.VisibleRecordCount = 0;
+			this.ExecutionTime = TimeSpan.Zero;
+			this.SeverityMetrics = new Dictionary<string, object>();
+		}
 		public FilterChangedBulletin(
 			int selectedRecordCount, 
 			int visibleRecordCount, 
@@ -17,12 +24,12 @@
 			this.ExecutionTime = executionTime;
 		}
 
-		public int SelectedRecordCount { get; }
+		public int SelectedRecordCount { get; init; }
 
-		public int VisibleRecordCount { get; }
+		public int VisibleRecordCount { get; init; }
 
-		public IDictionary<string, object> SeverityMetrics { get; }
+		public IDictionary<string, object> SeverityMetrics { get; init; }
 
-		public TimeSpan ExecutionTime { get; }
+		public TimeSpan ExecutionTime { get; init; }
 	}
 }

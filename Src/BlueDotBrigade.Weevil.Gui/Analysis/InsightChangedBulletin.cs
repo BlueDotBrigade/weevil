@@ -2,15 +2,15 @@
 {
 	internal class InsightChangedBulletin
 	{
-		public InsightChangedBulletin(bool hasInsight, int insightNeedingAttention)
+		public InsightChangedBulletin()
 		{
-			this.HasInsight = hasInsight;
-			this.InsightNeedingAttention = insightNeedingAttention;
+			this.HasInsight = false;
+			this.InsightNeedingAttention = 0;
 		}
 
-		public bool HasInsight { get; }
+		public bool HasInsight { get; init; }
 
-		public int InsightNeedingAttention { get; }
+		public int InsightNeedingAttention { get; init; }
 
 		public bool HasInsightNeedingAttention => this.InsightNeedingAttention > 0;
 	}

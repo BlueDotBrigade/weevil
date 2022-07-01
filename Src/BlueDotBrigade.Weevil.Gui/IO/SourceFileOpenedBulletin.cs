@@ -4,20 +4,20 @@
 
 	internal class SourceFileOpenedBulletin
 	{
-		public SourceFileOpenedBulletin(string sourceFilePath, TimeSpan sourceFileLoadingPeriod, ContextDictionary context, int totalRecordCount)
+		public SourceFileOpenedBulletin()
 		{
-			this.SourceFilePath = sourceFilePath;
-			this.SourceFileLoadingPeriod = sourceFileLoadingPeriod;
-			this.Context = context;
-			this.TotalRecordCount = totalRecordCount;
+			this.SourceFilePath = string.Empty;
+			this.SourceFileLoadingPeriod = TimeSpan.Zero;
+			this.Context = ContextDictionary.Empty;
+			this.TotalRecordCount = 0;
 		}
 
-		public string SourceFilePath { get; }
+		public string SourceFilePath { get; init; }
 
-		public ContextDictionary Context { get; }
+		public ContextDictionary Context { get; init; }
 
-		public int TotalRecordCount { get; }
+		public int TotalRecordCount { get; init; }
 
-		public TimeSpan SourceFileLoadingPeriod { get; }
+		public TimeSpan SourceFileLoadingPeriod { get; init; }
 	}
 }

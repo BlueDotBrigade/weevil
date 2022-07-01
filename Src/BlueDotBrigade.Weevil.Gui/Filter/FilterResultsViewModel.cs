@@ -286,7 +286,10 @@
 				if (value != _engine.SourceFileRemarks)
 				{
 					_engine.SourceFileRemarks = value;
-					_bulletinMediator.Post(new SourceFileRemarksChangedBulletin(_engine.SourceFileRemarks.Any()));
+					_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
+					{
+						HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
+					});
 				}
 			}
 		}
@@ -479,12 +482,12 @@
 							.Open();
 
 						_bulletinMediator.Post(new SourceFileOpenedBulletin
-						(
-							_engine.SourceFilePath,
-							_engine.Metrics.SourceFileLoadingPeriod,
-							_engine.Context,
-							_engine.Count
-						));
+						{
+							SourceFilePath = _engine.SourceFilePath,
+							SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
+							Context = _engine.Context,
+							TotalRecordCount = _engine.Count
+						});
 
 
 						_uiDispatcher.Invoke(() =>
@@ -492,7 +495,10 @@
 							this.SourceFileRemarks = _engine.SourceFileRemarks;
 						});
 
-						_bulletinMediator.Post(new SourceFileRemarksChangedBulletin(_engine.SourceFileRemarks.Any()));
+						_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
+						{
+							HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
+						});
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
 						var currentSection = string.Empty;
@@ -503,7 +509,10 @@
 
 						_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
 
-						_bulletinMediator.Post(new AnalysisCompleteBulletin(0));
+						_bulletinMediator.Post(new AnalysisCompleteBulletin
+						{
+							FlaggedRecordCount = 0
+						});
 
 						Log.Default.Write("Updating filter history on the UI.");
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
@@ -572,10 +581,10 @@
 					{
 						_insights = _engine.Analyzer.GetInsights();
 
-						_bulletinMediator.Post(new InsightChangedBulletin(
-							_insights.Length > 0,
-							_insights.Count(i => i.IsAttentionRequired)
-						));
+						_bulletinMediator.Post(new InsightChangedBulletin{
+							HasInsight = _insights.Length > 0,
+							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
+						});
 					}
 				);
 			}
@@ -677,12 +686,12 @@
 					_engine.Reload();
 
 					_bulletinMediator.Post(new SourceFileOpenedBulletin
-					(
-						_engine.SourceFilePath,
-						_engine.Metrics.SourceFileLoadingPeriod,
-						_engine.Context,
-						_engine.Count
-					));
+					{
+						SourceFilePath = _engine.SourceFilePath,
+						SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
+						Context = _engine.Context,
+						TotalRecordCount = _engine.Count
+					});
 
 					_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 					_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
@@ -896,9 +905,9 @@
 			_engine.Clear(operation);
 
 			_bulletinMediator.Post(new ClearRecordsBulletin
-			(
-				_engine.Count
-			));
+			{
+				TotalRecordCount = _engine.Count
+			});
 
 			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
 
@@ -1144,7 +1153,10 @@
 				var flagCount = _engine
 					.Analyzer.Analyze(analysisType, _dialogBox);
 
-				_bulletinMediator.Post(new AnalysisCompleteBulletin(flagCount));
+				_bulletinMediator.Post(new AnalysisCompleteBulletin
+				{
+					FlaggedRecordCount = flagCount
+				});
 			}
 			catch (Exception e)
 			{
@@ -1159,7 +1171,10 @@
 				var flagCount = _engine
 					.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
 
-				_bulletinMediator.Post(new AnalysisCompleteBulletin(flagCount));
+				_bulletinMediator.Post(new AnalysisCompleteBulletin
+				{
+					FlaggedRecordCount = flagCount
+				});
 			}
 			catch (Exception e)
 			{
@@ -1392,12 +1407,12 @@
 			});
 
 			_bulletinMediator.Post(new FilterChangedBulletin
-			(
-				_engine.Selector.Selected.Count,
-				this.VisibleItems?.Count ?? 0,
-				_engine.Filter.GetMetrics(),
-				_engine.Filter.FilterExecutionTime
-			));
+			{
+				SelectedRecordCount = _engine.Selector.Selected.Count,
+				VisibleRecordCount = this.VisibleItems?.Count ?? 0,
+				SeverityMetrics = _engine.Filter.GetMetrics(),
+				ExecutionTime = _engine.Filter.FilterExecutionTime
+			});
 
 			// Remember: filtering can impact the number of selected records.
 			_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
@@ -1416,11 +1431,11 @@
 			}
 
 			return new SelectionChangedBulletin
-			(
-				selectedItemCount,
-				selectedTimePeriod,
-				currentSection
-			);
+			{
+				SelectedRecordCount = selectedItemCount,
+				SelectionPeriod = selectedTimePeriod,
+				CurrentSection = currentSection
+			};
 		}
 
 		private Dictionary<string, object> GetFilterConfiguration()

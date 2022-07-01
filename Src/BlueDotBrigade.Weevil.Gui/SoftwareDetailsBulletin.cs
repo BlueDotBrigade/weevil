@@ -12,16 +12,9 @@
 			this.IsUpdateAvailable = false;
 		}
 
-		public SoftwareDetailsBulletin(Version currentVersion)
-		{
-			this.CurrentVersion = currentVersion;
-			this.LatestReleaseDetails = ApplicationInfo.NotSpecified;
-			this.IsUpdateAvailable = false;
-		}
-
 		public SoftwareDetailsBulletin(Version currentVersion, ApplicationInfo latestReleaseDetails)
 		{
-			this.CurrentVersion = currentVersion;
+			this.CurrentVersion = currentVersion ?? new Version();
 			this.LatestReleaseDetails = latestReleaseDetails ?? ApplicationInfo.NotSpecified;
 
 			if (this.LatestReleaseDetails != null)
