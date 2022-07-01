@@ -2,11 +2,6 @@
 {
 	internal class SourceFileRemarksChangedBulletin
 	{
-		public bool HasSourceFileRemarks { get; }
-
-		public SourceFileRemarksChangedBulletin(bool hasSourceFileRemarks)
-		{
-			this.HasSourceFileRemarks = hasSourceFileRemarks;
-		}
+		public bool HasSourceFileRemarks { get; init; }
 	}
 }

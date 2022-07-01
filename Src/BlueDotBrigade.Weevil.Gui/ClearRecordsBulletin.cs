@@ -2,11 +2,6 @@
 {
 	internal class ClearRecordsBulletin
 	{
-		public ClearRecordsBulletin(int totalRecordCount)
-		{
-			this.TotalRecordCount = totalRecordCount;
-		}
-
-		public int TotalRecordCount { get; }
+		public int TotalRecordCount { get; init; }
 	}
 }

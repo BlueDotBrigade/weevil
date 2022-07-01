@@ -81,11 +81,11 @@
 
 		public MainStatusBarViewModel()
 		{
-			this.SourceFileDetails = new SourceFileOpenedBulletin(String.Empty, TimeSpan.Zero, ContextDictionary.Empty, 0);
-			this.FilterDetails = new FilterChangedBulletin(0, 0, new Dictionary<string, object>(), TimeSpan.Zero);
-			this.SelectionDetails = new SelectionChangedBulletin(0, Metadata.ElapsedTimeUnknown, string.Empty);
-			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
-			this.InsightDetails = new InsightChangedBulletin(false, 0);
+			this.SourceFileDetails = new SourceFileOpenedBulletin();
+			this.FilterDetails = new FilterChangedBulletin();
+			this.SelectionDetails = new SelectionChangedBulletin();
+			this.AnalysisDetails = new AnalysisCompleteBulletin();
+			this.InsightDetails = new InsightChangedBulletin();
 			this.SoftwareDetails = new SoftwareDetailsBulletin();
 
 			// XAML is explicitly looking for these values in the dictionary
