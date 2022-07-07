@@ -50,15 +50,9 @@
 			return new List<IRecordAnalyzer>();
 		}
 
-		public ImmutableArray<IInsight> GetInsights(ContextDictionary context, ITableOfContents tableOfContents)
+		public ImmutableArray<IInsight> GetInsights(ContextDictionary context, ITableOfContents tableOfContents, ImmutableArray<IInsight> defaultInsights)
 		{
-			var insights = new List<IInsight>()
-			{
-				new CriticalErrorsInsight(),
-				new TimeGapInsight(),
-			};
-
-			return insights.ToImmutableArray();
+			return defaultInsights;
 		}
 
 		public IList<IMetricCollector> GetRecordCounters(ContextDictionary context)

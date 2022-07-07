@@ -53,10 +53,10 @@
 				{
 					using (var container = new CompositionContainer(catalog))
 					{
-						foreach (IPlugin plugin in container.GetExportedValues<IPlugin>())
-						{
-							plugins.Add(plugin);
-						}
+						// Note: If a plugin fails to load at run-time
+						// ... perform a `Rebuild All` in Visual Studio
+						// ... to ensure that the plugin cache is up-to-date
+						plugins.AddRange(container.GetExportedValues<IPlugin>());
 					}
 				}
 
