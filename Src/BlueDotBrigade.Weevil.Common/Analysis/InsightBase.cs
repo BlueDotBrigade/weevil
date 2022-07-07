@@ -21,7 +21,6 @@
 			this.Details = _defaultDetails;
 		}
 
-
 		public string Title { get; }
 		public string MetricValue { get; protected set;}
 		public string MetricUnit { get; }

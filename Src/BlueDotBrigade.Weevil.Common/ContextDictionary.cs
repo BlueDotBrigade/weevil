@@ -3,6 +3,11 @@
 	using System.Collections.Generic;
 	using System.Runtime.Serialization;
 
+	/// <summary>
+	/// Includes metadata that describes how the log file was created (e.g. the application version).
+	///
+	/// This information is used when determining how to parse or interpret log file records.
+	/// </summary>
 	[CollectionDataContract
 	(Name = "Context",
 		ItemName = "Property",

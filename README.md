@@ -83,7 +83,7 @@ For a list of the latest features, please refer to the [change log](https://gith
 
 ### Plugin Architecture
 
-Realize the greatest value by creating a business-domain specific *Weevil* plug-in which extends the application by creating custom:
+Realize the greatest value by creating a business-domain specific *Weevil* plugin which extends the application by creating custom:
 
 1. log file parsers
 2. log file analyzers
