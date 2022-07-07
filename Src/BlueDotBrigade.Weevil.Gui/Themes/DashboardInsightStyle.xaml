@@ -47,6 +47,24 @@
             </MultiDataTrigger.Conditions>
             <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/UiUnresponsive-DataRequiresAttention-48.png" />
          </MultiDataTrigger>
-      </Style.Triggers>
+          <MultiDataTrigger>
+              <MultiDataTrigger.Conditions>
+                  <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                             Value="{x:Type analysis:TemporalAnomalyInsight}" />
+                  <Condition Binding="{Binding IsAttentionRequired}" Value="False" />
+              </MultiDataTrigger.Conditions>
+                <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/TemporalAnomaly-Data-48.png" />
+          </MultiDataTrigger>
+          <MultiDataTrigger>
+              <MultiDataTrigger.Conditions>
+                  <Condition Binding="{Binding 
+                              Converter={StaticResource ObjectToTypeConverter}}" 
+                             Value="{x:Type analysis:TemporalAnomalyInsight}" />
+                  <Condition Binding="{Binding IsAttentionRequired}" Value="True" />
+              </MultiDataTrigger.Conditions>
+                <Setter Property="Image" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Insight/TemporalAnomaly-DataRequiresAttention-48.png" />
+          </MultiDataTrigger>
+        </Style.Triggers>
    </Style>
 </ResourceDictionary>

@@ -18,11 +18,11 @@
 			// nothing to do
 		}
 
-		public TimeGapInsight(TimeSpan threshold, string title, string details) : base(
+		public TimeGapInsight(TimeSpan threshold, string title, string defaultDetails) : base(
 			title,
 			"sec",
 			"Σ",
-			details)
+			defaultDetails)
 		{
 			_threshold = threshold;
 		}
