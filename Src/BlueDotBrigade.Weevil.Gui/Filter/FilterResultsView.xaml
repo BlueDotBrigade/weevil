@@ -297,10 +297,11 @@
                       <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
                       <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
                       <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
-                  <Separator/>
-                        <MenuItem Header="Measure Elapsed Time (UI Thread)" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
-                        <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-               </MenuItem>
+                      <Separator/>
+                      <MenuItem Header="Measure Elapsed Time (UI Thread)" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
+                      <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
+                      <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomaly}" />
+                    </MenuItem>
                     <MenuItem Header="Analyze Further..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
                               ItemContainerStyle="{StaticResource CommandMenuItemStyle}">

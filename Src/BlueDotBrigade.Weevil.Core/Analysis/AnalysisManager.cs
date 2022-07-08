@@ -66,6 +66,7 @@
 				{
 					new TimeGapAnalyzer(),
 					new TimeGapUiAnalyzer(),
+					new TemporalAnomalyAnalyzer(),
 					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
