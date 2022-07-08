@@ -16,6 +16,11 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Collections\**" />
+    <EmbeddedResource Remove="Collections\**" />
+    <None Remove="Collections\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="BlueDotBrigade.DatenLokator">
       <Version>1.2.4</Version>
     </PackageReference>
@@ -43,7 +48,6 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Collections\Immutable\" />
     <Folder Include="Data\Comparers\" />
   </ItemGroup>
 </Project>
