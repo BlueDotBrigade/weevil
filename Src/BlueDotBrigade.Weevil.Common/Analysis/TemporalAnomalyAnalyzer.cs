@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
@@ -16,7 +17,7 @@
 		{
 			var counter = 0;
 
-			var metric = new TemporalAnomalyMetrics();
+			var metric = new TemporalAnomalyMetrics(TimeSpan.Zero);
 
 			foreach (IRecord record in records)
 			{

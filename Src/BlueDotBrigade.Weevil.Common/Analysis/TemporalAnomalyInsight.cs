@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
@@ -11,11 +12,12 @@
 			"0",
 			"The log file timestamps are in chronological order.")
 		{
+			// nothing to do
 		}
 
 		protected override void OnRefresh(ImmutableArray<IRecord> records)
 		{
-			var metrics = new TemporalAnomalyMetrics();
+			var metrics = new TemporalAnomalyMetrics(TimeSpan.Zero);
 
 			foreach (IRecord record in records)
 			{
@@ -24,10 +26,15 @@
 
 			if (metrics.Counter > 0)
 			{
+				var threshold = metrics.Thershold.Equals(TimeSpan.Zero)
+					? "any discrepancy."
+					: metrics.Thershold.ToHumanReadable();
+
 				this.MetricValue = metrics.Counter.ToString("#,##0");
 				this.IsAttentionRequired = true;
 				this.Details = $"The log file timestamps were not in chronological order {metrics.Counter} time(s). " +
-				               $"The first anomaly occurred at {metrics.FirstOccurredAt.CreatedAt.ToString("HH:mm:ss")}.";
+				               $"The biggest anomaly occurred at {metrics.BiggestAnomalyAt.CreatedAt.ToString("HH:mm:ss")}, " +
+				               $"and was {metrics.BiggestAnomaly.ToHumanReadable()}. Using threshold: {threshold}";
 			}
 		}
 	}
