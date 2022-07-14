@@ -48,21 +48,39 @@
 		}
 
 		[TestMethod]
-		public void Threshold_NotInChronologicalOrder_Returns0()
+		public void Threshold_ErrorLessThanThreshold_Returns0()
 		{
 			ImmutableArray<IRecord> records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:45:00")
-				.WithCreatedAt(3, "10:30:00") // out of order
+				.WithCreatedAt(3, "10:30:00") // 15min error
 				.WithCreatedAt(4, "11:00:00")
 				.GetRecords();
 
-			var metrics = new TemporalAnomalyMetrics(TimeSpan.FromMinutes(16));
+			var metrics = new TemporalAnomalyMetrics(TimeSpan.FromMinutes(-20));
 
 			records.ForEach(r => metrics.Count(r));
 
 			Assert.AreEqual(0, metrics.Counter);
+		}
+
+		[TestMethod]
+		public void Threshold_ErrorGreaterThanThreshold_Returns1()
+		{
+			ImmutableArray<IRecord> records = R.Create()
+				.WithCreatedAt(0, "10:00:00")
+				.WithCreatedAt(1, "10:15:00")
+				.WithCreatedAt(2, "10:45:00")
+				.WithCreatedAt(3, "10:30:00") // 15min error
+				.WithCreatedAt(4, "11:00:00")
+				.GetRecords();
+
+			var metrics = new TemporalAnomalyMetrics(TimeSpan.FromMinutes(-10));
+
+			records.ForEach(r => metrics.Count(r));
+
+			Assert.AreEqual(1, metrics.Counter);
 		}
 
 		[TestMethod]
@@ -117,7 +135,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(9.0, metrics.BiggestAnomaly.TotalMinutes);
+			Assert.AreEqual(-9.0, metrics.BiggestAnomaly.TotalMinutes);
 		}
 
 		[TestMethod]
