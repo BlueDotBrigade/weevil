@@ -9,31 +9,56 @@
 
 		private static readonly string NotSpecifiedFormat = @"--.---";
 
+		private const string SecondFormat = @"ss\.fff\s";
+		private const string HourAndMinuteFormat = @"hh\:mm\:ss";
+		private const string DayFormat = @"d\.hh\:mm\:ss";
+
+		private const string NegativeSecondFormat = @"\-ss\.fff\s";
+		private const string NegativeHourFormat = @"\-hh\:mm\:ss";
+		private const string NegativeDayFormat = @"\-d\.hh\:mm\:ss";
+
 		public static string ToHumanReadable(this TimeSpan value)
 		{
 			var result = NotSpecifiedFormat;
 
-			if (value < TimeSpan.Zero)
+			if (value == TimeSpan.MinValue || value == TimeSpan.MaxValue)
 			{
 				result = NotSpecifiedFormat;
 			}
 			else
 			{
+				var isNegative = value < TimeSpan.Zero;
+
+				if (isNegative)
+				{
+					value = value * -1;
+				}
+
+				var format = string.Empty;
+
 				if (value < OneMinute)
 				{
-					result = value.ToString(@"ss\.fff\s");
+					format = isNegative
+						? NegativeSecondFormat
+						: SecondFormat;
 				}
 				else
 				{
 					if (value > OneDay)
 					{
-						result = value.ToString(@"d\.hh\:mm\:ss");
+						format = isNegative
+							? NegativeDayFormat
+							: DayFormat;
 					}
 					else
 					{
-						result = value.ToString(@"hh\:mm\:ss");
+						format = isNegative
+							? NegativeHourFormat
+							: HourAndMinuteFormat;
 					}
 				}
+
+				result = value.ToString(format);
 			}
 
 			return result;
