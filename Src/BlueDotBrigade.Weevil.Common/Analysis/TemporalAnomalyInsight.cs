@@ -26,9 +26,9 @@
 
 			if (metrics.Counter > 0)
 			{
-				var threshold = metrics.Thershold.Equals(TimeSpan.Zero)
+				var threshold = metrics.Threshold.Equals(TimeSpan.Zero)
 					? "any discrepancy."
-					: metrics.Thershold.ToHumanReadable();
+					: metrics.Threshold.ToHumanReadable();
 
 				this.MetricValue = metrics.Counter.ToString("#,##0");
 				this.IsAttentionRequired = true;

@@ -37,7 +37,7 @@
 						counter++;
 
 						record.Metadata.IsFlagged = true;
-						record.Metadata.UpdateUserComment($"{CommentLabel}");
+						record.Metadata.UpdateUserComment($"{CommentLabel}: {metric.CurrentAnomaly.ToHumanReadable()}");
 					}
 				}
 			}
@@ -62,7 +62,7 @@
 			var userInput = user.ShowUserPrompt(
 				"Temporal Anomaly",
 				"Threshold (ms):",
-				DefaultThreshold.TotalMilliseconds.ToString("0.#"));
+				DefaultThreshold.TotalMilliseconds.ToString("-0"));
 
 			var wasSuccessful = int.TryParse(userInput, out var timePeriodInMs);
 

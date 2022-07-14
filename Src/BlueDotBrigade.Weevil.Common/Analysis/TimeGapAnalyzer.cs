@@ -148,7 +148,7 @@
 					currentRecord.Metadata.IsFlagged = true;
 
 					currentRecord.Metadata.UpdateUserComment(
-						$"{CommentLabel}: {TimeSpanExtensions.ToHumanReadable(elapsedTime)}");
+						$"{CommentLabel}: {elapsedTime.ToHumanReadable()}");
 				}
 			}
 		}

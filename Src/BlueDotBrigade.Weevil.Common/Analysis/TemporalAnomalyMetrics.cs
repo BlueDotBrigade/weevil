@@ -18,9 +18,18 @@
 
 		private readonly TimeSpan _threshold;
 
+		private TimeSpan _currentAnomaly;
+
+		/// <summary>
+		/// Use to identify <see cref="IRecord"/> creation time anomalies.
+		/// </summary>
+		/// <param name="threshold">
+		/// Threshold used to determine if a problem should be reported.
+		/// When the timestamps are not in chronological order, the threshold should be expressed as a negative value.</param>
 		public TemporalAnomalyMetrics(TimeSpan threshold)
 		{
 			_threshold = threshold;
+
 			Reset();
 		}
 
@@ -32,10 +41,20 @@
 
 		public TimeSpan BiggestAnomaly => _biggestAnomaly;
 
-		public TimeSpan Thershold => _threshold;
+		/// <summary>
+		/// Indicates how much of an error must exist before a problem is detected.
+		/// </summary>
+		/// <remarks>
+		/// Value is expected to be less than or equal to zero.
+		/// </remarks>
+		public TimeSpan Threshold => _threshold;
+
+		public TimeSpan CurrentAnomaly => _currentAnomaly;
 
 		public void Count(IRecord record)
 		{
+			_currentAnomaly = TimeSpan.Zero;
+
 			if (record.HasCreationTime)
 			{
 				if (Record.IsDummyOrNull(_previousRecord))
@@ -50,9 +69,9 @@
 					}
 					else
 					{
-						var period = _previousRecord.CreatedAt - record.CreatedAt;
-
-						if (period > _threshold)
+						_currentAnomaly = record.CreatedAt - _previousRecord.CreatedAt;
+						
+						if (_currentAnomaly < _threshold)
 						{
 							if (Record.IsDummyOrNull(_firstOccurredAt))
 							{
@@ -60,9 +79,9 @@
 							}
 							Interlocked.Increment(ref _counter);
 
-							if (period > _biggestAnomaly)
+							if (_currentAnomaly < _biggestAnomaly)
 							{
-								_biggestAnomaly = period;
+								_biggestAnomaly = _currentAnomaly;
 								_biggestAnomalyAt = _previousRecord;
 							}
 						}
@@ -70,7 +89,7 @@
 						{
 							var message = string.Format(
 								"Ignoring temporal anomaly because it is less than the given threshold. Period={0}, Threshold={1}",
-								period.ToHumanReadable(),
+								_currentAnomaly.ToHumanReadable(),
 								_threshold.ToHumanReadable());
 						
 							Log.Default.Write(LogSeverityType.Information, message);
@@ -90,12 +109,15 @@
 			_biggestAnomalyAt = Record.Dummy;
 
 			_biggestAnomaly = TimeSpan.Zero;
+
+			_currentAnomaly = TimeSpan.Zero;
 		}
 
 		public IDictionary<string, object> GetResults()
 		{
 			return new Dictionary<string, object>
 			{
+				{ nameof(this.Threshold), this.Threshold },
 				{ nameof(this.Counter), this.Counter },
 				{ nameof(this.FirstOccurredAt), this.FirstOccurredAt.CreatedAt },
 				{ nameof(this.BiggestAnomalyAt), this.BiggestAnomalyAt.CreatedAt },
