@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil
 		public void LoadStartingAtLineNumber()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"), lineNumber: 100)
+				.UsingPath(InputData.GetFilePath("GenericBaseline.log"), startAtLineNumber: 100)
 				.Open();
 
 			Assert.AreEqual(100, engine[0].LineNumber);
