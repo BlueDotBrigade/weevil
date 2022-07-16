@@ -18,9 +18,10 @@
 		private const string ValueNotSpecified = @"n/a";
 
 		private readonly string _destinationFilePath;
+		private readonly Encoding _destinationFileEncoding;
 		private readonly FileFormatType _fileFormatType;
 
-		public DiskWriter(string destinationFilePath, FileFormatType fileFormatType)
+		public DiskWriter(string destinationFilePath, Encoding destinationFileEncoding, FileFormatType fileFormatType)
 		{
 			if (string.IsNullOrWhiteSpace(destinationFilePath))
 			{
@@ -34,7 +35,7 @@
 			}
 
 			_fileFormatType = fileFormatType;
-
+			_destinationFileEncoding = destinationFileEncoding;
 			_destinationFilePath = destinationFilePath;
 		}
 
@@ -84,7 +85,7 @@
 
 		private void SaveAsRaw(ImmutableArray<IRecord> records)
 		{
-			using (var streamWriter = new StreamWriter(_destinationFilePath, false, Encoding.UTF8, 65536))
+			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))
 			{
 				foreach (IRecord record in records)
 				{
@@ -96,7 +97,7 @@
 		private void SaveAsTsv(ImmutableArray<IRecord> records)
 		{
 			DateTime? previouslyCreatedAt = null;
-			using (var streamWriter = new StreamWriter(_destinationFilePath, false, Encoding.UTF8, 65536))
+			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))
 			{
 				streamWriter.WriteLine("Line Number\tFlagged\tPinned\tComment\tElapsedTime\tCreated At\tContent");
 

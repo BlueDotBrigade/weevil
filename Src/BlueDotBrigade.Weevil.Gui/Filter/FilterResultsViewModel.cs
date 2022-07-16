@@ -783,11 +783,11 @@
 			{
 				var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
 
-				var filePath = fileFormatType == FileFormatType.Tsv ?
+				var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
 					Path.Combine(destinationFolder, TsvFileName) :
 					Path.Combine(destinationFolder, RawFileName);
 
-				_engine.Selector.SaveSelection(filePath, fileFormatType);
+				_engine.Selector.SaveSelection(destinationFilePath, fileFormatType);
 			}
 			catch (IOException e) when (e.HResult.Equals(-2147024864))
 			{

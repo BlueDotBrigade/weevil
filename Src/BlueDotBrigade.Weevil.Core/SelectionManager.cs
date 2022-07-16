@@ -4,8 +4,8 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
-	using System.IO;
 	using System.Linq;
+	using System.Text;
 	using Analysis;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using Data;
@@ -18,6 +18,8 @@
 		#region Fields
 		private readonly IDictionary<int, IRecord> _selectedRecords;
 		private readonly object _selectedRecordsPadlock;
+
+		private readonly Encoding _sourceFileEncoding;
 
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IRecord> _visibleRecords;
@@ -33,10 +35,13 @@
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IRecord> visibleRecords,
 			NavigationManager navigationManager,
+			Encoding sourceFileEncoding,
 			Action reapplyCurrentFilter)
 		{
 			_selectedRecords = new SortedDictionary<int, IRecord>();
 			_selectedRecordsPadlock = new object();
+
+			_sourceFileEncoding = sourceFileEncoding;
 
 			_allRecords = allRecords;
 			_visibleRecords = visibleRecords;
@@ -258,7 +263,7 @@
 			return this;
 		}
 
-		public ISelect SaveSelection(string filePath, FileFormatType fileFormatType)
+		public ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType)
 		{
 			ImmutableArray<IRecord> sortedRecords;
 
@@ -280,7 +285,7 @@
 
 			if (sortedRecords != null)
 			{
-				new DiskWriter(filePath, fileFormatType).Write(sortedRecords);
+				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType).Write(sortedRecords);
 
 				Log.Default.Write(
 					LogSeverityType.Trace,
