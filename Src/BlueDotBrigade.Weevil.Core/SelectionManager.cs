@@ -258,7 +258,7 @@
 			return this;
 		}
 
-		public ISelect SaveSelection(string filePath, FileFormatType fileFormatType)
+		public ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType)
 		{
 			ImmutableArray<IRecord> sortedRecords;
 
@@ -280,7 +280,7 @@
 
 			if (sortedRecords != null)
 			{
-				new DiskWriter(filePath, fileFormatType).Write(sortedRecords);
+				new DiskWriter(destinationFilePath, fileFormatType).Write(sortedRecords);
 
 				Log.Default.Write(
 					LogSeverityType.Trace,
