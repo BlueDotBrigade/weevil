@@ -258,21 +258,20 @@
 			return this;
 		}
 
-		public ISelect SaveSelection(string destinationFolder, FileFormatType fileFormatType)
+		public ISelect SaveSelection(string filePath, FileFormatType fileFormatType)
 		{
-			const string TsvFileName = "SelectedRecords.tsv";
-			const string RawFileName = "SelectedRecords.log";
-
-			var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
-				Path.Combine(destinationFolder, TsvFileName) :
-				Path.Combine(destinationFolder, RawFileName);
-
 			ImmutableArray<IRecord> sortedRecords;
 
 			lock (_selectedRecordsPadlock)
 			{
-				IRecord[] sortedSelection = _selectedRecords.Values.OrderBy(x => x.LineNumber).ToArray();
-				sortedRecords = ImmutableArray.Create(sortedSelection);
+				if (_selectedRecords.Count > 1)
+				{
+					sortedRecords = _selectedRecords.Values.OrderBy(x => x.LineNumber).ToImmutableArray();
+				}
+				else
+				{
+					sortedRecords = _allRecords.OrderBy(x => x.LineNumber).ToImmutableArray();
+				}
 			}
 
 			Log.Default.Write(
@@ -281,7 +280,7 @@
 
 			if (sortedRecords != null)
 			{
-				new DiskWriter(destinationFilePath, fileFormatType).Write(sortedRecords);
+				new DiskWriter(filePath, fileFormatType).Write(sortedRecords);
 
 				Log.Default.Write(
 					LogSeverityType.Trace,

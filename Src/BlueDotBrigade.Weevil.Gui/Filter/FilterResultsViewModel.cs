@@ -41,6 +41,9 @@
 	[NotifyPropertyChanged()]
 	internal partial class FilterResultsViewModel : IDropTarget, INotifyPropertyChanged
 	{
+		const string TsvFileName = "SelectedRecords.tsv";
+		const string RawFileName = "SelectedRecords.log";
+
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 
@@ -776,11 +779,15 @@
 
 		private void SaveSelected(FileFormatType fileFormatType)
 		{
-			var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
-
 			try
 			{
-				_engine.Selector.SaveSelection(destinationFolder, fileFormatType);
+				var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
+
+				var filePath = fileFormatType == FileFormatType.Tsv ?
+					Path.Combine(destinationFolder, TsvFileName) :
+					Path.Combine(destinationFolder, RawFileName);
+
+				_engine.Selector.SaveSelection(filePath, fileFormatType);
 			}
 			catch (IOException e) when (e.HResult.Equals(-2147024864))
 			{
