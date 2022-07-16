@@ -34,7 +34,7 @@
 		ISelect Unselect(int lineNumber);
 		ISelect Unselect(IRecord record);
 		ISelect Unselect(IList<IRecord> records);
-		ISelect SaveSelection(string destinationFolder, FileFormatType fileFormatType);
+		ISelect SaveSelection(string filePath, FileFormatType fileFormatType);
 		ImmutableArray<IRecord> ClearAll();
 		ImmutableArray<IRecord> GetSelected();
 		void ToggleIsPinned();

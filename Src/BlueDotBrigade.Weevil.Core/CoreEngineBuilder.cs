@@ -58,19 +58,19 @@
 				// nothing to do
 			}
 
-			internal CoreEngineBuilder(string sourceFilePath, int lineNumber)
+			internal CoreEngineBuilder(string sourceFilePath, int startAtLineNumber)
 			{
 				_sourceFilePath = sourceFilePath;
 
-				_startAtLineNumber = lineNumber;
+				_startAtLineNumber = startAtLineNumber;
 				_hasBeenCleared = false;
 
 				_userDefinedContext = new ContextDictionary();
 
 				var message = string.Format(
-					$"Core engine construction will read records from the provided file. {nameof(sourceFilePath)}={0}, {nameof(lineNumber)}={1}",
+					$"Core engine construction will read records from the provided file. {nameof(sourceFilePath)}={0}, {nameof(startAtLineNumber)}={1}",
 					sourceFilePath,
-					lineNumber);
+					startAtLineNumber);
 
 				Log.Default.Write(LogSeverityType.Debug, message);
 			}

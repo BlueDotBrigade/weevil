@@ -102,9 +102,9 @@
 			return new EngineBuilder(sourceFilePath);
 		}
 
-		public static IEngineBuilder UsingPath(string sourceFilePath, int lineNumber)
+		public static IEngineBuilder UsingPath(string sourceFilePath, int startAtLineNumber)
 		{
-			return new EngineBuilder(sourceFilePath, lineNumber);
+			return new EngineBuilder(sourceFilePath, startAtLineNumber);
 		}
 
 		public void Clear(ClearOperation clearOperation)
