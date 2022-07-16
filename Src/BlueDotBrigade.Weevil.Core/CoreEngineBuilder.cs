@@ -6,8 +6,10 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Text;
 	using BlueDotBrigade.Weevil.Collections.Generic;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Test;
 	using Configuration.Sidecar;
 	using Data;
 	using Diagnostics;
@@ -149,6 +151,7 @@
 
 				string sourceFilePath;
 				long sourceFileLength;
+				Encoding sourceFileEncoding;
 				Stopwatch sourceFileLoadingPeriod = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
@@ -168,6 +171,7 @@
 				{
 					sourceFilePath = _sourceInstance.SourceFilePath;
 					sourceFileLength = _sourceInstance._logFileMetrics.FileSize;
+					sourceFileEncoding = _sourceInstance._sourceFileEncoding;
 
 					knownContext = _sourceInstance._context;
 					sourceFileRemarks = _sourceInstance._sourceFileRemarks;
@@ -196,6 +200,8 @@
 				}
 				else
 				{
+					sourceFileEncoding = EncodingHelper.GetEncoding(FileHelper.Open(_sourceFilePath));
+
 					using (FileStream dataSource = FileHelper.Open(_sourceFilePath))
 					{
 						sourceFilePath = _sourceFilePath;
@@ -246,6 +252,7 @@
 				var coreEngine = new CoreEngine(
 					sourceFilePath,
 					sourceFileLength,
+					sourceFileEncoding,
 					sourceFileLoadingPeriod.Elapsed,
 					coreExtension,
 					context,

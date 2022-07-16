@@ -6,6 +6,7 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Reflection;
+	using System.Text;
 	using System.Threading;
 	using Analysis;
 	using Configuration.Sidecar;
@@ -22,6 +23,7 @@
 		private readonly ICoreExtension _coreExtension;
 
 		private readonly string _sourceFilePath;
+		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
 		private string _sourceFileRemarks;
 
@@ -69,6 +71,7 @@
 		private CoreEngine(
 			string sourceFilePath,
 			long sourceFileLength,
+			Encoding sourceFileEncoding,
 			TimeSpan sourceFileLoadingPeriod,
 			ICoreExtension coreExtension,
 			ContextDictionary context,
@@ -92,6 +95,8 @@
 			_sourceFileRemarks = sourceFileRemarks;
 
 			_sourceFilePath = sourceFilePath;
+			_sourceFileEncoding = sourceFileEncoding;
+
 			_allRecords = records;
 			_hasBeenCleared = hasBeenCleared;
 
@@ -141,6 +146,7 @@
 				_allRecords,
 				_filterManager.Results,
 				_navigationManager, // TODO: adding navigation manager is a code smell
+				_sourceFileEncoding,
 				new Action(() => { _filterManager.ReApply(); }));
 
 			recordAndMetadataLoadingStopwatch.Stop();
