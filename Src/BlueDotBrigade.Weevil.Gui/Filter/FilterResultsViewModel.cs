@@ -829,18 +829,7 @@
 		{
 			if (File.Exists(HelpFilePath))
 			{
-				var helpUrl = new Uri("file:///" + HelpFilePath);
-				Debug.WriteLine(helpUrl);
-
-				var processDetails = new ProcessStartInfo
-				{
-					WorkingDirectory = Path.GetDirectoryName(HelpFilePath) ?? throw new ArgumentException("Help file directory was expected."),
-					FileName = HelpFilePath ?? throw new ArgumentException("Help file name was expected."),
-					// Needed to avoid .NET Core runtime error
-					// ... "The specified executable is not a valid application for this OS platform"
-					UseShellExecute = true, 
-				};
-				Process.Start(processDetails);
+				WindowsProcess.Start(WindowsProcessType.DefaultApplication, HelpFilePath);
 			}
 			else
 			{

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Diagnostics;
+	using System.IO;
 
 	public class WindowsProcess
 	{
@@ -19,18 +20,31 @@
 				case WindowsProcessType.FileExplorer:
 					processPath = Environment.ExpandEnvironmentVariables(Environment.Is64BitOperatingSystem ? "%windir%\\SysWOW64" : "%windir%\\System32");
 					processPath += @"\explorer.exe";
+					var startInformation = new ProcessStartInfo
+					{
+						FileName = processPath,
+						Arguments = args
+					};
+					Process.Start(startInformation);
+					break;
+
+				case WindowsProcessType.DefaultApplication:
+					var processDetails = new ProcessStartInfo
+					{
+						WorkingDirectory = Path.GetDirectoryName(args),
+						FileName = args,
+						// Needed to avoid .NET Core runtime error
+						// ... "The specified executable is not a valid application for this OS platform"
+						UseShellExecute = true,
+					};
+					Process.Start(processDetails);
 					break;
 
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type), "The provided type is not supported.");
 			}
 
-			var startInformation = new ProcessStartInfo
-			{
-				FileName = processPath,
-				Arguments = args
-			};
-			Process.Start(startInformation);
+
 		}
 
 		private static string GetArgumentsString(string[] args)
