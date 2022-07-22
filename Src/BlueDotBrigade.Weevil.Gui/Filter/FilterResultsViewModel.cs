@@ -805,19 +805,16 @@
 
 		public void ShowFileExplorer()
 		{
-			WindowsProcess.Start(WindowsProcessType.FileExplorer, Path.GetDirectoryName(_engine.SourceFilePath));
+			WindowsProcess.Start(
+				WindowsProcessType.FileExplorer, 
+				Path.GetDirectoryName(_engine.SourceFilePath));
 		}
 
 		public void ShowRegExTool()
 		{
-			var processDetails = new ProcessStartInfo
-			{
-				FileName = RegEx101Url.ToString(),
-				// Needed to avoid .NET Core runtime error
-				// ... "The specified executable is not a valid application for this OS platform"
-				UseShellExecute = true,
-			};
-			Process.Start(processDetails);
+			WindowsProcess.Start(
+				WindowsProcessType.DefaultApplication,
+				RegEx101Url.ToString());
 		}
 
 		public void ShowApplicationLogFile()
@@ -829,7 +826,9 @@
 		{
 			if (File.Exists(HelpFilePath))
 			{
-				WindowsProcess.Start(WindowsProcessType.DefaultApplication, HelpFilePath);
+				WindowsProcess.Start(
+					WindowsProcessType.DefaultApplication, 
+					HelpFilePath);
 			}
 			else
 			{

@@ -162,6 +162,8 @@
 			return fileSize;
 		}
 
-		public ICommand ShowThirdPartyNoticesCommand => new UiBoundCommand(() => WindowsProcess.Start(WindowsProcessType.DefaultApplication, _thirdPartyNoticesPath));
+		public ICommand ShowThirdPartyNoticesCommand => new UiBoundCommand(() => WindowsProcess.Start(
+			WindowsProcessType.DefaultApplication, 
+			_thirdPartyNoticesPath));
 	}
 }
