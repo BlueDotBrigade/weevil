@@ -2,6 +2,9 @@
 	Implementation notes:
 	- For proper deserialization, elements must be listed in alphabetical order.
 	- Don't forget to escape characters like ampersand.
+	
+	Be advised:
+	- Updating the `master` branch signals that a `new release` is available.
 -->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>

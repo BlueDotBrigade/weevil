@@ -263,14 +263,13 @@
                                  <Run Text="version is no longer supported."/>
                             </TextBlock>
                             <TextBlock Grid.Column="0" Grid.Row="4" TextWrapping="Wrap" MaxWidth="300">
-                                <Run Text="The latest"/>
                                 <Hyperlink 
                                     NavigateUri="{Binding SoftwareDetails.LatestReleaseDetails.ChangeLogUrl}" 
                                     documents:HyperlinkBehavior.OpenInBrowser="True"
                                     Foreground="{StaticResource MaterialDesignDarkForeground}">
-                                    features &amp; bug fixes
+                                    Change log
                                 </Hyperlink>
-                                <Run Text="include"></Run>
+                                <Run Text="highlights: "/>
                                 <Run Text="{Binding SoftwareDetails.LatestReleaseDetails.Description}"/>
                                 <TextBlock  TextWrapping="Wrap" MaxWidth="300"/>
                      </TextBlock>
