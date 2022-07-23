@@ -169,20 +169,6 @@
             <Separator Grid.Column="11" />
             <StatusBarItem Grid.Column="12">
                 <StackPanel Orientation="Horizontal">
-                    <Image Margin="0,0,4,0">
-                        <Image.Style>
-                            <Style TargetType="{x:Type Image}">
-                                <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-Data-24.png"/>
-                                <Setter Property="ToolTip" Value="User has not included file level remarks."/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
-                                        <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
-                                        <Setter Property="ToolTip" Value="User has included file level remarks."/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
                     <materialDesign:Badged >
                         <materialDesign:Badged.Style>
                             <Style TargetType="{x:Type materialDesign:Badged}">
@@ -221,6 +207,20 @@
                             </Image.Style>
                         </Image>
                     </materialDesign:Badged>
+                    <Image Margin="4,0,0,0">
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-Data-24.png"/>
+                                <Setter Property="ToolTip" Value="User has not included file level remarks."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
+                                        <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
+                                        <Setter Property="ToolTip" Value="User has included file level remarks."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                     <materialDesign:PopupBox
                   StaysOpen="True"
                   Cursor="Hand" 
