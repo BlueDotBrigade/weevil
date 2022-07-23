@@ -83,20 +83,6 @@
                     <TextBox Text="{Binding SourceFileDetails.Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
                         ToolTip="The current document&apos;s context."
                         Style="{StaticResource StatusBarTextBox}"/>
-                    <Image>
-                        <Image.Style>
-                            <Style TargetType="{x:Type Image}">
-                                <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-Data-24.png"/>
-                                <Setter Property="ToolTip" Value="User has not included file level remarks."/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
-                                        <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
-                                        <Setter Property="ToolTip" Value="User has included file level remarks."/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
                 </StackPanel>
             </StatusBarItem>
             <StatusBarItem Grid.Column="4" VerticalAlignment="Center">
@@ -183,6 +169,20 @@
             <Separator Grid.Column="11" />
             <StatusBarItem Grid.Column="12">
                 <StackPanel Orientation="Horizontal">
+                    <Image Margin="0,0,4,0">
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-Data-24.png"/>
+                                <Setter Property="ToolTip" Value="User has not included file level remarks."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
+                                        <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
+                                        <Setter Property="ToolTip" Value="User has included file level remarks."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                     <materialDesign:Badged >
                         <materialDesign:Badged.Style>
                             <Style TargetType="{x:Type materialDesign:Badged}">
@@ -194,7 +194,7 @@
                                 </Style.Triggers>
                             </Style>
                         </materialDesign:Badged.Style>
-                        <Image>
+                        <Image Margin="4,0,0,0">
                             <Image.Style>
                                 <Style TargetType="{x:Type Image}">
                                     <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
@@ -226,7 +226,7 @@
                   Cursor="Hand" 
                   Visibility="{Binding SoftwareDetails.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <materialDesign:PopupBox.ToggleContent>
-                            <Image Height="24" Width="24" Margin="4,0,0,0"
+                            <Image Height="24" Width="24" Margin="6,0,0,0"
                             Source="/Resources/Icons/NewReleaseAvailable-24.png"
                             ToolTip="New version is available! Click for details."/>
                         </materialDesign:PopupBox.ToggleContent>
