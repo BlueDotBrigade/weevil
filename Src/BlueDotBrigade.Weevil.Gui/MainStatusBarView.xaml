@@ -250,30 +250,32 @@
                                 New Release Available
                             </TextBlock>
                             <TextBlock Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" MaxWidth="300">
-                                 <Run Text="This version of"/>
+                                 <Run Text="Weevil"/>
+                                 <TextBlock Text="{Binding SoftwareDetails.LatestReleaseDetails.LatestRelease}"/>
+                                 <Run Text="(&quot;"/>
+                                 <TextBlock Text="{Binding SoftwareDetails.LatestReleaseDetails.CodeName}"/>
+                                 <Run Text="&quot;) should be"/>
                                  <Hyperlink 
-                                    NavigateUri="{Binding SoftwareDetails.LatestReleaseDetails.InstallerUrl}" 
-                                    documents:HyperlinkBehavior.OpenInBrowser="True"
-                                    Foreground="{StaticResource MaterialDesignDarkForeground}">
-                                    Weevil
-                                </Hyperlink>
-                                <Run Text="is no longer supported, and should be upgraded to"/>
-                                <TextBlock Text="{Binding SoftwareDetails.LatestReleaseDetails.LatestRelease}"/>
-                                (&quot;
-                                <TextBlock Text="{Binding SoftwareDetails.LatestReleaseDetails.CodeName}"/>
-                                &quot;).
-                            </TextBlock>
-                            <TextBlock Grid.Column="0" Grid.Row="4" TextWrapping="Wrap" MaxWidth="300">
-                                <Run Text="{Binding SoftwareDetails.LatestReleaseDetails.Description}"/>
-                                <TextBlock  TextWrapping="Wrap" MaxWidth="300"/>
-                                <Run Text="For more information, please see the"/>
-                                 <Hyperlink 
-                                     NavigateUri="{Binding SoftwareDetails.LatestReleaseDetails.ChangeLogUrl}" 
+                                     NavigateUri="{Binding SoftwareDetails.LatestReleaseDetails.InstallerUrl}" 
                                      documents:HyperlinkBehavior.OpenInBrowser="True"
                                      Foreground="{StaticResource MaterialDesignDarkForeground}">
-                                     <TextBlock Text="release notes"/>
+                                     <TextBlock Text="downloaded"/>
+                                 </Hyperlink>
+                                 <Run Text="because"/>
+                                 <Run FontStyle="Italic" Text="this"/>
+                                 <Run Text="version is no longer supported."/>
+                            </TextBlock>
+                            <TextBlock Grid.Column="0" Grid.Row="4" TextWrapping="Wrap" MaxWidth="300">
+                                <Run Text="The latest"/>
+                                <Hyperlink 
+                                    NavigateUri="{Binding SoftwareDetails.LatestReleaseDetails.ChangeLogUrl}" 
+                                    documents:HyperlinkBehavior.OpenInBrowser="True"
+                                    Foreground="{StaticResource MaterialDesignDarkForeground}">
+                                    features &amp; bug fixes
                                 </Hyperlink>
-                                <Run Text="."/>
+                                <Run Text="include"></Run>
+                                <Run Text="{Binding SoftwareDetails.LatestReleaseDetails.Description}"/>
+                                <TextBlock  TextWrapping="Wrap" MaxWidth="300"/>
                      </TextBlock>
                             <Button Grid.Row="6"
                         Command="{x:Static materialDesign:PopupBox.ClosePopupCommand}"
