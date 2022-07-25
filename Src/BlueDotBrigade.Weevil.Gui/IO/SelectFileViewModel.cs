@@ -4,8 +4,8 @@
 	using System.ComponentModel;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
-	using Microsoft.Practices.Prism.Commands;
-	using Microsoft.Practices.Prism.Mvvm;
+	using Prism.Commands;
+	using Prism.Mvvm;
 
 	public class SelectFileViewModel : BindableBase, INotifyPropertyChanged
 	{

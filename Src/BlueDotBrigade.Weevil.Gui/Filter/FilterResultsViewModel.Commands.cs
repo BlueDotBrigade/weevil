@@ -9,12 +9,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Windows;
 	using System.Windows.Input;
-	using Microsoft.Practices.Prism.Commands;
 	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
+	using Prism.Commands;
 
 	internal partial class FilterResultsViewModel
 	{
