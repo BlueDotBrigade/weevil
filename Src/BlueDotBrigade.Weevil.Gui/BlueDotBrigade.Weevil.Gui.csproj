@@ -66,9 +66,6 @@
 		</CodeAnalysisDictionary>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Blend.Interactivity.Wpf">
-			<Version>1.0.1340</Version>
-		</PackageReference>
 		<PackageReference Include="gong-wpf-dragdrop">
 			<Version>2.3.2</Version>
 		</PackageReference>
