@@ -9,10 +9,10 @@
 		private readonly string _defaultMetricValue;
 		private readonly string _defaultDetails;
 
-		protected InsightBase(string title, string metricUnit, string metricValue, string details)
+		protected InsightBase(string title, string metricUnit, string metricValue, string defaultDetails)
 		{
 			_defaultMetricValue = metricValue ?? throw new ArgumentNullException(nameof(metricValue));
-			_defaultDetails = details ?? throw new ArgumentNullException(nameof(details));
+			_defaultDetails = defaultDetails ?? throw new ArgumentNullException(nameof(defaultDetails));
 
 			this.IsAttentionRequired = false;
 			this.Title = title ?? throw new ArgumentNullException(nameof(title));

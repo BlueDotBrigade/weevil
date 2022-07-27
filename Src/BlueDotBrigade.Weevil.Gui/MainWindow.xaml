@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.Filter"
         mc:Ignorable="d"
-        Title="Weevil" Height="450" Width="800"
+        xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui"
+        xmlns:filter="clr-namespace:BlueDotBrigade.Weevil.Gui.Filter"
+        Title="{Binding ApplicationTitle}" Height="450" Width="800"
 		  WindowStartupLocation="CenterScreen" WindowState="Maximized"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="WhiteSmoke"
@@ -14,8 +15,14 @@
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{DynamicResource MaterialDesignFont}">
-   <Grid>
-		<local:FilterResultsView />
-	</Grid>
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        d:DataContext="{d:DesignInstance local:MainWindowViewModel}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <filter:FilterResultsView Grid.Row="0" DataContext="{Binding CurrrentFilter}" />
+        <local:MainStatusBarView Grid.Row="1" DataContext="{Binding CurrentStatus}"/>
+    </Grid>
 </Window>

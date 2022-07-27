@@ -9,12 +9,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Windows;
 	using System.Windows.Input;
-	using Microsoft.Practices.Prism.Commands;
 	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
+	using Prism.Commands;
 
 	internal partial class FilterResultsViewModel
 	{
@@ -74,27 +73,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#region Commands: Filtering
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.BeforeSelected), 
+			() => ClearRecords(ClearOperation.BeforeSelected), 
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.AfterSelected),
+			() => ClearRecords(ClearOperation.AfterSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.BeforeAndAfterSelected),
+			() => ClearRecords(ClearOperation.BeforeAndAfterSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBetweenSelectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.BetweenSelected),
+			() => ClearRecords(ClearOperation.BetweenSelected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.Selected),
+			() => ClearRecords(ClearOperation.Selected),
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearRecordsOperation.Unselected),
+			() => ClearRecords(ClearOperation.Unselected),
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
@@ -214,6 +213,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand DataTransitionsRisingEdgeCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectRisingEdges),
+			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand DetectTemporalAnomaly => new UiBoundCommand(
+			() => Analyze(AnalysisType.TemporalAnomaly),
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]

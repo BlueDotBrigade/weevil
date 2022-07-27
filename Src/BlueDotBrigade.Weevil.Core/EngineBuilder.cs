@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
+	using System;
 
 	public class EngineBuilder : IEngineBuilder
 	{
@@ -10,9 +11,9 @@
 			_coreEngineBuilder = new CoreEngine.CoreEngineBuilder(sourceFilePath);
 		}
 
-		public EngineBuilder(string sourceFilePath, int lineNumber)
+		public EngineBuilder(string sourceFilePath, int startAtLineNumber)
 		{
-			_coreEngineBuilder = new CoreEngine.CoreEngineBuilder(sourceFilePath, lineNumber);
+			_coreEngineBuilder = new CoreEngine.CoreEngineBuilder(sourceFilePath, startAtLineNumber);
 		}
 
 		public IEngineBuilder UsingContext(ContextDictionary context)

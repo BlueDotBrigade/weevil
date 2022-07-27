@@ -3,10 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Text;
 	using BlueDotBrigade.Weevil.Collections.Generic;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Test;
 	using Configuration.Sidecar;
 	using Data;
 	using Diagnostics;
@@ -36,37 +39,45 @@
 			private readonly CoreEngine _sourceInstance;
 			private readonly int _startAtLineNumber;
 
-			private readonly ClearRecordsOperation _clearOperation;
+			private readonly ClearOperation _clearOperation;
 			private readonly bool _hasBeenCleared;
 
 			private bool _isUsingUserDefinedContext;
 			private ContextDictionary _userDefinedContext;
 
+			/// <summary>
+			/// Represents the maximum number of records that will be loaded.
+			/// </summary>
 			private int _maxRecords = int.MaxValue;
-			private Range _range = Range.Complete;
+
+			/// <summary>
+			/// Represents the line numbers that will be loaded.
+			/// </summary>
+			private Range _range = Range.All;
 
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
 				// nothing to do
 			}
 
-			internal CoreEngineBuilder(string sourceFilePath, int lineNumber)
+			internal CoreEngineBuilder(string sourceFilePath, int startAtLineNumber)
 			{
 				_sourceFilePath = sourceFilePath;
-				_startAtLineNumber = lineNumber;
+
+				_startAtLineNumber = startAtLineNumber;
 				_hasBeenCleared = false;
 
 				_userDefinedContext = new ContextDictionary();
 
 				var message = string.Format(
-					$"Core engine construction will read records from the provided file. {nameof(sourceFilePath)}={0}, {nameof(lineNumber)}={1}",
+					$"Core engine construction will read records from the provided file. {nameof(sourceFilePath)}={0}, {nameof(startAtLineNumber)}={1}",
 					sourceFilePath,
-					lineNumber);
+					startAtLineNumber);
 
 				Log.Default.Write(LogSeverityType.Debug, message);
 			}
 
-			internal CoreEngineBuilder(CoreEngine source, ClearRecordsOperation clearOperation)
+			internal CoreEngineBuilder(CoreEngine source, ClearOperation clearOperation)
 			{
 				_sourceInstance = source;
 				_clearOperation = clearOperation;
@@ -92,6 +103,10 @@
 				return this;
 			}
 
+			/// <summary>
+			/// During the loading process the total number of records will be limited to the specified value.
+			/// </summary>
+			/// <param name="maxRecords">Represents the maximum number of records that can be returned.</param>
 			public CoreEngineBuilder UsingLimit(int maxRecords)
 			{
 				_maxRecords = maxRecords > 0
@@ -106,9 +121,13 @@
 				return this;
 			}
 
+			/// <summary>
+			/// During the loading process the records whose line number are within range will be loaded.
+			/// </summary>
+			/// <param name="range">Represents the line numbers that will be loaded.</param>
 			public CoreEngineBuilder UsingRange(Range range)
 			{
-				_range = range ?? throw new ArgumentNullException(nameof(range));
+				_range = range;
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
@@ -128,8 +147,12 @@
 					LogSeverityType.Debug,
 					"Core engine is being constructed.");
 
+				var sourceFileRemarks = string.Empty;
+
 				string sourceFilePath;
 				long sourceFileLength;
+				Encoding sourceFileEncoding;
+				Stopwatch sourceFileLoadingPeriod = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
@@ -137,12 +160,6 @@
 				var maxRecords = _maxRecords;
 				ImmutableArray<IRecord> records;
 				ImmutableArray<IRecord> selectedRecords = ImmutableArray<IRecord>.Empty;
-
-				Range range = _range;
-				if (_range.IsCompleteRange)
-				{
-					range = new Range(1, _range.Maximum);
-				}
 
 				var knownContext = new ContextDictionary();
 
@@ -154,8 +171,10 @@
 				{
 					sourceFilePath = _sourceInstance.SourceFilePath;
 					sourceFileLength = _sourceInstance._logFileMetrics.FileSize;
+					sourceFileEncoding = _sourceInstance._sourceFileEncoding;
 
 					knownContext = _sourceInstance._context;
+					sourceFileRemarks = _sourceInstance._sourceFileRemarks;
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
 
@@ -181,6 +200,8 @@
 				}
 				else
 				{
+					sourceFileEncoding = EncodingHelper.GetEncoding(FileHelper.Open(_sourceFilePath));
+
 					using (FileStream dataSource = FileHelper.Open(_sourceFilePath))
 					{
 						sourceFilePath = _sourceFilePath;
@@ -193,6 +214,8 @@
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
 
+						sourceFileLoadingPeriod.Restart();
+
 						var repository = new SerializedRecordRepository(
 							 dataSource,
 							 coreExtension.GetRecordParser(),
@@ -200,11 +223,14 @@
 							 startAtLineNumber,
 							 true);
 
-						records = repository.Get(range, maxRecords);
+						records = repository.Get(_range, maxRecords);
+
+						sourceFileLoadingPeriod.Stop();
 
 						sidecarManager.Load(
 							records,
 							out knownContext,
+							out sourceFileRemarks,
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
 							out tableOfContents);
@@ -226,8 +252,11 @@
 				var coreEngine = new CoreEngine(
 					sourceFilePath,
 					sourceFileLength,
+					sourceFileEncoding,
+					sourceFileLoadingPeriod.Elapsed,
 					coreExtension,
 					context,
+					sourceFileRemarks,
 					sidecarManager,
 					records,
 					_hasBeenCleared,

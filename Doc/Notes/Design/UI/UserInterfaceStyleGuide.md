@@ -75,6 +75,7 @@ Many of the Weevil icons have been sourced from [Icons8.com][Icons8] which allow
 | Error                    | Material Rounded →Popular → Status→ Cancel                         |                                                  |
 | Insight                  | Fluent System Filled →Household → Lighting→ Light On               |                                                  |
 | New Release Notification | iOS Filled →Messaging→ Megaphone                                   |                                                  |
+| Document Level Remarks   | Windows Metro → Editing → Image Editing → Pencil                   |                                                  |
 
 #### Dashboard
 

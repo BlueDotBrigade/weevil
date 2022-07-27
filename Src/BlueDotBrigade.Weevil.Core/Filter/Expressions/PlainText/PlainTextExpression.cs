@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.PlainText
 {
 	using System.Globalization;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
 
 	internal class PlainTextExpression : IExpression

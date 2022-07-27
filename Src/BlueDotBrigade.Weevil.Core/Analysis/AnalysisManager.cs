@@ -66,6 +66,7 @@
 				{
 					new TimeGapAnalyzer(),
 					new TimeGapUiAnalyzer(),
+					new TemporalAnomalyAnalyzer(),
 					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
@@ -87,13 +88,19 @@
 		{
 			Log.Default.Write(LogSeverityType.Debug, "Insight is being gathered from the recordset...");
 
-			var insights = new List<IInsight>();
+			var defaultInsights = new List<IInsight>
+			{
+				new CriticalErrorsInsight(),
+				new TimeGapInsight(),
+				new TemporalAnomalyInsight(),
+			};
 
 			var stopwatch = Stopwatch.StartNew();
 
-			insights.AddRange(_coreExtension.GetInsights(
+			ImmutableArray<IInsight> insights = _coreExtension.GetInsights(
 				_coreEngine.Context,
-				_coreEngine.Navigate.TableOfContents));
+				_coreEngine.Navigate.TableOfContents,
+				defaultInsights.ToImmutableArray());
 
 			foreach (IInsight insight in insights)
 			{
@@ -104,7 +111,7 @@
 
 			var attentionRequiredCount = insights.Count(x => x.IsAttentionRequired);
 
-			Log.Default.Write(LogSeverityType.Information, $"Insight has been gathered. Records={_coreEngine.Records.Length:###,###,###,###}, Insights={insights.Count}, AttentionRequired={attentionRequiredCount}, ExecutionTime={stopwatch.Elapsed.ToHumanReadable()}");
+			Log.Default.Write(LogSeverityType.Information, $"Insight has been gathered. Records={_coreEngine.Records.Length:###,###,###,###}, Insights={insights.Count()}, AttentionRequired={attentionRequiredCount}, ExecutionTime={stopwatch.Elapsed.ToHumanReadable()}");
 
 			return ImmutableArray.Create(insights.ToArray());
 		}
@@ -123,7 +130,7 @@
 
 		public int Analyze(string analyzerKey, IUserDialog userDialog)
 		{
-			ImmutableArray<IRecord> records = _coreEngine.Selector.IsTimePeriodSelected
+			ImmutableArray<IRecord> records = _coreEngine.Selector.HasSelectionPeriod
 				? _coreEngine.Selector.GetSelected()
 				: _coreEngine.Filter.Results;
 

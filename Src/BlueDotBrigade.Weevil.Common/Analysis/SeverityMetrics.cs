@@ -41,7 +41,7 @@
 			switch (record.Severity)
 			{
 				case SeverityType.Information:
-					Interlocked.Increment(ref _information); // TODO: remove Increment() to improve performance
+					Interlocked.Increment(ref _information);
 					break;
 
 				case SeverityType.Warning:

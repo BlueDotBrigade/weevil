@@ -31,6 +31,11 @@
 		/// </summary>
 		bool HasBeenCleared { get; }
 		ContextDictionary Context { get; }
+
+		/// <summary>
+		/// Represents user remarks that are applicable to the entire source file.
+		/// </summary>
+		string SourceFileRemarks { get; set; }
 		string SourceFilePath { get; }
 		string SourceDirectory { get; }
 		/// <summary>

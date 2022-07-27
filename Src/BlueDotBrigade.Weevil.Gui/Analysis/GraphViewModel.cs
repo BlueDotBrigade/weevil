@@ -5,11 +5,9 @@
 	using System.Collections.Immutable;
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
-	using System.Diagnostics;
 	using System.Globalization;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
-	using System.ServiceModel.PeerResolvers;
 	using System.Windows;
 	using System.Windows.Input;
 	using BlueDotBrigade.Weevil.Data;

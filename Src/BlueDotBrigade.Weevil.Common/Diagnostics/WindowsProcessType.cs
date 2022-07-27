@@ -3,5 +3,6 @@
 	public enum WindowsProcessType
 	{
 		FileExplorer,
+		DefaultApplication,
 	}
 }

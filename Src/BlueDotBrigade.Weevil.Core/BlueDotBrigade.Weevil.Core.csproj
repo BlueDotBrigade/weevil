@@ -1,55 +1,60 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>net48</TargetFramework>
-		<Platforms>x64</Platforms>
-		<PackageId>BlueDotBrigade.Weevil.Core</PackageId>
-		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-		<Version>2.9.0</Version>
-		<Authors>BlueDotBrigade;</Authors>
-		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
-		<Owners>Blue Dot Brigade</Owners>
-		<Description>The Weevil library facilitates the parsing, filtering and analysis of log files.</Description>
-		<IsPackable>true</IsPackable>
-		<PackageReleaseNotes>This library is currently a work in progress. As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
-		<PackageTags>BlueDotBrigade</PackageTags>
-		<RepositoryType>git</RepositoryType>
-		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-		<PackageIcon>Weevil.png</PackageIcon>
-		<ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
-		<AssemblyName>BlueDotBrigade.Weevil.Core</AssemblyName>
-	</PropertyGroup>
-	<ItemGroup>
-		<Compile Remove="Properties\**" />
-		<EmbeddedResource Remove="Properties\**" />
-		<None Remove="Properties\**" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Remove="Resources\Icons\Weevil.ico" />
-		<None Remove="Resources\Images\Weevil.png" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="NLog" Version="4.7.10" />
-		<PackageReference Include="System.ComponentModel.Composition" Version="5.0.0" />
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Resource Include="Resources\Icons\Weevil.ico" />
-		<Resource Include="Resources\Images\Weevil.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</Resource>
-	</ItemGroup>
-	<ItemGroup>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>BlueDotBrigade.Weevil.Core-UnitTests</_Parameter1>
-		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>BlueDotBrigade.Weevil.Core-IntegrationTests</_Parameter1>
-		</AssemblyAttribute>
-	</ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Platforms>x64</Platforms>
+    <PackageId>BlueDotBrigade.Weevil.Core</PackageId>
+    <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
+    <Version>2.10.0</Version>
+    <Authors>BlueDotBrigade;</Authors>
+    <Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+    <Owners>Blue Dot Brigade</Owners>
+    <Description>The Weevil library facilitates the parsing, filtering and analysis of log files.</Description>
+    <IsPackable>true</IsPackable>
+    <PackageReleaseNotes>This library is currently a work in progress. As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
+    <PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageIcon>Weevil.png</PackageIcon>
+    <ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
+    <AssemblyName>BlueDotBrigade.Weevil.Core</AssemblyName>
+    <Company>Blue Dot Brigade</Company>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\Icons\Weevil.ico" />
+    <None Remove="Resources\Images\Weevil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="5.0.0" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
+    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Weevil.ico" />
+    <Resource Include="Resources\Images\Weevil.png">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>BlueDotBrigade.Weevil.Core-UnitTests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>BlueDotBrigade.Weevil.Core-FunctionalTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

@@ -10,9 +10,7 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
-	using System.Net;
 	using System.Reflection;
-	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
@@ -21,12 +19,12 @@
 	using GongSolutions.Wpf.DragDrop;
 	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Analysis.LogSplitter;
 	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
+	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Help;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.IO;
@@ -35,6 +33,7 @@
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
+	using BlueDotBrigade.Weevil.Utilities;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
@@ -42,6 +41,9 @@
 	[NotifyPropertyChanged()]
 	internal partial class FilterResultsViewModel : IDropTarget, INotifyPropertyChanged
 	{
+		const string TsvFileName = "SelectedRecords.tsv";
+		const string RawFileName = "SelectedRecords.log";
+
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 
@@ -54,7 +56,7 @@
 
 		private static readonly string NewReleaseFilePath = @"C:\ProgramData\BlueDotBrigade\Weevil\Logs\";
 
-		private static readonly ImmutableArray<IInsight> NoInsight = ImmutableArray.Create(new IInsight[0]);
+		private static readonly ImmutableArray<IInsight> NoInsight = ImmutableArray.Create(Array.Empty<IInsight>());
 
 		#region Fields & Object Lifetime
 
@@ -72,6 +74,8 @@
 		/// </remarks>
 		/// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.threading.dispatcher">MSDN: Dispatcher</seealso>
 		private readonly IUiDispatcher _uiDispatcher;
+
+		private readonly IBulletinMediator _bulletinMediator;
 
 		private readonly DispatcherTimer initializationTimer;
 
@@ -100,11 +104,13 @@
 
 		private ImmutableArray<IInsight> _insights;
 
-		public FilterResultsViewModel(Window mainWindow, IUiDispatcher uiDispatcher)
+		public FilterResultsViewModel(Window mainWindow, IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
 			_mainWindow = mainWindow;
 			_uiDispatcher = uiDispatcher;
 			_dialogBox = new DialogBoxService(mainWindow);
+
+			_bulletinMediator = bulletinMediator;
 
 			_engine = Engine.Surrogate;
 
@@ -134,10 +140,6 @@
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
 
-			this.HasInsight = false;
-			this.HasInsightNeedingAttention = false;
-			this.InsightNeedingAttention = 0;
-
 			this.WeevilVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
 
 			initializationTimer = new DispatcherTimer();
@@ -151,8 +153,6 @@
 			_tableOfContents = new TableOfContents();
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
-
-			_insights = NoInsight;
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -161,11 +161,22 @@
 
 			try
 			{
+				Stream newReleaseStream = null;
+
 #if DEBUG
-				var applicationInfoPath = Path.GetFullPath(@"..\..\..\..\..\Doc\Notes\Release\NewReleaseNotification.xml");
-				Stream newReleaseStream = FileHelper.Open(applicationInfoPath);
+				var solutionDirectory = EnvironmentHelper.GetSolutionDirectory();
+				var applicationInfoPath = Path.Combine(solutionDirectory, @"Doc\Notes\Release\NewReleaseNotification.xml");
+
+				if (File.Exists(applicationInfoPath))
+				{
+					newReleaseStream = FileHelper.Open(applicationInfoPath);
+				}
+				else
+				{
+					Debug.Assert(false, $"File not found. Path=`{applicationInfoPath}`");
+				}
 #else
-				Stream newReleaseStream = new WebClient().OpenRead(NewReleaseUrl);
+				newReleaseStream = new System.Net.WebClient().OpenRead(NewReleaseUrl);
 #endif
 
 				result = TypeFactory.LoadFromXml<ApplicationInfo>(newReleaseStream);
@@ -182,44 +193,7 @@
 
 		#region Properties
 
-		public string SourceFilePath => _engine.SourceFilePath;
-
-		public ApplicationInfo NewReleaseDetails { get; set; }
-
 		public IList<IRecord> VisibleItems { get; private set; }
-
-		public int AllRecordCount => _engine.Count;
-
-		public int VisibleRecordCount => this.VisibleItems?.Count ?? 0;
-
-		public int SelectedRecordCount => _engine.Selector.Selected.Count;
-
-		[SafeForDependencyAnalysis]
-		public bool HasInsight { get; private set; }
-
-		[SafeForDependencyAnalysis]
-		public bool HasInsightNeedingAttention { get; private set; }
-
-		[SafeForDependencyAnalysis]
-		public int InsightNeedingAttention { get; private set; }
-
-		[SafeForDependencyAnalysis]
-		public bool IsUpdateAvailable
-		{
-			get
-			{
-				Depends.On(this.NewReleaseDetails);
-
-				var isUpdateAvailable = false;
-
-				if (this.NewReleaseDetails != null)
-				{
-					isUpdateAvailable = this.NewReleaseDetails.LatestReleaseVersion > this.WeevilVersion;
-				}
-
-				return isUpdateAvailable;
-			}
-		}
 
 		public Version WeevilVersion { get; private set; }
 
@@ -240,15 +214,7 @@
 		public bool IsLogFileOpen { get; private set; }
 
 		public bool IsCommandExecuting { get; private set; }
-
-		public int FlaggedRecordCount { get; private set; }
-		public bool HasBeenCleared => _engine.HasBeenCleared;
 		public bool IncludePinned { get; set; }
-
-		public IDictionary<string, object> Metrics { get; set; }
-
-		public ContextDictionary Context { get; set; }
-
 		public bool IsManualFilter { get; set; }
 
 		public bool IsFilterCaseSensitive { get; set; }
@@ -312,6 +278,25 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
+		public string SourceFileRemarks
+		{
+			get
+			{
+				return _engine.SourceFileRemarks;
+			}
+			set
+			{
+				if (value != _engine.SourceFileRemarks)
+				{
+					_engine.SourceFileRemarks = value;
+					_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
+					{
+						HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
+					});
+				}
+			}
+		}
+
 		public int ActiveRecordIndex { get; set; }
 
 		public bool IncludeDebugRecords { get; set; }
@@ -320,21 +305,12 @@
 
 		public bool IsProcessingLongOperation { get; private set; }
 
-		public bool CanChangeFilter => true;
-
-		public bool AreRecordsSelected { get; private set; }
-
 		[SafeForDependencyAnalysis]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
-
-		public TimeSpan ElapsedTime { get; private set; }
-
-		public string CurrentHeading { get; private set; }
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
 		public event EventHandler ResultsChanged;
-
 		#endregion
 
 		#region Event Handlers
@@ -342,7 +318,9 @@
 		{
 			initializationTimer.IsEnabled = false;
 
-			this.NewReleaseDetails = GetApplicationInfo();
+			_bulletinMediator.Post(new SoftwareDetailsBulletin(
+					this.WeevilVersion,
+				GetApplicationInfo()));
 
 			var args = Environment.GetCommandLineArgs();
 
@@ -454,10 +432,6 @@
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
 
-			this.HasInsight = false;
-			this.HasInsightNeedingAttention = false;
-			this.InsightNeedingAttention = 0;
-
 			var openAsResult = new OpenAsResult();
 			var wasFileOpened = false;
 
@@ -505,10 +479,43 @@
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
 
 						_engine = Engine
-							.UsingPath(sourceFilePath, openAsResult.Range.Minimum)
+							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
 							.Open();
+
+						_bulletinMediator.Post(new SourceFileOpenedBulletin
+						{
+							SourceFilePath = _engine.SourceFilePath,
+							SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
+							Context = _engine.Context,
+							TotalRecordCount = _engine.Count
+						});
+
+
+						_uiDispatcher.Invoke(() =>
+						{
+							this.SourceFileRemarks = _engine.SourceFileRemarks;
+						});
+
+						_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
+						{
+							HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
+						});
+
+						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
+						var currentSection = string.Empty;
+						if (selectedItem != null)
+						{
+							currentSection = _tableOfContents.GetSection(selectedItem.LineNumber);
+						}
+
+						_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+
+						_bulletinMediator.Post(new AnalysisCompleteBulletin
+						{
+							FlaggedRecordCount = 0
+						});
 
 						Log.Default.Write("Updating filter history on the UI.");
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
@@ -516,8 +523,6 @@
 
 						_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 						_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
-
-						this.Context = _engine.Context;
 
 						RefreshFilterResults();
 
@@ -579,9 +584,10 @@
 					{
 						_insights = _engine.Analyzer.GetInsights();
 
-						this.HasInsight = _insights.Length > 0;
-						this.InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired);
-						this.HasInsightNeedingAttention = this.InsightNeedingAttention > 0;
+						_bulletinMediator.Post(new InsightChangedBulletin{
+							HasInsight = _insights.Length > 0,
+							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
+						});
 					}
 				);
 			}
@@ -682,6 +688,14 @@
 					_engine.Save();
 					_engine.Reload();
 
+					_bulletinMediator.Post(new SourceFileOpenedBulletin
+					{
+						SourceFilePath = _engine.SourceFilePath,
+						SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
+						Context = _engine.Context,
+						TotalRecordCount = _engine.Count
+					});
+
 					_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
 					_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 
@@ -729,17 +743,9 @@
 		{
 			if (!this.IsCommandExecuting)
 			{
-				if (records.Count == 0)
-				{
-					this.CurrentHeading = string.Empty;
-				}
-				else
-				{
-					this.CurrentHeading = _tableOfContents.GetSection(records[0].LineNumber);
+				_engine.Selector.Select(records);
 
-					_engine.Selector.Select(records);
-					RefreshStatusBar();
-				}
+				_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
 			}
 		}
 
@@ -748,7 +754,8 @@
 			if (!this.IsCommandExecuting)
 			{
 				_engine.Selector.Unselect(records);
-				RefreshStatusBar();
+
+				_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
 			}
 		}
 
@@ -770,35 +777,17 @@
 			}
 		}
 
-		private void RefreshStatusBar()
-		{
-			_uiDispatcher.Invoke(() =>
-			{
-				RaisePropertyChanged(nameof(this.SourceFilePath));
-				RaisePropertyChanged(nameof(this.SelectedRecordCount));
-
-				this.Metrics = _engine.Filter.GetMetrics();
-
-				this.AreRecordsSelected = _engine.Selector.IsTimePeriodSelected;
-
-				if (_engine.Selector.IsTimePeriodSelected)
-				{
-					this.ElapsedTime = _engine.Selector.TimePeriodOfInterest;
-				}
-				else
-				{
-					this.ElapsedTime = Metadata.ElapsedTimeUnknown;
-				}
-			});
-		}
-
 		private void SaveSelected(FileFormatType fileFormatType)
 		{
-			var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
-
 			try
 			{
-				_engine.Selector.SaveSelection(destinationFolder, fileFormatType);
+				var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
+
+				var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
+					Path.Combine(destinationFolder, TsvFileName) :
+					Path.Combine(destinationFolder, RawFileName);
+
+				_engine.Selector.SaveSelection(destinationFilePath, fileFormatType);
 			}
 			catch (IOException e) when (e.HResult.Equals(-2147024864))
 			{
@@ -816,12 +805,16 @@
 
 		public void ShowFileExplorer()
 		{
-			WindowsProcess.Start(WindowsProcessType.FileExplorer, Path.GetDirectoryName(_engine.SourceFilePath));
+			WindowsProcess.Start(
+				WindowsProcessType.FileExplorer, 
+				Path.GetDirectoryName(_engine.SourceFilePath));
 		}
 
 		public void ShowRegExTool()
 		{
-			Process.Start(RegEx101Url.ToString());
+			WindowsProcess.Start(
+				WindowsProcessType.DefaultApplication,
+				RegEx101Url.ToString());
 		}
 
 		public void ShowApplicationLogFile()
@@ -833,9 +826,9 @@
 		{
 			if (File.Exists(HelpFilePath))
 			{
-				var helpUrl = new Uri("file:///" + HelpFilePath);
-				Debug.WriteLine(helpUrl);
-				Process.Start("\"" + HelpFilePath + "\"");
+				WindowsProcess.Start(
+					WindowsProcessType.DefaultApplication, 
+					HelpFilePath);
 			}
 			else
 			{
@@ -847,7 +840,12 @@
 		{
 			try
 			{
-				var dialog = new AboutDialog(this.WeevilVersion, LicensePath, ThirdPartyNoticesPath)
+				var dialog = new AboutDialog(
+					_uiDispatcher, 
+					this.WeevilVersion, 
+					LicensePath, 
+					ThirdPartyNoticesPath, 
+					_engine.SourceFilePath)
 				{
 					Owner = _mainWindow,
 				};
@@ -897,9 +895,15 @@
 
 		#region Commands: Filtering
 
-		public void ClearRecords(ClearRecordsOperation operation)
+		public void ClearRecords(ClearOperation operation)
 		{
 			_engine.Clear(operation);
+
+			_bulletinMediator.Post(new ClearRecordsBulletin
+			{
+				TotalRecordCount = _engine.Count
+			});
+
 			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
 
 			RefreshFilterResults();
@@ -1141,10 +1145,13 @@
 		{
 			try
 			{
-				this.FlaggedRecordCount = -1;
-				this.FlaggedRecordCount = _engine
+				var flagCount = _engine
 					.Analyzer.Analyze(analysisType, _dialogBox);
-				RaisePropertyChanged(nameof(this.FlaggedRecordCount));
+
+				_bulletinMediator.Post(new AnalysisCompleteBulletin
+				{
+					FlaggedRecordCount = flagCount
+				});
 			}
 			catch (Exception e)
 			{
@@ -1156,10 +1163,13 @@
 		{
 			try
 			{
-				this.FlaggedRecordCount = -1;
-				this.FlaggedRecordCount = _engine
+				var flagCount = _engine
 					.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
-				RaisePropertyChanged(nameof(this.FlaggedRecordCount));
+
+				_bulletinMediator.Post(new AnalysisCompleteBulletin
+				{
+					FlaggedRecordCount = flagCount
+				});
 			}
 			catch (Exception e)
 			{
@@ -1389,11 +1399,38 @@
 				this.VisibleItems = _engine.Filter.Results;
 
 				RaisePropertyChanged(nameof(this.VisibleItems));
-				RaisePropertyChanged(nameof(this.AllRecordCount));
-				RaisePropertyChanged(nameof(this.HasBeenCleared));
 			});
 
-			RefreshStatusBar();
+			_bulletinMediator.Post(new FilterChangedBulletin
+			{
+				SelectedRecordCount = _engine.Selector.Selected.Count,
+				VisibleRecordCount = this.VisibleItems?.Count ?? 0,
+				SeverityMetrics = _engine.Filter.GetMetrics(),
+				ExecutionTime = _engine.Filter.FilterExecutionTime
+			});
+
+			// Remember: filtering can impact the number of selected records.
+			_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+		}
+
+		private static SelectionChangedBulletin CreateSelectionChangedBulletin(ICoreEngine coreEngine)
+		{
+			var selectedItemCount = coreEngine.Selector.Selected.Count;
+			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
+			var selectedItem = coreEngine.Selector.Selected.FirstOrDefault().Value;
+
+			var currentSection = string.Empty;
+			if (selectedItem != null)
+			{
+				currentSection = coreEngine.Navigate.TableOfContents.GetSection(selectedItem.LineNumber);
+			}
+
+			return new SelectionChangedBulletin
+			{
+				SelectedRecordCount = selectedItemCount,
+				SelectionPeriod = selectedTimePeriod,
+				CurrentSection = currentSection
+			};
 		}
 
 		private Dictionary<string, object> GetFilterConfiguration()

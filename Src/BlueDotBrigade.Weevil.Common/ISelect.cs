@@ -10,8 +10,12 @@
 	public interface ISelect
 	{
 		IDictionary<int, IRecord> Selected { get; }
-		bool IsTimePeriodSelected { get; }
-		TimeSpan TimePeriodOfInterest { get; }
+		bool HasSelectionPeriod { get; }
+
+		/// <summary>
+		/// Represents the amount of time between the first and last selected records.
+		/// </summary>
+		TimeSpan SelectionPeriod { get; }
 		/// <summary>
 		/// The given <paramref name="lineNumber"/> is added to the "items of interest" list.
 		/// </summary>
@@ -30,7 +34,7 @@
 		ISelect Unselect(int lineNumber);
 		ISelect Unselect(IRecord record);
 		ISelect Unselect(IList<IRecord> records);
-		ISelect SaveSelection(string destinationFolder, FileFormatType fileFormatType);
+		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType);
 		ImmutableArray<IRecord> ClearAll();
 		ImmutableArray<IRecord> GetSelected();
 		void ToggleIsPinned();

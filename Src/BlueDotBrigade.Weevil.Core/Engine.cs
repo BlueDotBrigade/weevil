@@ -65,6 +65,18 @@
 
 		public ContextDictionary Context => _coreEngine.Context;
 
+		public string SourceFileRemarks
+		{
+			get
+			{
+				return _coreEngine.SourceFileRemarks;
+			}
+			set
+			{
+				_coreEngine.SourceFileRemarks = value;
+			}
+		}
+
 		public string SourceFilePath => Engine.IsRealInstance(this)
 			? _coreEngine.SourceFilePath
 			: string.Empty;
@@ -90,12 +102,12 @@
 			return new EngineBuilder(sourceFilePath);
 		}
 
-		public static IEngineBuilder UsingPath(string sourceFilePath, int lineNumber)
+		public static IEngineBuilder UsingPath(string sourceFilePath, int startAtLineNumber)
 		{
-			return new EngineBuilder(sourceFilePath, lineNumber);
+			return new EngineBuilder(sourceFilePath, startAtLineNumber);
 		}
 
-		public void Clear(ClearRecordsOperation clearOperation)
+		public void Clear(ClearOperation clearOperation)
 		{
 			_coreEngine = _coreEngine.FromInstance(clearOperation).Build();
 		}

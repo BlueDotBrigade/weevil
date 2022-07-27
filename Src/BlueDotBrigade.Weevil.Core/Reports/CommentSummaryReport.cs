@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Reports.Timeline
+﻿namespace BlueDotBrigade.Weevil.Reports
 {
 	using System;
 	using System.Collections.Immutable;

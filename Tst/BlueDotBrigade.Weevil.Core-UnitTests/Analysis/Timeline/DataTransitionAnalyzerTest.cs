@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Analysis
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Analysis.LogSplitter
+﻿namespace BlueDotBrigade.Weevil.Utilities
 {
 	using System.Collections.Immutable;
 	using System.IO;

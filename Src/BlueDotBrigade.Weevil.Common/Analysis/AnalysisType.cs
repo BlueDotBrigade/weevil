@@ -8,5 +8,6 @@
 		DetectRisingEdges,
 		ElapsedTimeUiThread,
 		ElapsedTime,
+		TemporalAnomaly,
 	}
 }

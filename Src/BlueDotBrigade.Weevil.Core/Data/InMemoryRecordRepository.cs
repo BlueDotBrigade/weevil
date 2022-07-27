@@ -12,7 +12,7 @@
 		private const int OperationRunning = 1;
 
 		#region Fields
-		private readonly ClearRecordsOperation _clearOperation;
+		private readonly ClearOperation _clearOperation;
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IRecord> _visibleRecords;
 		private readonly ImmutableArray<IRecord> _selectedRecords;
@@ -34,7 +34,7 @@
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IRecord> visibleRecords,
 			ImmutableArray<IRecord> selectedRecords,
-			ClearRecordsOperation clearOperation)
+			ClearOperation clearOperation)
 		{
 			_operationState = OperationInactive;
 
@@ -158,7 +158,7 @@
 		{
 			var results = new IRecord[records.Length - selectedRecords.Length];
 
-			var blacklist = selectedRecords.ToHashSet<IRecord>();
+			var blacklist = selectedRecords.ToImmutableHashSet();
 
 			var insertAt = 0;
 
@@ -219,27 +219,27 @@
 				{
 					switch (_clearOperation)
 					{
-						case ClearRecordsOperation.BeforeSelected:
+						case ClearOperation.BeforeSelected:
 							results = ClearBeforeSelected(_allRecords, _selectedRecords);
 							break;
 
-						case ClearRecordsOperation.BeforeAndAfterSelected:
+						case ClearOperation.BeforeAndAfterSelected:
 							results = ClearBeforeAndAfterSelected(_allRecords, _selectedRecords);
 							break;
 
-						case ClearRecordsOperation.BetweenSelected:
+						case ClearOperation.BetweenSelected:
 							results = ClearBetweenSelected(_allRecords, _selectedRecords);
 							break;
 
-						case ClearRecordsOperation.AfterSelected:
+						case ClearOperation.AfterSelected:
 							results = ClearAfterSelected(_allRecords, _selectedRecords);
 							break;
 
-						case ClearRecordsOperation.Selected:
+						case ClearOperation.Selected:
 							results = ClearSelected(_allRecords, _selectedRecords);
 							break;
 
-						case ClearRecordsOperation.Unselected:
+						case ClearOperation.Unselected:
 							results = ClearUnselected(_allRecords, _selectedRecords);
 							break;
 					}
@@ -276,6 +276,11 @@
 			}
 
 			return ImmutableArray.Create(results.ToArray());
+		}
+
+		public ImmutableArray<IRecord> Get(Range range, int maximumCount)
+		{
+			throw new NotImplementedException();
 		}
 
 		public ImmutableArray<IRecord> GetAll()

@@ -354,6 +354,12 @@ MigrationBackup/
 # Prevent user from accidentally overwriting the configuration:
 [aA]pp.config
 
+# Plugins have vendor specific terminology and other proprietary information (e.g. credentials).
+# As such, plugins must NEVER be added to the Weevil repository.
+/Src/BlueDotBrigade.Weevil.Plugins/*
+!/Src/BlueDotBrigade.Weevil.Plugins/ReadMe.md
+!/Src/BlueDotBrigade.Weevil.Plugins/BlueDotBrigade.Weevil.Plugins.csproj
+
 # We require log files for testing purposes (logs were previously blocked by global gitignore):
 !*.log
 

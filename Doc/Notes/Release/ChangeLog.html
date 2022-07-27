@@ -1,189 +1,1572 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <title>Weevil : Change Log</title>
-</head>
+<!DOCTYPE html>
+<!-- saved from url=(0011)about:blank -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    
+    <!--<base href="http://browsing-file-host/">--><base href=".">
+    <style>
+        html, body {margin: 0; padding-bottom:10px}
+        body {
+    background: #1f1f1f
+}
+.markdown-body {
+    color-scheme: dark;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    margin: 0;
+    color: #c9d1d9;
+    background-color: #1f1f1f;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-size: 16px;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+    .markdown-body .octicon {
+        display: inline-block;
+        fill: currentColor;
+        vertical-align: text-bottom;
+    }
+
+    .markdown-body h1:hover .anchor .octicon-link:before,
+    .markdown-body h2:hover .anchor .octicon-link:before,
+    .markdown-body h3:hover .anchor .octicon-link:before,
+    .markdown-body h4:hover .anchor .octicon-link:before,
+    .markdown-body h5:hover .anchor .octicon-link:before,
+    .markdown-body h6:hover .anchor .octicon-link:before {
+        width: 16px;
+        height: 16px;
+        content: ' ';
+        display: inline-block;
+        background-color: currentColor;
+        -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+        mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+    }
+
+    .markdown-body details,
+    .markdown-body figcaption,
+    .markdown-body figure {
+        display: block;
+    }
+
+    .markdown-body summary {
+        display: list-item;
+    }
+
+    .markdown-body [hidden] {
+        display: none !important;
+    }
+
+    .markdown-body a {
+        background-color: transparent;
+        color: #58a6ff;
+        text-decoration: none;
+    }
+
+        .markdown-body a:active,
+        .markdown-body a:hover {
+            outline-width: 0;
+        }
+
+    .markdown-body abbrMarkdown Preview {
+        border-bottom: none;
+        text-decoration: underline dotted;
+    }
+
+    .markdown-body b,
+    .markdown-body strong {
+        font-weight: 600;
+    }
+
+    .markdown-body dfn {
+        font-style: italic;
+    }
+
+    .markdown-body h1 {
+        margin: .67em 0;
+        font-weight: 600;
+        padding-bottom: .3em;
+        font-size: 2em;
+        border-bottom: 1px solid #21262d;
+    }
+
+    .markdown-body mark {
+        background-color: rgba(187,128,9,0.15);
+        color: #c9d1d9;
+    }
+
+    .markdown-body small {
+        font-size: 90%;
+    }
+
+    .markdown-body sub,
+    .markdown-body sup {
+        font-size: 75%;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+    }
+
+    .markdown-body sub {
+        bottom: -0.25em;
+    }
+
+    .markdown-body sup {
+        top: -0.5em;
+    }
+
+    .markdown-body img {
+        border-style: none;
+        max-width: 100%;
+        box-sizing: content-box;
+        background-color: #1f1f1f;
+    }
+
+    .markdown-body code,
+    .markdown-body kbd,
+    .markdown-body pre,
+    .markdown-body samp {
+        font-family: monospace,monospace;
+        font-size: 1em;
+    }
+
+    .markdown-body figure {
+        margin: 1em 40px;
+    }
+
+    .markdown-body hr {
+        box-sizing: content-box;
+        overflow: hidden;
+        background: transparent;
+        border-bottom: 1px solid #21262d;
+        height: .25em;
+        padding: 0;
+        margin: 24px 0;
+        background-color: #30363d;
+        border: 0;
+    }
+
+    .markdown-body input {
+        font: inherit;
+        margin: 0;
+        overflow: visible;
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+    }
+
+    .markdown-body [type=button],
+    .markdown-body [type=reset],
+    .markdown-body [type=submit] {
+        -webkit-appearance: button;
+    }
+
+        .markdown-body [type=button]::-moz-focus-inner,
+        .markdown-body [type=reset]::-moz-focus-inner,
+        .markdown-body [type=submit]::-moz-focus-inner {
+            border-style: none;
+            padding: 0;
+        }
+
+        .markdown-body [type=button]:-moz-focusring,
+        .markdown-body [type=reset]:-moz-focusring,
+        .markdown-body [type=submit]:-moz-focusring {
+            outline: 1px dotted ButtonText;
+        }
+
+    .markdown-body [type=checkbox],
+    .markdown-body [type=radio] {
+        box-sizing: border-box;
+        padding: 0;
+    }
+
+    .markdown-body [type=number]::-webkit-inner-spin-button,
+    .markdown-body [type=number]::-webkit-outer-spin-button {
+        height: auto;
+    }
+
+    .markdown-body [type=search] {
+        -webkit-appearance: textfield;
+        outline-offset: -2px;
+    }
+
+        .markdown-body [type=search]::-webkit-search-cancel-button,
+        .markdown-body [type=search]::-webkit-search-decoration {
+            -webkit-appearance: none;
+        }
+
+    .markdown-body ::-webkit-input-placeholder {
+        color: inherit;
+        opacity: .54;
+    }
+
+    .markdown-body ::-webkit-file-upload-button {
+        -webkit-appearance: button;
+        font: inherit;
+    }
+
+    .markdown-body a:hover {
+        text-decoration: underline;
+    }
+
+    .markdown-body hr::before {
+        display: table;
+        content: "";
+    }
+
+    .markdown-body hr::after {
+        display: table;
+        clear: both;
+        content: "";
+    }
+
+    .markdown-body table {
+        border-spacing: 0;
+        border-collapse: collapse;
+        display: block;
+        width: max-content;
+        max-width: 100%;
+        overflow: auto;
+    }
+
+    .markdown-body td,
+    .markdown-body th {
+        padding: 0;
+    }
+
+    .markdown-body details summary {
+        cursor: pointer;
+    }
+
+    .markdown-body details:not([open]) > *:not(summary) {
+        display: none !important;
+    }
+
+    .markdown-body kbd {
+        display: inline-block;
+        padding: 3px 5px;
+        font: 11px ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+        line-height: 10px;
+        color: #c9d1d9;
+        vertical-align: middle;
+        background-color: #161b22;
+        border: solid 1px rgba(110,118,129,0.4);
+        border-bottom-color: rgba(110,118,129,0.4);
+        border-radius: 6px;
+        box-shadow: inset 0 -1px 0 rgba(110,118,129,0.4);
+    }
+
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4,
+    .markdown-body h5,
+    .markdown-body h6 {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .markdown-body h2 {
+        font-weight: 600;
+        padding-bottom: .3em;
+        font-size: 1.5em;
+        border-bottom: 1px solid #21262d;
+    }
+
+    .markdown-body h3 {
+        font-weight: 600;
+        font-size: 1.25em;
+    }
+
+    .markdown-body h4 {
+        font-weight: 600;
+        font-size: 1em;
+    }
+
+    .markdown-body h5 {
+        font-weight: 600;
+        font-size: .875em;
+    }
+
+    .markdown-body h6 {
+        font-weight: 600;
+        font-size: .85em;
+        color: #8b949e;
+    }
+
+    .markdown-body p {
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+
+    .markdown-body blockquote {
+        margin: 0;
+        padding: 0 1em;
+        color: #8b949e;
+        border-left: .25em solid #30363d;
+    }
+
+    .markdown-body ul {
+        list-style: disc
+    }
+
+    .markdown-body ul,
+    .markdown-body ol {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-left: 2em;
+    }
+
+        .markdown-body ol ol,
+        .markdown-body ul ol {
+            list-style-type: lower-roman;
+        }
+
+            .markdown-body ul ul ol,
+            .markdown-body ul ol ol,
+            .markdown-body ol ul ol,
+            .markdown-body ol ol ol {
+                list-style-type: lower-alpha;
+            }
+
+    .markdown-body dd {
+        margin-left: 0;
+    }
+
+    .markdown-body tt,
+    .markdown-body code {
+        font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+        font-size: 12px;
+    }
+
+    .markdown-body pre {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+        font-size: 12px;
+        word-wrap: normal;
+    }
+
+    .markdown-body .octicon {
+        display: inline-block;
+        overflow: visible !important;
+        vertical-align: text-bottom;
+        fill: currentColor;
+    }
+
+    .markdown-body ::placeholder {
+        color: #484f58;
+        opacity: 1;
+    }
+
+    .markdown-body input::-webkit-outer-spin-button,
+    .markdown-body input::-webkit-inner-spin-button {
+        margin: 0;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .markdown-body .pl-c {
+        color: #8b949e;
+    }
+
+    .markdown-body .pl-c1,
+    .markdown-body .pl-s .pl-v {
+        color: #79c0ff;
+    }
+
+    .markdown-body .pl-e,
+    .markdown-body .pl-en {
+        color: #d2a8ff;
+    }
+
+    .markdown-body .pl-smi,
+    .markdown-body .pl-s .pl-s1 {
+        color: #c9d1d9;
+    }
+
+    .markdown-body .pl-ent {
+        color: #7ee787;
+    }
+
+    .markdown-body .pl-k {
+        color: #ff7b72;
+    }
+
+    .markdown-body .pl-s,
+    .markdown-body .pl-pds,
+    .markdown-body .pl-s .pl-pse .pl-s1,
+    .markdown-body .pl-sr,
+    .markdown-body .pl-sr .pl-cce,
+    .markdown-body .pl-sr .pl-sre,
+    .markdown-body .pl-sr .pl-sra {
+        color: #a5d6ff;
+    }
+
+    .markdown-body .pl-v,
+    .markdown-body .pl-smw {
+        color: #ffa657;
+    }
+
+    .markdown-body .pl-bu {
+        color: #f85149;
+    }
+
+    .markdown-body .pl-ii {
+        color: #f0f6fc;
+        background-color: #8e1519;
+    }
+
+    .markdown-body .pl-c2 {
+        color: #f0f6fc;
+        background-color: #b62324;
+    }
+
+    .markdown-body .pl-sr .pl-cce {
+        font-weight: bold;
+        color: #7ee787;
+    }
+
+    .markdown-body .pl-ml {
+        color: #f2cc60;
+    }
+
+    .markdown-body .pl-mh,
+    .markdown-body .pl-mh .pl-en,
+    .markdown-body .pl-ms {
+        font-weight: bold;
+        color: #1f6feb;
+    }
+
+    .markdown-body .pl-mi {
+        font-style: italic;
+        color: #c9d1d9;
+    }
+
+    .markdown-body .pl-mb {
+        font-weight: bold;
+        color: #c9d1d9;
+    }
+
+    .markdown-body .pl-md {
+        color: #ffdcd7;
+        background-color: #67060c;
+    }
+
+    .markdown-body .pl-mi1 {
+        color: #aff5b4;
+        background-color: #033a16;
+    }
+
+    .markdown-body .pl-mc {
+        color: #ffdfb6;
+        background-color: #5a1e02;
+    }
+
+    .markdown-body .pl-mi2 {
+        color: #c9d1d9;
+        background-color: #1158c7;
+    }
+
+    .markdown-body .pl-mdr {
+        font-weight: bold;
+        color: #d2a8ff;
+    }
+
+    .markdown-body .pl-ba {
+        color: #8b949e;
+    }
+
+    .markdown-body .pl-sg {
+        color: #484f58;
+    }
+
+    .markdown-body .pl-corl {
+        text-decoration: underline;
+        color: #a5d6ff;
+    }
+
+    .markdown-body [data-catalyst] {
+        display: block;
+    }
+
+    .markdown-body g-emoji {
+        font-family: "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+        font-size: 1em;
+        font-style: normal !important;
+        font-weight: 400;
+        line-height: 1;
+        vertical-align: -0.075em;
+    }
+
+        .markdown-body g-emoji img {
+            width: 1em;
+            height: 1em;
+        }
+
+    .markdown-body::before {
+        display: table;
+        content: "";
+    }
+
+    .markdown-body::after {
+        display: table;
+        clear: both;
+        content: "";
+    }
+
+    .markdown-body > *:first-child {
+        margin-top: 0 !important;
+    }
+
+    .markdown-body > *:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    .markdown-body a:not([href]) {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .markdown-body .absent {
+        color: #f85149;
+    }
+
+    .markdown-body .anchor {
+        float: left;
+        padding-right: 4px;
+        margin-left: -20px;
+        line-height: 1;
+    }
+
+        .markdown-body .anchor:focus {
+            outline: none;
+        }
+
+    .markdown-body p,
+    .markdown-body blockquote,
+    .markdown-body ul,
+    .markdown-body ol,
+    .markdown-body dl,
+    .markdown-body table,
+    .markdown-body pre,
+    .markdown-body details {
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+
+        .markdown-body blockquote > :first-child {
+            margin-top: 0;
+        }
+
+        .markdown-body blockquote > :last-child {
+            margin-bottom: 0;
+        }
+
+    .markdown-body sup > a::before {
+        content: "[";
+    }
+
+    .markdown-body sup > a::after {
+        content: "]";
+    }
+
+    .markdown-body h1 .octicon-link,
+    .markdown-body h2 .octicon-link,
+    .markdown-body h3 .octicon-link,
+    .markdown-body h4 .octicon-link,
+    .markdown-body h5 .octicon-link,
+    .markdown-body h6 .octicon-link {
+        color: #c9d1d9;
+        vertical-align: middle;
+        visibility: hidden;
+    }
+
+    .markdown-body h1:hover .anchor,
+    .markdown-body h2:hover .anchor,
+    .markdown-body h3:hover .anchor,
+    .markdown-body h4:hover .anchor,
+    .markdown-body h5:hover .anchor,
+    .markdown-body h6:hover .anchor {
+        text-decoration: none;
+    }
+
+        .markdown-body h1:hover .anchor .octicon-link,
+        .markdown-body h2:hover .anchor .octicon-link,
+        .markdown-body h3:hover .anchor .octicon-link,
+        .markdown-body h4:hover .anchor .octicon-link,
+        .markdown-body h5:hover .anchor .octicon-link,
+        .markdown-body h6:hover .anchor .octicon-link {
+            visibility: visible;
+        }
+
+    .markdown-body h1 tt,
+    .markdown-body h1 code,
+    .markdown-body h2 tt,
+    .markdown-body h2 code,
+    .markdown-body h3 tt,
+    .markdown-body h3 code,
+    .markdown-body h4 tt,
+    .markdown-body h4 code,
+    .markdown-body h5 tt,
+    .markdown-body h5 code,
+    .markdown-body h6 tt,
+    .markdown-body h6 code {
+        padding: 0 .2em;
+        font-size: inherit;
+    }
+
+    .markdown-body ul.no-list,
+    .markdown-body ol.no-list {
+        padding: 0;
+        list-style-type: none;
+    }
+
+    .markdown-body ol[type="1"] {
+        list-style-type: decimal;
+    }
+
+    .markdown-body ol[type=a] {
+        list-style-type: lower-alpha;
+    }
+
+    .markdown-body ol[type=i] {
+        list-style-type: lower-roman;
+    }
+
+    .markdown-body div > ol:not([type]) {
+        list-style-type: decimal;
+    }
+
+    .markdown-body ul ul,
+    .markdown-body ul ol,
+    .markdown-body ol ol,
+    .markdown-body ol ul {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .markdown-body li > p {
+        margin-top: 16px;
+    }
+
+    .markdown-body li + li {
+        margin-top: .25em;
+    }
+
+    .markdown-body dl {
+        padding: 0;
+    }
+
+        .markdown-body dl dt {
+            padding: 0;
+            margin-top: 16px;
+            font-size: 1em;
+            font-style: italic;
+            font-weight: 600;
+        }
+
+        .markdown-body dl dd {
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+
+    .markdown-body table th {
+        font-weight: 600;
+    }
+
+    .markdown-body table th,
+    .markdown-body table td {
+        padding: 6px 13px;
+        border: 1px solid #30363d;
+    }
+
+    .markdown-body table tr {
+        background-color: #1f1f1f;
+        border-top: 1px solid #21262d;
+    }
+
+        .markdown-body table tr:nth-child(2n) {
+            background-color: #161b22;
+        }
+
+    .markdown-body table img {
+        background-color: transparent;
+    }
+
+    .markdown-body img[align=right] {
+        padding-left: 20px;
+    }
+
+    .markdown-body img[align=left] {
+        padding-right: 20px;
+    }
+
+    .markdown-body .emoji {
+        max-width: none;
+        vertical-align: text-top;
+        background-color: transparent;
+    }
+
+    .markdown-body span.frame {
+        display: block;
+        overflow: hidden;
+    }
+
+        .markdown-body span.frame > span {
+            display: block;
+            float: left;
+            width: auto;
+            padding: 7px;
+            margin: 13px 0 0;
+            overflow: hidden;
+            border: 1px solid #30363d;
+        }
+
+        .markdown-body span.frame span img {
+            display: block;
+            float: left;
+        }
+
+        .markdown-body span.frame span span {
+            display: block;
+            padding: 5px 0 0;
+            clear: both;
+            color: #c9d1d9;
+        }
+
+    .markdown-body span.align-center {
+        display: block;
+        overflow: hidden;
+        clear: both;
+    }
+
+        .markdown-body span.align-center > span {
+            display: block;
+            margin: 13px auto 0;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .markdown-body span.align-center span img {
+            margin: 0 auto;
+            text-align: center;
+        }
+
+    .markdown-body span.align-right {
+        display: block;
+        overflow: hidden;
+        clear: both;
+    }
+
+        .markdown-body span.align-right > span {
+            display: block;
+            margin: 13px 0 0;
+            overflow: hidden;
+            text-align: right;
+        }
+
+        .markdown-body span.align-right span img {
+            margin: 0;
+            text-align: right;
+        }
+
+    .markdown-body span.float-left {
+        display: block;
+        float: left;
+        margin-right: 13px;
+        overflow: hidden;
+    }
+
+        .markdown-body span.float-left span {
+            margin: 13px 0 0;
+        }
+
+    .markdown-body span.float-right {
+        display: block;
+        float: right;
+        margin-left: 13px;
+        overflow: hidden;
+    }
+
+        .markdown-body span.float-right > span {
+            display: block;
+            margin: 13px auto 0;
+            overflow: hidden;
+            text-align: right;
+        }
+
+    .markdown-body code,
+    .markdown-body tt {
+        padding: .2em .4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(110,118,129,0.4);
+        border-radius: 6px;
+    }
+
+        .markdown-body code br,
+        .markdown-body tt br {
+            display: none;
+        }
+
+    .markdown-body del code {
+        text-decoration: inherit;
+    }
+
+    .markdown-body pre code {
+        font-size: 100%;
+    }
+
+    .markdown-body pre > code {
+        padding: 0;
+        margin: 0;
+        word-break: normal;
+        white-space: pre;
+        background: transparent;
+        border: 0;
+    }
+
+    .markdown-body .highlight {
+        margin-bottom: 16px;
+    }
+
+        .markdown-body .highlight pre {
+            margin-bottom: 0;
+            word-break: normal;
+        }
+
+        .markdown-body .highlight pre,
+        .markdown-body pre {
+            padding: 16px;
+            overflow: auto;
+            font-size: 85%;
+            line-height: 1.45;
+            background-color: #161b22;
+            border-radius: 6px;
+        }
+
+            .markdown-body pre code,
+            .markdown-body pre tt {
+                display: inline;
+                max-width: auto;
+                padding: 0;
+                margin: 0;
+                overflow: visible;
+                line-height: inherit;
+                word-wrap: normal;
+                background-color: transparent;
+                border: 0;
+            }
+
+    .markdown-body .csv-data td,
+    .markdown-body .csv-data th {
+        padding: 5px;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 1;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .markdown-body .csv-data .blob-num {
+        padding: 10px 8px 9px;
+        text-align: right;
+        background: #1f1f1f;
+        border: 0;
+    }
+
+    .markdown-body .csv-data tr {
+        border-top: 0;
+    }
+
+    .markdown-body .csv-data th {
+        font-weight: 600;
+        background: #161b22;
+        border-top: 0;
+    }
+
+    .markdown-body .footnotes {
+        font-size: 12px;
+        color: #8b949e;
+        border-top: 1px solid #30363d;
+    }
+
+        .markdown-body .footnotes ol {
+            padding-left: 16px;
+        }
+
+        .markdown-body .footnotes li {
+            position: relative;
+        }
+
+            .markdown-body .footnotes li:target::before {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                bottom: -8px;
+                left: -24px;
+                pointer-events: none;
+                content: "";
+                border: 2px solid #1f6feb;
+                border-radius: 6px;
+            }
+
+            .markdown-body .footnotes li:target {
+                color: #c9d1d9;
+            }
+
+        .markdown-body .footnotes .data-footnote-backref g-emoji {
+            font-family: monospace;
+        }
+
+    .markdown-body .task-list-item {
+        list-style-type: none;
+    }
+
+        .markdown-body .task-list-item label {
+            font-weight: 400;
+        }
+
+        .markdown-body .task-list-item.enabled label {
+            cursor: pointer;
+        }
+
+        .markdown-body .task-list-item + .task-list-item {
+            margin-top: 3px;
+        }
+
+        .markdown-body .task-list-item .handle {
+            display: none;
+        }
+
+    .markdown-body .task-list-item-checkbox {
+        margin: 0 .2em .25em -1.6em;
+        vertical-align: middle;
+    }
+
+    .markdown-body .contains-task-list:dir(rtl) .task-list-item-checkbox {
+        margin: 0 -1.6em .25em .2em;
+    }
+
+    .markdown-body ::-webkit-calendar-picker-indicator {
+        filter: invert(50%);
+    }
+/* PrismJS 1.25.0
+https://prismjs.com/download.html#themes=prism-tomorrow&languages=markup+css+clike+javascript */
+code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+    </style>
+    <title>Markdown Preview</title>
+    <meta http-equiv="cache-control" content="no-cache">
+<style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style><style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style><style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style><style id="MJX-CHTML-styles">
+mjx-container[jax="CHTML"] {
+  line-height: 0;
+}
+
+mjx-container [space="1"] {
+  margin-left: .111em;
+}
+
+mjx-container [space="2"] {
+  margin-left: .167em;
+}
+
+mjx-container [space="3"] {
+  margin-left: .222em;
+}
+
+mjx-container [space="4"] {
+  margin-left: .278em;
+}
+
+mjx-container [space="5"] {
+  margin-left: .333em;
+}
+
+mjx-container [rspace="1"] {
+  margin-right: .111em;
+}
+
+mjx-container [rspace="2"] {
+  margin-right: .167em;
+}
+
+mjx-container [rspace="3"] {
+  margin-right: .222em;
+}
+
+mjx-container [rspace="4"] {
+  margin-right: .278em;
+}
+
+mjx-container [rspace="5"] {
+  margin-right: .333em;
+}
+
+mjx-container [size="s"] {
+  font-size: 70.7%;
+}
+
+mjx-container [size="ss"] {
+  font-size: 50%;
+}
+
+mjx-container [size="Tn"] {
+  font-size: 60%;
+}
+
+mjx-container [size="sm"] {
+  font-size: 85%;
+}
+
+mjx-container [size="lg"] {
+  font-size: 120%;
+}
+
+mjx-container [size="Lg"] {
+  font-size: 144%;
+}
+
+mjx-container [size="LG"] {
+  font-size: 173%;
+}
+
+mjx-container [size="hg"] {
+  font-size: 207%;
+}
+
+mjx-container [size="HG"] {
+  font-size: 249%;
+}
+
+mjx-container [width="full"] {
+  width: 100%;
+}
+
+mjx-box {
+  display: inline-block;
+}
+
+mjx-block {
+  display: block;
+}
+
+mjx-itable {
+  display: inline-table;
+}
+
+mjx-row {
+  display: table-row;
+}
+
+mjx-row > * {
+  display: table-cell;
+}
+
+mjx-mtext {
+  display: inline-block;
+}
+
+mjx-mstyle {
+  display: inline-block;
+}
+
+mjx-merror {
+  display: inline-block;
+  color: red;
+  background-color: yellow;
+}
+
+mjx-mphantom {
+  visibility: hidden;
+}
+
+_::-webkit-full-page-media, _:future, :root mjx-container {
+  will-change: opacity;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-c::before {
+  display: block;
+  width: 0;
+}
+
+.MJX-TEX {
+  font-family: MJXZERO, MJXTEX;
+}
+
+.TEX-B {
+  font-family: MJXZERO, MJXTEX-B;
+}
+
+.TEX-I {
+  font-family: MJXZERO, MJXTEX-I;
+}
+
+.TEX-MI {
+  font-family: MJXZERO, MJXTEX-MI;
+}
+
+.TEX-BI {
+  font-family: MJXZERO, MJXTEX-BI;
+}
+
+.TEX-S1 {
+  font-family: MJXZERO, MJXTEX-S1;
+}
+
+.TEX-S2 {
+  font-family: MJXZERO, MJXTEX-S2;
+}
+
+.TEX-S3 {
+  font-family: MJXZERO, MJXTEX-S3;
+}
+
+.TEX-S4 {
+  font-family: MJXZERO, MJXTEX-S4;
+}
+
+.TEX-A {
+  font-family: MJXZERO, MJXTEX-A;
+}
+
+.TEX-C {
+  font-family: MJXZERO, MJXTEX-C;
+}
+
+.TEX-CB {
+  font-family: MJXZERO, MJXTEX-CB;
+}
+
+.TEX-FR {
+  font-family: MJXZERO, MJXTEX-FR;
+}
+
+.TEX-FRB {
+  font-family: MJXZERO, MJXTEX-FRB;
+}
+
+.TEX-SS {
+  font-family: MJXZERO, MJXTEX-SS;
+}
+
+.TEX-SSB {
+  font-family: MJXZERO, MJXTEX-SSB;
+}
+
+.TEX-SSI {
+  font-family: MJXZERO, MJXTEX-SSI;
+}
+
+.TEX-SC {
+  font-family: MJXZERO, MJXTEX-SC;
+}
+
+.TEX-T {
+  font-family: MJXZERO, MJXTEX-T;
+}
+
+.TEX-V {
+  font-family: MJXZERO, MJXTEX-V;
+}
+
+.TEX-VB {
+  font-family: MJXZERO, MJXTEX-VB;
+}
+
+mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
+  font-family: MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important;
+}
+
+@font-face /* 0 */ {
+  font-family: MJXZERO;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Zero.woff") format("woff");
+}
+
+@font-face /* 1 */ {
+  font-family: MJXTEX;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff") format("woff");
+}
+
+@font-face /* 2 */ {
+  font-family: MJXTEX-B;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff") format("woff");
+}
+
+@font-face /* 3 */ {
+  font-family: MJXTEX-I;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+}
+
+@font-face /* 4 */ {
+  font-family: MJXTEX-MI;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+}
+
+@font-face /* 5 */ {
+  font-family: MJXTEX-BI;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff") format("woff");
+}
+
+@font-face /* 6 */ {
+  font-family: MJXTEX-S1;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff") format("woff");
+}
+
+@font-face /* 7 */ {
+  font-family: MJXTEX-S2;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff") format("woff");
+}
+
+@font-face /* 8 */ {
+  font-family: MJXTEX-S3;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff") format("woff");
+}
+
+@font-face /* 9 */ {
+  font-family: MJXTEX-S4;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff") format("woff");
+}
+
+@font-face /* 10 */ {
+  font-family: MJXTEX-A;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff") format("woff");
+}
+
+@font-face /* 11 */ {
+  font-family: MJXTEX-C;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff") format("woff");
+}
+
+@font-face /* 12 */ {
+  font-family: MJXTEX-CB;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
+}
+
+@font-face /* 13 */ {
+  font-family: MJXTEX-FR;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff") format("woff");
+}
+
+@font-face /* 14 */ {
+  font-family: MJXTEX-FRB;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
+}
+
+@font-face /* 15 */ {
+  font-family: MJXTEX-SS;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff") format("woff");
+}
+
+@font-face /* 16 */ {
+  font-family: MJXTEX-SSB;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
+}
+
+@font-face /* 18 */ {
+  font-family: MJXTEX-SC;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff") format("woff");
+}
+
+@font-face /* 19 */ {
+  font-family: MJXTEX-T;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff") format("woff");
+}
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("http://markdown-editor-host/margin/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff") format("woff");
+}
+</style></head>
 <body>
 
-    <h1 id="weevil-change-log">Weevil : Change Log</h1>
-<h2 id="releases">Releases</h2>
-<p>The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features &amp; bug fixes.</p>
-<h3 id="version-2.9.0">Version 2.9.0</h3>
-<p>Released on March 6th, 2022.</p>
-<h4 id="whats-new">What's New?</h4>
-<ul>
-<li>Line graphs can be created using a regular expression <em>named group</em> to extract data from a log file. #159
-<ul>
-<li>Using the [RegEx101][RegEx] online utility, you can practice capturing data. In [this][RegEx] example, you can use a <em>named group</em> to detect the word <code>Never</code> in a paragraph.
-<ul>
-<li><code>(?&lt;NamedGroup&gt;Never)</code></li>
+    
+    <div id="___markdown-content___" class="markdown-body">
+        <h1 id="weevil-change-log"><a id="pragma-line-0"></a>Weevil : Change Log</h1>
+<h2 id="releases"><a id="pragma-line-2"></a>Releases</h2>
+<p id="pragma-line-4">The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features &amp; bug fixes.</p>
+<h3 id="version-2.10.0"><a id="pragma-line-6"></a>Version 2.10.0</h3>
+<p id="pragma-line-8">Release on July 27th, 2022.</p>
+<h4 id="whats-new"><a id="pragma-line-10"></a>What's New?</h4>
+<ul id="pragma-line-12">
+<li id="pragma-line-12">Analyzers:
+<ul id="pragma-line-13">
+<li id="pragma-line-13"><em>Detect Temporal Anomaly</em> can be used to flag records where the timestamps appear out of order. #307</li>
+</ul>
+</li>
+<li id="pragma-line-14">Dashboard insight:
+<ul id="pragma-line-15">
+<li id="pragma-line-15">Notification when log timestamps are out of order. #307</li>
+<li id="pragma-line-16">Insight can now be copied directly from the dashboard, thus making it easier to share information. #288</li>
+</ul>
+</li>
+<li id="pragma-line-17">The .NET Framework dependency has been replaced with Microsoft's .NET Core. #293</li>
+<li id="pragma-line-18">The <code>New Release</code> notification message is more intuitive. #290</li>
+<li id="pragma-line-19"><code>Save Raw</code> now saves the selected records to a file with the same encoding original file. #315</li>
+<li id="pragma-line-20">The name of the open file is now displayed in the Weevil's title bar. #285</li>
+<li id="pragma-line-21">Third-party NuGet packages have been updated to the latest version. #272</li>
+<li id="pragma-line-22">Performance metrics (e.g. RAM available, RAM used, etc.) are now visible in the <em>About</em> dialog. #277</li>
+</ul>
+<h4 id="bug-fixes"><a id="pragma-line-24"></a>Bug Fixes</h4>
+<ul id="pragma-line-26">
+<li id="pragma-line-26"><code>Save Raw</code> now saves all records when only 1 record has been selected. #315</li>
+<li id="pragma-line-27"><code>MainWindowViewModel</code> was accidentally being instantiated twice. #277</li>
+</ul>
+<h3 id="version-2.9.0"><a id="pragma-line-29"></a>Version 2.9.0</h3>
+<p id="pragma-line-31">Released on March 6th, 2022.</p>
+<h4 id="whats-new-1"><a id="pragma-line-33"></a>What's New?</h4>
+<ul id="pragma-line-35">
+<li id="pragma-line-35">Line graphs can be created using a regular expression <em>named group</em> to extract data from a log file. #159
+<ul id="pragma-line-36">
+<li id="pragma-line-36">Using the [RegEx101][RegEx] online utility, you can practice capturing data. In [this][RegEx] example, you can use a <em>named group</em> to detect the word <code>Never</code> in a paragraph.
+<ul id="pragma-line-37">
+<li id="pragma-line-37"><code>(?&lt;NamedGroup&gt;Never)</code></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>The <em>Detect Time Gap</em> analysis tool has been renamed to <em>Measure Elapsed Time</em>. #256</li>
-<li>The analysis tools now support detecting rising &amp; falling edges in both ascending/descending order. #244</li>
-<li>Exception callstacks no longer include file paths, which help to reduce visual noise. #237
-<ul>
-<li>The user still has the choice to see the original call stack by using the <em>copy raw</em> feature.</li>
+<li id="pragma-line-38">The <em>Detect Time Gap</em> analysis tool has been renamed to <em>Measure Elapsed Time</em>. #256</li>
+<li id="pragma-line-39">The analysis tools now support detecting rising &amp; falling edges in both ascending/descending order. #244</li>
+<li id="pragma-line-40">Exception callstacks no longer include file paths, which help to reduce visual noise. #237
+<ul id="pragma-line-41">
+<li id="pragma-line-41">The user still has the choice to see the original call stack by using the <em>copy raw</em> feature.</li>
 </ul>
 </li>
-<li>The <em>Find</em> operation now supports case insensitive searches. #235</li>
+<li id="pragma-line-42">The <em>Find</em> operation now supports case insensitive searches. #235</li>
 </ul>
-<h4 id="bug-fixes">Bug Fixes</h4>
-<ul>
-<li>Compressed files (<code>*.zip</code>) can be easily opened by dragging them on to the Weevil application window.  This feature had stopped working in earlier releases. #266</li>
+<h4 id="bug-fixes-1"><a id="pragma-line-44"></a>Bug Fixes</h4>
+<ul id="pragma-line-46">
+<li id="pragma-line-46">Compressed files (<code>*.zip</code>) can be easily opened by dragging them on to the Weevil application window.  This feature had stopped working in earlier releases. #266</li>
 </ul>
-<h3 id="version-2.8.1">Version 2.8.1</h3>
-<p>Released on December 1st, 2021</p>
-<h4 id="whats-new-1">What's New?</h4>
-<ul>
-<li><code>@ContentLength&gt;32</code> moniker supports identifying records longer than the given length (e.g. 32 characters) #226</li>
-<li><code>@IsMultiline</code> moniker supports identifying records that span multiple lines (e.g. an exception callstack) #227</li>
+<h3 id="version-2.8.1"><a id="pragma-line-48"></a>Version 2.8.1</h3>
+<p id="pragma-line-50">Released on December 1st, 2021</p>
+<h4 id="whats-new-2"><a id="pragma-line-52"></a>What's New?</h4>
+<ul id="pragma-line-54">
+<li id="pragma-line-54"><code>@ContentLength&gt;32</code> moniker supports identifying records longer than the given length (e.g. 32 characters) #226</li>
+<li id="pragma-line-55"><code>@IsMultiline</code> moniker supports identifying records that span multiple lines (e.g. an exception callstack) #227</li>
 </ul>
-<h4 id="bug-fixes-1">Bug Fixes</h4>
-<ul>
-<li>None</li>
+<h4 id="bug-fixes-2"><a id="pragma-line-57"></a>Bug Fixes</h4>
+<ul id="pragma-line-59">
+<li id="pragma-line-59">None</li>
 </ul>
-<h3 id="version-2.8.0">Version 2.8.0</h3>
-<p>Released on November 22nd, 2021</p>
-<h4 id="whats-new-2">What's New?</h4>
-<ul>
-<li>Navigate between filter results...
-<ul>
-<li>Find: Search for text in filter results. (#118)</li>
-<li>GoTo: Jump to a specific timestamp. (#119)</li>
-<li>GoTo: Jump to a specific line number. (#150)</li>
-<li>Flagged Records: Quickly navigate between records of interest. (#211)</li>
-<li>Record Comments: Navigate between records that have a user comment. (#212)</li>
+<h3 id="version-2.8.0"><a id="pragma-line-61"></a>Version 2.8.0</h3>
+<p id="pragma-line-63">Released on November 22nd, 2021</p>
+<h4 id="whats-new-3"><a id="pragma-line-65"></a>What's New?</h4>
+<ul id="pragma-line-67">
+<li id="pragma-line-67">Navigate between filter results...
+<ul id="pragma-line-68">
+<li id="pragma-line-68">Find: Search for text in filter results. (#118)</li>
+<li id="pragma-line-69">GoTo: Jump to a specific timestamp. (#119)</li>
+<li id="pragma-line-70">GoTo: Jump to a specific line number. (#150)</li>
+<li id="pragma-line-71">Flagged Records: Quickly navigate between records of interest. (#211)</li>
+<li id="pragma-line-72">Record Comments: Navigate between records that have a user comment. (#212)</li>
 </ul>
 </li>
-<li>Clear content between selected records. (#209)</li>
-<li>Includes a <em>Regular Expression</em> tool that can be used to check syntax. (#186)</li>
-<li>Keyboard focus is now set to the <code>TextBox</code> when an input dialog is displayed. (#166)</li>
-<li>Better handle long log entries (e.g. 2,000,000 characters) (#200)</li>
+<li id="pragma-line-73">Clear content between selected records. (#209)</li>
+<li id="pragma-line-74">Includes a <em>Regular Expression</em> tool that can be used to check syntax. (#186)</li>
+<li id="pragma-line-75">Keyboard focus is now set to the <code>TextBox</code> when an input dialog is displayed. (#166)</li>
+<li id="pragma-line-76">Better handle long log entries (e.g. 2,000,000 characters) (#200)</li>
 </ul>
-<h4 id="bug-fixes-2">Bug Fixes</h4>
-<ul>
-<li>Focus was not properly set after clicking include/exclude ComboBox. (#182)</li>
-<li>Improved performance by using the default <code>MaxDegreeOfParallelism</code>. (#161)</li>
+<h4 id="bug-fixes-3"><a id="pragma-line-78"></a>Bug Fixes</h4>
+<ul id="pragma-line-80">
+<li id="pragma-line-80">Focus was not properly set after clicking include/exclude ComboBox. (#182)</li>
+<li id="pragma-line-81">Improved performance by using the default <code>MaxDegreeOfParallelism</code>. (#161)</li>
 </ul>
-<h3 id="version-2.7.0">Version 2.7.0</h3>
-<p>Released on May 22th, 2021</p>
-<h4 id="whats-new-3">What's New?</h4>
-<ul>
-<li>A status bar light bulb, and accompanying dashboard has been added to provide insight about the open file. (#20, #117)</li>
-<li>Updated NuGet package dependencies to the latest version. (#111)</li>
-<li>A &quot;Detect Rising Edge&quot; <code>Analyzer</code> has been added. (#113)</li>
-<li>A new XML notification message is now used to notify users about new Weevil releases. (#117)</li>
-<li>The status bar tool tips are now more intuitive (#117)</li>
-<li><code>Copy+Shift+C</code> operation will result in the following placeholder <code>--:--:--</code> being used when no timestamp is available. (#117)</li>
-<li>Weevil now captures basic hardware information (e.g. CPU &amp; RAM) to facilitate troubleshooting production issues (#125)</li>
-<li>CPU &amp; RAM details are now fully visible in About dialog. (#117)</li>
-<li><code>@Elapsed</code> moniker now has a default value of 3 seconds (#135)</li>
-<li>The existing <code>@Elapsed</code> moniker has now been exposed as an <code>Analyzer</code> and dashboard <code>Insight</code> (#135)</li>
-<li>A full &quot;Garbage Collection&quot; can now be triggered using <code>Ctrl+Alt+Shift+F12</code> to help release RAM back to the OS. (#22)</li>
-<li>User has the option to copy either the raw record, or a &quot;friendly&quot; version that has a simplified .NET call stack. (#134)</li>
-<li>Weevil now monitors the responsiveness of it's own user interface. (#110)</li>
+<h3 id="version-2.7.0"><a id="pragma-line-83"></a>Version 2.7.0</h3>
+<p id="pragma-line-85">Released on May 22th, 2021</p>
+<h4 id="whats-new-4"><a id="pragma-line-87"></a>What's New?</h4>
+<ul id="pragma-line-89">
+<li id="pragma-line-89">A status bar light bulb, and accompanying dashboard has been added to provide insight about the open file. (#20, #117)</li>
+<li id="pragma-line-90">Updated NuGet package dependencies to the latest version. (#111)</li>
+<li id="pragma-line-91">A "Detect Rising Edge" <code>Analyzer</code> has been added. (#113)</li>
+<li id="pragma-line-92">A new XML notification message is now used to notify users about new Weevil releases. (#117)</li>
+<li id="pragma-line-93">The status bar tool tips are now more intuitive (#117)</li>
+<li id="pragma-line-94"><code>Copy+Shift+C</code> operation will result in the following placeholder <code>--:--:--</code> being used when no timestamp is available. (#117)</li>
+<li id="pragma-line-95">Weevil now captures basic hardware information (e.g. CPU &amp; RAM) to facilitate troubleshooting production issues (#125)</li>
+<li id="pragma-line-96">CPU &amp; RAM details are now fully visible in About dialog. (#117)</li>
+<li id="pragma-line-97"><code>@Elapsed</code> moniker now has a default value of 3 seconds (#135)</li>
+<li id="pragma-line-98">The existing <code>@Elapsed</code> moniker has now been exposed as an <code>Analyzer</code> and dashboard <code>Insight</code> (#135)</li>
+<li id="pragma-line-99">A full "Garbage Collection" can now be triggered using <code>Ctrl+Alt+Shift+F12</code> to help release RAM back to the OS. (#22)</li>
+<li id="pragma-line-100">User has the option to copy either the raw record, or a "friendly" version that has a simplified .NET call stack. (#134)</li>
+<li id="pragma-line-101">Weevil now monitors the responsiveness of it's own user interface. (#110)</li>
 </ul>
-<h4 id="bug-fixes-3">Bug Fixes</h4>
-<ul>
-<li>The status bar now reflects the number of flagged <code>Record</code>s post-analysis (#116) (#121)</li>
-<li>The menu no longer remains disabled when: you view the context menu before loading a file (#139)</li>
-<li>Fixed: filter aliases do not resolve properly when multiple aliases start with the same text. (#98)</li>
+<h4 id="bug-fixes-4"><a id="pragma-line-103"></a>Bug Fixes</h4>
+<ul id="pragma-line-105">
+<li id="pragma-line-105">The status bar now reflects the number of flagged <code>Record</code>s post-analysis (#116) (#121)</li>
+<li id="pragma-line-106">The menu no longer remains disabled when: you view the context menu before loading a file (#139)</li>
+<li id="pragma-line-107">Fixed: filter aliases do not resolve properly when multiple aliases start with the same text. (#98)</li>
 </ul>
-<h3 id="version-2.6.1">Version 2.6.1</h3>
-<p>Released on March 27th, 2021</p>
-<h4 id="whats-new-4">What's New?</h4>
-<ul>
-<li>The &quot;New Release&quot; notification now includes a &quot;Download&quot; hyperlink. (#92)</li>
-<li>The &quot;Include Debug&quot; &amp; &quot;Include Trace&quot; menu options have been moved to the filter options. (#101, #104)</li>
+<h3 id="version-2.6.1"><a id="pragma-line-109"></a>Version 2.6.1</h3>
+<p id="pragma-line-111">Released on March 27th, 2021</p>
+<h4 id="whats-new-5"><a id="pragma-line-113"></a>What's New?</h4>
+<ul id="pragma-line-115">
+<li id="pragma-line-115">The "New Release" notification now includes a "Download" hyperlink. (#92)</li>
+<li id="pragma-line-116">The "Include Debug" &amp; "Include Trace" menu options have been moved to the filter options. (#101, #104)</li>
 </ul>
-<h4 id="bug-fixes-4">Bug Fixes</h4>
-<ul>
-<li>Filter aliases do not resolve properly when multiple aliases start with the same text. (#98)</li>
+<h4 id="bug-fixes-5"><a id="pragma-line-118"></a>Bug Fixes</h4>
+<ul id="pragma-line-120">
+<li id="pragma-line-120">Filter aliases do not resolve properly when multiple aliases start with the same text. (#98)</li>
 </ul>
-<h3 id="version-2.6.0">Version 2.6.0</h3>
-<p>Released on March 15th, 2021</p>
-<h4 id="whats-new-5">What's New?</h4>
-<ul>
-<li>Case-insensitive filtering is now supported. (#57)</li>
-<li>&quot;Filtered&quot; results are now displayed after a <code>Clear()</code> operation (#78)</li>
-<li>Can now see the progress bar during <code>Reload()</code>, so that I know the application is responding to my request. (#77)</li>
-<li>Simplified Weevil's context menu. (#89, #91)</li>
-<li>If Record content includes a .NET callstack, the callstack will be automatically simplified to a more readable form. (#88)</li>
-<li>Exceptionally long content (e.g. a base64 encoded image) is now automatically truncated and a midline eclipse will be added to the end of the line. (#87)</li>
+<h3 id="version-2.6.0"><a id="pragma-line-122"></a>Version 2.6.0</h3>
+<p id="pragma-line-124">Released on March 15th, 2021</p>
+<h4 id="whats-new-6"><a id="pragma-line-126"></a>What's New?</h4>
+<ul id="pragma-line-128">
+<li id="pragma-line-128">Case-insensitive filtering is now supported. (#57)</li>
+<li id="pragma-line-129">"Filtered" results are now displayed after a <code>Clear()</code> operation (#78)</li>
+<li id="pragma-line-130">Can now see the progress bar during <code>Reload()</code>, so that I know the application is responding to my request. (#77)</li>
+<li id="pragma-line-131">Simplified Weevil's context menu. (#89, #91)</li>
+<li id="pragma-line-132">If Record content includes a .NET callstack, the callstack will be automatically simplified to a more readable form. (#88)</li>
+<li id="pragma-line-133">Exceptionally long content (e.g. a base64 encoded image) is now automatically truncated and a midline eclipse will be added to the end of the line. (#87)</li>
 </ul>
-<h4 id="bug-fixes-5">Bug Fixes</h4>
-<ul>
-<li>Filter history stopped working after log file <code>Reload()</code>. (#76)</li>
-<li>Previously an exception thrown when switching between different types of log files. (#85)</li>
+<h4 id="bug-fixes-6"><a id="pragma-line-135"></a>Bug Fixes</h4>
+<ul id="pragma-line-137">
+<li id="pragma-line-137">Filter history stopped working after log file <code>Reload()</code>. (#76)</li>
+<li id="pragma-line-138">Previously an exception thrown when switching between different types of log files. (#85)</li>
 </ul>
-<h3 id="version-2.5.2">Version 2.5.2</h3>
-<p>Released on March 7th, 2021</p>
-<h4 id="whats-new-6">What's New?</h4>
-<ul>
-<li>No changes.</li>
+<h3 id="version-2.5.2"><a id="pragma-line-140"></a>Version 2.5.2</h3>
+<p id="pragma-line-142">Released on March 7th, 2021</p>
+<h4 id="whats-new-7"><a id="pragma-line-144"></a>What's New?</h4>
+<ul id="pragma-line-146">
+<li id="pragma-line-146">No changes.</li>
 </ul>
-<h4 id="bug-fixes-6">Bug Fixes</h4>
-<ul>
-<li>Fixed a record selection bug that resulted in unexpected results during <code>Clear Before &amp; After</code> operation. (#66)</li>
-<li>The <code>TotalRecordCount</code> in the status bar now shows the correct value. (#62)</li>
-<li>Added the missing NLog configuration that was preventing Weevil from writing to it's own log file. (#64)</li>
+<h4 id="bug-fixes-7"><a id="pragma-line-148"></a>Bug Fixes</h4>
+<ul id="pragma-line-150">
+<li id="pragma-line-150">Fixed a record selection bug that resulted in unexpected results during <code>Clear Before &amp; After</code> operation. (#66)</li>
+<li id="pragma-line-151">The <code>TotalRecordCount</code> in the status bar now shows the correct value. (#62)</li>
+<li id="pragma-line-152">Added the missing NLog configuration that was preventing Weevil from writing to it's own log file. (#64)</li>
 </ul>
-<h3 id="version-2.5.1">Version 2.5.1</h3>
-<p>Released on March 4th, 2021</p>
-<h4 id="whats-new-7">What's New?</h4>
-<ul>
-<li>No new features.</li>
+<h3 id="version-2.5.1"><a id="pragma-line-154"></a>Version 2.5.1</h3>
+<p id="pragma-line-156">Released on March 4th, 2021</p>
+<h4 id="whats-new-8"><a id="pragma-line-158"></a>What's New?</h4>
+<ul id="pragma-line-160">
+<li id="pragma-line-160">No new features.</li>
 </ul>
-<h4 id="bug-fixes-7">Bug Fixes</h4>
-<ul>
-<li>Fixed an unexpected validation error that prevented a record from being unpinned. (#58)
-<ul>
-<li>
-<blockquote>
-<p>Value could not be converted.</p>
+<h4 id="bug-fixes-8"><a id="pragma-line-162"></a>Bug Fixes</h4>
+<ul id="pragma-line-164">
+<li id="pragma-line-164">Fixed an unexpected validation error that prevented a record from being unpinned. (#58)
+<ul id="pragma-line-165">
+<li id="pragma-line-165">
+<blockquote id="pragma-line-165">
+<p id="pragma-line-165">Value could not be converted.</p>
 </blockquote>
 </li>
 </ul>
 </li>
 </ul>
-<h3 id="version-2.5.0">Version 2.5.0</h3>
-<p>Released on March 4th, 2021</p>
-<h4 id="whats-new-8">What's New?</h4>
-<ul>
-<li>Weevil now has a &quot;Dark Theme&quot;. (#11)</li>
-<li>The <code>Content</code> column now automatically wraps to fit within the window.</li>
-<li>Added an <code>About</code> dialog box (#6)</li>
-<li><code>Alt+I</code> and <code>Alt+E</code> keyboard shortcuts will move cursor to the inclusive/exclusive filter <code>ComboBoxes</code>. (#36)</li>
+<h3 id="version-2.5.0"><a id="pragma-line-167"></a>Version 2.5.0</h3>
+<p id="pragma-line-169">Released on March 4th, 2021</p>
+<h4 id="whats-new-9"><a id="pragma-line-171"></a>What's New?</h4>
+<ul id="pragma-line-173">
+<li id="pragma-line-173">Weevil now has a "Dark Theme". (#11)</li>
+<li id="pragma-line-174">The <code>Content</code> column now automatically wraps to fit within the window.</li>
+<li id="pragma-line-175">Added an <code>About</code> dialog box (#6)</li>
+<li id="pragma-line-176"><code>Alt+I</code> and <code>Alt+E</code> keyboard shortcuts will move cursor to the inclusive/exclusive filter <code>ComboBoxes</code>. (#36)</li>
 </ul>
-<h4 id="bug-fixes-8">Bug Fixes</h4>
-<ul>
-<li>Icon in the status bar reminds the user when a <code>Clear</code> operation has been performed (#29)</li>
-<li>The &quot;new release available&quot; notification works again.</li>
+<h4 id="bug-fixes-9"><a id="pragma-line-178"></a>Bug Fixes</h4>
+<ul id="pragma-line-180">
+<li id="pragma-line-180">Icon in the status bar reminds the user when a <code>Clear</code> operation has been performed (#29)</li>
+<li id="pragma-line-181">The "new release available" notification works again.</li>
 </ul>
-<h3 id="version-2.4.0">Version 2.4.0</h3>
-<p>This version was not officially released.</p>
-<h4 id="whats-new-9">What's New?</h4>
-<ul>
-<li><code>Open As</code> dialog box can be used to load only a portion of a log file.
-<ul>
-<li>This feature is useful when using Weevil to open large log files.</li>
+<h3 id="version-2.4.0"><a id="pragma-line-183"></a>Version 2.4.0</h3>
+<p id="pragma-line-185">This version was not officially released.</p>
+<h4 id="whats-new-10"><a id="pragma-line-187"></a>What's New?</h4>
+<ul id="pragma-line-189">
+<li id="pragma-line-189"><code>Open As</code> dialog box can be used to load only a portion of a log file.
+<ul id="pragma-line-190">
+<li id="pragma-line-190">This feature is useful when using Weevil to open large log files.</li>
 </ul>
 </li>
-<li>Weevil can now open any plain text file.</li>
-<li>Resource usage report now includes a <code>WorkingSet64</code> column.</li>
+<li id="pragma-line-191">Weevil can now open any plain text file.</li>
+<li id="pragma-line-192">Resource usage report now includes a <code>WorkingSet64</code> column.</li>
 </ul>
-<h4 id="bug-fixes-9">Bug Fixes</h4>
-<ul>
-<li>Weevil would crash when using &quot;Detect Data&quot; and the same key/value pair was detected more than once.</li>
-<li>Files locked by another process can now be opened.</li>
-<li>Weevil was unable to find the <code>Plugins</code> directory, if the application was moved to a different directory.</li>
-<li>The log's sidecar (e.g. user comments) were not saved if you clicked &quot;Close&quot; (<code>X</code>) in the application's title bar.</li>
-<li>Record <code>Comment</code> was not saved, if the record was removed from memory as the result of a <code>Clear</code> operation.</li>
+<h4 id="bug-fixes-10"><a id="pragma-line-194"></a>Bug Fixes</h4>
+<ul id="pragma-line-196">
+<li id="pragma-line-196">Weevil would crash when using "Detect Data" and the same key/value pair was detected more than once.</li>
+<li id="pragma-line-197">Files locked by another process can now be opened.</li>
+<li id="pragma-line-198">Weevil was unable to find the <code>Plugins</code> directory, if the application was moved to a different directory.</li>
+<li id="pragma-line-199">The log's sidecar (e.g. user comments) were not saved if you clicked "Close" (<code>X</code>) in the application's title bar.</li>
+<li id="pragma-line-200">Record <code>Comment</code> was not saved, if the record was removed from memory as the result of a <code>Clear</code> operation.</li>
 </ul>
 
+    </div>
+    <script src="http://markdown-editor-host/margin/prism.js"></script>
+    <script src="http://markdown-editor-host/margin/mermaid.min.js"></script>
+    <script src="http://markdown-editor-host/margin/mathjax.js"></script>
+    <script>
+        mermaid.initialize({ 'securityLevel': 'loose', 'theme': 'dark', startOnLoad: true, flowchart: { htmlLabels: false } });
+    </script>
+    
 
-</body>
-</html>
+</body></html>

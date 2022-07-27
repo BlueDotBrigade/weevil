@@ -6,6 +6,7 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Reflection;
+	using System.Text;
 	using System.Threading;
 	using Analysis;
 	using Configuration.Sidecar;
@@ -14,7 +15,6 @@
 	using Filter;
 	using Navigation;
 	using Reports;
-	using Reports.Timeline;
 
 	[DebuggerDisplay("InstanceId={_instanceId}, Records={Count}, Results={Filter.Results.Length}")]
 	internal partial class CoreEngine : ICoreEngine
@@ -23,7 +23,9 @@
 		private readonly ICoreExtension _coreExtension;
 
 		private readonly string _sourceFilePath;
+		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
+		private string _sourceFileRemarks;
 
 		private readonly LogFileMetrics _logFileMetrics;
 
@@ -58,7 +60,7 @@
 		/// Facilitates the creation of a new <see cref="CoreEngine"/> object using a Fluent API and the current instance.
 		/// </summary>
 		/// <param name="clearOperation">Indicates what records will be omitted from the current object, when a new instance is created..</param>
-		internal CoreEngineBuilder FromInstance(ClearRecordsOperation clearOperation)
+		internal CoreEngineBuilder FromInstance(ClearOperation clearOperation)
 		{
 			return new CoreEngineBuilder(this, clearOperation);
 		}
@@ -69,8 +71,11 @@
 		private CoreEngine(
 			string sourceFilePath,
 			long sourceFileLength,
+			Encoding sourceFileEncoding,
+			TimeSpan sourceFileLoadingPeriod,
 			ICoreExtension coreExtension,
 			ContextDictionary context,
+			string sourceFileRemarks,
 			SidecarManager sidecarManager,
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
@@ -87,8 +92,11 @@
 
 			_coreExtension = coreExtension;
 			_context = context;
+			_sourceFileRemarks = sourceFileRemarks;
 
 			_sourceFilePath = sourceFilePath;
+			_sourceFileEncoding = sourceFileEncoding;
+
 			_allRecords = records;
 			_hasBeenCleared = hasBeenCleared;
 
@@ -96,10 +104,7 @@
 				LogSeverityType.Debug,
 				"File loading...");
 
-			var recordLoadingStopwatch = Stopwatch.StartNew();
 			var recordAndMetadataLoadingStopwatch = Stopwatch.StartNew();
-
-			recordLoadingStopwatch.Stop();
 
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 
@@ -108,7 +113,7 @@
 				"File loading has retrieved records from disk.",
 				new Dictionary<string, object>
 				{
-					{ "RecordLoadDuration", recordLoadingStopwatch.Elapsed.TotalSeconds},
+					{ "SourceFileLoadingPeriod", sourceFileLoadingPeriod.TotalSeconds},
 					{ "RecordCount", _allRecords.Length},
 					{ "FileSize", sourceFileLength},
 					{ "SourceFilePath", _sourceFilePath},
@@ -141,6 +146,7 @@
 				_allRecords,
 				_filterManager.Results,
 				_navigationManager, // TODO: adding navigation manager is a code smell
+				_sourceFileEncoding,
 				new Action(() => { _filterManager.ReApply(); }));
 
 			recordAndMetadataLoadingStopwatch.Stop();
@@ -148,12 +154,12 @@
 			_logFileMetrics = new LogFileMetrics(
 				sourceFileLength,
 				_allRecords.Length,
-				recordLoadingStopwatch.Elapsed,
+				sourceFileLoadingPeriod,
 				recordAndMetadataLoadingStopwatch.Elapsed);
 
 			var filterDuration =
 				_logFileMetrics.RecordAndMetadataLoadDuration.TotalSeconds -
-				_logFileMetrics.RecordLoadDuration.TotalSeconds;
+				_logFileMetrics.SourceFileLoadingPeriod.TotalSeconds;
 
 			Log.Default.Write(
 				LogSeverityType.Information,
@@ -161,7 +167,7 @@
 				new Dictionary<string, object>
 				{
 					{ "RecordAndMetadataLoadDuration", _logFileMetrics.RecordAndMetadataLoadDuration.TotalSeconds },
-					{ "RecordLoadDuration", _logFileMetrics.RecordLoadDuration.TotalSeconds },
+					{ "SourceFileLoadingPeriod", _logFileMetrics.SourceFileLoadingPeriod.TotalSeconds },
 					{ "FilterDuration", filterDuration },
 					{ "RecordCount", _logFileMetrics.RecordCount },
 					{ "FileSize", _logFileMetrics.FileSize },
@@ -218,6 +224,12 @@
 
 		public ContextDictionary Context => _context;
 
+		public string SourceFileRemarks
+		{
+			get { return _sourceFileRemarks ?? String.Empty; }
+			set { _sourceFileRemarks = value ?? String.Empty; }
+		}
+
 		public string SourceFilePath => _sourceFilePath;
 
 		public string SourceDirectory => Path.GetDirectoryName(_sourceFilePath);
@@ -268,13 +280,13 @@
 
 		public void Save(bool deleteBackup)
 		{
-
 			var sidecarData = new SidecarData
 			{
 				Records = _allRecords,
 				Context = _context,
 				FilterTraits = _filterManager,
 				TableOfContents = _navigationManager.TableOfContents,
+				SourceFileRemarks = _sourceFileRemarks,
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);

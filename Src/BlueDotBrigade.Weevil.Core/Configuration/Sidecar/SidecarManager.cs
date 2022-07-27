@@ -26,11 +26,13 @@
 		public void Load(
 			ImmutableArray<IRecord> allRecords,
 			out ContextDictionary context,
+			out string sourceFileRemarks,
 			out List<string> inclusiveFilterHistory,
 			out List<string> exclusiveFilterHistory,
 			out List<Section> tableOfContents)
 		{
 			context = new ContextDictionary();
+			sourceFileRemarks = string.Empty;
 			inclusiveFilterHistory = new List<string>();
 			exclusiveFilterHistory = new List<string>();
 			tableOfContents = new List<Section>();
@@ -42,6 +44,7 @@
 				List<string> inclusiveHistory = inclusiveFilterHistory;
 				List<string> exclusiveHistory = exclusiveFilterHistory;
 				ContextDictionary contextProperties = context;
+				string actualSourceFileRemarks = sourceFileRemarks;
 				List<Section> toc = tableOfContents;
 
 				var loaders = new List<IExecute>
@@ -49,7 +52,13 @@
 					Executor.Create(
 						new v2.SidecarLoader(_sidecarFilePath),
 						x => x.Load(),
-						x => x.Apply(allRecords, contextProperties, inclusiveHistory, exclusiveHistory, toc)),
+						x => x.Apply(
+							allRecords, 
+							contextProperties,
+							out actualSourceFileRemarks, 
+							inclusiveHistory, 
+							exclusiveHistory, 
+							toc)),
 
 					Executor.Create(
 						new v1.LogMetadataLoader(_sidecarFilePath),
@@ -69,7 +78,11 @@
 					}
 				}
 
-				if (sidecarLoaded == false)
+				if (sidecarLoaded == true)
+				{
+					sourceFileRemarks = actualSourceFileRemarks; // HACK: Remove this hack to get around passing variables to anonymous methods.
+				}
+				else
 				{
 					var message = "This file's sidecar is not compatible with this version of the application.";
 					Log.Default.Write(

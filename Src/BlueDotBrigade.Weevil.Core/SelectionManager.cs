@@ -4,8 +4,8 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
-	using System.IO;
 	using System.Linq;
+	using System.Text;
 	using Analysis;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using Data;
@@ -19,13 +19,15 @@
 		private readonly IDictionary<int, IRecord> _selectedRecords;
 		private readonly object _selectedRecordsPadlock;
 
+		private readonly Encoding _sourceFileEncoding;
+
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IRecord> _visibleRecords;
 		private readonly Action _reapplyCurrentFilter;
 
 		private readonly NavigationManager _navigationManager;
 
-		private TimeSpan _timePeriodOfInterest;
+		private TimeSpan _selectionPeriod;
 		#endregion
 
 		#region Object Lifetime
@@ -33,10 +35,13 @@
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IRecord> visibleRecords,
 			NavigationManager navigationManager,
+			Encoding sourceFileEncoding,
 			Action reapplyCurrentFilter)
 		{
 			_selectedRecords = new SortedDictionary<int, IRecord>();
 			_selectedRecordsPadlock = new object();
+
+			_sourceFileEncoding = sourceFileEncoding;
 
 			_allRecords = allRecords;
 			_visibleRecords = visibleRecords;
@@ -44,16 +49,16 @@
 
 			_navigationManager = navigationManager;
 
-			_timePeriodOfInterest = TimeSpan.Zero;
+			_selectionPeriod = Metadata.ElapsedTimeUnknown;
 		}
 		#endregion
 
 		#region Properties
 		public IDictionary<int, IRecord> Selected => _selectedRecords;
 
-		public bool IsTimePeriodSelected => _selectedRecords.Count >= 2;
+		public bool HasSelectionPeriod => _selectedRecords.Count >= 2;
 
-		public TimeSpan TimePeriodOfInterest => _timePeriodOfInterest;
+		public TimeSpan SelectionPeriod => _selectionPeriod;
 		#endregion
 
 		#region Static Members
@@ -63,7 +68,7 @@
 
 		private TimeSpan CalculateTimePeriod(IDictionary<int, IRecord> records)
 		{
-			TimeSpan timePeriod = TimeSpan.Zero;
+			TimeSpan timePeriod = Metadata.ElapsedTimeUnknown;
 
 			lock (_selectedRecordsPadlock)
 			{
@@ -129,7 +134,7 @@
 				LogSeverityType.Trace,
 				$"The number of selected records has changed. Added={added}, Current={count}");
 
-			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
+			_selectionPeriod = CalculateTimePeriod(_selectedRecords);
 
 			if (!Record.IsDummyOrNull(firstRecord))
 			{
@@ -178,7 +183,7 @@
 				_navigationManager.SetActiveLineNumber(firstRecord.LineNumber);
 			}
 
-			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
+			_selectionPeriod = CalculateTimePeriod(_selectedRecords);
 
 			return this;
 		}
@@ -220,7 +225,7 @@
 				LogSeverityType.Trace,
 				$"The number of selected records has changed. Removed={removed}, Current={count}");
 
-			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
+			_selectionPeriod = CalculateTimePeriod(_selectedRecords);
 
 			return this;
 		}
@@ -253,26 +258,25 @@
 				LogSeverityType.Trace,
 				$"The number of selected records has changed. Removed={removed}, Current={count}");
 
-			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
+			_selectionPeriod = CalculateTimePeriod(_selectedRecords);
 
 			return this;
 		}
 
-		public ISelect SaveSelection(string destinationFolder, FileFormatType fileFormatType)
+		public ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType)
 		{
-			const string TsvFileName = "SelectedRecords.tsv";
-			const string RawFileName = "SelectedRecords.log";
-
-			var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
-				Path.Combine(destinationFolder, TsvFileName) :
-				Path.Combine(destinationFolder, RawFileName);
-
 			ImmutableArray<IRecord> sortedRecords;
 
 			lock (_selectedRecordsPadlock)
 			{
-				IRecord[] sortedSelection = _selectedRecords.Values.OrderBy(x => x.LineNumber).ToArray();
-				sortedRecords = ImmutableArray.Create(sortedSelection);
+				if (_selectedRecords.Count > 1)
+				{
+					sortedRecords = _selectedRecords.Values.OrderBy(x => x.LineNumber).ToImmutableArray();
+				}
+				else
+				{
+					sortedRecords = _allRecords.OrderBy(x => x.LineNumber).ToImmutableArray();
+				}
 			}
 
 			Log.Default.Write(
@@ -281,7 +285,7 @@
 
 			if (sortedRecords != null)
 			{
-				new DiskWriter(destinationFilePath, fileFormatType).Write(sortedRecords);
+				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType).Write(sortedRecords);
 
 				Log.Default.Write(
 					LogSeverityType.Trace,
@@ -306,7 +310,7 @@
 				LogSeverityType.Information,
 				$"The number of selected records has changed. Previous={clearedRecords.Length}, Current=0");
 
-			_timePeriodOfInterest = CalculateTimePeriod(_selectedRecords);
+			_selectionPeriod = CalculateTimePeriod(_selectedRecords);
 
 			return ImmutableArray.Create(clearedRecords);
 		}

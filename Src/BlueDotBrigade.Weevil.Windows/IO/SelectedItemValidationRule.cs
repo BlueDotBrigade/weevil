@@ -1,8 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Windows.IO
 {
-	using System.ComponentModel;
 	using System.Globalization;
-	using System.Windows;
 	using System.Windows.Controls;
 
 	/// <summary>

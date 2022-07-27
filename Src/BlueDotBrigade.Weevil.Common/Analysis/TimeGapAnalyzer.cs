@@ -148,7 +148,7 @@
 					currentRecord.Metadata.IsFlagged = true;
 
 					currentRecord.Metadata.UpdateUserComment(
-						$"{CommentLabel}: {TimeSpanExtensions.ToHumanReadable(elapsedTime)}");
+						$"{CommentLabel}: {elapsedTime.ToHumanReadable()}");
 				}
 			}
 		}
@@ -161,6 +161,13 @@
 				DefaultThreshold.TotalMilliseconds.ToString("0.#"));
 
 			var wasSuccessful = int.TryParse(userInput, out var timePeriodInMs);
+
+			if (!wasSuccessful)
+			{
+				Log.Default.Write(
+					LogSeverityType.Error,
+					$"Unable to perform the temporal analysis because an unexpected input was received. Input={userInput}");
+			}
 
 			unresponsivenessPeriod = wasSuccessful ? TimeSpan.FromMilliseconds(timePeriodInMs) : TimeSpan.Zero;
 

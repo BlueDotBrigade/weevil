@@ -54,8 +54,10 @@
 			return canLoad;
 		}
 
-		public void Apply(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents)
+		public void Apply(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents)
 		{
+			sourceFileRemarks = _sidecar?.CommonData?.UserRemarks;
+
 			if (_sidecar.CommonData.Records != null)
 			{
 				foreach (RecordInfo recordInfo in _sidecar.CommonData.Records)
@@ -256,6 +258,8 @@
 					});
 				}
 			}
+
+			snapshot.CommonData.UserRemarks = newData.SourceFileRemarks;
 
 			return snapshot;
 		}

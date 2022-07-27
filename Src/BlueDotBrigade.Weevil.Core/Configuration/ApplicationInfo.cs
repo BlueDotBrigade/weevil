@@ -39,6 +39,9 @@
 		[DataMember]
 		public string Description { get; set; }
 
+		/// <summary>
+		/// Indicates where the application can be downloaded from.
+		/// </summary>
 		[DataMember]
 		public string InstallerUrl
 		{

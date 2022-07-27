@@ -10,6 +10,7 @@
 		void Load(
 			ImmutableArray<IRecord> allRecords,
 			out ContextDictionary context,
+			out string sourceFileRemarks,
 			out List<string> inclusiveFilterHistory,
 			out List<string> exclusiveFilterHistory,
 			out List<Section> tableOfContents);

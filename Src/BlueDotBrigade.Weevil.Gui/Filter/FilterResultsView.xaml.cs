@@ -27,8 +27,8 @@
 				}
 			};
 
-			var uiDispatcher = new UiDispatcher(Application.Current.Dispatcher);
-			this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, uiDispatcher);
+			//var uiDispatcher = new UiDispatcher(Application.Current.Dispatcher);
+			//this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, uiDispatcher);
 
 			InitializeComponent();
 
