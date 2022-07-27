@@ -102,10 +102,13 @@ A line graph can be created using the following steps:
 
 Weevil has several analyzers that can be used to extract data from a log file, flag relevant records, and copy regular expression "named group" values into the record's comment field:
 
-- `Detect Data`: results are always copied into the comment field
-- `Detect Data Transitions`: results are only copied when a value changes
-- `Detect Rising Edges`: results are only copied when a numerical value increases
-- `Detect Falling Edges`: results are only copied when a numerical value decreases (e.g. hardware's uptime value is reset to zero)
+A record is flagged & a comment is created when...
+
+- `Detect Data`: the regular expression matches record content
+- `Detect Data Transitions`: the matching regular expression value changes from one record to the next
+- `Detect Rising Edges`: the matching regular expression value increases from one record to the next
+- `Detect Falling Edges`: the matching regular expression value increases from one record to the next
+- `Detect Temporal Anomalies`: record timestamps appear out of order
 
 Steps:
 
