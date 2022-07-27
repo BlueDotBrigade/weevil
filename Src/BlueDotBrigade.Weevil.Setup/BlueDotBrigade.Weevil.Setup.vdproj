@@ -423,8 +423,8 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Weevil"
-        "ProductCode" = "8:{E8A89882-0897-4035-A4D2-58E48BADADEB}"
-        "PackageCode" = "8:{1CB5377F-58FC-4129-A6CD-5123C63F2CEF}"
+        "ProductCode" = "8:{C8B9EB61-B6F8-4FC0-8846-74754D271751}"
+        "PackageCode" = "8:{B44B3552-4E0B-44B9-B78D-211459B4206E}"
         "UpgradeCode" = "8:{41DF7DC3-3176-4A07-81F7-F993241E8CE7}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"

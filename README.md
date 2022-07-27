@@ -78,8 +78,12 @@ For a list of the latest features, please refer to the [change log](https://gith
    - `Comments` field is updated when the matching value is lower that the previously detected value.
    - `Flagged` field is set to `True` for matching records.
    - Example: firmware's uptime value has reset to zero
-5. Charts:
-   - Regular expression _named groups_ can now be used to create a line graph.
+5. Detect Temporal Anomaly:
+   - `Comments` field is updated when record timestamps appear out of order.
+   - `Flagged` field is set to `True` for matching records.
+   - Example: 7th record is logged at `10:30 AM`, and the 8th record is logged at `10:15 AM`
+6. Charts:
+   - Regular expression _named groups_ can be used to extract values and generate a line graph.
 
 ### Plugin Architecture
 

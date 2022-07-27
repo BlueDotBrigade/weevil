@@ -5,9 +5,9 @@
 	using System.Runtime.CompilerServices;
 	using System.Windows;
 	using System.Windows.Input;
-	using Microsoft.Practices.Prism.Commands;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
+	using Prism.Commands;
 
 	/// <summary>
 	/// Encapsulates an <see cref="ICommand"/> that will be invoked after it has been written to the application's log file.

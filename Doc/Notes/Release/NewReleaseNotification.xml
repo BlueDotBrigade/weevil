@@ -2,11 +2,14 @@
 	Implementation notes:
 	- For proper deserialization, elements must be listed in alphabetical order.
 	- Don't forget to escape characters like ampersand.
+	
+	Be advised:
+	- Updating the `master` branch signals that a `new release` is available.
 -->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
-	<CodeName>Can&apos;t Hold Us</CodeName>
-	<Description>The latest version supports creating a line graph from selected data.</Description>
+	<CodeName>Harder, Better, Faster, Stronger</CodeName>
+	<Description>Running on .NET Core 6, this version includes performance improvements &amp; new dashboard insight.</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.9.0</LatestRelease>
+	<LatestRelease>2.10.0</LatestRelease>
 </ApplicationInfo>
