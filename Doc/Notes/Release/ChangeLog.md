@@ -11,7 +11,7 @@ Release on July 27th, 2022.
 #### What's New?
 
 - Analyzers:
-  - *Detect Temporal Anomaly* can be used to flag records where the timestamps appear out of order. #307
+  - _Detect Temporal Anomaly_ can be used to flag records where the timestamps appear out of order. #307
 - Dashboard insight:
   - Notification when log timestamps are out of order. #307
   - Insight can now be copied directly from the dashboard, thus making it easier to share information. #288
