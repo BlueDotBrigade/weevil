@@ -4,6 +4,29 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+### Version 2.10.0
+
+Release on July 27th, 2022.
+
+#### What's New?
+
+- Analyzers:
+  - *Detect Temporal Anomaly* can be used to flag records where the timestamps appear out of order. #307
+- Dashboard insight:
+  - Notification when log timestamps are out of order. #307
+  - Insight can now be copied directly from the dashboard, thus making it easier to share information. #288
+- The .NET Framework dependency has been replaced with Microsoft's .NET Core. #293
+- The `New Release` notification message is more intuitive. #290
+- `Save Raw` now saves the selected records to a file with the same encoding original file. #315
+- The name of the open file is now displayed in the Weevil's title bar. #285
+- Third-party NuGet packages have been updated to the latest version. #272
+- Performance metrics (e.g. RAM available, RAM used, etc.) are now visible in the _About_ dialog. #277
+
+#### Bug Fixes
+
+- `Save Raw` now saves all records when only 1 record has been selected. #315
+- `MainWindowViewModel` was accidentally being instantiated twice. #277
+
 ### Version 2.9.0
 
 Released on March 6th, 2022.
