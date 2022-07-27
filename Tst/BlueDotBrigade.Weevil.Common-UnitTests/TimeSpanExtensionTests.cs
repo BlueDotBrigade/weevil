@@ -11,7 +11,7 @@
 		{
 			var period = TimeSpan.MinValue;
 
-			Assert.AreEqual("--.---s", period.ToHumanReadable());
+			Assert.AreEqual("--.---", period.ToHumanReadable());
 		}
 
 		[TestMethod]
@@ -19,7 +19,7 @@
 		{
 			var period = TimeSpan.MaxValue;
 
-			Assert.AreEqual("--.---s", period.ToHumanReadable());
+			Assert.AreEqual("--.---", period.ToHumanReadable());
 		}
 
 		[TestMethod]
