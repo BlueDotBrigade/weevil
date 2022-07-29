@@ -4,7 +4,7 @@
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.TestingTools</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil.TestingTools</RootNamespace>
-    <Version>2.10.0</Version>
+    <Version>2.11.0</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
