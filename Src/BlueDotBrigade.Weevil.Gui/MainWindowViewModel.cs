@@ -41,7 +41,8 @@
 				bulletinMediator);
 
 			Version weevilVersion = Assembly.GetEntryAssembly()?.GetName().Version;
-			this.ApplicationTitle = $"Weevil: v{weevilVersion}";
+			weevilVersion = weevilVersion ?? new Version(128, 128, 128);
+			this.ApplicationTitle = $"Weevil: v{weevilVersion.ToString(3)}";
 		}
 
 		public void Start()
