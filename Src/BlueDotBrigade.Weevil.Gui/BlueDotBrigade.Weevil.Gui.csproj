@@ -199,7 +199,7 @@
 	</Target>
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>BlueDotBrigade.Weevil.Gui-UiTests</_Parameter1>
+			<_Parameter1>BlueDotBrigade.Weevil.Gui-FunctionalTests</_Parameter1>
 		</AssemblyAttribute>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<!-- Required by Moq -->
