@@ -24,7 +24,7 @@
 
 		private readonly UiResponsivenessMonitor _uiMonitor;
 
-		public MainWindowViewModel(IUiDispatcher uiDispatcher, Window mainWindow, BulletinMediator bulletinMediator)
+		public MainWindowViewModel(IUiDispatcher uiDispatcher, Window mainWindow, IBulletinMediator bulletinMediator)
 		{
 			_uiDispatcher = uiDispatcher;
 			_uiMonitor = new UiResponsivenessMonitor();
