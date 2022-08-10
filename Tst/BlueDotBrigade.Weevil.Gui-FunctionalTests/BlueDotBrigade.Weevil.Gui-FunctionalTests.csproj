@@ -24,7 +24,7 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
 		<PackageReference Include="Moq" Version="4.18.2" />
 		<PackageReference Include="SpecFlow.Plus.LivingDocPlugin" Version="3.9.57" />
-		<PackageReference Include="SpecFlow.MsTest" Version="3.9.40" />
+		<PackageReference Include="SpecFlow.MsTest" Version="3.9.74" />
 		<PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
 		<PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
 		<PackageReference Include="FluentAssertions" Version="6.2.0" />
@@ -42,5 +42,11 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="SpecFlow.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>
