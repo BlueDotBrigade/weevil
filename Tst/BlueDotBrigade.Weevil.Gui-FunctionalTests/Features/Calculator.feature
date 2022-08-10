@@ -18,3 +18,10 @@ Examples:
 	| First | Second | Answer |
 	| 50    | 10     | 40     |
 	| 50    | 20     | 30     |
+
+@Requirement:100
+Scenario: Multiply two numbers
+	Given the first number is 2
+		And the second number is 10
+	When the two numbers are multiplied
+	Then the result should be 20

@@ -47,6 +47,12 @@ namespace BlueDotBrigade.Weevil.Gui_FunctionalTests.StepDefinitions
 			_actualResult = _calculator.Subtract();
 		}
 
+        [When(@"the two numbers are multiplied")]
+        public void WhenTheTwoNumbersAreMultiplied()
+        {
+	        _actualResult = _calculator.Multiply();
+        }
+
 
 		[Then("the result should be (.*)")]
         public void ThenTheResultShouldBe(int expectedResult)
