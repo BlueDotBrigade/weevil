@@ -6,7 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{E686522C-C87A-4232-B1E2-97561B1D69BB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		DomainSpecificTerminology.xml = DomainSpecificTerminology.xml
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		Weevil.ruleset = Weevil.ruleset
 	EndProjectSection
 EndProject
