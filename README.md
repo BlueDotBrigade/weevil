@@ -143,10 +143,16 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | --- | --- |
 | [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases) | The list of features & bug fixes for the latest *Weevil* release. |
 | [![Latest Stable](https://img.shields.io/badge/branch-Releases/2.x-blue)](https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x) | Source code for the most stable version of *Weevil*. |
-| [![Latest Code](https://img.shields.io/badge/branch-main-blue)](https://github.com/BlueDotBrigade/weevil/tree/main) | The most up-to-date source code. This branch will include features that are still under development.  |
+| [![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml) | A value of `passing` indicates that the `main` branch is compiling & that the automated tests have passed. |
+| [![Security Analysis](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml) | The result of GitHub's most recent security analysis of the Weevil code base. |
+| [![Latest Code](https://img.shields.io/badge/branch-main-blue)](https://github.com/BlueDotBrigade/weevil/tree/main) | The most up-to-date source code. This branch includes features that are still under development.  |
 | [![GitHub Repository Size](https://img.shields.io/github/repo-size/BlueDotBrigade/Weevil)](https://github.com/BlueDotBrigade/Weevil) | Total size of *Weevil*'s Git repository. |
 | [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code in the Git repository. |
 | [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the Git repository was last updated. |
+
+
+
+
 
 ### Guidelines
 
