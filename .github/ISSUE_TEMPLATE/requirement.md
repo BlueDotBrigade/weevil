@@ -1,6 +1,7 @@
 ---
 name: Requirement
-about: Template used to create a new software requirement (SRS).
+about: 'FOR ADMIN: Specify a condition or capability that the software shall meet
+  upon release.'
 title: Shall [brief description of behavior]
 labels: requirement
 assignees: ''

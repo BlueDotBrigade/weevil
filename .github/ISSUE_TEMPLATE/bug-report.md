@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve
+about: Create a bug report to help us improve the overall quality of the software.
 title: ''
 labels: bug
 assignees: Pressacco
