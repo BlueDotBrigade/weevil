@@ -1,7 +1,7 @@
 ---
 name: Requirement
-about: 'FOR ADMIN: Specify a condition or capability that the software shall meet
-  upon release.'
+about: 'FOR ADMIN ONLY: Specify a condition or capability that the software shall
+  meet upon release.'
 title: Shall [brief description of behavior]
 labels: requirement
 assignees: ''
