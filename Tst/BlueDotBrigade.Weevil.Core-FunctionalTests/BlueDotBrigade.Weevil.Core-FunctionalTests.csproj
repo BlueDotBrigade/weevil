@@ -38,6 +38,11 @@
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
+		<Content Include="..\..\SpecFlow.json" Link="SpecFlow.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
 	  <Folder Include="Features\" />
 	</ItemGroup>
 </Project>
