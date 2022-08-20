@@ -34,7 +34,7 @@ For a list of the latest features, please refer to the [change log](https://gith
 4. Non-Destructive operations
    - The original log file is never modified.
 5. Pinned Records
-   - Ensures that those records are always included in the files results. 
+   - Ensures that certain records are always included in the filter results. 
 6. Simplified Exception Callstack
    - Calls to .NET library methods are automatically removed from call stacks, thus making it easier to focus on the business domain logic. 
    - Full callstack is still available. 
