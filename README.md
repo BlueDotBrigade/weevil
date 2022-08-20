@@ -15,8 +15,7 @@
 
 ## What is Weevil?
 
-[![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
-[![GitHub License](https://img.shields.io/github/license/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/Weevil/blob/master/LICENSE.md)
+[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
 [![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml)
 
 *Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
@@ -25,16 +24,22 @@ For a list of the latest features, please refer to the [change log](https://gith
 
 ### General
 
-1. Supports record-level comments.
-2. Persisted State
+1. File Level Remarks
+2. Record Level Comments
+3. Persisted State
    - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
-3. All operations are non-destructive; the original log file will not be modified.
+4. All operations are non-destructive; the original log file will not be modified.
+5. Pinned Records
+   - Ensures that those records are always included in the files results. 
+6. Simplified Exception Callstack
+   - Calls to .NET library methods are automatically remocied from call stacks, thus making it easier for the analyst to focus on the business domain logic. 
+   - Full callstack is still available. 
 
 ### Filtering
 
 1. Inclusive & exclusive filtering
-   - Is used to select or hide log file records.
+   - Can be used to quickly select or hide records.
 2. Pinned Records
    - Guarantees that specific records always appear in the filter results.
 3. Filter Aliases
