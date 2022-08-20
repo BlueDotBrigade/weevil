@@ -27,7 +27,9 @@ For a list of the latest features, please refer to the [change log](https://gith
 ### General
 
 1. File Level Remarks
+   - Useful for making note of high level observations.
 2. Record Level Comments
+   - Useful when trying to interpret the meaning behind individual log entries.
 3. Persisted State
    - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
