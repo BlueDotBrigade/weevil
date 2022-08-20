@@ -6,12 +6,15 @@
    - [Navigation](#navigation)
    - [Analysis](#analysis)
    - [Plugin Architecture](#plugin-architecture)
-- [Get Started](#get-started)
+- [Getting Started](#getting-started)
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
 - [Development](#development)
    - [Guidelines](#guidelines)
    - [Compiling](#compiling)
+- [Recognition](#recognition)
+   - [Open Source Projects](#open-source-projects)
+   - [Contributors](#contributors)
 
 ## What is Weevil?
 
@@ -103,7 +106,7 @@ Realize the greatest value by creating a business-domain specific *Weevil* plugi
 2. log file analyzers
 3. dashboard insight
 
-## Get Started
+## Getting Started
 
 ### WPF Application
 
@@ -159,10 +162,6 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code in the Git repository. |
 | [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the Git repository was last updated. |
 
-
-
-
-
 ### Guidelines
 
 - When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
@@ -177,6 +176,23 @@ The following steps outline how to build Weevil's WPF application:
       - `%WEEVIL_PLUGINS_PATH%` which refers to the directory where the Weevil plugin assembly (`*.dll`) can be found.
 3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
+
+## Recognition
+
+- [GitHub](https://www.GitHub.com)
+   - Free Git repository hosting platform for this project & many others like it.
+
+### Open Source Projects
+
+
+- [Live Charts](https://github.com/beto-rodriguez/LiveCharts2)
+  - Beto Rodriguez et al. have developed an impressive WPF charting library. Am looking forward to future releases. 
+- [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
+   - An excellent WPF library that helps to standardize themes & improve the overall quality of an application's user interface.  
+
+### Contributors
+
+A special thanks to all of those who have contributed to this project. 
 
 [InstallationGuide]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/InstallationGuide.md
 [Help]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/Help.md
