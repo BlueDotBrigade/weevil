@@ -29,12 +29,16 @@ For a list of the latest features, please refer to the [change log](https://gith
 3. Persisted State
    - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
-4. All operations are non-destructive; the original log file will not be modified.
+4. Non-Destructive operations
+   - The original log file is never modified.
 5. Pinned Records
    - Ensures that those records are always included in the files results. 
 6. Simplified Exception Callstack
    - Calls to .NET library methods are automatically remocied from call stacks, thus making it easier for the analyst to focus on the business domain logic. 
    - Full callstack is still available. 
+7. Clear Operations
+   - Can be used to reduce RAM footprint, speed up filtering, and reduce visual noise. 
+
 
 ### Filtering
 
