@@ -19,7 +19,6 @@
 ## What is Weevil?
 
 [![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
-[![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml)
 
 *Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
 
@@ -37,7 +36,7 @@ For a list of the latest features, please refer to the [change log](https://gith
 5. Pinned Records
    - Ensures that those records are always included in the files results. 
 6. Simplified Exception Callstack
-   - Calls to .NET library methods are automatically remocied from call stacks, thus making it easier for the analyst to focus on the business domain logic. 
+   - Calls to .NET library methods are automatically removed from call stacks, thus making it easier to focus on the business domain logic. 
    - Full callstack is still available. 
 7. Clear Operations
    - Can be used to reduce RAM footprint, speed up filtering, and reduce visual noise. 
