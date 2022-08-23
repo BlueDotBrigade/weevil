@@ -6,18 +6,19 @@
    - [Navigation](#navigation)
    - [Analysis](#analysis)
    - [Plugin Architecture](#plugin-architecture)
-- [Get Started](#get-started)
+- [Getting Started](#getting-started)
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
 - [Development](#development)
    - [Guidelines](#guidelines)
    - [Compiling](#compiling)
+- [Recognition](#recognition)
+   - [Open Source Projects](#open-source-projects)
+   - [Contributors](#contributors)
 
 ## What is Weevil?
 
-[![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
-[![GitHub License](https://img.shields.io/github/license/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/Weevil/blob/master/LICENSE.md)
-[![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml)
+[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
 
 *Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
 
@@ -25,16 +26,28 @@ For a list of the latest features, please refer to the [change log](https://gith
 
 ### General
 
-1. Supports record-level comments.
-2. Persisted State
+1. File Level Remarks
+   - Useful for making note of high level observations.
+2. Record Level Comments
+   - Useful when trying to understand individual log entries.
+3. Persisted State
    - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
-3. All operations are non-destructive; the original log file will not be modified.
+4. Non-Destructive operations
+   - The original log file is never modified.
+5. Pinned Records
+   - Ensures that certain records are always included in the filter results. 
+6. Simplified Exception Callstack
+   - Calls to .NET library methods are automatically removed from call stacks, thus making it easier to focus on the business domain logic. 
+   - Full callstack is still available. 
+7. Clear Operations
+   - Can be used to reduce RAM footprint, speed up filtering, and reduce visual noise. 
+
 
 ### Filtering
 
 1. Inclusive & exclusive filtering
-   - Is used to select or hide log file records.
+   - Can be used to quickly select or hide records.
 2. Pinned Records
    - Guarantees that specific records always appear in the filter results.
 3. Filter Aliases
@@ -94,7 +107,7 @@ Realize the greatest value by creating a business-domain specific *Weevil* plugi
 2. log file analyzers
 3. dashboard insight
 
-## Get Started
+## Getting Started
 
 ### WPF Application
 
@@ -150,10 +163,6 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code in the Git repository. |
 | [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the Git repository was last updated. |
 
-
-
-
-
 ### Guidelines
 
 - When working on the WPF application, please be sure to follow the [Style Guide][StyleGuide] for the user interface.
@@ -168,6 +177,23 @@ The following steps outline how to build Weevil's WPF application:
       - `%WEEVIL_PLUGINS_PATH%` which refers to the directory where the Weevil plugin assembly (`*.dll`) can be found.
 3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
+
+## Recognition
+
+- [GitHub](https://www.GitHub.com)
+   - Free Git repository hosting platform for this project & many others like it.
+
+### Open Source Projects
+
+
+- [Live Charts](https://github.com/beto-rodriguez/LiveCharts2)
+  - Beto Rodriguez et al. have developed an impressive WPF charting library. Am looking forward to future releases. 
+- [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
+   - An excellent WPF library that helps to standardize themes & improve the overall quality of an application's user interface.  
+
+### Contributors
+
+A special thanks to all of those who have contributed to this project. 
 
 [InstallationGuide]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/InstallationGuide.md
 [Help]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/Help.md

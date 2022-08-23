@@ -2,6 +2,8 @@
 
 Ensures that files are opened properly.
 
+#340
+
 Scenario: Open empty file
 	Given that Weevil has started
 	When the user opens the `<FileName>` file
