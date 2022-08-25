@@ -20,7 +20,7 @@
 
 [![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
 
-![(Weevil animated .Gif demo)](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
+![(Weevil demo: this app doesn't support .gif)](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
 
 *Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
 
