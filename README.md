@@ -182,11 +182,12 @@ The following steps outline how to build Weevil's WPF application:
 
 ## Recognition
 
+- [PostSharp](https://www.postsharp.net/)
+   - Special thanks to *PostSharp* for donating a license for their aspect oriented library.
 - [GitHub](https://www.GitHub.com)
    - Free Git repository hosting platform for this project & many others like it.
 
 ### Open Source Projects
-
 
 - [Live Charts](https://github.com/beto-rodriguez/LiveCharts2)
   - Beto Rodriguez et al. have developed an impressive WPF charting library. Am looking forward to future releases. 
