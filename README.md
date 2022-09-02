@@ -185,7 +185,7 @@ The following steps outline how to build Weevil's WPF application:
 ## Recognition
 
 - [PostSharp](https://www.postsharp.net/)
-   - Special thanks to *PostSharp* for donating a license for their aspect oriented library.
+   - *PostSharp*`s aspect oriented library helps to simplify a code base by reducing boiler plate code. A special thanks for the donated license.
 - [GitHub](https://www.GitHub.com)
    - Free Git repository hosting platform for this project & many others like it.
 
