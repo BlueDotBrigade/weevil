@@ -91,14 +91,14 @@ namespace BlueDotBrigade.Weevil
             testRunner.CollectScenarioErrors();
         }
         
-        public virtual void OpenEmptyFile(string fileName, string expectedCount, string[] exampleTags)
+        public virtual void OpenEmptyFile(string fileName, string recordCount, string[] exampleTags)
         {
             string[] tagsOfScenario = exampleTags;
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             argumentsOfScenario.Add("FileName", fileName);
-            argumentsOfScenario.Add("ExpectedCount", expectedCount);
+            argumentsOfScenario.Add("RecordCount", recordCount);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Open empty file", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 5
+#line 7
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
@@ -108,42 +108,29 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 6
+#line 8
  testRunner.Given("that Weevil has started", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 7
+#line 9
  testRunner.When(string.Format("the user opens the `{0}` file", fileName), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 8
- testRunner.Then(string.Format("the record count shall be {0}", expectedCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 10
+ testRunner.Then(string.Format("the record count shall be {0}", recordCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("Open empty file: EmptyFile.txt")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("Open empty file: Empty.txt")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "OpeningFileShould")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "EmptyFile.txt")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:FileName", "EmptyFile.txt")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:ExpectedCount", "0")]
-        public void OpenEmptyFile_EmptyFile_Txt()
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Empty.txt")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:FileName", "Empty.txt")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:RecordCount", "0")]
+        public void OpenEmptyFile_Empty_Txt()
         {
-#line 5
-this.OpenEmptyFile("EmptyFile.txt", "0", ((string[])(null)));
-#line hidden
-        }
-        
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("Open empty file: FileWithOnlyWhitespace.txt")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "OpeningFileShould")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "FileWithOnlyWhitespace.txt")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:FileName", "FileWithOnlyWhitespace.txt")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:ExpectedCount", "0")]
-        public void OpenEmptyFile_FileWithOnlyWhitespace_Txt()
-        {
-#line 5
-this.OpenEmptyFile("FileWithOnlyWhitespace.txt", "0", ((string[])(null)));
+#line 7
+this.OpenEmptyFile("Empty.txt", "0", ((string[])(null)));
 #line hidden
         }
     }

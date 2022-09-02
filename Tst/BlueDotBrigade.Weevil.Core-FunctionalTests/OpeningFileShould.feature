@@ -7,10 +7,8 @@ Ensures that files are opened properly.
 Scenario: Open empty file
 	Given that Weevil has started
 	When the user opens the `<FileName>` file
-	Then the record count shall be <ExpectedCount>
+	Then the record count shall be <RecordCount>
 
 Examples:
-	| FileName                   | ExpectedCount |
-	| EmptyFile.txt              | 0             |
-	| FileWithOnlyWhitespace.txt | 0             |
-	
+	| FileName                | RecordCount |
+	| Empty.txt               | 0           |
