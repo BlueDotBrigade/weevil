@@ -219,7 +219,7 @@
 
 		public bool IsFilterCaseSensitive { get; set; }
 
-		public bool IsFilterInProgress => _concurrentFilterCount >= 1;
+		public bool IsFilterInProgress { get; private set; }
 
 		public bool AreFilterOptionsVisible { get; set; }
 
@@ -1270,7 +1270,7 @@
 				}
 
 				var queuedFilters = Interlocked.Increment(ref _concurrentFilterCount);
-				RaisePropertyChanged(nameof(this.IsFilterInProgress));
+				this.IsFilterInProgress = _concurrentFilterCount >= 1;
 
 				// Force UI to ensure that the screen has been refreshed
 				// ... so that the user knows a filter operation is in progress.
@@ -1316,7 +1316,7 @@
 				}
 
 				queuedFilters = Interlocked.Decrement(ref _concurrentFilterCount);
-				RaisePropertyChanged(nameof(this.IsFilterInProgress));
+				this.IsFilterInProgress = _concurrentFilterCount >= 1;
 
 				// Last filter to execute?
 				if (queuedFilters == 0)
