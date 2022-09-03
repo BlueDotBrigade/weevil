@@ -19,7 +19,6 @@
 		}
 
 		[SecurityCritical]
-		[HandleProcessCorruptedStateExceptions]
 		private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
 		{
 			var errorMessage = string.Format("An exception thrown by the WPF UI thread does not have an appropriate handler. IsHandled={0}", e.Handled);
@@ -43,7 +42,6 @@
 		}
 
 		[SecurityCritical]
-		[HandleProcessCorruptedStateExceptions]
 		private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
 			var exception = e.ExceptionObject as Exception;
@@ -69,7 +67,6 @@
 		}
 
 		[SecurityCritical]
-		[HandleProcessCorruptedStateExceptions]
 		private void OnUnhandledTplException(object sender, UnobservedTaskExceptionEventArgs e)
 		{
 			var errorMessage = string.Format("An unhandled TPL exception is forcing the application to terminate unexpectedly.");
@@ -93,7 +90,6 @@
 		}
 
 		[SecurityCritical]
-		[HandleProcessCorruptedStateExceptions]
 		private void OnApplicationOpening(object sender, StartupEventArgs e)
 		{
 			try
