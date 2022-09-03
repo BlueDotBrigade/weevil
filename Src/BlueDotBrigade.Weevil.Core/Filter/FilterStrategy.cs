@@ -6,7 +6,6 @@
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
 	using Diagnostics;
-	using Expressions;
 	using Expressions.Monikers;
 
 	internal class FilterStrategy : IFilterStrategy
