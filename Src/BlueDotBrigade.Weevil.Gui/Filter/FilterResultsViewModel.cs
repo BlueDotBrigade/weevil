@@ -293,6 +293,7 @@
 					{
 						HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
 					});
+					RaisePropertyChanged(nameof(this.SourceFileRemarks));
 				}
 			}
 		}
