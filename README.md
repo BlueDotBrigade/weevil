@@ -26,7 +26,7 @@
 
 *Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
 
-For a list of the latest features, please refer to the [change log](https://github.com/BlueDotBrigade/weevil/releases).
+For a list of the latest features, please refer to the [release notes](https://github.com/BlueDotBrigade/weevil/releases).
 
 ### General
 
