@@ -278,6 +278,7 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
+		[SafeForDependencyAnalysis]
 		public string SourceFileRemarks
 		{
 			get
