@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		DomainSpecificTerminology.xml = DomainSpecificTerminology.xml
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
-		PostSharp.license = PostSharp.license
 		Weevil.ruleset = Weevil.ruleset
 	EndProjectSection
 EndProject
