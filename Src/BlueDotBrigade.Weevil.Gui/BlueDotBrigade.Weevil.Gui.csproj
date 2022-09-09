@@ -3,7 +3,7 @@
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<OutputType>WinExe</OutputType>
 		<Platforms>x64</Platforms>
-		<AssemblyName>WeevilGui</AssemblyName>
+		<!--<AssemblyName>WeevilGui</AssemblyName>-->
 		<Deterministic>false</Deterministic>
 		<PublishUrl>publish\</PublishUrl>
 		<Install>true</Install>
