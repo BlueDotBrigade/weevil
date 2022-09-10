@@ -250,7 +250,7 @@
 					{
 						Log.Default.Write(LogSeverityType.Information,
 							"Records have been cleared.",
-							new Dictionary<string, string>
+							new Dictionary<string, object>
 							{
 								{"Operation", _clearOperation.ToString()},
 								{"Cleared", recordsCleared.ToString()},

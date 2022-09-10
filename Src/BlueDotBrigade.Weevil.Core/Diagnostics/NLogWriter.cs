@@ -16,10 +16,7 @@
 	{
 		private static readonly Logger LogWriter = NLog.LogManager.GetCurrentClassLogger();
 
-		private static readonly IDictionary NoMetadata = new Hashtable();
-
-		private static readonly IEnumerable<KeyValuePair<string, object>> NoProperties
-			= Array.Empty<KeyValuePair<string, object>>();
+		private static readonly IDictionary<string, object> NoMetadata = new Dictionary<string, object>();
 
 		private static readonly LogSeverityType DefaultSeverity = LogSeverityType.Debug;
 
@@ -30,7 +27,7 @@
 			Write(DefaultSeverity, message, NoMetadata);
 		}
 
-		public void Write(string message, IDictionary metadata)
+		public void Write(string message, IEnumerable<KeyValuePair<string, object>> metadata)
 		{
 			Write(DefaultSeverity, message, metadata);
 		}
@@ -40,48 +37,46 @@
 			Write(severity, message, NoMetadata);
 		}
 
-		public void Write(LogSeverityType severity, string message, IDictionary metadata)
+		public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 		{
-			IEnumerable<KeyValuePair<string, object>> properties 
-				= metadata as IEnumerable<KeyValuePair<string, object>> ?? NoProperties;
 
 			switch (severity)
 			{
 				case LogSeverityType.Trace:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForTraceEvent().Message(message).Properties(properties).LogEvent);
+						LogWriter.ForTraceEvent().Message(message).Properties(metadata).LogEvent);
 					break;
 
 				case LogSeverityType.Information:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForInfoEvent().Message(message).Properties(properties).LogEvent);
+						LogWriter.ForInfoEvent().Message(message).Properties(metadata).LogEvent);
 					break;
 
 				case LogSeverityType.Warning:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForWarnEvent().Message(message).Properties(properties).LogEvent);
+						LogWriter.ForWarnEvent().Message(message).Properties(metadata).LogEvent);
 					break;
 
 				case LogSeverityType.Error:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForErrorEvent().Message(message).Properties(properties).LogEvent);
+						LogWriter.ForErrorEvent().Message(message).Properties(metadata).LogEvent);
 					break;
 
 				case LogSeverityType.Critical:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForFatalEvent().Message(message).Properties(properties).LogEvent);
+						LogWriter.ForFatalEvent().Message(message).Properties(metadata).LogEvent);
 					break;
 
 				case LogSeverityType.Debug:
 				default:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForDebugEvent().Message(message).Properties(properties).LogEvent);
+						LogWriter.ForDebugEvent().Message(message).Properties(metadata).LogEvent);
 					break;
 			}
 		}
@@ -96,48 +91,45 @@
 			Write(severity, exception, message, NoMetadata);
 		}
 
-		public void Write(LogSeverityType severity, Exception exception, string message, IDictionary metadata)
+		public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 		{
-			IEnumerable<KeyValuePair<string, object>> properties 
-				= metadata as IEnumerable<KeyValuePair<string, object>> ?? NoProperties;
-
 			switch (severity)
 			{
 				case LogSeverityType.Trace:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForTraceEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
+						LogWriter.ForTraceEvent().Message(message).Properties(metadata).Exception(exception).LogEvent);
 					break;
 
 				case LogSeverityType.Information:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForInfoEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
+						LogWriter.ForInfoEvent().Message(message).Properties(metadata).Exception(exception).LogEvent);
 					break;
 
 				case LogSeverityType.Warning:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForWarnEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
+						LogWriter.ForWarnEvent().Message(message).Properties(metadata).Exception(exception).LogEvent);
 					break;
 
 				case LogSeverityType.Error:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForErrorEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
+						LogWriter.ForErrorEvent().Message(message).Properties(metadata).Exception(exception).LogEvent);
 					break;
 
 				case LogSeverityType.Critical:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForFatalEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
+						LogWriter.ForFatalEvent().Message(message).Properties(metadata).Exception(exception).LogEvent);
 					break;
 
 				case LogSeverityType.Debug:
 				default:
 					LogWriter.Log(
 						typeof(NLogWriter),
-						LogWriter.ForDebugEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
+						LogWriter.ForDebugEvent().Message(message).Properties(metadata).Exception(exception).LogEvent);
 					break;
 			}
 		}
