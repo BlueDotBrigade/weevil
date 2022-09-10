@@ -3,7 +3,6 @@
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<OutputType>WinExe</OutputType>
 		<Platforms>x64</Platforms>
-		<!--<AssemblyName>WeevilGui</AssemblyName>-->
 		<Deterministic>false</Deterministic>
 		<PublishUrl>publish\</PublishUrl>
 		<Install>true</Install>
@@ -23,6 +22,16 @@
 		<BootstrapperEnabled>true</BootstrapperEnabled>
 		<UseWPF>true</UseWPF>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<PlatformTarget>x64</PlatformTarget>
+		<Authors>BlueDotBrigade;</Authors>
+		<Company>Blue Dot Brigade</Company>
+		<Description>An open-source C# library &amp; WPF application that facilitates the analysis of log file data, while automatically detecting known issues.</Description>
+		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+		<PackageIcon>Weevil-100.png</PackageIcon>
+		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject>
@@ -180,18 +189,6 @@
 		<Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
 	</ItemGroup>
 	<PropertyGroup />
-	<PropertyGroup>
-		<PlatformTarget>x64</PlatformTarget>
-		<Authors>BlueDotBrigade;</Authors>
-		<Company>Blue Dot Brigade</Company>
-		<Description>An open-source C# library &amp; WPF application that facilitates the analysis of log file data, while automatically detecting known issues.</Description>
-		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
-		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
-		<PackageIcon>Weevil-100.png</PackageIcon>
-		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
-	</PropertyGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing&#xD;&#xA;)" />
 	</Target>
