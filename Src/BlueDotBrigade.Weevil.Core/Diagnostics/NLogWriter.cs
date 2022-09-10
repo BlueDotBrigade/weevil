@@ -16,21 +16,33 @@
 	{
 		private static readonly Logger LogWriter = NLog.LogManager.GetCurrentClassLogger();
 
-		private static readonly IDictionary NoMetadata = new Hashtable();
-
-		private static readonly IEnumerable<KeyValuePair<string, object>> NoProperties
-			= Array.Empty<KeyValuePair<string, object>>();
+		private static readonly IDictionary<string, object> NoMetadata = new Dictionary<string, object>();
 
 		private static readonly LogSeverityType DefaultSeverity = LogSeverityType.Debug;
 
 		private static readonly string DefaultExceptionMessage = "An unexpected exception has been raised.";
+
+		private NLog.LogLevel ResolveLogLevel(LogSeverityType severity)
+		{
+			switch (severity)
+			{
+				case LogSeverityType.Trace: return NLog.LogLevel.Trace;
+				case LogSeverityType.Information: return NLog.LogLevel.Info;
+				case LogSeverityType.Warning: return NLog.LogLevel.Warn;
+				case LogSeverityType.Error: return NLog.LogLevel.Error;
+				case LogSeverityType.Critical: return NLog.LogLevel.Fatal;
+				case LogSeverityType.Debug:
+				default:
+					return NLog.LogLevel.Debug;
+			}
+		}
 
 		public void Write(string message)
 		{
 			Write(DefaultSeverity, message, NoMetadata);
 		}
 
-		public void Write(string message, IDictionary metadata)
+		public void Write(string message, IEnumerable<KeyValuePair<string, object>> metadata)
 		{
 			Write(DefaultSeverity, message, metadata);
 		}
@@ -40,49 +52,27 @@
 			Write(severity, message, NoMetadata);
 		}
 
-		public void Write(LogSeverityType severity, string message, IDictionary metadata)
+		public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 		{
-			IEnumerable<KeyValuePair<string, object>> properties 
-				= metadata as IEnumerable<KeyValuePair<string, object>> ?? NoProperties;
+			LogLevel logLevel = ResolveLogLevel(severity);
+			IEnumerable<KeyValuePair<string, object>> properties = metadata ?? NoMetadata;
+			
+			LogEventInfo logEvent = LogWriter
+				.ForLogEvent(logLevel)
+				.Message(message)
+				.Properties(properties)
+				.LogEvent;
 
-			switch (severity)
+			if (logEvent == null)
 			{
-				case LogSeverityType.Trace:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForTraceEvent().Message(message).Properties(properties).LogEvent);
-					break;
-
-				case LogSeverityType.Information:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForInfoEvent().Message(message).Properties(properties).LogEvent);
-					break;
-
-				case LogSeverityType.Warning:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForWarnEvent().Message(message).Properties(properties).LogEvent);
-					break;
-
-				case LogSeverityType.Error:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForErrorEvent().Message(message).Properties(properties).LogEvent);
-					break;
-
-				case LogSeverityType.Critical:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForFatalEvent().Message(message).Properties(properties).LogEvent);
-					break;
-
-				case LogSeverityType.Debug:
-				default:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForDebugEvent().Message(message).Properties(properties).LogEvent);
-					break;
+				// As per SnakeFoot pointed out, we have to handle an empty `LogEvent` which can occur with NLog v5.
+				// ... Beause `LogEvent` property can return null when the LogLevel. Trace is not enabled (skips allocation when not needed).
+				// ... And one is not allowed to pass LogEventInfo == null into Logger.Log(...)-method, so now it will throw when LogLevel is not enabled.
+				// ... https://github.com/BlueDotBrigade/weevil/pull/352
+			}
+			else
+			{
+				LogWriter.Log(typeof(NLogWriter), logEvent);
 			}
 		}
 
@@ -96,49 +86,28 @@
 			Write(severity, exception, message, NoMetadata);
 		}
 
-		public void Write(LogSeverityType severity, Exception exception, string message, IDictionary metadata)
+		public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 		{
-			IEnumerable<KeyValuePair<string, object>> properties 
-				= metadata as IEnumerable<KeyValuePair<string, object>> ?? NoProperties;
+			LogLevel logLevel = ResolveLogLevel(severity);
+			IEnumerable<KeyValuePair<string, object>> properties = metadata ?? NoMetadata;
+			
+			LogEventInfo logEvent = LogWriter
+				.ForLogEvent(logLevel)
+				.Exception(exception)
+				.Message(message)
+				.Properties(properties)
+				.LogEvent;
 
-			switch (severity)
+			if (logEvent == null)
 			{
-				case LogSeverityType.Trace:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForTraceEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
-					break;
-
-				case LogSeverityType.Information:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForInfoEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
-					break;
-
-				case LogSeverityType.Warning:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForWarnEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
-					break;
-
-				case LogSeverityType.Error:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForErrorEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
-					break;
-
-				case LogSeverityType.Critical:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForFatalEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
-					break;
-
-				case LogSeverityType.Debug:
-				default:
-					LogWriter.Log(
-						typeof(NLogWriter),
-						LogWriter.ForDebugEvent().Message(message).Properties(properties).Exception(exception).LogEvent);
-					break;
+				// As per SnakeFoot pointed out, we have to handle an empty `LogEvent` which can occur with NLog v5.
+				// ... Beause `LogEvent` property can return null when the LogLevel. Trace is not enabled (skips allocation when not needed).
+				// ... And one is not allowed to pass LogEventInfo == null into Logger.Log(...)-method, so now it will throw when LogLevel is not enabled.
+				// ... https://github.com/BlueDotBrigade/weevil/pull/352
+			}
+			else
+			{
+				LogWriter.Log(typeof(NLogWriter), logEvent);
 			}
 		}
 	}
