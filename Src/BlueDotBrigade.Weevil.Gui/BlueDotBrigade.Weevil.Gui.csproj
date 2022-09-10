@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows</TargetFramework>
+		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
 		<OutputType>WinExe</OutputType>
 		<Platforms>x64</Platforms>
 		<Deterministic>false</Deterministic>
@@ -188,7 +189,6 @@
 	<ItemGroup>
 		<Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
 	</ItemGroup>
-	<PropertyGroup />
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing&#xD;&#xA;)" />
 	</Target>
