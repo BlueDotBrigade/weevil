@@ -54,6 +54,7 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="nlog.config" />
 	  <None Remove="PostSharp.license" />
 	  <None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
 	  <None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
@@ -67,9 +68,6 @@
 		<None Update="Resources\Images\Weevil-100.png">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
-		</None>
-		<None Update="WeevilGui.exe.nlog">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
@@ -207,5 +205,10 @@
 			<!-- Required by Moq -->
 			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="nlog.config">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 </Project>
