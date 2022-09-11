@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows</TargetFramework>
+		<!-- If `AssemblyName` is set to any other value (e.g. WeevilGui.exe) you may experience -->
+		<!-- PostSharp `No valid license key has been installed` compiler errors (PS0242) -->
+		<!-- when using GitHub actions. -->
+		<!-- See issue: #336 -->
 		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
 		<OutputType>WinExe</OutputType>
 		<Platforms>x64</Platforms>
@@ -50,6 +54,7 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="nlog.config" />
 	  <None Remove="PostSharp.license" />
 	  <None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
 	  <None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
@@ -63,9 +68,6 @@
 		<None Update="Resources\Images\Weevil-100.png">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
-		</None>
-		<None Update="WeevilGui.exe.nlog">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
@@ -203,5 +205,10 @@
 			<!-- Required by Moq -->
 			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="nlog.config">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 </Project>
