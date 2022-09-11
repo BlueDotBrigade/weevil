@@ -18,9 +18,9 @@
 
 ## What is Weevil?
 
-[![Release Notes](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Release%20Notes)](https://github.com/BlueDotBrigade/weevil/releases/)
-[![NuGet Package](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Core?label=NuGet%20Package)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Core)
+[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Release%20Notes)](https://github.com/BlueDotBrigade/weevil/releases/)
 [![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml)
+[![Security Analysis](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml)
 
 ![(Weevil demo: your app does not support *.Gif)](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
 
