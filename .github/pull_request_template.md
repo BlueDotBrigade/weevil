@@ -1,4 +1,4 @@
-When creating a _Pull Request_ please reference the _GitHub_ issue and ensure that:
+_Pull Request_ check list:
 
-1. [ ] _Unit Tests_ pass.
-2. [ ] There are no compiler errors or warnings.
+1. [ ] Pull request should reference the _GitHub_ issue number.
+2. [ ] Where appropriate, unit tests should be created.
