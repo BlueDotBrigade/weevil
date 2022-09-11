@@ -18,7 +18,7 @@
 
 ## What is Weevil?
 
-[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Release%20Notes)](https://github.com/BlueDotBrigade/weevil/releases/)
+[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Latest%20Release%20Tag)](https://github.com/BlueDotBrigade/weevil/releases/)
 [![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml)
 [![Security Analysis](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml)
 
