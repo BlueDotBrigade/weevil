@@ -1,7 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Navigation;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,7 +12,7 @@
 		public void Select_FirstRecord_Line1Selected()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("SampleData.log"))
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
 			engine.Selector.Select(lineNumber: 1);
@@ -26,7 +26,7 @@
 		public void Select_LastRecord_Line32Selected()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("SampleData.log"))
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
 			engine.Selector.Select(lineNumber: 32);
@@ -42,7 +42,7 @@
 		public void Select_NonExistentRecord_ThrowsRecordNotFound()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("SampleData.log"))
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
 			try

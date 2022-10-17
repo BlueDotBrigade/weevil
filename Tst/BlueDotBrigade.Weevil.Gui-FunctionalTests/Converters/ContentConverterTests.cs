@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Globalization;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,7 +13,7 @@
 		[WorkItem(200)]
 		public void Convert_LongMultiLineRecord_ReturnsTruncatedString()
 		{
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, InputData.GetAsString());
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString());
 			record.Metadata.IsMultiLine = true;
 
 			Assert.AreEqual(2379476, record.Content.Length);

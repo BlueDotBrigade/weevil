@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.IO;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.DatenLokator.TestsTools;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -34,7 +34,7 @@
 		[TestMethod]
 		public void GetNext_ReadUntilNextRecord_ReturnsRecord()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
@@ -47,7 +47,7 @@
 		[TestMethod]
 		public void GetNext_ReadingMultilineRecords_ReturnsLineNumberForStartOfEachRecord()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader("ReadUntilNextRecord.log");
+			StreamReader dataSource = new Daten().AsStreamReader("ReadUntilNextRecord.log");
 			var multilineParser = new MultilineRecordParser(dataSource, new TsvRecordParser());
 
 			IRecord multilineRecord = multilineParser.GetNext();
@@ -60,7 +60,7 @@
 		[TestMethod]
 		public void GetNext_ReadUntilEof_ReturnsRecord()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
@@ -73,7 +73,7 @@
 		[TestMethod]
 		public void GetNext_FileStartsWithPartialRecord_ReturnsRecord()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
@@ -86,7 +86,7 @@
 		[TestMethod]
 		public void GetNext_ThreeOneLineRecords_ReturnsThreeRecords()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			var multilineParser = new MultilineRecordParser(dataSource, recordParser);
@@ -99,7 +99,7 @@
 		[TestMethod]
 		public void GetNext_NoRecords_ReturnsEmptyRecord()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
@@ -110,7 +110,7 @@
 		[TestMethod]
 		public void GetNext_RecordStartsAfterMaxLineCount_EmptyRecordReturned()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			// Won't be able to find anything
@@ -129,7 +129,7 @@
 		[TestMethod]
 		public void GetNext_RecordStartsBeforeMaxLineCount_RecordReturned()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			// Record is returned
@@ -148,7 +148,7 @@
 		[TestMethod]
 		public void GetNext_RecordStartsDefaultMaxLinesWhileSearching_RecordReturned()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
@@ -162,7 +162,7 @@
 		{
 			// We are intentionally reading in an image file
 			// ... that cannot be interpreted as a log file
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
@@ -173,7 +173,7 @@
 		[TestMethod]
 		public void Metadata_IsMultilineRecord_HasMultilineAttribute()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
@@ -184,7 +184,7 @@
 		[TestMethod]
 		public void Metadata_IsSingleLineRecord_DoesNotHaveMultilineAttribute()
 		{
-			StreamReader dataSource = InputData.GetAsStreamReader();
+			StreamReader dataSource = new Daten().AsStreamReader();
 			var recordParser = new TsvRecordParser();
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();

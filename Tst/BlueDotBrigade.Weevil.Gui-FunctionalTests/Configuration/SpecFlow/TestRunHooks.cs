@@ -1,19 +1,25 @@
-﻿namespace BlueDotBrigade.Weevil.Configuration.SpecFlow
+﻿namespace BlueDotBrigade.Weevil.Gui.Configuration.SpecFlow
 {
+	using BlueDotBrigade.DatenLokator.TestsTools.Configuration;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.TestingTools.Configuration.SpecFlow;
 
 	/// <summary>
 	/// Represents SpecFlow events that execute before & after every test run.
 	/// </summary>
 	/// <seealso href="https://docs.specflow.org/projects/specflow/en/latest/Bindings/Hooks.html">SpecFlow: Hooks</seealso>
-	internal class SpecFlowTestRunHooks
+	[Binding]
+	internal class TestRunHooks
 	{
 		[BeforeTestRun(Order = Constants.AlwaysFirst)]
 		public static void Setup(TestRunnerManager testRunnerManager, ITestRunner testRunner)
 		{
 			Log.Default.Write(LogSeverityType.Debug, "SpecFlow test environment is being setup...");
 
-			InputData.Setup();
+			Lokator
+				.Get()
+				.UsingDefaultFileName("GenericBaseline.log")
+				.Setup();
 
 			Log.Default.Write(LogSeverityType.Information, "SpecFlow test environment has been setup.");
 		}
@@ -23,7 +29,9 @@
 		{
 			Log.Default.Write(LogSeverityType.Debug, "SpecFlow test environment is being torn down...");
 
-			InputData.Teardown();
+			Lokator
+				.Get()
+				.TearDown();
 
 			Log.Default.Write(LogSeverityType.Information, "SpecFlow test environment has been torn down.");
 		}

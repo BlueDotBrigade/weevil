@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Linq;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
@@ -15,7 +14,7 @@
 		public void FlagRecordsWhenDataTransitionDetected()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(
@@ -49,7 +48,7 @@
 		public void AddCommentWhenDataTransitionDetected()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(
@@ -82,7 +81,7 @@
 			var dectectMinuteIncreasing = @"\s12:(?<Minute>[0-9]{2})";
 
 			var engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(dectectMinuteIncreasing));
@@ -111,7 +110,7 @@
 			var detectSecondRollover = @"\s12:[0-9]{2}:(?<Second>[0-9]{2})";
 
 			var engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectSecondRollover));

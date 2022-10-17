@@ -20,7 +20,7 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="1.2.4" />
+		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
 		<PackageReference Include="Moq" Version="4.18.2" />
 		<PackageReference Include="SpecFlow.Plus.LivingDocPlugin" Version="3.9.57" />
@@ -44,8 +44,14 @@
 		<Folder Include="Support\" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Include=".Daten\Converters\ContentConverterTests\LongMultiLineRecord.log" />
+	  <None Include=".Daten\.Global\GenericBaseline.log" />
+	  <None Include=".Daten\.Global\GenericBaseline.log.xml" />
+	</ItemGroup>
+	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Update="SpecFlow.json">

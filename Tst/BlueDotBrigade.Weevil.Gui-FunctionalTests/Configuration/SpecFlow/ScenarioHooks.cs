@@ -1,11 +1,13 @@
-﻿namespace BlueDotBrigade.Weevil.Configuration.SpecFlow
+﻿namespace BlueDotBrigade.Weevil.Gui.Configuration.SpecFlow
 {
+	using BlueDotBrigade.Weevil.TestingTools.Configuration.SpecFlow;
+
 	/// <summary>
 	/// Represents SpecFlow events that execute before & after every Gherkin scenario.
 	/// </summary>
 	/// <seealso href="https://docs.specflow.org/projects/specflow/en/latest/Bindings/Hooks.html">SpecFlow: Hooks</seealso>
 	[Binding]
-	internal class SpecFlowScenarioHooks
+	internal class ScenarioHooks
 	{
 		[BeforeScenario(Order = Constants.AlwaysFirst)]
 		public static void OnBeforeScenario(ScenarioContext scenario)

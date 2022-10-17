@@ -6,7 +6,7 @@
 	using System.Text;
 	using System.Threading.Tasks;
 	using System.Windows;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using Moq;
