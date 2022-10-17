@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,7 +12,7 @@
 		public void CountNumberOfInformationalMessages()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			var actualErrors = int.Parse(engine.Filter.GetMetrics()["Information"].ToString());
@@ -24,7 +23,7 @@
 		public void SupportFindingRecordsWithComments()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			ImmutableArray<IRecord> results = engine
@@ -42,7 +41,7 @@
 		public void SupportFindingSpecificComment()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			ImmutableArray<IRecord> results = engine
@@ -59,7 +58,7 @@
 		public void DefaultToCaseSensitiveFiltering()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			ImmutableArray<IRecord> results = engine
@@ -73,7 +72,7 @@
 		public void SupportCaseSensitiveRegularExpressions()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			var configuration = new Dictionary<string, object>
@@ -93,7 +92,7 @@
 		public void SupportCaseInsensitiveRegularExpressions()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			var configuration = new Dictionary<string, object>
@@ -112,7 +111,7 @@
 		public void HidePinnedRecordsByDefault()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Records[9].Metadata.IsPinned = true;
@@ -126,7 +125,7 @@
 		public void ShowPinnedRecordsWhenEnabled()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Records[9].Metadata.IsPinned = true;

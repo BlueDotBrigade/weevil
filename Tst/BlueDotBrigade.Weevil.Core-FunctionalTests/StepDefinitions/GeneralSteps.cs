@@ -15,7 +15,7 @@
 		public void WhenTheUserOpensTheFile(string filename)
 		{
 			_engine = Engine
-				.UsingPath(InputData.GetFilePath(filename))
+				.UsingPath(new Daten().AsFilePath(filename))
 				.Open();
 		}
 

@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter
 {
 	using System;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -11,7 +10,7 @@
 		public void KeepLatestInclusiveFilterAtTopOfList()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2"));
@@ -25,7 +24,7 @@
 		public void KeepLatestExclusiveFilterAtTopOfList()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria(string.Empty, "Id=4"));
@@ -40,7 +39,7 @@
 		public void RemainIntactAfterClearOperation()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			var uniqueFilter = $"Info(?#RegEx comment created at {DateTime.Now.ToLongTimeString()})";

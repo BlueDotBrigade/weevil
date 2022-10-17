@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using Data;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Analysis;
 	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,7 +12,7 @@
 		public void SupportNavigatingToNextPinnedRecord()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Results[9].Metadata.IsPinned = true;
@@ -29,7 +28,7 @@
 		public void SupportNavigatingToNextRecordWithComment()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Analyzer.RemoveComments(true);
@@ -50,7 +49,7 @@
 		public void SupportNavigatingToNextFlaggedRecord()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(
@@ -70,7 +69,7 @@
 		public void HandleNavigatingWhenPinnedRecordsHidden()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria("Nothing Should Match This Filter"));

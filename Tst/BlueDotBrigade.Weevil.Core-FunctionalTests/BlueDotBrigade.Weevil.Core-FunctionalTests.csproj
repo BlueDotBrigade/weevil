@@ -18,19 +18,20 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
-		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="1.2.4" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
 		<PackageReference Include="Moq" Version="4.18.2" />
 		<PackageReference Include="SpecFlow.Plus.LivingDocPlugin" Version="3.9.57" />
 		<PackageReference Include="SpecFlow.MsTest" Version="3.9.74" />
-		<PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
-		<PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
-		<PackageReference Include="FluentAssertions" Version="6.2.0" />
+		<PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+		<PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+		<PackageReference Include="FluentAssertions" Version="6.7.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="..\..\DomainSpecificTerminology.xml">
@@ -44,5 +45,17 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Features\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
+	  <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
+	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log" />
+	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log.xml" />
+	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log" />
+	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log.xml" />
+	  <None Include=".Daten\.Global\Empty.txt" />
+	  <None Include=".Daten\.Global\EmptyWithWhitespace.txt" />
+	  <None Include=".Daten\.Global\GenericBaseline.log" />
+	  <None Include=".Daten\.Global\GenericBaseline.log.xml" />
 	</ItemGroup>
 </Project>

@@ -5,7 +5,7 @@
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using Moq;
@@ -30,7 +30,7 @@
 		//		uiDispatcher.Object,
 		//		bulletinMediator.Object);
 
-		//	await viewModel.OpenAsync(InputData.GetFilePath("GenericBaseline.log"));
+		//	await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
 
 		//	viewModel.IsManualFilter = true;
 		//	viewModel.FilterManually(new object[]

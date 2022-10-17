@@ -1,6 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
+	using BlueDotBrigade.DatenLokator.TestsTools;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -10,7 +10,7 @@
 		public void UseLineNumberWhenLoadingUserComment()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("UseLineNumberWhenLoadingUserComment.log"))
+				.UsingPath(new Daten().AsFilePath("UseLineNumberWhenLoadingUserComment.log"))
 				.Open();
 
 			engine.Selector.Select(31);
@@ -25,7 +25,7 @@
 		public void KeepCommentsForRecordsNoLongerInMemory()
 		{
 			IEngine firstEngine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			Assert.AreEqual("First", firstEngine[0].Metadata.Comment);
@@ -36,7 +36,7 @@
 			firstEngine = null;
 
 			IEngine secondEngine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			Assert.AreEqual("First", secondEngine[0].Metadata.Comment);
