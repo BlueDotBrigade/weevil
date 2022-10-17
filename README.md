@@ -1,5 +1,9 @@
 # Weevil
 
+[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Latest%20Release)](https://github.com/BlueDotBrigade/weevil/releases/)
+[![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml)
+[![Security Analysis](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml)
+
 - [What is Weevil?](#what-is-weevil)
    - [General](#general)
    - [Filtering](#filtering)
@@ -17,10 +21,6 @@
    - [Contributors](#contributors)
 
 ## What is Weevil?
-
-[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Latest%20Release%20Tag)](https://github.com/BlueDotBrigade/weevil/releases/)
-[![Build Status](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/dotnet.yml)
-[![Security Analysis](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml)
 
 ![(Weevil demo: your app does not support *.Gif)](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
 
@@ -185,7 +185,7 @@ The following steps outline how to build Weevil's WPF application:
 ## Recognition
 
 - [PostSharp](https://www.postsharp.net/)
-   - *PostSharp*`s aspect oriented library helps to simplify a code base by reducing boiler plate code. A special thanks for the donated license.
+   - *PostSharp*`s [aspect oriented][AOP] library helps to simplify a code base by reducing [boilerplate][]. Special thanks to the PostSharp team for donating a license.
 - [GitHub](https://www.GitHub.com)
    - Free Git repository hosting platform for this project & many others like it.
 
@@ -208,3 +208,6 @@ A special thanks to all of those who have contributed to this project.
 [Sidecar]: https://en.wikipedia.org/wiki/Sidecar_file
 
 [StableCode]: https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x
+
+[Boilerplate]: https://en.m.wikipedia.org/wiki/Boilerplate_code
+[AOP]: https://en.m.wikipedia.org/wiki/Aspect-oriented_programming
