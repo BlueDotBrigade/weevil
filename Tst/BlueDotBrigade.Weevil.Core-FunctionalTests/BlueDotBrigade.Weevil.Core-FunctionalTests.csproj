@@ -18,6 +18,13 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="Features\**" />
+	  <EmbeddedResource Remove="Features\**" />
+	  <None Remove="Features\**" />
+	  <SpecFlowFeatureFiles Remove="Features\**" />
+	  <SpecFlowObsoleteCodeBehindFiles Remove="Features\**" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
@@ -42,9 +49,6 @@
 		<Content Include="..\..\SpecFlow.json" Link="SpecFlow.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Features\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
