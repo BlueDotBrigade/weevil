@@ -5,14 +5,16 @@
 	{
 		private IEngine _engine = Engine.Surrogate;
 
-		[Given(@"that Weevil has started")]
-		public void GivenThatWeevilHasStarted()
+		[Given($@"the user has opened the default log file")]
+		public void GivenTheUserHasOpenedTheDefaultLog()
 		{
-			// nothing to do	
+			_engine = Engine
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
+				.Open();
 		}
 
-		[When($@"the user opens the `{A.FileName}` file")]
-		public void WhenTheUserOpensTheFile(string filename)
+		[Given($@"the user has opened the log file `{A.FileName}`")]
+		public void GivenTheUserHasOpenedThisLog(string filename)
 		{
 			_engine = Engine
 				.UsingPath(new Daten().AsFilePath(filename))

@@ -17,6 +17,7 @@
 - [Development](#development)
    - [Guidelines](#guidelines)
    - [Compiling](#compiling)
+   - [Verification](#verification)
 - [Recognition](#recognition)
    - [Open Source Projects](#open-source-projects)
    - [Contributors](#contributors)
@@ -187,6 +188,13 @@ The following steps outline how to build Weevil's WPF application:
 3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
 
+### Verification
+
+Software integrity is verified through a number of automated tests which can be found in the [/Weevil/Tst/][AutomatedTests] directory:
+
+- `*UnitTests`
+- `*FunctionalTests`
+
 ## Recognition
 
 - [PostSharp](https://www.postsharp.net/)
@@ -216,3 +224,5 @@ A special thanks to all of those who have contributed to this project.
 
 [Boilerplate]: https://en.m.wikipedia.org/wiki/Boilerplate_code
 [AOP]: https://en.m.wikipedia.org/wiki/Aspect-oriented_programming
+
+[AutomatedTests]: https://github.com/BlueDotBrigade/weevil/tree/main/Tst

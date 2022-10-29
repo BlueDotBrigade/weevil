@@ -44,9 +44,6 @@
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Features\" />
-	</ItemGroup>
-	<ItemGroup>
 	  <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
 	  <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
 	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log" />
