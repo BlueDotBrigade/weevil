@@ -33,36 +33,45 @@ For a list of the latest features, please refer to the [release notes](https://g
 ### General
 
 1. File Level Remarks
-   - Useful for making note of high level observations.
+   - This type of note is useful for capturing high level observations, or including additional context
+   - For example: The user may wish to include the test case number that was used to generate the log file.
 2. Record Level Comments
-   - Useful when trying to understand individual log entries.
+   - Record level notes can be created to capture the user's thoughts, or details which are not included in the record.
+   - For example: The record may reference a serial number, but not the type of hardware. This information could be added to the record level note.
 3. Persisted State
-   - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
+   - The filter history, record comments and file level comments are automatically loaded when the log file is opened.
    - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
 4. Non-Destructive operations
-   - The original log file is never modified.
+   - The _Weevil_ application ensures that the original log file is never modified.
 5. Pinned Records
-   - Ensures that certain records are always included in the filter results. 
-6. Simplified Exception Callstack
-   - Calls to .NET library methods are automatically removed from call stacks, thus making it easier to focus on the business domain logic. 
-   - Full callstack is still available. 
+   - The user can pin a record thus ensuring that the record is always included in the filter results.
+6. Simplified Exception Call Stack
+   - When a record includes a .NET exception call stack, _Weevil_ simplifies the call stack by removing all .NET core assembly references.
+   - This feature reduces visual noise, thus making it easier to focus on the business domain logic.
 7. Clear Operations
-   - Can be used to reduce RAM footprint, speed up filtering, and reduce visual noise. 
-
+   - This operation removes the record from memory, thus reducing the RAM footprint and speeding up the filtering process.
 
 ### Filtering
 
-1. Inclusive & exclusive filtering
-   - Can be used to quickly select or hide records.
-2. Pinned Records
-   - Guarantees that specific records always appear in the filter results.
-3. Filter Aliases
-   -  An alias can be added to _Weevil_ to make it easier to reference complex and/or frequently used filters.
-4. Monikers
-   - Provides support for querying *Weevil*'s metadata.
-   - For example: `@Comment` can be used to retrieve records that have a user comment.
+A _Weevil_ filter consists of one or more filter criteria that can be used to identify records within a log file.
+
+1. Inclusive and Exclusive
+   - Records that match the inclusive filter are displayed, while the exclusive filter is used to hide records.
+2. Filter Criteria
+   1. Plain Text
+   2. Regular Expressions
+   3. Aliases
+      - Frequently used or complex filters can be assigned a unique key that can be used to speed up the filtering process.
+      - For example, the `#IpAddress` key could be assigned to the following filter criteria  `^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`.
+   4. Monikers
+      - Unlike the other filter criteria which are applied to the record content, monikers can be used to query _Weevil_'s metadata.
+      - For example, the `@Comment` can be used to identify records that have a user comment.
+3. Multiple Criteria
+   - A logical "OR" operator (`||`) can be used to chain together multiple filter criteria.
+4. Pinned Records
+   - Pinned records are guaranteed to be included in the filter results.
 5. In-memory
-   - The entire log file is loaded into RAM to facilitate fast searches.
+   - To facilitate fast searching, the entire log file is loaded into RAM.
 
 ### Navigation
 
