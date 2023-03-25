@@ -6,12 +6,12 @@
 [![Security Analysis](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/BlueDotBrigade/weevil/actions/workflows/codeql-analysis.yml)
 
 - [What is Weevil?](#what-is-weevil)
-   - [General](#general)
+- [Key Features](#key-features)
    - [Filtering](#filtering)
    - [Navigation](#navigation)
    - [Analysis](#analysis)
-   - [Plugin Architecture](#plugin-architecture)
-- [Getting Started](#getting-started)
+   - [Extensible Architecture](#extensible-architecture)
+- [Software Development](#software-development)
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
 - [Development](#development)
@@ -26,107 +26,91 @@
 
 ![(Weevil demo: your app does not support *.Gif)](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
 
-*Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
+_Weevil_ is an open-source .NET project that is used by analysts to extract valuable insights from log files.  It's all about "_boring log files for tasty bytes_".  
 
-For a list of the latest features, please refer to the [release notes](https://github.com/BlueDotBrigade/weevil/releases).
+A complete list of features can be found in the [release notes](https://github.com/BlueDotBrigade/weevil/releases).
 
-### General
+## Key Features
 
-1. File Level Remarks
-   - This type of note is useful for capturing high level observations, or including additional context
-   - For example: The user may wish to include the test case number that was used to generate the log file.
-2. Record Level Comments
-   - Record level notes can be created to capture the user's thoughts, or details which are not included in the record.
-   - For example: The record may reference a serial number, but not the type of hardware. This information could be added to the record level note.
-3. Persisted State
-   - The filter history, record comments and file level comments are automatically loaded when the log file is opened.
-   - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
-4. Non-Destructive operations
-   - The _Weevil_ application ensures that the original log file is never modified.
-5. Pinned Records
-   - The user can pin a record thus ensuring that the record is always included in the filter results.
-6. Simplified Exception Call Stack
-   - When a record includes a .NET exception call stack, _Weevil_ simplifies the call stack by removing all .NET core assembly references.
-   - This feature reduces visual noise, thus making it easier to focus on the business domain logic.
-7. Clear Operations
-   - This operation removes the record from memory, thus reducing the RAM footprint and speeding up the filtering process.
+1. File and Record Level Notes
+    - Add high-level observations or context at the file level.
+    - Create record level notes for capturing user thoughts or additional details.
+2. Persisted State
+    - Automatically load filter history, record comments, and file level comments when opening a log file.
+    - Share the application's state as an XML [sidecar][Sidecar] with colleagues.
+3. Non-Destructive Operations
+	 - The _Weevil_ application ensures that the original log file is never modified.
+4. Simplified Callstacks
+    - When a record includes an exception call stack, _Weevil_ simplifies the call stack by only displaying business logic references.
+5. Clear Operations
+	 - This operation removes records from memory, thus reducing the RAM footprint and speeding up the filtering process.
 
 ### Filtering
 
-A _Weevil_ filter consists of one or more filter criteria that can be used to identify records within a log file.
+One or more filter criteria can be used to show or hide log file records.
 
-1. Inclusive and Exclusive
-   - Records that match the inclusive filter are displayed, while the exclusive filter is used to hide records.
+1. Inclusive and Exclusive Filters
+    - Display records matching the inclusive filter while hiding those matching the exclusive filter.
 2. Filter Criteria
-   1. Plain Text
-   2. Regular Expressions
-   3. Aliases
-      - Frequently used or complex filters can be assigned a unique key that can be used to speed up the filtering process.
-      - For example, the `#IpAddress` key could be assigned to the following filter criteria  `^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`.
-   4. Monikers
-      - Unlike the other filter criteria which are applied to the record content, monikers can be used to query _Weevil_'s metadata.
-      - For example, the `@Comment` can be used to identify records that have a user comment.
+	 1. Plain Text
+	 2. Regular Expressions
+	 3. Aliases
+		  - Frequently used or complex filters can be assigned a unique key that can be used to speed up the filtering process.
+		  - For example, the `#IpAddress` key could be assigned to the following filter criteria  `^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`.
+	 4. Monikers
+        - Monikers are built-in keys that can be used to query metadata collected by _Weevil_.
+		  - For example, the `@Comment` can be used to identify records that have a user comment.
 3. Multiple Criteria
-   - A logical "OR" operator (`||`) can be used to chain together multiple filter criteria.
+    - Multiple filter criteria can be combined together using a logical "OR" operator (`||`).
 4. Pinned Records
-   - Pinned records are guaranteed to be included in the filter results.
-5. In-memory
-   - To facilitate fast searching, the entire log file is loaded into RAM.
+	 - Pinned records are guaranteed to be included in the filter results.
 
 ### Navigation
 
 1. Find
-   - Search for text in filter results.
+    - Search for text within filtered results.
 2. Go To
-   - Jump to a specific line number.
-   - Jump to a specific timestamp.
+    - Jump to specific line numbers or timestamps.
 3. Pinned Records
-   - Quickly navigate between records of interest.
+    - Effortlessly navigate between important records.
 4. Flagged Records
-   - Navigate between records flagged during previous analysis. 
+    - Move between records flagged during prior analysis. 
 5. Record Comments
-   - Navigate between records that have a user comment. 
+    - Navigate between records containing user comments.
 
 ### Analysis
 
-[Regular expression][RegEx101] named groups can used to identify key data within the log file.  *Weevil*'s analysis tools can then be used to extract data and/or identify trends.
+Utilize [Regular expression][RegEx101] named groups to identify key data in log files. Leverage _Weevil_'s analysis tools to then extract data and identify trends.
+
+Each analysis tool updates the `Comments` fields with the values that match the provided named group(s), and the recor's `Flagged` field is set.
 
 1. Detect Data
-   - `Comments` field is updated with values that match the provided named group(s).
-   - `Flagged` field is set to `True` for matching records. 
-   - Example: extracting URLs from a log file.
+   - For example: extracting URLs from a log file
 2. Detect Data Transitions
-   - `Comments` field is updated when the matching value changes.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: detecting when hardware serial numbers change. 
+   - For example: when a hardware serial number changes
 3. Detect Rising Edges
-   - `Comments` field is updated when the matching value is higher that the previously detected value.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: detecting peek CPU usage in a log file
-4. Detect Falling Edges:
-   - `Comments` field is updated when the matching value is lower that the previously detected value.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: firmware's uptime value has reset to zero
-5. Detect Temporal Anomaly:
-   - `Comments` field is updated when record timestamps appear out of order.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: 7th record is logged at `10:30 AM`, and the 8th record is logged at `10:15 AM`
-6. Charts:
-   - Regular expression _named groups_ can be used to extract values and generate a line graph.
+   - For example: detecting peek CPU usage
+4. Detect Falling Edges
+   - For example: detect when a firmware's uptime has reset
+5. Detect Temporal Anomalies
+   - For example: detect when records are logged out of order
 
-### Plugin Architecture
+Furthermore, _Weevil_ includes the ability to generated graphs based on the extracted data.
 
-Realize the greatest value by creating a business-domain specific *Weevil* plugin which extends the application by creating custom:
+### Extensible Architecture
 
-1. log file parsers
-2. log file analyzers
-3. dashboard insight
+Maximize potential by developing domain-specific extensions tailored to your business' needs. _Weevil_ can be enhanced by custom plugins:
 
-## Getting Started
+1. Log File Parsers
+   - Create tailored parsers to accurately interpret log files from various sources and formats, ensuring seamless integration with _Weevil_.
+2. Log File Analyzers
+   - Design specialized analyzers to process and extract valuable insights from the parsed log data, optimizing the analysis for your specific business domain.
+3. Dashboard Insights
+   - Develop custom dashboard visualizations and insights that highlight the most relevant information, enabling efficient decision-making and improved understanding of your log data.
+
+## Software Development
 
 ### WPF Application
-
-For more information, please refer to the following:
 
 - [Installation Guide][InstallationGuide]
 - [Help Manual][Help]
@@ -201,8 +185,8 @@ The following steps outline how to build Weevil's WPF application:
 
 Software integrity is verified through a number of automated tests which can be found in the [/Weevil/Tst/][AutomatedTests] directory:
 
-- `*UnitTests`
-- `*FunctionalTests`
+- `UnitTests`
+- `FunctionalTests`
 
 ## Recognition
 
