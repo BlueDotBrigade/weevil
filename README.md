@@ -33,7 +33,7 @@ A complete list of features can be found in the [release notes](https://github.c
 ## Key Features
 
 1. File and Record Level Notes
-    - Add high-level observations or context at the file level.
+    - Add high-level observations, or context at the record level.
     - Create record level notes for capturing user thoughts or additional details.
 2. Persisted State
     - Automatically load filter history, record comments, and file level comments when opening a log file.
