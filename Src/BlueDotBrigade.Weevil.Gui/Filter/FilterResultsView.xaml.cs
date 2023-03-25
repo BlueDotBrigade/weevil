@@ -101,5 +101,19 @@
 				this.ViewModel.UnSelect(removed);
 			}
 		}
+
+		private void OnGotFocus(object sender, RoutedEventArgs e)
+		{
+			if (sender == this.InclusiveFilter)
+			{
+				IncludeColumn.Width = new GridLength(3, GridUnitType.Star);
+				ExcludeColumn.Width = new GridLength(1, GridUnitType.Star);
+			}
+			else if (sender == this.ExclusiveFilter)
+			{
+				IncludeColumn.Width = new GridLength(1, GridUnitType.Star);
+				ExcludeColumn.Width = new GridLength(3, GridUnitType.Star);
+			}
+		}
 	}
 }
