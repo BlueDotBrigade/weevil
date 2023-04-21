@@ -146,6 +146,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}, (x) => this.IsManualFilter);
 
 		[SafeForDependencyAnalysis]
+		public ICommand FilterByCommentCommand => new UiBoundCommand(FilterByComment, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
 		public ICommand ToggleFiltersCommand => new UiBoundCommand(ToggleFilters, () => this.IsMenuEnabled);
 		
 		[SafeForDependencyAnalysis]
