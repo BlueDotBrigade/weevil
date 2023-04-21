@@ -79,6 +79,11 @@
 				analyzers.AddRange(_coreExtension.GetAnalyzers(
 					_coreEngine.Context,
 					_coreEngine.Navigate.TableOfContents));
+
+				analyzers.AddRange(_coreExtension.GetAnalyzers(
+					_coreEngine,
+					_coreEngine.Context,
+					_coreEngine.Navigate.TableOfContents));
 			}
 
 			return analyzers;
@@ -106,7 +111,7 @@
 			{
 				insight.Refresh(_coreEngine.Records);
 			}
-				
+
 			stopwatch.Stop();
 
 			var attentionRequiredCount = insights.Count(x => x.IsAttentionRequired);
