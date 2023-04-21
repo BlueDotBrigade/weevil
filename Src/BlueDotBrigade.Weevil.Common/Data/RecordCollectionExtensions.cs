@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.Navigation;
 
 	public static class RecordCollectionExtensions
@@ -350,6 +351,42 @@
 				return wasFound
 					? indexOfResult
 					: throw new RecordNotFoundException();
+			}
+		}
+
+		public static IEnumerable<IRecord> GetSectionRecords(this ImmutableArray<IRecord> records, ISection section, ITableOfContents tableOfContent)
+		{
+			var firstLineNumber = section.LineNumber;
+
+			var firstIndex = records.IndexOfLineNumber(
+				firstLineNumber, 
+				RecordSearchType.ExactOrNext);
+
+			ISection nextSection = tableOfContent
+				.Sections
+				.Where(s => s.LineNumber > section.LineNumber)
+				.OrderBy(s => s.LineNumber)
+				.FirstOrDefault();
+
+			var lastLineNumber = (nextSection != null)
+				? nextSection.LineNumber
+				: records[records.Length - 1].LineNumber;
+
+			var lastIndex = records.IndexOfLineNumber(
+				lastLineNumber, 
+				RecordSearchType.ExactOrPrevious);
+
+			for (var i = firstIndex; i <= lastIndex; i++)
+			{
+				if (records[i].LineNumber >= section.LineNumber && 
+					records[i].LineNumber < nextSection.LineNumber)
+				{
+					yield return records[i];
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
 	}

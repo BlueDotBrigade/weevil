@@ -63,7 +63,7 @@
                  TextWrapping="WrapWithOverflow" />
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
             <RadioButton GroupName="Search Type" Content="Exact Match" IsEnabled="False"/>
-            <RadioButton GroupName="Search Type" Content="Closest Match" IsChecked="True"/>
+            <RadioButton GroupName="Search Type" Content="Nearest Neighbor" IsChecked="True"/>
             </StackPanel>
         <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
       <Button Grid.Row="2" Grid.Column="1" 
