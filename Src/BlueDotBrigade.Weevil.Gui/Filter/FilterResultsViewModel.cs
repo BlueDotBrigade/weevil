@@ -944,6 +944,14 @@
 			}
 		}
 
+		private void FilterByComment()
+		{
+			var configuration = GetFilterConfiguration();
+			var filter = new FilterCriteria("@Comment", string.Empty, configuration);
+			
+			FilterAsynchronously(FilterType.PlainText, filter);
+		}
+
 		public void ToggleFilters()
 		{
 			if (_engine.Filter.Criteria.Equals(FilterCriteria.None))
@@ -1037,7 +1045,7 @@
 							$"Unable to find the timestamp in the search results. Value={userValue}",
 							() => _engine
 								.Navigate
-								.GoTo(userValue, RecordSearchType.ClosestMatch)
+								.GoTo(userValue, RecordSearchType.NearestNeighbor)
 								.ToIndexUsing(_engine.Filter.Results));
 					}
 					else
@@ -1053,7 +1061,7 @@
 								$"Unable to find the line number in the search results. Value={userValue}",
 								() => _engine
 									.Navigate
-									.GoTo(lineNumber, RecordSearchType.ClosestMatch)
+									.GoTo(lineNumber, RecordSearchType.NearestNeighbor)
 									.ToIndexUsing(_engine.Filter.Results));
 						}
 						else
@@ -1178,7 +1186,6 @@
 				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
-
 
 		private void ToggleIsPinned()
 		{
