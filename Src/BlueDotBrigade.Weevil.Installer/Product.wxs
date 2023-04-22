@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="BlueDotBrigade.Weevil.Installer" Language="1033" Version="1.0.0.0" Manufacturer="" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079">
-		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+	<Product Id="*" Name="Weevil" Language="1033" Version="2.11.0" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Manufacturer="Blue Dot Brigade" Description="Weevil" Comments="Weevil is a product of Blue Dot Brigade" Platform="x64" />
 
-		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-		<MediaTemplate />
+		<MajorUpgrade DowngradeErrorMessage="A newer version of Weevil is already installed." />
+		<MediaTemplate EmbedCab="yes" />
 
-		<Feature Id="ProductFeature" Title="BlueDotBrigade.Weevil.Installer" Level="1">
+		<Feature Id="ProductFeature" Title="Weevil" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
 		</Feature>
 	</Product>
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="ProgramFilesFolder">
-				<Directory Id="INSTALLFOLDER" Name="BlueDotBrigade.Weevil.Installer" />
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="BlueDotBrigade" Name="BlueDotBrigade">
+					<Directory Id="INSTALLFOLDER" Name="Weevil">
+						<Directory Id="Bin" Name="Bin" />
+						<Directory Id="License" Name="License" />
+						<Directory Id="Doc" Name="Doc" />
+					</Directory>
+				</Directory>
 			</Directory>
 		</Directory>
 	</Fragment>
@@ -23,7 +29,7 @@
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
 			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
 			<!-- <Component Id="ProductComponent"> -->
-				<!-- TODO: Insert files, registry keys, and other resources here. -->
+			<!-- TODO: Insert files, registry keys, and other resources here. -->
 			<!-- </Component> -->
 		</ComponentGroup>
 	</Fragment>
