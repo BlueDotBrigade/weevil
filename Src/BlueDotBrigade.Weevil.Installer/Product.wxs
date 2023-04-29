@@ -8,6 +8,7 @@
 
 		<Feature Id="ProductFeature" Title="Weevil" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentGroupRef Id="weevil_bin_files" />
 		</Feature>
 	</Product>
 
@@ -16,9 +17,9 @@
 			<Directory Id="ProgramFiles64Folder">
 				<Directory Id="BlueDotBrigade" Name="BlueDotBrigade">
 					<Directory Id="INSTALLFOLDER" Name="Weevil">
-						<Directory Id="Bin" Name="Bin" />
-						<Directory Id="License" Name="License" />
-						<Directory Id="Doc" Name="Doc" />
+						<Directory Id="BinDir" Name="Bin" />
+						<Directory Id="LicenseDir" Name="License" />
+						<Directory Id="DocDir" Name="Doc" />
 					</Directory>
 				</Directory>
 			</Directory>
