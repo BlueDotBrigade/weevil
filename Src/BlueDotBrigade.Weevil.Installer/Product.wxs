@@ -12,7 +12,7 @@
 		<MediaTemplate EmbedCab="yes" />
 
 		<Feature Id="ProductFeature" Title="Weevil" Level="1">
-			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentGroupRef Id="RegistryKeys" />
 			<ComponentGroupRef Id="weevil_bin_files" />
 		</Feature>
 	</Product>
@@ -32,11 +32,16 @@
 	</Fragment>
 
 	<Fragment>
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
-			<!-- <Component Id="ProductComponent"> -->
-			<!-- TODO: Insert files, registry keys, and other resources here. -->
-			<!-- </Component> -->
+		<!--
+			HKCU = HKEY_CURRENT_USER
+			HKLM = HKEY_LOCAL_MACHINE
+		-->
+		<ComponentGroup Id="RegistryKeys" Directory="INSTALLFOLDER">
+			<Component Id="RegistryComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F83E">
+				<RegistryKey Root="HKCU" Key="Software\BlueDotBrigade\Weevil">
+					<RegistryValue Type="string" Name="EnableBetaFeatures" Value="True" />
+				</RegistryKey>
+			</Component>
 		</ComponentGroup>
 	</Fragment>
 </Wix>
