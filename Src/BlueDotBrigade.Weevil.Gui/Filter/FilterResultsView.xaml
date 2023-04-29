@@ -50,7 +50,7 @@
         <KeyBinding Key="V" Modifiers="Control+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
         <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
         <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
-        <KeyBinding Key="T" Modifiers="Ctrl+Alt" Command="{Binding ToggleFiltersCommand}" />
+        <KeyBinding Key="T" Modifiers="Ctrl+Shift" Command="{Binding ToggleFiltersCommand}" />
         <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
         <KeyBinding Key="R" Modifiers="Control" Command="{Binding ShowRegExToolCommand}" />
         <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
@@ -70,7 +70,7 @@
         <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
         <KeyBinding Key="F11" Command="{Binding MeasureElapsedTimeCommand}" />
 
-        <KeyBinding Key="C" Modifiers="Ctrl+Alt" Command="{Binding FilterByCommentCommand}" />
+        <KeyBinding Key="M" Modifiers="Ctrl+Shift" Command="{Binding FilterByCommentCommand}" />
 
         <KeyBinding Key="P" Modifiers="Control" Command="{Binding ToggleIsPinnedCommand}"/>
         <KeyBinding Key="Subtract" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
@@ -259,9 +259,9 @@
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="Filtering...">
-                        <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Alt+T" />
+                        <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
                         <Separator/>
-                        <MenuItem Header="By: Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Alt+C" />
+                        <MenuItem Header="By: Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <Separator/>
                         <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
                     </MenuItem>
@@ -297,8 +297,8 @@
                         <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
-                    <MenuItem Header="Graph Data" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
+                    <MenuItem Header="Show Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+                    <MenuItem Header="Show Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
                     <MenuItem Header="Analyze...">
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                         <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
@@ -309,7 +309,7 @@
                         <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
                         <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomaly}" />
                     </MenuItem>
-                    <MenuItem Header="Analyze Further..."
+                    <MenuItem Header="Analyze More..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
                               ItemContainerStyle="{StaticResource CommandMenuItemStyle}">
                         <MenuItem.Style>
