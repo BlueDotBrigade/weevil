@@ -3,6 +3,11 @@
 	<Product Id="*" Name="Weevil" Language="1033" Version="2.11.0" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Manufacturer="Blue Dot Brigade" Description="Weevil" Comments="Weevil is a product of Blue Dot Brigade" Platform="x64" />
 
+		<Property Id="ARPPRODUCTICON" Value="Weevil.ico" />
+		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
+		<Property Id="ARPCONTACT">Blue Dot Brigade</Property>
+		<Property Id="ARPURLINFOABOUT">http://Weevil.BlueDotBrigade.com</Property>
+
 		<MajorUpgrade DowngradeErrorMessage="A newer version of Weevil is already installed." />
 		<MediaTemplate EmbedCab="yes" />
 
