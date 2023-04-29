@@ -8,6 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>BlueDotBrigade.Weevil.Installer</OutputName>
     <OutputType>Package</OutputType>
+    <DefineConstants>SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net6.0-windows\</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <OutputPath>bin\Debug\x64\</OutputPath>
