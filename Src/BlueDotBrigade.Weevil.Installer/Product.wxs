@@ -12,13 +12,19 @@
 		<MediaTemplate EmbedCab="yes" />
 
 		<Feature Id="ProductFeature" Title="Weevil" Level="1">
-			<ComponentGroupRef Id="RegistryKeys" />
 			<ComponentGroupRef Id="weevil_bin_files" />
+			<ComponentRef Id="WeevilShortcut" />
+			<ComponentGroupRef Id="RegistryKeys" />
 		</Feature>
 	</Product>
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="BlueDotBrigadeShortcutDir" Name="Blue Dot Brigade">
+					<Directory Id="WeevilShortcutDir" Name="Weevil" />
+				</Directory>
+			</Directory>
 			<Directory Id="ProgramFiles64Folder">
 				<Directory Id="BlueDotBrigade" Name="BlueDotBrigade">
 					<Directory Id="INSTALLFOLDER" Name="Weevil">
@@ -43,5 +49,16 @@
 				</RegistryKey>
 			</Component>
 		</ComponentGroup>
+	</Fragment>
+
+	<Fragment>
+		<DirectoryRef Id="WeevilShortcutDir">
+			<Component Id="WeevilShortcut" Guid="*">
+				<Shortcut Id="WeevilShortcut" Name="Weevil" Description="Weevil" Target="[BinDir]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="BinDir" />
+				<RegistryValue Root="HKCU" Key="Software\Blue Dot Brigade\Weevil" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+				<RemoveFolder Id="WeevilShortcutDir_Remove" Directory="WeevilShortcutDir" On="uninstall" />
+				<RemoveFolder Id="BlueDotBrigadeShortcutDir_Remove" Directory="BlueDotBrigadeShortcutDir" On="uninstall" />
+			</Component>
+		</DirectoryRef>
 	</Fragment>
 </Wix>
