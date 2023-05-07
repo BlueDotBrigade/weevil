@@ -53,7 +53,13 @@
 			<!-- Hotkey: 87 (W) + 8192 (Ctrl) + 16384 (Alt) = 24663 -->
 			<Component Id="WeevilShortcut" Guid="BDBCC900-E933-4FF7-8E2C-B167BD12891D">
 				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[BinDir]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="BinDir" Hotkey="24663" />
-				<RegistryValue Root="HKCU" Key="Software\Blue Dot Brigade\Weevil" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+				<!-- 
+				The KeyPath attribute is set to yes, which means that this registry key 
+				is the key path for the component. The Windows Installer uses the key path 
+				to check if a component is already installed on the system. If the key path exists, 
+				it is assumed that the component is installed.
+				-->
+				<RegistryValue Root="HKCU" Key="Software\BlueDotBrigade\Weevil" Name="installed" Type="integer" Value="1" KeyPath="yes" />
 				<RemoveFolder Id="WeevilShortcutDir_Remove" Directory="WeevilShortcutDir" On="uninstall" />
 				<RemoveFolder Id="BlueDotBrigadeShortcutDir_Remove" Directory="BlueDotBrigadeShortcutDir" On="uninstall" />
 			</Component>
