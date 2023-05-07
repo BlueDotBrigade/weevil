@@ -5,8 +5,8 @@
 
 		<Property Id="ARPPRODUCTICON" Value="Weevil.ico" />
 		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
-		<Property Id="ARPCONTACT">Blue Dot Brigade</Property>
-		<Property Id="ARPURLINFOABOUT">http://Weevil.BlueDotBrigade.com</Property>
+		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
+		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of Weevil is already installed." />
 		<MediaTemplate EmbedCab="yes" />
