@@ -261,7 +261,7 @@
                     <MenuItem Header="Filtering...">
                         <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
                         <Separator/>
-                        <MenuItem Header="By: Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
+                        <MenuItem Header="Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <Separator/>
                         <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
                     </MenuItem>
