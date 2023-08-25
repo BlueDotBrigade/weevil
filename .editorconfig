@@ -200,3 +200,16 @@ dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.required_suffix = 
 dotnet_naming_style.begins_with_i.word_separator = 
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
+
+# SPELLING
+
+# Identifiers should be spelled correctly
+dotnet_diagnostic.CA1704.severity = warning
+
+# Identifiers should be cased correctly
+#dotnet_diagnostic.CA1709.severity = error
+
+spelling_languages = en-us
+# When you enable the following line, misspell a word, right click "Ignore" on the word, it will appear here.
+spelling_exclusion_path = spelling_whitelist.dic
+

@@ -21,18 +21,44 @@
 	<ApplicationIcon></ApplicationIcon>
 	<AssemblyName>BlueDotBrigade.Weevil.Common</AssemblyName>
 	<Company>Blue Dot Brigade</Company>
+	  <!-- 
+	  `EnableNETAnalyzers` is NOT needed for .NET Core 5 (and later) projects.
+	  Since this project is netstandard 2.1... the parameter was needed.
+	  -->
+	<EnableNETAnalyzers>True</EnableNETAnalyzers>
   </PropertyGroup>
-  <ItemGroup>
+
+	<PropertyGroup>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<AnalysisLevel>latest-all</AnalysisLevel>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<!-- 
+		CodeAnalysisDictionary was used by FxCop, but source code for Roslyn `Text.Analyzers` suggests
+		that the dictionary might be supported again. This is a better option than the `*.dic` file.
+		-->
+		<CodeAnalysisDictionary Include="CustomDictionary.xml">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</CodeAnalysisDictionary>
+	</ItemGroup>
+
+	<ItemGroup>
     <Compile Remove="Resources\Icons\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
     <None Remove="Resources\Icons\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="CustomDictionary.xml" />
     <None Remove="Resources\Images\Weevil.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+    <PackageReference Include="Text.Analyzers" Version="3.11.0-beta1.23364.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
