@@ -32,16 +32,6 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<AnalysisLevel>latest-all</AnalysisLevel>
 	</PropertyGroup>
-	
-	<ItemGroup>
-		<!-- 
-		CodeAnalysisDictionary was used by FxCop, but source code for Roslyn `Text.Analyzers` suggests
-		that the dictionary might be supported again. This is a better option than the `*.dic` file.
-		-->
-		<CodeAnalysisDictionary Include="CustomDictionary.xml">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</CodeAnalysisDictionary>
-	</ItemGroup>
 
 	<ItemGroup>
     <Compile Remove="Resources\Icons\**" />
@@ -49,7 +39,6 @@
     <None Remove="Resources\Icons\**" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="CustomDictionary.xml" />
     <None Remove="Resources\Images\Weevil.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
