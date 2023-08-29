@@ -24,7 +24,7 @@
 
 ## What is Weevil?
 
-![(Weevil demo: your app does not support *.Gif)](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
+![(WeevilDemo)](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
 
 _Weevil_ is an open-source .NET project that is used by analysts to extract valuable insights from log files.  It's all about "_boring log files for tasty bytes_".  
 
