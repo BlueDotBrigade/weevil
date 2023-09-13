@@ -1,4 +1,4 @@
-name: .NET Core WPF Application
+name: Build All Projects
 
 on:
   push:
