@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -45,8 +44,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-UnitTests", "Tst\BlueDotBrigade.Weevil.Core-UnitTests\BlueDotBrigade.Weevil.Core-UnitTests.csproj", "{35DCC175-B682-47E0-A2B8-C0F123A1E2AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Plugins", "Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.csproj", "{8DD59BAD-4E11-45A9-861D-14A4046C1D96}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "BlueDotBrigade.Weevil.Setup", "Src\BlueDotBrigade.Weevil.Setup\BlueDotBrigade.Weevil.Setup.vdproj", "{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\BlueDotBrigade.Weevil.Core-FunctionalTests.csproj", "{98DE5E64-6FBF-4382-A3B2-D54652B6014B}"
 EndProject
@@ -99,9 +96,6 @@ Global
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Debug|x64.Build.0 = Debug|x64
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Release|x64.ActiveCfg = Release|x64
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Release|x64.Build.0 = Release|x64
-		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Debug|x64.ActiveCfg = Debug
-		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Release|x64.ActiveCfg = Release
-		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Release|x64.Build.0 = Release
 		{98DE5E64-6FBF-4382-A3B2-D54652B6014B}.Debug|x64.ActiveCfg = Debug|x64
 		{98DE5E64-6FBF-4382-A3B2-D54652B6014B}.Debug|x64.Build.0 = Debug|x64
 		{98DE5E64-6FBF-4382-A3B2-D54652B6014B}.Release|x64.ActiveCfg = Release|x64
