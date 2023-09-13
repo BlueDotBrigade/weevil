@@ -37,6 +37,11 @@
 		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
+		<!--
+		Following 2 lines prevent localized assemblies from being copied to the `OutputPath`.
+		-->
+		<ExcludeSatelliteResourceAssemblies>true</ExcludeSatelliteResourceAssemblies>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject>
@@ -54,10 +59,10 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="nlog.config" />
-	  <None Remove="PostSharp.license" />
-	  <None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
-	  <None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
+		<None Remove="nlog.config" />
+		<None Remove="PostSharp.license" />
+		<None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
+		<None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Filter\FilterResultsViewModel.Commands.cs">
@@ -66,8 +71,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Resources\Images\Weevil-100.png">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
@@ -96,10 +101,10 @@
 			<Version>5.0.4</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp">
-			<Version>6.10.15</Version>
+			<Version>2023.0.7</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>6.10.15</Version>
+			<Version>2023.0.7</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="8.1.97" />
 		<PackageReference Include="System.Collections.Immutable">
@@ -207,8 +212,8 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 	<ItemGroup>
-	  <Content Include="nlog.config">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+		<Content Include="nlog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 </Project>
