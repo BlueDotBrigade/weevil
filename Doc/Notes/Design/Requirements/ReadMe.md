@@ -102,3 +102,16 @@ COMPLEX
 These requirements can be used to express richer system behavior by using more than one EARS keyword.
 Example: While the aircraft is on ground, when reverse thrust is commanded, the engine control system shall enable reverse thrust.
 Complex requirements for unwanted behavior also include the If-Then keywords.
+
+#### EARS Best Practices
+
+1. Use clear and concise language to express the requirement.
+2. Use active voice to describe the system behavior.
+3. Use specific and measurable criteria to define the requirement.
+4. Use consistent terminology throughout the requirements document.
+5. Use the appropriate EARS type to express the system behavior.
+6. Use examples to illustrate the requirement and clarify any ambiguity.
+7. Use traceability to link requirements to design, implementation, and testing.
+8. Use version control to manage changes to the requirements document.
+9. Use reviews and inspections to ensure the quality of the requirements.
+10. Use a requirements management tool to organize, track, and report on the requirements.

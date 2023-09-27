@@ -38,6 +38,18 @@ Info 2018-11-23 11:20:35 CompanyName.ApplicationName.ClassName Application is st
 8. While the `case-sensitivity` option is turned out, text expressions shall be interpreted as case-insensitive.
 9. While an analyst is creating a filter, the system shall automatically activate the filter 3 seconds after the analyst ceases typing.
 10. While a record is `pinned`, the system shall always display pinned records in the results, regardless of any filters that are applied.
+11. The system shall display the number of records in the filter results in the status bar.
+
+Requirement:
+
+The system shall display the number of records in the filter results in the status bar, using clear and concise language, in active voice, and with specific and measurable criteria. This requirement is ubiquitous, as it is always active, and is expressed using the EARS syntax.
+Requirement:
+
+The system shall display the number of records in the filter results in the status bar, using clear and concise language, in active voice, and with specific and measurable criteria. This requirement is ubiquitous, as it is always active, and is expressed using the EARS syntax.
+
+Requirement:
+
+The system shall display the number of records in the filter results in the status bar, using clear and concise language, in active voice, and with specific and measurable criteria. This requirement is ubiquitous, as it is always active, and is expressed using the EARS syntax.
 
 ### Filter Options
 
