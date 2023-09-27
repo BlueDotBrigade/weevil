@@ -66,7 +66,7 @@
 
 		private void OnSourceFileChanged(SourceFileOpenedBulletin bulletin)
 		{
-			var title = $"Weevil: " + Path.GetFileNameWithoutExtension(bulletin.SourceFilePath);
+			var title = Path.GetFileNameWithoutExtension(bulletin.SourceFilePath);
 
 			_uiDispatcher.Invoke(() => this.ApplicationTitle = title);
 		}

@@ -4,7 +4,7 @@
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.10.6</Version>
+    <Version>2.11.0</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
@@ -21,8 +21,19 @@
 	<ApplicationIcon></ApplicationIcon>
 	<AssemblyName>BlueDotBrigade.Weevil.Common</AssemblyName>
 	<Company>Blue Dot Brigade</Company>
+	  <!-- 
+	  `EnableNETAnalyzers` is NOT needed for .NET Core 5 (and later) projects.
+	  Since this project is netstandard 2.1... the parameter was needed.
+	  -->
+	<EnableNETAnalyzers>True</EnableNETAnalyzers>
   </PropertyGroup>
-  <ItemGroup>
+
+	<PropertyGroup>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<AnalysisLevel>latest-all</AnalysisLevel>
+	</PropertyGroup>
+
+	<ItemGroup>
     <Compile Remove="Resources\Icons\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
     <None Remove="Resources\Icons\**" />
@@ -33,6 +44,10 @@
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+    <PackageReference Include="Text.Analyzers" Version="3.11.0-beta1.23364.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

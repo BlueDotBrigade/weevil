@@ -7,6 +7,7 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Threading;
+	using BlueDotBrigade.Weevil.Navigation;
 
 	/// <summary>
 	/// Interaction logic for FilterResultsView.xaml
@@ -92,13 +93,52 @@
 			var added = e.AddedItems.Cast<IRecord>().ToList();
 			if (added.Count > 0)
 			{
-				this.ViewModel.Select(added);
+				try
+				{
+					this.ViewModel.Select(added);
+				}
+				catch (RecordNotFoundException recordException)
+				{
+					var message = "Attempting to select a record that is no longer visible.";
+
+					Log.Default.Write(
+						LogSeverityType.Error,
+						recordException,
+						message);
+				}
 			}
 
 			var removed = e.RemovedItems.Cast<IRecord>().ToList();
 			if (removed.Count > 0)
 			{
-				this.ViewModel.UnSelect(removed);
+				try
+				{
+					this.ViewModel.UnSelect(removed);
+				}
+				catch (RecordNotFoundException recordException)
+				{
+					var message = "Attempting to de-select a record that is no longer visible.";
+
+					Log.Default.Write(
+						LogSeverityType.Error,
+						recordException,
+						message);
+					throw;
+				}
+			}
+		}
+
+		private void OnGotFocus(object sender, RoutedEventArgs e)
+		{
+			if (sender == this.InclusiveFilter)
+			{
+				IncludeColumn.Width = new GridLength(3, GridUnitType.Star);
+				ExcludeColumn.Width = new GridLength(1, GridUnitType.Star);
+			}
+			else if (sender == this.ExclusiveFilter)
+			{
+				IncludeColumn.Width = new GridLength(1, GridUnitType.Star);
+				ExcludeColumn.Width = new GridLength(3, GridUnitType.Star);
 			}
 		}
 	}

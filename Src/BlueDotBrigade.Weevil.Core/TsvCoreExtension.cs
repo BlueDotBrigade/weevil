@@ -50,6 +50,11 @@
 			return new List<IRecordAnalyzer>();
 		}
 
+		public IList<IRecordAnalyzer> GetAnalyzers(ICoreEngine coreEngine, ContextDictionary context, ITableOfContents tableOfContents)
+		{
+			return new List<IRecordAnalyzer>();
+		}
+
 		public ImmutableArray<IInsight> GetInsights(ContextDictionary context, ITableOfContents tableOfContents, ImmutableArray<IInsight> defaultInsights)
 		{
 			return defaultInsights;

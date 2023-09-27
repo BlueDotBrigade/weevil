@@ -1,0 +1,34 @@
+﻿<Project Sdk="WixToolset.Sdk/4.0.0">
+	<PropertyGroup>
+		<ProductVersion>2.11.0</ProductVersion>
+		<DefineConstants>SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net6.0-windows\</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+		<OutputPath>bin\Debug\x64\</OutputPath>
+		<OutputName>Weevil-$(ProductVersion)</OutputName>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+		<OutputPath>bin\Release\x64\</OutputPath>
+		<OutputName>Weevil-$(ProductVersion)</OutputName>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj">
+			<Name>BlueDotBrigade.Weevil.Gui</Name>
+			<Project>{87387c7c-089e-4f58-a4c4-a7adf2e18e6a}</Project>
+			<Private>True</Private>
+			<DoNotHarvest>True</DoNotHarvest>
+			<RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+			<RefTargetDir>INSTALLFOLDER</RefTargetDir>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="..\BlueDotBrigade.Weevil.Gui\Resources\Icons\Weevil.ico">
+			<Link>Weevil.ico</Link>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\Doc\Notes\Release\Licenses\License-Installation.rtf">
+			<Link>License-Installation.rtf</Link>
+		</None>
+	</ItemGroup>
+</Project>

@@ -5,7 +5,18 @@
 	/// </summary>
 	public enum RecordSearchType
 	{
+		/// <summary>
+		/// Finds the record with the requested line number.
+		/// </summary>
 		ExactMatch,
-		ClosestMatch
+
+		/// <summary>
+		/// Finds the record that is closest to the requested line number.
+		/// </summary>
+		NearestNeighbor,
+
+		ExactOrNext,
+
+		ExactOrPrevious,
 	}
 }

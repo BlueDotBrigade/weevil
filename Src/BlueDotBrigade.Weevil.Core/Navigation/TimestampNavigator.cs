@@ -15,7 +15,7 @@
 			_activeRecord = activeRecord;
 		}
 
-		public IRecord Find(string timestamp, RecordSearchType searchType = RecordSearchType.ClosestMatch)
+		public IRecord Find(string timestamp, RecordSearchType searchType = RecordSearchType.NearestNeighbor)
 		{
 			var firstRecord = _activeRecord.DataSource.GetFirstCreatedAt();
 
