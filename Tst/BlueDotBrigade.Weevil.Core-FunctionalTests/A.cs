@@ -10,6 +10,8 @@
 	{
 		public const string FileName = @"(.*)";
 
+		public const string AnyText = @"(.*)";
+
 		public const string RecordCount = @"(\d+)";
 	}
 }
