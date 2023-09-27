@@ -1,0 +1,66 @@
+{
+	"todohighlight.include": [
+		"**/*.js",
+		"**/*.jsx",
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.html",
+		"**/*.css",
+		"**/*.scss",
+		"**/*.php",
+		"**/*.rb",
+		"**/*.txt",
+		"**/*.mdown",
+		"**/*.md",
+		"**/*.feature",
+	],
+	"todohighlight.defaultStyle": {
+		"color": "#2196f3",
+		"backgroundColor": "darkModeTheme"
+	},
+	"todohighlight.keywords": [
+		{
+			"text": "The", 
+			"color": "#2196f3",
+			"backgroundColor": "editor.background",
+			"isWholeLine": false,
+			"regex": { 
+				"pattern": "The"
+			}
+		},
+		{
+			"text": "When", 
+			"color": "#2196f3",
+			"backgroundColor": "editor.background",
+			"isWholeLine": false,
+			"regex": { 
+				"pattern": "When"
+			}
+		},	
+		{
+			"text": "While", 
+			"color": "#2196f3",
+			"backgroundColor": "editor.background",
+			"isWholeLine": false,
+			"regex": { 
+				"pattern": "While"
+			}
+		},	
+		{
+			"text": "shall",
+			"color": "#2196f3",
+			"backgroundColor": "editor.background",
+			"regex": { 
+				"pattern": "shall"
+			}
+		},
+		{
+			"text": "then",
+			"color": "#2196f3",
+			"backgroundColor": "editor.background",
+			"regex": { 
+				"pattern": "then"
+			}
+		},
+	]
+}
