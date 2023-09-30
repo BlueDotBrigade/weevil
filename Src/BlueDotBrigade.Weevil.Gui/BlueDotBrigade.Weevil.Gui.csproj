@@ -203,10 +203,6 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>BlueDotBrigade.Weevil.Gui-FunctionalTests</_Parameter1>
 		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<!-- Required by Moq -->
-			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
-		</AssemblyAttribute>
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="nlog.config">
