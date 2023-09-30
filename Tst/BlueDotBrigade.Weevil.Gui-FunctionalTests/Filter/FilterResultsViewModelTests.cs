@@ -8,43 +8,44 @@
 	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
+	using NSubstitute;
 
 	[TestClass]
 	public class FilterResultsViewModelTests
 	{
-		//[TestMethod]
-		//public async Task OpenAsync()
-		//{
-		//	var window = new Mock<Window>();
-			
-		//	var uiDispatcher = new Mock<IUiDispatcher>();
-		//	uiDispatcher
-		//		.Setup(x => x.Invoke(It.IsAny<Action>()))
-		//		.Callback((Action a) => a.Invoke());
+		[TestMethod]
+		public async Task OpenAsync()
+		{
+			var window = Substitute.For<Window>();
 
-		//	var bulletinMediator = new Mock<IBulletinMediator>();
+			var uiDispatcher = Substitute.For<IUiDispatcher>();
+			uiDispatcher
+				.When(x => x.Invoke(Arg.Any<Action>()))
+				.Do(x => (x.Arg<Action>()).Invoke());
 
-		//	var viewModel = new FilterResultsViewModel(
-		//		window.Object, 
-		//		uiDispatcher.Object,
-		//		bulletinMediator.Object);
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
 
-		//	await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
+			var viewModel = new FilterResultsViewModel(
+				window,
+				uiDispatcher,
+				bulletinMediator);
 
-		//	viewModel.IsManualFilter = true;
-		//	viewModel.FilterManually(new object[]
-		//	{
-		//		"sample-inclusive-filter",
-		//		string.Empty,
-		//	});
+			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
 
-		//	var stopwatch = Stopwatch.StartNew();
-		//	do
-		//	{
-		//		Thread.Sleep(TimeSpan.FromMilliseconds(100));
-		//	} while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5));
+			viewModel.IsManualFilter = true;
+			viewModel.FilterManually(new object[]
+			{
+				"sample-inclusive-filter",
+				string.Empty,
+			});
 
-		//	Assert.AreEqual(512, viewModel.VisibleItems.Count);
-		//}
+			var stopwatch = Stopwatch.StartNew();
+			do
+			{
+				Thread.Sleep(TimeSpan.FromMilliseconds(100));
+			} while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5));
+
+			Assert.AreEqual(512, viewModel.VisibleItems.Count);
+		}
 	}
 }

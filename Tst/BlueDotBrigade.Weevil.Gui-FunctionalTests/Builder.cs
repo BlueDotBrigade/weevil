@@ -14,14 +14,14 @@
 	{
 		public MainWindowViewModel GetMainWindow()
 		{
-			//var window = new Mock<Window>();
+			//var window = Substitute.For<Window>();
 
-			//var uiDispatcher = new Mock<IUiDispatcher>();
+			//var uiDispatcher = Substitute.For<IUiDispatcher>();
 			//uiDispatcher
 			//	.Setup(x => x.Invoke(It.IsAny<Action>()))
 			//	.Callback((Action a) => a.Invoke());
 
-			//var bulletinMediator = new Mock<IBulletinMediator>();
+			//var bulletinMediator = Substitute.For<IBulletinMediator>();
 
 			//var viewModel = new MainWindowViewModel(
 			//	uiDispatcher.Object, 
@@ -35,14 +35,14 @@
 
 		public FilterResultsViewModel Get()
 		{
-			//var window = new Mock<Window>();
+			//var window = Substitute.For<Window>();
 
-			//var uiDispatcher = new Mock<IUiDispatcher>();
+			//var uiDispatcher = Substitute.For<IUiDispatcher>();
 			//uiDispatcher
 			//	.Setup(x => x.Invoke(It.IsAny<Action>()))
 			//	.Callback((Action a) => a.Invoke());
 
-			//var bulletinMediator = new Mock<IBulletinMediator>();
+			//var bulletinMediator = Substitute.For<IBulletinMediator>();
 
 			//var viewModel = new FilterResultsViewModel(
 			//	window.Object,

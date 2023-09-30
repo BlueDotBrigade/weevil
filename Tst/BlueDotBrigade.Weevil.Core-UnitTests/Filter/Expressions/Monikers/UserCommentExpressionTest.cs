@@ -9,7 +9,7 @@
 		//[TestMethod]
 		//public void IsMatch_LookingForAnyComment_ReturnsTrue()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Metadata).Returns(new Metadata { Comment = "The lazy brown dog jumped over the fence" });
 
 		//	var filter = new UserCommentExpression("@Comment");
@@ -20,7 +20,7 @@
 		//[TestMethod]
 		//public void IsMatch_LookingForAnyComment_ReturnsFalse()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Metadata).Returns(new Metadata());
 
 		//	var filter = new UserCommentExpression("@Comment");
@@ -31,7 +31,7 @@
 		//[TestMethod]
 		//public void IsMatch_LookingForSpecificComment_ReturnsTrue()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Metadata).Returns(new Metadata { Comment = "The lazy brown dog jumped over the fence" });
 
 		//	var filter = new UserCommentExpression("@Comment=dog");
@@ -42,7 +42,7 @@
 		//[TestMethod]
 		//public void IsMatch_LookingForSpecificComment_ReturnsFalse()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Metadata).Returns(new Metadata { Comment = "The lazy brown dog jumped over the fence" });
 
 		//	var filter = new UserCommentExpression("@Comment=cat");

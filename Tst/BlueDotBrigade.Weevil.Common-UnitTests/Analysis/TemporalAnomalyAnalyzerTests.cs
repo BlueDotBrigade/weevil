@@ -21,7 +21,7 @@
 		//		.WithCreatedAt(4, "11:00:00")
 		//		.GetRecords();
 
-		//	var dialog = new Mock<IUserDialog>();
+		//	var dialog = Substitute.For<IUserDialog>();
 		//	dialog
 		//		.Setup(x => x.ShowUserPrompt(
 		//			It.IsAny<string>(), 

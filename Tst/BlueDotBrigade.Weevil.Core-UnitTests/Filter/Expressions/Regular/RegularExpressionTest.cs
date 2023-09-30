@@ -10,7 +10,7 @@
 		//[TestMethod]
 		//public void IsMatch_CaseSensitiveSearch_Passes()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog");
 
 		//	var expression = new RegularExpression("fox", Microsoft.RegexOptions.None); // default: case sensitive
@@ -21,7 +21,7 @@
 		//[TestMethod]
 		//public void IsMatch_CaseSensitiveSearch_Fails()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog");
 
 		//	var expression = new RegularExpression("FOX", Microsoft.RegexOptions.None); // default: case sensitive
@@ -32,7 +32,7 @@
 		//[TestMethod]
 		//public void IsMatch_CaseInsensitiveSearch_Passes()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog");
 
 		//	var expression = new RegularExpression("FoX", Microsoft.RegexOptions.IgnoreCase);
@@ -43,7 +43,7 @@
 		//[TestMethod]
 		//public void IsMatch_ExpressionNotInValue_ReturnsFalse()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog");
 
 		//	var expression = new RegularExpression("dinosaur");
@@ -54,7 +54,7 @@
 		//[TestMethod]
 		//public void IsMatch_StartsWithExpression_ReturnsTrue()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog");
 
 		//	var v = new RegularExpression("^The");
@@ -65,7 +65,7 @@
 		//[TestMethod]
 		//public void IsMatch_EndsWithExpression_ReturnsTrue()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog");
 
 		//	var expression = new RegularExpression("dog$");
@@ -76,7 +76,7 @@
 		//[TestMethod]
 		//public void IsMatch_ExpressionInMiddleOf_ReturnsTrue()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Content).Returns("The quick brown fox jumps over the lazy dog");
 
 		//	var expression = new RegularExpression("fox");

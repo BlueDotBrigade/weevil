@@ -88,7 +88,7 @@
 		//	// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 		//	// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 		//	// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-		//	var userDialog = new Mock<IUserDialog>();
+		//	var userDialog = Substitute.For<IUserDialog>();
 		//	userDialog.Setup(x => x.ShowUserPrompt(
 		//		It.IsAny<string>(),
 		//		It.IsAny<string>(),
@@ -117,7 +117,7 @@
 		//	// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 		//	// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 		//	// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-		//	var userDialog = new Mock<IUserDialog>();
+		//	var userDialog = Substitute.For<IUserDialog>();
 		//	userDialog.Setup(x => x.ShowUserPrompt(
 		//		It.IsAny<string>(),
 		//		It.IsAny<string>(),

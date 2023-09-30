@@ -11,7 +11,7 @@
 		//[TestInitialize]
 		//public void Setup()
 		//{
-		//	var expander = new Mock<IFilterAliasExpander>();
+		//	var expander = Substitute.For<IFilterAliasExpander>();
 		//	expander.Setup(x => x.Expand(It.IsAny<string>())).Returns((string s) => s);
 		//	expander.Setup(x => x.Expand(It.IsAny<string[]>())).Returns((string[] s) => s);
 

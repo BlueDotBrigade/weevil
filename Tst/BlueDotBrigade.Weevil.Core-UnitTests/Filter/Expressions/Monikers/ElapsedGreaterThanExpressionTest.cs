@@ -10,7 +10,7 @@
 		//[TestMethod]
 		//public void IsMatch_ElapsedTimeSameAsSpecifiedPeriod_ReturnsFalse()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Metadata).Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(100) });
 
 		//	var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
@@ -21,7 +21,7 @@
 		//[TestMethod]
 		//public void IsMatch_ElapsedTimeLessThanSpecifiedPeriod_ReturnsFalse()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Metadata).Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(1) });
 
 		//	var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
@@ -32,7 +32,7 @@
 		//[TestMethod]
 		//public void IsMatch_ElapsedTimeGreaterThanSpecifiedPeriod_ReturnsTrue()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Metadata).Returns(new Metadata { ElapsedTime = TimeSpan.FromHours(1) });
 
 		//	var expression = new ElapsedGreaterThanExpression("@Elapsed>100");

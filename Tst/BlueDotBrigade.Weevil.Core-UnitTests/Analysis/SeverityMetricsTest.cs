@@ -9,7 +9,7 @@
 		//[TestMethod]
 		//public void AdditionOperator_()
 		//{
-		//	var record = new Mock<IRecord>();
+		//	var record = Substitute.For<IRecord>();
 		//	record.Setup(x => x.Severity).Returns(SeverityType.Information);
 
 		//	var metricsA = new SeverityMetrics();

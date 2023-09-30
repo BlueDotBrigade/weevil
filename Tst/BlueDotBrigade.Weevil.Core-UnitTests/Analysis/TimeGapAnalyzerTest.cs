@@ -14,7 +14,7 @@
 
 		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
 		{
-			//var userDialog = new Mock<IUserDialog>();
+			//var userDialog = Substitute.For<IUserDialog>();
 
 			//// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			//// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
