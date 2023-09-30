@@ -8,7 +8,6 @@
 	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Moq;
 
 	[TestClass]
 	public class FilterResultsViewModelTests
