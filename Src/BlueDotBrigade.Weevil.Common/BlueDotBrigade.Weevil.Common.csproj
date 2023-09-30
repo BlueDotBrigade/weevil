@@ -21,11 +21,6 @@
 	<ApplicationIcon></ApplicationIcon>
 	<AssemblyName>BlueDotBrigade.Weevil.Common</AssemblyName>
 	<Company>Blue Dot Brigade</Company>
-	  <!-- 
-	  `EnableNETAnalyzers` is NOT needed for .NET Core 5 (and later) projects.
-	  Since this project is netstandard 2.1... the parameter was needed.
-	  -->
-	<EnableNETAnalyzers>True</EnableNETAnalyzers>
   </PropertyGroup>
 
 	<PropertyGroup>
