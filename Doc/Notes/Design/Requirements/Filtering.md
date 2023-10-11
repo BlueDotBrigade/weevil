@@ -1,5 +1,7 @@
 ﻿# Filtering
 
+Sample log file: /weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/.Daten/.Global/Default.log
+
 ## User Stories
 
 As an analyst, I want to be able to filter log entries using plain text, so that I can easily find relevant information.
@@ -26,19 +28,6 @@ Sample log file entry:
 Info 2018-11-23 11:20:35 CompanyName.ApplicationName.ClassName Application is starting... Version=1.2.3
 ```
 
-### General
-
-1. The system shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`).
-2. The system shall support filtering using different types of expressions (text, alias, and moniker).
-3. When an `include` filter is applied, the system displays all matching records in the results.
-4. When an exclude filter is applied, the system omits all matching records from the results.
-5. When both `include` and `exclude` filters are applied, the system shall prioritize the 'Exclude' filter.
-6. The system shall enable an exclude" filter for `Trace` records by default.
-7. The system shall enable an exclude filter for `Debug` records by default.
-8. While the `case-sensitivity` option is turned out, text expressions shall be interpreted as case-insensitive.
-9. While an analyst is creating a filter, the system shall automatically activate the filter 3 seconds after the analyst ceases typing.
-10. While a record is `pinned`, the system shall always display pinned records in the results, regardless of any filters that are applied.
-11. The system shall display the number of records in the filter results in the status bar.
 
 Requirement:
 
@@ -78,26 +67,6 @@ Monikers:
 4. When using the `@Severity=[level]` monkier, the system shall identify records that match the given severity (trace, debug, information, warning, error, critical).
 
 ## Scenarios
-
-# For log file consider using:
- # /workspaces/weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/.Daten/.Global/Default.log
-
-Scenario: Filter using one expression
-    Given Weevil has opened the file "Sample.log"
-    When the inclusive filter is "sample log message"
-        And the filters are applied
-    Then all records will include the text "sample log message"
-        And there will be 123 filter results
-
-Scenario: Filter using multiple expressions delimited by ||
-    Given Weevil has opened the file "Sample.log"
-    When the inclusive filter is "sample log message"
-        And the filters are applied
-    Then all records will include the text "sample log message"
-        And there will be 123 filter results
-
-Scenario: Filter using different types of expressions
-
 
 ## Appendices
 
