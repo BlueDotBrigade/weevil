@@ -5,6 +5,7 @@
 ### VS Code Shortcuts
 
 - `Ctrl+Space` : to see available snippets
+- `Ctrl+I` : to activate CoPilot within source code
 - `Ctrl+Alt+I` : to start CoPilot GPT chat
 
 ### Additional Reading

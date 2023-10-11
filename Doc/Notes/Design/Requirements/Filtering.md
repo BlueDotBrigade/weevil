@@ -77,6 +77,28 @@ Monikers:
 3. When using the `@Pinned` monkier, the system shall identify records that have been "pinned" by the user.
 4. When using the `@Severity=[level]` monkier, the system shall identify records that match the given severity (trace, debug, information, warning, error, critical).
 
+## Scenarios
+
+# For log file consider using:
+ # /workspaces/weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/.Daten/.Global/Default.log
+
+Scenario: Filter using one expression
+    Given Weevil has opened the file "Sample.log"
+    When the inclusive filter is "sample log message"
+        And the filters are applied
+    Then all records will include the text "sample log message"
+        And there will be 123 filter results
+
+Scenario: Filter using multiple expressions delimited by ||
+    Given Weevil has opened the file "Sample.log"
+    When the inclusive filter is "sample log message"
+        And the filters are applied
+    Then all records will include the text "sample log message"
+        And there will be 123 filter results
+
+Scenario: Filter using different types of expressions
+
+
 ## Appendices
 
 ### Domain Specific Language (DSL)
