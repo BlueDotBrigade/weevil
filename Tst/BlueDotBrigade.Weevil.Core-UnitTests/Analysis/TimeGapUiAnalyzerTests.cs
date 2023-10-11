@@ -12,20 +12,19 @@
 	{
 		private ImmutableArray<IRecord> _records;
 
-		//private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
-		//{
-		//	var userDialog = Substitute.For<IUserDialog>();
+		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
+		{
+			var userDialog = Substitute.For<IUserDialog>();
 
-		//	// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
-		//	// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
-		//	// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-		//	userDialog.Setup(x => x.ShowUserPrompt(
-		//		It.IsAny<string>(),
-		//		It.IsAny<string>(),
-		//		It.IsAny<string>())).Returns(msBeforeFlaggedRaised.ToString);
+			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
+			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
+			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns(msBeforeFlaggedRaised.ToString);
 
-		//	return userDialog.Object;
-		//}
+			return userDialog;
+		}
 
 		[TestInitialize]
 		public void PreTest()

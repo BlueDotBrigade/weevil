@@ -14,44 +14,35 @@
 	{
 		public MainWindowViewModel GetMainWindow()
 		{
-			//var window = Substitute.For<Window>();
+			var window = Substitute.For<Window>();
 
-			//var uiDispatcher = Substitute.For<IUiDispatcher>();
-			//uiDispatcher
-			//	.Setup(x => x.Invoke(It.IsAny<Action>()))
-			//	.Callback((Action a) => a.Invoke());
+			var uiDispatcher = Substitute.For<IUiDispatcher>();
+			uiDispatcher.Invoke(Arg.Invoke());            	
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
 
-			//var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new MainWindowViewModel(
+				uiDispatcher, 
+				window, 
+				bulletinMediator);
 
-			//var viewModel = new MainWindowViewModel(
-			//	uiDispatcher.Object, 
-			//	window.Object, 
-			//	bulletinMediator.Object);
-
-			//return viewModel;
-
-			return null;
+			return viewModel;
 		}
 
 		public FilterResultsViewModel Get()
 		{
-			//var window = Substitute.For<Window>();
+			var window = Substitute.For<Window>();
 
-			//var uiDispatcher = Substitute.For<IUiDispatcher>();
-			//uiDispatcher
-			//	.Setup(x => x.Invoke(It.IsAny<Action>()))
-			//	.Callback((Action a) => a.Invoke());
+			var uiDispatcher = Substitute.For<IUiDispatcher>();
+			uiDispatcher.Invoke(Arg.Invoke());
 
-			//var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
 
-			//var viewModel = new FilterResultsViewModel(
-			//	window.Object,
-			//	uiDispatcher.Object,
-			//	bulletinMediator.Object);
+			var viewModel = new FilterResultsViewModel(
+				window,
+				uiDispatcher,
+				bulletinMediator);
 
-			//return viewModel;
-
-			return null;
+			return viewModel;
 		}
 	}
 }
