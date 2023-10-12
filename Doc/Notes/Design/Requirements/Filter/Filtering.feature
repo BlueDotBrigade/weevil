@@ -2,11 +2,11 @@ Feature: Filtering
 
 REQUIREMENTS
 
-1. The system shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`).
-2. The system shall support filtering using different types of expressions (text, alias, and moniker).
-3. When an `include` filter is applied, the system displays all matching records in the results.
-4. When an exclude filter is applied, the system omits all matching records from the results.
-5. When both `include` and `exclude` filters are applied, the system shall prioritize the 'Exclude' filter.
+1. The system shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`). #406
+2. The system shall support filtering using different types of expressions (text, alias, and moniker). #398
+3. When an `include` filter is applied, the system displays all matching records in the results. #399
+4. When an `exclude` filter is applied, the system omits all matching records from the results. #400
+5. When both `include` and `exclude` filters are applied, the system shall prioritize the 'Exclude' filter. #401
 6. The system shall enable an exclude" filter for `Trace` records by default.
 7. The system shall enable an exclude filter for `Debug` records by default.
 8. While the `case-sensitivity` option is turned out, text expressions shall be interpreted as case-insensitive.
@@ -16,59 +16,67 @@ REQUIREMENTS
 
 Feature: Filtering
 
-Scenario: 1 inclusive filter displays matching records
-	Given Weevil has opened the file "Default.log"
-	When the inclusive filter is "Directives"
-  Then all records will include the text "Directives"
-        And there will be 7 filter results
+@SRS:406
+Scenario: Filtering using multiple expressions seprated by OR
+  Given Weevil has opened the file "Default.log"
+  When the inclusive filter is: Directives||Fatal
+  Then there will be 8 records in the filter results
+    And each result will include either
+    """
+    Directives
+    Fatal
+    """
 
-  
-Scenario: Filter using one expression
-    Given Weevil has opened the file "Sample.log"
-    When the inclusive filter is "sample log message"
-        And the filters are applied
-    Then all records will include the text "sample log message"
-        And there will be 123 filter results
+@SRS:398, @SRS:406
+Scenario: Filtering using a text expression
+  Given Weevil has opened the file "Default.log"
+  When the inclusive filter is: Directives
+  Then there will be 7 records in the filter results
+    And each result will include the text "Directives"
 
-Scenario: Filter using multiple expressions delimited by ||
-    Given Weevil has opened the file "Sample.log"
-    When the inclusive filter is "sample log message"
-        And the filters are applied
-    Then all records will include the text "sample log message"
-        And there will be 123 filter results
+@SRS:398, @SRS:406
+Scenario: Filtering using an alias expression
+  Given Weevil has opened the file "Default.log"
+  When the inclusive filter is: #Fatal
+  Then there will be 1 record in the filter results
+    And each result will include the text "Unrecoverable error has occurred"
 
-Scenario: Filter using different types of expressions
+@SRS:398, @SRS:406
+Scenario: Filtering using a moniker expression
+  Given Weevil has opened the file "Default.log"
+  When the inclusive filter is: @Severity=Information
+  Then there will be 36 records in the filter results
+    And each result will include the text "Info"
 
+@SRS:399
+Scenario: Include filter identifies important information
+  Given Weevil has opened the file "Default.log"
+  When the include filter is: #Information
+  Then there will be 36 records in the filter results
+    And each result will the text "Info"
 
-Scenario: Opening file
-    Given the default log is open
-    Then the record count will be 123
+@SRS:400
+Scenario: Exclude filter hides records
+  Given Weevil has opened the file "Default.log"
+  When the exclude filter is: Security||Scomp||Core
+  Then there will be 352 records in the filter results
+    And each result will not include either
+    """
+    Security
+    Scomp
+    Core
+    """
 
-  Scenario: Displaying records that match an inclusive filter
-    Given the analyst wants to search for specific records
-    And filters are available for the analyst to use
-    When the analyst applies an inclusive filter to the records
-    Then the system should only display records that matches the filter criteria
-
-  Scenario: Applying a filter using a domain-specific alias
-    Given I am viewing a list of log entries
-    When I apply the #Summary filter alias
-    Then only key high-level log entries should be displayed
-
-  Scenario: Filtering using a moniker for metadata query
-    Given I am viewing a list of log entries
-    When I apply the @Pinned moniker
-    Then only records flagged as pinned should be displayed
-
-  Scenario: Filtering based on severity using a moniker
-    Given I am viewing a list of log entries
-    When I apply the @Severity=warning moniker
-    Then only log entries with a warning severity level should be displayed
-
-@Requirement:365
-Scenario: Filter log entries by hardware serial number
-	Given that the default log file is open
-	When the plain text filtering option is selected
-	And case sensitive filtering has been enabled
-	And the inclusive filter is applied `S/N`
-	Then all records will include `S/N`
+@SRS:401
+Scenario: Exclude filter takes precedence over include filter
+  Given Weevil has opened the file "Default.log"
+  When the include filter is: #Information
+    And the exclude filter is: Security||Scomp||Core
+  Then there will be 10 records in the filter results
+    And each result will the text "Info"
+    And each result will not include either
+    """
+    Security
+    Scomp
+    Core
+    """
