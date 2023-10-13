@@ -116,6 +116,7 @@ Scenario: Opening file
     When I apply the @Severity=warning moniker
     Then only log entries with a warning severity level should be displayed
 
+```Gherkin
 @Requirement:365
 Scenario: Filter log entries by hardware serial number
 	Given that the default log file is open
@@ -123,3 +124,4 @@ Scenario: Filter log entries by hardware serial number
 	And case sensitive filtering has been enabled
 	And the inclusive filter is applied `S/N`
 	Then all records will include `S/N`
+```
