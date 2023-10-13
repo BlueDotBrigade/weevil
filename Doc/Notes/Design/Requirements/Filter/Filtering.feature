@@ -2,6 +2,8 @@ Feature: Filtering
 
 REQUIREMENTS
 
+#406
+
 1. The system shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`). #406
 2. The system shall support filtering using different types of expressions (text, alias, and moniker). #398
 3. When an `include` filter is applied, the system displays all matching records in the results. #399
