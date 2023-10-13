@@ -7,7 +7,7 @@ REQUIREMENTS
 3. When an `include` filter is applied, the system displays all matching records in the results. #399
 4. When an `exclude` filter is applied, the system omits all matching records from the results. #400
 5. When both `include` and `exclude` filters are applied, the system shall prioritize the 'Exclude' filter. #401
-6. The system shall enable an exclude" filter for `Trace` records by default.
+6. The system shall enable an exclude filter for `Trace` records by default.
 7. The system shall enable an exclude filter for `Debug` records by default.
 8. While the `case-sensitivity` option is turned out, text expressions shall be interpreted as case-insensitive.
 9. While an analyst is creating a filter, the system shall automatically activate the filter 3 seconds after the analyst ceases typing.
