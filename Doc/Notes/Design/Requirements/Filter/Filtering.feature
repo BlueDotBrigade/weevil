@@ -23,9 +23,9 @@ Filter Options
 
 Feature: Filtering
 
-Requirement: Weevil shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`).
+SRS: Weevil shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`).
 
-@SRS:406
+@SRS:406, @UserStory:123
 Scenario: Filtering using multiple expressions seprated by OR
   Given Weevil has opened the file "Default.log"
   When applying the include filter: Directives||Fatal
