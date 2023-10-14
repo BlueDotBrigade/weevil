@@ -23,6 +23,8 @@ Filter Options
 
 Feature: Filtering
 
+Requirement: Weevil shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`).
+
 @SRS:406
 Scenario: Filtering using multiple expressions seprated by OR
   Given Weevil has opened the file "Default.log"
