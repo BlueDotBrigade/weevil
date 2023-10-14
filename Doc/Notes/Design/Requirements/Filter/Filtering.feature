@@ -26,11 +26,22 @@ Feature: Filtering
 SRS: Weevil shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`).
 
 @SRS:406, @UserStory:123
-Scenario: Two filter expressions separated by OR
+Scenario: Two include filter expressions separated by OR
   Given Weevil has opened the file "Default.log"
   When applying the include filter: Directives||Fatal
   Then the results will include 8 records
     And each result will include either
+    """
+    Directives
+    Fatal
+    """
+
+@SRS:406, @UserStory:123
+Scenario: Two exclude filter expressions separated by OR
+  Given Weevil has opened the file "Default.log"
+  When applying the exclude filter: #Debug||#Trace
+  Then the results will include 1234 records
+    And each result will not include either
     """
     Directives
     Fatal
