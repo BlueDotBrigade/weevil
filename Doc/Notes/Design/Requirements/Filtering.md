@@ -1,4 +1,4 @@
-# Filtering
+﻿# Filtering
 
 #406
 
@@ -42,13 +42,6 @@ Requirement:
 
 The system shall display the number of records in the filter results in the status bar, using clear and concise language, in active voice, and with specific and measurable criteria. This requirement is ubiquitous, as it is always active, and is expressed using the EARS syntax.
 
-### Filter Options
-
-1. The system shall have text expression option of either "plain text" or "regular expression".
-2. While the `hide trace` option turned on, when filtering, the system shall implicitly apply a `@Severity=Trace` exclude filter.
-3. While the `hide debug` option turned on, when filtering, the system shall implicitly apply a `@Severity=Debug` exclude filter.
-4. While the `show pinned` option turned off, when filtering, the system shall ignore the `pinned` status of records.
-
 ### Expressions
 
 Text:
@@ -78,7 +71,7 @@ Monikers:
 - filter: Are used to identify matching records.
 - alias: Is a pre-defined filter which is represented by a key/value pair prefixed by a hashtag (e.g. #Severity=Warning)
 - moniker: Are used to query metadata collected by Weevil. This key/value pair is prefixed by an "at" symbol (e.g. @HasComment=True)
-- analyst: In the context of a user story, an "analyst" is the user who is using the Weevil application.
+  - analyst: In the context of a user story, an "analyst" is the user who is using the Weevil application.
 
 | Preferred Term | Do not refer To                           |
 | -------------- | ----------------------------------------- |
