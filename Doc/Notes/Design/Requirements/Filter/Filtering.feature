@@ -11,7 +11,7 @@ REQUIREMENTS
 5. When both `include` and `exclude` filters are applied, Weevil shall prioritize the 'Exclude' filter. #401
 6. While a record is `pinned`, Weevil shall always display the pinned record in the results, regardless of any filters that are applied. #371
 7. When the filter results are displayed, Weevil shall update the status bar with the number of records in the results. #408
-8. When typing of a filter has stopped for 3 seconds (±1), Weevil shall automatically apply the filter.
+8. When typing of a filter has stopped for 3 seconds (±1), Weevil shall automatically apply the filter. $410
 
 Filter Options
 
@@ -117,3 +117,22 @@ Scenario: Status bar displays number of records in results
   Given Weevil has opened the file "Default.log"
   When applying the include filter: #Information
   Then the status bar visible record count will display 36
+
+@SRS:410
+Scenario: Filter automatically applied when typing pauses
+  Given Weevil has opened the file "Default.log"
+  When entering the include filter: #Information
+    And waiting 4 seconds
+  Then the results will include 36 records
+
+# 387 = all records
+@SRS:410
+Scenario: Filter is not automatically applied when typing continues
+  Given Weevil has opened the file "Default.log"
+  When entering the include filter: #Error
+    And waiting 1 seconds
+    And entering the include filter: #Error||
+    And waiting 1 seconds
+    And entering the include filter: #Error||#Fatal
+    And waiting 1 seconds
+  Then the results will include all records
