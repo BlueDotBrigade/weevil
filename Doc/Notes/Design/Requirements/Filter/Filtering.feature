@@ -15,11 +15,11 @@ REQUIREMENTS
 
 Filter Options
 
-1. While the `case-sensitivity` option is turned out, text expressions shall be interpreted as case-insensitive.
-2. Weevil shall have text expression option of either "plain text" or "regular expression".
-3. While the `hide trace` option turned on, when filtering, Weevil shall implicitly apply a `@Severity=Trace` exclude filter.
-4. While the `hide debug` option turned on, when filtering, Weevil shall implicitly apply a `@Severity=Debug` exclude filter.
-5. While the `show pinned` option turned off, when filtering, Weevil shall ignore the `pinned` status of records.
+1. Weevil shall have text expression option of either `plain text` (default) or `regular expression`. #411
+2. While the `case-sensitivity` option is on (default), text expressions shall be interpreted as case-insensitive.
+2. While the `hide trace` option turned off (default), when filtering, Weevil shall implicitly apply a `@Severity=Trace` exclude filter.
+4. While the `hide debug` option turned off (default), when filtering, Weevil shall implicitly apply a `@Severity=Debug` exclude filter.
+5. While the `include pinned` option turned on (default), when filtering, Weevil shall ignore the `pinned` status of records.
 
 Feature: Filtering
 
@@ -136,3 +136,24 @@ Scenario: Filter is not automatically applied when typing continues
     And entering the include filter: #Error||#Fatal
     And waiting 1 seconds
   Then the results will include all records
+
+@SRS:411
+Scenario: `Plain Text` filter mode selected by default
+  Given Weevil has opened the file "Default.log"
+  Then the filter mode will be `Plain Text`
+
+@SRS:411
+Scenario: `Plain Text` filter mode is selected
+  Given Weevil has opened the file "Default.log"
+  When selecting the plain text filter mode
+    applying the include filter: Directives 
+  Then the results will include 7 records
+    And each result will include the text "Directives"
+
+@SRS:411
+Scenario: `RegEx` filter mode is selected
+  Given Weevil has opened the file "Default.log"
+  When selecting the plain text filter mode
+    applying the include filter: Voltage=\d{2}
+  Then the results will include 1 records
+    And each result will include the text "Voltage=51"
