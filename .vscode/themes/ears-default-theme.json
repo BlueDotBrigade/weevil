@@ -1,0 +1,12 @@
+{
+    "name": "EARS Default Theme",
+    "tokenColors": [
+        {
+            "scope": "keyword.other.ears",
+            "settings": {
+                "fontStyle": "bold",
+                "foreground": "#569CD6"
+            }
+        }
+    ]
+}
