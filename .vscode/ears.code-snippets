@@ -1,0 +1,50 @@
+{
+	"The-Shall": {
+		"prefix": "EARS Always Active",
+		"body": [
+		  "The ${1:<system name>} shall ${2:<system response>}.",
+		],
+		"description": "Use when the requirement is continuously in effect.",
+		"scope": "ears,markdown,plaintext,cucumber"
+	  },
+	"While-The-Shall": {
+		"prefix": "EARS State-Based",
+		"body": [
+		  "While ${1:<precondition(s)>}, the ${2:<system name>} shall ${3:<system response>}."
+		],
+		"description": "Use when the requirement is relevant only in a specific system state.",
+		"scope": "ears,markdown,plaintext,cucumber"
+	  },
+	"When-The-Shall": {
+	  "prefix": "EARS Event-Triggered",
+	  "body": [
+		"When ${1:<trigger>}, the ${2:<system name>} shall ${3:<system response>}."
+	  ],
+	  "description": "Use when an event triggers the requirement to be relevant.",
+	  "scope": "ears,markdown,plaintext,cucumber"
+	},
+	"Where-The-Shall": {
+	  "prefix": "EARS Context-Specific",
+	  "body": [
+		"Where ${1:<feature is included>}, the ${2:<system name>} shall ${3:<system response>}."
+	  ],
+	  "description": "Use when the requirement applies in a particular context or situation.",
+	  "scope": "ears,markdown,plaintext,cucumber"
+	},
+	"If-Then-Shall": {
+		"prefix": "EARS Error Handling",
+		"body": [
+		  "If ${1:<trigger>}, then the ${2:<system name>} shall ${3:<system response>}."
+		],
+		"description": "Use when both a specific state and an event trigger are relevant to the requirement.",
+		"scope": "ears,markdown,plaintext,cucumber"
+	  },
+	"While-When-The-Shall": {
+	  "prefix": "EARS Complex Condition",
+	  "body": [
+		"While ${1:<precondition(s)>}, when ${2:<trigger>}, the ${3:<system name>} shall ${4:<system response>}."
+	  ],
+	  "description": "Use when both a specific state and an event trigger are relevant to the requirement.",
+	  "scope": "ears,markdown,plaintext,cucumber"
+	}
+  }
