@@ -15,13 +15,11 @@ When <trigger>, the <system name> shall <system response>.
 
 Filter Options
 
-ears
-
 1. The software shall have an option to use either `plain text` (default) or `regular expression` text expressions. #411
-2. While the `case sensitivity` option is turned on, the software shall interpret text expressions case-sensitive. #394
-2. While the `hide trace` option turned off (default), when filtering, the software shall implicitly apply a `@Severity=Trace` exclude filter.
-4. While the `hide debug` option turned off (default), when filtering, the software shall implicitly apply a `@Severity=Debug` exclude filter.
-5. While the `include pinned` option turned on (default), when filtering, the software shall ignore the `pinned` status of records.
+2. While the `case sensitivity` option is `on` (default), the software shall interpret text expressions as case-sensitive. #394
+3. While the `show debug` option is `off`, when filtering, the software shall omit `Debug` records from the results. #414
+4. While the `show trace` option is `off`, when filtering, the software shall include `Trace` records from the results. #415
+5. While the `enforce pin` option turned `on`` (default), when filtering, the software shall ignore the `pinned` status of records.
 
 Feature: Filtering
 
@@ -194,3 +192,30 @@ Scenario: `Case Insensitive` regular expression filtering
   Then the results will include 7 records
     And each result will include the text "Directives"
 
+@SRS:414
+Scenario `Show Debug` option hides trace records
+  Given that Weevil has opened the file "Default.log"
+  When the `Show Debug` filter option is off
+    And applying the include filter: Diagnostics
+  Then the results will include 19 records
+
+@SRS:414
+Scenario `Show Debug` option shows trace records 
+  Given that Weevil has opened the file "Default.log"
+  When the `Show Debug` filter option is on
+    And applying the include filter: Core
+  Then the results will include 22 records
+
+@SRS:415
+Scenario `Show Trace` option hides trace records
+  Given that Weevil has opened the file "Default.log"
+  When the `Show Trace` filter option is off
+    And applying the include filter: Diagnostics
+  Then the results will include 3 records
+
+@SRS:415
+Scenario `Show Trace` option displays trace records 
+  Given that Weevil has opened the file "Default.log"
+  When the `Show Trace` filter option is on
+    And applying the include filter: Diagnostics
+  Then the results will include 102 records
