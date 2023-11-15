@@ -9,17 +9,30 @@ When <trigger>, the <system name> shall <system response>.
 3. When an `include` filter is applied, the software shall display all matching records in the results. #399
 4. When an `exclude` filter is applied, the software shall omit all matching records from the results. #400
 5. When both `include` and `exclude` filters are applied, the software shall prioritize the 'Exclude' filter. #401
-6. While a record is `pinned`, the software shall always display the pinned record in the results, regardless of any filters that are applied. #371
-7. When the filter results are displayed, the software shall update the status bar with the number of records in the results. #408
-8. When typing of a filter has stopped for 3 seconds (±1), the software shall automatically apply the filter. #410
+6. The software shall allow the user to mark a record as pinned. #416
+7. While the `persistent pins` option is `on` , when filtering, the software shall ALWAYS display pinned records in the results. #371
+8. When the filter results are displayed, the software shall update the status bar with the number of records in the results. #408
+9. When typing of a filter has stopped for 3 seconds (±1), the software shall automatically apply the filter. #410
+10. While the `show debug` option is off, when filtering, the software will hide records with a `debug` severity. #418
+11. While the `show trace` option is off, when filtering, the software will hide records with a `trace` severity. #419
 
 Filter Options
 
 1. The software shall have an option to use either `plain text` (default) or `regular expression` text expressions. #411
 2. While the `case sensitivity` option is `on` (default), the software shall interpret text expressions as case-sensitive. #394
-3. While the `show debug` option is `off`, when filtering, the software shall omit `Debug` records from the results. #414
-4. While the `show trace` option is `off`, when filtering, the software shall include `Trace` records from the results. #415
-5. While the `enforce pin` option turned `on`` (default), when filtering, the software shall ignore the `pinned` status of records.
+3. The software shall have an option, `show debug` records, which can be turned on (default) or off. #414
+4. The software shall have an option, `show trace` records, which can be turned on (default) or off. #415
+5. The software shall have an option to enable (default) or disable `persistent pins`.
+
+BREAK APART #394 & assign appropriate Gherkin scenarios
+
+
+
+
+
+
+
+
 
 Feature: Filtering
 
@@ -192,28 +205,28 @@ Scenario: `Case Insensitive` regular expression filtering
   Then the results will include 7 records
     And each result will include the text "Directives"
 
-@SRS:414
+@SRS:414,418
 Scenario `Show Debug` option hides trace records
   Given that Weevil has opened the file "Default.log"
   When the `Show Debug` filter option is off
     And applying the include filter: Diagnostics
   Then the results will include 19 records
 
-@SRS:414
+@SRS:414,418
 Scenario `Show Debug` option shows trace records 
   Given that Weevil has opened the file "Default.log"
   When the `Show Debug` filter option is on
     And applying the include filter: Core
   Then the results will include 22 records
 
-@SRS:415
+@SRS:415,419
 Scenario `Show Trace` option hides trace records
   Given that Weevil has opened the file "Default.log"
   When the `Show Trace` filter option is off
     And applying the include filter: Diagnostics
   Then the results will include 3 records
 
-@SRS:415
+@SRS:415,419
 Scenario `Show Trace` option displays trace records 
   Given that Weevil has opened the file "Default.log"
   When the `Show Trace` filter option is on
