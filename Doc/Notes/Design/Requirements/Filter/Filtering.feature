@@ -25,14 +25,6 @@ Filter Options
 4. The software shall have an option to turn `show trace` records on (default) or off. #415
 5. The software shall have an option to enable (default) or disable `persistent pins`.
 
-While the `case sensitivity` option is `on` (default), the software shall interpret text expressions as case-sensitive. #394
-While <precondition(s)>, the <system name> shall <system response>.
-
-
-
-
-
-
 
 
 
