@@ -9,6 +9,7 @@ When <trigger>, the <system name> shall <system response>.
 3. When an `include` filter is applied, the software shall display all matching records in the results. #399
 4. When an `exclude` filter is applied, the software shall omit all matching records from the results. #400
 5. When both `include` and `exclude` filters are applied, the software shall prioritize the 'Exclude' filter. #401
+6. While the `case sensitive` option is on, when filtering, the software shall differentiate between upper and lower case characters. #420
 6. The software shall allow the user to mark a record as pinned. #416
 7. While the `persistent pins` option is `on` , when filtering, the software shall ALWAYS display pinned records in the results. #371
 8. When the filter results are displayed, the software shall update the status bar with the number of records in the results. #408
@@ -19,12 +20,14 @@ When <trigger>, the <system name> shall <system response>.
 Filter Options
 
 1. The software shall have an option to use either `plain text` (default) or `regular expression` text expressions. #411
-2. While the `case sensitivity` option is `on` (default), the software shall interpret text expressions as case-sensitive. #394
-3. The software shall have an option, `show debug` records, which can be turned on (default) or off. #414
-4. The software shall have an option, `show trace` records, which can be turned on (default) or off. #415
+2. The software shall have an option to turn `case sensitive` filtering on (default) or off. #394
+3. The software shall have an option to turn `show debug` records on (default) or off. #414
+4. The software shall have an option to turn `show trace` records on (default) or off. #415
 5. The software shall have an option to enable (default) or disable `persistent pins`.
 
-BREAK APART #394 & assign appropriate Gherkin scenarios
+While the `case sensitivity` option is `on` (default), the software shall interpret text expressions as case-sensitive. #394
+While <precondition(s)>, the <system name> shall <system response>.
+
 
 
 
