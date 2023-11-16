@@ -23,7 +23,7 @@ Filter Options
 2. The software shall have an option to turn `case sensitive` filtering on (default) or off. #394
 3. The software shall have an option to turn `show debug` records on (default) or off. #414
 4. The software shall have an option to turn `show trace` records on (default) or off. #415
-5. The software shall have an option to enable (default) or disable `persistent pins`.
+5. The software shall have an option to turn `persistent pins` on (default) or off. #417
 
 
 
