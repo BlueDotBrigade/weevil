@@ -24,7 +24,7 @@ When <trigger>, the <system name> shall <system response>.
 4. The software shall have an option to turn `show trace` records on (default) or off. #415
 5. The software shall have an option to turn `persistent pins` on (default) or off. #417
 
-@SRS:406, @UserStory:123
+@Requirement:406, @UserStory:123
 Scenario: Two include filter expressions separated by OR
   Given that Weevil has opened the file "Default.log"
   When applying the include filter: Directives||Fatal
@@ -35,7 +35,7 @@ Scenario: Two include filter expressions separated by OR
     Fatal
     """
 
-@SRS:406, @UserStory:123
+@Requirement:406, @UserStory:123
 Scenario: Two exclude filter expressions separated by OR
   Given that Weevil has opened the file "Default.log"
   When applying the exclude filter: #Debug||#Trace
@@ -46,35 +46,35 @@ Scenario: Two exclude filter expressions separated by OR
     Fatal
     """
 
-@SRS:398, @SRS:406
+@Requirement:398, @Requirement:406
 Scenario: Filtering using a text expression
   Given that Weevil has opened the file "Default.log"
   When applying the include filter: Directives
   Then the results will include 7 records
     And each result will include the text "Directives"
 
-@SRS:398, @SRS:406
+@Requirement:398, @Requirement:406
 Scenario: Filtering using an alias expression
   Given that Weevil has opened the file "Default.log"
   When applying the include filter: #Fatal
   Then the results will include 1 records
     And each result will include the text "Unrecoverable error has occurred"
 
-@SRS:398, @SRS:406
+@Requirement:398, @Requirement:406
 Scenario: Filtering using a moniker expression
   Given that Weevil has opened the file "Default.log"
   When applying the include filter: @Severity=Information
   Then the results will include 36 records
     And each result will include the text "Info"
 
-@SRS:399
+@Requirement:399
 Scenario: Include filter identifies important information
   Given that Weevil has opened the file "Default.log"
   When applying the include filter: #Information
   Then the results will include 36 records
     And each result will the text "Info"
 
-@SRS:400
+@Requirement:400
 Scenario: Exclude filter hides records
   Given that Weevil has opened the file "Default.log"
   When applying the exclude filter: Security||Scomp||Core
@@ -86,7 +86,7 @@ Scenario: Exclude filter hides records
     Core
     """
 
-@SRS:401
+@Requirement:401
 Scenario: Exclude filter takes precedence over include filter
   Given that Weevil has opened the file "Default.log"
   When applying the include filter: #Information
@@ -99,7 +99,7 @@ Scenario: Exclude filter takes precedence over include filter
     Scomp
     Core
     """
-@SRS:371
+@Requirement:371
 Scenario: Pinned records are always displayed
   Given that Weevil has opened the file "Default.log"
   When pinning record ID 2
@@ -111,13 +111,13 @@ Scenario: Pinned records are always displayed
     And record ID 4 will be visible 
     And record ID 8 will be visible 
 
-@SRS:408
+@Requirement:408
 Scenario: Status bar displays number of records in results
   Given that Weevil has opened the file "Default.log"
   When applying the include filter: #Information
   Then the status bar visible record count will display 36
 
-@SRS:410
+@Requirement:410
 Scenario: Filter automatically applied when typing pauses
   Given that Weevil has opened the file "Default.log"
   When entering the include filter: #Information
@@ -125,7 +125,7 @@ Scenario: Filter automatically applied when typing pauses
   Then the results will include 36 records
 
 # 387 = all records
-@SRS:410
+@Requirement:410
 Scenario: Filter is not automatically applied when typing continues
   Given that Weevil has opened the file "Default.log"
   When entering the include filter: #Error
@@ -136,12 +136,12 @@ Scenario: Filter is not automatically applied when typing continues
     And waiting 1 seconds
   Then the results will include all records
 
-@SRS:411
+@Requirement:411
 Scenario: `Regular Expression` filter mode selected by default
   Given that Weevil has opened the file "Default.log"
   Then the filter mode will be `Regular Expression`
 
-@SRS:411
+@Requirement:411
 Scenario: `Plain Text` filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the plain text filter mode
@@ -149,7 +149,7 @@ Scenario: `Plain Text` filtering
   Then the results will include 7 records
     And each result will include the text "Directives"
 
-@SRS:411
+@Requirement:411
 Scenario: `Regular Expression` filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the plain text filter mode
@@ -157,7 +157,7 @@ Scenario: `Regular Expression` filtering
   Then the results will include 1 records
     And each result will include the text "Voltage=51"
 
-@SRS:394
+@Requirement:394
 Scenario: `Case Sensitive` plain text filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the plain text filter mode
@@ -165,7 +165,7 @@ Scenario: `Case Sensitive` plain text filtering
     And applying the include filter: directives
   Then the results will include 0 records
 
-@SRS:394
+@Requirement:394
 Scenario: `Case Insensitive` plain text filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the plain text filter mode
@@ -174,7 +174,7 @@ Scenario: `Case Insensitive` plain text filtering
   Then the results will include 7 records
     And each result will include the text "Directives"
 
-@SRS:394
+@Requirement:394
 Scenario: `Case Sensitive` regular expression filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the regular expression filter mode
@@ -182,7 +182,7 @@ Scenario: `Case Sensitive` regular expression filtering
     And applying the include filter: directives
   Then the results will include 0 records
 
-@SRS:394
+@Requirement:394
 Scenario: `Case Insensitive` regular expression filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the regular expression filter mode
@@ -191,28 +191,28 @@ Scenario: `Case Insensitive` regular expression filtering
   Then the results will include 7 records
     And each result will include the text "Directives"
 
-@SRS:414,418
+@Requirement:414, @Requirement:418
 Scenario `Show Debug` option hides trace records
   Given that Weevil has opened the file "Default.log"
   When the `Show Debug` filter option is off
     And applying the include filter: Diagnostics
   Then the results will include 19 records
 
-@SRS:414,418
+@Requirement:414, @Requirement:418
 Scenario `Show Debug` option shows trace records 
   Given that Weevil has opened the file "Default.log"
   When the `Show Debug` filter option is on
     And applying the include filter: Core
   Then the results will include 22 records
 
-@SRS:415,419
+@Requirement:415, @Requirement:419
 Scenario `Show Trace` option hides trace records
   Given that Weevil has opened the file "Default.log"
   When the `Show Trace` filter option is off
     And applying the include filter: Diagnostics
   Then the results will include 3 records
 
-@SRS:415,419
+@Requirement:415, @Requirement:419
 Scenario `Show Trace` option displays trace records 
   Given that Weevil has opened the file "Default.log"
   When the `Show Trace` filter option is on
