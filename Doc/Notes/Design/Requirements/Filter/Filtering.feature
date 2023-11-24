@@ -17,21 +17,12 @@ When <trigger>, the <system name> shall <system response>.
 10. While the `show debug` option is off, when filtering, the software will hide records with a `debug` severity. #418
 11. While the `show trace` option is off, when filtering, the software will hide records with a `trace` severity. #419
 
-Filter Options
 
 1. The software shall have an option to use either `plain text` (default) or `regular expression` text expressions. #411
 2. The software shall have an option to turn `case sensitive` filtering on (default) or off. #394
 3. The software shall have an option to turn `show debug` records on (default) or off. #414
 4. The software shall have an option to turn `show trace` records on (default) or off. #415
 5. The software shall have an option to turn `persistent pins` on (default) or off. #417
-
-
-
-
-
-Feature: Filtering
-
-SRS: The software shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`).
 
 @SRS:406, @UserStory:123
 Scenario: Two include filter expressions separated by OR
@@ -146,9 +137,9 @@ Scenario: Filter is not automatically applied when typing continues
   Then the results will include all records
 
 @SRS:411
-Scenario: `Plain Text` filter mode selected by default
+Scenario: `Regular Expression` filter mode selected by default
   Given that Weevil has opened the file "Default.log"
-  Then the filter mode will be `Plain Text`
+  Then the filter mode will be `Regular Expression`
 
 @SRS:411
 Scenario: `Plain Text` filtering
