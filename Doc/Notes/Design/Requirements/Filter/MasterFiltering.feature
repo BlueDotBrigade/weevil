@@ -9,7 +9,7 @@ REQUIREMENTS
 5. When both `include` and `exclude` filters are applied, the software shall prioritize the 'Exclude' filter. #401
 6. While the `case sensitive` option is on, when filtering, the software shall differentiate between upper and lower case characters. #420
 6. The software shall allow the user to mark a record as pinned. #416
-7. While the `persistent pins` option is `on` , when filtering, the software shall ALWAYS display pinned records in the results. #371
+7. While the `persistent pins` option is `on` , when filtering, the software shall always include pinned records in the results. #371
 8. When the filter results are displayed, the software shall update the status bar with the number of records in the results. #408
 9. When typing of a filter has stopped for 3 seconds (±1), the software shall automatically apply the filter. #410
 10. While the `show debug` option is off, when filtering, the software will hide records with a `debug` severity. #418

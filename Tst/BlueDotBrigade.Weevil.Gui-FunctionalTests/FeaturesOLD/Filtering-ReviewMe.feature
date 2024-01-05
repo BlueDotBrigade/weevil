@@ -35,10 +35,3 @@ So that I can query specific metadata collected by Weevil and filter log entries
 As an analyst,
 I want to use the @Pinned moniker,
 So that I can easily filter and view all records that I've flagged as pinned.
-
-
-	5.	Severity Moniker:
-
-As an analyst,
-I want to use the @Severity=[level] moniker,
-So that I can filter log entries based on their severity level (info, warning, error, critical).
