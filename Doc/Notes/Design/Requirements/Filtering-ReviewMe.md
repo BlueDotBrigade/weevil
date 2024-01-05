@@ -1,7 +1,5 @@
 ﻿# Filtering
 
-#406
-
 Sample log file: /weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/.Daten/.Global/Default.log
 
 ## User Stories
