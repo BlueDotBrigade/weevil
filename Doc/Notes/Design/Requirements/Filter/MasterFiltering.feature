@@ -2,8 +2,6 @@ Feature: Filtering
 
 REQUIREMENTS
 
-When <trigger>, the <system name> shall <system response>.
-
 1. The software shall support filtering using 1 or more expressions delimited by a logical OR operator (`||`). #406
 2. The software shall support filtering using different types of expressions (text, alias, and moniker). #398
 3. When an `include` filter is applied, the software shall display all matching records in the results. #399
@@ -218,3 +216,4 @@ Scenario `Show Trace` option displays trace records
   When the `Show Trace` filter option is on
     And applying the include filter: Diagnostics
   Then the results will include 102 records
+
