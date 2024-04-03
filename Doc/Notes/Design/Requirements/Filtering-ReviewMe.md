@@ -2,59 +2,8 @@
 
 Sample log file: /weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/.Daten/.Global/Default.log
 
-## User Stories
-
-As an analyst, I want to be able to filter log entries using plain text, so that I can easily find relevant information.
-
-As an analyst, I want to be able to filter log entries using regular expressions, so that I can perform complex searches.
-
-As an analyst, I want to be able to pin important log entries, so that they are always included in the filter results.
-
-As an analyst, I want a case-sensitive filter option, so that I can distinguish between text with different capitalization (e.g. `ID` vs `Grid`).
-
-As an analyst, I want a hide `Trace` records filter option (default: on), so that useless log entries are hidden thus reducing visual noise.
-
-As an analyst, I want a hide `Debug` records filter option (default: on), so that useless log entries are hidden thus reducing visual noise.
-
-As an analyst, I want Weevil to automatically apply the current filter 3 seconds after I stop typing, in order to speed up the filtering process.
-
-As an analyst, I want an `include pinned` filter option (default: on), so I can decide if pinned records appear in the search results.
-
-## Requirements
-
-Sample log file entry:
-
-```
-Info 2018-11-23 11:20:35 CompanyName.ApplicationName.ClassName Application is starting... Version=1.2.3
-```
-
-
-Requirement:
-
-The system shall display the number of records in the filter results in the status bar, using clear and concise language, in active voice, and with specific and measurable criteria. This requirement is ubiquitous, as it is always active, and is expressed using the EARS syntax.
-Requirement:
-
-The system shall display the number of records in the filter results in the status bar, using clear and concise language, in active voice, and with specific and measurable criteria. This requirement is ubiquitous, as it is always active, and is expressed using the EARS syntax.
-
-Requirement:
-
-The system shall display the number of records in the filter results in the status bar, using clear and concise language, in active voice, and with specific and measurable criteria. This requirement is ubiquitous, as it is always active, and is expressed using the EARS syntax.
-
-### Expressions
-
-Text:
-
-1. While "plain text" mode is selected, the system shall interpret text expressions as a "plain text" filter.
-2. While "regular expression" mode is selected, the system shall interpret text expressions as "regular expressions".
-
-Aliases:
-
-1. The system, shall interpret expressions prefixed with the `#` symbool as a filter alias.
-2. When using the `#IpAddress` alias, the system shall use a regular expression to identify records that include a computer's IP address.
-
 Monikers:
 
-1. The system, shall interpret expressions prefixed with the `@` symbool as a filter monkier.
 2. When using the `@Comment` monkier, the system shall identify log file records that include an analyst's annotation.
 3. When using the `@Pinned` monkier, the system shall identify records that have been "pinned" by the user.
 4. When using the `@Severity=[level]` monkier, the system shall identify records that match the given severity (trace, debug, information, warning, error, critical).
