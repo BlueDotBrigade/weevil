@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<!-- If `AssemblyName` is set to any other value (e.g. WeevilGui.exe) you may experience -->
 		<!-- PostSharp `No valid license key has been installed` compiler errors (PS0242) -->
 		<!-- when using GitHub actions. -->
