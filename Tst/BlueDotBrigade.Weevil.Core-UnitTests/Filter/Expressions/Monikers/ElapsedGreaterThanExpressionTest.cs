@@ -23,7 +23,7 @@
 		public void IsMatch_ElapsedTimeLessThanSpecifiedPeriod_ReturnsFalse()
 		{
 			var record = Substitute.For<IRecord>();
-			record.Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(1) });
+			record.Metadata.Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(1) });
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 
@@ -34,7 +34,7 @@
 		public void IsMatch_ElapsedTimeGreaterThanSpecifiedPeriod_ReturnsTrue()
 		{
 			var record = Substitute.For<IRecord>();
-			record.Returns(new Metadata { ElapsedTime = TimeSpan.FromHours(1) });
+			record.Metadata.Returns(new Metadata { ElapsedTime = TimeSpan.FromHours(1) });
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 

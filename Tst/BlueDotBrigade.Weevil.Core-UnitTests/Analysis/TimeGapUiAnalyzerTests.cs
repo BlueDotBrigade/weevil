@@ -6,6 +6,7 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
+	using NSubstitute;
 
 	[TestClass]
 	public class TimeGapUiAnalyzerTests
@@ -21,7 +22,7 @@
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-				.Returns(msBeforeFlaggedRaised.ToString);
+				.Returns(msBeforeFlaggedRaised.ToString());
 
 			return userDialog;
 		}

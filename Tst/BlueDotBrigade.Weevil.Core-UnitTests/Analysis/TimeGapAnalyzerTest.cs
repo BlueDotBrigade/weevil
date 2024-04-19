@@ -22,7 +22,7 @@
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(),Arg.Any<string>(),Arg.Any<string>())
-				.Returns(msBeforeFlaggedRaised.ToString);
+				.Returns(msBeforeFlaggedRaised.ToString());
 
 			return userDialog;
 		}

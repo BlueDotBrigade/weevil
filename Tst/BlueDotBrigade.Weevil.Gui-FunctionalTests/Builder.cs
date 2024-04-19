@@ -9,6 +9,7 @@
 	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.Threading;
+	using NSubstitute;
 
 	internal class Builder
 	{
