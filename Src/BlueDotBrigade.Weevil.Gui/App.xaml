@@ -5,14 +5,26 @@
              StartupUri="MainWindow.xaml">
    <Application.Resources>
       <ResourceDictionary>
-         <ResourceDictionary.MergedDictionaries>
-            <ResourceDictionary Source="pack://application:,,,/Themes/ApplicationStyles.xaml" />
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Weevil Specific -->
+                <ResourceDictionary Source="pack://application:,,,/Themes/ApplicationStyles.xaml" />
 
-            <materialDesign:CustomColorTheme BaseTheme="Dark" PrimaryColor="{StaticResource PrimaryColor}" SecondaryColor="{StaticResource SecondaryColor}" />
-            <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-            <ResourceDictionary Source="pack://application:,,,/Themes/StatusBarTextBox.xaml" />
-            <ResourceDictionary Source="pack://application:,,,/Themes/ProgressBar.xaml" />
+                <materialDesign:CustomColorTheme 
+                    BaseTheme="Dark" 
+                    PrimaryColor="{StaticResource PrimaryColor}" 
+                    SecondaryColor="{StaticResource SecondaryColor}" />
+
+
+                <!-- Material Design -->
+                <!-- NB: If you're migrating and not wanting to update your brushes, you will want this resource dictionary for the old brush names: -->
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ObsoleteBrushes.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+
+                <!-- Weevil Specific -->
+                <ResourceDictionary Source="pack://application:,,,/Themes/StatusBarTextBox.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Themes/ProgressBar.xaml" />
+
             </ResourceDictionary.MergedDictionaries>
-      </ResourceDictionary>
+        </ResourceDictionary>
    </Application.Resources>
 </Application>

@@ -31,7 +31,7 @@
     <None Remove="Resources\Icons\Insight\TimeGap-NoData-48.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\Context-Data-24.png" />
