@@ -20,7 +20,7 @@
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
 		<PackageReference Include="NSubstitute" Version="5.1.0" />
 		<PackageReference Include="SpecFlow.Plus.LivingDocPlugin" Version="3.9.57" />
 		<PackageReference Include="SpecFlow.MsTest" Version="3.9.74" />
