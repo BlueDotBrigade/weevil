@@ -7,27 +7,23 @@
 	using System.Windows;
 	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Threading;
+	using BlueDotBrigade.Weevil.TestingTools;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using NSubstitute;
 
-	[TestClass]
-	public class FilterResultsViewModelTests
+	[StaTestClass]
+	public class FilterResultsViewModelTests : UiTestBase
 	{
 		[TestMethod]
 		public async Task OpenAsync()
 		{
 			var window = Substitute.For<Window>();
 
-			var uiDispatcher = Substitute.For<IUiDispatcher>();
-			uiDispatcher
-				.When(x => x.Invoke(Arg.Any<Action>()))
-				.Do(x => (x.Arg<Action>()).Invoke());
-
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 
 			var viewModel = new FilterResultsViewModel(
 				window,
-				uiDispatcher,
+				this.UiDispatcher,
 				bulletinMediator);
 
 			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
