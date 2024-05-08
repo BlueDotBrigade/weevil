@@ -57,21 +57,5 @@
 				_token.FilterType,
 				new FilterCriteria(inclusiveFilter, string.Empty, _token.FilterParameters)).Results;
 		}
-
-		[Then($@"the record count will be {R.RecordCount}")]
-		public void ThenTheRecordCountWillBe(int recordCount)
-		{
-			_token.Engine.Count
-				.Should()
-				.Be(recordCount);
-		}
-
-		[Then($@"all records will include `{R.AnyText}`")]
-		public void ThenAllRecordsWillInclude(string text)
-		{
-			_token.Results
-				.Should()
-				.Contain(s => s.Content.Contains(text, StringComparison.OrdinalIgnoreCase));
-		}
 	}
 }
