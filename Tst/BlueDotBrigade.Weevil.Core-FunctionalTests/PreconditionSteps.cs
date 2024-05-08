@@ -5,7 +5,7 @@
 	using BlueDotBrigade.Weevil.Filter.Expressions.PlainText;
 
 	[Binding]
-	public sealed class GeneralSteps
+	public sealed class PreconditionSteps
 	{
 		private readonly Token _token;
 
@@ -14,19 +14,27 @@
 			_token = new Token();
 		}
 
-		[Given(@"that the default log file is open")]
-		public void GivenThatTheDefaultLogFileIsOpen()
+		[Given(@"the default log file was open")]
+		public void GivenTheDefaultLogFileWasOpen()
 		{
 			_token.Engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 		}
 
-		[Given($@"that the following log file is open `{A.FileName}`")]
-		public void GivenTheUserHasOpenedThisLog(string filename)
+		[Given($@"the log file was open `{A.FileName}`")]
+		public void GivenTheLogFileWasOpen(string fileName)
 		{
 			_token.Engine = Engine
-				.UsingPath(new Daten().AsFilePath(filename))
+				.UsingPath(new Daten().AsFilePath(fileName))
+				.Open();
+		}
+
+		[Given($@"the log file was open at `{A.FilePath}`")]
+		public void GivenTheLogFileWasOpenAt(string filePath)
+		{
+			_token.Engine = Engine
+				.UsingPath(filePath)
 				.Open();
 		}
 
