@@ -9,9 +9,9 @@
 	{
 		private readonly Token _token;
 
-		public GeneralSteps()
+		public PreconditionSteps(Token token)
 		{
-			_token = new Token();
+			_token = token;
 		}
 
 		[Given(@"the default log file was open")]

@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.StepDefinitions
+﻿namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
