@@ -22,7 +22,7 @@
 				.Open();
 		}
 
-		[Given($@"the log file was open `{A.FileName}`")]
+		[Given($@"the log file was open `{R.FileName}`")]
 		public void GivenTheLogFileWasOpen(string fileName)
 		{
 			_token.Engine = Engine
@@ -30,7 +30,7 @@
 				.Open();
 		}
 
-		[Given($@"the log file was open at `{A.FilePath}`")]
+		[Given($@"the log file was open at `{R.FilePath}`")]
 		public void GivenTheLogFileWasOpenAt(string filePath)
 		{
 			_token.Engine = Engine
@@ -50,7 +50,7 @@
 			_token.FilterParameters.Add("IsCaseSensitive", true);
 		}
 
-		[When($@"the inclusive filter is applied `{A.AnyText}`")]
+		[When($@"the inclusive filter is applied `{R.AnyText}`")]
 		public void WhenTheInclusiveFilterIsApplied(string inclusiveFilter)
 		{
 			_token.Results = _token.Engine.Filter.Apply(
@@ -58,7 +58,7 @@
 				new FilterCriteria(inclusiveFilter, string.Empty, _token.FilterParameters)).Results;
 		}
 
-		[Then($@"the record count will be {A.RecordCount}")]
+		[Then($@"the record count will be {R.RecordCount}")]
 		public void ThenTheRecordCountWillBe(int recordCount)
 		{
 			_token.Engine.Count
@@ -66,7 +66,7 @@
 				.Be(recordCount);
 		}
 
-		[Then($@"all records will include `{A.AnyText}`")]
+		[Then($@"all records will include `{R.AnyText}`")]
 		public void ThenAllRecordsWillInclude(string text)
 		{
 			_token.Results
