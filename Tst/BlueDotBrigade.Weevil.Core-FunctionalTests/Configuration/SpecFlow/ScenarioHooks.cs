@@ -9,18 +9,14 @@
 	[Binding]
 	internal class ScenarioHooks
 	{
-		private readonly IObjectContainer _container;
-
-		public ScenarioHooks(IObjectContainer container)
+		public ScenarioHooks()
 		{
-			 _container = container;
 		}
 
 		[BeforeScenario(Order = Constants.AlwaysFirst)]
 		public static void OnBeforeScenario(ScenarioContext scenario)
 		{
 			//scenario["state"] = new object();
-			 _container.RegisterTypeAs<Token, Token>();
 		}
 
 		[BeforeScenarioBlock(Order = Constants.AlwaysFirst)]

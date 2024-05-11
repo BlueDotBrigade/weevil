@@ -11,7 +11,7 @@ Scenario: Filtering using a plain text expression
 Scenario: `Plain Text` filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the plain text filter mode
-    applying the include filter: Directives 
+    And applying the include filter: Directives 
   Then the results will include 7 records
     And each result will include the text "Directives"
 
