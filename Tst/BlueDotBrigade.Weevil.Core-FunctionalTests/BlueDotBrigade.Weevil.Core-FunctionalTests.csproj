@@ -18,6 +18,10 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="OLD\FilteringOld.cs" />
+	  <Compile Remove="OLD\RecordContentValidator.cs" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
@@ -54,5 +58,7 @@
 	  <None Include=".Daten\.Global\EmptyWithWhitespace.txt" />
 	  <None Include=".Daten\.Global\GenericBaseline.log" />
 	  <None Include=".Daten\.Global\GenericBaseline.log.xml" />
+	  <None Include="OLD\FilteringOld.cs" />
+	  <None Include="OLD\RecordContentValidator.cs" />
 	</ItemGroup>
 </Project>

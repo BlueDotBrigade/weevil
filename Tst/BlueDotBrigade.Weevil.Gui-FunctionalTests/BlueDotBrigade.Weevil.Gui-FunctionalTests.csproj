@@ -20,6 +20,17 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="Drivers\**" />
+	  <EmbeddedResource Remove="Drivers\**" />
+	  <None Remove="Drivers\**" />
+	  <Page Remove="Drivers\**" />
+	  <SpecFlowFeatureFiles Remove="Drivers\**" />
+	  <SpecFlowObsoleteCodeBehindFiles Remove="Drivers\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="OLD\CalculatorStepDefinitions.cs" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
 		<PackageReference Include="NSubstitute" Version="5.1.0" />
@@ -40,13 +51,10 @@
 	  </Content>
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Drivers\" />
-		<Folder Include="Support\" />
-	</ItemGroup>
-	<ItemGroup>
 	  <None Include=".Daten\Converters\ContentConverterTests\LongMultiLineRecord.log" />
 	  <None Include=".Daten\.Global\GenericBaseline.log" />
 	  <None Include=".Daten\.Global\GenericBaseline.log.xml" />
+	  <None Include="OLD\CalculatorStepDefinitions.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
