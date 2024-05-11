@@ -4,7 +4,7 @@ Feature: Regular Expressions
 Scenario: `Regular Expression` filtering
   Given that Weevil has opened the file "Default.log"
   When selecting the plain text filter mode
-    applying the include filter: Voltage=\d{2}
+    And applying the include filter: Voltage=\d{2}
   Then the results will include 1 records
     And each result will include the text "Voltage=51"
 
