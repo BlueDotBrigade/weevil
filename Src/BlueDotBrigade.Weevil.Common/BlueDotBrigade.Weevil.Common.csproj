@@ -57,4 +57,13 @@
 			<_Parameter1>BlueDotBrigade.Weevil.Common-UnitTests</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
+  
+  	<ItemGroup>
+  	  <Content Include="..\..\DomainSpecificTerminology.xml" Link="Properties\DomainSpecificTerminology.xml" />
+  	</ItemGroup>
+	<ItemGroup>
+		<CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
+			<Link>Properties\DomainSpecificTerminology.xml</Link>
+		</CodeAnalysisDictionary>
+	</ItemGroup>
 </Project>
