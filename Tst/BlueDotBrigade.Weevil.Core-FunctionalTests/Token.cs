@@ -4,7 +4,7 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 
-	internal class Token
+	public class Token
 	{
 		public Token()
 		{
