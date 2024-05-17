@@ -1,6 +1,6 @@
 ﻿# Weevil Design : Lessons Learned
 
-## Sofware Architecture
+## Software Architecture
 
 ### API Design
 
@@ -17,7 +17,7 @@ Internal Contracts
         - StackOverflow: [Why Explicit Implementation of a Interface can not be public?][InterfaceAccessibility]
 
 
-### An Immutable Libary
+### An Immutable Library
 
 The original intent was to create a thread safe class library by making `BlueDotBrigade.Weevil.Core` entirely immutable.  Unfortunately there have been a few unexpected side effects, which in retrospect, seem obvious now:
 - new object tree for `Open`, `Clear` and `Refresh`

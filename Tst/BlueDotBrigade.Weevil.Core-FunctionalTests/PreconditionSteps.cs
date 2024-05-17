@@ -12,36 +12,38 @@
 		public PreconditionSteps(Token token)
 		{
 			_token = token;
-		}
+		}	
 
-		[Given(@"the default log file was open")]
-		public void GivenTheDefaultLogFileWasOpen()
+		[Given(@"that the default log file is open")]
+		public void GivenThatTheDefaultLogFileIsOpen()
 		{
 			_token.Engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 		}
 
-		[Given($@"the log file was open `{R.FileName}`")]
-		public void GivenTheLogFileWasOpen(string fileName)
+		[Given($@"that the log file is open at `{R.FileName}`")]
+		public void GivenThatTheLogFileIsOpenAt(string fileName)
 		{
 			_token.Engine = Engine
 				.UsingPath(new Daten().AsFilePath(fileName))
 				.Open();
 		}
 
-		[Given($@"the log file was open at `{R.FilePath}`")]
-		public void GivenTheLogFileWasOpenAt(string filePath)
+		[Given($@"that the log file is open at `{R.FilePath}`")]
+		public void GivenThatTheLogFileIsOpenAt(string filePath)
 		{
 			_token.Engine = Engine
 				.UsingPath(filePath)
 				.Open();
 		}
 
-		[When(@"the plain text filtering option is selected")]
-		public void WhenThePlainTextFilteringOptionIsSelected()
+		[When($@"selecting the {R.TextExpression} filtering option")]
+		public void WhenSelectingFilteringOption(ExpressionType expressionType)
 		{
-			_token.FilterType = FilterType.PlainText;
+			_token.FilterType = textExpressionType == TextExpressionType.PlainText
+				? FilterType.PlainText
+				: FilterType.RegularExpression;
 		}
 
 		[When(@"case sensitive filtering has been enabled")]

@@ -7,7 +7,7 @@ Ensures that files are opened properly.
 # - default parser creates 1 record per line ?
 
 Scenario: Open empty file
-	Given that the following log file is open `Empty.txt`
+	Given that the log file is open at `Empty.txt`
 	Then the record count will be 0
 
 Scenario: Default Log
