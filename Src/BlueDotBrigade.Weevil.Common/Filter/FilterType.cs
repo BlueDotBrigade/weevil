@@ -5,4 +5,12 @@
 		PlainText,
 		RegularExpression,
 	}
+
+	public enum ExpressionType
+	{
+		PlainText,
+		RegularExpression,
+		Moniker,
+		Alias,
+	}
 }
