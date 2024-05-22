@@ -4,14 +4,14 @@ Feature: Filtering
 Scenario: Filter log entries by hardware serial number
 	Given that the default log file is open
 	When the plain text filtering option is selected
-	And case sensitive filtering has been enabled
+	And the case sensitive option is on
 	And the inclusive filter is applied `S/N`
 	Then all records will include `S/N`
 
 
 
   Scenario: Displaying records that match an inclusive filter
-    Given the analyst wants to search for specific records
+    Given that the default log file is open
     And filters are available for the analyst to use
     When the analyst applies an inclusive filter to the records
     Then the system should only display records that matches the filter criteria
