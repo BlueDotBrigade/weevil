@@ -12,5 +12,5 @@ Scenario: Filtering using an alias expression
 
   Scenario: Applying a filter using an alias
     Given that the default log file is open
-    When I apply the #Summary filter alias
-    Then only key high-level log entries should be displayed    
+    When applying the include filter: #Summary
+    Then only key high-level log entries should be displayed
