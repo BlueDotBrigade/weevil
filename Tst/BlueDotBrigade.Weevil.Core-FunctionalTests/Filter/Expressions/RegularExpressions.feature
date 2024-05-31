@@ -11,7 +11,7 @@ Scenario: `Regular Expression` filtering
 @Requirement:394
 Scenario: `Case Sensitive` regular expression filtering
   Given that the default log file is open
-  When using the regular expression option
+  When selecting the regular expression filter mode
     And using case sensitive filtering
     And applying the include filter: directives
   Then the results will include 0 records

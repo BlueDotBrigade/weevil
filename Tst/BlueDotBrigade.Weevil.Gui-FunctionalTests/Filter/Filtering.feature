@@ -4,7 +4,7 @@ Feature: Filtering
 Scenario: Status bar displays number of records in results
   Given that the default log file is open
   When applying the include filter: #Information
-  Then the status bar visible record count will display 36
+  Then the filter will display 36 results
 
 @Requirement:410
 Scenario: Filter automatically applied when typing pauses
@@ -28,6 +28,6 @@ Scenario: Filter is not automatically applied when typing continues
 @Requirement:411
 Scenario: `Regular Expression` filter mode selected by default
   Given that the default log file is open
-  Then the filter mode will be `Regular Expression`
+  Then the filter mode will be Regular Expression
 
 

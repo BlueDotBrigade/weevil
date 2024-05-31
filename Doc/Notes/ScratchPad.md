@@ -2,12 +2,32 @@
 
 ## To Do
 
-1. [ ] Update the Gherkin scenario DSL
+1. [ ] Review each scenario 1 last time to ensure the standardize syntax is being used.
 2. [ ] Write the code-behind for the Gherkin steps
+3. [ ] Status bar
+	- move `flagged records` to the section with `selected records`
+4. [ ] Update the context Menu
+	- Add to the menu: show records with comments `Ctrl+Shift+M`
+	- Rename: Anaylze -> Analytics
+	- Move `Show Graph` to : Analytics 
+	- Move `Remove Flags` to: Analytics 
+	- Rename: Analyze More -> Plugin Analytics
+5. [ ] Fix Toggle Filtering <<< does this work properly?
+	- Ctrl+Shift+T to turn off all filtering
+	- Ctrl+Shift+T to re-apply previous filter
 
+## Gherkin Syntax
 
-When using the plain text option
-When using the regular expression option
+### Given
+
+Given that the default log file is open
+Given that the `Empty.txt` log file is open
+Given that the log file is open at `c:\Temp\Empty.txt`
+
+### When
+
+When selecting the plain text filter mode
+When selecting the regular expression filter mode
 
 When the case sensitive option is on/off
 When the debug records option is on/off
@@ -21,19 +41,18 @@ When entering the exclude filter:
 When applying the filters
 When canceling the filtering
 
+### Then
 
-Then the results will include 7 records
-Then each result will include the text "Directives"
-Then the status bar visible record count will be 36
-Then the status bar total record count will be 36
-Then the status bar selected record count will be 36
-
-
----
+Then there will be 512 visible records
+Then each result will include the text `abc`
+Then each result will exclude the text `abc`
 
 
-When using the plain text filter option
-When using the regular expression filter option
 
-When using plain text filters
-When using regular exression filters
+Then the visible record count in the status bar will be 123,456
+Then the selected record count in the status bar will be 123,456
+Then the total record count in the status bar will be 123,456
+Then the flagged record count in the status bar will be 123
+Then the elapsed time in the status bar will be 4:00
+Then the context in the status bar will be `1.2.3.4 SomeKey=SomeValue`
+Then the message in the status bar will be ~`hello world`

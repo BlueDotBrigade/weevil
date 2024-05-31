@@ -22,8 +22,8 @@
 				.Open();
 		}
 
-		[Given($@"that the log file is open at `{R.FileName}`")]
-		public void GivenThatTheLogFileIsOpenAt(string fileName)
+		[Given($@"that the `{R.FileName}` log file is open")]
+		public void GivenThatTheLogFileIsOpen(string fileName)
 		{
 			_token.Engine = Engine
 				.UsingPath(new Daten().AsFilePath(fileName))

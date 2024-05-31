@@ -10,7 +10,7 @@ Scenario: Filtering using a plain text expression
 @Requirement:411
 Scenario: `Plain Text` filtering
   Given that the default log file is open
-  When using the plain text option
+  When selecting the plain text filter mode
     And applying the include filter: Directives 
   Then the results will include 7 records
     And each result will include the text "Directives"
@@ -18,7 +18,7 @@ Scenario: `Plain Text` filtering
 @Requirement:394
 Scenario: `Case Sensitive` plain text filtering
   Given that the default log file is open
-  When using the plain text option
+  When selecting the plain text filter mode
     And the case sensitive option is on
     And applying the include filter: directives
   Then the results will include 0 records
@@ -26,7 +26,7 @@ Scenario: `Case Sensitive` plain text filtering
 @Requirement:394
 Scenario: `Case Insensitive` plain text filtering
   Given that the default log file is open
-  When using the plain text option
+  When selecting the plain text filter mode
     And the case sensitive option is off
     And applying the include filter: directives
   Then the results will include 7 records
