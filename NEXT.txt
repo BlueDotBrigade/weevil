@@ -1,0 +1,14 @@
+BlueDotBrigade.Weevil.Core-FunctionalTests
+ - SpecFlow WORKS
+
+
+ BlueDotBrigade.Weevil.Gui-FunctionalTests
+ - Does NOT work
+
+
+
+ -----------------
+
+
+ Check project configurations
+ - Update GitHub issue with the "solution"

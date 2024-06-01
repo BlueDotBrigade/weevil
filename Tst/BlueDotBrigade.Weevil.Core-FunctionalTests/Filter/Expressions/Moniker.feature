@@ -5,14 +5,14 @@ Feature: Moniker
 Scenario: Filtering using a moniker expression
   Given that the default log file is open
   When applying the include filter: @Severity=Information
-  Then the results will include 36 records
-    And each result will include the text: "Info"
+  Then there will be 36 results
+    And each result will include: Info
 
 
   Scenario: Filtering using a moniker for metadata query
     Given that the default log file is open
     When applying the include filter: @Pinned
-    Then only pinned records will be displayed
+    Then all records will be pinned
 
   Scenario: Filtering based on severity using a moniker
     Given that the default log file is open

@@ -5,7 +5,7 @@ Scenario: Filtering using a plain text expression
   Given that the default log file is open
   When applying the include filter: Directives
   Then the results will include 7 records
-    And each result will include the text "Directives"
+    And the results will include: Directives
 
 @Requirement:411
 Scenario: `Plain Text` filtering
