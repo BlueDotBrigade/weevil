@@ -41,7 +41,7 @@
 		[When($@"selecting the {R.TextExpression} filtering option")]
 		public void WhenSelectingFilteringOption(ExpressionType expressionType)
 		{
-			_token.FilterType = textExpressionType == TextExpressionType.PlainText
+			_token.FilterType = expressionType == ExpressionType.PlainText
 				? FilterType.PlainText
 				: FilterType.RegularExpression;
 		}
