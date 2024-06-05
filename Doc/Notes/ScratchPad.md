@@ -2,7 +2,7 @@
 
 ## To Do
 
-1. [ ] Review each scenario 1 last time to ensure the standardize syntax is being used.
+1. [X] Review each scenario 1 last time to ensure the standardize syntax is being used.
 1. [X] Standardize Gherkin... 
 	 - should statements include colon?
 		  - probably best to **not** use double quotes around text, because filters can contain any character
