@@ -12,9 +12,10 @@ Scenario: Filtering using a moniker expression
   Scenario: Filtering using a moniker for metadata query
     Given that the default log file is open
     When applying the include filter: @Pinned
-    Then all records will be pinned
+    Then all results will be pinned
 
   Scenario: Filtering based on severity using a moniker
     Given that the default log file is open
     When applying the include filter: @Severity=warning
-    Then only records with a warning severity level will be displayed
+    Then all results will have a severity of warning
+  
