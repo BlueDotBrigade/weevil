@@ -49,24 +49,27 @@ When pinning record ID 2 <<<<<<<<<<<<<<<<<<<<<<
 
 ### Then
 
-Then there will be 36 records
-Then each records will include: abc
-Then each records will include either
+Then there will be 36 results
+Then each result will include: abc
+Then each result will include either
 """
 enter
 list
 here
 """
-Then each records will exclude: abc
-Then each records will exclude
+Then each result will exclude: abc
+Then each result will exclude
 """
 enter
 list
 here
 """
 
-Then each records will be pinned
-Then the 4th record will be pinned
+Then each result will be pinned
+Then the 4th result will be pinned
+Then the results will be
+"""
+"""
 
 
 Then the visible record count in the status bar will be 123,456

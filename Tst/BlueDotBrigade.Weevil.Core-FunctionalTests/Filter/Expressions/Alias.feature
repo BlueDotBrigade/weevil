@@ -4,7 +4,7 @@ Feature: Alias
 Scenario: Filtering using an alias expression
   Given that the default log file is open
   When applying the include filter: #Fatal
-  Then there will be 1 results
+  Then there will be 1 result
     And each result will include: Unrecoverable error has occurred
 
 
