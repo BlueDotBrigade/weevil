@@ -5,7 +5,8 @@
 1. [ ] Review each scenario 1 last time to ensure the standardize syntax is being used.
 1. [X] Standardize Gherkin... 
 	 - should statements include colon?
-		  - probably best to **not** use double quotes around text, because filters can contain any character	- `Then` refers to results OR records
+		  - probably best to **not** use double quotes around text, because filters can contain any character
+	- `Then` refers to results OR records
 2. [ ] Write the code-behind for the Gherkin steps
 3. [ ] Status bar
 	- move "flagged records" to the section with "selected records"
@@ -48,24 +49,24 @@ When pinning record ID 2 <<<<<<<<<<<<<<<<<<<<<<
 
 ### Then
 
-Then there will be 36 visible records
-Then the records will be
-Then all records will include: abc
-Then all records will include either
+Then there will be 36 records
+Then each records will include: abc
+Then each records will include either
 """
 enter
 list
 here
 """
-Then all records will exclude: abc
-Then all records will exclude
+Then each records will exclude: abc
+Then each records will exclude
 """
 enter
 list
 here
 """
 
-Then all records will be pinned
+Then each records will be pinned
+Then the 4th record will be pinned
 
 
 Then the visible record count in the status bar will be 123,456
