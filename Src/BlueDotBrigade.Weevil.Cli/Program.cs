@@ -4,7 +4,9 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
+	using System.Threading.Tasks;
 	using Analysis;
+	using Cocona;
 	using Diagnostics;
 	using Filter;
 	using IO;
@@ -12,66 +14,49 @@
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
 	{
-		[SuppressMessage("Microsoft.Usage", "CA1801")]
-		[SuppressMessage("Microsoft.Globalization", "CA1303")]
-		[SuppressMessage("ReSharper", "UnusedParameter.Local")]
-		private static void Main(string[] args)
+		public static void Main()
 		{
-			var sourceFilePath = string.Empty;
-			var inclusiveFilter = string.Empty;
+			OutputWriterContext.Configure(new MarkdownFormatter(), new ConsoleWriter());
 
-			try
-			{
-				Log.Default.Write(LogSeverityType.Debug, "Weevil console application is starting...");
+			Log.Default.Write(LogSeverityType.Debug, "Weevil console application has started.");
+			Log.Register(new NLogWriter());
+			Log.Default.Write($"Weevil console application is initializing... Arguments={Environment.GetCommandLineArgs().Length}");
 
-				Log.Register(new NLogWriter());
+			var builder = CoconaApp.CreateBuilder();
 
-				Log.Default.Write($"Weevil console application has started. Arguments={args.Length}");
+			var application = builder.Build();
 
-				if (args.Length >= 2)
-				{
-					sourceFilePath = args[0];
-					inclusiveFilter = args[1];
+			application.AddCommands<FilterCommands>();
 
-					IEngine engine = Engine
-						.UsingPath(sourceFilePath)
-						.Open();
+			application.Run();
 
-					engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(inclusiveFilter));
-
-					var destinationFile =
-						Path.GetFileNameWithoutExtension(sourceFilePath) +
-						".Results" +
-						Path.GetExtension(sourceFilePath);
-
-					var destinationFilePath = Path.Combine(
-						Path.GetDirectoryName(sourceFilePath),
-						destinationFile);
-
-					new ConsoleWriter(FileFormatType.Raw).Write(engine.Filter.Results);
-				}
-				else
-				{
-					Console.WriteLine("Usage:");
-					Console.WriteLine("\tWeevilCli.exe [source] [inclusive Filter]");
-				}
-			}
-			catch (Exception exception)
-			{
-				Log.Default.Write(
-					LogSeverityType.Critical,
-					exception,
-					"An unexpected error was encountered while attempting to process the provided log file.",
-					new Dictionary<string, object>
-					{
-							{ "SourceFilePath", sourceFilePath },
-					});
-
-				throw;
-			}
-
-			System.Console.WriteLine(Resources.PressAnyKeyToExit);
-			System.Console.ReadKey();
+			Log.Default.Write(LogSeverityType.Debug, "Weevil console application is terminating...");
 		}
-	}
+
+
+		static Program()
+		{
+			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+			TaskScheduler.UnobservedTaskException += OnUnhandledTaskException;
+		}
+
+		private static void OnUnhandledTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+		{
+			Write.Error(e.Exception.Message);
+			Environment.Exit(e.Exception.HResult);
+		}
+
+		private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+		{
+			var exception = e.ExceptionObject as Exception;
+
+			var message = exception is null
+				? "Application is exiting due to an unexpected error."
+				: $"Application is exiting due to an unexpected error: {exception?.Message}";
+
+			Write.Error(message);
+
+			Environment.Exit(exception?.HResult ?? 1);
+		}
+	}		
 }
