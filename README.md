@@ -195,9 +195,11 @@ Software integrity is verified through a number of automated tests which can be 
 ### Open Source Projects
 
 - [Live Charts](https://github.com/beto-rodriguez/LiveCharts2)
-  - Beto Rodriguez et al. have developed an impressive WPF charting library. Am looking forward to future releases. 
+    - Beto Rodriguez et al. have developed an impressive WPF charting library. Am looking forward to future releases. 
 - [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
-   - An excellent WPF library that helps to standardize themes & improve the overall quality of an application's user interface.  
+    - An excellent WPF library that helps to standardize themes & improve the overall quality of an application's user interface.
+- [Cocona](https://github.com/mayuki/Cocona)
+    - Mayuki Sawatari et al. have created an interesting library for creating .NET Core command-line applications.
 
 ### Contributors
 

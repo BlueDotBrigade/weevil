@@ -49,6 +49,7 @@
 		</CodeAnalysisDictionary>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Cocona" Version="2.2.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="System.Collections.Immutable">
 			<Version>8.0.0</Version>
@@ -57,6 +58,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="Resources\Icons\Weevil.ico" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Analysis\" />
 	</ItemGroup>
 	<PropertyGroup />
 	<PropertyGroup>
