@@ -27,6 +27,7 @@
 			var application = builder.Build();
 
 			application.AddCommands<FilterCommands>();
+			application.AddCommands<InsightCommands>();
 
 			application.Run();
 
