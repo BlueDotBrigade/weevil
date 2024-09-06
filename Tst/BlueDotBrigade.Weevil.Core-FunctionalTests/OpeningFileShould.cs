@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil
 {
 	using System;
 	using BlueDotBrigade.DatenLokator.TestsTools;
+	using BlueDotBrigade.Weevil.Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -69,5 +70,45 @@ namespace BlueDotBrigade.Weevil
 
 			Assert.AreEqual(fileFormatValue, engine.Context[fileFormatKey]);
 		}
+
+		[TestMethod]
+		public void DeleteMe(string logFilePath, string includeFilter, string excludeFilter)
+		{
+			IEngine engine = Engine
+				.UsingPath(logFilePath)
+				.Open();
+
+			engine.Filter.Apply(
+				FilterType.RegularExpression,
+				new FilterCriteria(includeFilter, excludeFilter));
+
+			foreach (var record in engine.Filter.Results)
+			{
+				Console.WriteLine(record.ToString());
+			}
+		}
+
+		//[TestMethod]
+		//public void DeleteMe(string logFilePath, string includeFilter, string excludeFilter)
+		//{
+		//	var context = new ContextDictionary
+		//	{
+		//		{ "FileFormat", "2.12.0"},
+		//	};
+
+		//	IEngine engine = Engine
+		//		.UsingPath(logFilePath)
+		//		.UsingContext(context)
+		//		.Open();
+
+		//	engine.Filter.Apply(
+		//		Filter.FilterType.RegularExpression,
+		//		new FilterCriteria(includeFilter, excludeFilter));
+
+		//	foreach(var record in engine.Filter.Results)
+		//	{
+		//		Console.WriteLine(record.ToString());
+		//	}
+		//}
 	}
 }

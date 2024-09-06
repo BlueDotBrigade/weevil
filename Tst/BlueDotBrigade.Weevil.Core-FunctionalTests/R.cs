@@ -12,7 +12,8 @@
 
 		public const string FilePath = @"(.*)";
 
-		public const string TextExpression = @"(plain text|regular expression)";
+		//public const string TextExpression = @"(plain text|regular expression)"; <<< The Renroll Gherkin statement does not recognize this at compile time
+		public const string TextExpression = @"(.*)";
 
 		public const string AnyText = @"(.*)";
 

@@ -1,5 +1,8 @@
 Feature: Filtering
 
+Scenario: AAA
+Given that the default log file is open
+
 @Requirement:408
 Scenario: Status bar displays number of records in results
   Given that the default log file is open
@@ -29,5 +32,3 @@ Scenario: Filter is not automatically applied when typing continues
 Scenario: `Regular Expression` filter mode selected by default
   Given that the default log file is open
   Then the filter mode will be regular expression
-
-
