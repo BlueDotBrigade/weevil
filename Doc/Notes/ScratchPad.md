@@ -3,10 +3,12 @@
 ## To Do
 
 1. [X] Review each scenario 1 last time to ensure the standardize syntax is being used.
-1. [X] Standardize Gherkin... 
+2. [X] Standardize Gherkin... 
 	 - should statements include colon?
-		  - probably best to **not** use double quotes around text, because filters can contain any character
-	- `Then` refers to results OR records
+		  - probably best to **ot** use double quotes around text, because filters can contain any character				-
+3. [ ] When term should requirements & scenarios refer to: `records` or `results` ?
+	 - Consider requirements: https://github.com/BlueDotBrigade/weevil/issues/413
+	 - And Gherkin `Then` statements
 2. [ ] Write the code-behind for the Gherkin steps
 3. [ ] Status bar
 	- move "flagged records" to the section with "selected records"
@@ -49,7 +51,8 @@ When pinning record ID 2 <<<<<<<<<<<<<<<<<<<<<<
 
 ### Then
 
-Then there will be 36 results
+Then there will be 36 results <<< DO NOT USE
+Then there will be 36 visible records
 Then each result will include: abc
 Then each result will include either
 """
@@ -79,3 +82,4 @@ Then the flagged record count in the status bar will be 123
 Then the elapsed time in the status bar will be 4:00
 Then the context in the status bar will be: 1.2.3.4 SomeKey=SomeValue
 Then the message in the status bar will include: hello world
+
