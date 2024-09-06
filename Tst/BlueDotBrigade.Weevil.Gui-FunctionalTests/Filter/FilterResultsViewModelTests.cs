@@ -31,7 +31,7 @@
 			viewModel.IsManualFilter = true;
 			viewModel.FilterManually(new object[]
 			{
-				"sample-inclusive-filter",
+				"@IsPinned",
 				string.Empty,
 			});
 

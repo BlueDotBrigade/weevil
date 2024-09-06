@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter
 {
+	// TODO: FilterType should be replaced by ExpressionType
 	public enum FilterType
 	{
 		PlainText,

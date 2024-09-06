@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.StepDefinitions
 {
+	using System.Linq.Expressions;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions.PlainText;
@@ -38,10 +39,10 @@
 				.Open();
 		}
 
-		[When($@"selecting the {R.TextExpression} filtering option")]
-		public void WhenSelectingFilteringOption(ExpressionType expressionType)
+		[When($@"selecting the {R.TextExpression} filter mode")]
+		public void WhenSelectingThePlainTextFilterMode(FilterType expressionType)
 		{
-			_token.FilterType = expressionType == ExpressionType.PlainText
+			_token.FilterType = expressionType == FilterType.PlainText
 				? FilterType.PlainText
 				: FilterType.RegularExpression;
 		}

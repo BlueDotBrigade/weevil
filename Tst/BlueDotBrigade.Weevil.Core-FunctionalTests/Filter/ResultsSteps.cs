@@ -1,21 +1,25 @@
-namespace BlueDotBrigade.Weevil
+using BlueDotBrigade;
+using BlueDotBrigade.Weevil;
+using BlueDotBrigade.Weevil.Filter;
+
+namespace BlueDotBrigade.Weevil.Filter
 {
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions.PlainText;
 
 	[Binding]
-	public sealed class StatusBarSteps
+	public sealed class ResultsSteps
 	{
 		private readonly Token _token;
 
-		public StatusBarSteps(Token token)
+		public ResultsSteps(Token token)
 		{
 			_token = token;
 		}
 
-		[Then($@"the record count will be {R.RecordCount}")]
-		public void ThenTheRecordCountWillBe(int recordCount)
+		[Then($@"there will be {R.RecordCount} visible records")]
+		public void ThenThereWillBeVisibleRecords(int recordCount)
 		{
 			_token.Engine.Count
 				.Should()

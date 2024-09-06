@@ -16,21 +16,30 @@
 ### DSL Terminology
 
 - Filter Expressions:
-	- text : This filter type is used to identify records that include specific content.
-	- alias : A keyword that refers to a built-in regular expression.
-	- moniker : Can be used to query metadata collected by the system.
-- record : Refers to a log entry that typically takes up 1 line of a log file. typically refers to 1 line of a log file, but can represent multiple lines when the source application writes a log etnry that ina callstack
-- record: Represents a log entry which typically corresponds with 1 line from a log file, but may wrap to additional lines when "newline" characters are embedded in the log message (e.g. a callstack).
-- filter: Are used to identify matching records.
-- alias: Is a pre-defined filter which is represented by a key/value pair prefixed by a hashtag (e.g. #Severity=Warning)
-- moniker: Are used to query metadata collected by Weevil. This key/value pair is prefixed by an "at" symbol (e.g. @HasComment=True)
-  - analyst: In the context of a user story, an "analyst" is the user who is using the Weevil application.
+	- text
+		- This filter type is used to identify records that include specific content.
+	- alias 
+		- A keyword that refers to a built-in regular expression.
+	- moniker 
+		- Can be used to query metadata collected by the system.
+- record 
+	- Refers to a log entry that typically takes up 1 line of a log file. typically refers to 1 line of a log file, but can represent multiple lines when the source application writes a log etnry that ina callstack
+- record
+	- Represents a log entry which typically corresponds with 1 line from a log file, but may wrap to additional lines when "newline" characters are embedded in the log message (e.g. a callstack).
+- filter
+	- Are used to identify matching records.
+- alias
+	- Is a pre-defined filter which is represented by a key/value pair prefixed by a hashtag (e.g. #Severity=Warning)
+- moniker
+	- Are used to query metadata collected by Weevil. This key/value pair is prefixed by an "at" symbol (e.g. @HasComment=True)
+- analyst
+	- In the context of a user story, an "analyst" is the user who is using the Weevil application.
 
-| Preferred Term | Do not refer To                           |
-| -------------- | ----------------------------------------- |
-| analyst        | user                                      |
-| as an analyst  | As an analyst using the Weevil log viewer |
-| record         | log entry                                 |
+| Preferred Term | Instead Of        |
+| -------------- | ----------------- |
+| analyst        | user              |
+| record         | log entry, result |
+| display        | show              |
 
 ### Templates
 
