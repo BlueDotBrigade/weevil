@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using BlueDotBrigade.DatenLokator.TestsTools;
-	using TechTalk.SpecFlow;
 
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -26,14 +25,14 @@
 		}
 
 		[When(@"the user has opened the default log file")]
-		public async void TheUserHasOpenedTheDefaultLogFile()
+		public async Task TheUserHasOpenedTheDefaultLogFile()
 		{
 			var path = new Daten().AsFilePath(From.GlobalDefault);
 			await _mainWindowViewModel.CurrrentFilter.OpenAsync(path);
 		}
 
 		[When(@"the user has opened the log file `(.*)`")]
-		public async void WhenTheUserHasOpenedTheLogFile(string sourceFilePath)
+		public async Task WhenTheUserHasOpenedTheLogFile(string sourceFilePath)
 		{
 			await _mainWindowViewModel.CurrrentFilter.OpenAsync(sourceFilePath);
 		}
