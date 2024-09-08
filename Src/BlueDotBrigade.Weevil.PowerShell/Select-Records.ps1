@@ -14,8 +14,8 @@ if (-not $logFilePath) {
 
 # Check if both $include and $exclude are empty
 if ([string]::IsNullOrWhiteSpace($include) -and [string]::IsNullOrWhiteSpace($exclude)) {
-    Write-Error "At least one filter (include or exclude) is required."
-    exit 1
+    $include = Read-Host "Include filter"
+    $exclude = Read-Host "Exclude filter"
 }
 
 # Define the assembly paths
