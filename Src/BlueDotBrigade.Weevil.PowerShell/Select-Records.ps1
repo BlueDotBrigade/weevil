@@ -12,6 +12,9 @@ if (-not $logFilePath) {
     exit 1
 }
 
+# Ensure relative paths resolve to the current working directory (instead of the user's home directory).
+$logFilePath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot $logFilePath))
+
 # Check if both $include and $exclude are empty
 if ([string]::IsNullOrWhiteSpace($include) -and [string]::IsNullOrWhiteSpace($exclude)) {
     $include = Read-Host "Include filter"
