@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Management.Automation;
-using BlueDotBrigade.Weevil.Core;
-using BlueDotBrigade.Weevil.Core.Analysis;
-using BlueDotBrigade.Weevil.Core.Filtering;
-
 namespace BlueDotBrigade.Weevil.PowerShell
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Management.Automation;
+	using BlueDotBrigade.Weevil.Analysis;
 
 	/*
 	# Assuming you have already loaded the BlueDotBrigade.Weevil.PowerShell module
@@ -22,7 +19,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 		Write-Host "-------------------------------------"
 	}
 	*/
-    [Cmdlet(VerbsCommon.Get, "Insight")]
+	[Cmdlet(VerbsCommon.Get, "Insight")]
     public class GetInsightCmdlet : Cmdlet
     {
         [Parameter(Position = 0, Mandatory = true)]

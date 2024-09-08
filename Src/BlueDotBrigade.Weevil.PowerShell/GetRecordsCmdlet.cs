@@ -1,17 +1,16 @@
-using System;
-using System.Management.Automation;
-using BlueDotBrigade.Weevil.Core;
-using BlueDotBrigade.Weevil.Core.Filtering;
-
 namespace BlueDotBrigade.Weevil.PowerShell
 {
+	using System;
+	using System.Management.Automation;
+	using BlueDotBrigade.Weevil.Filter;
+
 	/*
 	# Assuming you have already loaded the BlueDotBrigade.Weevil.PowerShell module
 	$logFilePath = "C:\Temp\Application.log"
 	$records = Get-Records -FilePath $logFilePath -Include "Id=2" -Exclude "Error"
 	$records | ForEach-Object { Write-Host $_ }
 	*/
-    [Cmdlet(VerbsCommon.Get, "Records")]
+	[Cmdlet(VerbsCommon.Get, "Records")]
     public class GetRecordsCmdlet : Cmdlet
     {
         [Parameter(Position = 0, Mandatory = true)]
