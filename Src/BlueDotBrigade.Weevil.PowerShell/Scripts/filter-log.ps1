@@ -1,20 +1,20 @@
+
+
 param (
     [string]$logFilePath,   # Path to the log file
-    [string]$include,       # Include filter (regular expression)
-    [string]$exclude        # Exclude filter (regular expression)
+    [string]$include = "",  # Include filter (default to empty string)
+    [string]$exclude = ""   # Exclude filter (default to empty string)
 )
 
-# Verify that all required parameters are provided
+# Verify that the logFilePath parameter is provided
 if (-not $logFilePath) {
     Write-Error "logFilePath is required."
     exit 1
 }
-if (-not $include) {
-    Write-Error "Include filter is required."
-    exit 1
-}
-if (-not $exclude) {
-    Write-Error "Exclude filter is required."
+
+# Check if both $include and $exclude are empty
+if ([string]::IsNullOrWhiteSpace($include) -and [string]::IsNullOrWhiteSpace($exclude)) {
+    Write-Error "At least one filter (include or exclude) is required."
     exit 1
 }
 
