@@ -1,11 +1,11 @@
-﻿namespace BlueDotBrigade.Weevil.Configuration.SpecFlow
+﻿namespace BlueDotBrigade.Weevil.Configuration.Reqnroll
 {
-	using BlueDotBrigade.Weevil.TestingTools.Configuration.SpecFlow;
+	using BlueDotBrigade.Weevil.TestingTools.Configuration.Reqnroll;
 
 	/// <summary>
-	/// Represents SpecFlow events that execute before & after every Gherkin scenario.
+	/// Represents Reqnroll events that execute before & after every Gherkin scenario.
 	/// </summary>
-	/// <seealso href="https://docs.specflow.org/projects/specflow/en/latest/Bindings/Hooks.html">SpecFlow: Hooks</seealso>
+	/// <seealso href="https://docs.reqnroll.net/latest/automation/hooks.html">Reqnroll: Hooks</seealso>
 	[Binding]
 	internal class ScenarioHooks
 	{

@@ -42,6 +42,7 @@
 		<Content Include="..\..\DomainSpecificTerminology.xml">
 			<Link>Properties\DomainSpecificTerminology.xml</Link>
 		</Content>
+		<Content Include="..\..\reqnroll.json" Link="reqnroll.json" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include=".Daten\Converters\ContentConverterTests\LongMultiLineRecord.log" />

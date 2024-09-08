@@ -1,10 +1,10 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	/// <summary>
-	/// Represents commonly used parameters in SpecFlow <see href="https://docs.specflow.org/projects/specflow/en/latest/Bindings/Step-Definitions.html">step definitions</see>.
+	/// Represents commonly used parameters in Reqnroll <see href="https://docs.reqnroll.net/latest/automation/step-definitions.html">step definitions</see>.
 	/// </summary>
-	/// <seealso href="https://docs.specflow.org/projects/specflow/en/latest/Bindings/Step-Definitions.html">SpecFlow: Step Definitions</seealso>
-	/// <seealso href="https://docs.specflow.org/projects/specflow/en/latest/Bindings/Cucumber-Expressions.html">Gherkin Expressions</seealso>
+	/// <seealso href="https://docs.reqnroll.net/latest/automation/step-definitions.html">Reqnroll: Step Definitions</seealso>
+	/// <seealso href="https://docs.reqnroll.net/latest/automation/cucumber-expressions.html">Reqnroll: Gherkin Expressions</seealso>
 	/// <seealso href="https://regex101.com">Regular Expressions</seealso>
 	internal sealed class R
 	{

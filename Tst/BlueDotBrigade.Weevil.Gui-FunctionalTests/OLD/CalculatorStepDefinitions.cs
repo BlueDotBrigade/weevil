@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Gui.Obsolete
 	[Binding]
 	public sealed class CalculatorStepDefinitions
 	{
-		// For additional details on SpecFlow step definitions see https://go.specflow.org/doc-stepdef
+		// For additional details on Reqnroll step definitions see https://docs.reqnroll.net/latest/automation/step-definitions.html
 
 		private Calculator _calculator;
 		private int _actualResult;
@@ -22,7 +22,7 @@ namespace BlueDotBrigade.Weevil.Gui.Obsolete
 		public void GivenTheFirstNumberIs(int number)
 		{
 			//TODO: implement arrange (precondition) logic
-			// For storing and retrieving scenario-specific data see https://go.specflow.org/doc-sharingdata
+			// For storing and retrieving scenario-specific data see https://docs.reqnroll.net/latest/automation/sharing-data-between-bindings.html
 			// To use the multiline text or the table argument of the scenario,
 			// additional string/Table parameters can be defined on the step definition
 			// method. 
