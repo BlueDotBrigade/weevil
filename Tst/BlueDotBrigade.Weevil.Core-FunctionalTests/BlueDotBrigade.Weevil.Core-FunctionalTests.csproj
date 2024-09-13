@@ -56,4 +56,12 @@
 	  <None Include="OLD\FilteringOld.cs" />
 	  <None Include="OLD\RecordContentValidator.cs" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<!-- required to so that Reqnroll can see Weevil's extension at run-time -->
+		<AssemblyAttribute Include="Reqnroll.Plugins.RuntimePluginAttribute">
+			<_Parameter1>BlueDotBrigade.Weevil.ReqnrollExtension</_Parameter1>
+			<_Parameter1_TypeName>System.Type</_Parameter1_TypeName>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>
