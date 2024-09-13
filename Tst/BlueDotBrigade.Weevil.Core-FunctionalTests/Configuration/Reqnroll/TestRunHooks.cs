@@ -12,7 +12,7 @@
 	internal class TestRunHooks
 	{
 		[BeforeTestRun(Order = Constants.AlwaysFirst)]
-		public static void Setup(TestRunnerManager testRunnerManager, ITestRunner testRunner)
+		public static void Setup(ITestRunnerManager testRunnerManager)
 		{
 			Log.Default.Write(LogSeverityType.Debug, "Reqnroll test environment is being setup...");
 
@@ -25,7 +25,7 @@
 		}
 
 		[AfterTestRun(Order = Constants.AlwaysLast)]
-		public static void Teardown(TestRunnerManager testRunnerManager, ITestRunner testRunner)
+		public static void Teardown(ITestRunnerManager testRunnerManager)
 		{
 			Log.Default.Write(LogSeverityType.Debug, "Reqnroll test environment is being torn down...");
 
