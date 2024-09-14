@@ -21,16 +21,10 @@ public class ForceRegexPlugin : IRuntimePlugin
 {
 	public class ForceRegexDetector : ICucumberExpressionDetector
 	{
-		public bool IsCucumberExpression(string cucumberExpressionCandidate)
+		public bool IsCucumberExpression(string expression)
 		{
-			// TODO: If cucumberExpressionCandidate contains a specific regex pattern you use, 
-			// treat it as regex
-			if (Regex.IsMatch(cucumberExpressionCandidate, @"some-pattern"))
-				return false;
-			// Otherwise fall back to the default logic 
-			// (you can also derive from CucumberExpressionDetector and use 'base')
-			return new CucumberExpressionDetector().IsCucumberExpression(cucumberExpressionCandidate);
-			// In order to force all expressions to be regex, just return false.
+			// Similar to Reqnroll's predecessor SpecFlow, assume that all expressions are regex by default.
+			return false;
 		}
 	}
 
