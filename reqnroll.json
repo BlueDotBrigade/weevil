@@ -1,5 +1,5 @@
 {
-  "$schema": "https://specflow.org/specflow-config.json",
+  "$schema": "https://schemas.reqnroll.net/reqnroll-config-latest.json",
   "ide": {
     "editor": {
       "gherkinFormat": {
@@ -16,9 +16,5 @@
   },
   "language": {
     "feature": "en-us"
-  },
-  "livingDocGenerator": {
-    "enabled": true,
-    "filePath": "TestExecution.json"
   }
 }
