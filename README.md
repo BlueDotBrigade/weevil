@@ -2,7 +2,6 @@
 
 [![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Latest%20Release)](https://github.com/BlueDotBrigade/weevil/releases/)
 [![Latest Build](https://github.com/BlueDotBrigade/weevil/actions/workflows/build-all-projects.yml/badge.svg?branch=main)](https://github.com/BlueDotBrigade/weevil/actions/workflows/build-all-projects.yml)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=BlueDotBrigade_weevil&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=BlueDotBrigade_weevil)
 
 - [What is Weevil?](#what-is-weevil)
 - [Key Features](#key-features)
@@ -158,10 +157,6 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 | [![GitHub Repository Size](https://img.shields.io/github/repo-size/BlueDotBrigade/Weevil)](https://github.com/BlueDotBrigade/Weevil)                                                             | Total size of *Weevil*'s Git repository.                                                                   |
 | [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/)                                                               | Total number of lines of code in the Git repository.                                                       |
 | [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main)                                                | Indicates when the Git repository was last updated.                                                        |
-| [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=BlueDotBrigade_weevil&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=BlueDotBrigade_weevil) | SonarCube: Number of security issues detected. |
-|[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=BlueDotBrigade_weevil&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=BlueDotBrigade_weevil) | SonarCube: Number of security vulnerabilities detected |
-| [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=BlueDotBrigade_weevil&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=BlueDotBrigade_weevil) | SonarCube: Represents the project's SQALE rating. |
-|[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=BlueDotBrigade_weevil&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=BlueDotBrigade_weevil)| SonarCube: Characteristics of the code base that suggest the design may have maintenance issues. |
 
 ### Guidelines
 
