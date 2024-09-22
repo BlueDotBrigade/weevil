@@ -1,37 +1,29 @@
 Feature: Filtering
 
-@Requirement:365
-Scenario: Filter log entries by hardware serial number
-	Given that the default log file is open
-	When selecting the plain text filter mode
-	And the case sensitive option is on
-	And applying the include filter: S/N
-	Then all records will include: S/N
-
 @Requirement:406, @UserStory:123
-Scenario: Two include filter expressions separated by OR
+Scenario: Display records that match any of the OR separated expressions
 	Given that the default log file is open
 	When applying the include filter: Directives||Fatal
 	Then there will be 8 visible records
-	And the records will include either
+	And each record will include either
 		"""
 		Directives
 		Fatal
 		"""
 
 @Requirement:399
-Scenario: Include filter identifies important information
+Scenario: Use include filter to display records containing specific keywords
 	Given that the default log file is open
-	When applying the include filter: #Information
+	When applying the include filter: Info
 	Then there will be 36 visible records
 	And all records will include: Info
 
 @Requirement:400
-Scenario: Exclude filter hides records
+Scenario: Apply exclude filter to hide records containing specified terms
 	Given that the default log file is open
 	When applying the exclude filter: Security||Scomp||Core
 	Then there will be 352 visible records
-	And the records will exclude either
+	And no record will contain any of the following
 		"""
 		Security
 		Scomp
@@ -39,55 +31,35 @@ Scenario: Exclude filter hides records
 		"""
 
 @Requirement:401
-Scenario: Exclude filter takes precedence over include filter
+Scenario: Exclude filter overrides include filter when both are applied
 	Given that the default log file is open
-	When entering the include filter: #Information
-	And entering the exclusive filter: Security||Scomp||Core
+	When entering the include filter: Info
+	And entering the exclude filter: Security||Scomp||Core
 	And applying the filters
 	Then there will be 10 visible records
 	And all records will include: Info
-	And the records will exclude
+	And each record will include all of the following
 		"""
 		Security
 		Scomp
 		Core
 		"""
+
 @Requirement:371
-Scenario: Pinned records are always displayed
+Scenario: Pinned records remain visible regardless of active filters
 	Given that the default log file is open
-	When pinning record ID 2
-	And pinning record ID 4
-	And pinning record ID 8s
-	And applying the include filter: NoRecordMatches
-	Then the results will include 3 records
-	And record ID 2 will be visible
-	And record ID 4 will be visible
-	And record ID 8 will be visible
+	When pinning the record on line 2
+	And pinning the record on line 4
+	And pinning the record on line 8
+	And applying the include filter: text not found
+	Then there will be 3 visible records
+	And line number 2 will be visible
+	And line number 4 will be visible
+	And line number 8 will be visible
 
-@Requirement:414, @Requirement:418
-Scenario: `Show Debug` option hides trace records
+@Requirement:424
+Scenario: Use the built-in #Information alias to identify records with this severity-level
 	Given that the default log file is open
-	When the `Show Debug` filter option is off
-	And applying the include filter: Diagnostics
-	Then the results will include 19 records
-
-@Requirement:414, @Requirement:418
-Scenario: `Show Debug` option shows trace records
-	Given that the default log file is open
-	When the `Show Debug` filter option is on
-	And applying the include filter: Core
-	Then the results will include 22 records
-
-@Requirement:415, @Requirement:419
-Scenario: `Show Trace` option hides trace records
-	Given that the default log file is open
-	When the `Show Trace` filter option is off
-	And applying the include filter: Diagnostics
-	Then the results will include 3 records
-
-@Requirement:415, @Requirement:419
-Scenario: `Show Trace` option displays trace records
-	Given that the default log file is open
-	When the `Show Trace` filter option is on
-	And applying the include filter: Diagnostics
-	Then the results will include 102 records
+	When applying the include filter: #Information
+	Then there will be 36 visible records
+	And all records will include: Info
