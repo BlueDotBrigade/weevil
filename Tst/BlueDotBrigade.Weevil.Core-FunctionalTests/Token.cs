@@ -9,14 +9,15 @@
 		public Token()
 		{
 			this.Engine = BlueDotBrigade.Weevil.Engine.Surrogate;
-			this.Results = ImmutableArray<IRecord>.Empty;
-			this.FilterType = FilterType.RegularExpression;
+			this.FilterType = FilterType.RegularExpression;			
 			this.FilterParameters = new Dictionary<string, object>();
+			this.Results = ImmutableArray<IRecord>.Empty;
 		}
-
 		public IEngine Engine { get; set; }
 
 		public FilterType FilterType { get; set; }
+
+		public FilterCriteria Criteria { get; set; }
 
 		public ImmutableArray<IRecord> Results { get; set; }
 
