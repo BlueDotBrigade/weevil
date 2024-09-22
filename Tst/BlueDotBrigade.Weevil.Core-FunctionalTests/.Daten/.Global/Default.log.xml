@@ -45,118 +45,91 @@
 			<InclusiveFilters>
 				<Filter>
 					<SortOrder>1</SortOrder>
-					<Value>Cpu1Voltage=(?&lt;Voltage&gt;\d+\.\d+)</Value>
+					<Value>Directives.*mission</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>2</SortOrder>
-					<Value>threat level</Value>
+					<Value>Directives</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>3</SortOrder>
-					<Value>#Fatal</Value>
+					<Value>Cpu1Voltage=(?&lt;Voltage&gt;\d+\.\d+)</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>4</SortOrder>
-					<Value>SystemUptime=(?&lt;Uptime&gt;\d+)</Value>
+					<Value>threat level</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>5</SortOrder>
-					<Value>Uptime=</Value>
+					<Value>#Fatal</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>6</SortOrder>
-					<Value>Uptime</Value>
+					<Value>SystemUptime=(?&lt;Uptime&gt;\d+)</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>7</SortOrder>
-					<Value>SystemUptime=(?&lt;Uptime&gt;)</Value>
+					<Value>Uptime=</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>8</SortOrder>
-					<Value>SystemUptime=</Value>
+					<Value>Uptime</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>9</SortOrder>
-					<Value>#Warning||#Error||#Fatal</Value>
+					<Value>SystemUptime=(?&lt;Uptime&gt;)</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>10</SortOrder>
-					<Value>---</Value>
+					<Value>SystemUptime=</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>11</SortOrder>
-					<Value>Uptime||-----</Value>
+					<Value>#Warning||#Error||#Fatal</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>12</SortOrder>
-					<Value>uptime</Value>
+					<Value>---</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>13</SortOrder>
-					<Value>ptime</Value>
+					<Value>Uptime||-----</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>14</SortOrder>
-					<Value>thread level</Value>
+					<Value>uptime</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>15</SortOrder>
-					<Value>level</Value>
+					<Value>ptime</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>16</SortOrder>
-					<Value>threat</Value>
+					<Value>thread level</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>17</SortOrder>
-					<Value>Cpu1Voltage=(?&lt;Handles&gt;\d+\.\d+)</Value>
+					<Value>level</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>18</SortOrder>
-					<Value>----</Value>
+					<Value>threat</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>19</SortOrder>
-					<Value>Key performance metrics\. Handles=(?&lt;Handles&gt;\d+)</Value>
+					<Value>Cpu1Voltage=(?&lt;Handles&gt;\d+\.\d+)</Value>
 				</Filter>
 				<Filter>
 					<SortOrder>20</SortOrder>
-					<Value>Key performance metrics\. Handles(?&lt;Handles&gt;\d+)</Value>
+					<Value>----</Value>
 				</Filter>
 			</InclusiveFilters>
 		</FilterHistory>
 		<Records>
 			<Record>
-				<Comment></Comment>
-				<Id>115</Id>
-				<IsPinned>true</IsPinned>
-				<RelatesTo>
-					<ByteOffset>-1</ByteOffset>
-					<LineNumber>115</LineNumber>
-				</RelatesTo>
-			</Record>
-			<Record>
-				<Comment></Comment>
-				<Id>192</Id>
-				<IsPinned>true</IsPinned>
-				<RelatesTo>
-					<ByteOffset>-1</ByteOffset>
-					<LineNumber>192</LineNumber>
-				</RelatesTo>
-			</Record>
-			<Record>
-				<Comment></Comment>
-				<Id>196</Id>
-				<IsPinned>true</IsPinned>
-				<RelatesTo>
-					<ByteOffset>-1</ByteOffset>
-					<LineNumber>196</LineNumber>
-				</RelatesTo>
-			</Record>
-			<Record>
 				<Comment>Not good!</Comment>
 				<Id>195</Id>
-				<IsPinned>true</IsPinned>
+				<IsPinned>false</IsPinned>
 				<RelatesTo>
 					<ByteOffset>-1</ByteOffset>
 					<LineNumber>195</LineNumber>
@@ -165,7 +138,7 @@
 			<Record>
 				<Comment>Uptime: 172800</Comment>
 				<Id>3</Id>
-				<IsPinned>true</IsPinned>
+				<IsPinned>false</IsPinned>
 				<RelatesTo>
 					<ByteOffset>-1</ByteOffset>
 					<LineNumber>3</LineNumber>
@@ -174,7 +147,7 @@
 			<Record>
 				<Comment>Why attempting failover?</Comment>
 				<Id>214</Id>
-				<IsPinned>true</IsPinned>
+				<IsPinned>false</IsPinned>
 				<RelatesTo>
 					<ByteOffset>-1</ByteOffset>
 					<LineNumber>214</LineNumber>
@@ -183,7 +156,7 @@
 			<Record>
 				<Comment>Uptime: 174030 =&gt; 27 REBOOT</Comment>
 				<Id>236</Id>
-				<IsPinned>true</IsPinned>
+				<IsPinned>false</IsPinned>
 				<RelatesTo>
 					<ByteOffset>-1</ByteOffset>
 					<LineNumber>236</LineNumber>
@@ -192,7 +165,7 @@
 			<Record>
 				<Comment>Voltage issues.</Comment>
 				<Id>200</Id>
-				<IsPinned>true</IsPinned>
+				<IsPinned>false</IsPinned>
 				<RelatesTo>
 					<ByteOffset>-1</ByteOffset>
 					<LineNumber>200</LineNumber>
@@ -244,7 +217,7 @@
 		<UserRemarks>Why did the droid reboot?</UserRemarks>
 	</CommonData>
 	<Header>
-		<SavedAt>2022-10-08T06:28:53.435562-04:00</SavedAt>
+		<SavedAt>2024-09-20T17:00:18.9803436-04:00</SavedAt>
 		<SchemaVersion xmlns:d3p1="http://schemas.datacontract.org/2004/07/System">
 			<d3p1:_Build>0</d3p1:_Build>
 			<d3p1:_Major>4</d3p1:_Major>
