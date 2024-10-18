@@ -1,64 +1,75 @@
 namespace BlueDotBrigade.Weevil
 {
-	using System;
-	using System.Collections.Generic;
-	internal class RegionManager
-	{
-		private readonly List<RegionOfInterest> _regions = new List<RegionOfInterest>();
-		private int? _startIndex = null;
+    using System;
+    using System.Linq;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
 
-		public void MarkStart(int recordIndex)
-		{
-			_startIndex = recordIndex;
-		}
+    internal class RegionManager
+    {
+        private readonly List<RegionOfInterest> _regions = new List<RegionOfInterest>();
+		
+        private int? _startIndex = null;
 
-		public bool MarkEnd(int recordIndex)
-		{
-			if (_startIndex.HasValue)
-			{
-				var start = Math.Min(_startIndex.Value, recordIndex);
-				var end = Math.Max(_startIndex.Value, recordIndex);
+        public ImmutableArray<RegionOfInterest> Regions => _regions.ToImmutableArray();
 
-				var newRegion = new RegionOfInterest(start, end);
+        public void MarkStart(int recordIndex)
+        {
+            if (_regions.Any(r => r.Contains(recordIndex)))
+            {
+                throw new InvalidOperationException($"The record is already contained within an existing region. RecordIndex={recordIndex}");
+            }
+            _startIndex = recordIndex;
+        }
 
-				// Prevent creating the same region twice
-				if (_regions.Any(r => r.StartIndex == newRegion.StartIndex && r.EndIndex == newRegion.EndIndex))
-				{
-					_startIndex = null;
-					return false;
-				}
+        public void MarkEnd(int recordIndex)
+        {
+            if (_startIndex.HasValue)
+            {
+                var start = Math.Min(_startIndex.Value, recordIndex);
+                var end = Math.Max(_startIndex.Value, recordIndex);
 
-				// Check for overlap with existing regions
-				if (_regions.Any(r => r.OverlapsWith(newRegion)))
-				{
-					_startIndex = null;
-					return false;
-				}
+                var newRegion = new RegionOfInterest(start, end);
 
-				_regions.Add(newRegion);
-				_startIndex = null;
-				return true;
-			}
-			else
-			{
-				throw new InvalidOperationException("Region start has not been marked.");
-			}
-		}
+                // Prevent creating the same region twice
+                if (_regions.Any(r => r.StartIndex == newRegion.StartIndex && r.EndIndex == newRegion.EndIndex))
+                {
+                    _startIndex = null;
+                    throw new InvalidOperationException("Unable to create region because this region has already been defined.");
+                }
 
-		public void DeleteRegions()
-		{
-			_regions.Clear();
-		}
+                // Check for overlap with existing regions
+                if (_regions.Any(r => r.OverlapsWith(newRegion)))
+                {
+                    _startIndex = null;
+                    throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
+                }
 
-		public bool Delete(int recordIndex)
-		{
-			var region = _regions.FirstOrDefault(r => r.Contains(recordIndex));
-			if (region != null)
-			{
-				_regions.Remove(region);
-				return true;
-			}
-			return false;
-		}
-	}
+                _regions.Add(newRegion);
+                _startIndex = null;
+                return;
+            }
+            else
+            {
+                throw new InvalidOperationException("Region start has not been marked.");
+            }
+        }
+
+        public void Clear()
+        {
+            _regions.Clear();
+        }
+
+        public bool Clear(int recordIndex)
+        {
+            var region = _regions.FirstOrDefault(r => r.Contains(recordIndex));
+            
+            if (region != null)
+            {
+                _regions.Remove(region);
+                return true;
+            }
+            return false;
+        }
+    }
 }

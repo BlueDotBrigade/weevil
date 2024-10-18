@@ -1,3 +1,4 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BlueDotBrigade.Weevil.Core;
 
@@ -15,34 +16,20 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
         }
 
         [TestMethod]
-        public void MarkRegionStart_ValidLineNumber_StartLineNumberSet()
-        {
-            // Arrange
-            int startLineNumber = 800;
-
-            // Act
-            _regionManager.MarkRegionStart(startLineNumber);
-
-            // Assert
-            Assert.AreEqual(startLineNumber, _regionManager.CurrentRegionStartLineNumber);
-        }
-
-        [TestMethod]
         public void MarkRegionEnd_AfterStartRegion_RegionAdded()
         {
             // Arrange
-            int startLineNumber = 800;
-            int endLineNumber = 900;
-            _regionManager.MarkRegionStart(startLineNumber);
+            int startIndex = 800;
+            int endIndex = 900;
+            _regionManager.MarkStart(startIndex);
 
             // Act
-            _regionManager.MarkRegionEnd(endLineNumber);
+            _regionManager.MarkEnd(endIndex);
 
             // Assert
-            var regions = _regionManager.GetRegionsOfInterest();
-            Assert.AreEqual(1, regions.Count);
-            Assert.AreEqual(startLineNumber, regions[0].StartLineNumber);
-            Assert.AreEqual(endLineNumber, regions[0].EndLineNumber);
+            Assert.AreEqual(1, _regionManager.Regions.Length);
+            Assert.AreEqual(startIndex, _regionManager.Regions[0].StartIndex);
+            Assert.AreEqual(endIndex, _regionManager.Regions[0].EndIndex);
         }
 
         [TestMethod]
@@ -50,10 +37,10 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
         public void MarkRegionEnd_WithoutStart_ThrowsInvalidOperationException()
         {
             // Arrange
-            int endLineNumber = 900;
+            int endIndex = 900;
 
             // Act
-            _regionManager.MarkRegionEnd(endLineNumber);
+            _regionManager.MarkEnd(endIndex);
 
             // Assert handled by ExpectedException
         }
@@ -62,36 +49,62 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
         public void GetRegionsOfInterest_AfterMultipleRegions_ReturnsAllRegions()
         {
             // Arrange
-            _regionManager.MarkRegionStart(800);
-            _regionManager.MarkRegionEnd(900);
+            _regionManager.MarkStart(800);
+            _regionManager.MarkEnd(900);
 
-            _regionManager.MarkRegionStart(950);
-            _regionManager.MarkRegionEnd(1000);
+            _regionManager.MarkStart(950);
+            _regionManager.MarkEnd(1000);
 
             // Act
-            var regions = _regionManager.GetRegionsOfInterest();
-
             // Assert
-            Assert.AreEqual(2, regions.Count);
-            Assert.AreEqual(800, regions[0].StartLineNumber);
-            Assert.AreEqual(900, regions[0].EndLineNumber);
-            Assert.AreEqual(950, regions[1].StartLineNumber);
-            Assert.AreEqual(1000, regions[1].EndLineNumber);
+            Assert.AreEqual(2, _regionManager.Regions.Length);
+            Assert.AreEqual(800, _regionManager.Regions[0].StartIndex);
+            Assert.AreEqual(900, _regionManager.Regions[0].EndIndex);
+            Assert.AreEqual(950, _regionManager.Regions[1].StartIndex);
+            Assert.AreEqual(1000, _regionManager.Regions[1].EndIndex);
         }
 
         [TestMethod]
-        public void ClearRegions_AfterAddingRegions_RegionsCleared()
+        public void Clear_ExistingRegions_AllRegionsDeleted()
         {
             // Arrange
-            _regionManager.MarkRegionStart(800);
-            _regionManager.MarkRegionEnd(900);
+            _regionManager.MarkStart(800);
+            _regionManager.MarkEnd(900);
 
             // Act
-            _regionManager.ClearRegions();
+            _regionManager.Clear();
 
             // Assert
-            var regions = _regionManager.GetRegionsOfInterest();
-            Assert.AreEqual(0, regions.Count);
+            Assert.AreEqual(0, _regionManager.Regions.Length);
+        }
+
+        [TestMethod]
+        public void Clear_IndexIsWithinRegion_RegionDeleted()
+        {
+            // Arrange
+            _regionManager.MarkStart(800);
+            _regionManager.MarkEnd(900);
+
+            // Act
+            _regionManager.Clear(850);
+
+            // Assert
+            Assert.AreEqual(0, _regionManager.Regions.Length);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Clear_IndexIsOutsideOfRegion_Throws()
+        {
+            // Arrange
+            _regionManager.MarkStart(800);
+            _regionManager.MarkEnd(900);
+
+            // Act
+            _regionManager.Clear(100);
+
+            // Assert
+            Assert.AreEqual(1, _regionManager.Regions.Length);
         }
     }
 }

@@ -5,11 +5,11 @@ namespace BlueDotBrigade.Weevil
 		public int StartIndex { get; }
 		public int EndIndex { get; }
 
-		public RegionOfInterest(int startIndex, int endIndex)
-		{
+		public RegionOfInterest(int startIndex, int endIndex)	
+		{	
 			this.StartIndex = startIndex;
 			this.EndIndex = endIndex;
-		}
+		}	
 
 		public bool OverlapsWith(RegionOfInterest other)
 		{
