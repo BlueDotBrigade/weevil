@@ -12,19 +12,19 @@
 	/// <summary>
 	/// Interaction logic for FilterResultsView.xaml
 	/// </summary>
-	public partial class FilterResultsView : UserControl
+	public partial class FilterView : UserControl
 	{
-		public FilterResultsView()
+		public FilterView()
 		{
 			DataContextChanged += (sender, args) =>
 			{
 				if (args.OldValue != null)
 				{
-					((FilterResultsViewModel)args.OldValue).ResultsChanged -= OnResultsChanged;
+					((FilterViewModel)args.OldValue).ResultsChanged -= OnResultsChanged;
 				}
 				if (args.NewValue != null)
 				{
-					((FilterResultsViewModel)args.NewValue).ResultsChanged += OnResultsChanged;
+					((FilterViewModel)args.NewValue).ResultsChanged += OnResultsChanged;
 				}
 			};
 
@@ -53,7 +53,7 @@
 			}
 		}
 
-		private FilterResultsViewModel ViewModel => (FilterResultsViewModel)this.DataContext;
+		private FilterViewModel ViewModel => (FilterViewModel)this.DataContext;
 
 		private void OnResultsChanged(object sender, EventArgs e)
 		{

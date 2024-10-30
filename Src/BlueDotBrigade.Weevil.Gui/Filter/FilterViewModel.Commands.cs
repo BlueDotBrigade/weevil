@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using BlueDotBrigade.Weevil.Gui.Input;
 	using Prism.Commands;
 
-	internal partial class FilterResultsViewModel
+	internal partial class FilterViewModel
 	{
 		#region Commands: General
 		[SafeForDependencyAnalysis]

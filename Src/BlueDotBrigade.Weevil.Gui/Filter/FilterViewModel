@@ -39,7 +39,7 @@
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
 	[NotifyPropertyChanged()]
-	internal partial class FilterResultsViewModel : IDropTarget, INotifyPropertyChanged
+	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
 		const string RawFileName = "SelectedRecords.log";
@@ -59,9 +59,6 @@
 		private static readonly ImmutableArray<IInsight> NoInsight = ImmutableArray.Create(Array.Empty<IInsight>());
 
 		#region Fields & Object Lifetime
-
-		private readonly Window _mainWindow;
-
 		/// <summary>
 		/// Provides a mechanism for background threads to queue work for the UI's main message loop.
 		/// </summary>
@@ -104,11 +101,10 @@
 
 		private ImmutableArray<IInsight> _insights;
 
-		public FilterResultsViewModel(Window mainWindow, IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
+		public FilterViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
-			_mainWindow = mainWindow;
 			_uiDispatcher = uiDispatcher;
-			_dialogBox = new DialogBoxService(mainWindow);
+			_dialogBox = new DialogBoxService();
 
 			_bulletinMediator = bulletinMediator;
 
@@ -444,7 +440,6 @@
 				if (plugin.CanOpenAs)
 				{
 					(bool, OpenAsResult) result = plugin.ShowOpenAs(
-						_mainWindow,
 						LicensePath,
 						(path) => Engine.UsingPath(path),
 						sourceFilePath);
@@ -843,14 +838,11 @@
 			try
 			{
 				var dialog = new AboutDialog(
-					_uiDispatcher, 
-					this.WeevilVersion, 
-					LicensePath, 
-					ThirdPartyNoticesPath, 
-					_engine.SourceFilePath)
-				{
-					Owner = _mainWindow,
-				};
+					_uiDispatcher,
+					this.WeevilVersion,
+					LicensePath,
+					ThirdPartyNoticesPath,
+					_engine.SourceFilePath);
 
 				dialog.ShowDialog();
 			}
@@ -874,7 +866,7 @@
 
 			if (plugin.CanShowDashboard)
 			{
-				plugin.ShowDashboard(_mainWindow, this.WeevilVersion, _engine, _insights.ToArray());
+				plugin.ShowDashboard(this.WeevilVersion, _engine, _insights.ToArray());
 			}
 			else
 			{
