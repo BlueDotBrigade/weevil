@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<!-- Weevil was originally created as a WPF application, so the CLI has WPF dependencies. -->
-		<TargetFramework>net8.0-windows</TargetFramework>
-		<UseWPF>true</UseWPF>
-		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<TargetFramework>net8.0</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<Platforms>x64</Platforms>
 		<AssemblyName>WeevilCli</AssemblyName>
