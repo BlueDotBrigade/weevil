@@ -13,11 +13,11 @@
 
 		bool CanOpenAs { get; }
 
-		(bool, OpenAsResult) ShowOpenAs(object parentWindow, string licensePath, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
+		(bool, OpenAsResult) ShowOpenAs(string licensePath, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
 
 		bool CanShowDashboard { get; }
 
-		void ShowDashboard(object parentWindow, Version weevilVersion, IEngine engine, IInsight[] insights);
+		void ShowDashboard(Version weevilVersion, IEngine engine, IInsight[] insights);
 
 		ICoreExtension GetExtension(string sourceFilePath);
 
