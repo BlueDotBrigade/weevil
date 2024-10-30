@@ -1,17 +1,17 @@
 namespace BlueDotBrigade.Weevil
 {
-	internal class RegionOfInterest
+	internal class Bookend
 	{
 		public int StartLineNumber { get; }
 		public int EndLineNumber { get; }
 
-		public RegionOfInterest(int startLineNumber, int endLineNumber)	
+		public Bookend(int startLineNumber, int endLineNumber)	
 		{	
 			this.StartLineNumber = startLineNumber;
 			this.EndLineNumber = endLineNumber;
 		}	
 
-		public bool OverlapsWith(RegionOfInterest other)
+		public bool OverlapsWith(Bookend other)
 		{
 			return this.StartLineNumber <= other.EndLineNumber && this.EndLineNumber >= other.StartLineNumber;
 		}

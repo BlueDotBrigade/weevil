@@ -5,13 +5,13 @@ namespace BlueDotBrigade.Weevil
     using System.Collections.Generic;
     using System.Collections.Immutable;
 
-    internal class RegionManager
+    internal class BookendManager
     {
-        private readonly List<RegionOfInterest> _regions = new List<RegionOfInterest>();
+        private readonly List<Bookend> _regions = new List<Bookend>();
 		
         private int? _startLineNumber = null;
 
-        public ImmutableArray<RegionOfInterest> Regions => _regions.ToImmutableArray();
+        public ImmutableArray<Bookend> Bookends => _regions.ToImmutableArray();
 
         public void MarkStart(int lineNumber)
         {
@@ -29,7 +29,7 @@ namespace BlueDotBrigade.Weevil
                 var start = Math.Min(_startLineNumber.Value, lineNumber);
                 var end = Math.Max(_startLineNumber.Value, lineNumber);
 
-                var newRegion = new RegionOfInterest(start, end);
+                var newRegion = new Bookend(start, end);
 
                 // Prevent creating the same region twice
                 if (_regions.Any(r => r.StartLineNumber == newRegion.StartLineNumber && r.EndLineNumber == newRegion.EndLineNumber))
