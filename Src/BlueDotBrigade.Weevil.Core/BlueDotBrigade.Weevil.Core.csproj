@@ -53,5 +53,8 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>BlueDotBrigade.Weevil.Core-FunctionalTests</_Parameter1>
     </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>BlueDotBrigade.Weevil.Core-FeatureTests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 </Project>

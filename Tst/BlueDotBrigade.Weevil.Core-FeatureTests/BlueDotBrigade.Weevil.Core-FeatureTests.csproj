@@ -26,6 +26,7 @@
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
 		<PackageReference Include="NSubstitute" Version="5.1.0" />
+		<PackageReference Include="Reqnroll.MsTest" Version="2.1.0" />
 		<PackageReference Include="MSTest.TestAdapter" Version="3.6.0" />
 		<PackageReference Include="MSTest.TestFramework" Version="3.6.0" />
 		<PackageReference Include="FluentAssertions" Version="6.12.0" />
@@ -39,6 +40,7 @@
 		<Content Include="..\..\DomainSpecificTerminology.xml">
 			<Link>Properties\DomainSpecificTerminology.xml</Link>
 		</Content>
+		<Content Include="..\..\reqnroll.json" Link="reqnroll.json" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
@@ -61,5 +63,10 @@
 			<_Parameter1>BlueDotBrigade.Weevil.ReqnrollExtension</_Parameter1>
 			<_Parameter1_TypeName>System.Type</_Parameter1_TypeName>
 		</AssemblyAttribute>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Analysis\" />
+	  <Folder Include="Navigation\" />
 	</ItemGroup>
 </Project>
