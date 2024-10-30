@@ -28,8 +28,8 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 
             // Assert
             Assert.AreEqual(1, _regionManager.Regions.Length);
-            Assert.AreEqual(startIndex, _regionManager.Regions[0].StartIndex);
-            Assert.AreEqual(endIndex, _regionManager.Regions[0].EndIndex);
+            Assert.AreEqual(startIndex, _regionManager.Regions[0].StartLineNumber);
+            Assert.AreEqual(endIndex, _regionManager.Regions[0].EndLineNumber);
         }
 
         [TestMethod]
@@ -58,10 +58,10 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
             // Act
             // Assert
             Assert.AreEqual(2, _regionManager.Regions.Length);
-            Assert.AreEqual(800, _regionManager.Regions[0].StartIndex);
-            Assert.AreEqual(900, _regionManager.Regions[0].EndIndex);
-            Assert.AreEqual(950, _regionManager.Regions[1].StartIndex);
-            Assert.AreEqual(1000, _regionManager.Regions[1].EndIndex);
+            Assert.AreEqual(800, _regionManager.Regions[0].StartLineNumber);
+            Assert.AreEqual(900, _regionManager.Regions[0].EndLineNumber);
+            Assert.AreEqual(950, _regionManager.Regions[1].StartLineNumber);
+            Assert.AreEqual(1000, _regionManager.Regions[1].EndLineNumber);
         }
 
         [TestMethod]

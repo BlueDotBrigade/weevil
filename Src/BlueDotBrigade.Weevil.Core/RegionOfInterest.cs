@@ -2,23 +2,23 @@ namespace BlueDotBrigade.Weevil
 {
 	internal class RegionOfInterest
 	{
-		public int StartIndex { get; }
-		public int EndIndex { get; }
+		public int StartLineNumber { get; }
+		public int EndLineNumber { get; }
 
-		public RegionOfInterest(int startIndex, int endIndex)	
+		public RegionOfInterest(int startLineNumber, int endLineNumber)	
 		{	
-			this.StartIndex = startIndex;
-			this.EndIndex = endIndex;
+			this.StartLineNumber = startLineNumber;
+			this.EndLineNumber = endLineNumber;
 		}	
 
 		public bool OverlapsWith(RegionOfInterest other)
 		{
-			return this.StartIndex <= other.EndIndex && this.EndIndex >= other.StartIndex;
+			return this.StartLineNumber <= other.EndLineNumber && this.EndLineNumber >= other.StartLineNumber;
 		}
 
-		public bool Contains(int recordIndex)
+		public bool Contains(int lineNumber)
 		{
-			return recordIndex >= this.StartIndex && recordIndex <= this.EndIndex;
+			return lineNumber >= this.StartLineNumber && lineNumber <= this.EndLineNumber;
 		}
 	}
 }

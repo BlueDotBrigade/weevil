@@ -9,44 +9,44 @@ namespace BlueDotBrigade.Weevil
     {
         private readonly List<RegionOfInterest> _regions = new List<RegionOfInterest>();
 		
-        private int? _startIndex = null;
+        private int? _startLineNumber = null;
 
         public ImmutableArray<RegionOfInterest> Regions => _regions.ToImmutableArray();
 
-        public void MarkStart(int recordIndex)
+        public void MarkStart(int lineNumber)
         {
-            if (_regions.Any(r => r.Contains(recordIndex)))
+            if (_regions.Any(r => r.Contains(lineNumber)))
             {
-                throw new InvalidOperationException($"The record is already contained within an existing region. RecordIndex={recordIndex}");
+                throw new InvalidOperationException($"The record is already contained within an existing region. RecordIndex={lineNumber}");
             }
-            _startIndex = recordIndex;
+            _startLineNumber = lineNumber;
         }
 
-        public void MarkEnd(int recordIndex)
+        public void MarkEnd(int lineNumber)
         {
-            if (_startIndex.HasValue)
+            if (_startLineNumber.HasValue)
             {
-                var start = Math.Min(_startIndex.Value, recordIndex);
-                var end = Math.Max(_startIndex.Value, recordIndex);
+                var start = Math.Min(_startLineNumber.Value, lineNumber);
+                var end = Math.Max(_startLineNumber.Value, lineNumber);
 
                 var newRegion = new RegionOfInterest(start, end);
 
                 // Prevent creating the same region twice
-                if (_regions.Any(r => r.StartIndex == newRegion.StartIndex && r.EndIndex == newRegion.EndIndex))
+                if (_regions.Any(r => r.StartLineNumber == newRegion.StartLineNumber && r.EndLineNumber == newRegion.EndLineNumber))
                 {
-                    _startIndex = null;
+                    _startLineNumber = null;
                     throw new InvalidOperationException("Unable to create region because this region has already been defined.");
                 }
 
                 // Check for overlap with existing regions
                 if (_regions.Any(r => r.OverlapsWith(newRegion)))
                 {
-                    _startIndex = null;
+                    _startLineNumber = null;
                     throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
                 }
 
                 _regions.Add(newRegion);
-                _startIndex = null;
+                _startLineNumber = null;
                 return;
             }
             else
