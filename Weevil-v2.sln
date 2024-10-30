@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 		DomainSpecificTerminology.xml = DomainSpecificTerminology.xml
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		postsharp.config = postsharp.config
-		SpecFlow.json = SpecFlow.json
+		reqnroll.json = reqnroll.json
 		Weevil.ruleset = Weevil.ruleset
 	EndProjectSection
 EndProject
@@ -45,13 +45,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Plugins", "Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.csproj", "{8DD59BAD-4E11-45A9-861D-14A4046C1D96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\BlueDotBrigade.Weevil.Core-FunctionalTests.csproj", "{98DE5E64-6FBF-4382-A3B2-D54652B6014B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FeatureTests", "Tst\BlueDotBrigade.Weevil.Core-FeatureTests\BlueDotBrigade.Weevil.Core-FeatureTests.csproj", "{98DE5E64-6FBF-4382-A3B2-D54652B6014B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Gui-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Gui-FunctionalTests\BlueDotBrigade.Weevil.Gui-FunctionalTests.csproj", "{53951074-E2A4-4F3C-9CF4-76816578C6E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Gui-FeatureTests", "Tst\BlueDotBrigade.Weevil.Gui-FeatureTests\BlueDotBrigade.Weevil.Gui-FeatureTests.csproj", "{53951074-E2A4-4F3C-9CF4-76816578C6E1}"
 EndProject
 Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "BlueDotBrigade.Weevil.Installer", "Src\BlueDotBrigade.Weevil.Installer\BlueDotBrigade.Weevil.Installer.wixproj", "{E7AFD435-36C1-4299-BD86-0C070FE1539A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.PowerShell", "Src\BlueDotBrigade.Weevil.PowerShell\BlueDotBrigade.Weevil.PowerShell.csproj", "{8D500B24-89E1-4D0D-A742-2A714CADBF66}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\BlueDotBrigade.Weevil.Core-FunctionalTests.csproj", "{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +115,10 @@ Global
 		{8D500B24-89E1-4D0D-A742-2A714CADBF66}.Debug|x64.Build.0 = Debug|x64
 		{8D500B24-89E1-4D0D-A742-2A714CADBF66}.Release|x64.ActiveCfg = Release|x64
 		{8D500B24-89E1-4D0D-A742-2A714CADBF66}.Release|x64.Build.0 = Release|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Debug|x64.ActiveCfg = Debug|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Debug|x64.Build.0 = Debug|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Release|x64.ActiveCfg = Release|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

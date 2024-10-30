@@ -1,5 +1,29 @@
 # Gherkin Guidance
 
+1. Clear and Concise Titles:
+	 - Scenario titles should focus on the functionality or behavior being tested rather than on specific examples or data. 
+	 - Titles should succinctly describe the functionality or behavior being tested without referencing specific data or examples.
+	 - Focus on what the system does, not on the specific data used in the test.
+	 - Avoid mentioning specific examples or data in the titles.
+	 - Use a consistent naming convention across all scenarios.
+
+Structured Steps (Given-When-Then):
+
+1. Consistent Terminology:
+	 - Use the same terms to describe similar concepts (e.g., "records," "entries," "lines").
+	 - Enclose specific values or options in quotation marks for clarity.
+2. Avoid Ambiguity:
+	 - Ensure that each step is unambiguous and precisely describes the action or expectation.
+	 - Avoid contradictory statements within the same scenario.
+3. Maintain Readability:
+	 - Use plain English that can be understood by all stakeholders.
+	 - Avoid technical jargon unless it's commonly accepted by the audience.
+4. Quotes
+	 - Use double quotes when referencing
+		  - specific onscreen text
+		  - file name
+		  - file path
+
 ## Given
 
 - DO write in present perfect tense. [#A]

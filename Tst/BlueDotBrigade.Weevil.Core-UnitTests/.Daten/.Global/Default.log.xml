@@ -3,12 +3,12 @@
 	<CommonData>
 		<Context>
 			<Property xmlns="">
-				<Name>FileFormat</Name>
-				<Value>2.12.0</Value>
+				<Name>LogFormat</Name>
+				<Value>4096.953.12.111</Value>
 			</Property>
 			<Property xmlns="">
-				<Name>MriApiType</Name>
-				<Value>TherapyPack</Value>
+				<Name>AstroMech</Name>
+				<Value>R2-Series</Value>
 			</Property>
 		</Context>
 		<FilterHistory>
