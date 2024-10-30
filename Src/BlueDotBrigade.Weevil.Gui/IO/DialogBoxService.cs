@@ -17,17 +17,9 @@
 		/// <summary>
 		/// Used to display dialog boxes (e.g. error messages) to the user.
 		/// </summary>
-		/// <param name="parentWindow">Represents the <see cref="Window"/> to center the dialog box on.</param>
-		/// <example>
-		/// // Retrieves the root level .
-		/// Window applicationWindow = Application.Current.MainWindow
-		/// 
-		/// // Retrieves the immediate parent.
-		/// Window parentWindow = Window.GetWindow(this);
-		/// </example>
-		public DialogBoxService(Window parentWindow)
+		public DialogBoxService()
 		{
-			_parentWindow = parentWindow;
+			// nothing to do
 		}
 
 		public string ShowOpenFile(string compatibleFileExtensions)

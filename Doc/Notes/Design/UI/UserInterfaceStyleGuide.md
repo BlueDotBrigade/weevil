@@ -30,7 +30,7 @@
 
 ### General
 
-- Filename should end with a post fix which represents the icon's dimensions
+- The file name should end with a post fix which represents the icon's dimensions
 	- For example: `-24.png` is used for a 24x24 pixel icon.  
 
 ### Icons Having State

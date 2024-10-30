@@ -5,7 +5,7 @@
 	using System.Diagnostics.CodeAnalysis;
 
 	/// <threadsafety static="true" instance="true" />
-	[DebuggerDisplay("LineNumber={" + nameof(LineNumber) + "}")]
+	[DebuggerDisplay("Line {" + nameof(LineNumber) + "}: {this.DebuggerString()}")]
 	public sealed class Record : IRecord
 	{
 		/// <summary>
@@ -94,6 +94,11 @@
 		public static bool IsGenuine(IRecord record)
 		{
 			return !IsDummyOrNull(record);
+		}
+
+		private string DebuggerString()
+		{
+			return this.Content.Length <= 64 ? this.Content : this.Content.Substring(0, 64);
 		}
 
 		public override string ToString()

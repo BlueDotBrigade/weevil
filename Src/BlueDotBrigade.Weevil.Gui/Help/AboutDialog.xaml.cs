@@ -55,6 +55,8 @@
 			this.License = new File().ReadAllText(licensePath);
 			this.DataContext = this;
 
+			this.Owner = Application.Current.MainWindow;
+
 			InitializeComponent();
 
 			_timer = new Timer
