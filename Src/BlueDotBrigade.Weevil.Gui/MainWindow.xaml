@@ -22,7 +22,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <filter:FilterResultsView Grid.Row="0" DataContext="{Binding CurrrentFilter}" />
-        <local:MainStatusBarView Grid.Row="1" DataContext="{Binding CurrentStatus}"/>
+        <filter:FilterView Grid.Row="0" DataContext="{Binding FilterViewModel}" />
+        <local:MainStatusBarView Grid.Row="1" DataContext="{Binding StatusBarViewModel}"/>
     </Grid>
 </Window>

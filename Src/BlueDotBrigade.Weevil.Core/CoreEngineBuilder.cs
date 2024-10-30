@@ -152,7 +152,7 @@
 				string sourceFilePath;
 				long sourceFileLength;
 				Encoding sourceFileEncoding;
-				Stopwatch sourceFileLoadingPeriod = new Stopwatch();
+				Stopwatch loadingStopwatch = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
@@ -214,7 +214,7 @@
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
 
-						sourceFileLoadingPeriod.Restart();
+						loadingStopwatch.Restart();
 
 						var repository = new SerializedRecordRepository(
 							 dataSource,
@@ -225,7 +225,7 @@
 
 						records = repository.Get(_range, maxRecords);
 
-						sourceFileLoadingPeriod.Stop();
+						loadingStopwatch.Stop();
 
 						sidecarManager.Load(
 							records,
@@ -253,7 +253,7 @@
 					sourceFilePath,
 					sourceFileLength,
 					sourceFileEncoding,
-					sourceFileLoadingPeriod.Elapsed,
+					loadingStopwatch.Elapsed,
 					coreExtension,
 					context,
 					sourceFileRemarks,

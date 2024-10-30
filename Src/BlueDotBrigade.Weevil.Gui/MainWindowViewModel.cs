@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Reflection;
@@ -10,33 +11,28 @@
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.Gui.Threading;
+	using PostSharp.Patterns.Model;
 
-	internal class MainWindowViewModel : DependencyObject
+	[NotifyPropertyChanged()]
+	internal class MainWindowViewModel
 	{
 		private readonly IUiDispatcher _uiDispatcher;
-
-		public static readonly DependencyProperty ApplicationTitleProperty = DependencyProperty.Register(
-			nameof(ApplicationTitle),
-			typeof(string),
-			typeof(MainWindowViewModel)
-		);
-
-
 		private readonly UiResponsivenessMonitor _uiMonitor;
 
-		public MainWindowViewModel(IUiDispatcher uiDispatcher, Window mainWindow, IBulletinMediator bulletinMediator)
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		public MainWindowViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
 			_uiDispatcher = uiDispatcher;
 			_uiMonitor = new UiResponsivenessMonitor();
 
 			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnSourceFileChanged(x));
 
-			this.CurrrentFilter = new FilterResultsViewModel(
-				mainWindow,
+			this.FilterViewModel = new FilterViewModel(
 				uiDispatcher,
 				bulletinMediator);
 
-			this.CurrentStatus = new MainStatusBarViewModel(
+			this.StatusBarViewModel = new StatusBarViewModel(
 				uiDispatcher,
 				bulletinMediator);
 
@@ -71,14 +67,10 @@
 			_uiDispatcher.Invoke(() => this.ApplicationTitle = title);
 		}
 
-		public FilterResultsViewModel CurrrentFilter { get; }
+		public FilterViewModel FilterViewModel { get; }
 
-		public MainStatusBarViewModel CurrentStatus { get; }
+		public StatusBarViewModel StatusBarViewModel { get; }
 
-		public string ApplicationTitle
-		{
-			get => (string)GetValue(ApplicationTitleProperty);
-			private set => SetValue(ApplicationTitleProperty, value);
-		}
+		public string ApplicationTitle { get; set; }
 	}
 }

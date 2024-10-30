@@ -16,6 +16,7 @@
 		IFilter ReApply();
 
 		IFilter Apply(FilterType filterType, IFilterCriteria criteria);
+
 		void Abort();
 
 		event EventHandler<HistoryChangedEventArgs> HistoryChanged;

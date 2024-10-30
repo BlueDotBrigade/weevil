@@ -59,14 +59,15 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+		<None Remove="Filter\FilterViewModel" />
 		<None Remove="nlog.config" />
 		<None Remove="PostSharp.license" />
 		<None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
 		<None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Update="Filter\FilterResultsViewModel.Commands.cs">
-			<DependentUpon>FilterResultsViewModel.cs</DependentUpon>
+		<Compile Update="Filter\FilterViewModel.Commands.cs">
+			<DependentUpon>FilterViewModel</DependentUpon>
 		</Compile>
 	</ItemGroup>
 	<ItemGroup>
@@ -204,8 +205,11 @@
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>BlueDotBrigade.Weevil.Gui-FunctionalTests</_Parameter1>
+			<_Parameter1>BlueDotBrigade.Weevil.Gui-FeatureTests</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Include="Filter\FilterViewModel" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="nlog.config">

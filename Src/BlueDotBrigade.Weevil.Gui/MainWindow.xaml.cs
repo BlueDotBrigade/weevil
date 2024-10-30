@@ -20,7 +20,6 @@
 
 			_viewModel = new MainWindowViewModel(
 				uiDispatcher,
-				Application.Current.MainWindow,
 				bulletinMediator);
 
 			this.DataContext = _viewModel;

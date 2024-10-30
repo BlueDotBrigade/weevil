@@ -11,4 +11,7 @@
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Link="Release\Licenses\LICENSE.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Design\MVVM\" />
+  </ItemGroup>
 </Project>
