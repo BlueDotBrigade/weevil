@@ -5,7 +5,7 @@
 	using BlueDotBrigade.Weevil.Analysis;
 	using IO;
 
-	internal class TheDefaultPlugin : IPlugin
+	internal class DefaultPlugin : IPlugin
 	{
 		/// <inheritdoc />
 		public string Name => GetType().Assembly.FullName;
@@ -19,14 +19,14 @@
 		/// <inheritdoc />
 		public bool CanOpenAs => false;
 
-		public (bool, OpenAsResult) ShowOpenAs(object parentWindow, string license, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
+		public (bool, OpenAsResult) ShowOpenAs(string license, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
 		{
 			throw new NotSupportedException();
 		}
 
 		public bool CanShowDashboard => false;
 
-		public void ShowDashboard(object parentWindow, Version weevilVersion, IEngine engine, IInsight[] insights)
+		public void ShowDashboard(Version weevilVersion, IEngine engine, IInsight[] insights)
 		{
 			throw new NotImplementedException();
 		}
