@@ -264,5 +264,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand ToggleIsPinnedCommand => new UiBoundCommand(ToggleIsPinned, () => this.IsMenuEnabled);
 		#endregion
+
+		#region Commands: Bookmarks
+		public ICommand AddBookendCommand => new UiBoundCommand(AddBookend, () => this.IsMenuEnabled);
+		public ICommand RemoveBookendsCommand => new UiBoundCommand(RemoveBookends, () => this.IsMenuEnabled);
+		public ICommand ClearOutsideBookendsCommand => new UiBoundCommand(ClearOutsideBookends, () => this.IsMenuEnabled);
+		#endregion
 	}
 }

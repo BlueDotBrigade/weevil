@@ -1179,10 +1179,26 @@
 			}
 		}
 
+		private void AddBookend()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void RemoveBookends()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void ClearOutsideBookends()
+		{
+			throw new NotImplementedException();
+		}
+
 		private void ToggleIsPinned()
 		{
 			_engine.Selector.ToggleIsPinned();
 		}
+
 		public void UnpinAll()
 		{
 			_engine.Analyzer.UnpinAll();
