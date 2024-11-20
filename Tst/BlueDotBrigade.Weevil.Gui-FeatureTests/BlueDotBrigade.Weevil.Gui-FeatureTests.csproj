@@ -27,9 +27,6 @@
 	  <Page Remove="Drivers\**" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Compile Remove="OLD\CalculatorStepDefinitions.cs" />
-	</ItemGroup>
-	<ItemGroup>
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
 		<PackageReference Include="NSubstitute" Version="5.1.0" />
@@ -48,7 +45,6 @@
 	<ItemGroup>
 	  <None Include=".Daten\.Global\AstroMech.log" />
 	  <None Include=".Daten\Converters\ContentConverterTests\LongMultiLineRecord.log" />
-	  <None Include="OLD\CalculatorStepDefinitions.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
