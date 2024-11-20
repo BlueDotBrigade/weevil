@@ -59,7 +59,6 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Remove="Filter\FilterViewModel" />
 		<None Remove="nlog.config" />
 		<None Remove="PostSharp.license" />
 		<None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
@@ -67,7 +66,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Filter\FilterViewModel.Commands.cs">
-			<DependentUpon>FilterViewModel</DependentUpon>
+			<DependentUpon>FilterViewModel.cs</DependentUpon>
 		</Compile>
 	</ItemGroup>
 	<ItemGroup>
@@ -100,10 +99,10 @@
 			<Version>5.3.2</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp">
-			<Version>2024.0.8</Version>
+			<Version>2024.1.6</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>2024.0.8</Version>
+			<Version>2024.1.6</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="8.1.97" />
 		<PackageReference Include="System.Collections.Immutable">
@@ -207,9 +206,6 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>BlueDotBrigade.Weevil.Gui-FeatureTests</_Parameter1>
 		</AssemblyAttribute>
-	</ItemGroup>
-	<ItemGroup>
-	  <Compile Include="Filter\FilterViewModel" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="nlog.config">

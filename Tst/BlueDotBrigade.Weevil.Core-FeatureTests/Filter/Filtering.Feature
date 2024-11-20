@@ -1,5 +1,7 @@
 Feature: Filtering
 
+# ---------------- CORE ENGINE
+
 @Requirement:406, @UserStory:123
 Scenario: Logical OR operator used to define multiple expressions
 	Given that the default log file is open
