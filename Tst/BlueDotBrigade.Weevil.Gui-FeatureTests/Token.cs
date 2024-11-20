@@ -7,6 +7,7 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Threading;
+	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using NSubstitute;
@@ -17,10 +18,21 @@
 
 		public Token()
 		{
-			// nothing to do
+			//this.IncludeFilter = string.Empty;
+			//this.ExcludeFilter = string.Empty;
+
+			//this.FilterType = FilterType.RegularExpression;
+
+			//this.Configuration = new Dictionary<string, object>()
+			//{
+			//	{ "IncludePinned", true },
+			//	{ "IsCaseSensitive", true },
+			//	{ "HideDebugRecords", false },
+			//	{ "HideTraceRecords", false },
+			//};
 		}
 
-		internal async Task OpenFile(string logFilePath)
+		internal async Task OpenFileAsync(string logFilePath)
 		{
 			var uiDispatcher = Substitute.For<IUiDispatcher>();
 			uiDispatcher
@@ -38,19 +50,24 @@
 				bulletinMediator);
 
 			await _mainViewModel.FilterViewModel.OpenAsync(logFilePath);
-
-
-			//var window = Substitute.For<Window>();
-			//var uiDispatcher = new UiDispatcherFake();
-			//var bulletinMediator = Substitute.For<IBulletinMediator>();
-
-			//_filterResultsViewModel = new FilterResultsViewModel(
-			//	window,
-			//	uiDispatcher,
-			//	bulletinMediator);
-
-			//await _filterResultsViewModel.OpenAsync(logFilePath);
 		}
+
+		#region Input Values
+		//public string IncludeFilter { private get; set; }
+
+		//public string ExcludeFilter { private get; set; }
+
+		//public FilterType FilterType { get; set; }
+
+		//public Dictionary<string, object> Configuration { get; set; }
+
+		//public FilterCriteria FilterCriteria => new FilterCriteria(
+		//	this.IncludeFilter,
+		//	this.ExcludeFilter,
+		//	this.Configuration);
+		#endregion
+
+		#region View Models
 
 		public FilterViewModel Filter => _mainViewModel == null
 					? throw new UninitializedValueException("Gherkin scenario is missing an initialization step.")
@@ -59,5 +76,7 @@
 		public StatusBarViewModel StatusBar => _mainViewModel == null
 			? throw new UninitializedValueException("Gherkin scenario is missing an initialization step.")
 			: _mainViewModel.StatusBarViewModel;
+
+		#endregion
 	}
 }

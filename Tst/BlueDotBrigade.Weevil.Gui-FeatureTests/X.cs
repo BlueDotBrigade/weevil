@@ -11,5 +11,8 @@
 		public const string AnyText = @"(.*)";
 
 		public const string Integer = @"(\d+)";
+
+		public const string FileName = @"""([a-zA-Z0-9]+\.[a-zA-Z0-9]{1,4})""";
 	}
 }
+

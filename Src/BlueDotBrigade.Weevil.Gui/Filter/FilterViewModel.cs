@@ -326,14 +326,14 @@
 			{
 				if (File.Exists(args[1]))
 				{
-					OpenCompressed(args[1]);
+					OpenCompressedAsync(args[1]);
 				}
 			}
 		}
 
 		private void OnFileDropped(object sender, DroppedFileEventArgs e)
 		{
-			OpenCompressed(e.FilePath);
+			OpenCompressedAsync(e.FilePath);
 		}
 
 		protected void RaisePropertyChanged(string name)
@@ -343,7 +343,7 @@
 		#endregion
 
 		#region Commands: General
-		public async void Open()
+		public async void OpenAsync()
 		{
 			var filePath = _dialogBox.ShowOpenFile(CompatibleFileExtensions);
 			if (string.IsNullOrWhiteSpace(filePath))
@@ -356,7 +356,7 @@
 				{
 					this.IsCommandExecuting = true;
 
-					await OpenCompressed(filePath);
+					await OpenCompressedAsync(filePath);
 				}
 				finally
 				{
@@ -365,7 +365,7 @@
 			}
 		}
 
-		public async Task OpenCompressed(string sourceFilePath)
+		public async Task OpenCompressedAsync(string sourceFilePath)
 		{
 			var fileInfo = new FileInfo(sourceFilePath);
 			var isSourceFileCompressed = fileInfo.Extension.ToUpperInvariant() == ".ZIP";

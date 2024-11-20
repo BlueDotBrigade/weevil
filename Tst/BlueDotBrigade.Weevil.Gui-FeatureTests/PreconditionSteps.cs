@@ -20,7 +20,15 @@
 		{
 			var logFilePath = new Daten().AsFilePath(From.GlobalDefault);
 
-			await this.Context.OpenFile(logFilePath);
+			await this.Context.OpenFileAsync(logFilePath);
+		}
+
+		[Given(@$"that the {X.FileName} log file name is open")]
+		public async Task GivenThatTheLogFileNameIsOpen(string fileName)
+		{
+			var filePath = new Daten().AsFilePath(fileName);
+
+			await this.Context.OpenFileAsync(filePath);
 		}
 	}
 }
