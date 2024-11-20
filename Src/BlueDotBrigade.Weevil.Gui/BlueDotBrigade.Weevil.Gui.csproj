@@ -99,10 +99,10 @@
 			<Version>5.3.2</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp">
-			<Version>2024.0.8</Version>
+			<Version>2024.1.6</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>2024.0.8</Version>
+			<Version>2024.1.6</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="8.1.97" />
 		<PackageReference Include="System.Collections.Immutable">
