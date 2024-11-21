@@ -1,10 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
-	using NLog;
-	using NLog.Fluent;
 
 	/// <summary>
 	/// Represents an adapter that facilitates writing to NLog.
