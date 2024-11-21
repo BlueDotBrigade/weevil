@@ -19,7 +19,7 @@
 
 		public const string AnyText = @"(.*)";
 
-		public const string RecordCount = @"(\d+)";
+		public const string Integer = @"(\d+)";
 
 		public const string OnOff = @"(on|off)";
 
