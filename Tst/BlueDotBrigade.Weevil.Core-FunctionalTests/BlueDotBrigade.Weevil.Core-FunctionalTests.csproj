@@ -29,6 +29,7 @@
 		<PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
 		<PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
 		<PackageReference Include="FluentAssertions" Version="6.12.2" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
