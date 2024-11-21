@@ -19,15 +19,15 @@ namespace BlueDotBrigade.Weevil.Filter
 		}
 
 		/// <seealso cref="WhenApplyingTheIncludeFilter"/>
-		[When($"entering the include filter: {X.AnyText}")]
-		public void WhenEnteringTheIncludeFilter(string includeFilter)
+		[When($"using the include filter: {X.AnyText}")]
+		public void WhenUsingTheIncludeFilter(string includeFilter)
 		{
 			this.Context.IncludeFilter = includeFilter;
 		}
 
 		/// <seealso cref="WhenApplyingTheExcludeFilter"/>
-		[When($"entering the exclude filter: {X.AnyText}")]
-		public void WhenEnteringTheExcludeFilter(string excludeFilter)
+		[When($"using the exclude filter: {X.AnyText}")]
+		public void WhenUsingTheExcludeFilter(string excludeFilter)
 		{
 			this.Context.ExcludeFilter = excludeFilter;
 		}

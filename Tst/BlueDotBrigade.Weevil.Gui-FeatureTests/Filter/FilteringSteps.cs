@@ -14,8 +14,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			// nothing to do
 		}
 
-		[When($"entering the include filter: {X.AnyText}")]
-		public void WhenEnteringTheIncludeFilter(string include)
+		[When($"using the include filter: {X.AnyText}")]
+		public void WhenUsingTheIncludeFilter(string include)
 		{
 			this.Context.Filter.InclusiveFilter = include;
 		}
@@ -27,8 +27,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			this.Context.Filter.Filter();
 		}
 
-		[When($"entering the exclude filter: {X.AnyText}")]
-		public void WhenEnteringTheExcludeFilter(string exclude)
+		[When($"using the exclude filter: {X.AnyText}")]
+		public void WhenUsingTheExcludeFilter(string exclude)
 		{
 			this.Context.Filter.ExclusiveFilter = exclude;
 		}

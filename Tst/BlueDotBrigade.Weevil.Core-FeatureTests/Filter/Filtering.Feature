@@ -32,8 +32,8 @@ Scenario: Exclude filter hides records with specified terms
 @Requirement:401
 Scenario: Exclude filter overrides include filter when both are applied
 	Given that the default log file is open
-	When entering the include filter: Core
-	And entering the exclude filter: Debug
+	When using the include filter: Core
+	And using the exclude filter: Debug
 	And applying the filters
 	Then all records will include: Core
 	And all records will exclude: Debug
