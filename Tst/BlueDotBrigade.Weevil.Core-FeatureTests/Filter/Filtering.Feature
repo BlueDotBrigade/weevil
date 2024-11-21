@@ -6,7 +6,7 @@ Feature: Filtering
 Scenario: Logical OR operator used to define multiple expressions
 	Given that the default log file is open
 	When applying the include filter: Directives||Fatal
-	Then there will be 8 visible records
+	Then there will be 8 matching records
 	And each record will include either
 		"""
 		Directives
@@ -42,18 +42,18 @@ Scenario: Exclude filter overrides include filter when both are applied
 Scenario: Pinned records remain visible regardless of active filters
 	Given that the default log file is open
 	When pinning the record on line 2
-	And pinning the record on line 4
-	And pinning the record on line 8
-	And applying the include filter: text not found
-	Then there will be 3 visible records
-	And line number 2 will be visible
-	And line number 4 will be visible
-	And line number 8 will be visible
+		 And pinning the record on line 4
+		 And pinning the record on line 8
+		 And applying the include filter: text not found
+	Then there will be 3 matching records
+		 And line number 2 will be visible
+		 And line number 4 will be visible
+		 And line number 8 will be visible
 
 @Requirement:424
 Scenario: Built-in filter alias #IPv6 identifies records with IP addresses
 	Given that the default log file is open
 	When using the "Regular Expression" filter mode
-	And applying the include filter: #IPV6
-	Then there will be 1 visible records
-	And all records will include: S/N=IA-1073R037
+		  And applying the include filter: #IPV6
+	Then there will be 1 matching records
+		  And all records will include: S/N=IA-1073R037

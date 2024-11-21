@@ -39,5 +39,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			this.Context.Filter.ExclusiveFilter = exclude;
 			this.Context.Filter.Filter();
 		}
+
+		[Then($@"there will be {X.Integer} matching records")]
+		public void ThenThereWillBeMatchingRecords(int recordCount)
+		{			
+			this.Context.StatusBar.FilterDetails.VisibleRecordCount
+				.Should()
+				.Be(recordCount);
+		}
 	}
 }

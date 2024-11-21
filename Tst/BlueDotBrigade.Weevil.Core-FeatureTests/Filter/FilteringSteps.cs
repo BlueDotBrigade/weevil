@@ -62,8 +62,8 @@ namespace BlueDotBrigade.Weevil.Filter
 				this.Context.FilterCriteria);
 		}
 
-		[Then($@"there will be {X.Integer} visible records")]
-		public void ThenThereWillBeVisibleRecords(int recordCount)
+		[Then($@"there will be {X.Integer} matching records")]
+		public void ThenThereWillBeMatchingRecords(int recordCount)
 		{
 			this.Context.Results.Length
 				.Should()
