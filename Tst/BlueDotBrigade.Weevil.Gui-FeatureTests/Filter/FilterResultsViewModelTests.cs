@@ -7,7 +7,6 @@
 	using System.Windows;
 	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using BlueDotBrigade.Weevil.TestingTools;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using NSubstitute;
 

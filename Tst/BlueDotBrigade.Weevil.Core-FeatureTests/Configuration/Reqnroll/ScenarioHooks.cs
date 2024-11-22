@@ -1,6 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Configuration.Reqnroll
 {
-	using BlueDotBrigade.Weevil.TestingTools.Configuration.Reqnroll;
+	using BlueDotBrigade.Weevil.TestTools.Configuration.Reqnroll;
 
 	/// <summary>
 	/// Represents Reqnroll events that execute before & after every Gherkin scenario.
