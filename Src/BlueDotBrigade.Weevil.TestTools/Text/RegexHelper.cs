@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.TestingTools.Text
+﻿namespace BlueDotBrigade.Weevil.TestTools.Text
 {
 	public class RegexHelper
 	{

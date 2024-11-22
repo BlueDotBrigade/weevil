@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.TestingTools
+﻿namespace BlueDotBrigade.Weevil.TestTools
 {
 	/// <summary>
 	/// Represents commonly used parameters in Reqnroll <see href="https://docs.reqnroll.net/latest/automation/step-definitions.html">step definitions</see>.
