@@ -40,7 +40,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			this.Context.Filter.Filter();
 		}
 
-		[Then($@"there will be {X.Integer} matching records")]
+		[Then($@"there will be {X.WholeNumber} matching records")]
 		public void ThenThereWillBeMatchingRecords(int recordCount)
 		{			
 			this.Context.StatusBar.FilterDetails.VisibleRecordCount
