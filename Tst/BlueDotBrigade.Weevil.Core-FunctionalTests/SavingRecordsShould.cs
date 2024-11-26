@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System.IO;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Test;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;

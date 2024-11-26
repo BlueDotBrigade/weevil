@@ -1,6 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Configuration.Reqnroll
 {
-	using BlueDotBrigade.DatenLokator.TestsTools.Configuration;
+	using BlueDotBrigade.DatenLokator.TestTools.Configuration;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.TestTools.Configuration.Reqnroll;
 

@@ -2,8 +2,6 @@
 {
 	using System;
 	using System.IO;
-	using BlueDotBrigade.DatenLokator.TestsTools;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
 	public class MultiLineRecordParserTest

@@ -2,9 +2,7 @@
 {
 	using System;
 	using System.Globalization;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Data;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
 	public class ContentConverterTests
