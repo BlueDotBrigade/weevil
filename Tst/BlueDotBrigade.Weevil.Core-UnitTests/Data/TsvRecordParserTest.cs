@@ -1,8 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
-	using BlueDotBrigade.DatenLokator.TestsTools;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 	[TestClass]
 	public class TsvRecordParserTest
 	{

@@ -1,10 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System.Collections.Generic;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Gui.Filter;
-	using NSubstitute;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 
 	internal abstract class ReqnrollSteps

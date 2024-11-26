@@ -5,7 +5,7 @@
 	using global::BlueDotBrigade.Weevil.Analysis;
 	using global::BlueDotBrigade.Weevil.Data; 
 	using global::BlueDotBrigade.Weevil.Linq;
-	using global::BlueDotBrigade.Weevil.TestingTools.Data;
+
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]

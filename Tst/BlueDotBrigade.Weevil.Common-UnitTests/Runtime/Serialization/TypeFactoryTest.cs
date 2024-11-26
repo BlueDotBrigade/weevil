@@ -2,8 +2,6 @@
 {
 	using System.Collections.Generic;
 	using System.IO;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 	using Weevil.Runtime.Serialization;
 
 	[TestClass]

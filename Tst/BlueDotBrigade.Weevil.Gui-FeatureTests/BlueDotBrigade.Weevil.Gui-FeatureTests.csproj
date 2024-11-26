@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
+		<TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
 		<OutputType>WinExe</OutputType>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -27,7 +27,7 @@
 	  <Page Remove="Drivers\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
+		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="NSubstitute" Version="5.3.0" />
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
@@ -51,6 +51,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj" />
-		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj" />
 	</ItemGroup>
 </Project>

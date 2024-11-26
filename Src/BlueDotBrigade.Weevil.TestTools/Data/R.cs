@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.TestingTools.Data
+﻿namespace BlueDotBrigade.Weevil.TestTools.Data
 {
 	using System;
 	using System.Collections.Generic;

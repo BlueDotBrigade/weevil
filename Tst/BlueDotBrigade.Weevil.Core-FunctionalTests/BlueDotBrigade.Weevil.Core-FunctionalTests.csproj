@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<OutputType>Library</OutputType>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -23,7 +23,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
-		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.0.0" />
+		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="NSubstitute" Version="5.3.0" />
 		<PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />

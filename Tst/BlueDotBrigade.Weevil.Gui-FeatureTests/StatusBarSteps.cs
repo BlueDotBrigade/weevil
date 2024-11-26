@@ -1,7 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
-	using BlueDotBrigade.DatenLokator.TestsTools;
-
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[Binding]
@@ -12,7 +10,7 @@
 			// nothing to do
 		}
 
-		[Then($"the visible record count in the status bar will be {X.Integer}")]
+		[Then($"the visible record count in the status bar will be {X.WholeNumber}")]
 		public void ThenTheVisibleRecordCountInTheStatusBarWillBe(int recordCount)
 		{
 			Assert.AreEqual(

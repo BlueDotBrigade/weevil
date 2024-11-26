@@ -6,7 +6,7 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using System.Threading.Tasks;
-	using BlueDotBrigade.Weevil.TestingTools.Text;
+	using BlueDotBrigade.Weevil.TestTools.Text;
 	using Newtonsoft.Json.Converters;
 
 	[Binding]

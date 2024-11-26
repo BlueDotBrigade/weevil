@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.TestingTools</PackageId>
-    <RootNamespace>BlueDotBrigade.Weevil.TestingTools</RootNamespace>
+    <RootNamespace>BlueDotBrigade.Weevil.TestTools</RootNamespace>
     <Version>2.11.0</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
     <Description>Includes types, interfaces, and utilities that are shared by all of the Weevil assemblies.</Description>
 	<ApplicationIcon></ApplicationIcon>
-	<AssemblyName>BlueDotBrigade.Weevil.TestingTools</AssemblyName>
+	<AssemblyName>BlueDotBrigade.Weevil.TestTools</AssemblyName>
 	<Company>Blue Dot Brigade</Company>
   </PropertyGroup>
   <ItemGroup>
