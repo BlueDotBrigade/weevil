@@ -26,7 +26,7 @@ Scenario: Hide debug-level records when "Show Debug" option is disabled
 	When the "Show Debug" filter option is off
 	And the "Show Trace" filter option is off
 	And applying the filters
-	Then there will be 43 visible records
+	Then there will be 43 matching records
 
 @Requirement:414, @Requirement:418
 Scenario: Display debug-level records when "Show Debug" option is enabled
@@ -34,7 +34,7 @@ Scenario: Display debug-level records when "Show Debug" option is enabled
 	When the "Show Debug" filter option is on
 	And the "Show Trace" filter option is off
 	And applying the filters
-	Then there will be 49 visible records
+	Then there will be 49 matching records
 
 @Requirement:415, @Requirement:419
 Scenario: Hide trace-level records when "Show Trace" option is disabled
@@ -42,7 +42,7 @@ Scenario: Hide trace-level records when "Show Trace" option is disabled
 	When the "Show Debug" filter option is off
 	And the "Show Trace" filter option is off
 	And applying the filters
-	Then there will be 43 visible records
+	Then there will be 43 matching records
 
 @Requirement:415, @Requirement:419
 Scenario: Display trace-level records when "Show Trace" option is enabled
@@ -50,4 +50,4 @@ Scenario: Display trace-level records when "Show Trace" option is enabled
 	When the "Show Debug" filter option is off
 	And the "Show Trace" filter option is on
 	And applying the filters
-	Then there will be 381 visible records
+	Then there will be 381 matching records
