@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.TestingTools.Configuration.Reqnroll
+﻿namespace BlueDotBrigade.Weevil.TestTools.Configuration.Reqnroll
 {
 	using System;
 	

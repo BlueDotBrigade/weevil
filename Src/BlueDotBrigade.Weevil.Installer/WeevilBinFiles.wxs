@@ -176,15 +176,6 @@
                 <Component Id="BlueDotBrigade.Weevil.Plugins.csproj" Guid="{D4A32105-48BC-45BB-9B11-71D0DF0FA29E}">
                     <File Id="BlueDotBrigade.Weevil.Plugins.csproj" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\BlueDotBrigade.Weevil.Plugins.csproj" />
                 </Component>
-                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll" Guid="{1B680744-FE3A-4CB3-80C1-C9DC46F385C8}">
-                    <File Id="ProfoundMedical.Weevil_TulsaPro.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.dll" />
-                </Component>
-                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll.config" Guid="{177A5AF4-ADF9-4A47-B307-65F0DC90A26F}">
-                    <File Id="ProfoundMedical.Weevil_TulsaPro.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.dll.config" />
-                </Component>
-                <Component Id="ProfoundMedical.Weevil_TulsaPro.pdb" Guid="{C869158E-2CCA-419B-AD0D-5FC14F2004C4}">
-                    <File Id="ProfoundMedical.Weevil_TulsaPro.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.pdb" />
-                </Component>
                 <Component Id="ReadMe.md" Guid="{71CCA0F2-14BF-4690-BDB4-988DF17CBCFF}">
                     <File Id="ReadMe.md" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ReadMe.md" />
                 </Component>
@@ -459,9 +450,6 @@
             <ComponentRef Id="System.Speech.dll" />
             <ComponentRef Id="System.Web.Services.Description.dll" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Plugins.csproj" />
-            <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.dll" />
-            <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.dll.config" />
-            <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.pdb" />
             <ComponentRef Id="ReadMe.md" />
             <ComponentRef Id="System.Data.Odbc.dll_1" />
             <ComponentRef Id="System.Data.Odbc.dll_2" />

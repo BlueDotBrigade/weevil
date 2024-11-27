@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using BlueDotBrigade;
 using BlueDotBrigade.Weevil;
 using BlueDotBrigade.Weevil.Gui.Configuration.Reqnroll;
-using BlueDotBrigade.Weevil.TestingTools;
 using Reqnroll.Bindings.CucumberExpressions;
 using Reqnroll.Plugins;
 using Reqnroll.UnitTestProvider;

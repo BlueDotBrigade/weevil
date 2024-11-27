@@ -1,8 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
-	using BlueDotBrigade.DatenLokator.TestsTools.Configuration;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+	using BlueDotBrigade.DatenLokator.TestTools.Configuration;
 
 	[TestClass]
 	public class TestEnvironment

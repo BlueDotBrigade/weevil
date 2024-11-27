@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Commo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Windows", "Src\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj", "{D54EA855-B071-40DA-ABF1-2D8227F9130D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.TestingTools", "Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj", "{CBFA74F4-AF15-4B6B-B46A-CB7B8049C879}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.TestTools", "Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj", "{CBFA74F4-AF15-4B6B-B46A-CB7B8049C879}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Cli", "Src\BlueDotBrigade.Weevil.Cli\BlueDotBrigade.Weevil.Cli.csproj", "{655E4324-C7C5-4314-87CE-748CDFD20004}"
 EndProject

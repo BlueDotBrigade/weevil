@@ -6,7 +6,6 @@
 	using System.Text;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using BlueDotBrigade.Weevil.TestingTools;
 
 	public abstract class UiTestBase 
 	{

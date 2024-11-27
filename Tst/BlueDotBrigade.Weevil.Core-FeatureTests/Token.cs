@@ -34,13 +34,13 @@
 
 		public FilterType FilterType { get; set; }
 
+		public Dictionary<string, object> Configuration { get; set; }
+
 		public FilterCriteria FilterCriteria => new FilterCriteria(
 			this.IncludeFilter, 
 			this.ExcludeFilter, 
 			this.Configuration);
 
 		public ImmutableArray<IRecord> Results => Engine.Filter.Results;
-
-		public Dictionary<string, object> Configuration { get; set; }
 	}
 }

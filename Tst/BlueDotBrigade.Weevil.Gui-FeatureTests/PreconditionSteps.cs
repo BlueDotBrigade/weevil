@@ -5,8 +5,6 @@
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
-	using BlueDotBrigade.Weevil.TestingTools;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 
 	[Binding]
 	internal class PreconditionSteps : ReqnrollSteps
@@ -20,7 +18,15 @@
 		{
 			var logFilePath = new Daten().AsFilePath(From.GlobalDefault);
 
-			await this.Context.OpenFile(logFilePath);
+			await this.Context.OpenFileAsync(logFilePath);
+		}
+
+		[Given(@$"that the {X.FileName} log file name is open")]
+		public async Task GivenThatTheLogFileNameIsOpen(string fileName)
+		{
+			var filePath = new Daten().AsFilePath(fileName);
+
+			await this.Context.OpenFileAsync(filePath);
 		}
 	}
 }

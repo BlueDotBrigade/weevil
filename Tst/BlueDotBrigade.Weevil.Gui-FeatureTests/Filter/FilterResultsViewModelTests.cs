@@ -5,11 +5,7 @@
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using BlueDotBrigade.Weevil.TestingTools;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using NSubstitute;
 
 	// Adding this attribute prevents the exception: InvalidOperationException The calling thread must be STA, because many UI components require this.
 	// Mention this in: https://github.com/BlueDotBrigade/weevil/issues/191

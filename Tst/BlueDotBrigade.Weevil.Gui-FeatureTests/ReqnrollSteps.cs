@@ -1,15 +1,15 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System.Collections.Generic;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Gui.Filter;
-	using NSubstitute;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 
 	internal abstract class ReqnrollSteps
 	{
 		private readonly Token _context;
+
+		private static readonly Logger _logWriter = NLog.LogManager.GetCurrentClassLogger();
 
 		public ReqnrollSteps(Token context)
 		{
@@ -17,5 +17,7 @@
 		}
 
 		internal Token Context => _context;
+
+		internal Logger LogWriter => _logWriter;
 	}
 }

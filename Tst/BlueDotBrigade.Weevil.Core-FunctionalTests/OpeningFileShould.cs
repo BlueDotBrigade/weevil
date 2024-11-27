@@ -2,9 +2,7 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System;
-	using BlueDotBrigade.DatenLokator.TestsTools;
 	using BlueDotBrigade.Weevil.Filter;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
 	public class OpeningFileShould
