@@ -8,8 +8,8 @@ Ensures that files are opened properly.
 
 Scenario: Open empty file
 	Given that the "Empty.log" log file name is open 
-	Then there will be 0 visible records
+	Then there will be 0 matching records
 
 Scenario: Default Log
 	Given that the default log file is open
-	Then there will be 387 visible records
+	Then there will be 387 matching records
