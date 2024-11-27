@@ -2,11 +2,13 @@ namespace BlueDotBrigade.Weevil
 {
 	internal class Bookend
 	{
+		public string Name { get; }
+
 		public int StartLineNumber { get; }
 		public int EndLineNumber { get; }
 
 		public Bookend(int startLineNumber, int endLineNumber)	
-		{	
+		{	this.Name = string.Empty;
 			this.StartLineNumber = startLineNumber;
 			this.EndLineNumber = endLineNumber;
 		}	
