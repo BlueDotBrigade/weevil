@@ -11,7 +11,7 @@ Scenario: Filter is automatically applied when option is on
 	Then there will be 37 matching records
 
 @Requirement:XXX
-Scenario: Filter is not automatically applied when typing continues
+Scenario: Filter is not automatically applied when option is off
 	Given that the default log file is open
 	When the automatic filtering option is off
 		 And entering the include filter: #Information
