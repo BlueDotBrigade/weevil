@@ -266,8 +266,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#endregion
 
 		#region Commands: Bookmarks
+		[SafeForDependencyAnalysis]
 		public ICommand AddBookendCommand => new UiBoundCommand(AddBookend, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
 		public ICommand RemoveBookendsCommand => new UiBoundCommand(RemoveBookends, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
 		public ICommand ClearOutsideBookendsCommand => new UiBoundCommand(ClearOutsideBookends, () => this.IsMenuEnabled);
 		#endregion
 	}
