@@ -70,31 +70,44 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		#endregion
 
-		#region Commands: Filtering
+		#region Commands: Clear Records
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.BeforeSelected), 
 			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.AfterSelected),
 			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.BeforeAndAfterSelected),
 			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand ClearBetweenSelectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.BetweenSelected),
 			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.Selected),
 			() => this.IsMenuEnabled);
+
 		[SafeForDependencyAnalysis]
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.Unselected),
 			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand ClearBeyondBookendsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearOperation.BeyondBookends),
+			() => this.IsMenuEnabled);
+		#endregion
+
+		#region Commands: Filtering
 
 		[SafeForDependencyAnalysis]
 		public ICommand FilterCommand => new UiBoundCommand(Filter, () => this.IsMenuEnabled);
@@ -270,10 +283,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand AddBookendCommand => new UiBoundCommand(AddBookend, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand RemoveBookendsCommand => new UiBoundCommand(RemoveBookends, () => this.IsMenuEnabled);
-
-		[SafeForDependencyAnalysis]
-		public ICommand ClearOutsideBookendsCommand => new UiBoundCommand(ClearOutsideBookends, () => this.IsMenuEnabled);
+		public ICommand RemoveAllBookendsCommand => new UiBoundCommand(RemoveAllBookends, () => this.IsMenuEnabled);
 		#endregion
 	}
 }

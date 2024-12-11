@@ -166,6 +166,7 @@
 				var inclusiveFilterHistory = new List<string>();
 				var exclusiveFilterHistory = new List<string>();
 				var tableOfContents = new List<Section>();
+				var bookends = new List<Bookend>();
 
 				if (this.UseExistingInstance)
 				{
@@ -177,6 +178,7 @@
 					sourceFileRemarks = _sourceInstance._sourceFileRemarks;
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
+					bookends.AddRange(_sourceInstance._bookendManager.Bookends);
 
 					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
 					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);
@@ -184,15 +186,14 @@
 					coreExtension = _sourceInstance._coreExtension;
 					sidecarManager = _sourceInstance._sidecarManager;
 
-					selectedRecords = _sourceInstance
-						._selectionManager
-						.GetSelected();
+					selectedRecords = _sourceInstance._selectionManager.GetSelected();
 
 					var repository = new InMemoryRecordRepository(
 						_sourceInstance._allRecords,
 						_sourceInstance._filterManager.Results,
 						selectedRecords,
-						_clearOperation);
+						_clearOperation,
+						bookends.ToImmutableArray());
 
 					records = repository.Get(maxRecords);
 
@@ -233,7 +234,8 @@
 							out sourceFileRemarks,
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
-							out tableOfContents);
+							out tableOfContents,
+							out bookends);
 
 						if (inclusiveFilterHistory.Count == 0)
 						{
@@ -260,7 +262,8 @@
 					sidecarManager,
 					records,
 					_hasBeenCleared,
-					new TableOfContents(tableOfContents));
+					new TableOfContents(tableOfContents),
+					bookends.ToImmutableArray());
 
 				if (inclusiveFilterHistory.Count > 0)
 				{

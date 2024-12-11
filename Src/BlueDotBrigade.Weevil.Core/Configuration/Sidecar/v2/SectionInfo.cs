@@ -2,6 +2,7 @@
 {
 	using System.Diagnostics;
 	using System.Runtime.Serialization;
+	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("Level={Level}, Name={Name}")]
 	[DataContract(Name = "Section")]

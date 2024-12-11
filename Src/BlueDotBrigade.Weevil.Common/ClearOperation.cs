@@ -11,5 +11,9 @@
 		AfterSelected,
 		Selected,
 		Unselected,
+		/// <summary>
+		/// Only the records between the bookends are kept.
+		/// </summary>
+		BeyondBookends,
 	}
 }

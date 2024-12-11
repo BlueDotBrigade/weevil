@@ -16,6 +16,7 @@
 			this.Context = new ContextDictionary();
 			this.UserRemarks = string.Empty;
 			this.TableOfContents = new List<SectionInfo>();
+			this.Bookends = new List<BookendInfo>();
 			this.FilterHistory = new FilterHistory();
 			this.Records = new List<RecordInfo>();
 		}
@@ -34,5 +35,8 @@
 
 		[DataMember(Order = 500)]
 		public List<RecordInfo> Records { get; set; }
+
+		[DataMember(Order = 600)]
+		public List<BookendInfo> Bookends { get; set; }
 	}
 }

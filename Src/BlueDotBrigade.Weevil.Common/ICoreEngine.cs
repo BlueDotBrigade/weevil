@@ -19,17 +19,23 @@
 		/// Coupling business logic to the <see cref="Records"/> property is strongly discouraged.
 		/// </remarks>
 		ImmutableArray<IRecord> Records { get; }
+
 		LogFileMetrics Metrics { get; }
+
 		IFilter Filter { get; }
 		INavigate Navigate { get; }
 		ISelect Selector { get; }
 		IAnalyze Analyzer { get; }
+		IBookendManager Bookends { get; }
+
 		int Count { get; }
+
 		/// <summary>
 		/// Returns <see langword="True"/> when at least one clear operation
 		/// has been performed since the records were loaded from the <see cref="SourceFilePath"/>.
 		/// </summary>
 		bool HasBeenCleared { get; }
+
 		ContextDictionary Context { get; }
 
 		/// <summary>

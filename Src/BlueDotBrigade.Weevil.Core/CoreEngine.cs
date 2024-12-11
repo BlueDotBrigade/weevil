@@ -35,6 +35,7 @@
 		private readonly SidecarManager _sidecarManager;
 		private readonly SelectionManager _selectionManager;
 		private readonly NavigationManager _navigationManager;
+		private readonly IBookendManager _bookendManager;
 		private readonly IAnalyze _analysisManager;
 
 		private readonly int _originalRecordCount;
@@ -79,7 +80,8 @@
 			SidecarManager sidecarManager,
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
-			TableOfContents tableOfContents)
+			TableOfContents tableOfContents,
+			ImmutableArray<Bookend> bookends)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
 
@@ -149,6 +151,8 @@
 				_sourceFileEncoding,
 				new Action(() => { _filterManager.ReApply(); }));
 
+			_bookendManager = new BookendManager(_selectionManager, bookends);
+
 			recordAndMetadataLoadingStopwatch.Stop();
 
 			_logFileMetrics = new LogFileMetrics(
@@ -215,6 +219,8 @@
 		public SelectionManager Selector => _selectionManager;
 
 		public IAnalyze Analyzer => _analysisManager;
+
+		public IBookendManager Bookends => _bookendManager;
 
 		public ImmutableArray<IRecord> Records => _allRecords;
 
@@ -285,8 +291,9 @@
 				Records = _allRecords,
 				Context = _context,
 				FilterTraits = _filterManager,
-				TableOfContents = _navigationManager.TableOfContents,
 				SourceFileRemarks = _sourceFileRemarks,
+				TableOfContents = _navigationManager.TableOfContents,
+				Bookends = _bookendManager.Bookends,
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);
