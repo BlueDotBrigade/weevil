@@ -86,6 +86,18 @@
 				new Metadata());
 		}
 
+		public static ImmutableArray<IRecord> WithLineNumbers(int minLineNumber, int maxLineNumber)
+		{
+			var records = new List<IRecord>();
+
+			for (var i = minLineNumber; i <= maxLineNumber; i++)
+			{
+				records.Add(WithLineNumber(i));
+			}
+
+			return records.ToImmutableArray();
+		}
+
 		/// <summary>
 		/// Creates a fake record with the provided <paramref name="content"/>.
 		/// </summary>

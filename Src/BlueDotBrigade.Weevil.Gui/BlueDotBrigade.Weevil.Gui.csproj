@@ -198,14 +198,13 @@
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Help.html&quot; &quot;$(TargetDir)..\Doc\\&quot;  /D /Y&#xD;&#xA;&#xD;&#xA;REM Create directory and copy third-party licenses&#xD;&#xA;XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Licenses&quot; &quot;$(TargetDir)..\Licenses&quot;  /D /I /E /Y&#xD;&#xA;&#xD;&#xA;COPY /A /Y &quot;$(SolutionDir)LICENSE.md&quot; &quot;$(TargetDir)..\Licenses\\License.md&quot;&#xD;&#xA;&#xD;&#xA;REM To minimize coupling, Weevil must NEVER have direct knowledge of the plugins.&#xD;&#xA;REM This is why `BlueDotBrigade.Weevil.Plugins` is not added as a project reference.&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   REM Nothing more to do.&#xD;&#xA;) else (&#xD;&#xA;   ECHO Copying plugins to Bin directory...&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.*&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;)" />
 	</Target>
-	<ItemGroup>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
-		</AssemblyAttribute>
-	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>BlueDotBrigade.Weevil.Gui-FeatureTests</_Parameter1>
+		</AssemblyAttribute>
+		<!-- Required by NSubstitue -->
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
 	<ItemGroup>

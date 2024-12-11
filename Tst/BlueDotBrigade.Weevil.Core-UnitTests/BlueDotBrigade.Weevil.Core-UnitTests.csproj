@@ -1,71 +1,83 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <OutputType>Library</OutputType>
-    <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Platforms>x64</Platforms>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="BlueDotBrigade.DatenLokator">
-      <Version>2.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="FluentAssertions" Version="6.12.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="MSTest.TestAdapter">
-      <Version>3.6.3</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestFramework">
-      <Version>3.6.3</Version>
-    </PackageReference>
-    <PackageReference Include="NLog" Version="5.3.4" />
-    <PackageReference Include="NSubstitute" Version="5.3.0" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
-    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
-    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-      <Link>Properties\DomainSpecificTerminology.xml</Link>
-    </CodeAnalysisDictionary>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".Daten\Data\MultilineRecordParserTest\FileStartsWithPartialRecord.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\IsMultilineRecord.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\IsSingleLineRecord.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\NoRecords.txt" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\ReadUntilEof.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\ReadUntilNextRecord.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\RecordStartsAfterMaxLineCount.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\RecordStartsBeforeMaxLineCount.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\RecordStartsDefaultMaxLinesWhileSearching.txt" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\ThreeOneLineRecords.log" />
-    <None Include=".Daten\Data\MultilineRecordParserTest\UnknownFileFormat.png" />
-    <None Include=".Daten\Data\SerializedRecordRepositoryTest\NoLogEntries.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\CompleteRecord.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\CompleteRecordHasTrailingWhiteSpace.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\NoRecords.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingContext.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingMessage.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingSeverity.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingThreadId.log" />
-    <None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingTime.log" />
-    <None Include=".Daten\.Global\Default.log" />
-    <None Include=".Daten\.Global\Default.log.xml" />
-    <None Include=".Daten\.Global\SampleData.log" />
-  </ItemGroup>
-  <PropertyGroup>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<OutputType>Library</OutputType>
+		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Platforms>x64</Platforms>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+		<OutputPath>bin\x64\Debug\</OutputPath>
+		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+		<OutputPath>bin\x64\Release\</OutputPath>
+		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="BlueDotBrigade.DatenLokator">
+			<Version>2.1.0</Version>
+		</PackageReference>
+		<PackageReference Include="FluentAssertions" Version="6.12.2" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="MSTest.TestAdapter">
+			<Version>3.6.3</Version>
+		</PackageReference>
+		<PackageReference Include="MSTest.TestFramework">
+			<Version>3.6.3</Version>
+		</PackageReference>
+		<PackageReference Include="NLog" Version="5.3.4" />
+		<PackageReference Include="NSubstitute" Version="5.3.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<!-- Required by NSubstitue -->
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+	<ItemGroup>
+		<CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
+			<Link>Properties\DomainSpecificTerminology.xml</Link>
+		</CodeAnalysisDictionary>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include=".Daten\Configuration\Sidecar\v2\SidecarLoaderTests\SchemaWithBookends.xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include=".Daten\Configuration\Sidecar\v2\SidecarLoaderTests\SchemaWithoutBookends.xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include=".Daten\Data\MultilineRecordParserTest\FileStartsWithPartialRecord.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\IsMultilineRecord.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\IsSingleLineRecord.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\NoRecords.txt" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\ReadUntilEof.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\ReadUntilNextRecord.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\RecordStartsAfterMaxLineCount.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\RecordStartsBeforeMaxLineCount.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\RecordStartsDefaultMaxLinesWhileSearching.txt" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\ThreeOneLineRecords.log" />
+		<None Include=".Daten\Data\MultilineRecordParserTest\UnknownFileFormat.png" />
+		<None Include=".Daten\Data\SerializedRecordRepositoryTest\NoLogEntries.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\CompleteRecord.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\CompleteRecordHasTrailingWhiteSpace.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\NoRecords.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingContext.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingMessage.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingSeverity.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingThreadId.log" />
+		<None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingTime.log" />
+		<None Include=".Daten\.Global\Default.log" />
+		<None Include=".Daten\.Global\Default.log.xml" />
+		<None Include=".Daten\.Global\SampleData.log" />
+	</ItemGroup>
+	<PropertyGroup>
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
 </Project>

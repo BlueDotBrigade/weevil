@@ -1181,17 +1181,19 @@
 
 		private void AddBookend()
 		{
-			throw new NotImplementedException();
+			try
+			{
+				_engine.Bookends.CreateFromSelection();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
-		private void RemoveBookends()
+		private void RemoveAllBookends()
 		{
-			throw new NotImplementedException();
-		}
-
-		private void ClearOutsideBookends()
-		{
-			throw new NotImplementedException();
+			_engine.Bookends.Clear();
 		}
 
 		private void ToggleIsPinned()
