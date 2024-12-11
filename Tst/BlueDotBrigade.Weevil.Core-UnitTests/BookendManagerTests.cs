@@ -1,45 +1,51 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BlueDotBrigade.Weevil.Core;
+using NSubstitute;
+using System.Collections.Generic;
+using BlueDotBrigade.Weevil.Data;
+using System.Linq;
 
 namespace BlueDotBrigade.Weevil.Core.UnitTests
 {
 	[TestClass]
 	public class BookendManagerTests
 	{
+		private ISelect _selectionManager;
 		private BookendManager _bookendManager;
 
 		[TestInitialize]
 		public void Setup()
 		{
-			_bookendManager = new BookendManager();
+			_selectionManager = Substitute.For<ISelect>();
+			_bookendManager = new BookendManager(_selectionManager);
 		}
 
 		[TestMethod]
 		public void MarkEnd_AfterStart_BookendCreated()
 		{
 			// Arrange
-			int startIndex = 800;
-			int endIndex = 900;
-			_bookendManager.MarkStart(startIndex);
+			int minLineNumber = 800;
+			int maxLineNumber = 900;
+			_bookendManager.MarkStart(minLineNumber);
 
 			// Act
-			_bookendManager.MarkEnd(endIndex);
+			_bookendManager.MarkEnd(maxLineNumber);
 
 			// Assert
 			_bookendManager.Bookends.Length.Should().Be(1);
-			_bookendManager.Bookends[0].StartLineNumber.Should().Be(startIndex);
-			_bookendManager.Bookends[0].EndLineNumber.Should().Be(endIndex);
+			_bookendManager.Bookends[0].Minimum.LineNumber.Should().Be(minLineNumber);
+			_bookendManager.Bookends[0].Maximum.LineNumber.Should().Be(maxLineNumber);
 		}
 
 		[TestMethod]
 		public void MarkEnd_WithoutStart_ThrowsInvalidOperationException()
 		{
 			// Arrange
-			int endIndex = 900;
+			int maxLineNumber = 900;
 
 			// Act
-			Action act = () => _bookendManager.MarkEnd(endIndex);
+			Action act = () => _bookendManager.MarkEnd(maxLineNumber);
 
 			// Assert
 			act.Should().Throw<InvalidOperationException>();
@@ -57,10 +63,10 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 
 			// Act & Assert
 			_bookendManager.Bookends.Length.Should().Be(2);
-			_bookendManager.Bookends[0].StartLineNumber.Should().Be(800);
-			_bookendManager.Bookends[0].EndLineNumber.Should().Be(900);
-			_bookendManager.Bookends[1].StartLineNumber.Should().Be(950);
-			_bookendManager.Bookends[1].EndLineNumber.Should().Be(1000);
+			_bookendManager.Bookends[0].Minimum.LineNumber.Should().Be(800);
+			_bookendManager.Bookends[0].Maximum.LineNumber.Should().Be(900);
+			_bookendManager.Bookends[1].Minimum.LineNumber.Should().Be(950);
+			_bookendManager.Bookends[1].Maximum.LineNumber.Should().Be(1000);
 		}
 
 		[TestMethod]
@@ -104,6 +110,26 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 			// Assert
 			wasCleared.Should().BeFalse();
 			_bookendManager.Bookends.Length.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void CreateFromSelection_LineNumberIsOutsideOfBookend_ReturnsFalseAndKeepsBookend()
+		{
+			// Arrange
+			var selectedRecords = Enumerable
+				.Range(start: 16, count: 17)
+				.ToDictionary(lineNumber => lineNumber, lineNumber => R.WithLineNumber(lineNumber));
+
+			_selectionManager.Selected.Returns(selectedRecords);
+			_selectionManager.HasSelectionPeriod.Returns(true);
+
+			// Act
+			_bookendManager.CreateFromSelection();
+
+			// Assert
+			_bookendManager.Bookends.Length.Should().Be(1);
+			_bookendManager.Bookends[0].Minimum.LineNumber.Should().Be(16);
+			_bookendManager.Bookends[0].Maximum.LineNumber.Should().Be(32);
 		}
 	}
 }
