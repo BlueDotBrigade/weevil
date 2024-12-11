@@ -199,17 +199,26 @@
 
 		private static IList<IRecord> ClearBeyondBookends(ImmutableArray<IRecord> allRecords, ImmutableArray<Bookend> bookends)
 		{
-			var filteredRecords = new List<IRecord>();
-
-			foreach (Bookend bookend in bookends)
+			// Have any regions of interest been defined?
+			// ... If not, then return everything.
+			if (bookends.Length == 0)
 			{
-				// Add all records that fall within the current region of interest
-				filteredRecords.AddRange(allRecords.Where(record =>
-					record.LineNumber >= bookend.Minimum.LineNumber &&
-					record.LineNumber <= bookend.Maximum.LineNumber));
+				return allRecords;
 			}
+			else
+			{
+				var filteredRecords = new List<IRecord>();
 
-			return filteredRecords;
+				foreach (Bookend bookend in bookends)
+				{
+					// Add all records that fall within the current region of interest
+					filteredRecords.AddRange(allRecords.Where(record =>
+						record.LineNumber >= bookend.Minimum.LineNumber &&
+						record.LineNumber <= bookend.Maximum.LineNumber));
+				}
+
+				return filteredRecords;
+			}
 		}
 		#endregion
 
@@ -232,7 +241,8 @@
 
 			try
 			{
-				if (_selectedRecords.Length == 0)
+				// Early exit?
+				if (_selectedRecords.Length == 0 && _clearOperation != ClearOperation.BeyondBookends)
 				{
 					visibleRecords = _allRecords;
 				}
