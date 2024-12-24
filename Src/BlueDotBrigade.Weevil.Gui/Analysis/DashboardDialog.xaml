@@ -12,7 +12,7 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="11"
+        TextElement.FontSize="{DynamicResource TextFontSize}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
    <Window.Resources>
@@ -56,7 +56,6 @@
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"
-                 TextElement.FontSize="{StaticResource TextFontSize}"
                  TextOptions.TextFormattingMode="Ideal"
                  TextOptions.TextRenderingMode="Auto">
          <StatusBar.ItemsPanel>

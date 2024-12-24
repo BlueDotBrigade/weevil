@@ -78,6 +78,8 @@
 
 		private readonly IDialogBoxService _dialogBox;
 
+		private double _textFontSize;
+
 		private IEngine _engine;
 
 		private readonly DragAndDropViewModel _dragAndDrop;
@@ -130,6 +132,8 @@
 			this.AreFilterOptionsVisible = false;
 			this.IncludeDebugRecords = true;
 			this.IncludeTraceRecords = true;
+
+			this.TextFontSize = 12;
 
 			this.IsFilterToolboxEnabled = false;
 
@@ -214,6 +218,19 @@
 		public bool IsManualFilter { get; set; }
 
 		public bool IsFilterCaseSensitive { get; set; }
+
+		public double TextFontSize
+		{
+			get => _textFontSize;
+			set
+			{
+				if (value != _textFontSize)
+				{
+					_textFontSize = value;
+					Application.Current.Resources["TextFontSize"] = _textFontSize;
+				}
+			}
+		}
 
 		public bool IsFilterInProgress { get; private set; }
 

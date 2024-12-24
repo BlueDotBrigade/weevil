@@ -8,53 +8,53 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="11"
+        TextElement.FontSize="{DynamicResource TextFontSize}"
         FontFamily="{materialDesign:MaterialDesignFont}">
-   <Grid >
-      <Grid.RowDefinitions>
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="1*" />
-         <RowDefinition Height="Auto" />
-      </Grid.RowDefinitions>
-      <Grid.ColumnDefinitions>
-         <ColumnDefinition Width="1*" />
-         <ColumnDefinition Width="6*" />
-         <ColumnDefinition Width="0.5*" />
-      </Grid.ColumnDefinitions>
-      <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-      <Label Grid.Row="0" Grid.Column="0"
-             HorizontalAlignment="Right" Content="Details:"/>
-      <Grid Grid.Row="0" Grid.Column="1">
-         <Grid.RowDefinitions>
+    <Grid >
+        <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-         </Grid.RowDefinitions>
-         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="100" />
-         </Grid.ColumnDefinitions>
-         <TextBox Grid.Row="0" Grid.Column="0"
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="6*" />
+            <ColumnDefinition Width="0.5*" />
+        </Grid.ColumnDefinitions>
+        <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+        <Label Grid.Row="0" Grid.Column="0"
+             HorizontalAlignment="Right" Content="Details:"/>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Row="0" Grid.Column="0"
                   Text="{Binding Details}" 
                   Margin="5,5,5,5"
                   IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"
                   controls:TextBoxBehavior.AutoSelectEnabled="True"/>
-         <Image Grid.Row="0" Grid.Column="1" Source="/Resources/Images/Weevil-100.png" Height="100" Width="100"
+            <Image Grid.Row="0" Grid.Column="1" Source="/Resources/Images/Weevil-100.png" Height="100" Width="100"
                 VerticalAlignment="Top"/>
-      </Grid>
-      <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-      <Label Grid.Row="1" Grid.Column="0" 
+        </Grid>
+        <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+        <Label Grid.Row="1" Grid.Column="0" 
              HorizontalAlignment="Right" Content="Weevil License:"/>
-      <TextBox Grid.Row="1" Grid.Column="1"
+        <TextBox Grid.Row="1" Grid.Column="1"
                IsReadOnly="True" TextWrapping="Wrap" Margin="5,5,5,5"
                Text="{Binding License}"
                VerticalScrollBarVisibility="Visible"
                controls:TextBoxBehavior.AutoSelectEnabled="True"
                Style="{StaticResource MaterialDesignTextBox}"/>
-      <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}"/>
-      <Label Grid.Row="2" Grid.Column="0" 
+        <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}"/>
+        <Label Grid.Row="2" Grid.Column="0" 
              HorizontalAlignment="Right" Content="Third-Party Licenses:"/>
-      <TextBlock Grid.Row="2" Grid.Column="1" 
+        <TextBlock Grid.Row="2" Grid.Column="1" 
                  Margin="5,5,5,5">
          <Hyperlink Command="{Binding ShowThirdPartyNoticesCommand}">Show Documentation</Hyperlink>
-      </TextBlock>
-   </Grid>
+        </TextBlock>
+    </Grid>
 </Window>

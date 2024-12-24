@@ -10,18 +10,18 @@
         d:DesignHeight="450" d:DesignWidth="800"
         d:DataContext="{d:DesignInstance local:SelectFileViewModel}"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="12"
+        TextElement.FontSize="{DynamicResource TextFontSize}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         Background="{DynamicResource MaterialDesignPaper}">
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="10" />
-			<RowDefinition Height="*" />
-			<RowDefinition Height="40" />
-		</Grid.RowDefinitions>
-		<TextBlock>Select the file you want to open:</TextBlock>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+        <TextBlock>Select the file you want to open:</TextBlock>
         <ListBox  Grid.Row="2" 
                   ItemsSource="{Binding Filenames}"
                   SelectedItem="{Binding SelectedFilename}">
@@ -32,14 +32,14 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-			<StackPanel.Resources>
-				<Style TargetType="Button">
-					<Setter Property="Width" Value="200" />
-					<Setter Property="Margin" Value="5" />
-				</Style>
-			</StackPanel.Resources>
-			<Button Content="OK" Command="{Binding OkCommand}" />
-			<Button Content="Cancel" Command="{Binding CancelCommand}" />
-		</StackPanel>
-		</Grid>
+            <StackPanel.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Width" Value="200" />
+                    <Setter Property="Margin" Value="5" />
+                </Style>
+            </StackPanel.Resources>
+            <Button Content="OK" Command="{Binding OkCommand}" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </Grid>
 </Window>

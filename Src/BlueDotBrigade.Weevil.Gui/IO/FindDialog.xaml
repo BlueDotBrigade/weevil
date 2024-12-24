@@ -11,57 +11,58 @@
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="11"
+        TextElement.FontSize="{DynamicResource TextFontSize}"
+        
         FontFamily="{materialDesign:MaterialDesignFont}">
-	<Window.Resources>
-      <Style TargetType="TextBlock">
-         <Setter Property="Margin" Value="5" />
-         <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
-         <Setter Property="VerticalAlignment" Value="Center" />
-         <Setter Property="HorizontalAlignment" Value="Right" />
-         <Setter Property="TextAlignment" Value="Right" />
-      </Style>
-      <Style TargetType="TextBox">
-         <Setter Property="Margin" Value="5" />
-         <Setter Property="VerticalAlignment" Value="Center" />
-         <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
-      </Style>
-      <Style TargetType="Button" BasedOn="{StaticResource  MaterialDesignRaisedButton}">
-         <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
-         <Setter Property="Width" Value="{StaticResource ButtonWidth}" />
-      </Style>
-   </Window.Resources>
-   <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}" >
-      <Grid.RowDefinitions>
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="Auto" />
-         <RowDefinition Height="*" />
-         <RowDefinition Height="10" />
-      </Grid.RowDefinitions>
-      <Grid.ColumnDefinitions>
-         <ColumnDefinition Width="2*" />
-         <ColumnDefinition Width="6*" />
-         <ColumnDefinition Width="0.5*" />
-      </Grid.ColumnDefinitions>
-      <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-      <TextBlock Grid.Row="0" Grid.Column="0"
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource  MaterialDesignRaisedButton}">
+            <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
+            <Setter Property="Width" Value="{StaticResource ButtonWidth}" />
+        </Style>
+    </Window.Resources>
+    <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="6*" />
+            <ColumnDefinition Width="0.5*" />
+        </Grid.ColumnDefinitions>
+        <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+        <TextBlock Grid.Row="0" Grid.Column="0"
                  Text="Search for text:"
                  HorizontalAlignment="Right" 
                  TextWrapping="WrapWithOverflow" />
-      <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 
                Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"/>
-      <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-      <TextBlock Grid.Row="1" Grid.Column="0"
+        <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+        <TextBlock Grid.Row="1" Grid.Column="0"
                  Text="Case sensitive:"
                  HorizontalAlignment="Right" 
                  TextWrapping="WrapWithOverflow" />
         <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding IsCaseSensitive}" Content="Yes"/>
         <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-      <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-         <Button Content="Previous" Click="OnPreviousClicked" />
-         <Button Content="Next" Click="OnNextClicked" IsDefault="True"/>
-      </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+            <Button Content="Previous" Click="OnPreviousClicked" />
+            <Button Content="Next" Click="OnNextClicked" IsDefault="True"/>
+        </StackPanel>
 
-      <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-   </Grid>
+        <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+    </Grid>
 </Window>
