@@ -13,5 +13,6 @@
     <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>
     <Thickness x:Key="ComboBoxMargin" Left="4" Top="4" Right="4" Bottom="4"/>
 
-    <system:Double x:Key="TextFontSize">11</system:Double>
+    <system:Double x:Key="TextFontSize">12</system:Double>
+    <system:Double x:Key="ResultsFontSize">11</system:Double>
 </ResourceDictionary>

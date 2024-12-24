@@ -79,6 +79,7 @@
 		private readonly IDialogBoxService _dialogBox;
 
 		private double _textFontSize;
+		private double _resultsFontSize;
 
 		private IEngine _engine;
 
@@ -228,6 +229,19 @@
 				{
 					_textFontSize = value;
 					Application.Current.Resources["TextFontSize"] = _textFontSize;
+				}
+			}
+		}
+
+		public double ResultsFontSize
+		{
+			get => _resultsFontSize;
+			set
+			{
+				if (value != _resultsFontSize)
+				{
+					_resultsFontSize = value;
+					Application.Current.Resources["ResultsFontSize"] = _resultsFontSize;
 				}
 			}
 		}

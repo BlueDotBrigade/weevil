@@ -339,6 +339,7 @@
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
+                    <Setter Property="FontSize" Value="{DynamicResource ResultsFontSize}" />
                     <Setter Property="SnapsToDevicePixels" Value="True" />
                     <Setter Property="OverridesDefaultStyle" Value="True" />
                     <Setter Property="Background" Value="Transparent" />
@@ -480,12 +481,24 @@
                 <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
                     <AccessText Text="_Case Sensitive Filtering"></AccessText>
                 </CheckBox>
-                <Slider Value="{Binding TextFontSize, Mode=TwoWay}" 
+                <TextBlock> Application Font Size: </TextBlock>
+                <ComboBox x:Name="FontSizeComboBox"
+                      Width="100"
+                      SelectedValuePath="Content"
+                      SelectedValue="{Binding TextFontSize, Mode=TwoWay}"
+                      FontSize="{DynamicResource TextFontSize}">
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="10" />
+                        <ComboBoxItem Content="12" />
+                        <ComboBoxItem Content="14" />
+                    </ComboBox.Items>
+                </ComboBox>
+                <TextBlock> Row Font Size: </TextBlock>
+                <Slider Value="{Binding ResultsFontSize, Mode=TwoWay}" 
                         Minimum="8" Maximum="16" TickFrequency="1"
                         SmallChange="1" LargeChange="2"
                         Width="100">
                 </Slider>
-                <TextBlock> Font Size</TextBlock>
             </StackPanel>
             <TextBox Grid.Row="1"
                      Text="{Binding Path=SourceFileRemarks, Mode=TwoWay, Delay=500, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
