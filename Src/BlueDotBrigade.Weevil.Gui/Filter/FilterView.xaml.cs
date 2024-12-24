@@ -141,5 +141,19 @@
 				ExcludeColumn.Width = new GridLength(3, GridUnitType.Star);
 			}
 		}
+
+		private void UiFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		{
+			if (UiFontSizeComboBox.SelectedValue is string selectedValue &&
+				double.TryParse(selectedValue, out double fontSize))
+			{
+				Application.Current.Resources["TextFontSize"] = fontSize;
+			}
+		}
+
+		private void RowFontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			Application.Current.Resources["ResultsFontSize"] = e.NewValue;
+		}
 	}
 }

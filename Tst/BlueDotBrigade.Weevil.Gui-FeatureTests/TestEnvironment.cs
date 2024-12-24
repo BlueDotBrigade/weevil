@@ -24,14 +24,6 @@ namespace BlueDotBrigade.Weevil.Gui
 		{
 			Log.Default.Write(LogSeverityType.Debug, "Reqnroll test environment is being setup...");
 
-			// By default `System.Windows.Application.Current` is not initialized by MS Test.
-			if (Application.Current == null)
-			{
-				// Required by FilterViewModel for managing resources: Application.Current.Resources["TextFontSize"]
-				// ... Without the following line, automated tests may may fail.
-				new Application();
-			}
-
 			Lokator
 				.Get()
 				.UsingDefaultFileName("Droid.log")
