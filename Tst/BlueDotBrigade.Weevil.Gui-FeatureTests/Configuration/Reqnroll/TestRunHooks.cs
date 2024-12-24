@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Configuration.Reqnroll
 {
+	using System.Windows;
 	using BlueDotBrigade.DatenLokator.TestTools.Configuration;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.TestTools.Configuration.Reqnroll;
@@ -16,7 +17,13 @@
 		{
 			Log.Default.Write(LogSeverityType.Debug, "Reqnroll test environment is being setup...");
 
-			//Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
+			// By default `System.Windows.Application.Current` is not initialized by MS Test.
+			if (Application.Current == null)
+			{
+				// Required by FilterViewModel for managing resources: Application.Current.Resources["TextFontSize"]
+				// ... Without the following line, automated tests may may fail.
+				new Application();
+			}
 
 			Lokator
 				.Get()
