@@ -11,7 +11,7 @@
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
             xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
-            d:DesignHeight="200" d:DesignWidth="900" FontSize="{DynamicResource TextFontSize}">
+            d:DesignHeight="200" d:DesignWidth="900" FontSize="{DynamicResource ApplicationFontSize}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter" />
@@ -210,7 +210,7 @@
         </Grid>
         <ListView x:Name="ListView"
                 Grid.Row="1"
-                  FontSize="{DynamicResource TextFontSize}"
+                  FontSize="{DynamicResource ApplicationFontSize}"
                 ItemsSource="{Binding VisibleItems}"
                              SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
                              AlternationCount="2"
@@ -235,7 +235,7 @@
                 </Style>
             </ListView.Style>
             <ListView.ContextMenu>
-                <ContextMenu FontSize="{DynamicResource TextFontSize}">
+                <ContextMenu FontSize="{DynamicResource ApplicationFontSize}">
                     <MenuItem Header="Open" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
                     <MenuItem Header="Save State" Command="{Binding SaveStateCommand}" InputGestureText="Ctrl+S"/>
                     <MenuItem Header="Save Records...">
@@ -339,7 +339,7 @@
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
-                    <Setter Property="FontSize" Value="{DynamicResource ResultsFontSize}" />
+                    <Setter Property="FontSize" Value="{DynamicResource RowFontSize}" />
                     <Setter Property="SnapsToDevicePixels" Value="True" />
                     <Setter Property="OverridesDefaultStyle" Value="True" />
                     <Setter Property="Background" Value="Transparent" />

@@ -7,7 +7,7 @@
         Title="GraphDialog" 
         Height="450" Width="800" WindowState="Maximized"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="{DynamicResource TextFontSize}"
+        TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         Background="{DynamicResource MaterialDesignPaper}">

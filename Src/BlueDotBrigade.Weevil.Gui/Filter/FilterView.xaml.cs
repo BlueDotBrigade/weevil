@@ -45,10 +45,10 @@
 			// User-scoped settings are read from either:
 			// ... C:\Users\<UserName>\AppData\Local\Blue_Dot_Brigade\BlueDotBrigade.Weevil.Gui_Url_<HashValue>\2.11.0.0\user.config
 			// ... C:\Users\<UserName>\AppData\Local\Weevil\<Version>\user.config
-			Application.Current.Resources["TextFontSize"] = Settings.Default.ApplicationFontSize;
+			Application.Current.Resources["ApplicationFontSize"] = Settings.Default.ApplicationFontSize;
 			ApplicationFontSizeComboBox.SelectedValue = Settings.Default.ApplicationFontSize;
 
-			Application.Current.Resources["ResultsFontSize"] = Settings.Default.RowFontSize;
+			Application.Current.Resources["RowFontSize"] = Settings.Default.RowFontSize;
 			RowFontSizeSlider.Value = Settings.Default.RowFontSize;
 		}
 
@@ -160,7 +160,7 @@
 			if (ApplicationFontSizeComboBox.SelectedValue is string selectedValue &&
 				double.TryParse(selectedValue, out double fontSize))
 			{
-				Application.Current.Resources["TextFontSize"] = fontSize;
+				Application.Current.Resources["ApplicationFontSize"] = fontSize;
 				Settings.Default.ApplicationFontSize = fontSize;
 				Settings.Default.Save();
 			}
@@ -171,7 +171,7 @@
 			// If the user control has not yet been created, early exit to avoid saving WPF default values to settings (#251).
 			if (!this.IsLoaded) return;
 
-			Application.Current.Resources["ResultsFontSize"] = e.NewValue;
+			Application.Current.Resources["RowFontSize"] = e.NewValue;
 			Settings.Default.RowFontSize = e.NewValue;
 			Settings.Default.Save();
 		}

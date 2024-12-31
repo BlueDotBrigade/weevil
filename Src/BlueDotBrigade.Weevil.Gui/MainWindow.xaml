@@ -10,7 +10,7 @@
 		  WindowStartupLocation="CenterScreen" WindowState="Maximized"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="WhiteSmoke"
-        TextElement.FontSize="{DynamicResource TextFontSize}"
+        TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.FontWeight="Regular"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"

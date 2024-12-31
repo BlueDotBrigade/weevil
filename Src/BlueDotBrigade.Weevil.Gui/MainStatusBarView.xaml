@@ -16,7 +16,7 @@
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"
-                 TextElement.FontSize="{DynamicResource TextFontSize}"
+                 TextElement.FontSize="{DynamicResource ApplicationFontSize}"
                  TextOptions.TextFormattingMode="Ideal"
                  TextOptions.TextRenderingMode="Auto">
             <StatusBar.ItemsPanel>

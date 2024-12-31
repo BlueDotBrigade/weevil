@@ -12,7 +12,7 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="{DynamicResource TextFontSize}"
+        TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
    <Window.Resources>

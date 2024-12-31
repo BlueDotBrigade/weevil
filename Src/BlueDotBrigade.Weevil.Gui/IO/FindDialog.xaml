@@ -11,7 +11,7 @@
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="{DynamicResource TextFontSize}"
+        TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         
         FontFamily="{materialDesign:MaterialDesignFont}">
     <Window.Resources>
