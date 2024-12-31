@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
+	using System.Data.Common;
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
@@ -154,22 +155,67 @@
 
 		private void UpdateLayout()
 		{
-			// Force the ListView to update its layout
 			base.UpdateLayout();
 
-			// Adjust the width of each column
+			
+
 			if (ListView.View is GridView gridView)
 			{
-				foreach (var column in gridView.Columns)
+				// Re-size columns based on the application's font size				
+				for (var i = 0; i < gridView.Columns.Count; i++)
 				{
-					// Set the width to Auto and then back to its previous value to force recalculation
-					var previousWidth = column.Width;
-					column.Width = 0; // Setting to 0 first to force recalculation
+					GridViewColumn column = gridView.Columns[i];
 
-					column.Width = previousWidth;
+					// Set the width to Auto and then back to its previous value to force recalculation
+					var originalWidth = column.Width;
+					column.Width = 0; // Setting to 0 first to force recalculation
+					column.Width = originalWidth;
+				}
+
+				ListView.UpdateLayout();
+
+				var totalWidth = 0.0;
+
+				// Calculate the width of the last column
+				for (var i = 0; i < gridView.Columns.Count; i++)
+				{
+					GridViewColumn column = gridView.Columns[i];
+
+					if (i == gridView.Columns.Count - 1)
+					{
+						var remainingWidth = Math.Max(0, ListView.ActualWidth - SystemParameters.VerticalScrollBarWidth - totalWidth - 2);
+						column.Width = 0; // Setting to 0 first to force recalculation
+						column.Width = remainingWidth;
+					}else
+					{
+						totalWidth += column.ActualWidth;
+					}
 				}
 			}
 		}
+		//private static double CalculateLastColumnWidth(ListView listView)
+		//{
+		//	double actualWidth = listView.ActualWidth;
+		//	double otherColumnsWidth = 0;
+
+		//	if (listView.View is GridView gridView)
+		//	{
+		//		for (var i = 0; i < gridView.Columns.Count-1; i++)
+		//		{
+		//			GridViewColumn column = gridView.Columns[i];
+		//			otherColumnsWidth += column.ActualWidth;
+		//		}
+
+		//		int lastIndex = gridView.Columns.Count - 1;
+
+		//		double remainingWidth = Math.Max(0, actualWidth - otherColumnsWidth);
+		//		return remainingWidth;
+		//	}
+		//	else
+		//	{
+		//		throw new InvalidOperationException("The ListView.View property must be set to a GridView object.");
+		//	}
+		//}
 
 		private void ApplicationFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{

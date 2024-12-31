@@ -210,7 +210,7 @@
         </Grid>
         <ListView x:Name="ListView"
                 Grid.Row="1"
-                  FontSize="{DynamicResource ApplicationFontSize}"
+                FontSize="{DynamicResource ApplicationFontSize}"
                 ItemsSource="{Binding VisibleItems}"
                              SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
                              AlternationCount="2"
@@ -428,7 +428,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn  Width="1100">
+                    <GridViewColumn Width="1100">
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
