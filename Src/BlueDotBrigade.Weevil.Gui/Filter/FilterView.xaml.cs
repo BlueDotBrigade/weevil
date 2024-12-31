@@ -152,6 +152,25 @@
 			}
 		}
 
+		private void UpdateLayout()
+		{
+			// Force the ListView to update its layout
+			base.UpdateLayout();
+
+			// Adjust the width of each column
+			if (ListView.View is GridView gridView)
+			{
+				foreach (var column in gridView.Columns)
+				{
+					// Set the width to Auto and then back to its previous value to force recalculation
+					var previousWidth = column.Width;
+					column.Width = 0; // Setting to 0 first to force recalculation
+
+					column.Width = previousWidth;
+				}
+			}
+		}
+
 		private void ApplicationFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{
 			// If the user control has not yet been created, early exit to avoid saving WPF default values to settings (#251).
@@ -163,6 +182,8 @@
 				Application.Current.Resources["ApplicationFontSize"] = fontSize;
 				Settings.Default.ApplicationFontSize = fontSize;
 				Settings.Default.Save();
+
+				UpdateLayout();
 			}
 		}
 
