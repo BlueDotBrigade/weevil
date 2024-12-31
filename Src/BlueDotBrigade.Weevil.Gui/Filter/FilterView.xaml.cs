@@ -6,6 +6,7 @@
 	using System.Windows.Controls;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.Navigation;
 
@@ -32,7 +33,7 @@
 			//this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, uiDispatcher);
 
 			InitializeComponent();
-
+			
 			Loaded += OnControlLoaded;
 		}
 
@@ -40,6 +41,15 @@
 		{
 			var window = Window.GetWindow(this);
 			window.Closing += OnWindowClosing;
+
+			// User-scoped settings are read from either:
+			// ... C:\Users\<UserName>\AppData\Local\Blue_Dot_Brigade\BlueDotBrigade.Weevil.Gui_Url_<HashValue>\2.11.0.0\user.config
+			// ... C:\Users\<UserName>\AppData\Local\Weevil\<Version>\user.config
+			Application.Current.Resources["TextFontSize"] = Settings.Default.ApplicationFontSize;
+			ApplicationFontSizeComboBox.SelectedValue = Settings.Default.ApplicationFontSize;
+
+			Application.Current.Resources["ResultsFontSize"] = Settings.Default.RowFontSize;
+			RowFontSizeSlider.Value = Settings.Default.RowFontSize;
 		}
 
 		private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -142,18 +152,28 @@
 			}
 		}
 
-		private void UiFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		private void ApplicationFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{
-			if (UiFontSizeComboBox.SelectedValue is string selectedValue &&
+			// If the user control has not yet been created, early exit to avoid saving WPF default values to settings (#251).
+			if (!this.IsLoaded) return;
+
+			if (ApplicationFontSizeComboBox.SelectedValue is string selectedValue &&
 				double.TryParse(selectedValue, out double fontSize))
 			{
 				Application.Current.Resources["TextFontSize"] = fontSize;
+				Settings.Default.ApplicationFontSize = fontSize;
+				Settings.Default.Save();
 			}
 		}
 
 		private void RowFontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
+			// If the user control has not yet been created, early exit to avoid saving WPF default values to settings (#251).
+			if (!this.IsLoaded) return;
+
 			Application.Current.Resources["ResultsFontSize"] = e.NewValue;
+			Settings.Default.RowFontSize = e.NewValue;
+			Settings.Default.Save();
 		}
 	}
 }
