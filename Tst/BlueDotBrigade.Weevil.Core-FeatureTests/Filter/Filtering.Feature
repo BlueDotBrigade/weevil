@@ -1,5 +1,4 @@
-
-# ---------------- CORE ENGINE
+Feature: Filtering
 
 @Requirement:406, @UserStory:123
 Scenario: Logical OR operator used to define multiple expressions
