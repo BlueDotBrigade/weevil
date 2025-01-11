@@ -24,7 +24,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns(thresholdString);
 
-			this.Context.Engine.Analyzer.Analyze(AnalysisType.TemporalAnomaly, parameterProvider);
+			this.Context.Engine.Analyzer.Analyze(AnalysisType.ElapsedTime, parameterProvider);
 		}
 
 		[Then($"the flagged record count will be {X.WholeNumber}")]
