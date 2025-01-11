@@ -1,4 +1,3 @@
-Feature: Filtering
 
 # ---------------- CORE ENGINE
 
@@ -38,7 +37,7 @@ Scenario: Exclude filter overrides include filter when both are applied
 	Then all records will include: Core
 	And all records will exclude: Debug
 
-@Requirement:371
+@Requirement:371, @Requirement:416, @Requirement:417
 Scenario: Pinned records remain visible regardless of active filters
 	Given that the default log file is open
 	When pinning the record on line 2

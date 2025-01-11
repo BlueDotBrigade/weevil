@@ -51,3 +51,17 @@ Scenario: Display trace-level records when "Show Trace" option is enabled
 	And the "Show Trace" filter option is on
 	And applying the filters
 	Then there will be 381 matching records
+
+@Requirement:394, @Requirement:420
+Scenario: `Case Sensitive` filtering
+	Given that the default log file is open
+	When the case sensitive option is on
+	And applying the include filter: DIRECTIVES
+	Then there will be 0 matching records
+
+@Requirement:394, @Requirement:420
+Scenario: `Case Insensitive` filtering
+	Given that the default log file is open
+	When the case sensitive option is off
+	And applying the include filter: DIRECTIVES
+	Then there will be 7 matching records
