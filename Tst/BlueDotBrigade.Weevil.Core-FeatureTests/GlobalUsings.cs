@@ -1,4 +1,5 @@
-﻿global using FluentAssertions;
+﻿global using NSubstitute;
+global using FluentAssertions;
 
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 
