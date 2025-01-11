@@ -67,7 +67,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Analysis\" />
 	  <Folder Include="Navigation\" />
 	</ItemGroup>
 </Project>

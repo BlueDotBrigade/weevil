@@ -16,7 +16,7 @@
 
 		public const string FilePath = @"((?:(?<Drv>[A-Za-z]:\\))(?<Dir>([a-zA-Z0-9._-]+\\)*)(?<File>[a-zA-Z0-9._-]+)\.(?<Ext>[a-zA-Z]{1,4}))";
 
-		public const string TimePeriod = @"((?:\d+) (?:min|sec))";
+		public const string TimePeriod = @"((?:\d+) (?:min|sec|ms))";
 
 		public const string OnOff = @"(on|off)";
 

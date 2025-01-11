@@ -10,8 +10,8 @@
 			// nothing to do
 		}
 
-		[Then($"the visible record count in the status bar will be {X.WholeNumber}")]
-		public void ThenTheVisibleRecordCountInTheStatusBarWillBe(int recordCount)
+		[Then($"the status bar visible record count will be {X.WholeNumber}")]
+		public void ThenTheStatusBarVisibleRecordCountWillBe(int recordCount)
 		{
 			Assert.AreEqual(
 				recordCount,
