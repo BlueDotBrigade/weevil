@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Transforms
+﻿namespace BlueDotBrigade.Weevil.Transforms
 {
 	using System;
 	using System.Collections.Generic;
@@ -7,7 +7,6 @@
 	using System.Text.RegularExpressions;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.TestTools.Text;
-	using Newtonsoft.Json.Converters;
 
 	[Binding]
 	internal class TimeSpanTransform
