@@ -27,14 +27,6 @@
 			this.Context.FilterType = filterMode;
 		}
 
-		//[When($@"selecting the {R.TextExpression} filter mode")]
-		//public void WhenSelectingThePlainTextFilterMode(FilterType expressionType)
-		//{
-		//	this.Token.FilterType = expressionType == FilterType.PlainText
-		//		? FilterType.PlainText
-		//		: FilterType.RegularExpression;
-		//}
-
 		[When(@"case sensitive filtering has been enabled")]
 		public void WhenCaseSensitiveFilteringHasBeenEnabled()
 		{
