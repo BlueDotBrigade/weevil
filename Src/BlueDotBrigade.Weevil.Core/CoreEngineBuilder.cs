@@ -166,7 +166,7 @@
 				var inclusiveFilterHistory = new List<string>();
 				var exclusiveFilterHistory = new List<string>();
 				var tableOfContents = new List<Section>();
-				var bookends = new List<Bookend>();
+				var regions = new List<Region>();
 
 				if (this.UseExistingInstance)
 				{
@@ -178,7 +178,7 @@
 					sourceFileRemarks = _sourceInstance._sourceFileRemarks;
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
-					bookends.AddRange(_sourceInstance._bookendManager.Bookends);
+					regions.AddRange(_sourceInstance._regionManager.Regions);
 
 					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
 					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);
@@ -193,7 +193,7 @@
 						_sourceInstance._filterManager.Results,
 						selectedRecords,
 						_clearOperation,
-						bookends.ToImmutableArray());
+						regions.ToImmutableArray());
 
 					records = repository.Get(maxRecords);
 
@@ -235,7 +235,7 @@
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
 							out tableOfContents,
-							out bookends);
+							out regions);
 
 						if (inclusiveFilterHistory.Count == 0)
 						{
@@ -263,7 +263,7 @@
 					records,
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
-					bookends.ToImmutableArray());
+					regions.ToImmutableArray());
 
 				if (inclusiveFilterHistory.Count > 0)
 				{

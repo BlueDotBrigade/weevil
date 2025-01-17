@@ -5,10 +5,10 @@
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("Name={Name}, MinLineNumber={Minimum.LineNumber}, MaxLineNumber={Maximum.LineNumber}")]
-	[DataContract(Name = "Bookend")]
-	public class BookendInfo
+	[DataContract(Name = "Region")]
+	public class RegionInfo
 	{
-		public BookendInfo()
+		public RegionInfo()
 		{
 			this.Name = string.Empty;
 			this.Minimum = new RelatesTo();

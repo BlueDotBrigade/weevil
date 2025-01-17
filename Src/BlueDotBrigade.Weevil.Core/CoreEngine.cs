@@ -35,7 +35,7 @@
 		private readonly SidecarManager _sidecarManager;
 		private readonly SelectionManager _selectionManager;
 		private readonly NavigationManager _navigationManager;
-		private readonly IBookendManager _bookendManager;
+		private readonly IRegionManager _regionManager;
 		private readonly IAnalyze _analysisManager;
 
 		private readonly int _originalRecordCount;
@@ -81,7 +81,7 @@
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
-			ImmutableArray<Bookend> bookends)
+			ImmutableArray<Region> regions)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
 
@@ -151,7 +151,7 @@
 				_sourceFileEncoding,
 				new Action(() => { _filterManager.ReApply(); }));
 
-			_bookendManager = new BookendManager(_selectionManager, bookends);
+			_regionManager = new RegionManager(_selectionManager, regions);
 
 			recordAndMetadataLoadingStopwatch.Stop();
 
@@ -220,7 +220,7 @@
 
 		public IAnalyze Analyzer => _analysisManager;
 
-		public IBookendManager Bookends => _bookendManager;
+		public IRegionManager Regions => _regionManager;
 
 		public ImmutableArray<IRecord> Records => _allRecords;
 
@@ -293,7 +293,7 @@
 				FilterTraits = _filterManager,
 				SourceFileRemarks = _sourceFileRemarks,
 				TableOfContents = _navigationManager.TableOfContents,
-				Bookends = _bookendManager.Bookends,
+				Regions = _regionManager.Regions,
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);

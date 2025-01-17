@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <WeevilSidecar xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Configuration.Sidecar.v2">
 	<CommonData>
-		<Bookends>
-			<Bookend>
+		<Regions>
+			<Region>
 				<Name>Region Of Interest</Name>
 				<Minimum>
 					<ByteOffset>1024</ByteOffset>
@@ -12,8 +12,8 @@
 					<ByteOffset>9378</ByteOffset>
 					<LineNumber>34</LineNumber>
 				</Maximum>
-			</Bookend>
-		</Bookends>
+			</Region>
+		</Regions>
 		<Context/>
 		<FilterHistory>
 			<ExclusiveFilters/>

@@ -38,7 +38,7 @@
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveStateCommand}" />
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
-        <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddBookendCommand}" />
+        <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
 
         <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
         <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />
@@ -258,8 +258,8 @@
                         <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
                         <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
                         <Separator/>
-                        <MenuItem Header="Add Bookend" Command="{Binding AddBookendCommand}" InputGestureText="Ctrl+B" />
-                        <MenuItem Header="Remove All Bookends" Command="{Binding RemoveAllBookendsCommand}" />
+                        <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
+                        <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="Filtering...">
@@ -276,7 +276,7 @@
                         <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
                         <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
                         <Separator/>
-                        <MenuItem Header="Clear Outside Bookends" Command="{Binding ClearOutsideBookendsCommand}" />
+                        <MenuItem Header="Clear Outside Regions" Command="{Binding ClearOutsideRegionsCommand}" />
                         <Separator/>
                         <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
                         <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>

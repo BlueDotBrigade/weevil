@@ -2,9 +2,9 @@
 {
 	using System.Collections.Immutable;
 
-	public interface IBookendManager
+	public interface IRegionManager
 	{
-		ImmutableArray<Bookend> Bookends { get; }
+		ImmutableArray<Region> Regions { get; }
 
 		void CreateFromSelection();
 

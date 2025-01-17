@@ -6,7 +6,7 @@ namespace BlueDotBrigade.Weevil
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("Name={this.Name}, MinLineNumber={this.Minimum.LineNumber}, MaxLineNumber={this.Maximum.LineNumber}")]
-	public class Bookend
+	public class Region
 	{
 		[DataMember(Order = 100)]
 		public string Name { get; }
@@ -17,13 +17,13 @@ namespace BlueDotBrigade.Weevil
 		[DataMember(Order = 300)]
 		public RelatesTo Maximum { get; }
 
-		public Bookend(int startLineNumber, int endLineNumber)
+		public Region(int startLineNumber, int endLineNumber)
 			: this(string.Empty, startLineNumber, endLineNumber)
 		{
 			// nothing to do
 		}
 
-		public Bookend(string name, int startLineNumber, int endLineNumber)
+		public Region(string name, int startLineNumber, int endLineNumber)
 		{
 			this.Name = name;
 			this.Minimum = new RelatesTo()
@@ -38,14 +38,14 @@ namespace BlueDotBrigade.Weevil
 			};
 		}
 
-		public Bookend(string name, RelatesTo startsAt, RelatesTo endsAt)
+		public Region(string name, RelatesTo startsAt, RelatesTo endsAt)
 		{
 			this.Name = name ?? string.Empty;
 			this.Minimum = startsAt ?? throw new ArgumentNullException(nameof(startsAt));
 			this.Maximum = endsAt ?? throw new ArgumentNullException(nameof(endsAt));
 		}
 
-		public bool OverlapsWith(Bookend other)
+		public bool OverlapsWith(Region other)
 		{
 			return this.Minimum.LineNumber <= other.Maximum.LineNumber && this.Maximum.LineNumber >= other.Minimum.LineNumber;
 		}

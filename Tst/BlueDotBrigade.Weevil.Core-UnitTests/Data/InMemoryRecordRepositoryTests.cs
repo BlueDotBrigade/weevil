@@ -11,18 +11,18 @@
 	public class InMemoryRecordRepositoryTests
 	{
 		[TestMethod]
-		public void Test_ClearBeyondBookends_NoBookendsDefined()
+		public void Test_ClearBeyondRegions_NoRegionsDefined()
 		{
 			// Arrange
-			var bookends = new List<Bookend>();
+			var regions = new List<Region>();
 			var records = R.WithLineNumbers(11, 20);
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
 				ImmutableArray<IRecord>.Empty,
 				ImmutableArray<IRecord>.Empty,
-				ClearOperation.BeyondBookends,
-				bookends.ToImmutableArray());
+				ClearOperation.BeyondRegions,
+				regions.ToImmutableArray());
 
 			// Act
 			var filteredRecords = repository.GetAll();
@@ -32,12 +32,12 @@
 		}
 
 		[TestMethod]
-		public void Test_ClearBeyondBookends_ReturnsRecordsBetweenBookends()
+		public void Test_ClearBeyondRegions_ReturnsRecordsBetweenRegions()
 		{
 			// Arrange
-			var bookends = new List<Bookend>
+			var regions = new List<Region>
 			{
-				new Bookend("RegionOfInterest", 14, 16),
+				new Region("RegionOfInterest", 14, 16),
 			};
 			var records = R.WithLineNumbers(11, 20);
 
@@ -45,8 +45,8 @@
 				records.ToImmutableArray(),
 				ImmutableArray<IRecord>.Empty,
 				ImmutableArray<IRecord>.Empty,
-				ClearOperation.BeyondBookends,
-				bookends.ToImmutableArray());
+				ClearOperation.BeyondRegions,
+				regions.ToImmutableArray());
 
 			// Act
 			var filteredRecords = repository.GetAll();

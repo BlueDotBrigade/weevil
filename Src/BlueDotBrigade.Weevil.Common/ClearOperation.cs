@@ -12,8 +12,8 @@
 		Selected,
 		Unselected,
 		/// <summary>
-		/// Only the records between the bookends are kept.
+		/// Records outside of the region of interest are cleared from memory.
 		/// </summary>
-		BeyondBookends,
+		BeyondRegions,
 	}
 }

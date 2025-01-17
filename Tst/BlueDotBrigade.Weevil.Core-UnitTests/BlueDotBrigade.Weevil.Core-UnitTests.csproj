@@ -48,10 +48,10 @@
 		</CodeAnalysisDictionary>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include=".Daten\Configuration\Sidecar\v2\SidecarLoaderTests\SchemaWithBookends.xml" />
+		<None Include=".Daten\Configuration\Sidecar\v2\SidecarLoaderTests\SchemaWithRegions.xml" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Include=".Daten\Configuration\Sidecar\v2\SidecarLoaderTests\SchemaWithoutBookends.xml" />
+		<None Include=".Daten\Configuration\Sidecar\v2\SidecarLoaderTests\SchemaWithoutRegions.xml" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include=".Daten\Data\MultilineRecordParserTest\FileStartsWithPartialRecord.log" />

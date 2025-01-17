@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <WeevilSidecar xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Configuration.Sidecar.v2">
 	<CommonData>
-		<Bookends />
+		<Regions />
 		<Context>
 			<Property xmlns="">
 				<Name>FileFormat</Name>

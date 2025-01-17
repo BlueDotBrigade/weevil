@@ -26,7 +26,7 @@
 		INavigate Navigate { get; }
 		ISelect Selector { get; }
 		IAnalyze Analyzer { get; }
-		IBookendManager Bookends { get; }
+		IRegionManager Regions { get; }
 
 		int Count { get; }
 

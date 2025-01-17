@@ -102,8 +102,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand ClearBeyondBookendsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearOperation.BeyondBookends),
+		public ICommand ClearBeyondRegionsCommand => new UiBoundCommand(
+			() => ClearRecords(ClearOperation.BeyondRegions),
 			() => this.IsMenuEnabled);
 		#endregion
 
@@ -278,12 +278,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand ToggleIsPinnedCommand => new UiBoundCommand(ToggleIsPinned, () => this.IsMenuEnabled);
 		#endregion
 
-		#region Commands: Bookmarks
+		#region Commands: Regions of Interest
 		[SafeForDependencyAnalysis]
-		public ICommand AddBookendCommand => new UiBoundCommand(AddBookend, () => this.IsMenuEnabled);
+		public ICommand AddRegionCommand => new UiBoundCommand(AddRegion, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand RemoveAllBookendsCommand => new UiBoundCommand(RemoveAllBookends, () => this.IsMenuEnabled);
+		public ICommand RemoveAllRegionsCommand => new UiBoundCommand(RemoveAllRegions, () => this.IsMenuEnabled);
 		#endregion
 	}
 }
