@@ -16,7 +16,7 @@
                  Background="{StaticResource MaterialDesignPaper}" 
                  Foreground="{StaticResource TextForeground}"
                  TextElement.FontWeight="Regular"
-                 TextElement.FontSize="{StaticResource TextFontSize}"
+                 TextElement.FontSize="{DynamicResource ApplicationFontSize}"
                  TextOptions.TextFormattingMode="Ideal"
                  TextOptions.TextRenderingMode="Auto">
             <StatusBar.ItemsPanel>
@@ -241,7 +241,7 @@
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300" FontSize="16">
+                            <TextBlock Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" MaxWidth="300">
                                 New Release Available
                             </TextBlock>
                             <TextBlock Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" MaxWidth="300">

@@ -3,7 +3,7 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-            mc:Ignorable="d" 
+            mc:Ignorable="d"
             xmlns:dd="urn:gong-wpf-dragdrop"
             xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
@@ -11,7 +11,7 @@
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
             xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
-            d:DesignHeight="200" d:DesignWidth="900">
+            d:DesignHeight="200" d:DesignWidth="900" FontSize="{DynamicResource ApplicationFontSize}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter" />
@@ -210,7 +210,7 @@
         </Grid>
         <ListView x:Name="ListView"
                 Grid.Row="1"
-                FontSize="{StaticResource TextFontSize}"
+                FontSize="{DynamicResource ApplicationFontSize}"
                 ItemsSource="{Binding VisibleItems}"
                              SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
                              AlternationCount="2"
@@ -235,7 +235,7 @@
                 </Style>
             </ListView.Style>
             <ListView.ContextMenu>
-                <ContextMenu  FontSize="{StaticResource TextFontSize}">
+                <ContextMenu FontSize="{DynamicResource ApplicationFontSize}">
                     <MenuItem Header="Open" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
                     <MenuItem Header="Save State" Command="{Binding SaveStateCommand}" InputGestureText="Ctrl+S"/>
                     <MenuItem Header="Save Records...">
@@ -339,6 +339,7 @@
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
+                    <Setter Property="FontSize" Value="{DynamicResource RowFontSize}" />
                     <Setter Property="SnapsToDevicePixels" Value="True" />
                     <Setter Property="OverridesDefaultStyle" Value="True" />
                     <Setter Property="Background" Value="Transparent" />
@@ -347,7 +348,6 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
                                 <Border x:Name="Border"
-                            
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{DynamicResource MaterialDesignDivider}"
                                 BorderThickness="0,0,0,1"
@@ -379,7 +379,7 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="70">
+                    <GridViewColumn Width="Auto">
                         <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
@@ -387,7 +387,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn  Width="55">
+                    <GridViewColumn Width="Auto">
                         <GridViewColumnHeader Content="Flagged" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
@@ -395,7 +395,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="50">
+                    <GridViewColumn Width="Auto">
                         <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
@@ -403,7 +403,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn  Width="170">
+                    <GridViewColumn  Width="Auto">
                         <GridViewColumnHeader Content="Comment" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
@@ -417,7 +417,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn  Width="55">
+                    <GridViewColumn  Width="Auto">
                         <GridViewColumnHeader Content="Elapsed" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
@@ -428,7 +428,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn  Width="1100">
+                    <GridViewColumn Width="1100">
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
@@ -480,6 +480,38 @@
                 <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
                     <AccessText Text="_Case Sensitive Filtering"></AccessText>
                 </CheckBox>
+
+                <ComboBox x:Name="ApplicationFontSizeComboBox"
+                  Width="100" Margin="0,4,8,4"
+                  SelectedValuePath="Content"
+                  IsTextSearchEnabled="False"
+                  SelectionChanged="ApplicationFontSizeComboBox_SelectionChanged"
+                  materialDesign:ComboBoxAssist.ShowSelectedItem="True">
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="10" />
+                        <ComboBoxItem Content="12" />
+                        <ComboBoxItem Content="14" />
+                        <ComboBoxItem Content="16" />
+                        <ComboBoxItem Content="18" />
+                    </ComboBox.Items>
+                </ComboBox>
+                <Label Margin="0,6,8,4">Application Font Size</Label>
+
+                <!-- Row Font Size -->
+                <Slider 
+                    x:Name="RowFontSizeSlider"
+                    Width="100" Margin="0,8,8,4"
+                    Minimum="10" Maximum="18" 
+                    TickFrequency="1"
+                    SmallChange="1" LargeChange="2"
+                    ValueChanged="RowFontSizeSlider_ValueChanged">
+                    <Slider.ToolTip>
+                        <ToolTip DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <TextBlock Text="{Binding Value, StringFormat={}Font Size: {0:F1}}" />
+                        </ToolTip>
+                    </Slider.ToolTip>
+                </Slider>
+                <Label Margin="0,6,8,4">Row Font Size</Label>
             </StackPanel>
             <TextBox Grid.Row="1"
                      Text="{Binding Path=SourceFileRemarks, Mode=TwoWay, Delay=500, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"

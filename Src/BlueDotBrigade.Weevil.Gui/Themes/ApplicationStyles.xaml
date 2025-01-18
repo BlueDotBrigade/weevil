@@ -2,16 +2,17 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
-   <Color x:Key="PrimaryColor">#900A22</Color>
-   <Color x:Key="SecondaryColor">Gray</Color>
-   <Color x:Key="TextColor">WhiteSmoke</Color>
+    <Color x:Key="PrimaryColor">#900A22</Color>
+    <Color x:Key="SecondaryColor">Gray</Color>
+    <Color x:Key="TextColor">WhiteSmoke</Color>
 
-   <SolidColorBrush  x:Key="TextForeground" Color="{StaticResource TextColor}" />
-   <SolidColorBrush  x:Key="TextAccentForeground" Color="Gray" />
+    <SolidColorBrush  x:Key="TextForeground" Color="{StaticResource TextColor}" />
+    <SolidColorBrush  x:Key="TextAccentForeground" Color="Gray" />
 
-   <system:Double x:Key="ButtonWidth">100</system:Double>
-   <system:Double x:Key="TextFontSize">11</system:Double>
-   <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>
+    <system:Double x:Key="ButtonWidth">100</system:Double>
+    <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>
+    <Thickness x:Key="ComboBoxMargin" Left="4" Top="4" Right="4" Bottom="4"/>
 
-   <Thickness x:Key="ComboBoxMargin" Left="4" Top="4" Right="4" Bottom="4"/>
+    <system:Double x:Key="ApplicationFontSize">12</system:Double>
+    <system:Double x:Key="RowFontSize">11</system:Double>
 </ResourceDictionary>
