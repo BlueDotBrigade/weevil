@@ -109,7 +109,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 
 			// Assert
 			wasCleared.Should().BeFalse();
-			_regionManager.Bookends.Length.Should().Be(1);
+			_regionManager.Regions.Length.Should().Be(1);
 		}
 
 		[TestMethod]
@@ -127,9 +127,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 			_regionManager.CreateFromSelection();
 
 			// Assert
-			_regionManager.Bookends.Length.Should().Be(1);
-			_regionManager.Bookends[0].Minimum.LineNumber.Should().Be(16);
-			_regionManager.Bookends[0].Maximum.LineNumber.Should().Be(32);
+			_regionManager.Regions.Length.Should().Be(1);
+			_regionManager.Regions[0].Minimum.LineNumber.Should().Be(16);
+			_regionManager.Regions[0].Maximum.LineNumber.Should().Be(32);
 		}
 	}
 }
