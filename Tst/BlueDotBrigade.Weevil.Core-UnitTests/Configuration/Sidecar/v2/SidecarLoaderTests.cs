@@ -10,7 +10,7 @@
 	public class SidecarLoaderTests
 	{
 		[TestMethod]
-		public void Load_SchemaWithoutBookends_ReturnsEmptyBookmarks()
+		public void Load_SchemaWithoutRegions_ReturnsEmptyRegions()
 		{
 			// assert
 			var metadata = new Daten().AsString();
@@ -21,12 +21,12 @@
 			sidecarLoader.TryLoad(out var sidecarData);
 
 			// arrange
-			metadata.Should().NotContain("Bookends");
-			sidecarData.CommonData.Bookends.Should().BeEmpty();
+			metadata.Should().NotContain("Regions");
+			sidecarData.CommonData.Regions.Should().BeEmpty();
 		}
 
 		[TestMethod]
-		public void Load_SchemaWithBookends_ReturnsEmptyBookmarks()
+		public void Load_SchemaWithRegions_ReturnsEmptyRegions()
 		{
 			// assert
 			var metadata = new Daten().AsString();
@@ -37,9 +37,9 @@
 			sidecarLoader.TryLoad(out var sidecarData);
 
 			// arrange
-			sidecarData.CommonData.Bookends[0].Name.Should().Be("Region Of Interest");
-			sidecarData.CommonData.Bookends[0].Minimum.LineNumber.Should().Be(12);
-			sidecarData.CommonData.Bookends[0].Maximum.LineNumber.Should().Be(34);
+			sidecarData.CommonData.Regions[0].Name.Should().Be("Region Of Interest");
+			sidecarData.CommonData.Regions[0].Minimum.LineNumber.Should().Be(12);
+			sidecarData.CommonData.Regions[0].Maximum.LineNumber.Should().Be(34);
 		}
 	}
 }

@@ -64,7 +64,7 @@
 
 		public IAnalyze Analyzer => _coreEngine.Analyzer;
 
-		public IBookendManager Bookends => _coreEngine.Bookends;
+		public IRegionManager Regions => _coreEngine.Regions;
 
 		public int Count => _coreEngine.Count;
 

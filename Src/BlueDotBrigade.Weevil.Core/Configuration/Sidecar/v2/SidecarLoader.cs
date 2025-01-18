@@ -54,7 +54,7 @@
 			return canLoad;
 		}
 
-		public void Load(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents, List<Bookend> bookends)
+		public void Load(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents, List<Region> regions)
 		{
 			sourceFileRemarks = _sidecar?.CommonData?.UserRemarks;
 
@@ -121,15 +121,15 @@
 				}
 			}
 
-			if (_sidecar.CommonData.Bookends != null)
+			if (_sidecar.CommonData.Regions != null)
 			{
-				foreach (BookendInfo bookendInfo in _sidecar.CommonData.Bookends)
+				foreach (RegionInfo regionInfo in _sidecar.CommonData.Regions)
 				{
-					bookends.Add(
-						new Bookend(
-							bookendInfo.Name,
-							bookendInfo.Minimum,
-							bookendInfo.Maximum));
+					regions.Add(
+						new Region(
+							regionInfo.Name,
+							regionInfo.Minimum,
+							regionInfo.Maximum));
 				}
 			}
 		}
@@ -272,15 +272,15 @@
 				}
 			}
 
-			if (newData.Bookends != null)
+			if (newData.Regions != null)
 			{
-				foreach (Bookend bookend in newData.Bookends)
+				foreach (Region region in newData.Regions)
 				{
-					snapshot.CommonData.Bookends.Add(new BookendInfo
+					snapshot.CommonData.Regions.Add(new RegionInfo
 					{
-						Name = bookend.Name,
-						Minimum = bookend.Minimum,
-						Maximum = bookend.Maximum,
+						Name = region.Name,
+						Minimum = region.Minimum,
+						Maximum = region.Maximum,
 					});
 				}
 			}

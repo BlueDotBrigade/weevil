@@ -16,7 +16,7 @@
 		private readonly ImmutableArray<IRecord> _visibleRecords;
 		private readonly ImmutableArray<IRecord> _selectedRecords;
 
-		private readonly ImmutableArray<Bookend> _bookends;
+		private readonly ImmutableArray<Region> _regions;
 
 		private readonly ClearOperation _clearOperation;
 		private int _operationState;
@@ -37,13 +37,13 @@
 			ImmutableArray<IRecord> visibleRecords,
 			ImmutableArray<IRecord> selectedRecords,
 			ClearOperation clearOperation,
-			ImmutableArray<Bookend> bookends)
+			ImmutableArray<Region> regions)
 		{
 			_allRecords = allRecords;
 			_visibleRecords = visibleRecords;
 			_selectedRecords = selectedRecords;
 
-			_bookends = bookends;
+			_regions = regions;
 
 			_clearOperation = clearOperation;
 			_operationState = OperationInactive;
@@ -197,11 +197,11 @@
 			return selectedRecords;
 		}
 
-		private static IList<IRecord> ClearBeyondBookends(ImmutableArray<IRecord> allRecords, ImmutableArray<Bookend> bookends)
+		private static IList<IRecord> ClearBeyondRegions(ImmutableArray<IRecord> allRecords, ImmutableArray<Region> regions)
 		{
 			// Have any regions of interest been defined?
 			// ... If not, then return everything.
-			if (bookends.Length == 0)
+			if (regions.Length == 0)
 			{
 				return allRecords;
 			}
@@ -209,12 +209,12 @@
 			{
 				var filteredRecords = new List<IRecord>();
 
-				foreach (Bookend bookend in bookends)
+				foreach (Region region in regions)
 				{
 					// Add all records that fall within the current region of interest
 					filteredRecords.AddRange(allRecords.Where(record =>
-						record.LineNumber >= bookend.Minimum.LineNumber &&
-						record.LineNumber <= bookend.Maximum.LineNumber));
+						record.LineNumber >= region.Minimum.LineNumber &&
+						record.LineNumber <= region.Maximum.LineNumber));
 				}
 
 				return filteredRecords;
@@ -242,7 +242,7 @@
 			try
 			{
 				// Early exit?
-				if (_selectedRecords.Length == 0 && _clearOperation != ClearOperation.BeyondBookends)
+				if (_selectedRecords.Length == 0 && _clearOperation != ClearOperation.BeyondRegions)
 				{
 					visibleRecords = _allRecords;
 				}
@@ -274,8 +274,8 @@
 							visibleRecords = ClearUnselected(_allRecords, _selectedRecords);
 							break;
 
-						case ClearOperation.BeyondBookends:
-							visibleRecords = ClearBeyondBookends(_allRecords, _bookends);
+						case ClearOperation.BeyondRegions:
+							visibleRecords = ClearBeyondRegions(_allRecords, _regions);
 							break;
 
 						default:

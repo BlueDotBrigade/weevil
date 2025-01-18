@@ -1179,11 +1179,11 @@
 			}
 		}
 
-		private void AddBookend()
+		private void AddRegion()
 		{
 			try
 			{
-				_engine.Bookends.CreateFromSelection();
+				_engine.Regions.CreateFromSelection();
 			}
 			catch (Exception e)
 			{
@@ -1191,9 +1191,9 @@
 			}
 		}
 
-		private void RemoveAllBookends()
+		private void RemoveAllRegions()
 		{
-			_engine.Bookends.Clear();
+			_engine.Regions.Clear();
 		}
 
 		private void ToggleIsPinned()
@@ -1474,6 +1474,21 @@
 			}
 
 			return configuration;
+		}
+
+		public bool RegionStartsWith(IRecord record)
+		{
+			return _engine.Regions.StartsWith(record.LineNumber);
+		}
+
+		public bool RegionEndsWith(IRecord record)
+		{
+			return _engine.Regions.EndsWith(record.LineNumber);
+		}
+
+		public bool RegionContains(IRecord record)
+		{
+			return _engine.Regions.Contains(record.LineNumber);
 		}
 	}
 }

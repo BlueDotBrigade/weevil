@@ -2,9 +2,9 @@
 {
 	using System.Collections.Immutable;
 
-	public interface IBookendManager
+	public interface IRegionManager
 	{
-		ImmutableArray<Bookend> Bookends { get; }
+		ImmutableArray<Region> Regions { get; }
 
 		void CreateFromSelection();
 
@@ -15,5 +15,11 @@
 		void MarkEnd(int lineNumber);
 
 		void MarkStart(int lineNumber);
+
+		bool StartsWith(int lineNumber);
+
+		bool EndsWith(int lineNumber);
+
+		public bool Contains(int lineNumber);
 	}
 }

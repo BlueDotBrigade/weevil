@@ -14,6 +14,6 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 		public TableOfContents TableOfContents { get; set; }
 		public string SourceFileRemarks { get; set; }
 
-		public ImmutableArray<Bookend> Bookends{ get; set; }
+		public ImmutableArray<Region> Regions{ get; set; }
 	}
 }

@@ -7,34 +7,34 @@ namespace BlueDotBrigade.Weevil
 	using System.Diagnostics;
 	using System.Threading;
 
-	[DebuggerDisplay("Count={_bookends.Count}")]
-	internal class BookendManager : IBookendManager
+	[DebuggerDisplay("Count={_regions.Count}")]
+	internal class RegionManager : IRegionManager
 	{
 		private readonly ISelect _selectionManager;
 
-		private readonly List<Bookend> _bookends;
+		private readonly List<Region> _regions;
 
 		private int? _startLineNumber = null;
 
 		private int _highestName;
 
-		internal BookendManager(ISelect selectionManager) : this (selectionManager, ImmutableArray<Bookend>.Empty)
+		internal RegionManager(ISelect selectionManager) : this (selectionManager, ImmutableArray<Region>.Empty)
 		{
 			// nothing to do
 		}
 
-		internal BookendManager(ISelect selectionManager, ImmutableArray<Bookend> bookends)
+		internal RegionManager(ISelect selectionManager, ImmutableArray<Region> regions)
 		{
 			_selectionManager = selectionManager ?? throw new ArgumentNullException(nameof(selectionManager));
 
-			_bookends = new List<Bookend>(bookends);
+			_regions = new List<Region>(regions);
 
-			_highestName = _bookends.Count == 0
+			_highestName = _regions.Count == 0
 				? 0
-				: bookends.Select(bookend => int.Parse(bookend.Name)).Max();
+				: regions.Select(region => int.Parse(region.Name)).Max();
 		}
 
-		public ImmutableArray<Bookend> Bookends => _bookends.ToImmutableArray();
+		public ImmutableArray<Region> Regions => _regions.ToImmutableArray();
 
 		public void CreateFromSelection()
 		{
@@ -45,25 +45,25 @@ namespace BlueDotBrigade.Weevil
 				_highestName = Interlocked.Increment(ref _highestName);
 				var minLineNumber = sortedLineNumbers.Min();
 				var maxLineNumber = sortedLineNumbers.Max();
-				var bookend = new Bookend(_highestName.ToString(), minLineNumber, maxLineNumber);
+				var region = new Region(_highestName.ToString(), minLineNumber, maxLineNumber);
 
 				// Prevent creating the same region twice
-				if (_bookends.Any(r => r.Minimum.LineNumber == bookend.Minimum.LineNumber && r.Maximum.LineNumber == bookend.Maximum.LineNumber))
+				if (_regions.Any(r => r.Minimum.LineNumber == region.Minimum.LineNumber && r.Maximum.LineNumber == region.Maximum.LineNumber))
 				{
 					throw new InvalidOperationException("Unable to create region because this region has already been defined.");
 				}
 				// Check for overlap with existing regions
-				if (_bookends.Any(r => r.OverlapsWith(bookend)))
+				if (_regions.Any(r => r.OverlapsWith(region)))
 				{
 					throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
 				}
-				_bookends.Add(bookend);
+				_regions.Add(region);
 			}
 		}
 		
 		public void MarkStart(int lineNumber)
 		{
-			if (_bookends.Any(r => r.Contains(lineNumber)))
+			if (_regions.Any(r => r.Contains(lineNumber)))
 			{
 				throw new InvalidOperationException($"The record is already contained within an existing region. RecordIndex={lineNumber}");
 			}
@@ -77,23 +77,23 @@ namespace BlueDotBrigade.Weevil
 				var start = Math.Min(_startLineNumber.Value, lineNumber);
 				var end = Math.Max(_startLineNumber.Value, lineNumber);
 
-				var newRegion = new Bookend(start, end);
+				var newRegion = new Region(start, end);
 
 				// Prevent creating the same region twice
-				if (_bookends.Any(r => r.Minimum == newRegion.Minimum && r.Maximum == newRegion.Maximum))
+				if (_regions.Any(r => r.Minimum == newRegion.Minimum && r.Maximum == newRegion.Maximum))
 				{
 					_startLineNumber = null;
 					throw new InvalidOperationException("Unable to create region because this region has already been defined.");
 				}
 
 				// Check for overlap with existing regions
-				if (_bookends.Any(r => r.OverlapsWith(newRegion)))
+				if (_regions.Any(r => r.OverlapsWith(newRegion)))
 				{
 					_startLineNumber = null;
 					throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
 				}
 
-				_bookends.Add(newRegion);
+				_regions.Add(newRegion);
 				_startLineNumber = null;
 				return;
 			}
@@ -103,18 +103,33 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
+		public bool StartsWith(int lineNumber)
+		{
+			return _regions.Any(r => r.Minimum.LineNumber == lineNumber);
+		}
+
+		public bool EndsWith(int lineNumber)
+		{
+			return _regions.Any(r => r.Maximum.LineNumber == lineNumber);
+		}
+
+		public bool Contains(int lineNumber)
+		{
+			return _regions.Any(r => r.Contains(lineNumber));
+		}
+
 		public void Clear()
 		{
-			_bookends.Clear();
+			_regions.Clear();
 		}
 
 		public bool Clear(int recordIndex)
 		{
-			var region = _bookends.FirstOrDefault(r => r.Contains(recordIndex));
+			var region = _regions.FirstOrDefault(r => r.Contains(recordIndex));
 
 			if (region != null)
 			{
-				_bookends.Remove(region);
+				_regions.Remove(region);
 				return true;
 			}
 			return false;
