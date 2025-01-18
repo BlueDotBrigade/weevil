@@ -41,7 +41,7 @@
 		}
 
 		/// <remarks>
-		/// <b>KNOWN ISSUE:</b> The XML elements must be in alphabetical order. If not, then empty values will be deserialized.
+		/// <b>KNOWN ISSUE:</b> The XML elements must be in alphabetical order. If not, then empty values will be returned.
 		/// </remarks>
 		public static T LoadFromXml<T>(string path)
 		{
@@ -57,7 +57,7 @@
 		}
 
 		/// <remarks>
-		/// <b>KNOWN ISSUE:</b> The XML elements must be in alphabetical order. If not, then empty values will be deserialized.
+		/// <b>KNOWN ISSUE:</b> The XML elements must be in alphabetical order. If not, then empty values will be returned.
 		/// </remarks>
 		public static T LoadFromXml<T>(Stream serializedData)
 		{
