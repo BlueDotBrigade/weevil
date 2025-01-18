@@ -41,8 +41,10 @@
 		<Content Include="..\..\DomainSpecificTerminology.xml">
 			<Link>Properties\DomainSpecificTerminology.xml</Link>
 		</Content>
+		<Content Include=".Daten\.Global\GlobalDefault.log.xml" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Include=".Daten\.Global\GlobalDefault.log" />
 	  <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
 	  <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
 	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log" />
@@ -51,8 +53,6 @@
 	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log.xml" />
 	  <None Include=".Daten\.Global\Empty.txt" />
 	  <None Include=".Daten\.Global\EmptyWithWhitespace.txt" />
-	  <None Include=".Daten\.Global\AstroMech.log" />
-	  <None Include=".Daten\.Global\AstroMech.log.xml" />
 	  <None Include="OLD\FilteringOld.cs" />
 	  <None Include="OLD\RecordContentValidator.cs" />
 	</ItemGroup>
