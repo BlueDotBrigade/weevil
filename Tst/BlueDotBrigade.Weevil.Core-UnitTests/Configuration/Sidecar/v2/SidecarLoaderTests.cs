@@ -10,7 +10,7 @@
 	public class SidecarLoaderTests
 	{
 		[TestMethod]
-		public void Load_SchemaWithoutRegions_ReturnsEmptyBookmarks()
+		public void Load_SchemaWithoutRegions_ReturnsEmptyRegions()
 		{
 			// assert
 			var metadata = new Daten().AsString();
@@ -26,7 +26,7 @@
 		}
 
 		[TestMethod]
-		public void Load_SchemaWithRegions_ReturnsEmptyBookmarks()
+		public void Load_SchemaWithRegions_ReturnsEmptyRegions()
 		{
 			// assert
 			var metadata = new Daten().AsString();
