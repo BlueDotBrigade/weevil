@@ -3,18 +3,19 @@ namespace BlueDotBrigade.Weevil
 	using System;
 	using System.Diagnostics;
 	using System.Runtime.Serialization;
+	using System.Runtime.Serialization.DataContracts;
 	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("Name={this.Name}, MinLineNumber={this.Minimum.LineNumber}, MaxLineNumber={this.Maximum.LineNumber}")]
 	public class Region
 	{
-		[DataMember(Order = 100)]
+		[DataMember]
 		public string Name { get; }
 
-		[DataMember(Order = 200)]
+		[DataMember]
 		public RelatesTo Minimum { get; }
 
-		[DataMember(Order = 300)]
+		[DataMember]
 		public RelatesTo Maximum { get; }
 
 		public Region(int startLineNumber, int endLineNumber)

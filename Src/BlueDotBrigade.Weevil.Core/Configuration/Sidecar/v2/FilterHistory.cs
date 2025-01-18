@@ -17,6 +17,7 @@
 		}
 
 		public List<Filter> InclusiveFilters { get; set; }
+
 		public List<Filter> ExclusiveFilters { get; set; }
 	}
 }

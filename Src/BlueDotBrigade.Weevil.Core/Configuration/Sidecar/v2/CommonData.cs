@@ -21,22 +21,22 @@
 			this.Records = new List<RecordInfo>();
 		}
 
-		[DataMember(Order = 100)]
+		[DataMember]
 		public ContextDictionary Context { get; set; }
 
-		[DataMember(Order = 200)]
+		[DataMember]
 		public string UserRemarks { get; set; }
 
-		[DataMember(Order = 300)]
+		[DataMember]
 		public List<SectionInfo> TableOfContents { get; set; }
 
-		[DataMember(Order = 400)]
+		[DataMember]
 		public FilterHistory FilterHistory { get; set; }
 
-		[DataMember(Order = 500)]
+		[DataMember]
 		public List<RecordInfo> Records { get; set; }
 
-		[DataMember(Order = 600)]
+		[DataMember]
 		public List<RegionInfo> Regions { get; set; }
 	}
 }
