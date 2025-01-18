@@ -20,6 +20,7 @@
         <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
         <converters:ContentConverter x:Key="ContentConverter" />
         <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
+        <converters:RegionStringConverter x:Key="RegionStringConverter" />
         <Style x:Key="CommandMenuItemStyle"
                TargetType="{x:Type MenuItem}">
             <Setter Property="Header"
@@ -257,9 +258,6 @@
                         <Separator/>
                         <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
                         <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
-                        <Separator/>
-                        <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
-                        <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="Filtering...">
@@ -306,6 +304,9 @@
                     <MenuItem Header="Show Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
                     <MenuItem Header="Show Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
                     <MenuItem Header="Analyze...">
+                        <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
+                        <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
+                        <Separator/>
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                         <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
                         <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
@@ -432,8 +433,19 @@
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
-                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Right"
-                                    Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}">
+                                <TextBlock>
+                                    <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Right"
+                                        Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
+                                    <TextBlock Margin="0,5,0,0" FontWeight="Bold" Foreground="Red">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                <!-- 1) The current item (record) -->
+                                                <Binding Path="." />
+                                                <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
+                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
                                 </TextBlock>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

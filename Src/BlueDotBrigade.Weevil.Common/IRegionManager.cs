@@ -15,5 +15,11 @@
 		void MarkEnd(int lineNumber);
 
 		void MarkStart(int lineNumber);
+
+		bool StartsWith(int lineNumber);
+
+		bool EndsWith(int lineNumber);
+
+		public bool Contains(int lineNumber);
 	}
 }

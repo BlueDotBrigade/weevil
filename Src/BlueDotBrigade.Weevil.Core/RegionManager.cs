@@ -103,6 +103,21 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
+		public bool StartsWith(int lineNumber)
+		{
+			return _regions.Any(r => r.Minimum.LineNumber == lineNumber);
+		}
+
+		public bool EndsWith(int lineNumber)
+		{
+			return _regions.Any(r => r.Maximum.LineNumber == lineNumber);
+		}
+
+		public bool Contains(int lineNumber)
+		{
+			return _regions.Any(r => r.Contains(lineNumber));
+		}
+
 		public void Clear()
 		{
 			_regions.Clear();
