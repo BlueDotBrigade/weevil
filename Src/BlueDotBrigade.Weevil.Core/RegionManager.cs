@@ -88,7 +88,7 @@ namespace BlueDotBrigade.Weevil
 			{
 				if (_regions.Any(r => r.Contains(lineNumber)))
 				{
-					throw new InvalidOperationException($"The record is already contained within an existing region. RecordIndex={lineNumber}");
+					throw new InvalidOperationException($"The record is already contained within an existing region. LineNumber={lineNumber}");
 				}
 				_startLineNumber = lineNumber;
 			}
@@ -184,11 +184,11 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
-		public bool Clear(int recordIndex)
+		public bool Clear(int lineNumber)
 		{
 			lock (_regionsPadlock)
 			{
-				Region region = _regions.FirstOrDefault(r => r.Contains(recordIndex));
+				Region region = _regions.FirstOrDefault(r => r.Contains(lineNumber));
 
 				if (region != null)
 				{
