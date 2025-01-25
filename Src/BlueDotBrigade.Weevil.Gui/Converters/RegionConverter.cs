@@ -19,6 +19,8 @@
 	using System;
 	using System.Globalization;
 	using System.Windows.Data;
+	using global::BlueDotBrigade.Weevil.Data;
+	using global::BlueDotBrigade.Weevil.Gui.Filter;
 
 	public class RegionStringConverter : IMultiValueConverter
 	{
@@ -48,19 +50,19 @@
 			//  - starts with a region if ...
 			//  - ends with a region if ...
 			//  - or "in region" otherwise
-			if (viewModel.RegionStartsWith(record))
+			if (viewModel.RegionStartsWith(record, out var regionName1))
 			{
-				return "Start of Region";
+				return $"↧↧{regionName1}↧↧";
 			}
-			else if (viewModel.RegionEndsWith(record))
+			else if (viewModel.RegionEndsWith(record, out var regionName2))
 			{
-				return "End of Region";
+				return $"↥↥{regionName2}↥↥";
 			}
-			else if (viewModel.RegionContains(record))
+			else
 			{
-				return "In Region";
+				return string.Empty;
 			}
-
+			
 			return string.Empty;
 		}
 

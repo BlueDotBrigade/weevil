@@ -1476,14 +1476,14 @@
 			return configuration;
 		}
 
-		public bool RegionStartsWith(IRecord record)
+		public bool RegionStartsWith(IRecord record, out string regionName)
 		{
-			return _engine.Regions.StartsWith(record.LineNumber);
+			return _engine.Regions.TryStartsWith(record.LineNumber, out regionName);
 		}
 
-		public bool RegionEndsWith(IRecord record)
+		public bool RegionEndsWith(IRecord record, out string regionName)
 		{
-			return _engine.Regions.EndsWith(record.LineNumber);
+			return _engine.Regions.TryEndsWith(record.LineNumber, out regionName);
 		}
 
 		public bool RegionContains(IRecord record)
