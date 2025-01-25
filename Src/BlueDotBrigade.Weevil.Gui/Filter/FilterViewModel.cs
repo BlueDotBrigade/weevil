@@ -1422,16 +1422,20 @@
 			var selectedItem = coreEngine.Selector.Selected.FirstOrDefault().Value;
 
 			var currentSection = string.Empty;
+			var currentRegion = string.Empty;
+
 			if (selectedItem != null)
 			{
 				currentSection = coreEngine.Navigate.TableOfContents.GetSection(selectedItem.LineNumber);
+				currentRegion = coreEngine.Regions.GetRegionName(selectedItem.LineNumber);
 			}
 
 			return new SelectionChangedBulletin
 			{
 				SelectedRecordCount = selectedItemCount,
 				SelectionPeriod = selectedTimePeriod,
-				CurrentSection = currentSection
+				CurrentSection = currentSection,
+				CurrentRegion = currentRegion,
 			};
 		}
 

@@ -129,6 +129,16 @@ namespace BlueDotBrigade.Weevil
 				throw new InvalidOperationException("Region start has not been marked.");
 			}
 		}
+		
+		public string GetRegionName(int lineNumber)
+		{
+			lock (_regionsPadlock)
+			{
+				Region region = _regions.FirstOrDefault(r => r.Contains(lineNumber));
+				return region?.Name ?? string.Empty;
+			}
+		}
+
 
 		public bool TryStartsWith(int lineNumber, out string regionName)
 		{
