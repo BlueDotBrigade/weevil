@@ -14,7 +14,7 @@
 	/// </remarks>
 	public interface ITableOfContents
 	{
-		string GetSection(int lineNumber);
+		bool TryGetSectionName(int lineNumber, out string sectionName);
 
 		IReadOnlyList<ISection> Sections { get; }
 

@@ -30,22 +30,22 @@
 
 		ISection ITableOfContents.this[int index] => _sections[index];
 
-		public string GetSection(int lineNumber)
+		public bool TryGetSectionName(int lineNumber, out string sectionName)
 		{
-			var currentSection = string.Empty;
+			sectionName = string.Empty;
 
 			if (_sections.Count > 1)
 			{
 				// Is the line number within the table of contents?
 				if (lineNumber >= _sections[0].LineNumber)
 				{
-					foreach (Section tocItem in _sections)
+					foreach (Section section in _sections)
 					{
-						if (tocItem.Level == 2)
+						if (section.Level == 2)
 						{
-							if (lineNumber >= tocItem.LineNumber)
+							if (lineNumber >= section.LineNumber)
 							{
-								currentSection = tocItem.Name;
+								sectionName = section.Name;
 							}
 							else
 							{
@@ -56,7 +56,7 @@
 				}
 			}
 
-			return currentSection;
+			return !string.IsNullOrWhiteSpace(sectionName);
 		}
 	}
 }

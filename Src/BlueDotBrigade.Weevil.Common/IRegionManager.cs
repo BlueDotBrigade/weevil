@@ -16,7 +16,7 @@
 
 		void MarkStart(int lineNumber);
 
-		public string GetRegionName(int lineNumber);
+		public bool TryGetRegionName(int lineNumber, out string regionName);
 
 		bool TryStartsWith(int lineNumber, out string regionName);
 

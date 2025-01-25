@@ -130,15 +130,24 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 		
-		public string GetRegionName(int lineNumber)
-		{
+		public bool TryGetRegionName(int lineNumber, out string regionName)
+		{			
 			lock (_regionsPadlock)
 			{
 				Region region = _regions.FirstOrDefault(r => r.Contains(lineNumber));
-				return region?.Name ?? string.Empty;
+
+				if (region == null)
+				{
+					regionName = string.Empty;
+					return false;
+				}
+				else
+				{
+					regionName = region.Name;
+					return true;
+				}
 			}
 		}
-
 
 		public bool TryStartsWith(int lineNumber, out string regionName)
 		{

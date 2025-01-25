@@ -501,11 +501,6 @@
 						});
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
-						var currentSection = string.Empty;
-						if (selectedItem != null)
-						{
-							currentSection = _tableOfContents.GetSection(selectedItem.LineNumber);
-						}
 
 						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 
@@ -1421,21 +1416,21 @@
 			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
 			var selectedItem = coreEngine.Selector.Selected.FirstOrDefault().Value;
 
-			var currentSection = string.Empty;
-			var currentRegion = string.Empty;
+			var sectionName = string.Empty;
+			var regionName = string.Empty;
 
 			if (selectedItem != null)
 			{
-				currentSection = coreEngine.Navigate.TableOfContents.GetSection(selectedItem.LineNumber);
-				currentRegion = coreEngine.Regions.GetRegionName(selectedItem.LineNumber);
+				coreEngine.Navigate.TableOfContents.TryGetSectionName(selectedItem.LineNumber, out sectionName);
+				coreEngine.Regions.TryGetRegionName(selectedItem.LineNumber, out regionName);
 			}
 
 			return new SelectionChangedBulletin
 			{
 				SelectedRecordCount = selectedItemCount,
 				SelectionPeriod = selectedTimePeriod,
-				CurrentSection = currentSection,
-				CurrentRegion = currentRegion,
+				SectionName = sectionName,
+				RegionName = regionName,
 			};
 		}
 

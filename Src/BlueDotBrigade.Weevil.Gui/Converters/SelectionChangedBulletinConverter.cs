@@ -16,21 +16,21 @@
 
 			if (bulletin is SelectionChangedBulletin concreteBulletin)
 			{
-				if (!string.IsNullOrWhiteSpace(concreteBulletin.CurrentSection) &&
-					!string.IsNullOrWhiteSpace(concreteBulletin.CurrentRegion))
+				if (!string.IsNullOrWhiteSpace(concreteBulletin.SectionName) &&
+					!string.IsNullOrWhiteSpace(concreteBulletin.RegionName))
 				{
-					result = $"ROI-{concreteBulletin.CurrentRegion}: {concreteBulletin.CurrentSection}";
+					result = $"ROI-{concreteBulletin.RegionName}: {concreteBulletin.SectionName}";
 				}
 				else
 				{
-					if (!string.IsNullOrWhiteSpace(concreteBulletin.CurrentSection))
+					if (!string.IsNullOrWhiteSpace(concreteBulletin.SectionName))
 					{
-						result = $"{concreteBulletin.CurrentSection}";
+						result = $"{concreteBulletin.SectionName}";
 					}
 
-					if (!string.IsNullOrWhiteSpace(concreteBulletin.CurrentRegion))
+					if (!string.IsNullOrWhiteSpace(concreteBulletin.RegionName))
 					{
-						result = $"ROI-{concreteBulletin.CurrentRegion}";
+						result = $"ROI-{concreteBulletin.RegionName}";
 					}
 				}
 			}
