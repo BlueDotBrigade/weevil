@@ -1179,23 +1179,6 @@
 			}
 		}
 
-		private void AddRegion()
-		{
-			try
-			{
-				_engine.Regions.CreateFromSelection();
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
-		}
-
-		private void RemoveAllRegions()
-		{
-			_engine.Regions.Clear();
-		}
-
 		private void ToggleIsPinned()
 		{
 			_engine.Selector.ToggleIsPinned();
@@ -1251,7 +1234,7 @@
 					Log.Default.Write(
 						LogSeverityType.Error,
 						exception,
-						$"An unexpected error occured while raising the {nameof(ResultsChanged)} event.");
+						$"An unexpected error occurred while raising the {nameof(ResultsChanged)} event.");
 				}
 			}
 		}
@@ -1474,6 +1457,26 @@
 			}
 
 			return configuration;
+		}
+		
+		private void AddRegion()
+		{
+			try
+			{
+				_engine.Regions.CreateFromSelection();
+				RaiseResultsChanged();
+
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		private void RemoveAllRegions()
+		{
+			_engine.Regions.Clear();
+			RaiseResultsChanged();
 		}
 
 		public bool RegionStartsWith(IRecord record, out string regionName)

@@ -70,21 +70,15 @@
 		{
 			try
 			{
-				// PROBLEM: 
-				// Log files are quite large, which means there is the potential for a log of `PropertyChanged` events
-				// firing as records are removed/hidden during the filtering process.
-				// 
-				// SOLUTION:
-				// Rather than fire thousands of `PropertyChanged` events, one alternative is to simply bind the ListView control
-				// to the new results when the are available.  This in itself creates some challenges:
-				// - now we have to have code-behind that directly manipulates the `View`
-				// - it is harder to create an automated test for the `ViewModel` to ensure selected records feature is working
 				this.ListView.SelectedItems.Clear();
 
 				foreach (IRecord record in this.ViewModel.SelectedItems)
 				{
 					this.ListView.SelectedItems.Add(record);
 				}
+
+				// Force bindings (and converters) for only the visible items to be refreshed.
+				this.ListView.Items.Refresh();
 			}
 			catch (Exception exception)
 			{
