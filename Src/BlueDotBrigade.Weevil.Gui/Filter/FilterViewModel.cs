@@ -507,7 +507,7 @@
 							currentSection = _tableOfContents.GetSection(selectedItem.LineNumber);
 						}
 
-						_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 
 						_bulletinMediator.Post(new AnalysisCompleteBulletin
 						{
@@ -742,7 +742,7 @@
 			{
 				_engine.Selector.Select(records);
 
-				_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 			}
 		}
 
@@ -752,7 +752,7 @@
 			{
 				_engine.Selector.Unselect(records);
 
-				_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 			}
 		}
 
@@ -1412,10 +1412,10 @@
 			});
 
 			// Remember: filtering can impact the number of selected records.
-			_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+			_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 		}
 
-		private static SelectionChangedBulletin CreateSelectionChangedBulletin(ICoreEngine coreEngine)
+		private static SelectionChangedBulletin BuildSelectionChangedBulletin(ICoreEngine coreEngine)
 		{
 			var selectedItemCount = coreEngine.Selector.Selected.Count;
 			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
