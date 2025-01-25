@@ -16,9 +16,11 @@
 
 		void MarkStart(int lineNumber);
 
-		bool StartsWith(int lineNumber);
+		public bool TryGetRegionName(int lineNumber, out string regionName);
 
-		bool EndsWith(int lineNumber);
+		bool TryStartsWith(int lineNumber, out string regionName);
+
+		bool TryEndsWith(int lineNumber, out string regionName);
 
 		public bool Contains(int lineNumber);
 	}

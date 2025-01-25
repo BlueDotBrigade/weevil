@@ -501,13 +501,8 @@
 						});
 
 						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
-						var currentSection = string.Empty;
-						if (selectedItem != null)
-						{
-							currentSection = _tableOfContents.GetSection(selectedItem.LineNumber);
-						}
 
-						_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 
 						_bulletinMediator.Post(new AnalysisCompleteBulletin
 						{
@@ -742,7 +737,7 @@
 			{
 				_engine.Selector.Select(records);
 
-				_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 			}
 		}
 
@@ -752,7 +747,7 @@
 			{
 				_engine.Selector.Unselect(records);
 
-				_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 			}
 		}
 
@@ -1179,23 +1174,6 @@
 			}
 		}
 
-		private void AddRegion()
-		{
-			try
-			{
-				_engine.Regions.CreateFromSelection();
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
-		}
-
-		private void RemoveAllRegions()
-		{
-			_engine.Regions.Clear();
-		}
-
 		private void ToggleIsPinned()
 		{
 			_engine.Selector.ToggleIsPinned();
@@ -1251,7 +1229,7 @@
 					Log.Default.Write(
 						LogSeverityType.Error,
 						exception,
-						$"An unexpected error occured while raising the {nameof(ResultsChanged)} event.");
+						$"An unexpected error occurred while raising the {nameof(ResultsChanged)} event.");
 				}
 			}
 		}
@@ -1429,26 +1407,30 @@
 			});
 
 			// Remember: filtering can impact the number of selected records.
-			_bulletinMediator.Post(CreateSelectionChangedBulletin(_engine));
+			_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 		}
 
-		private static SelectionChangedBulletin CreateSelectionChangedBulletin(ICoreEngine coreEngine)
+		private static SelectionChangedBulletin BuildSelectionChangedBulletin(ICoreEngine coreEngine)
 		{
 			var selectedItemCount = coreEngine.Selector.Selected.Count;
 			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
 			var selectedItem = coreEngine.Selector.Selected.FirstOrDefault().Value;
 
-			var currentSection = string.Empty;
+			var sectionName = string.Empty;
+			var regionName = string.Empty;
+
 			if (selectedItem != null)
 			{
-				currentSection = coreEngine.Navigate.TableOfContents.GetSection(selectedItem.LineNumber);
+				coreEngine.Navigate.TableOfContents.TryGetSectionName(selectedItem.LineNumber, out sectionName);
+				coreEngine.Regions.TryGetRegionName(selectedItem.LineNumber, out regionName);
 			}
 
 			return new SelectionChangedBulletin
 			{
 				SelectedRecordCount = selectedItemCount,
 				SelectionPeriod = selectedTimePeriod,
-				CurrentSection = currentSection
+				SectionName = sectionName,
+				RegionName = regionName,
 			};
 		}
 
@@ -1475,15 +1457,35 @@
 
 			return configuration;
 		}
-
-		public bool RegionStartsWith(IRecord record)
+		
+		private void AddRegion()
 		{
-			return _engine.Regions.StartsWith(record.LineNumber);
+			try
+			{
+				_engine.Regions.CreateFromSelection();
+				RaiseResultsChanged();
+
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
-		public bool RegionEndsWith(IRecord record)
+		private void RemoveAllRegions()
 		{
-			return _engine.Regions.EndsWith(record.LineNumber);
+			_engine.Regions.Clear();
+			RaiseResultsChanged();
+		}
+
+		public bool RegionStartsWith(IRecord record, out string regionName)
+		{
+			return _engine.Regions.TryStartsWith(record.LineNumber, out regionName);
+		}
+
+		public bool RegionEndsWith(IRecord record, out string regionName)
+		{
+			return _engine.Regions.TryEndsWith(record.LineNumber, out regionName);
 		}
 
 		public bool RegionContains(IRecord record)

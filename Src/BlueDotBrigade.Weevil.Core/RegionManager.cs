@@ -1,11 +1,10 @@
 namespace BlueDotBrigade.Weevil
 {
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
+	using System;
+	using System.Linq;
+	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using System.Diagnostics;
-	using System.Threading;
 
 	[DebuggerDisplay("Count={_regions.Count}")]
 	internal class RegionManager : IRegionManager
@@ -13,12 +12,11 @@ namespace BlueDotBrigade.Weevil
 		private readonly ISelect _selectionManager;
 
 		private readonly List<Region> _regions;
+		private readonly object _regionsPadlock;
 
-		private int? _startLineNumber = null;
+		private int? _startLineNumber;
 
-		private int _highestName;
-
-		internal RegionManager(ISelect selectionManager) : this (selectionManager, ImmutableArray<Region>.Empty)
+		internal RegionManager(ISelect selectionManager) : this(selectionManager, ImmutableArray<Region>.Empty)
 		{
 			// nothing to do
 		}
@@ -28,111 +26,196 @@ namespace BlueDotBrigade.Weevil
 			_selectionManager = selectionManager ?? throw new ArgumentNullException(nameof(selectionManager));
 
 			_regions = new List<Region>(regions);
+			_regionsPadlock = new object();
 
-			_highestName = _regions.Count == 0
-				? 0
-				: regions.Select(region => int.Parse(region.Name)).Max();
+			_startLineNumber = null;
 		}
 
-		public ImmutableArray<Region> Regions => _regions.ToImmutableArray();
+		private static string ConvertNumberToLetter(int value)
+		{
+			if (value < 1 || value > 26)
+			{
+				throw new ArgumentOutOfRangeException(nameof(value), "Input must be between 1 and 26.");
+			}
+
+			return ((char)(value + 64)).ToString(); // ASCII 'A' = 65
+		}
+
+		public ImmutableArray<Region> Regions
+		{
+			get
+			{
+				lock (_regionsPadlock)
+				{
+					return _regions.ToImmutableArray();
+				}
+			}
+		}
 
 		public void CreateFromSelection()
 		{
 			if (_selectionManager.HasSelectionPeriod)
 			{
 				var sortedLineNumbers = _selectionManager.Selected.Keys.OrderBy(k => k).ToArray();
-
-				_highestName = Interlocked.Increment(ref _highestName);
 				var minLineNumber = sortedLineNumbers.Min();
 				var maxLineNumber = sortedLineNumbers.Max();
-				var region = new Region(_highestName.ToString(), minLineNumber, maxLineNumber);
 
-				// Prevent creating the same region twice
-				if (_regions.Any(r => r.Minimum.LineNumber == region.Minimum.LineNumber && r.Maximum.LineNumber == region.Maximum.LineNumber))
+				lock (_regionsPadlock)
 				{
-					throw new InvalidOperationException("Unable to create region because this region has already been defined.");
+					var regionName = ConvertNumberToLetter(_regions.Count + 1);
+					var region = new Region(regionName, minLineNumber, maxLineNumber);
+
+					// Prevent creating the same region twice
+					if (_regions.Any(r => r.Minimum.LineNumber == region.Minimum.LineNumber && r.Maximum.LineNumber == region.Maximum.LineNumber))
+					{
+						throw new InvalidOperationException("Unable to create region because this region has already been defined.");
+					}
+
+					// Check for overlap with existing regions
+					if (_regions.Any(r => r.OverlapsWith(region)))
+					{
+						throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
+					}
+
+					_regions.Add(region);
 				}
-				// Check for overlap with existing regions
-				if (_regions.Any(r => r.OverlapsWith(region)))
-				{
-					throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
-				}
-				_regions.Add(region);
 			}
 		}
-		
+
 		public void MarkStart(int lineNumber)
 		{
-			if (_regions.Any(r => r.Contains(lineNumber)))
+			lock (_regionsPadlock)
 			{
-				throw new InvalidOperationException($"The record is already contained within an existing region. RecordIndex={lineNumber}");
+				if (_regions.Any(r => r.Contains(lineNumber)))
+				{
+					throw new InvalidOperationException($"The record is already contained within an existing region. LineNumber={lineNumber}");
+				}
+				_startLineNumber = lineNumber;
 			}
-			_startLineNumber = lineNumber;
 		}
 
 		public void MarkEnd(int lineNumber)
 		{
 			if (_startLineNumber.HasValue)
 			{
-				var start = Math.Min(_startLineNumber.Value, lineNumber);
-				var end = Math.Max(_startLineNumber.Value, lineNumber);
-
-				var newRegion = new Region(start, end);
-
-				// Prevent creating the same region twice
-				if (_regions.Any(r => r.Minimum == newRegion.Minimum && r.Maximum == newRegion.Maximum))
+				lock (_regionsPadlock)
 				{
-					_startLineNumber = null;
-					throw new InvalidOperationException("Unable to create region because this region has already been defined.");
-				}
 
-				// Check for overlap with existing regions
-				if (_regions.Any(r => r.OverlapsWith(newRegion)))
-				{
-					_startLineNumber = null;
-					throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
-				}
+					var start = Math.Min(_startLineNumber.Value, lineNumber);
+					var end = Math.Max(_startLineNumber.Value, lineNumber);
 
-				_regions.Add(newRegion);
-				_startLineNumber = null;
-				return;
+					var newRegion = new Region(start, end);
+
+					// Prevent creating the same region twice
+					if (_regions.Any(r => r.Minimum == newRegion.Minimum && r.Maximum == newRegion.Maximum))
+					{
+						_startLineNumber = null;
+						throw new InvalidOperationException("Unable to create region because this region has already been defined.");
+					}
+
+					// Check for overlap with existing regions
+					if (_regions.Any(r => r.OverlapsWith(newRegion)))
+					{
+						_startLineNumber = null;
+						throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
+					}
+
+					_regions.Add(newRegion);
+					_startLineNumber = null;
+				}
 			}
 			else
 			{
 				throw new InvalidOperationException("Region start has not been marked.");
 			}
 		}
+		
+		public bool TryGetRegionName(int lineNumber, out string regionName)
+		{			
+			lock (_regionsPadlock)
+			{
+				Region region = _regions.FirstOrDefault(r => r.Contains(lineNumber));
 
-		public bool StartsWith(int lineNumber)
-		{
-			return _regions.Any(r => r.Minimum.LineNumber == lineNumber);
+				if (region == null)
+				{
+					regionName = string.Empty;
+					return false;
+				}
+				else
+				{
+					regionName = region.Name;
+					return true;
+				}
+			}
 		}
 
-		public bool EndsWith(int lineNumber)
+		public bool TryStartsWith(int lineNumber, out string regionName)
 		{
-			return _regions.Any(r => r.Maximum.LineNumber == lineNumber);
+			lock (_regionsPadlock)
+			{
+				Region region = _regions.FirstOrDefault(r => r.Minimum.LineNumber == lineNumber);
+
+				if (region == null)
+				{
+					regionName = string.Empty;
+					return false;
+				}
+				else
+				{
+					regionName = region.Name;
+					return true;
+				}
+			}
+		}
+
+		public bool TryEndsWith(int lineNumber, out string regionName)
+		{
+			lock (_regionsPadlock)
+			{
+				Region region = _regions.FirstOrDefault(r => r.Maximum.LineNumber == lineNumber);
+
+				if (region == null)
+				{
+					regionName = string.Empty;
+					return false;
+				}
+				else
+				{
+					regionName = region.Name;
+					return true;
+				}
+			}
 		}
 
 		public bool Contains(int lineNumber)
 		{
-			return _regions.Any(r => r.Contains(lineNumber));
+			lock (_regionsPadlock)
+			{
+				return _regions.Any(r => r.Contains(lineNumber));
+			}
 		}
 
 		public void Clear()
 		{
-			_regions.Clear();
+			lock (_regionsPadlock)
+			{
+				_regions.Clear();
+			}
 		}
 
-		public bool Clear(int recordIndex)
+		public bool Clear(int lineNumber)
 		{
-			var region = _regions.FirstOrDefault(r => r.Contains(recordIndex));
-
-			if (region != null)
+			lock (_regionsPadlock)
 			{
-				_regions.Remove(region);
-				return true;
+				Region region = _regions.FirstOrDefault(r => r.Contains(lineNumber));
+
+				if (region != null)
+				{
+					_regions.Remove(region);
+					return true;
+				}
+				return false;
 			}
-			return false;
 		}
 	}
 }
