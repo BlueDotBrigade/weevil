@@ -24,7 +24,7 @@
 
 ![WeevilDemo](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
 
-_Weevil_ is an open-source .NET project that is used by analysts to extract valuable insights from log files.  It's all about "_boring log files for tasty bytes_".  
+_Weevil_ is an open-source .NET project that is used by analysts to extract valuable insights from log files.  It's all about _boring log files for tasty bytes_.
 
 A complete list of features can be found in the [release notes](https://github.com/BlueDotBrigade/weevil/releases).
 
