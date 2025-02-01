@@ -132,12 +132,15 @@
 			var filterAliases = _coreExtension.GetFilterAliases(_context);
 			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
+			_regionManager = new RegionManager(regions);
+
 			_filterManager = new FilterManager(
 				_coreExtension,
 				_context,
 				filterAliasExpander,
 				_allRecords,
-				GetRecordCounters());
+				GetRecordCounters(),
+				_regionManager);
 
 			_filterManager.Apply(FilterType.PlainText, FilterCriteria.None);
 			_filterManager.ResultsChanged += OnResultsChanged;
@@ -150,8 +153,6 @@
 				_navigationManager, // TODO: adding navigation manager is a code smell
 				_sourceFileEncoding,
 				new Action(() => { _filterManager.ReApply(); }));
-
-			_regionManager = new RegionManager(_selectionManager, regions);
 
 			recordAndMetadataLoadingStopwatch.Stop();
 

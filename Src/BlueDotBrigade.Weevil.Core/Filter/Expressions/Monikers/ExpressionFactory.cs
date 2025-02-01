@@ -12,7 +12,7 @@
 			_creators = monikerActivators;
 		}
 
-		public ExpressionFactory()
+		public ExpressionFactory(IRegionManager regionManager)
 		{
 			_creators = new List<MonikerActivator>
 			{
@@ -24,6 +24,7 @@
 				new MonikerActivator(UserCommentExpression.Moniker, (e) => new UserCommentExpression(e)),
 				new MonikerActivator(ContentLengthExpression.Moniker, (e) => new ContentLengthExpression(e)),
 				new MonikerActivator(ElapsedGreaterThanExpression.Moniker, (e) => new ElapsedGreaterThanExpression(e)),
+				new MonikerActivator(RegionExpression.Moniker, (e) => new RegionExpression(e, regionManager)),
 			};
 		}
 
