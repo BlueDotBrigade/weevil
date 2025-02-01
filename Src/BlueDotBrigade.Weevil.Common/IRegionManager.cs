@@ -6,7 +6,7 @@
 	{
 		ImmutableArray<Region> Regions { get; }
 
-		void CreateFromSelection();
+		void CreateFromSelection(int[] selectedLineNumbers);
 
 		void Clear();
 

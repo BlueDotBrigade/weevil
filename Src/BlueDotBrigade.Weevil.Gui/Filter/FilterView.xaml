@@ -439,7 +439,11 @@
                                 <TextBlock>
                                     <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Right"
                                         Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
-                                    <TextBlock Margin="0,0,0,0" FontWeight="Bold" FontSize="17" Foreground="Red">
+                                    <TextBlock 
+                                        Margin="0,0,0,0" Padding="0,0,0,0" 
+                                        FontWeight="ExtraBlack" FontSize="17" 
+                                        Background="WhiteSmoke" Foreground="Black"
+                                        ToolTip="Region Of Interest">
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{StaticResource RegionStringConverter}">
                                                 <!-- 1) The current item (record) -->

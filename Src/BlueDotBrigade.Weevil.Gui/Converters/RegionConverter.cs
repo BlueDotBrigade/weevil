@@ -52,11 +52,11 @@
 			//  - or "in region" otherwise
 			if (viewModel.RegionStartsWith(record, out var regionName1))
 			{
-				return $"↧↧{regionName1}↧↧";
+				return $"🡇 {regionName1} ";
 			}
 			else if (viewModel.RegionEndsWith(record, out var regionName2))
 			{
-				return $"↥↥{regionName2}↥↥";
+				return $"🡅 {regionName2} ";
 			}
 			else
 			{
