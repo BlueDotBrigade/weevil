@@ -11,14 +11,12 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 	[TestClass]
 	public class RegionManagerTests
 	{
-		private ISelect _selectionManager;
 		private RegionManager _regionManager;
 
 		[TestInitialize]
 		public void Setup()
 		{
-			_selectionManager = Substitute.For<ISelect>();
-			_regionManager = new RegionManager(_selectionManager);
+			_regionManager = new RegionManager();
 		}
 
 		[TestMethod]
@@ -116,15 +114,12 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 		public void CreateFromSelection_LineNumberIsOutsideOfBookend_ReturnsFalseAndKeepsBookend()
 		{
 			// Arrange
-			var selectedRecords = Enumerable
+			var selectedLineNumbers = Enumerable
 				.Range(start: 16, count: 17)
-				.ToDictionary(lineNumber => lineNumber, lineNumber => R.WithLineNumber(lineNumber));
-
-			_selectionManager.Selected.Returns(selectedRecords);
-			_selectionManager.HasSelectionPeriod.Returns(true);
+				.ToArray();
 
 			// Act
-			_regionManager.CreateFromSelection();
+			_regionManager.CreateFromSelection(selectedLineNumbers);
 
 			// Assert
 			_regionManager.Regions.Length.Should().Be(1);

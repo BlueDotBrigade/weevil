@@ -9,22 +9,18 @@ namespace BlueDotBrigade.Weevil
 	[DebuggerDisplay("Count={_regions.Count}")]
 	internal class RegionManager : IRegionManager
 	{
-		private readonly ISelect _selectionManager;
-
 		private readonly List<Region> _regions;
 		private readonly object _regionsPadlock;
 
 		private int? _startLineNumber;
 
-		internal RegionManager(ISelect selectionManager) : this(selectionManager, ImmutableArray<Region>.Empty)
+		internal RegionManager() : this(ImmutableArray<Region>.Empty)
 		{
 			// nothing to do
 		}
 
-		internal RegionManager(ISelect selectionManager, ImmutableArray<Region> regions)
+		internal RegionManager(ImmutableArray<Region> regions)
 		{
-			_selectionManager = selectionManager ?? throw new ArgumentNullException(nameof(selectionManager));
-
 			_regions = new List<Region>(regions);
 			_regionsPadlock = new object();
 
@@ -52,33 +48,30 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
-		public void CreateFromSelection()
+		public void CreateFromSelection(int[] selectedLineNumbers)
 		{
-			if (_selectionManager.HasSelectionPeriod)
+			var sortedLineNumbers = selectedLineNumbers.OrderBy(k => k).ToArray();
+			var minLineNumber = sortedLineNumbers.Min();
+			var maxLineNumber = sortedLineNumbers.Max();
+
+			lock (_regionsPadlock)
 			{
-				var sortedLineNumbers = _selectionManager.Selected.Keys.OrderBy(k => k).ToArray();
-				var minLineNumber = sortedLineNumbers.Min();
-				var maxLineNumber = sortedLineNumbers.Max();
+				var regionName = ConvertNumberToLetter(_regions.Count + 1);
+				var region = new Region(regionName, minLineNumber, maxLineNumber);
 
-				lock (_regionsPadlock)
+				// Prevent creating the same region twice
+				if (_regions.Any(r => r.Minimum.LineNumber == region.Minimum.LineNumber && r.Maximum.LineNumber == region.Maximum.LineNumber))
 				{
-					var regionName = ConvertNumberToLetter(_regions.Count + 1);
-					var region = new Region(regionName, minLineNumber, maxLineNumber);
-
-					// Prevent creating the same region twice
-					if (_regions.Any(r => r.Minimum.LineNumber == region.Minimum.LineNumber && r.Maximum.LineNumber == region.Maximum.LineNumber))
-					{
-						throw new InvalidOperationException("Unable to create region because this region has already been defined.");
-					}
-
-					// Check for overlap with existing regions
-					if (_regions.Any(r => r.OverlapsWith(region)))
-					{
-						throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
-					}
-
-					_regions.Add(region);
+					throw new InvalidOperationException("Unable to create region because this region has already been defined.");
 				}
+
+				// Check for overlap with existing regions
+				if (_regions.Any(r => r.OverlapsWith(region)))
+				{
+					throw new InvalidOperationException("Unable to create region because it overlaps with an existing region.");
+				}
+
+				_regions.Add(region);
 			}
 		}
 

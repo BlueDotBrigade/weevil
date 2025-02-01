@@ -1462,9 +1462,12 @@
 		{
 			try
 			{
-				_engine.Regions.CreateFromSelection();
-				RaiseResultsChanged();
-
+				if (_engine.Selector.HasSelectionPeriod)
+				{
+					var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
+					_engine.Regions.CreateFromSelection(selectedLineNumbers);
+					RaiseResultsChanged();
+				}
 			}
 			catch (Exception e)
 			{
