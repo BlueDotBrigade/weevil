@@ -6,31 +6,29 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BlueDotBrigade;
 using BlueDotBrigade.Weevil;
+using BlueDotBrigade.Weevil.Gui;
+using BlueDotBrigade.Weevil.Gui;
+using BlueDotBrigade.Weevil.Gui.Configuration;
 using BlueDotBrigade.Weevil.Gui.Configuration.Reqnroll;
 using Reqnroll.Bindings.CucumberExpressions;
 using Reqnroll.Plugins;
 using Reqnroll.UnitTestProvider;
 
-[assembly: RuntimePlugin(typeof(Plugins))]
+[assembly: RuntimePlugin(typeof(ReqnrollPlugin))]
 
-namespace BlueDotBrigade.Weevil.Gui.Configuration.Reqnroll;
+namespace BlueDotBrigade.Weevil.Gui;
 
-//[StaTestClass]
-public class Plugins : IRuntimePlugin
+public class ReqnrollPlugin : IRuntimePlugin
 {
 	public void Initialize(
 		RuntimePluginEvents runtimePluginEvents,
 		RuntimePluginParameters runtimePluginParameters,
 		UnitTestProviderConfiguration unitTestProviderConfiguration)
 	{
-		// FAILS due to 
-		// System.InvalidOperationException: 'Failed to set the specified COM apartment state. Current apartment state 'MTA'.'
-		// Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
-
 		runtimePluginEvents.CustomizeGlobalDependencies += (_, args) =>
 		{
 			// register our class as ICucumberExpressionDetector
-			args.ObjectContainer.RegisterTypeAs<ForceRegexDetector, ICucumberExpressionDetector>();
+			args.ObjectContainer.RegisterTypeAs<ForceRegexExpressions, ICucumberExpressionDetector>();
 		};
 	}
 }
