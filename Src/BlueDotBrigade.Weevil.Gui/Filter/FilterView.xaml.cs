@@ -18,6 +18,12 @@
 	{
 		public FilterView()
 		{
+			// User-scoped settings are read from either:
+			// ... C:\Users\<UserName>\AppData\Local\Blue_Dot_Brigade\BlueDotBrigade.Weevil.Gui_Url_<HashValue>\2.11.0.0\user.config
+			// ... C:\Users\<UserName>\AppData\Local\Weevil\<Version>\user.config
+			Application.Current.Resources["ApplicationFontSize"] = Settings.Default.ApplicationFontSize;
+			Application.Current.Resources["RowFontSize"] = Settings.Default.RowFontSize;
+			
 			DataContextChanged += (sender, args) =>
 			{
 				if (args.OldValue != null)
@@ -30,11 +36,8 @@
 				}
 			};
 
-			//var uiDispatcher = new UiDispatcher(Application.Current.Dispatcher);
-			//this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, uiDispatcher);
-
 			InitializeComponent();
-			
+
 			Loaded += OnControlLoaded;
 		}
 
@@ -43,13 +46,7 @@
 			var window = Window.GetWindow(this);
 			window.Closing += OnWindowClosing;
 
-			// User-scoped settings are read from either:
-			// ... C:\Users\<UserName>\AppData\Local\Blue_Dot_Brigade\BlueDotBrigade.Weevil.Gui_Url_<HashValue>\2.11.0.0\user.config
-			// ... C:\Users\<UserName>\AppData\Local\Weevil\<Version>\user.config
-			Application.Current.Resources["ApplicationFontSize"] = Settings.Default.ApplicationFontSize;
 			ApplicationFontSizeComboBox.SelectedValue = Settings.Default.ApplicationFontSize;
-
-			Application.Current.Resources["RowFontSize"] = Settings.Default.RowFontSize;
 			RowFontSizeSlider.Value = Settings.Default.RowFontSize;
 		}
 
@@ -151,8 +148,6 @@
 		{
 			base.UpdateLayout();
 
-			
-
 			if (ListView.View is GridView gridView)
 			{
 				// Re-size columns based on the application's font size				
@@ -180,7 +175,8 @@
 						var remainingWidth = Math.Max(0, ListView.ActualWidth - SystemParameters.VerticalScrollBarWidth - totalWidth - 2);
 						column.Width = 0; // Setting to 0 first to force recalculation
 						column.Width = remainingWidth;
-					}else
+					}
+					else
 					{
 						totalWidth += column.ActualWidth;
 					}
