@@ -25,13 +25,14 @@
 					var viewModel = args.OldValue as FilterViewModel;
 
 					viewModel.ResultsChanged -= OnResultsChanged;
-					
+					viewModel.RegionsChanged -= OnRegionsChanged;
 				}
 				if (args.NewValue != null)
 				{
 					var viewModel = args.NewValue as FilterViewModel;
 
 					viewModel.ResultsChanged += OnResultsChanged;
+					viewModel.RegionsChanged += OnRegionsChanged;
 				}
 			};
 
@@ -39,6 +40,7 @@
 
 			Loaded += OnControlLoaded;
 		}
+
 
 		private void OnControlLoaded(object sender, System.Windows.RoutedEventArgs e)
 		{
@@ -62,6 +64,12 @@
 
 		private FilterViewModel ViewModel => (FilterViewModel)this.DataContext;
 
+		private void OnRegionsChanged(object sender, EventArgs e)
+		{
+			// Force bindings (and converters) for only the visible items to be refreshed.
+			this.ListView.Items.Refresh();
+		}
+
 		private void OnResultsChanged(object sender, EventArgs e)
 		{
 			try
@@ -72,9 +80,6 @@
 				{
 					this.ListView.SelectedItems.Add(record);
 				}
-
-				// Force bindings (and converters) for only the visible items to be refreshed.
-				this.ListView.Items.Refresh();
 			}
 			catch (Exception exception)
 			{

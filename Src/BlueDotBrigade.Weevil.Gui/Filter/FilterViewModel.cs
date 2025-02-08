@@ -316,6 +316,11 @@
 		/// </list>
 		/// </summary>
 		public event EventHandler ResultsChanged;
+
+		/// <summary>
+		/// Indicates that a region of interest has been added, removed, or modified.
+		/// </summary>
+		public event EventHandler RegionsChanged;
 		#endregion
 
 		#region Event Handlers
@@ -1218,7 +1223,30 @@
 		}
 
 		#endregion
-		
+		protected virtual void RaiseRegionsChanged()
+		{
+			EventHandler threadSafeHandler = this.RegionsChanged;
+
+			if (threadSafeHandler != null)
+			{
+				try
+				{
+					Log.Default.Write(
+						LogSeverityType.Debug,
+						$"Raising the {nameof(RegionsChanged)} event.");
+
+					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+				}
+				catch (Exception exception)
+				{
+					Log.Default.Write(
+						LogSeverityType.Error,
+						exception,
+						$"An unexpected error occurred while raising the {nameof(RegionsChanged)} event.");
+				}
+			}
+		}
+
 		protected virtual void RaiseResultsChanged()
 		{
 			EventHandler threadSafeHandler = this.ResultsChanged;
@@ -1227,6 +1255,10 @@
 			{
 				try
 				{
+					Log.Default.Write(
+						LogSeverityType.Debug,
+						$"Raising the {nameof(ResultsChanged)} event.");
+
 					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
 				}
 				catch (Exception exception)
@@ -1471,7 +1503,7 @@
 				{
 					var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
 					_engine.Regions.CreateFromSelection(selectedLineNumbers);
-					RaiseResultsChanged();
+					RaiseRegionsChanged();
 				}
 			}
 			catch (Exception e)
@@ -1483,7 +1515,7 @@
 		private void RemoveAllRegions()
 		{
 			_engine.Regions.Clear();
-			RaiseResultsChanged();
+			RaiseRegionsChanged();
 		}
 
 		public bool RegionStartsWith(IRecord record, out string regionName)
