@@ -48,7 +48,7 @@
 		</StartupObject>
 	</PropertyGroup>
 	<PropertyGroup>
-		<ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
+	  <ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
 		<OutputPath>bin\x64\Debug\</OutputPath>
@@ -220,5 +220,6 @@
 		<Content Include="nlog.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+		<Content Include="Resources\Icons\Weevil.ico" />
 	</ItemGroup>
 </Project>

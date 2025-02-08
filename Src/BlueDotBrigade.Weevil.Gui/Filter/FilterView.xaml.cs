@@ -30,11 +30,8 @@
 				}
 			};
 
-			//var uiDispatcher = new UiDispatcher(Application.Current.Dispatcher);
-			//this.DataContext = new FilterResultsViewModel(Application.Current.MainWindow, uiDispatcher);
-
 			InitializeComponent();
-			
+
 			Loaded += OnControlLoaded;
 		}
 
@@ -43,13 +40,7 @@
 			var window = Window.GetWindow(this);
 			window.Closing += OnWindowClosing;
 
-			// User-scoped settings are read from either:
-			// ... C:\Users\<UserName>\AppData\Local\Blue_Dot_Brigade\BlueDotBrigade.Weevil.Gui_Url_<HashValue>\2.11.0.0\user.config
-			// ... C:\Users\<UserName>\AppData\Local\Weevil\<Version>\user.config
-			Application.Current.Resources["ApplicationFontSize"] = Settings.Default.ApplicationFontSize;
 			ApplicationFontSizeComboBox.SelectedValue = Settings.Default.ApplicationFontSize;
-
-			Application.Current.Resources["RowFontSize"] = Settings.Default.RowFontSize;
 			RowFontSizeSlider.Value = Settings.Default.RowFontSize;
 		}
 
@@ -151,8 +142,6 @@
 		{
 			base.UpdateLayout();
 
-			
-
 			if (ListView.View is GridView gridView)
 			{
 				// Re-size columns based on the application's font size				
@@ -180,36 +169,14 @@
 						var remainingWidth = Math.Max(0, ListView.ActualWidth - SystemParameters.VerticalScrollBarWidth - totalWidth - 2);
 						column.Width = 0; // Setting to 0 first to force recalculation
 						column.Width = remainingWidth;
-					}else
+					}
+					else
 					{
 						totalWidth += column.ActualWidth;
 					}
 				}
 			}
 		}
-		//private static double CalculateLastColumnWidth(ListView listView)
-		//{
-		//	double actualWidth = listView.ActualWidth;
-		//	double otherColumnsWidth = 0;
-
-		//	if (listView.View is GridView gridView)
-		//	{
-		//		for (var i = 0; i < gridView.Columns.Count-1; i++)
-		//		{
-		//			GridViewColumn column = gridView.Columns[i];
-		//			otherColumnsWidth += column.ActualWidth;
-		//		}
-
-		//		int lastIndex = gridView.Columns.Count - 1;
-
-		//		double remainingWidth = Math.Max(0, actualWidth - otherColumnsWidth);
-		//		return remainingWidth;
-		//	}
-		//	else
-		//	{
-		//		throw new InvalidOperationException("The ListView.View property must be set to a GridView object.");
-		//	}
-		//}
 
 		private void ApplicationFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{
@@ -220,8 +187,6 @@
 				double.TryParse(selectedValue, out double fontSize))
 			{
 				Application.Current.Resources["ApplicationFontSize"] = fontSize;
-				Settings.Default.ApplicationFontSize = fontSize;
-				Settings.Default.Save();
 
 				UpdateLayout();
 			}

@@ -21,7 +21,7 @@
          Typography.Capitals="SmallCaps"
          Margin="16, 16, 8, 16"
          materialDesign:ColorZoneAssist.Mode="SecondaryDark"
-         Width="225" Height="200">
+         Width="225" MinHeight="200">
          <Grid Typography.Capitals="Normal">
             <Grid.RowDefinitions>
                <RowDefinition Height="Auto" />

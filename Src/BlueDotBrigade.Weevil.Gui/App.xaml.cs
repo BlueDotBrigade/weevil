@@ -9,6 +9,7 @@
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Properties;
 
 	public partial class App : Application
 	{
@@ -98,7 +99,7 @@
 				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 				TaskScheduler.UnobservedTaskException += OnUnhandledTplException;
 
-				Log.Default.Write(LogSeverityType.Information, "Weevil application is registering the logginer library...");
+				Log.Default.Write(LogSeverityType.Information, "Weevil application is initializing logging...");
 				Log.Register(new NLogWriter());
 
 				Log.Default.Write(
@@ -123,7 +124,15 @@
 					$"RamTotalInstalled={computerSnapshot.RamTotalInstalled.GigaBytes:0.00}GB, " +
 					$"RamTotalFree={computerSnapshot.RamTotalFree.GigaBytes:0.00}GB";
 
-		Log.Default.Write(
+				Log.Default.Write(LogSeverityType.Information, "Loading font sizes from settings...");
+
+				// User-scoped settings are read from either:
+				// ... C:\Users\<UserName>\AppData\Local\Blue_Dot_Brigade\BlueDotBrigade.Weevil.Gui_Url_<HashValue>\2.11.0.0\user.config
+				// ... C:\Users\<UserName>\AppData\Local\Weevil\<Version>\user.config
+				Application.Current.Resources["ApplicationFontSize"] = Settings.Default.ApplicationFontSize;
+				Application.Current.Resources["RowFontSize"] = Settings.Default.RowFontSize;
+
+				Log.Default.Write(
 					LogSeverityType.Information,
 					computerDetails);
 			}
@@ -137,6 +146,12 @@
 
 		private void OnApplicationClosing(object sender, ExitEventArgs e)
 		{
+			Log.Default.Write(LogSeverityType.Information, "Saving font sizes to settings.");
+			
+			Settings.Default.ApplicationFontSize = (double)Application.Current.Resources["ApplicationFontSize"];
+			Settings.Default.RowFontSize = (double)Application.Current.Resources["RowFontSize"];
+			Settings.Default.Save();
+
 			Log.Default.Write(
 				LogSeverityType.Information,
 				"Weevil application is closing...");
