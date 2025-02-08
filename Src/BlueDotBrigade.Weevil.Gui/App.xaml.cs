@@ -125,6 +125,10 @@
 					$"RamTotalFree={computerSnapshot.RamTotalFree.GigaBytes:0.00}GB";
 
 				Log.Default.Write(LogSeverityType.Information, "Loading font sizes from settings...");
+
+				// User-scoped settings are read from either:
+				// ... C:\Users\<UserName>\AppData\Local\Blue_Dot_Brigade\BlueDotBrigade.Weevil.Gui_Url_<HashValue>\2.11.0.0\user.config
+				// ... C:\Users\<UserName>\AppData\Local\Weevil\<Version>\user.config
 				Application.Current.Resources["ApplicationFontSize"] = Settings.Default.ApplicationFontSize;
 				Application.Current.Resources["RowFontSize"] = Settings.Default.RowFontSize;
 
