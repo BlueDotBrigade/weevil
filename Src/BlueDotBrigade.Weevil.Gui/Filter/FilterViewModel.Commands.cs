@@ -19,7 +19,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	{
 		#region Commands: General
 		[SafeForDependencyAnalysis]
-		public ICommand OpenCommand => new UiBoundCommand(OpenAsync, () => !this.IsCommandExecuting);
+		public ICommand OpenCommand => new UiBoundCommand(OpenAsync, () => !this.IsLogFileOpening);
 		[SafeForDependencyAnalysis]
 		public ICommand ReloadCommand => new UiBoundCommand(Reload, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
