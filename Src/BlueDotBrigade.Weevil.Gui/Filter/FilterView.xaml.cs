@@ -216,8 +216,6 @@
 				double.TryParse(selectedValue, out double fontSize))
 			{
 				Application.Current.Resources["ApplicationFontSize"] = fontSize;
-				Settings.Default.ApplicationFontSize = fontSize;
-				Settings.Default.Save();
 
 				UpdateLayout();
 			}
