@@ -183,29 +183,6 @@
 				}
 			}
 		}
-		//private static double CalculateLastColumnWidth(ListView listView)
-		//{
-		//	double actualWidth = listView.ActualWidth;
-		//	double otherColumnsWidth = 0;
-
-		//	if (listView.View is GridView gridView)
-		//	{
-		//		for (var i = 0; i < gridView.Columns.Count-1; i++)
-		//		{
-		//			GridViewColumn column = gridView.Columns[i];
-		//			otherColumnsWidth += column.ActualWidth;
-		//		}
-
-		//		int lastIndex = gridView.Columns.Count - 1;
-
-		//		double remainingWidth = Math.Max(0, actualWidth - otherColumnsWidth);
-		//		return remainingWidth;
-		//	}
-		//	else
-		//	{
-		//		throw new InvalidOperationException("The ListView.View property must be set to a GridView object.");
-		//	}
-		//}
 
 		private void ApplicationFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{
