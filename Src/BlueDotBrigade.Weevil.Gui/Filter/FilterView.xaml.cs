@@ -16,17 +16,27 @@
 	/// </summary>
 	public partial class FilterView : UserControl
 	{
+		private bool _isLogFileOpening;
+
 		public FilterView()
 		{
 			DataContextChanged += (sender, args) =>
 			{
 				if (args.OldValue != null)
 				{
-					((FilterViewModel)args.OldValue).ResultsChanged -= OnResultsChanged;
+					var viewModel = args.OldValue as FilterViewModel;
+
+					viewModel.FileOpened -= OnFileOpened;
+					viewModel.ResultsChanged -= OnResultsChanged;
+					viewModel.RegionsChanged -= OnRegionsChanged;
 				}
 				if (args.NewValue != null)
 				{
-					((FilterViewModel)args.NewValue).ResultsChanged += OnResultsChanged;
+					var viewModel = args.NewValue as FilterViewModel;
+
+					viewModel.FileOpened += OnFileOpened;
+					viewModel.ResultsChanged += OnResultsChanged;
+					viewModel.RegionsChanged += OnRegionsChanged;
 				}
 			};
 
@@ -34,6 +44,8 @@
 
 			Loaded += OnControlLoaded;
 		}
+
+		private FilterViewModel ViewModel => (FilterViewModel)this.DataContext;
 
 		private void OnControlLoaded(object sender, System.Windows.RoutedEventArgs e)
 		{
@@ -55,7 +67,16 @@
 			}
 		}
 
-		private FilterViewModel ViewModel => (FilterViewModel)this.DataContext;
+		private void OnFileOpened(object sender, EventArgs e)
+		{
+			_isLogFileOpening = true;
+		}
+
+		private void OnRegionsChanged(object sender, EventArgs e)
+		{
+			// Force bindings (and converters) for only the visible items to be refreshed.
+			this.ListView.Items.Refresh();
+		}
 
 		private void OnResultsChanged(object sender, EventArgs e)
 		{
@@ -67,9 +88,6 @@
 				{
 					this.ListView.SelectedItems.Add(record);
 				}
-
-				// Force bindings (and converters) for only the visible items to be refreshed.
-				this.ListView.Items.Refresh();
 			}
 			catch (Exception exception)
 			{
@@ -138,6 +156,19 @@
 			}
 		}
 
+		/// <summary>
+		/// Adjusts the position and size of user controls, thus ensuring that they have been 
+		/// arranged correctly based on the available space and layout rules.
+		/// </summary>
+		/// <remarks>
+		/// Layout is influenced by a number of factors:
+		/// <list type="bullet">
+		///		<item>font size</item>
+		///		<item>column width</item>
+		///		<item>only applies to visible controls</item>
+		///		<item>etc.</item>
+		/// </list>
+		/// </remarks>
 		private void UpdateLayout()
 		{
 			base.UpdateLayout();
@@ -199,7 +230,23 @@
 
 			Application.Current.Resources["RowFontSize"] = e.NewValue;
 			Settings.Default.RowFontSize = e.NewValue;
-			Settings.Default.Save();
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+			UpdateLayout();
+		}
+
+		private void OnProgressBarVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if(_isLogFileOpening)
+			{
+				_isLogFileOpening = false;
+
+				// The following ensures that the filter results are displayed properly.
+				// NOTE: The ListView layout can only be adjusted when the control is visible (i.e. progress bar hidden).
+				UpdateLayout();
+			}
 		}
 	}
 }

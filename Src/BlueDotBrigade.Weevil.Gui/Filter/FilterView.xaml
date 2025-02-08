@@ -181,7 +181,7 @@
                         IsChecked="{Binding AreFilterOptionsVisible, Mode=TwoWay}"
                         IsEnabled="{Binding IsFilterToolboxEnabled}" />
             <Button Grid.Column="4"
-                 Command="{Binding FilterOrCancelCommand}"
+                Command="{Binding FilterOrCancelCommand}"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
                  Margin="{StaticResource ButtonMargin}"
                  IsEnabled="{Binding IsFilterToolboxEnabled}" >
@@ -277,7 +277,7 @@
                         <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
                         <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
                         <Separator/>
-                        <MenuItem Header="Clear Outside Regions" Command="{Binding ClearOutsideRegionsCommand}" />
+                        <MenuItem Header="Clear Outside Regions" Command="{Binding ClearBeyondRegionsCommand}" />
                         <Separator/>
                         <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
                         <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>
@@ -462,7 +462,8 @@
         </ListView>
         <StackPanel Grid.Row="1"
                   Visibility="{Binding IsProcessingLongOperation, Converter={StaticResource BooleanToVisibilityConverter}}"
-                  VerticalAlignment="Center" HorizontalAlignment="Center" >
+                  VerticalAlignment="Center" HorizontalAlignment="Center" 
+                  IsVisibleChanged="OnProgressBarVisibilityChanged">
             <TextBlock Text="Boring log file for tasty bytes..." />
             <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
                       Value="0" 
