@@ -99,7 +99,7 @@
 				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 				TaskScheduler.UnobservedTaskException += OnUnhandledTplException;
 
-				Log.Default.Write(LogSeverityType.Information, "Weevil application is registering the logginer library...");
+				Log.Default.Write(LogSeverityType.Information, "Weevil application is initializing logging...");
 				Log.Register(new NLogWriter());
 
 				Log.Default.Write(
