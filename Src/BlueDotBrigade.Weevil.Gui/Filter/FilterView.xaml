@@ -277,7 +277,7 @@
                         <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
                         <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
                         <Separator/>
-                        <MenuItem Header="Clear Outside Regions" Command="{Binding ClearOutsideRegionsCommand}" />
+                        <MenuItem Header="Clear Outside Regions" Command="{Binding ClearBeyondRegionsCommand}" />
                         <Separator/>
                         <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
                         <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>
