@@ -308,6 +308,13 @@
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
+		/// <summary>
+		/// Indicates that the records have changed due to either:
+		/// <list type="bullet">
+		///		<item>opening a new file</item>
+		///		<item>applying a filter</item>
+		/// </list>
+		/// </summary>
 		public event EventHandler ResultsChanged;
 		#endregion
 
@@ -489,7 +496,6 @@
 							TotalRecordCount = _engine.Count
 						});
 
-
 						_uiDispatcher.Invoke(() =>
 						{
 							this.SourceFileRemarks = _engine.SourceFileRemarks;
@@ -517,7 +523,6 @@
 						_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 
 						RefreshFilterResults();
-
 
 						var analyzers = _engine
 							.Analyzer
@@ -1213,7 +1218,7 @@
 		}
 
 		#endregion
-
+		
 		protected virtual void RaiseResultsChanged()
 		{
 			EventHandler threadSafeHandler = this.ResultsChanged;

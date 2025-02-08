@@ -22,11 +22,16 @@
 			{
 				if (args.OldValue != null)
 				{
-					((FilterViewModel)args.OldValue).ResultsChanged -= OnResultsChanged;
+					var viewModel = args.OldValue as FilterViewModel;
+
+					viewModel.ResultsChanged -= OnResultsChanged;
+					
 				}
 				if (args.NewValue != null)
 				{
-					((FilterViewModel)args.NewValue).ResultsChanged += OnResultsChanged;
+					var viewModel = args.NewValue as FilterViewModel;
+
+					viewModel.ResultsChanged += OnResultsChanged;
 				}
 			};
 
@@ -199,7 +204,11 @@
 
 			Application.Current.Resources["RowFontSize"] = e.NewValue;
 			Settings.Default.RowFontSize = e.NewValue;
-			Settings.Default.Save();
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+			UpdateLayout();
 		}
 	}
 }
