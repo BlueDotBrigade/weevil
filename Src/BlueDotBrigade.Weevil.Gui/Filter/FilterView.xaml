@@ -181,7 +181,7 @@
                         IsChecked="{Binding AreFilterOptionsVisible, Mode=TwoWay}"
                         IsEnabled="{Binding IsFilterToolboxEnabled}" />
             <Button Grid.Column="4"
-                 Command="{Binding FilterOrCancelCommand}"
+                Command="{Binding FilterOrCancelCommand}"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
                  Margin="{StaticResource ButtonMargin}"
                  IsEnabled="{Binding IsFilterToolboxEnabled}" >
@@ -462,7 +462,8 @@
         </ListView>
         <StackPanel Grid.Row="1"
                   Visibility="{Binding IsProcessingLongOperation, Converter={StaticResource BooleanToVisibilityConverter}}"
-                  VerticalAlignment="Center" HorizontalAlignment="Center" >
+                  VerticalAlignment="Center" HorizontalAlignment="Center" 
+                  IsVisibleChanged="OnProgressBarVisibilityChanged">
             <TextBlock Text="Boring log file for tasty bytes..." />
             <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
                       Value="0" 

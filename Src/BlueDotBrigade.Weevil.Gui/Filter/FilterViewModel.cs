@@ -82,8 +82,6 @@
 
 		private readonly DragAndDropViewModel _dragAndDrop;
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
 		private string _inclusiveFilter;
 		private string _exclusiveFilter;
 
@@ -308,6 +306,8 @@
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
+		public event PropertyChangedEventHandler PropertyChanged;
+
 		/// <summary>
 		/// Indicates that the records have changed due to either:
 		/// <list type="bullet">
@@ -321,6 +321,8 @@
 		/// Indicates that a region of interest has been added, removed, or modified.
 		/// </summary>
 		public event EventHandler RegionsChanged;
+
+		public event EventHandler FileOpened;
 		#endregion
 
 		#region Event Handlers
@@ -443,7 +445,7 @@
 			this.IsFilterToolboxEnabled = false;
 
 			var openAsResult = new OpenAsResult();
-			var wasFileOpened = false;
+			var wasOpenRequested = false;
 
 			try
 			{
@@ -456,12 +458,12 @@
 						(path) => Engine.UsingPath(path),
 						sourceFilePath);
 
-					wasFileOpened = result.Item1;
+					wasOpenRequested = result.Item1;
 					openAsResult = result.Item2;
 				}
 				else
 				{
-					wasFileOpened = true;
+					wasOpenRequested = true;
 				}
 			}
 			catch (NotSupportedException e)
@@ -474,7 +476,7 @@
 				MessageBox.Show(message, "Open Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 
-			if (wasFileOpened)
+			if (wasOpenRequested)
 			{
 				await Task.Run(() =>
 				{
@@ -492,6 +494,8 @@
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
 							.Open();
+
+						this.FileOpened?.Invoke(this, EventArgs.Empty);
 
 						_bulletinMediator.Post(new SourceFileOpenedBulletin
 						{
