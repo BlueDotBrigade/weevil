@@ -37,6 +37,7 @@
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
+	using System.Windows.Input;
 
 	[NotifyPropertyChanged()]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
@@ -565,7 +566,7 @@
 						MessageBox.Show(e.Message, message);
 					}
 					finally
-					{
+					{ 
 						this.IsProcessingLongOperation = false;
 						this.IsLogFileOpen = Engine.IsRealInstance(_engine);
 					}
@@ -577,20 +578,24 @@
 						}
 
 						_tableOfContents = _engine.Navigate.TableOfContents;
-					}
-				).ContinueWith((x) =>
-					{
 						_insights = _engine.Analyzer.GetInsights();
 
 						_bulletinMediator.Post(new InsightChangedBulletin{
 							HasInsight = _insights.Length > 0,
 							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
+
+						_uiDispatcher.Invoke(() =>
+						{
+							this.CanOpenLogFile = true;
+							CommandManager.InvalidateRequerySuggested();
+						});
 					}
 				);
 			}
 			else
 			{
+				this.CanOpenLogFile = true;
 				this.IsProcessingLongOperation = false;
 			}
 		}
