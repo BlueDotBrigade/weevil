@@ -108,8 +108,8 @@
 
 			_engine = Engine.Surrogate;
 
-			this.IsLogFileOpen = Engine.IsRealInstance(_engine);
-			this.IsCommandExecuting = false;
+			this.IsLogFileOpen = false;
+			this.IsLogFileOpening = false;
 
 			this.IncludePinned = true;
 
@@ -198,16 +198,16 @@
 			{
 				if (Depends.Guard)
 				{
-					Depends.On(this.IsLogFileOpen, this.IsCommandExecuting);
+					Depends.On(this.IsLogFileOpen, this.IsLogFileOpening);
 				}
 
-				return this.IsLogFileOpen && !this.IsCommandExecuting;
+				return this.IsLogFileOpen && !this.IsLogFileOpening;
 			}
 		}
 
 		public bool IsLogFileOpen { get; private set; }
 
-		public bool IsCommandExecuting { get; private set; }
+		public bool IsLogFileOpening { get; private set; }
 		public bool IncludePinned { get; set; }
 		public bool IsManualFilter { get; set; }
 
@@ -366,16 +366,7 @@
 			}
 			else
 			{
-				try
-				{
-					this.IsCommandExecuting = true;
-
-					await OpenCompressedAsync(filePath);
-				}
-				finally
-				{
-					this.IsCommandExecuting = false;
-				}
+				await OpenCompressedAsync(filePath);
 			}
 		}
 
@@ -441,6 +432,7 @@
 
 		public async Task OpenAsync(string sourceFilePath)
 		{
+			this.IsLogFileOpening = true;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
 
@@ -678,7 +670,7 @@
 
 		public void Reload()
 		{
-			this.IsCommandExecuting = true;
+			this.IsLogFileOpening = true;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
 
@@ -717,7 +709,7 @@
 				{
 					_uiDispatcher.Invoke(() =>
 					{
-						this.IsCommandExecuting = false;
+						this.IsLogFileOpening = false;
 						this.IsProcessingLongOperation = false;
 						this.IsFilterToolboxEnabled = true;
 					});
@@ -747,7 +739,7 @@
 
 		public void Select(IList<IRecord> records)
 		{
-			if (!this.IsCommandExecuting)
+			if (!this.IsLogFileOpening)
 			{
 				_engine.Selector.Select(records);
 
@@ -757,7 +749,7 @@
 
 		public void UnSelect(IList<IRecord> records)
 		{
-			if (!this.IsCommandExecuting)
+			if (!this.IsLogFileOpening)
 			{
 				_engine.Selector.Unselect(records);
 
@@ -1321,7 +1313,7 @@
 
 					_uiDispatcher.Invoke(() =>
 					{
-						this.IsCommandExecuting = true;
+						this.IsLogFileOpening = true;
 						this.IsProcessingLongOperation = true;
 					});
 				}
@@ -1397,7 +1389,7 @@
 
 					_uiDispatcher.Invoke(() =>
 					{
-						this.IsCommandExecuting = false;
+						this.IsLogFileOpening = false;
 						this.IsProcessingLongOperation = false;
 					});
 				}
