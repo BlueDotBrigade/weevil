@@ -109,7 +109,7 @@
 			_engine = Engine.Surrogate;
 
 			this.IsLogFileOpen = false;
-			this.IsLogFileOpening = false;
+			this.CanOpenLogFile = true;
 
 			this.IncludePinned = true;
 
@@ -198,16 +198,16 @@
 			{
 				if (Depends.Guard)
 				{
-					Depends.On(this.IsLogFileOpen, this.IsLogFileOpening);
+					Depends.On(this.IsLogFileOpen, this.CanOpenLogFile);
 				}
 
-				return this.IsLogFileOpen && !this.IsLogFileOpening;
+				return this.IsLogFileOpen && this.CanOpenLogFile;
 			}
 		}
 
 		public bool IsLogFileOpen { get; private set; }
 
-		public bool IsLogFileOpening { get; private set; }
+		public bool CanOpenLogFile { get; private set; }
 		public bool IncludePinned { get; set; }
 		public bool IsManualFilter { get; set; }
 
@@ -432,7 +432,7 @@
 
 		public async Task OpenAsync(string sourceFilePath)
 		{
-			this.IsLogFileOpening = true;
+			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
 
@@ -670,7 +670,7 @@
 
 		public void Reload()
 		{
-			this.IsLogFileOpening = true;
+			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
 
@@ -709,7 +709,7 @@
 				{
 					_uiDispatcher.Invoke(() =>
 					{
-						this.IsLogFileOpening = false;
+						this.CanOpenLogFile = true;
 						this.IsProcessingLongOperation = false;
 						this.IsFilterToolboxEnabled = true;
 					});
@@ -739,7 +739,7 @@
 
 		public void Select(IList<IRecord> records)
 		{
-			if (!this.IsLogFileOpening)
+			if (this.CanOpenLogFile)
 			{
 				_engine.Selector.Select(records);
 
@@ -749,7 +749,7 @@
 
 		public void UnSelect(IList<IRecord> records)
 		{
-			if (!this.IsLogFileOpening)
+			if (this.CanOpenLogFile)
 			{
 				_engine.Selector.Unselect(records);
 
@@ -1313,7 +1313,7 @@
 
 					_uiDispatcher.Invoke(() =>
 					{
-						this.IsLogFileOpening = true;
+						this.CanOpenLogFile = false;
 						this.IsProcessingLongOperation = true;
 					});
 				}
@@ -1389,7 +1389,7 @@
 
 					_uiDispatcher.Invoke(() =>
 					{
-						this.IsLogFileOpening = false;
+						this.CanOpenLogFile = true;
 						this.IsProcessingLongOperation = false;
 					});
 				}
