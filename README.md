@@ -92,7 +92,7 @@ Each analysis tool updates the `Comments` fields with the values that match the 
 5. Detect Temporal Anomalies
    - For example: detect when records are logged out of order
 
-Furthermore _Weevil_ supports
+Furthermore, _Weevil_ supports:
 - defining Regions of Interest (ROI)
 - creating graphs using named groups
 
