@@ -12,6 +12,10 @@
 
 		string ShowSaveFile(string targetDirectory, string targetFileName);
 
+		string ShowUserPrompt(string title, string userPrompt);
+
+		string ShowUserPrompt(string title, string userPrompt, string validationPattern);
+
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 
 		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern);
