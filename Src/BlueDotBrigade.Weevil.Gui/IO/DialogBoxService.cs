@@ -1,12 +1,15 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.IO
-{
+﻿using System;
+	using System.Collections.Immutable;
+	using System.Linq;
+	using System.Windows;
+	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Navigation;
+	using Microsoft.Win32;
 
 	internal class DialogBoxService : IDialogBoxService
 	{
-		private readonly Window _parentWindow;
-
 		/// <summary>
 		/// Used to display dialog boxes (e.g. error messages) to the user.
 		/// </summary>
@@ -69,7 +72,7 @@
 
 		public string ShowUserPrompt(string title, string userPrompt, string defaultValue)
 		{
-			var dialog = new UserPromptDialog(_parentWindow)
+			var dialog = new UserPromptDialog()
 			{
 				Title = title,
 				UserPrompt = userPrompt,
@@ -83,12 +86,14 @@
 			return string.Empty;
 		}
 
+		
+
 		public bool TryShowGoTo(string defaultValue, out string userValue)
 		{
 			userValue = string.Empty;
 			var wasSuccessful = false;
 
-			var dialog = new GoToDialog(_parentWindow)
+			var dialog = new GoToDialog()
 			{
 				Title = "Go To",
 				UserPrompt = "Timestamp or line #:",
@@ -111,7 +116,7 @@
 			findText = String.Empty;
 			findNext = true;
 
-			var dialog = new FindDialog(_parentWindow, defaultValue);
+			var dialog = new FindDialog(defaultValue);
 
 			if (dialog.ShowDialog() == true)
 			{
