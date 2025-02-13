@@ -30,6 +30,7 @@
             <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
             <Setter Property="Width" Value="{StaticResource ButtonWidth}" />
         </Style>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Window.Resources>
     <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
         <Grid.RowDefinitions>
@@ -52,10 +53,10 @@
                Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                materialDesign:HintAssist.Hint="Enter value" />
         <TextBlock Grid.Row="1" Grid.Column="1"
-                   Text="{Binding ValidationMessage}"
-                   Foreground="Red"
-                   FontSize="12"
-                   Visibility="{Binding ValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" />
+           Text="{Binding ValidationMessage}"
+           Foreground="Red"
+           FontSize="12"
+           Visibility="{Binding IsValidationMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
         <Button Grid.Row="2" Grid.Column="1" 
               Content="Ok"
               Click="OnOkClicked"  

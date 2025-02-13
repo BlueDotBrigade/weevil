@@ -1,17 +1,22 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.IO
 {
     using System;
-    using System.Text.RegularExpressions;
-    using System.Windows;
+	using System.ComponentModel;
+	using System.Text.RegularExpressions;
+	using System.Windows;
     using FluentValidation;
     using FluentValidation.Results;
+	using static System.Net.Mime.MediaTypeNames;
+	using Application = System.Windows.Application;
 
-    /// <summary>
-    /// Interaction logic for UserPromptDialog.xaml
-    /// </summary>
-    public partial class UserPromptDialog : Window
+	/// <summary>
+	/// Interaction logic for UserPromptDialog.xaml
+	/// </summary>
+	public partial class UserPromptDialog : Window
     {
-        public static readonly DependencyProperty UserPromptProperty =
+		private const string AnyString = @"^.*$";
+
+		public static readonly DependencyProperty UserPromptProperty =
             DependencyProperty.Register(
                 nameof(UserPrompt), typeof(string),
                 typeof(UserPromptDialog));
@@ -49,20 +54,67 @@
             }
         }
 
-        public string ValidationPattern
+
+		/// <summary>
+		/// Gets or sets the regular expression pattern used to validate the user input.
+		/// </summary>
+		public string ValidationPattern
         {
             get => (string)GetValue(ValidationPatternProperty);
-            set => SetValue(ValidationPatternProperty, value);
+            set
+			{
+				if (this.ValidationPattern != value)
+				{
+					if (string.IsNullOrWhiteSpace(value))
+					{
+						value = AnyString;
+					}
+
+					SetValue(ValidationPatternProperty, value);
+				}
+			}
         }
 
-        public string ValidationMessage { get; private set; }
+		public event PropertyChangedEventHandler PropertyChanged;
 
-        public UserPromptDialog(Window parentWindow)
-        {
-            this.Owner = parentWindow ?? throw new ArgumentNullException(nameof(parentWindow));
-            this.Loaded += OnDialogLoaded;
+		protected void RaisePropertyChanged(string name)
+		{
+			var handler = this.PropertyChanged;
+
+			if (handler != null)
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(name));
+			}
+		}
+
+		private string _validationMessage;
+
+		public string ValidationMessage
+		{
+			get => _validationMessage;
+			private set
+			{
+				_validationMessage = value;
+				RaisePropertyChanged(nameof(this.ValidationMessage));
+				RaisePropertyChanged(nameof(IsValidationMessageVisible));
+			}
+		}
+
+		public bool IsValidationMessageVisible
+		{
+			get => !string.IsNullOrWhiteSpace(ValidationMessage);
+		}
+
+		public UserPromptDialog()
+		{
+            this.Owner = Application.Current.MainWindow;
+			this.Loaded += OnDialogLoaded;
             InitializeComponent();
             this.DataContext = this;
+
+			this.ValidationPattern = AnyString;
+			this.ValidationMessage = string.Empty;
+
             _validator = new UserInputValidator(ValidationPattern);
         }
 

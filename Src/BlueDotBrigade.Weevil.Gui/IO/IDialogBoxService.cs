@@ -14,7 +14,7 @@
 
 		string ShowUserPrompt(string title, string userPrompt);
 
-		string ShowUserPrompt(string title, string userPrompt, string validationPattern);
+		bool TryShowUserPrompt(string title, string userPrompt, string validationPattern, out string userValue);
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
 

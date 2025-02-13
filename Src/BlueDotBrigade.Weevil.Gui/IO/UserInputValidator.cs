@@ -1,7 +1,9 @@
 namespace BlueDotBrigade.Weevil.Gui.IO
 {
-       public class UserInputValidator : AbstractValidator<UserPromptDialog>
-    {
+	using FluentValidation;
+
+	public class UserInputValidator : AbstractValidator<UserPromptDialog>
+	{
         public UserInputValidator(string pattern)
         {
             if (string.IsNullOrWhiteSpace(pattern) || pattern == ".*")

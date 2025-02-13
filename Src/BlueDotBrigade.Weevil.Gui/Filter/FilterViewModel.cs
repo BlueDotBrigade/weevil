@@ -1502,9 +1502,12 @@
 			{
 				if (_engine.Selector.HasSelectionPeriod)
 				{
-					var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
-					_engine.Regions.CreateFromSelection(selectedLineNumbers);
-					RaiseRegionsChanged();
+					if (_dialogBox.TryShowUserPrompt("New Region Name", "Name (4 character max)", @"^[a-zA-Z]{1,4}$", out var regionName))
+					{
+						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
+						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
+						RaiseRegionsChanged();
+					}
 				}
 			}
 			catch (Exception e)

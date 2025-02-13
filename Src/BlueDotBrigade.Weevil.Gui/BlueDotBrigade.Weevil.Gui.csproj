@@ -93,6 +93,7 @@
 		</CodeAnalysisDictionary>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="FluentValidation" Version="11.11.0" />
 		<PackageReference Include="gong-wpf-dragdrop">
 			<Version>3.2.1</Version>
 		</PackageReference>

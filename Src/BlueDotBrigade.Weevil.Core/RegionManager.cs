@@ -27,16 +27,6 @@ namespace BlueDotBrigade.Weevil
 			_startLineNumber = null;
 		}
 
-		private static string ConvertNumberToLetter(int value)
-		{
-			if (value < 1 || value > 26)
-			{
-				throw new ArgumentOutOfRangeException(nameof(value), "Input must be between 1 and 26.");
-			}
-
-			return ((char)(value + 64)).ToString(); // ASCII 'A' = 65
-		}
-
 		public ImmutableArray<Region> Regions
 		{
 			get
@@ -48,7 +38,7 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
-		public void CreateFromSelection(int[] selectedLineNumbers)
+		public void CreateFromSelection(string regionName, int[] selectedLineNumbers)
 		{
 			var sortedLineNumbers = selectedLineNumbers.OrderBy(k => k).ToArray();
 			var minLineNumber = sortedLineNumbers.Min();
@@ -56,7 +46,6 @@ namespace BlueDotBrigade.Weevil
 
 			lock (_regionsPadlock)
 			{
-				var regionName = ConvertNumberToLetter(_regions.Count + 1);
 				var region = new Region(regionName, minLineNumber, maxLineNumber);
 
 				// Prevent creating the same region twice
