@@ -53,9 +53,9 @@
 			set => SetValue(FindNextProperty, value);
 		}
 
-		public FindDialog(Window parentWindow, string defaultValue)
+		public FindDialog(string defaultValue)
 		{
-			this.Owner = parentWindow ?? throw new ArgumentNullException(nameof(parentWindow));
+			this.Owner = Application.Current.MainWindow;
 
 			this.Loaded += OnDialogLoaded;
 

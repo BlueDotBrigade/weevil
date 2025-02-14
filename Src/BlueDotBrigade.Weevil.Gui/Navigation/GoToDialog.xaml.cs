@@ -34,9 +34,9 @@
 			set => SetValue(UserInputProperty, value);
 		}
 
-		public GoToDialog(Window parentWindow)
+		public GoToDialog()
 		{
-			this.Owner = parentWindow ?? throw new ArgumentNullException(nameof(parentWindow));
+			this.Owner = Application.Current.MainWindow;
 
 			this.Loaded += OnDialogLoaded;
 
