@@ -39,11 +39,17 @@
 			if (values?.Length < 2)
 				return string.Empty;
 
+			var prefix = string.Empty;
 			var record = values[0] as IRecord;
 			var viewModel = values[1] as FilterViewModel;
 
 			if (record == null || viewModel == null)
 				return string.Empty;
+
+			if (values.Length == 3)
+			{
+				prefix = values[2].ToString() + ": ";
+			}
 
 			// You can define your own logic:
 			// e.g., if region is a single continuous block, you might define:
@@ -52,11 +58,11 @@
 			//  - or "in region" otherwise
 			if (viewModel.RegionStartsWith(record, out var regionName1))
 			{
-				return $"🡇 {regionName1} ";
+				return $"🡇 {prefix}{regionName1} ";
 			}
 			else if (viewModel.RegionEndsWith(record, out var regionName2))
 			{
-				return $"🡅 {regionName2} ";
+				return $"🡅 {prefix}{regionName2} ";
 			}
 			else
 			{
