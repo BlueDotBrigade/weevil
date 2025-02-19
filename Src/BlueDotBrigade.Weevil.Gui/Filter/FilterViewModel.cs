@@ -1507,6 +1507,7 @@
 						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
 						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
 						RaiseRegionsChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 					}
 				}
 			}
@@ -1524,6 +1525,7 @@
 
 				_engine.Regions.Clear(selectedLineNumber);
 				RaiseRegionsChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 			}
 			else
 			{
@@ -1535,6 +1537,7 @@
 		{
 			_engine.Regions.Clear();
 			RaiseRegionsChanged();
+			_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 		}
 
 		public bool RegionStartsWith(IRecord record, out string regionName)
