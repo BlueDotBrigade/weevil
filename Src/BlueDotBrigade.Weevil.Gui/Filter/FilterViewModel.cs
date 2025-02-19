@@ -1516,6 +1516,21 @@
 			}
 		}
 
+		private void RemoveRegion()
+		{
+			if (_engine.Selector.Selected.Count == 1)
+			{
+				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+				_engine.Regions.Clear(selectedLineNumber);
+				RaiseRegionsChanged();
+			}
+			else
+			{
+				MessageBox.Show("A single record must be selected in order to remove a region.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+		}
+
 		private void RemoveAllRegions()
 		{
 			_engine.Regions.Clear();
