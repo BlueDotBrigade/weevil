@@ -38,6 +38,7 @@
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 	using System.Windows.Input;
+	using PostSharp.Extensibility;
 
 	[NotifyPropertyChanged()]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
@@ -1535,9 +1536,18 @@
 
 		private void RemoveAllRegions()
 		{
-			_engine.Regions.Clear();
-			RaiseRegionsChanged();
-			_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			MessageBoxResult userSelection = MessageBox.Show(
+				 "Remove all regions?",
+				 "Confirmation",
+				 MessageBoxButton.YesNo,
+				 MessageBoxImage.Question);
+
+			if (userSelection == MessageBoxResult.Yes)
+			{
+				_engine.Regions.Clear();
+				RaiseRegionsChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
 		}
 
 		public bool RegionStartsWith(IRecord record, out string regionName)
