@@ -23,6 +23,6 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <filter:FilterView Grid.Row="0" DataContext="{Binding FilterViewModel}" />
-        <local:MainStatusBarView Grid.Row="1" DataContext="{Binding StatusBarViewModel}"/>
+        <local:StatusBarView Grid.Row="1" DataContext="{Binding StatusBarViewModel}"/>
     </Grid>
 </Window>
