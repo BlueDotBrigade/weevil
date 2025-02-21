@@ -669,7 +669,7 @@
 			});
 		}
 
-		public void SaveState()
+		public void SaveMetadata()
 		{
 			_engine.Save();
 		}

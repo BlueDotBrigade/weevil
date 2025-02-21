@@ -23,7 +23,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand ReloadCommand => new UiBoundCommand(Reload, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
-		public ICommand SaveStateCommand => new UiBoundCommand(SaveState, () => this.IsMenuEnabled);
+		public ICommand SaveMetadataCommand => new UiBoundCommand(SaveMetadata, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand SaveSelectedAsRawCommand => new UiBoundCommand(() => SaveSelected(FileFormatType.Raw), () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
