@@ -133,7 +133,8 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   materialDesign:HintAssist.Hint="Inclusive Filter (Alt+I)"
+                   ToolTip="Records matching the expression(s) will be displayed."
+                   materialDesign:HintAssist.Hint="Include (Alt+I)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
                 <ComboBox.InputBindings>
@@ -163,9 +164,10 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   materialDesign:HintAssist.Hint="Exclusive filter (Alt+E)"
+                   ToolTip="Records matching the expression(s) will be hidden."
+                   materialDesign:HintAssist.Hint="Exclude (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
-                      GotFocus="OnGotFocus">
+                   GotFocus="OnGotFocus">
                 <ComboBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                         <KeyBinding.CommandParameter>
