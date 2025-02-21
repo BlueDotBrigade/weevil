@@ -12,8 +12,8 @@
 	/// <summary>
 	/// Interaction logic for UserPromptDialog.xaml
 	/// </summary>
-	public partial class UserPromptDialog : Window
-    {
+	public partial class UserPromptDialog : Window, INotifyPropertyChanged
+	{
 		private const string AnyString = @"^.*$";
 
 		public static readonly DependencyProperty UserPromptProperty =
@@ -107,16 +107,16 @@
 
 		public UserPromptDialog()
 		{
-            this.Owner = Application.Current.MainWindow;
+			this.Owner = Application.Current.MainWindow;
 			this.Loaded += OnDialogLoaded;
-            InitializeComponent();
-            this.DataContext = this;
+			InitializeComponent();
+			this.DataContext = this;
 
 			this.ValidationPattern = AnyString;
 			this.ValidationMessage = string.Empty;
 
-            _validator = new UserInputValidator(ValidationPattern);
-        }
+			_validator = new UserInputValidator(ValidationPattern);
+		}
 
         private static void OnValidationPatternChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -133,23 +133,23 @@
 
         private void OnOkClicked(object sender, RoutedEventArgs e)
         {
-            var validationResult = _validator?.Validate(this);
-            if (validationResult != null && !validationResult.IsValid)
-            {
-                ValidationMessage = validationResult.Errors[0].ErrorMessage;
-                return;
-            }
+			var validationResult = _validator?.Validate(this);
+			if (validationResult != null && !validationResult.IsValid)
+			{
+				ValidationMessage = validationResult.Errors[0].ErrorMessage;
+				return;
+			}
 
-            this.DialogResult = true;
-        }
+			this.DialogResult = true;
+		}
 
-        private void ValidateUserInput()
-        {
-            if (_validator != null)
-            {
-                var validationResult = _validator.Validate(this);
-                ValidationMessage = validationResult.IsValid ? string.Empty : validationResult.Errors[0].ErrorMessage;
-            }
-        }
-    }
+		private void ValidateUserInput()
+		{
+			if (_validator != null)
+			{
+				var validationResult = _validator.Validate(this);
+				ValidationMessage = validationResult.IsValid ? string.Empty : validationResult.Errors[0].ErrorMessage;
+			}
+		}
+	}
 }
