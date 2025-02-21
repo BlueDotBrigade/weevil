@@ -38,19 +38,19 @@
         </Style>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Window.Resources>
-    <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
+    <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="6*" />
             <ColumnDefinition Width="0.5*" />
         </Grid.ColumnDefinitions>
-        
+
         <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
         <TextBlock Grid.Row="0" Grid.Column="0"
                  Text="{Binding UserPrompt}"
@@ -59,20 +59,20 @@
         <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 
                Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                materialDesign:HintAssist.Hint="Enter value" />
-        
+
         <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
         <TextBlock Grid.Row="1" Grid.Column="1"
            Text="{Binding ValidationMessage}"
            Foreground="Red"
            Visibility="{Binding IsValidationMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-        
+
         <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
         <Button Grid.Row="2" Grid.Column="1" 
               Content="Ok"
               Click="OnOkClicked"  
               IsDefault="True"
               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
-        
+
         <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
     </Grid>
 </Window>
