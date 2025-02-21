@@ -50,7 +50,19 @@
             </StatusBar.ItemsPanel>
             <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Current document&apos;s path."/>
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
+                                        <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
+                                        <Setter Property="ToolTip" Value="The open document has file level remarks."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                     <TextBox>
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
@@ -168,7 +180,7 @@
             <Separator Grid.Column="11" />
             <StatusBarItem Grid.Column="12">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:Badged >
+                    <materialDesign:Badged Margin="0,0,8,0">
                         <materialDesign:Badged.Style>
                             <Style TargetType="{x:Type materialDesign:Badged}">
                                 <Setter Property="Badge" Value=""/>
@@ -206,24 +218,10 @@
                             </Image.Style>
                         </Image>
                     </materialDesign:Badged>
-                    <Image Margin="4,0,0,0">
-                        <Image.Style>
-                            <Style TargetType="{x:Type Image}">
-                                <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-Data-24.png"/>
-                                <Setter Property="ToolTip" Value="User has not included file level remarks."/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
-                                        <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
-                                        <Setter Property="ToolTip" Value="User has included file level remarks."/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
                     <materialDesign:PopupBox
-                  StaysOpen="True"
-                  Cursor="Hand" 
-                  Visibility="{Binding SoftwareDetails.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                          StaysOpen="True"
+                          Cursor="Hand" 
+                          Visibility="{Binding SoftwareDetails.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <materialDesign:PopupBox.ToggleContent>
                             <Image Height="24" Width="24" Margin="6,0,0,0"
                             Source="/Resources/Icons/NewReleaseAvailable-24.png"
