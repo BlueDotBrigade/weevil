@@ -23,7 +23,7 @@
 		private readonly ConcurrentDictionary<BulletinKey, object> _subscriptions;
 
 		/// <summary>
-		/// Facilates the routing of messages between view models.
+		/// Facilitates the routing of messages between view models.
 		/// </summary>
 		public BulletinMediator()
 		{
