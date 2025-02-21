@@ -4,19 +4,29 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 	public class UserInputValidator : AbstractValidator<UserPromptDialog>
 	{
-        public UserInputValidator(string pattern)
-        {
-            if (string.IsNullOrWhiteSpace(pattern) || pattern == ".*")
-            {
-                RuleFor(dialog => dialog.UserInput)
-                    .NotEmpty().WithMessage("Input cannot be empty.");
-            }
-            else
-            {
-                RuleFor(dialog => dialog.UserInput)
-                    .NotEmpty().WithMessage("Input cannot be empty.")
-                    .Matches(pattern).WithMessage("Invalid input format.");
-            }
-        }
-    }
+		private const string AnyString = @"^.*$";
+
+		public UserInputValidator(string regExPattern, string error)
+		{
+			if (string.IsNullOrWhiteSpace(regExPattern) || regExPattern == ".*")
+			{
+				RuleFor(dialog => dialog.UserInput)
+					.NotEmpty().WithMessage("Input cannot be empty.");
+			}
+			else
+			{
+				var rulePattern = string.IsNullOrWhiteSpace(regExPattern)
+					? AnyString
+					: regExPattern;
+
+				var ruleError = string.IsNullOrWhiteSpace(error)
+					? "Invalid input format."
+					: error;
+
+				RuleFor(dialog => dialog.UserInput)
+					.NotEmpty().WithMessage("Input cannot be empty.")
+					.Matches(rulePattern).WithMessage(ruleError);
+			}
+		}
+	}
 }
