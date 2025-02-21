@@ -254,16 +254,17 @@
 
                     <MenuItem Header="Edit">
                         <MenuItem Header="Copy Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+C" />
-                        <MenuItem Header="Copy Records (Raw)" Command="{Binding ClipboardCopyRawCommand}" />
+                        <MenuItem Header="Copy Raw Records" Command="{Binding ClipboardCopyRawCommand}" />
                         <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
                         <Separator/>
                         <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
+                        <Separator/>
                         <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
                     </MenuItem>
                     
                     <MenuItem Header="View">
-                        <MenuItem Header="Show Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
-                        <MenuItem Header="Show Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
+                        <MenuItem Header="Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
+                        <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
                         <Separator />
                         <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
                         <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
