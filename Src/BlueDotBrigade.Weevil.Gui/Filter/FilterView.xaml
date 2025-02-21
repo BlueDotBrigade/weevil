@@ -308,6 +308,7 @@
                     <MenuItem Header="Show Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
                     <MenuItem Header="Analyze...">
                         <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
+                        <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
                         <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
                         <Separator/>
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
@@ -442,8 +443,14 @@
                                     <TextBlock 
                                         Margin="0,0,0,0" Padding="0,0,0,0" 
                                         FontWeight="ExtraBlack" FontSize="17" 
-                                        Background="WhiteSmoke" Foreground="Black"
-                                        ToolTip="Region Of Interest">
+                                        Background="WhiteSmoke" Foreground="Black">
+                                        <TextBlock.ToolTip>
+                                            <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                <Binding Path="." />
+                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                <Binding Source="Region of Interest" />
+                                            </MultiBinding>
+                                        </TextBlock.ToolTip>
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{StaticResource RegionStringConverter}">
                                                 <!-- 1) The current item (record) -->

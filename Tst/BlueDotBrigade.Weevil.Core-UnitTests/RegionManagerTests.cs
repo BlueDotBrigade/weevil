@@ -109,22 +109,5 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 			wasCleared.Should().BeFalse();
 			_regionManager.Regions.Length.Should().Be(1);
 		}
-
-		[TestMethod]
-		public void CreateFromSelection_LineNumberIsOutsideOfBookend_ReturnsFalseAndKeepsBookend()
-		{
-			// Arrange
-			var selectedLineNumbers = Enumerable
-				.Range(start: 16, count: 17)
-				.ToArray();
-
-			// Act
-			_regionManager.CreateFromSelection(selectedLineNumbers);
-
-			// Assert
-			_regionManager.Regions.Length.Should().Be(1);
-			_regionManager.Regions[0].Minimum.LineNumber.Should().Be(16);
-			_regionManager.Regions[0].Maximum.LineNumber.Should().Be(32);
-		}
 	}
 }

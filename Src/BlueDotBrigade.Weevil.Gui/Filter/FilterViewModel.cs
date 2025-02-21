@@ -38,6 +38,7 @@
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 	using System.Windows.Input;
+	using PostSharp.Extensibility;
 
 	[NotifyPropertyChanged()]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
@@ -1502,11 +1503,12 @@
 			{
 				if (_engine.Selector.HasSelectionPeriod)
 				{
-					if (_dialogBox.TryShowUserPrompt("New Region Name", "Name (4 character max)", @"^[a-zA-Z]{1,4}$", out var regionName))
+					if (_dialogBox.TryShowUserPrompt("New Region Name", "Name (5 character max)", @"^[a-zA-Z0-9]{1,5}$", out var regionName))
 					{
 						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
 						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
 						RaiseRegionsChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 					}
 				}
 			}
@@ -1516,10 +1518,36 @@
 			}
 		}
 
+		private void RemoveRegion()
+		{
+			if (_engine.Selector.Selected.Count == 1)
+			{
+				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+				_engine.Regions.Clear(selectedLineNumber);
+				RaiseRegionsChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
+			else
+			{
+				MessageBox.Show("A single record must be selected in order to remove a region.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+		}
+
 		private void RemoveAllRegions()
 		{
-			_engine.Regions.Clear();
-			RaiseRegionsChanged();
+			MessageBoxResult userSelection = MessageBox.Show(
+				 "Remove all regions?",
+				 "Confirmation",
+				 MessageBoxButton.YesNo,
+				 MessageBoxImage.Question);
+
+			if (userSelection == MessageBoxResult.Yes)
+			{
+				_engine.Regions.Clear();
+				RaiseRegionsChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
 		}
 
 		public bool RegionStartsWith(IRecord record, out string regionName)

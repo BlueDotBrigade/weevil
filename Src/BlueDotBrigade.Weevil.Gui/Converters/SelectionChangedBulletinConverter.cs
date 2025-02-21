@@ -19,7 +19,7 @@
 				if (!string.IsNullOrWhiteSpace(concreteBulletin.SectionName) &&
 					!string.IsNullOrWhiteSpace(concreteBulletin.RegionName))
 				{
-					result = $"ROI-{concreteBulletin.RegionName}: {concreteBulletin.SectionName}";
+					result = $"{concreteBulletin.RegionName} / {concreteBulletin.SectionName}";
 				}
 				else
 				{
@@ -30,7 +30,7 @@
 
 					if (!string.IsNullOrWhiteSpace(concreteBulletin.RegionName))
 					{
-						result = $"ROI-{concreteBulletin.RegionName}";
+						result = $"{concreteBulletin.RegionName}";
 					}
 				}
 			}

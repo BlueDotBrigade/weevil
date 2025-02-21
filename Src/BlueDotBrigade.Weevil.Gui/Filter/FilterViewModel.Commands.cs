@@ -283,6 +283,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand AddRegionCommand => new UiBoundCommand(AddRegion, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
+		public ICommand RemoveRegionCommand => new UiBoundCommand(RemoveRegion, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllRegionsCommand => new UiBoundCommand(RemoveAllRegions, () => this.IsMenuEnabled);
 		#endregion
 	}
