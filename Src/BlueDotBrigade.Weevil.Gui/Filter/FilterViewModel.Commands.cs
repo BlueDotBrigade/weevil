@@ -19,11 +19,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	{
 		#region Commands: General
 		[SafeForDependencyAnalysis]
-		public ICommand OpenCommand => new UiBoundCommand(OpenAsync, () => this.CanOpenLogFile);
+		public ICommand OpenLogCommand => new UiBoundCommand(OpenAsync, () => this.CanOpenLogFile);
+		[SafeForDependencyAnalysis]
+		public ICommand SaveLogCommand => new UiBoundCommand(SaveMetadata, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ReloadCommand => new UiBoundCommand(Reload, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
-		public ICommand SaveMetadataCommand => new UiBoundCommand(SaveMetadata, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand SaveSelectedAsRawCommand => new UiBoundCommand(() => SaveSelected(FileFormatType.Raw), () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]

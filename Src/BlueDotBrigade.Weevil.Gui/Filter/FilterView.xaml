@@ -32,11 +32,13 @@
         </Style>
     </UserControl.Resources>
     <UserControl.InputBindings>
-        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenCommand}" />
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenLogCommand}" />
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveLogCommand}" />
+
         <KeyBinding Key="Enter" Modifiers="Alt" Command="{Binding FilterCommand}"/>
         <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
         <KeyBinding Key="F1" Modifiers="Control" Command="{Binding ShowAboutCommand}" />
-        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveStateCommand}" />
+        
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
         <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
@@ -112,7 +114,7 @@
             </Grid.ColumnDefinitions>
 
             <Button x:Name="OpenButton" Grid.Column="0"
-                 Command="{Binding OpenCommand}"
+                 Command="{Binding OpenLogCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
                  Margin="{StaticResource ButtonMargin}">
@@ -243,9 +245,8 @@
             <ListView.ContextMenu>
                 <ContextMenu FontSize="{DynamicResource ApplicationFontSize}">
                     <MenuItem Header="File">
-                        <MenuItem Header="Open Document" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
-                        <Separator/>
-                        <MenuItem Header="Save Document" Command="{Binding SaveStateCommand}" InputGestureText="Ctrl+S"/>
+                        <MenuItem Header="Open Document" Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
+                        <MenuItem Header="Save Document" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
                         <Separator />
                         <MenuItem Header="Save Raw Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
                         <MenuItem Header="Save Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
