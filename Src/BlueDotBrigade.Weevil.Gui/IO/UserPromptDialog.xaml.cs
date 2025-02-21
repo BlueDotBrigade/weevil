@@ -12,9 +12,8 @@
 	/// <summary>
 	/// Interaction logic for UserPromptDialog.xaml
 	/// </summary>
-	public partial class UserPromptDialog : Window
-    {
-		private const string AnyString = @"^.*$";
+	public partial class UserPromptDialog : Window, INotifyPropertyChanged
+	{
 
 		public static readonly DependencyProperty UserPromptProperty =
             DependencyProperty.Register(
@@ -29,14 +28,8 @@
                 {
                     BindsTwoWayByDefault = true,
                 });
-
-        public static readonly DependencyProperty ValidationPatternProperty =
-            DependencyProperty.Register(
-                nameof(ValidationPattern), typeof(string),
-                typeof(UserPromptDialog),
-                new PropertyMetadata(".*", OnValidationPatternChanged));
-
-        private UserInputValidator _validator;
+        
+		private UserInputValidator _validator;
 
         public string UserPrompt
         {
@@ -52,27 +45,6 @@
                 SetValue(UserInputProperty, value);
                 ValidateUserInput();
             }
-        }
-
-
-		/// <summary>
-		/// Gets or sets the regular expression pattern used to validate the user input.
-		/// </summary>
-		public string ValidationPattern
-        {
-            get => (string)GetValue(ValidationPatternProperty);
-            set
-			{
-				if (this.ValidationPattern != value)
-				{
-					if (string.IsNullOrWhiteSpace(value))
-					{
-						value = AnyString;
-					}
-
-					SetValue(ValidationPatternProperty, value);
-				}
-			}
         }
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -105,26 +77,20 @@
 			get => !string.IsNullOrWhiteSpace(ValidationMessage);
 		}
 
-		public UserPromptDialog()
+		public UserPromptDialog() : this (string.Empty, string.Empty)
 		{
-            this.Owner = Application.Current.MainWindow;
+			// nothing to do
+		}
+
+		public UserPromptDialog(string validationPattern, string validationError)
+		{
+			this.Owner = Application.Current.MainWindow;
 			this.Loaded += OnDialogLoaded;
-            InitializeComponent();
-            this.DataContext = this;
+			InitializeComponent();
+			this.DataContext = this;
 
-			this.ValidationPattern = AnyString;
-			this.ValidationMessage = string.Empty;
-
-            _validator = new UserInputValidator(ValidationPattern);
-        }
-
-        private static void OnValidationPatternChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is UserPromptDialog dialog)
-            {
-                dialog._validator = new UserInputValidator((string)e.NewValue);
-            }
-        }
+			_validator = new UserInputValidator(validationPattern, validationError);
+		}
 
         private void OnDialogLoaded(object sender, RoutedEventArgs e)
         {
@@ -133,23 +99,23 @@
 
         private void OnOkClicked(object sender, RoutedEventArgs e)
         {
-            var validationResult = _validator?.Validate(this);
-            if (validationResult != null && !validationResult.IsValid)
-            {
-                ValidationMessage = validationResult.Errors[0].ErrorMessage;
-                return;
-            }
+			var validationResult = _validator?.Validate(this);
+			if (validationResult != null && !validationResult.IsValid)
+			{
+				ValidationMessage = validationResult.Errors[0].ErrorMessage;
+				return;
+			}
 
-            this.DialogResult = true;
-        }
+			this.DialogResult = true;
+		}
 
-        private void ValidateUserInput()
-        {
-            if (_validator != null)
-            {
-                var validationResult = _validator.Validate(this);
-                ValidationMessage = validationResult.IsValid ? string.Empty : validationResult.Errors[0].ErrorMessage;
-            }
-        }
-    }
+		private void ValidateUserInput()
+		{
+			if (_validator != null)
+			{
+				var validationResult = _validator.Validate(this);
+				ValidationMessage = validationResult.IsValid ? string.Empty : validationResult.Errors[0].ErrorMessage;
+			}
+		}
+	}
 }

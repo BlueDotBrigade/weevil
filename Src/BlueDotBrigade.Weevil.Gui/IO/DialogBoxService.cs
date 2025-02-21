@@ -88,16 +88,15 @@ internal class DialogBoxService : IDialogBoxService
 		return string.Empty;
 	}
 
-	public bool TryShowUserPrompt(string title, string userPrompt, string validationPattern, out string userValue)
+	public bool TryShowUserPrompt(string title, string userPrompt, string validationPattern, string validationError, out string userValue)
 	{
 		userValue = string.Empty;
 		var wasSuccessful = false;
 
-		var dialog = new UserPromptDialog()
+		var dialog = new UserPromptDialog(validationPattern, validationError)
 		{
 			Title = title,
 			UserPrompt = userPrompt,
-			ValidationPattern = validationPattern ?? string.Empty,
 		};
 
 		if (dialog.ShowDialog() == true)

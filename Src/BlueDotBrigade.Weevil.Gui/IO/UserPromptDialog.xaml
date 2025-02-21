@@ -2,20 +2,24 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding Title}" 
-        Height="150" Width="600"
+        Height="180" Width="600"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.FontWeight="Medium"
         TextElement.FontSize="{DynamicResource ApplicationFontSize}"
+        Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{materialDesign:MaterialDesignFont}">
     <Window.Resources>
+        <Style TargetType="TextElement">
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="{DynamicResource ApplicationFontSize}" />
+        </Style>
         <Style TargetType="TextBlock">
             <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="{DynamicResource ApplicationFontSize}" />
             <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Right" />
@@ -23,27 +27,30 @@
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="{DynamicResource ApplicationFontSize}" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
         </Style>
         <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="FontSize" Value="{DynamicResource ApplicationFontSize}" />
             <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
             <Setter Property="Width" Value="{StaticResource ButtonWidth}" />
         </Style>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Window.Resources>
-    <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
+    <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="10" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="6*" />
             <ColumnDefinition Width="0.5*" />
         </Grid.ColumnDefinitions>
+
         <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
         <TextBlock Grid.Row="0" Grid.Column="0"
                  Text="{Binding UserPrompt}"
@@ -52,16 +59,20 @@
         <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 
                Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                materialDesign:HintAssist.Hint="Enter value" />
+
+        <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
         <TextBlock Grid.Row="1" Grid.Column="1"
            Text="{Binding ValidationMessage}"
            Foreground="Red"
-           FontSize="12"
            Visibility="{Binding IsValidationMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+        <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
         <Button Grid.Row="2" Grid.Column="1" 
               Content="Ok"
               Click="OnOkClicked"  
               IsDefault="True"
               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+
         <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
     </Grid>
 </Window>

@@ -32,11 +32,13 @@
         </Style>
     </UserControl.Resources>
     <UserControl.InputBindings>
-        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenCommand}" />
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenLogCommand}" />
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveLogCommand}" />
+
         <KeyBinding Key="Enter" Modifiers="Alt" Command="{Binding FilterCommand}"/>
         <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
         <KeyBinding Key="F1" Modifiers="Control" Command="{Binding ShowAboutCommand}" />
-        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveStateCommand}" />
+        
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
         <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
@@ -112,7 +114,7 @@
             </Grid.ColumnDefinitions>
 
             <Button x:Name="OpenButton" Grid.Column="0"
-                 Command="{Binding OpenCommand}"
+                 Command="{Binding OpenLogCommand}"
                  ToolTip="Open a new document. (Ctrl+O)"
                  Style="{StaticResource  MaterialDesignRaisedButton}"
                  Margin="{StaticResource ButtonMargin}">
@@ -133,7 +135,8 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   materialDesign:HintAssist.Hint="Inclusive Filter (Alt+I)"
+                   ToolTip="Records matching the expression(s) will be displayed."
+                   materialDesign:HintAssist.Hint="Include (Alt+I)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
                 <ComboBox.InputBindings>
@@ -163,9 +166,10 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   materialDesign:HintAssist.Hint="Exclusive filter (Alt+E)"
+                   ToolTip="Records matching the expression(s) will be hidden."
+                   materialDesign:HintAssist.Hint="Exclude (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
-                      GotFocus="OnGotFocus">
+                   GotFocus="OnGotFocus">
                 <ComboBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                         <KeyBinding.CommandParameter>
@@ -240,51 +244,59 @@
             </ListView.Style>
             <ListView.ContextMenu>
                 <ContextMenu FontSize="{DynamicResource ApplicationFontSize}">
-                    <MenuItem Header="Open" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
-                    <MenuItem Header="Save State" Command="{Binding SaveStateCommand}" InputGestureText="Ctrl+S"/>
-                    <MenuItem Header="Save Records...">
-                        <MenuItem Header="Raw Data" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
-                        <MenuItem Header="With Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
-                        <Separator/>
-                        <MenuItem Header="Comment Summary" Command="{Binding SaveCommentSummaryCommand}" />
+                    <MenuItem Header="File">
+                        <MenuItem Header="Open Document" Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
+                        <MenuItem Header="Save Document" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
+                        <Separator />
+                        <MenuItem Header="Save Raw Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
+                        <MenuItem Header="Save Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
+                        <MenuItem Header="Save Comment Timeline" Command="{Binding SaveCommentSummaryCommand}" />
                     </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="Show...">
-                        <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
-                        <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
-                    </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="Copy &amp; Paste...">
+
+                    <MenuItem Header="Edit">
                         <MenuItem Header="Copy Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+C" />
-                        <MenuItem Header="Copy Records (Raw)" Command="{Binding ClipboardCopyRawCommand}" />
+                        <MenuItem Header="Copy Raw Records" Command="{Binding ClipboardCopyRawCommand}" />
                         <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
                         <Separator/>
                         <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
+                        <Separator/>
                         <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
                     </MenuItem>
+                    
+                    <MenuItem Header="View">
+                        <MenuItem Header="Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
+                        <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+                        <Separator />
+                        <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
+                        <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
+                        <Separator/>
+                        <MenuItem Header="Reload Document" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
+                    </MenuItem>
+
                     <Separator/>
-                    <MenuItem Header="Filtering...">
+
+                    <MenuItem Header="Clear ...">
+                        <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
+                        <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
+                        <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
+                        <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Outside Regions" Command="{Binding ClearBeyondRegionsCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
+                        <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>
+                    </MenuItem>
+                    
+                    <Separator/>
+
+                    <MenuItem Header="Filter ...">
                         <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
                         <Separator/>
                         <MenuItem Header="Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <Separator/>
                         <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
                     </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="Clear...">
-                        <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
-                        <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
-                        <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
-                        <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
-                        <Separator/>
-                        <MenuItem Header="Clear Outside Regions" Command="{Binding ClearBeyondRegionsCommand}" />
-                        <Separator/>
-                        <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
-                        <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>
-                    </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="Reload " Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
-                    <Separator/>
+
                     <MenuItem Header="Navigate">
                         <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
                         <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
@@ -303,10 +315,7 @@
                         <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
                         <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
                     </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="Show Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
-                    <MenuItem Header="Show Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
-                    <MenuItem Header="Analyze...">
+                    <MenuItem Header="Analyze ...">
                         <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
                         <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
                         <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
@@ -319,6 +328,8 @@
                         <MenuItem Header="Measure Elapsed Time (UI Thread)" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
                         <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
                         <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomaly}" />
+                        <Separator />
+                        <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
                     </MenuItem>
                     <MenuItem Header="Analyze More..."
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
@@ -336,7 +347,6 @@
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
-                    <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
                     <Separator/>
                     <MenuItem Header="Help" Command="{Binding ShowHelpCommand}" InputGestureText="F1" />
                     <MenuItem Header="About" Command="{Binding ShowAboutCommand}" InputGestureText="Ctrl+F1" />
@@ -389,14 +399,6 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
                                 <TextBlock Text="{Binding LineNumber, StringFormat={}{0:###,###,##0}}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="Auto">
-                        <GridViewColumnHeader Content="Flagged" Padding="{StaticResource ColumnHeaderPadding}"/>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="data:IRecord">
-                                <CheckBox IsChecked="{Binding Path=Metadata.IsFlagged, TargetNullValue=false}" IsEnabled="False" HorizontalAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
