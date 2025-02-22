@@ -7,15 +7,9 @@
 	using BlueDotBrigade.Weevil.Data;
 
 	[ValueConversion(typeof(string), typeof(string))]
-	public class ContentConverter : IValueConverter
+	public class ContentToTruncationIconConverter : IValueConverter
 	{
-		private const int MaximumLength = 8 * 1024;
-		private const int TruncatedLength = 1 * 256;
-
-		private static readonly ShortenedRecordFormatter ShortenedRecordFormatter =
-			new ShortenedRecordFormatter(MaximumLength, TruncatedLength);
-
-		private static readonly SimpleCallStackFormatter CallStackFormatter = new SimpleCallStackFormatter();
+		private static readonly ContentConverter ContentConverter = new ContentConverter();
 
 		/// <summary>
 		/// Ensures that the record content is not exceptionally long.
@@ -29,8 +23,11 @@
 
 			if (record is IRecord concreteRecord)
 			{
-				var content = CallStackFormatter.Format(concreteRecord);
-				result = ShortenedRecordFormatter.Format(content);
+				var convertedText = ContentConverter.Convert(record, targetType, parameter, culture);
+
+				result = concreteRecord.Content == convertedText
+					? string.Empty
+					: "⚡";
 			}
 
 			return result;

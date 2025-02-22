@@ -19,6 +19,7 @@
         <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
         <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
         <converters:ContentConverter x:Key="ContentConverter" />
+        <converters:ContentToTruncationIconConverter x:Key="ContentToTruncationIconConverter" />
         <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
         <converters:RegionStringConverter x:Key="RegionStringConverter" />
         <Style x:Key="CommandMenuItemStyle"
@@ -460,6 +461,13 @@
                                                 <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
                                             </MultiBinding>
                                         </TextBlock.Text>
+                                    </TextBlock>
+                                    <TextBlock FontSize="18" FontWeight="Heavy" Foreground="Yellow"
+                                            Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
+                                            ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version.">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect ShadowDepth="2" Color="Black" BlurRadius="2" />
+                                        </TextBlock.Effect>
                                     </TextBlock>
                                 </TextBlock>
                             </DataTemplate>
