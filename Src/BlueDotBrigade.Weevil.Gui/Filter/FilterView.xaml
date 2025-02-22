@@ -450,7 +450,7 @@
                                             <MultiBinding Converter="{StaticResource RegionStringConverter}">
                                                 <Binding Path="." />
                                                 <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                <Binding Source="Region of Interest" />
+                                                <Binding Source="True" />
                                             </MultiBinding>
                                         </TextBlock.ToolTip>
                                         <TextBlock.Text>
