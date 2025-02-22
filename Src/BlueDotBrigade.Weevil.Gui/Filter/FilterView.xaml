@@ -248,9 +248,9 @@
                         <MenuItem Header="Open Document" Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
                         <MenuItem Header="Save Document" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
                         <Separator />
-                        <MenuItem Header="Save Raw Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
-                        <MenuItem Header="Save Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
-                        <MenuItem Header="Save Comment Timeline" Command="{Binding SaveCommentSummaryCommand}" />
+                        <MenuItem Header="Export Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
+                        <MenuItem Header="Export Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
+                        <MenuItem Header="Export Comment Timeline" Command="{Binding SaveCommentSummaryCommand}" />
                     </MenuItem>
 
                     <MenuItem Header="Edit">
@@ -292,7 +292,7 @@
                     <MenuItem Header="Filter ...">
                         <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
                         <Separator/>
-                        <MenuItem Header="Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
+                        <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <Separator/>
                         <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
                     </MenuItem>
