@@ -439,11 +439,10 @@
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
-                                <TextBlock>
-                                    <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Right"
+                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left">
+                                    <Run 
                                         Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
                                     <TextBlock 
-                                        Margin="0,0,0,0" Padding="0,0,0,0" 
                                         FontWeight="ExtraBlack" FontSize="17" 
                                         Background="WhiteSmoke" Foreground="Black">
                                         <TextBlock.ToolTip>
