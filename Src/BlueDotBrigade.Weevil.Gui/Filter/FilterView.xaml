@@ -462,13 +462,9 @@
                                             </MultiBinding>
                                         </TextBlock.Text>
                                     </TextBlock>
-                                    <TextBlock FontSize="18" FontWeight="Heavy" Foreground="Yellow"
+                                    <TextBlock FontSize="18" FontWeight="Heavy" Foreground="White" Background="Black"
                                             Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
-                                            ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version.">
-                                        <TextBlock.Effect>
-                                            <DropShadowEffect ShadowDepth="2" Color="Black" BlurRadius="2" />
-                                        </TextBlock.Effect>
-                                    </TextBlock>
+                                            ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version."/>
                                 </TextBlock>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
