@@ -444,8 +444,8 @@
                                     <Run 
                                         Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
                                     <TextBlock 
-                                        FontWeight="ExtraBlack" FontSize="17" 
-                                        Background="WhiteSmoke" Foreground="Black">
+                                        FontWeight="Heavy" FontSize="18" 
+                                        Background="Black" Foreground="White">
                                         <TextBlock.ToolTip>
                                             <MultiBinding Converter="{StaticResource RegionStringConverter}">
                                                 <Binding Path="." />
@@ -462,7 +462,7 @@
                                             </MultiBinding>
                                         </TextBlock.Text>
                                     </TextBlock>
-                                    <TextBlock FontSize="18" FontWeight="Heavy" Foreground="White" Background="Black"
+                                    <TextBlock FontSize="18" FontWeight="Heavy" Background="Black" Foreground="White"
                                             Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
                                             ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version."/>
                                 </TextBlock>
