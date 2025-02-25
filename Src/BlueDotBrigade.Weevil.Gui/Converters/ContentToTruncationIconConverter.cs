@@ -27,7 +27,7 @@
 
 				result = concreteRecord.Content == convertedText
 					? string.Empty
-					: " ★ ";
+					: " ... ";
 			}
 
 			return result;
