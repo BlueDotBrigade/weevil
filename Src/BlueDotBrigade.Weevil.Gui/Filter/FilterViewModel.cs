@@ -951,6 +951,14 @@
 			FilterAsynchronously(FilterType.PlainText, filter);
 		}
 
+		private void FilterByPinned()
+		{
+			var configuration = GetFilterConfiguration();
+			var filter = new FilterCriteria("@Pinned", string.Empty, configuration);
+
+			FilterAsynchronously(FilterType.PlainText, filter);
+		}
+
 		public void ToggleFilters()
 		{
 			if (_engine.Filter.Criteria.Equals(FilterCriteria.None))
