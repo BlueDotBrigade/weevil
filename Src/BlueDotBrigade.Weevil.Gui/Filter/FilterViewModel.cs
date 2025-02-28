@@ -732,9 +732,19 @@
 			ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
 		}
 
+		public void ClipboardCopyLineNumbers()
+		{
+			ClipboardHelper.CopySelectedLineNumbers(_engine);
+		}
+
+		public void ClipboardCopyTimestamps()
+		{
+			ClipboardHelper.CopySelectedTimestamps(_engine);
+		}
+
 		public void ClipboardCopyComment()
 		{
-			ClipboardHelper.CopyCommentFromSelected(_engine, Settings.Default.AddLineNumberPrefix);
+			ClipboardHelper.CopySelectedComments(_engine);
 		}
 
 		public void ClipboardPaste(bool allowOverwrite)
@@ -948,6 +958,14 @@
 			var configuration = GetFilterConfiguration();
 			var filter = new FilterCriteria("@Comment", string.Empty, configuration);
 			
+			FilterAsynchronously(FilterType.PlainText, filter);
+		}
+
+		private void FilterByPinned()
+		{
+			var configuration = GetFilterConfiguration();
+			var filter = new FilterCriteria("@Pinned", string.Empty, configuration);
+
 			FilterAsynchronously(FilterType.PlainText, filter);
 		}
 
@@ -1453,19 +1471,26 @@
 		{
 			var selectedItemCount = coreEngine.Selector.Selected.Count;
 			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
-			var selectedItem = coreEngine.Selector.Selected.FirstOrDefault().Value;
 
+			
+
+			var lineNumber = 0;
 			var sectionName = string.Empty;
 			var regionName = string.Empty;
 
-			if (selectedItem != null)
+			if (coreEngine.Selector.Selected.Count > 0)
 			{
-				coreEngine.Navigate.TableOfContents.TryGetSectionName(selectedItem.LineNumber, out sectionName);
-				coreEngine.Regions.TryGetRegionName(selectedItem.LineNumber, out regionName);
+				var selectedItem = coreEngine.Selector.Selected.First().Value;
+
+				lineNumber = selectedItem.LineNumber;
+
+				coreEngine.Navigate.TableOfContents.TryGetSectionName(lineNumber, out sectionName);
+				coreEngine.Regions.TryGetRegionName(lineNumber, out regionName);
 			}
 
 			return new SelectionChangedBulletin
 			{
+				LineNumber = lineNumber,
 				SelectedRecordCount = selectedItemCount,
 				SelectionPeriod = selectedTimePeriod,
 				SectionName = sectionName,

@@ -39,6 +39,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => ClipboardCopyRaw(false), 
 			() => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
+		public ICommand ClipboardCopyLineNumbersCommand => new UiBoundCommand(ClipboardCopyLineNumbers, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand ClipboardCopyTimestampsCommand => new UiBoundCommand(ClipboardCopyTimestamps, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
 		public ICommand ClipboardCopyCommentCommand => new UiBoundCommand(ClipboardCopyComment, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand ClipboardPasteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: false), () => this.IsMenuEnabled);
@@ -160,6 +164,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		[SafeForDependencyAnalysis]
 		public ICommand FilterByCommentCommand => new UiBoundCommand(FilterByComment, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand FilterByPinnedCommand => new UiBoundCommand(FilterByPinned, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
 		public ICommand ToggleFiltersCommand => new UiBoundCommand(ToggleFilters, () => this.IsMenuEnabled);

@@ -33,14 +33,14 @@
         </Style>
     </UserControl.Resources>
     <UserControl.InputBindings>
-        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenLogCommand}" />
-        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveLogCommand}" />
+        <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenLogCommand}" />
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveLogCommand}" />
 
         <KeyBinding Key="Enter" Modifiers="Alt" Command="{Binding FilterCommand}"/>
         <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
-        <KeyBinding Key="F1" Modifiers="Control" Command="{Binding ShowAboutCommand}" />
-        
-        <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
+        <KeyBinding Key="F1" Modifiers="Ctrl" Command="{Binding ShowAboutCommand}" />
+
+        <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
         <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
 
@@ -49,47 +49,50 @@
         <KeyBinding Key="F3" Modifiers="Shift" Command="{Binding FindPreviousCommand}" />
         <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding GoToCommand}" />
 
-        <KeyBinding Key="C" Modifiers="Control" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
-        <KeyBinding Key="C" Modifiers="Control+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
-        <KeyBinding Key="V" Modifiers="Control" Command="{Binding ClipboardPasteCommand}" />
-        <KeyBinding Key="V" Modifiers="Control+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
+        <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
+        <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
+        <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ClipboardPasteCommand}" />
+        <KeyBinding Key="V" Modifiers="Ctrl+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
         <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
-        <KeyBinding Key="O" Modifiers="Control+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
+        <KeyBinding Key="O" Modifiers="Ctrl+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
         <KeyBinding Key="T" Modifiers="Ctrl+Shift" Command="{Binding ToggleFiltersCommand}" />
-        <KeyBinding Key="E" Modifiers="Control" Command="{Binding ShowFileExplorerCommand}" />
-        <KeyBinding Key="R" Modifiers="Control" Command="{Binding ShowRegExToolCommand}" />
-        <KeyBinding Key="OemTilde" Modifiers="Control" Command="{Binding ShowApplicationLogFileCommand}" />
+        <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding ShowFileExplorerCommand}" />
+        <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ShowRegExToolCommand}" />
+        <KeyBinding Key="OemTilde" Modifiers="Ctrl" Command="{Binding ShowApplicationLogFileCommand}" />
         <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
         <!--<KeyBinding Key="Delete" Command="{Binding ClearSelectedRecordsCommand}" />-->
         <KeyBinding Key="Back" Command="{Binding RemoveSelectedCommentsCommand}" />
-        <KeyBinding Key="Back" Modifiers="Control+Shift"  Command="{Binding RemoveAllCommentsCommand}" />
+        <KeyBinding Key="Back" Modifiers="Ctrl+Shift"  Command="{Binding RemoveAllCommentsCommand}" />
 
-        <KeyBinding Key="OemTilde" Modifiers="Control+Shift"  Command="{Binding SplitCurrentLogCommand}" />
+        <KeyBinding Key="OemTilde" Modifiers="Ctrl+Shift"  Command="{Binding SplitCurrentLogCommand}" />
 
-        <KeyBinding Key="F5" Modifiers="Control" Command="{Binding ReloadCommand}" />
+        <KeyBinding Key="F5" Modifiers="Ctrl" Command="{Binding ReloadCommand}" />
 
-        <KeyBinding Key="D" Modifiers="Control" Command="{Binding ShowDashboardCommand}" />
-        <KeyBinding Key="G" Modifiers="Control+Shift" Command="{Binding GraphDataCommand}" />
+        <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ShowDashboardCommand}" />
+        <KeyBinding Key="G" Modifiers="Ctrl+Shift" Command="{Binding GraphDataCommand}" />
         <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
         <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
         <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
         <KeyBinding Key="F11" Command="{Binding MeasureElapsedTimeCommand}" />
 
         <KeyBinding Key="M" Modifiers="Ctrl+Shift" Command="{Binding FilterByCommentCommand}" />
+        <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding FilterByPinnedCommand}" />
 
-        <KeyBinding Key="P" Modifiers="Control" Command="{Binding ToggleIsPinnedCommand}"/>
-        <KeyBinding Key="Subtract" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
-        <KeyBinding Key="Add" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
-        <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding GoToPreviousPinCommand}" />
-        <KeyBinding Key="OemPlus" Modifiers="Control" Command="{Binding GoToNextPinCommand}" />
-        <KeyBinding Key="Subtract" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
-        <KeyBinding Key="Add" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
-        <KeyBinding Key="OemMinus" Modifiers="Control+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
-        <KeyBinding Key="OemPlus" Modifiers="Control+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
-        <KeyBinding Key="Subtract" Modifiers="Control+Shift" Command="{Binding GoToPreviousCommentCommand}" />
-        <KeyBinding Key="Add" Modifiers="Control+Shift" Command="{Binding GoToNextCommentCommand}" />
-        <KeyBinding Key="OemMinus" Modifiers="Control+Shift" Command="{Binding GoToPreviousCommentCommand}" />
-        <KeyBinding Key="OemPlus" Modifiers="Control+Shift" Command="{Binding GoToNextCommentCommand}" />
+        <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding ClipboardCopyTimestampsCommand}" />
+
+        <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding ToggleIsPinnedCommand}"/>
+        <KeyBinding Key="Subtract" Modifiers="Ctrl" Command="{Binding GoToPreviousPinCommand}" />
+        <KeyBinding Key="Add" Modifiers="Ctrl" Command="{Binding GoToNextPinCommand}" />
+        <KeyBinding Key="OemMinus" Modifiers="Ctrl" Command="{Binding GoToPreviousPinCommand}" />
+        <KeyBinding Key="OemPlus" Modifiers="Ctrl" Command="{Binding GoToNextPinCommand}" />
+        <KeyBinding Key="Subtract" Modifiers="Ctrl+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
+        <KeyBinding Key="Add" Modifiers="Ctrl+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
+        <KeyBinding Key="OemMinus" Modifiers="Ctrl+Shift+Alt" Command="{Binding GoToPreviousFlagCommand}" />
+        <KeyBinding Key="OemPlus" Modifiers="Ctrl+Shift+Alt" Command="{Binding GoToNextFlagCommand}" />
+        <KeyBinding Key="Subtract" Modifiers="Ctrl+Shift" Command="{Binding GoToPreviousCommentCommand}" />
+        <KeyBinding Key="Add" Modifiers="Ctrl+Shift" Command="{Binding GoToNextCommentCommand}" />
+        <KeyBinding Key="OemMinus" Modifiers="Ctrl+Shift" Command="{Binding GoToPreviousCommentCommand}" />
+        <KeyBinding Key="OemPlus" Modifiers="Ctrl+Shift" Command="{Binding GoToNextCommentCommand}" />
     </UserControl.InputBindings>
     <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
          FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
@@ -136,7 +139,6 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   ToolTip="Records matching the expression(s) will be displayed."
                    materialDesign:HintAssist.Hint="Include (Alt+I)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
@@ -167,7 +169,6 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   ToolTip="Records matching the expression(s) will be hidden."
                    materialDesign:HintAssist.Hint="Exclude (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
@@ -232,7 +233,7 @@
             </ListView.Resources>
             <ListView.InputBindings>
                 <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ClipboardPasteCommand}" />
-                <KeyBinding Key="V" Modifiers="Control+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
+                <KeyBinding Key="V" Modifiers="Ctrl+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
             </ListView.InputBindings>
             <ListView.Style>
                 <Style TargetType="ListView" BasedOn="{StaticResource MaterialDesignListView}">
@@ -258,6 +259,8 @@
                         <MenuItem Header="Copy Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+C" />
                         <MenuItem Header="Copy Raw Records" Command="{Binding ClipboardCopyRawCommand}" />
                         <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
+                        <MenuItem Header="Copy Line Numbers" Command="{Binding ClipboardCopyLineNumbersCommand}" />
+                        <MenuItem Header="Copy Timestamps" Command="{Binding ClipboardCopyTimestampsCommand}" InputGestureText="Ctrl+T"/>
                         <Separator/>
                         <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
                         <Separator/>
@@ -294,6 +297,7 @@
                         <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
                         <Separator/>
                         <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
+                        <MenuItem Header="Show Pinned Records" Command="{Binding FilterByPinnedCommand}" InputGestureText="Ctrl+Shift+P" />
                         <Separator/>
                         <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
                     </MenuItem>
@@ -396,14 +400,6 @@
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto">
-                        <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="data:IRecord">
-                                <TextBlock Text="{Binding LineNumber, StringFormat={}{0:###,###,##0}}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="Auto">
                         <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
@@ -440,32 +436,54 @@
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
-                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left">
-                                    <Run 
-                                        Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
-                                    <TextBlock 
-                                        FontWeight="Heavy" FontSize="18" 
-                                        Background="Black" Foreground="White">
-                                        <TextBlock.ToolTip>
-                                            <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                <Binding Path="." />
-                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                <Binding Source="True" />
-                                            </MultiBinding>
-                                        </TextBlock.ToolTip>
-                                        <TextBlock.Text>
-                                            <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                <!-- 1) The current item (record) -->
-                                                <Binding Path="." />
-                                                <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
-                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                    <TextBlock FontSize="18" FontWeight="Heavy" Background="Black" Foreground="White"
-                                            Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
-                                            ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version."/>
+                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <Run Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
+                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
+                                         <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=RegionTextBlock}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                            <TextBlock.ToolTip>
+                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                    <Binding Path="." />
+                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                    <Binding Source="True" />
+                                                </MultiBinding>
+                                            </TextBlock.ToolTip>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                    <!-- 1) The current item (record) -->
+                                                    <Binding Path="." />
+                                                    <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
+                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </Border>
+                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=TruncatedTextBlock}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
+                                                Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
+                                                ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version."/>
+                                    </Border>
                                 </TextBlock>
+                                    
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
