@@ -57,7 +57,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HasSourceFileRemarks, Mode=OneWay}" Value="True">
                                         <Setter Property="Source" Value="/Resources/Icons/SourceFileRemarks-DataRequiresAttention-24.png"/>
-                                        <Setter Property="ToolTip" Value="The open document has file level remarks."/>
+                                        <Setter Property="ToolTip" Value="This document has file level remarks."/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -90,9 +90,9 @@
             <StatusBarItem Grid.Column="3" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/Context-Data-24.png" 
-                      ToolTip="The current document&apos;s context."/>
+                      ToolTip="Document-level context."/>
                     <TextBox Text="{Binding SourceFileDetails.Context, Converter={StaticResource ContextConverter}, FallbackValue='Unknown Context', Mode=OneWay}" 
-                        ToolTip="The current document&apos;s context."
+                        ToolTip="Document-level context."
                         Style="{StaticResource StatusBarTextBox}"/>
                 </StackPanel>
             </StatusBarItem>
@@ -203,7 +203,7 @@
                                                 <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                                            <Setter Property="ToolTip" xml:space="preserve" Value="Open the dashboard (Ctrl+D) for insight&#x0d;&#x0a;about the current document."/>
+                                            <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
                            </MultiDataTrigger>
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
@@ -211,7 +211,7 @@
                                                 <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                                            <Setter Property="ToolTip" xml:space="preserve" Value="The current document&apos;s insight requires user attention.&#x0d;&#x0a;For more information, open the dashboard (Ctrl+D)."/>
+                                            <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
                            </MultiDataTrigger>
                                     </Style.Triggers>
                                 </Style>
