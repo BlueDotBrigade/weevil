@@ -732,9 +732,19 @@
 			ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
 		}
 
+		public void ClipboardCopyLineNumbers()
+		{
+			ClipboardHelper.CopySelectedLineNumbers(_engine);
+		}
+
+		public void ClipboardCopyTimestamps()
+		{
+			ClipboardHelper.CopySelectedTimestamps(_engine);
+		}
+
 		public void ClipboardCopyComment()
 		{
-			ClipboardHelper.CopyCommentFromSelected(_engine, Settings.Default.AddLineNumberPrefix);
+			ClipboardHelper.CopySelectedComments(_engine);
 		}
 
 		public void ClipboardPaste(bool allowOverwrite)

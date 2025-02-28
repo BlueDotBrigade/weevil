@@ -259,6 +259,8 @@
                         <MenuItem Header="Copy Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+C" />
                         <MenuItem Header="Copy Raw Records" Command="{Binding ClipboardCopyRawCommand}" />
                         <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
+                        <MenuItem Header="Copy Line Numbers" Command="{Binding ClipboardCopyLineNumbersCommand}" />
+                        <MenuItem Header="Copy Timestamps" Command="{Binding ClipboardCopyTimestampsCommand}" />
                         <Separator/>
                         <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
                         <Separator/>
