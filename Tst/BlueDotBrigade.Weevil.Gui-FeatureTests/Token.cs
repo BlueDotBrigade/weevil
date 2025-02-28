@@ -18,18 +18,6 @@
 
 		public Token()
 		{
-			//this.IncludeFilter = string.Empty;
-			//this.ExcludeFilter = string.Empty;
-
-			//this.FilterType = FilterType.RegularExpression;
-
-			//this.Configuration = new Dictionary<string, object>()
-			//{
-			//	{ "IncludePinned", true },
-			//	{ "IsCaseSensitive", true },
-			//	{ "HideDebugRecords", false },
-			//	{ "HideTraceRecords", false },
-			//};
 		}
 
 		internal async Task OpenFileAsync(string logFilePath)
@@ -53,18 +41,6 @@
 		}
 
 		#region Input Values
-		//public string IncludeFilter { private get; set; }
-
-		//public string ExcludeFilter { private get; set; }
-
-		//public FilterType FilterType { get; set; }
-
-		//public Dictionary<string, object> Configuration { get; set; }
-
-		//public FilterCriteria FilterCriteria => new FilterCriteria(
-		//	this.IncludeFilter,
-		//	this.ExcludeFilter,
-		//	this.Configuration);
 		#endregion
 
 		#region View Models
