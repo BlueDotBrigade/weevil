@@ -16,7 +16,6 @@
 		[BeforeScenario(Order = Constants.AlwaysFirst)]
 		public static void OnBeforeScenario(ScenarioContext scenario)
 		{
-			//scenario["state"] = new object();
 		}
 
 		[BeforeScenarioBlock(Order = Constants.AlwaysFirst)]
