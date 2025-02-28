@@ -440,32 +440,54 @@
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
-                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left">
-                                    <Run 
-                                        Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
-                                    <TextBlock 
-                                        FontWeight="Heavy" FontSize="18" 
-                                        Background="Black" Foreground="White">
-                                        <TextBlock.ToolTip>
-                                            <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                <Binding Path="." />
-                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                <Binding Source="True" />
-                                            </MultiBinding>
-                                        </TextBlock.ToolTip>
-                                        <TextBlock.Text>
-                                            <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                <!-- 1) The current item (record) -->
-                                                <Binding Path="." />
-                                                <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
-                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                    <TextBlock FontSize="18" FontWeight="Heavy" Background="Black" Foreground="White"
-                                            Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
-                                            ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version."/>
+                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <Run Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
+                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
+                                         <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=RegionTextBlock}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                            <TextBlock.ToolTip>
+                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                    <Binding Path="." />
+                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                    <Binding Source="True" />
+                                                </MultiBinding>
+                                            </TextBlock.ToolTip>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                    <!-- 1) The current item (record) -->
+                                                    <Binding Path="." />
+                                                    <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
+                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </Border>
+                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=TruncatedTextBlock}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
+                                                Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
+                                                ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version."/>
+                                    </Border>
                                 </TextBlock>
+                                    
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
