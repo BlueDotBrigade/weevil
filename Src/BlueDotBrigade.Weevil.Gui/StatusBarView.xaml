@@ -78,13 +78,56 @@
                 </StackPanel>
             </StatusBarItem>
             <StatusBarItem Grid.Column="1" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Represents the amount of time between the first and last selected records."/>
-                    <TextBox Text="{Binding Path=SelectionDetails.SelectionPeriod, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
-                        ToolTip="Time elapsed between selected records."
-                        controls:TextBoxBehavior.AutoSelectEnabled="True"
-                        VerticalAlignment="Center" IsReadOnly="True" BorderThickness="0,0,0,0" Background="Transparent"/>
-                </StackPanel>
+                <Grid>
+                    <!-- Container for time period controls -->
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectionDetails.SelectedRecordCount}" Value="1">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        
+                        <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Represents the amount of time between the first and last selected records."/>
+
+                        <TextBox Text="{Binding Path=SelectionDetails.SelectionPeriod, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
+                              ToolTip="Time elapsed between selected records."
+                              controls:TextBoxBehavior.AutoSelectEnabled="True"
+                              VerticalAlignment="Center" 
+                              IsReadOnly="True" 
+                              BorderThickness="0,0,0,0" 
+                              Background="Transparent"/>
+
+                    </StackPanel>
+                    <!-- Container for line number controls -->
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectionDetails.SelectedRecordCount}" Value="1">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <Image Source="/Resources/Icons/LineNumber-Data-24.png" ToolTip="Line number of the selected record."/>
+
+                        <TextBox Text="{Binding Path=SelectionDetails.LineNumber, StringFormat='{}{0:###,###,##0}', Mode=OneWay}" 
+                             ToolTip="Line number of the selected record."
+                             controls:TextBoxBehavior.AutoSelectEnabled="True"
+                             VerticalAlignment="Center" 
+                             IsReadOnly="True" 
+                             BorderThickness="0,0,0,0" 
+                             Background="Transparent"/>
+
+                    </StackPanel>
+                </Grid>
             </StatusBarItem>
             <Separator Grid.Column="2" />
             <StatusBarItem Grid.Column="3" VerticalAlignment="Center">

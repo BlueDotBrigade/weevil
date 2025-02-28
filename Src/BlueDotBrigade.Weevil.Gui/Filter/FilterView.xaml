@@ -398,14 +398,6 @@
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto">
-                        <GridViewColumnHeader Content="Line" Padding="{StaticResource ColumnHeaderPadding}"/>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="data:IRecord">
-                                <TextBlock Text="{Binding LineNumber, StringFormat={}{0:###,###,##0}}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="Auto">
                         <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
