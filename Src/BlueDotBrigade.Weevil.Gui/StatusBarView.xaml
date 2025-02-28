@@ -118,7 +118,7 @@
 
                         <Image Source="/Resources/Icons/LineNumber-Data-24.png" ToolTip="Line number of the selected record."/>
 
-                        <TextBox Text="{Binding Path=SelectionDetails.LineNumber, StringFormat='{}{0:###,###,##0}', Mode=OneWay}" 
+                        <TextBox Text="{Binding Path=SelectionDetails.LineNumber, StringFormat='{}{0:#,###,##0}', Mode=OneWay}" 
                              ToolTip="Line number of the selected record."
                              controls:TextBoxBehavior.AutoSelectEnabled="True"
                              VerticalAlignment="Center" 
@@ -147,7 +147,7 @@
             <StatusBarItem Grid.Column="6" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Records flagged by built-in or custom analyzers."/>
-                    <TextBox Text="{Binding AnalysisDetails.FlaggedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                    <TextBox Text="{Binding AnalysisDetails.FlaggedRecordCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
                            ToolTip="Records flagged by built-in or custom analyzers."
                            Style="{StaticResource StatusBarTextBox}"/>
                 </StackPanel>
@@ -156,11 +156,11 @@
             <StatusBarItem Grid.Column="8" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Number of informational messages in filter results." />
-                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Information], StringFormat='{}{0:###,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
+                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Information], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of informational messages in filter results"
                              Style="{StaticResource StatusBarTextBox}"/>
                     <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Number of warning messages in filter results." />
-                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Warnings], StringFormat='{}{0:###,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
+                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Warnings], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of warning messages in filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
                     <Image>
@@ -176,7 +176,7 @@
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Errors], StringFormat='{}{0:###,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
+                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Errors], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of error messages in filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
                 </StackPanel>
@@ -185,11 +185,11 @@
             <StatusBarItem Grid.Column="10">
                 <StackPanel Orientation="Horizontal" >
                     <Image Source="/Resources/Icons/RecordsSelected-Data-24.png" ToolTip="Number of user selected records."/>
-                    <TextBox Text="{Binding SelectionDetails.SelectedRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                    <TextBox Text="{Binding SelectionDetails.SelectedRecordCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Number of user selected records."
                              Style="{StaticResource StatusBarTextBox}"/>
                     <Image Source="/Resources/Icons/RecordsVisible-Data-24.png" ToolTip="Number of filter results."/>
-                    <TextBox Text="{Binding FilterDetails.VisibleRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                    <TextBox Text="{Binding FilterDetails.VisibleRecordCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Number of filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
                     <Image>
@@ -206,7 +206,7 @@
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBox Text="{Binding TotalRecordCount, StringFormat='{}{0:###,###,##0}', FallbackValue=0, Mode=OneWay}" >
+                    <TextBox Text="{Binding TotalRecordCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" >
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource StatusBarTextBox}">
                                 <Setter Property="ToolTip" Value="Total number of records in the original document." />
