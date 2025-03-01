@@ -31,4 +31,7 @@
 			<Link>License-Installation.rtf</Link>
 		</None>
 	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="WixToolset.Heat" Version="5.0.2" />
+	</ItemGroup>
 </Project>
