@@ -21,7 +21,7 @@
 		public TimeGapInsight(TimeSpan threshold, string title, string defaultDetails) : base(
 			title,
 			"sec",
-			"Σ",
+			"0",
 			defaultDetails)
 		{
 			_threshold = threshold;

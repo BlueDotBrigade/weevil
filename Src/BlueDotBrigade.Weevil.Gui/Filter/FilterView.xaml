@@ -484,7 +484,7 @@
                                         </Border.Style>
                                         <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
                                                 Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
-                                                ToolTip="This record has been shortened for readability. Press Ctrl+Alt+C to copy the original record content."/>
+                                                ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
                                     </Border>
                                 </TextBlock>
                                     
