@@ -1,389 +1,187 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
     <Fragment>
-        <DirectoryRef Id="BinDir">
-            <Component Id="BlueDotBrigade.Weevil.Common.dll" Guid="{0FE6A018-17C9-4647-91E1-A85A1E7C0E82}">
+        <DirectoryRef Id="InstallFolderBin">
+            <Component Id="BlueDotBrigade.Weevil.Common.dll" Guid="{2E7B6B62-78A3-4B54-B448-2242C6211647}">
                 <File Id="BlueDotBrigade.Weevil.Common.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Common.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Common.pdb" Guid="{9D61B318-92D4-4318-BBA1-63D7BBB7454F}">
+            <Component Id="BlueDotBrigade.Weevil.Common.pdb" Guid="{B5D14101-C848-46FB-AB0F-F746A97C33CA}">
                 <File Id="BlueDotBrigade.Weevil.Common.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Common.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Core.dll" Guid="{C5266C40-F8AB-4A66-8727-495DAAC865B7}">
+            <Component Id="BlueDotBrigade.Weevil.Core.dll" Guid="{CBAF8F4C-1331-4284-8B49-6AB07EB9F52F}">
                 <File Id="BlueDotBrigade.Weevil.Core.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Core.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Core.pdb" Guid="{8F6D1B03-B65C-4F3F-B5AC-CD495B173248}">
+            <Component Id="BlueDotBrigade.Weevil.Core.pdb" Guid="{9F996F1E-877A-49E2-9E09-6865F614644E}">
                 <File Id="BlueDotBrigade.Weevil.Core.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Core.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.deps.json" Guid="{57069B64-0F35-4FD7-8F6B-68FE6B4F72AC}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.deps.json" Guid="{68DAB471-D2E3-4624-BBA7-34226A02C0BC}">
                 <File Id="BlueDotBrigade.Weevil.Gui.deps.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.deps.json" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.dll" Guid="{13241E30-0F8F-4556-9796-8D7CE33F47BA}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.dll" Guid="{0E1D39F4-3692-43E0-8DB2-CB36D108ADE8}">
                 <File Id="BlueDotBrigade.Weevil.Gui.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.dll.config" Guid="{9AA56E23-0283-4E6E-A653-A5F97F4E719A}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.dll.config" Guid="{76029F82-1C5C-433C-9B16-ACAAA1BC725E}">
                 <File Id="BlueDotBrigade.Weevil.Gui.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.dll.config" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.exe" Guid="{68BB5A4E-9419-4035-9872-28EAFE975E7E}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.exe" Guid="{D99C124B-D2D5-4D31-87A8-8F624969D424}">
                 <File Id="BlueDotBrigade.Weevil.Gui.exe" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.exe" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pdb" Guid="{08AAA53D-8BD1-401C-9D9C-90DF7800407C}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.pdb" Guid="{6EECA3D4-288D-4AAB-930D-4441D5D829D5}">
                 <File Id="BlueDotBrigade.Weevil.Gui.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pspdb" Guid="{BB957BC8-1C98-4F1A-9DED-2E3FA8E291EA}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.pspdb" Guid="{2C9E93ED-CA82-4D94-A16E-59A39CFE9642}">
                 <File Id="BlueDotBrigade.Weevil.Gui.pspdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pspdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pssym" Guid="{A7B066DE-1C45-4134-BAEA-6A4C8647CABC}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.pssym" Guid="{2AD00D7C-4CB5-4D99-9B6A-448602B0A4F8}">
                 <File Id="BlueDotBrigade.Weevil.Gui.pssym" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pssym" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" Guid="{89C044F4-0661-4A34-A6A1-FB5342AC345E}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" Guid="{2F46ACC0-F409-48BF-AB78-A5495420B34F}">
                 <File Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Windows.dll" Guid="{EA7B70CE-05A6-4B03-8F52-72F9ADE0E075}">
+            <Component Id="BlueDotBrigade.Weevil.Windows.dll" Guid="{FBFB2ABF-28E5-4563-BEAB-D958930E00B1}">
                 <File Id="BlueDotBrigade.Weevil.Windows.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Windows.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Windows.pdb" Guid="{71B17A84-7F4B-44EF-9C66-96D66A41E321}">
+            <Component Id="BlueDotBrigade.Weevil.Windows.pdb" Guid="{F1DC1E6B-3BE1-43C2-B767-271AF0D6F797}">
                 <File Id="BlueDotBrigade.Weevil.Windows.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Windows.pdb" />
             </Component>
-            <Component Id="GongSolutions.WPF.DragDrop.dll" Guid="{30D0631D-409F-4C35-A3DD-67D8AA53A35D}">
+            <Component Id="FluentValidation.dll" Guid="{385367B9-719E-454F-8DBD-006CBC5BB3D6}">
+                <File Id="FluentValidation.dll" KeyPath="yes" Source="$(var.SourceDirPath)\FluentValidation.dll" />
+            </Component>
+            <Component Id="GongSolutions.WPF.DragDrop.dll" Guid="{93845BB4-093A-4EA3-8ECC-3FB6413FB674}">
                 <File Id="GongSolutions.WPF.DragDrop.dll" KeyPath="yes" Source="$(var.SourceDirPath)\GongSolutions.WPF.DragDrop.dll" />
             </Component>
-            <Component Id="HarfBuzzSharp.dll" Guid="{8E045867-8E0B-4BE2-A5A5-67B73C10504C}">
+            <Component Id="HarfBuzzSharp.dll" Guid="{2ABAD2F7-95A0-4ED4-B4E7-874D3664FDF1}">
                 <File Id="HarfBuzzSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\HarfBuzzSharp.dll" />
             </Component>
-            <Component Id="LiveChartsCore.dll" Guid="{C62AA6F6-5FE3-4FF1-A00C-CAD8DC241665}">
+            <Component Id="LiveChartsCore.dll" Guid="{B2242ACB-BF64-40E7-ABF7-50E58F8357F3}">
                 <File Id="LiveChartsCore.dll" KeyPath="yes" Source="$(var.SourceDirPath)\LiveChartsCore.dll" />
             </Component>
-            <Component Id="LiveChartsCore.SkiaSharpView.dll" Guid="{DB1408C5-92B9-45DC-8797-CBAD9EABD03F}">
+            <Component Id="LiveChartsCore.SkiaSharpView.dll" Guid="{6D6EC38F-EDF5-44AE-9926-B926C122A052}">
                 <File Id="LiveChartsCore.SkiaSharpView.dll" KeyPath="yes" Source="$(var.SourceDirPath)\LiveChartsCore.SkiaSharpView.dll" />
             </Component>
-            <Component Id="LiveChartsCore.SkiaSharpView.WPF.dll" Guid="{0C77C5D0-19F5-49C9-915E-A458F309F26E}">
+            <Component Id="LiveChartsCore.SkiaSharpView.WPF.dll" Guid="{64998CD0-B899-4AA5-AF07-53BCF52BDBFC}">
                 <File Id="LiveChartsCore.SkiaSharpView.WPF.dll" KeyPath="yes" Source="$(var.SourceDirPath)\LiveChartsCore.SkiaSharpView.WPF.dll" />
             </Component>
-            <Component Id="MaterialDesignColors.dll" Guid="{C1A3D4F1-BDB1-4D2A-9E4D-A6A164492EEF}">
+            <Component Id="MaterialDesignColors.dll" Guid="{213DD3B3-E9E2-40D0-B205-BB88BD8062E4}">
                 <File Id="MaterialDesignColors.dll" KeyPath="yes" Source="$(var.SourceDirPath)\MaterialDesignColors.dll" />
             </Component>
-            <Component Id="MaterialDesignThemes.Wpf.dll" Guid="{9FE6F48E-7717-40AE-ADB7-C3856379494E}">
+            <Component Id="MaterialDesignThemes.Wpf.dll" Guid="{D74AE84F-C33D-4260-B70C-C34BFA5B284F}">
                 <File Id="MaterialDesignThemes.Wpf.dll" KeyPath="yes" Source="$(var.SourceDirPath)\MaterialDesignThemes.Wpf.dll" />
             </Component>
-            <Component Id="Microsoft.Bcl.AsyncInterfaces.dll" Guid="{0DDC8A0C-6871-4965-BDDE-6E658B3E0193}">
-                <File Id="Microsoft.Bcl.AsyncInterfaces.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Bcl.AsyncInterfaces.dll" />
+            <Component Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Guid="{255AB264-9E98-430A-ABFE-35A55F3627CB}">
+                <File Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
             </Component>
-            <Component Id="Microsoft.Extensions.ObjectPool.dll" Guid="{9086D16D-DE80-4260-8E36-E659EF2088DC}">
-                <File Id="Microsoft.Extensions.ObjectPool.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.ObjectPool.dll" />
-            </Component>
-            <Component Id="Newtonsoft.Json.dll" Guid="{B81E0759-4807-45C0-A22C-D2A615CFC960}">
+            <Component Id="Newtonsoft.Json.dll" Guid="{CCB0CAD3-5A4D-4013-BD9B-1774ED543DAC}">
                 <File Id="Newtonsoft.Json.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Newtonsoft.Json.dll" />
             </Component>
-            <Component Id="nlog.config" Guid="{848821D8-A4DE-4865-8887-F9EF43630F36}">
+            <Component Id="nlog.config" Guid="{54E0F4D7-3D35-43A8-85E7-7E6F5196428E}">
                 <File Id="nlog.config" KeyPath="yes" Source="$(var.SourceDirPath)\nlog.config" />
             </Component>
-            <Component Id="NLog.dll" Guid="{709DBDFF-8BAA-44CA-AE86-1BC2DEE3AC19}">
+            <Component Id="NLog.dll" Guid="{19184A2A-B57E-4828-9ECF-908CF806E5B1}">
                 <File Id="NLog.dll" KeyPath="yes" Source="$(var.SourceDirPath)\NLog.dll" />
             </Component>
-            <Component Id="PostSharp.dll" Guid="{F6803AE2-A3AC-4E89-B360-689C14D193C4}">
+            <Component Id="PostSharp.dll" Guid="{46ABA76E-58EE-44EE-A1E3-DEA9EAEDF9AE}">
                 <File Id="PostSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.dll" />
             </Component>
-            <Component Id="PostSharp.Patterns.Aggregation.dll" Guid="{7D27234E-7ED6-42B3-8FFB-B42BA87BBD8E}">
+            <Component Id="PostSharp.Patterns.Aggregation.dll" Guid="{D9B615F2-84AC-41DB-9BE7-82424E07616C}">
                 <File Id="PostSharp.Patterns.Aggregation.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Aggregation.dll" />
             </Component>
-            <Component Id="PostSharp.Patterns.Common.dll" Guid="{17FF8BEF-9776-4E55-AB95-B0FAB68701A8}">
+            <Component Id="PostSharp.Patterns.Common.dll" Guid="{51DE89AF-8BB1-446A-88C4-C5E7326C58AB}">
                 <File Id="PostSharp.Patterns.Common.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Common.dll" />
             </Component>
-            <Component Id="PostSharp.Patterns.Model.dll" Guid="{46D6C121-A49D-4671-A88C-D4024557816A}">
+            <Component Id="PostSharp.Patterns.Model.dll" Guid="{76FBA99A-C4B3-4F8E-9CAB-CF8E9F298CBA}">
                 <File Id="PostSharp.Patterns.Model.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Model.dll" />
             </Component>
-            <Component Id="Prism.dll" Guid="{8D113580-B4C4-4FFE-967D-F99A99047CBC}">
+            <Component Id="Prism.Container.Abstractions.dll" Guid="{85AD79E7-A97C-4403-BE8A-C63D24559C4A}">
+                <File Id="Prism.Container.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Prism.Container.Abstractions.dll" />
+            </Component>
+            <Component Id="Prism.dll" Guid="{DE3B362B-1C50-467E-A9C3-DD54A9CBCE7B}">
                 <File Id="Prism.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Prism.dll" />
             </Component>
-            <Component Id="SkiaSharp.dll" Guid="{B2199E22-9751-46DB-B623-6B697A93CA64}">
+            <Component Id="Prism.Events.dll" Guid="{54CB370B-92D8-404C-BE6D-0A6F7A8041A3}">
+                <File Id="Prism.Events.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Prism.Events.dll" />
+            </Component>
+            <Component Id="SkiaSharp.dll" Guid="{CC5938EF-8809-4FD9-830C-AE817C0A9EDA}">
                 <File Id="SkiaSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.dll" />
             </Component>
-            <Component Id="SkiaSharp.HarfBuzz.dll" Guid="{668C8897-4E68-42DC-848D-9D0DA4E19778}">
+            <Component Id="SkiaSharp.HarfBuzz.dll" Guid="{1E844EA5-59DE-496C-9AFF-CF494B9BB00D}">
                 <File Id="SkiaSharp.HarfBuzz.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.HarfBuzz.dll" />
             </Component>
-            <Component Id="SkiaSharp.Views.Desktop.Common.dll" Guid="{AEAFD6BE-22C1-43AF-B3ED-B61F1A83B1DC}">
+            <Component Id="SkiaSharp.Views.Desktop.Common.dll" Guid="{D43AB33F-BC39-43CC-9DB3-E140BBEEB97C}">
                 <File Id="SkiaSharp.Views.Desktop.Common.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.Views.Desktop.Common.dll" />
             </Component>
-            <Component Id="SkiaSharp.Views.WPF.dll" Guid="{6EC0FCF8-8987-4E24-82F9-9290CF609FC4}">
+            <Component Id="SkiaSharp.Views.WPF.dll" Guid="{56AE8871-2BA8-493F-A854-79211FF421CB}">
                 <File Id="SkiaSharp.Views.WPF.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.Views.WPF.dll" />
             </Component>
-            <Component Id="System.ComponentModel.Composition.dll" Guid="{B0D797AE-8514-445C-801B-B49482B49416}">
+            <Component Id="System.ComponentModel.Composition.dll" Guid="{D4F6C873-BC23-4682-8E0E-6923F7CF990F}">
                 <File Id="System.ComponentModel.Composition.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ComponentModel.Composition.dll" />
             </Component>
-            <Component Id="System.ComponentModel.Composition.Registration.dll" Guid="{66E6F1F3-A851-4ECC-AE6E-E8E4030A9E42}">
-                <File Id="System.ComponentModel.Composition.Registration.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ComponentModel.Composition.Registration.dll" />
-            </Component>
-            <Component Id="System.Data.Odbc.dll" Guid="{A6592293-9DDF-4CEA-B727-F32EE3179DE0}">
-                <File Id="System.Data.Odbc.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Data.Odbc.dll" />
-            </Component>
-            <Component Id="System.Data.OleDb.dll" Guid="{DE29D79D-7D14-4707-A4EB-23B94314D98D}">
-                <File Id="System.Data.OleDb.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Data.OleDb.dll" />
-            </Component>
-            <Component Id="System.Data.SqlClient.dll" Guid="{96226C9B-6357-4DDB-8107-30E2DE4B6F46}">
-                <File Id="System.Data.SqlClient.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Data.SqlClient.dll" />
-            </Component>
-            <Component Id="System.DirectoryServices.AccountManagement.dll" Guid="{7CB8BFC6-9DBD-4F31-8EA0-46E9A19740D3}">
-                <File Id="System.DirectoryServices.AccountManagement.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.DirectoryServices.AccountManagement.dll" />
-            </Component>
-            <Component Id="System.DirectoryServices.Protocols.dll" Guid="{8A5EFCBC-61D5-4998-A61F-34617DD979C9}">
-                <File Id="System.DirectoryServices.Protocols.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.DirectoryServices.Protocols.dll" />
-            </Component>
-            <Component Id="System.IO.Ports.dll" Guid="{0030E1F1-B4F5-42D1-924F-DE6ED714F920}">
-                <File Id="System.IO.Ports.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.IO.Ports.dll" />
-            </Component>
-            <Component Id="System.Management.dll" Guid="{A841E64D-2D3D-4B51-A783-376FD9A56C0F}">
+            <Component Id="System.Management.dll" Guid="{535E8506-DBB8-4FE1-885C-3AEABEDD281C}">
                 <File Id="System.Management.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Management.dll" />
             </Component>
-            <Component Id="System.Private.ServiceModel.dll" Guid="{A4231B99-55F3-4BE6-8AE0-981A0CA72058}">
-                <File Id="System.Private.ServiceModel.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Private.ServiceModel.dll" />
-            </Component>
-            <Component Id="System.Reflection.Context.dll" Guid="{BE3CF610-F887-4BAB-BACA-47CA9C149A21}">
-                <File Id="System.Reflection.Context.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Reflection.Context.dll" />
-            </Component>
-            <Component Id="System.Runtime.Caching.dll" Guid="{BB9D40DD-4EA2-4AFB-B8E8-6BD4A645036D}">
-                <File Id="System.Runtime.Caching.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Runtime.Caching.dll" />
-            </Component>
-            <Component Id="System.ServiceModel.dll" Guid="{60427592-BA71-4E1A-A900-C1E1C91F61D8}">
-                <File Id="System.ServiceModel.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceModel.dll" />
-            </Component>
-            <Component Id="System.ServiceModel.Duplex.dll" Guid="{41DAB227-871E-4A8B-AE63-B70D658C6E7B}">
-                <File Id="System.ServiceModel.Duplex.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceModel.Duplex.dll" />
-            </Component>
-            <Component Id="System.ServiceModel.Http.dll" Guid="{CE7BE93A-CA8D-4A74-80A5-92F3E5B72994}">
-                <File Id="System.ServiceModel.Http.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceModel.Http.dll" />
-            </Component>
-            <Component Id="System.ServiceModel.NetTcp.dll" Guid="{4F5F2C5D-4587-4E53-96DF-9CEF619C19AA}">
-                <File Id="System.ServiceModel.NetTcp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceModel.NetTcp.dll" />
-            </Component>
-            <Component Id="System.ServiceModel.Primitives.dll" Guid="{5B7E966F-FD32-4C64-9634-B5952B76A538}">
-                <File Id="System.ServiceModel.Primitives.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceModel.Primitives.dll" />
-            </Component>
-            <Component Id="System.ServiceModel.Security.dll" Guid="{1520183F-E8F8-4854-AB38-B5FA261C46CC}">
-                <File Id="System.ServiceModel.Security.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceModel.Security.dll" />
-            </Component>
-            <Component Id="System.ServiceModel.Syndication.dll" Guid="{F9926DA4-2D75-462F-8F83-5E598D7BC235}">
-                <File Id="System.ServiceModel.Syndication.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceModel.Syndication.dll" />
-            </Component>
-            <Component Id="System.ServiceProcess.ServiceController.dll" Guid="{113FAD64-CB05-40E1-BD2F-91619B02A53F}">
-                <File Id="System.ServiceProcess.ServiceController.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ServiceProcess.ServiceController.dll" />
-            </Component>
-            <Component Id="System.Speech.dll" Guid="{A69E9B00-913B-4328-9823-543053F3AE3A}">
-                <File Id="System.Speech.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Speech.dll" />
-            </Component>
-            <Component Id="System.Web.Services.Description.dll" Guid="{520ECDB3-5766-46E8-B072-09858A74F79A}">
-                <File Id="System.Web.Services.Description.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Web.Services.Description.dll" />
-            </Component>
             <Directory Id="Plugins" Name="Plugins">
-                <Component Id="BlueDotBrigade.Weevil.Plugins.csproj" Guid="{D4A32105-48BC-45BB-9B11-71D0DF0FA29E}">
+                <Component Id="BlueDotBrigade.Weevil.Plugins.csproj" Guid="{8670159E-53C8-4A4A-9D3B-7FCC08EC51DE}">
                     <File Id="BlueDotBrigade.Weevil.Plugins.csproj" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\BlueDotBrigade.Weevil.Plugins.csproj" />
                 </Component>
-                <Component Id="ReadMe.md" Guid="{71CCA0F2-14BF-4690-BDB4-988DF17CBCFF}">
+                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll" Guid="{7546278B-C684-47D4-95C9-B3A0ADA4A301}">
+                    <File Id="ProfoundMedical.Weevil_TulsaPro.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.dll" />
+                </Component>
+                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll.config" Guid="{A513644D-69DD-49FC-BD53-E757853362B7}">
+                    <File Id="ProfoundMedical.Weevil_TulsaPro.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.dll.config" />
+                </Component>
+                <Component Id="ProfoundMedical.Weevil_TulsaPro.pdb" Guid="{0CE84536-49F6-4E3F-8110-6D061D2BC33C}">
+                    <File Id="ProfoundMedical.Weevil_TulsaPro.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.pdb" />
+                </Component>
+                <Component Id="ReadMe.md" Guid="{7A6E3D63-3694-448A-9EDA-9538CF46B100}">
                     <File Id="ReadMe.md" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ReadMe.md" />
                 </Component>
             </Directory>
             <Directory Id="runtimes" Name="runtimes">
-                <Directory Id="freebsd" Name="freebsd">
-                    <Directory Id="lib" Name="lib">
-                        <Directory Id="net6.0" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_1" Guid="{175E4476-06F8-4A2E-AC84-08F20DECC4E1}">
-                                <File Id="System.Data.Odbc.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\freebsd\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                <Directory Id="illumos" Name="illumos">
-                    <Directory Id="lib_1" Name="lib">
-                        <Directory Id="net6.0_1" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_2" Guid="{39CE6BF8-D195-48C9-9F4D-D5A56B9DEA9A}">
-                                <File Id="System.Data.Odbc.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\illumos\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                <Directory Id="ios" Name="ios">
-                    <Directory Id="lib_2" Name="lib">
-                        <Directory Id="net6.0_2" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_3" Guid="{BE37786B-6C1E-457C-91B6-111130037DFD}">
-                                <File Id="System.Data.Odbc.dll_3" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\ios\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                <Directory Id="linux" Name="linux">
-                    <Directory Id="lib_3" Name="lib">
-                        <Directory Id="net6.0_3" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_4" Guid="{F5EAC868-98FE-464E-8F41-361A0438BC59}">
-                                <File Id="System.Data.Odbc.dll_4" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\linux\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                            <Component Id="System.DirectoryServices.Protocols.dll_1" Guid="{80ED0476-30CE-4CD4-AC20-9AF9C8E65C56}">
-                                <File Id="System.DirectoryServices.Protocols.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\linux\lib\net6.0\System.DirectoryServices.Protocols.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                <Directory Id="linux_arm" Name="linux-arm">
-                    <Directory Id="native" Name="native">
-                        <Component Id="libSystem.IO.Ports.Native.so" Guid="{07044D2A-63B5-4E04-8BAD-E6A3C62737AB}">
-                            <File Id="libSystem.IO.Ports.Native.so" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\linux-arm\native\libSystem.IO.Ports.Native.so" />
-                        </Component>
-                    </Directory>
-                </Directory>
-                <Directory Id="linux_arm64" Name="linux-arm64">
-                    <Directory Id="native_1" Name="native">
-                        <Component Id="libSystem.IO.Ports.Native.so_1" Guid="{26BEF0F7-61B9-44B9-BD3E-5B2CC29EA233}">
-                            <File Id="libSystem.IO.Ports.Native.so_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\linux-arm64\native\libSystem.IO.Ports.Native.so" />
-                        </Component>
-                    </Directory>
-                </Directory>
-                <Directory Id="linux_x64" Name="linux-x64">
-                    <Directory Id="native_2" Name="native">
-                        <Component Id="libSystem.IO.Ports.Native.so_2" Guid="{44FF9AFE-CD12-492C-8A5D-74A1BAC33BF2}">
-                            <File Id="libSystem.IO.Ports.Native.so_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\linux-x64\native\libSystem.IO.Ports.Native.so" />
-                        </Component>
-                    </Directory>
-                </Directory>
                 <Directory Id="osx" Name="osx">
-                    <Directory Id="lib_4" Name="lib">
-                        <Directory Id="net6.0_4" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_5" Guid="{EF322FE6-A77E-4F85-83F5-DB9086C8A277}">
-                                <File Id="System.Data.Odbc.dll_5" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                            <Component Id="System.DirectoryServices.Protocols.dll_2" Guid="{5BF7B5E2-986F-4766-80B4-E3B240DB70E0}">
-                                <File Id="System.DirectoryServices.Protocols.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx\lib\net6.0\System.DirectoryServices.Protocols.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                    <Directory Id="native_3" Name="native">
-                        <Component Id="libHarfBuzzSharp.dylib" Guid="{DAAD7223-293D-427B-9B80-1015286FAFD7}">
+                    <Directory Id="native" Name="native">
+                        <Component Id="libHarfBuzzSharp.dylib" Guid="{74F69E97-055B-47A7-A1BF-C055800C5EA9}">
                             <File Id="libHarfBuzzSharp.dylib" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx\native\libHarfBuzzSharp.dylib" />
                         </Component>
-                        <Component Id="libSkiaSharp.dylib" Guid="{2005FE01-1294-49F0-BEB5-6E73EC211700}">
+                        <Component Id="libSkiaSharp.dylib" Guid="{8B34AC66-7E79-4697-B7AF-D92BACF5B57C}">
                             <File Id="libSkiaSharp.dylib" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx\native\libSkiaSharp.dylib" />
                         </Component>
                     </Directory>
                 </Directory>
-                <Directory Id="osx_arm64" Name="osx-arm64">
-                    <Directory Id="native_4" Name="native">
-                        <Component Id="libSystem.IO.Ports.Native.dylib" Guid="{01B1233F-1694-440F-A3A0-98F6ADF76709}">
-                            <File Id="libSystem.IO.Ports.Native.dylib" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx-arm64\native\libSystem.IO.Ports.Native.dylib" />
-                        </Component>
-                    </Directory>
-                </Directory>
-                <Directory Id="osx_x64" Name="osx-x64">
-                    <Directory Id="native_5" Name="native">
-                        <Component Id="libSystem.IO.Ports.Native.dylib_1" Guid="{06726CFB-04CD-40AC-A70C-B766D6D26517}">
-                            <File Id="libSystem.IO.Ports.Native.dylib_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx-x64\native\libSystem.IO.Ports.Native.dylib" />
-                        </Component>
-                    </Directory>
-                </Directory>
-                <Directory Id="solaris" Name="solaris">
-                    <Directory Id="lib_5" Name="lib">
-                        <Directory Id="net6.0_5" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_6" Guid="{BF904A79-A935-49FC-BC9D-E0EB2AB0A3A0}">
-                                <File Id="System.Data.Odbc.dll_6" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\solaris\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                <Directory Id="tvos" Name="tvos">
-                    <Directory Id="lib_6" Name="lib">
-                        <Directory Id="net6.0_6" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_7" Guid="{787995D3-25CC-471C-9586-546342B0934F}">
-                                <File Id="System.Data.Odbc.dll_7" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\tvos\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                <Directory Id="unix" Name="unix">
-                    <Directory Id="lib_7" Name="lib">
-                        <Directory Id="net6.0_7" Name="net6.0">
-                            <Component Id="System.IO.Ports.dll_1" Guid="{7FD6D60A-9E7F-40BC-BA90-1BD3828D70BC}">
-                                <File Id="System.IO.Ports.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\unix\lib\net6.0\System.IO.Ports.dll" />
-                            </Component>
-                        </Directory>
-                        <Directory Id="netcoreapp2.1" Name="netcoreapp2.1">
-                            <Component Id="System.Data.SqlClient.dll_1" Guid="{0D2C2C98-191A-4644-8C21-DED7380F8CBF}">
-                                <File Id="System.Data.SqlClient.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
                 <Directory Id="win" Name="win">
-                    <Directory Id="lib_8" Name="lib">
-                        <Directory Id="net6.0_8" Name="net6.0">
-                            <Component Id="System.Data.Odbc.dll_8" Guid="{82CB73FA-EF61-4903-9651-76A5BDFF1B97}">
-                                <File Id="System.Data.Odbc.dll_8" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Data.Odbc.dll" />
-                            </Component>
-                            <Component Id="System.Data.OleDb.dll_1" Guid="{3ACBF152-1FDD-4BA5-8E49-5E297A2E485B}">
-                                <File Id="System.Data.OleDb.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Data.OleDb.dll" />
-                            </Component>
-                            <Component Id="System.Diagnostics.EventLog.Messages.dll" Guid="{2C6A0A8B-4045-45B4-8EBC-2B7A64C3973C}">
-                                <File Id="System.Diagnostics.EventLog.Messages.dll" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Diagnostics.EventLog.Messages.dll" />
-                            </Component>
-                            <Component Id="System.DirectoryServices.AccountManagement.dll_1" Guid="{4B67DAAF-280B-46D3-9987-7C27076A1885}">
-                                <File Id="System.DirectoryServices.AccountManagement.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.DirectoryServices.AccountManagement.dll" />
-                            </Component>
-                            <Component Id="System.DirectoryServices.Protocols.dll_3" Guid="{8D753C7E-C3FE-4CBD-8F27-C192077BB70B}">
-                                <File Id="System.DirectoryServices.Protocols.dll_3" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.DirectoryServices.Protocols.dll" />
-                            </Component>
-                            <Component Id="System.IO.Ports.dll_2" Guid="{63F584D6-64D7-488A-9023-D13A6DC57697}">
-                                <File Id="System.IO.Ports.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.IO.Ports.dll" />
-                            </Component>
-                            <Component Id="System.Management.dll_1" Guid="{703B9EA3-6A3D-40A5-A7A4-17A85340A82E}">
-                                <File Id="System.Management.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Management.dll" />
-                            </Component>
-                            <Component Id="System.Runtime.Caching.dll_1" Guid="{BF3B98EA-A31B-4BEC-83F9-17BDC5BD0357}">
-                                <File Id="System.Runtime.Caching.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Runtime.Caching.dll" />
-                            </Component>
-                            <Component Id="System.ServiceProcess.ServiceController.dll_1" Guid="{FE2587BE-01CD-441E-A9FB-A942ECC39231}">
-                                <File Id="System.ServiceProcess.ServiceController.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.ServiceProcess.ServiceController.dll" />
-                            </Component>
-                            <Component Id="System.Speech.dll_1" Guid="{A2ECB228-09AA-418E-9808-10C18094DA29}">
-                                <File Id="System.Speech.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Speech.dll" />
-                            </Component>
-                        </Directory>
-                        <Directory Id="netcoreapp2.1_1" Name="netcoreapp2.1">
-                            <Component Id="System.Data.SqlClient.dll_2" Guid="{285E5352-2D84-44B0-ADD1-BC7125340BC6}">
-                                <File Id="System.Data.SqlClient.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll" />
+                    <Directory Id="lib" Name="lib">
+                        <Directory Id="net9.0" Name="net9.0">
+                            <Component Id="System.Management.dll_1" Guid="{94315CAE-BA60-46A1-BF96-3C89A6BCA33A}">
+                                <File Id="System.Management.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net9.0\System.Management.dll" />
                             </Component>
                         </Directory>
                     </Directory>
                 </Directory>
                 <Directory Id="win_arm64" Name="win-arm64">
-                    <Directory Id="native_6" Name="native">
-                        <Component Id="libHarfBuzzSharp.dll" Guid="{19C8A942-236F-4B1D-912B-183EED7877CB}">
+                    <Directory Id="native_1" Name="native">
+                        <Component Id="libHarfBuzzSharp.dll" Guid="{8838A0A9-37B5-4B7C-831A-3F7CF89DB1E5}">
                             <File Id="libHarfBuzzSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-arm64\native\libHarfBuzzSharp.dll" />
                         </Component>
-                        <Component Id="libSkiaSharp.dll" Guid="{EA2AC64E-2ECB-41A9-8E23-D018D946B262}">
+                        <Component Id="libSkiaSharp.dll" Guid="{E80F3294-DDA9-4E6D-9E75-BDFC130CA6C9}">
                             <File Id="libSkiaSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-arm64\native\libSkiaSharp.dll" />
-                        </Component>
-                        <Component Id="sni.dll" Guid="{8792B2D3-C0F0-4A8A-B7F0-AD7CB48276A7}">
-                            <File Id="sni.dll" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-arm64\native\sni.dll" />
                         </Component>
                     </Directory>
                 </Directory>
                 <Directory Id="win_x64" Name="win-x64">
-                    <Directory Id="native_7" Name="native">
-                        <Component Id="libHarfBuzzSharp.dll_1" Guid="{567C18A7-6A18-4193-89FE-195A37EB9BD2}">
+                    <Directory Id="native_2" Name="native">
+                        <Component Id="libHarfBuzzSharp.dll_1" Guid="{CD11599B-EC96-4725-9F11-E396C9537DC5}">
                             <File Id="libHarfBuzzSharp.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x64\native\libHarfBuzzSharp.dll" />
                         </Component>
-                        <Component Id="libSkiaSharp.dll_1" Guid="{43E82556-E5CE-4C20-93D7-6B7FBB95C279}">
+                        <Component Id="libSkiaSharp.dll_1" Guid="{19E94F31-80F4-43F5-8675-D5935C74896F}">
                             <File Id="libSkiaSharp.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x64\native\libSkiaSharp.dll" />
-                        </Component>
-                        <Component Id="sni.dll_1" Guid="{C0C749C3-8955-4AD3-97B5-AA59222D4D0A}">
-                            <File Id="sni.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x64\native\sni.dll" />
                         </Component>
                     </Directory>
                 </Directory>
                 <Directory Id="win_x86" Name="win-x86">
-                    <Directory Id="native_8" Name="native">
-                        <Component Id="libHarfBuzzSharp.dll_2" Guid="{1D8AA13A-3FE6-4656-8B0D-762233135F06}">
+                    <Directory Id="native_3" Name="native">
+                        <Component Id="libHarfBuzzSharp.dll_2" Guid="{37318E41-54FD-41D7-A5CC-3AFDADC1FE94}">
                             <File Id="libHarfBuzzSharp.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x86\native\libHarfBuzzSharp.dll" />
                         </Component>
-                        <Component Id="libSkiaSharp.dll_2" Guid="{8E71CCEB-DDA0-48D8-912D-F9CA24893309}">
+                        <Component Id="libSkiaSharp.dll_2" Guid="{26FB8196-7D27-4ECE-B15D-56C5C34AB9A7}">
                             <File Id="libSkiaSharp.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x86\native\libSkiaSharp.dll" />
-                        </Component>
-                        <Component Id="sni.dll_2" Guid="{8A1806B8-D433-4B67-B7EF-E91B5626F2A9}">
-                            <File Id="sni.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x86\native\sni.dll" />
                         </Component>
                     </Directory>
                 </Directory>
@@ -406,6 +204,7 @@
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Windows.dll" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Windows.pdb" />
+            <ComponentRef Id="FluentValidation.dll" />
             <ComponentRef Id="GongSolutions.WPF.DragDrop.dll" />
             <ComponentRef Id="HarfBuzzSharp.dll" />
             <ComponentRef Id="LiveChartsCore.dll" />
@@ -413,8 +212,7 @@
             <ComponentRef Id="LiveChartsCore.SkiaSharpView.WPF.dll" />
             <ComponentRef Id="MaterialDesignColors.dll" />
             <ComponentRef Id="MaterialDesignThemes.Wpf.dll" />
-            <ComponentRef Id="Microsoft.Bcl.AsyncInterfaces.dll" />
-            <ComponentRef Id="Microsoft.Extensions.ObjectPool.dll" />
+            <ComponentRef Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
             <ComponentRef Id="Newtonsoft.Json.dll" />
             <ComponentRef Id="nlog.config" />
             <ComponentRef Id="NLog.dll" />
@@ -422,73 +220,29 @@
             <ComponentRef Id="PostSharp.Patterns.Aggregation.dll" />
             <ComponentRef Id="PostSharp.Patterns.Common.dll" />
             <ComponentRef Id="PostSharp.Patterns.Model.dll" />
+            <ComponentRef Id="Prism.Container.Abstractions.dll" />
             <ComponentRef Id="Prism.dll" />
+            <ComponentRef Id="Prism.Events.dll" />
             <ComponentRef Id="SkiaSharp.dll" />
             <ComponentRef Id="SkiaSharp.HarfBuzz.dll" />
             <ComponentRef Id="SkiaSharp.Views.Desktop.Common.dll" />
             <ComponentRef Id="SkiaSharp.Views.WPF.dll" />
             <ComponentRef Id="System.ComponentModel.Composition.dll" />
-            <ComponentRef Id="System.ComponentModel.Composition.Registration.dll" />
-            <ComponentRef Id="System.Data.Odbc.dll" />
-            <ComponentRef Id="System.Data.OleDb.dll" />
-            <ComponentRef Id="System.Data.SqlClient.dll" />
-            <ComponentRef Id="System.DirectoryServices.AccountManagement.dll" />
-            <ComponentRef Id="System.DirectoryServices.Protocols.dll" />
-            <ComponentRef Id="System.IO.Ports.dll" />
             <ComponentRef Id="System.Management.dll" />
-            <ComponentRef Id="System.Private.ServiceModel.dll" />
-            <ComponentRef Id="System.Reflection.Context.dll" />
-            <ComponentRef Id="System.Runtime.Caching.dll" />
-            <ComponentRef Id="System.ServiceModel.dll" />
-            <ComponentRef Id="System.ServiceModel.Duplex.dll" />
-            <ComponentRef Id="System.ServiceModel.Http.dll" />
-            <ComponentRef Id="System.ServiceModel.NetTcp.dll" />
-            <ComponentRef Id="System.ServiceModel.Primitives.dll" />
-            <ComponentRef Id="System.ServiceModel.Security.dll" />
-            <ComponentRef Id="System.ServiceModel.Syndication.dll" />
-            <ComponentRef Id="System.ServiceProcess.ServiceController.dll" />
-            <ComponentRef Id="System.Speech.dll" />
-            <ComponentRef Id="System.Web.Services.Description.dll" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Plugins.csproj" />
+            <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.dll" />
+            <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.dll.config" />
+            <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.pdb" />
             <ComponentRef Id="ReadMe.md" />
-            <ComponentRef Id="System.Data.Odbc.dll_1" />
-            <ComponentRef Id="System.Data.Odbc.dll_2" />
-            <ComponentRef Id="System.Data.Odbc.dll_3" />
-            <ComponentRef Id="System.Data.Odbc.dll_4" />
-            <ComponentRef Id="System.DirectoryServices.Protocols.dll_1" />
-            <ComponentRef Id="libSystem.IO.Ports.Native.so" />
-            <ComponentRef Id="libSystem.IO.Ports.Native.so_1" />
-            <ComponentRef Id="libSystem.IO.Ports.Native.so_2" />
-            <ComponentRef Id="System.Data.Odbc.dll_5" />
-            <ComponentRef Id="System.DirectoryServices.Protocols.dll_2" />
             <ComponentRef Id="libHarfBuzzSharp.dylib" />
             <ComponentRef Id="libSkiaSharp.dylib" />
-            <ComponentRef Id="libSystem.IO.Ports.Native.dylib" />
-            <ComponentRef Id="libSystem.IO.Ports.Native.dylib_1" />
-            <ComponentRef Id="System.Data.Odbc.dll_6" />
-            <ComponentRef Id="System.Data.Odbc.dll_7" />
-            <ComponentRef Id="System.IO.Ports.dll_1" />
-            <ComponentRef Id="System.Data.SqlClient.dll_1" />
-            <ComponentRef Id="System.Data.Odbc.dll_8" />
-            <ComponentRef Id="System.Data.OleDb.dll_1" />
-            <ComponentRef Id="System.Diagnostics.EventLog.Messages.dll" />
-            <ComponentRef Id="System.DirectoryServices.AccountManagement.dll_1" />
-            <ComponentRef Id="System.DirectoryServices.Protocols.dll_3" />
-            <ComponentRef Id="System.IO.Ports.dll_2" />
             <ComponentRef Id="System.Management.dll_1" />
-            <ComponentRef Id="System.Runtime.Caching.dll_1" />
-            <ComponentRef Id="System.ServiceProcess.ServiceController.dll_1" />
-            <ComponentRef Id="System.Speech.dll_1" />
-            <ComponentRef Id="System.Data.SqlClient.dll_2" />
             <ComponentRef Id="libHarfBuzzSharp.dll" />
             <ComponentRef Id="libSkiaSharp.dll" />
-            <ComponentRef Id="sni.dll" />
             <ComponentRef Id="libHarfBuzzSharp.dll_1" />
             <ComponentRef Id="libSkiaSharp.dll_1" />
-            <ComponentRef Id="sni.dll_1" />
             <ComponentRef Id="libHarfBuzzSharp.dll_2" />
             <ComponentRef Id="libSkiaSharp.dll_2" />
-            <ComponentRef Id="sni.dll_2" />
         </ComponentGroup>
     </Fragment>
 </Wix>
