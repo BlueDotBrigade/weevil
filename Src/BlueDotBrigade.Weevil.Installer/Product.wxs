@@ -14,6 +14,11 @@
 			<ComponentGroupRef Id="weevil_bin_files" />
 			<ComponentRef Id="WeevilShortcut" />
 			<ComponentGroupRef Id="RegistryKeys" />
+			<ComponentRef Id="HelpHtmlComponent" />
+			<ComponentRef Id="LicenseMdComponent" />
+			<ComponentRef Id="Icons8LicenseComponent" />
+			<ComponentRef Id="LicenseInstallationComponent" />
+			<ComponentRef Id="ThirdPartyNoticesComponent" />
 		</Feature>
 	</Package>
 
@@ -27,13 +32,12 @@
 				<Directory Id="BlueDotBrigade" Name="BlueDotBrigade">
 					<Directory Id="INSTALLFOLDER" Name="Weevil">
 						<Directory Id="InstallFolderBin" Name="Bin" />
-						<Directory Id="LicenseDir" Name="License" />
+						<Directory Id="LicenseDir" Name="Licenses" />
 						<Directory Id="DocDir" Name="Doc" />
 					</Directory>
 				</Directory>
 			</StandardDirectory>
 		</Fragment>
-
 	<Fragment>
 		<!--
 			HKCU = HKEY_CURRENT_USER
@@ -47,6 +51,31 @@
 			</Component>
 		</ComponentGroup>
 	</Fragment>
+<Fragment>
+	
+  <!-- Install Help.html to the DocDir -->
+  <DirectoryRef Id="DocDir">
+    <Component Id="HelpHtmlComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AA">
+      <File Id="HelpHtmlFile" Source="$(var.SourceDirPath)\..\Doc\Help.html" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+
+  <!-- Install License.md to the LicenseDir -->
+  <DirectoryRef Id="LicenseDir">
+    <Component Id="LicenseMdComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AB">
+      <File Id="LicenseMdFile" Source="$(var.SourceDirPath)\..\Licenses\License.md" KeyPath="yes" />
+    </Component>
+	<Component Id="Icons8LicenseComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AC">
+		<File Id="Icons8LicenseFile" Source="$(var.SourceDirPath)\..\Licenses\icons8-license.pdf" KeyPath="yes" />
+	</Component>
+	<Component Id="LicenseInstallationComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AD">
+		<File Id="LicenseInstallationFile" Source="$(var.SourceDirPath)\..\Licenses\License-Installation.rtf" KeyPath="yes" />
+	</Component>
+	<Component Id="ThirdPartyNoticesComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AE">
+		<File Id="ThirdPartyNoticesFile" Source="$(var.SourceDirPath)\..\Licenses\ThirdPartyNoticesAndInformation.txt" KeyPath="yes" />
+	</Component>
+  </DirectoryRef>
+</Fragment>
 
 	<Fragment>
 		<DirectoryRef Id="WeevilShortcutDir">
