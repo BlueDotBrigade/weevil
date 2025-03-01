@@ -33,6 +33,11 @@
 			<Link>Weevil.ico</Link>
 		</Content>
 	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\Doc\Notes\Release\Licenses\License-Installation.rtf">
+			<Link>License-Installation.rtf</Link>
+		</None>
+	</ItemGroup>
 	<!-- 
 	KNOWN ISSUE 
 	The Visual Studio team confirmed this issue is a breaking change in VS2022 17.13. 
