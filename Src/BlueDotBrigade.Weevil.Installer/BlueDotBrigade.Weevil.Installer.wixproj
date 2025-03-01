@@ -28,7 +28,11 @@
 			<RefTargetDir>INSTALLFOLDER</RefTargetDir>
 		</ProjectReference>
 	</ItemGroup>
-
+	<ItemGroup>
+		<Content Include="..\BlueDotBrigade.Weevil.Gui\Resources\Icons\Weevil.ico">
+			<Link>Weevil.ico</Link>
+		</Content>
+	</ItemGroup>
 	<!-- 
 	KNOWN ISSUE 
 	The Visual Studio team confirmed this issue is a breaking change in VS2022 17.13. 
