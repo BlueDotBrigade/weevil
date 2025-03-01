@@ -1,10 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Common
 {
 	using System;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Moq;
 
 	[TestClass]
 	public class SimpleCallStackFormatterTests
@@ -12,7 +10,7 @@
 		[TestMethod]
 		public void Format_SimpleCallStack_ReturnsContentWithoutSystemNamespaces()
 		{
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, InputData.GetAsString());
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString());
 			record.Metadata.IsMultiLine = true;
 
 			var actualResult = new SimpleCallStackFormatter().Format(record);
@@ -26,7 +24,7 @@
 		[TestMethod]
 		public void Format_SimpleCallStack_ReturnsTrue()
 		{
-			var originalContent = InputData.GetAsString();
+			var originalContent = new Daten().AsString();
 			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
 			record.Metadata.IsMultiLine = true;
 
@@ -50,7 +48,7 @@
 		[TestMethod]
 		public void Format_CallStackWithPaths_ReturnsCallStackWithoutPaths()
 		{
-			var originalContent = InputData.GetAsString();
+			var originalContent = new Daten().AsString();
 			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
 			record.Metadata.IsMultiLine = true;
 

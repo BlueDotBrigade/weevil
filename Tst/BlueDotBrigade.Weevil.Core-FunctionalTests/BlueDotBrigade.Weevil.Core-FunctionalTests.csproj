@@ -1,51 +1,67 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <OutputType>Library</OutputType>
-    <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	<PlatformTarget>x64</PlatformTarget>
-    <Platforms>x64</Platforms>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet">
-      <Version>0.13.1</Version>
-    </PackageReference>
-    <PackageReference Include="BlueDotBrigade.DatenLokator">
-      <Version>1.2.4</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-    <PackageReference Include="Moq">
-      <Version>4.18.1</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestAdapter">
-      <Version>2.2.10</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestFramework">
-      <Version>2.2.10</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
-    <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\..\DomainSpecificTerminology.xml">
-      <Link>Properties\DomainSpecificTerminology.xml</Link>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Diagnostics\" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<PlatformTarget>x64</PlatformTarget>
+		<Platforms>x64</Platforms>
+	</PropertyGroup>	
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+		<OutputPath>bin\x64\Debug\</OutputPath>
+		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+		<OutputPath>bin\x64\Release\</OutputPath>
+		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="OLD\FilteringOld.cs" />
+	  <Compile Remove="OLD\RecordContentValidator.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.1.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="NSubstitute" Version="5.3.0" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
+		<!-- NOTE: Upgrading FluentAssertions to v8 requires a license. #475 -->
+		<PackageReference Include="FluentAssertions" Version="[7.0.0]" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="..\..\DomainSpecificTerminology.xml">
+			<Link>Properties\DomainSpecificTerminology.xml</Link>
+		</Content>
+		<Content Include=".Daten\.Global\GlobalDefault.log.xml" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include=".Daten\.Global\GlobalDefault.log" />
+	  <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
+	  <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
+	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log" />
+	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log.xml" />
+	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log" />
+	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log.xml" />
+	  <None Include=".Daten\.Global\Empty.txt" />
+	  <None Include=".Daten\.Global\EmptyWithWhitespace.txt" />
+	  <None Include="OLD\FilteringOld.cs" />
+	  <None Include="OLD\RecordContentValidator.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- required to so that Reqnroll can see Weevil's extension at run-time -->
+		<AssemblyAttribute Include="Reqnroll.Plugins.RuntimePluginAttribute">
+			<_Parameter1>BlueDotBrigade.Weevil.ReqnrollExtension</_Parameter1>
+			<_Parameter1_TypeName>System.Type</_Parameter1_TypeName>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>

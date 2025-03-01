@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Platforms>x64</Platforms>
 		<RootNamespace>BlueDotBrigade.Weevil.Plugins</RootNamespace>
-		<Version>2.10.0</Version>
+		<Version>2.11.0</Version>
 		<Authors>BlueDotBrigade;</Authors>
 		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
 		<Owners>Blue Dot Brigade</Owners>
 		<Description>This project dynamically detects the plugin files from %WEEVIL_PLUGINS_PATH%, so that thay can be added to the installation package.</Description>
 		<IsPackable>False</IsPackable>
-		<AssemblyVersion>2.10.0.0</AssemblyVersion>
-		<FileVersion>2.10.0.0</FileVersion>
+		<AssemblyVersion>2.11.0.0</AssemblyVersion>
+		<FileVersion>2.11.0.0</FileVersion>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<Company>Blue Dot Brigade</Company>
 	</PropertyGroup>
@@ -25,6 +25,9 @@
 		<Content Include="*.dll" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
 		<Content Include="*.dll.config" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
 		<Content Include="*.pdb" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="..\..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 	  <Exec Command="IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing&#xD;&#xA;)" />

@@ -11,7 +11,12 @@
 	public static class ClipboardHelper
 	{
 		private const string Delimiter = " === ";
-		private const string NoTimestampPlaceholder = @"--:--:--.----";
+
+		private const string ShortTimestampFormat =  @"HH:mm:ss.ffff";
+		private const string ShortMissingTimestamp = @"--:--:--.----";
+		
+		private const string LongTimestampFormat =  @"yyyy-MM-dd HH:mm:ss.ffff";
+		private const string LongMissingTimestamp = @"---------- --:--:--.----";
 
 		public static void CopyRawFromSelected(IEngine engine, bool addLineNumberPrefix, IRecordFormatter formatter)
 		{
@@ -44,59 +49,58 @@
 			}
 		}
 
-		public static void CopyCommentFromSelected(IEngine engine, bool addLineNumberPrefix)
+		public static void CopySelectedComments(IEngine engine)
 		{
-			IEngine coreEngine = engine;
-
-			if (coreEngine != null)
+			CopyFromSelected(engine, (record) =>
 			{
-				IRecord[] selectedRecords = engine
-						.Selector
-						.Selected
-						.Values.ToArray();
+				var timestamp = record.HasCreationTime
+					? record.CreatedAt.ToString(ShortTimestampFormat, CultureInfo.InvariantCulture)
+					: ShortMissingTimestamp;
 
-				var output = new StringBuilder();
+				return record.Metadata.HasComment
+					? timestamp + "\t" + record.Metadata.Comment
+					: string.Empty;
+			});
+		}
+		public static void CopySelectedLineNumbers(IEngine engine)
+		{
+			CopyFromSelected(engine, (record) => record.LineNumber.ToString("#,###,##0"));
+		}
 
-				foreach (IRecord record in selectedRecords)
+		public static void CopySelectedTimestamps(IEngine engine)
+		{
+			CopyFromSelected(engine, (record) =>
+			{
+				return record.HasCreationTime
+					? record.CreatedAt.ToString(LongTimestampFormat, CultureInfo.InvariantCulture)
+					: LongMissingTimestamp;
+			});
+		}
+
+		public static void CopyFromSelected(IEngine engine, Func<IRecord, string> formatter)
+		{
+			if (engine == null) throw new ArgumentNullException(nameof(engine));
+			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+
+			IRecord[] selectedRecords = engine.Selector.Selected.Values.ToArray();
+
+			var output = new StringBuilder();
+
+			foreach (IRecord record in selectedRecords)
+			{
+				var textToAppend = formatter(record);
+
+				if (string.IsNullOrEmpty(textToAppend))
 				{
-					if (record.Metadata.HasComment)
-					{
-						var timestamp = record.HasCreationTime
-							? record.CreatedAt.ToString("HH:mm:ss.ffff", CultureInfo.InvariantCulture)
-							: NoTimestampPlaceholder;
-
-						if (addLineNumberPrefix)
-						{
-							output.AppendLine($"{record.LineNumber}\t{timestamp}\t{record.Metadata.Comment}");
-						}
-						else
-						{
-							output.AppendLine($"{timestamp}\t{record.Metadata.Comment}");
-						}
-					}
+					// Ignore empty data. (e.g. record might not have a comment)
 				}
-
-				if (output.Length == 0)
+				else
 				{
-					foreach (IRecord record in selectedRecords)
-					{
-						var timestamp = record.HasCreationTime
-							? record.CreatedAt.ToString("HH:mm:ss.ffff", CultureInfo.InvariantCulture)
-							: string.Empty;
-
-						if (addLineNumberPrefix)
-						{
-							output.AppendLine($"{record.LineNumber}\t{timestamp}");
-						}
-						else
-						{
-							output.AppendLine($"{timestamp}");
-						}
-					}
+					output.AppendLine(textToAppend);
 				}
-
-				Clipboard.SetData(DataFormats.Text, output.ToString());
 			}
+
+			Clipboard.SetData(DataFormats.Text, output.ToString().TrimEnd());
 		}
 
 		internal static void PasteToSelected(IEngine engine, bool allowOverwrite = false)

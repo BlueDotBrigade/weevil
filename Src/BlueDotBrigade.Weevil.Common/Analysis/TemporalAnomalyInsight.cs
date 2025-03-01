@@ -31,7 +31,7 @@
 					: metrics.Threshold.ToHumanReadable();
 
 				this.MetricValue = metrics.Counter.ToString("#,##0");
-				this.IsAttentionRequired = true;
+				this.IsAttentionRequired = false; // When using NLog, log entries are often out of order.
 				this.Details = $"The log file timestamps were not in chronological order {metrics.Counter} time(s). " +
 				               $"The biggest anomaly occurred at {metrics.BiggestAnomalyAt.CreatedAt.ToString("HH:mm:ss")}, " +
 				               $"and was {metrics.BiggestAnomaly.ToHumanReadable()}. Using threshold: {threshold}";

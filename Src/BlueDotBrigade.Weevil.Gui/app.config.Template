@@ -5,7 +5,6 @@
 	<configSections>
 		<sectionGroup name="applicationSettings" type="System.Configuration.ApplicationSettingsGroup, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" >
 			<section name="BlueDotBrigade.Weevil.Gui.Properties.Settings" type="System.Configuration.ClientSettingsSection, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
-			<section name="ProfoundMedical.Weevil.Properties.Settings" type="System.Configuration.ClientSettingsSection, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
 		</sectionGroup>
 	</configSections>
 	<runtime>
@@ -17,11 +16,6 @@
 				<value>False</value>
 			</setting>
 		</BlueDotBrigade.Weevil.Gui.Properties.Settings>
-		<ProfoundMedical.Weevil.Properties.Settings>
-			<setting name="ShowAllInsight" serializeAs="String">
-				<value>True</value>
-			</setting>
-		</ProfoundMedical.Weevil.Properties.Settings>
 	</applicationSettings>
 </configuration>
 

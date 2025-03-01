@@ -13,5 +13,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 		public IFilterTraits FilterTraits { get; set; }
 		public TableOfContents TableOfContents { get; set; }
 		public string SourceFileRemarks { get; set; }
+
+		public ImmutableArray<Region> Regions{ get; set; }
 	}
 }

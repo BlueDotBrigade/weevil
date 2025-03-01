@@ -4,6 +4,36 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+### Version 2.11.0
+
+Release on March 1st, 2025.
+
+#### What's New?
+
+- Improved user experience:
+   - Font size is now configurable. #251 
+   - Added a `Ctrl+Shift+M` keyboard shortcut for the `@Comment` moniker #376
+   - Regions of Interest (ROI) can be used to define a subset of the log file. #375
+   - The title bar only displays the name of the open file, thus making it easier to find the desired Weevil application in the Windows task bar.
+   - Reorganized menu to follow standard convention (File, Edit, View, etc.) #344
+   - Removed _Flagged_ column in order to maximize visual real-estate. #344
+   - Visual indicator now shows when a record has been truncated. #491
+- Added support for running _Weevil_ headless.
+   - _Command-line_ (CLI) filtering.  #156  #295
+   - _PowerShell_ filtering. #155 #294
+- Addressed technical debt.
+   - Improved how the application is tested. #325 #450 #191
+      - Requirements have been written in a standardized [EARS][EARS] syntax. #362 #413
+      - Functional tests have been written in "plain English" using [Gherkin][Gherkin] syntax.  #191 
+   - Replaced the obsolete Microsoft installer with the latest WiX installer. #310
+   - Weevil has more of a _fluent_ like API. #377
+   - `FluentAssertions` dependency is now pinned to version 7 #475
+   - Updated to the latest dependencies (including .NET Core 9). #336 #391 #392 #452
+
+#### Bug Fixes
+
+- Various
+
 ### Version 2.10.0
 
 Release on July 27th, 2022.

@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
-	using System.IO.Pipes;
 
 	/// <summary>
 	/// Used when input is not required for an analysis.

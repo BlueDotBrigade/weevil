@@ -1,8 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 	[TestClass]
 	public class TsvRecordParserTest
 	{
@@ -14,7 +11,7 @@
 		[TestMethod]
 		public void TryParse_NoRecords_ReturnsEmptyRecord()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
 			Assert.IsFalse(wasSuccessful);
@@ -24,7 +21,7 @@
 		[TestMethod]
 		public void TryParse_CompleteRecord_ReturnsRecord()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
@@ -38,7 +35,7 @@
 		[TestMethod]
 		public void TryParse_CompleteRecordHasTrailingWhiteSpace_WhiteSpaceIsKept()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 
 			new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
@@ -48,7 +45,7 @@
 		[TestMethod]
 		public void TryParse_PartialRecordMissingMessage_ReturnsRecord()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
@@ -59,7 +56,7 @@
 		[TestMethod]
 		public void TryParse_PartialRecordMissingContext_ReturnsRecord()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 
 			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
 		}
@@ -67,7 +64,7 @@
 		[TestMethod]
 		public void TryParse_PartialRecordMissingThreadId_ReturnsRecord()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 
 			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
 		}
@@ -75,7 +72,7 @@
 		[TestMethod]
 		public void TryParse_PartialRecordMissingSeverity_ReturnsRecord()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 
 			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
 		}
@@ -83,7 +80,7 @@
 		[TestMethod]
 		public void TryParse_PartialRecordMissingTime_ReturnsRecord()
 		{
-			var content = InputData.GetAsString();
+			var content = new Daten().AsString();
 
 			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
 		}

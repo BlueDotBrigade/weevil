@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System.IO;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Test;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,7 +11,7 @@
 		[TestMethod]
 		public void SaveAllRecordsWhenOnlyOneSelected()
 		{
-			var originalPath = InputData.GetFilePath("GenericBaseline.log");
+			var originalPath = new Daten().AsFilePath(From.GlobalDefault);
 			var newPath = Path.Combine(Path.GetTempPath(), $"{nameof(SaveAllRecordsWhenOnlyOneSelected)}.log");
 
 			IEngine originalEngine = Engine
@@ -43,7 +42,7 @@
 		[TestMethod]
 		public void SaveWithSameEncodingAsSourceFile()
 		{
-			var originalPath = InputData.GetFilePath("GenericBaseline.log");
+			var originalPath = new Daten().AsFilePath(From.GlobalDefault);
 			var newPath = Path.Combine(Path.GetTempPath(), $"{nameof(SaveWithSameEncodingAsSourceFile)}.log");
 
 			IEngine originalEngine = Engine

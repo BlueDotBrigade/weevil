@@ -5,7 +5,6 @@
 	using System.IO;
 	using Analysis;
 	using Data;
-	using Filter;
 	using Filter.Expressions;
 	using Navigation;
 
@@ -24,7 +23,17 @@
 
 			_context = context;
 			_recordParser = new TsvRecordParser();
-			_filterAliases = new Dictionary<string, string>();
+			_filterAliases = new Dictionary<string, string>
+			{
+				{ "#Trace", @"@Severity=Trace" },
+				{ "#Debug", @"@Severity=Debug" },
+				{ "#Information", @"@Severity=Information" },
+				{ "#Warning", @"@Severity=Warning" },
+				{ "#Error", @"@Severity=Error" },
+				{ "#Critical", @"@Severity=Critical" },
+				{ "#IPv4", @"(?<IPv4>((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)(\\.(?!$)|$)){4})" },
+				{ "#IPv6", @"(?<IPv6>(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})" },
+			};
 			_metricCollectors = new List<IMetricCollector>
 			{
 				new SeverityMetrics()
@@ -33,7 +42,7 @@
 			_tableOfContents = new TableOfContents();
 		}
 
-		public string Name => GetType().Assembly.FullName;
+		public string Name => GetType().AssemblyQualifiedName;
 
 		public IRecordParser GetRecordParser()
 		{
@@ -46,6 +55,11 @@
 		}
 
 		public IList<IRecordAnalyzer> GetAnalyzers(ContextDictionary context, ITableOfContents tableOfContents)
+		{
+			return new List<IRecordAnalyzer>();
+		}
+
+		public IList<IRecordAnalyzer> GetAnalyzers(ICoreEngine coreEngine, ContextDictionary context, ITableOfContents tableOfContents)
 		{
 			return new List<IRecordAnalyzer>();
 		}

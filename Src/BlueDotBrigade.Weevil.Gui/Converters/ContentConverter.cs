@@ -23,7 +23,7 @@
 		/// <remarks>
 		/// Converts data flowing from the source (e.g. DataContext/ViewModel) to the target (i.e. the user control).
 		/// </remarks>
-		public object Convert(object record, Type targetType, object isMultiLine, CultureInfo culture)
+		public object Convert(object record, Type targetType, object parameter, CultureInfo culture)
 		{
 			var result = DependencyProperty.UnsetValue; // signal that conversion failed
 

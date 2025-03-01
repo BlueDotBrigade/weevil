@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.reqnroll.net/reqnroll-config-latest.json",
+  "ide": {
+    "editor": {
+      "gherkinFormat": {
+        "indentAndSteps": true
+      }
+    }
+  },
+  "runtime": {
+    "stopAtFirstError": true,
+    "missingOrPendingStepsOutcome": "Error"
+  },
+  "bindingCulture": {
+    "language": "en-us"
+  },
+  "language": {
+    "feature": "en-us"
+  }
+}

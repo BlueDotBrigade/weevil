@@ -12,6 +12,7 @@ https://msdn.microsoft.com/en-us/library/bb514188.aspx
 		<Recognized>
 			<Word>Csv</Word>
 			<Word>Tsv</Word>
+			<Word>Ui</Word>
 		</Recognized>
 		<Deprecated>
 			<Term PreferredAlternate=""></Term>

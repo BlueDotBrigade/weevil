@@ -76,6 +76,35 @@
 			return left.Add(right);
 		}
 
+		public override bool Equals(object that)
+		{
+			if (that == null)
+			{
+				return false;
+			}
+			else
+			{
+				if (that is StorageUnit thatInstance)
+				{
+					return this == thatInstance;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+
+		public bool Equals(StorageUnit that)
+		{
+			return _bytes == that._bytes;
+		}
+
+		public override int GetHashCode()
+		{
+			return _bytes.GetHashCode();
+		}
+
 		public static bool operator ==(StorageUnit left, StorageUnit right)
 		{
 			return left.Bytes == right.Bytes;

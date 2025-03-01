@@ -1,0 +1,68 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Package Name="Weevil" Language="1033" Version="2.11.0" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079" InstallerVersion="200">
+		<SummaryInformation Manufacturer="Blue Dot Brigade" Description="Weevil" />
+
+		<Property Id="ARPPRODUCTICON" Value="Weevil.ico" />
+		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
+		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
+		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of Weevil is already installed." />
+		<MediaTemplate EmbedCab="yes" />
+
+		<Feature Id="ProductFeature" Title="Weevil" Level="1">
+			<ComponentGroupRef Id="weevil_bin_files" />
+			<ComponentRef Id="WeevilShortcut" />
+			<ComponentGroupRef Id="RegistryKeys" />
+		</Feature>
+	</Package>
+
+	<Fragment>
+			<StandardDirectory Id="ProgramMenuFolder">
+				<Directory Id="BlueDotBrigadeShortcutDir" Name="Blue Dot Brigade">
+					<Directory Id="WeevilShortcutDir" Name="Weevil" />
+				</Directory>
+			</StandardDirectory>
+			<StandardDirectory Id="ProgramFiles64Folder">
+				<Directory Id="BlueDotBrigade" Name="BlueDotBrigade">
+					<Directory Id="INSTALLFOLDER" Name="Weevil">
+						<Directory Id="BinDir" Name="Bin" />
+						<Directory Id="LicenseDir" Name="License" />
+						<Directory Id="DocDir" Name="Doc" />
+					</Directory>
+				</Directory>
+			</StandardDirectory>
+		</Fragment>
+
+	<Fragment>
+		<!--
+			HKCU = HKEY_CURRENT_USER
+			HKLM = HKEY_LOCAL_MACHINE
+		-->
+		<ComponentGroup Id="RegistryKeys" Directory="INSTALLFOLDER">
+			<Component Id="RegistryComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F83E">
+				<RegistryKey Root="HKCU" Key="Software\BlueDotBrigade\Weevil">
+					<RegistryValue Type="string" Name="EnableBetaFeatures" Value="True" />
+				</RegistryKey>
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+
+	<Fragment>
+		<DirectoryRef Id="WeevilShortcutDir">
+			<!-- Hotkey: 87 (W) + 8192 (Ctrl) + 16384 (Alt) = 24663 -->
+			<Component Id="WeevilShortcut" Guid="BDBCC900-E933-4FF7-8E2C-B167BD12891D">
+				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[BinDir]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="BinDir" Hotkey="24663" />
+				<!-- 
+				The KeyPath attribute is set to yes, which means that this registry key 
+				is the key path for the component. The Windows Installer uses the key path 
+				to check if a component is already installed on the system. If the key path exists, 
+				it is assumed that the component is installed.
+				-->
+				<RegistryValue Root="HKCU" Key="Software\BlueDotBrigade\Weevil" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+				<RemoveFolder Id="WeevilShortcutDir_Remove" Directory="WeevilShortcutDir" On="uninstall" />
+				<RemoveFolder Id="BlueDotBrigadeShortcutDir_Remove" Directory="BlueDotBrigadeShortcutDir" On="uninstall" />
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+</Wix>

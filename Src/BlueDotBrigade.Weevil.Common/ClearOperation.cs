@@ -11,5 +11,9 @@
 		AfterSelected,
 		Selected,
 		Unselected,
+		/// <summary>
+		/// Records outside of the region of interest are cleared from memory.
+		/// </summary>
+		BeyondRegions,
 	}
 }

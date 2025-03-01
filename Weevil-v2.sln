@@ -6,7 +6,11 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{E686522C-C87A-4232-B1E2-97561B1D69BB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		DomainSpecificTerminology.xml = DomainSpecificTerminology.xml
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+		postsharp.config = postsharp.config
+		reqnroll.json = reqnroll.json
 		Weevil.ruleset = Weevil.ruleset
 	EndProjectSection
 EndProject
@@ -29,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Commo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Windows", "Src\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj", "{D54EA855-B071-40DA-ABF1-2D8227F9130D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.TestingTools", "Src\BlueDotBrigade.Weevil.TestingTools\BlueDotBrigade.Weevil.TestingTools.csproj", "{CBFA74F4-AF15-4B6B-B46A-CB7B8049C879}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.TestTools", "Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj", "{CBFA74F4-AF15-4B6B-B46A-CB7B8049C879}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Cli", "Src\BlueDotBrigade.Weevil.Cli\BlueDotBrigade.Weevil.Cli.csproj", "{655E4324-C7C5-4314-87CE-748CDFD20004}"
 EndProject
@@ -41,11 +45,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Plugins", "Src\BlueDotBrigade.Weevil.Plugins\BlueDotBrigade.Weevil.Plugins.csproj", "{8DD59BAD-4E11-45A9-861D-14A4046C1D96}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "BlueDotBrigade.Weevil.Setup", "Src\BlueDotBrigade.Weevil.Setup\BlueDotBrigade.Weevil.Setup.vdproj", "{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FeatureTests", "Tst\BlueDotBrigade.Weevil.Core-FeatureTests\BlueDotBrigade.Weevil.Core-FeatureTests.csproj", "{98DE5E64-6FBF-4382-A3B2-D54652B6014B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Gui-UiTests", "Tst\BlueDotBrigade.Weevil.Gui-UiTests\BlueDotBrigade.Weevil.Gui-UiTests.csproj", "{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Gui-FeatureTests", "Tst\BlueDotBrigade.Weevil.Gui-FeatureTests\BlueDotBrigade.Weevil.Gui-FeatureTests.csproj", "{53951074-E2A4-4F3C-9CF4-76816578C6E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\BlueDotBrigade.Weevil.Core-FunctionalTests.csproj", "{98DE5E64-6FBF-4382-A3B2-D54652B6014B}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "BlueDotBrigade.Weevil.Installer", "Src\BlueDotBrigade.Weevil.Installer\BlueDotBrigade.Weevil.Installer.wixproj", "{E7AFD435-36C1-4299-BD86-0C070FE1539A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.PowerShell", "Src\BlueDotBrigade.Weevil.PowerShell\BlueDotBrigade.Weevil.PowerShell.csproj", "{8D500B24-89E1-4D0D-A742-2A714CADBF66}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\BlueDotBrigade.Weevil.Core-FunctionalTests.csproj", "{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,17 +100,25 @@ Global
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Debug|x64.Build.0 = Debug|x64
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Release|x64.ActiveCfg = Release|x64
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96}.Release|x64.Build.0 = Release|x64
-		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Debug|x64.ActiveCfg = Debug
-		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Release|x64.ActiveCfg = Release
-		{FB1F80DC-BECE-458E-8BB3-FB7308AE2AE1}.Release|x64.Build.0 = Release
-		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Debug|x64.ActiveCfg = Debug|x64
-		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Debug|x64.Build.0 = Debug|x64
-		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Release|x64.ActiveCfg = Release|x64
-		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8}.Release|x64.Build.0 = Release|x64
 		{98DE5E64-6FBF-4382-A3B2-D54652B6014B}.Debug|x64.ActiveCfg = Debug|x64
 		{98DE5E64-6FBF-4382-A3B2-D54652B6014B}.Debug|x64.Build.0 = Debug|x64
 		{98DE5E64-6FBF-4382-A3B2-D54652B6014B}.Release|x64.ActiveCfg = Release|x64
 		{98DE5E64-6FBF-4382-A3B2-D54652B6014B}.Release|x64.Build.0 = Release|x64
+		{53951074-E2A4-4F3C-9CF4-76816578C6E1}.Debug|x64.ActiveCfg = Debug|x64
+		{53951074-E2A4-4F3C-9CF4-76816578C6E1}.Debug|x64.Build.0 = Debug|x64
+		{53951074-E2A4-4F3C-9CF4-76816578C6E1}.Release|x64.ActiveCfg = Release|x64
+		{53951074-E2A4-4F3C-9CF4-76816578C6E1}.Release|x64.Build.0 = Release|x64
+		{E7AFD435-36C1-4299-BD86-0C070FE1539A}.Debug|x64.ActiveCfg = Debug|x64
+		{E7AFD435-36C1-4299-BD86-0C070FE1539A}.Release|x64.ActiveCfg = Release|x64
+		{E7AFD435-36C1-4299-BD86-0C070FE1539A}.Release|x64.Build.0 = Release|x64
+		{8D500B24-89E1-4D0D-A742-2A714CADBF66}.Debug|x64.ActiveCfg = Debug|x64
+		{8D500B24-89E1-4D0D-A742-2A714CADBF66}.Debug|x64.Build.0 = Debug|x64
+		{8D500B24-89E1-4D0D-A742-2A714CADBF66}.Release|x64.ActiveCfg = Release|x64
+		{8D500B24-89E1-4D0D-A742-2A714CADBF66}.Release|x64.Build.0 = Release|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Debug|x64.ActiveCfg = Debug|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Debug|x64.Build.0 = Debug|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Release|x64.ActiveCfg = Release|x64
+		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,7 +132,8 @@ Global
 		{655E4324-C7C5-4314-87CE-748CDFD20004} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 		{87387C7C-089E-4F58-A4C4-A7ADF2E18E6A} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96} = {7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}
-		{6E8D4A80-FB75-41EE-8948-8A7DBB5112D8} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
+		{53951074-E2A4-4F3C-9CF4-76816578C6E1} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
+		{8D500B24-89E1-4D0D-A742-2A714CADBF66} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94508D1B-CE45-43A7-8D41-50927BFA3696}

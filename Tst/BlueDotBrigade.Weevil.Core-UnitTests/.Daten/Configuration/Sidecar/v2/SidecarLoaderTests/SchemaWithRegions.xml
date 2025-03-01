@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WeevilSidecar xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Configuration.Sidecar.v2">
+	<CommonData>
+		<Regions>
+			<Region>
+				<Name>Region Of Interest</Name>
+				<Minimum>
+					<ByteOffset>1024</ByteOffset>
+					<LineNumber>12</LineNumber>
+				</Minimum>
+				<Maximum>
+					<ByteOffset>9378</ByteOffset>
+					<LineNumber>34</LineNumber>
+				</Maximum>
+			</Region>
+		</Regions>
+		<Context/>
+		<FilterHistory>
+			<ExclusiveFilters/>
+			<InclusiveFilters/>
+		</FilterHistory>
+		<Records/>
+		<TableOfContents/>
+		<UserRemarks/>
+	</CommonData>
+	<Header>
+		<SavedAt>2024-12-10T19:25:13.4364093-04:00</SavedAt>
+		<SchemaVersion xmlns:d3p1="http://schemas.datacontract.org/2004/07/System">
+			<d3p1:_Build>0</d3p1:_Build>
+			<d3p1:_Major>4</d3p1:_Major>
+			<d3p1:_Minor>1</d3p1:_Minor>
+			<d3p1:_Revision>-1</d3p1:_Revision>
+		</SchemaVersion>
+	</Header>
+	<PluginData i:nil="true" />
+</WeevilSidecar>

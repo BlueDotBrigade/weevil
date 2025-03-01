@@ -10,8 +10,8 @@
 		  WindowStartupLocation="CenterScreen" WindowState="Maximized"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="WhiteSmoke"
+        TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.FontWeight="Regular"
-        TextElement.FontSize="{StaticResource TextFontSize}"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -22,7 +22,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <filter:FilterResultsView Grid.Row="0" DataContext="{Binding CurrrentFilter}" />
-        <local:MainStatusBarView Grid.Row="1" DataContext="{Binding CurrentStatus}"/>
+        <filter:FilterView Grid.Row="0" DataContext="{Binding FilterViewModel}" />
+        <local:StatusBarView Grid.Row="1" DataContext="{Binding StatusBarViewModel}"/>
     </Grid>
 </Window>

@@ -6,7 +6,7 @@
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Moq;
+	using NSubstitute;
 
 	[TestClass]
 	public class TimeGapAnalyzerTest
@@ -15,17 +15,16 @@
 
 		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
 		{
-			var userDialog = new Mock<IUserDialog>();
+			var userDialog = Substitute.For<IUserDialog>();
 
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			userDialog.Setup(x => x.ShowUserPrompt(
-				It.IsAny<string>(),
-				It.IsAny<string>(),
-				It.IsAny<string>())).Returns(msBeforeFlaggedRaised.ToString);
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(),Arg.Any<string>(),Arg.Any<string>())
+				.Returns(msBeforeFlaggedRaised.ToString());
 
-			return userDialog.Object;
+			return userDialog;
 		}
 
 		[TestInitialize]

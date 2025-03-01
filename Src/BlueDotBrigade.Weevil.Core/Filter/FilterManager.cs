@@ -26,6 +26,8 @@
 		private FilterStrategy _latestFilterStrategy;
 		private ImmutableArray<IRecord> _latestFilterResults;
 
+		private IRegionManager _regionManager;
+
 		private Filter _currentFilter;
 
 		private readonly IList<string> _includeHistory;
@@ -42,12 +44,15 @@
 			ContextDictionary context,
 			IFilterAliasExpander filterAliasExpander,
 			ImmutableArray<IRecord> allRecords,
-			ImmutableArray<IMetricCollector> metricCollectors)
+			ImmutableArray<IMetricCollector> metricCollectors,
+			IRegionManager regionManager)
 		{
 			_coreExtension = coreExtension;
 			_context = context;
 			_filterAliasExpander = filterAliasExpander;
 			_allRecords = allRecords;
+
+			_regionManager = regionManager;
 
 			_metricCollectors = metricCollectors;
 
@@ -285,7 +290,7 @@
 					});
 
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();

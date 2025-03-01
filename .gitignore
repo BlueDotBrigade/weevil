@@ -365,3 +365,10 @@ MigrationBackup/
 
 # This directory temporarily holds data used by the automated tests:
 *~ZIP/
+
+# Do not commit Gherkin code-behind.
+**/*.feature.cs
+/Tst/BlueDotBrigade.Weevil.Gui-FunctionalTests/Features/Opening.feature.cs
+/Tst/BlueDotBrigade.Weevil.Gui-FunctionalTests/StatusBarShall.feature.cs
+/Tst/BlueDotBrigade.Weevil.Core-FunctionalTests/OpeningFileShould.feature.cs
+/Src/BlueDotBrigade.Weevil.Cli/Properties/launchSettings.json

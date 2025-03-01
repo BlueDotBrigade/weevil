@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Platforms>x64</Platforms>
     <PackageId>BlueDotBrigade.Weevil.Core</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.10.0</Version>
+    <Version>2.11.0</Version>
     <Authors>BlueDotBrigade;</Authors>
     <Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
     <Owners>Blue Dot Brigade</Owners>
@@ -32,11 +32,8 @@
     <None Remove="Resources\Images\Weevil.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.0.0" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="NLog" Version="5.3.4" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
@@ -55,6 +52,9 @@
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>BlueDotBrigade.Weevil.Core-FunctionalTests</_Parameter1>
+    </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>BlueDotBrigade.Weevil.Core-FeatureTests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

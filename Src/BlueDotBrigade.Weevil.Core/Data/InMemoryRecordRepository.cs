@@ -12,11 +12,13 @@
 		private const int OperationRunning = 1;
 
 		#region Fields
-		private readonly ClearOperation _clearOperation;
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IRecord> _visibleRecords;
 		private readonly ImmutableArray<IRecord> _selectedRecords;
 
+		private readonly ImmutableArray<Region> _regions;
+
+		private readonly ClearOperation _clearOperation;
 		private int _operationState;
 		#endregion
 
@@ -34,14 +36,17 @@
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IRecord> visibleRecords,
 			ImmutableArray<IRecord> selectedRecords,
-			ClearOperation clearOperation)
+			ClearOperation clearOperation,
+			ImmutableArray<Region> regions)
 		{
-			_operationState = OperationInactive;
-
 			_allRecords = allRecords;
 			_visibleRecords = visibleRecords;
 			_selectedRecords = selectedRecords;
+
+			_regions = regions;
+
 			_clearOperation = clearOperation;
+			_operationState = OperationInactive;
 		}
 		#endregion
 
@@ -82,6 +87,7 @@
 
 			return results;
 		}
+
 		/// <summary>
 		/// Clears all records from memory that follow the last selected item.
 		/// </summary>
@@ -190,6 +196,30 @@
 		{
 			return selectedRecords;
 		}
+
+		private static IList<IRecord> ClearBeyondRegions(ImmutableArray<IRecord> allRecords, ImmutableArray<Region> regions)
+		{
+			// Have any regions of interest been defined?
+			// ... If not, then return everything.
+			if (regions.Length == 0)
+			{
+				return allRecords;
+			}
+			else
+			{
+				var filteredRecords = new List<IRecord>();
+
+				foreach (Region region in regions)
+				{
+					// Add all records that fall within the current region of interest
+					filteredRecords.AddRange(allRecords.Where(record =>
+						record.LineNumber >= region.Minimum.LineNumber &&
+						record.LineNumber <= region.Maximum.LineNumber));
+				}
+
+				return filteredRecords;
+			}
+		}
 		#endregion
 
 		#region Event Handlers
@@ -207,50 +237,58 @@
 				throw new InvalidOperationException("An operation is already in progress.");
 			}
 
-			IList<IRecord> results = null;
+			IList<IRecord> visibleRecords = ImmutableArray<IRecord>.Empty;
 
 			try
 			{
-				if (_selectedRecords.Length == 0)
+				// Early exit?
+				if (_selectedRecords.Length == 0 && _clearOperation != ClearOperation.BeyondRegions)
 				{
-					results = _allRecords;
+					visibleRecords = _allRecords;
 				}
 				else
 				{
 					switch (_clearOperation)
 					{
 						case ClearOperation.BeforeSelected:
-							results = ClearBeforeSelected(_allRecords, _selectedRecords);
+							visibleRecords = ClearBeforeSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.BeforeAndAfterSelected:
-							results = ClearBeforeAndAfterSelected(_allRecords, _selectedRecords);
+							visibleRecords = ClearBeforeAndAfterSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.BetweenSelected:
-							results = ClearBetweenSelected(_allRecords, _selectedRecords);
+							visibleRecords = ClearBetweenSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.AfterSelected:
-							results = ClearAfterSelected(_allRecords, _selectedRecords);
+							visibleRecords = ClearAfterSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.Selected:
-							results = ClearSelected(_allRecords, _selectedRecords);
+							visibleRecords = ClearSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.Unselected:
-							results = ClearUnselected(_allRecords, _selectedRecords);
+							visibleRecords = ClearUnselected(_allRecords, _selectedRecords);
 							break;
+
+						case ClearOperation.BeyondRegions:
+							visibleRecords = ClearBeyondRegions(_allRecords, _regions);
+							break;
+
+						default:
+							throw new ArgumentOutOfRangeException(nameof(_clearOperation), _clearOperation, "Clear operation is not supported.");
 					}
 
-					var recordsCleared = _allRecords.Length - results.Count;
+					var recordsCleared = _allRecords.Length - visibleRecords.Count;
 
 					if (recordsCleared > 0)
 					{
 						Log.Default.Write(LogSeverityType.Information,
 							"Records have been cleared.",
-							new Dictionary<string, string>
+							new Dictionary<string, object>
 							{
 								{"Operation", _clearOperation.ToString()},
 								{"Cleared", recordsCleared.ToString()},
@@ -261,9 +299,9 @@
 				if (maxRecords != int.MinValue &&
 					maxRecords != int.MaxValue)
 				{
-					results = results.Count < maxRecords
-						? results
-						: results.Take(maxRecords).ToList();
+					visibleRecords = visibleRecords.Count < maxRecords
+						? visibleRecords
+						: visibleRecords.Take(maxRecords).ToList();
 
 					Log.Default.Write(LogSeverityType.Information,
 						$"Record results have been limited to... Maximum={maxRecords}");
@@ -275,7 +313,7 @@
 				_operationState = OperationInactive;
 			}
 
-			return ImmutableArray.Create(results.ToArray());
+			return ImmutableArray.Create(visibleRecords.ToArray());
 		}
 
 		public ImmutableArray<IRecord> Get(Range range, int maximumCount)

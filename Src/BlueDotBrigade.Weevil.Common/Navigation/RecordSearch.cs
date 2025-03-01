@@ -76,7 +76,25 @@
 
 			var index = records.BinarySearch(desiredRecord, comparer);
 
-			if (searchType == RecordSearchType.ClosestMatch)
+			if (searchType == RecordSearchType.ExactOrPrevious)
+			{
+				// Unable to find exact match?
+				// ... then return next closest value
+				if (index < 0)
+				{
+					index = (index * -1) - 2;
+				}
+			} 
+			else if (searchType == RecordSearchType.ExactOrNext)
+			{
+				// Unable to find exact match?
+				// ... then return next closest value
+				if (index < 0)
+				{
+					index = (index * -1) - 1;
+				}
+			}
+			else if (searchType == RecordSearchType.NearestNeighbor)
 			{
 				// Unable to find exact match?
 				if (index < 0)

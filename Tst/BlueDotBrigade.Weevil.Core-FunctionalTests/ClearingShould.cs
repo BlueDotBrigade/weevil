@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 	using Data;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -12,7 +11,7 @@
 		public void SupportClearingSelectedRecords()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine
@@ -30,7 +29,7 @@
 		public void SupportClearingUnselectedRecords()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine
@@ -47,7 +46,7 @@
 		public void SupportClearingBeforeFirstRecord()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine
@@ -64,7 +63,7 @@
 		public void SupportClearingAfterLastRecord()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine
@@ -82,7 +81,7 @@
 		public void SupportClearingBetweenSelectedRecords()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			var selection = new List<IRecord>
@@ -106,7 +105,7 @@
 		public void SupportClearingRecordsBeforeSelection()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine
@@ -124,7 +123,7 @@
 		public void SupportClearingRecordsBeforeAndAfterSelection()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine
@@ -146,7 +145,7 @@
 		public void SupportClearingRecordsAfterSelection()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine
@@ -164,7 +163,7 @@
 		public void FlagWhenClearOperationHasBeenPerformed()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine

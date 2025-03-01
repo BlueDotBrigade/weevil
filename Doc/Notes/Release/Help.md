@@ -83,6 +83,7 @@ The following expressions can be used to query metadata collected by the Weevil 
 - `@ContentLength>128` : identify records longer than the given value
 - `@UiThread`: identifies all records that were created by the application's UI thread
   - `@UiThread=False`: identifies all records that were not created by the application's UI thread
+- `@Region`: identifies the beginning & end of each region of interest.
 
 ---
 

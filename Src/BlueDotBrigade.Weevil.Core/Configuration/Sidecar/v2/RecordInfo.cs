@@ -2,6 +2,7 @@
 {
 	using System.Diagnostics;
 	using System.Runtime.Serialization;
+	using BlueDotBrigade.Weevil.Data;
 
 	[DebuggerDisplay("LineNumber={RelatesTo.LineNumber}, IsPinned={IsPinned}, Comment={Comment}")]
 	[DataContract(Name = "Record")]

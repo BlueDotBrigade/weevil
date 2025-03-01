@@ -6,7 +6,6 @@
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
 	using Diagnostics;
-	using Expressions;
 	using Expressions.Monikers;
 
 	internal class FilterStrategy : IFilterStrategy
@@ -47,12 +46,14 @@
 			ContextDictionary context,
 			IFilterAliasExpander filterAliasExpander,
 			FilterType filterType,
-			IFilterCriteria filterCriteria)
+			IFilterCriteria filterCriteria,
+			IRegionManager regionManager)
 		{
 			_filterType = filterType;
 			_filterCriteria = filterCriteria;
 
-			var expressionFactory = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria);
+
+			var expressionFactory = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager);
 
 			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, true);
 			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, false);

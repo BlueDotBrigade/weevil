@@ -3,7 +3,7 @@
 	using System;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Moq;
+	using NSubstitute;
 
 	[TestClass]
 	public class ElapsedGreaterThanExpressionTest
@@ -11,34 +11,34 @@
 		[TestMethod]
 		public void IsMatch_ElapsedTimeSameAsSpecifiedPeriod_ReturnsFalse()
 		{
-			var record = new Mock<IRecord>();
-			record.Setup(x => x.Metadata).Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(100) });
+			var record = Substitute.For<IRecord>();
+			record.Metadata.Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(100) });
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 
-			Assert.IsFalse(expression.IsMatch(record.Object));
+			Assert.IsFalse(expression.IsMatch(record));
 		}
 
 		[TestMethod]
 		public void IsMatch_ElapsedTimeLessThanSpecifiedPeriod_ReturnsFalse()
 		{
-			var record = new Mock<IRecord>();
-			record.Setup(x => x.Metadata).Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(1) });
+			var record = Substitute.For<IRecord>();
+			record.Metadata.Returns(new Metadata { ElapsedTime = TimeSpan.FromMilliseconds(1) });
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 
-			Assert.IsFalse(expression.IsMatch(record.Object));
+			Assert.IsFalse(expression.IsMatch(record));
 		}
 
 		[TestMethod]
 		public void IsMatch_ElapsedTimeGreaterThanSpecifiedPeriod_ReturnsTrue()
 		{
-			var record = new Mock<IRecord>();
-			record.Setup(x => x.Metadata).Returns(new Metadata { ElapsedTime = TimeSpan.FromHours(1) });
+			var record = Substitute.For<IRecord>();
+			record.Metadata.Returns(new Metadata { ElapsedTime = TimeSpan.FromHours(1) });
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 
-			Assert.IsTrue(expression.IsMatch(record.Object));
+			Assert.IsTrue(expression.IsMatch(record));
 		}
 	}
 }

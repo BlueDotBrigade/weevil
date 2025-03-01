@@ -2,11 +2,11 @@
 {
 	using System;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.Linq;
+	using global::BlueDotBrigade.Weevil.Analysis;
+	using global::BlueDotBrigade.Weevil.Data; 
+	using global::BlueDotBrigade.Weevil.Linq;
+
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using BlueDotBrigade.Weevil.TestingTools.Data;
 
 	[TestClass]
 	public class TemporalAnomalyMetricsTests

@@ -30,7 +30,7 @@
 			return TryLoad(out _sidecar);
 		}
 
-		private bool TryLoad(out WeevilSidecar sidecarData)
+		internal bool TryLoad(out WeevilSidecar sidecarData)
 		{
 			var canLoad = false;
 			sidecarData = new WeevilSidecar();
@@ -54,7 +54,7 @@
 			return canLoad;
 		}
 
-		public void Apply(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents)
+		public void Load(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents, List<Region> regions)
 		{
 			sourceFileRemarks = _sidecar?.CommonData?.UserRemarks;
 
@@ -120,6 +120,18 @@
 					}));
 				}
 			}
+
+			if (_sidecar.CommonData.Regions != null)
+			{
+				foreach (RegionInfo regionInfo in _sidecar.CommonData.Regions)
+				{
+					regions.Add(
+						new Region(
+							regionInfo.Name,
+							regionInfo.Minimum,
+							regionInfo.Maximum));
+				}
+			}
 		}
 
 		public void Save(SidecarData newData, bool deleteBackup)
@@ -139,7 +151,7 @@
 
 		private void Serialize(WeevilSidecar sidecar, bool deleteBackup, string backupFilePath)
 		{
-			sidecar.Header.SchemaVersion = new Version(4, 0, 0);
+			sidecar.Header.SchemaVersion = new Version(4, 1);
 			sidecar.Header.SavedAt = DateTime.Now;
 
 			TypeFactory.SaveAsXml(sidecar, _filePath);
@@ -170,7 +182,7 @@
 		private static WeevilSidecar PackSidecar(WeevilSidecar oldData, SidecarData newData)
 		{
 			var snapshot = new WeevilSidecar();
-
+			
 			var masterRecords = new Dictionary<int, RecordInfo>();
 
 			// Is there any data from the past that we need to keep?
@@ -236,6 +248,7 @@
 				snapshot.CommonData.FilterHistory.InclusiveFilters =
 					GetFilterHistorySnapshot(newData.FilterTraits.IncludeHistory);
 			}
+
 			if (newData.FilterTraits?.ExcludeHistory != null)
 			{
 				snapshot.CommonData.FilterHistory.ExclusiveFilters =
@@ -255,6 +268,19 @@
 							ByteOffset = section.ByteOffset,
 							LineNumber = section.LineNumber,
 						},
+					});
+				}
+			}
+
+			if (newData.Regions != null)
+			{
+				foreach (Region region in newData.Regions)
+				{
+					snapshot.CommonData.Regions.Add(new RegionInfo
+					{
+						Name = region.Name,
+						Minimum = region.Minimum,
+						Maximum = region.Maximum,
 					});
 				}
 			}

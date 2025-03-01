@@ -13,7 +13,8 @@
 			out string sourceFileRemarks,
 			out List<string> inclusiveFilterHistory,
 			out List<string> exclusiveFilterHistory,
-			out List<Section> tableOfContents);
+			out List<Section> tableOfContents,
+			out List<Region> regions);
 
 		void Save(SidecarData data, bool deleteBackup);
 

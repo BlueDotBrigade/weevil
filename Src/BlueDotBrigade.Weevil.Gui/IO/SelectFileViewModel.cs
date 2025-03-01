@@ -12,23 +12,23 @@
 		private DelegateCommand okCommand;
 		private string selectedFilename;
 		private DelegateCommand cancelCommand;
-		private string[] _filenames;
+		private string[] _fileNames;
 
 		public SelectFileViewModel(string[] filenames)
 		{
-			this.Filenames = filenames ?? throw new ArgumentNullException(nameof(filenames));
+			this.FileNames = filenames ?? throw new ArgumentNullException(nameof(filenames));
 		}
 
-		public string[] Filenames
+		public string[] FileNames
 		{
 			get
 			{
-				return _filenames;
+				return _fileNames;
 			}
 			set
 			{
-				_filenames = value.Where(x => !x.ToUpper().EndsWith(".LOG.XML")).ToArray();
-				RaisePropertyChanged(nameof(Filenames));
+				_fileNames = value.Where(x => !x.ToUpper().EndsWith(".LOG.XML")).ToArray();
+				RaisePropertyChanged(nameof(FileNames));
 			}
 		}
 

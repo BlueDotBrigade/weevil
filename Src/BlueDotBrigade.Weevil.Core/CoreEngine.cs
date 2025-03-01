@@ -35,6 +35,7 @@
 		private readonly SidecarManager _sidecarManager;
 		private readonly SelectionManager _selectionManager;
 		private readonly NavigationManager _navigationManager;
+		private readonly IRegionManager _regionManager;
 		private readonly IAnalyze _analysisManager;
 
 		private readonly int _originalRecordCount;
@@ -79,7 +80,8 @@
 			SidecarManager sidecarManager,
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
-			TableOfContents tableOfContents)
+			TableOfContents tableOfContents,
+			ImmutableArray<Region> regions)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
 
@@ -130,12 +132,15 @@
 			var filterAliases = _coreExtension.GetFilterAliases(_context);
 			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
+			_regionManager = new RegionManager(regions);
+
 			_filterManager = new FilterManager(
 				_coreExtension,
 				_context,
 				filterAliasExpander,
 				_allRecords,
-				GetRecordCounters());
+				GetRecordCounters(),
+				_regionManager);
 
 			_filterManager.Apply(FilterType.PlainText, FilterCriteria.None);
 			_filterManager.ResultsChanged += OnResultsChanged;
@@ -216,6 +221,8 @@
 
 		public IAnalyze Analyzer => _analysisManager;
 
+		public IRegionManager Regions => _regionManager;
+
 		public ImmutableArray<IRecord> Records => _allRecords;
 
 		public int Count => _allRecords.Length;
@@ -285,8 +292,9 @@
 				Records = _allRecords,
 				Context = _context,
 				FilterTraits = _filterManager,
-				TableOfContents = _navigationManager.TableOfContents,
 				SourceFileRemarks = _sourceFileRemarks,
+				TableOfContents = _navigationManager.TableOfContents,
+				Regions = _regionManager.Regions,
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);

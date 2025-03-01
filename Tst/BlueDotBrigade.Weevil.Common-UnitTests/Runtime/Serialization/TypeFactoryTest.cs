@@ -2,8 +2,6 @@
 {
 	using System.Collections.Generic;
 	using System.IO;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using Weevil.Runtime.Serialization;
 
 	[TestClass]
@@ -54,7 +52,7 @@
 		[TestMethod]
 		public void LoadFromXml_SerializedList_ObjectGraphReturned()
 		{
-			Stream inputData = InputData.GetAsStream();
+			Stream inputData = new Daten().AsStream();
 			Mammal metadata = TypeFactory.LoadFromXml<TypeFactoryTest.Mammal>(inputData);
 
 			Assert.IsNotNull(metadata);

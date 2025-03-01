@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel.Composition.Hosting;
 	using System.IO;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.Diagnostics;
 
 	public class PluginFactory
@@ -19,12 +20,15 @@
 
 		public IPlugin Create(string sourceFilePath)
 		{
-			IEnumerable<IPlugin> plugins = LoadPlugins();
+			IList<IPlugin> plugins = LoadThirdPartyPlugins();
+			plugins.Add(new TsvPlugin());
+			plugins.Add(new DefaultPlugin());
+
 			IPlugin compatiblePlugin = null;
 
 			foreach (IPlugin plugin in plugins)
 			{
-				Log.Default.Write(LogSeverityType.Debug, $"Looking for an appropriate plugin for the input file. Plugin={plugin.Name}, SourceFilePath={sourceFilePath}");
+				Log.Default.Write(LogSeverityType.Debug, $"Checking if plugin is able to parse the file. Plugin={plugin.Name}, SourceFilePath={sourceFilePath}");
 
 				if (plugin.CheckCompatibility(sourceFilePath))
 				{
@@ -34,16 +38,15 @@
 				}
 			}
 
-			if (compatiblePlugin is null)
+			if (compatiblePlugin is DefaultPlugin)
 			{
 				Log.Default.Write(LogSeverityType.Warning, $"A compatible plugin could not be found for the input file. SourceFilePath={sourceFilePath}");
-				compatiblePlugin = new TheDefaultPlugin();
 			}
 
 			return compatiblePlugin;
 		}
 
-		private static IEnumerable<IPlugin> LoadPlugins()
+		private static IList<IPlugin> LoadThirdPartyPlugins()
 		{
 			var plugins = new List<IPlugin>();
 
@@ -64,7 +67,7 @@
 				{
 					Log.Default.Write(
 						LogSeverityType.Warning,
-						"Unable to load any plugins.  The plugin directory is either empty, or there is a 32/64 bit mismatch.");
+						"Unable to find any plugins.  The plugin directory is either empty, or there is a 32/64 bit mismatch.");
 				}
 			}
 			else
@@ -74,7 +77,7 @@
 					"Plugin directory is missing.");
 			}
 
-			return plugins;
+			return plugins.ToList();
 		}
 	}
 }

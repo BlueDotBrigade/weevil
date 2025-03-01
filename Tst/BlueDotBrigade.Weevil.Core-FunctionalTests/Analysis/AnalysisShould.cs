@@ -1,12 +1,11 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Linq;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Moq;
+	using NSubstitute;
 
 	[TestClass]
 	public class AnalysisShould
@@ -15,7 +14,7 @@
 		public void FlagRecordsWhenDataTransitionDetected()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(
@@ -49,7 +48,7 @@
 		public void AddCommentWhenDataTransitionDetected()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(
@@ -82,7 +81,7 @@
 			var dectectMinuteIncreasing = @"\s12:(?<Minute>[0-9]{2})";
 
 			var engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(dectectMinuteIncreasing));
@@ -90,12 +89,11 @@
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var userDialog = new Mock<IUserDialog>();
-			userDialog.Setup(x => x.ShowUserPrompt(
-				It.IsAny<string>(),
-				It.IsAny<string>(),
-				It.IsAny<string>())).Returns("Ascending");
-			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, userDialog.Object);
+			var userDialog = Substitute.For<IUserDialog>();
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns("Ascending");
+			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, userDialog);
 
 			var flaggedRecords = engine
 				.Filter.Results
@@ -111,7 +109,7 @@
 			var detectSecondRollover = @"\s12:[0-9]{2}:(?<Second>[0-9]{2})";
 
 			var engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"))
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectSecondRollover));
@@ -119,12 +117,11 @@
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var userDialog = new Mock<IUserDialog>();
-			userDialog.Setup(x => x.ShowUserPrompt(
-				It.IsAny<string>(),
-				It.IsAny<string>(),
-				It.IsAny<string>())).Returns("Ascending"); 
-			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, userDialog.Object);
+			var userDialog = Substitute.For<IUserDialog>();
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(),Arg.Any<string>(),Arg.Any<string>())
+				.Returns("Ascending"); 
+			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, userDialog);
 
 			var flaggedRecords = engine
 				.Filter.Results

@@ -1,113 +1,125 @@
 # Weevil
 
+[![Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Latest%20Release)](https://github.com/BlueDotBrigade/weevil/releases/)
+[![Latest Build](https://github.com/BlueDotBrigade/weevil/actions/workflows/build-all-projects.yml/badge.svg?branch=main)](https://github.com/BlueDotBrigade/weevil/actions/workflows/build-all-projects.yml)
+
 - [What is Weevil?](#what-is-weevil)
-   - [General](#general)
+- [Key Features](#key-features)
    - [Filtering](#filtering)
    - [Navigation](#navigation)
    - [Analysis](#analysis)
-   - [Plugin Architecture](#plugin-architecture)
-- [Get Started](#get-started)
+   - [Extensible Architecture](#extensible-architecture)
+- [Software Development](#software-development)
    - [WPF Application](#wpf-application)
    - [NuGet Packages](#nuget-packages)
 - [Development](#development)
    - [Guidelines](#guidelines)
    - [Compiling](#compiling)
+   - [Verification](#verification)
+- [Recognition](#recognition)
+   - [Open Source Projects](#open-source-projects)
+   - [Contributors](#contributors)
 
 ## What is Weevil?
 
-[![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases/)
-[![GitHub License](https://img.shields.io/github/license/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/Weevil/blob/master/LICENSE.md)
+![WeevilDemo](Doc/Notes/Release/v10_0_0/Weevil-Demo.gif)
 
-*Weevil* is an extensible .NET open-source project that makes it easier for analysts to review log files. In other words, "_boring log files for tasty bytes_".  
+_Weevil_ is an open-source .NET project that is used by analysts to extract valuable insights from log files.  It's all about _boring log files for tasty bytes_.
 
-For a list of the latest features, please refer to the [change log](https://github.com/BlueDotBrigade/weevil/releases).
+A complete list of features can be found in the [release notes](https://github.com/BlueDotBrigade/weevil/releases).
 
-### General
+## Key Features
 
-1. Supports record-level comments.
+1. File and Record Level Notes
+    - Capture high-level observations as remarks, or low-level details as record comments.
 2. Persisted State
-   - Filter history, user comments, and other metadata are automatically loaded when a log file is opened.
-   - The application's state is stored as an XML [sidecar][Sidecar] which can be shared with colleagues.
-3. All operations are non-destructive; the original log file will not be modified.
+    - Automatically load filter history, record comments, and file level comments when opening a log file.
+    - Share the application's state as an XML [sidecar][Sidecar] with colleagues.
+3. Non-Destructive Operations
+	 - The _Weevil_ application ensures that the original log file is never modified.
+4. Simplified Callstacks
+    - When a record includes an exception call stack, _Weevil_ simplifies the call stack by only displaying business logic references.
+5. Clear Operations
+	 - This operation removes records from memory, thus reducing the RAM footprint and speeding up the filtering process.
 
 ### Filtering
 
-1. Inclusive & exclusive filtering
-   - Is used to select or hide log file records.
-2. Pinned Records
-   - Guarantees that specific records always appear in the filter results.
-3. Filter Aliases
-   -  An alias can be added to _Weevil_ to make it easier to reference complex and/or frequently used filters.
-4. Monikers
-   - Provides support for querying *Weevil*'s metadata.
-   - For example: `@Comment` can be used to retrieve records that have a user comment.
-5. In-memory
-   - The entire log file is loaded into RAM to facilitate fast searches.
+One or more filter criteria can be used to show or hide log file records.
+
+1. Inclusive and Exclusive Filters
+    - Display records matching the inclusive filter while hiding those matching the exclusive filter.
+2. Filter Criteria
+	 1. Plain Text
+	 2. Regular Expressions
+	 3. Aliases
+		  - Frequently used or complex filters can be assigned a unique key that can be used to speed up the filtering process.
+		  - For example, the `#IpAddress` key could be assigned to the following filter criteria  `^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`.
+	 4. Monikers
+        - Monikers are built-in keys that can be used to query metadata collected by _Weevil_.
+		  - For example, the `@Comment` can be used to identify records that have a user comment.
+3. Multiple Criteria
+    - Multiple filter criteria can be combined together using a logical "OR" operator (`||`).
+4. Pinned Records
+	 - Pinned records are guaranteed to be included in the filter results.
 
 ### Navigation
 
 1. Find
-   - Search for text in filter results.
+    - Search for text within filtered results.
 2. Go To
-   - Jump to a specific line number.
-   - Jump to a specific timestamp.
+    - Jump to specific line numbers or timestamps.
 3. Pinned Records
-   - Quickly navigate between records of interest.
+    - Effortlessly navigate between important records.
 4. Flagged Records
-   - Navigate between records flagged during previous analysis. 
+    - Move between records flagged during prior analysis. 
 5. Record Comments
-   - Navigate between records that have a user comment. 
+    - Navigate between records containing user comments.
 
 ### Analysis
 
-[Regular expression][RegEx101] named groups can used to identify key data within the log file.  *Weevil*'s analysis tools can then be used to extract data and/or identify trends.
+Utilize [Regular expression][RegEx101] named groups to identify key data in log files. Leverage _Weevil_'s analysis tools to then extract data and identify trends.
+
+Each analysis tool updates the `Comments` fields with the values that match the provided named group(s), and the recor's `Flagged` field is set.
 
 1. Detect Data
-   - `Comments` field is updated with values that match the provided named group(s).
-   - `Flagged` field is set to `True` for matching records. 
-   - Example: extracting URLs from a log file.
+   - For example: extracting URLs from a log file
 2. Detect Data Transitions
-   - `Comments` field is updated when the matching value changes.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: detecting when hardware serial numbers change. 
+   - For example: when a hardware serial number changes
 3. Detect Rising Edges
-   - `Comments` field is updated when the matching value is higher that the previously detected value.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: detecting peek CPU usage in a log file
-4. Detect Falling Edges:
-   - `Comments` field is updated when the matching value is lower that the previously detected value.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: firmware's uptime value has reset to zero
-5. Detect Temporal Anomaly:
-   - `Comments` field is updated when record timestamps appear out of order.
-   - `Flagged` field is set to `True` for matching records.
-   - Example: 7th record is logged at `10:30 AM`, and the 8th record is logged at `10:15 AM`
-6. Charts:
-   - Regular expression _named groups_ can be used to extract values and generate a line graph.
+   - For example: detecting peek CPU usage
+4. Detect Falling Edges
+   - For example: detect when a firmware's uptime has reset
+5. Detect Temporal Anomalies
+   - For example: detect when records are logged out of order
 
-### Plugin Architecture
+Furthermore, _Weevil_ supports:
+- defining Regions of Interest (ROI)
+- creating graphs using named groups
 
-Realize the greatest value by creating a business-domain specific *Weevil* plugin which extends the application by creating custom:
+### Extensible Architecture
 
-1. log file parsers
-2. log file analyzers
-3. dashboard insight
+Maximize potential by developing domain-specific extensions tailored to your business' needs. _Weevil_ can be enhanced by custom plugins:
 
-## Get Started
+1. Log File Parsers
+   - Create tailored parsers to accurately interpret log files from various sources and formats, ensuring seamless integration with _Weevil_.
+2. Log File Analyzers
+   - Design specialized analyzers to process and extract valuable insights from the parsed log data, optimizing the analysis for your specific business domain.
+3. Dashboard Insights
+   - Develop custom dashboard visualizations and insights that highlight the most relevant information, enabling efficient decision-making and improved understanding of your log data.
+
+## Software Development
 
 ### WPF Application
-
-For more information, please refer to the following:
 
 - [Installation Guide][InstallationGuide]
 - [Help Manual][Help]
 
 ### NuGet Packages
 
-| Latest Release | NuGet Package |
-| --- | --- |
-| [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Common)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Common) | BlueDotBrigade.Weevil.Common.nupkg |
-| [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Core)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Core) | BlueDotBrigade.Weevil.Core.nupkg |
+| Latest Release                                                                                                                                  | NuGet Package                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Common)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Common)   | BlueDotBrigade.Weevil.Common.nupkg  |
+| [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Core)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Core)       | BlueDotBrigade.Weevil.Core.nupkg    |
 | [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Windows)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Windows) | BlueDotBrigade.Weevil.Windows.nupkg |
 
 A .NET application can use *Weevil*'s feature set by directly referencing the `BlueDotBrigade.Weevil.Core` *NuGet* package.
@@ -138,14 +150,15 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 
 ## Development
 
-| Attribute | Description |
-| --- | --- |
-| [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/releases) | The list of features & bug fixes for the latest *Weevil* release. |
-| [![Latest Stable](https://img.shields.io/badge/branch-Releases/2.x-blue)](https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x) | Source code for the most stable version of *Weevil*. |
-| [![Latest Code](https://img.shields.io/badge/branch-main-blue)](https://github.com/BlueDotBrigade/weevil/tree/main) | The most up-to-date source code. This branch will include features that are still under development.  |
-| [![GitHub Repository Size](https://img.shields.io/github/repo-size/BlueDotBrigade/Weevil)](https://github.com/BlueDotBrigade/Weevil) | Total size of *Weevil*'s Git repository. |
-| [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/) | Total number of lines of code in the Git repository. |
-| [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main) | Indicates when the Git repository was last updated. |
+| Attribute                                                                                                                                                                                        | Description                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| [![GitHub Latest Release](https://img.shields.io/github/release/BlueDotBrigade/Weevil.svg?label=Latest%20Release)](https://github.com/BlueDotBrigade/weevil/releases)                                                   | The list of features & bug fixes for the latest *Weevil* release.                                          |
+| [![Latest Stable](https://img.shields.io/badge/branch-Releases/2.x-blue?label=Release%20Branch)](https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x)                                                            | Source code for the most stable version of *Weevil*.                                                       |
+| [![Latest Code](https://img.shields.io/badge/branch-main-blue?label=Development%20Branch)](https://github.com/BlueDotBrigade/weevil/tree/main)                                                                              | The most up-to-date source code. This branch includes features that are still under development.           |
+| [![Latest Build](https://github.com/BlueDotBrigade/weevil/actions/workflows/build-all-projects.yml/badge.svg?branch=main)](https://github.com/BlueDotBrigade/weevil/actions/workflows/build-all-projects.yml)                        | A value of `passing` indicates that the `main` branch is compiling & that the automated tests have passed. |
+| [![GitHub Repository Size](https://img.shields.io/github/repo-size/BlueDotBrigade/Weevil)](https://github.com/BlueDotBrigade/Weevil)                                                             | Total size of *Weevil*'s Git repository.                                                                   |
+| [![Lines of code](https://img.shields.io/tokei/lines/github/BlueDotBrigade/Weevil.svg)](https://github.com/BlueDotBrigade/weevil/)                                                               | Total number of lines of code in the Git repository.                                                       |
+| [![Last Commit](https://img.shields.io/github/last-commit/BlueDotBrigade/Weevil/main.svg)](https://github.com/BlueDotBrigade/weevil/commits/main)                                                | Indicates when the Git repository was last updated.                                                        |
 
 ### Guidelines
 
@@ -162,6 +175,33 @@ The following steps outline how to build Weevil's WPF application:
 3. Using *Visual Studio*, compile the WPF project: `BlueDotBrigade.Weevil.Gui`
 [EnvironmentVariable]: https://en.wikipedia.org/wiki/Environment_variable#Windows
 
+### Verification
+
+Software integrity is verified through a number of automated tests which can be found in the [/Weevil/Tst/][AutomatedTests] directory:
+
+- `UnitTests`
+- `FunctionalTests`
+
+## Recognition
+
+- [PostSharp](https://www.postsharp.net/)
+   - *PostSharp*`s [aspect oriented][AOP] library helps to simplify a code base by reducing [boilerplate][]. Special thanks to the PostSharp team for donating a license.
+- [GitHub](https://www.GitHub.com)
+   - Free Git repository hosting platform for this project & many others like it.
+
+### Open Source Projects
+
+- [Live Charts](https://github.com/beto-rodriguez/LiveCharts2)
+    - Beto Rodriguez et al. have developed an impressive WPF charting library. Am looking forward to future releases. 
+- [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
+    - An excellent WPF library that helps to standardize themes & improve the overall quality of an application's user interface.
+- [Cocona](https://github.com/mayuki/Cocona)
+    - Mayuki Sawatari et al. have created an interesting library for creating .NET Core command-line applications.
+
+### Contributors
+
+A special thanks to all of those who have contributed to this project. 
+
 [InstallationGuide]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/InstallationGuide.md
 [Help]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/Help.md
 [StyleGuide]: https://github.com/BlueDotBrigade/weevil/blob/main/Doc/Notes/Design/UI/UserInterfaceStyleGuide.md
@@ -170,3 +210,8 @@ The following steps outline how to build Weevil's WPF application:
 [Sidecar]: https://en.wikipedia.org/wiki/Sidecar_file
 
 [StableCode]: https://github.com/BlueDotBrigade/weevil/tree/Releases/2.x
+
+[Boilerplate]: https://en.m.wikipedia.org/wiki/Boilerplate_code
+[AOP]: https://en.m.wikipedia.org/wiki/Aspect-oriented_programming
+
+[AutomatedTests]: https://github.com/BlueDotBrigade/weevil/tree/main/Tst

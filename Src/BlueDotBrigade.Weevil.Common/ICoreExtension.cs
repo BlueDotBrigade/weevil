@@ -21,6 +21,8 @@
 
 		IList<IRecordAnalyzer> GetAnalyzers(ContextDictionary context, ITableOfContents tableOfContents);
 
+		IList<IRecordAnalyzer> GetAnalyzers(ICoreEngine coreEngine, ContextDictionary context, ITableOfContents tableOfContents);
+
 		/// <summary>
 		/// Request insight that is appropriate for the current plugin.
 		/// </summary>

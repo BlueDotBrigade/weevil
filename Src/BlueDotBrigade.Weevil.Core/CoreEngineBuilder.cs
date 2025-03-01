@@ -152,7 +152,7 @@
 				string sourceFilePath;
 				long sourceFileLength;
 				Encoding sourceFileEncoding;
-				Stopwatch sourceFileLoadingPeriod = new Stopwatch();
+				Stopwatch loadingStopwatch = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
@@ -166,6 +166,7 @@
 				var inclusiveFilterHistory = new List<string>();
 				var exclusiveFilterHistory = new List<string>();
 				var tableOfContents = new List<Section>();
+				var regions = new List<Region>();
 
 				if (this.UseExistingInstance)
 				{
@@ -177,6 +178,7 @@
 					sourceFileRemarks = _sourceInstance._sourceFileRemarks;
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
+					regions.AddRange(_sourceInstance._regionManager.Regions);
 
 					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
 					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);
@@ -184,15 +186,14 @@
 					coreExtension = _sourceInstance._coreExtension;
 					sidecarManager = _sourceInstance._sidecarManager;
 
-					selectedRecords = _sourceInstance
-						._selectionManager
-						.GetSelected();
+					selectedRecords = _sourceInstance._selectionManager.GetSelected();
 
 					var repository = new InMemoryRecordRepository(
 						_sourceInstance._allRecords,
 						_sourceInstance._filterManager.Results,
 						selectedRecords,
-						_clearOperation);
+						_clearOperation,
+						regions.ToImmutableArray());
 
 					records = repository.Get(maxRecords);
 
@@ -214,7 +215,7 @@
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
 
-						sourceFileLoadingPeriod.Restart();
+						loadingStopwatch.Restart();
 
 						var repository = new SerializedRecordRepository(
 							 dataSource,
@@ -225,7 +226,7 @@
 
 						records = repository.Get(_range, maxRecords);
 
-						sourceFileLoadingPeriod.Stop();
+						loadingStopwatch.Stop();
 
 						sidecarManager.Load(
 							records,
@@ -233,7 +234,8 @@
 							out sourceFileRemarks,
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
-							out tableOfContents);
+							out tableOfContents,
+							out regions);
 
 						if (inclusiveFilterHistory.Count == 0)
 						{
@@ -253,14 +255,15 @@
 					sourceFilePath,
 					sourceFileLength,
 					sourceFileEncoding,
-					sourceFileLoadingPeriod.Elapsed,
+					loadingStopwatch.Elapsed,
 					coreExtension,
 					context,
 					sourceFileRemarks,
 					sidecarManager,
 					records,
 					_hasBeenCleared,
-					new TableOfContents(tableOfContents));
+					new TableOfContents(tableOfContents),
+					regions.ToImmutableArray());
 
 				if (inclusiveFilterHistory.Count > 0)
 				{

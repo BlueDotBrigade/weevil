@@ -2,8 +2,7 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
+	using BlueDotBrigade.Weevil.Filter;
 
 	[TestClass]
 	public class OpeningFileShould
@@ -12,7 +11,7 @@ namespace BlueDotBrigade.Weevil
 		public void OpenEmptyFile()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("EmptyFile.txt"))
+				.UsingPath(new Daten().AsFilePath("EmptyFile.txt"))
 				.Open();
 
 			Assert.AreEqual(0, engine.Count);
@@ -22,7 +21,7 @@ namespace BlueDotBrigade.Weevil
 		public void OpenFileWithOnlyWhitespace()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("FileWithOnlyWhitespace.txt"))
+				.UsingPath(new Daten().AsFilePath("FileWithOnlyWhitespace.txt"))
 				.Open();
 
 			Assert.AreEqual(1, engine.Count);
@@ -32,7 +31,7 @@ namespace BlueDotBrigade.Weevil
 		public void LoadStartingAtLineNumber()
 		{
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("GenericBaseline.log"), startAtLineNumber: 100)
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault), startAtLineNumber: 100)
 				.Open();
 
 			Assert.AreEqual(100, engine[0].LineNumber);
@@ -45,7 +44,7 @@ namespace BlueDotBrigade.Weevil
 			var fileFormatKey = "FileFormat";
 
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("LogWithSidecarContext.log"))
+				.UsingPath(new Daten().AsFilePath("LogWithSidecarContext.log"))
 				.Open();
 
 			Assert.AreEqual("1.2.3.4", engine.Context[fileFormatKey]);
@@ -63,7 +62,7 @@ namespace BlueDotBrigade.Weevil
 			};
 
 			IEngine engine = Engine
-				.UsingPath(InputData.GetFilePath("LogWithSidecarContext.log"))
+				.UsingPath(new Daten().AsFilePath("LogWithSidecarContext.log"))
 				.UsingContext(context)
 				.Open();
 

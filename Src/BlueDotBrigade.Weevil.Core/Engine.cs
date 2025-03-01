@@ -57,9 +57,14 @@
 		public LogFileMetrics Metrics => _coreEngine.Metrics;
 
 		public IFilter Filter => _coreEngine.Filter;
+
 		public INavigate Navigate => _coreEngine.Navigate;
+
 		public ISelect Selector => _coreEngine.Selector;
+
 		public IAnalyze Analyzer => _coreEngine.Analyzer;
+
+		public IRegionManager Regions => _coreEngine.Regions;
 
 		public int Count => _coreEngine.Count;
 

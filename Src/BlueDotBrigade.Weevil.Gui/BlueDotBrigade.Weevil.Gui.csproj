@@ -1,9 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<!-- If `AssemblyName` is set to any other value (e.g. WeevilGui.exe) you may experience -->
+		<!-- PostSharp `No valid license key has been installed` compiler errors (PS0242) -->
+		<!-- when using GitHub actions. -->
+		<!-- See issue: #336 -->
+		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
+		<PlatformTarget>x64</PlatformTarget>
 		<OutputType>WinExe</OutputType>
 		<Platforms>x64</Platforms>
-		<AssemblyName>WeevilGui</AssemblyName>
 		<Deterministic>false</Deterministic>
 		<PublishUrl>publish\</PublishUrl>
 		<Install>true</Install>
@@ -16,20 +23,32 @@
 		<UpdateRequired>false</UpdateRequired>
 		<MapFileExtensions>true</MapFileExtensions>
 		<ApplicationRevision>0</ApplicationRevision>
-		<Version>2.10.0</Version>
+		<Version>2.11.0</Version>
 		<ApplicationVersion>2.10.0</ApplicationVersion>
 		<IsWebBootstrapper>false</IsWebBootstrapper>
 		<UseApplicationTrust>false</UseApplicationTrust>
 		<BootstrapperEnabled>true</BootstrapperEnabled>
-		<UseWPF>true</UseWPF>
-		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<Authors>BlueDotBrigade;</Authors>
+		<Company>Blue Dot Brigade</Company>
+		<Description>An open-source C# library &amp; WPF application that facilitates the analysis of log file data, while automatically detecting known issues.</Description>
+		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+		<PackageIcon>Weevil-100.png</PackageIcon>
+		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
+		<!--
+		Following 2 lines prevent localized assemblies from being copied to the `OutputPath`.
+		-->
+		<ExcludeSatelliteResourceAssemblies>true</ExcludeSatelliteResourceAssemblies>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject>
 		</StartupObject>
 	</PropertyGroup>
 	<PropertyGroup>
-		<ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
+	  <ApplicationIcon>Resources\Icons\Weevil.ico</ApplicationIcon>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
 		<OutputPath>bin\x64\Debug\</OutputPath>
@@ -40,21 +59,30 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
-	  <None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
+		<None Remove="nlog.config" />
+		<None Remove="PostSharp.license" />
+		<None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
+		<None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
+		<None Remove="Resources\Icons\LineNumber-Data-24.png" />
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Update="Filter\FilterResultsViewModel.Commands.cs">
-			<DependentUpon>FilterResultsViewModel.cs</DependentUpon>
+		<Compile Update="Filter\FilterViewModel.Commands.cs">
+			<DependentUpon>FilterViewModel.cs</DependentUpon>
+		</Compile>
+		<Compile Update="Properties\Settings.Designer.cs">
+		  <DesignTimeSharedInput>True</DesignTimeSharedInput>
+		  <AutoGen>True</AutoGen>
+		  <DependentUpon>Settings.settings</DependentUpon>
 		</Compile>
 	</ItemGroup>
 	<ItemGroup>
-		<None Update="Resources\Images\Weevil-100.png">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
+		<None Update="Properties\Settings.settings">
+		  <Generator>SettingsSingleFileGenerator</Generator>
+		  <LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
-		<None Update="WeevilGui.exe.nlog">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<None Update="Resources\Images\Weevil-100.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
@@ -66,37 +94,34 @@
 		</CodeAnalysisDictionary>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="FluentValidation" Version="11.11.0" />
 		<PackageReference Include="gong-wpf-dragdrop">
-			<Version>2.3.2</Version>
+			<Version>3.2.1</Version>
 		</PackageReference>
-		<PackageReference Include="LiveChartsCore.SkiaSharpView.WPF">
-			<Version>2.0.0-beta.90</Version>
-		</PackageReference>
+		<PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
 		<PackageReference Include="MaterialDesignThemes">
 			<Version>4.0.0</Version>
 		</PackageReference>
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Newtonsoft.Json">
-			<Version>13.0.1</Version>
+			<Version>13.0.3</Version>
 		</PackageReference>
 		<PackageReference Include="NLog">
-			<Version>5.0.0</Version>
+			<Version>5.3.4</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp">
-			<Version>6.10.10</Version>
+			<Version>2024.1.6</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>6.10.10</Version>
+			<Version>2024.1.6</Version>
 		</PackageReference>
-		<PackageReference Include="Prism.Core" Version="8.1.97" />
+		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="System.Collections.Immutable">
-			<Version>6.0.0</Version>
+			<Version>9.0.0</Version>
 		</PackageReference>
+		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-		<PackageReference Include="System.Management" Version="6.0.0" />
-		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
+		<PackageReference Include="System.Management" Version="9.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
@@ -178,32 +203,28 @@
 	<ItemGroup>
 		<Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
 	</ItemGroup>
-	<PropertyGroup />
-	<PropertyGroup>
-		<PlatformTarget>x64</PlatformTarget>
-		<Authors>BlueDotBrigade;</Authors>
-		<Company>Blue Dot Brigade</Company>
-		<Description>An open-source C# library &amp; WPF application that facilitates the analysis of log file data, while automatically detecting known issues.</Description>
-		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
-		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
-		<PackageIcon>Weevil-100.png</PackageIcon>
-		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageTags>BlueDotBrigade;Weevil;Log Viewer;</PackageTags>
-	</PropertyGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing&#xD;&#xA;)" />
 	</Target>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Help.html&quot; &quot;$(TargetDir)..\Doc\\&quot;  /D /Y&#xD;&#xA;&#xD;&#xA;REM Create directory and copy third-party licenses&#xD;&#xA;XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Licenses&quot; &quot;$(TargetDir)..\Licenses&quot;  /D /I /E /Y&#xD;&#xA;&#xD;&#xA;COPY /A /Y &quot;$(SolutionDir)LICENSE.md&quot; &quot;$(TargetDir)..\Licenses\\License.md&quot;&#xD;&#xA;&#xD;&#xA;REM To minimize coupling, Weevil must NEVER have direct knowledge of the plugins.&#xD;&#xA;REM This is why `BlueDotBrigade.Weevil.Plugins` is not added as a project reference.&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   REM Nothing more to do.&#xD;&#xA;) else (&#xD;&#xA;   ECHO Copying plugins to Bin directory...&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.*&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;)" />
 	</Target>
-	<ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>BlueDotBrigade.Weevil.Gui-UiTests</_Parameter1>
+			<_Parameter1>BlueDotBrigade.Weevil.Gui-FeatureTests</_Parameter1>
 		</AssemblyAttribute>
+		<!-- Required by NSubstitue -->
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<!-- Required by Moq -->
 			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="nlog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\Icons\Weevil.ico" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Resource Include="Resources\Icons\LineNumber-Data-24.png" />
 	</ItemGroup>
 </Project>

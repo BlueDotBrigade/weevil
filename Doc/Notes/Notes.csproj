@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+	  <TargetFramework>net9.0</TargetFramework>
 	<Platforms>x64</Platforms>
     <RootNamespace>Notes</RootNamespace>
     <Version>2.10.0</Version>
@@ -10,5 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Link="Release\Licenses\LICENSE.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Design\MVVM\" />
   </ItemGroup>
 </Project>

@@ -41,7 +41,6 @@
 
 		public string Path { get; }
 
-		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)

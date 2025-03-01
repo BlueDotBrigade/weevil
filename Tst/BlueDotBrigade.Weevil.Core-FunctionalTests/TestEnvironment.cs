@@ -1,8 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
-	using BlueDotBrigade.DatenLokator.TestsTools.UnitTesting;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+	using BlueDotBrigade.DatenLokator.TestTools.Configuration;
 
 	[TestClass]
 	public class TestEnvironment
@@ -11,7 +11,10 @@
 		public static void Setup(TestContext context)
 		{
 			Console.WriteLine("Test environment is being prepared...");
-			InputData.Setup();
+			Lokator
+				.Get()
+				.UsingDefaultFileName("GlobalDefault.log")
+				.Setup();
 			Console.WriteLine("Test environment preparation is complete.");
 		}
 
@@ -19,7 +22,7 @@
 		public static void Teardown()
 		{
 			Console.WriteLine("Test environment is being cleaned up...");
-			InputData.Teardown();
+			Lokator.Get().TearDown();
 			Console.WriteLine("Test environment preparation is complete.");
 		}
 	}

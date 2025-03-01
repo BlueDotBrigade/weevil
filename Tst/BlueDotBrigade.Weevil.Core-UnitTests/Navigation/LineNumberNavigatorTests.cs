@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.TestingTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -64,7 +63,7 @@
 			};
 
 			Assert.AreEqual(10, new LineNumberNavigator(new ActiveRecord(records))
-				.Find(12, RecordSearchType.ClosestMatch)
+				.Find(12, RecordSearchType.NearestNeighbor)
 				.LineNumber);
 		}
 	}

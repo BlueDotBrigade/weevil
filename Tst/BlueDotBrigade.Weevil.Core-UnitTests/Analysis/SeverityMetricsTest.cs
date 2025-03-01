@@ -2,7 +2,7 @@
 {
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Moq;
+	using NSubstitute;
 
 	[TestClass]
 	public class SeverityMetricsTest
@@ -10,16 +10,16 @@
 		[TestMethod]
 		public void AdditionOperator_()
 		{
-			var record = new Mock<IRecord>();
-			record.Setup(x => x.Severity).Returns(SeverityType.Information);
+			var record = Substitute.For<IRecord>();
+			record.Severity.Returns(SeverityType.Information);
 
 			var metricsA = new SeverityMetrics();
-			metricsA.Count(record.Object); // Information=1
-			metricsA.Count(record.Object); // Information=2
-			metricsA.Count(record.Object); // Information=3
+			metricsA.Count(record); // Information=1
+			metricsA.Count(record); // Information=2
+			metricsA.Count(record); // Information=3
 
 			var metricsB = new SeverityMetrics();
-			metricsB.Count(record.Object); // Information=1
+			metricsB.Count(record); // Information=1
 
 			SeverityMetrics result = metricsA + metricsB;
 

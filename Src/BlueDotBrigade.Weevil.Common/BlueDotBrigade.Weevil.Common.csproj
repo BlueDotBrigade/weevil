@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.10.6</Version>
+    <Version>2.11.1</Version>
     <Authors>BlueDotBrigade;</Authors>
 	<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
@@ -22,7 +22,13 @@
 	<AssemblyName>BlueDotBrigade.Weevil.Common</AssemblyName>
 	<Company>Blue Dot Brigade</Company>
   </PropertyGroup>
-  <ItemGroup>
+
+	<PropertyGroup>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<AnalysisLevel>latest-all</AnalysisLevel>
+	</PropertyGroup>
+
+	<ItemGroup>
     <Compile Remove="Resources\Icons\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
     <None Remove="Resources\Icons\**" />
@@ -32,7 +38,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
+    <PackageReference Include="Text.Analyzers" Version="3.11.0-beta1.23364.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -46,5 +56,14 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>BlueDotBrigade.Weevil.Common-UnitTests</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+  
+  	<ItemGroup>
+  	  <Content Include="..\..\DomainSpecificTerminology.xml" Link="Properties\DomainSpecificTerminology.xml" />
+  	</ItemGroup>
+	<ItemGroup>
+		<CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
+			<Link>Properties\DomainSpecificTerminology.xml</Link>
+		</CodeAnalysisDictionary>
 	</ItemGroup>
 </Project>

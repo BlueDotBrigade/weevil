@@ -13,19 +13,19 @@
 		/// <summary>
 		/// Contains information that is needed in order to save & load sidecar metadata.
 		/// </summary>
-		[DataMember(Order = 100)]
+		[DataMember]
 		public Header Header { get; set; }
 
 		/// <summary>
 		/// Contains data that is plugin specific.
 		/// </summary>
-		[DataMember(Order = 200)]
+		[DataMember]
 		public PluginData PluginData { get; set; }
 
 		/// <summary>
 		/// Contains data that is common to all plugins.
 		/// </summary>
-		[DataMember(Order = 300)]
+		[DataMember]
 		public CommonData CommonData { get; set; }
 	}
 }

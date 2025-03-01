@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.TestingTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -37,34 +36,5 @@
 
 			Assert.Fail("Because only a time was provided, and no date, an exception should be thrown.");
 		}
-
-		/* RECORDS
-		 * 
-		 * SCENARIOS
-		 *
-		 * Selected=10:30
-		 * GoTo=12:00
-		 * Result=11:00
-		 *
-		 * Selected=10:30
-		 * GoTo=9:00
-		 * Result=10:00
-		 *
-		 * RULES
-		 * start with next record
-		 * for each record
-		 *		if timestamp == GoToValue
-		 *			match found
-		 *
-		 *		
-		 *	endfor
-		 */
-
-		// What is considered a match?
-		// - Pinned = true/false
-		// - Text = contains value true/false
-		// - Time = 
-		// 
-		// Time & LineNumber may need different algorithm (than Pinned & 
 	}
 }

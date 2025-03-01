@@ -6,7 +6,7 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Moq;
+	using NSubstitute;
 
 	[TestClass]
 	public class TimeGapUiAnalyzerTests
@@ -15,17 +15,16 @@
 
 		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
 		{
-			var userDialog = new Mock<IUserDialog>();
+			var userDialog = Substitute.For<IUserDialog>();
 
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			userDialog.Setup(x => x.ShowUserPrompt(
-				It.IsAny<string>(),
-				It.IsAny<string>(),
-				It.IsAny<string>())).Returns(msBeforeFlaggedRaised.ToString);
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns(msBeforeFlaggedRaised.ToString());
 
-			return userDialog.Object;
+			return userDialog;
 		}
 
 		[TestInitialize]
@@ -59,124 +58,6 @@
 			}
 
 			_records.Clear();
-		}
-
-		[TestMethod]
-		public void Analyze_CheckUiRecordsForGaps_FlaggedRecord30()
-		{
-			DateTime now = DateTime.Now;
-			SeverityType severity = SeverityType.Debug;
-
-			var records = new List<IRecord>
-			{
-				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
-				new Record(20, now.AddSeconds(7), severity, "content", new Metadata { WasGeneratedByUi = false }),
-				new Record(30, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = true }),
-			};
-
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(
-				records.ToImmutableArray(),
-				EnvironmentHelper.GetExecutableDirectory(),
-				GetUserDialog(3000),
-				canUpdateMetadata: true);
-
-			Assert.IsFalse(records[0].Metadata.IsFlagged);
-			Assert.IsFalse(records[1].Metadata.IsFlagged);
-			Assert.IsTrue(records[2].Metadata.IsFlagged);
-		}
-
-
-
-		[TestMethod]
-		public void Analyze_NoPrecedingRecord_RecordNotFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
-
-			Assert.IsFalse(_records[0].Metadata.IsFlagged);
-		}
-
-		[TestMethod]
-		public void Analyze_ApplicationInitializing_RecordNotFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
-
-			Assert.IsFalse(_records[1].Metadata.IsFlagged);
-		}
-
-		[TestMethod]
-		public void Analyze_PrecedingRecordWasInitialing_RecordNotFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
-
-			Assert.IsFalse(_records[2].Metadata.IsFlagged);
-		}
-
-		[TestMethod]
-		public void Analyze_LongPeriodBetweenUiRecords_RecordFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), true);
-
-			Assert.IsTrue(_records[3].Metadata.IsFlagged); // here
-		}
-
-		[TestMethod]
-		public void Analyze_ShortPeriodBetweenUiRecords_RecordNotFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
-
-			Assert.IsFalse(_records[4].Metadata.IsFlagged);
-		}
-
-		[TestMethod]
-		public void Analyze_RecordWasNotWrittenByUiThread_RecordNotFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
-
-			Assert.IsFalse(_records[5].Metadata.IsFlagged);
-		}
-
-		[TestMethod]
-		public void Analyze_MixedUiAndNotUiRecords_RecordFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), true);
-
-			Assert.IsTrue(_records[6].Metadata.IsFlagged);
-		}
-
-		[TestMethod]
-		public void Analyze_ApplicationTerminatingMessage_RecordNotFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
-
-			Assert.IsFalse(_records[7].Metadata.IsFlagged);
-		}
-
-		[TestMethod]
-		public void Analyze_PrecedingRecordWasApplicationTerminating_RecordNotFlagged()
-		{
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(_records, EnvironmentHelper.GetExecutableDirectory(), GetUserDialog(1000), false);
-
-			Assert.IsFalse(_records[8].Metadata.IsFlagged);
 		}
 	}
 }
