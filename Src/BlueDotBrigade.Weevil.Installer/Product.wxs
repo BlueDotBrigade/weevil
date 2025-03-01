@@ -1,4 +1,7 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+	xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util"
+	xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
+	
 	<Package Name="Weevil" Language="1033" Version="2.11.0" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079" InstallerVersion="200">
 		<SummaryInformation Manufacturer="Blue Dot Brigade" Description="Weevil" />
 
@@ -6,6 +9,13 @@
 		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
 		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
 		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
+
+		<!-- Check installed .NET Core Runtime on the target computer. -->
+		<netfx:DotNetCompatibilityCheck Id="netCoreStatus"
+										Property="NETCORESTATUS" RollForward="latestMajor"
+										RuntimeType="desktop" Version="9.0.0" Platform="x64" />
+		<Launch Condition="Installed OR NETCORESTATUS=&quot;0&quot;"
+				Message="[ProductName] requires Microsoft .NET Core 9.0 runtime (or later) to be installed.  [\[]Desktop, x64[\]]" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of Weevil is already installed." />
 		<MediaTemplate EmbedCab="yes" />
