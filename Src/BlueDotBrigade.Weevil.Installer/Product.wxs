@@ -1,4 +1,7 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+	xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util"
+	xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
+	
 	<Package Name="Weevil" Language="1033" Version="2.11.0" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079" InstallerVersion="200">
 		<SummaryInformation Manufacturer="Blue Dot Brigade" Description="Weevil" />
 
@@ -7,6 +10,13 @@
 		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
 		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
 
+		<!-- Check installed .NET Core Runtime on the target computer. -->
+		<netfx:DotNetCompatibilityCheck Id="netCoreStatus"
+										Property="NETCORESTATUS" RollForward="latestMajor"
+										RuntimeType="desktop" Version="9.0.0" Platform="x64" />
+		<Launch Condition="Installed OR NETCORESTATUS=&quot;0&quot;"
+				Message="[ProductName] requires Microsoft .NET Core 9.0 runtime (or later) to be installed.  [\[]Desktop, x64[\]]" />
+
 		<MajorUpgrade DowngradeErrorMessage="A newer version of Weevil is already installed." />
 		<MediaTemplate EmbedCab="yes" />
 
@@ -14,6 +24,11 @@
 			<ComponentGroupRef Id="weevil_bin_files" />
 			<ComponentRef Id="WeevilShortcut" />
 			<ComponentGroupRef Id="RegistryKeys" />
+			<ComponentRef Id="HelpHtmlComponent" />
+			<ComponentRef Id="LicenseMdComponent" />
+			<ComponentRef Id="Icons8LicenseComponent" />
+			<ComponentRef Id="LicenseInstallationComponent" />
+			<ComponentRef Id="ThirdPartyNoticesComponent" />
 		</Feature>
 	</Package>
 
@@ -26,14 +41,13 @@
 			<StandardDirectory Id="ProgramFiles64Folder">
 				<Directory Id="BlueDotBrigade" Name="BlueDotBrigade">
 					<Directory Id="INSTALLFOLDER" Name="Weevil">
-						<Directory Id="BinDir" Name="Bin" />
-						<Directory Id="LicenseDir" Name="License" />
+						<Directory Id="InstallFolderBin" Name="Bin" />
+						<Directory Id="LicenseDir" Name="Licenses" />
 						<Directory Id="DocDir" Name="Doc" />
 					</Directory>
 				</Directory>
 			</StandardDirectory>
 		</Fragment>
-
 	<Fragment>
 		<!--
 			HKCU = HKEY_CURRENT_USER
@@ -47,12 +61,37 @@
 			</Component>
 		</ComponentGroup>
 	</Fragment>
+<Fragment>
+	
+  <!-- Install Help.html to the DocDir -->
+  <DirectoryRef Id="DocDir">
+    <Component Id="HelpHtmlComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AA">
+      <File Id="HelpHtmlFile" Source="$(var.SourceDirPath)\..\Doc\Help.html" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
+
+  <!-- Install License.md to the LicenseDir -->
+  <DirectoryRef Id="LicenseDir">
+    <Component Id="LicenseMdComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AB">
+      <File Id="LicenseMdFile" Source="$(var.SourceDirPath)\..\Licenses\License.md" KeyPath="yes" />
+    </Component>
+	<Component Id="Icons8LicenseComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AC">
+		<File Id="Icons8LicenseFile" Source="$(var.SourceDirPath)\..\Licenses\icons8-license.pdf" KeyPath="yes" />
+	</Component>
+	<Component Id="LicenseInstallationComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AD">
+		<File Id="LicenseInstallationFile" Source="$(var.SourceDirPath)\..\Licenses\License-Installation.rtf" KeyPath="yes" />
+	</Component>
+	<Component Id="ThirdPartyNoticesComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AE">
+		<File Id="ThirdPartyNoticesFile" Source="$(var.SourceDirPath)\..\Licenses\ThirdPartyNoticesAndInformation.txt" KeyPath="yes" />
+	</Component>
+  </DirectoryRef>
+</Fragment>
 
 	<Fragment>
 		<DirectoryRef Id="WeevilShortcutDir">
 			<!-- Hotkey: 87 (W) + 8192 (Ctrl) + 16384 (Alt) = 24663 -->
 			<Component Id="WeevilShortcut" Guid="BDBCC900-E933-4FF7-8E2C-B167BD12891D">
-				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[BinDir]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="BinDir" Hotkey="24663" />
+				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" Hotkey="24663" />
 				<!-- 
 				The KeyPath attribute is set to yes, which means that this registry key 
 				is the key path for the component. The Windows Installer uses the key path 

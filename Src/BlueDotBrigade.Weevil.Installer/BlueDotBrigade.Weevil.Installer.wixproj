@@ -1,16 +1,23 @@
-﻿<Project Sdk="WixToolset.Sdk/4.0.0">
+﻿<Project Sdk="WixToolset.Sdk/5.0.0">
 	<PropertyGroup>
+		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
 		<ProductVersion>2.11.0</ProductVersion>
-		<DefineConstants>SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net6.0-windows\</DefineConstants>
+		<OutputName>Weevil-$(ProductVersion)</OutputName>
+		<Name>BlueDotBrigade.Weevil.Installer</Name>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-		<OutputPath>bin\Debug\x64\</OutputPath>
-		<OutputName>Weevil-$(ProductVersion)</OutputName>
+		<DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows\;</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-		<OutputPath>bin\Release\x64\</OutputPath>
-		<OutputName>Weevil-$(ProductVersion)</OutputName>
+		<DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows\;</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+		<None Include="ReadMe.md" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="WixToolset.Netfx.wixext" Version="5.0.2" />
+		<PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj">
 			<Name>BlueDotBrigade.Weevil.Gui</Name>
@@ -31,4 +38,11 @@
 			<Link>License-Installation.rtf</Link>
 		</None>
 	</ItemGroup>
+	<!-- 
+	KNOWN ISSUE 
+	The Visual Studio team confirmed this issue is a breaking change in VS2022 17.13. 
+	We'll address the breaking change when one of our customers requires it. 
+	https://github.com/firegiant/HeatWaveSupport/issues/73
+	-->
+	<Target Name="CollectSuggestedVisualStudioComponentIds" />
 </Project>

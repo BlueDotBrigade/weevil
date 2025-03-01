@@ -39,6 +39,7 @@
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 	using System.Windows.Input;
 	using PostSharp.Extensibility;
+	using System.Net.Http;
 
 	[NotifyPropertyChanged()]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
@@ -157,25 +158,13 @@
 
 			try
 			{
-				Stream newReleaseStream = null;
-
-#if DEBUG
-				var solutionDirectory = EnvironmentHelper.GetSolutionDirectory();
-				var applicationInfoPath = Path.Combine(solutionDirectory, @"Doc\Notes\Release\NewReleaseNotification.xml");
-
-				if (File.Exists(applicationInfoPath))
+				using (HttpClient client = new HttpClient())
 				{
-					newReleaseStream = FileHelper.Open(applicationInfoPath);
-				}
-				else
-				{
-					Debug.Assert(false, $"File not found. Path=`{applicationInfoPath}`");
-				}
-#else
-				newReleaseStream = new System.Net.WebClient().OpenRead(NewReleaseUrl);
-#endif
+					var webRequest = new HttpRequestMessage(HttpMethod.Get, NewReleaseUrl);
+					var response = client.Send(webRequest);
 
-				result = TypeFactory.LoadFromXml<ApplicationInfo>(newReleaseStream);
+					result = TypeFactory.LoadFromXml<ApplicationInfo>(response.Content.ReadAsStream());
+				}
 			}
 			catch (Exception e) 
 			{
