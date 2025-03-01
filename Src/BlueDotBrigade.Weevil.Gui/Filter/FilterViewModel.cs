@@ -969,6 +969,14 @@
 			FilterAsynchronously(FilterType.PlainText, filter);
 		}
 
+		private void FilterByRegions()
+		{
+			var configuration = GetFilterConfiguration();
+			var filter = new FilterCriteria("@Regions", string.Empty, configuration);
+
+			FilterAsynchronously(FilterType.PlainText, filter);
+		}
+
 		public void ToggleFilters()
 		{
 			if (_engine.Filter.Criteria.Equals(FilterCriteria.None))

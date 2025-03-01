@@ -1,11 +1,11 @@
-﻿# Weevil: Setup Guide
+﻿# Weevil: Installation Guide
 
 ## Requirements
 
 - 8GB of RAM
   - 16GB of RAM is strongly recommended.
-- [.Net Framework 4.8 Runtime](https://dotnet.microsoft.com/download/dotnet-framework)
-	- This depenedency must be installed before starting *Weevil*.
+- [.NET Core 9 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-9.0.200-windows-x64-installer)
+	- This dependency must be installed before starting *Weevil*.
 
 ## Installation
 

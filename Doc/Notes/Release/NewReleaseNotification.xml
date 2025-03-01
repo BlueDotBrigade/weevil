@@ -8,8 +8,8 @@
 -->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
-	<CodeName>Harder, Better, Faster, Stronger</CodeName>
-	<Description>Running on .NET Core 6, this version includes performance improvements &amp; new dashboard insight.</Description>
+	<CodeName>Sucker for Pain</CodeName>
+	<Description>Configurable font size, regions of interest, simplified UI, and more!</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.10.0</LatestRelease>
+	<LatestRelease>2.11.0</LatestRelease>
 </ApplicationInfo>
