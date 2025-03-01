@@ -79,6 +79,7 @@
 
         <KeyBinding Key="M" Modifiers="Ctrl+Shift" Command="{Binding FilterByCommentCommand}" />
         <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding FilterByPinnedCommand}" />
+        <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding FilterByRegionsCommand}" />
 
         <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding ClipboardCopyTimestampsCommand}" />
 
@@ -299,6 +300,7 @@
                         <Separator/>
                         <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <MenuItem Header="Show Pinned Records" Command="{Binding FilterByPinnedCommand}" InputGestureText="Ctrl+Shift+P" />
+                        <MenuItem Header="Show Regions" Command="{Binding FilterByRegionsCommand}" InputGestureText="Ctrl+Shift+R" />
                         <Separator/>
                         <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
                     </MenuItem>
