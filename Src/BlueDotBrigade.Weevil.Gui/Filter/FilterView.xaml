@@ -538,7 +538,7 @@
                 </CheckBox>
 
                 <ComboBox x:Name="ApplicationFontSizeComboBox"
-                  Width="100" Margin="0,4,8,4"
+                  Width="100" Margin="100,4,8,4"
                   SelectedValuePath="Content"
                   IsTextSearchEnabled="False"
                   SelectionChanged="ApplicationFontSizeComboBox_SelectionChanged"
@@ -556,10 +556,11 @@
                 <!-- Row Font Size -->
                 <Slider 
                     x:Name="RowFontSizeSlider"
-                    Width="100" Margin="0,8,8,4"
+                    Width="100" Margin="20,8,8,4"
                     Minimum="10" Maximum="18" 
-                    TickFrequency="1"
-                    SmallChange="1" LargeChange="2"
+                    TickFrequency="0.5"
+                    SmallChange="0.5" LargeChange="1"
+                    IsSnapToTickEnabled="True"
                     ValueChanged="RowFontSizeSlider_ValueChanged">
                     <Slider.ToolTip>
                         <ToolTip DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
