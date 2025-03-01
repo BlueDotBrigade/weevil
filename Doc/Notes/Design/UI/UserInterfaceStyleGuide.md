@@ -54,6 +54,33 @@ Has Data Requiring Attention
 
 ## Appendices
 
+### Appendix C: Color Palette
+
+- Dark Mode Backgrounds → #1A1A1A, #2C2C2C, #3C3C3C
+- Text on Dark UI → #C0C0C0 (for contrast)
+- Borders & Dividers → #6B6B6B, #7F7F7F
+- Disabled States → #949494, #A9A9A9
+- Light Mode Backgrounds → #EEEEEE, #FAFAFA, #FFFFFF
+- Hover Effects → Slightly lighter or darker versions of primary elements
+
+Grayscale Palette:
+
+- #1A1A1A – Very Dark Gray (near-black, great for deep backgrounds)
+- #2C2C2C – Dark Gray (UI elements, dark mode backgrounds)
+- #3C3C3C – Charcoal Gray (Yes, good for text on dark UI, subtle borders)
+- #525252 – Medium-Dark Gray (Hover states, secondary text on dark UI)
+- #6B6B6B – Muted Gray (Dividers, secondary elements)
+- #7F7F7F – Neutral Gray (Inactive icons, disabled buttons)
+- #949494 – Medium-Light Gray (Yes, good for placeholder text, soft backgrounds)
+- #A9A9A9 – Soft Gray (UI separators, subtle accents)
+- #C0C0C0 – Light Gray (Form backgrounds, low emphasis text)
+- #D6D6D6 – Lighter Gray (Input fields, light theme borders)
+- #E0E0E0 – Very Light Gray (Disabled controls, minimal contrast elements)
+- #EEEEEE – Almost White (Alternative background)
+- #F5F5F5 – Ultra Light Gray (Background shading)
+- #FAFAFA – Near White (Softest UI elements)
+- #FFFFFF – Pure White (High contrast backgrounds)
+
 ### Appendix S: Icon Source
 
 Many of the Weevil icons have been sourced from [Icons8.com][Icons8] which allows content to be used free of charge provided that:

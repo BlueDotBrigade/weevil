@@ -41,6 +41,7 @@
         <KeyBinding Key="F1" Modifiers="Ctrl" Command="{Binding ShowAboutCommand}" />
 
         <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{Binding SaveSelectedAsRawCommand}" />
+        <KeyBinding Key="S" Modifiers="Ctrl+Alt" Command="{Binding SaveSelectedAsTsvCommand}" />
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
         <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
 
@@ -49,7 +50,8 @@
         <KeyBinding Key="F3" Modifiers="Shift" Command="{Binding FindPreviousCommand}" />
         <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding GoToCommand}" />
 
-        <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
+        <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ClipboardCopyRawCommand}" />
+        <KeyBinding Key="C" Modifiers="Ctrl+Alt" Command="{Binding ClipboardCopySimpleCallStackCommand}" />
         <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ClipboardPasteCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
@@ -247,39 +249,38 @@
             <ListView.ContextMenu>
                 <ContextMenu FontSize="{DynamicResource ApplicationFontSize}">
                     <MenuItem Header="File">
-                        <MenuItem Header="Open Document" Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
-                        <MenuItem Header="Save Document" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
+                        <MenuItem Header="Open..." Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
+                        <MenuItem Header="Save" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
                         <Separator />
-                        <MenuItem Header="Export Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
-                        <MenuItem Header="Export Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" />
-                        <MenuItem Header="Export Comment Timeline" Command="{Binding SaveCommentSummaryCommand}" />
+                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
+                        <Separator />
+                        <MenuItem Header="EXPORT" IsEnabled="False" FontWeight="Bold"/>
+                        <MenuItem Header="Original Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
+                        <MenuItem Header="Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" InputGestureText="Ctrl+Alt+S"/>
+                        <MenuItem Header="Comment Timeline" Command="{Binding SaveCommentSummaryCommand}" />
                     </MenuItem>
 
                     <MenuItem Header="Edit">
-                        <MenuItem Header="Copy Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+C" />
-                        <MenuItem Header="Copy Raw Records" Command="{Binding ClipboardCopyRawCommand}" />
-                        <MenuItem Header="Copy Comments" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
-                        <MenuItem Header="Copy Line Numbers" Command="{Binding ClipboardCopyLineNumbersCommand}" />
-                        <MenuItem Header="Copy Timestamps" Command="{Binding ClipboardCopyTimestampsCommand}" InputGestureText="Ctrl+T"/>
+                        <MenuItem Header="COPY" IsEnabled="False" FontWeight="Bold"/>
+                        <MenuItem Header="Original Records" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C"/>
+                        <MenuItem Header="Simplified Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+Alt+C" />
+                        <MenuItem Header="Comment Timeline" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
+                        <MenuItem Header="Line Numbers" Command="{Binding ClipboardCopyLineNumbersCommand}" />
+                        <MenuItem Header="Timestamps" Command="{Binding ClipboardCopyTimestampsCommand}" InputGestureText="Ctrl+T"/>
                         <Separator/>
-                        <MenuItem Header="Paste Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
-                        <Separator/>
-                        <MenuItem Header="Overwrite Comments" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
+                        <MenuItem Header="PASTE" IsEnabled="False" FontWeight="Bold"/>
+                        <MenuItem Header="Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
+                        <MenuItem Header="Comments (Overwrite)" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
                     </MenuItem>
-                    
+
                     <MenuItem Header="View">
-                        <MenuItem Header="Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
-                        <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
-                        <Separator />
                         <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
                         <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
-                        <Separator/>
-                        <MenuItem Header="Reload Document" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
                     </MenuItem>
 
                     <Separator/>
 
-                    <MenuItem Header="Clear ...">
+                    <MenuItem Header="Clear">
                         <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
                         <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
                         <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
@@ -293,13 +294,13 @@
                     
                     <Separator/>
 
-                    <MenuItem Header="Filter ...">
+                    <MenuItem Header="Filter">
                         <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
                         <Separator/>
                         <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <MenuItem Header="Show Pinned Records" Command="{Binding FilterByPinnedCommand}" InputGestureText="Ctrl+Shift+P" />
                         <Separator/>
-                        <MenuItem Header="Re-Apply Filters" Command="{Binding ReApplyFiltersCommand}" InputGestureText="F5" />
+                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
                     </MenuItem>
 
                     <MenuItem Header="Navigate">
@@ -320,17 +321,20 @@
                         <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
                         <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
                     </MenuItem>
-                    <MenuItem Header="Analyze ...">
+                    <MenuItem Header="Analyze">
+                        <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+                        <MenuItem Header="Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
+                        <Separator />
                         <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
                         <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
                         <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
                         <Separator/>
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
-                        <MenuItem Header="Detect Data Transitions" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
+                        <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
                         <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
                         <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
                         <Separator/>
-                        <MenuItem Header="Measure Elapsed Time (UI Thread)" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
+                        <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
                         <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
                         <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomaly}" />
                         <Separator />
@@ -480,7 +484,7 @@
                                         </Border.Style>
                                         <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
                                                 Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
-                                                ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the full, unmodified version."/>
+                                                ToolTip="This record has been shortened for readability. Press Ctrl+Alt+C to copy the original record content."/>
                                     </Border>
                                 </TextBlock>
                                     

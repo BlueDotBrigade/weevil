@@ -982,7 +982,7 @@
 			}
 		}
 
-		private void ReApplyFilters()
+		private void Refresh()
 		{
 			_engine.Filter.ReApply();
 		}
