@@ -1,155 +1,277 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
     <Fragment>
         <DirectoryRef Id="InstallFolderBin">
-            <Component Id="BlueDotBrigade.Weevil.Common.dll" Guid="{2E7B6B62-78A3-4B54-B448-2242C6211647}">
+            <Component Id="BlueDotBrigade.Weevil.Common.dll" Guid="{BBD22EA9-7D2E-452D-AD35-C42874DB76E3}">
                 <File Id="BlueDotBrigade.Weevil.Common.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Common.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Common.pdb" Guid="{B5D14101-C848-46FB-AB0F-F746A97C33CA}">
+            <Component Id="BlueDotBrigade.Weevil.Common.pdb" Guid="{63F34BBC-9603-4C5F-A417-D90D68AAC269}">
                 <File Id="BlueDotBrigade.Weevil.Common.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Common.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Core.dll" Guid="{CBAF8F4C-1331-4284-8B49-6AB07EB9F52F}">
+            <Component Id="BlueDotBrigade.Weevil.Core.dll" Guid="{6167AC01-DCF4-4E02-9AE4-16483DE97E23}">
                 <File Id="BlueDotBrigade.Weevil.Core.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Core.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Core.pdb" Guid="{9F996F1E-877A-49E2-9E09-6865F614644E}">
+            <Component Id="BlueDotBrigade.Weevil.Core.pdb" Guid="{E656608F-2F0A-4587-ADF9-50ECE19934CF}">
                 <File Id="BlueDotBrigade.Weevil.Core.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Core.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.deps.json" Guid="{68DAB471-D2E3-4624-BBA7-34226A02C0BC}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.deps.json" Guid="{F4B61320-C40C-489C-8A04-08A40B9405A5}">
                 <File Id="BlueDotBrigade.Weevil.Gui.deps.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.deps.json" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.dll" Guid="{0E1D39F4-3692-43E0-8DB2-CB36D108ADE8}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.dll" Guid="{F30E684F-FC1B-4071-B31C-5CC3AF0946C9}">
                 <File Id="BlueDotBrigade.Weevil.Gui.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.dll.config" Guid="{76029F82-1C5C-433C-9B16-ACAAA1BC725E}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.dll.config" Guid="{A1089036-F6AC-4BAA-B38C-7DBA30041F99}">
                 <File Id="BlueDotBrigade.Weevil.Gui.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.dll.config" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.exe" Guid="{D99C124B-D2D5-4D31-87A8-8F624969D424}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.exe" Guid="{E7107B90-7C55-44AD-9955-D55DE70F7C58}">
                 <File Id="BlueDotBrigade.Weevil.Gui.exe" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.exe" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pdb" Guid="{6EECA3D4-288D-4AAB-930D-4441D5D829D5}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.pdb" Guid="{81BDE419-6D92-4168-9B3B-47B2CF0A4082}">
                 <File Id="BlueDotBrigade.Weevil.Gui.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pspdb" Guid="{2C9E93ED-CA82-4D94-A16E-59A39CFE9642}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.pspdb" Guid="{1EC7624F-0A32-49FB-BAF0-3CFF1A5DD8F7}">
                 <File Id="BlueDotBrigade.Weevil.Gui.pspdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pspdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pssym" Guid="{2AD00D7C-4CB5-4D99-9B6A-448602B0A4F8}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.pssym" Guid="{5C30592F-FE71-496A-B533-51A84F420E2D}">
                 <File Id="BlueDotBrigade.Weevil.Gui.pssym" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pssym" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" Guid="{2F46ACC0-F409-48BF-AB78-A5495420B34F}">
+            <Component Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" Guid="{F6D77353-0A05-49A8-B693-59774BEA97CD}">
                 <File Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Windows.dll" Guid="{FBFB2ABF-28E5-4563-BEAB-D958930E00B1}">
+            <Component Id="BlueDotBrigade.Weevil.PowerShell.deps.json" Guid="{04930803-2AA8-4DC9-9841-0AF7876ABED9}">
+                <File Id="BlueDotBrigade.Weevil.PowerShell.deps.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.PowerShell.deps.json" />
+            </Component>
+            <Component Id="BlueDotBrigade.Weevil.PowerShell.dll" Guid="{395FAE24-3C62-4F84-8BD0-C34B317D3F48}">
+                <File Id="BlueDotBrigade.Weevil.PowerShell.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.PowerShell.dll" />
+            </Component>
+            <Component Id="BlueDotBrigade.Weevil.PowerShell.pdb" Guid="{7F1A5B35-9FB8-46DF-A9C8-F76E7DB7AC95}">
+                <File Id="BlueDotBrigade.Weevil.PowerShell.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.PowerShell.pdb" />
+            </Component>
+            <Component Id="BlueDotBrigade.Weevil.PowerShell.xml" Guid="{1406D82D-E613-4BBE-BD44-A00422C31ACB}">
+                <File Id="BlueDotBrigade.Weevil.PowerShell.xml" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.PowerShell.xml" />
+            </Component>
+            <Component Id="BlueDotBrigade.Weevil.Windows.dll" Guid="{8F475F7C-A5D7-4DD1-B97A-719A662B0262}">
                 <File Id="BlueDotBrigade.Weevil.Windows.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Windows.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Windows.pdb" Guid="{F1DC1E6B-3BE1-43C2-B767-271AF0D6F797}">
+            <Component Id="BlueDotBrigade.Weevil.Windows.pdb" Guid="{9471D9BC-C5B9-4D0B-91BD-FADD075052F4}">
                 <File Id="BlueDotBrigade.Weevil.Windows.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Windows.pdb" />
             </Component>
-            <Component Id="FluentValidation.dll" Guid="{385367B9-719E-454F-8DBD-006CBC5BB3D6}">
+            <Component Id="Cocona.Core.dll" Guid="{CE791486-755D-480E-AEAA-64A9A0C810AE}">
+                <File Id="Cocona.Core.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Cocona.Core.dll" />
+            </Component>
+            <Component Id="Cocona.dll" Guid="{09C7BF48-B630-4F92-8F1A-831B48211A2E}">
+                <File Id="Cocona.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Cocona.dll" />
+            </Component>
+            <Component Id="FluentValidation.dll" Guid="{5724FCE3-4162-4AAA-AA5B-37E4E9185269}">
                 <File Id="FluentValidation.dll" KeyPath="yes" Source="$(var.SourceDirPath)\FluentValidation.dll" />
             </Component>
-            <Component Id="GongSolutions.WPF.DragDrop.dll" Guid="{93845BB4-093A-4EA3-8ECC-3FB6413FB674}">
+            <Component Id="GongSolutions.WPF.DragDrop.dll" Guid="{462EE104-CD7E-46AB-B5C5-7698F8A6E60B}">
                 <File Id="GongSolutions.WPF.DragDrop.dll" KeyPath="yes" Source="$(var.SourceDirPath)\GongSolutions.WPF.DragDrop.dll" />
             </Component>
-            <Component Id="HarfBuzzSharp.dll" Guid="{2ABAD2F7-95A0-4ED4-B4E7-874D3664FDF1}">
+            <Component Id="HarfBuzzSharp.dll" Guid="{7B3CCF4F-2DCE-433E-BD86-EDF8FC3AFD73}">
                 <File Id="HarfBuzzSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\HarfBuzzSharp.dll" />
             </Component>
-            <Component Id="LiveChartsCore.dll" Guid="{B2242ACB-BF64-40E7-ABF7-50E58F8357F3}">
+            <Component Id="LiveChartsCore.dll" Guid="{F7BE3AA6-8DA7-4019-95BC-71068232DD46}">
                 <File Id="LiveChartsCore.dll" KeyPath="yes" Source="$(var.SourceDirPath)\LiveChartsCore.dll" />
             </Component>
-            <Component Id="LiveChartsCore.SkiaSharpView.dll" Guid="{6D6EC38F-EDF5-44AE-9926-B926C122A052}">
+            <Component Id="LiveChartsCore.SkiaSharpView.dll" Guid="{71A7F3CC-7DF6-4E56-85C1-D6494850CF53}">
                 <File Id="LiveChartsCore.SkiaSharpView.dll" KeyPath="yes" Source="$(var.SourceDirPath)\LiveChartsCore.SkiaSharpView.dll" />
             </Component>
-            <Component Id="LiveChartsCore.SkiaSharpView.WPF.dll" Guid="{64998CD0-B899-4AA5-AF07-53BCF52BDBFC}">
+            <Component Id="LiveChartsCore.SkiaSharpView.WPF.dll" Guid="{68D19A2B-7108-4CD4-9A16-F6D7C0F62031}">
                 <File Id="LiveChartsCore.SkiaSharpView.WPF.dll" KeyPath="yes" Source="$(var.SourceDirPath)\LiveChartsCore.SkiaSharpView.WPF.dll" />
             </Component>
-            <Component Id="MaterialDesignColors.dll" Guid="{213DD3B3-E9E2-40D0-B205-BB88BD8062E4}">
+            <Component Id="MaterialDesignColors.dll" Guid="{004D300E-7380-49C5-920B-365824328350}">
                 <File Id="MaterialDesignColors.dll" KeyPath="yes" Source="$(var.SourceDirPath)\MaterialDesignColors.dll" />
             </Component>
-            <Component Id="MaterialDesignThemes.Wpf.dll" Guid="{D74AE84F-C33D-4260-B70C-C34BFA5B284F}">
+            <Component Id="MaterialDesignThemes.Wpf.dll" Guid="{6A10C0F6-3F7A-47B2-B1BA-46D39D9D6771}">
                 <File Id="MaterialDesignThemes.Wpf.dll" KeyPath="yes" Source="$(var.SourceDirPath)\MaterialDesignThemes.Wpf.dll" />
             </Component>
-            <Component Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Guid="{255AB264-9E98-430A-ABFE-35A55F3627CB}">
+            <Component Id="Microsoft.Extensions.Configuration.Abstractions.dll" Guid="{656AB652-ECD0-4ADB-8BA5-A5396CF07A44}">
+                <File Id="Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.Abstractions.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Configuration.Binder.dll" Guid="{EEC0470E-FF61-45F5-BB30-643C34868AA6}">
+                <File Id="Microsoft.Extensions.Configuration.Binder.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.Binder.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Configuration.CommandLine.dll" Guid="{795217B4-7518-428F-8178-BAB65A3AB0B1}">
+                <File Id="Microsoft.Extensions.Configuration.CommandLine.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.CommandLine.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Configuration.dll" Guid="{D8BF8249-F5D5-491A-9C96-EA8BEC1ED70D}">
+                <File Id="Microsoft.Extensions.Configuration.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" Guid="{093A3C85-0DBA-4D93-97B8-065CF64F35DE}">
+                <File Id="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.EnvironmentVariables.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Configuration.FileExtensions.dll" Guid="{8FE83E12-3436-4C3A-AB04-89DDC6814BDF}">
+                <File Id="Microsoft.Extensions.Configuration.FileExtensions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.FileExtensions.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Configuration.Json.dll" Guid="{01545FC6-416F-4597-8DEC-3159485977CE}">
+                <File Id="Microsoft.Extensions.Configuration.Json.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.Json.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Configuration.UserSecrets.dll" Guid="{46AEF812-263B-475F-A76E-F8189D5A8185}">
+                <File Id="Microsoft.Extensions.Configuration.UserSecrets.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Configuration.UserSecrets.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Guid="{6C19C695-26BF-4761-95AF-615E4092F71E}">
                 <File Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
             </Component>
-            <Component Id="Newtonsoft.Json.dll" Guid="{CCB0CAD3-5A4D-4013-BD9B-1774ED543DAC}">
+            <Component Id="Microsoft.Extensions.DependencyInjection.dll" Guid="{FAD2051B-0145-46E1-A74B-64EEDE4635B5}">
+                <File Id="Microsoft.Extensions.DependencyInjection.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.DependencyInjection.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.FileProviders.Abstractions.dll" Guid="{ACC5391D-C90B-4154-9ABB-8195521553A6}">
+                <File Id="Microsoft.Extensions.FileProviders.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.FileProviders.Abstractions.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.FileProviders.Physical.dll" Guid="{17BCF11E-C53C-4950-939A-F6F74D9A2F5D}">
+                <File Id="Microsoft.Extensions.FileProviders.Physical.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.FileProviders.Physical.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.FileSystemGlobbing.dll" Guid="{C39F5224-07D7-4FB9-B781-9107D6A2D919}">
+                <File Id="Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.FileSystemGlobbing.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Hosting.Abstractions.dll" Guid="{87C4885C-ACAB-48A3-988F-05195D60108D}">
+                <File Id="Microsoft.Extensions.Hosting.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Hosting.Abstractions.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Hosting.dll" Guid="{E4E6F00B-89E4-451F-90EB-CAA2D8ABE668}">
+                <File Id="Microsoft.Extensions.Hosting.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Hosting.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Logging.Abstractions.dll" Guid="{5224C657-C9B1-40CA-A30B-61E18B4B488F}">
+                <File Id="Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Logging.Abstractions.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Logging.Configuration.dll" Guid="{26A5236D-D8F4-4902-ADD6-AE644B73034A}">
+                <File Id="Microsoft.Extensions.Logging.Configuration.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Logging.Configuration.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Logging.Console.dll" Guid="{A5059D7C-82C8-45FE-A30B-7BB4141DB8AD}">
+                <File Id="Microsoft.Extensions.Logging.Console.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Logging.Console.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Logging.Debug.dll" Guid="{B9B0A3A2-9B85-4475-B9A4-60282F373253}">
+                <File Id="Microsoft.Extensions.Logging.Debug.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Logging.Debug.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Logging.dll" Guid="{4DC0D6D5-7913-4EB4-95C3-8F1B99379E50}">
+                <File Id="Microsoft.Extensions.Logging.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Logging.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Logging.EventLog.dll" Guid="{601B187D-4A38-4811-A63D-6F92A0A35BDF}">
+                <File Id="Microsoft.Extensions.Logging.EventLog.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Logging.EventLog.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Logging.EventSource.dll" Guid="{2B96171C-E06C-4352-9BA4-19DC78F9E6B3}">
+                <File Id="Microsoft.Extensions.Logging.EventSource.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Logging.EventSource.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Options.ConfigurationExtensions.dll" Guid="{1D74ADF1-7E49-4D32-A678-CFD0AE26E8CB}">
+                <File Id="Microsoft.Extensions.Options.ConfigurationExtensions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Options.ConfigurationExtensions.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Options.dll" Guid="{C199E5F3-43D5-4CB9-B925-CECEA20C0AA8}">
+                <File Id="Microsoft.Extensions.Options.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Options.dll" />
+            </Component>
+            <Component Id="Microsoft.Extensions.Primitives.dll" Guid="{D6AFA50F-B6FC-437B-9AA6-01A5F2760802}">
+                <File Id="Microsoft.Extensions.Primitives.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Microsoft.Extensions.Primitives.dll" />
+            </Component>
+            <Component Id="Newtonsoft.Json.dll" Guid="{B096477B-3028-43CF-873C-374E3E4D5611}">
                 <File Id="Newtonsoft.Json.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Newtonsoft.Json.dll" />
             </Component>
-            <Component Id="nlog.config" Guid="{54E0F4D7-3D35-43A8-85E7-7E6F5196428E}">
+            <Component Id="nlog.config" Guid="{924F8869-A3BF-480E-A66E-0F5DB04CAF7E}">
                 <File Id="nlog.config" KeyPath="yes" Source="$(var.SourceDirPath)\nlog.config" />
             </Component>
-            <Component Id="NLog.dll" Guid="{19184A2A-B57E-4828-9ECF-908CF806E5B1}">
+            <Component Id="NLog.dll" Guid="{46349807-4C34-4A4C-BB6B-46971D61898C}">
                 <File Id="NLog.dll" KeyPath="yes" Source="$(var.SourceDirPath)\NLog.dll" />
             </Component>
-            <Component Id="PostSharp.dll" Guid="{46ABA76E-58EE-44EE-A1E3-DEA9EAEDF9AE}">
+            <Component Id="PostSharp.dll" Guid="{2265B6A8-663B-43F0-BF31-F3E41E05CFF2}">
                 <File Id="PostSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.dll" />
             </Component>
-            <Component Id="PostSharp.Patterns.Aggregation.dll" Guid="{D9B615F2-84AC-41DB-9BE7-82424E07616C}">
+            <Component Id="PostSharp.Patterns.Aggregation.dll" Guid="{D70E1DEA-E47C-4D9C-AD32-5A2F33B0D129}">
                 <File Id="PostSharp.Patterns.Aggregation.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Aggregation.dll" />
             </Component>
-            <Component Id="PostSharp.Patterns.Common.dll" Guid="{51DE89AF-8BB1-446A-88C4-C5E7326C58AB}">
+            <Component Id="PostSharp.Patterns.Common.dll" Guid="{64C08FD9-4CBB-43C1-AA7E-AA48E13A4D1D}">
                 <File Id="PostSharp.Patterns.Common.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Common.dll" />
             </Component>
-            <Component Id="PostSharp.Patterns.Model.dll" Guid="{76FBA99A-C4B3-4F8E-9CAB-CF8E9F298CBA}">
+            <Component Id="PostSharp.Patterns.Model.dll" Guid="{0C70D3D9-3706-4336-B176-474C56035514}">
                 <File Id="PostSharp.Patterns.Model.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Model.dll" />
             </Component>
-            <Component Id="Prism.Container.Abstractions.dll" Guid="{85AD79E7-A97C-4403-BE8A-C63D24559C4A}">
+            <Component Id="Prism.Container.Abstractions.dll" Guid="{A1BB3CB8-4C95-4AE4-A7D4-69E22A6E8D99}">
                 <File Id="Prism.Container.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Prism.Container.Abstractions.dll" />
             </Component>
-            <Component Id="Prism.dll" Guid="{DE3B362B-1C50-467E-A9C3-DD54A9CBCE7B}">
+            <Component Id="Prism.dll" Guid="{D5C5C346-19DE-4967-9FEB-D3C7540EDD99}">
                 <File Id="Prism.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Prism.dll" />
             </Component>
-            <Component Id="Prism.Events.dll" Guid="{54CB370B-92D8-404C-BE6D-0A6F7A8041A3}">
+            <Component Id="Prism.Events.dll" Guid="{CF137B35-03C2-4779-81D0-C15F463156A8}">
                 <File Id="Prism.Events.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Prism.Events.dll" />
             </Component>
-            <Component Id="SkiaSharp.dll" Guid="{CC5938EF-8809-4FD9-830C-AE817C0A9EDA}">
+            <Component Id="SkiaSharp.dll" Guid="{112535DD-8539-4645-A0EC-D35547A199FF}">
                 <File Id="SkiaSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.dll" />
             </Component>
-            <Component Id="SkiaSharp.HarfBuzz.dll" Guid="{1E844EA5-59DE-496C-9AFF-CF494B9BB00D}">
+            <Component Id="SkiaSharp.HarfBuzz.dll" Guid="{B29D35D0-ED9A-4439-9CA9-5B843EEAED3E}">
                 <File Id="SkiaSharp.HarfBuzz.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.HarfBuzz.dll" />
             </Component>
-            <Component Id="SkiaSharp.Views.Desktop.Common.dll" Guid="{D43AB33F-BC39-43CC-9DB3-E140BBEEB97C}">
+            <Component Id="SkiaSharp.Views.Desktop.Common.dll" Guid="{04383B14-41AA-46CC-AFBC-CD644A1EE87C}">
                 <File Id="SkiaSharp.Views.Desktop.Common.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.Views.Desktop.Common.dll" />
             </Component>
-            <Component Id="SkiaSharp.Views.WPF.dll" Guid="{56AE8871-2BA8-493F-A854-79211FF421CB}">
+            <Component Id="SkiaSharp.Views.WPF.dll" Guid="{235EB07E-81C9-46CE-B6D8-0FEB46185D76}">
                 <File Id="SkiaSharp.Views.WPF.dll" KeyPath="yes" Source="$(var.SourceDirPath)\SkiaSharp.Views.WPF.dll" />
             </Component>
-            <Component Id="System.ComponentModel.Composition.dll" Guid="{D4F6C873-BC23-4682-8E0E-6923F7CF990F}">
+            <Component Id="System.ComponentModel.Composition.dll" Guid="{616E473C-6C15-4036-8451-1D89D5478729}">
                 <File Id="System.ComponentModel.Composition.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.ComponentModel.Composition.dll" />
             </Component>
-            <Component Id="System.Management.dll" Guid="{535E8506-DBB8-4FE1-885C-3AEABEDD281C}">
+            <Component Id="System.Diagnostics.EventLog.dll" Guid="{AC1E5CEB-6881-4847-B9FC-F895F92929E3}">
+                <File Id="System.Diagnostics.EventLog.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Diagnostics.EventLog.dll" />
+            </Component>
+            <Component Id="System.Management.dll" Guid="{8C0749A1-29B4-47D4-862B-4A814CA8C31A}">
                 <File Id="System.Management.dll" KeyPath="yes" Source="$(var.SourceDirPath)\System.Management.dll" />
             </Component>
+            <Component Id="WeevilCli.deps.json" Guid="{9A72EBB0-F745-460B-BAC7-816F01969A9C}">
+                <File Id="WeevilCli.deps.json" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilCli.deps.json" />
+            </Component>
+            <Component Id="WeevilCli.dll" Guid="{73E8AA73-78EB-4852-9840-51F2C8D7CD45}">
+                <File Id="WeevilCli.dll" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilCli.dll" />
+            </Component>
+            <Component Id="WeevilCli.dll.config" Guid="{5C927282-B26D-449A-8011-9C9BC4FA29FA}">
+                <File Id="WeevilCli.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilCli.dll.config" />
+            </Component>
+            <Component Id="WeevilCli.exe" Guid="{8494005A-FF72-4B92-A0DD-A331A1D8C42A}">
+                <File Id="WeevilCli.exe" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilCli.exe" />
+            </Component>
+            <Component Id="WeevilCli.exe.nlog" Guid="{C079F7B3-22BD-4DB3-A510-51B38AFF2846}">
+                <File Id="WeevilCli.exe.nlog" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilCli.exe.nlog" />
+            </Component>
+            <Component Id="WeevilCli.pdb" Guid="{11B6EC55-25C6-4A2E-8276-6356AD0E6DB2}">
+                <File Id="WeevilCli.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilCli.pdb" />
+            </Component>
+            <Component Id="WeevilCli.runtimeconfig.json" Guid="{0AE26F52-8E2A-4966-B3B1-A377EB6C04D0}">
+                <File Id="WeevilCli.runtimeconfig.json" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilCli.runtimeconfig.json" />
+            </Component>
             <Directory Id="Plugins" Name="Plugins">
-                <Component Id="BlueDotBrigade.Weevil.Plugins.csproj" Guid="{8670159E-53C8-4A4A-9D3B-7FCC08EC51DE}">
+                <Component Id="BlueDotBrigade.Weevil.Plugins.csproj" Guid="{9DCEFFC6-44DE-4CFB-8905-B3AA85B8249E}">
                     <File Id="BlueDotBrigade.Weevil.Plugins.csproj" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\BlueDotBrigade.Weevil.Plugins.csproj" />
                 </Component>
-                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll" Guid="{7546278B-C684-47D4-95C9-B3A0ADA4A301}">
+                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll" Guid="{39524414-896F-4680-A406-4CA3E2F3DF89}">
                     <File Id="ProfoundMedical.Weevil_TulsaPro.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.dll" />
                 </Component>
-                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll.config" Guid="{A513644D-69DD-49FC-BD53-E757853362B7}">
+                <Component Id="ProfoundMedical.Weevil_TulsaPro.dll.config" Guid="{216F9461-C8E5-4460-8E94-6643029ABE7A}">
                     <File Id="ProfoundMedical.Weevil_TulsaPro.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.dll.config" />
                 </Component>
-                <Component Id="ProfoundMedical.Weevil_TulsaPro.pdb" Guid="{0CE84536-49F6-4E3F-8110-6D061D2BC33C}">
+                <Component Id="ProfoundMedical.Weevil_TulsaPro.pdb" Guid="{B02F21AE-F369-4B22-8BA2-A98A69C54C2D}">
                     <File Id="ProfoundMedical.Weevil_TulsaPro.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ProfoundMedical.Weevil-TulsaPro.pdb" />
                 </Component>
-                <Component Id="ReadMe.md" Guid="{7A6E3D63-3694-448A-9EDA-9538CF46B100}">
+                <Component Id="ReadMe.md" Guid="{B8325CEC-AF8D-42CD-BF0A-B424A1D5361A}">
                     <File Id="ReadMe.md" KeyPath="yes" Source="$(var.SourceDirPath)\Plugins\ReadMe.md" />
                 </Component>
             </Directory>
             <Directory Id="runtimes" Name="runtimes">
                 <Directory Id="osx" Name="osx">
                     <Directory Id="native" Name="native">
-                        <Component Id="libHarfBuzzSharp.dylib" Guid="{74F69E97-055B-47A7-A1BF-C055800C5EA9}">
+                        <Component Id="libHarfBuzzSharp.dylib" Guid="{3D7ED5BD-B5FA-428F-B530-F6804935DA45}">
                             <File Id="libHarfBuzzSharp.dylib" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx\native\libHarfBuzzSharp.dylib" />
                         </Component>
-                        <Component Id="libSkiaSharp.dylib" Guid="{8B34AC66-7E79-4697-B7AF-D92BACF5B57C}">
+                        <Component Id="libSkiaSharp.dylib" Guid="{7A8A5606-D534-4D7B-8A75-BEA995F9960A}">
                             <File Id="libSkiaSharp.dylib" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\osx\native\libSkiaSharp.dylib" />
                         </Component>
                     </Directory>
                 </Directory>
                 <Directory Id="win" Name="win">
                     <Directory Id="lib" Name="lib">
+                        <Directory Id="net6.0" Name="net6.0">
+                            <Component Id="System.Diagnostics.EventLog.dll_1" Guid="{0465CCC6-1565-4645-975E-8D5B0A354743}">
+                                <File Id="System.Diagnostics.EventLog.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Diagnostics.EventLog.dll" />
+                            </Component>
+                            <Component Id="System.Diagnostics.EventLog.Messages.dll" Guid="{D35C8EFB-BEF6-4EDA-911C-A53D4438C1EE}">
+                                <File Id="System.Diagnostics.EventLog.Messages.dll" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net6.0\System.Diagnostics.EventLog.Messages.dll" />
+                            </Component>
+                        </Directory>
                         <Directory Id="net9.0" Name="net9.0">
-                            <Component Id="System.Management.dll_1" Guid="{94315CAE-BA60-46A1-BF96-3C89A6BCA33A}">
+                            <Component Id="System.Management.dll_1" Guid="{E9EEB265-B80C-4CE4-86AB-02CD441119A7}">
                                 <File Id="System.Management.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win\lib\net9.0\System.Management.dll" />
                             </Component>
                         </Directory>
@@ -157,30 +279,30 @@
                 </Directory>
                 <Directory Id="win_arm64" Name="win-arm64">
                     <Directory Id="native_1" Name="native">
-                        <Component Id="libHarfBuzzSharp.dll" Guid="{8838A0A9-37B5-4B7C-831A-3F7CF89DB1E5}">
+                        <Component Id="libHarfBuzzSharp.dll" Guid="{2AC589C5-8B60-46D9-A42C-83F71932A88C}">
                             <File Id="libHarfBuzzSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-arm64\native\libHarfBuzzSharp.dll" />
                         </Component>
-                        <Component Id="libSkiaSharp.dll" Guid="{E80F3294-DDA9-4E6D-9E75-BDFC130CA6C9}">
+                        <Component Id="libSkiaSharp.dll" Guid="{18E4F4FE-74D2-42A6-8ED7-D237F7FD1BCD}">
                             <File Id="libSkiaSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-arm64\native\libSkiaSharp.dll" />
                         </Component>
                     </Directory>
                 </Directory>
                 <Directory Id="win_x64" Name="win-x64">
                     <Directory Id="native_2" Name="native">
-                        <Component Id="libHarfBuzzSharp.dll_1" Guid="{CD11599B-EC96-4725-9F11-E396C9537DC5}">
+                        <Component Id="libHarfBuzzSharp.dll_1" Guid="{7D6E40BB-4F42-43BB-B8E6-0E2C077A05AE}">
                             <File Id="libHarfBuzzSharp.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x64\native\libHarfBuzzSharp.dll" />
                         </Component>
-                        <Component Id="libSkiaSharp.dll_1" Guid="{19E94F31-80F4-43F5-8675-D5935C74896F}">
+                        <Component Id="libSkiaSharp.dll_1" Guid="{42493999-22EA-4A7F-B053-1021D86A4168}">
                             <File Id="libSkiaSharp.dll_1" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x64\native\libSkiaSharp.dll" />
                         </Component>
                     </Directory>
                 </Directory>
                 <Directory Id="win_x86" Name="win-x86">
                     <Directory Id="native_3" Name="native">
-                        <Component Id="libHarfBuzzSharp.dll_2" Guid="{37318E41-54FD-41D7-A5CC-3AFDADC1FE94}">
+                        <Component Id="libHarfBuzzSharp.dll_2" Guid="{C02BE658-AD3D-40D8-B947-BED95DE28091}">
                             <File Id="libHarfBuzzSharp.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x86\native\libHarfBuzzSharp.dll" />
                         </Component>
-                        <Component Id="libSkiaSharp.dll_2" Guid="{26FB8196-7D27-4ECE-B15D-56C5C34AB9A7}">
+                        <Component Id="libSkiaSharp.dll_2" Guid="{8D5C3D35-C2D7-4694-B79A-0270BEA15EA5}">
                             <File Id="libSkiaSharp.dll_2" KeyPath="yes" Source="$(var.SourceDirPath)\runtimes\win-x86\native\libSkiaSharp.dll" />
                         </Component>
                     </Directory>
@@ -202,8 +324,14 @@
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.pspdb" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.pssym" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
+            <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.deps.json" />
+            <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.dll" />
+            <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.pdb" />
+            <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.xml" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Windows.dll" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Windows.pdb" />
+            <ComponentRef Id="Cocona.Core.dll" />
+            <ComponentRef Id="Cocona.dll" />
             <ComponentRef Id="FluentValidation.dll" />
             <ComponentRef Id="GongSolutions.WPF.DragDrop.dll" />
             <ComponentRef Id="HarfBuzzSharp.dll" />
@@ -212,7 +340,31 @@
             <ComponentRef Id="LiveChartsCore.SkiaSharpView.WPF.dll" />
             <ComponentRef Id="MaterialDesignColors.dll" />
             <ComponentRef Id="MaterialDesignThemes.Wpf.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.Abstractions.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.Binder.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.CommandLine.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.FileExtensions.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.Json.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Configuration.UserSecrets.dll" />
             <ComponentRef Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+            <ComponentRef Id="Microsoft.Extensions.DependencyInjection.dll" />
+            <ComponentRef Id="Microsoft.Extensions.FileProviders.Abstractions.dll" />
+            <ComponentRef Id="Microsoft.Extensions.FileProviders.Physical.dll" />
+            <ComponentRef Id="Microsoft.Extensions.FileSystemGlobbing.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Hosting.Abstractions.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Hosting.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Logging.Abstractions.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Logging.Configuration.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Logging.Console.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Logging.Debug.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Logging.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Logging.EventLog.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Logging.EventSource.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Options.ConfigurationExtensions.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Options.dll" />
+            <ComponentRef Id="Microsoft.Extensions.Primitives.dll" />
             <ComponentRef Id="Newtonsoft.Json.dll" />
             <ComponentRef Id="nlog.config" />
             <ComponentRef Id="NLog.dll" />
@@ -228,7 +380,15 @@
             <ComponentRef Id="SkiaSharp.Views.Desktop.Common.dll" />
             <ComponentRef Id="SkiaSharp.Views.WPF.dll" />
             <ComponentRef Id="System.ComponentModel.Composition.dll" />
+            <ComponentRef Id="System.Diagnostics.EventLog.dll" />
             <ComponentRef Id="System.Management.dll" />
+            <ComponentRef Id="WeevilCli.deps.json" />
+            <ComponentRef Id="WeevilCli.dll" />
+            <ComponentRef Id="WeevilCli.dll.config" />
+            <ComponentRef Id="WeevilCli.exe" />
+            <ComponentRef Id="WeevilCli.exe.nlog" />
+            <ComponentRef Id="WeevilCli.pdb" />
+            <ComponentRef Id="WeevilCli.runtimeconfig.json" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Plugins.csproj" />
             <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.dll" />
             <ComponentRef Id="ProfoundMedical.Weevil_TulsaPro.dll.config" />
@@ -236,6 +396,8 @@
             <ComponentRef Id="ReadMe.md" />
             <ComponentRef Id="libHarfBuzzSharp.dylib" />
             <ComponentRef Id="libSkiaSharp.dylib" />
+            <ComponentRef Id="System.Diagnostics.EventLog.dll_1" />
+            <ComponentRef Id="System.Diagnostics.EventLog.Messages.dll" />
             <ComponentRef Id="System.Management.dll_1" />
             <ComponentRef Id="libHarfBuzzSharp.dll" />
             <ComponentRef Id="libSkiaSharp.dll" />
