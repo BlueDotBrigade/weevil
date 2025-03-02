@@ -23,6 +23,7 @@
 		<Feature Id="ProductFeature" Title="Weevil" Level="1">
 			<ComponentGroupRef Id="weevil_bin_files" />
 			<ComponentGroupRef Id="documentation_files" />
+			<ComponentGroupRef Id="scripts_files" />
 			
 			<ComponentRef Id="WeevilShortcut" />
 			<ComponentGroupRef Id="RegistryKeys" />
@@ -41,6 +42,7 @@
 						<Directory Id="InstallFolderBin" Name="Bin" />
 						<Directory Id="LicenseDir" Name="Licenses" />
 						<Directory Id="DocDir" Name="Doc" />
+						<Directory Id="ScriptsDir" Name="Scripts" />
 					</Directory>
 				</Directory>
 			</StandardDirectory>

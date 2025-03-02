@@ -1,0 +1,23 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Fragment>
+		<DirectoryRef Id="ScriptsDir">
+			<Component Id="SelectHttpErrorsComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AF">
+				<File Id="SelectHttpErrorsFile" Source="$(var.SourceDirPath)\..\Scripts\Select-HttpErrors.ps1" KeyPath="yes" />
+			</Component>
+			<Component Id="SelectRecordsComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8BA">
+				<File Id="SelectRecordsFile" Source="$(var.SourceDirPath)\..\Scripts\Select-Records.ps1" KeyPath="yes" />
+			</Component>
+			<Component Id="SplitFileComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8BB">
+				<File Id="SplitFileFile" Source="$(var.SourceDirPath)\..\Scripts\Split-File.ps1" KeyPath="yes" />
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="scripts_files">
+			<ComponentRef Id="SelectHttpErrorsComponent" />
+			<ComponentRef Id="SelectRecordsComponent" />
+			<ComponentRef Id="SplitFileComponent" />
+		</ComponentGroup>
+	</Fragment>
+</Wix>
