@@ -1,6 +1,6 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 	<Fragment>
-		<DirectoryRef Id="ScriptsDir">
+		<DirectoryRef Id="InstallFolderBin">
 			<Component Id="SelectHttpErrorsComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AF">
 				<File Id="SelectHttpErrorsFile" Source="$(var.SourceDirPath)\..\Scripts\Select-HttpErrors.ps1" KeyPath="yes" />
 			</Component>

@@ -42,7 +42,6 @@
 						<Directory Id="InstallFolderBin" Name="Bin" />
 						<Directory Id="LicenseDir" Name="Licenses" />
 						<Directory Id="DocDir" Name="Doc" />
-						<Directory Id="ScriptsDir" Name="Scripts" />
 					</Directory>
 				</Directory>
 			</StandardDirectory>
@@ -67,7 +66,8 @@
 				<!--
 				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" Hotkey="24663" />
 				-->
-				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" />
+				<Shortcut Id="GuiShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" />
+				<Shortcut Id="CliShortcut" Name="Weevil CLI" Description="Weevil command-line application." Target="[SystemFolder]cmd.exe" Arguments='/c "[InstallFolderBin]\WeevilCli.exe"' WorkingDirectory="InstallFolderBin" />
 				<!-- 
 				The KeyPath attribute is set to yes, which means that this registry key 
 				is the key path for the component. The Windows Installer uses the key path 
