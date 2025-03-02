@@ -62,7 +62,10 @@
 		<DirectoryRef Id="WeevilShortcutDir">
 			<!-- Hotkey: 87 (W) + 8192 (Ctrl) + 16384 (Alt) = 24663 -->
 			<Component Id="WeevilShortcut" Guid="BDBCC900-E933-4FF7-8E2C-B167BD12891D">
+				<!--
 				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" Hotkey="24663" />
+				-->
+				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" />
 				<!-- 
 				The KeyPath attribute is set to yes, which means that this registry key 
 				is the key path for the component. The Windows Installer uses the key path 
