@@ -6,7 +6,7 @@ The following summarizes the changes that have been made to Weevil's core engine
 
 ### Version 2.11.0
 
-Release on March 1st, 2025.
+Release on March 2nd, 2025.
 
 #### What's New?
 
