@@ -1525,7 +1525,7 @@
 			{
 				if (_engine.Selector.HasSelectionPeriod)
 				{
-					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9]{1,5}$", "Must be between 1 and 5 characters.", out var regionName))
+					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9\-]{1,6}$", "Must be between 1 and 6 characters (A to Z).", out var regionName))
 					{
 						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
 						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
