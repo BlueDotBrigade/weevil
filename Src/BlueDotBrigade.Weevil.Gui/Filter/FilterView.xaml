@@ -55,7 +55,7 @@
         <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ClipboardPasteCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
-        <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
         <KeyBinding Key="O" Modifiers="Ctrl+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
         <KeyBinding Key="T" Modifiers="Ctrl+Shift" Command="{Binding ToggleFiltersCommand}" />
         <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding ShowFileExplorerCommand}" />
@@ -277,6 +277,8 @@
                     <MenuItem Header="View">
                         <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
                         <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
+                        <Separator/>
+                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
                     </MenuItem>
 
                     <Separator/>
@@ -301,8 +303,6 @@
                         <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <MenuItem Header="Show Pinned Records" Command="{Binding FilterByPinnedCommand}" InputGestureText="Ctrl+Shift+P" />
                         <MenuItem Header="Show Regions" Command="{Binding FilterByRegionsCommand}" InputGestureText="Ctrl+Shift+R" />
-                        <Separator/>
-                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
                     </MenuItem>
 
                     <MenuItem Header="Navigate">
