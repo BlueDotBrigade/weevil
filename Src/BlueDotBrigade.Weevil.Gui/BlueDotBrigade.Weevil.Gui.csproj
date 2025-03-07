@@ -23,8 +23,8 @@
 		<UpdateRequired>false</UpdateRequired>
 		<MapFileExtensions>true</MapFileExtensions>
 		<ApplicationRevision>0</ApplicationRevision>
-		<Version>2.11.0</Version>
-		<ApplicationVersion>2.10.0</ApplicationVersion>
+		<Version>2.12.0</Version>
+		<ApplicationVersion>2.12.0</ApplicationVersion>
 		<IsWebBootstrapper>false</IsWebBootstrapper>
 		<UseApplicationTrust>false</UseApplicationTrust>
 		<BootstrapperEnabled>true</BootstrapperEnabled>
