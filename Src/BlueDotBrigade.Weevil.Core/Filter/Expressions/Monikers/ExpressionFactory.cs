@@ -12,7 +12,7 @@
 			_creators = monikerActivators;
 		}
 
-		public ExpressionFactory(IRegionManager regionManager)
+		public ExpressionFactory(IRegionManager regionManager, IBookmarkManager bookmarkManager)
 		{
 			_creators = new List<MonikerActivator>
 			{
@@ -25,6 +25,7 @@
 				new MonikerActivator(ContentLengthExpression.Moniker, (e) => new ContentLengthExpression(e)),
 				new MonikerActivator(ElapsedGreaterThanExpression.Moniker, (e) => new ElapsedGreaterThanExpression(e)),
 				new MonikerActivator(RegionExpression.Moniker, (e) => new RegionExpression(e, regionManager)),
+				new MonikerActivator(BookmarkExpression.Moniker, (e) => new BookmarkExpression(e, bookmarkManager)),
 			};
 		}
 

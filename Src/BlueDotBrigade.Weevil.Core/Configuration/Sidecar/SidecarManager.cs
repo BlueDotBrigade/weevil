@@ -30,7 +30,8 @@
 			out List<string> inclusiveFilterHistory,
 			out List<string> exclusiveFilterHistory,
 			out List<Section> tableOfContents,
-			out List<Region> regions)
+			out List<Region> regions,
+			out List<Bookmark> bookmarks)
 		{
 			context = new ContextDictionary();
 			sourceFileRemarks = string.Empty;
@@ -38,6 +39,7 @@
 			exclusiveFilterHistory = new List<string>();
 			tableOfContents = new List<Section>();
 			regions = new List<Region>();
+			bookmarks = new List<Bookmark>();
 
 			if (_file.Exists(_sidecarFilePath))
 			{
@@ -49,6 +51,7 @@
 				string actualSourceFileRemarks = sourceFileRemarks;
 				List<Section> toc = tableOfContents;
 				List<Region> regionsRef = regions;
+				List<Bookmark> bookmarkRef = bookmarks;
 
 				var loaders = new List<IExecute>
 				{
@@ -62,7 +65,8 @@
 							inclusiveHistory, 
 							exclusiveHistory, 
 							toc,
-							regionsRef)),
+							regionsRef,
+							bookmarkRef)),
 
 					Executor.Create(
 						new v1.LogMetadataLoader(_sidecarFilePath),

@@ -28,6 +28,8 @@
 
 		private IRegionManager _regionManager;
 
+		private IBookmarkManager _bookmarkManager;
+
 		private Filter _currentFilter;
 
 		private readonly IList<string> _includeHistory;
@@ -45,7 +47,8 @@
 			IFilterAliasExpander filterAliasExpander,
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IMetricCollector> metricCollectors,
-			IRegionManager regionManager)
+			IRegionManager regionManager, 
+			IBookmarkManager bookmarkManager)
 		{
 			_coreExtension = coreExtension;
 			_context = context;
@@ -53,6 +56,7 @@
 			_allRecords = allRecords;
 
 			_regionManager = regionManager;
+			_bookmarkManager = bookmarkManager;
 
 			_metricCollectors = metricCollectors;
 
@@ -290,7 +294,7 @@
 					});
 
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();

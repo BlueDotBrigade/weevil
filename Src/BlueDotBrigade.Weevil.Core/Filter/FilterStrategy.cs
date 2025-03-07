@@ -47,13 +47,13 @@
 			IFilterAliasExpander filterAliasExpander,
 			FilterType filterType,
 			IFilterCriteria filterCriteria,
-			IRegionManager regionManager)
+			IRegionManager regionManager,
+			IBookmarkManager bookmarkManager)
 		{
 			_filterType = filterType;
 			_filterCriteria = filterCriteria;
 
-
-			var expressionFactory = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager);
+			var expressionFactory = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager, bookmarkManager);
 
 			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, true);
 			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, false);
