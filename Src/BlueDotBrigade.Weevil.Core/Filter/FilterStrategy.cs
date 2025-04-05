@@ -26,6 +26,8 @@
 		private readonly LogicalOrOperation _inclusiveFilter;
 		private readonly LogicalOrOperation _exclusiveFilter;
 
+		private readonly ExpressionBuilder _expressionBuilder;
+
 		private readonly bool _includePinned;
 
 		static FilterStrategy()
@@ -52,11 +54,10 @@
 			_filterType = filterType;
 			_filterCriteria = filterCriteria;
 
+			_expressionBuilder = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager);
 
-			var expressionFactory = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager);
-
-			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, true);
-			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, false);
+			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, true);
+			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, false);
 
 			exclusiveExpressions.AddRange(ConvertConfigurationIntoExpressions(filterCriteria.Configuration));
 
@@ -70,6 +71,11 @@
 					_includePinned = userConfigurationValue;
 				}
 			}
+		}
+
+		public ExpressionBuilder GetExpressionBuilder()
+		{
+			return _expressionBuilder;
 		}
 
 		public FilterType FilterType => _filterType;

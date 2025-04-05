@@ -335,10 +335,11 @@
                         <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
                         <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
                         <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
+                        <MenuItem Header="Detect Repeating Records" Command="{Binding DetectRepeatingRecordsCommand}" />
                         <Separator/>
                         <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
                         <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-                        <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomaly}" />
+                        <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomalyCommand}" />
                         <Separator />
                         <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
                     </MenuItem>
