@@ -486,7 +486,7 @@
                                             </TextBlock.Text>
                                         </TextBlock>
                                     </Border>
-                                    <Border x:Name="BookmarkTag" 
+                                    <!--<Border x:Name="BookmarkTag" 
                                             BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
                                             Margin="0,0,0,-2" 
                                             Background="#3c3c3c">
@@ -510,14 +510,14 @@
                                             </TextBlock.ToolTip>
                                             <TextBlock.Text>
                                                 <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
-                                                    <!-- 1) The current item (record) -->
+                                                    --><!-- 1) The current item (record) --><!--
                                                     <Binding Path="." />
-                                                    <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
+                                                    --><!-- 2) The parent ViewModel (the UserControl.DataContext) --><!--
                                                     <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
                                                 </MultiBinding>
                                             </TextBlock.Text>
                                         </TextBlock>
-                                    </Border>
+                                    </Border>-->
                                     <Border 
                                         x:Name="TruncatedTag"
                                         BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
