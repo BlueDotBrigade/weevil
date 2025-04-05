@@ -6,9 +6,9 @@
     <AssemblyName>BlueDotBrigade.Weevil.PowerShell</AssemblyName>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Version>2.11.0</Version>
+    <Version>2.12.0</Version>
     <Authors>BlueDotBrigade;</Authors>
-    <Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+    <Copyright>© 2025 Blue Dot Brigade</Copyright>
     <Owners>Blue Dot Brigade</Owners>
 	<Company>Blue Dot Brigade</Company>
     <Description>PowerShell Cmdlets for the Weevil log viewer application.</Description>
@@ -20,8 +20,8 @@
     <PackageVersion>1.0.0</PackageVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <AssemblyVersion>2.11.0.0</AssemblyVersion>
-    <FileVersion>2.11.0.0</FileVersion>
+    <AssemblyVersion>2.12.0.0</AssemblyVersion>
+    <FileVersion>2.12.0.0</FileVersion>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Platforms>AnyCPU;x64</Platforms>

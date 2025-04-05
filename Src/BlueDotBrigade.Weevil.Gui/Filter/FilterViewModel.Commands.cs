@@ -170,6 +170,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		[SafeForDependencyAnalysis]
 		public ICommand FilterByRegionsCommand => new UiBoundCommand(FilterByRegions, () => this.IsMenuEnabled);
+		[SafeForDependencyAnalysis]
+		public ICommand FilterByBookmarksCommand => new UiBoundCommand(FilterByBookmarks, () => this.IsMenuEnabled);
 
 
 		[SafeForDependencyAnalysis]
@@ -298,6 +300,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllRegionsCommand => new UiBoundCommand(RemoveAllRegions, () => this.IsMenuEnabled);
+		#endregion
+
+		#region Commands: Bookmarks
+		[SafeForDependencyAnalysis]
+		public ICommand AddBookmarkCommand => new UiBoundCommand(AddBookmark, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand RemoveBookmarkCommand => new UiBoundCommand(RemoveBookmark, () => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand RemoveAllBookmarksCommand => new UiBoundCommand(RemoveAllBookmarks, () => this.IsMenuEnabled);
 		#endregion
 	}
 }

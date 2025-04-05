@@ -28,11 +28,11 @@
 			return SurrogateExpression.IsReal(result);
 		}
 
-		public static ExpressionBuilder Create(ICoreExtension coreExtension, ContextDictionary context, FilterType filterType, IFilterCriteria criteria, IRegionManager regionManager)
+		public static ExpressionBuilder Create(ICoreExtension coreExtension, ContextDictionary context, FilterType filterType, IFilterCriteria criteria, IRegionManager regionManager, IBookmarkManager bookmarkManager)
 		{
 			var factories = new List<IExpressionFactory>();
 
-			var builtInMonikers = new Monikers.ExpressionFactory(regionManager);
+			var builtInMonikers = new Monikers.ExpressionFactory(regionManager, bookmarkManager);
 
 			factories.Add(builtInMonikers);
 

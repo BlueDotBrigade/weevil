@@ -66,6 +66,8 @@
 
 		public IRegionManager Regions => _coreEngine.Regions;
 
+		public IBookmarkManager Bookmarks => _coreEngine.Bookmarks;
+
 		public int Count => _coreEngine.Count;
 
 		public ContextDictionary Context => _coreEngine.Context;

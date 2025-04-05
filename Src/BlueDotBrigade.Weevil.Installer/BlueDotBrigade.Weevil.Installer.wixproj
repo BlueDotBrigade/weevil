@@ -1,7 +1,7 @@
 ﻿<Project Sdk="WixToolset.Sdk/5.0.0">
 	<PropertyGroup>
 		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-		<ProductVersion>2.11.0</ProductVersion>
+		<ProductVersion>2.12.0</ProductVersion>
 		<OutputName>Weevil-$(ProductVersion)</OutputName>
 		<Name>BlueDotBrigade.Weevil.Installer</Name>
 	</PropertyGroup>

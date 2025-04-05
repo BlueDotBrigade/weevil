@@ -167,6 +167,7 @@
 				var exclusiveFilterHistory = new List<string>();
 				var tableOfContents = new List<Section>();
 				var regions = new List<Region>();
+				var bookmarks = new List<Bookmark>();
 
 				if (this.UseExistingInstance)
 				{
@@ -179,6 +180,7 @@
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
 					regions.AddRange(_sourceInstance._regionManager.Regions);
+					bookmarks.AddRange(_sourceInstance._bookmarkManager.Bookmarks);
 
 					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
 					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);
@@ -235,7 +237,8 @@
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
 							out tableOfContents,
-							out regions);
+							out regions,
+							out bookmarks);
 
 						if (inclusiveFilterHistory.Count == 0)
 						{
@@ -263,7 +266,8 @@
 					records,
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
-					regions.ToImmutableArray());
+					regions.ToImmutableArray(),
+					bookmarks.ToImmutableArray());
 
 				if (inclusiveFilterHistory.Count > 0)
 				{

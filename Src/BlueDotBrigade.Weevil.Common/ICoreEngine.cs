@@ -28,6 +28,8 @@
 		IAnalyze Analyzer { get; }
 		IRegionManager Regions { get; }
 
+		IBookmarkManager Bookmarks { get; }
+
 		int Count { get; }
 
 		/// <summary>
