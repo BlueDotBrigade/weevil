@@ -966,6 +966,14 @@
 			FilterAsynchronously(FilterType.PlainText, filter);
 		}
 
+		private void FilterByBookmarks()
+		{
+			var configuration = GetFilterConfiguration();
+			var filter = new FilterCriteria("@Bookmarks", string.Empty, configuration);
+
+			FilterAsynchronously(FilterType.PlainText, filter);
+		}
+
 		public void ToggleFilters()
 		{
 			if (_engine.Filter.Criteria.Equals(FilterCriteria.None))
@@ -1518,14 +1526,14 @@
 
 			return configuration;
 		}
-		
+
 		private void AddRegion()
 		{
 			try
 			{
 				if (_engine.Selector.HasSelectionPeriod)
 				{
-					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9]{1,5}$", "Must be between 1 and 5 characters.", out var regionName))
+					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9\-]{1,6}$", "Must be between 1 and 6 characters (A to Z).", out var regionName))
 					{
 						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
 						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
@@ -1560,6 +1568,59 @@
 		{
 			MessageBoxResult userSelection = MessageBox.Show(
 				 "Remove all regions?",
+				 "Confirmation",
+				 MessageBoxButton.YesNo,
+				 MessageBoxImage.Question);
+
+			if (userSelection == MessageBoxResult.Yes)
+			{
+				_engine.Regions.Clear();
+				RaiseRegionsChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
+		}
+
+		private void AddBookmark()
+		{
+			try
+			{
+				if (_engine.Selector.HasSelectionPeriod)
+				{
+					if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,6}$", "Must be between 1 and 6 characters (A to Z).", out var regionName))
+					{
+						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
+						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
+						RaiseRegionsChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		private void RemoveBookmark()
+		{
+			if (_engine.Selector.Selected.Count == 1)
+			{
+				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+				_engine.Regions.Clear(selectedLineNumber);
+				RaiseRegionsChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
+			else
+			{
+				MessageBox.Show("A single record must be selected in order to remove a region.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+		}
+
+		private void RemoveAllBookmarks()
+		{
+			MessageBoxResult userSelection = MessageBox.Show(
+				 "Remove all bookmarks?",
 				 "Confirmation",
 				 MessageBoxButton.YesNo,
 				 MessageBoxImage.Question);

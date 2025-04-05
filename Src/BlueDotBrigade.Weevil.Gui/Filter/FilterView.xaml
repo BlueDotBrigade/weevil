@@ -22,6 +22,7 @@
         <converters:ContentToTruncationIconConverter x:Key="ContentToTruncationIconConverter" />
         <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
         <converters:RegionStringConverter x:Key="RegionStringConverter" />
+        <converters:BookmarkStringConverter x:Key="BookmarkStringConverter" />
         <Style x:Key="CommandMenuItemStyle"
                TargetType="{x:Type MenuItem}">
             <Setter Property="Header"
@@ -45,6 +46,8 @@
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
         <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
 
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddBookmarkCommand}" />
+
         <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
         <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />
         <KeyBinding Key="F3" Modifiers="Shift" Command="{Binding FindPreviousCommand}" />
@@ -55,7 +58,7 @@
         <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ClipboardPasteCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
-        <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
         <KeyBinding Key="O" Modifiers="Ctrl+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
         <KeyBinding Key="T" Modifiers="Ctrl+Shift" Command="{Binding ToggleFiltersCommand}" />
         <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding ShowFileExplorerCommand}" />
@@ -80,6 +83,7 @@
         <KeyBinding Key="M" Modifiers="Ctrl+Shift" Command="{Binding FilterByCommentCommand}" />
         <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding FilterByPinnedCommand}" />
         <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding FilterByRegionsCommand}" />
+        <KeyBinding Key="B" Modifiers="Ctrl+Shift" Command="{Binding FilterByBookmarksCommand}" />
 
         <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding ClipboardCopyTimestampsCommand}" />
 
@@ -277,6 +281,8 @@
                     <MenuItem Header="View">
                         <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
                         <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
+                        <Separator/>
+                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
                     </MenuItem>
 
                     <Separator/>
@@ -301,8 +307,7 @@
                         <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
                         <MenuItem Header="Show Pinned Records" Command="{Binding FilterByPinnedCommand}" InputGestureText="Ctrl+Shift+P" />
                         <MenuItem Header="Show Regions" Command="{Binding FilterByRegionsCommand}" InputGestureText="Ctrl+Shift+R" />
-                        <Separator/>
-                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
+                        <MenuItem Header="Show Bookmarks" Command="{Binding FilterByBookmarksCommand}" InputGestureText="Ctrl+Shift+B" />
                     </MenuItem>
 
                     <MenuItem Header="Navigate">
@@ -330,6 +335,10 @@
                         <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
                         <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
                         <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Add Bookmark" Command="{Binding AddBookmarkCommand}" InputGestureText="Ctrl+1" />
+                        <MenuItem Header="Remove Bookmark" Command="{Binding RemoveBookmarkCommand}"/>
+                        <MenuItem Header="Remove All Bookmarks" Command="{Binding RemoveAllBookmarksCommand}" />
                         <Separator/>
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                         <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
@@ -445,7 +454,10 @@
                             <DataTemplate DataType="data:IRecord">
                                 <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" VerticalAlignment="Center">
                                     <Run Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
-                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
+                                    <Border x:Name="RegionTag" 
+                                            BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
+                                            Margin="0,0,0,-2" 
+                                            Background="#3c3c3c">
                                          <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Visibility" Value="Visible"/>
@@ -474,7 +486,43 @@
                                             </TextBlock.Text>
                                         </TextBlock>
                                     </Border>
-                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
+                                    <Border x:Name="BookmarkTag" 
+                                            BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
+                                            Margin="0,0,0,-2" 
+                                            Background="#3c3c3c">
+                                         <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=BookmarkTextBlock}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                            <TextBlock.ToolTip>
+                                                <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
+                                                    <Binding Path="." />
+                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                    <Binding Source="True" />
+                                                </MultiBinding>
+                                            </TextBlock.ToolTip>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
+                                                    <!-- 1) The current item (record) -->
+                                                    <Binding Path="." />
+                                                    <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
+                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </Border>
+                                    <Border 
+                                        x:Name="TruncatedTag"
+                                        BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
+                                        Margin="0,0,0,-2" 
+                                        Background="#3c3c3c">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Visibility" Value="Visible"/>

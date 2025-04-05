@@ -4,9 +4,9 @@
     <Platforms>x64</Platforms>
     <PackageId>BlueDotBrigade.Weevil.Windows</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil.Windows</RootNamespace>
-    <Version>2.11.0</Version>
+    <Version>2.12.0</Version>
     <Authors>BlueDotBrigade;</Authors>
-    <Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+    <Copyright>© 2025 Blue Dot Brigade</Copyright>
     <Owners>Blue Dot Brigade</Owners>
     <Description>Includes Windows Presentation Foundation (WPF) base element classes, various classes that support the WPF property system and event logic, and other types that can be consumed by Weevil plugins.</Description>
     <IsPackable>true</IsPackable>

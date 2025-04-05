@@ -36,6 +36,7 @@
 		private readonly SelectionManager _selectionManager;
 		private readonly NavigationManager _navigationManager;
 		private readonly IRegionManager _regionManager;
+		private readonly IBookmarkManager _bookmarkManager;
 		private readonly IAnalyze _analysisManager;
 
 		private readonly int _originalRecordCount;
@@ -81,7 +82,8 @@
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
-			ImmutableArray<Region> regions)
+			ImmutableArray<Region> regions,
+			ImmutableArray<Bookmark> bookmarks)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
 
@@ -134,13 +136,16 @@
 
 			_regionManager = new RegionManager(regions);
 
+			_bookmarkManager = new BookmarkManager(bookmarks);
+
 			_filterManager = new FilterManager(
 				_coreExtension,
 				_context,
 				filterAliasExpander,
 				_allRecords,
 				GetRecordCounters(),
-				_regionManager);
+				_regionManager,
+				_bookmarkManager);
 
 			_filterManager.Apply(FilterType.PlainText, FilterCriteria.None);
 			_filterManager.ResultsChanged += OnResultsChanged;
@@ -223,6 +228,8 @@
 
 		public IRegionManager Regions => _regionManager;
 
+		public IBookmarkManager Bookmarks => _bookmarkManager;
+
 		public ImmutableArray<IRecord> Records => _allRecords;
 
 		public int Count => _allRecords.Length;
@@ -295,6 +302,7 @@
 				SourceFileRemarks = _sourceFileRemarks,
 				TableOfContents = _navigationManager.TableOfContents,
 				Regions = _regionManager.Regions,
+				Bookmarks = _bookmarkManager.Bookmarks,
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);

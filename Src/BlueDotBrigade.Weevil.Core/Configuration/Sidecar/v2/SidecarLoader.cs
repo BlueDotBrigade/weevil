@@ -54,7 +54,7 @@
 			return canLoad;
 		}
 
-		public void Load(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents, List<Region> regions)
+		public void Load(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents, List<Region> regions, List<Bookmark> bookmarks)
 		{
 			sourceFileRemarks = _sidecar?.CommonData?.UserRemarks;
 
@@ -132,6 +132,17 @@
 							regionInfo.Maximum));
 				}
 			}
+
+			if (_sidecar.CommonData.Bookmarks != null)
+			{
+				foreach (BookmarkInfo bookmarkInfo in _sidecar.CommonData.Bookmarks)
+				{
+					bookmarks.Add(
+						new Bookmark(
+							bookmarkInfo.Name,
+							bookmarkInfo.Record.LineNumber));
+				}
+			}
 		}
 
 		public void Save(SidecarData newData, bool deleteBackup)
@@ -151,7 +162,7 @@
 
 		private void Serialize(WeevilSidecar sidecar, bool deleteBackup, string backupFilePath)
 		{
-			sidecar.Header.SchemaVersion = new Version(4, 1);
+			sidecar.Header.SchemaVersion = new Version(4, 2);
 			sidecar.Header.SavedAt = DateTime.Now;
 
 			TypeFactory.SaveAsXml(sidecar, _filePath);
@@ -281,6 +292,18 @@
 						Name = region.Name,
 						Minimum = region.Minimum,
 						Maximum = region.Maximum,
+					});
+				}
+			}
+
+			if (newData.Bookmarks != null)
+			{
+				foreach (Bookmark region in newData.Bookmarks)
+				{
+					snapshot.CommonData.Bookmarks.Add(new BookmarkInfo
+					{
+						Name = region.Name,
+						Record = region.Record,
 					});
 				}
 			}
