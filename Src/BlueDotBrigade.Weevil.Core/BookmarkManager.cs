@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil
 		{			
 			lock (_bookmarkPadlock)
 			{
-				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Contains(lineNumber));
+				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 
 				if (bookmark == null)
 				{
@@ -71,7 +71,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			lock (_bookmarkPadlock)
 			{
-				return _bookmarks.Any(r => r.Contains(lineNumber));
+				return _bookmarks.Any(r => r.Record.LineNumber == lineNumber);
 			}
 		}
 
@@ -87,7 +87,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			lock (_bookmarkPadlock)
 			{
-				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Contains(lineNumber));
+				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 
 				if (bookmark != null)
 				{
