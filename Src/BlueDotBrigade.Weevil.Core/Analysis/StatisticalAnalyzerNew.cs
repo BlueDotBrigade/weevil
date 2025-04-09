@@ -1,10 +1,15 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
-	internal sealed class StatisticalAnalyzer
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using BlueDotBrigade.Weevil.Statistics;
+
+	internal sealed class StatisticalAnalyzerNew
     {
         private readonly IReadOnlyList<ICalculator> _calculators;
 
-        public StatisticalAnalyzer()
+        public StatisticalAnalyzerNew()
         {
             _calculators = new List<ICalculator>
             {

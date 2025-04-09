@@ -4,8 +4,8 @@ namespace BlueDotBrigade.Weevil.Statistics
     {
         public string Description => "Average after removing top/bottom extremes";
         public string BestFor => "Smoothing average while reducing outlier impact";
-    {
-        private readonly double _trimPercent;
+     
+		private readonly double _trimPercent;
 
         public TrimmedMeanCalculator(double trimPercent)
         {

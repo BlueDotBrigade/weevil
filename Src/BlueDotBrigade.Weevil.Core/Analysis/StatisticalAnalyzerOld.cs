@@ -8,11 +8,11 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using Filter;
 	using Filter.Expressions.Regular;
 
-	internal class StatisticalAnalyzer : IRecordAnalyzer
+	internal class StatisticalAnalyzerOld : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
 
-		public StatisticalAnalyzer(FilterStrategy filterStrategy)
+		public StatisticalAnalyzerOld(FilterStrategy filterStrategy)
 		{
 			_filterStrategy = filterStrategy;
 		}
