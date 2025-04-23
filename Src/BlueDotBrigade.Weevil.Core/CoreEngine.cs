@@ -45,6 +45,8 @@
 
 		private static int _instancesCreated;
 		private readonly int _instanceId;
+
+		private readonly MetadataManager _metadataManager;
 		#endregion
 
 		#region Object Lifetime
@@ -185,6 +187,8 @@
 				});
 
 			Debug.WriteLine($"{nameof(CoreEngine)} resources have been allocated.");
+
+			_metadataManager = new MetadataManager();
 		}
 
 		/// <summary>
@@ -315,6 +319,16 @@
 				ImmutableArray<IRecord> filterResults = _filterManager.Results;
 				new CommentSummaryReport(filterResults).Generate(destinationFolder);
 			}
+		}
+
+		public Metadata GetMetadata(int lineNumber)
+		{
+			return _metadataManager.GetMetadata(lineNumber);
+		}
+
+		public void SetMetadata(int lineNumber, Metadata metadata)
+		{
+			_metadataManager.SetMetadata(lineNumber, metadata);
 		}
 	}
 }

@@ -11,6 +11,16 @@
 		/// </summary>
 		public static readonly TimeSpan ElapsedTimeUnknown = TimeSpan.MinValue;
 
+		public static readonly Metadata Default = new Metadata
+		{
+			_comment = string.Empty,
+			_elapsedTime = TimeSpan.Zero,
+			_isPinned = false,
+			_isFlagged = false,
+			_wasGeneratedByUi = false,
+			_isMultiLine = false
+		};
+
 		private string _comment;
 		private TimeSpan _elapsedTime;
 		private bool _isPinned;
@@ -20,7 +30,7 @@
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		public Metadata()
+		private Metadata()
 		{
 			_comment = string.Empty;
 			_elapsedTime = TimeSpan.Zero;

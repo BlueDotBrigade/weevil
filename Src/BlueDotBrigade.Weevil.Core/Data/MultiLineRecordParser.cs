@@ -22,6 +22,7 @@
 		private readonly IRecordParser _recordParser;
 		private readonly int _maximumLinesToSearch;
 		private readonly bool _isLoggingEnabled;
+		private readonly MetadataManager _metadataManager;
 		private int _lineNumber;
 
 		private IRecord _currentRecord;
@@ -31,6 +32,12 @@
 			: this(dataSource, recordParser, MaximumLinesToSearch, FirstRecordLineNumber, LoggingEnabled)
 		{
 			// nothing to do
+		}
+
+		public MultilineRecordParser(StreamReader dataSource, IRecordParser recordParser, MetadataManager metadataManager)
+			: this(dataSource, recordParser, MaximumLinesToSearch, FirstRecordLineNumber, LoggingEnabled)
+		{
+			_metadataManager = metadataManager;
 		}
 
 		public MultilineRecordParser(StreamReader dataSource, IRecordParser recordParser, int maximumLinesToSearch, int firstRecordLineNumber, bool isLoggingEnabled)
@@ -164,9 +171,9 @@
 							 _currentRecord.CreatedAt,
 							 _currentRecord.Severity,
 							 stringBuilder.ToString(),
-							 _currentRecord.Metadata);
+							 _metadataManager);
 
-						_currentRecord.Metadata.IsMultiLine = isMultilineRecord;
+						metadata.IsMultiLine = isMultilineRecord;
 					}
 					else
 					{
@@ -179,14 +186,15 @@
 				{
 					isLoading = false;
 
+					var metadata = _metadataManager.GetMetadata(_currentRecord.LineNumber);
 					_currentRecord = new Record(
 						 _currentRecord.LineNumber,
 						 _currentRecord.CreatedAt,
 						 _currentRecord.Severity,
 						 stringBuilder.ToString(),
-						 _currentRecord.Metadata);
+						 _metadataManager);
 
-					_currentRecord.Metadata.IsMultiLine = isMultilineRecord;
+					metadata.IsMultiLine = isMultilineRecord;
 				}
 			} while (isLoading);
 		}

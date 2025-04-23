@@ -55,6 +55,9 @@
 			/// </summary>
 			private Range _range = Range.All;
 
+			// Add a private field for MetadataManager
+			private MetadataManager _metadataManager;
+
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
 				// nothing to do
@@ -214,6 +217,7 @@
 						coreExtension = plugin.GetExtension(sourceFilePath);
 
 						sidecarManager = new SidecarManager(_sourceFilePath);
+						_metadataManager = new MetadataManager();
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
 
@@ -267,7 +271,8 @@
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
 					regions.ToImmutableArray(),
-					bookmarks.ToImmutableArray());
+					bookmarks.ToImmutableArray(),
+					_metadataManager);
 
 				if (inclusiveFilterHistory.Count > 0)
 				{

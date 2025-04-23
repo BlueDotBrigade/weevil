@@ -14,6 +14,7 @@
 
 		private readonly IFile _file;
 		private readonly string _sidecarFilePath;
+		private readonly MetadataManager _metadataManager;
 
 		public SidecarManager(string logFilePath)
 		{
@@ -21,6 +22,7 @@
 				 ? throw new ArgumentNullException(nameof(logFilePath))
 				 : $"{logFilePath}.{MetadataFileExtension}";
 			_file = new File();
+			_metadataManager = new MetadataManager();
 		}
 
 		public void Load(
@@ -148,6 +150,16 @@
 			}
 
 			return offset;
+		}
+
+		public Metadata GetMetadata(int lineNumber)
+		{
+			return _metadataManager.GetMetadata(lineNumber);
+		}
+
+		public void SetMetadata(int lineNumber, Metadata metadata)
+		{
+			_metadataManager.SetMetadata(lineNumber, metadata);
 		}
 	}
 }

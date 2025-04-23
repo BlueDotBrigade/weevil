@@ -24,6 +24,8 @@
 		/// </summary>
 		public static readonly DateTime CreationTimeUnknown = DateTime.MaxValue;
 
+		private readonly MetadataManager _metadataManager;
+
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content)
 		: this(lineNumber, createdAt, severity, content, new Metadata())
 		{
@@ -40,6 +42,15 @@
 			this.Metadata = metadata;
 		}
 
+		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content, MetadataManager metadataManager)
+		{
+			this.LineNumber = lineNumber;
+			this.CreatedAt = createdAt;
+			this.Severity = severity;
+			this.Content = content ?? string.Empty;
+			_metadataManager = metadataManager;
+		}
+
 		public int LineNumber { get; }
 
 		public DateTime CreatedAt { get; }
@@ -50,7 +61,7 @@
 
 		public bool HasContent => !string.IsNullOrWhiteSpace(this.Content);
 
-		public Metadata Metadata { get; }
+		public Metadata Metadata => _metadataManager.GetMetadata(this.LineNumber);
 
 		/// <summary>
 		/// Returns <see langword="true"/> if it is known when the record was created.

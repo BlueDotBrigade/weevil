@@ -7,6 +7,12 @@
 	internal class TsvRecordParser : IRecordParser
 	{
 		private static readonly char[] FieldDelimiter = new[] { '\t' };
+		private readonly MetadataManager _metadataManager;
+
+		public TsvRecordParser(MetadataManager metadataManager)
+		{
+			_metadataManager = metadataManager;
+		}
 
 		public bool TryParse(int line, string content, out IRecord record)
 		{
@@ -25,7 +31,7 @@
 				if (isValidRecord)
 				{
 					DateTime createdAt = DateTime.MaxValue;
-					var metadata = new Metadata();
+					var metadata = _metadataManager.GetMetadata(line);
 
 					try
 					{
@@ -49,7 +55,7 @@
 
 						var context = fields[4];
 
-						record = new Record(line, createdAt, severityType, content, metadata);
+						record = new Record(line, createdAt, severityType, content, _metadataManager);
 					}
 					catch (FormatException e)
 					{
