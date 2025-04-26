@@ -61,9 +61,9 @@
 				if (_filterStrategy.InclusiveFilter.Count > 0)
 				{
 					var previous = new Dictionary<string, string>();
-					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetAllExpressions());
+					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
 
-					var sortedRecords = analysisOrder == AnalysisOrder.Ascending
+					ImmutableArray<IRecord> sortedRecords = analysisOrder == AnalysisOrder.Ascending
 						? records
 						: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
 
@@ -127,21 +127,6 @@
 			}
 
 			return count;
-		}
-
-		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)
-		{
-			var results = new List<RegularExpression>();
-
-			foreach (IExpression expression in expressions)
-			{
-				if (expression is RegularExpression)
-				{
-					results.Add(expression as RegularExpression);
-				}
-			}
-
-			return results;
 		}
 	}
 }

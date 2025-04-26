@@ -39,7 +39,7 @@
 				if (_filterStrategy.InclusiveFilter.Count > 0)
 				{
 					var previousState = new Dictionary<string, string>();
-					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetAllExpressions());
+					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
 
 					foreach (IRecord record in records)
 					{
@@ -99,21 +99,6 @@
 			}
 
 			return count;
-		}
-
-		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)
-		{
-			var results = new List<RegularExpression>();
-
-			foreach (IExpression expression in expressions)
-			{
-				if (expression is RegularExpression)
-				{
-					results.Add(expression as RegularExpression);
-				}
-			}
-
-			return results;
 		}
 	}
 }

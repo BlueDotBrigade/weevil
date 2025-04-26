@@ -1,6 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions
 {
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using Data;
 
 	public class LogicalOrOperation
@@ -35,6 +37,21 @@
 		public ImmutableArray<IExpression> GetAllExpressions()
 		{
 			return _expressions;
+		}
+
+		public ImmutableArray<RegularExpression> GetRegularExpressions()
+		{
+			var results = new List<RegularExpression>();
+
+			foreach (IExpression expression in _expressions)
+			{
+				if (expression is RegularExpression)
+				{
+					results.Add(expression as RegularExpression);
+				}
+			}
+
+			return results.ToImmutableArray();
 		}
 	}
 }
