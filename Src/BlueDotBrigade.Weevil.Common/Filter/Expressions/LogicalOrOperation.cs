@@ -32,7 +32,7 @@
 			return isMatch;
 		}
 
-		public ImmutableArray<IExpression> GetExpressions()
+		public ImmutableArray<IExpression> GetAllExpressions()
 		{
 			return _expressions;
 		}

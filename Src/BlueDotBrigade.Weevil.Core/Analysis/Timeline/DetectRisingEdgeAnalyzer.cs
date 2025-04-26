@@ -61,7 +61,7 @@
 				if (_filterStrategy.InclusiveFilter.Count > 0)
 				{
 					var previous = new Dictionary<string, string>();
-					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
+					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetAllExpressions());
 
 					var sortedRecords = analysisOrder == AnalysisOrder.Ascending
 						? records

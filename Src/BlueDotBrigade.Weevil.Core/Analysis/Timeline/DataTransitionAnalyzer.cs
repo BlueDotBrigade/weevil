@@ -39,7 +39,7 @@
 				if (_filterStrategy.InclusiveFilter.Count > 0)
 				{
 					var previousState = new Dictionary<string, string>();
-					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
+					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetAllExpressions());
 
 					foreach (IRecord record in records)
 					{
