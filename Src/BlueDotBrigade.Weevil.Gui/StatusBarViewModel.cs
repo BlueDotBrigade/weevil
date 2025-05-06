@@ -30,6 +30,7 @@
 		private readonly IUiDispatcher _uiDispatcher;
 
 		private bool _wasFileJustOpened;
+		private bool _wereStatisticsJustPublished;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -84,7 +85,17 @@
 			if (_filterChangedStopwatch.Elapsed >= DisplayMetricsDuration)
 			{
 				_filterChangedStopwatch.Reset();
-				_uiDispatcher.Invoke(() => this.StatusMessage = this.SourceFileDetails.SourceFilePath);
+				_uiDispatcher.Invoke(() =>
+				{
+					if (_wereStatisticsJustPublished)
+					{
+						_wereStatisticsJustPublished = false;
+					}
+					else
+					{
+						this.StatusMessage = this.SourceFileDetails.SourceFilePath;
+					}
+				});
 			}
 		}
 
@@ -148,6 +159,7 @@
 
 				if (bulletin.Data.Count > 0)
 				{
+					_wereStatisticsJustPublished = true;
 					this.StatusMessage = string.Join(";", bulletin.Data.Select(x => $"{x.Key}={x.Value}"));
 				}
 			});
