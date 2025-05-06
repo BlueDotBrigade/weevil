@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
