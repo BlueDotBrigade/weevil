@@ -1,9 +1,11 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Linq;
 	using System.Timers;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Data;
@@ -21,7 +23,7 @@
 	{
 		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromSeconds(0.5);
 		private static readonly TimeSpan DisplayMetricsDuration = TimeSpan.FromSeconds(8);
-	
+
 		private readonly Timer _timer;
 		private readonly Stopwatch _filterChangedStopwatch;
 
@@ -36,7 +38,7 @@
 			this.SourceFileDetails = new SourceFileOpenedBulletin();
 			this.FilterDetails = new FilterChangedBulletin();
 			this.SelectionDetails = new SelectionChangedBulletin();
-			this.AnalysisDetails = new AnalysisCompleteBulletin();
+			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
 			this.InsightDetails = new InsightChangedBulletin();
 			this.SoftwareDetails = new SoftwareDetailsBulletin();
 
@@ -53,8 +55,8 @@
 
 			_timer = new Timer
 			{
-				Interval = DefaultTimerPeriod.TotalMilliseconds, 
-				AutoReset = true, 
+				Interval = DefaultTimerPeriod.TotalMilliseconds,
+				AutoReset = true,
 				Enabled = false,
 			};
 			_timer.Elapsed += OnTimerElapsed;
@@ -140,7 +142,15 @@
 
 		private void OnAnalysisComplete(AnalysisCompleteBulletin bulletin)
 		{
-			_uiDispatcher.Invoke(() => this.AnalysisDetails = bulletin);
+			_uiDispatcher.Invoke(() =>
+			{
+				this.AnalysisDetails = bulletin;
+
+				if (bulletin.Data.Count > 0)
+				{
+					this.StatusMessage = string.Join(";", bulletin.Data.Select(x => $"{x.Key}={x.Value}"));
+				}
+			});
 		}
 
 		private void OnNewInsight(InsightChangedBulletin bulletin)

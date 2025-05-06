@@ -5,7 +5,15 @@ namespace BlueDotBrigade.Weevil.Statistics
 		public string Description => "Total sum ÷ count";
 		public string BestFor => "General overview of value magnitude";
 
-        public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTimeOffset> timestamps)
-			=> new("Mean", values.Count == 0 ? null : values.Average());
+		public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTime> timestamps)
+		{
+			double? mean = null;
+			if (values.Count > 0)
+			{
+				mean = values.Average();
+				mean = Math.Round(mean.Value, 3);
+			}
+			return new("Mean", mean);
+		}
 	}
 }

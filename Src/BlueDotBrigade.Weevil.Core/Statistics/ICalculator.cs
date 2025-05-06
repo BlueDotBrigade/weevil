@@ -5,6 +5,6 @@ namespace BlueDotBrigade.Weevil.Statistics
 		string Description { get; }
 		string BestFor { get; }
 
-		KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTimeOffset> timestamps);
+		KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTime> timestamps);
 	}
 }

@@ -9,5 +9,6 @@
 		ElapsedTimeUiThread,
 		ElapsedTime,
 		TemporalAnomaly,
+		Statistical,
 	}
 }

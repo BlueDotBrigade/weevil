@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Statistics
             _trimPercent = trimPercent;
         }
 
-        public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTimeOffset> timestamps)
+        public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTime> timestamps)
         {
             if (values.Count == 0) return new("TrimmedMean", null);
 
@@ -22,7 +22,9 @@ namespace BlueDotBrigade.Weevil.Statistics
             if (trimCount * 2 >= values.Count) return new("TrimmedMean", null);
 
             var trimmed = sorted.Skip(trimCount).Take(values.Count - 2 * trimCount);
-            return new("TrimmedMean", trimmed.Average());
+			var trimmedMean = trimmed.Average();
+
+			return new("TrimmedMean", trimmedMean);
         }
     }
 }

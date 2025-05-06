@@ -5,7 +5,7 @@ namespace BlueDotBrigade.Weevil.Statistics
         public string Description => "Largest numeric value matched.";
         public string BestFor => "Identifying worst-case or max usage/outlier.";
 
-        public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTimeOffset> timestamps)
+        public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTime> timestamps)
             => new("Max", values.Count == 0 ? null : values.Max());
     }
 }
