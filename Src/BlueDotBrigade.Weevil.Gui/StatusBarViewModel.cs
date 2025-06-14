@@ -160,7 +160,7 @@
 				if (bulletin.Data.Count > 0)
 				{
 					_wereStatisticsJustPublished = true;
-					this.StatusMessage = string.Join(";", bulletin.Data.Select(x => $"{x.Key}={x.Value}"));
+					this.StatusMessage = string.Join("; ", bulletin.Data.Select(x => $"{x.Key}={x.Value}"));
 				}
 			});
 		}
