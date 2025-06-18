@@ -16,7 +16,7 @@
 
 		public string DisplayName => "Temporal Anomaly";
 
-		private int Analyze(ImmutableArray<IRecord> records, TimeSpan tolerance, bool canUpdateMetadata)
+		private Results Analyze(ImmutableArray<IRecord> records, TimeSpan tolerance, bool canUpdateMetadata)
 		{
 			var metric = new TemporalAnomalyMetrics(tolerance);
 
@@ -42,19 +42,19 @@
 				}
 			}
 
-			return metric.Counter;
+			return new Results(metric.Counter);
 		}
 
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var count = 0;
+			Results results = Results.None;
 
 			if (TryGetTolerance(userDialog, out TimeSpan tolerance))
 			{
-				count = Analyze(records, tolerance, canUpdateMetadata);
+				results = Analyze(records, tolerance, canUpdateMetadata);
 			}
 
-			return count;
+			return results;
 		}
 
 		protected bool TryGetTolerance(IUserDialog user, out TimeSpan tolerance)

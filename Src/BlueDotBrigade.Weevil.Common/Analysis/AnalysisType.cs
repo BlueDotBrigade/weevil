@@ -13,5 +13,6 @@
 		ElapsedTimeUiThread,
 		ElapsedTime,
 		TemporalAnomaly,
+		Statistical,
 	}
 }

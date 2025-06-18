@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Runtime.Serialization;
-	using System.Security.Permissions;
 
 	[Serializable]
 	public class MatchCountException : Exception

@@ -40,6 +40,7 @@
 	using System.Windows.Input;
 	using PostSharp.Extensibility;
 	using System.Net.Http;
+	using Newtonsoft.Json.Linq;
 
 	[NotifyPropertyChanged()]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
@@ -502,10 +503,7 @@
 
 						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 
-						_bulletinMediator.Post(new AnalysisCompleteBulletin
-						{
-							FlaggedRecordCount = 0
-						});
+						_bulletinMediator.Post(new AnalysisCompleteBulletin(0));
 
 						Log.Default.Write("Updating filter history on the UI.");
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
@@ -1177,13 +1175,12 @@
 		{
 			try
 			{
-				var flagCount = _engine
+				var results = _engine
 					.Analyzer.Analyze(analysisType, _dialogBox);
 
-				_bulletinMediator.Post(new AnalysisCompleteBulletin
-				{
-					FlaggedRecordCount = flagCount
-				});
+				_bulletinMediator.Post(new AnalysisCompleteBulletin(
+					results.FlaggedRecords,
+					results.Data));
 			}
 			catch (Exception e)
 			{
@@ -1195,13 +1192,12 @@
 		{
 			try
 			{
-				var flagCount = _engine
+				Results results = _engine
 					.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
 
-				_bulletinMediator.Post(new AnalysisCompleteBulletin
-				{
-					FlaggedRecordCount = flagCount
-				});
+				_bulletinMediator.Post(new AnalysisCompleteBulletin(
+					results.FlaggedRecords,
+					results.Data));
 			}
 			catch (Exception e)
 			{
