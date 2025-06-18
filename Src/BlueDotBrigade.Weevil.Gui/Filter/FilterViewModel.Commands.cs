@@ -247,9 +247,15 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand DetectTemporalAnomaly => new UiBoundCommand(
+		public ICommand DetectTemporalAnomalyCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.TemporalAnomaly),
 			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand DetectRepeatingRecordsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectRepeatingRecords),
+			() => this.IsMenuEnabled);
+
 
 		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllFlagsCommand => new UiBoundCommand(RemoveAllFlags, () => this.IsMenuEnabled);
