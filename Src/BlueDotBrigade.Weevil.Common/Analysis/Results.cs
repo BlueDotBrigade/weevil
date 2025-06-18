@@ -24,7 +24,7 @@
 
 		public Results(int flaggedRecords, IDictionary<string, object> data)
 		{
-			this.FlaggedRecords = 0;
+			this.FlaggedRecords = flaggedRecords;
 			this.Data = data;
 		}
 	}
