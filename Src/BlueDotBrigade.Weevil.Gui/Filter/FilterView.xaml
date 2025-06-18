@@ -65,7 +65,7 @@
         <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ShowRegExToolCommand}" />
         <KeyBinding Key="OemTilde" Modifiers="Ctrl" Command="{Binding ShowApplicationLogFileCommand}" />
         <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
-        <!--<KeyBinding Key="Delete" Command="{Binding ClearSelectedRecordsCommand}" />-->
+        
         <KeyBinding Key="Back" Command="{Binding RemoveSelectedCommentsCommand}" />
         <KeyBinding Key="Back" Modifiers="Ctrl+Shift"  Command="{Binding RemoveAllCommentsCommand}" />
 
