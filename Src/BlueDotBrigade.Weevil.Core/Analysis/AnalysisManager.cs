@@ -71,6 +71,7 @@
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DetectRepeatingRecordsAnalyzer(_coreEngine.Filter.FilterStrategy)
 				});
 			}
 
@@ -127,13 +128,13 @@
 			Analyze(analyzerKey, new UserDialogNotRequired());
 		}
 
-		public int  Analyze(AnalysisType analysisType, IUserDialog userDialog)
+		public Results Analyze(AnalysisType analysisType, IUserDialog userDialog)
 		{
 			var analyzerKey = analysisType.ToString();
 			return Analyze(analyzerKey, userDialog);
 		}
 
-		public int Analyze(string analyzerKey, IUserDialog userDialog)
+		public Results Analyze(string analyzerKey, IUserDialog userDialog)
 		{
 			ImmutableArray<IRecord> records = _coreEngine.Selector.HasSelectionPeriod
 				? _coreEngine.Selector.GetSelected()
@@ -141,13 +142,13 @@
 
 			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
 
-			var recordCount = analyzer.Analyze(
+			Results results = analyzer.Analyze(
 				records,
 				_coreEngine.SourceDirectory,
 				userDialog,
 				true);
 
-			return recordCount;
+			return results;
 		}
 	}
 }

@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -30,7 +29,7 @@
 		/// 2. an appropriate comment is added to the record
 		/// </remarks>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var count = 0;
 
@@ -39,7 +38,7 @@
 				if (_filterStrategy.InclusiveFilter.Count > 0)
 				{
 					var previousState = new Dictionary<string, string>();
-					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
+					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
 
 					foreach (IRecord record in records)
 					{
@@ -98,22 +97,7 @@
 				}
 			}
 
-			return count;
-		}
-
-		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)
-		{
-			var results = new List<RegularExpression>();
-
-			foreach (IExpression expression in expressions)
-			{
-				if (expression is RegularExpression)
-				{
-					results.Add(expression as RegularExpression);
-				}
-			}
-
-			return results;
+			return new Results(count);
 		}
 	}
 }

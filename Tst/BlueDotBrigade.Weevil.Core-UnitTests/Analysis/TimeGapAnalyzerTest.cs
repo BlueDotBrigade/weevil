@@ -130,13 +130,13 @@
 
 			var analyzer = new TimeGapAnalyzer();
 
-			var result = analyzer.Analyze(
+			var results = analyzer.Analyze(
 				records.ToImmutableArray(),
 				EnvironmentHelper.GetExecutableDirectory(),
 				GetUserDialog(3000),
 				canUpdateMetadata: true);
 
-			Assert.AreEqual(1, result);
+			Assert.AreEqual(1, results.FlaggedRecords);
 			Assert.AreEqual(1, analyzer.Count);
 		}
 
