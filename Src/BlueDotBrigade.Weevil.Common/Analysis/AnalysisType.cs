@@ -6,6 +6,10 @@
 		DetectDataTransition,
 		DetectFallingEdges,
 		DetectRisingEdges,
+		/// <summary>
+		/// Identifies the first & last record in a block of repeating of repeating records.
+		/// </summary>
+		DetectRepeatingRecords,
 		ElapsedTimeUiThread,
 		ElapsedTime,
 		TemporalAnomaly,

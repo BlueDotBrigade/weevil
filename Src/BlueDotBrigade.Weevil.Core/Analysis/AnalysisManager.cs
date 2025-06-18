@@ -71,7 +71,7 @@
 					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
 					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new StatisticalAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DetectRepeatingRecordsAnalyzer(_coreEngine.Filter.FilterStrategy)
 				});
 			}
 
