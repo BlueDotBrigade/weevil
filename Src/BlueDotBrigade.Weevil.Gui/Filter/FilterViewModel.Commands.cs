@@ -251,6 +251,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => Analyze(AnalysisType.DetectRepeatingRecords),
 			() => this.IsMenuEnabled);
 
+		[SafeForDependencyAnalysis]
+		public ICommand CalculateStatisticsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.Statistical),
+			() => this.IsMenuEnabled);
+
 
 		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllFlagsCommand => new UiBoundCommand(RemoveAllFlags, () => this.IsMenuEnabled);

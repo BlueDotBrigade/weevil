@@ -13,6 +13,9 @@
 		ElapsedTimeUiThread,
 		ElapsedTime,
 		TemporalAnomaly,
+		/// <summary>
+		/// Calculates statistics (e.g. mean value, standard deviation, etc.) for the selected records.
+		/// </summary>
 		Statistical,
 	}
 }
