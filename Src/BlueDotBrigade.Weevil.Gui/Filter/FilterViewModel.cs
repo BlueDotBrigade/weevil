@@ -1473,8 +1473,6 @@
 			var selectedItemCount = coreEngine.Selector.Selected.Count;
 			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
 
-			
-
 			var lineNumber = 0;
 			var sectionName = string.Empty;
 			var regionName = string.Empty;
@@ -1529,7 +1527,7 @@
 			{
 				if (_engine.Selector.HasSelectionPeriod)
 				{
-					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9\-]{1,6}$", "Must be between 1 and 6 characters (A to Z).", out var regionName))
+					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var regionName))
 					{
 						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
 						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
