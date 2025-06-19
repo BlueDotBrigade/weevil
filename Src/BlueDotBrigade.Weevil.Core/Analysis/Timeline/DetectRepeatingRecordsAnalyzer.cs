@@ -21,9 +21,10 @@
 
 		public string DisplayName => "Detect Both Edges";
 
-        public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
         {
-            var count = 0;
+            var flaggedRecords = 0;
+			var blockCount = 0;
 
             var serializedExpression = userDialog.ShowUserPrompt(
             "Detect Edges",
@@ -69,13 +70,15 @@
 							{
 								Log.Default.Write($"Detected a block of repeating records. StartsAt={firstMatch.LineNumber}, EndsAt={lastMatch.LineNumber}");
 
-								firstMatch.Metadata.UpdateUserComment("Begin");
-								firstMatch.Metadata.IsFlagged = true;
-								count++;
+								blockCount++;
 
-								lastMatch.Metadata.UpdateUserComment("End");
+								firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
+								firstMatch.Metadata.IsFlagged = true;
+								flaggedRecords++;
+
+								lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
 								lastMatch.Metadata.IsFlagged = true;
-								count++;
+								flaggedRecords++;
 							}
 						}
 
@@ -90,17 +93,19 @@
 				{
 					Log.Default.Write($"Detected the last block of repeating records. StartsAt={firstMatch.LineNumber}, EndsAt={lastMatch.LineNumber}");
 
-					firstMatch.Metadata.UpdateUserComment("Begin");
-					firstMatch.Metadata.IsFlagged = true;
-					count++;
+					blockCount++;
 
-					lastMatch.Metadata.UpdateUserComment("End");
+					firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
+					firstMatch.Metadata.IsFlagged = true;
+					flaggedRecords++;
+
+					lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
 					lastMatch.Metadata.IsFlagged = true;
-					count++;
+					flaggedRecords++;
 				}
 			}
 
-            return count;
+			return new Results(flaggedRecords);
         }
 	}
 }

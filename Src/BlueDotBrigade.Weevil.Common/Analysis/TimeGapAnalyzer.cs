@@ -50,12 +50,14 @@
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
+			Results results = Results.None;
+
 			if (TryGetTolerance(userDialog, out TimeSpan maximumAllowedPeriod))
 			{
-				Analyze(records, maximumAllowedPeriod, canUpdateMetadata);
+				results = Analyze(records, maximumAllowedPeriod, canUpdateMetadata);
 			}
 
-			return new Results(this.Count);
+			return results;
 		}
 
 		private static int GetIndexOfNextTimestamp(ImmutableArray<IRecord> records, int startingIndex)
