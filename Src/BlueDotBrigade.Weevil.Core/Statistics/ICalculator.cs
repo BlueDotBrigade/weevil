@@ -1,5 +1,7 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
+	/// <seealso cref="IRecordAnalyzer">
+	/// <seealso cref="IMetricCollector">
 	internal interface ICalculator
 	{
 		string Description { get; }

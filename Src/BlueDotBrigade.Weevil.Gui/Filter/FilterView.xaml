@@ -65,7 +65,7 @@
         <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ShowRegExToolCommand}" />
         <KeyBinding Key="OemTilde" Modifiers="Ctrl" Command="{Binding ShowApplicationLogFileCommand}" />
         <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
-        <!--<KeyBinding Key="Delete" Command="{Binding ClearSelectedRecordsCommand}" />-->
+        
         <KeyBinding Key="Back" Command="{Binding RemoveSelectedCommentsCommand}" />
         <KeyBinding Key="Back" Modifiers="Ctrl+Shift"  Command="{Binding RemoveAllCommentsCommand}" />
 
@@ -340,6 +340,8 @@
                         <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
                         <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
                         <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
                         <Separator/>
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                         <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />

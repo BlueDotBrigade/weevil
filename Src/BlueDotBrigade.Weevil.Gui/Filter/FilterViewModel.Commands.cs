@@ -96,11 +96,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearOperation.Selected),
-			() => this.IsMenuEnabled);
-
-		[SafeForDependencyAnalysis]
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.Unselected),
 			() => this.IsMenuEnabled);
@@ -254,6 +249,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand DetectRepeatingRecordsCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectRepeatingRecords),
+			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand CalculateStatisticsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.Statistical),
 			() => this.IsMenuEnabled);
 
 

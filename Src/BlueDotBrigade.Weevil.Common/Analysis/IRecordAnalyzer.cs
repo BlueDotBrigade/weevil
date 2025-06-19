@@ -4,6 +4,8 @@
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 
+	/// <seealso cref="ICalculator"/>
+	/// <seealso cref="IMetricCollector"/>
 	public interface IRecordAnalyzer
 	{
 		/// <summary>
