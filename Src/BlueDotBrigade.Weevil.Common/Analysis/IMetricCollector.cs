@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using Data;
 
+	/// <seealso cref="ICalculator"/>
 	/// <seealso cref="IRecordAnalyzer"/>
 	public interface IMetricCollector
 	{
