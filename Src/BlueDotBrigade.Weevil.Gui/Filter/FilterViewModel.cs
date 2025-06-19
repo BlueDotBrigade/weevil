@@ -1580,12 +1580,9 @@
 			{
 				if (_engine.Selector.HasSelectionPeriod)
 				{
-					if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var regionName))
+					if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var bookmarkName))
 					{
-						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
-						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
-						RaiseRegionsChanged();
-						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+						MessageBox.Show("Bookmarks have not yet been implemented.");
 					}
 				}
 			}
