@@ -2,8 +2,9 @@
 {
 	public enum AnalysisType
 	{
-		DetectData,
-		DetectDataTransition,
+               DetectData,
+               DetectFirst,
+               DetectDataTransition,
 		DetectFallingEdges,
 		DetectRisingEdges,
 		/// <summary>

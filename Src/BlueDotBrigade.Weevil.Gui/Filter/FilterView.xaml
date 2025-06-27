@@ -75,6 +75,7 @@
 
         <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ShowDashboardCommand}" />
         <KeyBinding Key="G" Modifiers="Ctrl+Shift" Command="{Binding GraphDataCommand}" />
+        <KeyBinding Key="F7" Command="{Binding DetectFirstCommand}" />
         <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
         <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
         <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
@@ -343,6 +344,7 @@
                         <Separator/>
                         <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
                         <Separator/>
+                        <MenuItem Header="Detect First" Command="{Binding DetectFirstCommand}" InputGestureText="F7" />
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                         <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
                         <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
