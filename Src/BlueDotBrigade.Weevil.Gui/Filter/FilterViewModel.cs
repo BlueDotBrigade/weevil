@@ -167,7 +167,7 @@
 					result = TypeFactory.LoadFromXml<ApplicationInfo>(response.Content.ReadAsStream());
 				}
 			}
-			catch (Exception e) 
+			catch (Exception e)
 			{
 				var message = $"Unable to determine the latest official release. Reason=`{e.Message}`";
 				Log.Default.Write(LogSeverityType.Warning, message);
@@ -313,6 +313,11 @@
 		/// Indicates that a region of interest has been added, removed, or modified.
 		/// </summary>
 		public event EventHandler RegionsChanged;
+
+		/// <summary>
+		/// Indicates that a bookmark has been added or removed.
+		/// </summary>
+		public event EventHandler BookmarksChanged;
 
 		public event EventHandler FileOpened;
 		#endregion
@@ -554,7 +559,7 @@
 						MessageBox.Show(e.Message, message);
 					}
 					finally
-					{ 
+					{
 						this.IsProcessingLongOperation = false;
 						this.IsLogFileOpen = Engine.IsRealInstance(_engine);
 					}
@@ -568,7 +573,8 @@
 						_tableOfContents = _engine.Navigate.TableOfContents;
 						_insights = _engine.Analyzer.GetInsights();
 
-						_bulletinMediator.Post(new InsightChangedBulletin{
+						_bulletinMediator.Post(new InsightChangedBulletin
+						{
 							HasInsight = _insights.Length > 0,
 							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
@@ -807,7 +813,7 @@
 		public void ShowFileExplorer()
 		{
 			WindowsProcess.Start(
-				WindowsProcessType.FileExplorer, 
+				WindowsProcessType.FileExplorer,
 				Path.GetDirectoryName(_engine.SourceFilePath));
 		}
 
@@ -828,7 +834,7 @@
 			if (File.Exists(HelpFilePath))
 			{
 				WindowsProcess.Start(
-					WindowsProcessType.DefaultApplication, 
+					WindowsProcessType.DefaultApplication,
 					HelpFilePath);
 			}
 			else
@@ -881,7 +887,7 @@
 		private void GraphData()
 		{
 			_dialogBox.ShowGraph(
-				_engine.Selector.GetSelected(), 
+				_engine.Selector.GetSelected(),
 				_inclusiveFilter);
 		}
 
@@ -944,7 +950,7 @@
 		{
 			var configuration = GetFilterConfiguration();
 			var filter = new FilterCriteria("@Comment", string.Empty, configuration);
-			
+
 			FilterAsynchronously(FilterType.PlainText, filter);
 		}
 
@@ -980,7 +986,7 @@
 			}
 			else
 			{
-				_previousFilterCriteria = (FilterCriteria) _engine.Filter.Criteria;
+				_previousFilterCriteria = (FilterCriteria)_engine.Filter.Criteria;
 				FilterAsynchronously(FilterType.RegularExpression, FilterCriteria.None);
 			}
 		}
@@ -1268,6 +1274,30 @@
 			}
 		}
 
+		protected virtual void RaiseBookmarksChanged()
+		{
+			EventHandler threadSafeHandler = this.BookmarksChanged;
+
+			if (threadSafeHandler != null)
+			{
+				try
+				{
+					Log.Default.Write(
+							LogSeverityType.Debug,
+							$"Raising the {nameof(BookmarksChanged)} event.");
+
+					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+				}
+				catch (Exception exception)
+				{
+					Log.Default.Write(
+							LogSeverityType.Error,
+							exception,
+							$"An unexpected error occurred while raising the {nameof(BookmarksChanged)} event.");
+				}
+			}
+		}
+
 		protected virtual void RaiseResultsChanged()
 		{
 			EventHandler threadSafeHandler = this.ResultsChanged;
@@ -1327,7 +1357,7 @@
 
 				// Force UI to ensure that the screen has been refreshed
 				// ... so that the user knows a filter operation is in progress.
-				_uiDispatcher.Invoke(delegate() { }, DispatcherPriority.Render);
+				_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
 
 				// First filter to execute?
 				if (queuedFilters == 1)
@@ -1578,12 +1608,19 @@
 		{
 			try
 			{
-				if (_engine.Selector.HasSelectionPeriod)
+				if (_engine.Selector.Selected.Count == 1)
 				{
 					if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var bookmarkName))
 					{
-						MessageBox.Show("Bookmarks have not yet been implemented.");
+						var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+						_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+						RaiseBookmarksChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 					}
+				}
+				else
+				{
+					MessageBox.Show("A single record must be selected in order to create a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
 				}
 			}
 			catch (Exception e)
@@ -1598,29 +1635,77 @@
 			{
 				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
 
-				_engine.Regions.Clear(selectedLineNumber);
-				RaiseRegionsChanged();
+				_engine.Bookmarks.Clear(selectedLineNumber);
+				RaiseBookmarksChanged();
 				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 			}
 			else
 			{
-				MessageBox.Show("A single record must be selected in order to remove a region.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+				MessageBox.Show("A single record must be selected in order to remove a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 		}
 
 		private void RemoveAllBookmarks()
 		{
 			MessageBoxResult userSelection = MessageBox.Show(
-				 "Remove all bookmarks?",
-				 "Confirmation",
-				 MessageBoxButton.YesNo,
-				 MessageBoxImage.Question);
+					 "Remove all bookmarks?",
+					 "Confirmation",
+					 MessageBoxButton.YesNo,
+					 MessageBoxImage.Question);
 
 			if (userSelection == MessageBoxResult.Yes)
 			{
-				_engine.Regions.Clear();
-				RaiseRegionsChanged();
+				_engine.Bookmarks.Clear();
+				RaiseBookmarksChanged();
 				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
+		}
+
+		private void SetBookmark(int slot)
+		{
+			try
+			{
+				if (_engine.Selector.Selected.Count == 1)
+				{
+					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+					var existing = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
+					if (existing != null)
+					{
+						_engine.Bookmarks.Clear(existing.Record.LineNumber);
+					}
+
+					_engine.Bookmarks.CreateFromSelection(slot.ToString(), selectedLineNumber);
+
+					RaiseBookmarksChanged();
+					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+				}
+				else
+				{
+					MessageBox.Show("A single record must be selected in order to create a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+				}
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		private void GoToBookmark(int slot)
+		{
+			var bookmark = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
+			if (bookmark != null)
+			{
+				SearchFilterResults(
+						$"Bookmark {slot} is not visible in the current results.",
+						() => _engine
+								.Navigate
+								.GoTo(bookmark.Record.LineNumber, RecordSearchType.NearestNeighbor)
+								.ToIndexUsing(_engine.Filter.Results));
+			}
+			else
+			{
+				MessageBox.Show($"Bookmark {slot} has not been set.", "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 		}
 
@@ -1637,6 +1722,11 @@
 		public bool RegionContains(IRecord record)
 		{
 			return _engine.Regions.Contains(record.LineNumber);
+		}
+
+		public bool TryGetBookmarkName(IRecord record, out string bookmarkName)
+		{
+			return _engine.Bookmarks.TryGetBookmarkName(record.LineNumber, out bookmarkName);
 		}
 	}
 }

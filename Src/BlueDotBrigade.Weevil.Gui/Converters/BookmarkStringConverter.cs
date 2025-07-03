@@ -30,19 +30,30 @@
 		///   values[1]: The parent FilterViewModel (the DataContext of the UserControl/Window)
 		///   values[2]: True indicates that a tooltip is being created.
 		/// </summary>
-		public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-		{
-			if (values?.Length < 2)
-				return string.Empty;
+                public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+                {
+                        if (values?.Length < 2)
+                                return string.Empty;
 
-			var record = values[0] as IRecord;
-			var viewModel = values[1] as FilterViewModel;
+                        var record = values[0] as IRecord;
+                        var viewModel = values[1] as FilterViewModel;
 
-			if (record == null || viewModel == null)
-				return string.Empty;
+                        if (record == null || viewModel == null)
+                                return string.Empty;
 
-			return "Bookmark";
-		}
+                        bool isToolTip = false;
+                        if (values.Length >= 3)
+                        {
+                                bool.TryParse(values[2]?.ToString(), out isToolTip);
+                        }
+
+                        if (viewModel.TryGetBookmarkName(record, out var bookmarkName))
+                        {
+                                return isToolTip ? $"Bookmark: {bookmarkName}" : $"🔖 {bookmarkName} ";
+                        }
+
+                        return string.Empty;
+                }
 
 		public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
 		{
