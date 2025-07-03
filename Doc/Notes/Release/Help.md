@@ -106,6 +106,7 @@ Weevil has several analyzers that can be used to extract data from a log file, f
 A record is flagged & a comment is created when...
 
 - `Detect Data`: the regular expression matches record content
+- `Detect First`: the first occurrence of a unique value is found
 - `Detect Data Transitions`: the matching regular expression value changes from one record to the next
 - `Detect Rising Edges`: the matching regular expression value increases from one record to the next
 - `Detect Falling Edges`: the matching regular expression value increases from one record to the next

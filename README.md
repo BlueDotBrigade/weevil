@@ -83,13 +83,15 @@ Each analysis tool updates the `Comments` fields with the values that match the 
 
 1. Detect Data
    - For example: extracting URLs from a log file
-2. Detect Data Transitions
+2. Detect First
+   - For example: flag the first time a unique user name appears
+3. Detect Data Transitions
    - For example: when a hardware serial number changes
-3. Detect Rising Edges
+4. Detect Rising Edges
    - For example: detecting peek CPU usage
-4. Detect Falling Edges
+5. Detect Falling Edges
    - For example: detect when a firmware's uptime has reset
-5. Detect Temporal Anomalies
+6. Detect Temporal Anomalies
    - For example: detect when records are logged out of order
 
 Furthermore, _Weevil_ supports:

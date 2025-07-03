@@ -221,15 +221,20 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => Analyze(AnalysisType.ElapsedTime),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
-		public ICommand DetectDataCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.DetectData),
-			() => this.IsMenuEnabled);
+                [SafeForDependencyAnalysis]
+                public ICommand DetectDataCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectData),
+                        () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
-		public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.DetectDataTransition),
-			() => this.IsMenuEnabled);
+                [SafeForDependencyAnalysis]
+                public ICommand DetectFirstCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectFirst),
+                        () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectDataTransition),
+                        () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
 		public ICommand DataTransitionsFallingEdgeCommand => new UiBoundCommand(
