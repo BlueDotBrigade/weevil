@@ -316,7 +316,25 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand RemoveBookmarkCommand => new UiBoundCommand(RemoveBookmark, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand RemoveAllBookmarksCommand => new UiBoundCommand(RemoveAllBookmarks, () => this.IsMenuEnabled);
-		#endregion
-	}
+                public ICommand RemoveAllBookmarksCommand => new UiBoundCommand(RemoveAllBookmarks, () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand SetBookmark1Command => new UiBoundCommand(() => SetBookmark(1), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand SetBookmark2Command => new UiBoundCommand(() => SetBookmark(2), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand SetBookmark3Command => new UiBoundCommand(() => SetBookmark(3), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand GoToBookmark1Command => new UiBoundCommand(() => GoToBookmark(1), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand GoToBookmark2Command => new UiBoundCommand(() => GoToBookmark(2), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand GoToBookmark3Command => new UiBoundCommand(() => GoToBookmark(3), () => this.IsMenuEnabled);
+                #endregion
+        }
 }

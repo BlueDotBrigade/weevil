@@ -309,12 +309,17 @@
 		/// </summary>
 		public event EventHandler ResultsChanged;
 
-		/// <summary>
-		/// Indicates that a region of interest has been added, removed, or modified.
-		/// </summary>
-		public event EventHandler RegionsChanged;
+                /// <summary>
+                /// Indicates that a region of interest has been added, removed, or modified.
+                /// </summary>
+                public event EventHandler RegionsChanged;
 
-		public event EventHandler FileOpened;
+                /// <summary>
+                /// Indicates that a bookmark has been added or removed.
+                /// </summary>
+                public event EventHandler BookmarksChanged;
+
+                public event EventHandler FileOpened;
 		#endregion
 
 		#region Event Handlers
@@ -1244,9 +1249,9 @@
 		}
 
 		#endregion
-		protected virtual void RaiseRegionsChanged()
-		{
-			EventHandler threadSafeHandler = this.RegionsChanged;
+                protected virtual void RaiseRegionsChanged()
+                {
+                        EventHandler threadSafeHandler = this.RegionsChanged;
 
 			if (threadSafeHandler != null)
 			{
@@ -1264,8 +1269,32 @@
 						LogSeverityType.Error,
 						exception,
 						$"An unexpected error occurred while raising the {nameof(RegionsChanged)} event.");
-				}
-			}
+                        }
+                }
+
+                protected virtual void RaiseBookmarksChanged()
+                {
+                        EventHandler threadSafeHandler = this.BookmarksChanged;
+
+                        if (threadSafeHandler != null)
+                        {
+                                try
+                                {
+                                        Log.Default.Write(
+                                                LogSeverityType.Debug,
+                                                $"Raising the {nameof(BookmarksChanged)} event.");
+
+                                        _uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+                                }
+                                catch (Exception exception)
+                                {
+                                        Log.Default.Write(
+                                                LogSeverityType.Error,
+                                                exception,
+                                                $"An unexpected error occurred while raising the {nameof(BookmarksChanged)} event.");
+                                }
+                        }
+                }
 		}
 
 		protected virtual void RaiseResultsChanged()
@@ -1574,55 +1603,110 @@
 			}
 		}
 
-		private void AddBookmark()
-		{
-			try
-			{
-				if (_engine.Selector.HasSelectionPeriod)
-				{
-					if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var bookmarkName))
-					{
-						MessageBox.Show("Bookmarks have not yet been implemented.");
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
-		}
+                private void AddBookmark()
+                {
+                        try
+                        {
+                                if (_engine.Selector.Selected.Count == 1)
+                                {
+                                        if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var bookmarkName))
+                                        {
+                                                var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+                                                _engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+                                                RaiseBookmarksChanged();
+                                                _bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+                                        }
+                                }
+                                else
+                                {
+                                        MessageBox.Show("A single record must be selected in order to create a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                }
+                        }
+                        catch (Exception e)
+                        {
+                                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                }
 
-		private void RemoveBookmark()
-		{
-			if (_engine.Selector.Selected.Count == 1)
-			{
-				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+                private void RemoveBookmark()
+                {
+                        if (_engine.Selector.Selected.Count == 1)
+                        {
+                                var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
 
-				_engine.Regions.Clear(selectedLineNumber);
-				RaiseRegionsChanged();
-				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
-			}
-			else
-			{
-				MessageBox.Show("A single record must be selected in order to remove a region.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-			}
-		}
+                                _engine.Bookmarks.Clear(selectedLineNumber);
+                                RaiseBookmarksChanged();
+                                _bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+                        }
+                        else
+                        {
+                                MessageBox.Show("A single record must be selected in order to remove a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                }
 
-		private void RemoveAllBookmarks()
-		{
-			MessageBoxResult userSelection = MessageBox.Show(
-				 "Remove all bookmarks?",
-				 "Confirmation",
-				 MessageBoxButton.YesNo,
-				 MessageBoxImage.Question);
+                private void RemoveAllBookmarks()
+                {
+                        MessageBoxResult userSelection = MessageBox.Show(
+                                 "Remove all bookmarks?",
+                                 "Confirmation",
+                                 MessageBoxButton.YesNo,
+                                 MessageBoxImage.Question);
 
-			if (userSelection == MessageBoxResult.Yes)
-			{
-				_engine.Regions.Clear();
-				RaiseRegionsChanged();
-				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
-			}
-		}
+                        if (userSelection == MessageBoxResult.Yes)
+                        {
+                                _engine.Bookmarks.Clear();
+                                RaiseBookmarksChanged();
+                                _bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+                        }
+                }
+
+                private void SetBookmark(int slot)
+                {
+                        try
+                        {
+                                if (_engine.Selector.Selected.Count == 1)
+                                {
+                                        var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+                                        var existing = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
+                                        if (existing != null)
+                                        {
+                                                _engine.Bookmarks.Clear(existing.Record.LineNumber);
+                                        }
+
+                                        _engine.Bookmarks.CreateFromSelection(slot.ToString(), selectedLineNumber);
+
+                                        RaiseBookmarksChanged();
+                                        _bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+                                }
+                                else
+                                {
+                                        MessageBox.Show("A single record must be selected in order to create a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                }
+                        }
+                        catch (Exception e)
+                        {
+                                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                }
+
+                private void GoToBookmark(int slot)
+                {
+                        var bookmark = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
+                        if (bookmark != null)
+                        {
+                                SearchFilterResults(
+                                        $"Bookmark {slot} is not visible in the current results.",
+                                        () => _engine
+                                                .Navigate
+                                                .GoTo(bookmark.Record.LineNumber, RecordSearchType.NearestNeighbor)
+                                                .ToIndexUsing(_engine.Filter.Results));
+                        }
+                        else
+                        {
+                                MessageBox.Show($"Bookmark {slot} has not been set.", "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                }
 
 		public bool RegionStartsWith(IRecord record, out string regionName)
 		{
@@ -1634,9 +1718,14 @@
 			return _engine.Regions.TryEndsWith(record.LineNumber, out regionName);
 		}
 
-		public bool RegionContains(IRecord record)
-		{
-			return _engine.Regions.Contains(record.LineNumber);
-		}
-	}
+                public bool RegionContains(IRecord record)
+                {
+                        return _engine.Regions.Contains(record.LineNumber);
+                }
+
+                public bool TryGetBookmarkName(IRecord record, out string bookmarkName)
+                {
+                        return _engine.Bookmarks.TryGetBookmarkName(record.LineNumber, out bookmarkName);
+                }
+        }
 }
