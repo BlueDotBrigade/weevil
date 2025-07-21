@@ -168,8 +168,8 @@
 
 			var insertAt = 0;
 
-			for (var i = 0; i <= results.Length; i++)
-			{
+            for (var i = 0; i < records.Length; i++)
+            {
 				if (blacklist.Contains(records[i]))
 				{
 					// consider the record cleared
