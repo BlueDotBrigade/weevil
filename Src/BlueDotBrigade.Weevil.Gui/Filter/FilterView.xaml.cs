@@ -26,17 +26,19 @@
 				{
 					var viewModel = args.OldValue as FilterViewModel;
 
-					viewModel.FileOpened -= OnFileOpened;
-					viewModel.ResultsChanged -= OnResultsChanged;
-					viewModel.RegionsChanged -= OnRegionsChanged;
+                                        viewModel.FileOpened -= OnFileOpened;
+                                        viewModel.ResultsChanged -= OnResultsChanged;
+                                        viewModel.RegionsChanged -= OnRegionsChanged;
+                                        viewModel.BookmarksChanged -= OnBookmarksChanged;
 				}
 				if (args.NewValue != null)
 				{
 					var viewModel = args.NewValue as FilterViewModel;
 
-					viewModel.FileOpened += OnFileOpened;
-					viewModel.ResultsChanged += OnResultsChanged;
-					viewModel.RegionsChanged += OnRegionsChanged;
+                                        viewModel.FileOpened += OnFileOpened;
+                                        viewModel.ResultsChanged += OnResultsChanged;
+                                        viewModel.RegionsChanged += OnRegionsChanged;
+                                        viewModel.BookmarksChanged += OnBookmarksChanged;
 				}
 			};
 
@@ -72,11 +74,17 @@
 			_isLogFileOpening = true;
 		}
 
-		private void OnRegionsChanged(object sender, EventArgs e)
-		{
-			// Force bindings (and converters) for only the visible items to be refreshed.
-			this.ListView.Items.Refresh();
-		}
+                private void OnRegionsChanged(object sender, EventArgs e)
+                {
+                        // Force bindings (and converters) for only the visible items to be refreshed.
+                        this.ListView.Items.Refresh();
+                }
+
+                private void OnBookmarksChanged(object sender, EventArgs e)
+                {
+                        // Force bindings (and converters) for only the visible items to be refreshed.
+                        this.ListView.Items.Refresh();
+                }
 
 		private void OnResultsChanged(object sender, EventArgs e)
 		{

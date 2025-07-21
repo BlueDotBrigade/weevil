@@ -1,0 +1,131 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ContextMenu x:Key="FilterViewContextMenu" x:Shared="False" FontSize="{DynamicResource ApplicationFontSize}">
+                    <MenuItem Header="File">
+                        <MenuItem Header="Open..." Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
+                        <MenuItem Header="Save" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
+                        <Separator />
+                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
+                        <Separator />
+                        <MenuItem Header="EXPORT" IsEnabled="False" FontWeight="Bold"/>
+                        <MenuItem Header="Original Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
+                        <MenuItem Header="Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" InputGestureText="Ctrl+Alt+S"/>
+                        <MenuItem Header="Comment Timeline" Command="{Binding SaveCommentSummaryCommand}" />
+                    </MenuItem>
+
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="COPY" IsEnabled="False" FontWeight="Bold"/>
+                        <MenuItem Header="Original Records" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C"/>
+                        <MenuItem Header="Simplified Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+Alt+C" />
+                        <MenuItem Header="Comment Timeline" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
+                        <MenuItem Header="Line Numbers" Command="{Binding ClipboardCopyLineNumbersCommand}" />
+                        <MenuItem Header="Timestamps" Command="{Binding ClipboardCopyTimestampsCommand}" InputGestureText="Ctrl+T"/>
+                        <Separator/>
+                        <MenuItem Header="PASTE" IsEnabled="False" FontWeight="Bold"/>
+                        <MenuItem Header="Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
+                        <MenuItem Header="Comments (Overwrite)" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
+                    </MenuItem>
+
+                    <MenuItem Header="View">
+                        <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
+                        <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
+                        <Separator/>
+                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
+                    </MenuItem>
+
+                    <Separator/>
+
+                    <MenuItem Header="Clear">
+                        <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
+                        <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
+                        <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
+                        <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Outside Regions" Command="{Binding ClearBeyondRegionsCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
+                        <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>
+                    </MenuItem>
+                    
+                    <Separator/>
+
+                    <MenuItem Header="Filter">
+                        <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
+                        <Separator/>
+                        <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
+                        <MenuItem Header="Show Pinned Records" Command="{Binding FilterByPinnedCommand}" InputGestureText="Ctrl+Shift+P" />
+                        <MenuItem Header="Show Regions" Command="{Binding FilterByRegionsCommand}" InputGestureText="Ctrl+Shift+R" />
+                        <MenuItem Header="Show Bookmarks" Command="{Binding FilterByBookmarksCommand}" InputGestureText="Ctrl+Shift+B" />
+                    </MenuItem>
+
+                    <MenuItem Header="Navigate">
+                        <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
+                        <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
+                        <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
+                        <Separator/>
+                        <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
+                        <Separator/>
+                        <MenuItem Header="Set Bookmark 1" Command="{Binding SetBookmark1Command}" InputGestureText="Ctrl+Shift+1" />
+                        <MenuItem Header="Set Bookmark 2" Command="{Binding SetBookmark2Command}" InputGestureText="Ctrl+Shift+2" />
+                        <MenuItem Header="Set Bookmark 3" Command="{Binding SetBookmark3Command}" InputGestureText="Ctrl+Shift+3" />
+                        <MenuItem Header="Go To Bookmark 1" Command="{Binding GoToBookmark1Command}" InputGestureText="Ctrl+1" />
+                        <MenuItem Header="Go To Bookmark 2" Command="{Binding GoToBookmark2Command}" InputGestureText="Ctrl+2" />
+                        <MenuItem Header="Go To Bookmark 3" Command="{Binding GoToBookmark3Command}" InputGestureText="Ctrl+3" />
+                        <MenuItem Header="Remove Bookmark" Command="{Binding RemoveBookmarkCommand}"/>
+                        <MenuItem Header="Remove All Bookmarks" Command="{Binding RemoveAllBookmarksCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Previous Comment" Command="{Binding GoToPreviousCommentCommand}" InputGestureText="Ctrl+Shift+Minus" />
+                        <MenuItem Header="Next Comment" Command="{Binding GoToNextCommentCommand}" InputGestureText="Ctrl+Shift+Plus" />
+                        <Separator/>
+                        <MenuItem Header="Previous Flag" Command="{Binding GoToPreviousFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Minus" />
+                        <MenuItem Header="Next Flag" Command="{Binding GoToNextFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Plus" />
+                        <Separator/>
+                        <MenuItem Header="Previous Pinned" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
+                        <MenuItem Header="Next Pinned" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
+                        <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
+                        <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
+                    </MenuItem>
+                    <MenuItem Header="Analyze">
+                        <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
+                        <MenuItem Header="Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
+                        <Separator />
+                        <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
+                        <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
+                        <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
+                        <Separator/>
+                        <MenuItem Header="Detect First" Command="{Binding DetectFirstCommand}" InputGestureText="F7" />
+                        <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
+                        <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
+                        <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
+                        <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
+                        <MenuItem Header="Detect Repeating Records" Command="{Binding DetectRepeatingRecordsCommand}" />
+                        <Separator/>
+                        <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
+                        <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
+                        <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomalyCommand}" />
+                        <Separator />
+                        <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
+                    </MenuItem>
+                    <MenuItem Header="Analyze More..."
+                              ItemsSource="{Binding Path=CustomAnalyzerCommands}"
+                              ItemContainerStyle="{StaticResource CommandMenuItemStyle}">
+                        <MenuItem.Style>
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MaterialDesignMenuItem}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="IsEnabled" Value="True"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CustomAnalyzerCommands.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Help" Command="{Binding ShowHelpCommand}" InputGestureText="F1" />
+                    <MenuItem Header="About" Command="{Binding ShowAboutCommand}" InputGestureText="Ctrl+F1" />
+    </ContextMenu>
+</ResourceDictionary>

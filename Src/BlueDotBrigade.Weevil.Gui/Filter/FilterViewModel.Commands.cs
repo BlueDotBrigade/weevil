@@ -96,11 +96,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand ClearSelectedRecordsCommand => new UiBoundCommand(
-			() => ClearRecords(ClearOperation.Selected),
-			() => this.IsMenuEnabled);
-
-		[SafeForDependencyAnalysis]
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.Unselected),
 			() => this.IsMenuEnabled);
@@ -226,15 +221,20 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => Analyze(AnalysisType.ElapsedTime),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
-		public ICommand DetectDataCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.DetectData),
-			() => this.IsMenuEnabled);
+                [SafeForDependencyAnalysis]
+                public ICommand DetectDataCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectData),
+                        () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
-		public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.DetectDataTransition),
-			() => this.IsMenuEnabled);
+                [SafeForDependencyAnalysis]
+                public ICommand DetectFirstCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectFirst),
+                        () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectDataTransition),
+                        () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
 		public ICommand DataTransitionsFallingEdgeCommand => new UiBoundCommand(
@@ -247,9 +247,20 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand DetectTemporalAnomaly => new UiBoundCommand(
+		public ICommand DetectTemporalAnomalyCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.TemporalAnomaly),
 			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand DetectRepeatingRecordsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.DetectRepeatingRecords),
+			() => this.IsMenuEnabled);
+
+		[SafeForDependencyAnalysis]
+		public ICommand CalculateStatisticsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.Statistical),
+			() => this.IsMenuEnabled);
+
 
 		[SafeForDependencyAnalysis]
 		public ICommand RemoveAllFlagsCommand => new UiBoundCommand(RemoveAllFlags, () => this.IsMenuEnabled);
@@ -310,7 +321,25 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand RemoveBookmarkCommand => new UiBoundCommand(RemoveBookmark, () => this.IsMenuEnabled);
 
 		[SafeForDependencyAnalysis]
-		public ICommand RemoveAllBookmarksCommand => new UiBoundCommand(RemoveAllBookmarks, () => this.IsMenuEnabled);
-		#endregion
-	}
+                public ICommand RemoveAllBookmarksCommand => new UiBoundCommand(RemoveAllBookmarks, () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand SetBookmark1Command => new UiBoundCommand(() => SetBookmark(1), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand SetBookmark2Command => new UiBoundCommand(() => SetBookmark(2), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand SetBookmark3Command => new UiBoundCommand(() => SetBookmark(3), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand GoToBookmark1Command => new UiBoundCommand(() => GoToBookmark(1), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand GoToBookmark2Command => new UiBoundCommand(() => GoToBookmark(2), () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
+                public ICommand GoToBookmark3Command => new UiBoundCommand(() => GoToBookmark(3), () => this.IsMenuEnabled);
+                #endregion
+        }
 }
