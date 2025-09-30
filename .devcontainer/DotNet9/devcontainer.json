@@ -1,0 +1,9 @@
+{
+  "name": ".NET Core 9 Container",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "9.0"
+    }
+  }
+}
