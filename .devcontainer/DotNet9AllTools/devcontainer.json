@@ -1,5 +1,6 @@
 {
   "name": ".NET Core 9 All Tools",
+  "description": "Large container with wide set of pre-installed tools, including .NET Core 9 support.",
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
     "ghcr.io/devcontainers/features/dotnet:2": {

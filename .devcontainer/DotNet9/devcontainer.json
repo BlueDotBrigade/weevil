@@ -1,6 +1,7 @@
 {
   "name": ".NET Core 9",
   "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
+  "description": "Lightweight .NET 9 development container with PowerShell and GitHub CLI.",
   "features": {
     "ghcr.io/devcontainers/features/powershell:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
