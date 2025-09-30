@@ -1,5 +1,5 @@
 {
-  "name": ".NET Core 9 Container",
+  "name": ".NET Core 9 + All Tools",
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
     "ghcr.io/devcontainers/features/dotnet:2": {
