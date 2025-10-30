@@ -30,8 +30,8 @@
 				new Regex(@"^\s+at TechTalk.SpecFlow\..*\r?\n?", options),
 				new Regex(@"^\s+at Reqnroll\..*\r?\n?", options),
 				new Regex(@"^\s+at Boa.Constrictor.Screenplay\..*\r?\n?", options),
-				new Regex(@"^.*--- End of inner exception stack trace ---.*\r?\n?", options),
-				new Regex(@"^.*--- End of stack trace from previous location where exception was thrown ---.*\r?\n?", options),
+				new Regex(@".*--- End of inner exception stack trace", options),
+				new Regex(@".*--- End of stack trace from previous location\r?\n?", options),
 			};
 			CallStackPatterns = patterns.ToArray();
 		}
