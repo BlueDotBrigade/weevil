@@ -4,6 +4,7 @@
 	{
                DetectData,
                DetectFirst,
+               DetectStableValues,
                DetectDataTransition,
 		DetectFallingEdges,
 		DetectRisingEdges,

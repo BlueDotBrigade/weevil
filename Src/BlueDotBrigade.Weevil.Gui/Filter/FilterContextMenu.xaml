@@ -95,6 +95,7 @@
                         <Separator/>
                         <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
                         <Separator/>
+                        <MenuItem Header="Detect Stable Values" Command="{Binding DetectStableValuesCommand}" InputGestureText="F6"  />
                         <MenuItem Header="Detect First" Command="{Binding DetectFirstCommand}" InputGestureText="F7" />
                         <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
                         <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />

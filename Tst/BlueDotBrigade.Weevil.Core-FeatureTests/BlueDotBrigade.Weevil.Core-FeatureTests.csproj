@@ -46,10 +46,11 @@
 		<Content Include=".Daten\.Global\Droid.log.xml" />
 	</ItemGroup>
 	<ItemGroup>
-	  <None Include=".Daten\.Global\Droid.log" />
-	  <None Include=".Daten\.Global\Empty.log" />
-	  <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
-	  <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
+          <None Include=".Daten\.Global\Droid.log" />
+          <None Include=".Daten\.Global\Empty.log" />
+          <None Include=".Daten\Analysis\StableValueAnalyzer.log" />
+          <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
+          <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
 	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log" />
 	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log.xml" />
 	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log" />

@@ -227,6 +227,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
                         () => this.IsMenuEnabled);
 
                 [SafeForDependencyAnalysis]
+                public ICommand DetectStableValuesCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectStableValues),
+                        () => this.IsMenuEnabled);
+
+                [SafeForDependencyAnalysis]
                 public ICommand DetectFirstCommand => new UiBoundCommand(
                         () => Analyze(AnalysisType.DetectFirst),
                         () => this.IsMenuEnabled);
