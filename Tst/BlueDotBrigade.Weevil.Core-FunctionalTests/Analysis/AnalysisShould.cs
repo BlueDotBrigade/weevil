@@ -1,6 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
-	using System.Linq;
+        using System;
+        using System.IO;
+        using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
@@ -44,40 +46,114 @@
 			}
 		}
 
-		[TestMethod]
-		public void AddCommentWhenDataTransitionDetected()
-		{
-			IEngine engine = Engine
-				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
-				.Open();
+                [TestMethod]
+                public void AddCommentWhenDataTransitionDetected()
+                {
+                        IEngine engine = Engine
+                                .UsingPath(new Daten().AsFilePath(From.GlobalDefault))
+                                .Open();
 
-			engine.Filter.Apply(
-				FilterType.RegularExpression,
-				new FilterCriteria(@"to new state (?<State>.*)"));
+                        engine.Filter.Apply(
+                                FilterType.RegularExpression,
+                                new FilterCriteria(@"to new state (?<State>.*)"));
 
-			engine
-				.Analyzer
-				.Analyze(AnalysisType.DetectDataTransition);
+                        engine
+                                .Analyzer
+                                .Analyze(AnalysisType.DetectDataTransition);
 
-			foreach (IRecord record in engine.Filter.Results)
-			{
-				switch (record.LineNumber)
-				{
-					case 100:
-					case 200:
-					case 300:
-					case 400:
-					case 500:
-						Assert.IsTrue(record.Metadata.HasComment);
-						break;
-				}
-			}
-		}
+                        foreach (IRecord record in engine.Filter.Results)
+                        {
+                                switch (record.LineNumber)
+                                {
+                                        case 100:
+                                        case 200:
+                                        case 300:
+                                        case 400:
+                                        case 500:
+                                                Assert.IsTrue(record.Metadata.HasComment);
+                                                break;
+                                }
+                        }
+                }
 
-		// HACK: This integration test should be a unit test. It isn't because the analyzer depends on `FilterStrategy` (a complex object) as an input. Code smell.
-		[TestMethod]
-		public void DetectRisingEdges()
-		{
+                [TestMethod]
+                public void DetectStableValuesFlagsStartAndStop()
+                {
+                        var filePath = CreateStableValueLog();
+
+                        try
+                        {
+                                IEngine engine = Engine
+                                        .UsingPath(filePath)
+                                        .Open();
+
+                                engine.Filter.Apply(
+                                        FilterType.RegularExpression,
+                                        new FilterCriteria(@"Temperature=(?<State>\w+)"));
+
+                                Results results = engine
+                                        .Analyzer
+                                        .Analyze(AnalysisType.DetectStableValues);
+
+                                int[] flaggedLines = engine
+                                        .Filter
+                                        .Results
+                                        .Where(record => record.Metadata.IsFlagged)
+                                        .Select(record => record.LineNumber)
+                                        .ToArray();
+
+                                CollectionAssert.AreEquivalent(
+                                        new[] { 1, 3, 4, 5, 6 },
+                                        flaggedLines);
+
+                                Assert.AreEqual(6, results.FlaggedRecords);
+                        }
+                        finally
+                        {
+                                TryDelete(filePath);
+                        }
+                }
+
+                [TestMethod]
+                public void DetectStableValuesAnnotatesComments()
+                {
+                        var filePath = CreateStableValueLog();
+
+                        try
+                        {
+                                IEngine engine = Engine
+                                        .UsingPath(filePath)
+                                        .Open();
+
+                                engine.Filter.Apply(
+                                        FilterType.RegularExpression,
+                                        new FilterCriteria(@"Temperature=(?<State>\w+)"));
+
+                                engine
+                                        .Analyzer
+                                        .Analyze(AnalysisType.DetectStableValues);
+
+                                var recordsByLineNumber = engine
+                                        .Filter
+                                        .Results
+                                        .ToDictionary(record => record.LineNumber);
+
+                                Assert.AreEqual("Start State: Cold", recordsByLineNumber[1].Metadata.Comment);
+                                Assert.AreEqual("Stop State: Cold", recordsByLineNumber[3].Metadata.Comment);
+                                Assert.AreEqual("Start State: Warm", recordsByLineNumber[4].Metadata.Comment);
+                                Assert.AreEqual("Stop State: Warm", recordsByLineNumber[5].Metadata.Comment);
+                                Assert.AreEqual("Start State: Hot, Stop State: Hot", recordsByLineNumber[6].Metadata.Comment);
+                        }
+                        finally
+                        {
+                                TryDelete(filePath);
+                        }
+                }
+
+                // HACK: This integration test should be a unit test. It isn't because the analyzer depends on `FilterStrategy` (a complex object) as an input. Code smell.
+                [TestMethod]
+                public void DetectRisingEdges()
+                {
 			var dectectMinuteIncreasing = @"\s12:(?<Minute>[0-9]{2})";
 
 			var engine = Engine
@@ -104,11 +180,11 @@
 		}
 
 		[TestMethod]
-		public void DetectFallingEdges()
-		{
-			var detectSecondRollover = @"\s12:[0-9]{2}:(?<Second>[0-9]{2})";
+                public void DetectFallingEdges()
+                {
+                        var detectSecondRollover = @"\s12:[0-9]{2}:(?<Second>[0-9]{2})";
 
-			var engine = Engine
+                        var engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -127,8 +203,50 @@
 				.Filter.Results
 				.Count(x => x.Metadata.IsFlagged);
 
-			// 8 transitions + 1 for the first value found
-			Assert.AreEqual(9, flaggedRecords);
-		}
-	}
+                        // 8 transitions + 1 for the first value found
+                        Assert.AreEqual(9, flaggedRecords);
+                }
+
+                private static string CreateStableValueLog()
+                {
+                        var lines = new[]
+                        {
+                                "Info 1900-01-01 12:00:00.0000 248 Temperature=Cold",
+                                "Info 1900-01-01 12:00:01.0000 248 Temperature=Cold",
+                                "Info 1900-01-01 12:00:02.0000 248 Temperature=Cold",
+                                "Info 1900-01-01 12:00:03.0000 248 Temperature=Warm",
+                                "Info 1900-01-01 12:00:04.0000 248 Temperature=Warm",
+                                "Info 1900-01-01 12:00:05.0000 248 Temperature=Hot",
+                        };
+
+                        var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
+                        File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+
+                        return filePath;
+                }
+
+                private static void TryDelete(string filePath)
+                {
+                        if (string.IsNullOrWhiteSpace(filePath))
+                        {
+                                return;
+                        }
+
+                        try
+                        {
+                                if (File.Exists(filePath))
+                                {
+                                        File.Delete(filePath);
+                                }
+                        }
+                        catch (IOException)
+                        {
+                                // Ignored - best effort cleanup.
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                                // Ignored - best effort cleanup.
+                        }
+                }
+        }
 }
