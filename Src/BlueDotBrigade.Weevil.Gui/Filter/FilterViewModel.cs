@@ -124,6 +124,7 @@
 
                         _concurrentFilterCount = 0;
                         _currentfilterCriteria = FilterCriteria.None;
+                        _currentfilterType = FilterType.RegularExpression;
                         _previousFilterCriteria = FilterCriteria.None;
                         _previousFilterType = FilterType.RegularExpression;
 
