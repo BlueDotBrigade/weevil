@@ -94,6 +94,7 @@
 
 		private string _findText;
 		private bool _findIsCaseSensitive;
+		private bool _findUseRegex;
 
                 private FilterType _currentfilterType;
                 private FilterType _filterExpressionType;
@@ -1031,7 +1032,7 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(_findText, out _findIsCaseSensitive, out var findNext, out _findText))
+			if (_dialogBox.TryShowFind(_findText, out _findIsCaseSensitive, out var findNext, out _findUseRegex, out _findText))
 			{
 				if (findNext)
 				{
@@ -1049,10 +1050,10 @@
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
 					() => _engine
 						.Navigate
-						.NextContent(_findText, _findIsCaseSensitive)
+						.NextContent(_findText, _findIsCaseSensitive, _findUseRegex)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
@@ -1062,10 +1063,10 @@
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
 					() => _engine
 						.Navigate
-						.PreviousContent(_findText, _findIsCaseSensitive)
+						.PreviousContent(_findText, _findIsCaseSensitive, _findUseRegex)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}

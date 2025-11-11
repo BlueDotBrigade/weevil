@@ -35,6 +35,24 @@
 					BindsTwoWayByDefault = true,
 				});
 
+		public static readonly DependencyProperty IsRegexModeProperty =
+			DependencyProperty.Register(
+				nameof(IsRegexMode), typeof(bool),
+				typeof(FindDialog),
+				new FrameworkPropertyMetadata
+				{
+					BindsTwoWayByDefault = true,
+				});
+
+		public static readonly DependencyProperty IsPlainTextModeProperty =
+			DependencyProperty.Register(
+				nameof(IsPlainTextMode), typeof(bool),
+				typeof(FindDialog),
+				new FrameworkPropertyMetadata
+				{
+					BindsTwoWayByDefault = true,
+				});
+
 		public bool IsCaseSensitive
 		{
 			get => (bool)GetValue(IsCaseSensitiveProperty);
@@ -53,6 +71,18 @@
 			set => SetValue(FindNextProperty, value);
 		}
 
+		public bool IsRegexMode
+		{
+			get => (bool)GetValue(IsRegexModeProperty);
+			set => SetValue(IsRegexModeProperty, value);
+		}
+
+		public bool IsPlainTextMode
+		{
+			get => (bool)GetValue(IsPlainTextModeProperty);
+			set => SetValue(IsPlainTextModeProperty, value);
+		}
+
 		public FindDialog(string defaultValue)
 		{
 			this.Owner = Application.Current.MainWindow;
@@ -62,6 +92,8 @@
 			this.IsCaseSensitive = false;
 			this.UserInput = defaultValue ?? string.Empty;
 			this.FindNext = true;
+			this.IsPlainTextMode = true; // Default to Plain Text mode
+			this.IsRegexMode = false;
 
 			InitializeComponent();
 			this.DataContext = this;
