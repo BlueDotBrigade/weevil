@@ -89,12 +89,14 @@
 		private string _inclusiveFilter;
 		private string _exclusiveFilter;
 
-		private FilterCriteria _previousFilterCriteria;
+                private FilterCriteria _previousFilterCriteria;
+                private FilterType _previousFilterType;
 
 		private string _findText;
 		private bool _findIsCaseSensitive;
 
-		private FilterType _currentfilterType;
+                private FilterType _currentfilterType;
+                private FilterType _filterExpressionType;
 		private IFilterCriteria _currentfilterCriteria;
 
 		private int _concurrentFilterCount;
@@ -120,14 +122,17 @@
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
 
-			_concurrentFilterCount = 0;
-			_currentfilterCriteria = FilterCriteria.None;
-			_previousFilterCriteria = FilterCriteria.None;
+                        _concurrentFilterCount = 0;
+                        _currentfilterCriteria = FilterCriteria.None;
+                        _currentfilterType = FilterType.RegularExpression;
+                        _previousFilterCriteria = FilterCriteria.None;
+                        _previousFilterType = FilterType.RegularExpression;
 
 			_findText = string.Empty;
 			_findIsCaseSensitive = false;
 
-			this.IsManualFilter = false;
+                        this.IsManualFilter = false;
+                        _filterExpressionType = FilterType.RegularExpression;
 			this.IsFilterCaseSensitive = true;
 			this.AreFilterOptionsVisible = false;
 			this.IncludeDebugRecords = true;
@@ -226,12 +231,12 @@
 					_inclusiveFilter = value;
 
 					// Automatic filtering?
-					if (!this.IsManualFilter)
-					{
-						var filterCriteria = new FilterCriteria(value, _exclusiveFilter, GetFilterConfiguration());
+                                        if (!this.IsManualFilter)
+                                        {
+                                                var filterCriteria = new FilterCriteria(value, _exclusiveFilter, GetFilterConfiguration());
 
-						FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
-					}
+                                                FilterAsynchronously(this.FilterExpressionType, filterCriteria);
+                                        }
 				}
 			}
 		}
@@ -251,12 +256,12 @@
 					_exclusiveFilter = value;
 
 					// Automatic filtering?
-					if (!this.IsManualFilter)
-					{
-						var filterCriteria = new FilterCriteria(_inclusiveFilter, value, GetFilterConfiguration());
+                                        if (!this.IsManualFilter)
+                                        {
+                                                var filterCriteria = new FilterCriteria(_inclusiveFilter, value, GetFilterConfiguration());
 
-						FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
-					}
+                                                FilterAsynchronously(this.FilterExpressionType, filterCriteria);
+                                        }
 				}
 			}
 		}
@@ -289,7 +294,26 @@
 
 		public bool IncludeDebugRecords { get; set; }
 
-		public bool IncludeTraceRecords { get; set; }
+                public bool IncludeTraceRecords { get; set; }
+
+                public FilterType FilterExpressionType
+                {
+                        get => _filterExpressionType;
+                        set
+                        {
+                                if (_filterExpressionType != value)
+                                {
+                                        _filterExpressionType = value;
+                                        RaisePropertyChanged(nameof(this.FilterExpressionType));
+
+                                        if (!this.IsManualFilter)
+                                        {
+                                                var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
+                                                FilterAsynchronously(_filterExpressionType, filterCriteria);
+                                        }
+                                }
+                        }
+                }
 
 		public bool IsProcessingLongOperation { get; private set; }
 
@@ -931,7 +955,7 @@
 
 			var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
 
-			FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
+                        FilterAsynchronously(this.FilterExpressionType, filterCriteria);
 		}
 
 		public void FilterOrCancel(object[] filters)
@@ -982,12 +1006,13 @@
 		{
 			if (_engine.Filter.Criteria.Equals(FilterCriteria.None))
 			{
-				FilterAsynchronously(FilterType.RegularExpression, _previousFilterCriteria);
+                                FilterAsynchronously(_previousFilterType, _previousFilterCriteria);
 			}
 			else
 			{
-				_previousFilterCriteria = (FilterCriteria)_engine.Filter.Criteria;
-				FilterAsynchronously(FilterType.RegularExpression, FilterCriteria.None);
+                                _previousFilterCriteria = (FilterCriteria)_engine.Filter.Criteria;
+                                _previousFilterType = _currentfilterType;
+                                FilterAsynchronously(FilterType.RegularExpression, FilterCriteria.None);
 			}
 		}
 
