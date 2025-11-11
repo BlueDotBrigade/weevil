@@ -17,7 +17,7 @@
 			throw new NotImplementedException();
 		}
 
-		public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out string findText)
+		public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out bool useRegex, out string findText)
 		{
 			throw new NotImplementedException();
 		}

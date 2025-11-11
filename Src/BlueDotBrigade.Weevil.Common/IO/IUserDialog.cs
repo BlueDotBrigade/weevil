@@ -5,6 +5,6 @@
 		string ShowUserPrompt(string title, string prompt);
 		string ShowUserPrompt(string title, string prompt, string defaultValue);
 
-		bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out string findText);
+		bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out bool useRegex, out string findText);
 	}
 }

@@ -129,13 +129,14 @@ internal class DialogBoxService : IDialogBoxService
 		return wasSuccessful;
 	}
 
-	public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out string findText)
+	public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out bool useRegex, out string findText)
 	{
 		var wasSuccessful = false;
 
 		isCaseSensitive = false;
 		findText = String.Empty;
 		findNext = true;
+		useRegex = false;
 
 		var dialog = new FindDialog(defaultValue);
 
@@ -144,6 +145,7 @@ internal class DialogBoxService : IDialogBoxService
 			isCaseSensitive = dialog.IsCaseSensitive;
 			findText = dialog.UserInput;
 			findNext = dialog.FindNext;
+			useRegex = dialog.IsRegexMode;
 
 			wasSuccessful = true;
 		}
