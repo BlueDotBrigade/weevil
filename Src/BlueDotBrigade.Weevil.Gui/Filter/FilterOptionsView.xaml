@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="BlueDotBrigade.Weevil.Gui.Filter.FilterOptionsView"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
+            mc:Ignorable="d"
+            d:DesignHeight="50" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+    </UserControl.Resources>
+    <StackPanel Orientation="Horizontal">
+        <CheckBox
+                IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
+            <AccessText Text="Can Include _Debug"></AccessText>
+        </CheckBox>
+        <CheckBox
+                IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
+            <AccessText Text="Can Include _Trace"></AccessText>
+        </CheckBox>
+        <CheckBox
+                IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
+            <AccessText Text="Must Include _Pinned"></AccessText>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
+            <AccessText Text="_Manual Filtering"></AccessText>
+        </CheckBox>
+        <RadioButton Margin="0,4,8,4"
+                     GroupName="FilterExpressionMode"
+                     IsChecked="{Binding FilterExpressionType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=RegularExpression}"
+                     ToolTip="When selected, include and exclude filters are treated as regular expressions.">
+            <AccessText Text="Regular E_xpression Filtering"></AccessText>
+        </RadioButton>
+        <RadioButton Margin="0,4,8,4"
+                     GroupName="FilterExpressionMode"
+                     IsChecked="{Binding FilterExpressionType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=PlainText}"
+                     ToolTip="When selected, include and exclude filters are treated as plain text.">
+            <AccessText Text="_Plain Text Filtering"></AccessText>
+        </RadioButton>
+        <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
+            <AccessText Text="_Case Sensitive Filtering"></AccessText>
+        </CheckBox>
+    </StackPanel>
+</UserControl>

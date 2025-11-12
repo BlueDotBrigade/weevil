@@ -118,7 +118,10 @@
 			this.IsLogFileOpen = false;
 			this.CanOpenLogFile = true;
 
-			this.IncludePinned = true;
+			this.FilterOptionsViewModel = new FilterOptionsViewModel();
+			this.FilterOptionsViewModel.FilterOptionsChanged += OnFilterOptionsChanged;
+
+			this.IncludePinned = this.FilterOptionsViewModel.IncludePinned;
 
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
@@ -132,12 +135,12 @@
 			_findText = string.Empty;
 			_findIsCaseSensitive = false;
 
-                        this.IsManualFilter = false;
-                        _filterExpressionType = FilterType.RegularExpression;
-			this.IsFilterCaseSensitive = true;
+                        this.IsManualFilter = this.FilterOptionsViewModel.IsManualFilter;
+                        _filterExpressionType = this.FilterOptionsViewModel.FilterExpressionType;
+			this.IsFilterCaseSensitive = this.FilterOptionsViewModel.IsFilterCaseSensitive;
 			this.AreFilterOptionsVisible = false;
-			this.IncludeDebugRecords = true;
-			this.IncludeTraceRecords = true;
+			this.IncludeDebugRecords = this.FilterOptionsViewModel.IncludeDebugRecords;
+			this.IncludeTraceRecords = this.FilterOptionsViewModel.IncludeTraceRecords;
 
 			this.IsFilterToolboxEnabled = false;
 
@@ -299,12 +302,16 @@
 
                 public FilterType FilterExpressionType
                 {
-                        get => _filterExpressionType;
+                        get => this.FilterOptionsViewModel?.FilterExpressionType ?? _filterExpressionType;
                         set
                         {
                                 if (_filterExpressionType != value)
                                 {
                                         _filterExpressionType = value;
+                                        if (this.FilterOptionsViewModel != null)
+                                        {
+                                                this.FilterOptionsViewModel.FilterExpressionType = value;
+                                        }
                                         RaisePropertyChanged(nameof(this.FilterExpressionType));
 
                                         if (!this.IsManualFilter)
@@ -317,6 +324,8 @@
                 }
 
 		public bool IsProcessingLongOperation { get; private set; }
+
+		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
@@ -370,6 +379,25 @@
 		private void OnFileDropped(object sender, DroppedFileEventArgs e)
 		{
 			OpenCompressedAsync(e.FilePath);
+		}
+
+		private void OnFilterOptionsChanged(object sender, EventArgs e)
+		{
+			// Sync filter options from FilterOptionsViewModel back to FilterViewModel
+			// This ensures backward compatibility with existing code that references these properties
+			this.IncludeDebugRecords = this.FilterOptionsViewModel.IncludeDebugRecords;
+			this.IncludeTraceRecords = this.FilterOptionsViewModel.IncludeTraceRecords;
+			this.IncludePinned = this.FilterOptionsViewModel.IncludePinned;
+			this.IsManualFilter = this.FilterOptionsViewModel.IsManualFilter;
+			this.IsFilterCaseSensitive = this.FilterOptionsViewModel.IsFilterCaseSensitive;
+			this._filterExpressionType = this.FilterOptionsViewModel.FilterExpressionType;
+
+			// Trigger automatic filtering if not in manual mode
+			if (!this.IsManualFilter)
+			{
+				var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
+				FilterAsynchronously(this.FilterExpressionType, filterCriteria);
+			}
 		}
 
 		protected void RaisePropertyChanged(string name)
@@ -1557,19 +1585,19 @@
 		{
 			var configuration = new Dictionary<string, object>();
 
-			if (this.IncludePinned)
+			if (this.FilterOptionsViewModel.IncludePinned)
 			{
-				configuration.Add("IncludePinned", this.IncludePinned);
+				configuration.Add("IncludePinned", this.FilterOptionsViewModel.IncludePinned);
 			}
 
-			configuration.Add("IsCaseSensitive", this.IsFilterCaseSensitive);
+			configuration.Add("IsCaseSensitive", this.FilterOptionsViewModel.IsFilterCaseSensitive);
 
-			if (!this.IncludeDebugRecords)
+			if (!this.FilterOptionsViewModel.IncludeDebugRecords)
 			{
 				configuration.Add("HideDebugRecords", true);
 			}
 
-			if (!this.IncludeTraceRecords)
+			if (!this.FilterOptionsViewModel.IncludeTraceRecords)
 			{
 				configuration.Add("HideTraceRecords", true);
 			}
