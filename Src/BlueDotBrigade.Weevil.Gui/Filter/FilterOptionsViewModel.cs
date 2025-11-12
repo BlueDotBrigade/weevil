@@ -1,134 +1,34 @@
 namespace BlueDotBrigade.Weevil.Gui.Filter
 {
+	using System;
 	using System.ComponentModel;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
-	using PostSharp.Patterns.Model;
 
-	[NotifyPropertyChanged()]
+	/// <summary>
+	/// View model for filter options that exposes the FilterOptions model.
+	/// </summary>
 	internal class FilterOptionsViewModel : INotifyPropertyChanged
 	{
-		#region Fields
-		private FilterType _filterExpressionType;
-		private bool _includeDebugRecords;
-		private bool _includeTraceRecords;
-		private bool _includePinned;
-		private bool _isManualFilter;
-		private bool _isFilterCaseSensitive;
-		#endregion
-
-		#region Object Lifetime
 		public FilterOptionsViewModel()
 		{
-			this.IncludeDebugRecords = true;
-			this.IncludeTraceRecords = true;
-			this.IncludePinned = true;
-			this.IsManualFilter = false;
-			this.IsFilterCaseSensitive = true;
-			this.FilterExpressionType = FilterType.RegularExpression;
+			this.Options = new FilterOptions();
+			this.Options.PropertyChanged += OnOptionsPropertyChanged;
 		}
-		#endregion
 
-		#region Events
 		public event PropertyChangedEventHandler PropertyChanged;
-		public event System.EventHandler FilterOptionsChanged;
-		#endregion
+		public event EventHandler OptionsChanged;
 
-		#region Properties
-		public bool IncludeDebugRecords
-		{
-			get => _includeDebugRecords;
-			set
-			{
-				if (_includeDebugRecords != value)
-				{
-					_includeDebugRecords = value;
-					OnPropertyChanged(nameof(IncludeDebugRecords));
-					OnFilterOptionsChanged();
-				}
-			}
-		}
+		/// <summary>
+		/// Gets the filter options model containing all settings.
+		/// </summary>
+		public FilterOptions Options { get; }
 
-		public bool IncludeTraceRecords
+		private void OnOptionsPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			get => _includeTraceRecords;
-			set
-			{
-				if (_includeTraceRecords != value)
-				{
-					_includeTraceRecords = value;
-					OnPropertyChanged(nameof(IncludeTraceRecords));
-					OnFilterOptionsChanged();
-				}
-			}
+			// Bubble up property changes
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs($"Options.{e.PropertyName}"));
+			
+			// Notify that options have changed
+			OptionsChanged?.Invoke(this, EventArgs.Empty);
 		}
-
-		public bool IncludePinned
-		{
-			get => _includePinned;
-			set
-			{
-				if (_includePinned != value)
-				{
-					_includePinned = value;
-					OnPropertyChanged(nameof(IncludePinned));
-					OnFilterOptionsChanged();
-				}
-			}
-		}
-
-		public bool IsManualFilter
-		{
-			get => _isManualFilter;
-			set
-			{
-				if (_isManualFilter != value)
-				{
-					_isManualFilter = value;
-					OnPropertyChanged(nameof(IsManualFilter));
-					OnFilterOptionsChanged();
-				}
-			}
-		}
-
-		public bool IsFilterCaseSensitive
-		{
-			get => _isFilterCaseSensitive;
-			set
-			{
-				if (_isFilterCaseSensitive != value)
-				{
-					_isFilterCaseSensitive = value;
-					OnPropertyChanged(nameof(IsFilterCaseSensitive));
-					OnFilterOptionsChanged();
-				}
-			}
-		}
-
-		public FilterType FilterExpressionType
-		{
-			get => _filterExpressionType;
-			set
-			{
-				if (_filterExpressionType != value)
-				{
-					_filterExpressionType = value;
-					OnPropertyChanged(nameof(FilterExpressionType));
-					OnFilterOptionsChanged();
-				}
-			}
-		}
-		#endregion
-
-		#region Private Methods
-		private void OnPropertyChanged(string propertyName)
-		{
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
-
-		private void OnFilterOptionsChanged()
-		{
-			FilterOptionsChanged?.Invoke(this, System.EventArgs.Empty);
-		}
-		#endregion
 	}
 }

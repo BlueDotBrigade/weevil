@@ -119,7 +119,7 @@
 			this.CanOpenLogFile = true;
 
 			this.FilterOptionsViewModel = new FilterOptionsViewModel();
-			this.FilterOptionsViewModel.FilterOptionsChanged += OnFilterOptionsChanged;
+			this.FilterOptionsViewModel.OptionsChanged += OnFilterOptionsChanged;
 
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
@@ -133,7 +133,7 @@
 			_findText = string.Empty;
 			_findIsCaseSensitive = false;
 
-                        _filterExpressionType = this.FilterOptionsViewModel.FilterExpressionType;
+                        _filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
 			this.AreFilterOptionsVisible = false;
 
 			this.IsFilterToolboxEnabled = false;
@@ -206,36 +206,36 @@
 		
 		public bool IncludePinned
 		{
-			get => this.FilterOptionsViewModel?.IncludePinned ?? true;
+			get => this.FilterOptionsViewModel?.Options.IncludePinned ?? true;
 			set
 			{
-				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IncludePinned != value)
+				if (this.FilterOptionsViewModel?.Options != null)
 				{
-					this.FilterOptionsViewModel.IncludePinned = value;
+					this.FilterOptionsViewModel.Options.IncludePinned = value;
 				}
 			}
 		}
 		
 		public bool IsManualFilter
 		{
-			get => this.FilterOptionsViewModel?.IsManualFilter ?? false;
+			get => this.FilterOptionsViewModel?.Options.IsManualFilter ?? false;
 			set
 			{
-				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IsManualFilter != value)
+				if (this.FilterOptionsViewModel?.Options != null)
 				{
-					this.FilterOptionsViewModel.IsManualFilter = value;
+					this.FilterOptionsViewModel.Options.IsManualFilter = value;
 				}
 			}
 		}
 
 		public bool IsFilterCaseSensitive
 		{
-			get => this.FilterOptionsViewModel?.IsFilterCaseSensitive ?? true;
+			get => this.FilterOptionsViewModel?.Options.IsFilterCaseSensitive ?? true;
 			set
 			{
-				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IsFilterCaseSensitive != value)
+				if (this.FilterOptionsViewModel?.Options != null)
 				{
-					this.FilterOptionsViewModel.IsFilterCaseSensitive = value;
+					this.FilterOptionsViewModel.Options.IsFilterCaseSensitive = value;
 				}
 			}
 		}
@@ -324,39 +324,39 @@
 
 		public bool IncludeDebugRecords
 		{
-			get => this.FilterOptionsViewModel?.IncludeDebugRecords ?? true;
+			get => this.FilterOptionsViewModel?.Options.IncludeDebugRecords ?? true;
 			set
 			{
-				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IncludeDebugRecords != value)
+				if (this.FilterOptionsViewModel?.Options != null)
 				{
-					this.FilterOptionsViewModel.IncludeDebugRecords = value;
+					this.FilterOptionsViewModel.Options.IncludeDebugRecords = value;
 				}
 			}
 		}
 
                 public bool IncludeTraceRecords
                 {
-			get => this.FilterOptionsViewModel?.IncludeTraceRecords ?? true;
+			get => this.FilterOptionsViewModel?.Options.IncludeTraceRecords ?? true;
 			set
 			{
-				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IncludeTraceRecords != value)
+				if (this.FilterOptionsViewModel?.Options != null)
 				{
-					this.FilterOptionsViewModel.IncludeTraceRecords = value;
+					this.FilterOptionsViewModel.Options.IncludeTraceRecords = value;
 				}
 			}
 		}
 
                 public FilterType FilterExpressionType
                 {
-                        get => this.FilterOptionsViewModel?.FilterExpressionType ?? _filterExpressionType;
+                        get => this.FilterOptionsViewModel?.Options.FilterExpressionType ?? _filterExpressionType;
                         set
                         {
                                 if (_filterExpressionType != value)
                                 {
                                         _filterExpressionType = value;
-                                        if (this.FilterOptionsViewModel != null)
+                                        if (this.FilterOptionsViewModel?.Options != null)
                                         {
-                                                this.FilterOptionsViewModel.FilterExpressionType = value;
+                                                this.FilterOptionsViewModel.Options.FilterExpressionType = value;
                                         }
                                         RaisePropertyChanged(nameof(this.FilterExpressionType));
 
@@ -430,13 +430,13 @@
 		private void OnFilterOptionsChanged(object sender, EventArgs e)
 		{
 			// Update the backing field for FilterExpressionType
-			this._filterExpressionType = this.FilterOptionsViewModel.FilterExpressionType;
+			this._filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
 
 			// Trigger automatic filtering if not in manual mode
-			if (!this.IsManualFilter)
+			if (!this.FilterOptionsViewModel.Options.IsManualFilter)
 			{
 				var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
-				FilterAsynchronously(this.FilterExpressionType, filterCriteria);
+				FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 			}
 		}
 
@@ -1623,26 +1623,7 @@
 
 		private Dictionary<string, object> GetFilterConfiguration()
 		{
-			var configuration = new Dictionary<string, object>();
-
-			if (this.FilterOptionsViewModel.IncludePinned)
-			{
-				configuration.Add("IncludePinned", this.FilterOptionsViewModel.IncludePinned);
-			}
-
-			configuration.Add("IsCaseSensitive", this.FilterOptionsViewModel.IsFilterCaseSensitive);
-
-			if (!this.FilterOptionsViewModel.IncludeDebugRecords)
-			{
-				configuration.Add("HideDebugRecords", true);
-			}
-
-			if (!this.FilterOptionsViewModel.IncludeTraceRecords)
-			{
-				configuration.Add("HideTraceRecords", true);
-			}
-
-			return configuration;
+			return this.FilterOptionsViewModel.Options.ToConfiguration();
 		}
 
 		private void AddRegion()

@@ -11,33 +11,33 @@
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal">
         <CheckBox
-                IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
+                IsChecked="{Binding Options.IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
             <AccessText Text="Can Include _Debug"></AccessText>
         </CheckBox>
         <CheckBox
-                IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
+                IsChecked="{Binding Options.IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
             <AccessText Text="Can Include _Trace"></AccessText>
         </CheckBox>
         <CheckBox
-                IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
+                IsChecked="{Binding Options.IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
             <AccessText Text="Must Include _Pinned"></AccessText>
         </CheckBox>
-        <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
+        <CheckBox IsChecked="{Binding Options.IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
             <AccessText Text="_Manual Filtering"></AccessText>
         </CheckBox>
         <RadioButton Margin="0,4,8,4"
                      GroupName="FilterExpressionMode"
-                     IsChecked="{Binding FilterExpressionType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=RegularExpression}"
+                     IsChecked="{Binding Options.FilterExpressionType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=RegularExpression}"
                      ToolTip="When selected, include and exclude filters are treated as regular expressions.">
             <AccessText Text="Regular E_xpression Filtering"></AccessText>
         </RadioButton>
         <RadioButton Margin="0,4,8,4"
                      GroupName="FilterExpressionMode"
-                     IsChecked="{Binding FilterExpressionType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=PlainText}"
+                     IsChecked="{Binding Options.FilterExpressionType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=PlainText}"
                      ToolTip="When selected, include and exclude filters are treated as plain text.">
             <AccessText Text="_Plain Text Filtering"></AccessText>
         </RadioButton>
-        <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
+        <CheckBox IsChecked="{Binding Options.IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
             <AccessText Text="_Case Sensitive Filtering"></AccessText>
         </CheckBox>
     </StackPanel>
