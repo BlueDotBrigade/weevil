@@ -35,7 +35,7 @@
             TooltipPosition="Bottom">
         </lvc:CartesianChart>
 
-        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Down" IsExpanded="True">
+        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Down" IsExpanded="False">
             <StackPanel Orientation="Vertical">
                 <TextBox
                     x:Name="RegularExpressionTextBox" Grid.Column="1" 
