@@ -18,7 +18,6 @@ Release on March 2nd, 2025.
    - Reorganized menu to follow standard convention (File, Edit, View, etc.) #344
    - Removed _Flagged_ column in order to maximize visual real-estate. #344
    - Visual indicator now shows when a record has been truncated. #491
-   - Graph properties panel now starts collapsed by default. #545
 - Added support for running _Weevil_ headless.
    - _Command-line_ (CLI) filtering.  #156  #295
    - _PowerShell_ filtering. #155 #294
