@@ -121,8 +121,6 @@
 			this.FilterOptionsViewModel = new FilterOptionsViewModel();
 			this.FilterOptionsViewModel.FilterOptionsChanged += OnFilterOptionsChanged;
 
-			this.IncludePinned = this.FilterOptionsViewModel.IncludePinned;
-
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
 
@@ -135,12 +133,8 @@
 			_findText = string.Empty;
 			_findIsCaseSensitive = false;
 
-                        this.IsManualFilter = this.FilterOptionsViewModel.IsManualFilter;
                         _filterExpressionType = this.FilterOptionsViewModel.FilterExpressionType;
-			this.IsFilterCaseSensitive = this.FilterOptionsViewModel.IsFilterCaseSensitive;
 			this.AreFilterOptionsVisible = false;
-			this.IncludeDebugRecords = this.FilterOptionsViewModel.IncludeDebugRecords;
-			this.IncludeTraceRecords = this.FilterOptionsViewModel.IncludeTraceRecords;
 
 			this.IsFilterToolboxEnabled = false;
 
@@ -209,10 +203,42 @@
 		public bool IsLogFileOpen { get; private set; }
 
 		public bool CanOpenLogFile { get; private set; }
-		public bool IncludePinned { get; set; }
-		public bool IsManualFilter { get; set; }
+		
+		public bool IncludePinned
+		{
+			get => this.FilterOptionsViewModel?.IncludePinned ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IncludePinned != value)
+				{
+					this.FilterOptionsViewModel.IncludePinned = value;
+				}
+			}
+		}
+		
+		public bool IsManualFilter
+		{
+			get => this.FilterOptionsViewModel?.IsManualFilter ?? false;
+			set
+			{
+				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IsManualFilter != value)
+				{
+					this.FilterOptionsViewModel.IsManualFilter = value;
+				}
+			}
+		}
 
-		public bool IsFilterCaseSensitive { get; set; }
+		public bool IsFilterCaseSensitive
+		{
+			get => this.FilterOptionsViewModel?.IsFilterCaseSensitive ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IsFilterCaseSensitive != value)
+				{
+					this.FilterOptionsViewModel.IsFilterCaseSensitive = value;
+				}
+			}
+		}
 
 		public bool IsFilterInProgress { get; private set; }
 
@@ -296,9 +322,29 @@
 
 		public int ActiveRecordIndex { get; set; }
 
-		public bool IncludeDebugRecords { get; set; }
+		public bool IncludeDebugRecords
+		{
+			get => this.FilterOptionsViewModel?.IncludeDebugRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IncludeDebugRecords != value)
+				{
+					this.FilterOptionsViewModel.IncludeDebugRecords = value;
+				}
+			}
+		}
 
-                public bool IncludeTraceRecords { get; set; }
+                public bool IncludeTraceRecords
+                {
+			get => this.FilterOptionsViewModel?.IncludeTraceRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel != null && this.FilterOptionsViewModel.IncludeTraceRecords != value)
+				{
+					this.FilterOptionsViewModel.IncludeTraceRecords = value;
+				}
+			}
+		}
 
                 public FilterType FilterExpressionType
                 {
@@ -383,13 +429,7 @@
 
 		private void OnFilterOptionsChanged(object sender, EventArgs e)
 		{
-			// Sync filter options from FilterOptionsViewModel back to FilterViewModel
-			// This ensures backward compatibility with existing code that references these properties
-			this.IncludeDebugRecords = this.FilterOptionsViewModel.IncludeDebugRecords;
-			this.IncludeTraceRecords = this.FilterOptionsViewModel.IncludeTraceRecords;
-			this.IncludePinned = this.FilterOptionsViewModel.IncludePinned;
-			this.IsManualFilter = this.FilterOptionsViewModel.IsManualFilter;
-			this.IsFilterCaseSensitive = this.FilterOptionsViewModel.IsFilterCaseSensitive;
+			// Update the backing field for FilterExpressionType
 			this._filterExpressionType = this.FilterOptionsViewModel.FilterExpressionType;
 
 			// Trigger automatic filtering if not in manual mode

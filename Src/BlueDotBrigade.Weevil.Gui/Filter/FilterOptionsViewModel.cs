@@ -9,6 +9,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	{
 		#region Fields
 		private FilterType _filterExpressionType;
+		private bool _includeDebugRecords;
+		private bool _includeTraceRecords;
+		private bool _includePinned;
+		private bool _isManualFilter;
+		private bool _isFilterCaseSensitive;
 		#endregion
 
 		#region Object Lifetime
@@ -29,15 +34,75 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#endregion
 
 		#region Properties
-		public bool IncludeDebugRecords { get; set; }
+		public bool IncludeDebugRecords
+		{
+			get => _includeDebugRecords;
+			set
+			{
+				if (_includeDebugRecords != value)
+				{
+					_includeDebugRecords = value;
+					OnPropertyChanged(nameof(IncludeDebugRecords));
+					OnFilterOptionsChanged();
+				}
+			}
+		}
 
-		public bool IncludeTraceRecords { get; set; }
+		public bool IncludeTraceRecords
+		{
+			get => _includeTraceRecords;
+			set
+			{
+				if (_includeTraceRecords != value)
+				{
+					_includeTraceRecords = value;
+					OnPropertyChanged(nameof(IncludeTraceRecords));
+					OnFilterOptionsChanged();
+				}
+			}
+		}
 
-		public bool IncludePinned { get; set; }
+		public bool IncludePinned
+		{
+			get => _includePinned;
+			set
+			{
+				if (_includePinned != value)
+				{
+					_includePinned = value;
+					OnPropertyChanged(nameof(IncludePinned));
+					OnFilterOptionsChanged();
+				}
+			}
+		}
 
-		public bool IsManualFilter { get; set; }
+		public bool IsManualFilter
+		{
+			get => _isManualFilter;
+			set
+			{
+				if (_isManualFilter != value)
+				{
+					_isManualFilter = value;
+					OnPropertyChanged(nameof(IsManualFilter));
+					OnFilterOptionsChanged();
+				}
+			}
+		}
 
-		public bool IsFilterCaseSensitive { get; set; }
+		public bool IsFilterCaseSensitive
+		{
+			get => _isFilterCaseSensitive;
+			set
+			{
+				if (_isFilterCaseSensitive != value)
+				{
+					_isFilterCaseSensitive = value;
+					OnPropertyChanged(nameof(IsFilterCaseSensitive));
+					OnFilterOptionsChanged();
+				}
+			}
+		}
 
 		public FilterType FilterExpressionType
 		{
