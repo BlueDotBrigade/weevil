@@ -129,7 +129,15 @@ internal class DialogBoxService : IDialogBoxService
 		return wasSuccessful;
 	}
 
-	public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out bool useRegex, out string findText)
+	public bool TryShowFind(
+		string defaultValue, 
+		out bool isCaseSensitive, 
+		out bool findNext, 
+		out bool useRegex, 
+		out string findText,
+		out bool searchElapsedTime,
+		out int? minElapsedMs,
+		out int? maxElapsedMs)
 	{
 		var wasSuccessful = false;
 
@@ -137,6 +145,9 @@ internal class DialogBoxService : IDialogBoxService
 		findText = String.Empty;
 		findNext = true;
 		useRegex = false;
+		searchElapsedTime = false;
+		minElapsedMs = null;
+		maxElapsedMs = null;
 
 		var dialog = new FindDialog(defaultValue);
 
@@ -146,6 +157,21 @@ internal class DialogBoxService : IDialogBoxService
 			findText = dialog.UserInput;
 			findNext = dialog.FindNext;
 			useRegex = dialog.IsRegexMode;
+			searchElapsedTime = dialog.SearchElapsedTime;
+
+			// Parse elapsed time values
+			if (searchElapsedTime)
+			{
+				if (!string.IsNullOrWhiteSpace(dialog.MinElapsedTimeMs) && int.TryParse(dialog.MinElapsedTimeMs, out var minMs))
+				{
+					minElapsedMs = minMs;
+				}
+
+				if (!string.IsNullOrWhiteSpace(dialog.MaxElapsedTimeMs) && int.TryParse(dialog.MaxElapsedTimeMs, out var maxMs))
+				{
+					maxElapsedMs = maxMs;
+				}
+			}
 
 			wasSuccessful = true;
 		}

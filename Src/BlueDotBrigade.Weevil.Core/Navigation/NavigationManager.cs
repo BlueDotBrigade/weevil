@@ -35,6 +35,7 @@
 				new PinNavigator(_activeRecord),
 				new CommentNavigator(_activeRecord),
 				new FlagNavigator(_activeRecord),
+				new ElapsedTimeNavigator(_activeRecord),
 			}.ToImmutableArray();
 		}
 
@@ -156,6 +157,20 @@
 			return this
 				.Using<IFlagNavigator>()
 				.FindNext();
+		}
+
+		public IRecord PreviousElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			return this
+				.Using<IElapsedTimeNavigator>()
+				.FindPrevious(minMilliseconds, maxMilliseconds);
+		}
+
+		public IRecord NextElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			return this
+				.Using<IElapsedTimeNavigator>()
+				.FindNext(minMilliseconds, maxMilliseconds);
 		}
 	}
 }
