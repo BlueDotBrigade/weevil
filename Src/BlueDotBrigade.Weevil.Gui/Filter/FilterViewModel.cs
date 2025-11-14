@@ -1100,15 +1100,37 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(_findText, out _findIsCaseSensitive, out var findNext, out _findUseRegex, out _findText))
+			if (_dialogBox.TryShowFind(
+				_findText, 
+				out _findIsCaseSensitive, 
+				out var findNext, 
+				out _findUseRegex, 
+				out _findText,
+				out var searchElapsedTime,
+				out var minElapsedMs,
+				out var maxElapsedMs))
 			{
-				if (findNext)
+				if (searchElapsedTime)
 				{
-					FindNext();
+					if (findNext)
+					{
+						FindNextElapsedTime(minElapsedMs, maxElapsedMs);
+					}
+					else
+					{
+						FindPreviousElapsedTime(minElapsedMs, maxElapsedMs);
+					}
 				}
 				else
 				{
-					FindPrevious();
+					if (findNext)
+					{
+						FindNext();
+					}
+					else
+					{
+						FindPrevious();
+					}
 				}
 			}
 		}
@@ -1137,6 +1159,32 @@
 						.PreviousContent(_findText, _findIsCaseSensitive, _findUseRegex)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
+		}
+
+		private void FindNextElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			var minDesc = minMilliseconds.HasValue ? minMilliseconds.Value.ToString() : "none";
+			var maxDesc = maxMilliseconds.HasValue ? maxMilliseconds.Value.ToString() : "none";
+			
+			SearchFilterResults(
+				$"Unable to find a record with the specified elapsed time in the search results.\r\n\r\nMinimum (ms): {minDesc}\r\nMaximum (ms): {maxDesc}",
+				() => _engine
+					.Navigate
+					.NextElapsedTime(minMilliseconds, maxMilliseconds)
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		private void FindPreviousElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			var minDesc = minMilliseconds.HasValue ? minMilliseconds.Value.ToString() : "none";
+			var maxDesc = maxMilliseconds.HasValue ? maxMilliseconds.Value.ToString() : "none";
+			
+			SearchFilterResults(
+				$"Unable to find a record with the specified elapsed time in the search results.\r\n\r\nMinimum (ms): {minDesc}\r\nMaximum (ms): {maxDesc}",
+				() => _engine
+					.Navigate
+					.PreviousElapsedTime(minMilliseconds, maxMilliseconds)
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoTo()

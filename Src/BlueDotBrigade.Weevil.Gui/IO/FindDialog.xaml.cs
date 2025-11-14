@@ -53,6 +53,33 @@
 					BindsTwoWayByDefault = true,
 				});
 
+		public static readonly DependencyProperty SearchElapsedTimeProperty =
+			DependencyProperty.Register(
+				nameof(SearchElapsedTime), typeof(bool),
+				typeof(FindDialog),
+				new FrameworkPropertyMetadata
+				{
+					BindsTwoWayByDefault = true,
+				});
+
+		public static readonly DependencyProperty MinElapsedTimeMsProperty =
+			DependencyProperty.Register(
+				nameof(MinElapsedTimeMs), typeof(string),
+				typeof(FindDialog),
+				new FrameworkPropertyMetadata
+				{
+					BindsTwoWayByDefault = true,
+				});
+
+		public static readonly DependencyProperty MaxElapsedTimeMsProperty =
+			DependencyProperty.Register(
+				nameof(MaxElapsedTimeMs), typeof(string),
+				typeof(FindDialog),
+				new FrameworkPropertyMetadata
+				{
+					BindsTwoWayByDefault = true,
+				});
+
 		public bool IsCaseSensitive
 		{
 			get => (bool)GetValue(IsCaseSensitiveProperty);
@@ -83,6 +110,24 @@
 			set => SetValue(IsPlainTextModeProperty, value);
 		}
 
+		public bool SearchElapsedTime
+		{
+			get => (bool)GetValue(SearchElapsedTimeProperty);
+			set => SetValue(SearchElapsedTimeProperty, value);
+		}
+
+		public string MinElapsedTimeMs
+		{
+			get => (string)GetValue(MinElapsedTimeMsProperty);
+			set => SetValue(MinElapsedTimeMsProperty, value);
+		}
+
+		public string MaxElapsedTimeMs
+		{
+			get => (string)GetValue(MaxElapsedTimeMsProperty);
+			set => SetValue(MaxElapsedTimeMsProperty, value);
+		}
+
 		public FindDialog(string defaultValue)
 		{
 			this.Owner = Application.Current.MainWindow;
@@ -94,6 +139,9 @@
 			this.FindNext = true;
 			this.IsPlainTextMode = true; // Default to Plain Text mode
 			this.IsRegexMode = false;
+			this.SearchElapsedTime = false;
+			this.MinElapsedTimeMs = string.Empty;
+			this.MaxElapsedTimeMs = string.Empty;
 
 			InitializeComponent();
 			this.DataContext = this;
@@ -107,12 +155,28 @@
 		private void OnPreviousClicked(object sender, RoutedEventArgs e)
 		{
 			this.FindNext = false;
+			this.SearchElapsedTime = false;
 			this.DialogResult = true;
 		}
 
 		private void OnNextClicked(object sender, RoutedEventArgs e)
 		{
 			this.FindNext = true;
+			this.SearchElapsedTime = false;
+			this.DialogResult = true;
+		}
+
+		private void OnPreviousElapsedClicked(object sender, RoutedEventArgs e)
+		{
+			this.FindNext = false;
+			this.SearchElapsedTime = true;
+			this.DialogResult = true;
+		}
+
+		private void OnNextElapsedClicked(object sender, RoutedEventArgs e)
+		{
+			this.FindNext = true;
+			this.SearchElapsedTime = true;
 			this.DialogResult = true;
 		}
 	}
