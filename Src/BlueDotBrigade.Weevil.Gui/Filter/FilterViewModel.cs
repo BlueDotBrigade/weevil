@@ -154,6 +154,9 @@
 			_tableOfContents = new TableOfContents();
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
+
+			// Subscribe to navigation requests from the Dashboard
+			_bulletinMediator.Subscribe<NavigateToInsightRecordBulletin>(this, OnNavigateToInsightRecord);
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -973,7 +976,7 @@
 			}
 			else
 			{
-				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights);
+				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights, _bulletinMediator);
 			}
 		}
 
@@ -1247,6 +1250,19 @@
 						}
 					}
 				}
+			}
+		}
+
+		private void OnNavigateToInsightRecord(NavigateToInsightRecordBulletin bulletin)
+		{
+			if (bulletin?.Record != null)
+			{
+				SearchFilterResults(
+					$"Unable to find the insight's related record in the search results. Line={bulletin.Record.LineNumber}",
+					() => _engine
+						.Navigate
+						.GoTo(bulletin.Record.LineNumber, RecordSearchType.NearestNeighbor)
+						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
 

@@ -51,9 +51,9 @@ internal class DialogBoxService : IDialogBoxService
 		return string.Empty;
 	}
 
-	public void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights)
+	public void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, IBulletinMediator bulletinMediator)
 	{
-		var dialog = new DashboardDialog(weevilVersion, engine)
+		var dialog = new DashboardDialog(weevilVersion, engine, bulletinMediator)
 		{
 			Insights = insights.ToArray(),
 		};

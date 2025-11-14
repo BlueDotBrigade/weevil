@@ -35,6 +35,12 @@
 				this.Details = $"The log file timestamps were not in chronological order {metrics.Counter} time(s). " +
 				               $"The biggest anomaly occurred at {metrics.BiggestAnomalyAt.CreatedAt.ToString("HH:mm:ss")}, " +
 				               $"and was {metrics.BiggestAnomaly.ToHumanReadable()}. Using threshold: {threshold}";
+
+				// Store the record where the biggest anomaly occurred
+				if (metrics.BiggestAnomalyAt != null && !Record.IsDummyOrNull(metrics.BiggestAnomalyAt))
+				{
+					this.RelatedRecords = ImmutableArray.Create(metrics.BiggestAnomalyAt);
+				}
 			}
 		}
 	}
