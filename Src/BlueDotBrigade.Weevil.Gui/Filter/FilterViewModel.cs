@@ -118,7 +118,8 @@
 			this.IsLogFileOpen = false;
 			this.CanOpenLogFile = true;
 
-			this.IncludePinned = true;
+			this.FilterOptionsViewModel = new FilterOptionsViewModel();
+			this.FilterOptionsViewModel.OptionsChanged += OnFilterOptionsChanged;
 
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
@@ -132,12 +133,8 @@
 			_findText = string.Empty;
 			_findIsCaseSensitive = false;
 
-                        this.IsManualFilter = false;
-                        _filterExpressionType = FilterType.RegularExpression;
-			this.IsFilterCaseSensitive = true;
+                        _filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
 			this.AreFilterOptionsVisible = false;
-			this.IncludeDebugRecords = true;
-			this.IncludeTraceRecords = true;
 
 			this.IsFilterToolboxEnabled = false;
 
@@ -206,10 +203,42 @@
 		public bool IsLogFileOpen { get; private set; }
 
 		public bool CanOpenLogFile { get; private set; }
-		public bool IncludePinned { get; set; }
-		public bool IsManualFilter { get; set; }
+		
+		public bool IncludePinned
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludePinned ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludePinned = value;
+				}
+			}
+		}
+		
+		public bool IsManualFilter
+		{
+			get => this.FilterOptionsViewModel?.Options.IsManualFilter ?? false;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IsManualFilter = value;
+				}
+			}
+		}
 
-		public bool IsFilterCaseSensitive { get; set; }
+		public bool IsFilterCaseSensitive
+		{
+			get => this.FilterOptionsViewModel?.Options.IsFilterCaseSensitive ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IsFilterCaseSensitive = value;
+				}
+			}
+		}
 
 		public bool IsFilterInProgress { get; private set; }
 
@@ -293,18 +322,42 @@
 
 		public int ActiveRecordIndex { get; set; }
 
-		public bool IncludeDebugRecords { get; set; }
+		public bool IncludeDebugRecords
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludeDebugRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeDebugRecords = value;
+				}
+			}
+		}
 
-                public bool IncludeTraceRecords { get; set; }
+                public bool IncludeTraceRecords
+                {
+			get => this.FilterOptionsViewModel?.Options.IncludeTraceRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeTraceRecords = value;
+				}
+			}
+		}
 
                 public FilterType FilterExpressionType
                 {
-                        get => _filterExpressionType;
+                        get => this.FilterOptionsViewModel?.Options.FilterExpressionType ?? _filterExpressionType;
                         set
                         {
                                 if (_filterExpressionType != value)
                                 {
                                         _filterExpressionType = value;
+                                        if (this.FilterOptionsViewModel?.Options != null)
+                                        {
+                                                this.FilterOptionsViewModel.Options.FilterExpressionType = value;
+                                        }
                                         RaisePropertyChanged(nameof(this.FilterExpressionType));
 
                                         if (!this.IsManualFilter)
@@ -317,6 +370,8 @@
                 }
 
 		public bool IsProcessingLongOperation { get; private set; }
+
+		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
@@ -370,6 +425,19 @@
 		private void OnFileDropped(object sender, DroppedFileEventArgs e)
 		{
 			OpenCompressedAsync(e.FilePath);
+		}
+
+		private void OnFilterOptionsChanged(object sender, EventArgs e)
+		{
+			// Update the backing field for FilterExpressionType
+			this._filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
+
+			// Trigger automatic filtering if not in manual mode
+			if (!this.FilterOptionsViewModel.Options.IsManualFilter)
+			{
+				var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
+				FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
+			}
 		}
 
 		protected void RaisePropertyChanged(string name)
@@ -1603,26 +1671,7 @@
 
 		private Dictionary<string, object> GetFilterConfiguration()
 		{
-			var configuration = new Dictionary<string, object>();
-
-			if (this.IncludePinned)
-			{
-				configuration.Add("IncludePinned", this.IncludePinned);
-			}
-
-			configuration.Add("IsCaseSensitive", this.IsFilterCaseSensitive);
-
-			if (!this.IncludeDebugRecords)
-			{
-				configuration.Add("HideDebugRecords", true);
-			}
-
-			if (!this.IncludeTraceRecords)
-			{
-				configuration.Add("HideTraceRecords", true);
-			}
-
-			return configuration;
+			return this.FilterOptionsViewModel.Options.ToConfiguration();
 		}
 
 		private void AddRegion()
