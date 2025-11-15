@@ -1269,17 +1269,17 @@
 				var insightRecordCount = bulletin.RelatedRecords.Length;
 				var successfullyFlaggedCount = 0;
 
-				// Create a set of line numbers currently in memory for efficient lookup
-				var availableLineNumbers = new HashSet<int>();
-				foreach (var record in _engine.Records)
+				// Create a set of line numbers from the insight for efficient lookup
+				var insightLineNumbers = new HashSet<int>();
+				foreach (var record in bulletin.RelatedRecords)
 				{
-					availableLineNumbers.Add(record.LineNumber);
+					insightLineNumbers.Add(record.LineNumber);
 				}
 
 				// Flag records that are still available in memory
-				foreach (var record in bulletin.RelatedRecords)
+				foreach (var record in _engine.Records)
 				{
-					if (availableLineNumbers.Contains(record.LineNumber))
+					if (insightLineNumbers.Contains(record.LineNumber))
 					{
 						record.Metadata.IsFlagged = true;
 						successfullyFlaggedCount++;
