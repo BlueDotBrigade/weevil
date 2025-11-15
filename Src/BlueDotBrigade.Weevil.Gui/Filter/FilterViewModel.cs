@@ -1265,10 +1265,45 @@
 					record.Metadata.IsFlagged = false;
 				}
 
-				// Step 2: Flag all insight-related records
+				// Step 2: Flag all insight-related records and count successfully flagged
+				var insightRecordCount = bulletin.RelatedRecords.Length;
+				var successfullyFlaggedCount = 0;
+
+				// Create a set of line numbers from the insight for efficient lookup
+				var insightLineNumbers = new HashSet<int>();
 				foreach (var record in bulletin.RelatedRecords)
 				{
-					record.Metadata.IsFlagged = true;
+					insightLineNumbers.Add(record.LineNumber);
+				}
+
+				// Flag records that are still available in memory
+				foreach (var record in _engine.Records)
+				{
+					if (insightLineNumbers.Contains(record.LineNumber))
+					{
+						record.Metadata.IsFlagged = true;
+						successfullyFlaggedCount++;
+					}
+				}
+
+				// Check if any records were missing and notify user
+				if (successfullyFlaggedCount < insightRecordCount)
+				{
+					var missingRecordCount = insightRecordCount - successfullyFlaggedCount;
+					var message = $"{missingRecordCount} insight-related record(s) were cleared and could not be flagged.";
+
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						$"Insight navigation: {missingRecordCount} out of {insightRecordCount} records are no longer available in memory.");
+
+					_uiDispatcher.Invoke(() =>
+					{
+						MessageBox.Show(
+							$"Some insight-related records were cleared and are no longer available. Flagging has been adjusted.\n\n{message}",
+							"Records Not Available",
+							MessageBoxButton.OK,
+							MessageBoxImage.Information);
+					});
 				}
 
 				// Step 3: Append @Flagged to include filter
