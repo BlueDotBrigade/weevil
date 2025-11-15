@@ -20,3 +20,9 @@ Scenario: Insight with no problems has no related records
 	When applying the include filter: Information
 		And the critical errors insight is refreshed
 	Then the insight should not have related records
+
+Scenario: Related records are flagged for navigation
+	Given that the default log file is open
+	When the critical errors insight is refreshed
+	Then the insight should have related records
+		And all related records should be flaggable

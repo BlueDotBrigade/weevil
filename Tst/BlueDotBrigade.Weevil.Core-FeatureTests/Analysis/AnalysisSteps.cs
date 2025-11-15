@@ -129,5 +129,24 @@ namespace BlueDotBrigade.Weevil.Analysis
                         insight.RelatedRecords[0].LineNumber.Should().BeGreaterThan(0);
                 }
 
+                [Then("all related records should be flaggable")]
+                public void ThenAllRelatedRecordsShouldBeFlaggable()
+                {
+                        var insight = this.Context.LastInsight;
+                        insight.Should().NotBeNull();
+                        insight.RelatedRecords.Should().NotBeEmpty();
+                        
+                        // Verify we can flag these records (they have Metadata that supports IsFlagged)
+                        foreach (var record in insight.RelatedRecords)
+                        {
+                                record.Metadata.Should().NotBeNull();
+                                // Flag and unflag to verify it works
+                                record.Metadata.IsFlagged = true;
+                                record.Metadata.IsFlagged.Should().BeTrue();
+                                record.Metadata.IsFlagged = false;
+                                record.Metadata.IsFlagged.Should().BeFalse();
+                        }
+                }
+
         }
 }

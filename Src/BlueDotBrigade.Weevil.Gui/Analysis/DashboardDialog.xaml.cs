@@ -128,8 +128,7 @@
 			{
 				if (insight.RelatedRecords.Length > 0)
 				{
-					var firstRecord = insight.RelatedRecords[0];
-					_bulletinMediator.Post(new NavigateToInsightRecordBulletin(firstRecord));
+					_bulletinMediator.Post(new NavigateToInsightRecordBulletin(insight.RelatedRecords));
 					
 					// Bring the main window to the front
 					if (this.Owner != null)

@@ -1,20 +1,21 @@
 namespace BlueDotBrigade.Weevil.Gui.Analysis
 {
+	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	/// <summary>
-	/// Bulletin requesting navigation to a record related to an insight.
+	/// Bulletin requesting navigation to records related to an insight.
 	/// </summary>
 	internal class NavigateToInsightRecordBulletin
 	{
-		public NavigateToInsightRecordBulletin(IRecord record)
+		public NavigateToInsightRecordBulletin(ImmutableArray<IRecord> relatedRecords)
 		{
-			this.Record = record;
+			this.RelatedRecords = relatedRecords;
 		}
 
 		/// <summary>
-		/// The record to navigate to in the main window.
+		/// All records related to the insight that require user attention.
 		/// </summary>
-		public IRecord Record { get; }
+		public ImmutableArray<IRecord> RelatedRecords { get; }
 	}
 }
