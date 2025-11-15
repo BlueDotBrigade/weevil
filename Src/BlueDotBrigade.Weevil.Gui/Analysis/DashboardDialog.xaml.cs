@@ -42,6 +42,7 @@
 				typeof(DashboardDialog));
 
 		private readonly IEngine _engine;
+		private readonly IBulletinMediator _bulletinMediator;
 
 		public Version WeevilVersion
 		{
@@ -79,9 +80,10 @@
 			set => SetValue(ContextProperty, value);
 		}
 
-		public DashboardDialog(Version weevilVersion, IEngine engine)
+		public DashboardDialog(Version weevilVersion, IEngine engine, IBulletinMediator bulletinMediator)
 		{
 			_engine = engine ?? throw new ArgumentNullException(nameof(engine));
+			_bulletinMediator = bulletinMediator ?? throw new ArgumentNullException(nameof(bulletinMediator));
 
 			InitializeComponent();
 
@@ -118,6 +120,23 @@
 				this.From,
 				this.To);
 			Clipboard.SetData(DataFormats.UnicodeText, report);
+		}
+
+		private void OnNavigateToRecord(object sender, RoutedEventArgs e)
+		{
+			if (sender is FrameworkElement element && element.DataContext is IInsight insight)
+			{
+				if (insight.RelatedRecords.Length > 0)
+				{
+					_bulletinMediator.Post(new NavigateToInsightRecordBulletin(insight.RelatedRecords));
+					
+					// Bring the main window to the front
+					if (this.Owner != null)
+					{
+						this.Owner.Activate();
+					}
+				}
+			}
 		}
 	}
 }

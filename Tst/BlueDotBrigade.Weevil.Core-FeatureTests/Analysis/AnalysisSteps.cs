@@ -88,5 +88,65 @@ namespace BlueDotBrigade.Weevil.Analysis
                         record.Metadata.Comment.Should().Be(expectedComment);
                 }
 
+                [When("the critical errors insight is refreshed")]
+                public void WhenTheCriticalErrorsInsightIsRefreshed()
+                {
+                        var insight = new CriticalErrorsInsight();
+                        insight.Refresh(this.Context.Engine.Filter.Results);
+                        this.Context.LastInsight = insight;
+                }
+
+                [When("the temporal anomaly insight is refreshed")]
+                public void WhenTheTemporalAnomalyInsightIsRefreshed()
+                {
+                        var insight = new TemporalAnomalyInsight();
+                        insight.Refresh(this.Context.Engine.Filter.Results);
+                        this.Context.LastInsight = insight;
+                }
+
+                [Then("the insight should have related records")]
+                public void ThenTheInsightShouldHaveRelatedRecords()
+                {
+                        var insight = this.Context.LastInsight;
+                        insight.Should().NotBeNull();
+                        insight.RelatedRecords.Should().NotBeEmpty();
+                }
+
+                [Then("the insight should not have related records")]
+                public void ThenTheInsightShouldNotHaveRelatedRecords()
+                {
+                        var insight = this.Context.LastInsight;
+                        insight.Should().NotBeNull();
+                        insight.RelatedRecords.Should().BeEmpty();
+                }
+
+                [Then("the first related record line number should be greater than 0")]
+                public void ThenTheFirstRelatedRecordLineNumberShouldBeGreaterThanZero()
+                {
+                        var insight = this.Context.LastInsight;
+                        insight.Should().NotBeNull();
+                        insight.RelatedRecords.Should().NotBeEmpty();
+                        insight.RelatedRecords[0].LineNumber.Should().BeGreaterThan(0);
+                }
+
+                [Then("all related records should be flaggable")]
+                public void ThenAllRelatedRecordsShouldBeFlaggable()
+                {
+                        var insight = this.Context.LastInsight;
+                        insight.Should().NotBeNull();
+                        insight.RelatedRecords.Should().NotBeEmpty();
+                        
+                        // Verify we can flag these records (they have Metadata that supports IsFlagged)
+                        foreach (var record in insight.RelatedRecords)
+                        {
+                                record.Metadata.Should().NotBeNull();
+                                // Flag and unflag to verify it works
+                                record.Metadata.IsFlagged = true;
+                                record.Metadata.IsFlagged.Should().BeTrue();
+                                record.Metadata.IsFlagged = false;
+                                record.Metadata.IsFlagged.Should().BeFalse();
+                        }
+                }
+
         }
 }

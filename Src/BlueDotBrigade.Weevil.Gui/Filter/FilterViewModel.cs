@@ -154,6 +154,9 @@
 			_tableOfContents = new TableOfContents();
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
+
+			// Subscribe to navigation requests from the Dashboard
+			_bulletinMediator.Subscribe<NavigateToInsightRecordBulletin>(this, OnNavigateToInsightRecord);
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -973,7 +976,7 @@
 			}
 			else
 			{
-				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights);
+				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights, _bulletinMediator);
 			}
 		}
 
@@ -1247,6 +1250,68 @@
 						}
 					}
 				}
+			}
+		}
+
+		private void OnNavigateToInsightRecord(NavigateToInsightRecordBulletin bulletin)
+		{
+			if (bulletin?.RelatedRecords != null && bulletin.RelatedRecords.Length > 0)
+			{
+				// Option 6: Flag insight records and add @Flagged to filter
+				
+				// Step 1: Clear all existing flags
+				foreach (var record in _engine.Records)
+				{
+					record.Metadata.IsFlagged = false;
+				}
+
+				// Step 2: Flag all insight-related records
+				foreach (var record in bulletin.RelatedRecords)
+				{
+					record.Metadata.IsFlagged = true;
+				}
+
+				// Step 3: Append @Flagged to include filter
+				var currentIncludeFilter = _inclusiveFilter ?? string.Empty;
+				string newIncludeFilter;
+
+				// Check if @Flagged already exists in the filter
+				if (currentIncludeFilter.Contains("@Flagged"))
+				{
+					// Already has @Flagged, no need to append
+					newIncludeFilter = currentIncludeFilter;
+				}
+				else if (string.IsNullOrWhiteSpace(currentIncludeFilter))
+				{
+					// Empty filter, just set to @Flagged
+					newIncludeFilter = "@Flagged";
+				}
+				else
+				{
+					// Append ||@Flagged to existing filter
+					newIncludeFilter = $"{currentIncludeFilter}||@Flagged";
+				}
+
+				// Step 4: Apply the filter (this will trigger FilterAsynchronously via the property setter)
+				_uiDispatcher.Invoke(() =>
+				{
+					this.InclusiveFilter = newIncludeFilter;
+				});
+
+				// Step 5: Navigate to the first record (after a brief delay to allow filter to apply)
+				Task.Delay(500).ContinueWith(_ =>
+				{
+					_uiDispatcher.Invoke(() =>
+					{
+						var firstRecord = bulletin.RelatedRecords[0];
+						SearchFilterResults(
+							$"Unable to find the insight's related record in the search results. Line={firstRecord.LineNumber}",
+							() => _engine
+								.Navigate
+								.GoTo(firstRecord.LineNumber, RecordSearchType.NearestNeighbor)
+								.ToIndexUsing(_engine.Filter.Results));
+					});
+				});
 			}
 		}
 
