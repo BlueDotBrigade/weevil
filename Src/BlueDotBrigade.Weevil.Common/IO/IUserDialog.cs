@@ -14,5 +14,7 @@
 			out bool searchElapsedTime,
 			out int? minElapsedMs,
 			out int? maxElapsedMs);
+
+		bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression);
 	}
 }

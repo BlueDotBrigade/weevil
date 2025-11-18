@@ -178,4 +178,24 @@ internal class DialogBoxService : IDialogBoxService
 
 		return wasSuccessful;
 	}
+
+	public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
+	{
+		regularExpression = string.Empty;
+		var wasSuccessful = false;
+
+		var dialog = new AnalysisDialog()
+		{
+			RegularExpression = defaultRegex ?? string.Empty,
+			RecordsDescription = recordsDescription ?? "All"
+		};
+
+		if (dialog.ShowDialog() == true)
+		{
+			regularExpression = dialog.RegularExpression;
+			wasSuccessful = true;
+		}
+
+		return wasSuccessful;
+	}
 }

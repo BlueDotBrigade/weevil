@@ -21,5 +21,7 @@
 		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern);
 		
 		bool TryShowGoTo(string defaultValue, out string userValue);
+
+		bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression);
 	}
 }
