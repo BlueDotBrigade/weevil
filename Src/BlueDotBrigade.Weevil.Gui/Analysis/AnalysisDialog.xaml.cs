@@ -1,12 +1,11 @@
 namespace BlueDotBrigade.Weevil.Gui.Analysis
 {
-	using System.ComponentModel;
 	using System.Windows;
 
 	/// <summary>
 	/// Interaction logic for AnalysisDialog.xaml
 	/// </summary>
-	public partial class AnalysisDialog : Window, INotifyPropertyChanged
+	public partial class AnalysisDialog : Window
 	{
 		public static readonly DependencyProperty RegularExpressionProperty =
 			DependencyProperty.Register(
@@ -32,18 +31,6 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		{
 			get => (string)GetValue(RecordsDescriptionProperty);
 			set => SetValue(RecordsDescriptionProperty, value);
-		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected void RaisePropertyChanged(string name)
-		{
-			var handler = this.PropertyChanged;
-
-			if (handler != null)
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(name));
-			}
 		}
 
 		public AnalysisDialog()

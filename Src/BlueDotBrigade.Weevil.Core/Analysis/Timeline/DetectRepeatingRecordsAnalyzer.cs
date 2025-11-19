@@ -35,6 +35,12 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 return new Results(0);
             }
 
+            if (string.IsNullOrWhiteSpace(customRegex))
+            {
+                // No regex provided
+                return new Results(0);
+            }
+
             if (_expressionBuilder.TryGetExpression(customRegex, out IExpression expression))
             {
                 var sortedRecords = records.OrderBy((x => x.LineNumber)).ToImmutableArray();
@@ -44,7 +50,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 				foreach (IRecord record in sortedRecords)
                 {
-					record.Metadata.IsFlagged = false;
+					if (canUpdateMetadata)
+					{
+						record.Metadata.IsFlagged = false;
+					}
 
 					if (expression.IsMatch(record))
                     {
@@ -71,13 +80,16 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 								blockCount++;
 
-								firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
-								firstMatch.Metadata.IsFlagged = true;
-								flaggedRecords++;
+								if (canUpdateMetadata)
+								{
+									firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
+									firstMatch.Metadata.IsFlagged = true;
 
-								lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
-								lastMatch.Metadata.IsFlagged = true;
-								flaggedRecords++;
+									lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
+									lastMatch.Metadata.IsFlagged = true;
+								}
+
+								flaggedRecords += 2;
 							}
 						}
 
@@ -92,13 +104,16 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 					blockCount++;
 
-					firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
-					firstMatch.Metadata.IsFlagged = true;
-					flaggedRecords++;
+					if (canUpdateMetadata)
+					{
+						firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
+						firstMatch.Metadata.IsFlagged = true;
 
-					lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
-					lastMatch.Metadata.IsFlagged = true;
-					flaggedRecords++;
+						lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
+						lastMatch.Metadata.IsFlagged = true;
+					}
+
+					flaggedRecords += 2;
 				}
 			}
 
