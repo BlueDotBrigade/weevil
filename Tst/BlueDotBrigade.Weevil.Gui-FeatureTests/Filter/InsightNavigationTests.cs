@@ -300,5 +300,66 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			Assert.AreEqual(initialFilter, viewModel.InclusiveFilter, 
 				"Filter should not duplicate @Flagged if already present");
 		}
+
+		/// <summary>
+		/// Tests that @Flagged moniker detection is case-insensitive.
+		/// </summary>
+		[TestMethod]
+		public async Task OnNavigateToInsightRecord_WithLowercaseFlaggedMoniker_DoesNotDuplicate()
+		{
+			// Arrange
+			var bulletinMediator = new BulletinMediator();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator);
+
+			// Open a log file
+			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
+
+			// Wait for the file to be fully loaded
+			var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+			while (!viewModel.IsLogFileOpen && stopwatch.Elapsed < TimeSpan.FromSeconds(5))
+			{
+				Thread.Sleep(TimeSpan.FromMilliseconds(100));
+			}
+
+			Assert.IsTrue(viewModel.IsLogFileOpen, "Log file should be open before test continues");
+
+			// Set a filter that contains @flagged in lowercase
+			var initialFilter = "Error||@flagged";
+			viewModel.InclusiveFilter = initialFilter;
+
+			// Wait for filter to apply
+			stopwatch.Restart();
+			while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5))
+			{
+				Thread.Sleep(TimeSpan.FromMilliseconds(100));
+			}
+
+			// Create mock records that exist in the log
+			var record1 = Substitute.For<IRecord>();
+			record1.LineNumber.Returns(1);
+			record1.Metadata.Returns(new Metadata());
+
+			var record2 = Substitute.For<IRecord>();
+			record2.LineNumber.Returns(10);
+			record2.Metadata.Returns(new Metadata());
+
+			var insightRecords = ImmutableArray.Create(record1, record2);
+			var bulletin = new NavigateToInsightRecordBulletin(insightRecords);
+
+			// Act - trigger the insight navigation
+			bulletinMediator.Post(bulletin);
+
+			// Give time for async operations to complete
+			stopwatch.Restart();
+			while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5))
+			{
+				Thread.Sleep(TimeSpan.FromMilliseconds(100));
+			}
+
+			// Assert
+			// The filter should remain unchanged (case-insensitive check)
+			Assert.AreEqual(initialFilter, viewModel.InclusiveFilter, 
+				"Filter should detect @Flagged case-insensitively and not duplicate");
+		}
 	}
 }
