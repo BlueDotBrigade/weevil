@@ -29,5 +29,10 @@
 		{
 			throw new NotImplementedException();
 		}
+
+		public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

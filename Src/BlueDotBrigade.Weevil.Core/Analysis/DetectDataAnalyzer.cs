@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Analysis
+namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
@@ -28,41 +28,64 @@
 		{
 			var count = 0;
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			// Get default regex from current inclusive filter
+			var defaultRegex = string.Empty;
+			if (_filterStrategy != FilterStrategy.KeepAllRecords && _filterStrategy.InclusiveFilter.Count > 0)
 			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
+				defaultRegex = _filterStrategy.FilterCriteria.Include;
+			}
+
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+			{
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Create expression from custom regex
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			if (!expressionBuilder.TryGetExpression(customRegex, out var expression))
+			{
+				return new Results(0);
+			}
+
+			if (!(expression is RegularExpression regexExpression))
+			{
+				return new Results(0);
+			}
+
+			foreach (IRecord record in records)
+			{
+				if (canUpdateMetadata)
 				{
-					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+					record.Metadata.IsFlagged = false;
+				}
 
-					foreach (IRecord record in records)
+				IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+
+				if (keyValuePairs.Count > 0)
+				{
+					foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
 					{
-						if (canUpdateMetadata)
+						if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
 						{
-							record.Metadata.IsFlagged = false;
-						}
+							var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
 
-						foreach (RegularExpression expression in expressions)
-						{
-							IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
-
-							if (keyValuePairs.Count > 0)
+							if (canUpdateMetadata)
 							{
-								foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
-								{
-									if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
-									{
-										var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
-
-										if (canUpdateMetadata)
-										{
-											record.Metadata.IsFlagged = true;
-											record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
-										}
-
-										count++;
-									}
-								}
+								record.Metadata.IsFlagged = true;
+								record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
 							}
+
+							count++;
 						}
 					}
 				}
