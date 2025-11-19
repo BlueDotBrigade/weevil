@@ -33,12 +33,43 @@
 		{
 			var count = 0;
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
-			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
-				{
+		// Get default regex from current inclusive filter
+		var defaultRegex = string.Empty;
+		if (_filterStrategy != FilterStrategy.KeepAllRecords && _filterStrategy.InclusiveFilter.Count > 0)
+		{
+			defaultRegex = _filterStrategy.FilterCriteria.Include;
+		}
+
+		// Show analysis dialog to get custom regex
+		var recordsDescription = records.Length.ToString("N0");
+
+		if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+		{
+			// User cancelled
+			return new Results(0);
+		}
+
+		if (string.IsNullOrWhiteSpace(customRegex))
+		{
+			// No regex provided
+			return new Results(0);
+		}
+
+		// Create expression from custom regex
+		var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+		if (!expressionBuilder.TryGetExpression(customRegex, out var customExpression))
+		{
+			return new Results(0);
+		}
+
+		if (!(customExpression is RegularExpression customRegexExpression))
+		{
+			return new Results(0);
+		}
+
+		// Use custom regex
 					var previousState = new Dictionary<string, string>();
-					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+		ImmutableArray<RegularExpression> expressions = ImmutableArray.Create(customRegexExpression);
 
 					foreach (IRecord record in records)
 					{
@@ -91,11 +122,10 @@
 										}
 									}
 								}
-							}
-						}
 					}
 				}
 			}
+
 
 			return new Results(count);
 		}
