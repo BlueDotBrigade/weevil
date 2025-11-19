@@ -25,115 +25,140 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 {
                         var count = 0;
 
-                        if (_filterStrategy != FilterStrategy.KeepAllRecords)
+                        // Get default regex from current inclusive filter
+                        var defaultRegex = string.Empty;
+                        if (_filterStrategy != FilterStrategy.KeepAllRecords && _filterStrategy.InclusiveFilter.Count > 0)
                         {
-                                if (_filterStrategy.InclusiveFilter.Count > 0)
+                                defaultRegex = _filterStrategy.FilterCriteria.Include;
+                        }
+
+                        // Show analysis dialog to get custom regex
+                        var recordsDescription = records.Length.ToString("N0");
+
+                        if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+                        {
+                                // User cancelled
+                                return new Results(0);
+                        }
+
+                        if (string.IsNullOrWhiteSpace(customRegex))
+                        {
+                                // No regex provided
+                                return new Results(0);
+                        }
+
+                        // Create expression from custom regex
+                        var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+                        if (!expressionBuilder.TryGetExpression(customRegex, out var customExpression))
+                        {
+                                return new Results(0);
+                        }
+
+                        if (!(customExpression is RegularExpression customRegexExpression))
+                        {
+                                return new Results(0);
+                        }
+
+                        // Use custom regex
+                        var expressions = ImmutableArray.Create(customRegexExpression);
+                        var activeRuns = new Dictionary<string, ValueRun>();
+
+                        foreach (IRecord record in records)
+                        {
+                                if (canUpdateMetadata)
                                 {
-                                        ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+                                        record.Metadata.IsFlagged = false;
+                                }
 
-                                        if (!expressions.IsDefaultOrEmpty)
+                                var matchedKeys = new HashSet<string>();
+
+                                foreach (RegularExpression expression in expressions)
+                                {
+                                        IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
+
+                                        if (keyValuePairs.Count == 0)
                                         {
-                                                var activeRuns = new Dictionary<string, ValueRun>();
+                                                continue;
+                                        }
 
-                                                foreach (IRecord record in records)
+                                        foreach (KeyValuePair<string, string> currentState in keyValuePairs)
+                                        {
+                                                if (string.IsNullOrWhiteSpace(currentState.Value))
                                                 {
-                                                        if (canUpdateMetadata)
+                                                        if (activeRuns.TryGetValue(currentState.Key, out var run))
                                                         {
-                                                                record.Metadata.IsFlagged = false;
+                                                                FinalizeRun(currentState.Key, run);
                                                         }
 
-                                                        var matchedKeys = new HashSet<string>();
-
-                                                        foreach (RegularExpression expression in expressions)
-                                                        {
-                                                                IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
-
-                                                                if (keyValuePairs.Count == 0)
-                                                                {
-                                                                        continue;
-                                                                }
-
-                                                                foreach (KeyValuePair<string, string> currentState in keyValuePairs)
-                                                                {
-                                                                        if (string.IsNullOrWhiteSpace(currentState.Value))
-                                                                        {
-                                                                                if (activeRuns.TryGetValue(currentState.Key, out var run))
-                                                                                {
-                                                                                        FinalizeRun(currentState.Key, run);
-                                                                                }
-
-                                                                                continue;
-                                                                        }
-
-                                                                        matchedKeys.Add(currentState.Key);
-
-                                                                        if (activeRuns.TryGetValue(currentState.Key, out var existingRun))
-                                                                        {
-                                                                                if (existingRun.ValueEquals(currentState.Value))
-                                                                                {
-                                                                                        existingRun.UpdateLastRecord(record);
-                                                                                }
-                                                                                else
-                                                                                {
-                                                                                        FinalizeRun(currentState.Key, existingRun);
-                                                                                        StartNewRun(currentState.Key, currentState.Value, record);
-                                                                                }
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                                StartNewRun(currentState.Key, currentState.Value, record);
-                                                                        }
-                                                                }
-                                                        }
-
-                                                        if (activeRuns.Count > 0)
-                                                        {
-                                                                List<string> keysToFinalize = activeRuns.Keys
-                                                                        .Where(key => !matchedKeys.Contains(key))
-                                                                        .ToList();
-
-                                                                foreach (string key in keysToFinalize)
-                                                                {
-                                                                        if (activeRuns.TryGetValue(key, out var run))
-                                                                        {
-                                                                                FinalizeRun(key, run);
-                                                                        }
-                                                                }
-                                                        }
+                                                        continue;
                                                 }
 
-                                                foreach (KeyValuePair<string, ValueRun> activeRun in activeRuns.ToArray())
-                                                {
-                                                        FinalizeRun(activeRun.Key, activeRun.Value);
-                                                }
+                                                matchedKeys.Add(currentState.Key);
 
-                                                void StartNewRun(string key, string value, IRecord record)
+                                                if (activeRuns.TryGetValue(currentState.Key, out var existingRun))
                                                 {
-                                                        var friendlyName = RegularExpression.GetFriendlyParameterName(key);
-                                                        var run = ValueRun.Start(friendlyName, value, record);
-                                                        activeRuns[key] = run;
-
-                                                        count++;
-                                                        if (canUpdateMetadata)
+                                                        if (existingRun.ValueEquals(currentState.Value))
                                                         {
-                                                                record.Metadata.IsFlagged = true;
-                                                                record.Metadata.UpdateUserComment($"Start {friendlyName}: {value}");
+                                                                existingRun.UpdateLastRecord(record);
+                                                        }
+                                                        else
+                                                        {
+                                                                FinalizeRun(currentState.Key, existingRun);
+                                                                StartNewRun(currentState.Key, currentState.Value, record);
                                                         }
                                                 }
-
-                                                void FinalizeRun(string key, ValueRun run)
+                                                else
                                                 {
-                                                        count++;
-                                                        if (canUpdateMetadata)
-                                                        {
-                                                                run.LastRecord.Metadata.IsFlagged = true;
-                                                                run.LastRecord.Metadata.UpdateUserComment($"Stop {run.FriendlyName}: {run.Value}");
-                                                        }
-
-                                                        activeRuns.Remove(key);
+                                                        StartNewRun(currentState.Key, currentState.Value, record);
                                                 }
                                         }
                                 }
+
+                                if (activeRuns.Count > 0)
+                                {
+                                        List<string> keysToFinalize = activeRuns.Keys
+                                                .Where(key => !matchedKeys.Contains(key))
+                                                .ToList();
+
+                                        foreach (string key in keysToFinalize)
+                                        {
+                                                if (activeRuns.TryGetValue(key, out var run))
+                                                {
+                                                        FinalizeRun(key, run);
+                                                }
+                                        }
+                                }
+                        }
+
+                        foreach (KeyValuePair<string, ValueRun> activeRun in activeRuns.ToArray())
+                        {
+                                FinalizeRun(activeRun.Key, activeRun.Value);
+                        }
+
+                        void StartNewRun(string key, string value, IRecord record)
+                        {
+                                var friendlyName = RegularExpression.GetFriendlyParameterName(key);
+                                var run = ValueRun.Start(friendlyName, value, record);
+                                activeRuns[key] = run;
+
+                                count++;
+                                if (canUpdateMetadata)
+                                {
+                                        record.Metadata.IsFlagged = true;
+                                        record.Metadata.UpdateUserComment($"Start {friendlyName}: {value}");
+                                }
+                        }
+
+                        void FinalizeRun(string key, ValueRun run)
+                        {
+                                count++;
+                                if (canUpdateMetadata)
+                                {
+                                        run.LastRecord.Metadata.IsFlagged = true;
+                                        run.LastRecord.Metadata.UpdateUserComment($"Stop {run.FriendlyName}: {run.Value}");
+                                }
+
+                                activeRuns.Remove(key);
                         }
 
                         return new Results(count);
