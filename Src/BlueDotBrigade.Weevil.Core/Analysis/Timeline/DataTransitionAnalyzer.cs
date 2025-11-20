@@ -33,19 +33,14 @@
 		{
 			var count = 0;
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			if (AnalysisHelper.CanPerformAnalysis(_filterStrategy))
 			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
-				{
-					var previousState = new Dictionary<string, string>();
-					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+				var previousState = new Dictionary<string, string>();
+				ImmutableArray<RegularExpression> expressions = AnalysisHelper.GetRegularExpressions(_filterStrategy);
 
-					foreach (IRecord record in records)
-					{
-						if (canUpdateMetadata)
-						{
-							record.Metadata.IsFlagged = false;
-						}
+				foreach (IRecord record in records)
+				{
+					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -65,11 +60,11 @@
 
 												count++;
 
-												if (canUpdateMetadata)
-												{
-													record.Metadata.IsFlagged = true;
-													record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
-												}
+												AnalysisHelper.UpdateRecordMetadata(
+													record,
+													true,
+													$"{parameterName}: {currentState.Value}",
+													canUpdateMetadata);
 
 												previousState[currentState.Key] = currentState.Value;
 											}
@@ -80,12 +75,11 @@
 
 											count++;
 
-											if (canUpdateMetadata)
-											{
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
-											}
-
+											AnalysisHelper.UpdateRecordMetadata(
+												record,
+												true,
+												$"{parameterName}: {currentState.Value}",
+												canUpdateMetadata);
 
 											previousState.Add(currentState.Key, currentState.Value);
 										}
@@ -93,7 +87,6 @@
 								}
 							}
 						}
-					}
 				}
 			}
 
