@@ -65,10 +65,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
                         foreach (IRecord record in records)
                         {
-                                if (canUpdateMetadata)
-                                {
-                                        record.Metadata.IsFlagged = false;
-                                }
+                                AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
                                 var matchedKeys = new HashSet<string>();
 
@@ -142,11 +139,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                                 activeRuns[key] = run;
 
                                 count++;
-                                if (canUpdateMetadata)
-                                {
-                                        record.Metadata.IsFlagged = true;
-                                        record.Metadata.UpdateUserComment($"Start {friendlyName}: {value}");
-                                }
+                                AnalysisHelper.UpdateRecordMetadata(
+							record,
+							true,
+							$"Start {friendlyName}: {value}",
+							canUpdateMetadata);
                         }
 
                         void FinalizeRun(string key, ValueRun run)

@@ -73,10 +73,7 @@
 
 					foreach (IRecord record in records)
 					{
-						if (canUpdateMetadata)
-						{
-							record.Metadata.IsFlagged = false;
-						}
+						AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -96,11 +93,11 @@
 
 												count++;
 
-												if (canUpdateMetadata)
-												{
-													record.Metadata.IsFlagged = true;
-													record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
-												}
+												AnalysisHelper.UpdateRecordMetadata(
+							record,
+							true,
+							$"{parameterName}: {currentState.Value}",
+							canUpdateMetadata);
 
 												previousState[currentState.Key] = currentState.Value;
 											}
@@ -111,11 +108,11 @@
 
 											count++;
 
-											if (canUpdateMetadata)
-											{
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
-											}
+											AnalysisHelper.UpdateRecordMetadata(
+							record,
+							true,
+							$"{parameterName}: {currentState.Value}",
+							canUpdateMetadata);
 
 
 											previousState.Add(currentState.Key, currentState.Value);
