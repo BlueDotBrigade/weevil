@@ -100,8 +100,8 @@
 														record.Metadata.UpdateUserComment($"{parameterName}: {previous[current.Key]} => {current.Value}");
 													}
 												}
-												previous[current.Key] = current.Value;
 											}
+											previous[current.Key] = current.Value;
 										}
 										else
 										{
