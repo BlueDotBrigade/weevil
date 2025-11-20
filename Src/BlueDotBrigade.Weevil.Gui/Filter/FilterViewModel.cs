@@ -1310,8 +1310,8 @@
 				var currentIncludeFilter = _inclusiveFilter ?? string.Empty;
 				string newIncludeFilter;
 
-				// Check if @Flagged already exists in the filter
-				if (currentIncludeFilter.Contains("@Flagged"))
+				// Check if @Flagged already exists in the filter (case-insensitive)
+				if (currentIncludeFilter.Contains("@Flagged", StringComparison.OrdinalIgnoreCase))
 				{
 					// Already has @Flagged, no need to append
 					newIncludeFilter = currentIncludeFilter;
