@@ -22,24 +22,6 @@
 
 		public string DisplayName => "Detect Falling Edges";
 
-		private static AnalysisOrder GetAnalysisOrder(IUserDialog userDialog)
-		{
-			var userInput = userDialog.ShowUserPrompt(
-				"Analysis Details",
-				"Analysis order (Ascending/Descending):",
-				"Ascending");
-
-			if (Enum.TryParse(userInput, true, out AnalysisOrder direction))
-			{
-				return direction;
-			}
-
-			throw new ArgumentOutOfRangeException(
-				$"{nameof(direction)}",
-				direction,
-				"Unable to perform operation. The analysis order was expected to be either: Ascending or Descending");
-		}
-
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
 		/// </summary>
@@ -53,27 +35,22 @@
 		{
 			var count = 0;
 
-			var analysisOrder = GetAnalysisOrder(userDialog);
+			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			if (AnalysisHelper.CanPerformAnalysis(_filterStrategy))
 			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
+				var previous = new Dictionary<string, string>();
+				ImmutableArray<RegularExpression> expressions = AnalysisHelper.GetRegularExpressions(_filterStrategy);
+
+				var sortedRecords = analysisOrder == AnalysisOrder.Ascending
+					? records
+					: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
+
+				foreach (IRecord record in sortedRecords)
 				{
-					var previous = new Dictionary<string, string>();
-					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
-					var sortedRecords = analysisOrder == AnalysisOrder.Ascending
-						? records
-						: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
-
-					foreach (IRecord record in sortedRecords)
-					{
-						if (canUpdateMetadata)
-						{
-							record.Metadata.IsFlagged = false;
-						}
-
-						foreach (RegularExpression expression in expressions)
+					foreach (RegularExpression expression in expressions)
 						{
 							IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
 
@@ -95,11 +72,11 @@
 													count++;
 
 													if (canUpdateMetadata)
-													{
-														record.Metadata.IsFlagged = true;
-														record.Metadata.UpdateUserComment($"{parameterName}: {previous[current.Key]} => {current.Value}");
-													}
-												}
+													AnalysisHelper.UpdateRecordMetadata(
+														record,
+														true,
+														$"{parameterName}: {previous[current.Key]} => {current.Value}",
+														canUpdateMetadata);
 												previous[current.Key] = current.Value;
 											}
 										}
@@ -109,11 +86,11 @@
 
 											count++;
 
-											if (canUpdateMetadata)
-											{
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {current.Value}");
-											}
+													AnalysisHelper.UpdateRecordMetadata(
+														record,
+														true,
+														$"{parameterName}: {current.Value}",
+														canUpdateMetadata);
 											
 											previous.Add(current.Key, current.Value);
 										}
