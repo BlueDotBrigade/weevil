@@ -23,7 +23,6 @@
 		public string DisplayName => "Detect Rising Edges";
 
 
-
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
 		/// </summary>

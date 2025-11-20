@@ -21,7 +21,6 @@
 		public string Key => AnalysisType.DetectFallingEdges.ToString();
 
 		public string DisplayName => "Detect Falling Edges";
-
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
 		/// </summary>
