@@ -25,22 +25,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 {
                         var count = 0;
 
-                        if (_filterStrategy != FilterStrategy.KeepAllRecords)
+                        if (AnalysisHelper.CanPerformAnalysis(_filterStrategy))
                         {
-                                if (_filterStrategy.InclusiveFilter.Count > 0)
+                                ImmutableArray<RegularExpression> expressions = AnalysisHelper.GetRegularExpressions(_filterStrategy);
+
+                                if (!expressions.IsDefaultOrEmpty)
                                 {
-                                        ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+                                        var activeRuns = new Dictionary<string, ValueRun>();
 
-                                        if (!expressions.IsDefaultOrEmpty)
+                                        foreach (IRecord record in records)
                                         {
-                                                var activeRuns = new Dictionary<string, ValueRun>();
-
-                                                foreach (IRecord record in records)
-                                                {
-                                                        if (canUpdateMetadata)
-                                                        {
-                                                                record.Metadata.IsFlagged = false;
-                                                        }
+                                                AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
                                                         var matchedKeys = new HashSet<string>();
 
@@ -114,25 +109,24 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                                                         activeRuns[key] = run;
 
                                                         count++;
-                                                        if (canUpdateMetadata)
-                                                        {
-                                                                record.Metadata.IsFlagged = true;
-                                                                record.Metadata.UpdateUserComment($"Start {friendlyName}: {value}");
-                                                        }
+                                                        AnalysisHelper.UpdateRecordMetadata(
+                                                                record,
+                                                                true,
+                                                                $"Start {friendlyName}: {value}",
+                                                                canUpdateMetadata);
                                                 }
 
                                                 void FinalizeRun(string key, ValueRun run)
                                                 {
                                                         count++;
-                                                        if (canUpdateMetadata)
-                                                        {
-                                                                run.LastRecord.Metadata.IsFlagged = true;
-                                                                run.LastRecord.Metadata.UpdateUserComment($"Stop {run.FriendlyName}: {run.Value}");
-                                                        }
+                                                        AnalysisHelper.UpdateRecordMetadata(
+                                                                run.LastRecord,
+                                                                true,
+                                                                $"Stop {run.FriendlyName}: {run.Value}",
+                                                                canUpdateMetadata);
 
                                                         activeRuns.Remove(key);
                                                 }
-                                        }
                                 }
                         }
 
