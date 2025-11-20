@@ -70,14 +70,13 @@
 
 													count++;
 
-													if (canUpdateMetadata)
 													AnalysisHelper.UpdateRecordMetadata(
 														record,
 														true,
 														$"{parameterName}: {previous[current.Key]} => {current.Value}",
 														canUpdateMetadata);
-												previous[current.Key] = current.Value;
 											}
+												previous[current.Key] = current.Value;
 										}
 										else
 										{

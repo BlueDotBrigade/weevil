@@ -51,8 +51,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			}
 
 			throw new ArgumentOutOfRangeException(
-				$"{nameof(direction)}",
-				direction,
+				nameof(userInput),
+				userInput,
 				"Unable to perform operation. The analysis order was expected to be either: Ascending or Descending");
 		}
 
