@@ -25,13 +25,46 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 {
                         var count = 0;
 
-                        if (AnalysisHelper.CanPerformAnalysis(_filterStrategy))
+                        // Get default regex from current inclusive filter
+                        var defaultRegex = string.Empty;
+                        if (_filterStrategy != FilterStrategy.KeepAllRecords && _filterStrategy.InclusiveFilter.Count > 0)
                         {
-                                ImmutableArray<RegularExpression> expressions = AnalysisHelper.GetRegularExpressions(_filterStrategy);
+                                defaultRegex = _filterStrategy.FilterCriteria.Include;
+                        }
 
-                                if (!expressions.IsDefaultOrEmpty)
-                                {
-                                        var activeRuns = new Dictionary<string, ValueRun>();
+                        // Show analysis dialog to get custom regex
+                        var recordsDescription = records.Length.ToString("N0");
+
+                        if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+                        {
+                                // User cancelled
+                                return new Results(0);
+                        }
+
+                        if (string.IsNullOrWhiteSpace(customRegex))
+                        {
+                                // No regex provided
+                                return new Results(0);
+                        }
+
+                        // Create expression from custom regex
+                        var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+                        if (!expressionBuilder.TryGetExpression(customRegex, out var customExpression))
+                        {
+                                return new Results(0);
+                        }
+
+                        if (!(customExpression is RegularExpression customRegexExpression))
+                        {
+                                return new Results(0);
+                        }
+
+                        // Use custom regex
+                        ImmutableArray<RegularExpression> expressions = ImmutableArray.Create(customRegexExpression);
+
+                        if (!expressions.IsDefaultOrEmpty)
+                        {
+                                var activeRuns = new Dictionary<string, ValueRun>();
 
                                         foreach (IRecord record in records)
                                         {
@@ -127,7 +160,6 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
                                                         activeRuns.Remove(key);
                                                 }
-                                }
                         }
 
                         return new Results(count);
