@@ -70,11 +70,9 @@
 			// Use custom regex
 			ImmutableArray<RegularExpression> expressions = ImmutableArray.Create(customRegexExpression);
 
-			if (AnalysisHelper.CanPerformAnalysis(_filterStrategy))
-			{
-				var previousState = new Dictionary<string, string>();
+			var previousState = new Dictionary<string, string>();
 
-				foreach (IRecord record in records)
+			foreach (IRecord record in records)
 				{
 					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
@@ -124,7 +122,6 @@
 							}
 						}
 				}
-			}
 
 			return new Results(count);
 		}

@@ -75,11 +75,9 @@
 
 			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
-			if (AnalysisHelper.CanPerformAnalysis(_filterStrategy))
-			{
-				var previous = new Dictionary<string, string>();
+			var previous = new Dictionary<string, string>();
 
-				ImmutableArray<IRecord> sortedRecords = analysisOrder == AnalysisOrder.Ascending
+			ImmutableArray<IRecord> sortedRecords = analysisOrder == AnalysisOrder.Ascending
 					? records
 					: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
 
@@ -136,7 +134,6 @@
 							}
 						}
 				}
-			}
 
 			return new Results(count);
 		}
