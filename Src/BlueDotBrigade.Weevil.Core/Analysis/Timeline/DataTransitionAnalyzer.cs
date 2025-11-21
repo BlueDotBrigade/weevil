@@ -33,12 +33,46 @@
 		{
 			var count = 0;
 
-			if (AnalysisHelper.CanPerformAnalysis(_filterStrategy))
+			// Get default regex from current inclusive filter
+			var defaultRegex = string.Empty;
+			if (_filterStrategy != FilterStrategy.KeepAllRecords && _filterStrategy.InclusiveFilter.Count > 0)
 			{
-				var previousState = new Dictionary<string, string>();
-				ImmutableArray<RegularExpression> expressions = AnalysisHelper.GetRegularExpressions(_filterStrategy);
+				defaultRegex = _filterStrategy.FilterCriteria.Include;
+			}
 
-				foreach (IRecord record in records)
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+			{
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Create expression from custom regex
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			if (!expressionBuilder.TryGetExpression(customRegex, out var customExpression))
+			{
+				return new Results(0);
+			}
+
+			if (!(customExpression is RegularExpression customRegexExpression))
+			{
+				return new Results(0);
+			}
+
+			// Use custom regex
+			ImmutableArray<RegularExpression> expressions = ImmutableArray.Create(customRegexExpression);
+
+			var previousState = new Dictionary<string, string>();
+
+			foreach (IRecord record in records)
 				{
 					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
@@ -88,7 +122,6 @@
 							}
 						}
 				}
-			}
 
 			return new Results(count);
 		}
