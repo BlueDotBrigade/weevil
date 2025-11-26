@@ -155,7 +155,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					message);
 				MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
-		}, (x) => this.IsManualFilter);
+		}, (x) => true);
 
 		[SafeForDependencyAnalysis]
 		public ICommand FilterByCommentCommand => new UiBoundCommand(FilterByComment, () => this.IsMenuEnabled);

@@ -13,7 +13,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private bool _includeDebugRecords;
 		private bool _includeTraceRecords;
 		private bool _includePinned;
-		private bool _isManualFilter;
 		private bool _isFilterCaseSensitive;
 		private FilterType _filterExpressionType;
 
@@ -22,7 +21,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			this.IncludeDebugRecords = true;
 			this.IncludeTraceRecords = true;
 			this.IncludePinned = true;
-			this.IsManualFilter = false;
 			this.IsFilterCaseSensitive = true;
 			this.FilterExpressionType = FilterType.RegularExpression;
 		}
@@ -64,19 +62,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				{
 					_includePinned = value;
 					OnPropertyChanged(nameof(IncludePinned));
-				}
-			}
-		}
-
-		public bool IsManualFilter
-		{
-			get => _isManualFilter;
-			set
-			{
-				if (_isManualFilter != value)
-				{
-					_isManualFilter = value;
-					OnPropertyChanged(nameof(IsManualFilter));
 				}
 			}
 		}
