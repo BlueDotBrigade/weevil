@@ -10,11 +10,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 	internal class DetectRepeatingRecordsAnalyzer : IRecordAnalyzer
 	{
-		private readonly ExpressionBuilder _expressionBuilder;
+		private readonly FilterStrategy _filterStrategy;
 
 		public DetectRepeatingRecordsAnalyzer(FilterStrategy filterStrategy)
 		{
-			_expressionBuilder = filterStrategy.GetExpressionBuilder();
+			_filterStrategy = filterStrategy;
 		}
 
 		public string Key => AnalysisType.DetectRepeatingRecords.ToString();
@@ -26,10 +26,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             var flaggedRecords = 0;
 			var blockCount = 0;
 
+            // Get default regex from current inclusive filter
+            var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
+
             // Show analysis dialog to get custom regex
             var recordsDescription = records.Length.ToString("N0");
 
-            if (!userDialog.TryShowAnalysisDialog(string.Empty, recordsDescription, out var customRegex))
+            if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
             {
                 // User cancelled
                 return new Results(0);
@@ -41,7 +44,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 return new Results(0);
             }
 
-            if (_expressionBuilder.TryGetExpression(customRegex, out IExpression expression))
+            // Create expression from custom regex
+            var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+            if (expressionBuilder.TryGetExpression(customRegex, out IExpression expression))
             {
                 var sortedRecords = records.OrderBy((x => x.LineNumber)).ToImmutableArray();
 

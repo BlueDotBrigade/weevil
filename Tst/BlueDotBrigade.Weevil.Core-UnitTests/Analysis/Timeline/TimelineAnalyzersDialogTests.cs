@@ -198,5 +198,103 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		#endregion
+
+		#region DetectRepeatingRecordsAnalyzer Tests
+
+		[TestMethod]
+		public void DetectRepeatingRecordsAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new DetectRepeatingRecordsAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		[TestMethod]
+		public void DetectRepeatingRecordsAnalyzer_BlankRegex_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new DetectRepeatingRecordsAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		[TestMethod]
+		public void DetectRepeatingRecordsAnalyzer_EmptyStringRegex_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new DetectRepeatingRecordsAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		#endregion
+
+		#region StatisticalAnalyzer Tests
+
+		[TestMethod]
+		public void StatisticalAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		[TestMethod]
+		public void StatisticalAnalyzer_BlankRegex_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		[TestMethod]
+		public void StatisticalAnalyzer_EmptyStringRegex_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		#endregion
 	}
 }
