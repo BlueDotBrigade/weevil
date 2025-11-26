@@ -29,11 +29,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var count = 0;
 
 			// Get default regex from current inclusive filter
-			var defaultRegex = string.Empty;
-			if (_filterStrategy != FilterStrategy.KeepAllRecords && _filterStrategy.InclusiveFilter.Count > 0)
-			{
-				defaultRegex = _filterStrategy.FilterCriteria.Include;
-			}
+			var defaultRegex = Timeline.AnalysisHelper.GetDefaultRegex(_filterStrategy);
 
 			// Show analysis dialog to get custom regex
 			var recordsDescription = records.Length.ToString("N0");

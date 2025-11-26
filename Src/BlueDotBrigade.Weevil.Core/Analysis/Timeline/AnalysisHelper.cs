@@ -87,5 +87,19 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				record.Metadata.IsFlagged = false;
 			}
 		}
+
+		/// <summary>
+		/// Gets the default regex from the inclusive filter of the filter strategy.
+		/// </summary>
+		/// <param name="filterStrategy">The filter strategy containing the filter criteria.</param>
+		/// <returns>The include filter regex if available; otherwise, an empty string.</returns>
+		public static string GetDefaultRegex(FilterStrategy filterStrategy)
+		{
+			if (filterStrategy != FilterStrategy.KeepAllRecords && filterStrategy.InclusiveFilter.Count > 0)
+			{
+				return filterStrategy.FilterCriteria.Include;
+			}
+			return string.Empty;
+		}
 	}
 }
