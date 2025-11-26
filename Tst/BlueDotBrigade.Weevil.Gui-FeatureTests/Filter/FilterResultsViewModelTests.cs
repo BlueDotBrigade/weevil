@@ -23,7 +23,6 @@
 
 			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
 
-			viewModel.IsManualFilter = true;
 			viewModel.FilterManually(new object[]
 			{
 				"@IsPinned",

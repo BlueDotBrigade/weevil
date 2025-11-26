@@ -218,18 +218,6 @@
 				}
 			}
 		}
-		
-		public bool IsManualFilter
-		{
-			get => this.FilterOptionsViewModel?.Options.IsManualFilter ?? false;
-			set
-			{
-				if (this.FilterOptionsViewModel?.Options != null)
-				{
-					this.FilterOptionsViewModel.Options.IsManualFilter = value;
-				}
-			}
-		}
 
 		public bool IsFilterCaseSensitive
 		{
@@ -262,14 +250,6 @@
 				if (value != _inclusiveFilter)
 				{
 					_inclusiveFilter = value;
-
-					// Automatic filtering?
-                                        if (!this.IsManualFilter)
-                                        {
-                                                var filterCriteria = new FilterCriteria(value, _exclusiveFilter, GetFilterConfiguration());
-
-                                                FilterAsynchronously(this.FilterExpressionType, filterCriteria);
-                                        }
 				}
 			}
 		}
@@ -287,14 +267,6 @@
 				if (value != _exclusiveFilter)
 				{
 					_exclusiveFilter = value;
-
-					// Automatic filtering?
-                                        if (!this.IsManualFilter)
-                                        {
-                                                var filterCriteria = new FilterCriteria(_inclusiveFilter, value, GetFilterConfiguration());
-
-                                                FilterAsynchronously(this.FilterExpressionType, filterCriteria);
-                                        }
 				}
 			}
 		}
@@ -362,12 +334,6 @@
                                                 this.FilterOptionsViewModel.Options.FilterExpressionType = value;
                                         }
                                         RaisePropertyChanged(nameof(this.FilterExpressionType));
-
-                                        if (!this.IsManualFilter)
-                                        {
-                                                var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
-                                                FilterAsynchronously(_filterExpressionType, filterCriteria);
-                                        }
                                 }
                         }
                 }
@@ -435,12 +401,9 @@
 			// Update the backing field for FilterExpressionType
 			this._filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
 
-			// Trigger automatic filtering if not in manual mode
-			if (!this.FilterOptionsViewModel.Options.IsManualFilter)
-			{
-				var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
-				FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
-			}
+			// Re-apply the filter with the new filter options
+			var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
+			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
 
 		protected void RaisePropertyChanged(string name)

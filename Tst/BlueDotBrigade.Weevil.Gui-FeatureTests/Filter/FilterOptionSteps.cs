@@ -13,11 +13,5 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// nothing to do
 		}
-
-		[When($"the automatic filtering option is {X.OnOff}")]
-		public void WhenTheAutomaticFilteringOptionIsOn(bool isOn)
-		{
-			this.Context.Filter.IsManualFilter = !isOn;
-		}
 	}
 }
