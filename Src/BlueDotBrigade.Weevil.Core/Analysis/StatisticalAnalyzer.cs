@@ -59,47 +59,64 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var timestamps = new List<DateTime>();
 			var values = new List<double>();
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			// Get default regex from current inclusive filter
+			var defaultRegex = string.Empty;
+			if (_filterStrategy != FilterStrategy.KeepAllRecords && _filterStrategy.InclusiveFilter.Count > 0)
 			{
-				// Problem: There can be multiple RegEx, each with 0 or more capturing groups.
-				// To simplify the implementation, assume that there is only one RegEx group.
+				defaultRegex = _filterStrategy.FilterCriteria.Include;
+			}
 
-				ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
-				if (expressions.Length != 1)
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+			{
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Create expression from custom regex
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			if (!expressionBuilder.TryGetExpression(customRegex, out var expression))
+			{
+				return new Results(0);
+			}
+
+			if (!(expression is RegularExpression regexExpression))
+			{
+				return new Results(0);
+			}
+
+			foreach (IRecord record in records)
+			{
+				IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+
+				if (keyValuePairs.Count == 1)
 				{
-					throw new MatchCountException(
-						"(include filter)",
-						$"The include filter should only have 1 expression.");
-				}
-
-				RegularExpression expression = expressions.First();
-
-				foreach (IRecord record in records)
-				{
-					IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
-
-					if (keyValuePairs.Count == 1)
+					if (double.TryParse(keyValuePairs.First().Value, out var value))
 					{
-						if (double.TryParse(keyValuePairs.First().Value, out var value))
+						count++;
+
+						timestamps.Add(record.CreatedAt);
+						values.Add(value);
+
+						if (canUpdateMetadata)
 						{
-							count++;
-
-							timestamps.Add(record.CreatedAt);
-							values.Add(value);
-
-							if (canUpdateMetadata)
-							{
-								record.Metadata.IsFlagged = false;
-							}
+							record.Metadata.IsFlagged = false;
 						}
 					}
-					else if (keyValuePairs.Count >= 2)
-					{
-						throw new MatchCountException(
-							"(include filter)",
-							$"The include filter's regular expression should have only 1 matching group.");
-					}
-
+				}
+				else if (keyValuePairs.Count >= 2)
+				{
+					throw new MatchCountException(
+						"(custom regex)",
+						$"The regular expression should have only 1 matching group.");
 				}
 			}
 
