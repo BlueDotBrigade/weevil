@@ -30,15 +30,6 @@
             <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
             <converters:RegionStringConverter x:Key="RegionStringConverter" />
             <converters:BookmarkStringConverter x:Key="BookmarkStringConverter" />
-            <Style x:Key="CommandMenuItemStyle"
-                   TargetType="{x:Type MenuItem}">
-                <Setter Property="Header"
-                       Value="{Binding Path=DisplayText}"/>
-                <Setter Property="Command"
-                       Value="{Binding Path=Command}"/>
-                <Setter Property="CommandParameter"
-                       Value="{Binding Path=CommandParameter}"/>
-            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <UserControl.InputBindings>
@@ -176,7 +167,6 @@
                         </KeyBinding.CommandParameter>
                     </KeyBinding>
                 </ComboBox.InputBindings>
-
             </ComboBox>
             <!-- 
          HACK: WPF ComboBoxes do not support access keys. The `Label` is being used to receive focus on behalf of the ComboBox. See: #36
