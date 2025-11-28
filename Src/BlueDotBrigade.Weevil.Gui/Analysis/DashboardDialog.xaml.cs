@@ -80,7 +80,7 @@
 			set => SetValue(ContextProperty, value);
 		}
 
-		public DashboardDialog(Version weevilVersion, IEngine engine, IBulletinMediator bulletinMediator)
+		internal DashboardDialog(Version weevilVersion, IEngine engine, IBulletinMediator bulletinMediator)
 		{
 			_engine = engine ?? throw new ArgumentNullException(nameof(engine));
 			_bulletinMediator = bulletinMediator ?? throw new ArgumentNullException(nameof(bulletinMediator));
