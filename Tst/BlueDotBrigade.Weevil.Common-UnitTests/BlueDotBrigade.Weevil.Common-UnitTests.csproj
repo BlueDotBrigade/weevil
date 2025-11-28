@@ -43,6 +43,10 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <Content Include=".Daten\SimpleCallStackFormatterTests\EndOfInnerException.txt" />
+    <Content Include=".daten\simplecallstackformattertests\EndOfStackTrace.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="Data\Comparers\" />
   </ItemGroup>
   <ItemGroup>

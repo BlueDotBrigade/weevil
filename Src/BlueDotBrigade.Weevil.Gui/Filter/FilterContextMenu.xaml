@@ -1,5 +1,19 @@
+<!-- 
+  This menu should be bound to the FilterViewModel.
+  F12 (Go to Definition) on bound commands will not work here because 
+  ResourceDictionary does not support d:DataContext for design-time resolution.
+-->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style x:Key="CommandMenuItemStyle"
+                   TargetType="{x:Type MenuItem}">
+        <Setter Property="Header"
+                       Value="{Binding Path=DisplayText}"/>
+        <Setter Property="Command"
+                       Value="{Binding Path=Command}"/>
+        <Setter Property="CommandParameter"
+                       Value="{Binding Path=CommandParameter}"/>
+    </Style>
     <ContextMenu x:Key="FilterViewContextMenu" x:Shared="False" FontSize="{DynamicResource ApplicationFontSize}">
                     <MenuItem Header="File">
                         <MenuItem Header="Open..." Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>

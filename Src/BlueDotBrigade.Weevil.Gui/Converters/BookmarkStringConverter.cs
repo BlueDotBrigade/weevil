@@ -49,7 +49,7 @@
 
                         if (viewModel.TryGetBookmarkName(record, out var bookmarkName))
                         {
-                                return isToolTip ? $"Bookmark: {bookmarkName}" : $"🔖 {bookmarkName} ";
+                                return isToolTip ? $"Bookmark: {bookmarkName}" : $"★ {bookmarkName} ";
                         }
 
                         return string.Empty;

@@ -126,7 +126,7 @@ this.ScenarioInitialize(scenarioInfo);
  await testRunner.ThenAsync("there will be 8 matching records", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 8
- await testRunner.AndAsync("each record will include either", "Directives\nFatal", ((global::Reqnroll.Table)(null)), "And ");
+ await testRunner.AndAsync("each record will include either", "Directives\r\nFatal", ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -192,7 +192,7 @@ this.ScenarioInitialize(scenarioInfo);
  await testRunner.WhenAsync("applying the exclude filter: Trace||Debug", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 24
- await testRunner.ThenAsync("no record will contain any of the following", "Trace\nDebug", ((global::Reqnroll.Table)(null)), "Then ");
+ await testRunner.ThenAsync("no record will contain any of the following", "Trace\r\nDebug", ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
