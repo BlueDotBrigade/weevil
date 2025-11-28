@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 
 	/// <summary>
