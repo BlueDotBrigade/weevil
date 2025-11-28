@@ -6,10 +6,10 @@
 		<Name>BlueDotBrigade.Weevil.Installer</Name>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-		<DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows\;</DefineConstants>
+		<DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net10.0-windows\;</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-		<DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows\;</DefineConstants>
+		<DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net10.0-windows\;</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="ReadMe.md" />

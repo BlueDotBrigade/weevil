@@ -1,0 +1,10 @@
+{
+  "name": ".NET Core 10 All Tools",
+  "description": "Large container with wide set of pre-installed tools, including .NET Core 10 support.",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "10.0"
+    }
+  }
+}
