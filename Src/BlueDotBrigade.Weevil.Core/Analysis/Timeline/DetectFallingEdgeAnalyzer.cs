@@ -12,10 +12,17 @@
 	internal class DetectFallingEdgeAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectFallingEdgeAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectFallingEdgeAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectFallingEdges.ToString();
@@ -52,20 +59,17 @@
 				return new Results(0);
 			}
 
-			// Create expression from custom regex
+			// Parse expressions with alias expansion and || support
 			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
-			if (!expressionBuilder.TryGetExpression(customRegex, out var customExpression))
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
 			{
 				return new Results(0);
 			}
-
-			if (!(customExpression is RegularExpression customRegexExpression))
-			{
-				return new Results(0);
-			}
-
-			// Use custom regex
-			ImmutableArray<RegularExpression> expressions = ImmutableArray.Create(customRegexExpression);
 
 			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
