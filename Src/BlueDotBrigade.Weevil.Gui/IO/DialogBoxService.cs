@@ -5,6 +5,7 @@ using System.Windows;
 using BlueDotBrigade.Weevil;
 using BlueDotBrigade.Weevil.Analysis;
 using BlueDotBrigade.Weevil.Data;
+using BlueDotBrigade.Weevil.Gui;
 using BlueDotBrigade.Weevil.Gui.Analysis;
 using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
