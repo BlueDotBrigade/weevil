@@ -32,12 +32,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 				return ImmutableArray<RegularExpression>.Empty;
 			}
 
-			// Expand aliases first (handles the || splitting internally)
+			// Expand aliases first - this replaces aliases with their full expressions
+			// and preserves the || separators in the output
 			var expandedInput = aliasExpander?.Expand(rawInput) ?? rawInput;
 
-			// Split by || (same delimiter used in filtering)
+			// Split by || (uses the same delimiter constant as filtering)
 			var segments = expandedInput.Split(
-				FilterStrategy.ExpressionDelimiter,
+				new[] { Constants.FilterOrOperator },
 				StringSplitOptions.RemoveEmptyEntries);
 
 			foreach (var segment in segments)
@@ -80,12 +81,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 				return ImmutableArray<IExpression>.Empty;
 			}
 
-			// Expand aliases first (handles the || splitting internally)
+			// Expand aliases first - this replaces aliases with their full expressions
+			// and preserves the || separators in the output
 			var expandedInput = aliasExpander?.Expand(rawInput) ?? rawInput;
 
-			// Split by || (same delimiter used in filtering)
+			// Split by || (uses the same delimiter constant as filtering)
 			var segments = expandedInput.Split(
-				FilterStrategy.ExpressionDelimiter,
+				new[] { Constants.FilterOrOperator },
 				StringSplitOptions.RemoveEmptyEntries);
 
 			foreach (var segment in segments)

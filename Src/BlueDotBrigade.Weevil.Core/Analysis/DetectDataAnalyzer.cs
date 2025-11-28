@@ -72,8 +72,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 					record.Metadata.IsFlagged = false;
 				}
 
-				// Track unique key/value pairs per record to avoid duplicates
-				var seenKeyValues = new HashSet<string>();
+				// Track unique key/value pairs per record to avoid duplicates using tuple-based key
+				var seenKeyValues = new HashSet<(string Key, string Value)>();
 
 				foreach (RegularExpression regexExpression in expressions)
 				{
@@ -85,7 +85,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 						{
 							if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
 							{
-								var compositeKey = $"{keyValuePair.Key}:{keyValuePair.Value}";
+								var compositeKey = (keyValuePair.Key, keyValuePair.Value);
 
 								// Skip duplicate key/value pairs within the same record
 								if (seenKeyValues.Contains(compositeKey))
