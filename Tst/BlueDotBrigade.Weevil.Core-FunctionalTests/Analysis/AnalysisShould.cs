@@ -91,9 +91,7 @@
                                         FilterType.RegularExpression,
                                         new FilterCriteria(@"Temperature=(?<State>\w+)"));
 
-                                Results results = engine
-                                        .Analyzer
-                                        .Analyze(AnalysisType.DetectStableValues);
+                                engine.Analyzer.Analyze(AnalysisType.DetectStableValues);
 
                                 int[] flaggedLines = engine
                                         .Filter
@@ -106,7 +104,7 @@
                                         new[] { 1, 3, 4, 5, 6 },
                                         flaggedLines);
 
-                                Assert.AreEqual(6, results.FlaggedRecords);
+                                Assert.AreEqual(6, engine.Filter.Results.Count(r => r.Metadata.IsFlagged));
                         }
                         finally
                         {
@@ -220,7 +218,7 @@
                         };
 
                         var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
-                        File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+                        System.IO.File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
 
                         return filePath;
                 }
@@ -234,9 +232,9 @@
 
                         try
                         {
-                                if (File.Exists(filePath))
+                                if (System.IO.File.Exists(filePath))
                                 {
-                                        File.Delete(filePath);
+									System.IO.File.Delete(filePath);
                                 }
                         }
                         catch (IOException)
