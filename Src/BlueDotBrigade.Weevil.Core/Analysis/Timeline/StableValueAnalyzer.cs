@@ -11,10 +11,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         internal class StableValueAnalyzer : IRecordAnalyzer
         {
                 private readonly FilterStrategy _filterStrategy;
+                private readonly IFilterAliasExpander _aliasExpander;
 
                 public StableValueAnalyzer(FilterStrategy filterStrategy)
+                        : this(filterStrategy, null)
+                {
+                }
+
+                public StableValueAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
                 {
                         _filterStrategy = filterStrategy;
+                        _aliasExpander = aliasExpander;
                 }
 
                 public string Key => AnalysisType.DetectStableValues.ToString();
@@ -43,20 +50,12 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                                 return new Results(0);
                         }
 
-                        // Create expression from custom regex
+                        // Parse expressions with alias expansion and || support
                         var expressionBuilder = _filterStrategy.GetExpressionBuilder();
-                        if (!expressionBuilder.TryGetExpression(customRegex, out var customExpression))
-                        {
-                                return new Results(0);
-                        }
-
-                        if (!(customExpression is RegularExpression customRegexExpression))
-                        {
-                                return new Results(0);
-                        }
-
-                        // Use custom regex
-                        ImmutableArray<RegularExpression> expressions = ImmutableArray.Create(customRegexExpression);
+                        ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+                                customRegex,
+                                _aliasExpander,
+                                expressionBuilder);
 
                         if (!expressions.IsDefaultOrEmpty)
                         {

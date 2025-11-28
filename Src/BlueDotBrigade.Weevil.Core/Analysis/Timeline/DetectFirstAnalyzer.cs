@@ -10,10 +10,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	internal class DetectFirstAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectFirstAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectFirstAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectFirst.ToString();
@@ -42,20 +49,18 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
-			// Create expression from custom regex
+			// Parse expressions with alias expansion and || support
 			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
-			if (!expressionBuilder.TryGetExpression(customRegex, out var customExpression))
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
 			{
 				return new Results(0);
 			}
 
-			if (!(customExpression is RegularExpression customRegexExpression))
-			{
-				return new Results(0);
-			}
-
-			// Use custom regex
-			var expressions = ImmutableArray.Create(customRegexExpression);
 			var foundValues = new HashSet<string>();
 
 			foreach (IRecord record in records)
