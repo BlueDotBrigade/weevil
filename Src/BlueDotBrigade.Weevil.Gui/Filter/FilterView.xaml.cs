@@ -5,6 +5,7 @@
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
+	using System.Windows.Media;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
@@ -46,6 +47,27 @@
 
 			Loaded += OnControlLoaded;
 		}
+
+		private void InclusiveFilter_Loaded(object sender, RoutedEventArgs e)
+		{
+			InclusiveFilter.ApplyTemplate();
+
+			if (InclusiveFilter.Template.FindName("PART_EditableTextBox", InclusiveFilter) is TextBox textBox)
+			{
+				textBox.CaretBrush = Brushes.Yellow; // Or any high-contrast brush
+			}
+		}
+
+		private void ExclusiveFilter_Loaded(object sender, RoutedEventArgs e)
+		{
+			ExclusiveFilter.ApplyTemplate();
+
+			if (ExclusiveFilter.Template.FindName("PART_EditableTextBox", ExclusiveFilter) is TextBox textBox)
+			{
+				textBox.CaretBrush = Brushes.Yellow; // Or any high-contrast brush
+			}
+		}
+
 
 		private FilterViewModel ViewModel => (FilterViewModel)this.DataContext;
 

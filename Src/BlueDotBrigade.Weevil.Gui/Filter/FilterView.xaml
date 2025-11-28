@@ -156,7 +156,8 @@
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
                    materialDesign:HintAssist.Hint="Include (Alt+I)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
-                   GotFocus="OnGotFocus">
+                   GotFocus="OnGotFocus"
+                   Loaded="InclusiveFilter_Loaded">
                 <ComboBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                         <KeyBinding.CommandParameter>
@@ -185,7 +186,8 @@
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
                    materialDesign:HintAssist.Hint="Exclude (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
-                   GotFocus="OnGotFocus">
+                   GotFocus="OnGotFocus"
+                   Loaded="ExclusiveFilter_Loaded">
                 <ComboBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                         <KeyBinding.CommandParameter>
