@@ -25,6 +25,7 @@
 		private static readonly string DefaultSeriesName = "Series";
 		private static readonly string DefaultXAxisLabel = "Time";
 		private static readonly string DefaultYAxisLabel = "Y-Axis";
+		private static readonly string DefaultWindowTitle = "Graph";
 		private static readonly string FloatFormat = "0.000";
 
 		private static readonly NumberStyles NumberStyle =
@@ -54,7 +55,7 @@
 		{
 			_records = records;
 
-			this.WindowTitle = windowTitle ?? "Graph";
+			this.WindowTitle = windowTitle ?? DefaultWindowTitle;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
 
