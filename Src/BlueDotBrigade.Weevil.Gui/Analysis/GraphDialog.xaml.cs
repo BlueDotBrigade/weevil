@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Analysis
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.ComponentModel;
@@ -13,7 +14,7 @@
 	{
 		private readonly GraphViewModel _viewModel;
 
-		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern)
+		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern, string windowTitle)
 		{
 			LiveCharts.Configure(
 				settings => settings
@@ -21,10 +22,27 @@
 					.AddSkiaSharp()
 					.AddDarkTheme());
 
-			_viewModel = new GraphViewModel(records, regExPattern);
+			_viewModel = new GraphViewModel(records, regExPattern, windowTitle);
+			_viewModel.PropertyChanged += OnViewModelPropertyChanged;
 			this.DataContext = _viewModel;
 
 			InitializeComponent();
+
+			this.Title = windowTitle;
+			this.Closed += OnWindowClosed;
+		}
+
+		private void OnWindowClosed(object sender, EventArgs e)
+		{
+			_viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+		}
+
+		private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(GraphViewModel.WindowTitle))
+			{
+				this.Title = _viewModel.WindowTitle;
+			}
 		}
 	}
 }

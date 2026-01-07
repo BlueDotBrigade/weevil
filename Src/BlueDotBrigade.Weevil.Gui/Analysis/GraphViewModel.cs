@@ -25,6 +25,7 @@
 		private static readonly string DefaultSeriesName = "Series";
 		private static readonly string DefaultXAxisLabel = "Time";
 		private static readonly string DefaultYAxisLabel = "Y-Axis";
+		private static readonly string DefaultWindowTitle = "Graph";
 		private static readonly string FloatFormat = "0.000";
 
 		private static readonly NumberStyles NumberStyle =
@@ -43,16 +44,18 @@
 
 		private string _xAxisLabel;
 		private string _yAxisLabel;
+		private string _windowTitle;
 
 		private string _regularExpression;
 		private string _dataDetected;
 		private string _sampleData;
 		private int _tooltipWidth;
 
-		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression)
+		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle)
 		{
 			_records = records;
 
+			this.WindowTitle = windowTitle ?? DefaultWindowTitle;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
 
@@ -126,6 +129,22 @@
 				{
 					_yAxisLabel = value;
 					RaisePropertyChanged(nameof(this.YAxisLabel));
+				}
+			}
+		}
+
+		public string WindowTitle
+		{
+			get
+			{
+				return _windowTitle;
+			}
+			set
+			{
+				if (_windowTitle != value)
+				{
+					_windowTitle = value;
+					RaisePropertyChanged(nameof(this.WindowTitle));
 				}
 			}
 		}
