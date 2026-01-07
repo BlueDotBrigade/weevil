@@ -14,7 +14,7 @@ using Microsoft.Win32;
 
 internal class DialogBoxService : IDialogBoxService
 {
-	private static int _graphWindowCounter = 0;
+	private static int _graphWindowCounter;
 
 	/// <summary>
 	/// Used to display dialog boxes (e.g. error messages) to the user.
