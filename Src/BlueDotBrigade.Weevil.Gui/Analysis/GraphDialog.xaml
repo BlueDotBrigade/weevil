@@ -6,6 +6,7 @@
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         Title="GraphDialog" 
         Height="450" Width="800" WindowState="Maximized"
+        ShowInTaskbar="True"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -74,6 +75,13 @@
                          materialDesign:HintAssist.Hint="Y-Axis"
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <Separator/>
+                <TextBox x:Name="WindowTitleTextBox" 
+                         Text="{Binding WindowTitle}"
+                         materialDesign:HintAssist.Hint="Graph Window Title"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
 
                 <Button Content="Update" Command="{Binding UpdateCommand}" Margin="5"/>
             </StackPanel>
