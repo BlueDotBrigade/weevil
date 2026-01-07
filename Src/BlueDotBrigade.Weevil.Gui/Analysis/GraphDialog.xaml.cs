@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Analysis
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.ComponentModel;
@@ -31,7 +32,7 @@
 			this.Closed += OnWindowClosed;
 		}
 
-		private void OnWindowClosed(object sender, System.EventArgs e)
+		private void OnWindowClosed(object sender, EventArgs e)
 		{
 			_viewModel.PropertyChanged -= OnViewModelPropertyChanged;
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using BlueDotBrigade.Weevil;
 using BlueDotBrigade.Weevil.Analysis;
@@ -66,8 +67,8 @@ internal class DialogBoxService : IDialogBoxService
 
 	public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern)
 	{
-		_graphWindowCounter++;
-		var windowTitle = $"Graph{_graphWindowCounter}";
+		var windowNumber = Interlocked.Increment(ref _graphWindowCounter);
+		var windowTitle = $"Graph{windowNumber}";
 		var dialog = new GraphDialog(records, selectedPattern, windowTitle);
 		dialog.Show();
 	}
