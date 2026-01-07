@@ -12,11 +12,25 @@ using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
 using Microsoft.Win32;
 
+/// <summary>
+/// Manages application-wide state for graph windows.
+/// </summary>
+internal static class GraphWindowCounter
+{
+	private static int _counter;
+
+	/// <summary>
+	/// Gets the next sequential graph window number in a thread-safe manner.
+	/// </summary>
+	/// <returns>The next window number (1, 2, 3, etc.)</returns>
+	public static int GetNext()
+	{
+		return Interlocked.Increment(ref _counter);
+	}
+}
+
 internal class DialogBoxService : IDialogBoxService
 {
-
-	private static int _graphWindowCounter;
-
 	private DashboardDialog _activeDashboard;
 
 	/// <summary>
@@ -90,7 +104,7 @@ internal class DialogBoxService : IDialogBoxService
 
 	public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern)
 	{
-		var windowNumber = Interlocked.Increment(ref _graphWindowCounter);
+		var windowNumber = GraphWindowCounter.GetNext();
 		var windowTitle = $"Graph{windowNumber}";
 		var dialog = new GraphDialog(records, selectedPattern, windowTitle);
 		dialog.Show();
