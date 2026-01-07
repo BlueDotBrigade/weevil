@@ -10,10 +10,17 @@ namespace BlueDotBrigade.Weevil.Analysis
 	internal class DetectDataAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectDataAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectDataAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectData.ToString();
@@ -46,14 +53,14 @@ namespace BlueDotBrigade.Weevil.Analysis
 				return new Results(0);
 			}
 
-			// Create expression from custom regex
+			// Parse expressions with alias expansion and || support
 			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
-			if (!expressionBuilder.TryGetExpression(customRegex, out var expression))
-			{
-				return new Results(0);
-			}
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
 
-			if (!(expression is RegularExpression regexExpression))
+			if (expressions.IsDefaultOrEmpty)
 			{
 				return new Results(0);
 			}
@@ -65,23 +72,39 @@ namespace BlueDotBrigade.Weevil.Analysis
 					record.Metadata.IsFlagged = false;
 				}
 
-				IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+				// Track unique key/value pairs per record to avoid duplicates using tuple-based key
+				var seenKeyValues = new HashSet<(string Key, string Value)>();
 
-				if (keyValuePairs.Count > 0)
+				foreach (RegularExpression regexExpression in expressions)
 				{
-					foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
+					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+
+					if (keyValuePairs.Count > 0)
 					{
-						if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
+						foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
 						{
-							var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
-
-							if (canUpdateMetadata)
+							if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
 							{
-								record.Metadata.IsFlagged = true;
-								record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
-							}
+								var compositeKey = (keyValuePair.Key, keyValuePair.Value);
 
-							count++;
+								// Skip duplicate key/value pairs within the same record
+								if (seenKeyValues.Contains(compositeKey))
+								{
+									continue;
+								}
+
+								seenKeyValues.Add(compositeKey);
+
+								var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
+
+								if (canUpdateMetadata)
+								{
+									record.Metadata.IsFlagged = true;
+									record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
+								}
+
+								count++;
+							}
 						}
 					}
 				}

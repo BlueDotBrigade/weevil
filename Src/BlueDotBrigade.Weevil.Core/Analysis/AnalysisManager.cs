@@ -7,6 +7,7 @@
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
 	using Timeline;
 
@@ -62,19 +63,22 @@
 
 			if ((componentType & ComponentType.Core) == ComponentType.Core)
 			{
+				var filterStrategy = _coreEngine.Filter.FilterStrategy;
+				var aliasExpander = _coreEngine.Filter.AliasExpander;
+
 				analyzers.AddRange(new List<IRecordAnalyzer>()
 				{
 					new TimeGapAnalyzer(),
 					new TimeGapUiAnalyzer(),
 					new TemporalAnomalyAnalyzer(),
-                                       new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
-                                       new DetectFirstAnalyzer(_coreEngine.Filter.FilterStrategy),
-                                       new StableValueAnalyzer(_coreEngine.Filter.FilterStrategy),
-                                       new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new DetectRepeatingRecordsAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new StatisticalAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new DetectDataAnalyzer(filterStrategy, aliasExpander),
+					new DetectFirstAnalyzer(filterStrategy, aliasExpander),
+					new StableValueAnalyzer(filterStrategy, aliasExpander),
+					new DataTransitionAnalyzer(filterStrategy, aliasExpander),
+					new DetectRisingEdgeAnalyzer(filterStrategy, aliasExpander),
+					new DetectFallingEdgeAnalyzer(filterStrategy, aliasExpander),
+					new DetectRepeatingRecordsAnalyzer(filterStrategy, aliasExpander),
+					new StatisticalAnalyzer(filterStrategy, aliasExpander),
 				});
 			}
 

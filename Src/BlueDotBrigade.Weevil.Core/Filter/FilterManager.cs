@@ -87,6 +87,8 @@
 
 		public TimeSpan FilterExecutionTime => _filterExecutionTime;
 
+		public IFilterAliasExpander AliasExpander => _filterAliasExpander;
+
 		public event EventHandler<ResultsChangedEventArgs> ResultsChanged;
 		public event EventHandler<HistoryChangedEventArgs> HistoryChanged;
 		#endregion

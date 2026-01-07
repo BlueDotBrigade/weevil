@@ -11,10 +11,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	internal class DetectRepeatingRecordsAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectRepeatingRecordsAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectRepeatingRecordsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectRepeatingRecords.ToString();
@@ -44,9 +51,14 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 return new Results(0);
             }
 
-            // Create expression from custom regex
+            // Parse expressions with alias expansion and || support
             var expressionBuilder = _filterStrategy.GetExpressionBuilder();
-            if (expressionBuilder.TryGetExpression(customRegex, out IExpression expression))
+            ImmutableArray<IExpression> expressions = AnalyzerExpressionHelper.ParseAllExpressions(
+                customRegex,
+                _aliasExpander,
+                expressionBuilder);
+
+            if (!expressions.IsDefaultOrEmpty)
             {
                 var sortedRecords = records.OrderBy((x => x.LineNumber)).ToImmutableArray();
 
@@ -60,7 +72,18 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 						record.Metadata.IsFlagged = false;
 					}
 
-					if (expression.IsMatch(record))
+					// Check if any expression matches
+					var isMatch = false;
+					foreach (IExpression expression in expressions)
+					{
+						if (expression.IsMatch(record))
+						{
+							isMatch = true;
+							break;
+						}
+					}
+
+					if (isMatch)
                     {
                         if (firstMatch == null)
                         {
