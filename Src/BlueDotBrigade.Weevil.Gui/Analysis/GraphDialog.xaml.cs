@@ -28,6 +28,12 @@
 			InitializeComponent();
 
 			this.Title = windowTitle;
+			this.Closed += OnWindowClosed;
+		}
+
+		private void OnWindowClosed(object sender, System.EventArgs e)
+		{
+			_viewModel.PropertyChanged -= OnViewModelPropertyChanged;
 		}
 
 		private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
