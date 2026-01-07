@@ -99,22 +99,6 @@
 			this.To = range.To;
 		}
 
-		public void RefreshData(IEngine engine, IInsight[] insights)
-		{
-			this.Insights = insights ?? Array.Empty<IInsight>();
-			this.Context = engine.Context;
-			this.SourceFilePath = engine.SourceFilePath;
-
-			foreach (var insight in this.Insights)
-			{
-				insight.Refresh(engine.Filter.Results);
-			}
-
-			var range = engine.Filter.Results.GetEstimatedRange();
-			this.From = range.From;
-			this.To = range.To;
-		}
-
 		private void OnRefresh(object sender, RoutedEventArgs e)
 		{
 			foreach (IInsight insight in this.Insights)
