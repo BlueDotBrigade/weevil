@@ -13,6 +13,8 @@ using Microsoft.Win32;
 
 internal class DialogBoxService : IDialogBoxService
 {
+	private static int _graphWindowCounter = 0;
+
 	/// <summary>
 	/// Used to display dialog boxes (e.g. error messages) to the user.
 	/// </summary>
@@ -64,7 +66,9 @@ internal class DialogBoxService : IDialogBoxService
 
 	public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern)
 	{
-		var dialog = new GraphDialog(records, selectedPattern);
+		_graphWindowCounter++;
+		var windowTitle = $"Graph{_graphWindowCounter}";
+		var dialog = new GraphDialog(records, selectedPattern, windowTitle);
 		dialog.Show();
 	}
 

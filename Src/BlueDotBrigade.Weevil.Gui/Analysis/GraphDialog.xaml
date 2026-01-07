@@ -74,6 +74,13 @@
                          materialDesign:HintAssist.Hint="Y-Axis"
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <Separator/>
+                <TextBox x:Name="WindowTitleTextBox" 
+                         Text="{Binding WindowTitle}"
+                         materialDesign:HintAssist.Hint="Graph Window Title"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
 
                 <Button Content="Update" Command="{Binding UpdateCommand}" Margin="5"/>
             </StackPanel>

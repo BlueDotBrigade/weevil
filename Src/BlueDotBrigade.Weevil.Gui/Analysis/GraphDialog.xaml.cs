@@ -13,7 +13,7 @@
 	{
 		private readonly GraphViewModel _viewModel;
 
-		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern)
+		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern, string windowTitle)
 		{
 			LiveCharts.Configure(
 				settings => settings
@@ -21,10 +21,12 @@
 					.AddSkiaSharp()
 					.AddDarkTheme());
 
-			_viewModel = new GraphViewModel(records, regExPattern);
+			_viewModel = new GraphViewModel(records, regExPattern, windowTitle);
 			this.DataContext = _viewModel;
 
 			InitializeComponent();
+
+			this.Title = windowTitle;
 		}
 	}
 }
