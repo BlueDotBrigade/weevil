@@ -14,7 +14,10 @@ using Microsoft.Win32;
 
 internal class DialogBoxService : IDialogBoxService
 {
+
 	private static int _graphWindowCounter;
+
+	private DashboardDialog _activeDashboard;
 
 	/// <summary>
 	/// Used to display dialog boxes (e.g. error messages) to the user.
@@ -57,9 +60,29 @@ internal class DialogBoxService : IDialogBoxService
 
 	public void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, IBulletinMediator bulletinMediator)
 	{
+		// Close existing dashboard if one is already open
+		if (_activeDashboard != null)
+		{
+			var oldDashboard = _activeDashboard;
+			_activeDashboard = null; // Clear the reference before closing to avoid race conditions
+			oldDashboard.Close();
+		}
+
 		var dialog = new DashboardDialog(weevilVersion, engine, bulletinMediator)
 		{
 			Insights = insights.ToArray(),
+		};
+
+		// Track the active dashboard
+		_activeDashboard = dialog;
+		
+		// Clean up reference when dashboard is closed
+		dialog.Closed += (sender, args) =>
+		{
+			if (_activeDashboard == dialog)
+			{
+				_activeDashboard = null;
+			}
 		};
 
 		dialog.Show();

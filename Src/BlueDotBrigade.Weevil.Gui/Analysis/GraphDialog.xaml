@@ -6,6 +6,7 @@
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         Title="GraphDialog" 
         Height="450" Width="800" WindowState="Maximized"
+        ShowInTaskbar="True"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
