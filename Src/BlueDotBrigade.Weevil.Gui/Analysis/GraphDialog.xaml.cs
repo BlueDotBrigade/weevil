@@ -34,10 +34,7 @@
 
 		private void OnWindowClosed(object sender, EventArgs e)
 		{
-			if (_viewModel != null)
-			{
-				_viewModel.PropertyChanged -= OnViewModelPropertyChanged;
-			}
+			_viewModel.PropertyChanged -= OnViewModelPropertyChanged;
 		}
 
 		private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
