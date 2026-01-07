@@ -74,17 +74,30 @@ internal class DialogBoxService : IDialogBoxService
 
 	public void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, IBulletinMediator bulletinMediator)
 	{
-		// Close existing dashboard if one is already open
-		if (_activeDashboard != null)
+		// If an active dashboard exists and is loaded, activate it instead of creating a new one
+		if (_activeDashboard != null && _activeDashboard.IsLoaded)
 		{
-			var oldDashboard = _activeDashboard;
-			_activeDashboard = null; // Clear the reference before closing to avoid race conditions
-			oldDashboard.Close();
+			// Update data to reflect the current engine state
+			_activeDashboard.RefreshData(engine, insights.ToArray());
+
+			// If the dashboard is minimized, restore it to normal state
+			if (_activeDashboard.WindowState == WindowState.Minimized)
+			{
+				_activeDashboard.WindowState = WindowState.Normal;
+			}
+
+			// Bring the dashboard to the foreground and activate it
+			_activeDashboard.Activate();
+			_activeDashboard.Focus();
+
+			return;
 		}
 
+		// Create a new dashboard if no active dashboard exists
 		var dialog = new DashboardDialog(weevilVersion, engine, bulletinMediator)
 		{
 			Insights = insights.ToArray(),
+			Owner = Application.Current?.MainWindow
 		};
 
 		// Track the active dashboard
