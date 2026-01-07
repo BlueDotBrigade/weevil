@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -77,9 +77,6 @@ internal class DialogBoxService : IDialogBoxService
 		// If an active dashboard exists and is loaded, activate it instead of creating a new one
 		if (_activeDashboard != null && _activeDashboard.IsLoaded)
 		{
-			// Update data to reflect the current engine state
-			_activeDashboard.RefreshData(engine, insights.ToArray());
-
 			// If the dashboard is minimized, restore it to normal state
 			if (_activeDashboard.WindowState == WindowState.Minimized)
 			{
