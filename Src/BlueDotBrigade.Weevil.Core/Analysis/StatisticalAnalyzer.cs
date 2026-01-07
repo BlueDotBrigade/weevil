@@ -19,11 +19,18 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		private readonly IReadOnlyList<ICalculator> _calculators;
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 		private readonly IDictionary<string, double> _results;
 
 		public StatisticalAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public StatisticalAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 
 			_calculators = new List<ICalculator>
 			{
@@ -77,42 +84,54 @@ namespace BlueDotBrigade.Weevil.Analysis
 				return new Results(0);
 			}
 
-			// Create expression from custom regex
+			// Parse expressions with alias expansion and || support
 			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
-			if (!expressionBuilder.TryGetExpression(customRegex, out var expression))
-			{
-				return new Results(0);
-			}
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
 
-			if (!(expression is RegularExpression regexExpression))
+			if (expressions.IsDefaultOrEmpty)
 			{
 				return new Results(0);
 			}
 
 			foreach (IRecord record in records)
 			{
-				IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+				// Collect all key-value pairs from all expressions for this record
+				// For statistical analysis, we take the first numeric value found
+				double? foundValue = null;
 
-				if (keyValuePairs.Count == 1)
+				foreach (RegularExpression regexExpression in expressions)
 				{
-					if (double.TryParse(keyValuePairs.First().Value, out var value))
+					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+
+					if (keyValuePairs.Count == 1)
 					{
-						count++;
-
-						timestamps.Add(record.CreatedAt);
-						values.Add(value);
-
-						if (canUpdateMetadata)
+						if (double.TryParse(keyValuePairs.First().Value, out var value))
 						{
-							record.Metadata.IsFlagged = false;
+							foundValue = value;
+							break; // Take first numeric value found
 						}
 					}
+					else if (keyValuePairs.Count >= 2)
+					{
+						throw new MatchCountException(
+							"(custom regex)",
+							$"The regular expression should have only 1 matching group.");
+					}
 				}
-				else if (keyValuePairs.Count >= 2)
+
+				if (foundValue.HasValue)
 				{
-					throw new MatchCountException(
-						"(custom regex)",
-						$"The regular expression should have only 1 matching group.");
+					count++;
+					timestamps.Add(record.CreatedAt);
+					values.Add(foundValue.Value);
+
+					if (canUpdateMetadata)
+					{
+						record.Metadata.IsFlagged = false;
+					}
 				}
 			}
 
