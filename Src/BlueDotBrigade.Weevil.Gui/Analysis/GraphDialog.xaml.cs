@@ -22,11 +22,20 @@
 					.AddDarkTheme());
 
 			_viewModel = new GraphViewModel(records, regExPattern, windowTitle);
+			_viewModel.PropertyChanged += OnViewModelPropertyChanged;
 			this.DataContext = _viewModel;
 
 			InitializeComponent();
 
 			this.Title = windowTitle;
+		}
+
+		private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(GraphViewModel.WindowTitle))
+			{
+				this.Title = _viewModel.WindowTitle;
+			}
 		}
 	}
 }
