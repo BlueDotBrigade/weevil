@@ -5,6 +5,7 @@
         Title="Dashboard" Height="600" Width="800"
         WindowStartupLocation="CenterOwner"
         WindowState="Maximized"
+        ShowInTaskbar="True"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
         xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
