@@ -88,7 +88,6 @@ internal class DialogBoxService : IDialogBoxService
 
 			// Bring the dashboard to the foreground and activate it
 			_activeDashboard.Activate();
-			_activeDashboard.Focus();
 
 			return;
 		}
