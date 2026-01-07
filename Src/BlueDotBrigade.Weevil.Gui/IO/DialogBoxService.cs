@@ -59,8 +59,9 @@ internal class DialogBoxService : IDialogBoxService
 		// Close existing dashboard if one is already open
 		if (_activeDashboard != null)
 		{
-			_activeDashboard.Close();
-			_activeDashboard = null;
+			var oldDashboard = _activeDashboard;
+			_activeDashboard = null; // Clear the reference before closing to avoid race conditions
+			oldDashboard.Close();
 		}
 
 		var dialog = new DashboardDialog(weevilVersion, engine, bulletinMediator)
