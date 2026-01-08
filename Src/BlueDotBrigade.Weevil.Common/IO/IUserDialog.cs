@@ -13,7 +13,8 @@
 			out string findText,
 			out bool searchElapsedTime,
 			out int? minElapsedMs,
-			out int? maxElapsedMs);
+			out int? maxElapsedMs,
+			out bool searchComments);
 
 		bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression);
 	}

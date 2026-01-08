@@ -25,7 +25,8 @@
 			out string findText,
 			out bool searchElapsedTime,
 			out int? minElapsedMs,
-			out int? maxElapsedMs)
+			out int? maxElapsedMs,
+			out bool searchComments)
 		{
 			throw new NotImplementedException();
 		}

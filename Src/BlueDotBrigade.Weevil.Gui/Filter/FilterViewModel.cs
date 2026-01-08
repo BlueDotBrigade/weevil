@@ -95,6 +95,10 @@
 		private string _findText;
 		private bool _findIsCaseSensitive;
 		private bool _findUseRegex;
+		private bool _findSearchComments;
+		private bool _findSearchElapsedTime;
+		private int? _findMinElapsedMs;
+		private int? _findMaxElapsedMs;
 
                 private FilterType _currentfilterType;
                 private FilterType _filterExpressionType;
@@ -1101,19 +1105,31 @@
 				out var findNext, 
 				out _findUseRegex, 
 				out _findText,
-				out var searchElapsedTime,
-				out var minElapsedMs,
-				out var maxElapsedMs))
+				out _findSearchElapsedTime,
+				out _findMinElapsedMs,
+				out _findMaxElapsedMs,
+				out _findSearchComments))
 			{
-				if (searchElapsedTime)
+				if (_findSearchElapsedTime)
 				{
 					if (findNext)
 					{
-						FindNextElapsedTime(minElapsedMs, maxElapsedMs);
+						FindNextElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
 					}
 					else
 					{
-						FindPreviousElapsedTime(minElapsedMs, maxElapsedMs);
+						FindPreviousElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+					}
+				}
+				else if (_findSearchComments)
+				{
+					if (findNext)
+					{
+						FindNextComment();
+					}
+					else
+					{
+						FindPreviousComment();
 					}
 				}
 				else
@@ -1132,7 +1148,15 @@
 
 		private void FindNext()
 		{
-			if (!string.IsNullOrWhiteSpace(_findText))
+			if (_findSearchElapsedTime)
+			{
+				FindNextElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+			}
+			else if (_findSearchComments)
+			{
+				FindNextComment();
+			}
+			else if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
 					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
@@ -1145,13 +1169,47 @@
 
 		private void FindPrevious()
 		{
-			if (!string.IsNullOrWhiteSpace(_findText))
+			if (_findSearchElapsedTime)
+			{
+				FindPreviousElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+			}
+			else if (_findSearchComments)
+			{
+				FindPreviousComment();
+			}
+			else if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
 					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
 					() => _engine
 						.Navigate
 						.PreviousContent(_findText, _findIsCaseSensitive, _findUseRegex)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		private void FindNextComment()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in comments.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
+					() => _engine
+						.Navigate
+						.NextCommentWithText(_findText, _findIsCaseSensitive, _findUseRegex)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		private void FindPreviousComment()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in comments.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
+					() => _engine
+						.Navigate
+						.PreviousCommentWithText(_findText, _findIsCaseSensitive, _findUseRegex)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}

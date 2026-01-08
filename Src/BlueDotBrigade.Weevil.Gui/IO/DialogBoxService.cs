@@ -189,7 +189,8 @@ internal class DialogBoxService : IDialogBoxService
 		out string findText,
 		out bool searchElapsedTime,
 		out int? minElapsedMs,
-		out int? maxElapsedMs)
+		out int? maxElapsedMs,
+		out bool searchComments)
 	{
 		var wasSuccessful = false;
 
@@ -198,6 +199,7 @@ internal class DialogBoxService : IDialogBoxService
 		findNext = true;
 		useRegex = false;
 		searchElapsedTime = false;
+		searchComments = false;
 		minElapsedMs = null;
 		maxElapsedMs = null;
 
@@ -210,6 +212,7 @@ internal class DialogBoxService : IDialogBoxService
 			findNext = dialog.FindNext;
 			useRegex = dialog.IsRegexMode;
 			searchElapsedTime = dialog.SearchElapsedTime;
+			searchComments = dialog.SearchComments;
 
 			// Parse elapsed time values
 			if (searchElapsedTime)
