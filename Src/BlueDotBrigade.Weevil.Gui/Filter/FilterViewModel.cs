@@ -976,7 +976,8 @@
 		{
 			_dialogBox.ShowGraph(
 				_engine.Selector.GetSelected(),
-				_inclusiveFilter);
+				_inclusiveFilter,
+				_engine.SourceFilePath);
 		}
 
 		private void ForceGarbageCollection()

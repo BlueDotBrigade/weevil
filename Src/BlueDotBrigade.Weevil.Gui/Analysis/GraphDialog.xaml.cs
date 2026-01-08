@@ -14,7 +14,7 @@
 	{
 		private readonly GraphViewModel _viewModel;
 
-		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern, string windowTitle)
+		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern, string windowTitle, string sourceFilePath)
 		{
 			LiveCharts.Configure(
 				settings => settings
@@ -22,7 +22,7 @@
 					.AddSkiaSharp()
 					.AddDarkTheme());
 
-			_viewModel = new GraphViewModel(records, regExPattern, windowTitle);
+			_viewModel = new GraphViewModel(records, regExPattern, windowTitle, sourceFilePath);
 			_viewModel.PropertyChanged += OnViewModelPropertyChanged;
 			this.DataContext = _viewModel;
 

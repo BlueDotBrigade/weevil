@@ -111,11 +111,11 @@ internal class DialogBoxService : IDialogBoxService
 		dialog.Show();
 	}
 
-	public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern)
+	public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, string sourceFilePath)
 	{
 		var windowNumber = GraphWindowCounter.GetNext();
 		var windowTitle = $"Graph{windowNumber}";
-		var dialog = new GraphDialog(records, selectedPattern, windowTitle);
+		var dialog = new GraphDialog(records, selectedPattern, windowTitle, sourceFilePath);
 		dialog.Show();
 	}
 
