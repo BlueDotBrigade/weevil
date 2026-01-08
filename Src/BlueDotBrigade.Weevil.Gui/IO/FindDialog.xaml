@@ -75,8 +75,6 @@
                     <Button Content="Previous" Click="OnPreviousClicked" />
                     <Button Content="Next" Click="OnNextClicked" IsDefault="True"/>
                 </StackPanel>
-
-                <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
             </Grid>
         </TabItem>
         
@@ -122,8 +120,6 @@
                     <Button Content="Previous" Click="OnPreviousCommentClicked" />
                     <Button Content="Next" Click="OnNextCommentClicked" IsDefault="True"/>
                 </StackPanel>
-
-                <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
             </Grid>
         </TabItem>
         
@@ -171,8 +167,6 @@
                     <Button Content="Previous" Click="OnPreviousElapsedClicked" />
                     <Button Content="Next" Click="OnNextElapsedClicked" IsDefault="True"/>
                 </StackPanel>
-
-                <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
             </Grid>
         </TabItem>
     </TabControl>
