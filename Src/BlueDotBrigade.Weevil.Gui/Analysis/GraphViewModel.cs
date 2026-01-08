@@ -27,6 +27,8 @@
 		private static readonly string DefaultYAxisLabel = "Y-Axis";
 		private static readonly string DefaultWindowTitle = "Graph";
 		private static readonly string FloatFormat = "0.000";
+		private static readonly int MaxSeriesCount = 2;
+		private static readonly string DefaultSeries2Suffix = " 2";
 
 		private static readonly NumberStyles NumberStyle =
 			NumberStyles.AllowLeadingWhite |
@@ -278,7 +280,7 @@
 				// allowing users to customize series names without them being overwritten
 				if (isInitializing && _records.Length > 0)
 				{
-					var seriesNames = GetSeriesNames(_records.First().Content, this.RegularExpression);
+					var seriesNames = GetSeriesNames(_records, this.RegularExpression);
 					if (seriesNames.Count > 0)
 					{
 						this.Series1Name = seriesNames[0];
@@ -422,7 +424,7 @@
 
 				if (matches.Any())
 				{
-					var values = matches.Take(2).ToList();
+					var values = matches.Take(MaxSeriesCount).ToList();
 					if (values.Count > 0)
 					{
 						hasFirstValue = float.TryParse(values[0].Value, NumberStyle, CultureInfo.InvariantCulture, out value1);
@@ -450,7 +452,7 @@
 
 					if (matches.Any())
 					{
-						seriesNames.AddRange(matches.Take(2).Select(m => m.Key));
+						seriesNames.AddRange(matches.Take(MaxSeriesCount).Select(m => m.Key));
 					}
 				}
 				catch (Exception e)
@@ -467,6 +469,23 @@
 			}
 
 			return seriesNames;
+		}
+
+		private static List<string> GetSeriesNames(ImmutableArray<IRecord> records, string regularExpression)
+		{
+			// Find the first record that matches the pattern to extract series names
+			foreach (var record in records)
+			{
+				var seriesNames = GetSeriesNames(record.Content, regularExpression);
+				// If we found named groups (not just the default), return them
+				if (seriesNames.Count > 0 && seriesNames[0] != DefaultSeriesName)
+				{
+					return seriesNames;
+				}
+			}
+
+			// If no record matched, return default
+			return new List<string> { DefaultSeriesName };
 		}
 
 		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name)
@@ -506,7 +525,7 @@
 
 			// Use provided names or defaults
 			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : DefaultSeriesName;
-			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : DefaultSeriesName + " 2";
+			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : DefaultSeriesName + DefaultSeries2Suffix;
 
 			var seriesList = new List<ISeries>
 			{
