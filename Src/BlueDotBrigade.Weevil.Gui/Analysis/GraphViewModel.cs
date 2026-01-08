@@ -273,7 +273,9 @@
 		{
 			try
 			{
-				// Initialize series names on first load
+				// Initialize series names on first load from RegEx named groups
+				// After initialization, series names are preserved even if RegEx changes,
+				// allowing users to customize series names without them being overwritten
 				if (isInitializing && _records.Length > 0)
 				{
 					var seriesNames = GetSeriesNames(_records.First().Content, this.RegularExpression);
@@ -295,10 +297,13 @@
 				var seriesList = this.Series.ToList();
 				if (seriesList.Count > 1)
 				{
+					// Two series: use Series1Name and Series2Name for Y-axes
 					this.YAxes = GetYAxes(this.Series1Name, this.Series2Name);
 				}
 				else
 				{
+					// Single series: use YAxisLabel for backward compatibility with existing graphs
+					// On initialization, Series1Name and YAxisLabel will be the same
 					this.YAxes = GetYAxes(isInitializing ? this.Series1Name : this.YAxisLabel);
 				}
 			}
@@ -448,9 +453,10 @@
 						seriesNames.AddRange(matches.Take(2).Select(m => m.Key));
 					}
 				}
-				catch
+				catch (Exception e)
 				{
-					// If there's an error getting the series names, return empty list
+					// If there's an error getting the series names, log and return empty list
+					Log.Default.Write(LogSeverityType.Warning, e, "Could not extract series names from regular expression.");
 				}
 			}
 
