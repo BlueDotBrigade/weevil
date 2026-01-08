@@ -599,7 +599,11 @@
 							}
 						});
 
-						this.IsFilterToolboxEnabled = true;
+						// Enable the filter toolbox on UI thread to avoid cross-thread access issues
+						_uiDispatcher.Invoke(() =>
+						{
+							this.IsFilterToolboxEnabled = true;
+						});
 
 						Log.Default.Write(
 							LogSeverityType.Information,
@@ -619,8 +623,16 @@
 					}
 					finally
 					{
-						this.IsProcessingLongOperation = false;
-						this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+						// Marshal UI-bound flags to UI thread immediately after file parsing completes
+						// This enables menu options and filtering without waiting for insights to compute
+						_uiDispatcher.Invoke(() =>
+						{
+							this.IsProcessingLongOperation = false;
+							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+							this.CanOpenLogFile = true; // Enable menus immediately
+							RaisePropertyChanged(nameof(IsMenuEnabled));
+							CommandManager.InvalidateRequerySuggested();
+						});
 					}
 				}).ContinueWith((x) =>
 					{
@@ -638,9 +650,9 @@
 							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
 
+						// Refresh command states after insights are computed (optional, for completeness)
 						_uiDispatcher.Invoke(() =>
 						{
-							this.CanOpenLogFile = true;
 							CommandManager.InvalidateRequerySuggested();
 						});
 					}
