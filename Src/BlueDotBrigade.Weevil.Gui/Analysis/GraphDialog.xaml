@@ -76,6 +76,19 @@
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"/>
                 <Separator/>
+                <TextBox x:Name="Series1NameTextBox" 
+                         Text="{Binding Series1Name}"
+                         materialDesign:HintAssist.Hint="Series 1 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <TextBox x:Name="Series2NameTextBox" 
+                         Text="{Binding Series2Name}"
+                         materialDesign:HintAssist.Hint="Series 2 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <Separator/>
                 <TextBox x:Name="WindowTitleTextBox" 
                          Text="{Binding WindowTitle}"
                          materialDesign:HintAssist.Hint="Graph Window Title"
