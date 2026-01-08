@@ -58,6 +58,18 @@
 		IRecord NextComment();
 
 		/// <summary>
+		/// Searches backwards through records looking for a comment containing the specified text. Descending order: 4, 3, 2, 1.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException"/>
+		IRecord PreviousCommentWithText(string text, bool isCaseSensitive, bool useRegex = false);
+
+		/// <summary>
+		/// Searches forwards through records looking for a comment containing the specified text. Ascending order: 1, 2, 3, 4.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException"/>
+		IRecord NextCommentWithText(string text, bool isCaseSensitive, bool useRegex = false);
+
+		/// <summary>
 		/// Searches backwards for a record that was flagged by an analyzer. Descending order: 4, 3, 2, 1.
 		/// </summary>
 		/// <seealso cref="IRecordAnalyzer"/>

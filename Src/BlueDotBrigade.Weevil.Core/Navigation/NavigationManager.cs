@@ -145,6 +145,30 @@
 				.FindNext();
 		}
 
+		public IRecord PreviousCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<ICommentNavigator>()
+				.FindPrevious(text, isCaseSensitive, useRegex);
+		}
+
+		public IRecord NextCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<ICommentNavigator>()
+				.FindNext(text, isCaseSensitive, useRegex);
+		}
+
 		public IRecord PreviousFlag()
 		{
 			return this
