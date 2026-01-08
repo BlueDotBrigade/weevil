@@ -117,6 +117,7 @@
 
 			this.IsLogFileOpen = false;
 			this.CanOpenLogFile = true;
+			this.AreInsightsReady = false;
 
 			this.FilterOptionsViewModel = new FilterOptionsViewModel();
 			this.FilterOptionsViewModel.OptionsChanged += OnFilterOptionsChanged;
@@ -206,6 +207,22 @@
 		public bool IsLogFileOpen { get; private set; }
 
 		public bool CanOpenLogFile { get; private set; }
+		
+		public bool AreInsightsReady { get; private set; }
+
+		[SafeForDependencyAnalysis]
+		public bool IsDashboardEnabled
+		{
+			get
+			{
+				if (Depends.Guard)
+				{
+					Depends.On(this.IsMenuEnabled, this.AreInsightsReady);
+				}
+
+				return this.IsMenuEnabled && this.AreInsightsReady;
+			}
+		}
 		
 		public bool IncludePinned
 		{
@@ -491,6 +508,7 @@
 			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
+			this.AreInsightsReady = false;
 
 			var openAsResult = new OpenAsResult();
 			var wasOpenRequested = false;
@@ -647,8 +665,13 @@
 							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
 
-						// Optionally requery commands after insights are ready
-						_uiDispatcher.Invoke(() => CommandManager.InvalidateRequerySuggested());
+						// Set insights ready and requery commands after insights are ready
+						_uiDispatcher.Invoke(() =>
+						{
+							this.AreInsightsReady = true;
+							RaisePropertyChanged(nameof(IsDashboardEnabled));
+							CommandManager.InvalidateRequerySuggested();
+						});
 					}
 				);
 			}

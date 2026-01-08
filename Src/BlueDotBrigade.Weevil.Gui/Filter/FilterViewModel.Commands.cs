@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand ShowAboutCommand => new UiBoundCommand(ShowAbout);
 		[SafeForDependencyAnalysis]
-		public ICommand ShowDashboardCommand => new UiBoundCommand(ShowDashboard, () => this.IsMenuEnabled);
+		public ICommand ShowDashboardCommand => new UiBoundCommand(ShowDashboard, () => this.IsDashboardEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand GraphDataCommand => new UiBoundCommand(GraphData, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
