@@ -38,6 +38,11 @@
 
 		public IRecord FindPrevious(string value, bool isCaseSensitive, bool useRegex = false)
 		{
+			if (value == null)
+			{
+				throw new ArgumentNullException(nameof(value));
+			}
+
 			if (useRegex)
 			{
 				var regexOptions = isCaseSensitive
@@ -69,6 +74,11 @@
 
 		public IRecord FindNext(string value, bool isCaseSensitive, bool useRegex = false)
 		{
+			if (value == null)
+			{
+				throw new ArgumentNullException(nameof(value));
+			}
+
 			if (useRegex)
 			{
 				var regexOptions = isCaseSensitive
