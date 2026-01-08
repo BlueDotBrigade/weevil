@@ -599,7 +599,8 @@
 							}
 						});
 
-						this.IsFilterToolboxEnabled = true;
+						// Marshal UI updates to dispatcher to avoid cross-thread issues
+						_uiDispatcher.Invoke(() => this.IsFilterToolboxEnabled = true);
 
 						Log.Default.Write(
 							LogSeverityType.Information,
@@ -619,11 +620,19 @@
 					}
 					finally
 					{
-						this.IsProcessingLongOperation = false;
-						this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+						// Immediately enable UI on dispatcher so menus become actionable without waiting for insights
+						_uiDispatcher.Invoke(() =>
+						{
+							this.IsProcessingLongOperation = false;      // show records
+							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+							this.CanOpenLogFile = true;                  // enable menus now
+							RaisePropertyChanged(nameof(IsMenuEnabled));  // force re-evaluation
+							CommandManager.InvalidateRequerySuggested();  // refresh commands
+						});
 					}
 				}).ContinueWith((x) =>
 					{
+						// Continue computing insights asynchronously (UI is already enabled)
 						if (_engine.Navigate.TableOfContents.Sections.Count == 0)
 						{
 							_engine.Navigate.RebuildTableOfContents();
@@ -638,11 +647,8 @@
 							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
 
-						_uiDispatcher.Invoke(() =>
-						{
-							this.CanOpenLogFile = true;
-							CommandManager.InvalidateRequerySuggested();
-						});
+						// Optionally requery commands after insights are ready
+						_uiDispatcher.Invoke(() => CommandManager.InvalidateRequerySuggested());
 					}
 				);
 			}
