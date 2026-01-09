@@ -24,6 +24,8 @@
 			this.VisibleRecordCount = visibleRecordCount;
 			this.SeverityMetrics = severityMetrics;
 			this.ExecutionTime = executionTime;
+			this.BookmarkCount = 0;
+			this.RegionCount = 0;
 		}
 
 		public int SelectedRecordCount { get; init; }
