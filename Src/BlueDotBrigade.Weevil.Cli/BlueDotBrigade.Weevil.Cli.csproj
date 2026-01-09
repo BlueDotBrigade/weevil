@@ -51,6 +51,8 @@
 	<ItemGroup>
 		<PackageReference Include="Cocona" Version="2.2.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="NLog" Version="6.0.7" />
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
 		<PackageReference Include="System.Collections.Immutable">
 			<Version>10.0.1</Version>
 		</PackageReference>

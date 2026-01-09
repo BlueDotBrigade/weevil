@@ -119,11 +119,12 @@
 		<PackageReference Include="NLog">
 			<Version>6.0.7</Version>
 		</PackageReference>
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
 		<PackageReference Include="PostSharp">
-			<Version>2024.1.6</Version>
+			<Version>2026.0.5</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>2024.1.6</Version>
+			<Version>2026.0.5</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="System.Collections.Immutable">
