@@ -1,48 +1,48 @@
 ﻿<Project Sdk="WixToolset.Sdk/5.0.0">
-	<PropertyGroup>
-		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-		<ProductVersion>2.12.0</ProductVersion>
-		<OutputName>Weevil-$(ProductVersion)</OutputName>
-		<Name>BlueDotBrigade.Weevil.Installer</Name>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-		<DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows\;</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-		<DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)\Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows\;</DefineConstants>
-	</PropertyGroup>
-	<ItemGroup>
-		<None Include="ReadMe.md" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="WixToolset.Netfx.wixext" Version="5.0.2" />
-		<PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj">
-			<Name>BlueDotBrigade.Weevil.Gui</Name>
-			<Project>{87387c7c-089e-4f58-a4c4-a7adf2e18e6a}</Project>
-			<Private>True</Private>
-			<DoNotHarvest>True</DoNotHarvest>
-			<RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-			<RefTargetDir>INSTALLFOLDER</RefTargetDir>
-		</ProjectReference>
-	</ItemGroup>
-	<ItemGroup>
-		<Content Include="..\BlueDotBrigade.Weevil.Gui\Resources\Icons\Weevil.ico">
-			<Link>Weevil.ico</Link>
-		</Content>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="..\..\Doc\Notes\Release\Licenses\License-Installation.rtf">
-			<Link>License-Installation.rtf</Link>
-		</None>
-	</ItemGroup>
-	<!-- 
+  <PropertyGroup>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProductVersion>2.12.0</ProductVersion>
+    <OutputName>Weevil-$(ProductVersion)</OutputName>
+    <Name>BlueDotBrigade.Weevil.Installer</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="ReadMe.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Netfx.wixext" Version="6.0.2" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="6.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj">
+      <Name>BlueDotBrigade.Weevil.Gui</Name>
+      <Project>{87387c7c-089e-4f58-a4c4-a7adf2e18e6a}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\BlueDotBrigade.Weevil.Gui\Resources\Icons\Weevil.ico">
+      <Link>Weevil.ico</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Doc\Notes\Release\Licenses\License-Installation.rtf">
+      <Link>License-Installation.rtf</Link>
+    </None>
+  </ItemGroup>
+  <!-- 
 	KNOWN ISSUE 
 	The Visual Studio team confirmed this issue is a breaking change in VS2022 17.13. 
 	We'll address the breaking change when one of our customers requires it. 
 	https://github.com/firegiant/HeatWaveSupport/issues/73
 	-->
-	<Target Name="CollectSuggestedVisualStudioComponentIds" />
+  <Target Name="CollectSuggestedVisualStudioComponentIds" />
 </Project>
