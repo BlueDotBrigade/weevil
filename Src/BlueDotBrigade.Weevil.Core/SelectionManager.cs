@@ -315,27 +315,13 @@
 			return ImmutableArray.Create(clearedRecords);
 		}
 
-		public ImmutableArray<IRecord> GetSelected(bool oneIsMany = false)
+		public ImmutableArray<IRecord> GetSelected()
 		{
 			IRecord[] selectedRecords = null;
 
 			lock (_selectedRecordsPadlock)
 			{
-				// When 0 records selected: return all visible records
-				if (_selectedRecords.Count == 0)
-				{
-					selectedRecords = _visibleRecords.ToArray();
-				}
-				// When exactly 1 record selected AND oneIsMany=true: return all visible records
-				else if (_selectedRecords.Count == 1 && oneIsMany)
-				{
-					selectedRecords = _visibleRecords.ToArray();
-				}
-				// Otherwise: return the selected records
-				else
-				{
-					selectedRecords = _selectedRecords.Values.ToArray();
-				}
+				selectedRecords = _selectedRecords.Values.ToArray();
 			}
 
 			Log.Default.Write(

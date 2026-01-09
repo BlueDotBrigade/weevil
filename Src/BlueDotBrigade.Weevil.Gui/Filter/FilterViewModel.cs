@@ -978,10 +978,8 @@
 
 		private void GraphData()
 		{
-			ImmutableArray<IRecord> recordsToGraph = _engine.Selector.GetSelected(oneIsMany: true);
-
 			_dialogBox.ShowGraph(
-				recordsToGraph,
+				_engine.Selector.GetSelected(),
 				_inclusiveFilter,
 				_engine.SourceFilePath);
 		}
