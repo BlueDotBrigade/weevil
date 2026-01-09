@@ -36,25 +36,16 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void Select_NonExistentRecord_ThrowsRecordNotFound()
 		{
 			IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
-			try
-			{
-				engine.Selector.Select(lineNumber: int.MaxValue);
-			}
-			catch (RecordNotFoundException)
-			{
-				throw;
-			}
-			finally
-			{
-				Assert.AreEqual(0, engine.Selector.Selected.Count);
-			}
+			Action act = () => engine.Selector.Select(lineNumber: int.MaxValue);
+			act.Should().Throw<RecordNotFoundException>();
+
+			Assert.AreEqual(0, engine.Selector.Selected.Count);
 		}
 	}
 }

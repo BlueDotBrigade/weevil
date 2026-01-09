@@ -11,9 +11,10 @@
 			this.VisibleRecordCount = 0;
 			this.ExecutionTime = TimeSpan.Zero;
 			this.SeverityMetrics = new Dictionary<string, object>();
-			this.BookmarkCount = 0;
+			
 			this.RegionCount = 0;
 		}
+
 		public FilterChangedBulletin(
 			int selectedRecordCount, 
 			int visibleRecordCount, 
@@ -24,7 +25,6 @@
 			this.VisibleRecordCount = visibleRecordCount;
 			this.SeverityMetrics = severityMetrics;
 			this.ExecutionTime = executionTime;
-			this.BookmarkCount = 0;
 			this.RegionCount = 0;
 		}
 
@@ -35,8 +35,6 @@
 		public IDictionary<string, object> SeverityMetrics { get; init; }
 
 		public TimeSpan ExecutionTime { get; init; }
-
-		public int BookmarkCount { get; init; }
 
 		public int RegionCount { get; init; }
 	}

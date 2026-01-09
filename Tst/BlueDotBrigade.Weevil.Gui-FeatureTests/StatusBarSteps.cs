@@ -23,7 +23,7 @@
 		{
 			Assert.AreEqual(
 				bookmarkCount,
-				this.Context.StatusBar.FilterDetails.BookmarkCount);
+				this.Context.StatusBar.BookmarkDetails.BookmarkCount);
 		}
 
 		[Then($"the status bar region count will be {X.WholeNumber}")]
@@ -31,7 +31,7 @@
 		{
 			Assert.AreEqual(
 				regionCount,
-				this.Context.StatusBar.FilterDetails.RegionCount);
+				this.Context.StatusBar.RegionDetails.RegionCount);
 		}
 	}
 }

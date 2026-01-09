@@ -6,7 +6,7 @@
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
     <Version>2.12.0</Version>
     <Authors>BlueDotBrigade;</Authors>
-	<Copyright>© 2025 Blue Dot Brigade</Copyright>
+	<Copyright>© 2026 Blue Dot Brigade</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
     <Description>Includes types, interfaces, and utilities that are shared by all of the Weevil assemblies.</Description>
     <IsPackable>true</IsPackable>
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="10.0.1" />
     <PackageReference Include="Text.Analyzers" Version="3.11.0-beta1.23364.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

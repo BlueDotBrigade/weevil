@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
+	using System;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -22,7 +23,6 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void FindNext_CaseSensitive_Throws()
 		{
 			var records = R.Create()
@@ -32,9 +32,8 @@
 				.GetRecords();
 
 			var activeRecord = new ActiveRecord(records);
-			var result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: true);
-
-			Assert.Fail("Should have failed because: `OVER` is uppercase.");
+			Action act1 = () => new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: true);
+			act1.Should().Throw<RecordNotFoundException>();
 		}
 
 		[TestMethod]
@@ -68,7 +67,6 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void FindNext_RegexCaseSensitive_Throws()
 		{
 			var records = R.Create()
@@ -78,9 +76,8 @@
 				.GetRecords();
 
 			var activeRecord = new ActiveRecord(records);
-			var result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: true, useRegex: true);
-
-			Assert.Fail("Should have failed because: `OVER` is uppercase.");
+			Action act2 = () => new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: true, useRegex: true);
+			act2.Should().Throw<RecordNotFoundException>();
 		}
 
 		[TestMethod]

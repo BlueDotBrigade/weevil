@@ -6,7 +6,7 @@
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
     <Version>2.12.0</Version>
     <Authors>BlueDotBrigade;</Authors>
-    <Copyright>© 2025 Blue Dot Brigade</Copyright>
+    <Copyright>© 2026 Blue Dot Brigade</Copyright>
     <Owners>Blue Dot Brigade</Owners>
     <Description>The Weevil library facilitates the parsing, filtering and analysis of log files.</Description>
     <IsPackable>true</IsPackable>
@@ -32,8 +32,9 @@
     <None Remove="Resources\Images\Weevil.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.3.4" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+    <PackageReference Include="NLog" Version="6.0.7" />
+    <PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />

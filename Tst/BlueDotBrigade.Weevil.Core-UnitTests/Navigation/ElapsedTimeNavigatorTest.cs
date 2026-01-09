@@ -9,7 +9,6 @@ namespace BlueDotBrigade.Weevil.Navigation
 	public class ElapsedTimeNavigatorTest
 	{
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void FindNext_NoMatchingRecords_Throws()
 		{
 			var records = new List<IRecord>();
@@ -24,9 +23,9 @@ namespace BlueDotBrigade.Weevil.Navigation
 			}
 
 			// All records have elapsed time of 0 (no elapsed time set)
-			Assert.AreEqual(
-				Record.Dummy, 
-				new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(100, 200));
+			// Should throw RecordNotFoundException
+			Action act = () => new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(100, 200);
+			act.Should().Throw<RecordNotFoundException>();
 		}
 
 		[TestMethod]
@@ -53,10 +52,10 @@ namespace BlueDotBrigade.Weevil.Navigation
 			}
 
 			// Find records with elapsed time between 2000ms and 4000ms
-			// Should find the record with 3000ms elapsed time (lineNumber 53)
+			// Should find the first matching record with 2000ms elapsed time (lineNumber 52)
 			var result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(2000, 4000);
 			
-			Assert.AreEqual(53, result.LineNumber);
+			Assert.AreEqual(52, result.LineNumber);
 		}
 
 		[TestMethod]
@@ -144,10 +143,10 @@ namespace BlueDotBrigade.Weevil.Navigation
 			activeRecord.SetActiveIndex(records.Count - 1);
 			
 			// Find records with elapsed time between 2000ms and 4000ms, going backwards
-			// Should find the record with 3000ms elapsed time (lineNumber 53)
+			// Should find the first matching record going backwards with 4000ms elapsed time (lineNumber 54)
 			var result = new ElapsedTimeNavigator(activeRecord).FindPrevious(2000, 4000);
 			
-			Assert.AreEqual(53, result.LineNumber);
+			Assert.AreEqual(54, result.LineNumber);
 		}
 
 		[TestMethod]

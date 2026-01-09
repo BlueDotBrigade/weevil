@@ -12,6 +12,7 @@
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.IO;
+	using BlueDotBrigade.Weevil.Gui.Navigation;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using PostSharp.Patterns.Model;
 
@@ -38,6 +39,8 @@
 		{
 			this.SourceFileDetails = new SourceFileOpenedBulletin();
 			this.FilterDetails = new FilterChangedBulletin();
+			this.BookmarkDetails = new BookmarksChangedBulletin();
+			this.RegionDetails = new RegionsChangedBulletin();
 			this.SelectionDetails = new SelectionChangedBulletin();
 			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
 			this.InsightDetails = new InsightChangedBulletin();
@@ -72,6 +75,8 @@
 			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnFileChanged(x));
 			bulletinMediator.Subscribe<ClearRecordsBulletin>(this, x => OnClearOperation(x));
 			bulletinMediator.Subscribe<FilterChangedBulletin>(this, x => OnFilterChanged(x));
+			bulletinMediator.Subscribe<BookmarksChangedBulletin>(this, x => OnBookmarksChanged(x));
+			bulletinMediator.Subscribe<RegionsChangedBulletin>(this, x => OnRegionsChanged(x));
 			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, x => OnSelectionChanged(x));
 			bulletinMediator.Subscribe<AnalysisCompleteBulletin>(this, x => OnAnalysisComplete(x));
 			bulletinMediator.Subscribe<InsightChangedBulletin>(this, x => OnNewInsight(x));
@@ -146,6 +151,22 @@
 			_filterChangedStopwatch.Restart();
 		}
 
+		private void OnBookmarksChanged(BookmarksChangedBulletin bulletin)
+		{
+			_uiDispatcher.Invoke(() =>
+			{
+				this.BookmarkDetails = bulletin;
+			});
+		}
+
+		private void OnRegionsChanged(RegionsChangedBulletin bulletin)
+		{
+			_uiDispatcher.Invoke(() =>
+			{
+				this.RegionDetails = bulletin;
+			});
+		}
+
 		private void OnSelectionChanged(SelectionChangedBulletin bulletin)
 		{
 			_uiDispatcher.Invoke(() => this.SelectionDetails = bulletin);
@@ -185,6 +206,10 @@
 		public SourceFileOpenedBulletin SourceFileDetails { get; private set; }
 
 		public FilterChangedBulletin FilterDetails { get; private set; }
+
+		public BookmarksChangedBulletin BookmarkDetails { get; private set; }
+
+		public RegionsChangedBulletin RegionDetails { get; private set; }
 
 		public SelectionChangedBulletin SelectionDetails { get; private set; }
 

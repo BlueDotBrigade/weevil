@@ -8,7 +8,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Version>2.12.0</Version>
     <Authors>BlueDotBrigade;</Authors>
-    <Copyright>© 2025 Blue Dot Brigade</Copyright>
+    <Copyright>© 2026 Blue Dot Brigade</Copyright>
     <Owners>Blue Dot Brigade</Owners>
 	<Company>Blue Dot Brigade</Company>
     <Description>PowerShell Cmdlets for the Weevil log viewer application.</Description>
@@ -33,8 +33,10 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.6" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.5.4" />
+    <PackageReference Include="NLog" Version="6.0.7" />
+    <PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>

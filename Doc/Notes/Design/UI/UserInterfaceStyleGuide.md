@@ -20,10 +20,10 @@
 
 ### Image Size
 
-| Type       | DPI | Dimensions |
-| ---------- | --- | ---------- |
-| Status Bar | 96  | 24x24      |
-| Insight    | 96  | 48x48      |
+| Type       | DPI | Dimensions | Comments                                                            |
+| ---------- | --- | ---------- | ------------------------------------------------------------------- |
+| Status Bar | 96  | 24x24      | Icons have 20% padding within the image canvas. See: Icons8 Padding |
+| Insight    | 96  | 48x48      |                                                                     |
 
 
 ## Icons
@@ -31,9 +31,9 @@
 ### General
 
 - The file name should end with a post fix which represents the icon's dimensions
-	- For example: `-24.png` is used for a 24x24 pixel icon.  
+	- For example: `-24.png` is used for a 24x24 pixel icon.
 
-### Icons Having State
+### Icon State
 
 No data available:
 

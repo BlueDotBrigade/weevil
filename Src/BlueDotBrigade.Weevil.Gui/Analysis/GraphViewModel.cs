@@ -10,6 +10,7 @@
 	using System.Runtime.CompilerServices;
 	using System.Windows;
 	using System.Windows.Input;
+	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
@@ -75,7 +76,6 @@
 			Update(true);
 
 			this.XAxisLabel = this.XAxes.First().Name;
-			this.YAxisLabel = this.YAxes.First().Name;
 		}
 
 		public IEnumerable<ISeries> Series
@@ -120,22 +120,6 @@
 				{
 					_xAxisLabel = value;
 					RaisePropertyChanged(nameof(this.XAxisLabel));
-				}
-			}
-		}
-
-		public string YAxisLabel
-		{
-			get
-			{
-				return _yAxisLabel;
-			}
-			set
-			{
-				if (_yAxisLabel != value)
-				{
-					_yAxisLabel = value;
-					RaisePropertyChanged(nameof(this.YAxisLabel));
 				}
 			}
 		}
@@ -260,11 +244,12 @@
 		private string GetDetectedData(string regularExpression, string inputString)
 		{
 			var result = string.Empty;
+			var expressions = ParseRegularExpressions(regularExpression);
 
 			try
 			{
 				if (TryGetMatch(
-					    regularExpression,
+					    expressions,
 					    inputString,
 					    out var detectedValue))
 				{
@@ -313,18 +298,14 @@
 
 				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
 				
-				// Determine number of Y-axes based on series count
 				var seriesList = this.Series.ToList();
 				if (seriesList.Count > 1)
 				{
-					// Two series: use Series1Name and Series2Name for Y-axes
 					this.YAxes = GetYAxes(this.Series1Name, this.Series2Name);
 				}
 				else
 				{
-					// Single series: use YAxisLabel for backward compatibility with existing graphs
-					// On initialization, Series1Name and YAxisLabel will be the same
-					this.YAxes = GetYAxes(isInitializing ? this.Series1Name : this.YAxisLabel);
+					this.YAxes = GetYAxes(this.Series1Name);
 				}
 			}
 			catch (MatchCountException e)
@@ -404,22 +385,72 @@
 			};
 		}
 
-		private static bool TryGetMatch(string regularExpression, string inputString, out float value)
+		private static ImmutableArray<RegularExpression> ParseRegularExpressions(string regularExpression)
+		{
+			if (string.IsNullOrWhiteSpace(regularExpression))
+			{
+				return ImmutableArray<RegularExpression>.Empty;
+			}
+
+			var expressions = new List<RegularExpression>();
+
+			var segments = regularExpression.Split(
+				new[] { Constants.FilterOrOperator },
+				StringSplitOptions.RemoveEmptyEntries);
+
+			foreach (var segment in segments)
+			{
+				var trimmedSegment = segment.Trim();
+				if (!string.IsNullOrWhiteSpace(trimmedSegment))
+				{
+					expressions.Add(new RegularExpression(trimmedSegment));
+
+					if (expressions.Count >= MaxSeriesCount)
+					{
+						break;
+					}
+				}
+			}
+
+			return expressions.ToImmutableArray();
+		}
+
+		private static void GetGroupNameOrDefault(List<string> seriesNames)
+		{
+			if (seriesNames.Count == 0)
+			{
+				seriesNames.Add($"{DefaultSeriesName} 1");
+				return;
+			}
+
+			for (var index = 0; index < seriesNames.Count; index++)
+			{
+				if (string.IsNullOrEmpty(seriesNames[index]))
+				{
+					seriesNames[index] = $"{DefaultSeriesName} {index + 1}";
+				}
+			}
+		}
+
+		private static bool TryGetMatch(ImmutableArray<RegularExpression> expressions, string inputString, out float value)
 		{
 			var wasSuccessful = false;
 			value = float.NaN;
 
-			if (!string.IsNullOrEmpty(regularExpression) &&
+			if (!expressions.IsDefaultOrEmpty &&
 			    !string.IsNullOrEmpty(inputString))
 			{
-				var expression = new RegularExpression(regularExpression);
-				IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
-
-				if (matches.Any())
+				foreach (var expression in expressions)
 				{
-					if (float.TryParse(matches.First().Value, NumberStyle, CultureInfo.InvariantCulture, out value))
+					IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
+
+					if (matches.Any())
 					{
-						wasSuccessful = true;
+						if (float.TryParse(matches.First().Value, NumberStyle, CultureInfo.InvariantCulture, out value))
+						{
+							wasSuccessful = true;
+							break;
+						}
 					}
 				}
 			}
@@ -427,29 +458,51 @@
 			return wasSuccessful;
 		}
 
-		private static bool TryGetMatchForRecord(string regularExpression, string inputString, out float value1, out float value2)
+		private static bool TryGetMatchForRecord(ImmutableArray<RegularExpression> expressions, string inputString, out float value1, out float value2)
 		{
 			value1 = float.NaN;
 			value2 = float.NaN;
 			var hasFirstValue = false;
 			var hasSecondValue = false;
 
-			if (!string.IsNullOrEmpty(regularExpression) &&
+			if (!expressions.IsDefaultOrEmpty &&
 			    !string.IsNullOrEmpty(inputString))
 			{
-				var expression = new RegularExpression(regularExpression);
-				IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
-
-				if (matches.Any())
+				if (expressions.Length == 1)
 				{
-					var values = matches.Take(MaxSeriesCount).ToList();
-					if (values.Count > 0)
+					IDictionary<string, string> matches = expressions[0].GetKeyValuePairs(inputString);
+
+					if (matches.Any())
 					{
-						hasFirstValue = float.TryParse(values[0].Value, NumberStyle, CultureInfo.InvariantCulture, out value1);
+						var values = matches.Take(MaxSeriesCount).ToList();
+						if (values.Count > 0)
+						{
+							hasFirstValue = float.TryParse(values[0].Value, NumberStyle, CultureInfo.InvariantCulture, out value1);
+						}
+						if (values.Count > 1)
+						{
+							hasSecondValue = float.TryParse(values[1].Value, NumberStyle, CultureInfo.InvariantCulture, out value2);
+						}
 					}
-					if (values.Count > 1)
+				}
+				else
+				{
+					for (var index = 0; index < expressions.Length && index < MaxSeriesCount; index++)
 					{
-						hasSecondValue = float.TryParse(values[1].Value, NumberStyle, CultureInfo.InvariantCulture, out value2);
+						IDictionary<string, string> matches = expressions[index].GetKeyValuePairs(inputString);
+
+						if (matches.Any())
+						{
+							var matchValue = matches.First().Value;
+							if (index == 0)
+							{
+								hasFirstValue = float.TryParse(matchValue, NumberStyle, CultureInfo.InvariantCulture, out value1);
+							}
+							else
+							{
+								hasSecondValue = float.TryParse(matchValue, NumberStyle, CultureInfo.InvariantCulture, out value2);
+							}
+						}
 					}
 				}
 			}
@@ -457,53 +510,104 @@
 			return hasFirstValue || hasSecondValue;
 		}
 
-		private static List<string> GetSeriesNames(string inputString, string regularExpression)
+		private static List<string> GetSeriesNames(string inputString, ImmutableArray<RegularExpression> expressions)
 		{
-			var seriesNames = new List<string>();
-
-			if (!string.IsNullOrEmpty(regularExpression) && !string.IsNullOrEmpty(inputString))
+			if (expressions.IsDefaultOrEmpty)
 			{
-				try
-				{
-					var expression = new RegularExpression(regularExpression);
-					IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
+				return new List<string> { DefaultSeriesName };
+			}
 
-					if (matches.Any())
+			var seriesCount = Math.Min(expressions.Length, MaxSeriesCount);
+			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
+
+			if (!string.IsNullOrEmpty(inputString))
+			{
+				if (expressions.Length == 1)
+				{
+					try
 					{
-						seriesNames.AddRange(matches.Take(MaxSeriesCount).Select(m => m.Key));
+						IDictionary<string, string> matches = expressions[0].GetKeyValuePairs(inputString);
+
+						if (matches.Any())
+						{
+							var names = matches.Take(MaxSeriesCount).Select(m => m.Key).ToList();
+							for (var index = 0; index < names.Count && index < seriesNames.Count; index++)
+							{
+								seriesNames[index] = names[index];
+							}
+						}
+					}
+					catch (Exception e)
+					{
+						Log.Default.Write(LogSeverityType.Warning, e, "Could not extract series names from regular expression.");
 					}
 				}
-				catch (Exception e)
+				else
 				{
-					// If there's an error getting the series names, log and return empty list
-					Log.Default.Write(LogSeverityType.Warning, e, "Could not extract series names from regular expression.");
+					for (var index = 0; index < expressions.Length && index < MaxSeriesCount; index++)
+					{
+						try
+						{
+							IDictionary<string, string> matches = expressions[index].GetKeyValuePairs(inputString);
+
+							if (matches.Any())
+							{
+								seriesNames[index] = matches.First().Key;
+							}
+						}
+						catch (Exception e)
+						{
+							Log.Default.Write(LogSeverityType.Warning, e, "Could not extract series names from regular expression.");
+						}
+					}
 				}
 			}
-
-			// Ensure we have at least a default name
-			if (seriesNames.Count == 0)
-			{
-				seriesNames.Add(DefaultSeriesName);
-			}
-
+			GetGroupNameOrDefault(seriesNames);
 			return seriesNames;
 		}
 
 		private static List<string> GetSeriesNames(ImmutableArray<IRecord> records, string regularExpression)
 		{
-			// Find the first record that matches the pattern to extract series names
-			foreach (var record in records)
+			var expressions = ParseRegularExpressions(regularExpression);
+
+			if (expressions.IsDefaultOrEmpty)
 			{
-				var seriesNames = GetSeriesNames(record.Content, regularExpression);
-				// If we found named groups (not just the default), return them
-				if (seriesNames.Count > 0 && seriesNames[0] != DefaultSeriesName)
-				{
-					return seriesNames;
-				}
+				return new List<string> { DefaultSeriesName };
 			}
 
-			// If no record matched, return default
-			return new List<string> { DefaultSeriesName };
+			var seriesCount = Math.Min(expressions.Length, MaxSeriesCount);
+			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
+
+			// Find records that match each expression to extract series names
+			foreach (var record in records)
+			{
+				var recordSeriesNames = GetSeriesNames(record.Content, expressions);
+
+				for (var index = 0; index < seriesNames.Count && index < recordSeriesNames.Count; index++)
+				{
+					if (string.IsNullOrEmpty(seriesNames[index]) && !string.IsNullOrEmpty(recordSeriesNames[index]))
+					{
+						seriesNames[index] = recordSeriesNames[index];
+					}
+				}
+
+				var hasAllNames = true;
+				for (var index = 0; index < seriesNames.Count; index++)
+				{
+					if (string.IsNullOrEmpty(seriesNames[index]))
+					{
+						hasAllNames = false;
+						break;
+					}
+				}
+
+				if (hasAllNames)
+				{
+					break;
+				}
+			}
+			GetGroupNameOrDefault(seriesNames);
+			return seriesNames;
 		}
 
 		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name)
@@ -511,6 +615,7 @@
 			var values1 = new ObservableCollection<DateTimePoint>();
 			var values2 = new ObservableCollection<DateTimePoint>();
 			var hasSecondSeries = false;
+			var expressions = ParseRegularExpressions(regularExpression);
 
 			if (records.Length > 0)
 			{
@@ -518,7 +623,7 @@
 				{
 					try
 					{
-						if (TryGetMatchForRecord(regularExpression, record.Content, out var value1, out var value2))
+						if (TryGetMatchForRecord(expressions, record.Content, out var value1, out var value2))
 						{
 							if (!float.IsNaN(value1))
 							{
@@ -541,9 +646,9 @@
 				}
 			}
 
-			// Use provided names or defaults
-			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : DefaultSeriesName;
-			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : DefaultSeriesName + DefaultSeries2Suffix;
+			// Use provided names or defaults (Series N convention)
+			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : $"{DefaultSeriesName} 1";
+			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : $"{DefaultSeriesName} 2";
 
 			var seriesList = new List<ISeries>
 			{

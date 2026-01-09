@@ -16,20 +16,21 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="BlueDotBrigade.DatenLokator">
-			<Version>2.1.0</Version>
+			<Version>2.3.0</Version>
 		</PackageReference>
 		<!-- NOTE: Upgrading FluentAssertions to v8 requires a license. #475 -->
 		<PackageReference Include="FluentAssertions" Version="[7.0.0]" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
 		<PackageReference Include="MSTest.TestAdapter">
-			<Version>3.6.3</Version>
+			<Version>4.0.2</Version>
 		</PackageReference>
 		<PackageReference Include="MSTest.TestFramework">
-			<Version>3.6.3</Version>
+			<Version>4.0.2</Version>
 		</PackageReference>
-		<PackageReference Include="NLog" Version="5.3.4" />
+		<PackageReference Include="NLog" Version="6.0.7" />
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
 		<PackageReference Include="NSubstitute" Version="5.3.0" />
-		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />

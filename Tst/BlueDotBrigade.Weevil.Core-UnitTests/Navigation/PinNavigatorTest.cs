@@ -9,7 +9,6 @@
 	public class PinNavigatorTest
 	{
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void GoToNext_NoPinnedRecords_Throws()
 		{
 			var records = new List<IRecord>();
@@ -23,9 +22,8 @@
 						"Sample log entry."));
 			}
 
-			Assert.AreEqual(
-				Record.Dummy, 
-				new PinNavigator(new ActiveRecord(records)).FindNext());
+			Action act = () => new PinNavigator(new ActiveRecord(records)).FindNext();
+			act.Should().Throw<RecordNotFoundException>();
 		}
 
 		[TestMethod]

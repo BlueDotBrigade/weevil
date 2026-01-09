@@ -31,7 +31,7 @@
 		<Authors>BlueDotBrigade;</Authors>
 		<Company>Blue Dot Brigade</Company>
 		<Description>An open-source C# library &amp; WPF application that facilitates the analysis of log file data, while automatically detecting known issues.</Description>
-		<Copyright>© 2025 Blue Dot Brigade</Copyright>
+		<Copyright>© 2026 Blue Dot Brigade</Copyright>
 		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
 		<PackageIcon>Weevil-100.png</PackageIcon>
 		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
@@ -60,10 +60,19 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="nlog.config" />
-		<None Remove="PostSharp.license" />
+		<None Remove="Resources\Icons\Bookmarks-Data-24.png" />
+		<None Remove="Resources\Icons\Bookmarks-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\Bookmarks-NoData-24.png" />
 		<None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
 		<None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
 		<None Remove="Resources\Icons\LineNumber-Data-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-Data-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-Data-24.png.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-NoData-24.png" />
+		<None Remove="Resources\Icons\Regions-Data-24.png" />
+		<None Remove="Resources\Icons\Regions-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\Regions-NoData-24.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Filter\FilterViewModel.Commands.cs">
@@ -94,7 +103,7 @@
 		</CodeAnalysisDictionary>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="FluentValidation" Version="11.11.0" />
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
 		<PackageReference Include="gong-wpf-dragdrop">
 			<Version>3.2.1</Version>
 		</PackageReference>
@@ -104,24 +113,25 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Newtonsoft.Json">
-			<Version>13.0.3</Version>
+			<Version>13.0.4</Version>
 		</PackageReference>
 		<PackageReference Include="NLog">
-			<Version>5.3.4</Version>
+			<Version>6.0.7</Version>
 		</PackageReference>
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
 		<PackageReference Include="PostSharp">
-			<Version>2024.1.6</Version>
+			<Version>2026.0.5</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>2024.1.6</Version>
+			<Version>2026.0.5</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="System.Collections.Immutable">
-			<Version>9.0.0</Version>
+			<Version>10.0.1</Version>
 		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-		<PackageReference Include="System.Management" Version="9.0.0" />
+		<PackageReference Include="System.Management" Version="10.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
@@ -129,10 +139,18 @@
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<Resource Include="Resources\Icons\Bookmarks-Data-24.png" />
+		<Resource Include="Resources\Icons\Bookmarks-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\Bookmarks-NoData-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-Data-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-NoData-24.png" />
+		<Resource Include="Resources\Icons\Regions-Data-24.png" />
+		<Resource Include="Resources\Icons\Regions-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\Regions-NoData-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-Data-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-DataRequiresAttention-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-NoData-24.png" />
-		<Resource Include="Resources\Icons\LogEntry-Fatal.png" />
 		<Resource Include="Resources\Icons\Records-Pinned.png" />
 	</ItemGroup>
 	<ItemGroup>
