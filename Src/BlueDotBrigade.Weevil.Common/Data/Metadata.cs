@@ -23,7 +23,7 @@
 		public Metadata()
 		{
 			_comment = string.Empty;
-			_elapsedTime = TimeSpan.Zero;
+			_elapsedTime = ElapsedTimeUnknown;
 			_isPinned = false;
 			_isFlagged = false;
 			_wasGeneratedByUi = false;
