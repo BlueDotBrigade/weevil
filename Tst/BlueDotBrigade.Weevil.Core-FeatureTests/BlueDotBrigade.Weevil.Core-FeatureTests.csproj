@@ -43,18 +43,38 @@
 			<Link>Properties\DomainSpecificTerminology.xml</Link>
 		</Content>
 		<Content Include="..\..\reqnroll.json" Link="reqnroll.json" />
-		<Content Include=".Daten\.Global\Droid.log.xml" />
+		<Content Include=".Daten\.Global\Droid.log.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 	<ItemGroup>
-          <None Include=".Daten\.Global\Droid.log" />
-          <None Include=".Daten\.Global\Empty.log" />
-          <None Include=".Daten\Analysis\StableValueAnalyzer.log" />
-          <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
-          <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
-	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log" />
-	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log.xml" />
-	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log" />
-	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log.xml" />
+          <None Include=".Daten\.Global\Droid.log">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+          <None Include=".Daten\.Global\Empty.log">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+          <None Include=".Daten\Analysis\StableValueAnalyzer.log">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+          <None Include=".Daten\OpeningFileShould\EmptyFile.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+          <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log.xml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
+	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log.xml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </None>
 	  <None Include="OLD\FilteringOld.cs" />
 	  <None Include="OLD\RecordContentValidator.cs" />
 	</ItemGroup>
