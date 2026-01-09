@@ -110,6 +110,7 @@ namespace BlueDotBrigade.Weevil
 			lock (_bookmarkPadlock)
 			{
 				_bookmarks.Clear();
+				_nextSequenceNumber = 1;  // Reset sequence counter when clearing all bookmarks
 			}
 		}
 
@@ -122,6 +123,8 @@ namespace BlueDotBrigade.Weevil
 				if (bookmark != null)
 				{
 					_bookmarks.Remove(bookmark);
+					// Recalculate sequence number based on remaining bookmarks
+					_nextSequenceNumber = CalculateNextSequenceNumber(_bookmarks.ToImmutableArray());
 					return true;
 				}
 				return false;

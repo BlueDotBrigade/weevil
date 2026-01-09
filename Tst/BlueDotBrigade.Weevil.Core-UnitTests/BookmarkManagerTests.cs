@@ -73,6 +73,58 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                 }
 
                 [TestMethod]
+                public void Clear_All_ResetsSequenceNumber()
+                {
+                        // Arrange
+                        _bookmarkManager.CreateFromSelection(string.Empty, 1);  // Creates "1"
+                        _bookmarkManager.CreateFromSelection(string.Empty, 2);  // Creates "2"
+                        _bookmarkManager.Clear();
+
+                        // Act
+                        _bookmarkManager.CreateFromSelection(string.Empty, 3);
+
+                        // Assert - Should restart from 1 after clear
+                        _bookmarkManager.Bookmarks.Length.Should().Be(1);
+                        _bookmarkManager.Bookmarks[0].Name.Should().Be("1");
+                }
+
+                [TestMethod]
+                public void Clear_SpecificBookmark_RecalculatesSequence()
+                {
+                        // Arrange
+                        _bookmarkManager.CreateFromSelection("1", 10);
+                        _bookmarkManager.CreateFromSelection("2", 20);
+                        _bookmarkManager.CreateFromSelection("3", 30);
+
+                        // Act - Remove bookmark "2"
+                        _bookmarkManager.Clear(20);
+                        _bookmarkManager.CreateFromSelection(string.Empty, 40);
+
+                        // Assert - Sequence should continue from max remaining (3) + 1 = 4
+                        _bookmarkManager.Bookmarks.Length.Should().Be(3);
+                        _bookmarkManager.Bookmarks[2].Name.Should().Be("4");
+                }
+
+                [TestMethod]
+                public void Clear_AllSequentialBookmarks_ResetsToOne()
+                {
+                        // Arrange
+                        _bookmarkManager.CreateFromSelection("1", 10);
+                        _bookmarkManager.CreateFromSelection("2", 20);
+                        _bookmarkManager.CreateFromSelection("3", 30);
+
+                        // Act - Remove all sequential bookmarks one by one
+                        _bookmarkManager.Clear(30);  // Remove "3"
+                        _bookmarkManager.Clear(20);  // Remove "2"
+                        _bookmarkManager.Clear(10);  // Remove "1"
+                        _bookmarkManager.CreateFromSelection(string.Empty, 40);
+
+                        // Assert - Should restart from 1 when all numeric bookmarks are removed
+                        _bookmarkManager.Bookmarks.Length.Should().Be(1);
+                        _bookmarkManager.Bookmarks[0].Name.Should().Be("1");
+                }
+
+                [TestMethod]
                 public void CreateFromSelection_EmptyName_UsesSequentialNumber()
                 {
                         // Arrange & Act
