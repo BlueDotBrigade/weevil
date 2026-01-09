@@ -980,7 +980,8 @@
 		{
 			_dialogBox.ShowGraph(
 				_engine.Selector.GetSelected(),
-				_inclusiveFilter);
+				_inclusiveFilter,
+				_engine.SourceFilePath);
 		}
 
 		private void ForceGarbageCollection()
@@ -1883,13 +1884,21 @@
 			{
 				if (_engine.Selector.Selected.Count == 1)
 				{
-					if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var bookmarkName))
-					{
-						var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
-						_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
-						RaiseBookmarksChanged();
-						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
-					}
+					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+					
+					// Show dialog for optional bookmark name, but create bookmark even if user cancels
+					string bookmarkName = string.Empty;
+					_dialogBox.TryShowUserPrompt(
+						"Create Bookmark", 
+						"Name (leave empty for default)", 
+						@"^[a-zA-Z0-9\-]{0,12}$",  // Allow 0-12 characters (empty is valid)
+						"Must be 0 to 12 characters: letters, numbers, or hyphens.", 
+						out bookmarkName);
+					
+					// Create bookmark regardless of dialog result (empty name gets sequential number)
+					_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+					RaiseBookmarksChanged();
+					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 				}
 				else
 				{
