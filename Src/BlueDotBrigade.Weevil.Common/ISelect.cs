@@ -36,17 +36,7 @@
 		ISelect Unselect(IList<IRecord> records);
 		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType);
 		ImmutableArray<IRecord> ClearAll();
-		/// <summary>
-		/// Returns the selected records.
-		/// </summary>
-		/// <param name="oneIsMany">When true and exactly 1 record is selected, returns all visible records instead. Default is false.</param>
-		/// <remarks>
-		/// <list type="bullet">
-		/// <item>When 0 records are selected, returns all visible (filtered) records.</item>
-		/// <item>When 1 or more records are selected, returns exactly those selected records.</item>
-		/// </list>
-		/// </remarks>
-		ImmutableArray<IRecord> GetSelected(bool oneIsMany = false);
+		ImmutableArray<IRecord> GetSelected();
 		void ToggleIsPinned();
 	}
 }
