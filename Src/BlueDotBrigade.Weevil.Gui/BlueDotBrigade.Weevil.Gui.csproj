@@ -61,9 +61,19 @@
 	<ItemGroup>
 		<None Remove="nlog.config" />
 		<None Remove="PostSharp.license" />
+		<None Remove="Resources\Icons\Bookmarks-Data-24.png" />
+		<None Remove="Resources\Icons\Bookmarks-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\Bookmarks-NoData-24.png" />
 		<None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
 		<None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
 		<None Remove="Resources\Icons\LineNumber-Data-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-Data-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-Data-24.png.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-NoData-24.png" />
+		<None Remove="Resources\Icons\Regions-Data-24.png" />
+		<None Remove="Resources\Icons\Regions-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\Regions-NoData-24.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Filter\FilterViewModel.Commands.cs">
@@ -129,10 +139,18 @@
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<Resource Include="Resources\Icons\Bookmarks-Data-24.png" />
+		<Resource Include="Resources\Icons\Bookmarks-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\Bookmarks-NoData-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-Data-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-NoData-24.png" />
+		<Resource Include="Resources\Icons\Regions-Data-24.png" />
+		<Resource Include="Resources\Icons\Regions-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\Regions-NoData-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-Data-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-DataRequiresAttention-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-NoData-24.png" />
-		<Resource Include="Resources\Icons\LogEntry-Fatal.png" />
 		<Resource Include="Resources\Icons\Records-Pinned.png" />
 	</ItemGroup>
 	<ItemGroup>

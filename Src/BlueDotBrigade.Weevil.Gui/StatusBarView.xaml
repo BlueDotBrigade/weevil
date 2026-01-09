@@ -155,14 +155,15 @@
             <Separator Grid.Column="7" />
             <StatusBarItem Grid.Column="8" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Number of bookmarks created." />
-                    <TextBox Text="{Binding FilterDetails.BookmarkCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                    <Image Source="/Resources/Icons/Bookmarks-Data-24.png" ToolTip="Number of bookmarks created." />
+                    <TextBox Text="{Binding BookmarkDetails.BookmarkCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Number of bookmarks created."
                              Style="{StaticResource StatusBarTextBox}"/>
-                    <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Number of regions created." />
-                    <TextBox Text="{Binding FilterDetails.RegionCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                    <Image Source="/Resources/Icons/Regions-Data-24.png" ToolTip="Number of regions created." />
+                    <TextBox Text="{Binding RegionDetails.RegionCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
                              ToolTip="Number of regions created."
                              Style="{StaticResource StatusBarTextBox}"/>
+                    <Separator />
                     <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Number of warning messages in filter results." />
                     <TextBox Text="{Binding FilterDetails.SeverityMetrics[Warnings], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of warning messages in filter results."
@@ -183,7 +184,19 @@
                     <TextBox Text="{Binding FilterDetails.SeverityMetrics[Errors], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of error messages in filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
-                    <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Number of critical messages in filter results." />
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Resources/Icons/LogEntry-Fatal-DataRequiresAttention-24.png" />
+                                <Setter Property="ToolTip" Value="Number of critical messages in filter results."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FilterDetails.SeverityMetrics[Fatals], FallbackValue=0, TargetNullValue=0, Mode=OneWay}" Value="0">
+                                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-Fatal-Data-24.png"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                     <TextBox Text="{Binding FilterDetails.SeverityMetrics[Fatals], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of critical messages in filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
