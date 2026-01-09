@@ -51,7 +51,7 @@
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 
-		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/EKCf6T/4");
+		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/dRrRat/1");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
@@ -95,6 +95,10 @@
 		private string _findText;
 		private bool _findIsCaseSensitive;
 		private bool _findUseRegex;
+		private bool _findSearchComments;
+		private bool _findSearchElapsedTime;
+		private int? _findMinElapsedMs;
+		private int? _findMaxElapsedMs;
 
                 private FilterType _currentfilterType;
                 private FilterType _filterExpressionType;
@@ -117,8 +121,10 @@
 
 			this.IsLogFileOpen = false;
 			this.CanOpenLogFile = true;
+			this.AreInsightsReady = false;
 
-			this.IncludePinned = true;
+			this.FilterOptionsViewModel = new FilterOptionsViewModel();
+			this.FilterOptionsViewModel.OptionsChanged += OnFilterOptionsChanged;
 
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
@@ -132,12 +138,8 @@
 			_findText = string.Empty;
 			_findIsCaseSensitive = false;
 
-                        this.IsManualFilter = false;
-                        _filterExpressionType = FilterType.RegularExpression;
-			this.IsFilterCaseSensitive = true;
+                        _filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
 			this.AreFilterOptionsVisible = false;
-			this.IncludeDebugRecords = true;
-			this.IncludeTraceRecords = true;
 
 			this.IsFilterToolboxEnabled = false;
 
@@ -157,6 +159,9 @@
 			_tableOfContents = new TableOfContents();
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
+
+			// Subscribe to navigation requests from the Dashboard
+			_bulletinMediator.Subscribe<NavigateToInsightRecordBulletin>(this, OnNavigateToInsightRecord);
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -206,10 +211,46 @@
 		public bool IsLogFileOpen { get; private set; }
 
 		public bool CanOpenLogFile { get; private set; }
-		public bool IncludePinned { get; set; }
-		public bool IsManualFilter { get; set; }
+		
+		public bool AreInsightsReady { get; private set; }
 
-		public bool IsFilterCaseSensitive { get; set; }
+		[SafeForDependencyAnalysis]
+		public bool IsDashboardEnabled
+		{
+			get
+			{
+				if (Depends.Guard)
+				{
+					Depends.On(this.IsMenuEnabled, this.AreInsightsReady);
+				}
+
+				return this.IsMenuEnabled && this.AreInsightsReady;
+			}
+		}
+		
+		public bool IncludePinned
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludePinned ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludePinned = value;
+				}
+			}
+		}
+
+		public bool IsFilterCaseSensitive
+		{
+			get => this.FilterOptionsViewModel?.Options.IsFilterCaseSensitive ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IsFilterCaseSensitive = value;
+				}
+			}
+		}
 
 		public bool IsFilterInProgress { get; private set; }
 
@@ -230,14 +271,6 @@
 				if (value != _inclusiveFilter)
 				{
 					_inclusiveFilter = value;
-
-					// Automatic filtering?
-                                        if (!this.IsManualFilter)
-                                        {
-                                                var filterCriteria = new FilterCriteria(value, _exclusiveFilter, GetFilterConfiguration());
-
-                                                FilterAsynchronously(this.FilterExpressionType, filterCriteria);
-                                        }
 				}
 			}
 		}
@@ -255,14 +288,6 @@
 				if (value != _exclusiveFilter)
 				{
 					_exclusiveFilter = value;
-
-					// Automatic filtering?
-                                        if (!this.IsManualFilter)
-                                        {
-                                                var filterCriteria = new FilterCriteria(_inclusiveFilter, value, GetFilterConfiguration());
-
-                                                FilterAsynchronously(this.FilterExpressionType, filterCriteria);
-                                        }
 				}
 			}
 		}
@@ -293,30 +318,50 @@
 
 		public int ActiveRecordIndex { get; set; }
 
-		public bool IncludeDebugRecords { get; set; }
+		public bool IncludeDebugRecords
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludeDebugRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeDebugRecords = value;
+				}
+			}
+		}
 
-                public bool IncludeTraceRecords { get; set; }
+                public bool IncludeTraceRecords
+                {
+			get => this.FilterOptionsViewModel?.Options.IncludeTraceRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeTraceRecords = value;
+				}
+			}
+		}
 
                 public FilterType FilterExpressionType
                 {
-                        get => _filterExpressionType;
+                        get => this.FilterOptionsViewModel?.Options.FilterExpressionType ?? _filterExpressionType;
                         set
                         {
                                 if (_filterExpressionType != value)
                                 {
                                         _filterExpressionType = value;
-                                        RaisePropertyChanged(nameof(this.FilterExpressionType));
-
-                                        if (!this.IsManualFilter)
+                                        if (this.FilterOptionsViewModel?.Options != null)
                                         {
-                                                var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
-                                                FilterAsynchronously(_filterExpressionType, filterCriteria);
+                                                this.FilterOptionsViewModel.Options.FilterExpressionType = value;
                                         }
+                                        RaisePropertyChanged(nameof(this.FilterExpressionType));
                                 }
                         }
                 }
 
 		public bool IsProcessingLongOperation { get; private set; }
+
+		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
 		[SafeForDependencyAnalysis]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
@@ -370,6 +415,16 @@
 		private void OnFileDropped(object sender, DroppedFileEventArgs e)
 		{
 			OpenCompressedAsync(e.FilePath);
+		}
+
+		private void OnFilterOptionsChanged(object sender, EventArgs e)
+		{
+			// Update the backing field for FilterExpressionType
+			this._filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
+
+			// Re-apply the filter with the new filter options
+			var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
+			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
 
 		protected void RaisePropertyChanged(string name)
@@ -457,6 +512,7 @@
 			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
+			this.AreInsightsReady = false;
 
 			var openAsResult = new OpenAsResult();
 			var wasOpenRequested = false;
@@ -565,7 +621,8 @@
 							}
 						});
 
-						this.IsFilterToolboxEnabled = true;
+						// Marshal UI updates to dispatcher to avoid cross-thread issues
+						_uiDispatcher.Invoke(() => this.IsFilterToolboxEnabled = true);
 
 						Log.Default.Write(
 							LogSeverityType.Information,
@@ -585,11 +642,19 @@
 					}
 					finally
 					{
-						this.IsProcessingLongOperation = false;
-						this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+						// Immediately enable UI on dispatcher so menus become actionable without waiting for insights
+						_uiDispatcher.Invoke(() =>
+						{
+							this.IsProcessingLongOperation = false;      // show records
+							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+							this.CanOpenLogFile = true;                  // enable menus now
+							RaisePropertyChanged(nameof(IsMenuEnabled));  // force re-evaluation
+							CommandManager.InvalidateRequerySuggested();  // refresh commands
+						});
 					}
 				}).ContinueWith((x) =>
 					{
+						// Continue computing insights asynchronously (UI is already enabled)
 						if (_engine.Navigate.TableOfContents.Sections.Count == 0)
 						{
 							_engine.Navigate.RebuildTableOfContents();
@@ -604,9 +669,11 @@
 							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
 
+						// Set insights ready and requery commands after insights are ready
 						_uiDispatcher.Invoke(() =>
 						{
-							this.CanOpenLogFile = true;
+							this.AreInsightsReady = true;
+							RaisePropertyChanged(nameof(IsDashboardEnabled));
 							CommandManager.InvalidateRequerySuggested();
 						});
 					}
@@ -905,7 +972,7 @@
 			}
 			else
 			{
-				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights);
+				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights, _bulletinMediator);
 			}
 		}
 
@@ -913,7 +980,8 @@
 		{
 			_dialogBox.ShowGraph(
 				_engine.Selector.GetSelected(),
-				_inclusiveFilter);
+				_inclusiveFilter,
+				_engine.SourceFilePath);
 		}
 
 		private void ForceGarbageCollection()
@@ -1032,22 +1100,64 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(_findText, out _findIsCaseSensitive, out var findNext, out _findUseRegex, out _findText))
+			if (_dialogBox.TryShowFind(
+				_findText, 
+				out _findIsCaseSensitive, 
+				out var findNext, 
+				out _findUseRegex, 
+				out _findText,
+				out _findSearchElapsedTime,
+				out _findMinElapsedMs,
+				out _findMaxElapsedMs,
+				out _findSearchComments))
 			{
-				if (findNext)
+				if (_findSearchElapsedTime)
 				{
-					FindNext();
+					if (findNext)
+					{
+						FindNextElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+					}
+					else
+					{
+						FindPreviousElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+					}
+				}
+				else if (_findSearchComments)
+				{
+					if (findNext)
+					{
+						FindNextComment();
+					}
+					else
+					{
+						FindPreviousComment();
+					}
 				}
 				else
 				{
-					FindPrevious();
+					if (findNext)
+					{
+						FindNext();
+					}
+					else
+					{
+						FindPrevious();
+					}
 				}
 			}
 		}
 
 		private void FindNext()
 		{
-			if (!string.IsNullOrWhiteSpace(_findText))
+			if (_findSearchElapsedTime)
+			{
+				FindNextElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+			}
+			else if (_findSearchComments)
+			{
+				FindNextComment();
+			}
+			else if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
 					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
@@ -1060,7 +1170,15 @@
 
 		private void FindPrevious()
 		{
-			if (!string.IsNullOrWhiteSpace(_findText))
+			if (_findSearchElapsedTime)
+			{
+				FindPreviousElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+			}
+			else if (_findSearchComments)
+			{
+				FindPreviousComment();
+			}
+			else if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
 					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
@@ -1069,6 +1187,58 @@
 						.PreviousContent(_findText, _findIsCaseSensitive, _findUseRegex)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
+		}
+
+		private void FindNextComment()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in comments.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
+					() => _engine
+						.Navigate
+						.NextCommentWithText(_findText, _findIsCaseSensitive, _findUseRegex)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		private void FindPreviousComment()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in comments.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
+					() => _engine
+						.Navigate
+						.PreviousCommentWithText(_findText, _findIsCaseSensitive, _findUseRegex)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		private void FindNextElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			var minDesc = minMilliseconds.HasValue ? minMilliseconds.Value.ToString() : "none";
+			var maxDesc = maxMilliseconds.HasValue ? maxMilliseconds.Value.ToString() : "none";
+			
+			SearchFilterResults(
+				$"Unable to find a record with the specified elapsed time in the search results.\r\n\r\nMinimum (ms): {minDesc}\r\nMaximum (ms): {maxDesc}",
+				() => _engine
+					.Navigate
+					.NextElapsedTime(minMilliseconds, maxMilliseconds)
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		private void FindPreviousElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			var minDesc = minMilliseconds.HasValue ? minMilliseconds.Value.ToString() : "none";
+			var maxDesc = maxMilliseconds.HasValue ? maxMilliseconds.Value.ToString() : "none";
+			
+			SearchFilterResults(
+				$"Unable to find a record with the specified elapsed time in the search results.\r\n\r\nMinimum (ms): {minDesc}\r\nMaximum (ms): {maxDesc}",
+				() => _engine
+					.Navigate
+					.PreviousElapsedTime(minMilliseconds, maxMilliseconds)
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoTo()
@@ -1131,6 +1301,103 @@
 						}
 					}
 				}
+			}
+		}
+
+		private void OnNavigateToInsightRecord(NavigateToInsightRecordBulletin bulletin)
+		{
+			if (bulletin?.RelatedRecords != null && bulletin.RelatedRecords.Length > 0)
+			{
+				// Option 6: Flag insight records and add @Flagged to filter
+				
+				// Step 1: Clear all existing flags
+				foreach (var record in _engine.Records)
+				{
+					record.Metadata.IsFlagged = false;
+				}
+
+				// Step 2: Flag all insight-related records and count successfully flagged
+				var insightRecordCount = bulletin.RelatedRecords.Length;
+				var successfullyFlaggedCount = 0;
+
+				// Create a set of line numbers from the insight for efficient lookup
+				var insightLineNumbers = new HashSet<int>();
+				foreach (var record in bulletin.RelatedRecords)
+				{
+					insightLineNumbers.Add(record.LineNumber);
+				}
+
+				// Flag records that are still available in memory
+				foreach (var record in _engine.Records)
+				{
+					if (insightLineNumbers.Contains(record.LineNumber))
+					{
+						record.Metadata.IsFlagged = true;
+						successfullyFlaggedCount++;
+					}
+				}
+
+				// Check if any records were missing and notify user
+				if (successfullyFlaggedCount < insightRecordCount)
+				{
+					var missingRecordCount = insightRecordCount - successfullyFlaggedCount;
+					var message = $"{missingRecordCount} insight-related record(s) were cleared and could not be flagged.";
+
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						$"Insight navigation: {missingRecordCount} out of {insightRecordCount} records are no longer available in memory.");
+
+					_uiDispatcher.Invoke(() =>
+					{
+						MessageBox.Show(
+							$"Some insight-related records were cleared and are no longer available. Flagging has been adjusted.\n\n{message}",
+							"Records Not Available",
+							MessageBoxButton.OK,
+							MessageBoxImage.Information);
+					});
+				}
+
+				// Step 3: Append @Flagged to include filter
+				var currentIncludeFilter = _inclusiveFilter ?? string.Empty;
+				string newIncludeFilter;
+
+				// Check if @Flagged already exists in the filter (case-insensitive)
+				if (currentIncludeFilter.Contains("@Flagged", StringComparison.OrdinalIgnoreCase))
+				{
+					// Already has @Flagged, no need to append
+					newIncludeFilter = currentIncludeFilter;
+				}
+				else if (string.IsNullOrWhiteSpace(currentIncludeFilter))
+				{
+					// Empty filter, just set to @Flagged
+					newIncludeFilter = "@Flagged";
+				}
+				else
+				{
+					// Append ||@Flagged to existing filter
+					newIncludeFilter = $"{currentIncludeFilter}||@Flagged";
+				}
+
+				// Step 4: Apply the filter (this will trigger FilterAsynchronously via the property setter)
+				_uiDispatcher.Invoke(() =>
+				{
+					this.InclusiveFilter = newIncludeFilter;
+				});
+
+				// Step 5: Navigate to the first record (after a brief delay to allow filter to apply)
+				Task.Delay(500).ContinueWith(_ =>
+				{
+					_uiDispatcher.Invoke(() =>
+					{
+						var firstRecord = bulletin.RelatedRecords[0];
+						SearchFilterResults(
+							$"Unable to find the insight's related record in the search results. Line={firstRecord.LineNumber}",
+							() => _engine
+								.Navigate
+								.GoTo(firstRecord.LineNumber, RecordSearchType.NearestNeighbor)
+								.ToIndexUsing(_engine.Filter.Results));
+					});
+				});
 			}
 		}
 
@@ -1517,7 +1784,9 @@
 				SelectedRecordCount = _engine.Selector.Selected.Count,
 				VisibleRecordCount = this.VisibleItems?.Count ?? 0,
 				SeverityMetrics = _engine.Filter.GetMetrics(),
-				ExecutionTime = _engine.Filter.FilterExecutionTime
+				ExecutionTime = _engine.Filter.FilterExecutionTime,
+				BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+				RegionCount = _engine.Regions.Regions.Length
 			});
 
 			// Remember: filtering can impact the number of selected records.
@@ -1555,26 +1824,7 @@
 
 		private Dictionary<string, object> GetFilterConfiguration()
 		{
-			var configuration = new Dictionary<string, object>();
-
-			if (this.IncludePinned)
-			{
-				configuration.Add("IncludePinned", this.IncludePinned);
-			}
-
-			configuration.Add("IsCaseSensitive", this.IsFilterCaseSensitive);
-
-			if (!this.IncludeDebugRecords)
-			{
-				configuration.Add("HideDebugRecords", true);
-			}
-
-			if (!this.IncludeTraceRecords)
-			{
-				configuration.Add("HideTraceRecords", true);
-			}
-
-			return configuration;
+			return this.FilterOptionsViewModel.Options.ToConfiguration();
 		}
 
 		private void AddRegion()
@@ -1636,13 +1886,21 @@
 			{
 				if (_engine.Selector.Selected.Count == 1)
 				{
-					if (_dialogBox.TryShowUserPrompt("Create Bookmark", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var bookmarkName))
-					{
-						var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
-						_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
-						RaiseBookmarksChanged();
-						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
-					}
+					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+					
+					// Show dialog for optional bookmark name, but create bookmark even if user cancels
+					string bookmarkName = string.Empty;
+					_dialogBox.TryShowUserPrompt(
+						"Create Bookmark", 
+						"Name (leave empty for default)", 
+						@"^[a-zA-Z0-9\-]{0,12}$",  // Allow 0-12 characters (empty is valid)
+						"Must be 0 to 12 characters: letters, numbers, or hyphens.", 
+						out bookmarkName);
+					
+					// Create bookmark regardless of dialog result (empty name gets sequential number)
+					_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+					RaiseBookmarksChanged();
+					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 				}
 				else
 				{

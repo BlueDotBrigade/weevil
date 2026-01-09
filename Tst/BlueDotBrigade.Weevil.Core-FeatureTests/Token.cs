@@ -36,6 +36,8 @@
 
 		public Dictionary<string, object> Configuration { get; set; }
 
+		public Analysis.IInsight LastInsight { get; set; }
+
 		public FilterCriteria FilterCriteria => new FilterCriteria(
 			this.IncludeFilter, 
 			this.ExcludeFilter, 

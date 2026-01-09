@@ -10,10 +10,17 @@
 	internal class DataTransitionAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DataTransitionAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DataTransitionAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectDataTransition.ToString();
@@ -33,19 +40,41 @@
 		{
 			var count = 0;
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
-			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
-				{
-					var previousState = new Dictionary<string, string>();
-					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+			// Get default regex from current inclusive filter
+			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
 
-					foreach (IRecord record in records)
-					{
-						if (canUpdateMetadata)
-						{
-							record.Metadata.IsFlagged = false;
-						}
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+			{
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Parse expressions with alias expansion and || support
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
+			{
+				return new Results(0);
+			}
+
+			var previousState = new Dictionary<string, string>();
+
+			foreach (IRecord record in records)
+				{
+					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -65,11 +94,11 @@
 
 												count++;
 
-												if (canUpdateMetadata)
-												{
-													record.Metadata.IsFlagged = true;
-													record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
-												}
+												AnalysisHelper.UpdateRecordMetadata(
+													record,
+													true,
+													$"{parameterName}: {currentState.Value}",
+													canUpdateMetadata);
 
 												previousState[currentState.Key] = currentState.Value;
 											}
@@ -80,12 +109,11 @@
 
 											count++;
 
-											if (canUpdateMetadata)
-											{
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {currentState.Value}");
-											}
-
+											AnalysisHelper.UpdateRecordMetadata(
+												record,
+												true,
+												$"{parameterName}: {currentState.Value}",
+												canUpdateMetadata);
 
 											previousState.Add(currentState.Key, currentState.Value);
 										}
@@ -93,9 +121,7 @@
 								}
 							}
 						}
-					}
 				}
-			}
 
 			return new Results(count);
 		}

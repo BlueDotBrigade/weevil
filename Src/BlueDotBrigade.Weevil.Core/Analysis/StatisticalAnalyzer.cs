@@ -19,11 +19,18 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		private readonly IReadOnlyList<ICalculator> _calculators;
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 		private readonly IDictionary<string, double> _results;
 
 		public StatisticalAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public StatisticalAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 
 			_calculators = new List<ICalculator>
 			{
@@ -59,47 +66,72 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var timestamps = new List<DateTime>();
 			var values = new List<double>();
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			// Get default regex from current inclusive filter
+			var defaultRegex = Timeline.AnalysisHelper.GetDefaultRegex(_filterStrategy);
+
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
 			{
-				// Problem: There can be multiple RegEx, each with 0 or more capturing groups.
-				// To simplify the implementation, assume that there is only one RegEx group.
+				// User cancelled
+				return new Results(0);
+			}
 
-				ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
-				if (expressions.Length != 1)
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Parse expressions with alias expansion and || support
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
+			{
+				return new Results(0);
+			}
+
+			foreach (IRecord record in records)
+			{
+				// Collect all key-value pairs from all expressions for this record
+				// For statistical analysis, we take the first numeric value found
+				double? foundValue = null;
+
+				foreach (RegularExpression regexExpression in expressions)
 				{
-					throw new MatchCountException(
-						"(include filter)",
-						$"The include filter should only have 1 expression.");
-				}
-
-				RegularExpression expression = expressions.First();
-
-				foreach (IRecord record in records)
-				{
-					IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
+					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
 
 					if (keyValuePairs.Count == 1)
 					{
 						if (double.TryParse(keyValuePairs.First().Value, out var value))
 						{
-							count++;
-
-							timestamps.Add(record.CreatedAt);
-							values.Add(value);
-
-							if (canUpdateMetadata)
-							{
-								record.Metadata.IsFlagged = false;
-							}
+							foundValue = value;
+							break; // Take first numeric value found
 						}
 					}
 					else if (keyValuePairs.Count >= 2)
 					{
 						throw new MatchCountException(
-							"(include filter)",
-							$"The include filter's regular expression should have only 1 matching group.");
+							"(custom regex)",
+							$"The regular expression should have only 1 matching group.");
 					}
+				}
 
+				if (foundValue.HasValue)
+				{
+					count++;
+					timestamps.Add(record.CreatedAt);
+					values.Add(foundValue.Value);
+
+					if (canUpdateMetadata)
+					{
+						record.Metadata.IsFlagged = false;
+					}
 				}
 			}
 

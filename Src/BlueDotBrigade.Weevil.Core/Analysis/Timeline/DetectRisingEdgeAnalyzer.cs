@@ -12,33 +12,23 @@
 	internal class DetectRisingEdgeAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectRisingEdgeAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectRisingEdgeAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectRisingEdges.ToString();
 
 		public string DisplayName => "Detect Rising Edges";
 
-		private static AnalysisOrder GetAnalysisOrder(IUserDialog userDialog)
-		{
-			var userInput = userDialog.ShowUserPrompt(
-				"Analysis Details",
-				"Analysis order (Ascending/Descending):",
-				"Ascending");
-
-			if (Enum.TryParse(userInput, true, out AnalysisOrder direction))
-			{
-				return direction;
-			}
-
-			throw new ArgumentOutOfRangeException(
-				$"{nameof(direction)}",
-				direction,
-				"Unable to perform operation. The analysis order was expected to be either: Ascending or Descending");
-		}
 
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
@@ -53,25 +43,47 @@
 		{
 			var count = 0;
 
-			var analysisOrder = GetAnalysisOrder(userDialog);
+			// Get default regex from current inclusive filter
+			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
 			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Parse expressions with alias expansion and || support
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
+			{
+				return new Results(0);
+			}
+
+			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
+
+			var previous = new Dictionary<string, string>();
+
+			ImmutableArray<IRecord> sortedRecords = analysisOrder == AnalysisOrder.Ascending
+					? records
+					: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
+
+				foreach (IRecord record in sortedRecords)
 				{
-					var previous = new Dictionary<string, string>();
-					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
-
-					ImmutableArray<IRecord> sortedRecords = analysisOrder == AnalysisOrder.Ascending
-						? records
-						: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
-
-					foreach (IRecord record in sortedRecords)
-					{
-						if (canUpdateMetadata)
-						{
-							record.Metadata.IsFlagged = false;
-						}
+					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
 						foreach (RegularExpression expression in expressions)
 						{
@@ -94,11 +106,11 @@
 
 													count++;
 
-													if (canUpdateMetadata)
-													{
-														record.Metadata.IsFlagged = true;
-														record.Metadata.UpdateUserComment($"{parameterName}: {previous[current.Key]} => {current.Value}");
-													}
+													AnalysisHelper.UpdateRecordMetadata(
+														record,
+														true,
+														$"{parameterName}: {previous[current.Key]} => {current.Value}",
+														canUpdateMetadata);
 												}
 												previous[current.Key] = current.Value;
 											}
@@ -109,11 +121,11 @@
 
 											count++;
 
-											if (canUpdateMetadata)
-											{
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {current.Value}");
-											}
+													AnalysisHelper.UpdateRecordMetadata(
+														record,
+														true,
+														$"{parameterName}: {current.Value}",
+														canUpdateMetadata);
 											
 											previous.Add(current.Key, current.Value);
 										}
@@ -121,9 +133,7 @@
 								}
 							}
 						}
-					}
 				}
-			}
 
 			return new Results(count);
 		}

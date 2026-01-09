@@ -56,5 +56,29 @@
 
 			Assert.IsTrue(originalContent.Length > formattedResult.Length);
 		}
+
+		[TestMethod]
+		public void Format_EndOfInnerException_ReturnsCompressedCallStack()
+		{
+			var originalContent = new Daten().AsString();
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
+			record.Metadata.IsMultiLine = true;
+
+			var formattedResult = new SimpleCallStackFormatter().Format(record);
+
+			Assert.IsFalse(formattedResult.Contains("End of inner exception"));
+		}
+
+		[TestMethod]
+		public void Format_EndOfStackTrace_ReturnsCompressedCallStack()
+		{
+			var originalContent = new Daten().AsString();
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
+			record.Metadata.IsMultiLine = true;
+
+			var formattedResult = new SimpleCallStackFormatter().Format(record);
+
+			Assert.IsFalse(formattedResult.Contains("End of stack trace from previous location"));
+		}
 	}
 }

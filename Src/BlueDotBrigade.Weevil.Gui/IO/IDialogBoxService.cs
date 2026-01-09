@@ -16,10 +16,12 @@
 
 		bool TryShowUserPrompt(string title, string userPrompt, string validationPattern, string validationError, out string userValue);
 
-		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights);
+		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, IBulletinMediator bulletinMediator);
 
-		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern);
+		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, string sourceFilePath);
 		
 		bool TryShowGoTo(string defaultValue, out string userValue);
+
+		bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression);
 	}
 }

@@ -10,10 +10,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	internal class DetectFirstAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectFirstAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectFirstAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectFirst.ToString();
@@ -24,45 +31,68 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		{
 			var count = 0;
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			// Get default regex from current inclusive filter
+			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
+
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
 			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Parse expressions with alias expansion and || support
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
+			{
+				return new Results(0);
+			}
+
+			var foundValues = new HashSet<string>();
+
+			foreach (IRecord record in records)
+			{
+				if (canUpdateMetadata)
 				{
-					var foundValues = new HashSet<string>();
-					ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+					record.Metadata.IsFlagged = false;
+				}
 
-					foreach (IRecord record in records)
+				foreach (RegularExpression expression in expressions)
+				{
+					IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
+
+					if (keyValuePairs.Count > 0)
 					{
-						if (canUpdateMetadata)
+						foreach (KeyValuePair<string, string> pair in keyValuePairs)
 						{
-							record.Metadata.IsFlagged = false;
-						}
-
-						foreach (RegularExpression expression in expressions)
-						{
-							IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
-
-							if (keyValuePairs.Count > 0)
+							if (!string.IsNullOrWhiteSpace(pair.Value))
 							{
-								foreach (KeyValuePair<string, string> pair in keyValuePairs)
+								var uniqueKey = $"{pair.Key}:{pair.Value}";
+								if (!foundValues.Contains(uniqueKey))
 								{
-									if (!string.IsNullOrWhiteSpace(pair.Value))
+									var parameterName = RegularExpression.GetFriendlyParameterName(pair.Key);
+
+									if (canUpdateMetadata)
 									{
-										var uniqueKey = $"{pair.Key}:{pair.Value}";
-										if (!foundValues.Contains(uniqueKey))
-										{
-											var parameterName = RegularExpression.GetFriendlyParameterName(pair.Key);
-
-											if (canUpdateMetadata)
-											{
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {pair.Value}");
-											}
-
-											foundValues.Add(uniqueKey);
-											count++;
-										}
+										record.Metadata.IsFlagged = true;
+										record.Metadata.UpdateUserComment($"{parameterName}: {pair.Value}");
 									}
+
+									foundValues.Add(uniqueKey);
+									count++;
 								}
 							}
 						}

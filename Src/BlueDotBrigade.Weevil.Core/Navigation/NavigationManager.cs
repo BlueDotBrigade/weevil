@@ -35,6 +35,7 @@
 				new PinNavigator(_activeRecord),
 				new CommentNavigator(_activeRecord),
 				new FlagNavigator(_activeRecord),
+				new ElapsedTimeNavigator(_activeRecord),
 			}.ToImmutableArray();
 		}
 
@@ -144,6 +145,30 @@
 				.FindNext();
 		}
 
+		public IRecord PreviousCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<ICommentNavigator>()
+				.FindPrevious(text, isCaseSensitive, useRegex);
+		}
+
+		public IRecord NextCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<ICommentNavigator>()
+				.FindNext(text, isCaseSensitive, useRegex);
+		}
+
 		public IRecord PreviousFlag()
 		{
 			return this
@@ -156,6 +181,20 @@
 			return this
 				.Using<IFlagNavigator>()
 				.FindNext();
+		}
+
+		public IRecord PreviousElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			return this
+				.Using<IElapsedTimeNavigator>()
+				.FindPrevious(minMilliseconds, maxMilliseconds);
+		}
+
+		public IRecord NextElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			return this
+				.Using<IElapsedTimeNavigator>()
+				.FindNext(minMilliseconds, maxMilliseconds);
 		}
 	}
 }

@@ -11,10 +11,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         internal class StableValueAnalyzer : IRecordAnalyzer
         {
                 private readonly FilterStrategy _filterStrategy;
+                private readonly IFilterAliasExpander _aliasExpander;
 
                 public StableValueAnalyzer(FilterStrategy filterStrategy)
+                        : this(filterStrategy, null)
+                {
+                }
+
+                public StableValueAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
                 {
                         _filterStrategy = filterStrategy;
+                        _aliasExpander = aliasExpander;
                 }
 
                 public string Key => AnalysisType.DetectStableValues.ToString();
@@ -25,22 +32,38 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 {
                         var count = 0;
 
-                        if (_filterStrategy != FilterStrategy.KeepAllRecords)
+                        // Get default regex from current inclusive filter
+                        var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
+
+                        // Show analysis dialog to get custom regex
+                        var recordsDescription = records.Length.ToString("N0");
+
+                        if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
                         {
-                                if (_filterStrategy.InclusiveFilter.Count > 0)
-                                {
-                                        ImmutableArray<RegularExpression> expressions = _filterStrategy.InclusiveFilter.GetRegularExpressions();
+                                // User cancelled
+                                return new Results(0);
+                        }
 
-                                        if (!expressions.IsDefaultOrEmpty)
+                        if (string.IsNullOrWhiteSpace(customRegex))
+                        {
+                                // No regex provided
+                                return new Results(0);
+                        }
+
+                        // Parse expressions with alias expansion and || support
+                        var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+                        ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+                                customRegex,
+                                _aliasExpander,
+                                expressionBuilder);
+
+                        if (!expressions.IsDefaultOrEmpty)
+                        {
+                                var activeRuns = new Dictionary<string, ValueRun>();
+
+                                        foreach (IRecord record in records)
                                         {
-                                                var activeRuns = new Dictionary<string, ValueRun>();
-
-                                                foreach (IRecord record in records)
-                                                {
-                                                        if (canUpdateMetadata)
-                                                        {
-                                                                record.Metadata.IsFlagged = false;
-                                                        }
+                                                AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
                                                         var matchedKeys = new HashSet<string>();
 
@@ -114,26 +137,24 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                                                         activeRuns[key] = run;
 
                                                         count++;
-                                                        if (canUpdateMetadata)
-                                                        {
-                                                                record.Metadata.IsFlagged = true;
-                                                                record.Metadata.UpdateUserComment($"Start {friendlyName}: {value}");
-                                                        }
+                                                        AnalysisHelper.UpdateRecordMetadata(
+                                                                record,
+                                                                true,
+                                                                $"Start {friendlyName}: {value}",
+                                                                canUpdateMetadata);
                                                 }
 
                                                 void FinalizeRun(string key, ValueRun run)
                                                 {
                                                         count++;
-                                                        if (canUpdateMetadata)
-                                                        {
-                                                                run.LastRecord.Metadata.IsFlagged = true;
-                                                                run.LastRecord.Metadata.UpdateUserComment($"Stop {run.FriendlyName}: {run.Value}");
-                                                        }
+                                                        AnalysisHelper.UpdateRecordMetadata(
+                                                                run.LastRecord,
+                                                                true,
+                                                                $"Stop {run.FriendlyName}: {run.Value}",
+                                                                canUpdateMetadata);
 
                                                         activeRuns.Remove(key);
                                                 }
-                                        }
-                                }
                         }
 
                         return new Results(count);

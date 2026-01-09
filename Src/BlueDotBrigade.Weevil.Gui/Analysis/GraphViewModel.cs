@@ -25,7 +25,10 @@
 		private static readonly string DefaultSeriesName = "Series";
 		private static readonly string DefaultXAxisLabel = "Time";
 		private static readonly string DefaultYAxisLabel = "Y-Axis";
+		private static readonly string DefaultWindowTitle = "Graph";
 		private static readonly string FloatFormat = "0.000";
+		private static readonly int MaxSeriesCount = 2;
+		private static readonly string DefaultSeries2Suffix = " 2";
 
 		private static readonly NumberStyles NumberStyle =
 			NumberStyles.AllowLeadingWhite |
@@ -43,16 +46,23 @@
 
 		private string _xAxisLabel;
 		private string _yAxisLabel;
+		private string _windowTitle;
+		private string _sourceFilePath;
 
 		private string _regularExpression;
 		private string _dataDetected;
 		private string _sampleData;
 		private int _tooltipWidth;
 
-		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression)
+		private string _series1Name;
+		private string _series2Name;
+
+		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
 			_records = records;
 
+			this.WindowTitle = windowTitle ?? DefaultWindowTitle;
+			this.SourceFilePath = sourceFilePath ?? string.Empty;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
 
@@ -130,6 +140,38 @@
 			}
 		}
 
+		public string WindowTitle
+		{
+			get
+			{
+				return _windowTitle;
+			}
+			set
+			{
+				if (_windowTitle != value)
+				{
+					_windowTitle = value;
+					RaisePropertyChanged(nameof(this.WindowTitle));
+				}
+			}
+		}
+
+		public string SourceFilePath
+		{
+			get
+			{
+				return _sourceFilePath;
+			}
+			set
+			{
+				if (_sourceFilePath != value)
+				{
+					_sourceFilePath = value;
+					RaisePropertyChanged(nameof(this.SourceFilePath));
+				}
+			}
+		}
+
 		public string DataDetected
 		{
 			get => _dataDetected;
@@ -187,6 +229,32 @@
 			}
 		}
 
+		public string Series1Name
+		{
+			get => _series1Name;
+			set
+			{
+				if (_series1Name != value)
+				{
+					_series1Name = value;
+					RaisePropertyChanged(nameof(this.Series1Name));
+				}
+			}
+		}
+
+		public string Series2Name
+		{
+			get => _series2Name;
+			set
+			{
+				if (_series2Name != value)
+				{
+					_series2Name = value;
+					RaisePropertyChanged(nameof(this.Series2Name));
+				}
+			}
+		}
+
 		public ICommand UpdateCommand => new UiBoundCommand(() => Update(false));
 
 		private string GetDetectedData(string regularExpression, string inputString)
@@ -225,10 +293,39 @@
 		{
 			try
 			{
-				this.Series = GetSeries(_records, this.RegularExpression);
+				// Initialize series names on first load from RegEx named groups
+				// After initialization, series names are preserved even if RegEx changes,
+				// allowing users to customize series names without them being overwritten
+				if (isInitializing && _records.Length > 0)
+				{
+					var seriesNames = GetSeriesNames(_records, this.RegularExpression);
+					if (seriesNames.Count > 0)
+					{
+						this.Series1Name = seriesNames[0];
+						if (seriesNames.Count > 1)
+						{
+							this.Series2Name = seriesNames[1];
+						}
+					}
+				}
+
+				this.Series = GetSeries(_records, this.RegularExpression, this.Series1Name, this.Series2Name);
 
 				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
-				this.YAxes = GetYAxes(isInitializing ? this.Series.First().Name : this.YAxisLabel);
+				
+				// Determine number of Y-axes based on series count
+				var seriesList = this.Series.ToList();
+				if (seriesList.Count > 1)
+				{
+					// Two series: use Series1Name and Series2Name for Y-axes
+					this.YAxes = GetYAxes(this.Series1Name, this.Series2Name);
+				}
+				else
+				{
+					// Single series: use YAxisLabel for backward compatibility with existing graphs
+					// On initialization, Series1Name and YAxisLabel will be the same
+					this.YAxes = GetYAxes(isInitializing ? this.Series1Name : this.YAxisLabel);
+				}
 			}
 			catch (MatchCountException e)
 			{
@@ -290,6 +387,23 @@
 			};
 		}
 
+		private static IEnumerable<ICartesianAxis> GetYAxes(string series1Name, string series2Name)
+		{
+			return new Axis[]
+			{
+				new Axis
+				{
+					Name = series1Name ?? DefaultYAxisLabel,
+					Position = LiveChartsCore.Measure.AxisPosition.Start,
+				},
+				new Axis
+				{
+					Name = series2Name ?? DefaultYAxisLabel,
+					Position = LiveChartsCore.Measure.AxisPosition.End,
+				}
+			};
+		}
+
 		private static bool TryGetMatch(string regularExpression, string inputString, out float value)
 		{
 			var wasSuccessful = false;
@@ -313,10 +427,90 @@
 			return wasSuccessful;
 		}
 
-		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression)
+		private static bool TryGetMatchForRecord(string regularExpression, string inputString, out float value1, out float value2)
 		{
-			var seriesName = DefaultSeriesName;
-			var values = new ObservableCollection<DateTimePoint>();
+			value1 = float.NaN;
+			value2 = float.NaN;
+			var hasFirstValue = false;
+			var hasSecondValue = false;
+
+			if (!string.IsNullOrEmpty(regularExpression) &&
+			    !string.IsNullOrEmpty(inputString))
+			{
+				var expression = new RegularExpression(regularExpression);
+				IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
+
+				if (matches.Any())
+				{
+					var values = matches.Take(MaxSeriesCount).ToList();
+					if (values.Count > 0)
+					{
+						hasFirstValue = float.TryParse(values[0].Value, NumberStyle, CultureInfo.InvariantCulture, out value1);
+					}
+					if (values.Count > 1)
+					{
+						hasSecondValue = float.TryParse(values[1].Value, NumberStyle, CultureInfo.InvariantCulture, out value2);
+					}
+				}
+			}
+
+			return hasFirstValue || hasSecondValue;
+		}
+
+		private static List<string> GetSeriesNames(string inputString, string regularExpression)
+		{
+			var seriesNames = new List<string>();
+
+			if (!string.IsNullOrEmpty(regularExpression) && !string.IsNullOrEmpty(inputString))
+			{
+				try
+				{
+					var expression = new RegularExpression(regularExpression);
+					IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
+
+					if (matches.Any())
+					{
+						seriesNames.AddRange(matches.Take(MaxSeriesCount).Select(m => m.Key));
+					}
+				}
+				catch (Exception e)
+				{
+					// If there's an error getting the series names, log and return empty list
+					Log.Default.Write(LogSeverityType.Warning, e, "Could not extract series names from regular expression.");
+				}
+			}
+
+			// Ensure we have at least a default name
+			if (seriesNames.Count == 0)
+			{
+				seriesNames.Add(DefaultSeriesName);
+			}
+
+			return seriesNames;
+		}
+
+		private static List<string> GetSeriesNames(ImmutableArray<IRecord> records, string regularExpression)
+		{
+			// Find the first record that matches the pattern to extract series names
+			foreach (var record in records)
+			{
+				var seriesNames = GetSeriesNames(record.Content, regularExpression);
+				// If we found named groups (not just the default), return them
+				if (seriesNames.Count > 0 && seriesNames[0] != DefaultSeriesName)
+				{
+					return seriesNames;
+				}
+			}
+
+			// If no record matched, return default
+			return new List<string> { DefaultSeriesName };
+		}
+
+		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name)
+		{
+			var values1 = new ObservableCollection<DateTimePoint>();
+			var values2 = new ObservableCollection<DateTimePoint>();
+			var hasSecondSeries = false;
 
 			if (records.Length > 0)
 			{
@@ -324,9 +518,17 @@
 				{
 					try
 					{
-						if (TryGetMatch(regularExpression, record.Content, out var value))
+						if (TryGetMatchForRecord(regularExpression, record.Content, out var value1, out var value2))
 						{
-							values.Add(new DateTimePoint(record.CreatedAt, value));
+							if (!float.IsNaN(value1))
+							{
+								values1.Add(new DateTimePoint(record.CreatedAt, value1));
+							}
+							if (!float.IsNaN(value2))
+							{
+								values2.Add(new DateTimePoint(record.CreatedAt, value2));
+								hasSecondSeries = true;
+							}
 						}
 					}
 					catch (InvalidExpressionException e)
@@ -337,33 +539,38 @@
 							e);
 					}
 				}
-
-				seriesName = GetSeriesName(records.First().Content, new RegularExpression(regularExpression));
 			}
 
-			return new ISeries[]
+			// Use provided names or defaults
+			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : DefaultSeriesName;
+			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : DefaultSeriesName + DefaultSeries2Suffix;
+
+			var seriesList = new List<ISeries>
 			{
-					new LineSeries<DateTimePoint>
-					{
-						Name = seriesName,
-						Values = values,
-						GeometrySize = 10,
-						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
-					}
+				new LineSeries<DateTimePoint>
+				{
+					Name = finalSeries1Name,
+					Values = values1,
+					GeometrySize = 10,
+					ScalesYAt = 0,
+					TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
+				}
 			};
-		}
 
-		private static string GetSeriesName(string inputString, RegularExpression expression)
-		{
-			var seriesName = DefaultSeriesName;
-
-			var matches = expression.GetKeyValuePairs(inputString);
-			if (matches.Any())
+			// Add second series if it has data
+			if (hasSecondSeries)
 			{
-				seriesName = matches.First().Key;
+				seriesList.Add(new LineSeries<DateTimePoint>
+				{
+					Name = finalSeries2Name,
+					Values = values2,
+					GeometrySize = 10,
+					ScalesYAt = 1,
+					TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
+				});
 			}
 
-			return seriesName;
+			return seriesList;
 		}
 	}
 }

@@ -17,7 +17,21 @@
 			throw new NotImplementedException();
 		}
 
-		public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out bool useRegex, out string findText)
+		public bool TryShowFind(
+			string defaultValue, 
+			out bool isCaseSensitive, 
+			out bool findNext, 
+			out bool useRegex, 
+			out string findText,
+			out bool searchElapsedTime,
+			out int? minElapsedMs,
+			out int? maxElapsedMs,
+			out bool searchComments)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
 		{
 			throw new NotImplementedException();
 		}

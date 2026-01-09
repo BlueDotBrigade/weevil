@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
+namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Immutable;
 	using System.Linq;
@@ -10,11 +10,18 @@
 
 	internal class DetectRepeatingRecordsAnalyzer : IRecordAnalyzer
 	{
-		private readonly ExpressionBuilder _expressionBuilder;
+		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectRepeatingRecordsAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
 		{
-			_expressionBuilder = filterStrategy.GetExpressionBuilder();
+		}
+
+		public DetectRepeatingRecordsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
+		{
+			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectRepeatingRecords.ToString();
@@ -26,12 +33,32 @@
             var flaggedRecords = 0;
 			var blockCount = 0;
 
-            var serializedExpression = userDialog.ShowUserPrompt(
-            "Detect Edges",
-            "Regular Expression:",
-            "");
+            // Get default regex from current inclusive filter
+            var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
 
-            if (_expressionBuilder.TryGetExpression(serializedExpression, out IExpression expression))
+            // Show analysis dialog to get custom regex
+            var recordsDescription = records.Length.ToString("N0");
+
+            if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+            {
+                // User cancelled
+                return new Results(0);
+            }
+
+            if (string.IsNullOrWhiteSpace(customRegex))
+            {
+                // No regex provided
+                return new Results(0);
+            }
+
+            // Parse expressions with alias expansion and || support
+            var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+            ImmutableArray<IExpression> expressions = AnalyzerExpressionHelper.ParseAllExpressions(
+                customRegex,
+                _aliasExpander,
+                expressionBuilder);
+
+            if (!expressions.IsDefaultOrEmpty)
             {
                 var sortedRecords = records.OrderBy((x => x.LineNumber)).ToImmutableArray();
 
@@ -40,11 +67,23 @@
 
 				foreach (IRecord record in sortedRecords)
                 {
-					record.Metadata.IsFlagged = false;
+					if (canUpdateMetadata)
+					{
+						record.Metadata.IsFlagged = false;
+					}
 
-					// Looking at a record within the target block?
-					// ... If not, assume we are at the end of the block & reset.
-					if (expression.IsMatch(record))
+					// Check if any expression matches
+					var isMatch = false;
+					foreach (IExpression expression in expressions)
+					{
+						if (expression.IsMatch(record))
+						{
+							isMatch = true;
+							break;
+						}
+					}
+
+					if (isMatch)
                     {
                         if (firstMatch == null)
                         {
@@ -52,16 +91,13 @@
                         }
 						else
 						{
-							// Intent: drag this pointer to the end of the block
 							lastMatch = record;
 						}
 					}
 					else
 					{
-						// Start of block found?
 						if (firstMatch != null)
 						{
-							// Block contains only 1 record?
 							if (lastMatch == null)
 							{
 								// WHAT DO WE DO HERE ???
@@ -72,36 +108,40 @@
 
 								blockCount++;
 
-								firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
-								firstMatch.Metadata.IsFlagged = true;
-								flaggedRecords++;
+								if (canUpdateMetadata)
+								{
+									firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
+									firstMatch.Metadata.IsFlagged = true;
 
-								lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
-								lastMatch.Metadata.IsFlagged = true;
-								flaggedRecords++;
+									lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
+									lastMatch.Metadata.IsFlagged = true;
+								}
+
+								flaggedRecords += 2;
 							}
 						}
 
-						// Reset state to begin searching for the next block.
 						firstMatch = null;
 						lastMatch = null;
 					}
                 }
 
-				// Is the block at the end of the results?
 				if (firstMatch != null && lastMatch != null)
 				{
 					Log.Default.Write($"Detected the last block of repeating records. StartsAt={firstMatch.LineNumber}, EndsAt={lastMatch.LineNumber}");
 
 					blockCount++;
 
-					firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
-					firstMatch.Metadata.IsFlagged = true;
-					flaggedRecords++;
+					if (canUpdateMetadata)
+					{
+						firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
+						firstMatch.Metadata.IsFlagged = true;
 
-					lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
-					lastMatch.Metadata.IsFlagged = true;
-					flaggedRecords++;
+						lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
+						lastMatch.Metadata.IsFlagged = true;
+					}
+
+					flaggedRecords += 2;
 				}
 			}
 

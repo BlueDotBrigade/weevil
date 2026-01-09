@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[SafeForDependencyAnalysis]
 		public ICommand ShowAboutCommand => new UiBoundCommand(ShowAbout);
 		[SafeForDependencyAnalysis]
-		public ICommand ShowDashboardCommand => new UiBoundCommand(ShowDashboard, () => this.IsMenuEnabled);
+		public ICommand ShowDashboardCommand => new UiBoundCommand(ShowDashboard, () => this.IsDashboardEnabled);
 		[SafeForDependencyAnalysis]
 		public ICommand GraphDataCommand => new UiBoundCommand(GraphData, () => this.IsMenuEnabled);
 		[SafeForDependencyAnalysis]
@@ -155,7 +155,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					message);
 				MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
-		}, (x) => this.IsManualFilter);
+		}, (x) => true);
 
 		[SafeForDependencyAnalysis]
 		public ICommand FilterByCommentCommand => new UiBoundCommand(FilterByComment, () => this.IsMenuEnabled);

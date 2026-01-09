@@ -6,6 +6,7 @@
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
         Title="GraphDialog" 
         Height="450" Width="800" WindowState="Maximized"
+        ShowInTaskbar="True"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -23,6 +24,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -35,7 +37,7 @@
             TooltipPosition="Bottom">
         </lvc:CartesianChart>
 
-        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Down" IsExpanded="True">
+        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Down" IsExpanded="False">
             <StackPanel Orientation="Vertical">
                 <TextBox
                     x:Name="RegularExpressionTextBox" Grid.Column="1" 
@@ -74,9 +76,55 @@
                          materialDesign:HintAssist.Hint="Y-Axis"
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <Separator/>
+                <TextBox x:Name="Series1NameTextBox" 
+                         Text="{Binding Series1Name}"
+                         materialDesign:HintAssist.Hint="Series 1 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <TextBox x:Name="Series2NameTextBox" 
+                         Text="{Binding Series2Name}"
+                         materialDesign:HintAssist.Hint="Series 2 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <Separator/>
+                <TextBox x:Name="WindowTitleTextBox" 
+                         Text="{Binding WindowTitle}"
+                         materialDesign:HintAssist.Hint="Graph Window Title"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
 
                 <Button Content="Update" Command="{Binding UpdateCommand}" Margin="5"/>
             </StackPanel>
         </Expander>
+
+        <StatusBar Grid.Row="2" Grid.Column="0"
+                   Background="{StaticResource MaterialDesignPaper}" 
+                   Foreground="{StaticResource TextForeground}"
+                   TextElement.FontWeight="Regular"
+                   TextOptions.TextFormattingMode="Ideal"
+                   TextOptions.TextRenderingMode="Auto">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Source file path."/>
+                    <TextBox Text="{Binding SourceFilePath}"
+                             ToolTip="Source file path."
+                             Style="{StaticResource StatusBarTextBox}">
+                    </TextBox>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
