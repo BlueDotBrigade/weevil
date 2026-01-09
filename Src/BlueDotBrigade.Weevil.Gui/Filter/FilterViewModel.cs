@@ -980,9 +980,7 @@
 		{
 			// When 0 or 1 record is selected, graph all visible (filtered) records.
 			// When 2+ records are selected, graph exactly those selected records.
-			ImmutableArray<IRecord> recordsToGraph = _engine.Selector.HasSelectionPeriod
-				? _engine.Selector.GetSelected()
-				: _engine.Filter.Results;
+			ImmutableArray<IRecord> recordsToGraph = _engine.Selector.GetSelected(oneIsMany: true);
 
 			_dialogBox.ShowGraph(
 				recordsToGraph,
