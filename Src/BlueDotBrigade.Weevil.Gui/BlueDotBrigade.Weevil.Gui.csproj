@@ -117,7 +117,7 @@
 			<Version>13.0.4</Version>
 		</PackageReference>
 		<PackageReference Include="NLog">
-			<Version>5.3.4</Version>
+			<Version>6.0.7</Version>
 		</PackageReference>
 		<PackageReference Include="PostSharp">
 			<Version>2024.1.6</Version>
