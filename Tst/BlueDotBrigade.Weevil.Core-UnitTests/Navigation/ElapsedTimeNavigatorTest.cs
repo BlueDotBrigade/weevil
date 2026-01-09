@@ -9,7 +9,6 @@ namespace BlueDotBrigade.Weevil.Navigation
 	public class ElapsedTimeNavigatorTest
 	{
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void FindNext_NoMatchingRecords_Throws()
 		{
 			var records = new List<IRecord>();
@@ -25,7 +24,8 @@ namespace BlueDotBrigade.Weevil.Navigation
 
 			// All records have elapsed time of 0 (no elapsed time set)
 			// Should throw RecordNotFoundException
-			new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(100, 200);
+			Action act = () => new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(100, 200);
+			act.Should().Throw<RecordNotFoundException>();
 		}
 
 		[TestMethod]

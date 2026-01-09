@@ -10,21 +10,18 @@
 	public class ActiveRecordTests
 	{
 		[TestMethod]
-		[ExpectedException((typeof(ArgumentException)))]
 		public void Constructor_UninitializedArray_ThrowsArgumentException()
 		{
-			var activeRecord = new ActiveRecord(new ImmutableArray<IRecord>());
-
-			Assert.Fail("Uninitialized immutable array should throw exception.");
+			Action act = () => _ = new ActiveRecord(new ImmutableArray<IRecord>());
+			act.Should().Throw<ArgumentException>();
 		}
 
 		[TestMethod]
-		[ExpectedException((typeof(ArgumentException)))]
 		public void UpdateDataSource_UninitializedArray_ThrowsArgumentException()
 		{
 			var activeRecord = new ActiveRecord(new ImmutableArray<IRecord>());
-
-			Assert.Fail("Uninitialized immutable array should throw exception.");
+			Action act = () => activeRecord.UpdateDataSource(new ImmutableArray<IRecord>());
+			act.Should().Throw<ArgumentException>();
 		}
 
 		[TestMethod]
