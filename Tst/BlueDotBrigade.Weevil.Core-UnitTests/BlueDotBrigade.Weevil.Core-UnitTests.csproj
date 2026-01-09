@@ -20,7 +20,7 @@
 		</PackageReference>
 		<!-- NOTE: Upgrading FluentAssertions to v8 requires a license. #475 -->
 		<PackageReference Include="FluentAssertions" Version="[7.0.0]" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
 		<PackageReference Include="MSTest.TestAdapter">
 			<Version>3.6.3</Version>
 		</PackageReference>
