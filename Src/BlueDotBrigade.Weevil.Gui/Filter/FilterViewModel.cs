@@ -10,14 +10,14 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using System.Net.Http;
 	using System.Reflection;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
+	using System.Windows.Input;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil;
-	using GongSolutions.Wpf.DragDrop;
-	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Data;
@@ -27,20 +27,21 @@
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Help;
 	using BlueDotBrigade.Weevil.Gui.IO;
+	using BlueDotBrigade.Weevil.Gui.Navigation;
+	using BlueDotBrigade.Weevil.Gui.Properties;
+	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.Reports;
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
-	using BlueDotBrigade.Weevil.Gui.Properties;
-	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.Utilities;
+	using GongSolutions.Wpf.DragDrop;
+	using Newtonsoft.Json.Linq;
+	using PostSharp.Extensibility;
+	using PostSharp.Patterns.Model;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
-	using System.Windows.Input;
-	using PostSharp.Extensibility;
-	using System.Net.Http;
-	using Newtonsoft.Json.Linq;
 
 	[NotifyPropertyChanged()]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
@@ -566,6 +567,16 @@
 							.Open();
 
 						this.FileOpened?.Invoke(this, EventArgs.Empty);
+
+						_bulletinMediator.Post(new BookmarksChangedBulletin
+						{
+							BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+						});
+
+						_bulletinMediator.Post(new RegionsChangedBulletin
+						{
+							RegionCount = _engine.Regions.Regions.Length,
+						});
 
 						_bulletinMediator.Post(new SourceFileOpenedBulletin
 						{
@@ -1556,6 +1567,11 @@
 						$"Raising the {nameof(RegionsChanged)} event.");
 
 					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+
+					_bulletinMediator.Post(new RegionsChangedBulletin
+					{
+						RegionCount = _engine.Regions.Regions.Length,
+					});
 				}
 				catch (Exception exception)
 				{
@@ -1580,6 +1596,11 @@
 							$"Raising the {nameof(BookmarksChanged)} event.");
 
 					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+
+					_bulletinMediator.Post(new BookmarksChangedBulletin
+					{
+						BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+					});
 				}
 				catch (Exception exception)
 				{
@@ -1785,8 +1806,6 @@
 				VisibleRecordCount = this.VisibleItems?.Count ?? 0,
 				SeverityMetrics = _engine.Filter.GetMetrics(),
 				ExecutionTime = _engine.Filter.FilterExecutionTime,
-				BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
-				RegionCount = _engine.Regions.Regions.Length
 			});
 
 			// Remember: filtering can impact the number of selected records.
@@ -1900,7 +1919,11 @@
 					// Create bookmark regardless of dialog result (empty name gets sequential number)
 					_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
 					RaiseBookmarksChanged();
-					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+
+					//_bulletinMediator.Post(new BookmarksChangedBulletin 
+					//{
+					//	RegionCount = _engine.Bookmarks.Bookmarks.Length,
+					//});
 				}
 				else
 				{
