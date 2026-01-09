@@ -26,7 +26,7 @@
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
 		<PackageReference Include="NSubstitute" Version="5.3.0" />
-		<PackageReference Include="Reqnroll.MsTest" Version="2.2.1" />
+		<PackageReference Include="Reqnroll.MsTest" Version="3.3.1" />
 		<PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
 		<PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
 		<!-- NOTE: Upgrading FluentAssertions to v8 requires a license. #475 -->
