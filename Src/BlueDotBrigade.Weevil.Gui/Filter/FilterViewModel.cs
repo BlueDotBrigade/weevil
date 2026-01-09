@@ -1784,7 +1784,9 @@
 				SelectedRecordCount = _engine.Selector.Selected.Count,
 				VisibleRecordCount = this.VisibleItems?.Count ?? 0,
 				SeverityMetrics = _engine.Filter.GetMetrics(),
-				ExecutionTime = _engine.Filter.FilterExecutionTime
+				ExecutionTime = _engine.Filter.FilterExecutionTime,
+				BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+				RegionCount = _engine.Regions.Regions.Length
 			});
 
 			// Remember: filtering can impact the number of selected records.
