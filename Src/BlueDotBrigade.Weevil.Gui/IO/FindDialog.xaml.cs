@@ -87,6 +87,7 @@
 				new FrameworkPropertyMetadata
 				{
 					BindsTwoWayByDefault = true,
+					PropertyChangedCallback = OnSearchCommentsChanged
 				});
 
 		public static readonly DependencyProperty SearchContentProperty =
@@ -96,7 +97,26 @@
 				new FrameworkPropertyMetadata
 				{
 					BindsTwoWayByDefault = true,
+					PropertyChangedCallback = OnSearchContentChanged
 				});
+
+		private static void OnSearchCommentsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			var dialog = (FindDialog)d;
+			if ((bool)e.NewValue)
+			{
+				dialog.SearchContent = false;
+			}
+		}
+
+		private static void OnSearchContentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			var dialog = (FindDialog)d;
+			if ((bool)e.NewValue)
+			{
+				dialog.SearchComments = false;
+			}
+		}
 
 		public bool IsCaseSensitive
 		{
