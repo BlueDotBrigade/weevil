@@ -11,3 +11,13 @@ Then the status bar visible record count will be 387
 Scenario: Display record count of zero when loading an empty file
 Given that the "Empty.txt" log file name is open
 Then the status bar visible record count will be 0
+
+@Requirement:589
+Scenario: Display bookmark count in status bar
+Given that the default log file is open
+Then the status bar bookmark count will be 0
+
+@Requirement:589
+Scenario: Display region count in status bar
+Given that the default log file is open
+Then the status bar region count will be 0
