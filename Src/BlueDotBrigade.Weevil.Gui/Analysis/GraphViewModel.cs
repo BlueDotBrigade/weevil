@@ -76,7 +76,6 @@
 			Update(true);
 
 			this.XAxisLabel = this.XAxes.First().Name;
-			this.YAxisLabel = this.YAxes.First().Name;
 		}
 
 		public IEnumerable<ISeries> Series
@@ -121,22 +120,6 @@
 				{
 					_xAxisLabel = value;
 					RaisePropertyChanged(nameof(this.XAxisLabel));
-				}
-			}
-		}
-
-		public string YAxisLabel
-		{
-			get
-			{
-				return _yAxisLabel;
-			}
-			set
-			{
-				if (_yAxisLabel != value)
-				{
-					_yAxisLabel = value;
-					RaisePropertyChanged(nameof(this.YAxisLabel));
 				}
 			}
 		}
@@ -315,18 +298,14 @@
 
 				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
 				
-				// Determine number of Y-axes based on series count
 				var seriesList = this.Series.ToList();
 				if (seriesList.Count > 1)
 				{
-					// Two series: use Series1Name and Series2Name for Y-axes
 					this.YAxes = GetYAxes(this.Series1Name, this.Series2Name);
 				}
 				else
 				{
-					// Single series: use YAxisLabel for backward compatibility with existing graphs
-					// On initialization, Series1Name and YAxisLabel will be the same
-					this.YAxes = GetYAxes(isInitializing ? this.Series1Name : this.YAxisLabel);
+					this.YAxes = GetYAxes(this.Series1Name);
 				}
 			}
 			catch (MatchCountException e)

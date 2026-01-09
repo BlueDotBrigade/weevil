@@ -71,11 +71,6 @@
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          controls:TextBoxBehavior.AutoSelectEnabled="True"/>
-                <TextBox x:Name="YAxisLabelTextBox" 
-                         Text="{Binding YAxisLabel}"
-                         materialDesign:HintAssist.Hint="Y-Axis"
-                         VerticalAlignment="Center" 
-                         materialDesign:TextFieldAssist.HasClearButton="True"/>
                 <Separator/>
                 <TextBox x:Name="Series1NameTextBox" 
                          Text="{Binding Series1Name}"
