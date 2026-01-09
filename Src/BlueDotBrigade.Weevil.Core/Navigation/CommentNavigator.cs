@@ -46,8 +46,8 @@
 			if (useRegex)
 			{
 				var regexOptions = isCaseSensitive
-					? RegexOptions.None
-					: RegexOptions.IgnoreCase;
+					? RegexOptions.Compiled
+					: RegexOptions.Compiled | RegexOptions.IgnoreCase;
 				var regex = new Regex(value, regexOptions);
 
 				var resultAt = _activeRecord
@@ -82,8 +82,8 @@
 			if (useRegex)
 			{
 				var regexOptions = isCaseSensitive
-					? RegexOptions.None
-					: RegexOptions.IgnoreCase;
+					? RegexOptions.Compiled
+					: RegexOptions.Compiled | RegexOptions.IgnoreCase;
 				var regex = new Regex(value, regexOptions);
 
 				var resultAt = _activeRecord
