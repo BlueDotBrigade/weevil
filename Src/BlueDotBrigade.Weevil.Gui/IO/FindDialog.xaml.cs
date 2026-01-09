@@ -89,6 +89,15 @@
 					BindsTwoWayByDefault = true,
 				});
 
+		public static readonly DependencyProperty SearchContentProperty =
+			DependencyProperty.Register(
+				nameof(SearchContent), typeof(bool),
+				typeof(FindDialog),
+				new FrameworkPropertyMetadata
+				{
+					BindsTwoWayByDefault = true,
+				});
+
 		public bool IsCaseSensitive
 		{
 			get => (bool)GetValue(IsCaseSensitiveProperty);
@@ -143,6 +152,12 @@
 			set => SetValue(SearchCommentsProperty, value);
 		}
 
+		public bool SearchContent
+		{
+			get => (bool)GetValue(SearchContentProperty);
+			set => SetValue(SearchContentProperty, value);
+		}
+
 		public FindDialog(string defaultValue)
 		{
 			this.Owner = Application.Current.MainWindow;
@@ -156,6 +171,7 @@
 			this.IsRegexMode = false;
 			this.SearchElapsedTime = false;
 			this.SearchComments = false;
+			this.SearchContent = true; // Default to searching content
 			this.MinElapsedTimeMs = string.Empty;
 			this.MaxElapsedTimeMs = string.Empty;
 
@@ -168,35 +184,19 @@
 			this.InputTextBox.SelectAll();
 		}
 
-		private void OnPreviousClicked(object sender, RoutedEventArgs e)
+		private void OnPreviousTextClicked(object sender, RoutedEventArgs e)
 		{
 			this.FindNext = false;
 			this.SearchElapsedTime = false;
-			this.SearchComments = false;
+			// SearchComments property is already set by the radio button
 			this.DialogResult = true;
 		}
 
-		private void OnNextClicked(object sender, RoutedEventArgs e)
+		private void OnNextTextClicked(object sender, RoutedEventArgs e)
 		{
 			this.FindNext = true;
 			this.SearchElapsedTime = false;
-			this.SearchComments = false;
-			this.DialogResult = true;
-		}
-
-		private void OnPreviousCommentClicked(object sender, RoutedEventArgs e)
-		{
-			this.FindNext = false;
-			this.SearchElapsedTime = false;
-			this.SearchComments = true;
-			this.DialogResult = true;
-		}
-
-		private void OnNextCommentClicked(object sender, RoutedEventArgs e)
-		{
-			this.FindNext = true;
-			this.SearchElapsedTime = false;
-			this.SearchComments = true;
+			// SearchComments property is already set by the radio button
 			this.DialogResult = true;
 		}
 
