@@ -436,7 +436,7 @@
 			return expressions.ToImmutableArray();
 		}
 
-		private static void EnsureSeriesNames(List<string> seriesNames)
+		private static void GetGroupNameOrDefault(List<string> seriesNames)
 		{
 			if (seriesNames.Count == 0)
 			{
@@ -585,6 +585,7 @@
 					}
 				}
 			}
+			GetGroupNameOrDefault(seriesNames);
 			return seriesNames;
 		}
 
@@ -628,7 +629,7 @@
 					break;
 				}
 			}
-			EnsureSeriesNames(seriesNames);
+			GetGroupNameOrDefault(seriesNames);
 			return seriesNames;
 		}
 
