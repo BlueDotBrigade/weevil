@@ -33,13 +33,14 @@
         </Style>
     </Window.Resources>
     <TabControl>
-        <!-- Content Tab -->
-        <TabItem Header="Content">
+        <!-- Text Tab (Content or Comments) -->
+        <TabItem Header="Text">
             <Grid FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="10" />
                 </Grid.RowDefinitions>
@@ -50,75 +51,39 @@
                 </Grid.ColumnDefinitions>
                 <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
                 <TextBlock Grid.Row="0" Grid.Column="0"
+                         Text="Search in:"
+                         HorizontalAlignment="Right" 
+                         TextWrapping="WrapWithOverflow" />
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="5">
+                    <RadioButton Content="Content" IsChecked="{Binding SearchContent}" GroupName="SearchLocation" Margin="0,0,20,0"/>
+                    <RadioButton Content="Comments" IsChecked="{Binding SearchComments}" GroupName="SearchLocation"/>
+                </StackPanel>
+                <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+                <TextBlock Grid.Row="1" Grid.Column="0"
                          Text="Search for text:"
                          HorizontalAlignment="Right" 
                          TextWrapping="WrapWithOverflow" />
-                <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputTextBox" 
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="InputTextBox" 
                        Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"/>
-                <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-                <TextBlock Grid.Row="1" Grid.Column="0"
+                <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+                <TextBlock Grid.Row="2" Grid.Column="0"
                          Text="Case sensitive:"
                          HorizontalAlignment="Right" 
                          TextWrapping="WrapWithOverflow" />
-                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding IsCaseSensitive}" Content="Yes"/>
-                <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-                <TextBlock Grid.Row="2" Grid.Column="0"
+                <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding IsCaseSensitive}" Content="Yes"/>
+                <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+                <TextBlock Grid.Row="3" Grid.Column="0"
                          Text="Mode:"
                          HorizontalAlignment="Right" 
                          TextWrapping="WrapWithOverflow" />
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="5">
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="5">
                     <RadioButton Content="Plain Text" IsChecked="{Binding IsPlainTextMode}" GroupName="SearchMode" Margin="0,0,20,0"/>
                     <RadioButton Content="Regular Expression" IsChecked="{Binding IsRegexMode}" GroupName="SearchMode"/>
                 </StackPanel>
-                <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                    <Button Content="Previous" Click="OnPreviousClicked" />
-                    <Button Content="Next" Click="OnNextClicked" IsDefault="True"/>
-                </StackPanel>
-            </Grid>
-        </TabItem>
-        
-        <!-- Comments Tab -->
-        <TabItem Header="Comments">
-            <Grid FocusManager.FocusedElement="{Binding ElementName=CommentInputTextBox}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="10" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="6*" />
-                    <ColumnDefinition Width="0.5*" />
-                </Grid.ColumnDefinitions>
-                <Rectangle Grid.Row="0" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                         Text="Search for text:"
-                         HorizontalAlignment="Right" 
-                         TextWrapping="WrapWithOverflow" />
-                <TextBox Grid.Row="0" Grid.Column="1" x:Name="CommentInputTextBox" 
-                       Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"/>
-                <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-                <TextBlock Grid.Row="1" Grid.Column="0"
-                         Text="Case sensitive:"
-                         HorizontalAlignment="Right" 
-                         TextWrapping="WrapWithOverflow" />
-                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding IsCaseSensitive}" Content="Yes"/>
-                <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-                <TextBlock Grid.Row="2" Grid.Column="0"
-                         Text="Mode:"
-                         HorizontalAlignment="Right" 
-                         TextWrapping="WrapWithOverflow" />
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="5">
-                    <RadioButton Content="Plain Text" IsChecked="{Binding IsPlainTextMode}" GroupName="CommentSearchMode" Margin="0,0,20,0"/>
-                    <RadioButton Content="Regular Expression" IsChecked="{Binding IsRegexMode}" GroupName="CommentSearchMode"/>
-                </StackPanel>
-                <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                    <Button Content="Previous" Click="OnPreviousCommentClicked" />
-                    <Button Content="Next" Click="OnNextCommentClicked" IsDefault="True"/>
+                <Rectangle Grid.Row="4" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                    <Button Content="Previous" Click="OnPreviousTextClicked" />
+                    <Button Content="Next" Click="OnNextTextClicked" IsDefault="True"/>
                 </StackPanel>
             </Grid>
         </TabItem>
