@@ -275,7 +275,7 @@
 				}
 				else
 				{
-					sortedRecords = _visibleRecords.OrderBy(x => x.LineNumber).ToImmutableArray();
+					sortedRecords = _allRecords.OrderBy(x => x.LineNumber).ToImmutableArray();
 				}
 			}
 
@@ -321,14 +321,7 @@
 
 			lock (_selectedRecordsPadlock)
 			{
-				if (_selectedRecords.Count > 1)
-				{
-					selectedRecords = _selectedRecords.Values.ToArray();
-				}
-				else
-				{
-					selectedRecords = _visibleRecords.ToArray();
-				}
+				selectedRecords = _selectedRecords.Values.ToArray();
 			}
 
 			Log.Default.Write(
