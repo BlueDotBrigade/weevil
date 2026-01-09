@@ -47,6 +47,7 @@
 		private string _xAxisLabel;
 		private string _yAxisLabel;
 		private string _windowTitle;
+		private string _sourceFilePath;
 
 		private string _regularExpression;
 		private string _dataDetected;
@@ -56,11 +57,12 @@
 		private string _series1Name;
 		private string _series2Name;
 
-		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle)
+		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
 			_records = records;
 
 			this.WindowTitle = windowTitle ?? DefaultWindowTitle;
+			this.SourceFilePath = sourceFilePath ?? string.Empty;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
 
@@ -150,6 +152,22 @@
 				{
 					_windowTitle = value;
 					RaisePropertyChanged(nameof(this.WindowTitle));
+				}
+			}
+		}
+
+		public string SourceFilePath
+		{
+			get
+			{
+				return _sourceFilePath;
+			}
+			set
+			{
+				if (_sourceFilePath != value)
+				{
+					_sourceFilePath = value;
+					RaisePropertyChanged(nameof(this.SourceFilePath));
 				}
 			}
 		}

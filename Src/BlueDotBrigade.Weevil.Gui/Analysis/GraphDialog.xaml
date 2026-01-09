@@ -24,6 +24,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -99,5 +100,31 @@
                 <Button Content="Update" Command="{Binding UpdateCommand}" Margin="5"/>
             </StackPanel>
         </Expander>
+
+        <StatusBar Grid.Row="2" Grid.Column="0"
+                   Background="{StaticResource MaterialDesignPaper}" 
+                   Foreground="{StaticResource TextForeground}"
+                   TextElement.FontWeight="Regular"
+                   TextOptions.TextFormattingMode="Ideal"
+                   TextOptions.TextRenderingMode="Auto">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Source file path."/>
+                    <TextBox Text="{Binding SourceFilePath}"
+                             ToolTip="Source file path."
+                             Style="{StaticResource StatusBarTextBox}">
+                    </TextBox>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

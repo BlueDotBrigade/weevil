@@ -18,7 +18,7 @@
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, IBulletinMediator bulletinMediator);
 
-		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern);
+		void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, string sourceFilePath);
 		
 		bool TryShowGoTo(string defaultValue, out string userValue);
 
