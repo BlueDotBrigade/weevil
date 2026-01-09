@@ -585,7 +585,6 @@
 					}
 				}
 			}
-			EnsureSeriesNames(seriesNames);
 			return seriesNames;
 		}
 
