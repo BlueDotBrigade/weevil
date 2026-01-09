@@ -36,7 +36,7 @@
 		<PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
 		<!-- NOTE: Upgrading FluentAssertions to v8 requires a license. #475 -->
 		<PackageReference Include="FluentAssertions" Version="[7.0.0]" />
-		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="..\..\DomainSpecificTerminology.xml">

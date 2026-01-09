@@ -129,9 +129,9 @@
 		<PackageReference Include="System.Collections.Immutable">
 			<Version>10.0.1</Version>
 		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-		<PackageReference Include="System.Management" Version="9.0.0" />
+		<PackageReference Include="System.Management" Version="10.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
