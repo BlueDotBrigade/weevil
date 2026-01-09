@@ -5,7 +5,7 @@
 		<RootNamespace>BlueDotBrigade.Weevil.Plugins</RootNamespace>
 		<Version>2.12.0</Version>
 		<Authors>BlueDotBrigade;</Authors>
-		<Copyright>© 2025 Blue Dot Brigade</Copyright>
+		<Copyright>© 2026 Blue Dot Brigade</Copyright>
 		<Owners>Blue Dot Brigade</Owners>
 		<Description>This project dynamically detects the plugin files from %WEEVIL_PLUGINS_PATH%, so that thay can be added to the installation package.</Description>
 		<IsPackable>False</IsPackable>
