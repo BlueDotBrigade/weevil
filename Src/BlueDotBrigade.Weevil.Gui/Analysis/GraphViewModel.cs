@@ -440,7 +440,7 @@
 		{
 			if (seriesNames.Count == 0)
 			{
-				seriesNames.Add(DefaultSeriesName);
+				seriesNames.Add($"{DefaultSeriesName} 1");
 				return;
 			}
 
@@ -448,9 +448,7 @@
 			{
 				if (string.IsNullOrEmpty(seriesNames[index]))
 				{
-					seriesNames[index] = index == 0
-						? DefaultSeriesName
-						: $"{DefaultSeriesName} {index + 1}";
+					seriesNames[index] = $"{DefaultSeriesName} {index + 1}";
 				}
 			}
 		}
@@ -669,9 +667,9 @@
 				}
 			}
 
-			// Use provided names or defaults
-			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : DefaultSeriesName;
-			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : DefaultSeriesName + DefaultSeries2Suffix;
+			// Use provided names or defaults (Series N convention)
+			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : $"{DefaultSeriesName} 1";
+			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : $"{DefaultSeriesName} 2";
 
 			var seriesList = new List<ISeries>
 			{
