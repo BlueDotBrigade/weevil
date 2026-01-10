@@ -1,23 +1,31 @@
-name: Old - Build Status
+name: Build and Test (.NET 9)
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore Weevil-v2.sln
+
+      - name: Build (Release, x64)
+        run: dotnet build Weevil-v2.sln --configuration Release -p:Platform=x64 --no-restore
+
+      - name: Test (Release, x64)
+        run: dotnet test Weevil-v2.sln --configuration Release -p:Platform=x64 --no-build --verbosity normal
