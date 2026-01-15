@@ -241,6 +241,18 @@
 			}
 		}
 
+		public bool IncludeBookmarks
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludeBookmarks ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeBookmarks = value;
+				}
+			}
+		}
+
 		public bool IsFilterCaseSensitive
 		{
 			get => this.FilterOptionsViewModel?.Options.IsFilterCaseSensitive ?? true;

@@ -14,6 +14,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private bool _includeDebugRecords;
 		private bool _includeTraceRecords;
 		private bool _includePinned;
+		private bool _includeBookmarks;
 		private bool _isFilterCaseSensitive;
 		private FilterType _filterExpressionType;
 
@@ -22,6 +23,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			this.IncludeDebugRecords = true;
 			this.IncludeTraceRecords = true;
 			this.IncludePinned = true;
+			this.IncludeBookmarks = true;
 			this.IsFilterCaseSensitive = true;
 			this.FilterExpressionType = FilterType.RegularExpression;
 		}
@@ -67,6 +69,19 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 		}
 
+		public bool IncludeBookmarks
+		{
+			get => _includeBookmarks;
+			set
+			{
+				if (_includeBookmarks != value)
+				{
+					_includeBookmarks = value;
+					OnPropertyChanged(nameof(IncludeBookmarks));
+				}
+			}
+		}
+
 		public bool IsFilterCaseSensitive
 		{
 			get => _isFilterCaseSensitive;
@@ -103,6 +118,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			if (this.IncludePinned)
 			{
 				configuration.Add("IncludePinned", this.IncludePinned);
+			}
+
+			if (this.IncludeBookmarks)
+			{
+				configuration.Add("IncludeBookmarks", this.IncludeBookmarks);
 			}
 
 			configuration.Add("IsCaseSensitive", this.IsFilterCaseSensitive);
