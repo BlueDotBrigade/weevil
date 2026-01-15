@@ -2,7 +2,6 @@ using BlueDotBrigade;
 using BlueDotBrigade.Weevil;
 using BlueDotBrigade.Weevil.Filter;
 using BlueDotBrigade.Weevil.Data;
-using BlueDotBrigade.Weevil.Filter;
 using BlueDotBrigade.Weevil.Filter.Expressions.PlainText;
 
 using static System.Net.Mime.MediaTypeNames;
