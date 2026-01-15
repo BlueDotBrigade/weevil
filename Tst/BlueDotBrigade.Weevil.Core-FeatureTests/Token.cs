@@ -20,6 +20,7 @@
 			this.Configuration = new Dictionary<string, object>()
 			{
 				{ "IncludePinned", true },
+				{ "IncludeBookmarks", true },
 				{ "IsCaseSensitive", true },
 				{ "HideDebugRecords", false },
 				{ "HideTraceRecords", false },

@@ -51,5 +51,29 @@
 					throw new ArgumentOutOfRangeException(nameof(severityOption), severityOption, $"Severity option was expected to be either: {X.ShowSeverityOption}");
 			}
 		}
+
+		[When(@"the ""Show Pinned"" filter option is on")]
+		public void WhenTheShowPinnedFilterOptionIsOn()
+		{
+			this.Context.Configuration["IncludePinned"] = true;
+		}
+
+		[When(@"the ""Show Pinned"" filter option is off")]
+		public void WhenTheShowPinnedFilterOptionIsOff()
+		{
+			this.Context.Configuration["IncludePinned"] = false;
+		}
+
+		[When(@"the ""Show Bookmarks"" filter option is on")]
+		public void WhenTheShowBookmarksFilterOptionIsOn()
+		{
+			this.Context.Configuration["IncludeBookmarks"] = true;
+		}
+
+		[When(@"the ""Show Bookmarks"" filter option is off")]
+		public void WhenTheShowBookmarksFilterOptionIsOff()
+		{
+			this.Context.Configuration["IncludeBookmarks"] = false;
+		}
 	}
 }
