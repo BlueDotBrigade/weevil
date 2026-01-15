@@ -15,8 +15,11 @@
         
         FontFamily="{materialDesign:MaterialDesignFont}">
     <Window.Resources>
-        <Style TargetType="TabControl">
-            <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
+        <Style TargetType="TabControl" BasedOn="{StaticResource MaterialDesignTabControl}">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        </Style>
+        <Style TargetType="TabItem" BasedOn="{StaticResource MaterialDesignTabItem}">
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
         </Style>
         <Style TargetType="TextBlock">
             <Setter Property="Margin" Value="5" />
@@ -33,6 +36,11 @@
         <Style TargetType="Button" BasedOn="{StaticResource  MaterialDesignRaisedButton}">
             <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
             <Setter Property="Width" Value="{StaticResource ButtonWidth}" />
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
     </Window.Resources>
     <TabControl>
