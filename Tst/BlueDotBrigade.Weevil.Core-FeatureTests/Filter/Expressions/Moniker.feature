@@ -7,3 +7,8 @@ Scenario: Filtering using a moniker expression
 	When applying the include filter: @Severity=Information
 	Then there will be 37 matching records
 	And all records will include: Info
+
+Scenario: Filtering using the @Line moniker
+	Given that the default log file is open
+	When applying the include filter: @Line=100
+	Then there will be 1 matching records
