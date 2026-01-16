@@ -1,7 +1,7 @@
 ﻿/*
  * The boilerplate code contained within this file, exposes public methods to the WPF user interface.
  *
- * The `SafeForDependencyAnalysis` attribute signals to the `PostSharp` AOP library, that the `PropertyChanged`
+ * The `NotObservable` attribute signals to the `Metalama` AOP library, that the `PropertyChanged`
  * event will not be raised for commands.
  */
 namespace BlueDotBrigade.Weevil.Gui.Filter
@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Windows;
 	using System.Windows.Input;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
@@ -18,89 +18,89 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	internal partial class FilterViewModel
 	{
 		#region Commands: General
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand OpenLogCommand => new UiBoundCommand(OpenAsync, () => this.CanOpenLogFile);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand SaveLogCommand => new UiBoundCommand(SaveMetadata, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ReloadCommand => new UiBoundCommand(Reload, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand SaveSelectedAsRawCommand => new UiBoundCommand(() => SaveSelected(FileFormatType.Raw), () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand SaveSelectedAsTsvCommand => new UiBoundCommand(() => SaveSelected(FileFormatType.Tsv), () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ExitCommand => new UiBoundCommand(Exit, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClipboardCopySimpleCallStackCommand => new UiBoundCommand(
 			() => ClipboardCopyRaw(true), 
 			() => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClipboardCopyRawCommand => new UiBoundCommand(
 			() => ClipboardCopyRaw(false), 
 			() => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClipboardCopyLineNumbersCommand => new UiBoundCommand(ClipboardCopyLineNumbers, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClipboardCopyTimestampsCommand => new UiBoundCommand(ClipboardCopyTimestamps, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClipboardCopyCommentCommand => new UiBoundCommand(ClipboardCopyComment, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClipboardPasteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: false), () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClipboardPasteOverwriteCommand => new UiBoundCommand(() => ClipboardPaste(allowOverwrite: true), () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GoToCommand => new UiBoundCommand(() => GoTo(), () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ShowHelpCommand => new UiBoundCommand(ShowHelp);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ShowAboutCommand => new UiBoundCommand(ShowAbout);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ShowDashboardCommand => new UiBoundCommand(ShowDashboard, () => this.IsDashboardEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GraphDataCommand => new UiBoundCommand(GraphData, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ShowFileExplorerCommand => new UiBoundCommand(ShowFileExplorer, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ShowRegExToolCommand => new UiBoundCommand(ShowRegExTool);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ShowApplicationLogFileCommand => new UiBoundCommand(ShowApplicationLogFile);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand SplitCurrentLogCommand => new UiBoundCommand(SplitCurrentLog, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ForceGarbageCollectionCommand => new UiBoundCommand(ForceGarbageCollection, () => this.IsMenuEnabled);
 
 		#endregion
 
 		#region Commands: Clear Records
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClearBeforeSelectedRecordCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.BeforeSelected), 
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClearAfterSelectedRecordCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.AfterSelected),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClearBeforeAndAfterSelectionCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.BeforeAndAfterSelected),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClearBetweenSelectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.BetweenSelected),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClearUnselectedRecordsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.Unselected),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ClearBeyondRegionsCommand => new UiBoundCommand(
 			() => ClearRecords(ClearOperation.BeyondRegions),
 			() => this.IsMenuEnabled);
@@ -108,10 +108,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		#region Commands: Filtering
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FilterCommand => new UiBoundCommand(Filter, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public DelegateCommand<object[]> FilterOrCancelCommand => new DelegateCommand<object[]>(parameters =>
 		{
 			try
@@ -134,7 +134,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 		});
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public DelegateCommand<object[]> FilterManuallyCommand => new DelegateCommand<object[]>(parameters =>
 		{
 			try
@@ -157,126 +157,126 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 		}, (x) => true);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FilterByCommentCommand => new UiBoundCommand(FilterByComment, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FilterByPinnedCommand => new UiBoundCommand(FilterByPinned, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FilterByRegionsCommand => new UiBoundCommand(FilterByRegions, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FilterByBookmarksCommand => new UiBoundCommand(FilterByBookmarks, () => this.IsMenuEnabled);
 
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ToggleFiltersCommand => new UiBoundCommand(ToggleFilters, () => this.IsMenuEnabled);
 		
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand RefreshCommand => new UiBoundCommand(Refresh, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreFilterOptionsVisible = !this.AreFilterOptionsVisible, () => this.IsFilterToolboxEnabled);
 		#endregion
 
 		#region Commands: Navigation
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FindTextCommand => new UiBoundCommand(() => FindText(), () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FindNextCommand => new UiBoundCommand(() => FindNext(), () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand FindPreviousCommand => new UiBoundCommand(() => FindPrevious(), () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GoToNextCommentCommand => new UiBoundCommand(GoToNextComment, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GoToPreviousCommentCommand => new UiBoundCommand(GoToPreviousComment, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GoToNextPinCommand => new UiBoundCommand(GoToNextPin, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GoToPreviousPinCommand => new UiBoundCommand(GoToPreviousPin, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GoToNextFlagCommand => new UiBoundCommand(GoToNextFlag, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand GoToPreviousFlagCommand => new UiBoundCommand(GoToPreviousFlag, () => this.IsMenuEnabled);
 		#endregion
 
 		#region Commands: Analysis
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand SaveCommentSummaryCommand => new UiBoundCommand(SaveCommentSummary, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand MeasureElapsedTimeUiThreadCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.ElapsedTimeUiThread), 
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand MeasureElapsedTimeCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.ElapsedTime),
 			() => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand DetectDataCommand => new UiBoundCommand(
                         () => Analyze(AnalysisType.DetectData),
                         () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand DetectStableValuesCommand => new UiBoundCommand(
                         () => Analyze(AnalysisType.DetectStableValues),
                         () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand DetectFirstCommand => new UiBoundCommand(
                         () => Analyze(AnalysisType.DetectFirst),
                         () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
                         () => Analyze(AnalysisType.DetectDataTransition),
                         () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand DataTransitionsFallingEdgeCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectFallingEdges),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand DataTransitionsRisingEdgeCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectRisingEdges),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand DetectTemporalAnomalyCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.TemporalAnomaly),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand DetectRepeatingRecordsCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectRepeatingRecords),
 			() => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand CalculateStatisticsCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.Statistical),
 			() => this.IsMenuEnabled);
 
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand RemoveAllFlagsCommand => new UiBoundCommand(RemoveAllFlags, () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand RemoveAllCommentsCommand => new UiBoundCommand(() => RemoveComments(true), () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand RemoveSelectedCommentsCommand => new UiBoundCommand(() => RemoveComments(false), () => this.IsMenuEnabled);
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand UnpinAllCommand => new UiBoundCommand(UnpinAll, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public DelegateCommand<object[]> CustomAnalyzerCommand => new DelegateCommand<object[]>(parameters =>
 		{
 			try
@@ -303,47 +303,47 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		#endregion
 
 		#region Commands: Selection
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand ToggleIsPinnedCommand => new UiBoundCommand(ToggleIsPinned, () => this.IsMenuEnabled);
 		#endregion
 
 		#region Commands: Regions of Interest
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand AddRegionCommand => new UiBoundCommand(AddRegion, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand RemoveRegionCommand => new UiBoundCommand(RemoveRegion, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand RemoveAllRegionsCommand => new UiBoundCommand(RemoveAllRegions, () => this.IsMenuEnabled);
 		#endregion
 
 		#region Commands: Bookmarks
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand AddBookmarkCommand => new UiBoundCommand(AddBookmark, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public ICommand RemoveBookmarkCommand => new UiBoundCommand(RemoveBookmark, () => this.IsMenuEnabled);
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
                 public ICommand RemoveAllBookmarksCommand => new UiBoundCommand(RemoveAllBookmarks, () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand SetBookmark1Command => new UiBoundCommand(() => SetBookmark(1), () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand SetBookmark2Command => new UiBoundCommand(() => SetBookmark(2), () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand SetBookmark3Command => new UiBoundCommand(() => SetBookmark(3), () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand GoToBookmark1Command => new UiBoundCommand(() => GoToBookmark(1), () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand GoToBookmark2Command => new UiBoundCommand(() => GoToBookmark(2), () => this.IsMenuEnabled);
 
-                [SafeForDependencyAnalysis]
+                [NotObservable]
                 public ICommand GoToBookmark3Command => new UiBoundCommand(() => GoToBookmark(3), () => this.IsMenuEnabled);
                 #endregion
         }

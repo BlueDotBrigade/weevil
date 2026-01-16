@@ -28,12 +28,6 @@
             <Component Id="BlueDotBrigade.Weevil.Gui.pdb" Guid="{81BDE419-6D92-4168-9B3B-47B2CF0A4082}">
                 <File Id="BlueDotBrigade.Weevil.Gui.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pspdb" Guid="{1EC7624F-0A32-49FB-BAF0-3CFF1A5DD8F7}">
-                <File Id="BlueDotBrigade.Weevil.Gui.pspdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pspdb" />
-            </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pssym" Guid="{5C30592F-FE71-496A-B533-51A84F420E2D}">
-                <File Id="BlueDotBrigade.Weevil.Gui.pssym" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pssym" />
-            </Component>
             <Component Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" Guid="{F6D77353-0A05-49A8-B693-59774BEA97CD}">
                 <File Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
             </Component>
@@ -168,18 +162,6 @@
             </Component>
             <Component Id="NLog.dll" Guid="{46349807-4C34-4A4C-BB6B-46971D61898C}">
                 <File Id="NLog.dll" KeyPath="yes" Source="$(var.SourceDirPath)\NLog.dll" />
-            </Component>
-            <Component Id="PostSharp.dll" Guid="{2265B6A8-663B-43F0-BF31-F3E41E05CFF2}">
-                <File Id="PostSharp.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.dll" />
-            </Component>
-            <Component Id="PostSharp.Patterns.Aggregation.dll" Guid="{D70E1DEA-E47C-4D9C-AD32-5A2F33B0D129}">
-                <File Id="PostSharp.Patterns.Aggregation.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Aggregation.dll" />
-            </Component>
-            <Component Id="PostSharp.Patterns.Common.dll" Guid="{64C08FD9-4CBB-43C1-AA7E-AA48E13A4D1D}">
-                <File Id="PostSharp.Patterns.Common.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Common.dll" />
-            </Component>
-            <Component Id="PostSharp.Patterns.Model.dll" Guid="{0C70D3D9-3706-4336-B176-474C56035514}">
-                <File Id="PostSharp.Patterns.Model.dll" KeyPath="yes" Source="$(var.SourceDirPath)\PostSharp.Patterns.Model.dll" />
             </Component>
             <Component Id="Prism.Container.Abstractions.dll" Guid="{A1BB3CB8-4C95-4AE4-A7D4-69E22A6E8D99}">
                 <File Id="Prism.Container.Abstractions.dll" KeyPath="yes" Source="$(var.SourceDirPath)\Prism.Container.Abstractions.dll" />
@@ -321,8 +303,6 @@
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.dll.config" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.exe" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.pdb" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.pspdb" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.pssym" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
             <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.deps.json" />
             <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.dll" />
@@ -368,10 +348,6 @@
             <ComponentRef Id="Newtonsoft.Json.dll" />
             <ComponentRef Id="nlog.config" />
             <ComponentRef Id="NLog.dll" />
-            <ComponentRef Id="PostSharp.dll" />
-            <ComponentRef Id="PostSharp.Patterns.Aggregation.dll" />
-            <ComponentRef Id="PostSharp.Patterns.Common.dll" />
-            <ComponentRef Id="PostSharp.Patterns.Model.dll" />
             <ComponentRef Id="Prism.Container.Abstractions.dll" />
             <ComponentRef Id="Prism.dll" />
             <ComponentRef Id="Prism.Events.dll" />
