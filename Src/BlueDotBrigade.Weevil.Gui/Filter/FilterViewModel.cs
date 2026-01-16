@@ -2027,26 +2027,6 @@
 			}
 		}
 
-		private void GoToLatestBookmark()
-		{
-			var bookmarks = _engine.Bookmarks.Bookmarks;
-			if (bookmarks.Length > 0)
-			{
-				// Get the last bookmark in the list (most recently created)
-				var latestBookmark = bookmarks[bookmarks.Length - 1];
-				SearchFilterResults(
-						$"Bookmark '{latestBookmark.Name}' is not visible in the current results.",
-						() => _engine
-								.Navigate
-								.GoTo(latestBookmark.Record.LineNumber, RecordSearchType.NearestNeighbor)
-								.ToIndexUsing(_engine.Filter.Results));
-			}
-			else
-			{
-				MessageBox.Show("No bookmarks have been set.", "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
-			}
-		}
-
 		public bool RegionStartsWith(IRecord record, out string regionName)
 		{
 			return _engine.Regions.TryStartsWith(record.LineNumber, out regionName);
