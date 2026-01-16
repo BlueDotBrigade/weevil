@@ -3,10 +3,6 @@
 		<TargetFramework>net9.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-		<!-- If `AssemblyName` is set to any other value (e.g. WeevilGui.exe) you may experience -->
-		<!-- PostSharp `No valid license key has been installed` compiler errors (PS0242) -->
-		<!-- when using GitHub actions. -->
-		<!-- See issue: #336 -->
 		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
 		<PlatformTarget>x64</PlatformTarget>
 		<OutputType>WinExe</OutputType>
@@ -119,11 +115,8 @@
 			<Version>6.0.7</Version>
 		</PackageReference>
 		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
-		<PackageReference Include="PostSharp">
-			<Version>2026.0.5</Version>
-		</PackageReference>
-		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>2026.0.5</Version>
+		<PackageReference Include="Metalama.Patterns.Observability">
+			<Version>2025.0.6</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="System.Collections.Immutable">

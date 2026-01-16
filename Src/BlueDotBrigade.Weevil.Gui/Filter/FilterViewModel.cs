@@ -37,13 +37,12 @@
 	using BlueDotBrigade.Weevil.Utilities;
 	using GongSolutions.Wpf.DragDrop;
 	using Newtonsoft.Json.Linq;
-	using PostSharp.Extensibility;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
-	[NotifyPropertyChanged()]
+	[Observable]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
