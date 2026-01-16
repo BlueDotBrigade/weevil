@@ -82,9 +82,13 @@
                         <MenuItem Header="Set Bookmark 1" Command="{Binding SetBookmark1Command}" InputGestureText="Ctrl+Shift+1" />
                         <MenuItem Header="Set Bookmark 2" Command="{Binding SetBookmark2Command}" InputGestureText="Ctrl+Shift+2" />
                         <MenuItem Header="Set Bookmark 3" Command="{Binding SetBookmark3Command}" InputGestureText="Ctrl+Shift+3" />
+                        <MenuItem Header="Set Bookmark 4" Command="{Binding SetBookmark4Command}" InputGestureText="Ctrl+Shift+4" />
+                        <MenuItem Header="Set Bookmark 5" Command="{Binding SetBookmark5Command}" InputGestureText="Ctrl+Shift+5" />
                         <MenuItem Header="Go To Bookmark 1" Command="{Binding GoToBookmark1Command}" InputGestureText="Ctrl+1" />
                         <MenuItem Header="Go To Bookmark 2" Command="{Binding GoToBookmark2Command}" InputGestureText="Ctrl+2" />
                         <MenuItem Header="Go To Bookmark 3" Command="{Binding GoToBookmark3Command}" InputGestureText="Ctrl+3" />
+                        <MenuItem Header="Go To Bookmark 4" Command="{Binding GoToBookmark4Command}" InputGestureText="Ctrl+4" />
+                        <MenuItem Header="Go To Bookmark 5" Command="{Binding GoToBookmark5Command}" InputGestureText="Ctrl+5" />
                         <MenuItem Header="Remove Bookmark" Command="{Binding RemoveBookmarkCommand}"/>
                         <MenuItem Header="Remove All Bookmarks" Command="{Binding RemoveAllBookmarksCommand}" />
                         <Separator/>
