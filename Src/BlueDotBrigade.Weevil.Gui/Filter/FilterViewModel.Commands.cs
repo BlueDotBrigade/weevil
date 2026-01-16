@@ -338,6 +338,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
                 public ICommand SetBookmark3Command => new UiBoundCommand(() => SetBookmark(3), () => this.IsMenuEnabled);
 
                 [NotObservable]
+                public ICommand SetBookmark4Command => new UiBoundCommand(() => SetBookmark(4), () => this.IsMenuEnabled);
+
+                [NotObservable]
+                public ICommand SetBookmark5Command => new UiBoundCommand(() => SetBookmark(5), () => this.IsMenuEnabled);
+
+                [NotObservable]
                 public ICommand GoToBookmark1Command => new UiBoundCommand(() => GoToBookmark(1), () => this.IsMenuEnabled);
 
                 [NotObservable]
@@ -345,6 +351,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
                 [NotObservable]
                 public ICommand GoToBookmark3Command => new UiBoundCommand(() => GoToBookmark(3), () => this.IsMenuEnabled);
+
+                [NotObservable]
+                public ICommand GoToBookmark4Command => new UiBoundCommand(() => GoToBookmark(4), () => this.IsMenuEnabled);
+
+                [NotObservable]
+                public ICommand GoToBookmark5Command => new UiBoundCommand(() => GoToBookmark(5), () => this.IsMenuEnabled);
                 #endregion
         }
 }
