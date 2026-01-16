@@ -194,7 +194,7 @@
 
 		public Version WeevilVersion { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public bool IsMenuEnabled
 		{
 			get
@@ -214,7 +214,7 @@
 		
 		public bool AreInsightsReady { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public bool IsDashboardEnabled
 		{
 			get
@@ -295,7 +295,7 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public string SourceFileRemarks
 		{
 			get
@@ -363,7 +363,7 @@
 
 		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
