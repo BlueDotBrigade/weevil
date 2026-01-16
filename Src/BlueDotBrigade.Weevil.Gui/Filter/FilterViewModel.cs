@@ -37,13 +37,12 @@
 	using BlueDotBrigade.Weevil.Utilities;
 	using GongSolutions.Wpf.DragDrop;
 	using Newtonsoft.Json.Linq;
-	using PostSharp.Extensibility;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
-	[NotifyPropertyChanged()]
+	[Observable]
 	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
@@ -195,7 +194,7 @@
 
 		public Version WeevilVersion { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public bool IsMenuEnabled
 		{
 			get
@@ -215,7 +214,7 @@
 		
 		public bool AreInsightsReady { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public bool IsDashboardEnabled
 		{
 			get
@@ -308,7 +307,7 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public string SourceFileRemarks
 		{
 			get
@@ -376,7 +375,7 @@
 
 		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }

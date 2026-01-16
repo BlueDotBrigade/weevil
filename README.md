@@ -188,8 +188,8 @@ Software integrity is verified through a number of automated tests which can be 
 
 ## Recognition
 
-- [PostSharp](https://www.postsharp.net/)
-   - *PostSharp*`s [aspect oriented][AOP] library helps to simplify a code base by reducing [boilerplate][]. Special thanks to the PostSharp team for donating a license.
+- [Metalama](https://www.postsharp.net/metalama)
+   - *Metalama*'s [aspect oriented][AOP] library helps to simplify a code base by reducing [boilerplate][]. Special thanks to the PostSharp Technologies team for creating this successor to PostSharp.
 - [GitHub](https://www.GitHub.com)
    - Free Git repository hosting platform for this project & many others like it.
 

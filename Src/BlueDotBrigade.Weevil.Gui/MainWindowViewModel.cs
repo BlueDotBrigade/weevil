@@ -11,9 +11,9 @@
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 
-	[NotifyPropertyChanged()]
+	[Observable]
 	internal class MainWindowViewModel
 	{
 		private readonly IUiDispatcher _uiDispatcher;
