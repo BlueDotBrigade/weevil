@@ -1987,13 +1987,28 @@
 				{
 					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
 
-					var existing = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
+					// Clear any existing bookmark with this slot number
+					var existing = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString() || b.Name.StartsWith(slot + " : "));
 					if (existing != null)
 					{
 						_engine.Bookmarks.Clear(existing.Record.LineNumber);
 					}
 
-					_engine.Bookmarks.CreateFromSelection(slot.ToString(), selectedLineNumber);
+					// Prompt user for optional bookmark name
+					string customName = string.Empty;
+					bool userProvidedName = _dialogBox.TryShowUserPrompt(
+						$"Set Bookmark {slot}",
+						"Name (leave empty for default)",
+						@"^[a-zA-Z0-9\-]{0,12}$",  // Allow 0-12 characters (empty is valid)
+						"Must be 0 to 12 characters: letters, numbers, or hyphens.",
+						out customName);
+
+					// Format bookmark name: "{slot} : {customName}" if name provided, otherwise just "{slot}"
+					string bookmarkName = string.IsNullOrWhiteSpace(customName) 
+						? slot.ToString() 
+						: $"{slot} : {customName}";
+
+					_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
 
 					RaiseBookmarksChanged();
 					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
@@ -2011,7 +2026,9 @@
 
 		private void GoToBookmark(int slot)
 		{
-			var bookmark = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
+			// Find bookmark by slot number (matches "1", "2", etc. or "1 : name", "2 : name", etc.)
+			var bookmark = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => 
+				b.Name == slot.ToString() || b.Name.StartsWith(slot + " : "));
 			if (bookmark != null)
 			{
 				SearchFilterResults(
