@@ -14,3 +14,20 @@ Scenario: Treat pattern characters as literal text in plain text mode
   When using the "Plain Text" filter mode
     And applying the include filter: Voltage=\d{2,3}
   Then there will be 0 matching records
+
+@Requirement:394
+Scenario: Plain text filtering with case sensitivity ON
+  Given that the default log file is open
+  When using the "Plain Text" filter mode
+    And the case sensitive option is on
+    And applying the include filter: DIRECTIVES
+  Then there will be 0 matching records
+
+@Requirement:394
+Scenario: Plain text filtering with case sensitivity OFF
+  Given that the default log file is open
+  When using the "Plain Text" filter mode
+    And the case sensitive option is off
+    And applying the include filter: DIRECTIVES
+  Then there will be 7 matching records
+    And all records will include: Directives
