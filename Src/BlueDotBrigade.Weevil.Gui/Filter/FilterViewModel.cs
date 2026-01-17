@@ -199,11 +199,6 @@
 		{
 			get
 			{
-				if (Depends.Guard)
-				{
-					Depends.On(this.IsLogFileOpen, this.CanOpenLogFile);
-				}
-
 				return this.IsLogFileOpen && this.CanOpenLogFile;
 			}
 		}
@@ -219,11 +214,6 @@
 		{
 			get
 			{
-				if (Depends.Guard)
-				{
-					Depends.On(this.IsMenuEnabled, this.AreInsightsReady);
-				}
-
 				return this.IsMenuEnabled && this.AreInsightsReady;
 			}
 		}
@@ -1140,17 +1130,35 @@
 
 		private void FindText()
 		{
+			// Use local variables for out parameters since Metalama converts fields to properties
+			bool isCaseSensitive;
+			bool useRegex;
+			string findText;
+			bool searchElapsedTime;
+			int? minElapsedMs;
+			int? maxElapsedMs;
+			bool searchComments;
+			
 			if (_dialogBox.TryShowFind(
 				_findText, 
-				out _findIsCaseSensitive, 
+				out isCaseSensitive, 
 				out var findNext, 
-				out _findUseRegex, 
-				out _findText,
-				out _findSearchElapsedTime,
-				out _findMinElapsedMs,
-				out _findMaxElapsedMs,
-				out _findSearchComments))
+				out useRegex, 
+				out findText,
+				out searchElapsedTime,
+				out minElapsedMs,
+				out maxElapsedMs,
+				out searchComments))
 			{
+				// Assign to fields after the method call
+				_findIsCaseSensitive = isCaseSensitive;
+				_findUseRegex = useRegex;
+				_findText = findText;
+				_findSearchElapsedTime = searchElapsedTime;
+				_findMinElapsedMs = minElapsedMs;
+				_findMaxElapsedMs = maxElapsedMs;
+				_findSearchComments = searchComments;
+				
 				if (_findSearchElapsedTime)
 				{
 					if (findNext)
