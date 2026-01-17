@@ -437,12 +437,27 @@
 			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
 
+		/// <summary>
+		/// Raises the PropertyChanged event for the specified property.
+		/// </summary>
+		/// <param name="propertyName">The name of the property that changed.</param>
+		/// <remarks>
+		/// This method is intentionally empty. At compile time, Metalama.Patterns.Observability
+		/// will inject the implementation that raises the PropertyChanged event.
+		/// This allows manual property change notifications for properties that Metalama
+		/// cannot automatically detect (e.g., properties marked with [NotObservable] or
+		/// properties that depend on external state).
+		/// </remarks>
 		protected virtual void OnPropertyChanged(string propertyName)
 		{
-			// Metalama will weave in the PropertyChanged event and this method will be called
+			// Method body will be injected by Metalama at compile time
 		}
 
-		protected void RaisePropertyChanged(string name)
+		/// <summary>
+		/// Helper method to raise property change notifications, automatically capturing the caller's property name.
+		/// </summary>
+		/// <param name="name">The name of the property that changed. If not specified, the caller's member name is used.</param>
+		protected void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = null)
 		{
 			OnPropertyChanged(name);
 		}
