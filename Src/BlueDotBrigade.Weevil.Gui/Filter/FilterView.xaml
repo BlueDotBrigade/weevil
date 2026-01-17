@@ -49,9 +49,13 @@
         <KeyBinding Key="D1" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark1Command}" />
         <KeyBinding Key="D2" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark2Command}" />
         <KeyBinding Key="D3" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark3Command}" />
+        <KeyBinding Key="D4" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark4Command}" />
+        <KeyBinding Key="D5" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark5Command}" />
         <KeyBinding Key="D1" Modifiers="Ctrl" Command="{Binding GoToBookmark1Command}" />
         <KeyBinding Key="D2" Modifiers="Ctrl" Command="{Binding GoToBookmark2Command}" />
         <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding GoToBookmark3Command}" />
+        <KeyBinding Key="D4" Modifiers="Ctrl" Command="{Binding GoToBookmark4Command}" />
+        <KeyBinding Key="D5" Modifiers="Ctrl" Command="{Binding GoToBookmark5Command}" />
 
         <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
         <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />

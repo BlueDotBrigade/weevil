@@ -14,12 +14,12 @@
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.Gui.Navigation;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 
 	/// <summary>
 	/// Listens for application events, and updates the status bar as needed.
 	/// </summary>
-	[NotifyPropertyChanged()]
+	[Observable]
 	internal class StatusBarViewModel
 	{
 		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromSeconds(0.5);

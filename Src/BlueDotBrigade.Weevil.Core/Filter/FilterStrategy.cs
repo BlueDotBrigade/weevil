@@ -22,6 +22,7 @@
 		private const string HideDebugRecords = "HideDebugRecords";
 		private const string HideTraceRecords = "HideTraceRecords";
 		private const string IncludePinned = "IncludePinned";
+		private const string IncludeBookmarks = "IncludeBookmarks";
 
 		private readonly LogicalOrOperation _inclusiveFilter;
 		private readonly LogicalOrOperation _exclusiveFilter;
@@ -29,6 +30,8 @@
 		private readonly ExpressionBuilder _expressionBuilder;
 
 		private readonly bool _includePinned;
+		private readonly bool _includeBookmarks;
+		private readonly IBookmarkManager _bookmarkManager;
 
 		static FilterStrategy()
 		{
@@ -54,6 +57,7 @@
 		{
 			_filterType = filterType;
 			_filterCriteria = filterCriteria;
+			_bookmarkManager = bookmarkManager;
 
             _expressionBuilder = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager, bookmarkManager);
 
@@ -70,6 +74,14 @@
 				if (bool.TryParse(filterCriteria.Configuration[IncludePinned].ToString(), out var userConfigurationValue))
 				{
 					_includePinned = userConfigurationValue;
+				}
+			}
+
+			if (filterCriteria.Configuration.ContainsKey(IncludeBookmarks))
+			{
+				if (bool.TryParse(filterCriteria.Configuration[IncludeBookmarks].ToString(), out var userConfigurationValue))
+				{
+					_includeBookmarks = userConfigurationValue;
 				}
 			}
 		}
@@ -98,6 +110,10 @@
 			else
 			{
 				if (_includePinned && record.Metadata.IsPinned)
+				{
+					canKeepRecord = true;
+				}
+				else if (_includeBookmarks && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _))
 				{
 					canKeepRecord = true;
 				}

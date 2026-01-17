@@ -55,3 +55,35 @@ Scenario: Built-in filter alias #IPv6 identifies records with IP addresses
 		  And applying the include filter: #IPV6
 	Then there will be 1 matching records
 		  And all records will include: S/N=IA-1073R037
+
+Scenario: Bookmarked records remain visible with include filter when bookmarks always visible is enabled
+	Given that the default log file is open
+	When bookmarking the record on line 2
+		 And bookmarking the record on line 4
+		 And bookmarking the record on line 8
+		 And unpinning the record on line 2
+		 And unpinning the record on line 4
+		 And unpinning the record on line 8
+		 And the "Show Pinned" filter option is on
+		 And the "Show Bookmarks" filter option is on
+		 And applying the include filter: text not found
+	Then there will be 3 matching records
+		 And line number 2 will be visible
+		 And line number 4 will be visible
+		 And line number 8 will be visible
+
+Scenario: Bookmarked records remain visible with exclude filter when bookmarks always visible is enabled
+	Given that the default log file is open
+	When bookmarking the record on line 2
+		 And bookmarking the record on line 4
+		 And bookmarking the record on line 8
+		 And unpinning the record on line 2
+		 And unpinning the record on line 4
+		 And unpinning the record on line 8
+		 And the "Show Pinned" filter option is on
+		 And the "Show Bookmarks" filter option is on
+		 And applying the exclude filter: Info
+	Then there will be 3 matching records
+		 And line number 2 will be visible
+		 And line number 4 will be visible
+		 And line number 8 will be visible
