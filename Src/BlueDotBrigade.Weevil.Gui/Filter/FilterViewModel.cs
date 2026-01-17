@@ -1987,26 +1987,21 @@
 				{
 					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
 
-					// Clear any existing bookmark with this slot number
-					var existing = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => IsBookmarkForSlot(b.Name, slot));
-					if (existing != null)
+					// Calculate default bookmark name based on total count after creation
+					int currentCount = _engine.Bookmarks.Bookmarks.Length;
+					string defaultName = $"Bookmark{currentCount + 1}";
+
+					// Prompt user for bookmark name with default
+					string bookmarkName = _dialogBox.ShowUserPrompt(
+						"Create Bookmark",
+						"Bookmark name:",
+						defaultName);
+
+					// If user cancels, use default name (all bookmarks must have a name)
+					if (string.IsNullOrWhiteSpace(bookmarkName))
 					{
-						_engine.Bookmarks.Clear(existing.Record.LineNumber);
+						bookmarkName = defaultName;
 					}
-
-					// Prompt user for optional bookmark name
-					string customName = string.Empty;
-					_dialogBox.TryShowUserPrompt(
-						$"Set Bookmark {slot}",
-						"Name (leave empty for default)",
-						@"^[a-zA-Z0-9\-]{0,12}$",  // Allow 0-12 characters (empty is valid)
-						"Must be 0 to 12 characters: letters, numbers, or hyphens.",
-						out customName);
-
-					// Format bookmark name: "{slot} : {customName}" if name provided, otherwise just "{slot}"
-					string bookmarkName = string.IsNullOrWhiteSpace(customName) 
-						? slot.ToString() 
-						: $"{slot} : {customName}";
 
 					_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
 
@@ -2026,10 +2021,11 @@
 
 		private void GoToBookmark(int slot)
 		{
-			// Find bookmark by slot number (matches "1", "2", etc. or "1 : name", "2 : name", etc.)
-			var bookmark = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => IsBookmarkForSlot(b.Name, slot));
-			if (bookmark != null)
+			// For Ctrl+1 through Ctrl+5, find the Nth bookmark (1-indexed)
+			var bookmarks = _engine.Bookmarks.Bookmarks;
+			if (slot > 0 && slot <= bookmarks.Length)
 			{
+				var bookmark = bookmarks[slot - 1];
 				SearchFilterResults(
 						$"Bookmark {slot} is not visible in the current results.",
 						() => _engine
@@ -2041,12 +2037,6 @@
 			{
 				MessageBox.Show($"Bookmark {slot} has not been set.", "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
-		}
-
-		private bool IsBookmarkForSlot(string bookmarkName, int slot)
-		{
-			// Match bookmarks named "{slot}" or "{slot} : {custom_name}"
-			return bookmarkName == slot.ToString() || bookmarkName.StartsWith(slot + " : ");
 		}
 
 		public bool RegionStartsWith(IRecord record, out string regionName)
