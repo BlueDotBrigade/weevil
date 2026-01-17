@@ -1132,6 +1132,7 @@
 		{
 			// Use local variables for out parameters since Metalama converts fields to properties
 			bool isCaseSensitive;
+			bool findNext;
 			bool useRegex;
 			string findText;
 			bool searchElapsedTime;
@@ -1142,7 +1143,7 @@
 			if (_dialogBox.TryShowFind(
 				_findText, 
 				out isCaseSensitive, 
-				out var findNext, 
+				out findNext, 
 				out useRegex, 
 				out findText,
 				out searchElapsedTime,
