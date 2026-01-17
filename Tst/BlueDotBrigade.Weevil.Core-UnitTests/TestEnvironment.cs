@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.IO;
+	using System.Reflection;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	using BlueDotBrigade.DatenLokator.TestTools.Configuration;
@@ -9,6 +10,8 @@
 	[TestClass]
 	public class TestEnvironment
 	{
+		private const BindingFlags PrivateInstanceFlags = BindingFlags.NonPublic | BindingFlags.Instance;
+
 		[AssemblyInitialize]
 		public static void Setup(TestContext context)
 		{
@@ -34,20 +37,20 @@
 					Console.WriteLine($"Assembly location: {assemblyLocation}");
 					Console.WriteLine($"Starting search from: {testProjectDir}");
 					
+					if (testProjectDir == null)
+					{
+						throw new InvalidOperationException("Could not determine assembly directory");
+					}
+					
 					// Navigate up from bin/[Platform]/[Configuration] to project root
-					while (testProjectDir != null && !Directory.Exists(Path.Combine(testProjectDir, ".Daten")))
+					while (!Directory.Exists(Path.Combine(testProjectDir, ".Daten")))
 					{
 						var parent = Path.GetDirectoryName(testProjectDir);
 						if (parent == testProjectDir || parent == null)
 						{
-							break; // Reached filesystem root
+							throw new InvalidOperationException($"Could not find .Daten directory starting from: {assemblyLocation}");
 						}
 						testProjectDir = parent;
-					}
-					
-					if (testProjectDir == null || !Directory.Exists(Path.Combine(testProjectDir, ".Daten")))
-					{
-						throw new InvalidOperationException($"Could not find .Daten directory starting from: {assemblyLocation}");
 					}
 					
 					Console.WriteLine($"Found .Daten directory at: {testProjectDir}");
@@ -58,8 +61,7 @@
 					var lokatorType = lokator.GetType();
 					
 					// Access the private _coordinator field
-					var coordinatorField = lokatorType.GetField("_coordinator", 
-						System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+					var coordinatorField = lokatorType.GetField("_coordinator", PrivateInstanceFlags);
 					
 					if (coordinatorField == null)
 					{
@@ -75,8 +77,7 @@
 					var coordinatorType = coordinator.GetType();
 					
 					// 1. Set _rootDirectoryPath in the coordinator
-					var rootPathField = coordinatorType.GetField("_rootDirectoryPath",
-						System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+					var rootPathField = coordinatorType.GetField("_rootDirectoryPath", PrivateInstanceFlags);
 					
 					if (rootPathField == null)
 					{
@@ -87,8 +88,7 @@
 					Console.WriteLine($"Set root directory path to: {testProjectDir}");
 					
 					// 2. Get the file management strategy and fix its root path
-					var fileStrategyField = coordinatorType.GetField("_fileManagementStrategy",
-						System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+					var fileStrategyField = coordinatorType.GetField("_fileManagementStrategy", PrivateInstanceFlags);
 					
 					if (fileStrategyField != null)
 					{
@@ -98,8 +98,7 @@
 							var fileStrategyType = fileStrategy.GetType();
 							
 							// Set the _rootDirectoryPath in the strategy
-							var strategyRootPathField = fileStrategyType.GetField("_rootDirectoryPath",
-								System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+							var strategyRootPathField = fileStrategyType.GetField("_rootDirectoryPath", PrivateInstanceFlags);
 							
 							if (strategyRootPathField != null)
 							{
@@ -108,8 +107,7 @@
 							}
 							
 							// Set the _isSetup flag in the strategy
-							var strategyIsSetupField = fileStrategyType.GetField("_isSetup",
-								System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+							var strategyIsSetupField = fileStrategyType.GetField("_isSetup", PrivateInstanceFlags);
 							
 							if (strategyIsSetupField != null)
 							{
@@ -120,8 +118,7 @@
 					}
 					
 					// 3. Set _isSetup flag in coordinator
-					var isSetupField = coordinatorType.GetField("_isSetup",
-						System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+					var isSetupField = coordinatorType.GetField("_isSetup", PrivateInstanceFlags);
 					
 					if (isSetupField != null)
 					{
