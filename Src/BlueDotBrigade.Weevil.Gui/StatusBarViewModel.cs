@@ -33,8 +33,6 @@
 		private bool _wasFileJustOpened;
 		private bool _wereStatisticsJustPublished;
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
 		public StatusBarViewModel()
 		{
 			this.SourceFileDetails = new SourceFileOpenedBulletin();
@@ -226,6 +224,11 @@
 		public bool TotalRecordCountChanged { get; private set; }
 
 		public bool HasSourceFileRemarks { get; private set; }
+
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			// Metalama will weave in the PropertyChanged event and this method will be called
+		}
 		#endregion
 	}
 }

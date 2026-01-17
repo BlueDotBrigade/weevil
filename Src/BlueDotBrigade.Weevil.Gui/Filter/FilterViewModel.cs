@@ -43,7 +43,7 @@
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
 	[Observable]
-	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
+	internal partial class FilterViewModel : IDropTarget
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
 		const string RawFileName = "SelectedRecords.log";
@@ -380,8 +380,6 @@
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
 		/// <summary>
 		/// Indicates that the records have changed due to either:
 		/// <list type="bullet">
@@ -439,9 +437,14 @@
 			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
 
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			// Metalama will weave in the PropertyChanged event and this method will be called
+		}
+
 		protected void RaisePropertyChanged(string name)
 		{
-			this?.PropertyChanged(this, new PropertyChangedEventArgs(name));
+			OnPropertyChanged(name);
 		}
 		#endregion
 
