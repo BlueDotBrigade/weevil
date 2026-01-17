@@ -50,7 +50,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 					continue;
 				}
 
-				if (expressionBuilder.TryGetExpression(trimmedSegment, out var expression))
+				if (expressionBuilder != null && expressionBuilder.TryGetExpression(trimmedSegment, out var expression))
 				{
 					if (expression is RegularExpression regexExpression)
 					{

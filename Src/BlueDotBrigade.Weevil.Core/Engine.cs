@@ -26,9 +26,29 @@
 		[SuppressMessage("Performance", "CA1810:Initialize reference type static fields inline", Justification = "Method required to build complex instance.")]
 		static Engine()
 		{
-			var directoryPath = Path.Combine(
-				Environment.GetEnvironmentVariable("LocalAppData"),
-				"Weevil");
+			// Cross-platform support: LocalAppData is Windows-specific
+			// On Linux/Mac, fall back to user's home directory
+			var localAppData = Environment.GetEnvironmentVariable("LocalAppData");
+			if (string.IsNullOrEmpty(localAppData))
+			{
+				// On Unix-like systems, use XDG_DATA_HOME or ~/.local/share
+				localAppData = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+				if (string.IsNullOrEmpty(localAppData))
+				{
+					var home = Environment.GetEnvironmentVariable("HOME");
+					if (!string.IsNullOrEmpty(home))
+					{
+						localAppData = Path.Combine(home, ".local", "share");
+					}
+					else
+					{
+						// Final fallback: use temp directory
+						localAppData = Path.GetTempPath();
+					}
+				}
+			}
+			
+			var directoryPath = Path.Combine(localAppData, "Weevil");
 
 			Directory.CreateDirectory(directoryPath);
 
