@@ -23,7 +23,18 @@
 			// This workaround explicitly provides the correct path by searching upward from
 			// the assembly location for the project directory (identified by the .csproj file).
 			var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-			var projectDirectory = FindProjectDirectory(Path.GetDirectoryName(assemblyLocation));
+			if (string.IsNullOrEmpty(assemblyLocation))
+			{
+				throw new InvalidOperationException("Unable to determine assembly location");
+			}
+			
+			var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+			if (string.IsNullOrEmpty(assemblyDirectory))
+			{
+				throw new InvalidOperationException($"Unable to determine directory from assembly location: {assemblyLocation}");
+			}
+			
+			var projectDirectory = FindProjectDirectory(assemblyDirectory);
 			var datenDirectory = Path.Combine(projectDirectory, ".Daten");
 			
 			var properties = new Dictionary<string, object>
