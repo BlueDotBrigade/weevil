@@ -8,6 +8,8 @@
 	[TestClass]
 	public class TestEnvironment
 	{
+		private const string DatenDirectoryName = ".Daten";
+		
 		[AssemblyInitialize]
 		public static void Setup(TestContext context)
 		{
@@ -18,18 +20,16 @@
 			// causing paths like "/home/..." to become "\home\..." which don't exist.
 			// We provide the correct root path via TestContext to bypass the buggy path construction.
 			var projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
-			var binIndex = projectDirectory.LastIndexOf("/bin/", StringComparison.OrdinalIgnoreCase);
-			if (binIndex == -1)
-			{
-				binIndex = projectDirectory.LastIndexOf("\\bin\\", StringComparison.OrdinalIgnoreCase);
-			}
+			var binIndex = projectDirectory.IndexOf(
+				$"{System.IO.Path.DirectorySeparatorChar}bin{System.IO.Path.DirectorySeparatorChar}",
+				StringComparison.OrdinalIgnoreCase);
 			
 			if (binIndex > 0)
 			{
 				projectDirectory = projectDirectory.Substring(0, binIndex);
 			}
 			
-			var rootDirectoryPath = System.IO.Path.Combine(projectDirectory, ".Daten");
+			var rootDirectoryPath = System.IO.Path.Combine(projectDirectory, DatenDirectoryName);
 			context.Properties["DatenLokatorRootPath"] = rootDirectoryPath;
 			
 			Lokator.Get()
