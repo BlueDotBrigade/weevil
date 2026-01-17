@@ -1987,16 +1987,24 @@
 				{
 					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
 
-					var existing = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
-					if (existing != null)
+					// Calculate default bookmark name based on total count after creation
+					int currentCount = _engine.Bookmarks.Bookmarks.Length;
+					string defaultName = $"Bookmark{currentCount + 1}";
+
+					// Prompt user for bookmark name with default
+					string bookmarkName = _dialogBox.ShowUserPrompt(
+						"Create Bookmark",
+						"Name:",
+						defaultName);
+
+					// If user cancels dialog, do not create bookmark (standard Windows behavior)
+					if (!string.IsNullOrWhiteSpace(bookmarkName))
 					{
-						_engine.Bookmarks.Clear(existing.Record.LineNumber);
+						_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+
+						RaiseBookmarksChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 					}
-
-					_engine.Bookmarks.CreateFromSelection(slot.ToString(), selectedLineNumber);
-
-					RaiseBookmarksChanged();
-					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 				}
 				else
 				{
@@ -2011,9 +2019,12 @@
 
 		private void GoToBookmark(int slot)
 		{
-			var bookmark = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
-			if (bookmark != null)
+			// The bookmark number (slot) represents the order bookmarks were created (1st, 2nd, 3rd, etc.)
+			// For Ctrl+1 through Ctrl+5, find the Nth bookmark (1-indexed)
+			var bookmarks = _engine.Bookmarks.Bookmarks;
+			if (slot > 0 && slot <= bookmarks.Length)
 			{
+				var bookmark = bookmarks[slot - 1];
 				SearchFilterResults(
 						$"Bookmark {slot} is not visible in the current results.",
 						() => _engine
