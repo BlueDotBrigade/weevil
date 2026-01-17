@@ -1994,19 +1994,17 @@
 					// Prompt user for bookmark name with default
 					string bookmarkName = _dialogBox.ShowUserPrompt(
 						"Create Bookmark",
-						"Bookmark name:",
+						"Name:",
 						defaultName);
 
-					// If user cancels, use default name (all bookmarks must have a name)
-					if (string.IsNullOrWhiteSpace(bookmarkName))
+					// If user cancels dialog, do not create bookmark (standard Windows behavior)
+					if (!string.IsNullOrWhiteSpace(bookmarkName))
 					{
-						bookmarkName = defaultName;
+						_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+
+						RaiseBookmarksChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 					}
-
-					_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
-
-					RaiseBookmarksChanged();
-					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 				}
 				else
 				{
@@ -2021,6 +2019,7 @@
 
 		private void GoToBookmark(int slot)
 		{
+			// The bookmark number (slot) represents the order bookmarks were created (1st, 2nd, 3rd, etc.)
 			// For Ctrl+1 through Ctrl+5, find the Nth bookmark (1-indexed)
 			var bookmarks = _engine.Bookmarks.Bookmarks;
 			if (slot > 0 && slot <= bookmarks.Length)
