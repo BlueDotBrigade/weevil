@@ -19,8 +19,6 @@
 		private readonly IUiDispatcher _uiDispatcher;
 		private readonly UiResponsivenessMonitor _uiMonitor;
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
 		public MainWindowViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
 			_uiDispatcher = uiDispatcher;
@@ -72,5 +70,10 @@
 		public StatusBarViewModel StatusBarViewModel { get; }
 
 		public string ApplicationTitle { get; set; }
+
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			// Metalama will weave in the PropertyChanged event and this method will be called
+		}
 	}
 }
