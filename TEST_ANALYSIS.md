@@ -1,5 +1,163 @@
 # ElapsedTimeNavigatorTest Analysis - Issue #591
 
+[Previous analysis content retained - see git history]
+
+---
+
+# DatenLokator v2.3.0 Linux Compatibility Issue - Issue #615
+
+## Executive Summary
+
+Investigation of test failures revealed **critical bugs in the external DatenLokator v2.3.0 library** that prevent tests from running on Linux/Unix systems:
+
+- **142 tests in BlueDotBrigade.Weevil.Core-UnitTests were failing**
+- **Root cause**: DatenLokator v2.3.0 has two path-handling bugs on non-Windows systems
+- **Workaround implemented**: 115 tests now passing (81% success rate)
+- **27 tests still failing** due to unfixable path-combining bug in the library
+
+## Bug Analysis
+
+### Bug #1: Backslash Prefix on Unix Absolute Paths
+
+**Problem**: The library incorrectly prefixes Unix absolute paths with a backslash character.
+
+**Example**:
+- Correct path: `/home/runner/work/weevil/weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/.Daten`
+- Buggy path: `\home\runner\work\weevil\weevil\Tst\BlueDotBrigade.Weevil.Core-UnitTests/.Daten`
+
+**Impact**: `Directory.Exists()` fails because the path is invalid on Linux.
+
+**Technical Details**: When a path starts with a backslash on Linux, the system treats it as a relative path, and `Path.GetFullPath()` prepends the current directory, creating an invalid combined path.
+
+### Bug #2: Path Duplication When Combining Absolute Paths
+
+**Problem**: The `SubFolderThenGlobal.GetFilePath()` method doesn't properly detect absolute paths on Linux and incorrectly combines them with the root directory.
+
+**Example**:
+- Root: `/home/runner/work/weevil/weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests`
+- Source: `/home/runner/work/weevil/weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/Configuration/Sidecar/v2/SidecarLoaderTests`
+- Result: `/home/runner/work/weevil/weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/home/runner/work/weevil/weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/Configuration/Sidecar/v2/SidecarLoaderTests`
+
+**Impact**: File lookups fail with `FileNotFoundException` for test data files in subdirectories.
+
+## Workaround Implementation
+
+### Solution for Bug #1
+
+Used reflection to manually initialize the Lokator Coordinator without calling the buggy `Setup()` method:
+
+```csharp
+// Detect Linux/Unix system
+if (Path.DirectorySeparatorChar == '/')
+{
+    // Find correct .Daten directory path
+    var testProjectDir = FindDatenDirectory();
+    
+    // Use reflection to set private fields
+    var coordinator = GetCoordinatorViaReflection();
+    SetField(coordinator, "_rootDirectoryPath", testProjectDir);
+    SetField(coordinator, "_isSetup", true);
+    
+    // Fix file management strategy
+    var fileStrategy = GetFieldValue(coordinator, "_fileManagementStrategy");
+    SetField(fileStrategy, "_rootDirectoryPath", testProjectDir);
+    SetField(fileStrategy, "_isSetup", true);
+}
+```
+
+### Results
+
+**Passing Tests (115/142 = 81%)**:
+- All tests that use default file naming (test name only)
+- Tests that access data in the `.Global` directory
+- Tests that don't use subdirectory-based test naming
+
+**Failing Tests (27/142 = 19%)**:
+All failures occur in tests using subdirectory-based test data:
+- `SidecarLoaderTests` (2 tests)
+- `MultiLineRecordParserTest` (12 tests)
+- `TsvRecordParserTest` (8 tests)
+- `SelectionManagerTest` (3 tests)
+- `DataTransitionAnalyzerTests` (2 tests)
+
+## Why the CI Never Caught This
+
+The GitHub Actions workflow (`.github/workflows/dotnet.yml`) only runs on Windows:
+
+```yaml
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+```
+
+**Result**: This Linux-specific bug was never encountered in CI testing.
+
+## Recommendations
+
+### Short Term
+
+1. ✅ **Workaround implemented** - Tests now mostly work on Linux
+2. Document the 27 failing tests as known issues
+3. Consider adding Linux CI to catch cross-platform issues
+
+### Long Term
+
+1. **Report bug to BlueDotBrigade/daten-lokator maintainers**
+   - Bug affects v2.3.0
+   - Prevents library use on Linux/Unix systems
+   - Requires fix in path handling logic
+
+2. **Options for permanent fix**:
+   - Wait for DatenLokator library update
+   - Fork and patch the library
+   - Replace DatenLokator with a cross-platform alternative
+
+3. **Add Linux CI**:
+   ```yaml
+   strategy:
+     matrix:
+       os: [windows-latest, ubuntu-latest]
+   runs-on: ${{ matrix.os }}
+   ```
+
+## Technical Investigation Details
+
+### DatenLokator v2.3.0 Architecture
+
+```
+Lokator (Singleton)
+  └─ Coordinator
+      ├─ _rootDirectoryPath: string
+      ├─ _fileManagementStrategy: IFileManagementStrategy
+      │   └─ SubFolderThenGlobal
+      │       ├─ _rootDirectoryPath: string
+      │       ├─ _isSetup: bool
+      │       └─ GetFilePath() ← Bug occurs here
+      └─ _isSetup: bool
+```
+
+### Root Cause in SubFolderThenGlobal
+
+The `GetFilePath()` method constructs test data file paths by:
+1. Taking the test's source file directory
+2. Combining it with the root directory
+3. Looking for test data files
+
+**On Windows**: Path.Combine detects absolute paths correctly
+**On Linux**: The library uses backslashes, confusing Path.Combine
+
+## Conclusion
+
+- **NOT a test bug** - tests are correctly written
+- **NOT a Weevil library bug** - Weevil code is cross-platform compatible  
+- **External library bug** - DatenLokator v2.3.0 is incompatible with Linux/Unix
+
+**Action Required**: Report to BlueDotBrigade/daten-lokator maintainers
+
+---
+
+# ElapsedTimeNavigatorTest Analysis - Issue #591
+
 ## Executive Summary
 
 Analyzed 6 tests in `BlueDotBrigade.Weevil.Navigation.ElapsedTimeNavigatorTest`:
