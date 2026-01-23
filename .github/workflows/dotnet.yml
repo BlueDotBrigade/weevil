@@ -24,8 +24,11 @@ jobs:
       - name: Restore
         run: dotnet restore Weevil-v2.sln
 
-      - name: Build (Release, x64)
-        run: dotnet build Weevil-v2.sln --configuration Release -p:Platform=x64 --no-restore
+      # Some automated tests rely on InternalsVisibleTo to access internal implementation types.
+      # InternalsVisibleTo is intentionally restricted to DEBUG builds to avoid widening
+      # the public surface area in Release, so CI must use the Debug configuration.
+      - name: Build (Debug, x64)
+        run: dotnet build Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-restore
 
-      - name: Test (Release, x64)
-        run: dotnet test Weevil-v2.sln --configuration Release -p:Platform=x64 --no-build --verbosity normal
+      - name: Test (Debug, x64)
+        run: dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal
