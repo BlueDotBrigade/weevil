@@ -104,6 +104,8 @@
                 private FilterType _filterExpressionType;
 		private IFilterCriteria _currentfilterCriteria;
 
+		// Prevent Metalama from converting this to a property, which cannot be passed into `Interlocked`.
+		[NotObservable]
 		private int _concurrentFilterCount;
 
 		private ITableOfContents _tableOfContents;
@@ -254,7 +256,7 @@
 			}
 		}
 
-		public bool IsFilterInProgress => _concurrentFilterCount >= 1;
+		public bool IsFilterInProgress { get; private set; }
 
 		public bool AreFilterOptionsVisible { get; set; }
 
@@ -1704,15 +1706,15 @@
 					_engine.Filter.Abort();
 				}
 
-				var queuedFilters = Interlocked.Increment(ref _concurrentFilterCount);
-
-				// Force UI to ensure that the screen has been refreshed
-				// ... so that the user knows a filter operation is in progress.
-				_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
-
 				// First filter to execute?
-				if (queuedFilters == 1)
+				if (Interlocked.Increment(ref _concurrentFilterCount) == 1)
 				{
+					this.IsFilterInProgress = true;
+
+					// Force UI to ensure that the screen has been refreshed
+					// ... so that the user knows a filter operation is in progress.
+					_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
+
 					Log.Default.Write(
 						LogSeverityType.Debug,
 						$"Filter operation is displaying the progress bar.");
@@ -1749,11 +1751,11 @@
 					});
 				}
 
-				queuedFilters = Interlocked.Decrement(ref _concurrentFilterCount);
-
 				// Last filter to execute?
-				if (queuedFilters == 0)
+				if (Interlocked.Decrement(ref _concurrentFilterCount) == 0)
 				{
+					this.IsFilterInProgress = false;
+
 					// Was the filter applied?
 					// ... if not, then display the original 
 					if (wasFilterApplied)
