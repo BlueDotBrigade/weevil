@@ -104,7 +104,7 @@
                                         new[] { 1, 3, 4, 5, 6 },
                                         flaggedLines);
 
-                                Assert.AreEqual(6, engine.Filter.Results.Count(r => r.Metadata.IsFlagged));
+                                Assert.AreEqual(5, engine.Filter.Results.Count(r => r.Metadata.IsFlagged));
                         }
                         finally
                         {
