@@ -315,7 +315,7 @@
 					{
 						HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
 					});
-					RaisePropertyChanged(nameof(this.SourceFileRemarks));
+					OnPropertyChanged(nameof(this.SourceFileRemarks));
 				}
 			}
 		}
@@ -358,7 +358,7 @@
                                         {
                                                 this.FilterOptionsViewModel.Options.FilterExpressionType = value;
                                         }
-                                        RaisePropertyChanged(nameof(this.FilterExpressionType));
+										OnPropertyChanged(nameof(this.FilterExpressionType));
                                 }
                         }
                 }
@@ -429,30 +429,6 @@
 			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
 
-		/// <summary>
-		/// Raises the PropertyChanged event for the specified property.
-		/// </summary>
-		/// <param name="propertyName">The name of the property that changed.</param>
-		/// <remarks>
-		/// This method is intentionally empty. At compile time, Metalama.Patterns.Observability
-		/// will inject the implementation that raises the PropertyChanged event.
-		/// This allows manual property change notifications for properties that Metalama
-		/// cannot automatically detect (e.g., properties marked with [NotObservable] or
-		/// properties that depend on external state).
-		/// </remarks>
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			// Method body will be injected by Metalama at compile time
-		}
-
-		/// <summary>
-		/// Helper method to raise property change notifications, automatically capturing the caller's property name.
-		/// </summary>
-		/// <param name="name">The name of the property that changed. If not specified, the caller's member name is used.</param>
-		protected void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = null)
-		{
-			OnPropertyChanged(name);
-		}
 		#endregion
 
 		#region Commands: General
@@ -680,7 +656,7 @@
 							this.IsProcessingLongOperation = false;      // show records
 							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
 							this.CanOpenLogFile = true;                  // enable menus now
-							RaisePropertyChanged(nameof(IsMenuEnabled));  // force re-evaluation
+							OnPropertyChanged(nameof(IsMenuEnabled));  // force re-evaluation
 							CommandManager.InvalidateRequerySuggested();  // refresh commands
 						});
 					}
@@ -705,7 +681,7 @@
 						_uiDispatcher.Invoke(() =>
 						{
 							this.AreInsightsReady = true;
-							RaisePropertyChanged(nameof(IsDashboardEnabled));
+							OnPropertyChanged(nameof(IsDashboardEnabled));
 							CommandManager.InvalidateRequerySuggested();
 						});
 					}
@@ -1785,8 +1761,8 @@
 						_uiDispatcher.Invoke(() =>
 						{
 							// Note: We can't set the property directly, because we would trigger the filter operation again. 
-							RaisePropertyChanged(nameof(this.InclusiveFilter));
-							RaisePropertyChanged(nameof(this.ExclusiveFilter));
+							OnPropertyChanged(nameof(this.InclusiveFilter));
+							OnPropertyChanged(nameof(this.ExclusiveFilter));
 						});
 					}
 
@@ -1830,12 +1806,12 @@
 			_uiDispatcher.Invoke(() =>
 			{
 				// Note: We can't set the property directly, because we would trigger the filter operation again. 
-				RaisePropertyChanged(nameof(this.InclusiveFilter));
-				RaisePropertyChanged(nameof(this.ExclusiveFilter));
+				OnPropertyChanged(nameof(this.InclusiveFilter));
+				OnPropertyChanged(nameof(this.ExclusiveFilter));
 
 				this.VisibleItems = _engine.Filter.Results;
 
-				RaisePropertyChanged(nameof(this.VisibleItems));
+				OnPropertyChanged(nameof(this.VisibleItems));
 			});
 
 			_bulletinMediator.Post(new FilterChangedBulletin
