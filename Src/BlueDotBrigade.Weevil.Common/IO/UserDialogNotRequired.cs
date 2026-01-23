@@ -9,12 +9,12 @@
 	{
 		public string ShowUserPrompt(string title, string prompt)
 		{
-			throw new NotImplementedException();
+			return string.Empty;
 		}
 
 		public string ShowUserPrompt(string title, string prompt, string defaultValue)
 		{
-			throw new NotImplementedException();
+			return defaultValue ?? string.Empty;
 		}
 
 		public bool TryShowFind(
@@ -28,12 +28,21 @@
 			out int? maxElapsedMs,
 			out bool searchComments)
 		{
-			throw new NotImplementedException();
+			isCaseSensitive = false;
+			findNext = true;
+			useRegex = false;
+			findText = defaultValue ?? string.Empty;
+			searchElapsedTime = false;
+			minElapsedMs = null;
+			maxElapsedMs = null;
+			searchComments = false;
+			return !string.IsNullOrWhiteSpace(findText);
 		}
 
 		public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
 		{
-			throw new NotImplementedException();
+			regularExpression = defaultRegex ?? string.Empty;
+			return !string.IsNullOrWhiteSpace(regularExpression);
 		}
 	}
 }
