@@ -36,7 +36,7 @@
 			minElapsedMs = null;
 			maxElapsedMs = null;
 			searchComments = false;
-			return false;
+			return !string.IsNullOrWhiteSpace(findText);
 		}
 
 		public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
