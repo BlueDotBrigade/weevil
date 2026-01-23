@@ -37,14 +37,13 @@
 	using BlueDotBrigade.Weevil.Utilities;
 	using GongSolutions.Wpf.DragDrop;
 	using Newtonsoft.Json.Linq;
-	using PostSharp.Extensibility;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
-	[NotifyPropertyChanged()]
-	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
+	[Observable]
+	internal partial class FilterViewModel : IDropTarget
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
 		const string RawFileName = "SelectedRecords.log";
@@ -195,16 +194,11 @@
 
 		public Version WeevilVersion { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public bool IsMenuEnabled
 		{
 			get
 			{
-				if (Depends.Guard)
-				{
-					Depends.On(this.IsLogFileOpen, this.CanOpenLogFile);
-				}
-
 				return this.IsLogFileOpen && this.CanOpenLogFile;
 			}
 		}
@@ -215,16 +209,11 @@
 		
 		public bool AreInsightsReady { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public bool IsDashboardEnabled
 		{
 			get
 			{
-				if (Depends.Guard)
-				{
-					Depends.On(this.IsMenuEnabled, this.AreInsightsReady);
-				}
-
 				return this.IsMenuEnabled && this.AreInsightsReady;
 			}
 		}
@@ -237,6 +226,18 @@
 				if (this.FilterOptionsViewModel?.Options != null)
 				{
 					this.FilterOptionsViewModel.Options.IncludePinned = value;
+				}
+			}
+		}
+
+		public bool IncludeBookmarks
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludeBookmarks ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeBookmarks = value;
 				}
 			}
 		}
@@ -296,7 +297,7 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public string SourceFileRemarks
 		{
 			get
@@ -364,12 +365,10 @@
 
 		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
-
-		public event PropertyChangedEventHandler PropertyChanged;
 
 		/// <summary>
 		/// Indicates that the records have changed due to either:
@@ -428,9 +427,29 @@
 			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
 
-		protected void RaisePropertyChanged(string name)
+		/// <summary>
+		/// Raises the PropertyChanged event for the specified property.
+		/// </summary>
+		/// <param name="propertyName">The name of the property that changed.</param>
+		/// <remarks>
+		/// This method is intentionally empty. At compile time, Metalama.Patterns.Observability
+		/// will inject the implementation that raises the PropertyChanged event.
+		/// This allows manual property change notifications for properties that Metalama
+		/// cannot automatically detect (e.g., properties marked with [NotObservable] or
+		/// properties that depend on external state).
+		/// </remarks>
+		protected virtual void OnPropertyChanged(string propertyName)
 		{
-			this?.PropertyChanged(this, new PropertyChangedEventArgs(name));
+			// Method body will be injected by Metalama at compile time
+		}
+
+		/// <summary>
+		/// Helper method to raise property change notifications, automatically capturing the caller's property name.
+		/// </summary>
+		/// <param name="name">The name of the property that changed. If not specified, the caller's member name is used.</param>
+		protected void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = null)
+		{
+			OnPropertyChanged(name);
 		}
 		#endregion
 
@@ -1111,17 +1130,36 @@
 
 		private void FindText()
 		{
+			// Use local variables for out parameters since Metalama converts fields to properties
+			bool isCaseSensitive;
+			bool findNext;
+			bool useRegex;
+			string findText;
+			bool searchElapsedTime;
+			int? minElapsedMs;
+			int? maxElapsedMs;
+			bool searchComments;
+			
 			if (_dialogBox.TryShowFind(
 				_findText, 
-				out _findIsCaseSensitive, 
-				out var findNext, 
-				out _findUseRegex, 
-				out _findText,
-				out _findSearchElapsedTime,
-				out _findMinElapsedMs,
-				out _findMaxElapsedMs,
-				out _findSearchComments))
+				out isCaseSensitive, 
+				out findNext, 
+				out useRegex, 
+				out findText,
+				out searchElapsedTime,
+				out minElapsedMs,
+				out maxElapsedMs,
+				out searchComments))
 			{
+				// Assign to fields after the method call
+				_findIsCaseSensitive = isCaseSensitive;
+				_findUseRegex = useRegex;
+				_findText = findText;
+				_findSearchElapsedTime = searchElapsedTime;
+				_findMinElapsedMs = minElapsedMs;
+				_findMaxElapsedMs = maxElapsedMs;
+				_findSearchComments = searchComments;
+				
 				if (_findSearchElapsedTime)
 				{
 					if (findNext)
@@ -1976,16 +2014,24 @@
 				{
 					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
 
-					var existing = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
-					if (existing != null)
+					// Calculate default bookmark name based on total count after creation
+					int currentCount = _engine.Bookmarks.Bookmarks.Length;
+					string defaultName = $"Bookmark{currentCount + 1}";
+
+					// Prompt user for bookmark name with default
+					string bookmarkName = _dialogBox.ShowUserPrompt(
+						"Create Bookmark",
+						"Name:",
+						defaultName);
+
+					// If user cancels dialog, do not create bookmark (standard Windows behavior)
+					if (!string.IsNullOrWhiteSpace(bookmarkName))
 					{
-						_engine.Bookmarks.Clear(existing.Record.LineNumber);
+						_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+
+						RaiseBookmarksChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 					}
-
-					_engine.Bookmarks.CreateFromSelection(slot.ToString(), selectedLineNumber);
-
-					RaiseBookmarksChanged();
-					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 				}
 				else
 				{
@@ -2000,9 +2046,12 @@
 
 		private void GoToBookmark(int slot)
 		{
-			var bookmark = _engine.Bookmarks.Bookmarks.FirstOrDefault(b => b.Name == slot.ToString());
-			if (bookmark != null)
+			// The bookmark number (slot) represents the order bookmarks were created (1st, 2nd, 3rd, etc.)
+			// For Ctrl+1 through Ctrl+5, find the Nth bookmark (1-indexed)
+			var bookmarks = _engine.Bookmarks.Bookmarks;
+			if (slot > 0 && slot <= bookmarks.Length)
 			{
+				var bookmark = bookmarks[slot - 1];
 				SearchFilterResults(
 						$"Bookmark {slot} is not visible in the current results.",
 						() => _engine

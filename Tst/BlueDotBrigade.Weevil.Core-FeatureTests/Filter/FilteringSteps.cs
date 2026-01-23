@@ -2,7 +2,6 @@ using BlueDotBrigade;
 using BlueDotBrigade.Weevil;
 using BlueDotBrigade.Weevil.Filter;
 using BlueDotBrigade.Weevil.Data;
-using BlueDotBrigade.Weevil.Filter;
 using BlueDotBrigade.Weevil.Filter.Expressions.PlainText;
 
 using static System.Net.Mime.MediaTypeNames;
@@ -149,6 +148,19 @@ internal sealed class FilteringSteps : ReqnrollSteps
 	{
 		var index = this.Context.Engine.Records.IndexOfLineNumber(lineNumber);
 		this.Context.Engine.Records[index].Metadata.IsPinned = true;
+	}
+
+	[When($"unpinning the record on line {X.WholeNumber}")]
+	public void WhenUnpinningTheRecordOnLine(int lineNumber)
+	{
+		var index = this.Context.Engine.Records.IndexOfLineNumber(lineNumber);
+		this.Context.Engine.Records[index].Metadata.IsPinned = false;
+	}
+
+	[When($"bookmarking the record on line {X.WholeNumber}")]
+	public void WhenBookmarkingTheRecordOnLine(int lineNumber)
+	{
+		this.Context.Engine.Bookmarks.CreateFromSelection(string.Empty, lineNumber);
 	}
 
 	[Then($"line number {X.WholeNumber} will be visible")]

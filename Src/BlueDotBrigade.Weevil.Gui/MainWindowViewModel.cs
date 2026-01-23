@@ -11,15 +11,13 @@
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 
-	[NotifyPropertyChanged()]
+	[Observable]
 	internal class MainWindowViewModel
 	{
 		private readonly IUiDispatcher _uiDispatcher;
 		private readonly UiResponsivenessMonitor _uiMonitor;
-
-		public event PropertyChangedEventHandler PropertyChanged;
 
 		public MainWindowViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
@@ -72,5 +70,21 @@
 		public StatusBarViewModel StatusBarViewModel { get; }
 
 		public string ApplicationTitle { get; set; }
+
+		/// <summary>
+		/// Raises the PropertyChanged event for the specified property.
+		/// </summary>
+		/// <param name="propertyName">The name of the property that changed.</param>
+		/// <remarks>
+		/// This method is intentionally empty. At compile time, Metalama.Patterns.Observability
+		/// will inject the implementation that raises the PropertyChanged event.
+		/// This allows manual property change notifications for properties that Metalama
+		/// cannot automatically detect (e.g., properties marked with [NotObservable] or
+		/// properties that depend on external state).
+		/// </remarks>
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			// Method body will be injected by Metalama at compile time
+		}
 	}
 }
