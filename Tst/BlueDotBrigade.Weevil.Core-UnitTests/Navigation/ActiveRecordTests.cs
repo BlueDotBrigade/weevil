@@ -19,7 +19,7 @@
 		[TestMethod]
 		public void UpdateDataSource_UninitializedArray_ThrowsArgumentException()
 		{
-			var activeRecord = new ActiveRecord(new ImmutableArray<IRecord>());
+			var activeRecord = new ActiveRecord(ImmutableArray.Create<IRecord>());
 			Action act = () => activeRecord.UpdateDataSource(new ImmutableArray<IRecord>());
 			act.Should().Throw<ArgumentException>();
 		}
