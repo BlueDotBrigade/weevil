@@ -164,13 +164,13 @@
 		{
 			var results = new IRecord[records.Length - selectedRecords.Length];
 
-			var blacklist = selectedRecords.ToImmutableHashSet();
+			var blacklist = selectedRecords.Select(r => r.LineNumber).ToImmutableHashSet();
 
 			var insertAt = 0;
 
             for (var i = 0; i < records.Length; i++)
             {
-				if (blacklist.Contains(records[i]))
+				if (blacklist.Contains(records[i].LineNumber))
 				{
 					// consider the record cleared
 				}
