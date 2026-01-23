@@ -42,7 +42,7 @@
 		public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
 		{
 			regularExpression = defaultRegex ?? string.Empty;
-			return true;
+			return !string.IsNullOrWhiteSpace(regularExpression);
 		}
 	}
 }
