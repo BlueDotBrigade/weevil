@@ -74,6 +74,7 @@
 				if (bool.TryParse(filterCriteria.Configuration[IncludePinned].ToString(), out var userConfigurationValue))
 				{
 					_includePinned = userConfigurationValue;
+					Log.Default.Write(LogSeverityType.Debug, $"Filter configuration: IncludePinned={_includePinned}");
 				}
 			}
 
@@ -82,6 +83,7 @@
 				if (bool.TryParse(filterCriteria.Configuration[IncludeBookmarks].ToString(), out var userConfigurationValue))
 				{
 					_includeBookmarks = userConfigurationValue;
+					Log.Default.Write(LogSeverityType.Debug, $"Filter configuration: IncludeBookmarks={_includeBookmarks}, BookmarkCount={_bookmarkManager?.Bookmarks.Length ?? 0}");
 				}
 			}
 		}
@@ -111,10 +113,12 @@
 			{
 				if (_includePinned && record.Metadata.IsPinned)
 				{
+					Log.Default.Write(LogSeverityType.Debug, $"Keeping pinned record. LineNumber={record.LineNumber}");
 					canKeepRecord = true;
 				}
-				else if (_includeBookmarks && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _))
+				else if (_includeBookmarks && _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _))
 				{
+					Log.Default.Write(LogSeverityType.Debug, $"Keeping bookmarked record. LineNumber={record.LineNumber}");
 					canKeepRecord = true;
 				}
 				else
