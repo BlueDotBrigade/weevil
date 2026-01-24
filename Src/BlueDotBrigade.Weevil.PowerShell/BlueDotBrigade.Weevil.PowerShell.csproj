@@ -36,7 +36,7 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.5.4" />
     <PackageReference Include="NLog" Version="6.0.7" />
     <PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
