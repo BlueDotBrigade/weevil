@@ -140,7 +140,7 @@
 			var exclude = (string.IsNullOrWhiteSpace(this.Exclude)) ? "(not specified)" : this.Exclude;
 
 			var configuration = DictionaryExtensions.ToString<string, object>(this.Configuration, "=", ";");
-			configuration = (string.IsNullOrWhiteSpace(configuration)) ? "(none)" : this.Exclude;
+			configuration = (string.IsNullOrWhiteSpace(configuration)) ? "(none)" : configuration;
 
 			return $"{nameof(this.Include)}: {include}, {nameof(this.Exclude)}: {exclude}, {nameof(this.Configuration)}: {configuration}";
 		}
