@@ -124,12 +124,18 @@
 
 				if (isPinnedAndShouldKeep)
 				{
-					Log.Default.Write(LogSeverityType.Debug, $"Keeping pinned record. LineNumber={record.LineNumber}");
+					if (record.LineNumber == 2 || record.LineNumber == 4 || record.LineNumber == 8)
+					{
+						Log.Default.Write(LogSeverityType.Debug, $"Keeping pinned record. LineNumber={record.LineNumber}");
+					}
 					canKeepRecord = true;
 				}
 				else if (isBookmarkedAndShouldKeep)
 				{
-					Log.Default.Write(LogSeverityType.Debug, $"Keeping bookmarked record. LineNumber={record.LineNumber}");
+					if (record.LineNumber == 2 || record.LineNumber == 4 || record.LineNumber == 8)
+					{
+						Log.Default.Write(LogSeverityType.Debug, $"Keeping bookmarked record. LineNumber={record.LineNumber}");
+					}
 					canKeepRecord = true;
 				}
 				else
