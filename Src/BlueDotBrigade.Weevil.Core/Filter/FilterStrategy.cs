@@ -111,18 +111,30 @@
 			}
 			else
 			{
-				if (_includePinned && record.Metadata.IsPinned)
+				// Check if record should be kept due to pinned or bookmarked status
+				var isPinnedAndShouldKeep = _includePinned && record.Metadata.IsPinned;
+				var hasBookmark = _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
+				var isBookmarkedAndShouldKeep = _includeBookmarks && hasBookmark;
+
+				// Log for lines 2, 4, and 8 specifically to debug
+				if (record.LineNumber == 2 || record.LineNumber == 4 || record.LineNumber == 8)
+				{
+					Log.Default.Write(LogSeverityType.Debug, $"Checking record {record.LineNumber}: isPinned={record.Metadata.IsPinned}, hasBookmark={hasBookmark}, _includeBookmarks={_includeBookmarks}, _includePinned={_includePinned}");
+				}
+
+				if (isPinnedAndShouldKeep)
 				{
 					Log.Default.Write(LogSeverityType.Debug, $"Keeping pinned record. LineNumber={record.LineNumber}");
 					canKeepRecord = true;
 				}
-				else if (_includeBookmarks && _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _))
+				else if (isBookmarkedAndShouldKeep)
 				{
 					Log.Default.Write(LogSeverityType.Debug, $"Keeping bookmarked record. LineNumber={record.LineNumber}");
 					canKeepRecord = true;
 				}
 				else
 				{
+					// Apply normal filtering logic
 					if (_inclusiveFilter.Count > 0 && _exclusiveFilter.Count == 0)
 					{
 						canKeepRecord = _inclusiveFilter.ReturnsTrue(record);
