@@ -34,7 +34,7 @@
   <ItemGroup>
     <PackageReference Include="NLog" Version="6.0.7" />
     <PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />

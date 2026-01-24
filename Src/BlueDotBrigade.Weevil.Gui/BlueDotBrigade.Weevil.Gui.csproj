@@ -116,15 +116,15 @@
 		</PackageReference>
 		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
 		<PackageReference Include="Metalama.Patterns.Observability">
-			<Version>2026.0.15</Version>
+			<Version>2026.0.16</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="System.Collections.Immutable">
-			<Version>10.0.1</Version>
+			<Version>10.0.2</Version>
 		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-		<PackageReference Include="System.Management" Version="10.0.1" />
+		<PackageReference Include="System.Management" Version="10.0.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />

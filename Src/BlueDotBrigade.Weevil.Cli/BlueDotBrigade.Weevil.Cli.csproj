@@ -54,9 +54,9 @@
 		<PackageReference Include="NLog" Version="6.0.7" />
 		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
 		<PackageReference Include="System.Collections.Immutable">
-			<Version>10.0.1</Version>
+			<Version>10.0.2</Version>
 		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.1" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
 	</ItemGroup>
 	<ItemGroup>
