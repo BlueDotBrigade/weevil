@@ -109,8 +109,9 @@
 														true,
 														$"{parameterName}: {previous[current.Key]} => {current.Value}",
 														canUpdateMetadata);
-											}
+												}
 												previous[current.Key] = current.Value;
+											}
 										}
 										else
 										{
@@ -130,7 +131,6 @@
 								}
 							}
 						}
-					}
 				}
 
 			return new Results(count);
