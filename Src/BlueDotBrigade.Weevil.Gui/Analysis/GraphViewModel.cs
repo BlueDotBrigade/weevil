@@ -57,6 +57,7 @@
 
 		private string _series1Name;
 		private string _series2Name;
+		private string _secondaryAxisSeries;
 
 		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
@@ -66,6 +67,7 @@
 			this.SourceFilePath = sourceFilePath ?? string.Empty;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
+			this.SecondaryAxisSeries = "None";
 
 			this.SampleData = records.Any()
 				? _records[0].Content
@@ -239,6 +241,20 @@
 			}
 		}
 
+		public string SecondaryAxisSeries
+		{
+			get => _secondaryAxisSeries;
+			set
+			{
+				if (_secondaryAxisSeries != value)
+				{
+					_secondaryAxisSeries = value;
+					RaisePropertyChanged(nameof(this.SecondaryAxisSeries));
+					Update(false);
+				}
+			}
+		}
+
 		public ICommand UpdateCommand => new UiBoundCommand(() => Update(false));
 
 		private string GetDetectedData(string regularExpression, string inputString)
@@ -294,14 +310,19 @@
 					}
 				}
 
-				this.Series = GetSeries(_records, this.RegularExpression, this.Series1Name, this.Series2Name);
+				this.Series = GetSeries(_records, this.RegularExpression, this.Series1Name, this.Series2Name, this.SecondaryAxisSeries);
 
 				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
 				
 				var seriesList = this.Series.ToList();
-				if (seriesList.Count > 1)
+				// Determine if we need dual axes based on the SecondaryAxisSeries setting
+				bool needsDualAxes = seriesList.Count > 1 && this.SecondaryAxisSeries != "None";
+				if (needsDualAxes)
 				{
-					this.YAxes = GetYAxes(this.Series1Name, this.Series2Name);
+					// Get the name of the series on the secondary axis
+					string secondarySeriesName = this.SecondaryAxisSeries == "Series 1" ? this.Series1Name : this.Series2Name;
+					string primarySeriesName = this.SecondaryAxisSeries == "Series 1" ? this.Series2Name : this.Series1Name;
+					this.YAxes = GetYAxes(primarySeriesName, secondarySeriesName);
 				}
 				else
 				{
@@ -614,7 +635,7 @@
 			return seriesNames;
 		}
 
-		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name)
+		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name, string secondaryAxisSeries)
 		{
 			var values1 = new ObservableCollection<DateTimePoint>();
 			var values2 = new ObservableCollection<DateTimePoint>();
@@ -654,6 +675,22 @@
 			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : $"{DefaultSeriesName} 1";
 			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : $"{DefaultSeriesName} 2";
 
+			// Determine which series should be on the secondary axis (right side)
+			int series1AxisIndex = 0;
+			int series2AxisIndex = 0;
+			
+			if (secondaryAxisSeries == "Series 1")
+			{
+				series1AxisIndex = 1;  // Series 1 on right axis
+				series2AxisIndex = 0;  // Series 2 on left axis
+			}
+			else if (secondaryAxisSeries == "Series 2")
+			{
+				series1AxisIndex = 0;  // Series 1 on left axis
+				series2AxisIndex = 1;  // Series 2 on right axis
+			}
+			// else "None" - both on left axis (index 0)
+
 			var seriesList = new List<ISeries>
 			{
 				new LineSeries<DateTimePoint>
@@ -661,7 +698,7 @@
 					Name = finalSeries1Name,
 					Values = values1,
 					GeometrySize = 10,
-					ScalesYAt = 0,
+					ScalesYAt = series1AxisIndex,
 					TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
 				}
 			};
@@ -674,7 +711,7 @@
 					Name = finalSeries2Name,
 					Values = values2,
 					GeometrySize = 10,
-					ScalesYAt = 1,
+					ScalesYAt = series2AxisIndex,
 					TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
 				});
 			}
