@@ -84,6 +84,16 @@
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <ComboBox x:Name="SecondaryAxisSeriesComboBox"
+                          SelectedValue="{Binding SecondaryAxisSeries}"
+                          SelectedValuePath="Content"
+                          materialDesign:HintAssist.Hint="Secondary Y-Axis Series"
+                          VerticalAlignment="Center"
+                          Margin="5">
+                    <ComboBoxItem Content="None"/>
+                    <ComboBoxItem Content="Series 1"/>
+                    <ComboBoxItem Content="Series 2"/>
+                </ComboBox>
                 <Separator/>
                 <TextBox x:Name="WindowTitleTextBox" 
                          Text="{Binding WindowTitle}"
