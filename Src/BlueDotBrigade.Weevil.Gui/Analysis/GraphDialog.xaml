@@ -14,7 +14,6 @@
         FontFamily="{materialDesign:MaterialDesignFont}"
         Background="{DynamicResource MaterialDesignPaper}">
     <Window.Resources>
-        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         <converters:StringToBooleanConverter x:Key="StringToBooleanConverter" />
         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
             <Setter Property="Margin" Value="5" />

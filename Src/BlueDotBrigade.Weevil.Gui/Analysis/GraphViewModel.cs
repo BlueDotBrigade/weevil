@@ -362,10 +362,15 @@
 					}
 					else // both on right
 					{
-						// Both on right - use combined label or first series name
-						rightAxisName = string.IsNullOrEmpty(this.Series2Name) 
-							? this.Series1Name 
-							: $"{this.Series1Name} / {this.Series2Name}";
+						// Both on right - use combined label or default
+						if (!string.IsNullOrEmpty(this.Series1Name) && !string.IsNullOrEmpty(this.Series2Name))
+						{
+							rightAxisName = $"{this.Series1Name} / {this.Series2Name}";
+						}
+						else
+						{
+							rightAxisName = this.Series1Name ?? this.Series2Name ?? DefaultYAxisLabel;
+						}
 					}
 					
 					this.YAxes = GetYAxes(leftAxisName ?? DefaultYAxisLabel, rightAxisName ?? DefaultYAxisLabel);
