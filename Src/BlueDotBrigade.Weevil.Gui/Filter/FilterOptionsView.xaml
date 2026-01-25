@@ -22,6 +22,10 @@
                 IsChecked="{Binding Options.IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
             <AccessText Text="Must Include _Pinned"></AccessText>
         </CheckBox>
+        <CheckBox
+                IsChecked="{Binding Options.IncludeBookmarks}" Margin="0,4,8,4" ToolTip="When checked, bookmarked records are always included in filter results.">
+            <AccessText Text="Must Include _Bookmarks"></AccessText>
+        </CheckBox>
         <RadioButton Margin="0,4,8,4"
                      GroupName="FilterExpressionMode"
                      IsChecked="{Binding Options.FilterExpressionType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=RegularExpression}"
