@@ -562,7 +562,11 @@
 					}
 				}
 			}
-			GetGroupNameOrDefault(seriesNames);
+			// NOTE: GetGroupNameOrDefault should only be called after all records are processed
+			// in the calling method GetSeriesNames(ImmutableArray<IRecord>, string), not here.
+			// Calling it here fills in default names prematurely, preventing actual group names
+			// from being extracted from subsequent records.
+			// GetGroupNameOrDefault(seriesNames);
 			return seriesNames;
 		}
 
