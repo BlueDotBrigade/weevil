@@ -28,7 +28,7 @@
 		private static readonly string DefaultYAxisLabel = "Y-Axis";
 		private static readonly string DefaultWindowTitle = "Graph";
 		private static readonly string FloatFormat = "0.000";
-		private static readonly int MaxSeriesCount = 2;
+		private static readonly int MaxSeriesCount = 4;
 		private static readonly string DefaultSeries2Suffix = " 2";
 
 		// Y-Axis position options for each series
@@ -61,8 +61,12 @@
 
 		private string _series1Name;
 		private string _series2Name;
+		private string _series3Name;
+		private string _series4Name;
 		private string _series1Axis = YAxisLeft;
 		private string _series2Axis = YAxisLeft;
+		private string _series3Axis = YAxisLeft;
+		private string _series4Axis = YAxisLeft;
 
 		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
@@ -245,6 +249,32 @@
 			}
 		}
 
+		public string Series3Name
+		{
+			get => _series3Name;
+			set
+			{
+				if (_series3Name != value)
+				{
+					_series3Name = value;
+					RaisePropertyChanged(nameof(this.Series3Name));
+				}
+			}
+		}
+
+		public string Series4Name
+		{
+			get => _series4Name;
+			set
+			{
+				if (_series4Name != value)
+				{
+					_series4Name = value;
+					RaisePropertyChanged(nameof(this.Series4Name));
+				}
+			}
+		}
+
 		public string Series1Axis
 		{
 			get => _series1Axis;
@@ -268,6 +298,34 @@
 				{
 					_series2Axis = value;
 					RaisePropertyChanged(nameof(this.Series2Axis));
+					Update(false);
+				}
+			}
+		}
+
+		public string Series3Axis
+		{
+			get => _series3Axis;
+			set
+			{
+				if (_series3Axis != value)
+				{
+					_series3Axis = value;
+					RaisePropertyChanged(nameof(this.Series3Axis));
+					Update(false);
+				}
+			}
+		}
+
+		public string Series4Axis
+		{
+			get => _series4Axis;
+			set
+			{
+				if (_series4Axis != value)
+				{
+					_series4Axis = value;
+					RaisePropertyChanged(nameof(this.Series4Axis));
 					Update(false);
 				}
 			}
@@ -325,61 +383,70 @@
 						{
 							this.Series2Name = seriesNames[1];
 						}
+						if (seriesNames.Count > 2)
+						{
+							this.Series3Name = seriesNames[2];
+						}
+						if (seriesNames.Count > 3)
+						{
+							this.Series4Name = seriesNames[3];
+						}
 					}
 				}
 
-				this.Series = GetSeries(_records, this.RegularExpression, this.Series1Name, this.Series2Name, this.Series1Axis, this.Series2Axis);
+				this.Series = GetSeries(_records, this.RegularExpression, 
+				new[] { this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name }, 
+				new[] { this.Series1Axis, this.Series2Axis, this.Series3Axis, this.Series4Axis });
 
 				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
 				
 				var seriesList = this.Series.ToList();
+				
+				// Collect all series names and axes
+				var allSeriesNames = new[] { this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name };
+				var allSeriesAxes = new[] { this.Series1Axis, this.Series2Axis, this.Series3Axis, this.Series4Axis };
+				
 				// Determine if we need dual axes - when any series is on the right axis
-				bool needsDualAxes = seriesList.Count > 1 && (this.Series1Axis == YAxisRight || this.Series2Axis == YAxisRight);
+				bool needsDualAxes = seriesList.Count > 1 && allSeriesAxes.Any(axis => axis == YAxisRight);
+				
 				if (needsDualAxes)
 				{
-					// Determine which series names go on which axes
-					// GetYAxes first parameter = left axis (Position.Start), second = right axis (Position.End)
-					string leftAxisName = null;
-					string rightAxisName = null;
+					// Build axis names by combining series names that are on each axis
+					var leftSeriesNames = new List<string>();
+					var rightSeriesNames = new List<string>();
 					
-					// Build axis names based on which series are on each axis
-					if (this.Series1Axis == YAxisLeft && this.Series2Axis == YAxisLeft)
+					for (int i = 0; i < MaxSeriesCount; i++)
 					{
-						// Both on left - shouldn't reach here with needsDualAxes = true, but handle it
-						leftAxisName = this.Series1Name;
-					}
-					else if (this.Series1Axis == YAxisLeft && this.Series2Axis == YAxisRight)
-					{
-						// Series 1 on left, Series 2 on right
-						leftAxisName = this.Series1Name;
-						rightAxisName = this.Series2Name;
-					}
-					else if (this.Series1Axis == YAxisRight && this.Series2Axis == YAxisLeft)
-					{
-						// Series 1 on right, Series 2 on left
-						leftAxisName = this.Series2Name;
-						rightAxisName = this.Series1Name;
-					}
-					else // both on right
-					{
-						// Both on right - use combined label or default
-						if (!string.IsNullOrEmpty(this.Series1Name) && !string.IsNullOrEmpty(this.Series2Name))
+						if (i < seriesList.Count && !string.IsNullOrEmpty(allSeriesNames[i]))
 						{
-							rightAxisName = $"{this.Series1Name} / {this.Series2Name}";
-						}
-						else
-						{
-							rightAxisName = this.Series1Name ?? this.Series2Name ?? DefaultYAxisLabel;
+							if (allSeriesAxes[i] == YAxisLeft)
+							{
+								leftSeriesNames.Add(allSeriesNames[i]);
+							}
+							else
+							{
+								rightSeriesNames.Add(allSeriesNames[i]);
+							}
 						}
 					}
 					
-					this.YAxes = GetYAxes(leftAxisName ?? DefaultYAxisLabel, rightAxisName ?? DefaultYAxisLabel);
+					string leftAxisName = leftSeriesNames.Any() 
+						? string.Join(" / ", leftSeriesNames) 
+						: DefaultYAxisLabel;
+					string rightAxisName = rightSeriesNames.Any() 
+						? string.Join(" / ", rightSeriesNames) 
+						: DefaultYAxisLabel;
+					
+					this.YAxes = GetYAxes(leftAxisName, rightAxisName);
 				}
 				else
 				{
-					// Single axis - use the name of the series on the left (or first series by default)
-					string axisName = this.Series1Axis == YAxisLeft ? this.Series1Name : this.Series2Name;
-					this.YAxes = GetYAxes(axisName ?? this.Series1Name);
+					// Single axis - use the combined name of all series or first available
+					var allNames = new[] { this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name }
+						.Where(name => !string.IsNullOrEmpty(name))
+						.Take(seriesList.Count);
+					string axisName = allNames.Any() ? string.Join(" / ", allNames) : DefaultYAxisLabel;
+					this.YAxes = GetYAxes(axisName);
 				}
 			}
 			catch (MatchCountException e)
@@ -532,12 +599,15 @@
 			return wasSuccessful;
 		}
 
-		private static bool TryGetMatchForRecord(ImmutableArray<RegularExpression> expressions, string inputString, out float value1, out float value2)
+		private static bool TryGetMatchForRecord(ImmutableArray<RegularExpression> expressions, string inputString, out float[] values)
 		{
-			value1 = float.NaN;
-			value2 = float.NaN;
-			var hasFirstValue = false;
-			var hasSecondValue = false;
+			values = new float[MaxSeriesCount];
+			for (int i = 0; i < MaxSeriesCount; i++)
+			{
+				values[i] = float.NaN;
+			}
+			
+			var hasAnyValue = false;
 
 			if (!expressions.IsDefaultOrEmpty &&
 			    !string.IsNullOrEmpty(inputString))
@@ -548,14 +618,14 @@
 
 					if (matches.Any())
 					{
-						var values = matches.Take(MaxSeriesCount).ToList();
-						if (values.Count > 0)
+						var matchList = matches.Take(MaxSeriesCount).ToList();
+						for (var index = 0; index < matchList.Count && index < MaxSeriesCount; index++)
 						{
-							hasFirstValue = float.TryParse(values[0].Value, NumberStyle, CultureInfo.InvariantCulture, out value1);
-						}
-						if (values.Count > 1)
-						{
-							hasSecondValue = float.TryParse(values[1].Value, NumberStyle, CultureInfo.InvariantCulture, out value2);
+							if (float.TryParse(matchList[index].Value, NumberStyle, CultureInfo.InvariantCulture, out var value))
+							{
+								values[index] = value;
+								hasAnyValue = true;
+							}
 						}
 					}
 				}
@@ -568,20 +638,17 @@
 						if (matches.Any())
 						{
 							var matchValue = matches.First().Value;
-							if (index == 0)
+							if (float.TryParse(matchValue, NumberStyle, CultureInfo.InvariantCulture, out var value))
 							{
-								hasFirstValue = float.TryParse(matchValue, NumberStyle, CultureInfo.InvariantCulture, out value1);
-							}
-							else
-							{
-								hasSecondValue = float.TryParse(matchValue, NumberStyle, CultureInfo.InvariantCulture, out value2);
+								values[index] = value;
+								hasAnyValue = true;
 							}
 						}
 					}
 				}
 			}
 
-			return hasFirstValue || hasSecondValue;
+			return hasAnyValue;
 		}
 
 		private static List<string> GetSeriesNames(string inputString, ImmutableArray<RegularExpression> expressions)
@@ -688,11 +755,17 @@
 			return seriesNames;
 		}
 
-		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name, string series1Axis, string series2Axis)
+		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string[] seriesNames, string[] seriesAxes)
 		{
-			var values1 = new ObservableCollection<DateTimePoint>();
-			var values2 = new ObservableCollection<DateTimePoint>();
-			var hasSecondSeries = false;
+			var seriesValues = new ObservableCollection<DateTimePoint>[MaxSeriesCount];
+			var hasSeriesData = new bool[MaxSeriesCount];
+			
+			for (int i = 0; i < MaxSeriesCount; i++)
+			{
+				seriesValues[i] = new ObservableCollection<DateTimePoint>();
+				hasSeriesData[i] = false;
+			}
+			
 			var expressions = ParseRegularExpressions(regularExpression);
 
 			if (records.Length > 0)
@@ -701,16 +774,15 @@
 				{
 					try
 					{
-						if (TryGetMatchForRecord(expressions, record.Content, out var value1, out var value2))
+						if (TryGetMatchForRecord(expressions, record.Content, out var values))
 						{
-							if (!float.IsNaN(value1))
+							for (int i = 0; i < MaxSeriesCount; i++)
 							{
-								values1.Add(new DateTimePoint(record.CreatedAt, value1));
-							}
-							if (!float.IsNaN(value2))
-							{
-								values2.Add(new DateTimePoint(record.CreatedAt, value2));
-								hasSecondSeries = true;
+								if (!float.IsNaN(values[i]))
+								{
+									seriesValues[i].Add(new DateTimePoint(record.CreatedAt, values[i]));
+									hasSeriesData[i] = true;
+								}
 							}
 						}
 					}
@@ -724,38 +796,30 @@
 				}
 			}
 
-			// Use provided names or defaults (Series N convention)
-			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : $"{DefaultSeriesName} 1";
-			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : $"{DefaultSeriesName} 2";
+			var seriesList = new List<ISeries>();
 
-			// Determine which axis each series should be on
-			// Left = axis 0, Right = axis 1
-			int series1AxisIndex = series1Axis == YAxisRight ? 1 : 0;
-			int series2AxisIndex = series2Axis == YAxisRight ? 1 : 0;
-
-			var seriesList = new List<ISeries>
+			// Create series for each that has data
+			for (int i = 0; i < MaxSeriesCount; i++)
 			{
-				new LineSeries<DateTimePoint>
+				if (hasSeriesData[i])
 				{
-					Name = finalSeries1Name,
-					Values = values1,
-					GeometrySize = 10,
-					ScalesYAt = series1AxisIndex,
-					TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
+					var finalSeriesName = !string.IsNullOrEmpty(seriesNames[i]) 
+						? seriesNames[i] 
+						: $"{DefaultSeriesName} {i + 1}";
+					
+					// Determine which axis this series should be on
+					// Left = axis 0, Right = axis 1
+					int axisIndex = seriesAxes[i] == YAxisRight ? 1 : 0;
+					
+					seriesList.Add(new LineSeries<DateTimePoint>
+					{
+						Name = finalSeriesName,
+						Values = seriesValues[i],
+						GeometrySize = 10,
+						ScalesYAt = axisIndex,
+						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
+					});
 				}
-			};
-
-			// Add second series if it has data
-			if (hasSecondSeries)
-			{
-				seriesList.Add(new LineSeries<DateTimePoint>
-				{
-					Name = finalSeries2Name,
-					Values = values2,
-					GeometrySize = 10,
-					ScalesYAt = series2AxisIndex,
-					TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
-				});
 			}
 
 			return seriesList;

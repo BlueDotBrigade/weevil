@@ -106,6 +106,38 @@
                                  IsChecked="{Binding Series2Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
                                  GroupName="Series2Axis"/>
                 </StackPanel>
+                <TextBox x:Name="Series3NameTextBox" 
+                         Text="{Binding Series3Name}"
+                         materialDesign:HintAssist.Hint="Series 3 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 3 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series3Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series3Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series3Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series3Axis"/>
+                </StackPanel>
+                <TextBox x:Name="Series4NameTextBox" 
+                         Text="{Binding Series4Name}"
+                         materialDesign:HintAssist.Hint="Series 4 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 4 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series4Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series4Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series4Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series4Axis"/>
+                </StackPanel>
                 <Separator/>
                 <TextBox x:Name="WindowTitleTextBox" 
                          Text="{Binding WindowTitle}"
