@@ -658,7 +658,9 @@
 				return new List<string> { DefaultSeriesName };
 			}
 
-			var seriesCount = Math.Min(expressions.Length, MaxSeriesCount);
+			// When we have a single expression, it might have multiple named groups
+			// So we need to allocate space for up to MaxSeriesCount series
+			var seriesCount = (expressions.Length == 1) ? MaxSeriesCount : Math.Min(expressions.Length, MaxSeriesCount);
 			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
 
 			if (!string.IsNullOrEmpty(inputString))
@@ -720,7 +722,9 @@
 				return new List<string> { DefaultSeriesName };
 			}
 
-			var seriesCount = Math.Min(expressions.Length, MaxSeriesCount);
+			// When we have a single expression, it might have multiple named groups
+			// So we need to allocate space for up to MaxSeriesCount series
+			var seriesCount = (expressions.Length == 1) ? MaxSeriesCount : Math.Min(expressions.Length, MaxSeriesCount);
 			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
 
 			// Find records that match each expression to extract series names
