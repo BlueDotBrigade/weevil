@@ -31,10 +31,9 @@
 		private static readonly int MaxSeriesCount = 2;
 		private static readonly string DefaultSeries2Suffix = " 2";
 
-		// Secondary axis series options
-		public static readonly string SecondaryAxisNone = "None";
-		public static readonly string SecondaryAxisSeries1 = "Series 1";
-		public static readonly string SecondaryAxisSeries2 = "Series 2";
+		// Y-Axis position options for each series
+		public static readonly string YAxisLeft = "Left";
+		public static readonly string YAxisRight = "Right";
 
 		private static readonly NumberStyles NumberStyle =
 			NumberStyles.AllowLeadingWhite |
@@ -62,7 +61,8 @@
 
 		private string _series1Name;
 		private string _series2Name;
-		private string _secondaryAxisSeries = SecondaryAxisNone;
+		private string _series1Axis = YAxisLeft;
+		private string _series2Axis = YAxisLeft;
 
 		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
@@ -245,15 +245,29 @@
 			}
 		}
 
-		public string SecondaryAxisSeries
+		public string Series1Axis
 		{
-			get => _secondaryAxisSeries;
+			get => _series1Axis;
 			set
 			{
-				if (_secondaryAxisSeries != value)
+				if (_series1Axis != value)
 				{
-					_secondaryAxisSeries = value;
-					RaisePropertyChanged(nameof(this.SecondaryAxisSeries));
+					_series1Axis = value;
+					RaisePropertyChanged(nameof(this.Series1Axis));
+					Update(false);
+				}
+			}
+		}
+
+		public string Series2Axis
+		{
+			get => _series2Axis;
+			set
+			{
+				if (_series2Axis != value)
+				{
+					_series2Axis = value;
+					RaisePropertyChanged(nameof(this.Series2Axis));
 					Update(false);
 				}
 			}
@@ -314,38 +328,51 @@
 					}
 				}
 
-				this.Series = GetSeries(_records, this.RegularExpression, this.Series1Name, this.Series2Name, this.SecondaryAxisSeries);
+				this.Series = GetSeries(_records, this.RegularExpression, this.Series1Name, this.Series2Name, this.Series1Axis, this.Series2Axis);
 
 				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
 				
 				var seriesList = this.Series.ToList();
-				// Determine if we need dual axes based on the SecondaryAxisSeries setting
-				bool needsDualAxes = seriesList.Count > 1 && this.SecondaryAxisSeries != SecondaryAxisNone;
+				// Determine if we need dual axes - when any series is on the right axis
+				bool needsDualAxes = seriesList.Count > 1 && (this.Series1Axis == YAxisRight || this.Series2Axis == YAxisRight);
 				if (needsDualAxes)
 				{
-					// Determine which axis names go where
+					// Determine which series names go on which axes
 					// GetYAxes first parameter = left axis (Position.Start), second = right axis (Position.End)
-					string leftAxisName;
-					string rightAxisName;
+					string leftAxisName = null;
+					string rightAxisName = null;
 					
-					if (this.SecondaryAxisSeries == SecondaryAxisSeries1)
+					// Build axis names based on which series are on each axis
+					if (this.Series1Axis == YAxisLeft && this.Series2Axis == YAxisLeft)
+					{
+						// Both on left - shouldn't reach here with needsDualAxes = true, but handle it
+						leftAxisName = this.Series1Name;
+					}
+					else if (this.Series1Axis == YAxisLeft && this.Series2Axis == YAxisRight)
+					{
+						// Series 1 on left, Series 2 on right
+						leftAxisName = this.Series1Name;
+						rightAxisName = this.Series2Name;
+					}
+					else if (this.Series1Axis == YAxisRight && this.Series2Axis == YAxisLeft)
 					{
 						// Series 1 on right, Series 2 on left
 						leftAxisName = this.Series2Name;
 						rightAxisName = this.Series1Name;
 					}
-					else // SecondaryAxisSeries2
+					else // both on right
 					{
-						// Series 2 on right, Series 1 on left
-						leftAxisName = this.Series1Name;
-						rightAxisName = this.Series2Name;
+						// Both on right
+						rightAxisName = this.Series1Name;
 					}
 					
-					this.YAxes = GetYAxes(leftAxisName, rightAxisName);
+					this.YAxes = GetYAxes(leftAxisName ?? DefaultYAxisLabel, rightAxisName ?? DefaultYAxisLabel);
 				}
 				else
 				{
-					this.YAxes = GetYAxes(this.Series1Name);
+					// Single axis - use the name of the series on the left (or first series by default)
+					string axisName = this.Series1Axis == YAxisLeft ? this.Series1Name : this.Series2Name;
+					this.YAxes = GetYAxes(axisName ?? this.Series1Name);
 				}
 			}
 			catch (MatchCountException e)
@@ -654,7 +681,7 @@
 			return seriesNames;
 		}
 
-		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name, string secondaryAxisSeries)
+		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string series1Name, string series2Name, string series1Axis, string series2Axis)
 		{
 			var values1 = new ObservableCollection<DateTimePoint>();
 			var values2 = new ObservableCollection<DateTimePoint>();
@@ -694,21 +721,10 @@
 			var finalSeries1Name = !string.IsNullOrEmpty(series1Name) ? series1Name : $"{DefaultSeriesName} 1";
 			var finalSeries2Name = !string.IsNullOrEmpty(series2Name) ? series2Name : $"{DefaultSeriesName} 2";
 
-			// Determine which series should be on the secondary axis (right side)
-			int series1AxisIndex = 0;
-			int series2AxisIndex = 0;
-			
-			if (secondaryAxisSeries == SecondaryAxisSeries1)
-			{
-				series1AxisIndex = 1;  // Series 1 on right axis
-				series2AxisIndex = 0;  // Series 2 on left axis
-			}
-			else if (secondaryAxisSeries == SecondaryAxisSeries2)
-			{
-				series1AxisIndex = 0;  // Series 1 on left axis
-				series2AxisIndex = 1;  // Series 2 on right axis
-			}
-			// else SecondaryAxisNone - both on left axis (index 0)
+			// Determine which axis each series should be on
+			// Left = axis 0, Right = axis 1
+			int series1AxisIndex = series1Axis == YAxisRight ? 1 : 0;
+			int series2AxisIndex = series2Axis == YAxisRight ? 1 : 0;
 
 			var seriesList = new List<ISeries>
 			{

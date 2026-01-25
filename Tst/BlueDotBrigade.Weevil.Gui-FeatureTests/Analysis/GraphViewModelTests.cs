@@ -42,7 +42,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		}
 
 		[TestMethod]
-		public void GraphViewModel_WithSecondaryAxisSeriesNone_ShouldPlotBothSeriesOnLeftAxis()
+		public void GraphViewModel_WithBothSeriesOnLeftAxis_ShouldPlotBothSeriesOnLeftAxis()
 		{
 			// Arrange
 			var records = ImmutableArray.Create<IRecord>(
@@ -53,7 +53,9 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Act
 			var viewModel = new GraphViewModel(records, expression, "title", "source");
-			viewModel.SecondaryAxisSeries = GraphViewModel.SecondaryAxisNone;
+			// Default is both on left, but set explicitly for clarity
+			viewModel.Series1Axis = GraphViewModel.YAxisLeft;
+			viewModel.Series2Axis = GraphViewModel.YAxisLeft;
 			var series = viewModel.Series.ToList();
 
 			// Assert
@@ -74,7 +76,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		}
 
 		[TestMethod]
-		public void GraphViewModel_WithSecondaryAxisSeriesSeries1_ShouldPlotSeries1OnRightAxis()
+		public void GraphViewModel_WithSeries1OnRightAxis_ShouldPlotSeries1OnRightAxis()
 		{
 			// Arrange
 			var records = ImmutableArray.Create<IRecord>(
@@ -85,7 +87,8 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Act
 			var viewModel = new GraphViewModel(records, expression, "title", "source");
-			viewModel.SecondaryAxisSeries = GraphViewModel.SecondaryAxisSeries1;
+			viewModel.Series1Axis = GraphViewModel.YAxisRight;
+			viewModel.Series2Axis = GraphViewModel.YAxisLeft;
 			var series = viewModel.Series.ToList();
 
 			// Assert
@@ -106,7 +109,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		}
 
 		[TestMethod]
-		public void GraphViewModel_WithSecondaryAxisSeriesSeries2_ShouldPlotSeries2OnRightAxis()
+		public void GraphViewModel_WithSeries2OnRightAxis_ShouldPlotSeries2OnRightAxis()
 		{
 			// Arrange
 			var records = ImmutableArray.Create<IRecord>(
@@ -117,7 +120,8 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Act
 			var viewModel = new GraphViewModel(records, expression, "title", "source");
-			viewModel.SecondaryAxisSeries = GraphViewModel.SecondaryAxisSeries2;
+			viewModel.Series1Axis = GraphViewModel.YAxisLeft;
+			viewModel.Series2Axis = GraphViewModel.YAxisRight;
 			var series = viewModel.Series.ToList();
 
 			// Assert
