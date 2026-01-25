@@ -140,5 +140,139 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			// Should have two Y-axes
 			viewModel.YAxes.Should().HaveCount(2);
 		}
+
+		[TestMethod]
+		public void GraphViewModel_WithThreeExpressions_ShouldCreateThreeSeries()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "CPU=5"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "MEM=10"),
+				new Record(3, DateTime.UtcNow.AddSeconds(2), SeverityType.Information, "DISK=15"));
+
+			var expression = $"CPU=(?<cpu>\\d+){Constants.FilterOrOperator}MEM=(?<mem>\\d+){Constants.FilterOrOperator}DISK=(?<disk>\\d+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert
+			series.Should().HaveCount(3);
+			series[0].Name.Should().Be("cpu");
+			series[1].Name.Should().Be("mem");
+			series[2].Name.Should().Be("disk");
+
+			var firstSeries = series[0] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var secondSeries = series[1] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var thirdSeries = series[2] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+
+			firstSeries.Should().NotBeNull();
+			secondSeries.Should().NotBeNull();
+			thirdSeries.Should().NotBeNull();
+
+			firstSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			secondSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			thirdSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+		}
+
+		[TestMethod]
+		public void GraphViewModel_WithFourExpressions_ShouldCreateFourSeries()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "CPU=5"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "MEM=10"),
+				new Record(3, DateTime.UtcNow.AddSeconds(2), SeverityType.Information, "DISK=15"),
+				new Record(4, DateTime.UtcNow.AddSeconds(3), SeverityType.Information, "NET=20"));
+
+			var expression = $"CPU=(?<cpu>\\d+){Constants.FilterOrOperator}MEM=(?<mem>\\d+){Constants.FilterOrOperator}DISK=(?<disk>\\d+){Constants.FilterOrOperator}NET=(?<net>\\d+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert
+			series.Should().HaveCount(4);
+			series[0].Name.Should().Be("cpu");
+			series[1].Name.Should().Be("mem");
+			series[2].Name.Should().Be("disk");
+			series[3].Name.Should().Be("net");
+
+			var firstSeries = series[0] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var secondSeries = series[1] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var thirdSeries = series[2] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var fourthSeries = series[3] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+
+			firstSeries.Should().NotBeNull();
+			secondSeries.Should().NotBeNull();
+			thirdSeries.Should().NotBeNull();
+			fourthSeries.Should().NotBeNull();
+
+			firstSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			secondSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			thirdSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			fourthSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+		}
+
+		[TestMethod]
+		public void GraphViewModel_WithSingleExpressionFourGroups_ShouldCreateFourSeries()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "CPU=5&MEM=10&DISK=15&NET=20"));
+
+			var expression = "CPU=(?<cpu>\\d+)&MEM=(?<mem>\\d+)&DISK=(?<disk>\\d+)&NET=(?<net>\\d+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert
+			series.Should().HaveCount(4);
+			series[0].Name.Should().Be("cpu");
+			series[1].Name.Should().Be("mem");
+			series[2].Name.Should().Be("disk");
+			series[3].Name.Should().Be("net");
+
+			var firstSeries = series[0] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var secondSeries = series[1] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var thirdSeries = series[2] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			var fourthSeries = series[3] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+
+			firstSeries.Should().NotBeNull();
+			secondSeries.Should().NotBeNull();
+			thirdSeries.Should().NotBeNull();
+			fourthSeries.Should().NotBeNull();
+
+			firstSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			secondSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			thirdSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+			fourthSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().Should().ContainSingle();
+		}
+
+		[TestMethod]
+		public void GraphViewModel_WithMoreThanFourGroups_ShouldLimitToFourSeries()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "CPU=5"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "MEM=10"),
+				new Record(3, DateTime.UtcNow.AddSeconds(2), SeverityType.Information, "DISK=15"),
+				new Record(4, DateTime.UtcNow.AddSeconds(3), SeverityType.Information, "NET=20"),
+				new Record(5, DateTime.UtcNow.AddSeconds(4), SeverityType.Information, "GPU=25"));
+
+			// Five expressions, but should only create 4 series
+			var expression = $"CPU=(?<cpu>\\d+){Constants.FilterOrOperator}MEM=(?<mem>\\d+){Constants.FilterOrOperator}DISK=(?<disk>\\d+){Constants.FilterOrOperator}NET=(?<net>\\d+){Constants.FilterOrOperator}GPU=(?<gpu>\\d+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert
+			series.Should().HaveCount(4);
+			series[0].Name.Should().Be("cpu");
+			series[1].Name.Should().Be("mem");
+			series[2].Name.Should().Be("disk");
+			series[3].Name.Should().Be("net");
+		}
 	}
-}
