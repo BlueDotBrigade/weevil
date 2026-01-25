@@ -276,3 +276,4 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			series[3].Name.Should().Be("net");
 		}
 	}
+}
