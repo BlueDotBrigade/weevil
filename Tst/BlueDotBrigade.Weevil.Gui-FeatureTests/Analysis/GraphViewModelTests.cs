@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Act
 			var viewModel = new GraphViewModel(records, expression, "title", "source");
-			viewModel.SecondaryAxisSeries = "None";
+			viewModel.SecondaryAxisSeries = GraphViewModel.SecondaryAxisNone;
 			var series = viewModel.Series.ToList();
 
 			// Assert
@@ -85,7 +85,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Act
 			var viewModel = new GraphViewModel(records, expression, "title", "source");
-			viewModel.SecondaryAxisSeries = "Series 1";
+			viewModel.SecondaryAxisSeries = GraphViewModel.SecondaryAxisSeries1;
 			var series = viewModel.Series.ToList();
 
 			// Assert
@@ -117,7 +117,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Act
 			var viewModel = new GraphViewModel(records, expression, "title", "source");
-			viewModel.SecondaryAxisSeries = "Series 2";
+			viewModel.SecondaryAxisSeries = GraphViewModel.SecondaryAxisSeries2;
 			var series = viewModel.Series.ToList();
 
 			// Assert
