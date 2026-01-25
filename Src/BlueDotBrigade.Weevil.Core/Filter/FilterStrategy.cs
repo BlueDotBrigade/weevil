@@ -74,26 +74,15 @@
 				if (bool.TryParse(filterCriteria.Configuration[IncludePinned].ToString(), out var userConfigurationValue))
 				{
 					_includePinned = userConfigurationValue;
-					Log.Default.Write(LogSeverityType.Debug, $"Filter configuration: IncludePinned={_includePinned}");
 				}
 			}
 
 			if (filterCriteria.Configuration.ContainsKey(IncludeBookmarks))
 			{
-				Log.Default.Write(LogSeverityType.Debug, $"Filter configuration contains IncludeBookmarks key. Value type: {filterCriteria.Configuration[IncludeBookmarks]?.GetType().Name}, Value: {filterCriteria.Configuration[IncludeBookmarks]}");
 				if (bool.TryParse(filterCriteria.Configuration[IncludeBookmarks].ToString(), out var userConfigurationValue))
 				{
 					_includeBookmarks = userConfigurationValue;
-					Log.Default.Write(LogSeverityType.Debug, $"Filter configuration: IncludeBookmarks={_includeBookmarks}, BookmarkCount={_bookmarkManager?.Bookmarks.Length ?? 0}");
 				}
-				else
-				{
-					Log.Default.Write(LogSeverityType.Debug, $"Failed to parse IncludeBookmarks value: {filterCriteria.Configuration[IncludeBookmarks]}");
-				}
-			}
-			else
-			{
-				Log.Default.Write(LogSeverityType.Debug, $"Filter configuration does NOT contain IncludeBookmarks key. Configuration keys: {string.Join(", ", filterCriteria.Configuration.Keys)}");
 			}
 		}
 
@@ -125,26 +114,12 @@
 				var hasBookmark = _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
 				var isBookmarkedAndShouldKeep = _includeBookmarks && hasBookmark;
 
-				// Log for lines 2, 4, and 8 specifically to debug
-				if (record.LineNumber == 2 || record.LineNumber == 4 || record.LineNumber == 8)
-				{
-					Log.Default.Write(LogSeverityType.Debug, $"Checking record {record.LineNumber}: isPinned={record.Metadata.IsPinned}, hasBookmark={hasBookmark}, _includeBookmarks={_includeBookmarks}, _includePinned={_includePinned}");
-				}
-
 				if (isPinnedAndShouldKeep)
 				{
-					if (record.LineNumber == 2 || record.LineNumber == 4 || record.LineNumber == 8)
-					{
-						Log.Default.Write(LogSeverityType.Debug, $"Keeping pinned record. LineNumber={record.LineNumber}");
-					}
 					canKeepRecord = true;
 				}
 				else if (isBookmarkedAndShouldKeep)
 				{
-					if (record.LineNumber == 2 || record.LineNumber == 4 || record.LineNumber == 8)
-					{
-						Log.Default.Write(LogSeverityType.Debug, $"Keeping bookmarked record. LineNumber={record.LineNumber}");
-					}
 					canKeepRecord = true;
 				}
 				else
