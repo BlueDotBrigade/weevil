@@ -15,6 +15,7 @@
         Background="{DynamicResource MaterialDesignPaper}">
     <Window.Resources>
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <converters:StringToBooleanConverter x:Key="StringToBooleanConverter" />
         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
             <Setter Property="Margin" Value="5" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -83,11 +84,11 @@
                 <StackPanel Orientation="Horizontal" Margin="5">
                     <TextBlock Text="Series 1 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <RadioButton Content="Left" 
-                                 IsChecked="{Binding Series1Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Left}"
+                                 IsChecked="{Binding Series1Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
                                  GroupName="Series1Axis" 
                                  Margin="0,0,10,0"/>
                     <RadioButton Content="Right" 
-                                 IsChecked="{Binding Series1Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Right}"
+                                 IsChecked="{Binding Series1Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
                                  GroupName="Series1Axis"/>
                 </StackPanel>
                 <TextBox x:Name="Series2NameTextBox" 
@@ -99,11 +100,11 @@
                 <StackPanel Orientation="Horizontal" Margin="5">
                     <TextBlock Text="Series 2 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <RadioButton Content="Left" 
-                                 IsChecked="{Binding Series2Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Left}"
+                                 IsChecked="{Binding Series2Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
                                  GroupName="Series2Axis" 
                                  Margin="0,0,10,0"/>
                     <RadioButton Content="Right" 
-                                 IsChecked="{Binding Series2Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Right}"
+                                 IsChecked="{Binding Series2Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
                                  GroupName="Series2Axis"/>
                 </StackPanel>
                 <Separator/>
