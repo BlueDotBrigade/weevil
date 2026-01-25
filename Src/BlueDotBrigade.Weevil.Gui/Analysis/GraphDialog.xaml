@@ -4,6 +4,7 @@
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
+        xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
         Title="GraphDialog" 
         Height="450" Width="800" WindowState="Maximized"
         ShowInTaskbar="True"
@@ -13,6 +14,7 @@
         FontFamily="{materialDesign:MaterialDesignFont}"
         Background="{DynamicResource MaterialDesignPaper}">
     <Window.Resources>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
             <Setter Property="Margin" Value="5" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -78,23 +80,32 @@
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 1 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series1Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series1Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series1Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series1Axis"/>
+                </StackPanel>
                 <TextBox x:Name="Series2NameTextBox" 
                          Text="{Binding Series2Name}"
                          materialDesign:HintAssist.Hint="Series 2 Name"
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          controls:TextBoxBehavior.AutoSelectEnabled="True"/>
-                <ComboBox x:Name="SecondaryAxisSeriesComboBox"
-                          SelectedValue="{Binding SecondaryAxisSeries}"
-                          SelectedValuePath="Content"
-                          materialDesign:HintAssist.Hint="Secondary Y-Axis Series"
-                          VerticalAlignment="Center"
-                          Margin="5">
-                    <!-- Options must match GraphViewModel.SecondaryAxisNone/Series1/Series2 constants -->
-                    <ComboBoxItem Content="None"/>
-                    <ComboBoxItem Content="Series 1"/>
-                    <ComboBoxItem Content="Series 2"/>
-                </ComboBox>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 2 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series2Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series2Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series2Axis, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series2Axis"/>
+                </StackPanel>
                 <Separator/>
                 <TextBox x:Name="WindowTitleTextBox" 
                          Text="{Binding WindowTitle}"
