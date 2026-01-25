@@ -90,6 +90,7 @@
                           materialDesign:HintAssist.Hint="Secondary Y-Axis Series"
                           VerticalAlignment="Center"
                           Margin="5">
+                    <!-- Options must match GraphViewModel.SecondaryAxisNone/Series1/Series2 constants -->
                     <ComboBoxItem Content="None"/>
                     <ComboBoxItem Content="Series 1"/>
                     <ComboBoxItem Content="Series 2"/>

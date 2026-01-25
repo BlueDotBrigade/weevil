@@ -31,6 +31,11 @@
 		private static readonly int MaxSeriesCount = 2;
 		private static readonly string DefaultSeries2Suffix = " 2";
 
+		// Secondary axis series options
+		public static readonly string SecondaryAxisNone = "None";
+		public static readonly string SecondaryAxisSeries1 = "Series 1";
+		public static readonly string SecondaryAxisSeries2 = "Series 2";
+
 		private static readonly NumberStyles NumberStyle =
 			NumberStyles.AllowLeadingWhite |
 			NumberStyles.AllowTrailingWhite |
@@ -67,7 +72,7 @@
 			this.SourceFilePath = sourceFilePath ?? string.Empty;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
-			this.SecondaryAxisSeries = "None";
+			this.SecondaryAxisSeries = SecondaryAxisNone;
 
 			this.SampleData = records.Any()
 				? _records[0].Content
@@ -316,12 +321,12 @@
 				
 				var seriesList = this.Series.ToList();
 				// Determine if we need dual axes based on the SecondaryAxisSeries setting
-				bool needsDualAxes = seriesList.Count > 1 && this.SecondaryAxisSeries != "None";
+				bool needsDualAxes = seriesList.Count > 1 && this.SecondaryAxisSeries != SecondaryAxisNone;
 				if (needsDualAxes)
 				{
 					// Get the name of the series on the secondary axis
-					string secondarySeriesName = this.SecondaryAxisSeries == "Series 1" ? this.Series1Name : this.Series2Name;
-					string primarySeriesName = this.SecondaryAxisSeries == "Series 1" ? this.Series2Name : this.Series1Name;
+					string secondarySeriesName = this.SecondaryAxisSeries == SecondaryAxisSeries1 ? this.Series1Name : this.Series2Name;
+					string primarySeriesName = this.SecondaryAxisSeries == SecondaryAxisSeries1 ? this.Series2Name : this.Series1Name;
 					this.YAxes = GetYAxes(primarySeriesName, secondarySeriesName);
 				}
 				else
@@ -679,17 +684,17 @@
 			int series1AxisIndex = 0;
 			int series2AxisIndex = 0;
 			
-			if (secondaryAxisSeries == "Series 1")
+			if (secondaryAxisSeries == SecondaryAxisSeries1)
 			{
 				series1AxisIndex = 1;  // Series 1 on right axis
 				series2AxisIndex = 0;  // Series 2 on left axis
 			}
-			else if (secondaryAxisSeries == "Series 2")
+			else if (secondaryAxisSeries == SecondaryAxisSeries2)
 			{
 				series1AxisIndex = 0;  // Series 1 on left axis
 				series2AxisIndex = 1;  // Series 2 on right axis
 			}
-			// else "None" - both on left axis (index 0)
+			// else SecondaryAxisNone - both on left axis (index 0)
 
 			var seriesList = new List<ISeries>
 			{
