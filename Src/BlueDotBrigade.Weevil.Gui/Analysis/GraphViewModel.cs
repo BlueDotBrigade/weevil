@@ -62,7 +62,7 @@
 
 		private string _series1Name;
 		private string _series2Name;
-		private string _secondaryAxisSeries;
+		private string _secondaryAxisSeries = SecondaryAxisNone;
 
 		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
@@ -72,7 +72,6 @@
 			this.SourceFilePath = sourceFilePath ?? string.Empty;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
-			this.SecondaryAxisSeries = SecondaryAxisNone;
 
 			this.SampleData = records.Any()
 				? _records[0].Content
@@ -324,10 +323,25 @@
 				bool needsDualAxes = seriesList.Count > 1 && this.SecondaryAxisSeries != SecondaryAxisNone;
 				if (needsDualAxes)
 				{
-					// Get the name of the series on the secondary axis
-					string secondarySeriesName = this.SecondaryAxisSeries == SecondaryAxisSeries1 ? this.Series1Name : this.Series2Name;
-					string primarySeriesName = this.SecondaryAxisSeries == SecondaryAxisSeries1 ? this.Series2Name : this.Series1Name;
-					this.YAxes = GetYAxes(primarySeriesName, secondarySeriesName);
+					// Determine which axis names go where
+					// GetYAxes first parameter = left axis (Position.Start), second = right axis (Position.End)
+					string leftAxisName;
+					string rightAxisName;
+					
+					if (this.SecondaryAxisSeries == SecondaryAxisSeries1)
+					{
+						// Series 1 on right, Series 2 on left
+						leftAxisName = this.Series2Name;
+						rightAxisName = this.Series1Name;
+					}
+					else // SecondaryAxisSeries2
+					{
+						// Series 2 on right, Series 1 on left
+						leftAxisName = this.Series1Name;
+						rightAxisName = this.Series2Name;
+					}
+					
+					this.YAxes = GetYAxes(leftAxisName, rightAxisName);
 				}
 				else
 				{
