@@ -5,9 +5,12 @@ namespace BlueDotBrigade.Weevil
 	using System.Runtime.Serialization.DataContracts;
 	using BlueDotBrigade.Weevil.Data;
 
-	[DebuggerDisplay("Name={this.Name}, LineNumber={this.Record.LineNumber}")]
+	[DebuggerDisplay("Id={this.Id}, Name={this.Name}, LineNumber={this.Record.LineNumber}")]
 	public class Bookmark
 	{
+		[DataMember]
+		public int Id { get; }
+
 		[DataMember]
 		public string Name { get; }
 
@@ -15,13 +18,20 @@ namespace BlueDotBrigade.Weevil
 		public RelatesTo Record { get; }
 
 		public Bookmark(int lineNumber)
-			: this(string.Empty, lineNumber)
+			: this(0, string.Empty, lineNumber)
 		{
 			// nothing to do
 		}
 
 		public Bookmark(string name, int lineNumber)
+			: this(0, name, lineNumber)
 		{
+			// nothing to do
+		}
+
+		public Bookmark(int id, string name, int lineNumber)
+		{
+			this.Id = id;
 			this.Name = name;
 			this.Record = new RelatesTo()
 			{

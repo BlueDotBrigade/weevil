@@ -139,6 +139,7 @@
 				{
 					bookmarks.Add(
 						new Bookmark(
+							bookmarkInfo.Id,
 							bookmarkInfo.Name,
 							bookmarkInfo.Record.LineNumber));
 				}
@@ -302,6 +303,7 @@
 				{
 					snapshot.CommonData.Bookmarks.Add(new BookmarkInfo
 					{
+						Id = region.Id,
 						Name = region.Name,
 						Record = region.Record,
 					});

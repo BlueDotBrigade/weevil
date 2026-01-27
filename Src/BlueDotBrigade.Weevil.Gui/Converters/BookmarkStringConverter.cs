@@ -47,9 +47,18 @@
                                 bool.TryParse(values[2]?.ToString(), out isToolTip);
                         }
 
-                        if (viewModel.TryGetBookmarkName(record, out var bookmarkName))
+                        if (viewModel.TryGetBookmark(record, out var bookmark))
                         {
-                                return isToolTip ? $"Bookmark: {bookmarkName}" : $"★ {bookmarkName} ";
+                                // Display format: ★ {Id} : {Name} (if ID is set)
+                                // Otherwise: ★ {Name}
+                                if (bookmark.Id > 0)
+                                {
+                                        return isToolTip ? $"Bookmark {bookmark.Id}: {bookmark.Name}" : $"★ {bookmark.Id} : {bookmark.Name} ";
+                                }
+                                else
+                                {
+                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"★ {bookmark.Name} ";
+                                }
                         }
 
                         return string.Empty;

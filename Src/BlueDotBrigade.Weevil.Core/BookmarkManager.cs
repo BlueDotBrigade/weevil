@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
-		public void CreateFromSelection(string bookmarkName, int lineNumber)
+		public void CreateFromSelection(int id, string bookmarkName, int lineNumber)
 		{
 			lock (_bookmarkPadlock)
 			{
@@ -62,7 +62,7 @@ namespace BlueDotBrigade.Weevil
 					? _nextSequenceNumber.ToString() 
 					: bookmarkName;
 
-				var bookmark = new Bookmark(effectiveName, lineNumber);
+				var bookmark = new Bookmark(id, effectiveName, lineNumber);
 
 				if (_bookmarks.Any(r => r.Record.LineNumber == bookmark.Record.LineNumber))
 				{
@@ -97,6 +97,16 @@ namespace BlueDotBrigade.Weevil
 				}
 			}
 		}
+
+		public bool TryGetBookmarkById(int id, out Bookmark bookmark)
+		{
+			lock (_bookmarkPadlock)
+			{
+				bookmark = _bookmarks.FirstOrDefault(r => r.Id == id);
+				return bookmark != null;
+			}
+		}
+
 		public bool Contains(int lineNumber)
 		{
 			lock (_bookmarkPadlock)
