@@ -69,6 +69,17 @@ namespace BlueDotBrigade.Weevil
 					throw new InvalidOperationException("Unable to create bookmark because this bookmark has already been defined.");
 				}
 
+				// If creating a bookmark with a specific ID (e.g., Ctrl+Shift+[1-5]),
+				// remove any existing bookmark with that same ID first
+				if (id > 0)
+				{
+					var existingBookmarkWithSameId = _bookmarks.FirstOrDefault(r => r.Id == id);
+					if (existingBookmarkWithSameId != null)
+					{
+						_bookmarks.Remove(existingBookmarkWithSameId);
+					}
+				}
+
 				_bookmarks.Add(bookmark);
 
 				// Increment sequence number if we used it
@@ -103,6 +114,15 @@ namespace BlueDotBrigade.Weevil
 			lock (_bookmarkPadlock)
 			{
 				bookmark = _bookmarks.FirstOrDefault(r => r.Id == id);
+				return bookmark != null;
+			}
+		}
+
+		public bool TryGetBookmark(int lineNumber, out Bookmark bookmark)
+		{
+			lock (_bookmarkPadlock)
+			{
+				bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 				return bookmark != null;
 			}
 		}

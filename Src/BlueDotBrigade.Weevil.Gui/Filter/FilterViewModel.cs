@@ -2062,9 +2062,7 @@
 
 		public bool TryGetBookmark(IRecord record, out Bookmark bookmark)
 		{
-			var bookmarks = _engine.Bookmarks.Bookmarks;
-			bookmark = bookmarks.FirstOrDefault(b => b.Record.LineNumber == record.LineNumber);
-			return bookmark != null;
+			return _engine.Bookmarks.TryGetBookmark(record.LineNumber, out bookmark);
 		}
 	}
 }

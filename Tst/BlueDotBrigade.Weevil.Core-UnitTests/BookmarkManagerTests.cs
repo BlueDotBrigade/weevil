@@ -248,19 +248,50 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                 }
 
                 [TestMethod]
-                public void CreateFromSelection_MultipleBookmarksWithSameId_LastOneIsFound()
+                public void CreateFromSelection_DuplicateId_ReplacesExistingBookmark()
                 {
-                        // Arrange
+                        // Arrange - Create a bookmark with ID 2
                         _bookmarkManager.CreateFromSelection(2, "First", 10);
+
+                        // Act - Create another bookmark with the same ID 2, but different line
                         _bookmarkManager.CreateFromSelection(2, "Second", 20);
 
-                        // Act
+                        // Assert - The old bookmark should be replaced; only one bookmark with ID=2 should exist
+                        _bookmarkManager.Bookmarks.Length.Should().Be(1);
                         var found = _bookmarkManager.TryGetBookmarkById(2, out var bookmark);
-
-                        // Assert - Should return the first match (LINQ FirstOrDefault behavior)
                         found.Should().BeTrue();
-                        bookmark.Name.Should().Be("First");
-                        bookmark.Record.LineNumber.Should().Be(10);
+                        bookmark.Name.Should().Be("Second");
+                        bookmark.Record.LineNumber.Should().Be(20);
+                }
+
+                [TestMethod]
+                public void TryGetBookmark_ExistingLineNumber_ReturnsBookmark()
+                {
+                        // Arrange
+                        _bookmarkManager.CreateFromSelection(3, "Test", 100);
+
+                        // Act
+                        var found = _bookmarkManager.TryGetBookmark(100, out var bookmark);
+
+                        // Assert
+                        found.Should().BeTrue();
+                        bookmark.Should().NotBeNull();
+                        bookmark.Id.Should().Be(3);
+                        bookmark.Name.Should().Be("Test");
+                }
+
+                [TestMethod]
+                public void TryGetBookmark_NonExistingLineNumber_ReturnsFalse()
+                {
+                        // Arrange
+                        _bookmarkManager.CreateFromSelection(1, "Test", 10);
+
+                        // Act
+                        var found = _bookmarkManager.TryGetBookmark(999, out var bookmark);
+
+                        // Assert
+                        found.Should().BeFalse();
+                        bookmark.Should().BeNull();
                 }
         }
 }

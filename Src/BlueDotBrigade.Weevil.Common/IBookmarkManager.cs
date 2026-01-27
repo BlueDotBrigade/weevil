@@ -15,5 +15,7 @@
 		public bool TryGetBookmarkName(int lineNumber, out string bookmarkName);
 
 		public bool TryGetBookmarkById(int id, out Bookmark bookmark);
+
+		public bool TryGetBookmark(int lineNumber, out Bookmark bookmark);
 	}
 }
