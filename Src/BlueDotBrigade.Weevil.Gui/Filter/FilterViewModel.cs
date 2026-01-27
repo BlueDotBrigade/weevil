@@ -1931,7 +1931,8 @@
 						out bookmarkName);
 					
 					// Create bookmark regardless of dialog result (empty name gets sequential number)
-					_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+					// ID is 0 for bookmarks created via Ctrl+N (not via Ctrl+Shift+[1-5])
+					_engine.Bookmarks.CreateFromSelection(0, bookmarkName, selectedLineNumber);
 					RaiseBookmarksChanged();
 
 					//_bulletinMediator.Post(new BookmarksChangedBulletin 
@@ -2003,7 +2004,8 @@
 					// If user cancels dialog, do not create bookmark (standard Windows behavior)
 					if (!string.IsNullOrWhiteSpace(bookmarkName))
 					{
-						_engine.Bookmarks.CreateFromSelection(bookmarkName, selectedLineNumber);
+						// Pass the slot (1-5) as the bookmark ID
+						_engine.Bookmarks.CreateFromSelection(slot, bookmarkName, selectedLineNumber);
 
 						RaiseBookmarksChanged();
 						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
@@ -2022,12 +2024,9 @@
 
 		private void GoToBookmark(int slot)
 		{
-			// The bookmark number (slot) represents the order bookmarks were created (1st, 2nd, 3rd, etc.)
-			// For Ctrl+1 through Ctrl+5, find the Nth bookmark (1-indexed)
-			var bookmarks = _engine.Bookmarks.Bookmarks;
-			if (slot > 0 && slot <= bookmarks.Length)
+			// Use the bookmark ID (slot) to find the bookmark, instead of using array index
+			if (_engine.Bookmarks.TryGetBookmarkById(slot, out var bookmark))
 			{
-				var bookmark = bookmarks[slot - 1];
 				SearchFilterResults(
 						$"Bookmark {slot} is not visible in the current results.",
 						() => _engine
@@ -2059,6 +2058,13 @@
 		public bool TryGetBookmarkName(IRecord record, out string bookmarkName)
 		{
 			return _engine.Bookmarks.TryGetBookmarkName(record.LineNumber, out bookmarkName);
+		}
+
+		public bool TryGetBookmark(IRecord record, out Bookmark bookmark)
+		{
+			var bookmarks = _engine.Bookmarks.Bookmarks;
+			bookmark = bookmarks.FirstOrDefault(b => b.Record.LineNumber == record.LineNumber);
+			return bookmark != null;
 		}
 	}
 }
