@@ -299,13 +299,13 @@
 
 			if (newData.Bookmarks != null)
 			{
-				foreach (Bookmark region in newData.Bookmarks)
+				foreach (Bookmark bookmark in newData.Bookmarks)
 				{
 					snapshot.CommonData.Bookmarks.Add(new BookmarkInfo
 					{
-						Id = region.Id,
-						Name = region.Name,
-						Record = region.Record,
+						Id = bookmark.Id,
+						Name = bookmark.Name,
+						Record = bookmark.Record,
 					});
 				}
 			}
