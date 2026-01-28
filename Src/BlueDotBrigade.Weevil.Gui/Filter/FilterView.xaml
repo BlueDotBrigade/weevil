@@ -45,7 +45,6 @@
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
         <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
 
-        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddBookmarkCommand}" />
         <KeyBinding Key="D1" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark1Command}" />
         <KeyBinding Key="D2" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark2Command}" />
         <KeyBinding Key="D3" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark3Command}" />

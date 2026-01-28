@@ -320,9 +320,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		#region Commands: Bookmarks
 		[NotObservable]
-		public ICommand AddBookmarkCommand => new UiBoundCommand(AddBookmark, () => this.IsMenuEnabled);
-
-		[NotObservable]
 		public ICommand RemoveBookmarkCommand => new UiBoundCommand(RemoveBookmark, () => this.IsMenuEnabled);
 
 		[NotObservable]

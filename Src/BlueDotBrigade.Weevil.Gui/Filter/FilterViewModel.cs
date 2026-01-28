@@ -1913,44 +1913,6 @@
 			}
 		}
 
-		private void AddBookmark()
-		{
-			try
-			{
-				if (_engine.Selector.Selected.Count == 1)
-				{
-					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
-					
-					// Show dialog for optional bookmark name, but create bookmark even if user cancels
-					string bookmarkName = string.Empty;
-					_dialogBox.TryShowUserPrompt(
-						"Create Bookmark", 
-						"Name (leave empty for default)", 
-						@"^[a-zA-Z0-9\-]{0,12}$",  // Allow 0-12 characters (empty is valid)
-						"Must be 0 to 12 characters: letters, numbers, or hyphens.", 
-						out bookmarkName);
-					
-					// Create bookmark regardless of dialog result (empty name gets sequential number)
-					// ID is -1 for bookmarks created via Ctrl+N (not via Ctrl+Shift+[1-5])
-					_engine.Bookmarks.Create(-1, bookmarkName, selectedLineNumber);
-					RaiseBookmarksChanged();
-
-					//_bulletinMediator.Post(new BookmarksChangedBulletin 
-					//{
-					//	RegionCount = _engine.Bookmarks.Bookmarks.Length,
-					//});
-				}
-				else
-				{
-					MessageBox.Show("A single record must be selected in order to create a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-				}
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
-		}
-
 		private void RemoveBookmark()
 		{
 			if (_engine.Selector.Selected.Count == 1)
