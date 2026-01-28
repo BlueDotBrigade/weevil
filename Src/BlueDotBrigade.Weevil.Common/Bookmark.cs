@@ -18,13 +18,13 @@ namespace BlueDotBrigade.Weevil
 		public RelatesTo Record { get; }
 
 		public Bookmark(int lineNumber)
-			: this(0, string.Empty, lineNumber)
+			: this(-1, string.Empty, lineNumber)
 		{
 			// nothing to do
 		}
 
 		public Bookmark(string name, int lineNumber)
-			: this(0, name, lineNumber)
+			: this(-1, name, lineNumber)
 		{
 			// nothing to do
 		}

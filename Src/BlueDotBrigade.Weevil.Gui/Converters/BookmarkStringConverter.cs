@@ -49,15 +49,16 @@
 
                         if (viewModel.TryGetBookmark(record, out var bookmark))
                         {
-                                // Display format: ★ {Id} : {Name} (if ID is set)
-                                // Otherwise: ★ {Name}
+                                // Display format: * {Id} : {Name} (if ID is set)
+                                // Tooltip format: Bookmark: {Name} (Ctrl+{Id})
+                                // Otherwise: * {Name} or Bookmark: {Name}
                                 if (bookmark.Id > 0)
                                 {
-                                        return isToolTip ? $"Bookmark {bookmark.Id}: {bookmark.Name}" : $"★ {bookmark.Id} : {bookmark.Name} ";
+                                        return isToolTip ? $"Bookmark: {bookmark.Name} (Ctrl+{bookmark.Id})" : $"* {bookmark.Id} : {bookmark.Name} ";
                                 }
                                 else
                                 {
-                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"★ {bookmark.Name} ";
+                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"* {bookmark.Name} ";
                                 }
                         }
 
