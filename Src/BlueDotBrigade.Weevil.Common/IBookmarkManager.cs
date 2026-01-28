@@ -6,7 +6,7 @@
 	{
 		ImmutableArray<Bookmark> Bookmarks { get; }
 
-		void CreateFromSelection(int id, string bookmarkName, int lineNumber);
+		void Create(int id, string bookmarkName, int lineNumber);
 
 		void Clear();
 

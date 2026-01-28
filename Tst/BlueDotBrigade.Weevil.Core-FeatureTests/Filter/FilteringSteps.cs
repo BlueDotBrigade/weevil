@@ -160,7 +160,7 @@ internal sealed class FilteringSteps : ReqnrollSteps
 	[When($"bookmarking the record on line {X.WholeNumber}")]
 	public void WhenBookmarkingTheRecordOnLine(int lineNumber)
 	{
-		this.Context.Engine.Bookmarks.CreateFromSelection(0, string.Empty, lineNumber);
+		this.Context.Engine.Bookmarks.Create(-1, string.Empty, lineNumber);
 	}
 
 	[Then($"line number {X.WholeNumber} will be visible")]

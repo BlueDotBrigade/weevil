@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil
 	internal class BookmarkManager : IBookmarkManager
 	{
 		private readonly List<Bookmark> _bookmarks;
-		private readonly object _bookmarkPadlock;
+		private readonly object _gate;
 		private int _nextSequenceNumber;
 
 		internal BookmarkManager() : this(ImmutableArray<Bookmark>.Empty)
@@ -21,7 +21,7 @@ namespace BlueDotBrigade.Weevil
 		internal BookmarkManager(ImmutableArray<Bookmark> bookmarks)
 		{
 			_bookmarks = new List<Bookmark>(bookmarks);
-			_bookmarkPadlock = new object();
+			_gate = new object();
 			_nextSequenceNumber = CalculateNextSequenceNumber(bookmarks);
 		}
 
@@ -46,16 +46,16 @@ namespace BlueDotBrigade.Weevil
 		{
 			get
 			{
-				lock (_bookmarkPadlock)
+				lock (_gate)
 				{
 					return _bookmarks.ToImmutableArray();
 				}
 			}
 		}
 
-		public void CreateFromSelection(int id, string bookmarkName, int lineNumber)
+		public void Create(int id, string bookmarkName, int lineNumber)
 		{
-			lock (_bookmarkPadlock)
+			lock (_gate)
 			{
 				// If no name provided, use the next sequential number
 				var effectiveName = string.IsNullOrEmpty(bookmarkName) 
@@ -92,7 +92,7 @@ namespace BlueDotBrigade.Weevil
 
 		public bool TryGetBookmarkName(int lineNumber, out string bookmarkName)
 		{			
-			lock (_bookmarkPadlock)
+			lock (_gate)
 			{
 				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 
@@ -111,7 +111,7 @@ namespace BlueDotBrigade.Weevil
 
 		public bool TryGetBookmarkById(int id, out Bookmark bookmark)
 		{
-			lock (_bookmarkPadlock)
+			lock (_gate)
 			{
 				bookmark = _bookmarks.FirstOrDefault(r => r.Id == id);
 				return bookmark != null;
@@ -120,7 +120,7 @@ namespace BlueDotBrigade.Weevil
 
 		public bool TryGetBookmark(int lineNumber, out Bookmark bookmark)
 		{
-			lock (_bookmarkPadlock)
+			lock (_gate)
 			{
 				bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 				return bookmark != null;
@@ -129,7 +129,7 @@ namespace BlueDotBrigade.Weevil
 
 		public bool Contains(int lineNumber)
 		{
-			lock (_bookmarkPadlock)
+			lock (_gate)
 			{
 				return _bookmarks.Any(r => r.Record.LineNumber == lineNumber);
 			}
@@ -137,7 +137,7 @@ namespace BlueDotBrigade.Weevil
 
 		public void Clear()
 		{
-			lock (_bookmarkPadlock)
+			lock (_gate)
 			{
 				_bookmarks.Clear();
 				_nextSequenceNumber = 1;  // Reset sequence counter when clearing all bookmarks
@@ -146,7 +146,7 @@ namespace BlueDotBrigade.Weevil
 
 		public bool Clear(int lineNumber)
 		{
-			lock (_bookmarkPadlock)
+			lock (_gate)
 			{
 				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 

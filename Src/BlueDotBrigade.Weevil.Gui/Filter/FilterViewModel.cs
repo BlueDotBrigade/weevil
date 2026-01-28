@@ -1931,8 +1931,8 @@
 						out bookmarkName);
 					
 					// Create bookmark regardless of dialog result (empty name gets sequential number)
-					// ID is 0 for bookmarks created via Ctrl+N (not via Ctrl+Shift+[1-5])
-					_engine.Bookmarks.CreateFromSelection(0, bookmarkName, selectedLineNumber);
+					// ID is -1 for bookmarks created via Ctrl+N (not via Ctrl+Shift+[1-5])
+					_engine.Bookmarks.Create(-1, bookmarkName, selectedLineNumber);
 					RaiseBookmarksChanged();
 
 					//_bulletinMediator.Post(new BookmarksChangedBulletin 
@@ -2005,7 +2005,7 @@
 					if (!string.IsNullOrWhiteSpace(bookmarkName))
 					{
 						// Pass the slot (1-5) as the bookmark ID
-						_engine.Bookmarks.CreateFromSelection(slot, bookmarkName, selectedLineNumber);
+						_engine.Bookmarks.Create(slot, bookmarkName, selectedLineNumber);
 
 						RaiseBookmarksChanged();
 						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
