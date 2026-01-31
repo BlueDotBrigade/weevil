@@ -62,14 +62,14 @@
 		public void Test_ClearBeyondRegions_MultipleRegions_RecordsInSequentialOrder()
 		{
 			// Arrange - Bug #647: Create regions out of order
-			// Region 2 is created first (lines 18-20)
-			// Region 1 is created second (lines 12-14, topmost region)
+			// Region 2 is created first (lines 20-22)
+			// Region 1 is created second (lines 10-11, topmost region)
 			var regions = new List<Region>
 			{
-				new Region("Region2", 18, 20),
-				new Region("Region1", 12, 14),
+				new Region("Region2", 20, 22),
+				new Region("Region1", 10, 11),
 			};
-			var records = R.WithLineNumbers(10, 25);
+			var records = R.WithLineNumbers(1, 30);
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
@@ -82,13 +82,12 @@
 			var filteredRecords = repository.GetAll();
 
 			// Assert - Records should be in sequential order by line number
-			filteredRecords.Length.Should().Be(6);
-			filteredRecords[0].LineNumber.Should().Be(12);
-			filteredRecords[1].LineNumber.Should().Be(13);
-			filteredRecords[2].LineNumber.Should().Be(14);
-			filteredRecords[3].LineNumber.Should().Be(18);
-			filteredRecords[4].LineNumber.Should().Be(19);
-			filteredRecords[5].LineNumber.Should().Be(20);
+			filteredRecords.Length.Should().Be(5);
+			filteredRecords[0].LineNumber.Should().Be(10);
+			filteredRecords[1].LineNumber.Should().Be(11);
+			filteredRecords[2].LineNumber.Should().Be(20);
+			filteredRecords[3].LineNumber.Should().Be(21);
+			filteredRecords[4].LineNumber.Should().Be(22);
 		}
 
                 [TestMethod]
