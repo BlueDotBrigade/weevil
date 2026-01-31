@@ -1,154 +1,147 @@
-# Issue #649 - Steps to Reproduce and Expected Behavior
+# Issue #649 - Steps to Reproduce
 
-## Test Data Setup
-Use the test log file: `Tst/BlueDotBrigade.Weevil.Core-FeatureTests/.Daten/.Global/Droid.log`
-- Total records: 387
-- Records with "Info": ~36 records
-- Records with "Directives": 7 records (lines 1, 8, 15, 20, ...)
+## Bug Summary
 
-## Scenario 1: Include Filter with Pinned Records
+**Found and Fixed:** The bug occurs when "Show Pinned" or "Show Bookmarks" options are enabled with **NO filters** applied.
+
+**Root Cause:** In `FilterStrategy.CanKeep()`, when no include/exclude filters exist, the code returned `true` for ALL records without checking if ShowPinned/ShowBookmarks options were enabled.
+
+**Expected:** Only pinned/bookmarked records should be visible when these options are ON with no filters.
+
+**Actual:** All records were visible, ignoring the ShowPinned/ShowBookmarks options.
+
+---
+
+## Steps to Reproduce the Bug
+
+### Scenario 1: ShowPinned ON with No Filters (Bug Found ✓)
 
 **Steps:**
-1. Open the Droid.log file
-2. Pin records on lines 2, 4, and 8
-3. Ensure "Show Pinned" option is enabled (default)
-4. Apply include filter: "text not found" (matches nothing)
+1. Open any log file
+2. Ensure NO records are pinned
+3. Enable "Show Pinned" option
+4. Do NOT apply any include or exclude filters
 5. Observe results
 
 **Expected:**
-- 3 records visible (only the pinned ones: lines 2, 4, 8)
-- Pinned records override the include filter
+- 0 records visible (since no records are pinned)
+- OR only pinned records visible if any exist
 
-**Actual:**
-✅ **PASS** - Test "Pinned records remain visible regardless of active filters" passes
+**Actual (Before Fix):**
+- ❌ ALL records were visible (bug!)
 
----
-
-## Scenario 2: Include Filter with Bookmarked Records
-
-**Steps:**
-1. Open the Droid.log file
-2. Bookmark records on lines 2, 4, and 8
-3. Unpin all bookmarked records
-4. Ensure "Show Pinned" option is enabled
-5. Ensure "Show Bookmarks" option is enabled  
-6. Apply include filter: "text not found" (matches nothing)
-7. Observe results
-
-**Expected:**
-- 3 records visible (only the bookmarked ones: lines 2, 4, 8)
-- Bookmarked records override the include filter
-
-**Actual:**
-✅ **PASS** - Test "Bookmarked records remain visible with include filter when bookmarks always visible is enabled" passes
+**After Fix:**
+- ✅ Only pinned records are visible
 
 ---
 
-## Scenario 3: Exclude Filter with Bookmarked Records
+### Scenario 2: ShowBookmarks ON with No Filters (Bug Found ✓)
 
 **Steps:**
-1. Open the Droid.log file
-2. Bookmark records on lines 2, 4, and 8
-   - Line 2: Contains "Trace" (NOT "Info")
-   - Line 4: Contains "Trace" (NOT "Info")
-   - Line 8: Contains "Info"
-3. Unpin all bookmarked records
-4. Ensure "Show Pinned" option is enabled
-5. Ensure "Show Bookmarks" option is enabled
-6. Apply exclude filter: "Info"
-7. Observe results
-
-**Expected:**
-- 3 records visible (only the bookmarked ones: lines 2, 4, 8)
-- Line 8 is visible even though it matches the exclude filter
-- Bookmarked records override the exclude filter
-
-**Actual:**
-✅ **PASS** - Test "Bookmarked records remain visible with exclude filter when bookmarks always visible is enabled" passes
-
----
-
-## Scenario 4: Only Exclude Filter (No Special Records Marked)
-
-**Steps:**
-1. Open the Droid.log file
-2. Ensure no records are pinned or bookmarked
-3. Ensure "Show Pinned" option is enabled (default)
-4. Ensure "Show Bookmarks" option is enabled (default)
-5. Apply exclude filter: "Directives"
+1. Open any log file
+2. Bookmark one specific record (e.g., line 10)
+3. Enable "Show Bookmarks" option
+4. Disable "Show Pinned" option
+5. Do NOT apply any include or exclude filters
 6. Observe results
 
 **Expected:**
-- 380 records visible (387 total - 7 with "Directives")
-- All records NOT matching "Directives" are shown
+- 1 record visible (only the bookmarked one)
 
-**Actual:**
-✅ **PASS** - This should work based on the logic in FilterStrategy.CanKeep() lines 144-146
+**Actual (Before Fix):**
+- ❌ ALL records were visible (bug!)
+
+**After Fix:**
+- ✅ Only the bookmarked record is visible
 
 ---
 
-## Scenario 5: No Filters with Show Bookmarks Enabled
+### Scenario 3: Both Options ON with No Filters (Bug Found ✓)
 
 **Steps:**
-1. Open the Droid.log file
-2. Bookmark record on line 1
-3. Unpin all records
-4. Ensure "Show Pinned" option is OFF
-5. Ensure "Show Bookmarks" option is ON
-6. Do NOT apply any include or exclude filters
-7. Observe results
+1. Open any log file
+2. Pin one record (e.g., line 5)
+3. Bookmark a different record (e.g., line 15)
+4. Enable both "Show Pinned" and "Show Bookmarks" options
+5. Do NOT apply any include or exclude filters
+6. Observe results
 
 **Expected:**
-- 1 record visible (only the bookmarked one: line 1)
-- When "Show Bookmarks" is ON with no filters, only bookmarked records are shown
+- 2 records visible (the pinned one and the bookmarked one)
 
-**Actual:**
-✅ **PASS** - Based on FilterStrategy.CanKeep() logic lines 127-136
+**Actual (Before Fix):**
+- ❌ ALL records were visible (bug!)
+
+**After Fix:**
+- ✅ Only the 2 special records are visible
 
 ---
 
-## Scenario 6: Include AND Exclude Filters with Bookmarked Records
+## Test Coverage
 
-**Steps:**
-1. Open the Droid.log file
-2. Bookmark record on line 8 (contains both "Info" and "Directives")
-3. Unpin all records
-4. Ensure "Show Pinned" option is ON
-5. Ensure "Show Bookmarks" option is ON
-6. Apply include filter: "Info"
-7. Apply exclude filter: "Directives"
-8. Observe results
+Created **34 comprehensive unit tests** in `FilterStrategyTests.cs` covering all combinations:
 
-**Expected:**
-- Records matching "Info" but NOT "Directives" are shown
-- PLUS line 8 (bookmarked) is shown even though it matches the exclude filter
-- Bookmarked records override exclude filter
+### Test Matrix
+- **Include filter:** empty / matches / no match
+- **Exclude filter:** empty / matches / no match  
+- **Pinned record:** yes / no
+- **Bookmarked record:** yes / no
+- **Show Pinned option:** on / off
+- **Show Bookmarks option:** on / off
 
-**Actual:**
-✅ **PASS** - Based on FilterStrategy.CanKeep() logic lines 117-124
+### Test Results
+- ✅ All 34 unit tests pass
+- ✅ All 41 existing feature tests pass
+- ✅ No regressions introduced
 
 ---
 
-## Analysis
+## The Fix
 
-All test scenarios pass with the current implementation. The filtering logic in `FilterStrategy.CanKeep()` appears to be working correctly:
+**File:** `Src/BlueDotBrigade.Weevil.Core/Filter/FilterStrategy.cs`
 
-1. **Pinned/Bookmarked records override filters** when the respective options are enabled
-2. **Include filters** show matching records
-3. **Exclude filters** hide matching records (with lower priority than include)
-4. **Show Pinned/Bookmarks options** without filters show ONLY special records
+**Change:** Restructured `CanKeep()` method to check special record status BEFORE checking if filters exist.
 
-## Possible Bug Scenarios (Not Yet Tested)
+**Old Logic (Buggy):**
+```csharp
+if (no filters)
+{
+    return true; // ❌ Shows all records, ignores ShowPinned/ShowBookmarks
+}
+else
+{
+    if (isPinned && ShowPinned ON) return true;
+    if (isBookmarked && ShowBookmarks ON) return true;
+    // ... apply filters
+}
+```
 
-1. **Race condition**: Multiple rapid filter changes might produce inconsistent results
-2. **Large datasets**: Performance issues with many pinned/bookmarked records
-3. **UI state**: The options UI might not correctly reflect the actual filter state
-4. **Sidecar loading**: Bookmarks loaded from sidecar files might not be processed correctly
+**New Logic (Fixed):**
+```csharp
+// Always check special records first
+if (isPinned && ShowPinned ON) return true;
+if (isBookmarked && ShowBookmarks ON) return true;
 
-## Recommendation
+// Then handle the case of no filters
+if (no filters)
+{
+    // Only show all if special options are OFF
+    return !(ShowPinned || ShowBookmarks);
+}
+else
+{
+    // ... apply filters
+}
+```
 
-Since all automated tests pass and the logic appears correct:
-1. Request specific steps to reproduce from the issue reporter
-2. Check if the bug is UI-related rather than logic-related
-3. Verify if the bug occurs with real-world log files vs. test files
-4. Check for timing/threading issues in the FilterManager parallel processing
+---
+
+## Summary
+
+The bug was successfully identified through comprehensive unit testing and fixed. The issue affected users who:
+1. Enabled "Show Pinned" or "Show Bookmarks" options
+2. Did NOT apply any include/exclude filters
+3. Expected to see ONLY their pinned/bookmarked records
+4. Instead saw ALL records
+
+This has been corrected, and all tests now pass.

@@ -276,6 +276,106 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON");
 		}
 
+		[TestMethod]
+		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
+		{
+			// Arrange
+			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			var strategy = CreateFilterStrategy(
+				includeFilter: string.Empty,
+				excludeFilter: string.Empty,
+				showPinned: true,
+				showBookmarks: false,
+				bookmarkManager);
+
+			// Act
+			var result = strategy.CanKeep(record);
+
+			// Assert
+			result.Should().BeFalse("bookmarked record should not be visible when ShowBookmarks is OFF, even if ShowPinned is ON");
+		}
+
+		[TestMethod]
+		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
+		{
+			// Arrange
+			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			var strategy = CreateFilterStrategy(
+				includeFilter: string.Empty,
+				excludeFilter: string.Empty,
+				showPinned: true,
+				showBookmarks: true,
+				bookmarkManager);
+
+			// Act
+			var result = strategy.CanKeep(record);
+
+			// Assert
+			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON");
+		}
+
+		[TestMethod]
+		public void CanKeep_NoFilters_Pinned_Bookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
+		{
+			// Arrange
+			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			var strategy = CreateFilterStrategy(
+				includeFilter: string.Empty,
+				excludeFilter: string.Empty,
+				showPinned: true,
+				showBookmarks: false,
+				bookmarkManager);
+
+			// Act
+			var result = strategy.CanKeep(record);
+
+			// Assert
+			result.Should().BeTrue("pinned record should be visible when ShowPinned is ON");
+		}
+
+		[TestMethod]
+		public void CanKeep_NoFilters_Pinned_Bookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
+		{
+			// Arrange
+			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			var strategy = CreateFilterStrategy(
+				includeFilter: string.Empty,
+				excludeFilter: string.Empty,
+				showPinned: false,
+				showBookmarks: true,
+				bookmarkManager);
+
+			// Act
+			var result = strategy.CanKeep(record);
+
+			// Assert
+			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON");
+		}
+
+		[TestMethod]
+		public void CanKeep_NoFilters_Pinned_Bookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
+		{
+			// Arrange
+			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			var strategy = CreateFilterStrategy(
+				includeFilter: string.Empty,
+				excludeFilter: string.Empty,
+				showPinned: true,
+				showBookmarks: true,
+				bookmarkManager);
+
+			// Act
+			var result = strategy.CanKeep(record);
+
+			// Assert
+			result.Should().BeTrue("record with both special statuses should be visible when either option is ON");
+		}
+
 		#endregion
 
 		#region Include Filter Matches - No Special Records
