@@ -72,7 +72,7 @@ Scenario: Bookmarked records remain visible with include filter when bookmarks a
 		 And line number 4 will be visible
 		 And line number 8 will be visible
 
-Scenario: Scenario: Bookmarked records remain visible with exclude filter when bookmarks always visible is enabled
+Scenario: Bookmarked records remain visible with exclude filter when bookmarks always visible is enabled
 	Given that the default log file is open
 	When bookmarking the record on line 2
 		 And bookmarking the record on line 4
