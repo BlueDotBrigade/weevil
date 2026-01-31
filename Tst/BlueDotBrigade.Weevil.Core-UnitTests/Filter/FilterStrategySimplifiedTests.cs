@@ -157,11 +157,11 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		[DataRow(true,  true,  false, true,  false, true,  DisplayName = "Match   | Pinned    | NotBookmarked | ShowPinnedOn  | ShowBookmarksOff")]
 		[DataRow(true,  false, true,  false, false, false, DisplayName = "Match   | NotPinned | Bookmarked    | ShowPinnedOff | ShowBookmarksOff")]
 		[DataRow(true,  false, true,  false, true,  true,  DisplayName = "Match   | NotPinned | Bookmarked    | ShowPinnedOff | ShowBookmarksOn ")]
-		// Exclude no match - true unless ShowPinned/ShowBookmarks ON without being special
+		// Exclude no match - always true (non-excluded records are visible)
 		[DataRow(false, false, false, false, false, true,  DisplayName = "NoMatch | NotPinned | NotBookmarked | ShowPinnedOff | ShowBookmarksOff")]
-		[DataRow(false, false, false, true,  false, false, DisplayName = "NoMatch | NotPinned | NotBookmarked | ShowPinnedOn  | ShowBookmarksOff")]
-		[DataRow(false, false, false, false, true,  false, DisplayName = "NoMatch | NotPinned | NotBookmarked | ShowPinnedOff | ShowBookmarksOn ")]
-		[DataRow(false, false, false, true,  true,  false, DisplayName = "NoMatch | NotPinned | NotBookmarked | ShowPinnedOn  | ShowBookmarksOn ")]
+		[DataRow(false, false, false, true,  false, true,  DisplayName = "NoMatch | NotPinned | NotBookmarked | ShowPinnedOn  | ShowBookmarksOff")]
+		[DataRow(false, false, false, false, true,  true,  DisplayName = "NoMatch | NotPinned | NotBookmarked | ShowPinnedOff | ShowBookmarksOn ")]
+		[DataRow(false, false, false, true,  true,  true,  DisplayName = "NoMatch | NotPinned | NotBookmarked | ShowPinnedOn  | ShowBookmarksOn ")]
 		[DataRow(false, true,  false, true,  false, true,  DisplayName = "NoMatch | Pinned    | NotBookmarked | ShowPinnedOn  | ShowBookmarksOff")]
 		[DataRow(false, false, true,  false, true,  true,  DisplayName = "NoMatch | NotPinned | Bookmarked    | ShowPinnedOff | ShowBookmarksOn ")]
 		public void ExcludeFilter_VariousCombinations(bool contentMatches, bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks, bool expectedResult)

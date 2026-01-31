@@ -749,7 +749,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		}
 
 		[TestMethod]
-		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
+		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -765,11 +765,11 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeFalse("with ShowPinned ON and no include filter, only pinned records should be visible");
+			result.Should().BeTrue("with exclude filter, non-excluded records should be visible regardless of ShowPinned setting");
 		}
 
 		[TestMethod]
-		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsFalse()
+		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -785,11 +785,11 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeFalse("with ShowBookmarks ON and no include filter, only bookmarked records should be visible");
+			result.Should().BeTrue("with exclude filter, non-excluded records should be visible regardless of ShowBookmarks setting");
 		}
 
 		[TestMethod]
-		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
+		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -805,7 +805,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeFalse("with both options ON and no include filter, only special records should be visible");
+			result.Should().BeTrue("with exclude filter, non-excluded records should be visible regardless of ShowPinned/ShowBookmarks settings");
 		}
 
 		#endregion
