@@ -209,7 +209,8 @@
 			{
 				var filteredRecords = new List<IRecord>();
 
-				foreach (Region region in regions)
+				// Sort regions by line number to maintain sequential order (Bug #647)
+			foreach (Region region in regions.OrderBy(r => r.Minimum.LineNumber))
 				{
 					// Add all records that fall within the current region of interest
 					filteredRecords.AddRange(allRecords.Where(record =>
