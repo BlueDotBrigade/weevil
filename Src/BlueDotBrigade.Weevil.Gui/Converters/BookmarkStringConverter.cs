@@ -21,7 +21,7 @@
 	using System.Windows.Data;
 	using global::BlueDotBrigade.Weevil.Data;
 	using global::BlueDotBrigade.Weevil.Gui.Filter;
-
+	
 	public class BookmarkStringConverter : IMultiValueConverter
 	{
 		/// <summary>
@@ -54,11 +54,11 @@
                                 // Otherwise: * {Name} or Bookmark: {Name}
                                 if (bookmark.Id > 0)
                                 {
-                                        return isToolTip ? $"Bookmark: {bookmark.Name} (Ctrl+{bookmark.Id})" : $"* {bookmark.Id} : {bookmark.Name} ";
+                                        return isToolTip ? $"Bookmark: {bookmark.Name} (Ctrl+{bookmark.Id})" : $"★ {bookmark.Id} : {bookmark.Name} ";
                                 }
                                 else
                                 {
-                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"* {bookmark.Name} ";
+                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"★ {bookmark.Name} ";
                                 }
                         }
 
