@@ -14,7 +14,35 @@
         <Setter Property="CommandParameter"
                        Value="{Binding Path=CommandParameter}"/>
     </Style>
-    <ContextMenu x:Key="FilterViewContextMenu" x:Shared="False" FontSize="{DynamicResource ApplicationFontSize}">
+    
+    <!-- Style for detection menu items with 3-column layout -->
+    <Style x:Key="DetectionMenuItemStyle" TargetType="{x:Type MenuItem}">
+        <Setter Property="HeaderTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                            <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                            <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding}" Grid.Column="0"/>
+                        <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=MenuItem}, Path=InputGestureText}" 
+                                   Grid.Column="1" 
+                                   HorizontalAlignment="Right" 
+                                   Foreground="Gray"/>
+                        <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=MenuItem}, Path=Tag}" 
+                                   Grid.Column="2" 
+                                   Margin="12,0,0,0" 
+                                   Foreground="DarkGray" 
+                                   FontFamily="Courier New"/>
+                    </Grid>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <ContextMenu x:Key="FilterViewContextMenu" x:Shared="False" FontSize="{DynamicResource ApplicationFontSize}" Grid.IsSharedSizeScope="True">
                     <MenuItem Header="File">
                         <MenuItem Header="Open..." Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
                         <MenuItem Header="Save" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
@@ -107,17 +135,45 @@
                         <Separator/>
                         <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
                         <Separator/>
-                        <MenuItem Header="Detect Stable Values" Command="{Binding DetectStableValuesCommand}" InputGestureText="F6"  />
-                        <MenuItem Header="Detect First" Command="{Binding DetectFirstCommand}" InputGestureText="F7" />
-                        <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
-                        <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
-                        <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
-                        <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
-                        <MenuItem Header="Detect Repeating Records" Command="{Binding DetectRepeatingRecordsCommand}" />
+                        <MenuItem Header="Detect Stable Values" 
+                                  Command="{Binding DetectStableValuesCommand}" 
+                                  InputGestureText="F6" 
+                                  Tag="AAA---"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
+                        <MenuItem Header="Detect First" 
+                                  Command="{Binding DetectFirstCommand}" 
+                                  InputGestureText="F7"
+                                  Tag="A-----"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
+                        <MenuItem Header="Detect Data" 
+                                  Command="{Binding DetectDataCommand}" 
+                                  InputGestureText="F8"
+                                  Tag="A-C-D-"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
+                        <MenuItem Header="Detect Data Changes" 
+                                  Command="{Binding DetectDataTransitionsCommand}" 
+                                  InputGestureText="F9"
+                                  Tag="AaaBbb"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
+                        <MenuItem Header="Detect Rising Edges" 
+                                  Command="{Binding DataTransitionsRisingEdgeCommand}"
+                                  Tag="AbcAbc"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
+                        <MenuItem Header="Detect Falling Edges" 
+                                  Command="{Binding DataTransitionsFallingEdgeCommand}"
+                                  Tag="abCabC"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
+                        <MenuItem Header="Detect Repeating Records" 
+                                  Command="{Binding DetectRepeatingRecordsCommand}"
+                                  Tag="AaaaA-"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
                         <Separator/>
                         <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
                         <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-                        <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomalyCommand}" />
+                        <MenuItem Header="Detect Temporal Anomaly" 
+                                  Command="{Binding DetectTemporalAnomalyCommand}"
+                                  Tag="---A--"
+                                  Style="{StaticResource DetectionMenuItemStyle}"/>
                         <Separator />
                         <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
                     </MenuItem>
