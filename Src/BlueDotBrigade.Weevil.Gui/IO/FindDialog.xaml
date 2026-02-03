@@ -78,8 +78,8 @@
              HorizontalAlignment="Right" 
              TextWrapping="WrapWithOverflow" />
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="5">
-                        <RadioButton Content="Content" IsChecked="{Binding SearchContent}" GroupName="SearchLocation" Margin="0,0,20,0"/>
-                        <RadioButton Content="Comments" IsChecked="{Binding SearchComments}" GroupName="SearchLocation"/>
+                        <RadioButton Content="Comments" IsChecked="{Binding SearchComments}" GroupName="SearchLocation" Margin="0,0,20,0"/>
+                        <RadioButton Content="Content" IsChecked="{Binding SearchContent}" GroupName="SearchLocation"/>
                     </StackPanel>
                     <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
                     <TextBlock Grid.Row="1" Grid.Column="0"
