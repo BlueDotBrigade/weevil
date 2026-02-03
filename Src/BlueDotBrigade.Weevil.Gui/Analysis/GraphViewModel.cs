@@ -48,6 +48,7 @@
 		private IEnumerable<ISeries> _series;
 		private IEnumerable<ICartesianAxis> _xAxes;
 		private IEnumerable<ICartesianAxis> _yAxes;
+		private ObservableCollection<SeriesMetrics> _seriesMetrics;
 
 		private string _xAxisLabel;
 		private string _yAxisLabel;
@@ -76,6 +77,7 @@
 			this.SourceFilePath = sourceFilePath ?? string.Empty;
 			this.TooltipWidth = 10;
 			this.RegularExpression = regularExpression ?? string.Empty;
+			this.SeriesMetrics = new ObservableCollection<SeriesMetrics>();
 
 			this.SampleData = records.Any()
 				? _records[0].Content
@@ -331,7 +333,19 @@
 			}
 		}
 
+		public ObservableCollection<SeriesMetrics> SeriesMetrics
+		{
+			get => _seriesMetrics;
+			set
+			{
+				_seriesMetrics = value;
+				RaisePropertyChanged(nameof(this.SeriesMetrics));
+			}
+		}
+
 		public ICommand UpdateCommand => new UiBoundCommand(() => Update(false));
+
+		public ICommand CopyMetricsCommand => new UiBoundCommand(() => CopyMetricsToClipboard());
 
 		private string GetDetectedData(string regularExpression, string inputString)
 		{
@@ -448,6 +462,9 @@
 					string axisName = allNames.Any() ? string.Join(" / ", allNames) : DefaultYAxisLabel;
 					this.YAxes = GetYAxes(axisName);
 				}
+
+				// Calculate and update metrics
+				this.SeriesMetrics = CalculateSeriesMetrics(this.Series);
 			}
 			catch (MatchCountException e)
 			{
@@ -827,6 +844,127 @@
 			}
 
 			return seriesList;
+		}
+
+		/// <summary>
+		/// Calculates statistical metrics for all series.
+		/// </summary>
+		private static ObservableCollection<SeriesMetrics> CalculateSeriesMetrics(
+			IEnumerable<ISeries> series)
+		{
+			var metricsList = new ObservableCollection<SeriesMetrics>();
+
+			foreach (var s in series)
+			{
+				if (s is LineSeries<DateTimePoint> lineSeries)
+				{
+					var points = lineSeries.Values.Cast<DateTimePoint>().ToList();
+					
+					if (points.Any())
+					{
+						var values = points.Select(p => p.Value ?? 0.0).ToList();
+						var timestamps = points.Select(p => p.DateTime).ToList();
+						
+						var count = values.Count;
+						var min = values.Min();
+						var max = values.Max();
+						var mean = values.Average();
+						
+						// Calculate median
+						var sortedValues = values.OrderBy(v => v).ToList();
+						var mid = sortedValues.Count / 2;
+						var median = (sortedValues.Count % 2 == 0)
+							? (sortedValues[mid - 1] + sortedValues[mid]) / 2.0
+							: sortedValues[mid];
+						
+						var rangeStart = timestamps.Min();
+						var rangeEnd = timestamps.Max();
+						
+						var metrics = new SeriesMetrics(
+							lineSeries.Name ?? "Unknown",
+							count,
+							min,
+							max,
+							Math.Round(mean, 3),
+							Math.Round(median, 3),
+							rangeStart,
+							rangeEnd);
+						
+						metricsList.Add(metrics);
+					}
+					else
+					{
+						// Empty series
+						var metrics = new SeriesMetrics(
+							lineSeries.Name ?? "Unknown",
+							0,
+							null,
+							null,
+							null,
+							null,
+							null,
+							null);
+						
+						metricsList.Add(metrics);
+					}
+				}
+			}
+
+			return metricsList;
+		}
+
+		/// <summary>
+		/// Serializes the metrics data as tab-delimited text suitable for clipboard copying.
+		/// </summary>
+		public string SerializeMetrics()
+		{
+			if (this.SeriesMetrics == null || !this.SeriesMetrics.Any())
+			{
+				return string.Empty;
+			}
+
+			var lines = new List<string>();
+			
+			// Header row
+			lines.Add("Series Name\tCount\tMin\tMax\tMean\tMedian\tRange Start\tRange End");
+			
+			// Data rows
+			foreach (var metrics in this.SeriesMetrics)
+			{
+				var line = string.Join("\t",
+					metrics.SeriesName,
+					metrics.Count.ToString(),
+					metrics.MinFormatted,
+					metrics.MaxFormatted,
+					metrics.MeanFormatted,
+					metrics.MedianFormatted,
+					metrics.RangeStartFormatted,
+					metrics.RangeEndFormatted);
+				
+				lines.Add(line);
+			}
+			
+			return string.Join(Environment.NewLine, lines);
+		}
+
+		/// <summary>
+		/// Copies the metrics data to the clipboard.
+		/// </summary>
+		private void CopyMetricsToClipboard()
+		{
+			try
+			{
+				var serializedData = SerializeMetrics();
+				if (!string.IsNullOrEmpty(serializedData))
+				{
+					Clipboard.SetData(DataFormats.UnicodeText, serializedData);
+				}
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(LogSeverityType.Error, e, "Failed to copy metrics to clipboard.");
+				MessageBox.Show("Failed to copy metrics to clipboard.", "Copy Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 	}
 }

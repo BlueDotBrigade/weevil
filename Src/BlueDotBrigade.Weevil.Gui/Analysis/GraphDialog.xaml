@@ -27,6 +27,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -39,7 +40,49 @@
             TooltipPosition="Bottom">
         </lvc:CartesianChart>
 
-        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Down" IsExpanded="False">
+        <!-- Metrics Table -->
+        <Grid Grid.Row="1" Grid.Column="0" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Series Metrics" 
+                       FontWeight="Bold" Margin="5,0,0,5" />
+            <Button Grid.Row="0" Grid.Column="1" Content="Copy All" 
+                    Command="{Binding CopyMetricsCommand}" 
+                    Margin="5,0,5,5"
+                    ToolTip="Copy metrics to clipboard as tab-delimited text" />
+            
+            <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                      ItemsSource="{Binding SeriesMetrics}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Extended"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="All"
+                      MaxHeight="200"
+                      VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Series Name" Binding="{Binding SeriesName}" Width="*" />
+                    <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="Auto" />
+                    <DataGridTextColumn Header="Min" Binding="{Binding MinFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Max" Binding="{Binding MaxFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Mean" Binding="{Binding MeanFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Median" Binding="{Binding MedianFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Range Start" Binding="{Binding RangeStartFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Range End" Binding="{Binding RangeEndFormatted}" Width="Auto" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Expander Grid.Row="2" Grid.Column="0" ExpandDirection="Down" IsExpanded="False">
             <StackPanel Orientation="Vertical">
                 <TextBox
                     x:Name="RegularExpressionTextBox" Grid.Column="1" 
@@ -150,7 +193,7 @@
             </StackPanel>
         </Expander>
 
-        <StatusBar Grid.Row="2" Grid.Column="0"
+        <StatusBar Grid.Row="3" Grid.Column="0"
                    Background="{StaticResource MaterialDesignPaper}" 
                    Foreground="{StaticResource TextForeground}"
                    TextElement.FontWeight="Regular"
