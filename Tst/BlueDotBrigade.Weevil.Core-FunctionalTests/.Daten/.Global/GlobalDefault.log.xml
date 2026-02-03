@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <WeevilSidecar xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Configuration.Sidecar.v2">
 	<CommonData>
-		<Bookmarks />
 		<Context>
 			<Property xmlns="">
 				<Name>FileFormat</Name>
@@ -127,11 +126,11 @@
 		<UserRemarks>These are file level comments.</UserRemarks>
 	</CommonData>
 	<Header>
-		<SavedAt>2026-02-03T02:34:59.2492536+00:00</SavedAt>
+		<SavedAt>2025-01-18T12:38:22.1791997-05:00</SavedAt>
 		<SchemaVersion xmlns:d3p1="http://schemas.datacontract.org/2004/07/System">
 			<d3p1:_Build>-1</d3p1:_Build>
 			<d3p1:_Major>4</d3p1:_Major>
-			<d3p1:_Minor>2</d3p1:_Minor>
+			<d3p1:_Minor>1</d3p1:_Minor>
 			<d3p1:_Revision>-1</d3p1:_Revision>
 		</SchemaVersion>
 	</Header>
