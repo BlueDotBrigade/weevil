@@ -5,6 +5,7 @@
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.IO;
 
 	public static class OutputWriterContext
 	{
