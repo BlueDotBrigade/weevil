@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.IO;
 	using Data;
 	using Diagnostics;
 	using IO;
@@ -20,7 +21,7 @@
 			_sidecarFilePath = string.IsNullOrEmpty(logFilePath)
 				 ? throw new ArgumentNullException(nameof(logFilePath))
 				 : $"{logFilePath}.{MetadataFileExtension}";
-			_file = new File();
+			_file = new IO.File();
 		}
 
 		public void Load(
@@ -109,28 +110,76 @@
 
 		public void Save(SidecarData data, bool deleteBackup)
 		{
-			var backupFilePath = $"{_sidecarFilePath}~";
+			try
+			{
+				var backupFilePath = $"{_sidecarFilePath}~";
 
-			Log.Default.Write(LogSeverityType.Debug, $"Sidecar data is being saved... File={_sidecarFilePath}");
+				Log.Default.Write(LogSeverityType.Debug, $"Sidecar data is being saved... File={_sidecarFilePath}");
 
-			BackupPreviousSidecar(backupFilePath);
+				BackupPreviousSidecar(backupFilePath);
 
-			new v2.SidecarLoader(_sidecarFilePath).Save(data, deleteBackup);
+				new v2.SidecarLoader(_sidecarFilePath).Save(data, deleteBackup);
 
-			Log.Default.Write(LogSeverityType.Information,
-					$"Sidecar data has been saved. File={_sidecarFilePath}");
+				Log.Default.Write(LogSeverityType.Information,
+						$"Sidecar data has been saved. File={_sidecarFilePath}");
+			}
+			catch (DirectoryNotFoundException e)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					e,
+					$"Unable to save sidecar metadata. The directory may have been deleted (e.g., temporary directory). File={_sidecarFilePath}");
+			}
+			catch (UnauthorizedAccessException e)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					e,
+					$"Unable to save sidecar metadata. Access denied to the file location. File={_sidecarFilePath}");
+			}
+			catch (IOException e)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					e,
+					$"Unable to save sidecar metadata. The file may be in a read-only location or a temporary directory. File={_sidecarFilePath}");
+			}
 		}
 
 		private void BackupPreviousSidecar(string backupFilePath)
 		{
-			if (_file.Exists(_sidecarFilePath))
+			try
 			{
-				if (_file.Exists(backupFilePath))
+				if (_file.Exists(_sidecarFilePath))
 				{
-					_file.Delete(backupFilePath);
-				}
+					if (_file.Exists(backupFilePath))
+					{
+						_file.Delete(backupFilePath);
+					}
 
-				_file.Copy(_sidecarFilePath, backupFilePath);
+					_file.Copy(_sidecarFilePath, backupFilePath);
+				}
+			}
+			catch (DirectoryNotFoundException e)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					e,
+					$"Unable to backup previous sidecar. Continuing with save operation. File={_sidecarFilePath}");
+			}
+			catch (UnauthorizedAccessException e)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					e,
+					$"Unable to backup previous sidecar. Continuing with save operation. File={_sidecarFilePath}");
+			}
+			catch (IOException e)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					e,
+					$"Unable to backup previous sidecar. Continuing with save operation. File={_sidecarFilePath}");
 			}
 		}
 
