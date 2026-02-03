@@ -1,6 +1,5 @@
 namespace BlueDotBrigade.Weevil.IO
 {
-	using System.Diagnostics;
 	using System;
 
 	public sealed class PlainTextFormatter : IOutputFormatter
