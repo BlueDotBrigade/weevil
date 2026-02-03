@@ -14,7 +14,7 @@
         <Setter Property="CommandParameter"
                        Value="{Binding Path=CommandParameter}"/>
     </Style>
-    <ContextMenu x:Key="FilterViewContextMenu" x:Shared="False" FontSize="{DynamicResource ApplicationFontSize}">
+    <ContextMenu x:Key="FilterViewContextMenu" x:Shared="False" FontSize="{DynamicResource ApplicationFontSize}" Grid.IsSharedSizeScope="True">
                     <MenuItem Header="File">
                         <MenuItem Header="Open..." Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
                         <MenuItem Header="Save" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
@@ -107,17 +107,121 @@
                         <Separator/>
                         <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
                         <Separator/>
-                        <MenuItem Header="Detect Stable Values" Command="{Binding DetectStableValuesCommand}" InputGestureText="F6"  />
-                        <MenuItem Header="Detect First" Command="{Binding DetectFirstCommand}" InputGestureText="F7" />
-                        <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
-                        <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
-                        <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
-                        <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
-                        <MenuItem Header="Detect Repeating Records" Command="{Binding DetectRepeatingRecordsCommand}" />
+                        <MenuItem Command="{Binding DetectStableValuesCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect Stable Values"/>
+                                    <TextBlock Grid.Column="1" Text="F6" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="AAA---" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem Command="{Binding DetectFirstCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect First"/>
+                                    <TextBlock Grid.Column="1" Text="F7" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="A-----" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem Command="{Binding DetectDataCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect Data"/>
+                                    <TextBlock Grid.Column="1" Text="F8" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="A-C-D-" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem Command="{Binding DetectDataTransitionsCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect Data Changes"/>
+                                    <TextBlock Grid.Column="1" Text="F9" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="AaaBbb" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem Command="{Binding DataTransitionsRisingEdgeCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect Rising Edges"/>
+                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="AbcAbc" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem Command="{Binding DataTransitionsFallingEdgeCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect Falling Edges"/>
+                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="abCabC" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem Command="{Binding DetectRepeatingRecordsCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect Repeating Records"/>
+                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="AaaaA-" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
                         <Separator/>
                         <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
                         <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-                        <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomalyCommand}" />
+                        <MenuItem Command="{Binding DetectTemporalAnomalyCommand}" InputGestureText="{x:Null}">
+                            <MenuItem.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" SharedSizeGroup="Col1"/>
+                                        <ColumnDefinition Width="50" SharedSizeGroup="Col2"/>
+                                        <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detect Temporal Anomaly"/>
+                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
+                                    <TextBlock Grid.Column="2" Text="---A--" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
+                                </Grid>
+                            </MenuItem.Header>
+                        </MenuItem>
                         <Separator />
                         <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
                     </MenuItem>
