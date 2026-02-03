@@ -14,7 +14,7 @@ namespace BlueDotBrigade.Weevil.Integration
 	public class CompressedFileIntegrationTests
 	{
 		[TestMethod]
-		public void OpenLogFromZip_SaveMetadata_DoesNotThrowException()
+		public void OpenLogFromZip_SaveMetadata_SkipsSaveInTempDirectory()
 		{
 			// Arrange - Create a test log file in a zip
 			var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -51,15 +51,13 @@ namespace BlueDotBrigade.Weevil.Integration
 				// Add a comment to the first record
 				engine.Records[0].Metadata.Comment = "Test comment added";
 
-				// Delete the temporary directory to simulate the issue
-				// This will cause the save to fail
-				Directory.Delete(extractDir, true);
-
 				// Try to save - this should NOT throw an exception
-				// Instead, it should log a warning
+				// and should skip the save since it's in a temp directory
 				engine.Save();
 
-				// Assert - test passes if no exception is thrown
+				// Assert - no sidecar should be created in temp directory
+				var sidecarPath = $"{extractedLogPath}.xml";
+				Assert.IsFalse(System.IO.File.Exists(sidecarPath), "Sidecar should not be created in temp directory");
 			}
 			finally
 			{
@@ -83,13 +81,14 @@ namespace BlueDotBrigade.Weevil.Integration
 		}
 
 		[TestMethod]
-		public void OpenLogFromZip_SuccessfulSave_CreatesMetadata()
+		public void OpenLogFromNonTempDirectory_SuccessfulSave_CreatesMetadata()
 		{
-			// Arrange - Create a test log file
-			var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-			Directory.CreateDirectory(tempDir);
+			// Arrange - Create a test log file in current directory (not temp)
+			var currentDir = Directory.GetCurrentDirectory();
+			var testDir = Path.Combine(currentDir, $"test_{Guid.NewGuid()}");
+			Directory.CreateDirectory(testDir);
 			
-			var logFilePath = Path.Combine(tempDir, "test.log");
+			var logFilePath = Path.Combine(testDir, "test.log");
 			System.IO.File.WriteAllLines(logFilePath, new[]
 			{
 				"2024-01-01 10:00:00 [INFO] Test log entry 1",
@@ -107,12 +106,12 @@ namespace BlueDotBrigade.Weevil.Integration
 				// Add a comment to the first record
 				engine.Records[0].Metadata.Comment = "Test comment";
 
-				// Save - this should succeed
+				// Save - this should succeed since it's not in temp directory
 				engine.Save();
 
 				// Assert
 				var sidecarPath = $"{logFilePath}.xml";
-				Assert.IsTrue(System.IO.File.Exists(sidecarPath), "Sidecar file should be created");
+				Assert.IsTrue(System.IO.File.Exists(sidecarPath), "Sidecar file should be created in non-temp directory");
 
 				// Verify the comment was saved
 				var engine2 = Engine
@@ -126,9 +125,9 @@ namespace BlueDotBrigade.Weevil.Integration
 				// Cleanup
 				try
 				{
-					if (Directory.Exists(tempDir))
+					if (Directory.Exists(testDir))
 					{
-						Directory.Delete(tempDir, true);
+						Directory.Delete(testDir, true);
 					}
 				}
 				catch
