@@ -9,6 +9,7 @@ namespace BlueDotBrigade.Weevil.IO
 		string AsBullet(string message);
 		string AsNumbered(string message);
 		string AsError(string message);
+		string AsTable(string[] headers, string[][] rows);
 		void ResetNumbering();
 	}
 }

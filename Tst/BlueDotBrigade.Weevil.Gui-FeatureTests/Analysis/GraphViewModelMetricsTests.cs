@@ -178,5 +178,85 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			// Median of [1, 2, 3, 4] is (2 + 3) / 2 = 2.5
 			metrics.Median.Should().Be(2.5);
 		}
+
+		[TestMethod]
+		public void SerializeMetrics_WithPlainTextFormatter_ShouldGenerateTabDelimitedText()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, new DateTime(2024, 1, 1, 10, 0, 0), SeverityType.Information, "Value=5.0"));
+
+			var expression = "Value=(?<value>\\d+\\.?\\d*)";
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var formatter = new BlueDotBrigade.Weevil.IO.PlainTextFormatter();
+
+			// Act
+			var serialized = viewModel.SerializeMetrics(formatter);
+
+			// Assert
+			serialized.Should().NotBeNullOrEmpty();
+			serialized.Should().Contain("\t"); // Should have tab delimiters
+			var lines = serialized.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+			lines.Should().HaveCount(2); // Header + 1 data row
+		}
+
+		[TestMethod]
+		public void SerializeMetrics_WithMarkdownFormatter_ShouldGenerateMarkdownTable()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, new DateTime(2024, 1, 1, 10, 0, 0), SeverityType.Information, "Value=5.0"));
+
+			var expression = "Value=(?<value>\\d+\\.?\\d*)";
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var formatter = new BlueDotBrigade.Weevil.IO.MarkdownFormatter();
+
+			// Act
+			var serialized = viewModel.SerializeMetrics(formatter);
+
+			// Assert
+			serialized.Should().NotBeNullOrEmpty();
+			var lines = serialized.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+			lines.Should().HaveCount(3); // Header + separator + 1 data row
+			lines[0].Should().StartWith("| "); // Markdown table format
+			lines[1].Should().Contain("---"); // Separator row
+		}
+
+		[TestMethod]
+		public void SerializeMetrics_WithHtmlFormatter_ShouldGenerateHtmlTable()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, new DateTime(2024, 1, 1, 10, 0, 0), SeverityType.Information, "Value=5.0"));
+
+			var expression = "Value=(?<value>\\d+\\.?\\d*)";
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var formatter = new BlueDotBrigade.Weevil.IO.HtmlFormatter();
+
+			// Act
+			var serialized = viewModel.SerializeMetrics(formatter);
+
+			// Assert
+			serialized.Should().NotBeNullOrEmpty();
+			serialized.Should().Contain("<table>");
+			serialized.Should().Contain("<thead>");
+			serialized.Should().Contain("<tbody>");
+		}
+
+		[TestMethod]
+		public void SerializeMetrics_WithNullFormatter_ShouldThrowArgumentNullException()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, new DateTime(2024, 1, 1, 10, 0, 0), SeverityType.Information, "Value=5.0"));
+
+			var expression = "Value=(?<value>\\d+\\.?\\d*)";
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+
+			// Act & Assert
+			Action act = () => viewModel.SerializeMetrics(null);
+			act.Should().Throw<ArgumentNullException>()
+				.WithParameterName("formatter");
+		}
 	}
 }

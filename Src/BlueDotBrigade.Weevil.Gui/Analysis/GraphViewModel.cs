@@ -16,6 +16,7 @@
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Gui.Input;
+	using BlueDotBrigade.Weevil.IO;
 	using LiveChartsCore;
 	using LiveChartsCore.Defaults;
 	using LiveChartsCore.Kernel.Sketches;
@@ -941,20 +942,46 @@
 		/// </summary>
 		public string SerializeMetrics()
 		{
+			return SerializeMetrics(new PlainTextFormatter());
+		}
+
+		/// <summary>
+		/// Serializes the metrics data using the specified output formatter.
+		/// </summary>
+		/// <param name="formatter">The formatter to use for output formatting.</param>
+		/// <returns>Formatted metrics data as a string.</returns>
+		public string SerializeMetrics(IOutputFormatter formatter)
+		{
+			if (formatter == null)
+			{
+				throw new ArgumentNullException(nameof(formatter));
+			}
+
 			if (this.SeriesMetrics == null || !this.SeriesMetrics.Any())
 			{
 				return string.Empty;
 			}
 
-			var lines = new List<string>();
-			
-			// Header row
-			lines.Add("Series Name\tCount\tMin\tMax\tMean\tMedian\tRange Start\tRange End");
-			
-			// Data rows
-			foreach (var metrics in this.SeriesMetrics)
+			// Prepare headers
+			var headers = new[]
 			{
-				var line = string.Join("\t",
+				"Series Name",
+				"Count",
+				"Min",
+				"Max",
+				"Mean",
+				"Median",
+				"Range Start",
+				"Range End"
+			};
+
+			// Prepare data rows
+			var rows = new string[this.SeriesMetrics.Count][];
+			for (int i = 0; i < this.SeriesMetrics.Count; i++)
+			{
+				var metrics = this.SeriesMetrics[i];
+				rows[i] = new[]
+				{
 					metrics.SeriesName,
 					metrics.Count.ToString(),
 					metrics.MinFormatted,
@@ -962,12 +989,11 @@
 					metrics.MeanFormatted,
 					metrics.MedianFormatted,
 					metrics.RangeStartFormatted,
-					metrics.RangeEndFormatted);
-				
-				lines.Add(line);
+					metrics.RangeEndFormatted
+				};
 			}
-			
-			return string.Join(Environment.NewLine, lines);
+
+			return formatter.AsTable(headers, rows);
 		}
 
 		/// <summary>
