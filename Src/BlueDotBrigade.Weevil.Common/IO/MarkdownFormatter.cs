@@ -1,9 +1,9 @@
-﻿namespace BlueDotBrigade.Weevil.Cli.IO
+namespace BlueDotBrigade.Weevil.IO
 {
 	using System.Diagnostics;
 	using System;
 
-	internal sealed class MarkdownFormatter : IOutputFormatter
+	public sealed class MarkdownFormatter : IOutputFormatter
 	{
 		private int _numberedItemCounter = 1;
 
@@ -15,4 +15,3 @@
 		public void ResetNumbering() => _numberedItemCounter = 1;
 	}
 }
-

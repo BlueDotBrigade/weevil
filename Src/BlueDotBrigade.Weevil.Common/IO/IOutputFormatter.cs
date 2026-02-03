@@ -1,4 +1,4 @@
-﻿namespace BlueDotBrigade.Weevil.Cli.IO
+namespace BlueDotBrigade.Weevil.IO
 {
 	using System.Diagnostics;
 	using System;
@@ -13,4 +13,3 @@
 		void ResetNumbering();
 	}
 }
-

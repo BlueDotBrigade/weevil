@@ -1,9 +1,9 @@
-﻿namespace BlueDotBrigade.Weevil.Cli.IO
+namespace BlueDotBrigade.Weevil.IO
 {
 	using System.Diagnostics;
 	using System;
 
-	internal sealed class HtmlFormatter : IOutputFormatter
+	public sealed class HtmlFormatter : IOutputFormatter
 	{
 		private int _numberedItemCounter = 1;
 

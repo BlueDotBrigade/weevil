@@ -10,6 +10,7 @@
 	using Diagnostics;
 	using Filter;
 	using IO;
+	using BlueDotBrigade.Weevil.IO;
 
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
