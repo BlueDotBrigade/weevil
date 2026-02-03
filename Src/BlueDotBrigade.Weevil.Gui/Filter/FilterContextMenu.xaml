@@ -172,7 +172,6 @@
                                         <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Detect Rising Edges"/>
-                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
                                     <TextBlock Grid.Column="2" Text="AbcAbc" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
                                 </Grid>
                             </MenuItem.Header>
@@ -186,7 +185,6 @@
                                         <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Detect Falling Edges"/>
-                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
                                     <TextBlock Grid.Column="2" Text="abCabC" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
                                 </Grid>
                             </MenuItem.Header>
@@ -200,7 +198,6 @@
                                         <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Detect Repeating Records"/>
-                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
                                     <TextBlock Grid.Column="2" Text="AaaaA-" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
                                 </Grid>
                             </MenuItem.Header>
@@ -217,7 +214,6 @@
                                         <ColumnDefinition Width="140" SharedSizeGroup="Col3"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Detect Temporal Anomaly"/>
-                                    <TextBlock Grid.Column="1" Text="" HorizontalAlignment="Right" Foreground="Gray"/>
                                     <TextBlock Grid.Column="2" Text="---A--" Margin="12,0,0,0" Foreground="DarkGray" FontFamily="Courier New"/>
                                 </Grid>
                             </MenuItem.Header>
