@@ -942,7 +942,7 @@
 		/// </summary>
 		public string SerializeMetrics()
 		{
-			return SerializeMetrics(new TabDelimitedFormatter());
+			return SerializeMetrics(new PlainTextFormatter());
 		}
 
 		/// <summary>
@@ -962,11 +962,9 @@
 				return string.Empty;
 			}
 
-			var lines = new List<string>();
-			formatter.ResetNumbering();
-			
-			// Header row
-			var header = string.Join("\t",
+			// Prepare headers
+			var headers = new[]
+			{
 				"Series Name",
 				"Count",
 				"Min",
@@ -974,13 +972,16 @@
 				"Mean",
 				"Median",
 				"Range Start",
-				"Range End");
-			lines.Add(formatter.AsHeading(header));
-			
-			// Data rows
-			foreach (var metrics in this.SeriesMetrics)
+				"Range End"
+			};
+
+			// Prepare data rows
+			var rows = new string[this.SeriesMetrics.Count][];
+			for (int i = 0; i < this.SeriesMetrics.Count; i++)
 			{
-				var line = string.Join("\t",
+				var metrics = this.SeriesMetrics[i];
+				rows[i] = new[]
+				{
 					metrics.SeriesName,
 					metrics.Count.ToString(),
 					metrics.MinFormatted,
@@ -988,12 +989,11 @@
 					metrics.MeanFormatted,
 					metrics.MedianFormatted,
 					metrics.RangeStartFormatted,
-					metrics.RangeEndFormatted);
-				
-				lines.Add(formatter.AsText(line));
+					metrics.RangeEndFormatted
+				};
 			}
-			
-			return string.Join(Environment.NewLine, lines);
+
+			return formatter.AsTable(headers, rows);
 		}
 
 		/// <summary>

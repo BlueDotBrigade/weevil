@@ -11,6 +11,41 @@ namespace BlueDotBrigade.Weevil.IO
 		public string AsBullet(string message) => $"<li>{message}</li>";
 		public string AsNumbered(string message) => $"<li>{_numberedItemCounter++}. {message}</li>";
 		public string AsError(string message) => $"<span style='color:red;'>ERROR: {message}</span>";
+		
+		public string AsTable(string[] headers, string[][] rows)
+		{
+			var lines = new System.Collections.Generic.List<string>();
+			
+			lines.Add("<table>");
+			
+			// Header row
+			lines.Add("  <thead>");
+			lines.Add("    <tr>");
+			foreach (var header in headers)
+			{
+				lines.Add($"      <th>{header}</th>");
+			}
+			lines.Add("    </tr>");
+			lines.Add("  </thead>");
+			
+			// Data rows
+			lines.Add("  <tbody>");
+			foreach (var row in rows)
+			{
+				lines.Add("    <tr>");
+				foreach (var cell in row)
+				{
+					lines.Add($"      <td>{cell}</td>");
+				}
+				lines.Add("    </tr>");
+			}
+			lines.Add("  </tbody>");
+			
+			lines.Add("</table>");
+			
+			return string.Join(Environment.NewLine, lines);
+		}
+		
 		public void ResetNumbering() => _numberedItemCounter = 1;
 	}
 }
