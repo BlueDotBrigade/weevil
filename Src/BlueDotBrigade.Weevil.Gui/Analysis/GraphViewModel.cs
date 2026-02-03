@@ -30,6 +30,7 @@
 		private static readonly string FloatFormat = "0.000";
 		private static readonly int MaxSeriesCount = 4;
 		private static readonly string DefaultSeries2Suffix = " 2";
+		private static readonly int MetricsPrecision = 3;
 
 		// Y-Axis position options for each series
 		public static readonly string YAxisLeft = "Left";
@@ -862,35 +863,57 @@
 					
 					if (points.Any())
 					{
-						var values = points.Select(p => p.Value ?? 0.0).ToList();
+						// Filter out null values to avoid skewing statistics
+						var values = points
+							.Where(p => p.Value.HasValue)
+							.Select(p => p.Value.Value)
+							.ToList();
 						var timestamps = points.Select(p => p.DateTime).ToList();
 						
-						var count = values.Count;
-						var min = values.Min();
-						var max = values.Max();
-						var mean = values.Average();
-						
-						// Calculate median
-						var sortedValues = values.OrderBy(v => v).ToList();
-						var mid = sortedValues.Count / 2;
-						var median = (sortedValues.Count % 2 == 0)
-							? (sortedValues[mid - 1] + sortedValues[mid]) / 2.0
-							: sortedValues[mid];
-						
-						var rangeStart = timestamps.Min();
-						var rangeEnd = timestamps.Max();
-						
-						var metrics = new SeriesMetrics(
-							lineSeries.Name ?? "Unknown",
-							count,
-							min,
-							max,
-							Math.Round(mean, 3),
-							Math.Round(median, 3),
-							rangeStart,
-							rangeEnd);
-						
-						metricsList.Add(metrics);
+						if (values.Any())
+						{
+							var count = values.Count;
+							var min = values.Min();
+							var max = values.Max();
+							var mean = values.Average();
+							
+							// Calculate median
+							var sortedValues = values.OrderBy(v => v).ToList();
+							var mid = sortedValues.Count / 2;
+							var median = (sortedValues.Count % 2 == 0)
+								? (sortedValues[mid - 1] + sortedValues[mid]) / 2.0
+								: sortedValues[mid];
+							
+							var rangeStart = timestamps.Min();
+							var rangeEnd = timestamps.Max();
+							
+							var metrics = new SeriesMetrics(
+								lineSeries.Name ?? "Unknown",
+								count,
+								min,
+								max,
+								Math.Round(mean, MetricsPrecision),
+								Math.Round(median, MetricsPrecision),
+								rangeStart,
+								rangeEnd);
+							
+							metricsList.Add(metrics);
+						}
+						else
+						{
+							// All values were null
+							var metrics = new SeriesMetrics(
+								lineSeries.Name ?? "Unknown",
+								0,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null);
+							
+							metricsList.Add(metrics);
+						}
 					}
 					else
 					{

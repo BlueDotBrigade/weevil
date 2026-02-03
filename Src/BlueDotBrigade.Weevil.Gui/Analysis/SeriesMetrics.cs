@@ -7,6 +7,9 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 	/// </summary>
 	public class SeriesMetrics
 	{
+		private const string NumericFormat = "0.000";
+		private const string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+
 		public SeriesMetrics(
 			string seriesName,
 			int count,
@@ -39,11 +42,11 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		/// <summary>
 		/// Returns a formatted string representation suitable for display.
 		/// </summary>
-		public string MinFormatted => Min.HasValue ? Min.Value.ToString("0.000") : "N/A";
-		public string MaxFormatted => Max.HasValue ? Max.Value.ToString("0.000") : "N/A";
-		public string MeanFormatted => Mean.HasValue ? Mean.Value.ToString("0.000") : "N/A";
-		public string MedianFormatted => Median.HasValue ? Median.Value.ToString("0.000") : "N/A";
-		public string RangeStartFormatted => RangeStart.HasValue ? RangeStart.Value.ToString("yyyy-MM-dd HH:mm:ss") : "N/A";
-		public string RangeEndFormatted => RangeEnd.HasValue ? RangeEnd.Value.ToString("yyyy-MM-dd HH:mm:ss") : "N/A";
+		public string MinFormatted => Min.HasValue ? Min.Value.ToString(NumericFormat) : "N/A";
+		public string MaxFormatted => Max.HasValue ? Max.Value.ToString(NumericFormat) : "N/A";
+		public string MeanFormatted => Mean.HasValue ? Mean.Value.ToString(NumericFormat) : "N/A";
+		public string MedianFormatted => Median.HasValue ? Median.Value.ToString(NumericFormat) : "N/A";
+		public string RangeStartFormatted => RangeStart.HasValue ? RangeStart.Value.ToString(DateTimeFormat) : "N/A";
+		public string RangeEndFormatted => RangeEnd.HasValue ? RangeEnd.Value.ToString(DateTimeFormat) : "N/A";
 	}
 }
