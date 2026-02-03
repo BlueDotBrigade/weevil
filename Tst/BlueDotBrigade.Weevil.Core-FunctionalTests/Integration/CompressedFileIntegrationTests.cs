@@ -59,8 +59,7 @@ namespace BlueDotBrigade.Weevil.Integration
 				// Instead, it should log a warning
 				engine.Save();
 
-				// Assert - if we get here without exception, the test passes
-				Assert.IsTrue(true, "Save completed without throwing exception");
+				// Assert - test passes if no exception is thrown
 			}
 			finally
 			{

@@ -30,8 +30,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 			// Act - should not throw exception
 			sidecarManager.Save(sidecarData, false);
 
-			// Assert - if we get here without exception, the test passes
-			Assert.IsTrue(true, "Save completed without throwing exception");
+			// Assert - test passes if no exception is thrown
 		}
 
 		[TestMethod]
@@ -64,8 +63,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 				// Act - should not throw exception even if directory is read-only
 				sidecarManager.Save(sidecarData, false);
 
-				// Assert - if we get here without exception, the test passes
-				Assert.IsTrue(true, "Save completed without throwing exception");
+				// Assert - test passes if no exception is thrown
 			}
 			finally
 			{
