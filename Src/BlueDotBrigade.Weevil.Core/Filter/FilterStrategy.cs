@@ -124,10 +124,11 @@
 				}
 				else
 				{
-					// When "Include Bookmarks" or "Include Pinned" is enabled without an include filter,
+					// When "Include Bookmarks" or "Include Pinned" is enabled without any filters,
 					// only show bookmarked/pinned records (don't show other records)
 					var hasIncludeFilter = _inclusiveFilter.Count > 0;
-					var shouldOnlyShowSpecialRecords = (_includeBookmarks || _includePinned) && !hasIncludeFilter;
+					var hasExcludeFilter = _exclusiveFilter.Count > 0;
+					var shouldOnlyShowSpecialRecords = (_includeBookmarks || _includePinned) && !hasIncludeFilter && !hasExcludeFilter;
 
 					if (shouldOnlyShowSpecialRecords)
 					{
