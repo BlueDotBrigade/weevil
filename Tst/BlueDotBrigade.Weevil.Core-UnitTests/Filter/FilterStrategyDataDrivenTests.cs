@@ -236,14 +236,14 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 
 		/// <summary>
 		/// Test CanKeep with exclude filter that does NOT match the record content.
-		/// Expected: True when ShowPinned/ShowBookmarks OFF, or when record is special.
-		///           False when ShowPinned/ShowBookmarks ON but record is not special (only show special records).
+		/// Expected: True when record doesn't match exclude filter (should be visible).
+		///           True even when ShowPinned/ShowBookmarks ON (exclude filter should apply).
 		/// </summary>
 		[TestMethod]
 		[DataRow(false, false, false, false, true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOff")]
-		[DataRow(false, false, true,  false, false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
-		[DataRow(false, false, false, true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, false, true,  true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
+		[DataRow(false, false, true,  false, true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
+		[DataRow(false, false, false, true,  true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
+		[DataRow(false, false, true,  true,  true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
 		[DataRow(true,  false, true,  false, true,  DisplayName = "Pinned    | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
 		[DataRow(false, true,  false, true,  true,  DisplayName = "NotPinned | Bookmarked    | ShowPinnedOff  | ShowBookmarksOn ")]
 		public void CanKeep_ExcludeNoMatch_ReturnsExpected(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks, bool expectedResult)
@@ -263,7 +263,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 
 			// Assert
 			result.Should().Be(expectedResult,
-				$"record does not match exclude - visible unless ShowPinned/ShowBookmarks ON without being special");
+				$"record does not match exclude - visible when exclude filter is present");
 		}
 
 		#endregion
