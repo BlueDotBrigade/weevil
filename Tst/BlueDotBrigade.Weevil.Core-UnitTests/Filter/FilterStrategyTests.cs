@@ -789,7 +789,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		}
 
 		[TestMethod]
-		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
+		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -805,7 +805,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("record does not match exclude filter, so it should be visible even with both options ON");
+			result.Should().BeFalse("when both options are ON, only special records should be visible");
 		}
 
 		#endregion
