@@ -97,20 +97,10 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		/// <param name="showBookmarks">ShowBookmarks configuration option</param>
 		[TestMethod]
 		[DataRow(false, false, false, false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOff")]
-		[DataRow(false, false, true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
-		[DataRow(false, false, false, true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, false, true,  true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
 		[DataRow(true,  false, false, false, DisplayName = "Pinned    | NotBookmarked | ShowPinnedOff  | ShowBookmarksOff")]
-		[DataRow(true,  false, true,  false, DisplayName = "Pinned    | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
-		[DataRow(true,  false, false, true,  DisplayName = "Pinned    | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
 		[DataRow(false, true,  false, false, DisplayName = "NotPinned | Bookmarked    | ShowPinnedOff  | ShowBookmarksOff")]
-		[DataRow(false, true,  false, true,  DisplayName = "NotPinned | Bookmarked    | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, true,  true,  false, DisplayName = "NotPinned | Bookmarked    | ShowPinnedOn   | ShowBookmarksOff")]
-		[DataRow(false, true,  true,  true,  DisplayName = "NotPinned | Bookmarked    | ShowPinnedOn   | ShowBookmarksOn ")]
-		[DataRow(true,  true,  true,  false, DisplayName = "Pinned    | Bookmarked    | ShowPinnedOn   | ShowBookmarksOff")]
-		[DataRow(true,  true,  false, true,  DisplayName = "Pinned    | Bookmarked    | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(true,  true,  true,  true,  DisplayName = "Pinned    | Bookmarked    | ShowPinnedOn   | ShowBookmarksOn ")]
-		public void CanKeep_NoFilters_AlwaysReturnsTrue(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks)
+		[DataRow(true,  true,  false, false, DisplayName = "Pinned    | Bookmarked    | ShowPinnedOff  | ShowBookmarksOff")]
+		public void CanKeep_NoFilters_BothOptionsOff_ReturnsTrue(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks)
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned);
@@ -126,7 +116,57 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("with no filters, all records should be visible regardless of show options");
+			result.Should().BeTrue("with no filters and both options off, all records should be visible");
+		}
+
+		[TestMethod]
+		[DataRow(true,  false, true,  false, DisplayName = "Pinned    | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
+		[DataRow(false, true,  false, true,  DisplayName = "NotPinned | Bookmarked    | ShowPinnedOff  | ShowBookmarksOn ")]
+		[DataRow(true,  true,  true,  false, DisplayName = "Pinned    | Bookmarked    | ShowPinnedOn   | ShowBookmarksOff")]
+		[DataRow(true,  true,  false, true,  DisplayName = "Pinned    | Bookmarked    | ShowPinnedOff  | ShowBookmarksOn ")]
+		[DataRow(true,  true,  true,  true,  DisplayName = "Pinned    | Bookmarked    | ShowPinnedOn   | ShowBookmarksOn ")]
+		public void CanKeep_NoFilters_SpecialRecord_ReturnsTrue(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks)
+		{
+			// Arrange
+			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned);
+			var bookmarkManager = CreateBookmarkManager(isBookmarked, SAMPLE_LINE_NUMBER);
+			var strategy = CreateFilterStrategy(
+				includeFilter: string.Empty,
+				excludeFilter: string.Empty,
+				showPinned: showPinned,
+				showBookmarks: showBookmarks,
+				bookmarkManager);
+
+			// Act
+			var result = strategy.CanKeep(record);
+
+			// Assert
+			result.Should().BeTrue("record is pinned or bookmarked and the corresponding option is on");
+		}
+
+		[TestMethod]
+		[DataRow(false, false, true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
+		[DataRow(false, false, false, true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
+		[DataRow(false, false, true,  true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
+		[DataRow(true,  false, false, true,  DisplayName = "Pinned    | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
+		[DataRow(false, true,  true,  false, DisplayName = "NotPinned | Bookmarked    | ShowPinnedOn   | ShowBookmarksOff")]
+		public void CanKeep_NoFilters_NotSpecial_ReturnsFalse(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks)
+		{
+			// Arrange
+			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned);
+			var bookmarkManager = CreateBookmarkManager(isBookmarked, SAMPLE_LINE_NUMBER);
+			var strategy = CreateFilterStrategy(
+				includeFilter: string.Empty,
+				excludeFilter: string.Empty,
+				showPinned: showPinned,
+				showBookmarks: showBookmarks,
+				bookmarkManager);
+
+			// Act
+			var result = strategy.CanKeep(record);
+
+			// Assert
+			result.Should().BeFalse("with no filters and show options on, only special records should be visible");
 		}
 
 		#endregion
@@ -141,7 +181,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		[DataRow(false, false, false, false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOff")]
 		[DataRow(false, false, true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
 		[DataRow(false, false, false, true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, false, true,  true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
 		[DataRow(true,  false, false, false, DisplayName = "Pinned    | NotBookmarked | ShowPinnedOff  | ShowBookmarksOff")]
 		[DataRow(true,  false, true,  false, DisplayName = "Pinned    | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
 		[DataRow(false, true,  false, false, DisplayName = "NotPinned | Bookmarked    | ShowPinnedOff  | ShowBookmarksOff")]
@@ -237,13 +276,13 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		/// <summary>
 		/// Test CanKeep with exclude filter that does NOT match the record content.
 		/// Expected: True when record doesn't match exclude filter (should be visible).
-		///           True even when ShowPinned/ShowBookmarks ON (exclude filter should apply).
+		///           False when both options ON and not special (only special records visible).
 		/// </summary>
 		[TestMethod]
 		[DataRow(false, false, false, false, true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOff")]
 		[DataRow(false, false, true,  false, true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
 		[DataRow(false, false, false, true,  true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, false, true,  true,  true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
+		[DataRow(false, false, true,  true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
 		[DataRow(true,  false, true,  false, true,  DisplayName = "Pinned    | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
 		[DataRow(false, true,  false, true,  true,  DisplayName = "NotPinned | Bookmarked    | ShowPinnedOff  | ShowBookmarksOn ")]
 		public void CanKeep_ExcludeNoMatch_ReturnsExpected(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks, bool expectedResult)

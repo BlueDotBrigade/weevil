@@ -42,6 +42,7 @@ Scenario: Pinned records remain visible regardless of active filters
 	When pinning the record on line 2
 		 And pinning the record on line 4
 		 And pinning the record on line 8
+		 And the "Show Pinned" filter option is on
 		 And applying the include filter: text not found
 	Then there will be 3 matching records
 		 And line number 2 will be visible
