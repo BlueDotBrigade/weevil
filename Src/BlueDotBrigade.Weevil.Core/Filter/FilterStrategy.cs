@@ -116,58 +116,59 @@
 		{
 			var canKeepRecord = false;
 
-			if (_inclusiveFilter.Count == 0 && _exclusiveFilter.Count == 0)
+			// Check if record should be kept due to pinned or bookmarked status first
+			var isPinnedAndShouldKeep = _includePinned && record.Metadata.IsPinned;
+			var hasBookmark = _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
+			var isBookmarkedAndShouldKeep = _includeBookmarks && hasBookmark;
+
+			// When BOTH "Show Pinned" AND "Show Bookmarks" are enabled, ONLY show pinned/bookmarked records
+			// (regardless of filters)
+			var onlyShowSpecialRecords = _includePinned && _includeBookmarks;
+
+			if (isPinnedAndShouldKeep || isBookmarkedAndShouldKeep)
 			{
+				// Pinned or bookmarked records that should be kept are ALWAYS visible
 				canKeepRecord = true;
 			}
-			else
+			else if (onlyShowSpecialRecords)
 			{
-				// Check if record should be kept due to pinned or bookmarked status
-				var isPinnedAndShouldKeep = _includePinned && record.Metadata.IsPinned;
-				var hasBookmark = _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
-				var isBookmarkedAndShouldKeep = _includeBookmarks && hasBookmark;
-
-				if (isPinnedAndShouldKeep)
+				// Both options are ON, but this record is neither pinned nor bookmarked
+				// So it should NOT be visible
+				canKeepRecord = false;
+			}
+			else if (_inclusiveFilter.Count == 0 && _exclusiveFilter.Count == 0)
+			{
+				// No filters exist - check if we should only show special records
+				if (_includePinned || _includeBookmarks)
 				{
-					canKeepRecord = true;
-				}
-				else if (isBookmarkedAndShouldKeep)
-				{
-					canKeepRecord = true;
+					// Show Pinned or Show Bookmarks is enabled, but this record is neither
+					// So it should NOT be visible
+					canKeepRecord = false;
 				}
 				else
 				{
-					// When "Include Bookmarks" or "Include Pinned" is enabled with NO filters at all,
-					// only show bookmarked/pinned records (don't show other records).
-					// If any filters exist, apply them normally to non-special records.
-					var hasIncludeFilter = _inclusiveFilter.Count > 0;
-					var hasExcludeFilter = _exclusiveFilter.Count > 0;
-					var shouldOnlyShowSpecialRecords = (_includeBookmarks || _includePinned) && !hasIncludeFilter && !hasExcludeFilter;
-
-					if (shouldOnlyShowSpecialRecords)
+					// No filters and no special options - show all records
+					canKeepRecord = true;
+				}
+			}
+			else
+			{
+				// Filters exist and only one (or neither) special option is enabled
+				// Apply normal filtering logic
+				if (_inclusiveFilter.Count > 0 && _exclusiveFilter.Count == 0)
+				{
+					canKeepRecord = _inclusiveFilter.ReturnsTrue(record);
+				}
+				else if (_inclusiveFilter.Count == 0 && _exclusiveFilter.Count > 0)
+				{
+					canKeepRecord = !_exclusiveFilter.ReturnsTrue(record);
+				}
+				else
+				{
+					if (_inclusiveFilter.ReturnsTrue(record))
 					{
-						// Don't show non-bookmarked/non-pinned records when only bookmarks/pins should be visible
-						canKeepRecord = false;
-					}
-					else
-					{
-						// Apply normal filtering logic
-						if (_inclusiveFilter.Count > 0 && _exclusiveFilter.Count == 0)
-						{
-							canKeepRecord = _inclusiveFilter.ReturnsTrue(record);
-						}
-						else if (_inclusiveFilter.Count == 0 && _exclusiveFilter.Count > 0)
-						{
-							canKeepRecord = !_exclusiveFilter.ReturnsTrue(record);
-						}
-						else
-						{
-							if (_inclusiveFilter.ReturnsTrue(record))
-							{
-								var isRecordIgnored = _exclusiveFilter.ReturnsTrue(record);
-								canKeepRecord = !isRecordIgnored;
-							}
-						}
+						var isRecordIgnored = _exclusiveFilter.ReturnsTrue(record);
+						canKeepRecord = !isRecordIgnored;
 					}
 				}
 			}
