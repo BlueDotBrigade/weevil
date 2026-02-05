@@ -170,7 +170,7 @@ Scenario: Show Pinned disabled with include filter means pinned records not show
 		 And the "Show Pinned" filter option is off
 		 And the "Show Bookmarks" filter option is off
 		 And applying the include filter: Diagnostics
-	Then there will be 83 matching records
+	Then there will be 102 matching records
 		 And all records will include: Diagnostics
 
 Scenario: Show Bookmarks disabled with include filter means bookmarked records not shown unless they match
@@ -182,7 +182,7 @@ Scenario: Show Bookmarks disabled with include filter means bookmarked records n
 		 And the "Show Pinned" filter option is off
 		 And the "Show Bookmarks" filter option is off
 		 And applying the include filter: Diagnostics
-	Then there will be 83 matching records
+	Then there will be 102 matching records
 		 And all records will include: Diagnostics
 
 # Show Pinned/Bookmarks with EXCLUDE Filters
@@ -282,7 +282,7 @@ Scenario: Include and Exclude with Show Pinned on means pinned records always vi
 		 And using the include filter: Info
 		 And using the exclude filter: Directives
 		 And applying the filters
-	Then there will be 30 matching records
+	Then there will be 32 matching records
 		 And line number 3 will be visible
 		 And line number 7 will be visible
 
@@ -297,6 +297,6 @@ Scenario: Include and Exclude with Show Bookmarks on means bookmarked records al
 		 And using the include filter: Info
 		 And using the exclude filter: Directives
 		 And applying the filters
-	Then there will be 30 matching records
+	Then there will be 32 matching records
 		 And line number 3 will be visible
 		 And line number 7 will be visible
