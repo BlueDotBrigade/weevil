@@ -95,7 +95,7 @@ Scenario: No filters applied displays all records
 	When the "Show Pinned" filter option is off
 		 And the "Show Bookmarks" filter option is off
 		 And applying the filters
-	Then there will be 399 matching records
+	Then there will be 387 matching records
 
 Scenario: Only include filter displays matching records
 	Given that the default log file is open
@@ -110,7 +110,7 @@ Scenario: Only exclude filter hides matching records from all records
 	When the "Show Pinned" filter option is off
 		 And the "Show Bookmarks" filter option is off
 		 And applying the exclude filter: Info
-	Then there will be 362 matching records
+	Then there will be 350 matching records
 		 And no record will contain any of the following
 		"""
 		Info
@@ -194,7 +194,7 @@ Scenario: Show Pinned disabled with exclude filter means pinned records are excl
 		 And the "Show Pinned" filter option is off
 		 And the "Show Bookmarks" filter option is off
 		 And applying the exclude filter: Trace
-	Then there will be 61 matching records
+	Then there will be 49 matching records
 		 And no record will contain any of the following
 		"""
 		Trace
@@ -209,7 +209,7 @@ Scenario: Show Bookmarks disabled with exclude filter means bookmarked records a
 		 And the "Show Pinned" filter option is off
 		 And the "Show Bookmarks" filter option is off
 		 And applying the exclude filter: Trace
-	Then there will be 61 matching records
+	Then there will be 49 matching records
 		 And no record will contain any of the following
 		"""
 		Trace
@@ -222,7 +222,7 @@ Scenario: Show Pinned enabled with exclude filter means pinned records always vi
 		 And the "Show Pinned" filter option is on
 		 And the "Show Bookmarks" filter option is off
 		 And applying the exclude filter: Trace
-	Then there will be 63 matching records
+	Then there will be 51 matching records
 		 And line number 2 will be visible
 		 And line number 3 will be visible
 
@@ -235,7 +235,7 @@ Scenario: Show Bookmarks enabled with exclude filter means bookmarked records al
 		 And the "Show Pinned" filter option is off
 		 And the "Show Bookmarks" filter option is on
 		 And applying the exclude filter: Trace
-	Then there will be 63 matching records
+	Then there will be 51 matching records
 		 And line number 2 will be visible
 		 And line number 3 will be visible
 
@@ -250,7 +250,7 @@ Scenario: Include and Exclude with Show Pinned off means pinned records excluded
 		 And using the include filter: Trace||Info
 		 And using the exclude filter: Diagnostics
 		 And applying the filters
-	Then there will be 292 matching records
+	Then there will be 275 matching records
 		 And no record will contain any of the following
 		"""
 		Diagnostics
@@ -267,7 +267,7 @@ Scenario: Include and Exclude with Show Bookmarks off means bookmarked records e
 		 And using the include filter: Trace||Info
 		 And using the exclude filter: Diagnostics
 		 And applying the filters
-	Then there will be 292 matching records
+	Then there will be 275 matching records
 		 And no record will contain any of the following
 		"""
 		Diagnostics
@@ -282,7 +282,7 @@ Scenario: Include and Exclude with Show Pinned on means pinned records always vi
 		 And using the include filter: Info
 		 And using the exclude filter: Directives
 		 And applying the filters
-	Then there will be 32 matching records
+	Then there will be 30 matching records
 		 And line number 3 will be visible
 		 And line number 7 will be visible
 
@@ -297,6 +297,6 @@ Scenario: Include and Exclude with Show Bookmarks on means bookmarked records al
 		 And using the include filter: Info
 		 And using the exclude filter: Directives
 		 And applying the filters
-	Then there will be 32 matching records
+	Then there will be 30 matching records
 		 And line number 3 will be visible
 		 And line number 7 will be visible
