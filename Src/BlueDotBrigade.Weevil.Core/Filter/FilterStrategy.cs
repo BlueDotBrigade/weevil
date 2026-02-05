@@ -99,6 +99,19 @@
 
 		public LogicalOrOperation ExclusiveFilter => _exclusiveFilter;
 
+		/// <summary>
+		/// Determines if a record should be kept based on filter criteria and special record settings.
+		/// 
+		/// Filter Logic:
+		/// 1. No include, no exclude: all records visible
+		/// 2. Only include: matching records are visible
+		/// 3. Only exclude: all records visible except those matching exclude filter
+		/// 4. Include and exclude: records matching include filter, then exclude matching records
+		/// 
+		/// Special Records (override EXCLUDE filter):
+		/// - If "show pinned" is enabled: pinned records are ALWAYS visible (even if they match exclude filter)
+		/// - If "show bookmarks" is enabled: bookmarked records are ALWAYS visible (even if they match exclude filter)
+		/// </summary>
 		public bool CanKeep(IRecord record)
 		{
 			var canKeepRecord = false;
@@ -124,10 +137,12 @@
 				}
 				else
 				{
-					// When "Include Bookmarks" or "Include Pinned" is enabled without an include filter,
-					// only show bookmarked/pinned records (don't show other records)
+					// When "Include Bookmarks" or "Include Pinned" is enabled with NO filters at all,
+					// only show bookmarked/pinned records (don't show other records).
+					// If any filters exist, apply them normally to non-special records.
 					var hasIncludeFilter = _inclusiveFilter.Count > 0;
-					var shouldOnlyShowSpecialRecords = (_includeBookmarks || _includePinned) && !hasIncludeFilter;
+					var hasExcludeFilter = _exclusiveFilter.Count > 0;
+					var shouldOnlyShowSpecialRecords = (_includeBookmarks || _includePinned) && !hasIncludeFilter && !hasExcludeFilter;
 
 					if (shouldOnlyShowSpecialRecords)
 					{
