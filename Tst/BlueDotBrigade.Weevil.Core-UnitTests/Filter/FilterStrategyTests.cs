@@ -109,7 +109,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		}
 
 		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
+		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -125,11 +125,11 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("with no filters, all records should be visible regardless of ShowPinned setting");
+			result.Should().BeFalse("with no filters and ShowPinned ON, only pinned records should be visible");
 		}
 
 		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
+		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsFalse()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -145,11 +145,11 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("with no filters, all records should be visible regardless of ShowBookmarks setting");
+			result.Should().BeFalse("with no filters and ShowBookmarks ON, only bookmarked records should be visible");
 		}
 
 		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
+		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -165,7 +165,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("with no filters, all records should be visible regardless of show options");
+			result.Should().BeFalse("with no filters and both options ON, only special records should be visible");
 		}
 
 		#endregion
@@ -213,7 +213,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		}
 
 		[TestMethod]
-		public void CanKeep_NoFilters_Pinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
+		public void CanKeep_NoFilters_Pinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsFalse()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
@@ -229,7 +229,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("with no filters, all records should be visible regardless of show options");
+			result.Should().BeFalse("with ShowBookmarks ON, only bookmarked records should be visible");
 		}
 
 		#endregion
@@ -277,7 +277,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		}
 
 		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
+		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -293,7 +293,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("with no filters, all records should be visible regardless of show options");
+			result.Should().BeFalse("with ShowPinned ON, only pinned records should be visible");
 		}
 
 		[TestMethod]
@@ -421,7 +421,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		}
 
 		[TestMethod]
-		public void CanKeep_IncludeMatches_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
+		public void CanKeep_IncludeMatches_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
 		{
 			// Arrange
 			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
@@ -437,7 +437,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			var result = strategy.CanKeep(record);
 
 			// Assert
-			result.Should().BeTrue("record matches include filter, regardless of show options");
+			result.Should().BeFalse("with both options ON, only special records should be visible");
 		}
 
 		#endregion
