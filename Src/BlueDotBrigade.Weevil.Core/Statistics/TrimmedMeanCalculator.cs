@@ -21,7 +21,7 @@ namespace BlueDotBrigade.Weevil.Statistics
 
             if (trimCount * 2 >= values.Count) return new("TrimmedMean", null);
 
-            var trimmed = sorted.Skip(trimCount).Take(values.Count - 2 * trimCount);
+            var trimmed = sorted.Skip(trimCount).Take(sorted.Length - 2 * trimCount);
 			var trimmedMean = trimmed.Average();
 
 			return new("TrimmedMean", trimmedMean);
