@@ -14,10 +14,10 @@
             xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.Filter"
             d:DesignHeight="200" d:DesignWidth="900" FontSize="{DynamicResource ApplicationFontSize}">
     <UserControl.Resources>
-            <ResourceDictionary>
-                <ResourceDictionary.MergedDictionaries>
-                    <ResourceDictionary Source="FilterContextMenu.xaml" />
-                </ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="FilterContextMenu.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter" />
@@ -73,7 +73,7 @@
         <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ShowRegExToolCommand}" />
         <KeyBinding Key="OemTilde" Modifiers="Ctrl" Command="{Binding ShowApplicationLogFileCommand}" />
         <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
-        
+
         <KeyBinding Key="Back" Command="{Binding RemoveSelectedCommentsCommand}" />
         <KeyBinding Key="Back" Modifiers="Ctrl+Shift"  Command="{Binding RemoveAllCommentsCommand}" />
 
@@ -157,10 +157,10 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                   guiControls:MdixComboBoxBehavior.CaretBrush="Yellow"
                    materialDesign:HintAssist.Hint="Include (Alt+I)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
-                   GotFocus="OnGotFocus"
-                   Loaded="InclusiveFilter_Loaded">
+                   GotFocus="OnGotFocus">
                 <ComboBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                         <KeyBinding.CommandParameter>
@@ -187,10 +187,10 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                   guiControls:MdixComboBoxBehavior.CaretBrush="Yellow"
                    materialDesign:HintAssist.Hint="Exclude (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
-                   GotFocus="OnGotFocus"
-                   Loaded="ExclusiveFilter_Loaded">
+                   GotFocus="OnGotFocus">
                 <ComboBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding FilterManuallyCommand}">
                         <KeyBinding.CommandParameter>
@@ -325,6 +325,7 @@
                                     IsEnabled="True" 
                                     MinWidth="150"
                                     TextWrapping="Wrap" 
+                                    guiControls:MdixComboBoxBehavior.CaretBrush="Yellow"
                                     controls:TextBoxBehavior.AutoSelectEnabled="True">
                                 </TextBox>
                             </DataTemplate>
@@ -503,3 +504,4 @@
         </Grid>
     </Grid>
 </UserControl>
+    
