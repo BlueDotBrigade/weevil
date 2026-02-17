@@ -19,7 +19,7 @@
 		/// <summary>
 		/// This operator returns <see langword="True"/> if any of the <see cref="IExpression"/> values match the given <see cref="IRecord"/>.
 		/// </summary>
-		public bool ReturnsTrue(IRecord record)
+		public bool IsMatch(IRecord record)
 		{
 			var isMatch = false;
 
