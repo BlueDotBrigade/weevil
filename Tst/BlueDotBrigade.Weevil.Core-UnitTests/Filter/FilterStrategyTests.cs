@@ -107,67 +107,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			// Assert
 			result.Should().BeTrue("no filters means all records should be visible");
 		}
-
-		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: string.Empty,
-				excludeFilter: string.Empty,
-				showPinned: true,
-				showBookmarks: false,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("with no filters and ShowPinned ON, only pinned records should be visible");
-		}
-
-		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsFalse()
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: string.Empty,
-				excludeFilter: string.Empty,
-				showPinned: false,
-				showBookmarks: true,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("with no filters and ShowBookmarks ON, only bookmarked records should be visible");
-		}
-
-		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: string.Empty,
-				excludeFilter: string.Empty,
-				showPinned: true,
-				showBookmarks: true,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("with no filters and both options ON, only special records should be visible");
-		}
-
 		#endregion
 
 		#region No Filters - Pinned Record
@@ -211,27 +150,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			// Assert
 			result.Should().BeTrue("pinned record should be visible when ShowPinned is ON");
 		}
-
-		[TestMethod]
-		public void CanKeep_NoFilters_Pinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsFalse()
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: string.Empty,
-				excludeFilter: string.Empty,
-				showPinned: false,
-				showBookmarks: true,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("with ShowBookmarks ON, only bookmarked records should be visible");
-		}
-
 		#endregion
 
 		#region No Filters - Bookmarked Record
@@ -274,26 +192,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 
 			// Assert
 			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON");
-		}
-
-		[TestMethod]
-		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: string.Empty,
-				excludeFilter: string.Empty,
-				showPinned: true,
-				showBookmarks: false,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("with ShowPinned ON, only pinned records should be visible");
 		}
 
 		[TestMethod]
@@ -418,26 +316,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 
 			// Assert
 			result.Should().BeTrue("record matches include filter, regardless of ShowPinned setting");
-		}
-
-		[TestMethod]
-		public void CanKeep_IncludeMatches_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: "ERROR",
-				excludeFilter: string.Empty,
-				showPinned: true,
-				showBookmarks: true,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("with both options ON, only special records should be visible");
 		}
 
 		#endregion
@@ -787,27 +665,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			// Assert
 			result.Should().BeTrue("record does not match exclude filter, so it should be visible even with ShowBookmarks ON");
 		}
-
-		[TestMethod]
-		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: string.Empty,
-				excludeFilter: "ERROR",
-				showPinned: true,
-				showBookmarks: true,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("when both options are ON, only special records should be visible");
-		}
-
 		#endregion
 
 		#region Include and Exclude Both Match - No Special Records

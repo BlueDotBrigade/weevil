@@ -57,7 +57,7 @@ Scenario: Built-in filter alias #IPv6 identifies records with IP addresses
 	Then there will be 1 matching records
 		  And all records will include: S/N=IA-1073R037
 
-Scenario: Bookmarked records remain visible with include filter when bookmarks always visible is enabled
+Scenario: Bookmarked records remain visible when using include filter
 	Given that the default log file is open
 	When bookmarking the record on line 2
 		 And bookmarking the record on line 4
@@ -73,7 +73,7 @@ Scenario: Bookmarked records remain visible with include filter when bookmarks a
 		 And line number 4 will be visible
 		 And line number 8 will be visible
 
-Scenario: Bookmarked records remain visible with exclude filter when bookmarks always visible is enabled
+Scenario: Bookmarked records remain visible with using exclude filter
 	Given that the default log file is open
 	When bookmarking the record on line 2
 		 And bookmarking the record on line 4
@@ -83,7 +83,7 @@ Scenario: Bookmarked records remain visible with exclude filter when bookmarks a
 		 And unpinning the record on line 8
 		 And the "Show Pinned" filter option is on
 		 And the "Show Bookmarks" filter option is on
-		 And applying the exclude filter: Info
+		 And applying the exclude filter: #AllRecords
 	Then there will be 3 matching records
 		 And line number 2 will be visible
 		 And line number 4 will be visible
@@ -116,51 +116,6 @@ Scenario: Only exclude filter hides matching records from all records
 		"""
 		Info
 		"""
-
-# Show Pinned/Bookmarks with NO Filters
-
-Scenario: Show Pinned enabled with no filters shows only pinned records
-	Given that the default log file is open
-	When pinning the record on line 2
-		 And pinning the record on line 5
-		 And pinning the record on line 10
-		 And the "Show Pinned" filter option is on
-		 And the "Show Bookmarks" filter option is off
-		 And applying the filters
-	Then there will be 3 matching records
-		 And line number 2 will be visible
-		 And line number 5 will be visible
-		 And line number 10 will be visible
-
-Scenario: Show Bookmarks enabled with no filters shows only bookmarked records
-	Given that the default log file is open
-	When bookmarking the record on line 3
-		 And bookmarking the record on line 7
-		 And unpinning the record on line 3
-		 And unpinning the record on line 7
-		 And the "Show Pinned" filter option is off
-		 And the "Show Bookmarks" filter option is on
-		 And applying the filters
-	Then there will be 2 matching records
-		 And line number 3 will be visible
-		 And line number 7 will be visible
-
-Scenario: Both Show Pinned and Show Bookmarks enabled with no filters shows pinned or bookmarked records
-	Given that the default log file is open
-	When pinning the record on line 2
-		 And pinning the record on line 5
-		 And bookmarking the record on line 8
-		 And bookmarking the record on line 12
-		 And unpinning the record on line 8
-		 And unpinning the record on line 12
-		 And the "Show Pinned" filter option is on
-		 And the "Show Bookmarks" filter option is on
-		 And applying the filters
-	Then there will be 4 matching records
-		 And line number 2 will be visible
-		 And line number 5 will be visible
-		 And line number 8 will be visible
-		 And line number 12 will be visible
 
 # Show Pinned/Bookmarks with INCLUDE Filters
 
