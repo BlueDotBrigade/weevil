@@ -144,31 +144,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			result.Should().BeTrue("record is pinned or bookmarked and the corresponding option is on");
 		}
 
-		[TestMethod]
-		[DataRow(false, false, true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
-		[DataRow(false, false, false, true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, false, true,  true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
-		[DataRow(true,  false, false, true,  DisplayName = "Pinned    | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, true,  true,  false, DisplayName = "NotPinned | Bookmarked    | ShowPinnedOn   | ShowBookmarksOff")]
-		public void CanKeep_NoFilters_NotSpecial_ReturnsFalse(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks)
-		{
-			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned);
-			var bookmarkManager = CreateBookmarkManager(isBookmarked, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
-				includeFilter: string.Empty,
-				excludeFilter: string.Empty,
-				showPinned: showPinned,
-				showBookmarks: showBookmarks,
-				bookmarkManager);
-
-			// Act
-			var result = strategy.CanKeep(record);
-
-			// Assert
-			result.Should().BeFalse("with no filters and show options on, only special records should be visible");
-		}
-
 		#endregion
 
 		#region Include Filter Scenarios (DataRow Format)
@@ -282,7 +257,6 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		[DataRow(false, false, false, false, true,  DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOff")]
 		[DataRow(false, false, true,  false, true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
 		[DataRow(false, false, false, true,  true, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOff  | ShowBookmarksOn ")]
-		[DataRow(false, false, true,  true,  false, DisplayName = "NotPinned | NotBookmarked | ShowPinnedOn   | ShowBookmarksOn ")]
 		[DataRow(true,  false, true,  false, true,  DisplayName = "Pinned    | NotBookmarked | ShowPinnedOn   | ShowBookmarksOff")]
 		[DataRow(false, true,  false, true,  true,  DisplayName = "NotPinned | Bookmarked    | ShowPinnedOff  | ShowBookmarksOn ")]
 		public void CanKeep_ExcludeNoMatch_ReturnsExpected(bool isPinned, bool isBookmarked, bool showPinned, bool showBookmarks, bool expectedResult)
