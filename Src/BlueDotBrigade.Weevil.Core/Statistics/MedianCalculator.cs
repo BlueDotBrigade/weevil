@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
-internal sealed class MedianCalculator : ICalculator
+public sealed class MedianCalculator : ICalculator
     {
         public string Description => "Middle value in sorted list";
         public string BestFor => "Ignoring outliers to show central tendency";
@@ -16,7 +16,7 @@ internal sealed class MedianCalculator : ICalculator
                 ? (sorted[mid - 1] + sorted[mid]) / 2.0
                 : sorted[mid];
 
-			return new("Median", median);
+			return new("Median", Math.Round(median, 3));
         }
     }
 }

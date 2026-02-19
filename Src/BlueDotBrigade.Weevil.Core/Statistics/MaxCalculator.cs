@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
-    internal sealed class MaxCalculator : ICalculator
+    public sealed class MaxCalculator : ICalculator
     {
         public string Description => "Largest numeric value matched.";
         public string BestFor => "Identifying worst-case or max usage/outlier.";

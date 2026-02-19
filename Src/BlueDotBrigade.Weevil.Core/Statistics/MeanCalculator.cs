@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
-	internal sealed class MeanCalculator : ICalculator
+	public sealed class MeanCalculator : ICalculator
 	{
 		public string Description => "Total sum ÷ count";
 		public string BestFor => "General overview of value magnitude";

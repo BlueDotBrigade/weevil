@@ -17,6 +17,7 @@
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Gui.Input;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Statistics;
 	using LiveChartsCore;
 	using LiveChartsCore.Defaults;
 	using LiveChartsCore.Kernel.Sketches;
@@ -31,7 +32,6 @@
 		private static readonly string FloatFormat = "0.000";
 		private static readonly int MaxSeriesCount = 4;
 		private static readonly string DefaultSeries2Suffix = " 2";
-		private static readonly int MetricsPrecision = 3;
 
 		// Y-Axis position options for each series
 		public static readonly string YAxisLeft = "Left";
@@ -856,6 +856,13 @@
 		{
 			var metricsList = new ObservableCollection<SeriesMetrics>();
 
+			var minCalc = new MinCalculator();
+			var maxCalc = new MaxCalculator();
+			var meanCalc = new MeanCalculator();
+			var medianCalc = new MedianCalculator();
+			var stdDevCalc = new StandardDeviationCalculator();
+			var rangeCalc = new RangeCalculator();
+
 			foreach (var s in series)
 			{
 				if (s is LineSeries<DateTimePoint> lineSeries)
@@ -874,32 +881,24 @@
 						if (values.Any())
 						{
 							var count = values.Count;
-							var min = values.Min();
-							var max = values.Max();
-							var mean = values.Average();
-							
-							// Calculate median
-							var sortedValues = values.OrderBy(v => v).ToList();
-							var mid = sortedValues.Count / 2;
-							var median = (sortedValues.Count % 2 == 0)
-								? (sortedValues[mid - 1] + sortedValues[mid]) / 2.0
-								: sortedValues[mid];
+							var min = (double?)minCalc.Calculate(values, timestamps).Value;
+							var max = (double?)maxCalc.Calculate(values, timestamps).Value;
+							var mean = (double?)meanCalc.Calculate(values, timestamps).Value;
+							var median = (double?)medianCalc.Calculate(values, timestamps).Value;
+							var standardDeviation = (double?)stdDevCalc.Calculate(values, timestamps).Value;
 
-							// Calculate population standard deviation
-							var sumOfSquaredDifferences = values.Sum(v => (v - mean) * (v - mean));
-							var standardDeviation = Math.Sqrt(sumOfSquaredDifferences / values.Count);
-
-							var rangeStart = timestamps.Min();
-							var rangeEnd = timestamps.Max();
+							rangeCalc.Calculate(values, timestamps);
+							var rangeStart = rangeCalc.Range.StartAt;
+							var rangeEnd = rangeCalc.Range.EndAt;
 							
 							var metrics = new SeriesMetrics(
 								lineSeries.Name ?? "Unknown",
 								count,
 								min,
 								max,
-								Math.Round(mean, MetricsPrecision),
-								Math.Round(median, MetricsPrecision),
-								Math.Round(standardDeviation, MetricsPrecision),
+								mean,
+								median,
+								standardDeviation,
 								rangeStart,
 								rangeEnd);
 							
