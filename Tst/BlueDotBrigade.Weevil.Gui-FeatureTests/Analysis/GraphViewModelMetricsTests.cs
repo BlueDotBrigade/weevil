@@ -33,19 +33,20 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			lines.Should().HaveCount(2); // Header + 1 data row
 
 			// Check header
-			lines[0].Should().Be("Series Name\tCount\tMin\tMax\tMean\tMedian\tRange Start\tRange End");
+			lines[0].Should().Be("Series Name\tCount\tMin\tMax\tMean\tMedian\tStdDev\tRange Start\tRange End");
 
 			// Check data row
 			var dataRow = lines[1].Split('\t');
-			dataRow.Should().HaveCount(8);
+			dataRow.Should().HaveCount(9);
 			dataRow[0].Should().Be("value"); // Series Name
 			dataRow[1].Should().Be("3"); // Count
 			dataRow[2].Should().Be("5.000"); // Min
 			dataRow[3].Should().Be("15.000"); // Max
 			dataRow[4].Should().Be("10.000"); // Mean
 			dataRow[5].Should().Be("10.000"); // Median
-			dataRow[6].Should().Be("2024-01-01 10:00:00"); // Range Start
-			dataRow[7].Should().Be("2024-01-01 10:00:02"); // Range End
+			dataRow[6].Should().Be("4.082"); // StdDev
+			dataRow[7].Should().Be("2024-01-01 10:00:00"); // Range Start
+			dataRow[8].Should().Be("2024-01-01 10:00:02"); // Range End
 		}
 
 		[TestMethod]
@@ -69,7 +70,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			lines.Should().HaveCount(3); // Header + 2 data rows
 
 			// Check header
-			lines[0].Should().Be("Series Name\tCount\tMin\tMax\tMean\tMedian\tRange Start\tRange End");
+			lines[0].Should().Be("Series Name\tCount\tMin\tMax\tMean\tMedian\tStdDev\tRange Start\tRange End");
 
 			// Check first data row (CPU series)
 			var dataRow1 = lines[1].Split('\t');
@@ -152,6 +153,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			metrics.Max.Should().Be(5.0);
 			metrics.Mean.Should().Be(3.0);
 			metrics.Median.Should().Be(3.0);
+			metrics.StandardDeviation.Should().Be(1.414); // sqrt(2) rounded to 3 decimal places
 			metrics.RangeStart.Should().Be(new DateTime(2024, 1, 1, 10, 0, 0));
 			metrics.RangeEnd.Should().Be(new DateTime(2024, 1, 1, 10, 0, 4));
 		}

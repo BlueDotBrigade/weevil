@@ -76,6 +76,7 @@
                     <DataGridTextColumn Header="Max" Binding="{Binding MaxFormatted}" Width="Auto" />
                     <DataGridTextColumn Header="Mean" Binding="{Binding MeanFormatted}" Width="Auto" />
                     <DataGridTextColumn Header="Median" Binding="{Binding MedianFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="StdDev" Binding="{Binding StandardDeviationFormatted}" Width="Auto" />
                     <DataGridTextColumn Header="Range Start" Binding="{Binding RangeStartFormatted}" Width="Auto" />
                     <DataGridTextColumn Header="Range End" Binding="{Binding RangeEndFormatted}" Width="Auto" />
                 </DataGrid.Columns>
