@@ -17,6 +17,7 @@ namespace BlueDotBrigade.Weevil.Statistics
             if (values.Count == 0) return new("TrimmedMean", null);
 
             var sorted = values.OrderBy(v => v).ToArray();
+            // Use sorted.Length (not values.Count) to ensure calculations reference the array we're operating on
             int trimCount = (int)(sorted.Length * _trimPercent);
 
             if (trimCount * 2 >= sorted.Length) return new("TrimmedMean", null);
