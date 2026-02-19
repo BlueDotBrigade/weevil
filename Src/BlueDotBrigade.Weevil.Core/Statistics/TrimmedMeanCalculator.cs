@@ -1,31 +1,30 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
- public sealed class TrimmedMeanCalculator : ICalculator
-    {
-        public string Description => "Average after removing top/bottom extremes";
-        public string BestFor => "Smoothing average while reducing outlier impact";
-     
+	public sealed class TrimmedMeanCalculator : ICalculator
+	{
+		public string Name => "TrimmedMean";
+		public string Description => "Average after removing top/bottom extremes";
+		public string BestFor => "Smoothing average while reducing outlier impact";
+
 		private readonly double _trimPercent;
 
-        public TrimmedMeanCalculator(double trimPercent)
-        {
-            _trimPercent = trimPercent;
-        }
+		public TrimmedMeanCalculator(double trimPercent)
+		{
+			_trimPercent = trimPercent;
+		}
 
-        public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTime> timestamps)
-        {
-            if (values.Count == 0) return new("TrimmedMean", null);
+		public double? Calculate(IReadOnlyList<double> values)
+		{
+			if (values.Count == 0) return null;
 
-            var sorted = values.OrderBy(v => v).ToArray();
-            // Use sorted.Length (not values.Count) to ensure calculations reference the array we're operating on
-            int trimCount = (int)(sorted.Length * _trimPercent);
+			var sorted = values.OrderBy(v => v).ToArray();
+			// Use sorted.Length (not values.Count) to ensure calculations reference the array we're operating on
+			int trimCount = (int)(sorted.Length * _trimPercent);
 
-            if (trimCount * 2 >= sorted.Length) return new("TrimmedMean", null);
+			if (trimCount * 2 >= sorted.Length) return null;
 
-            var trimmed = sorted.Skip(trimCount).Take(sorted.Length - 2 * trimCount);
-			var trimmedMean = trimmed.Average();
-
-			return new("TrimmedMean", trimmedMean);
-        }
-    }
+			var trimmed = sorted.Skip(trimCount).Take(sorted.Length - 2 * trimCount);
+			return trimmed.Average();
+		}
+	}
 }

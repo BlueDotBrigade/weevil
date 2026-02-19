@@ -13,14 +13,13 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new CountCalculator();
 			var values = new List<double> { 1, 2, 3, 4, 5 };
-			var timestamps = new List<DateTime> { DateTime.Now };
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual("Count", result.Key);
-			Assert.AreEqual(5, (int)result.Value);
+			Assert.IsNotNull(result);
+			Assert.AreEqual(5.0, result.Value, 0.001);
 		}
 
 		[TestMethod]
@@ -29,14 +28,13 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new CountCalculator();
 			var values = new List<double>();
-			var timestamps = new List<DateTime>();
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual("Count", result.Key);
-			Assert.AreEqual(0, (int)result.Value);
+			Assert.IsNotNull(result);
+			Assert.AreEqual(0.0, result.Value, 0.001);
 		}
 
 		[TestMethod]
@@ -45,13 +43,12 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new CountCalculator();
 			var values = new List<double> { 42.5 };
-			var timestamps = new List<DateTime> { DateTime.Now };
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual(1, (int)result.Value);
+			Assert.AreEqual(1.0, result.Value, 0.001);
 		}
 	}
 }
