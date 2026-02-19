@@ -13,15 +13,13 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new MedianCalculator();
 			var values = new List<double> { 3, 1, 5, 2, 4 };
-			var timestamps = new List<DateTime> { DateTime.Now };
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual("Median", result.Key);
-			Assert.IsNotNull(result.Value);
-			Assert.AreEqual(3.0, (double)result.Value, 0.001);
+			Assert.IsNotNull(result);
+			Assert.AreEqual(3.0, result.Value, 0.001);
 		}
 
 		[TestMethod]
@@ -30,15 +28,13 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new MedianCalculator();
 			var values = new List<double> { 1, 2, 3, 4 };
-			var timestamps = new List<DateTime> { DateTime.Now };
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
 			// Median of [1, 2, 3, 4] = (2 + 3) / 2 = 2.5
-			Assert.AreEqual("Median", result.Key);
-			Assert.AreEqual(2.5, (double)result.Value, 0.001);
+			Assert.AreEqual(2.5, result.Value, 0.001);
 		}
 
 		[TestMethod]
@@ -47,14 +43,12 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new MedianCalculator();
 			var values = new List<double>();
-			var timestamps = new List<DateTime>();
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual("Median", result.Key);
-			Assert.IsNull(result.Value);
+			Assert.IsNull(result);
 		}
 
 		[TestMethod]
@@ -63,13 +57,12 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new MedianCalculator();
 			var values = new List<double> { 7.0 };
-			var timestamps = new List<DateTime> { DateTime.Now };
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual(7.0, (double)result.Value, 0.001);
+			Assert.AreEqual(7.0, result.Value, 0.001);
 		}
 	}
 }

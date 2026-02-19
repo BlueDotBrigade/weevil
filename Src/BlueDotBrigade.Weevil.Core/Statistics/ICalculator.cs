@@ -4,9 +4,10 @@ namespace BlueDotBrigade.Weevil.Statistics
 	/// <seealso cref="IMetricCollector">
 	public interface ICalculator
 	{
+		string Name { get; }
 		string Description { get; }
 		string BestFor { get; }
 
-		KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTime> timestamps);
+		double? Calculate(IReadOnlyList<double> values);
 	}
 }

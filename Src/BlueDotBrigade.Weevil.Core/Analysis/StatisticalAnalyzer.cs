@@ -34,7 +34,6 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			_calculators = new List<ICalculator>
 			{
-				new RangeCalculator(),
 				new CountCalculator(),
 				new MinCalculator(),
 				new MaxCalculator(),
@@ -138,8 +137,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 			}
 
 			var data = _calculators
-				.Select(c => c.Calculate(values, timestamps))
-				.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+				.ToDictionary(c => c.Name, c => (object)c.Calculate(values));
+
+			var rangeCalc = new RangeCalculator();
+			data["Range"] = rangeCalc.Calculate(timestamps);
 
 			return new Results(count, data);
 		}

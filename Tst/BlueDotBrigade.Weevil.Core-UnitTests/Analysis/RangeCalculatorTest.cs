@@ -12,7 +12,6 @@ namespace BlueDotBrigade.Weevil.Statistics
 		{
 			// Arrange
 			var calculator = new RangeCalculator();
-			var values = new List<double> { 1, 2, 3 };
 			var timestamps = new List<DateTime>
 			{
 				new DateTime(2024, 1, 1, 10, 0, 0),
@@ -21,13 +20,12 @@ namespace BlueDotBrigade.Weevil.Statistics
 			};
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(timestamps);
 
 			// Assert
-			Assert.AreEqual("Range", result.Key);
-			Assert.IsNotNull(result.Value);
-			Assert.AreEqual(new DateTime(2024, 1, 1, 10, 0, 0), calculator.Range.StartAt);
-			Assert.AreEqual(new DateTime(2024, 1, 1, 10, 0, 10), calculator.Range.EndAt);
+			Assert.IsNotNull(result);
+			Assert.AreEqual(new DateTime(2024, 1, 1, 10, 0, 0), result.StartAt);
+			Assert.AreEqual(new DateTime(2024, 1, 1, 10, 0, 10), result.EndAt);
 		}
 
 		[TestMethod]
@@ -35,16 +33,14 @@ namespace BlueDotBrigade.Weevil.Statistics
 		{
 			// Arrange
 			var calculator = new RangeCalculator();
-			var values = new List<double>();
 			var timestamps = new List<DateTime>();
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(timestamps);
 
 			// Assert
-			Assert.AreEqual("Range", result.Key);
-			Assert.IsNull(calculator.Range.StartAt);
-			Assert.IsNull(calculator.Range.EndAt);
+			Assert.IsNull(result.StartAt);
+			Assert.IsNull(result.EndAt);
 		}
 
 		[TestMethod]
@@ -52,15 +48,14 @@ namespace BlueDotBrigade.Weevil.Statistics
 		{
 			// Arrange
 			var calculator = new RangeCalculator();
-			var values = new List<double> { 42 };
 			var timestamps = new List<DateTime> { new DateTime(2024, 6, 15, 12, 0, 0) };
 
 			// Act
-			calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(timestamps);
 
 			// Assert
-			Assert.AreEqual(new DateTime(2024, 6, 15, 12, 0, 0), calculator.Range.StartAt);
-			Assert.AreEqual(new DateTime(2024, 6, 15, 12, 0, 0), calculator.Range.EndAt);
+			Assert.AreEqual(new DateTime(2024, 6, 15, 12, 0, 0), result.StartAt);
+			Assert.AreEqual(new DateTime(2024, 6, 15, 12, 0, 0), result.EndAt);
 		}
 	}
 }

@@ -2,18 +2,15 @@ namespace BlueDotBrigade.Weevil.Statistics
 {
 	public sealed class MeanCalculator : ICalculator
 	{
+		public string Name => "Mean";
 		public string Description => "Total sum ÷ count";
 		public string BestFor => "General overview of value magnitude";
 
-		public KeyValuePair<string, object> Calculate(IReadOnlyList<double> values, IReadOnlyList<DateTime> timestamps)
+		public double? Calculate(IReadOnlyList<double> values)
 		{
-			double? mean = null;
-			if (values.Count > 0)
-			{
-				mean = values.Average();
-				mean = Math.Round(mean.Value, 3);
-			}
-			return new("Mean", mean);
+			if (values.Count == 0) return null;
+
+			return Math.Round(values.Average(), 3);
 		}
 	}
 }

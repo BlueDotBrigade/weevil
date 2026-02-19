@@ -881,15 +881,15 @@
 						if (values.Any())
 						{
 							var count = values.Count;
-							var min = (double?)minCalc.Calculate(values, timestamps).Value;
-							var max = (double?)maxCalc.Calculate(values, timestamps).Value;
-							var mean = (double?)meanCalc.Calculate(values, timestamps).Value;
-							var median = (double?)medianCalc.Calculate(values, timestamps).Value;
-							var standardDeviation = (double?)stdDevCalc.Calculate(values, timestamps).Value;
+							var min = minCalc.Calculate(values);
+							var max = maxCalc.Calculate(values);
+							var mean = meanCalc.Calculate(values);
+							var median = medianCalc.Calculate(values);
+							var standardDeviation = stdDevCalc.Calculate(values);
 
-							rangeCalc.Calculate(values, timestamps);
-							var rangeStart = rangeCalc.Range.StartAt;
-							var rangeEnd = rangeCalc.Range.EndAt;
+							var range = rangeCalc.Calculate(timestamps);
+							var rangeStart = range.StartAt;
+							var rangeEnd = range.EndAt;
 							
 							var metrics = new SeriesMetrics(
 								lineSeries.Name ?? "Unknown",

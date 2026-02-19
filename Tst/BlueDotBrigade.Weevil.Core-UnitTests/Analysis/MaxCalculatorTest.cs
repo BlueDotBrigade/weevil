@@ -13,15 +13,13 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new MaxCalculator();
 			var values = new List<double> { 5, 1, 9, 3, 7 };
-			var timestamps = new List<DateTime> { DateTime.Now };
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual("Max", result.Key);
-			Assert.IsNotNull(result.Value);
-			Assert.AreEqual(9.0, (double)result.Value, 0.001);
+			Assert.IsNotNull(result);
+			Assert.AreEqual(9.0, result.Value, 0.001);
 		}
 
 		[TestMethod]
@@ -30,14 +28,12 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new MaxCalculator();
 			var values = new List<double>();
-			var timestamps = new List<DateTime>();
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual("Max", result.Key);
-			Assert.IsNull(result.Value);
+			Assert.IsNull(result);
 		}
 
 		[TestMethod]
@@ -46,13 +42,12 @@ namespace BlueDotBrigade.Weevil.Statistics
 			// Arrange
 			var calculator = new MaxCalculator();
 			var values = new List<double> { 42.5 };
-			var timestamps = new List<DateTime> { DateTime.Now };
 
 			// Act
-			var result = calculator.Calculate(values, timestamps);
+			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual(42.5, (double)result.Value, 0.001);
+			Assert.AreEqual(42.5, result.Value, 0.001);
 		}
 	}
 }
