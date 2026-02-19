@@ -17,6 +17,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			double? max,
 			double? mean,
 			double? median,
+			double? standardDeviation,
 			DateTime? rangeStart,
 			DateTime? rangeEnd)
 		{
@@ -26,6 +27,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			this.Max = max;
 			this.Mean = mean;
 			this.Median = median;
+			this.StandardDeviation = standardDeviation;
 			this.RangeStart = rangeStart;
 			this.RangeEnd = rangeEnd;
 		}
@@ -36,6 +38,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		public double? Max { get; }
 		public double? Mean { get; }
 		public double? Median { get; }
+		public double? StandardDeviation { get; }
 		public DateTime? RangeStart { get; }
 		public DateTime? RangeEnd { get; }
 
@@ -46,6 +49,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		public string MaxFormatted => Max.HasValue ? Max.Value.ToString(NumericFormat) : "N/A";
 		public string MeanFormatted => Mean.HasValue ? Mean.Value.ToString(NumericFormat) : "N/A";
 		public string MedianFormatted => Median.HasValue ? Median.Value.ToString(NumericFormat) : "N/A";
+		public string StandardDeviationFormatted => StandardDeviation.HasValue ? StandardDeviation.Value.ToString(NumericFormat) : "N/A";
 		public string RangeStartFormatted => RangeStart.HasValue ? RangeStart.Value.ToString(DateTimeFormat) : "N/A";
 		public string RangeEndFormatted => RangeEnd.HasValue ? RangeEnd.Value.ToString(DateTimeFormat) : "N/A";
 	}

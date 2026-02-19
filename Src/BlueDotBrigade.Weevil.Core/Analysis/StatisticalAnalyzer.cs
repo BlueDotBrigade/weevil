@@ -41,6 +41,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				new MeanCalculator(),
 				new MedianCalculator(),
 				new TrimmedMeanCalculator(TrimmedMeanPercent),
+				new StandardDeviationCalculator(),
 			};
 
 			_results = new Dictionary<string, double>
@@ -51,7 +52,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 				{ "Max", 0 },
 				{ "Mean", 0 },
 				{ "Median", 0 },
-				{ "TrimmedMean", 0 }
+				{ "TrimmedMean", 0 },
+				{ "StdDev", 0 }
 			};
 		}
 

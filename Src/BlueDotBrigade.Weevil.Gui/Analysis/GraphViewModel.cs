@@ -884,7 +884,11 @@
 							var median = (sortedValues.Count % 2 == 0)
 								? (sortedValues[mid - 1] + sortedValues[mid]) / 2.0
 								: sortedValues[mid];
-							
+
+							// Calculate population standard deviation
+							var sumOfSquaredDifferences = values.Sum(v => (v - mean) * (v - mean));
+							var standardDeviation = Math.Sqrt(sumOfSquaredDifferences / values.Count);
+
 							var rangeStart = timestamps.Min();
 							var rangeEnd = timestamps.Max();
 							
@@ -895,6 +899,7 @@
 								max,
 								Math.Round(mean, MetricsPrecision),
 								Math.Round(median, MetricsPrecision),
+								Math.Round(standardDeviation, MetricsPrecision),
 								rangeStart,
 								rangeEnd);
 							
@@ -911,6 +916,7 @@
 								null,
 								null,
 								null,
+								null,
 								null);
 							
 							metricsList.Add(metrics);
@@ -922,6 +928,7 @@
 						var metrics = new SeriesMetrics(
 							lineSeries.Name ?? "Unknown",
 							0,
+							null,
 							null,
 							null,
 							null,
@@ -971,6 +978,7 @@
 				"Max",
 				"Mean",
 				"Median",
+				"StdDev",
 				"Range Start",
 				"Range End"
 			};
@@ -988,6 +996,7 @@
 					metrics.MaxFormatted,
 					metrics.MeanFormatted,
 					metrics.MedianFormatted,
+					metrics.StandardDeviationFormatted,
 					metrics.RangeStartFormatted,
 					metrics.RangeEndFormatted
 				};
