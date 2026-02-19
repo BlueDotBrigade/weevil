@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
-	internal sealed class StandardDeviationCalculator : ICalculator
+	public sealed class StandardDeviationCalculator : ICalculator
 	{
 		public string Description => "Square root of the average squared deviation from the mean";
 		public string BestFor => "Measuring the spread or variability of data";

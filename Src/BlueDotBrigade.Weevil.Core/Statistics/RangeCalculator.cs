@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
-    internal sealed class RangeCalculator : ICalculator
+    public sealed class RangeCalculator : ICalculator
     {
         public string Description => "Timestamp of the first and last matching log entry";
         public string BestFor => "Determining when a pattern or process began and ended";

@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
-    internal sealed class CountCalculator : ICalculator
+    public sealed class CountCalculator : ICalculator
     {
         public string Description => "Total number of matches";
         public string BestFor => "Measuring frequency or total occurrences";

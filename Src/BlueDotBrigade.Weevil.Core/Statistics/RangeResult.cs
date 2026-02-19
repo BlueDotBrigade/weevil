@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
-    internal record RangeResult(DateTime? StartAt, DateTime? EndAt)
+    public record RangeResult(DateTime? StartAt, DateTime? EndAt)
     {
         public override string ToString()
         {

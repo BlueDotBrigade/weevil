@@ -1,6 +1,6 @@
 namespace BlueDotBrigade.Weevil.Statistics
 {
- internal sealed class TrimmedMeanCalculator : ICalculator
+ public sealed class TrimmedMeanCalculator : ICalculator
     {
         public string Description => "Average after removing top/bottom extremes";
         public string BestFor => "Smoothing average while reducing outlier impact";
