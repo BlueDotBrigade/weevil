@@ -17,11 +17,12 @@ namespace BlueDotBrigade.Weevil.Statistics
             if (values.Count == 0) return new("TrimmedMean", null);
 
             var sorted = values.OrderBy(v => v).ToArray();
-            int trimCount = (int)(values.Count * _trimPercent);
+            // Use sorted.Length (not values.Count) to ensure calculations reference the array we're operating on
+            int trimCount = (int)(sorted.Length * _trimPercent);
 
-            if (trimCount * 2 >= values.Count) return new("TrimmedMean", null);
+            if (trimCount * 2 >= sorted.Length) return new("TrimmedMean", null);
 
-            var trimmed = sorted.Skip(trimCount).Take(values.Count - 2 * trimCount);
+            var trimmed = sorted.Skip(trimCount).Take(sorted.Length - 2 * trimCount);
 			var trimmedMean = trimmed.Average();
 
 			return new("TrimmedMean", trimmedMean);
