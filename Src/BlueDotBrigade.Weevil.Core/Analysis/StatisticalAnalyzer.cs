@@ -7,7 +7,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
-	using BlueDotBrigade.Weevil.Statistics;
+	using BlueDotBrigade.Weevil.Math;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 
 	internal sealed class StatisticalAnalyzer : IRecordAnalyzer

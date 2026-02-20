@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Statistics
+namespace BlueDotBrigade.Weevil.Math
 {
 	public sealed class MeanCalculator : ICalculator
 	{
@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Statistics
 		{
 			if (values.Count == 0) return null;
 
-			return Math.Round(values.Average(), 3);
+			return System.Math.Round(values.Average(), 3);
 		}
 	}
 }

@@ -206,7 +206,7 @@
 
 					if (i == gridView.Columns.Count - 1)
 					{
-						var remainingWidth = Math.Max(0, ListView.ActualWidth - SystemParameters.VerticalScrollBarWidth - totalWidth - 2);
+						var remainingWidth = System.Math.Max(0, ListView.ActualWidth - SystemParameters.VerticalScrollBarWidth - totalWidth - 2);
 						column.Width = 0; // Setting to 0 first to force recalculation
 						column.Width = remainingWidth;
 					}
