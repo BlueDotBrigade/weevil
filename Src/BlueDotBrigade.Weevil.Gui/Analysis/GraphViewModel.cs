@@ -683,6 +683,7 @@
 			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
 
 			if (!string.IsNullOrEmpty(inputString))
+			{
 				if (expressions.Length == 1)
 				{
 					try
