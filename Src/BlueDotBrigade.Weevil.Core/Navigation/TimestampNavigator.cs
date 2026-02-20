@@ -25,8 +25,12 @@
 					$"Unable to find record - the collection is empty. Value={timestamp}, SearchType={searchType}");
 			}
 
+			var referenceRecord = _activeRecord.Record.HasCreationTime
+				? _activeRecord.Record
+				: firstRecord;
+
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =
-				ConvertToDateTime(firstRecord, timestamp);
+				ConvertToDateTime(referenceRecord, timestamp);
 
 			var index = _activeRecord.DataSource.IndexOfCreatedAt(searchValue.referenceTime, searchType);
 			return _activeRecord.SetActiveIndex(index);
