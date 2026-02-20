@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Statistics
+namespace BlueDotBrigade.Weevil.Math
 {
 	/// <seealso cref="IRecordAnalyzer">
 	/// <seealso cref="IMetricCollector">

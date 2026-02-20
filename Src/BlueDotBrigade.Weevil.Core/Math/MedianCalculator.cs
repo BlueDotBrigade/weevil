@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Statistics
+namespace BlueDotBrigade.Weevil.Math
 {
 	public sealed class MedianCalculator : ICalculator
 	{
@@ -17,7 +17,7 @@ namespace BlueDotBrigade.Weevil.Statistics
 				? (sorted[mid - 1] + sorted[mid]) / 2.0
 				: sorted[mid];
 
-			return Math.Round(median, 3);
+			return System.Math.Round(median, 3);
 		}
 	}
 }

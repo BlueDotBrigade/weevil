@@ -83,8 +83,8 @@ namespace BlueDotBrigade.Weevil
 				lock (_regionsPadlock)
 				{
 
-					var start = Math.Min(_startLineNumber.Value, lineNumber);
-					var end = Math.Max(_startLineNumber.Value, lineNumber);
+					var start = System.Math.Min(_startLineNumber.Value, lineNumber);
+					var end = System.Math.Max(_startLineNumber.Value, lineNumber);
 
 					var newRegion = new Region(start, end);
 

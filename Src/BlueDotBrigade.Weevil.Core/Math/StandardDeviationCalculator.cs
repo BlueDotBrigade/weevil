@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Statistics
+namespace BlueDotBrigade.Weevil.Math
 {
 	public sealed class StandardDeviationCalculator : ICalculator
 	{
@@ -12,9 +12,9 @@ namespace BlueDotBrigade.Weevil.Statistics
 
 			var mean = values.Average();
 			var sumOfSquaredDifferences = values.Sum(v => (v - mean) * (v - mean));
-			var stdDev = Math.Sqrt(sumOfSquaredDifferences / values.Count);
+			var stdDev = System.Math.Sqrt(sumOfSquaredDifferences / values.Count);
 
-			return Math.Round(stdDev, 3);
+			return System.Math.Round(stdDev, 3);
 		}
 	}
 }

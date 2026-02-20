@@ -17,7 +17,7 @@
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Gui.Input;
 	using BlueDotBrigade.Weevil.IO;
-	using BlueDotBrigade.Weevil.Statistics;
+	using BlueDotBrigade.Weevil.Math;
 	using LiveChartsCore;
 	using LiveChartsCore.Defaults;
 	using LiveChartsCore.Kernel.Sketches;
@@ -679,11 +679,10 @@
 
 			// When we have a single expression, it might have multiple named groups
 			// So we need to allocate space for up to MaxSeriesCount series
-			var seriesCount = (expressions.Length == 1) ? MaxSeriesCount : Math.Min(expressions.Length, MaxSeriesCount);
+			var seriesCount = (expressions.Length == 1) ? MaxSeriesCount : System.Math.Min(expressions.Length, MaxSeriesCount);
 			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
 
 			if (!string.IsNullOrEmpty(inputString))
-			{
 				if (expressions.Length == 1)
 				{
 					try
@@ -743,7 +742,7 @@
 
 			// When we have a single expression, it might have multiple named groups
 			// So we need to allocate space for up to MaxSeriesCount series
-			var seriesCount = (expressions.Length == 1) ? MaxSeriesCount : Math.Min(expressions.Length, MaxSeriesCount);
+			var seriesCount = (expressions.Length == 1) ? MaxSeriesCount : System.Math.Min(expressions.Length, MaxSeriesCount);
 			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
 
 			// Find records that match each expression to extract series names

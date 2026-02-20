@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Statistics
+namespace BlueDotBrigade.Weevil.Math
 {
     public record RangeResult(DateTime? StartAt, DateTime? EndAt)
     {
