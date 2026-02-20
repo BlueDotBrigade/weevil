@@ -1,7 +1,7 @@
 namespace BlueDotBrigade.Weevil.Math
 {
-	/// <seealso cref="IRecordAnalyzer">
-	/// <seealso cref="IMetricCollector">
+	/// <seealso cref="IRecordAnalyzer"/>
+	/// <seealso cref="IMetricCollector"/>
 	public interface ICalculator
 	{
 		string Name { get; }
