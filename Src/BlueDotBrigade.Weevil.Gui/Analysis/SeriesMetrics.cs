@@ -24,7 +24,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			DateTime? rangeEnd)
 		{
 			this.SeriesName = seriesName;
-			this.SeriesColor = new SolidColorBrush(seriesColor);
+			this.SeriesColor = seriesColor;
 			this.Count = count;
 			this.Min = min;
 			this.Max = max;
@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		}
 
 		public string SeriesName { get; }
-		public Brush SeriesColor { get; }
+		public Color SeriesColor { get; }
 		public int Count { get; }
 		public double? Min { get; }
 		public double? Max { get; }
