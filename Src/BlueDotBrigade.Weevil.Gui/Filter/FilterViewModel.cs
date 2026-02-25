@@ -986,10 +986,16 @@
 
 		private void GraphData()
 		{
-			_dialogBox.ShowGraph(
-				_engine.Selector.GetSelected(),
-				_inclusiveFilter,
-				_engine.SourceFilePath);
+			var records = _engine.Selector.GetSelected();
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (_dialogBox.TryShowAnalysisDialog(_inclusiveFilter, recordsDescription, out var confirmedFilter))
+			{
+				_dialogBox.ShowGraph(
+					records,
+					confirmedFilter,
+					_engine.SourceFilePath);
+			}
 		}
 
 		private void ForceGarbageCollection()
