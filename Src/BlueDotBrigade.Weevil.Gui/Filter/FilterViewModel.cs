@@ -989,7 +989,7 @@
 			var records = _engine.Selector.GetSelected();
 			var recordsDescription = records.Length.ToString("N0");
 
-			if (_dialogBox.TryShowAnalysisDialog(_inclusiveFilter, recordsDescription, out var confirmedFilter))
+			if (_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
 			{
 				_dialogBox.ShowGraph(
 					records,

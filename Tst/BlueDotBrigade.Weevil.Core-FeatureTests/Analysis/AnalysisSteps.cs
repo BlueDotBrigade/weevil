@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil.Analysis
                         // TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
                         var parameterProvider = Substitute.For<IUserDialog>();
                         parameterProvider
-                                .TryShowAnalysisDialog(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+                                .TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
                                 .Returns(x => { x[2] = regularExpression; return true; });
 
                         this.Context.Engine.Analyzer.Analyze(AnalysisType.DetectRepeatingRecords, parameterProvider);

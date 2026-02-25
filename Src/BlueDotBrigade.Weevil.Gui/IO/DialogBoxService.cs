@@ -234,7 +234,7 @@ internal class DialogBoxService : IDialogBoxService
 		return wasSuccessful;
 	}
 
-	public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
+	public bool TryGetExpressions(string defaultRegex, string recordsDescription, out string regularExpression)
 	{
 		regularExpression = string.Empty;
 		var wasSuccessful = false;
