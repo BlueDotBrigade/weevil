@@ -275,5 +275,104 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			series[2].Name.Should().Be("disk");
 			series[3].Name.Should().Be("net");
 		}
+
+		[TestMethod]
+		public void GraphViewModel_WithAllTrueValues_ShouldInterpretAsOne()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "IsEnabled=true"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "IsEnabled=true"),
+				new Record(3, DateTime.UtcNow.AddSeconds(2), SeverityType.Information, "IsEnabled=true"));
+
+			var expression = "IsEnabled=(?<IsEnabled>\\w+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert
+			series.Should().ContainSingle();
+			var lineSeries = series[0] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			lineSeries.Should().NotBeNull();
+			var points = lineSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().ToList();
+			points.Should().HaveCount(3);
+			points.All(p => p.Value == 1.0).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GraphViewModel_WithAllFalseValues_ShouldInterpretAsZero()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "IsEnabled=false"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "IsEnabled=false"),
+				new Record(3, DateTime.UtcNow.AddSeconds(2), SeverityType.Information, "IsEnabled=false"));
+
+			var expression = "IsEnabled=(?<IsEnabled>\\w+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert
+			series.Should().ContainSingle();
+			var lineSeries = series[0] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			lineSeries.Should().NotBeNull();
+			var points = lineSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().ToList();
+			points.Should().HaveCount(3);
+			points.All(p => p.Value == 0.0).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GraphViewModel_WithMixedBooleanValues_ShouldInterpretTrueAsOneAndFalseAsZero()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "IsEnabled=true"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "IsEnabled=false"),
+				new Record(3, DateTime.UtcNow.AddSeconds(2), SeverityType.Information, "IsEnabled=True"),
+				new Record(4, DateTime.UtcNow.AddSeconds(3), SeverityType.Information, "IsEnabled=False"));
+
+			var expression = "IsEnabled=(?<IsEnabled>\\w+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert
+			series.Should().ContainSingle();
+			var lineSeries = series[0] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			lineSeries.Should().NotBeNull();
+			var points = lineSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().ToList();
+			points.Should().HaveCount(4);
+			points[0].Value.Should().Be(1.0);
+			points[1].Value.Should().Be(0.0);
+			points[2].Value.Should().Be(1.0);
+			points[3].Value.Should().Be(0.0);
+		}
+
+		[TestMethod]
+		public void GraphViewModel_WithMixedBooleanAndNumericValues_ShouldNotConvertBooleans()
+		{
+			// Arrange: series has both boolean and numeric values - booleans should not be converted
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "IsEnabled=true"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "IsEnabled=5"));
+
+			var expression = "IsEnabled=(?<IsEnabled>\\w+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+			var series = viewModel.Series.ToList();
+
+			// Assert: only the numeric value (5) should produce a data point
+			series.Should().ContainSingle();
+			var lineSeries = series[0] as LineSeries<LiveChartsCore.Defaults.DateTimePoint>;
+			lineSeries.Should().NotBeNull();
+			var points = lineSeries!.Values.Cast<LiveChartsCore.Defaults.DateTimePoint>().ToList();
+			points.Should().ContainSingle();
+			points[0].Value.Should().Be(5.0);
+		}
 	}
 }

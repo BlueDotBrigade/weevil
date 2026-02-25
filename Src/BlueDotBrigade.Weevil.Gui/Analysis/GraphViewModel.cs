@@ -670,6 +670,47 @@
 			return hasAnyValue;
 		}
 
+		private static bool TryGetRawMatchForRecord(ImmutableArray<RegularExpression> expressions, string inputString, out string[] values)
+		{
+			values = new string[MaxSeriesCount];
+
+			var hasAnyValue = false;
+
+			if (!expressions.IsDefaultOrEmpty &&
+			    !string.IsNullOrEmpty(inputString))
+			{
+				if (expressions.Length == 1)
+				{
+					IDictionary<string, string> matches = expressions[0].GetKeyValuePairs(inputString);
+
+					if (matches.Any())
+					{
+						var matchList = matches.Take(MaxSeriesCount).ToList();
+						for (var index = 0; index < matchList.Count && index < MaxSeriesCount; index++)
+						{
+							values[index] = matchList[index].Value;
+							hasAnyValue = true;
+						}
+					}
+				}
+				else
+				{
+					for (var index = 0; index < expressions.Length && index < MaxSeriesCount; index++)
+					{
+						IDictionary<string, string> matches = expressions[index].GetKeyValuePairs(inputString);
+
+						if (matches.Any())
+						{
+							values[index] = matches.First().Value;
+							hasAnyValue = true;
+						}
+					}
+				}
+			}
+
+			return hasAnyValue;
+		}
+
 		private static List<string> GetSeriesNames(string inputString, ImmutableArray<RegularExpression> expressions)
 		{
 			if (expressions.IsDefaultOrEmpty)
@@ -793,18 +834,24 @@
 
 			if (records.Length > 0)
 			{
+				// First pass: collect raw string values to determine if each series is all-boolean
+				var rawSeriesData = new List<(DateTime Timestamp, string Value)>[MaxSeriesCount];
+				for (int i = 0; i < MaxSeriesCount; i++)
+				{
+					rawSeriesData[i] = new List<(DateTime, string)>();
+				}
+
 				foreach (IRecord record in records)
 				{
 					try
 					{
-						if (TryGetMatchForRecord(expressions, record.Content, out var values))
+						if (TryGetRawMatchForRecord(expressions, record.Content, out var rawValues))
 						{
 							for (int i = 0; i < MaxSeriesCount; i++)
 							{
-								if (!float.IsNaN(values[i]))
+								if (rawValues[i] != null)
 								{
-									seriesValues[i].Add(new DateTimePoint(record.CreatedAt, values[i]));
-									hasSeriesData[i] = true;
+									rawSeriesData[i].Add((record.CreatedAt, rawValues[i]));
 								}
 							}
 						}
@@ -815,6 +862,37 @@
 							e.Expression,
 							$"Cannot parse the record on line {record.LineNumber}.", 
 							e);
+					}
+				}
+
+				// Determine which series contain only boolean values
+				var isBooleanSeries = new bool[MaxSeriesCount];
+				for (int i = 0; i < MaxSeriesCount; i++)
+				{
+					isBooleanSeries[i] = rawSeriesData[i].Count > 0 &&
+						rawSeriesData[i].All(item => bool.TryParse(item.Value, out _));
+				}
+
+				// Second pass: convert raw values to data points
+				for (int i = 0; i < MaxSeriesCount; i++)
+				{
+					foreach (var (timestamp, rawValue) in rawSeriesData[i])
+					{
+						float floatValue;
+						if (isBooleanSeries[i] && bool.TryParse(rawValue, out var boolValue))
+						{
+							floatValue = boolValue ? 1.0f : 0.0f;
+						}
+						else if (!float.TryParse(rawValue, NumberStyle, CultureInfo.InvariantCulture, out floatValue))
+						{
+							floatValue = float.NaN;
+						}
+
+						if (!float.IsNaN(floatValue))
+						{
+							seriesValues[i].Add(new DateTimePoint(timestamp, floatValue));
+							hasSeriesData[i] = true;
+						}
 					}
 				}
 			}
