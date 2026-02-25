@@ -22,6 +22,9 @@
 	using LiveChartsCore.Defaults;
 	using LiveChartsCore.Kernel.Sketches;
 	using LiveChartsCore.SkiaSharpView;
+	using LiveChartsCore.SkiaSharpView.Painting;
+	using SkiaSharp;
+	using System.Windows.Media;
 
 	public class GraphViewModel : INotifyPropertyChanged
 	{
@@ -36,6 +39,14 @@
 		// Y-Axis position options for each series
 		public static readonly string YAxisLeft = "Left";
 		public static readonly string YAxisRight = "Right";
+
+		private static readonly SKColor[] SeriesColors = new[]
+		{
+			new SKColor(0x74, 0x4D, 0xA9),  // Purple  #744DA9
+			new SKColor(0xE7, 0x48, 0x56),  // Red     #E74856
+			new SKColor(0xFF, 0x8C, 0x00),  // Orange  #FF8C00
+			new SKColor(0x00, 0x99, 0xBC),  // Cyan    #0099BC
+		};
 
 		private static readonly NumberStyles NumberStyle =
 			NumberStyles.AllowLeadingWhite |
@@ -918,6 +929,7 @@
 						Values = seriesValues[i],
 						GeometrySize = 10,
 						ScalesYAt = axisIndex,
+						Stroke = new SolidColorPaint(SeriesColors[i]),
 						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
 					});
 				}
@@ -945,6 +957,13 @@
 			{
 				if (s is LineSeries<DateTimePoint> lineSeries)
 				{
+					var seriesColor = System.Windows.Media.Colors.Gray;
+					if (lineSeries.Stroke is SolidColorPaint solidPaint)
+					{
+						var skColor = solidPaint.Color;
+						seriesColor = System.Windows.Media.Color.FromRgb(skColor.Red, skColor.Green, skColor.Blue);
+					}
+
 					var points = lineSeries.Values.Cast<DateTimePoint>().ToList();
 					
 					if (points.Any())
@@ -971,6 +990,7 @@
 							
 							var metrics = new SeriesMetrics(
 								lineSeries.Name ?? "Unknown",
+								seriesColor,
 								count,
 								min,
 								max,
@@ -987,6 +1007,7 @@
 							// All values were null
 							var metrics = new SeriesMetrics(
 								lineSeries.Name ?? "Unknown",
+								seriesColor,
 								0,
 								null,
 								null,
@@ -1004,6 +1025,7 @@
 						// Empty series
 						var metrics = new SeriesMetrics(
 							lineSeries.Name ?? "Unknown",
+							seriesColor,
 							0,
 							null,
 							null,
