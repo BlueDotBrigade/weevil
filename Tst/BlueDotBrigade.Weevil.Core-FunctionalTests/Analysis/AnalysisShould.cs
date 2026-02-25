@@ -165,7 +165,7 @@
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
 			var userDialog = Substitute.For<IUserDialog>();
 			userDialog
-				.TryShowAnalysisDialog(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
 				.Returns(x => { x[2] = dectectMinuteIncreasing; return true; });
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
@@ -196,7 +196,7 @@
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
 			var userDialog = Substitute.For<IUserDialog>();
 			userDialog
-				.TryShowAnalysisDialog(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
 				.Returns(x => { x[2] = detectSecondRollover; return true; });
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(),Arg.Any<string>(),Arg.Any<string>())

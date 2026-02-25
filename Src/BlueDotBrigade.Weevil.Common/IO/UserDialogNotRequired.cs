@@ -39,7 +39,7 @@
 			return !string.IsNullOrWhiteSpace(findText);
 		}
 
-		public bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression)
+		public bool TryGetExpressions(string defaultRegex, string recordsDescription, out string regularExpression)
 		{
 			regularExpression = defaultRegex ?? string.Empty;
 			return !string.IsNullOrWhiteSpace(regularExpression);
