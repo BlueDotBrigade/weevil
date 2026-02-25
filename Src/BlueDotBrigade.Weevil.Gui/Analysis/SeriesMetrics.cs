@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Gui.Analysis
 {
 	using System;
+	using System.Windows.Media;
 
 	/// <summary>
 	/// Represents statistical metrics for a graph series.
@@ -12,6 +13,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 		public SeriesMetrics(
 			string seriesName,
+			Color seriesColor,
 			int count,
 			double? min,
 			double? max,
@@ -22,6 +24,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			DateTime? rangeEnd)
 		{
 			this.SeriesName = seriesName;
+			this.SeriesColor = new SolidColorBrush(seriesColor);
 			this.Count = count;
 			this.Min = min;
 			this.Max = max;
@@ -33,6 +36,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		}
 
 		public string SeriesName { get; }
+		public Brush SeriesColor { get; }
 		public int Count { get; }
 		public double? Min { get; }
 		public double? Max { get; }
