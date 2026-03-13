@@ -10,13 +10,7 @@ These instructions apply to the shared infrastructure library (`BlueDotBrigade.W
 
 ## Design Principles
 
-Favor simple, clear designs. Apply established principles and patterns only when they meaningfully improve the code. Because `Common` is consumed across the entire codebase, design decisions here have the widest ripple effect.
-
-- Low coupling / high cohesion
-- SOLID design principles
-- .NET flavour of the Gang of Four design patterns
-
-These concepts should **not** be applied if they will make the source code unnecessarily complicated.
+Apply the project-wide design principles defined in `copilot-instructions.md`. Because `Common` is consumed by every component in the codebase, design decisions here have the widest ripple effect.
 
 ## Stability Rules
 

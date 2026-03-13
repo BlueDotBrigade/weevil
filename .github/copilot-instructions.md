@@ -36,6 +36,7 @@ Doc/                                  # Documentation, design notes, and UI styl
 - Preserve UI responsiveness; do not block the UI thread.
 - Maintain existing WPF data-binding patterns.
 - The majority of business logic must reside in `Core` so the application can run headless. Weevil's UI layer is interchangeable — it could be a WPF application, CLI, PowerShell module, or a test framework like Reqnroll.
+- Apply the DRY (Don't Repeat Yourself) principle to code, configuration, and documentation. Avoid duplicating logic, data, or rules across multiple locations.
 
 ## Design Principles
 

@@ -12,13 +12,7 @@ The majority of Weevil's business logic must reside in `Core` so the application
 
 ## Design Principles
 
-Favor simple, clear designs. Apply established principles and patterns only when they meaningfully improve the code:
-
-- Low coupling / high cohesion
-- SOLID design principles
-- .NET flavour of the Gang of Four design patterns
-
-These concepts should **not** be applied if they will make the source code unnecessarily complicated.
+Apply the project-wide design principles defined in `copilot-instructions.md`. These are especially important in `Core` since every other library and UI layer depends on it.
 
 ## Stability Rules
 
