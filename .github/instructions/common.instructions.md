@@ -8,6 +8,10 @@ applyTo: "Src/BlueDotBrigade.Weevil.Common/**"
 
 These instructions apply to the shared infrastructure library (`BlueDotBrigade.Weevil.Common`). This library defines the public contracts, data types, and cross-cutting utilities consumed by every other component in the repository. Changes here have the widest impact.
 
+## Design Principles
+
+Apply the project-wide design principles defined in `copilot-instructions.md`. Because `Common` is consumed by every component in the codebase, design decisions here have the widest ripple effect.
+
 ## Stability Rules
 
 - Do not modify the `IRecord` interface without a full compatibility review; it is a public contract consumed across the entire codebase.

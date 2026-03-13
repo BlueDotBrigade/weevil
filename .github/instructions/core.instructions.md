@@ -8,6 +8,12 @@ applyTo: "Src/BlueDotBrigade.Weevil.Core/**"
 
 These instructions apply to the core log analysis library (`BlueDotBrigade.Weevil.Core`). The core library must remain stable and performant. Changes here can affect every other component in the repository.
 
+The majority of Weevil's business logic must reside in `Core` so the application can run headless. The UI layer is interchangeable — WPF application, CLI, PowerShell module, or a test framework like Reqnroll.
+
+## Design Principles
+
+Apply the project-wide design principles defined in `copilot-instructions.md`. These are especially important in `Core` since every other library and UI layer depends on it.
+
 ## Stability Rules
 
 - Preserve existing filter semantics. Do not change how inclusive or exclusive filters select records without explicit approval.
