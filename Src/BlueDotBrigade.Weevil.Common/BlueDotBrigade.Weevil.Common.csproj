@@ -52,7 +52,7 @@
     </Resource>
   </ItemGroup>
   
-  	<ItemGroup>
+  	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>BlueDotBrigade.Weevil.Common-UnitTests</_Parameter1>
 		</AssemblyAttribute>
