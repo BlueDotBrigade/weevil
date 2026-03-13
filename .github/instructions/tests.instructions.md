@@ -41,7 +41,6 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 ## Test Data
 
 - Reusable test data lives in the `.Daten/` directory within each test project.
-- The `Default.log` file contains 387 standard records and is the baseline for feature tests.
 - Use the `Daten` helper class to load test data: `new Daten().AsString()`.
 - Do not hardcode raw log strings inline; use test data files for maintainability.
 - The shared test context object is `Token`; its default configuration sets `IncludePinned` and `IncludeBookmarks` to `false`.
@@ -52,7 +51,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Avoid asserting on internal state (private fields, internal methods). Test through public APIs.
 - Do not write tests that rely on execution order; each test must be independent.
 - Use `Record.Dummy` as the null object when a test requires an absent record reference.
-- When testing filters, use the existing `FilterCriteria` and `LoadCriteria` builder patterns.
+- When testing filters, construct `FilterCriteria` directly using `new FilterCriteria(expression)` or `FilterCriteria.None`. Load the engine via the `Engine.UsingPath(...)` builder style.
 
 ## Regression Tests
 

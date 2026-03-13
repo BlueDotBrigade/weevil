@@ -1,12 +1,12 @@
 ---
-applyTo: "Src/BlueDotBrigade.Weevil.Core/**,Src/BlueDotBrigade.Weevil.Common/**"
+applyTo: "Src/BlueDotBrigade.Weevil.Core/**"
 ---
 
 # Core Library Instructions
 
 ## Purpose
 
-These instructions apply to the core log analysis library (`BlueDotBrigade.Weevil.Core`) and the shared infrastructure library (`BlueDotBrigade.Weevil.Common`). The core library must remain stable and performant. Changes here can affect every other component in the repository.
+These instructions apply to the core log analysis library (`BlueDotBrigade.Weevil.Core`). The core library must remain stable and performant. Changes here can affect every other component in the repository.
 
 ## Stability Rules
 
@@ -22,15 +22,6 @@ These instructions apply to the core log analysis library (`BlueDotBrigade.Weevi
 - Properties use noun or adjective names (`FilterType`, `IsGenuine`, `HasContent`).
 - Interfaces are prefixed with `I` and describe a capability or contract (`IFilterStrategy`, `IRecordParser`).
 - Internal implementation types do not require the `I` prefix.
-
-## Data Model
-
-- `IRecord` is the immutable public contract for a log record. Do not modify `IRecord` without a compatibility review.
-- `Record` is the sealed, thread-safe implementation. Records must never be mutated after creation.
-- Mutable per-record state (comments, pinned status, flags) belongs in `Metadata`, which supports `INotifyPropertyChanged`.
-- Use `ImmutableArray<IRecord>` for record collections passed across boundaries.
-- Use `Record.Dummy` as the null object when a genuine record is absent.
-- Use `Record.IsGenuine(record)` or `Record.IsDummyOrNull(record)` to validate record references.
 
 ## Filter Architecture
 
