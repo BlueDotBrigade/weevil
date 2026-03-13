@@ -66,6 +66,11 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Use `Given` steps to establish preconditions, `When` to perform actions, and `Then` to verify outcomes.
 - Avoid asserting inside `Given` or `When` steps.
 - Reuse existing step definitions wherever possible rather than creating duplicates.
+- Gherkin scenarios are the preferred format for capturing test specifications. Write scenarios in plain English that a non-technical stakeholder can read.
+
+## Terminology
+
+- A list of testing terminology can be found here: TBD
 
 ## Test Configuration
 

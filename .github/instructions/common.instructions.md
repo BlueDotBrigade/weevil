@@ -8,6 +8,16 @@ applyTo: "Src/BlueDotBrigade.Weevil.Common/**"
 
 These instructions apply to the shared infrastructure library (`BlueDotBrigade.Weevil.Common`). This library defines the public contracts, data types, and cross-cutting utilities consumed by every other component in the repository. Changes here have the widest impact.
 
+## Design Principles
+
+Favor simple, clear designs. Apply established principles and patterns only when they meaningfully improve the code. Because `Common` is consumed across the entire codebase, design decisions here have the widest ripple effect.
+
+- Low coupling / high cohesion
+- SOLID design principles
+- .NET flavour of the Gang of Four design patterns
+
+These concepts should **not** be applied if they will make the source code unnecessarily complicated.
+
 ## Stability Rules
 
 - Do not modify the `IRecord` interface without a full compatibility review; it is a public contract consumed across the entire codebase.

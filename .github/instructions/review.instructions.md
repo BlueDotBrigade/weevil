@@ -66,3 +66,10 @@ These instructions guide Copilot during pull request reviews. Every review shoul
 - Flag broad refactors when the issue only requires a narrow fix.
 - Flag new abstractions or base classes introduced without a clear need.
 - Flag loosened access modifiers (`internal` → `public`) made solely to support test access; tests should use `InternalsVisibleTo` in Debug builds instead.
+- Flag over-application of design patterns (SOLID, Gang of Four, MVVM) where the added abstraction provides no clear benefit and makes the code unnecessarily complicated.
+
+## Documentation Conventions
+
+- Flag feature requests that are not captured as user stories.
+- Flag formalized requirements that do not use EARS syntax.
+- Flag test specifications that are not written as Gherkin scenarios.

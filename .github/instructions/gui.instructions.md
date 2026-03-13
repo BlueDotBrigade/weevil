@@ -14,6 +14,7 @@ These instructions apply to the WPF desktop application (`BlueDotBrigade.Weevil.
 - ViewModels are internal classes annotated with `[Observable]` from `Metalama.Patterns.Observability` to automatically generate `INotifyPropertyChanged` implementations.
 - Do not manually implement `INotifyPropertyChanged` in ViewModels; rely on the `[Observable]` attribute.
 - XAML views bind to ViewModel properties. Do not place business logic in code-behind files.
+- Apply MVVM best practices, SOLID principles, and Gang of Four patterns only when they meaningfully improve the code. Do not introduce these patterns if they make the source code unnecessarily complicated.
 
 ## UI Thread Safety
 
