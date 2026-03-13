@@ -19,6 +19,8 @@ Src/BlueDotBrigade.Weevil.Cli         # Command-line interface
 Src/BlueDotBrigade.Weevil.PowerShell  # PowerShell tooling
 Src/BlueDotBrigade.Weevil.Plugins     # Plugin infrastructure
 Src/BlueDotBrigade.Weevil.Installer   # WiX installer
+Src/BlueDotBrigade.Weevil.TestTools   # Shared test helpers and utilities
+Src/BlueDotBrigade.Weevil.Windows     # Windows-specific platform abstractions
 Tst/                                  # Unit tests, feature tests, and functional tests
 Doc/                                  # Documentation, design notes, and UI style guides
 ```
@@ -47,7 +49,7 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 ```
 
 > **Note:** The GUI project contains post-build scripts and must be built on Windows.
-> `InternalsVisibleTo` is restricted to DEBUG builds, so CI always uses `--configuration Debug`.
+> All projects using `InternalsVisibleTo` restrict it to DEBUG builds, so CI always uses `--configuration Debug`.
 
 ## Testing Expectations
 
@@ -64,7 +66,7 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 - Follow Microsoft .NET Framework Design Guidelines for naming.
 - Methods use verb or verb-phrase names. Properties use noun or adjective names.
 - Interfaces are prefixed with `I` and describe a capability or contract.
-- Statistics calculators round computed values to 3 decimal places using `Math.Round`.
+- Math calculators round computed values to 3 decimal places using `System.Math.Round(..., 3)`.
 - In namespaces named `Math` (e.g., `BlueDotBrigade.Weevil.Math`), use fully qualified `System.Math.*` calls to avoid collision with the namespace name.
 
 ## Do Not Modify
