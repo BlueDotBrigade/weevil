@@ -24,9 +24,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns("Ascending");
 
-			// Mock TryShowAnalysisDialog
+			// Mock TryGetExpressions
 			userDialog
-				.TryShowAnalysisDialog(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
 				.Returns(x =>
 				{
 					if (shouldCancel)

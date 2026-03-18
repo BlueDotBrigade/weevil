@@ -70,6 +70,14 @@
                       MaxHeight="200"
                       VerticalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="" Width="24" CanUserResize="False" CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="12" Height="12" Fill="{Binding SeriesColor}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Series Name" Binding="{Binding SeriesName}" Width="*" />
                     <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="Auto" />
                     <DataGridTextColumn Header="Min" Binding="{Binding MinFormatted}" Width="Auto" />

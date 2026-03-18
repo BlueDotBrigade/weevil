@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                         // Show analysis dialog to get custom regex
                         var recordsDescription = records.Length.ToString("N0");
 
-                        if (!userDialog.TryShowAnalysisDialog(defaultRegex, recordsDescription, out var customRegex))
+                        if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
                         {
                                 // User cancelled
                                 return new Results(0);

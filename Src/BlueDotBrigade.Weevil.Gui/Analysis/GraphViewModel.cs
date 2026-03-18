@@ -22,6 +22,9 @@
 	using LiveChartsCore.Defaults;
 	using LiveChartsCore.Kernel.Sketches;
 	using LiveChartsCore.SkiaSharpView;
+	using LiveChartsCore.SkiaSharpView.Painting;
+	using SkiaSharp;
+	using System.Windows.Media;
 
 	public class GraphViewModel : INotifyPropertyChanged
 	{
@@ -36,6 +39,14 @@
 		// Y-Axis position options for each series
 		public static readonly string YAxisLeft = "Left";
 		public static readonly string YAxisRight = "Right";
+
+		private static readonly SKColor[] SeriesColors = new[]
+		{
+			new SKColor(0x74, 0x4D, 0xA9),  // Purple  #744DA9
+			new SKColor(0xE7, 0x48, 0x56),  // Red     #E74856
+			new SKColor(0xFF, 0x8C, 0x00),  // Orange  #FF8C00
+			new SKColor(0x00, 0x99, 0xBC),  // Cyan    #0099BC
+		};
 
 		private static readonly NumberStyles NumberStyle =
 			NumberStyles.AllowLeadingWhite |
@@ -670,6 +681,47 @@
 			return hasAnyValue;
 		}
 
+		private static bool TryGetRawMatchForRecord(ImmutableArray<RegularExpression> expressions, string inputString, out string[] values)
+		{
+			values = new string[MaxSeriesCount];
+
+			var hasAnyValue = false;
+
+			if (!expressions.IsDefaultOrEmpty &&
+			    !string.IsNullOrEmpty(inputString))
+			{
+				if (expressions.Length == 1)
+				{
+					IDictionary<string, string> matches = expressions[0].GetKeyValuePairs(inputString);
+
+					if (matches.Any())
+					{
+						var matchList = matches.Take(MaxSeriesCount).ToList();
+						for (var index = 0; index < matchList.Count && index < MaxSeriesCount; index++)
+						{
+							values[index] = matchList[index].Value;
+							hasAnyValue = true;
+						}
+					}
+				}
+				else
+				{
+					for (var index = 0; index < expressions.Length && index < MaxSeriesCount; index++)
+					{
+						IDictionary<string, string> matches = expressions[index].GetKeyValuePairs(inputString);
+
+						if (matches.Any())
+						{
+							values[index] = matches.First().Value;
+							hasAnyValue = true;
+						}
+					}
+				}
+			}
+
+			return hasAnyValue;
+		}
+
 		private static List<string> GetSeriesNames(string inputString, ImmutableArray<RegularExpression> expressions)
 		{
 			if (expressions.IsDefaultOrEmpty)
@@ -793,18 +845,24 @@
 
 			if (records.Length > 0)
 			{
+				// First pass: collect raw string values to determine if each series is all-boolean
+				var rawSeriesData = new List<(DateTime Timestamp, string Value)>[MaxSeriesCount];
+				for (int i = 0; i < MaxSeriesCount; i++)
+				{
+					rawSeriesData[i] = new List<(DateTime, string)>();
+				}
+
 				foreach (IRecord record in records)
 				{
 					try
 					{
-						if (TryGetMatchForRecord(expressions, record.Content, out var values))
+						if (TryGetRawMatchForRecord(expressions, record.Content, out var rawValues))
 						{
 							for (int i = 0; i < MaxSeriesCount; i++)
 							{
-								if (!float.IsNaN(values[i]))
+								if (rawValues[i] != null)
 								{
-									seriesValues[i].Add(new DateTimePoint(record.CreatedAt, values[i]));
-									hasSeriesData[i] = true;
+									rawSeriesData[i].Add((record.CreatedAt, rawValues[i]));
 								}
 							}
 						}
@@ -815,6 +873,37 @@
 							e.Expression,
 							$"Cannot parse the record on line {record.LineNumber}.", 
 							e);
+					}
+				}
+
+				// Determine which series contain only boolean values
+				var isBooleanSeries = new bool[MaxSeriesCount];
+				for (int i = 0; i < MaxSeriesCount; i++)
+				{
+					isBooleanSeries[i] = rawSeriesData[i].Count > 0 &&
+						rawSeriesData[i].All(item => bool.TryParse(item.Value, out _));
+				}
+
+				// Second pass: convert raw values to data points
+				for (int i = 0; i < MaxSeriesCount; i++)
+				{
+					foreach (var (timestamp, rawValue) in rawSeriesData[i])
+					{
+						float floatValue;
+						if (isBooleanSeries[i] && bool.TryParse(rawValue, out var boolValue))
+						{
+							floatValue = boolValue ? 1.0f : 0.0f;
+						}
+						else if (!float.TryParse(rawValue, NumberStyle, CultureInfo.InvariantCulture, out floatValue))
+						{
+							floatValue = float.NaN;
+						}
+
+						if (!float.IsNaN(floatValue))
+						{
+							seriesValues[i].Add(new DateTimePoint(timestamp, floatValue));
+							hasSeriesData[i] = true;
+						}
 					}
 				}
 			}
@@ -840,6 +929,7 @@
 						Values = seriesValues[i],
 						GeometrySize = 10,
 						ScalesYAt = axisIndex,
+						Stroke = new SolidColorPaint(SeriesColors[i]),
 						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
 					});
 				}
@@ -867,6 +957,13 @@
 			{
 				if (s is LineSeries<DateTimePoint> lineSeries)
 				{
+					var seriesColor = System.Windows.Media.Colors.Gray;
+					if (lineSeries.Stroke is SolidColorPaint solidPaint)
+					{
+						var skColor = solidPaint.Color;
+						seriesColor = System.Windows.Media.Color.FromRgb(skColor.Red, skColor.Green, skColor.Blue);
+					}
+
 					var points = lineSeries.Values.Cast<DateTimePoint>().ToList();
 					
 					if (points.Any())
@@ -893,6 +990,7 @@
 							
 							var metrics = new SeriesMetrics(
 								lineSeries.Name ?? "Unknown",
+								seriesColor,
 								count,
 								min,
 								max,
@@ -909,6 +1007,7 @@
 							// All values were null
 							var metrics = new SeriesMetrics(
 								lineSeries.Name ?? "Unknown",
+								seriesColor,
 								0,
 								null,
 								null,
@@ -926,6 +1025,7 @@
 						// Empty series
 						var metrics = new SeriesMetrics(
 							lineSeries.Name ?? "Unknown",
+							seriesColor,
 							0,
 							null,
 							null,

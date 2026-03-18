@@ -16,6 +16,6 @@
 			out int? maxElapsedMs,
 			out bool searchComments);
 
-		bool TryShowAnalysisDialog(string defaultRegex, string recordsDescription, out string regularExpression);
+		bool TryGetExpressions(string defaultRegex, string recordsDescription, out string regularExpression);
 	}
 }
