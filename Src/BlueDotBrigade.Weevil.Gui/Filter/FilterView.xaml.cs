@@ -1,10 +1,12 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
+	using System.ComponentModel;
 	using System.Data.Common;
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
+	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
@@ -30,6 +32,7 @@
                                         viewModel.ResultsChanged -= OnResultsChanged;
                                         viewModel.RegionsChanged -= OnRegionsChanged;
                                         viewModel.BookmarksChanged -= OnBookmarksChanged;
+                                        viewModel.PropertyChanged -= OnViewModelPropertyChanged;
 				}
 				if (args.NewValue != null)
 				{
@@ -39,6 +42,7 @@
                                         viewModel.ResultsChanged += OnResultsChanged;
                                         viewModel.RegionsChanged += OnRegionsChanged;
                                         viewModel.BookmarksChanged += OnBookmarksChanged;
+                                        viewModel.PropertyChanged += OnViewModelPropertyChanged;
 				}
 			};
 
@@ -108,6 +112,25 @@
 					exception,
 					message);
 				MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(FilterViewModel.ActiveRecordIndex))
+			{
+				var index = this.ViewModel.ActiveRecordIndex;
+				if (index >= 0 && index < this.ListView.Items.Count)
+				{
+					this.ListView.ScrollIntoView(this.ListView.Items[index]);
+					this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+					{
+						if (this.ListView.ItemContainerGenerator.ContainerFromIndex(index) is ListViewItem item)
+						{
+							item.Focus();
+						}
+					}));
+				}
 			}
 		}
 
