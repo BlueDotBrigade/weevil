@@ -61,12 +61,9 @@
 	</Fragment>
 	<Fragment>
 		<DirectoryRef Id="WeevilShortcutDir">
-			<!-- Hotkey: 87 (W) + 8192 (Ctrl) + 16384 (Alt) = 24663 -->
+			<!-- Hotkey: 87 (W) + 512 (Ctrl) + 1024 (Alt) = 1623 -->
 			<Component Id="WeevilShortcut" Guid="BDBCC900-E933-4FF7-8E2C-B167BD12891D">
-				<!--
-				<Shortcut Id="WeevilShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" Hotkey="24663" />
-				-->
-				<Shortcut Id="GuiShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" />
+				<Shortcut Id="GuiShortcut" Name="Weevil GUI" Description="Weevil log view application." Target="[InstallFolderBin]\BlueDotBrigade.Weevil.Gui.exe" WorkingDirectory="InstallFolderBin" Hotkey="1623" />
 				<Shortcut Id="CliShortcut" Name="Weevil CLI" Description="Weevil command-line application." Target="[SystemFolder]cmd.exe" Arguments='/k "[InstallFolderBin]\WeevilCli.exe"' WorkingDirectory="InstallFolderBin" />
 				<!-- 
 				The KeyPath attribute is set to yes, which means that this registry key 
