@@ -65,13 +65,11 @@
 				{
 					if (DateTime.TryParse(value, out var requestedTime))
 					{
-						referenceTime = new DateTime(
+						var referenceDate = new DateTime(
 							activeRecord.CreatedAt.Year,
 							activeRecord.CreatedAt.Month,
-							activeRecord.CreatedAt.Day,
-							requestedTime.Hour,
-							requestedTime.Minute,
-							requestedTime.Second);
+							activeRecord.CreatedAt.Day);
+						referenceTime = referenceDate + requestedTime.TimeOfDay;
 
 						if (value.Count(c => c == ':') == 1)
 						{
