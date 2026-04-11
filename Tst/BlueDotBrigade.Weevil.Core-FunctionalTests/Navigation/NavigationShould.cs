@@ -8,6 +8,54 @@
 	[TestClass]
 	public class NavigationShould
 	{
+		// Regression: Issue #499 - GoTo timestamp does not always appear to work
+		[TestMethod]
+		public void GoToExactTimestampWhenOnlyOneMatchExists()
+		{
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("GoToTimestamp.log"))
+				.Open();
+
+			engine.Selector.Select(1);
+
+			IRecord result = engine.Navigate.GoTo("06:59:39.0207", RecordSearchType.NearestNeighbor);
+
+			Assert.AreEqual(4, result.LineNumber);
+		}
+
+		// Regression: Issue #499 - GoTo timestamp does not always appear to work
+		[TestMethod]
+		public void GoToNearestRecordWhenTimestampIsSlightlyBeforeRecord()
+		{
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("GoToTimestamp.log"))
+				.Open();
+
+			engine.Selector.Select(1);
+
+			// Search for a time 7ms before line 4 (06:59:39.0207); line 4 is the nearest neighbor
+			IRecord result = engine.Navigate.GoTo("06:59:39.020", RecordSearchType.NearestNeighbor);
+
+			Assert.AreEqual(4, result.LineNumber);
+		}
+
+		// Regression: Issue #499 - GoTo timestamp does not always appear to work
+		[TestMethod]
+		public void GoToNearestRecordWhenTimestampIsSlightlyAfterRecord()
+		{
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("GoToTimestamp.log"))
+				.Open();
+
+			engine.Selector.Select(1);
+
+			// Search for a time 3ms after line 4 (06:59:39.0207); line 4 is the nearest neighbor
+			IRecord result = engine.Navigate.GoTo("06:59:39.021", RecordSearchType.NearestNeighbor);
+
+			Assert.AreEqual(4, result.LineNumber);
+		}
+
+
 		[TestMethod]
 		public void SupportNavigatingToNextPinnedRecord()
 		{
