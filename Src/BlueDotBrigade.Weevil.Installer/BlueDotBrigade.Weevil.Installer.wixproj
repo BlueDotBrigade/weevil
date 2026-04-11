@@ -1,4 +1,4 @@
-﻿<Project Sdk="WixToolset.Sdk/5.0.0">
+﻿<Project Sdk="WixToolset.Sdk/6.0.2">
   <PropertyGroup>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProductVersion>2.12.0</ProductVersion>
@@ -6,10 +6,10 @@
     <Name>BlueDotBrigade.Weevil.Installer</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;</DefineConstants>
+    <DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;ScriptsSrcPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.PowerShell;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;</DefineConstants>
+    <DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;ScriptsSrcPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.PowerShell;</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <None Include="ReadMe.md" />
