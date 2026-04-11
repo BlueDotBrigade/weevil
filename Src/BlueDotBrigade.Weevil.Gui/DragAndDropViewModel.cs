@@ -5,7 +5,6 @@
 	using System.IO;
 	using System.Linq;
 	using System.Windows;
-	using GongSolutions.Wpf.DragDrop;
 
 	internal class DragAndDropViewModel
 	{
@@ -46,21 +45,31 @@
 			}
 		}
 
-		public void Drag(IDropInfo dropInfo)
+		public void DragOver(DragEventArgs e)
 		{
-			IEnumerable<string> dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-			dropInfo.Effects = dragFileList.Any(IsFileSupported) ? DragDropEffects.Copy : DragDropEffects.None;
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+				e.Effects = files.Any(IsFileSupported) ? DragDropEffects.Copy : DragDropEffects.None;
+			}
+			else
+			{
+				e.Effects = DragDropEffects.None;
+			}
+
+			e.Handled = true;
 		}
 
-		public void Drop(IDropInfo dropInfo)
+		public void Drop(DragEventArgs e)
 		{
-			var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>().ToList();
-			dropInfo.Effects = dragFileList.Any(IsFileSupported) ? DragDropEffects.Copy : DragDropEffects.None;
-
-			if (dropInfo.Effects == DragDropEffects.Copy)
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
-				var filePath = dragFileList.First();
-				DroppedFile?.Invoke(this, new DroppedFileEventArgs(filePath));
+				var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+				if (files.Any(IsFileSupported))
+				{
+					var filePath = files.First();
+					DroppedFile?.Invoke(this, new DroppedFileEventArgs(filePath));
+				}
 			}
 		}
 
