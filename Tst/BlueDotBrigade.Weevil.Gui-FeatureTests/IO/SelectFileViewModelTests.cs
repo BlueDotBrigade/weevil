@@ -8,7 +8,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		public void GivenFileSelected_WhenOkExecuted_ThenSelectedFilenameIsRetained()
 		{
 			var closeRequested = false;
-			var viewModel = new SelectFileViewModel(new[] { "application.log" });
+			var viewModel = new SelectFileViewModel(new[] { "application.log", "system.log", "readme.txt" });
 			viewModel.SelectedFilename = "application.log";
 			viewModel.CloseRequested += (sender, args) => closeRequested = true;
 
@@ -22,7 +22,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		public void GivenFileSelected_WhenCancelExecuted_ThenSelectedFilenameIsNull()
 		{
 			var closeRequested = false;
-			var viewModel = new SelectFileViewModel(new[] { "application.log" });
+			var viewModel = new SelectFileViewModel(new[] { "application.log", "system.log", "readme.txt" });
 			viewModel.SelectedFilename = "application.log";
 			viewModel.CloseRequested += (sender, args) => closeRequested = true;
 
