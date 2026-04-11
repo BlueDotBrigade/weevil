@@ -1964,7 +1964,7 @@
 					var selectedLineNumber = selectedRecord.LineNumber;
 
 					var defaultName = selectedRecord.HasCreationTime
-						? selectedRecord.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+						? selectedRecord.CreatedAt.ToString("HH:mm:ss")
 						: "Bookmark";
 
 					// Prompt user for bookmark name with default
