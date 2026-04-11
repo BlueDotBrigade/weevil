@@ -3,6 +3,8 @@
 	using System.Windows;
 	using System.Windows.Controls;
 	using System.Windows.Controls.Primitives;
+	using System.Windows.Input;
+	using System.Windows.Media;
 
 	/// <revisionHistory>
 	///     <revision date="2018/06/20" version="1.0.0" author="Clifford Nelson">
@@ -78,6 +80,77 @@
 
 			e.Handled = true;
 			frameworkElement.Focus();
+		}
+
+		public static bool GetSelectParentListViewItemOnClick(FrameworkElement frameworkElement)
+		{
+			return (bool)frameworkElement.GetValue(SelectParentListViewItemOnClickProperty);
+		}
+
+		public static void SetSelectParentListViewItemOnClick(FrameworkElement frameworkElement, bool value)
+		{
+			frameworkElement.SetValue(SelectParentListViewItemOnClickProperty, value);
+		}
+
+		/// <summary>
+		/// When enabled on a read-only <see cref="TextBox"/> inside a <see cref="ListViewItem"/>,
+		/// ensures that clicking on the text still selects the parent row.
+		/// </summary>
+		/// <remarks>
+		/// A <see cref="TextBox"/> consumes <c>MouseLeftButtonDown</c> internally (to place the text cursor),
+		/// which prevents the event from bubbling up to the <see cref="ListViewItem"/> that handles row selection.
+		/// This behavior intercepts <c>PreviewMouseLeftButtonDown</c> (tunneling) and re-raises a fresh
+		/// <c>MouseLeftButtonDown</c> directly on the parent <see cref="ListViewItem"/>, restoring the
+		/// standard WPF selection mechanism — including Ctrl+Click and Shift+Click multi-selection.
+		/// </remarks>
+		public static readonly DependencyProperty SelectParentListViewItemOnClickProperty =
+			DependencyProperty.RegisterAttached("SelectParentListViewItemOnClick",
+				typeof(bool), typeof(TextBoxBehavior),
+				new FrameworkPropertyMetadata(false, OnSelectParentListViewItemOnClickChanged));
+
+		private static void OnSelectParentListViewItemOnClickChanged(
+			DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			if (d is TextBox textBox && e.NewValue is bool enabled)
+			{
+				if (enabled)
+				{
+					textBox.PreviewMouseLeftButtonDown += OnTextBoxPreviewMouseLeftButtonDown;
+				}
+				else
+				{
+					textBox.PreviewMouseLeftButtonDown -= OnTextBoxPreviewMouseLeftButtonDown;
+				}
+			}
+		}
+
+		private static void OnTextBoxPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			if (sender is TextBox textBox)
+			{
+				var listViewItem = FindAncestor<ListViewItem>(textBox);
+				if (listViewItem != null)
+				{
+					listViewItem.RaiseEvent(new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left)
+					{
+						RoutedEvent = UIElement.MouseLeftButtonDownEvent,
+					});
+				}
+			}
+		}
+
+		private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
+		{
+			current = VisualTreeHelper.GetParent(current);
+			while (current != null)
+			{
+				if (current is T found)
+				{
+					return found;
+				}
+				current = VisualTreeHelper.GetParent(current);
+			}
+			return null;
 		}
 	}
 }
