@@ -6,6 +6,7 @@
 		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
 		<PlatformTarget>x64</PlatformTarget>
 		<OutputType>WinExe</OutputType>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x64</Platforms>
 		<Deterministic>false</Deterministic>
 		<PublishUrl>publish\</PublishUrl>
