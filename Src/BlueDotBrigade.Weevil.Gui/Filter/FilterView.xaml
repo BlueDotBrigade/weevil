@@ -347,9 +347,21 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
                                 <StackPanel>
-                                    <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                        <Run Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
-                                    </TextBlock>
+                                    <TextBox
+                                        Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"
+                                        IsReadOnly="True"
+                                        IsUndoEnabled="False"
+                                        IsTabStop="False"
+                                        Style="{x:Null}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Padding="0"
+                                        TextWrapping="WrapWithOverflow"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        HorizontalScrollBarVisibility="Disabled"
+                                        VerticalScrollBarVisibility="Disabled"
+                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListViewItem}}" />
                                     <StackPanel Orientation="Horizontal">
                                         <Border x:Name="RegionTag" 
                                                 BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
