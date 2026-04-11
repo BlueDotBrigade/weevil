@@ -352,7 +352,7 @@
                                         IsReadOnly="True"
                                         IsUndoEnabled="False"
                                         IsTabStop="False"
-                                        controls:TextBoxBehavior.ClickSelectsRow="True"
+                                        local:FilterListViewBehavior.ClickSelectsRow="True"
                                         Style="{x:Null}"
                                         Background="Transparent"
                                         BorderThickness="0"
