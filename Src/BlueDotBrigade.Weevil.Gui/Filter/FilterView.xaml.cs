@@ -9,6 +9,7 @@
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.Navigation;
@@ -61,6 +62,35 @@
 
 			ApplicationFontSizeComboBox.SelectedValue = Settings.Default.ApplicationFontSize;
 			RowFontSizeSlider.Value = Settings.Default.RowFontSize;
+
+			DataObject.AddPastingHandler(InclusiveFilter, OnFilterComboBoxPasting);
+			DataObject.AddPastingHandler(ExclusiveFilter, OnFilterComboBoxPasting);
+		}
+
+		private void OnFilterComboBoxPasting(object sender, DataObjectPastingEventArgs e)
+		{
+			if (e.DataObject.GetDataPresent(DataFormats.Text))
+			{
+				var pastedText = e.DataObject.GetData(DataFormats.Text) as string ?? string.Empty;
+
+				if (RegexFilterHelper.HasEscapedDoubleQuotes(pastedText))
+				{
+					var result = MessageBox.Show(
+						"The pasted text contains escaped double quotes (\"\").\r\n\r\nWould you like to replace them with single double quotes (\")?\r\n\r\nClick 'Yes' to fix the expression, or 'No' to paste as-is.",
+						"Fix Escaped Double Quotes?",
+						MessageBoxButton.YesNo,
+						MessageBoxImage.Question,
+						MessageBoxResult.Yes);
+
+					if (result == MessageBoxResult.Yes)
+					{
+						var fixedText = RegexFilterHelper.FixEscapedDoubleQuotes(pastedText);
+						var newDataObject = new DataObject();
+						newDataObject.SetData(DataFormats.Text, fixedText);
+						e.DataObject = newDataObject;
+					}
+				}
+			}
 		}
 
 		private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
