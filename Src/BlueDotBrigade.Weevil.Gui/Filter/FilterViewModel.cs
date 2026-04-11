@@ -460,7 +460,8 @@
 
 				if (files.Length > 0)
 				{
-					temporarySourceFileName = await ShowListOfCompressedFiles(files);
+					var fileNames = files.Select(f => Path.GetFileName(f)).ToArray();
+					temporarySourceFileName = await ShowListOfCompressedFiles(fileNames);
 				}
 				if (!string.IsNullOrEmpty(temporarySourceFileName))
 				{

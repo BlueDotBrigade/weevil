@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.IO"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="SelectFileView" Height="450" Width="800"
+        Title="Select File" Height="450" Width="800"
         d:DesignHeight="450" d:DesignWidth="800"
         d:DataContext="{d:DesignInstance local:SelectFileViewModel}"
         TextElement.FontWeight="Medium"
@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
         <TextBlock>Select the file you want to open:</TextBlock>
         <ListBox  Grid.Row="2" 
-                  ItemsSource="{Binding Filenames}"
+                  ItemsSource="{Binding FileNames}"
                   SelectedItem="{Binding SelectedFilename}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
