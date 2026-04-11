@@ -101,6 +101,11 @@
 				{
 					this.ListView.SelectedItems.Add(record);
 				}
+
+				// Recalculate column widths after filter results change.
+				// Note: BeginInvoke at Background priority ensures that this runs after
+				// any pending progress bar hide and rendering operations are complete.
+				this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(UpdateLayout));
 			}
 			catch (Exception exception)
 			{
