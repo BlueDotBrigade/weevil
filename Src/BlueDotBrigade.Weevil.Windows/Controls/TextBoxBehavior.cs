@@ -82,14 +82,14 @@
 			frameworkElement.Focus();
 		}
 
-		public static bool GetSelectParentListViewItemOnClick(FrameworkElement frameworkElement)
+		public static bool GetClickSelectsRow(FrameworkElement frameworkElement)
 		{
-			return (bool)frameworkElement.GetValue(SelectParentListViewItemOnClickProperty);
+			return (bool)frameworkElement.GetValue(ClickSelectsRowProperty);
 		}
 
-		public static void SetSelectParentListViewItemOnClick(FrameworkElement frameworkElement, bool value)
+		public static void SetClickSelectsRow(FrameworkElement frameworkElement, bool value)
 		{
-			frameworkElement.SetValue(SelectParentListViewItemOnClickProperty, value);
+			frameworkElement.SetValue(ClickSelectsRowProperty, value);
 		}
 
 		/// <summary>
@@ -103,12 +103,12 @@
 		/// <c>MouseLeftButtonDown</c> directly on the parent <see cref="ListViewItem"/>, restoring the
 		/// standard WPF selection mechanism — including Ctrl+Click and Shift+Click multi-selection.
 		/// </remarks>
-		public static readonly DependencyProperty SelectParentListViewItemOnClickProperty =
-			DependencyProperty.RegisterAttached("SelectParentListViewItemOnClick",
+		public static readonly DependencyProperty ClickSelectsRowProperty =
+			DependencyProperty.RegisterAttached("ClickSelectsRow",
 				typeof(bool), typeof(TextBoxBehavior),
-				new FrameworkPropertyMetadata(false, OnSelectParentListViewItemOnClickChanged));
+				new FrameworkPropertyMetadata(false, OnClickSelectsRowChanged));
 
-		private static void OnSelectParentListViewItemOnClickChanged(
+		private static void OnClickSelectsRowChanged(
 			DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			if (d is TextBox textBox && e.NewValue is bool enabled)
