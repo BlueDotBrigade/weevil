@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Windows;
+	using System.Windows.Input;
 
 	/// <summary>
 	/// Interaction logic for UserPromptDialog.xaml
@@ -47,6 +48,16 @@
 		private void OnDialogLoaded(object sender, RoutedEventArgs e)
 		{
 			this.InputTextBox.SelectAll();
+		}
+
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+			if (e.Key == Key.Escape)
+			{
+				e.Handled = true;
+				this.Close();
+			}
+			base.OnKeyDown(e);
 		}
 
 		private void OnOkClicked(object sender, RoutedEventArgs e)
