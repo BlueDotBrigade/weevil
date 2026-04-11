@@ -2,13 +2,20 @@
 	<Fragment>
 		<DirectoryRef Id="InstallFolderBin">
 			<Component Id="SelectHttpErrorsComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AF">
-				<File Id="SelectHttpErrorsFile" Source="$(var.SourceDirPath)\..\Scripts\Select-HttpErrors.ps1" KeyPath="yes" />
+				<File Id="SelectHttpErrorsFile" Source="$(var.ScriptsSrcPath)\Select-HttpErrors.ps1" KeyPath="yes" />
 			</Component>
 			<Component Id="SelectRecordsComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8BA">
-				<File Id="SelectRecordsFile" Source="$(var.SourceDirPath)\..\Scripts\Select-Records.ps1" KeyPath="yes" />
+				<File Id="SelectRecordsFile" Source="$(var.ScriptsSrcPath)\Select-Records.ps1" KeyPath="yes" />
 			</Component>
 			<Component Id="SplitFileComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8BB">
-				<File Id="SplitFileFile" Source="$(var.SourceDirPath)\..\Scripts\Split-File.ps1" KeyPath="yes" />
+				<File Id="SplitFileFile" Source="$(var.ScriptsSrcPath)\Split-File.ps1" KeyPath="yes" />
+			</Component>
+			<Component Id="SplitFileBySizeComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8BC">
+				<File Id="SplitFileBySizeFile" Source="$(var.ScriptsSrcPath)\Split-File-BySize.ps1" KeyPath="yes" />
+			</Component>
+			<Component Id="ScriptsPathComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8BD">
+				<Environment Id="ScriptsPathEntry" Name="PATH" Value="[InstallFolderBin]" Action="set" Part="last" System="yes" />
+				<RegistryValue Root="HKLM" Key="Software\BlueDotBrigade\Weevil" Name="ScriptsPath" Type="string" Value="[InstallFolderBin]" KeyPath="yes" />
 			</Component>
 		</DirectoryRef>
 	</Fragment>
@@ -18,6 +25,8 @@
 			<ComponentRef Id="SelectHttpErrorsComponent" />
 			<ComponentRef Id="SelectRecordsComponent" />
 			<ComponentRef Id="SplitFileComponent" />
+			<ComponentRef Id="SplitFileBySizeComponent" />
+			<ComponentRef Id="ScriptsPathComponent" />
 		</ComponentGroup>
 	</Fragment>
 </Wix>
