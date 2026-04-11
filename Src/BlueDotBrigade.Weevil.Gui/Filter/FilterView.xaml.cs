@@ -76,7 +76,9 @@
 				if (RegexFilterHelper.HasEscapedDoubleQuotes(pastedText))
 				{
 					var result = MessageBox.Show(
-						"The pasted text contains escaped double quotes (\"\").\r\n\r\nWould you like to replace them with single double quotes (\")?\r\n\r\nClick 'Yes' to fix the expression, or 'No' to paste as-is.",
+						"The pasted text contains escaped double quotes (\"\")." + Environment.NewLine + Environment.NewLine +
+						"Would you like to replace them with single double quotes (\")?" + Environment.NewLine + Environment.NewLine +
+						"Click 'Yes' to fix the expression, or 'No' to paste as-is.",
 						"Fix Escaped Double Quotes?",
 						MessageBoxButton.YesNo,
 						MessageBoxImage.Question,
