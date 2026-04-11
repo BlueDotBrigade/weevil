@@ -1103,6 +1103,8 @@
 		private void Refresh()
 		{
 			_engine.Filter.ReApply();
+			RefreshFilterResults();
+			RaiseResultsChanged();
 		}
 
 		private void AbortFilter()
