@@ -1958,11 +1958,12 @@
 			{
 				if (_engine.Selector.Selected.Count == 1)
 				{
-					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+					var selectedRecord = _engine.Selector.Selected.Single().Value;
+					var selectedLineNumber = selectedRecord.LineNumber;
 
-					// Calculate default bookmark name based on total count after creation
-					int currentCount = _engine.Bookmarks.Bookmarks.Length;
-					string defaultName = $"Bookmark{currentCount + 1}";
+					var defaultName = selectedRecord.HasCreationTime
+						? selectedRecord.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+						: "Bookmark";
 
 					// Prompt user for bookmark name with default
 					string bookmarkName = _dialogBox.ShowUserPrompt(
