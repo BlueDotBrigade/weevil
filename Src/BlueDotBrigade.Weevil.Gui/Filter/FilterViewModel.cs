@@ -456,12 +456,12 @@
 			{
 				var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 				ZipFile.ExtractToDirectory(sourceFilePath, tempFolder);
-				var files = Directory.GetFiles(tempFolder);
+				var files = Directory.GetFiles(tempFolder, "*", SearchOption.AllDirectories);
 
 				if (files.Length > 0)
 				{
-					var fileNames = files.Select(f => Path.GetFileName(f)).ToArray();
-					temporarySourceFileName = await ShowListOfCompressedFiles(fileNames);
+					var relativeNames = files.Select(f => Path.GetRelativePath(tempFolder, f)).ToArray();
+					temporarySourceFileName = await ShowListOfCompressedFiles(relativeNames);
 				}
 				if (!string.IsNullOrEmpty(temporarySourceFileName))
 				{
@@ -475,9 +475,9 @@
 			}
 			finally
 			{
-				if (isSourceFileCompressed && File.Exists(temporarySourceFileName))
+				if (isSourceFileCompressed && File.Exists(sourceFilePath))
 				{
-					File.Delete(temporarySourceFileName);
+					File.Delete(sourceFilePath);
 				}
 			}
 		}
