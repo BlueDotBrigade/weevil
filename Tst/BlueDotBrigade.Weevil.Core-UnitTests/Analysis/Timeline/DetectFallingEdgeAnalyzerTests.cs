@@ -76,5 +76,30 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             records[3].Metadata.Comment.Should().Contain("64.1 => 32.1");
             results.FlaggedRecords.Should().BeGreaterOrEqualTo(1);
         }
+
+        [TestMethod]
+        public void GivenFallingValuesWithIntegers_WhenAnalyzeRuns_ThenFirstLowerValueRecordIsFlagged()
+        {
+            var records = R.Create()
+                .WithContent("15:02:32.8257 64")
+                .WithContent("15:02:33.3308 64")
+                .WithContent("15:02:33.8373 32")
+                .WithContent("15:02:34.3489 16")
+                .WithContent("15:02:34.8520 16")
+                .GetRecords();
+
+            var analyzer = new DetectFallingEdgeAnalyzer(CreateFilterStrategy());
+            var userDialog = GetDialog(@"(?<Value>\d+)$");
+
+            Results results = analyzer.Analyze(
+                records,
+                string.Empty,
+                userDialog,
+                canUpdateMetadata: true);
+
+            records[2].Metadata.IsFlagged.Should().BeTrue();
+            records[2].Metadata.Comment.Should().Contain("64 => 32");
+            results.FlaggedRecords.Should().BeGreaterOrEqualTo(1);
+        }
     }
 }
