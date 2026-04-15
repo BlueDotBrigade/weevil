@@ -41,6 +41,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
@@ -66,11 +67,12 @@
             <RadioButton GroupName="Search Type" Content="Nearest Neighbor" IsChecked="True"/>
         </StackPanel>
         <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
-        <Button Grid.Row="2" Grid.Column="1" 
+        <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left">Hint: am/pm must be included for 12 hour timestamps.</TextBlock>
+        <Rectangle Grid.Row="3" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
+        <Button Grid.Row="3" Grid.Column="1" 
               Content="Ok"
               Click="OnOkClicked"  
               IsDefault="True"
               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
-        <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
     </Grid>
 </Window>
