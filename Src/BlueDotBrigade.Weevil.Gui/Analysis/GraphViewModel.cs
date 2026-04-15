@@ -7,6 +7,7 @@
 	using System.ComponentModel;
 	using System.Globalization;
 	using System.Linq;
+  using System.Text.RegularExpressions;
 	using System.Runtime.CompilerServices;
 	using System.Windows;
 	using System.Windows.Input;
@@ -33,8 +34,13 @@
 		private static readonly string DefaultYAxisLabel = "Y-Axis";
 		private static readonly string DefaultWindowTitle = "Graph";
 		private static readonly string FloatFormat = "0.000";
+     private static readonly string TwelveHourTimeFormat = "hh:mm:ss tt";
+		private static readonly string TwentyFourHourTimeFormat = "HH:mm:ss";
+		private static readonly string TwelveHourDateTimeFormat = "yyyy-MM-dd hh:mm:ss tt";
+		private static readonly string TwentyFourHourDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 		private static readonly int MaxSeriesCount = 4;
 		private static readonly string DefaultSeries2Suffix = " 2";
+		private static readonly Regex MeridiemRegex = new(@"\b(?:AM|PM)\b|\b(?:A\.?M\.?|P\.?M\.?)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		// Y-Axis position options for each series
 		public static readonly string YAxisLeft = "Left";
@@ -57,6 +63,7 @@
 			NumberStyles.AllowDecimalPoint;
 
 		private readonly ImmutableArray<IRecord> _records;
+		private readonly string _xAxisTimeFormat;
 
 		private IEnumerable<ISeries> _series;
 		private IEnumerable<ICartesianAxis> _xAxes;
@@ -85,6 +92,7 @@
 		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
 			_records = records;
+			_xAxisTimeFormat = GetXAxisTimeFormat(records);
 
 			this.WindowTitle = windowTitle ?? DefaultWindowTitle;
 			this.SourceFilePath = sourceFilePath ?? string.Empty;
@@ -425,7 +433,7 @@
 				new[] { this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name }, 
 				new[] { this.Series1Axis, this.Series2Axis, this.Series3Axis, this.Series4Axis });
 
-				this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth));
+                this.XAxes = GetXAxes(this.XAxisLabel, TimeSpan.FromSeconds(this.TooltipWidth), _xAxisTimeFormat);
 				
 				var seriesList = this.Series.ToList();
 				
@@ -508,14 +516,14 @@
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		private static IEnumerable<ICartesianAxis> GetXAxes(string name, TimeSpan unitWidth)
+        private static IEnumerable<ICartesianAxis> GetXAxes(string name, TimeSpan unitWidth, string labelFormat)
 		{
 			return new Axis[]
 			{
 				new Axis
 				{
 					Name = name ?? DefaultXAxisLabel,
-					Labeler = point => new DateTime((long)point).ToString("hh:mm:ss"),
+                  Labeler = point => new DateTime((long)point).ToString(labelFormat, CultureInfo.InvariantCulture),
 					LabelsRotation = 15,
 
 					//// in this case we want our columns with a width of 1 day, we can get that number
@@ -526,6 +534,49 @@
 					//MinStep = TimeSpan.FromSeconds(60).Ticks // mark
 				}
 			};
+		}
+
+		private static string GetXAxisTimeFormat(ImmutableArray<IRecord> records)
+		{
+			if (records.IsDefaultOrEmpty)
+			{
+				return TwentyFourHourTimeFormat;
+			}
+
+			bool usesMeridiem = records.Any(record =>
+				!string.IsNullOrWhiteSpace(record.Content) &&
+				MeridiemRegex.IsMatch(record.Content));
+
+			DateTime? earliest = null;
+			DateTime? latest = null;
+
+			foreach (var record in records)
+			{
+				if (!record.HasCreationTime)
+				{
+					continue;
+				}
+
+				var timestamp = record.CreatedAt;
+				if (earliest is null || timestamp < earliest.Value)
+				{
+					earliest = timestamp;
+				}
+
+				if (latest is null || timestamp > latest.Value)
+				{
+					latest = timestamp;
+				}
+			}
+
+			bool spansMultipleDays = earliest.HasValue && latest.HasValue && earliest.Value.Date != latest.Value.Date;
+
+			if (usesMeridiem)
+			{
+				return spansMultipleDays ? TwelveHourDateTimeFormat : TwelveHourTimeFormat;
+			}
+
+			return spansMultipleDays ? TwentyFourHourDateTimeFormat : TwentyFourHourTimeFormat;
 		}
 
 		private static IEnumerable<ICartesianAxis> GetYAxes(string name)
@@ -1130,4 +1181,3 @@
 		}
 	}
 }
-
