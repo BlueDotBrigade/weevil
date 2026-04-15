@@ -4,7 +4,6 @@
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             mc:Ignorable="d"
-            xmlns:dd="urn:gong-wpf-dragdrop"
             xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
             xmlns:system="clr-namespace:System;assembly=mscorlib"
@@ -112,7 +111,7 @@
         <KeyBinding Key="OemMinus" Modifiers="Ctrl+Shift" Command="{Binding GoToPreviousCommentCommand}" />
         <KeyBinding Key="OemPlus" Modifiers="Ctrl+Shift" Command="{Binding GoToNextCommentCommand}" />
     </UserControl.InputBindings>
-    <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
+    <Grid x:Name="WindowLayout" AllowDrop="True" DragOver="OnWindowLayoutDragOver" Drop="OnWindowLayoutDrop"
          FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
