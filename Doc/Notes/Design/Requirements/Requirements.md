@@ -28,4 +28,4 @@ Feature: Analysis
 
 REQUIREMENTS
 
-1. When displaying a graph, the software shall format each x-axis timestamp using the same clock format as the source records (12-hour with AM/PM or 24-hour). #730
+1. While an analysis graph is displayed, the software shall format each x-axis timestamp using the same clock format as the source records (12-hour with AM/PM or 24-hour). #730
