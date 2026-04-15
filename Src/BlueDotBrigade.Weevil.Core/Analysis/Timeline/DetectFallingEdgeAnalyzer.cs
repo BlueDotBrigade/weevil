@@ -9,6 +9,10 @@
 	using Filter;
 	using Filter.Expressions.Regular;
 
+	/// <summary>
+	/// Extracts numeric values via regex named capture groups and compares each to the previous value.
+	/// Flags records where the numeric value decreases compared to the preceding record.
+	/// </summary>
 	internal class DetectFallingEdgeAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
