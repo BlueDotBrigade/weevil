@@ -51,14 +51,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Series Metrics" 
-                       FontWeight="Bold" Margin="5,0,0,5" />
-            <Button Grid.Row="0" Grid.Column="1" Content="Copy All" 
-                    Command="{Binding CopyMetricsCommand}" 
-                    Margin="5,0,5,5"
-                    ToolTip="Copy metrics to clipboard as tab-delimited text" />
-            
-            <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+            <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                       ItemsSource="{Binding SeriesMetrics}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -71,14 +64,16 @@
                       VerticalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="" Width="24" CanUserResize="False" CanUserSort="False">
+                        <DataGridTemplateColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </DataGridTemplateColumn.CellStyle>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Rectangle Width="12" Height="12"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Rectangle.Fill>
-                                        <SolidColorBrush Color="{Binding SeriesColor}" />
-                                    </Rectangle.Fill>
-                                </Rectangle>
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Fill="{Binding SeriesBrush}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -93,6 +88,11 @@
                     <DataGridTextColumn Header="Range End" Binding="{Binding RangeEndFormatted}" Width="Auto" />
                 </DataGrid.Columns>
             </DataGrid>
+
+            <Button Grid.Row="1" Grid.Column="1" Content="Copy All" 
+                    Command="{Binding CopyMetricsCommand}" 
+                    Margin="5,0,5,5"
+                    ToolTip="Copy metrics to clipboard as tab-delimited text" />
         </Grid>
 
         <Expander Grid.Row="2" Grid.Column="0" ExpandDirection="Down" IsExpanded="False">
