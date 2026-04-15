@@ -76,5 +76,30 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             records[1].Metadata.Comment.Should().Contain("0.1 => 2.1");
             results.FlaggedRecords.Should().BeGreaterOrEqualTo(1);
         }
+
+        [TestMethod]
+        public void GivenRisingValuesWithIntegers_WhenAnalyzeRuns_ThenFirstHigherValueRecordIsFlagged()
+        {
+            var records = R.Create()
+                .WithContent("15:02:32.8257 0")
+                .WithContent("15:02:33.3308 2")
+                .WithContent("15:02:33.8373 4")
+                .WithContent("15:02:34.3489 8")
+                .WithContent("15:02:34.8520 8")
+                .GetRecords();
+
+            var analyzer = new DetectRisingEdgeAnalyzer(CreateFilterStrategy());
+            var userDialog = GetDialog(@"(?<Value>\d+)$");
+
+            Results results = analyzer.Analyze(
+                records,
+                string.Empty,
+                userDialog,
+                canUpdateMetadata: true);
+
+            records[1].Metadata.IsFlagged.Should().BeTrue();
+            records[1].Metadata.Comment.Should().Contain("0 => 2");
+            results.FlaggedRecords.Should().BeGreaterOrEqualTo(1);
+        }
     }
 }
