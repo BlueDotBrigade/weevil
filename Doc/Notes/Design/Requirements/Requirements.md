@@ -23,3 +23,9 @@ REQUIREMENTS
 
 For the most up-to-date documentation see:
 https://github.com/BlueDotBrigade/weevil/issues/413
+
+Feature: Analysis
+
+REQUIREMENTS
+
+1. When displaying a graph, the software shall format each x-axis timestamp using the same clock format as the source records (12-hour with AM/PM or 24-hour). #730
