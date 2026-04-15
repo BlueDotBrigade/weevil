@@ -179,6 +179,22 @@
 			}
 		}
 
+		private void OnWindowLayoutDragOver(object sender, DragEventArgs e)
+		{
+			if (this.ViewModel != null)
+			{
+				this.ViewModel.DragOver(e);
+			}
+		}
+
+		private void OnWindowLayoutDrop(object sender, DragEventArgs e)
+		{
+			if (this.ViewModel != null)
+			{
+				this.ViewModel.Drop(e);
+			}
+		}
+
 		private void OnGotFocus(object sender, RoutedEventArgs e)
 		{
 			if (sender == this.InclusiveFilter)

@@ -35,7 +35,6 @@
 	using BlueDotBrigade.Weevil.Reports;
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Utilities;
-	using GongSolutions.Wpf.DragDrop;
 	using Newtonsoft.Json.Linq;
 	using Metalama.Patterns.Observability;
 	using Directory = System.IO.Directory;
@@ -43,7 +42,7 @@
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
 	[Observable]
-	internal partial class FilterViewModel : IDropTarget
+	internal partial class FilterViewModel
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
 		const string RawFileName = "SelectedRecords.log";
@@ -867,14 +866,14 @@
 			}
 		}
 
-		public void DragOver(IDropInfo dropInfo)
+		public void DragOver(DragEventArgs e)
 		{
-			_dragAndDrop.Drag(dropInfo);
+			_dragAndDrop.DragOver(e);
 		}
 
-		public void Drop(IDropInfo dropInfo)
+		public void Drop(DragEventArgs e)
 		{
-			_dragAndDrop.Drop(dropInfo);
+			_dragAndDrop.Drop(e);
 		}
 
 		public void Exit()
