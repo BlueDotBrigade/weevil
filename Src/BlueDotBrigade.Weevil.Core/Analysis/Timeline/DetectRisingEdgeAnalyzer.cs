@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+      using System.Globalization;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
@@ -101,8 +102,8 @@
 									{
 										if (previous.ContainsKey(current.Key))
 										{
-											if (long.TryParse(previous[current.Key], out var previousValue) &&
-												long.TryParse(current.Value, out var currentValue))
+                                  if (decimal.TryParse(previous[current.Key], NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
+										decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
 											{
 												if (currentValue > previousValue)
 												{
@@ -143,4 +144,3 @@
 		}
 	}
 }
-
