@@ -10,7 +10,8 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 
 ## Test Frameworks
 
-- **Unit tests**: Use MSTest (`[TestClass]`, `[TestMethod]`) with FluentAssertions or standard `Assert` methods.
+- **Unit tests**: Use MSTest (`[TestClass]`, `[TestMethod]`) and prefer `FluentAssertions` for assertions.
+- Avoid `Microsoft.VisualStudio.TestTools.UnitTesting.Assert` when an equivalent FluentAssertions expression exists.
 - **Feature/scenario tests**: Use the Reqnroll framework (BDD/Gherkin style) with `.feature` files and corresponding step definition classes.
 - Do not mix the two frameworks in the same test project.
 
@@ -36,13 +37,16 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Unit test method names follow the pattern: `GivenCondition_WhenAction_ThenExpectedResult`.
   - Example: `GivenEmptyCollection_WhenCalculateCalled_ThenReturnsNull`
 - Reqnroll scenario titles should read as plain English sentences describing expected behavior.
-- Test class names match the class under test with a `Test` suffix (e.g., `MeanCalculatorTest`).
+- Unit test class names must match the class under test with a `Tests` suffix (e.g., `MeanCalculatorTests`).
+- The unit test file name must match the unit test class name (for example: `MeanCalculatorTests.cs` contains `MeanCalculatorTests`).
 
 ## Test Data
 
 - Reusable test data lives in the `.Daten/` directory within each test project.
 - Use the `Daten` helper class to load test data: `new Daten().AsString()`.
 - Do not hardcode raw log strings inline; use test data files for maintainability.
+- When fake records are required, use `BlueDotBrigade.Weevil.TestTools.Data.R` to construct records with minimal visual noise.
+- Keep `[TestMethod]` bodies focused on intent; avoid verbose inline `new Record(...)` setup when `R` can express the same scenario.
 - The shared test context object is `Token`; its default configuration sets `IncludePinned` and `IncludeBookmarks` to `false`.
 
 ## Writing Tests

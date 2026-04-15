@@ -73,6 +73,8 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 - Place the bulk of feature tests in `Tst/BlueDotBrigade.Weevil.Core-FeatureTests`.
 - Add GUI feature tests only for genuine end-user journeys or UI-specific behavior.
 - Test method naming convention: `GivenCondition_WhenAction_ThenExpectedResult`.
+- For test code in Tst projects, use `BlueDotBrigade.Weevil.TestTools.Data.R` to create fake records to keep tests readable, and prefer `FluentAssertions` over `MSTest Assert` where equivalent assertions exist.
+- In Tst projects, unit test class names must use the `{ClassUnderTest}Tests` convention, and the .cs file name must match the test class name exactly.
 
 ## Global Coding Conventions
 
