@@ -918,18 +918,23 @@
 					var finalSeriesName = !string.IsNullOrEmpty(seriesNames[i]) 
 						? seriesNames[i] 
 						: $"{DefaultSeriesName} {i + 1}";
-					
+
 					// Determine which axis this series should be on
 					// Left = axis 0, Right = axis 1
 					int axisIndex = seriesAxes[i] == YAxisRight ? 1 : 0;
-					
+
+					var color = SeriesColors[i];
+
 					seriesList.Add(new LineSeries<DateTimePoint>
 					{
 						Name = finalSeriesName,
 						Values = seriesValues[i],
 						GeometrySize = 10,
 						ScalesYAt = axisIndex,
-						Stroke = new SolidColorPaint(SeriesColors[i]),
+						Stroke = new SolidColorPaint(color),
+						Fill = new SolidColorPaint(color.WithAlpha(51)),
+						GeometryStroke = new SolidColorPaint(color),
+						GeometryFill = new SolidColorPaint(color),
 						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
 					});
 				}
@@ -1125,3 +1130,4 @@
 		}
 	}
 }
+

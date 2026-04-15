@@ -8,6 +8,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	using Data;
 	using Filter;
 
+	/// <summary>
+	/// Performs a binary match against each record and finds blocks of consecutive matching records.
+	/// Flags the first and last record of each block of two or more consecutive matches.
+	/// </summary>
 	internal class DetectRepeatingRecordsAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;

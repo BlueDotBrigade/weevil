@@ -8,6 +8,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         using Filter;
         using Filter.Expressions.Regular;
 
+        /// <summary>
+        /// Extracts values via regex named capture groups and tracks each key independently over time.
+        /// Flags the start and end record of consecutive records that share the same extracted value.
+        /// When the value changes or disappears, the current stable run is finalized and a new run begins.
+        /// </summary>
         internal class StableValueAnalyzer : IRecordAnalyzer
         {
                 private readonly FilterStrategy _filterStrategy;
@@ -192,3 +197,4 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 }
         }
 }
+

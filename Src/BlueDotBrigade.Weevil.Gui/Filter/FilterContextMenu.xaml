@@ -15,7 +15,14 @@
                        Value="{Binding Path=CommandParameter}"/>
     </Style>
 
-    <!-- Style for detection menu items with 2-column layout -->
+    <!-- 
+      Style for detection menu items with 2-column layout.
+      Each MenuItem.Tag holds a 6-character mnemonic displayed in Courier New:
+        Uppercase (A, B) = flagged record
+        lowercase (a, b) = unflagged participant in the pattern
+        hyphen (-)       = record not part of the detected pattern
+      Same letter = same value/match; different letter = different value.
+    -->
     <Style x:Key="DetectionMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MaterialDesignMenuItem}">
         <Setter Property="HeaderTemplate">
             <Setter.Value>
@@ -121,7 +128,9 @@
             <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
             <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
         </MenuItem>
-        <MenuItem Header="Analyze">
+        <Separator/>
+        <MenuItem Header="ANALYSIS" IsEnabled="False" FontWeight="Bold"/>
+        <MenuItem Header="General">
             <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
             <MenuItem Header="Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
             <Separator />
@@ -129,49 +138,53 @@
             <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
             <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
             <Separator/>
+            <MenuItem Header="Annotate Records"
+                                      Command="{Binding DetectDataCommand}"
+                                      InputGestureText="F8"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+            <Separator/>
+            <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
+            <Separator/>
             <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
-            <Separator/>
-            <MenuItem Header="Detect Stable Values" 
-                                  Command="{Binding DetectStableValuesCommand}" 
-                                  InputGestureText="F6" 
-                                  Tag="??????"
-                                  Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Detect First" 
-                                  Command="{Binding DetectFirstCommand}" 
-                                  InputGestureText="F7"
-                                  Tag="Aaaaaa"
-                                  Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Detect Data" 
-                                  Command="{Binding DetectDataCommand}" 
-                                  InputGestureText="F8"
-                                  Tag="ABCDEF"
-                                  Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Detect Data Changes" 
-                                  Command="{Binding DetectDataTransitionsCommand}" 
-                                  InputGestureText="F9"
-                                  Tag="AaaBbb"
-                                  Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Detect Rising Edges" 
-                                  Command="{Binding DataTransitionsRisingEdgeCommand}"
-                                  Tag="AbcAbc"
-                                  Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Detect Falling Edges" 
-                                  Command="{Binding DataTransitionsFallingEdgeCommand}"
-                                  Tag="abCabC"
-                                  Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Detect Repeating Records" 
-                                  Command="{Binding DetectRepeatingRecordsCommand}"
-                                  Tag="AaaaaA"
-                                  Style="{StaticResource DetectionMenuItemStyle}"/>
-            <Separator/>
+        </MenuItem>
+        <MenuItem Header="Event Detection">
+            <MenuItem Header="First Occurrence"
+                                      Command="{Binding DetectFirstCommand}"
+                                      InputGestureText="F7"
+                                      Tag="A--B--"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Transitions"
+                                      Command="{Binding DetectDataTransitionsCommand}"
+                                      InputGestureText="F9"
+                                      Tag="AaaBbb"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Rising Edges"
+                                      Command="{Binding DataTransitionsRisingEdgeCommand}"
+                                      Tag="AbcAbc"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Falling Edges"
+                                      Command="{Binding DataTransitionsFallingEdgeCommand}"
+                                      Tag="abCabC"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Repeating Records"
+                                      Command="{Binding DetectRepeatingRecordsCommand}"
+                                      Tag="-AaaA-"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+        </MenuItem>
+        <MenuItem Header="Temporal Analysis">
+            <MenuItem Header="Temporal Anomalies"
+                                      Command="{Binding DetectTemporalAnomalyCommand}"/>
             <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
             <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-            <MenuItem Header="Detect Temporal Anomaly" 
-                                  Command="{Binding DetectTemporalAnomalyCommand}"/>
-            <Separator />
-            <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
         </MenuItem>
-        <MenuItem Header="Analyze More..."
+        <MenuItem Header="Trend Analysis">
+            <MenuItem Header="Detect Stability"
+                                      Command="{Binding DetectStableValuesCommand}"
+                                      InputGestureText="F6"
+                                      Tag="AaABbB"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+        </MenuItem>
+        <MenuItem Header="Domain Specific Analysis"
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
                               ItemContainerStyle="{StaticResource CommandMenuItemStyle}">
             <MenuItem.Style>

@@ -1,5 +1,7 @@
 namespace BlueDotBrigade.Weevil.Math
 {
+	using MathNet.Numerics.Statistics;
+
 	public sealed class MedianCalculator : ICalculator
 	{
 		public string Name => "Median";
@@ -10,12 +12,7 @@ namespace BlueDotBrigade.Weevil.Math
 		{
 			if (values.Count == 0) return null;
 
-			var sorted = values.OrderBy(v => v).ToArray();
-			var mid = sorted.Length / 2;
-
-			var median = (sorted.Length % 2 == 0)
-				? (sorted[mid - 1] + sorted[mid]) / 2.0
-				: sorted[mid];
+			var median = values.Median();
 
 			return System.Math.Round(median, 3);
 		}

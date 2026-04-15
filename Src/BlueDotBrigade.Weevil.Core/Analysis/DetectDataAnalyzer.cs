@@ -7,6 +7,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using Filter;
 	using Filter.Expressions.Regular;
 
+	/// <summary>
+	/// Extracts key-value pairs from every record using regex named capture groups,
+	/// flagging each matching record and annotating it with the extracted values.
+	/// </summary>
 	internal class DetectDataAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
@@ -114,3 +118,4 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 	}
 }
+
