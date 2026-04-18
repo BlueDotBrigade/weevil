@@ -56,8 +56,10 @@ Capture only:
 - `ActiveDurationSeconds`
 - `IdleDurationSeconds`
 - `LogFileSizeBytes`
-- `CpuModel`
 - `InstalledRamMb`
+- `FiltersAppliedCount`
+- `GraphOpenedCount`
+- `DashboardOpenedCount`
 - `SchemaVersion`
 
 ### 2.3 Lifecycle rules
@@ -103,11 +105,28 @@ Why this is still non-brittle:
 7. Unit/functional coverage for lifecycle and triggers.
 
 ## Phase 2 (later)
-1. Add feature usage counters (high-value only).
+1. Add richer feature usage counters (high-value only).
 2. Add exception/performance metrics.
 3. Add bounded local persistence for unsent payloads.
 4. Add retry/backoff/batching.
 5. Add simple dashboards and weekly review KPIs.
+
+### Phase 2 target schema (high-level)
+Use a two-level model:
+- `Session`
+  - `SessionId`, `AppType`, `SessionStartUtc`, `SessionEndUtc`
+  - `ActiveDurationSeconds`, `IdleDurationSeconds`
+  - `InstalledRamMb`, `LogFileSizeBytes`
+  - summary counters (filter/analyzer/dashboard/graph usage)
+- `SessionEvent[]`
+  - `EventType` (e.g., `FilterApplied`, `AnalyzerRun`, `GraphOpened`, `DashboardOpened`)
+  - `TimestampUtc`
+  - `ExecutionDurationMs` (when applicable)
+  - event-specific safe metadata (no PII)
+
+Notes:
+- CPU model/CPU telemetry is intentionally excluded from all phases.
+- Keep schema additive so Phase 1 sessions map naturally into Phase 2 without migration complexity.
 
 ---
 
