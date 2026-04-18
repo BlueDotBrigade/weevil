@@ -1,7 +1,7 @@
 namespace BlueDotBrigade.Weevil.IO
 {
-	using System;
 	using System.Text.Json;
+	using FluentAssertions;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -18,7 +18,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Hello", doc.RootElement.GetProperty("text").GetString());
+			doc.RootElement.GetProperty("text").GetString().Should().Be("Hello");
 		}
 
 		[TestMethod]
@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Title", doc.RootElement.GetProperty("heading").GetString());
+			doc.RootElement.GetProperty("heading").GetString().Should().Be("Title");
 		}
 
 		[TestMethod]
@@ -46,7 +46,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Summary", doc.RootElement.GetProperty("subHeading").GetString());
+			doc.RootElement.GetProperty("subHeading").GetString().Should().Be("Summary");
 		}
 
 		[TestMethod]
@@ -60,7 +60,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Item", doc.RootElement.GetProperty("bullet").GetString());
+			doc.RootElement.GetProperty("bullet").GetString().Should().Be("Item");
 		}
 
 		[TestMethod]
@@ -75,12 +75,12 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc1 = JsonDocument.Parse(first);
-			Assert.AreEqual(1, doc1.RootElement.GetProperty("number").GetInt32());
-			Assert.AreEqual("First", doc1.RootElement.GetProperty("text").GetString());
+			doc1.RootElement.GetProperty("number").GetInt32().Should().Be(1);
+			doc1.RootElement.GetProperty("text").GetString().Should().Be("First");
 
 			using var doc2 = JsonDocument.Parse(second);
-			Assert.AreEqual(2, doc2.RootElement.GetProperty("number").GetInt32());
-			Assert.AreEqual("Second", doc2.RootElement.GetProperty("text").GetString());
+			doc2.RootElement.GetProperty("number").GetInt32().Should().Be(2);
+			doc2.RootElement.GetProperty("text").GetString().Should().Be("Second");
 		}
 
 		[TestMethod]
@@ -94,7 +94,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Something failed", doc.RootElement.GetProperty("error").GetString());
+			doc.RootElement.GetProperty("error").GetString().Should().Be("Something failed");
 		}
 
 		[TestMethod]
@@ -109,9 +109,9 @@ namespace BlueDotBrigade.Weevil.IO
 			// Assert
 			using var doc = JsonDocument.Parse(result);
 			var headers = doc.RootElement.GetProperty("headers");
-			Assert.AreEqual(2, headers.GetArrayLength());
-			Assert.AreEqual("Name", headers[0].GetString());
-			Assert.AreEqual("Age", headers[1].GetString());
+			headers.GetArrayLength().Should().Be(2);
+			headers[0].GetString().Should().Be("Name");
+			headers[1].GetString().Should().Be("Age");
 		}
 
 		[TestMethod]
@@ -126,9 +126,9 @@ namespace BlueDotBrigade.Weevil.IO
 			// Assert
 			using var doc = JsonDocument.Parse(result);
 			var row = doc.RootElement.GetProperty("row");
-			Assert.AreEqual(2, row.GetArrayLength());
-			Assert.AreEqual("Alice", row[0].GetString());
-			Assert.AreEqual("30", row[1].GetString());
+			row.GetArrayLength().Should().Be(2);
+			row[0].GetString().Should().Be("Alice");
+			row[1].GetString().Should().Be("30");
 		}
 
 		[TestMethod]
@@ -149,13 +149,13 @@ namespace BlueDotBrigade.Weevil.IO
 			// Assert
 			using var doc = JsonDocument.Parse(result);
 			var headersElement = doc.RootElement.GetProperty("headers");
-			Assert.AreEqual(3, headersElement.GetArrayLength());
-			Assert.AreEqual("Name", headersElement[0].GetString());
+			headersElement.GetArrayLength().Should().Be(3);
+			headersElement[0].GetString().Should().Be("Name");
 
 			var rowsElement = doc.RootElement.GetProperty("rows");
-			Assert.AreEqual(2, rowsElement.GetArrayLength());
-			Assert.AreEqual("Alice", rowsElement[0][0].GetString());
-			Assert.AreEqual("Los Angeles", rowsElement[1][2].GetString());
+			rowsElement.GetArrayLength().Should().Be(2);
+			rowsElement[0][0].GetString().Should().Be("Alice");
+			rowsElement[1][2].GetString().Should().Be("Los Angeles");
 		}
 
 		[TestMethod]
@@ -171,11 +171,8 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			var headersElement = doc.RootElement.GetProperty("headers");
-			Assert.AreEqual(2, headersElement.GetArrayLength());
-
-			var rowsElement = doc.RootElement.GetProperty("rows");
-			Assert.AreEqual(0, rowsElement.GetArrayLength());
+			doc.RootElement.GetProperty("headers").GetArrayLength().Should().Be(2);
+			doc.RootElement.GetProperty("rows").GetArrayLength().Should().Be(0);
 		}
 
 		[TestMethod]
@@ -192,7 +189,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual(1, doc.RootElement.GetProperty("number").GetInt32());
+			doc.RootElement.GetProperty("number").GetInt32().Should().Be(1);
 		}
 
 		[TestMethod]
@@ -206,7 +203,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Line1\nLine2\tTabbed \"quoted\"", doc.RootElement.GetProperty("text").GetString());
+			doc.RootElement.GetProperty("text").GetString().Should().Be("Line1\nLine2\tTabbed \"quoted\"");
 		}
 	}
 }
