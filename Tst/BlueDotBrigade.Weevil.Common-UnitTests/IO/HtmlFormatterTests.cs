@@ -7,6 +7,36 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 public class HtmlFormatterTests
 {
 [TestMethod]
+public void GivenMessage_WhenAsSubHeadingCalled_ThenReturnsHtmlSubHeading()
+{
+// Arrange
+var formatter = new HtmlFormatter();
+
+// Act
+var result = formatter.AsSubHeading("Summary");
+
+// Assert
+Assert.AreEqual("<h2>Summary</h2>", result);
+}
+
+[TestMethod]
+public void GivenColumns_WhenAsTableHeaderAndAsTableRowCalled_ThenReturnsHtmlFragments()
+{
+// Arrange
+var formatter = new HtmlFormatter();
+
+// Act
+var header = formatter.AsTableHeader(new[] { "Name", "Age" });
+var row = formatter.AsTableRow(new[] { "Alice", "30" });
+
+// Assert
+Assert.IsTrue(header.Contains("<thead>"));
+Assert.IsTrue(header.Contains("<th>Name</th>"));
+Assert.IsTrue(header.Contains("<th>Age</th>"));
+Assert.AreEqual("    <tr>" + Environment.NewLine + "      <td>Alice</td>" + Environment.NewLine + "      <td>30</td>" + Environment.NewLine + "    </tr>", row);
+}
+
+[TestMethod]
 public void AsTable_WithValidData_ShouldGenerateHtmlTable()
 {
 // Arrange

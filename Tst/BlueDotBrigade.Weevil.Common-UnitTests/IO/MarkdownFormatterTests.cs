@@ -7,6 +7,37 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 public class MarkdownFormatterTests
 {
 [TestMethod]
+public void GivenMessage_WhenAsSubHeadingCalled_ThenReturnsMarkdownSubHeading()
+{
+// Arrange
+var formatter = new MarkdownFormatter();
+
+// Act
+var result = formatter.AsSubHeading("Summary");
+
+// Assert
+Assert.AreEqual("## Summary", result);
+}
+
+[TestMethod]
+public void GivenColumns_WhenAsTableHeaderAndAsTableRowCalled_ThenReturnsMarkdownRows()
+{
+// Arrange
+var formatter = new MarkdownFormatter();
+
+// Act
+var header = formatter.AsTableHeader(new[] { "Name", "Age" });
+var row = formatter.AsTableRow(new[] { "Alice", "30" });
+var lines = header.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+// Assert
+Assert.AreEqual(2, lines.Length);
+Assert.AreEqual("| Name | Age |", lines[0]);
+Assert.AreEqual("| --- | --- |", lines[1]);
+Assert.AreEqual("| Alice | 30 |", row);
+}
+
+[TestMethod]
 public void AsTable_WithValidData_ShouldGenerateMarkdownTable()
 {
 // Arrange

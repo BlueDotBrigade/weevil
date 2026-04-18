@@ -38,6 +38,40 @@ namespace BlueDotBrigade.Weevil.IO
 				writer.Messages.ToArray());
 		}
 
+		[TestMethod]
+		public void GivenNumberingResetOperation_WhenWriteSubHeadingThenWriteNumberedCalled_ThenNumberingRestartsFromOne()
+		{
+			var formatter = new TrackingFormatter();
+			var writer = new RecordingWriter();
+
+			OutputWriterContext.Configure(formatter, writer);
+
+			OutputWriterContext.WriteNumbered("first");
+			OutputWriterContext.WriteSubHeading("sub-heading");
+			OutputWriterContext.WriteNumbered("after-sub-heading");
+
+			CollectionAssert.AreEqual(
+				new[] { "N1:first", "SH:sub-heading", "N1:after-sub-heading" },
+				writer.Messages.ToArray());
+		}
+
+		[TestMethod]
+		public void GivenTableHeaderOperation_WhenWriteTableHeaderThenWriteNumberedCalled_ThenNumberingRestartsFromOne()
+		{
+			var formatter = new TrackingFormatter();
+			var writer = new RecordingWriter();
+
+			OutputWriterContext.Configure(formatter, writer);
+
+			OutputWriterContext.WriteNumbered("first");
+			OutputWriterContext.WriteTableHeader(new[] { "A" });
+			OutputWriterContext.WriteNumbered("after-table-header");
+
+			CollectionAssert.AreEqual(
+				new[] { "N1:first", "TH:A", "N1:after-table-header" },
+				writer.Messages.ToArray());
+		}
+
 		private sealed class RecordingWriter : IOutputWriter
 		{
 			public List<string> Messages { get; } = new();
@@ -54,9 +88,12 @@ namespace BlueDotBrigade.Weevil.IO
 
 			public string AsText(string message) => $"T:{message}";
 			public string AsHeading(string message) => $"H:{message}";
+			public string AsSubHeading(string message) => $"SH:{message}";
 			public string AsBullet(string message) => $"B:{message}";
 			public string AsNumbered(string message) => $"N{_counter++}:{message}";
 			public string AsError(string message) => $"E:{message}";
+			public string AsTableHeader(string[] headers) => $"TH:{string.Join(",", headers)}";
+			public string AsTableRow(string[] columns) => $"TR:{string.Join(",", columns)}";
 			public string AsTable(string[] headers, string[][] rows) => string.Empty;
 
 			public void ResetNumbering()

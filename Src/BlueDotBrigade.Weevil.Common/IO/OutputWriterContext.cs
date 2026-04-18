@@ -27,6 +27,12 @@ namespace BlueDotBrigade.Weevil.IO
 			_outputWriter.WriteLine(_outputFormatter.AsHeading(message));
 		}
 
+		public static void WriteSubHeading(string message)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(_outputFormatter.AsSubHeading(message));
+		}
+
 		public static void WriteBullet(string message)
 		{
 			_outputFormatter.ResetNumbering();
@@ -42,6 +48,23 @@ namespace BlueDotBrigade.Weevil.IO
 		{
 			_outputFormatter.ResetNumbering();
 			_outputWriter.WriteLine(_outputFormatter.AsError(message));
+		}
+
+		public static void WriteTableHeader(string[] headers)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(_outputFormatter.AsTableHeader(headers));
+		}
+
+		public static void WriteTableRow(string[] columns)
+		{
+			_outputWriter.WriteLine(_outputFormatter.AsTableRow(columns));
+		}
+
+		public static void WriteTable(string[] headers, string[][] rows)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(_outputFormatter.AsTable(headers, rows));
 		}
 	}
 }
