@@ -272,5 +272,20 @@ namespace BlueDotBrigade.Weevil.IO
 			// Assert
 			result.Should().Contain("x &lt; 10 &amp; y &gt; 5");
 		}
+
+		[TestMethod]
+		public void GivenOpenTable_WhenAsNumberedCalled_ThenTableElementIsClosed()
+		{
+			// Arrange
+			var formatter = new XmlFormatter();
+			formatter.AsTableHeader(new[] { "Col1" });
+
+			// Act
+			var result = formatter.AsNumbered("item one");
+
+			// Assert
+			result.Should().StartWith("</table>");
+			result.Should().Contain("<item number=\"1\">item one</item>");
+		}
 	}
 }

@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public string AsHeading(string message) => CloseTableIfOpen() + $"<heading>{SecurityElement.Escape(message)}</heading>";
 		public string AsSubHeading(string message) => CloseTableIfOpen() + $"<subheading>{SecurityElement.Escape(message)}</subheading>";
 		public string AsBullet(string message) => CloseTableIfOpen() + $"<item>{SecurityElement.Escape(message)}</item>";
-		public string AsNumbered(string message) => $"<item number=\"{_numberedItemCounter++}\">{SecurityElement.Escape(message)}</item>";
+		public string AsNumbered(string message) => CloseTableIfOpen() + $"<item number=\"{_numberedItemCounter++}\">{SecurityElement.Escape(message)}</item>";
 		public string AsError(string message) => CloseTableIfOpen() + $"<error>{SecurityElement.Escape(message)}</error>";
 
 		public string AsTableHeader(string[] headers)
