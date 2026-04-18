@@ -1,6 +1,7 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
 	xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util"
-	xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
+	xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx"
+	xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 	
 	<Package Name="Weevil" Language="1033" Version="2.12.0" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079" InstallerVersion="200">
 		<SummaryInformation Manufacturer="Blue Dot Brigade" Description="Weevil" />
@@ -9,6 +10,9 @@
 		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
 		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
 		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
+		<Property Id="TELEMETRYENABLED" Value="1" />
+		<WixVariable Id="WixUILicenseRtf" Value="License-Installation.rtf" />
+		<ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
 
 		<!-- Check installed .NET Core Runtime on the target computer. -->
 		<netfx:DotNetCompatibilityCheck Id="netCoreStatus"
@@ -55,9 +59,25 @@
 			<Component Id="RegistryComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F83E">
 				<RegistryKey Root="HKCU" Key="Software\BlueDotBrigade\Weevil">
 					<RegistryValue Type="string" Name="EnableBetaFeatures" Value="True" />
+					<RegistryValue Type="integer" Name="TelemetryEnabled" Value="[TELEMETRYENABLED]" />
 				</RegistryKey>
 			</Component>
 		</ComponentGroup>
+	</Fragment>
+	<Fragment>
+		<UI>
+			<DialogRef Id="InstallDirDlg" />
+			<Control
+				Id="TelemetryEnabledCheckbox"
+				Type="CheckBox"
+				X="20"
+				Y="200"
+				Width="320"
+				Height="32"
+				Property="TELEMETRYENABLED"
+				CheckBoxValue="1"
+				Text="We collect anonymous usage data to improve the application. No personal identifying information will be collected." />
+		</UI>
 	</Fragment>
 	<Fragment>
 		<DirectoryRef Id="WeevilShortcutDir">

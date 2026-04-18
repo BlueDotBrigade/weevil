@@ -105,6 +105,9 @@
 				Log.Default.Write(
 					LogSeverityType.Information,
 					"Weevil application is starting...");
+				
+				var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
+				Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
 
 				Log.Default.Write(LogSeverityType.Debug,
 					$"The logging library has been registered. Type={nameof(NLogWriter)}");
