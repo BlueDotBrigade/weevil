@@ -20,7 +20,7 @@ namespace BlueDotBrigade.Weevil
 		/// <summary>
 		/// Application version for the session.
 		/// </summary>
-		public string Version { get; set; } = string.Empty;
+		public Version Version { get; set; } = new Version(0, 0);
 
 		/// <summary>
 		/// UTC timestamp when the session began.
