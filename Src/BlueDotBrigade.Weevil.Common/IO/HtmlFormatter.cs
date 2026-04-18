@@ -12,6 +12,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public string AsBullet(string message) => $"<li>{message}</li>";
 		public string AsNumbered(string message) => $"<li>{_numberedItemCounter++}. {message}</li>";
 		public string AsError(string message) => $"<span style='color:red;'>ERROR: {message}</span>";
+		public string AsWarning(string message) => $"<span style='color:orange;'>WARNING: {message}</span>";
 		public string AsTableHeader(string[] headers)
 		{
 			var lines = new System.Collections.Generic.List<string>

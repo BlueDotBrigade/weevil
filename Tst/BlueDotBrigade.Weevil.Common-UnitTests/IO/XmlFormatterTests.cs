@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
+	using System.Xml.Linq;
 	using FluentAssertions;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -17,7 +18,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsText("hello world");
 
 			// Assert
-			result.Should().Be("<text>hello world</text>");
+			result.Should().Be("<Text>hello world</Text>");
 		}
 
 		[TestMethod]
@@ -30,7 +31,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsHeading("Summary");
 
 			// Assert
-			result.Should().Be("<heading>Summary</heading>");
+			result.Should().Be("<Heading>Summary</Heading>");
 		}
 
 		[TestMethod]
@@ -43,7 +44,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsSubHeading("Details");
 
 			// Assert
-			result.Should().Be("<subheading>Details</subheading>");
+			result.Should().Be("<SubHeading>Details</SubHeading>");
 		}
 
 		[TestMethod]
@@ -56,7 +57,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsBullet("first item");
 
 			// Assert
-			result.Should().Be("<item>first item</item>");
+			result.Should().Be("<Item>first item</Item>");
 		}
 
 		[TestMethod]
@@ -69,7 +70,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsNumbered("step one");
 
 			// Assert
-			result.Should().Be("<item number=\"1\">step one</item>");
+			result.Should().Be("<Item Number=\"1\">step one</Item>");
 		}
 
 		[TestMethod]
@@ -83,8 +84,8 @@ namespace BlueDotBrigade.Weevil.IO
 			var second = formatter.AsNumbered("step two");
 
 			// Assert
-			first.Should().Be("<item number=\"1\">step one</item>");
-			second.Should().Be("<item number=\"2\">step two</item>");
+			first.Should().Be("<Item Number=\"1\">step one</Item>");
+			second.Should().Be("<Item Number=\"2\">step two</Item>");
 		}
 
 		[TestMethod]
@@ -97,7 +98,20 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsError("something failed");
 
 			// Assert
-			result.Should().Be("<error>something failed</error>");
+			result.Should().Be("<Error>something failed</Error>");
+		}
+
+		[TestMethod]
+		public void GivenMessage_WhenAsWarningCalled_ThenReturnsXmlWarningElement()
+		{
+			// Arrange
+			var formatter = new XmlFormatter();
+
+			// Act
+			var result = formatter.AsWarning("pay attention");
+
+			// Assert
+			result.Should().Be("<Warning>pay attention</Warning>");
 		}
 
 		[TestMethod]
@@ -110,7 +124,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsText("value < 5 & value > 3");
 
 			// Assert
-			result.Should().Be("<text>value &lt; 5 &amp; value &gt; 3</text>");
+			result.Should().Be("<Text>value &lt; 5 &amp; value &gt; 3</Text>");
 		}
 
 		[TestMethod]
@@ -123,15 +137,15 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsTableHeader(new[] { "Name", "Age" });
 
 			// Assert
-			result.Should().Contain("<table>");
-			result.Should().Contain("<columns>");
-			result.Should().Contain("<column>Name</column>");
-			result.Should().Contain("<column>Age</column>");
-			result.Should().Contain("</columns>");
+			result.Should().Contain("<Table>");
+			result.Should().Contain("<Columns>");
+			result.Should().Contain("<Name />");
+			result.Should().Contain("<Age />");
+			result.Should().Contain("</Columns>");
 		}
 
 		[TestMethod]
-		public void GivenColumns_WhenAsTableRowCalled_ThenReturnsXmlRowElement()
+		public void GivenColumns_WhenAsTableRowCalled_ThenReturnsXmlRowElementUsingFallbackColumnNames()
 		{
 			// Arrange
 			var formatter = new XmlFormatter();
@@ -140,10 +154,25 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsTableRow(new[] { "Alice", "30" });
 
 			// Assert
-			result.Should().Contain("<row>");
-			result.Should().Contain("<cell>Alice</cell>");
-			result.Should().Contain("<cell>30</cell>");
-			result.Should().Contain("</row>");
+			result.Should().Contain("<Row>");
+			result.Should().Contain("<Column1>Alice</Column1>");
+			result.Should().Contain("<Column2>30</Column2>");
+			result.Should().Contain("</Row>");
+		}
+
+		[TestMethod]
+		public void GivenColumnNamesWithSpecialCharacters_WhenAsTableHeaderThenAsTableRowCalled_ThenUsesSanitizedTitleCaseColumnElementNames()
+		{
+			// Arrange
+			var formatter = new XmlFormatter();
+			formatter.AsTableHeader(new[] { "first_name", "age-years" });
+
+			// Act
+			var result = formatter.AsTableRow(new[] { "Alice", "30" });
+
+			// Assert
+			result.Should().Contain("<FirstName>Alice</FirstName>");
+			result.Should().Contain("<AgeYears>30</AgeYears>");
 		}
 
 		[TestMethod]
@@ -177,8 +206,8 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsTable(headers, rows);
 
 			// Assert
-			result.Should().Contain("<table>");
-			result.Should().Contain("</table>");
+			result.Should().Contain("<Table>");
+			result.Should().Contain("</Table>");
 		}
 
 		[TestMethod]
@@ -197,16 +226,16 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsTable(headers, rows);
 
 			// Assert
-			result.Should().Contain("<columns>");
-			result.Should().Contain("<column>Name</column>");
-			result.Should().Contain("<column>Age</column>");
-			result.Should().Contain("<column>City</column>");
-			result.Should().Contain("</columns>");
-			result.Should().Contain("<rows>");
-			result.Should().Contain("<row>");
-			result.Should().Contain("<cell>Alice</cell>");
-			result.Should().Contain("<cell>Bob</cell>");
-			result.Should().Contain("</rows>");
+			result.Should().Contain("<Columns>");
+			result.Should().Contain("<Name />");
+			result.Should().Contain("<Age />");
+			result.Should().Contain("<City />");
+			result.Should().Contain("</Columns>");
+			result.Should().Contain("<Rows>");
+			result.Should().Contain("<Row>");
+			result.Should().Contain("<Name>Alice</Name>");
+			result.Should().Contain("<Name>Bob</Name>");
+			result.Should().Contain("</Rows>");
 		}
 
 		[TestMethod]
@@ -221,11 +250,11 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsTable(headers, rows);
 
 			// Assert
-			result.Should().Contain("<table>");
-			result.Should().Contain("<column>Name</column>");
-			result.Should().Contain("<column>Age</column>");
-			result.Should().Contain("<rows />");
-			result.Should().Contain("</table>");
+			result.Should().Contain("<Table>");
+			result.Should().Contain("<Name />");
+			result.Should().Contain("<Age />");
+			result.Should().Contain("<Rows />");
+			result.Should().Contain("</Table>");
 		}
 
 		[TestMethod]
@@ -239,8 +268,8 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsText("after table");
 
 			// Assert
-			result.Should().StartWith("</table>");
-			result.Should().Contain("<text>after table</text>");
+			result.Should().StartWith("</Table>");
+			result.Should().Contain("<Text>after table</Text>");
 		}
 
 		[TestMethod]
@@ -254,8 +283,23 @@ namespace BlueDotBrigade.Weevil.IO
 			var result = formatter.AsHeading("New Section");
 
 			// Assert
-			result.Should().StartWith("</table>");
-			result.Should().Contain("<heading>New Section</heading>");
+			result.Should().StartWith("</Table>");
+			result.Should().Contain("<Heading>New Section</Heading>");
+		}
+
+		[TestMethod]
+		public void GivenOpenTable_WhenAsNumberedCalled_ThenTableElementIsClosed()
+		{
+			// Arrange
+			var formatter = new XmlFormatter();
+			formatter.AsTableHeader(new[] { "Col1" });
+
+			// Act
+			var result = formatter.AsNumbered("step");
+
+			// Assert
+			result.Should().StartWith("</Table>");
+			result.Should().Contain("<Item Number=\"1\">step</Item>");
 		}
 
 		[TestMethod]
@@ -271,6 +315,22 @@ namespace BlueDotBrigade.Weevil.IO
 
 			// Assert
 			result.Should().Contain("x &lt; 10 &amp; y &gt; 5");
+		}
+
+		[TestMethod]
+		public void GivenTableOutput_WhenAsTableCalled_ThenXmlIsWellFormed()
+		{
+			// Arrange
+			var formatter = new XmlFormatter();
+			var headers = new[] { "Name", "Age" };
+			var rows = new[] { new[] { "Alice", "30" } };
+
+			// Act
+			var result = formatter.AsTable(headers, rows);
+
+			// Assert
+			Action parse = () => XDocument.Parse(result);
+			parse.Should().NotThrow();
 		}
 	}
 }

@@ -72,6 +72,23 @@ namespace BlueDotBrigade.Weevil.IO
 				writer.Messages.ToArray());
 		}
 
+		[TestMethod]
+		public void GivenNumberingResetOperation_WhenWriteWarningThenWriteNumberedCalled_ThenNumberingRestartsFromOne()
+		{
+			var formatter = new TrackingFormatter();
+			var writer = new RecordingWriter();
+
+			OutputWriterContext.Configure(formatter, writer);
+
+			OutputWriterContext.WriteNumbered("first");
+			OutputWriterContext.WriteWarning("warning");
+			OutputWriterContext.WriteNumbered("after-warning");
+
+			CollectionAssert.AreEqual(
+				new[] { "N1:first", "W:warning", "N1:after-warning" },
+				writer.Messages.ToArray());
+		}
+
 		private sealed class RecordingWriter : IOutputWriter
 		{
 			public List<string> Messages { get; } = new();
@@ -92,6 +109,7 @@ namespace BlueDotBrigade.Weevil.IO
 			public string AsBullet(string message) => $"B:{message}";
 			public string AsNumbered(string message) => $"N{_counter++}:{message}";
 			public string AsError(string message) => $"E:{message}";
+			public string AsWarning(string message) => $"W:{message}";
 			public string AsTableHeader(string[] headers) => $"TH:{string.Join(",", headers)}";
 			public string AsTableRow(string[] columns) => $"TR:{string.Join(",", columns)}";
 			public string AsTable(string[] headers, string[][] rows) => string.Empty;
