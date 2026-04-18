@@ -11,6 +11,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 	public sealed class XmlFormatter : IOutputFormatter
 	{
+		private static readonly Regex HeaderTokenRegex = new("[A-Za-z0-9]+", RegexOptions.Compiled);
 		private int _numberedItemCounter = 1;
 		private bool _isTableOpen;
 		private string[] _activeColumnNames = Array.Empty<string>();
@@ -19,9 +20,12 @@ namespace BlueDotBrigade.Weevil.IO
 		public string AsHeading(string message) => CloseTableIfOpen() + CreateElement("Heading", message);
 		public string AsSubHeading(string message) => CloseTableIfOpen() + CreateElement("SubHeading", message);
 		public string AsBullet(string message) => CloseTableIfOpen() + CreateElement("Item", message);
-		public string AsNumbered(string message) =>
-			CloseTableIfOpen() + new XElement("Item", new XAttribute("Number", _numberedItemCounter++), message ?? string.Empty)
-				.ToString(SaveOptions.DisableFormatting);
+		public string AsNumbered(string message)
+		{
+			return CloseTableIfOpen()
+				+ new XElement("Item", new XAttribute("Number", _numberedItemCounter++), message ?? string.Empty)
+					.ToString(SaveOptions.DisableFormatting);
+		}
 		public string AsError(string message) => CloseTableIfOpen() + CreateElement("Error", message);
 		public string AsWarning(string message) => CloseTableIfOpen() + CreateElement("Warning", message);
 
@@ -129,7 +133,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 		private static string ToTitleCaseIdentifier(string value, int ordinal)
 		{
-			var tokens = Regex.Matches(value ?? string.Empty, "[A-Za-z0-9]+")
+			var tokens = HeaderTokenRegex.Matches(value ?? string.Empty)
 				.Select(m => m.Value)
 				.Where(t => t.Length > 0)
 				.Select(ToTitleCaseToken)
@@ -158,7 +162,7 @@ namespace BlueDotBrigade.Weevil.IO
 			using var xmlWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings
 			{
 				Indent = true,
-				OmitXmlDeclaration = false,
+				OmitXmlDeclaration = false
 			});
 
 			document.WriteTo(xmlWriter);
