@@ -67,16 +67,18 @@
 	<Fragment>
 		<UI>
 			<DialogRef Id="InstallDirDlg" />
-			<Control
-				Id="TelemetryEnabledCheckbox"
-				Type="CheckBox"
-				X="20"
-				Y="200"
-				Width="320"
-				Height="32"
-				Property="TELEMETRYENABLED"
-				CheckBoxValue="1"
-				Text="We collect anonymous usage data to improve the application. No personal identifying information will be collected." />
+			<Dialog Id="InstallDirDlg">
+				<Control
+					Id="TelemetryEnabledCheckbox"
+					Type="CheckBox"
+					X="20"
+					Y="200"
+					Width="320"
+					Height="32"
+					Property="TELEMETRYENABLED"
+					CheckBoxValue="1"
+					Text="We collect anonymous usage data to improve the application. No personal identifying information will be collected." />
+			</Dialog>
 		</UI>
 	</Fragment>
 	<Fragment>
