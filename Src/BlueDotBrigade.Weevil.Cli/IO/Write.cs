@@ -10,6 +10,7 @@ namespace BlueDotBrigade.Weevil.Cli.IO
 		public static void Bullet(string message) => OutputWriterContext.WriteBullet(message);
 		public static void Numbered(string message) => OutputWriterContext.WriteNumbered(message);
 		public static void Error(string message) => OutputWriterContext.WriteError(message);
+		public static void Warning(string message) => OutputWriterContext.WriteWarning(message);
 		public static void TableHeader(string[] headers) => OutputWriterContext.WriteTableHeader(headers);
 		public static void TableRow(string[] columns) => OutputWriterContext.WriteTableRow(columns);
 		public static void Table(string[] headers, string[][] rows) => OutputWriterContext.WriteTable(headers, rows);
