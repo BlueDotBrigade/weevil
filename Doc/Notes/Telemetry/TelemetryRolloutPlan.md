@@ -75,6 +75,18 @@ Capture only:
 - Never block normal UX for telemetry.
 - Never crash app because telemetry failed.
 
+### 2.5 Activity detection strategy (simple + reliable)
+- Track activity using meaningful application actions, not low-level keyboard/mouse hooks.
+- Update `LastActivityUtc` on:
+  - CLI command execution,
+  - GUI filter execution,
+  - GUI navigation/selection actions,
+  - GUI record-interaction actions (bookmark/pin/comment),
+  - GUI dashboard open,
+  - GUI graph open.
+- Run a 60-second timer to convert elapsed active time into minute-level `SessionActiveMinutes`.
+- If inactivity is greater than 1 minute, treat that period as idle and exclude it from active duration.
+
 ---
 
 ## 3) Vendor strategy (avoid brittle coupling)
@@ -115,19 +127,20 @@ Why this is still non-brittle:
 
 ## 5) AI execution plan (Claude / GitHub Copilot)
 Use these PR slices exactly.
+The first five slices are the first five implementation sub-tasks for this issue.
 
-## PR-1: Contracts + null path
+## Sub-task 1 (PR-1): Contracts + null path
 - Add `ITelemetryClient`, `TelemetrySession`, `NullTelemetryClient`.
 - Add tests for disabled/no-op behavior.
 - No runtime behavior changes yet.
 
-## PR-2: Installer + config plumbing
+## Sub-task 2 (PR-2): Installer + config plumbing
 - Add WiX checkbox (default enabled).
 - Persist and load setting in CLI/GUI startup.
 - Required text:
   - “We collect anonymous usage data to improve the application. No personal identifying information will be collected.”
 
-## PR-3: Session lifecycle + idle accounting
+## Sub-task 3 (PR-3): Session lifecycle + idle accounting
 - Start on file open.
 - End previous on new file open.
 - Record meaningful activity:
@@ -135,13 +148,13 @@ Use these PR slices exactly.
   - GUI filter/navigation/record actions.
 - Exclude idle time.
 
-## PR-4: Upload triggers
+## Sub-task 4 (PR-4): Upload triggers
 - Async on rollover.
 - Sync best-effort on shutdown/crash.
 - Enforce exactly-once send per session.
 
-## PR-5: Provider adapter
-- Implement App Insights adapter (or chosen provider) behind interface.
+## Sub-task 5 (PR-5): Provider adapter (final Phase 1 step)
+- Implement the selected provider adapter behind `ITelemetryClient` after vendor decision.
 - Add timeout, cancellation, and failure isolation.
 
 ## PR-6: Hardening + docs
@@ -152,6 +165,16 @@ Use these PR slices exactly.
 ---
 
 ## 6) Test gates (must pass per PR)
+### Phase 1 test plan review (mapped to first five sub-tasks)
+- **Sub-task 1**: unit tests prove telemetry-disabled path is a strict no-op.
+- **Sub-task 2**: installer + runtime config tests verify opt-out fully disables telemetry in GUI and CLI.
+- **Sub-task 3**: lifecycle/idle tests verify:
+  - start/end triggers,
+  - active-time accumulation,
+  - inactivity periods over 1 minute are excluded.
+- **Sub-task 4**: upload tests verify async rollover send, sync shutdown/crash send, and exactly-once per ended session.
+- **Sub-task 5**: provider adapter tests verify timeout/cancellation handling and failure isolation without affecting user workflow.
+
 ### Functional
 - Opt-out disables all telemetry behavior.
 - Session start/end triggers are correct.
@@ -224,24 +247,35 @@ Planned additive fields (Phase 2+):
 ### A.2 `SessionFilterExecution` entity
 Purpose: support future filter analytics without widening the session entity excessively.
 
-Required in Phase 1:
+Introduced in Phase 2:
 - `SessionId`
 - `ExecutedAtUtc`
 - `ExecutedPeriodMinutes`
-
-Planned additive fields (Phase 2+):
 - `HasIncludeFilter`
 - `HasExcludeFilter`
 - `FilterOptions`
+- `ExecutionDurationMs`
 
 ### A.3 `SessionEvent` entity
 Introduced in Phase 2:
+- `EventId`
 - `SessionId`
-- `EventType` (e.g., `FilterApplied`, `AnalyzerRun`, `GraphOpened`, `DashboardOpened`)
+- `EventType` (e.g., `FilterApplied`, `AnalyzerRun`, `GraphOpened`, `DashboardOpened`, `RecordCommentAdded`)
+- `EventCategory` (`Filter`, `Analyzer`, `Navigation`, `UI`)
 - `TimestampUtc`
 - `ExecutionDurationMs` (when applicable)
 - event-specific safe metadata (no PII)
 
-### A.4 Guardrails
+### A.4 `SessionAnalyzerExecution` entity
+Introduced in Phase 2:
+- `SessionId`
+- `AnalyzerType`
+- `StartedAtUtc`
+- `CompletedAtUtc`
+- `ExecutionDurationMs`
+- `InputRecordCount`
+- `OutputMetricCount`
+
+### A.5 Guardrails
 - CPU model/CPU telemetry is excluded from all phases.
 - No PII in any entity.
