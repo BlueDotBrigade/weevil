@@ -22,6 +22,8 @@
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application has started.");
 			Log.Register(new NLogWriter());
 			Log.Default.Write($"Weevil console application is initializing... Arguments={Environment.GetCommandLineArgs().Length}");
+			var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
+			Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
 
 			var builder = CoconaApp.CreateBuilder();
 
