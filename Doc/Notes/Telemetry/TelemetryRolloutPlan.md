@@ -47,17 +47,18 @@ Implementations:
 - `NullTelemetryClient` (telemetry disabled/failsafe).
 - `AppInsightsTelemetryClient` (or selected provider).
 
-### 2.2 Session object (single payload per session)
+### 2.2 Phase 1 session payload (subset of Appendix A schema)
 Capture only:
 - `SessionId` (GUID)
-- `AppType` (`CLI` / `GUI`)
+- `Application` (`WeevilGui.exe` / `WeevilCli.exe`)
+- `Version` (Weevil version)
 - `SessionStartUtc`, `SessionEndUtc`
-- `EndReason` (`NewFile`, `Shutdown`, `Crash`)
-- `ActiveDurationSeconds`
-- `IdleDurationSeconds`
+- `SessionActiveMinutes`
 - `LogFileSizeBytes`
-- `CpuModel`
 - `InstalledRamMb`
+- `FilterExecutionCount`
+- `GraphOpenCount`
+- `DashboardOpenCount`
 - `SchemaVersion`
 
 ### 2.3 Lifecycle rules
@@ -97,13 +98,14 @@ Why this is still non-brittle:
 1. Installer opt-out (WiX), default enabled, explicit wording.
 2. Runtime setting loaded in CLI + GUI.
 3. Session manager + idle detection timer (60s cadence).
-4. Lifecycle hooks for start/end reasons.
+4. Lifecycle hooks for start/end triggers.
 5. Async send on rollover, sync send on shutdown/crash.
 6. Null client + provider adapter.
-7. Unit/functional coverage for lifecycle and triggers.
+7. Capture the Phase 1 telemetry subset defined in Appendix A.
+8. Unit/functional coverage for lifecycle and triggers.
 
 ## Phase 2 (later)
-1. Add feature usage counters (high-value only).
+1. Extend telemetry using the additive fields/entities defined in Appendix A.
 2. Add exception/performance metrics.
 3. Add bounded local persistence for unsent payloads.
 4. Add retry/backoff/batching.
@@ -152,8 +154,8 @@ Use these PR slices exactly.
 ## 6) Test gates (must pass per PR)
 ### Functional
 - Opt-out disables all telemetry behavior.
-- Session start/end reasons are correct.
-- CLI/GUI app type attribution is correct.
+- Session start/end triggers are correct.
+- Application attribution is correct (`WeevilGui.exe` / `WeevilCli.exe`).
 
 ### Idle logic
 - Idle threshold excludes inactive time.
@@ -194,3 +196,52 @@ Phase 1 is done when:
 - Session telemetry is captured accurately with idle exclusion.
 - Upload behavior matches lifecycle rules and is non-disruptive.
 - Failures in telemetry never affect core app functionality.
+
+---
+
+## Appendix A) Final/future telemetry schema (authoritative)
+Design goal: keep schema additive so Phase 1 writes a strict subset and Phase 2 extends without breaking compatibility.
+
+### A.1 `Session` entity
+Required in Phase 1:
+- `SessionId`
+- `Application` (`WeevilGui.exe` / `WeevilCli.exe`)
+- `Version`
+- `SessionStartUtc`
+- `SessionEndUtc`
+- `SessionActiveMinutes`
+- `LogFileSizeBytes`
+- `InstalledRamMb`
+- `FilterExecutionCount`
+- `GraphOpenCount`
+- `DashboardOpenCount`
+- `SchemaVersion`
+
+Planned additive fields (Phase 2+):
+- Exception and performance summary fields.
+- Additional high-value usage counters.
+
+### A.2 `SessionFilterExecution` entity
+Purpose: support future filter analytics without widening the session entity excessively.
+
+Required in Phase 1:
+- `SessionId`
+- `ExecutedAtUtc`
+- `ExecutedPeriodMinutes`
+
+Planned additive fields (Phase 2+):
+- `HasIncludeFilter`
+- `HasExcludeFilter`
+- `FilterOptions`
+
+### A.3 `SessionEvent` entity
+Introduced in Phase 2:
+- `SessionId`
+- `EventType` (e.g., `FilterApplied`, `AnalyzerRun`, `GraphOpened`, `DashboardOpened`)
+- `TimestampUtc`
+- `ExecutionDurationMs` (when applicable)
+- event-specific safe metadata (no PII)
+
+### A.4 Guardrails
+- CPU model/CPU telemetry is excluded from all phases.
+- No PII in any entity.
