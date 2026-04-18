@@ -53,9 +53,7 @@ Capture only:
 - `Application` (`WeevilGui.exe` / `WeevilCli.exe`)
 - `Version` (Weevil version)
 - `SessionStartUtc`, `SessionEndUtc`
-- `EndReason` (`NewFile`, `Shutdown`, `Crash`)
-- `ActivePeriodMinutes`
-- `IdlePeriodMinutes`
+- `SessionActiveMinutes`
 - `LogFileSizeBytes`
 - `InstalledRamMb`
 - `FilterExecutionCount`
@@ -100,7 +98,7 @@ Why this is still non-brittle:
 1. Installer opt-out (WiX), default enabled, explicit wording.
 2. Runtime setting loaded in CLI + GUI.
 3. Session manager + idle detection timer (60s cadence).
-4. Lifecycle hooks for start/end reasons.
+4. Lifecycle hooks for start/end triggers.
 5. Async send on rollover, sync send on shutdown/crash.
 6. Null client + provider adapter.
 7. Capture the Phase 1 telemetry subset defined in Appendix A.
@@ -156,7 +154,7 @@ Use these PR slices exactly.
 ## 6) Test gates (must pass per PR)
 ### Functional
 - Opt-out disables all telemetry behavior.
-- Session start/end reasons are correct.
+- Session start/end triggers are correct.
 - Application attribution is correct (`WeevilGui.exe` / `WeevilCli.exe`).
 
 ### Idle logic
@@ -211,9 +209,7 @@ Required in Phase 1:
 - `Version`
 - `SessionStartUtc`
 - `SessionEndUtc`
-- `EndReason`
-- `ActivePeriodMinutes`
-- `IdlePeriodMinutes`
+- `SessionActiveMinutes`
 - `LogFileSizeBytes`
 - `InstalledRamMb`
 - `FilterExecutionCount`
