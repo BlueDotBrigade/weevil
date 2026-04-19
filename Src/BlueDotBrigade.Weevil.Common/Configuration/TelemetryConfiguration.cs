@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil
+namespace BlueDotBrigade.Weevil.Configuration
 {
 	using System;
 	using System.IO;
@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil
 			return LoadIsEnabledFromRegistry();
 		}
 
-		internal static bool ParseEnabledValue(string rawValue)
+		private static bool ParseEnabledValue(string rawValue)
 		{
 			if (string.IsNullOrWhiteSpace(rawValue))
 			{

@@ -7,6 +7,7 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Threading;
+	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
