@@ -6,6 +6,7 @@
 	using System.IO;
 	using System.Threading.Tasks;
 	using Analysis;
+	using BlueDotBrigade.Weevil.Configuration;
 	using Cocona;
 	using Diagnostics;
 	using Filter;

@@ -77,7 +77,7 @@
 					Height="32"
 					Property="TELEMETRYENABLED"
 					CheckBoxValue="1"
-					Text="We collect anonymous usage data to improve the application. No personal identifying information will be collected." />
+					Text="Telemetry data is used to improve the application. No personal identifying information will be collected." />
 			</Dialog>
 		</UI>
 	</Fragment>
