@@ -6,6 +6,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 
 	using System.IO;
 	using System.Linq;
+	using System.Reflection;
 	using System.Text;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Analysis;
@@ -26,42 +27,55 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			Description = "Extracts key performance indicators (KPIs), and relevant metrics.")]
 		public void Insight(string logPath, bool verbose = false)
 		{
-			IEngine engine = Engine
-					.UsingPath(logPath)
-					.Open();
+			var telemetry = TelemetrySessionLifecycle.Shared;
+			var version = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
+			telemetry.StartSessionOnFileOpen("WeevilCli.exe", version, logPath);
 
-			var severityMetrics =  engine.Filter.GetMetrics();
-
-			var insights = engine.Analyzer.GetInsights();
-
-			if (verbose)
+			try
 			{
-				Write.Heading("Metrics");
+				telemetry.RecordCliCommandExecution();
 
-				Write.Text($"Total Records\t{engine.Metrics.RecordCount}");
-				Write.Text($"File Size\t{engine.Metrics.FileSize}");
+				IEngine engine = Engine
+						.UsingPath(logPath)
+						.Open();
 
-				foreach (var item in severityMetrics)
+				var severityMetrics =  engine.Filter.GetMetrics();
+
+				var insights = engine.Analyzer.GetInsights();
+
+				if (verbose)
 				{
-					Write.Text($"{item.Key}\t{item.Value}");
-				}
-			}else{
+					Write.Heading("Metrics");
+
+					Write.Text($"Total Records\t{engine.Metrics.RecordCount}");
+					Write.Text($"File Size\t{engine.Metrics.FileSize}");
+
+					foreach (var item in severityMetrics)
+					{
+						Write.Text($"{item.Key}\t{item.Value}");
+					}
+				}else{
 				
-				insights = insights.Where(x => x.IsAttentionRequired == true).ToImmutableArray();
-			}
-
-			Write.Heading("Insights");
-
-			if (insights.Length == 0)
-			{
-				Write.Text("No noteworthy insight was found.");
-			}
-			else
-			{
-				foreach(var insight in insights)
-				{
-					Write.Text($"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}");
+					insights = insights.Where(x => x.IsAttentionRequired == true).ToImmutableArray();
 				}
+
+				Write.Heading("Insights");
+
+				if (insights.Length == 0)
+				{
+					Write.Text("No noteworthy insight was found.");
+				}
+				else
+				{
+					foreach(var insight in insights)
+					{
+						Write.Text($"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}");
+					}
+				}
+			}
+			finally
+			{
+				telemetry.EndCurrentSession();
 			}
 		}
 	}
