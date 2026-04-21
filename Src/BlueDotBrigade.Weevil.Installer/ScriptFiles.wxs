@@ -1,6 +1,9 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 	<Fragment>
 		<DirectoryRef Id="InstallFolderBin">
+			<Component Id="CompressLogsComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8BE">
+				<File Id="CompressLogsFile" Source="$(var.ScriptsSrcPath)\Compress-Logs.ps1" KeyPath="yes" />
+			</Component>
 			<Component Id="SelectHttpErrorsComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F8AF">
 				<File Id="SelectHttpErrorsFile" Source="$(var.ScriptsSrcPath)\Select-HttpErrors.ps1" KeyPath="yes" />
 			</Component>
@@ -22,6 +25,7 @@
 
 	<Fragment>
 		<ComponentGroup Id="scripts_files">
+			<ComponentRef Id="CompressLogsComponent" />
 			<ComponentRef Id="SelectHttpErrorsComponent" />
 			<ComponentRef Id="SelectRecordsComponent" />
 			<ComponentRef Id="SplitFileComponent" />
