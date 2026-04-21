@@ -62,7 +62,7 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 ```
 
 > **Note:** The GUI project contains post-build scripts and must be built on Windows.
-> All projects using `InternalsVisibleTo` restrict it to DEBUG builds, so CI always uses `--configuration Debug`.
+> All projects using `InternalsVisibleTo` restrict it to DEBUG builds, so CI always uses `--configuration Debug`. If the build fails in this workspace, likely cause is a running Weevil instance; close any running Weevil instances before attempting a build.
 
 ## Testing Expectations
 
