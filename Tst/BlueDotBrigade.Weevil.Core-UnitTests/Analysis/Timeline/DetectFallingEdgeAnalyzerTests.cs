@@ -74,7 +74,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
             records[3].Metadata.IsFlagged.Should().BeTrue();
             records[3].Metadata.Comment.Should().Contain("64.1 => 32.1");
-            results.FlaggedRecords.Should().BeGreaterOrEqualTo(1);
+          records[0].Metadata.IsFlagged.Should().BeFalse();
+            records[1].Metadata.IsFlagged.Should().BeFalse();
+            records[2].Metadata.IsFlagged.Should().BeFalse();
+            records[4].Metadata.IsFlagged.Should().BeFalse();
+            records[5].Metadata.IsFlagged.Should().BeFalse();
+            records[6].Metadata.IsFlagged.Should().BeFalse();
+            results.FlaggedRecords.Should().Be(1);
         }
 
         [TestMethod]
@@ -99,7 +105,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
             records[2].Metadata.IsFlagged.Should().BeTrue();
             records[2].Metadata.Comment.Should().Contain("64 => 32");
-            results.FlaggedRecords.Should().BeGreaterOrEqualTo(1);
+          records[0].Metadata.IsFlagged.Should().BeFalse();
+            records[1].Metadata.IsFlagged.Should().BeFalse();
+            records[3].Metadata.IsFlagged.Should().BeFalse();
+            records[4].Metadata.IsFlagged.Should().BeFalse();
+            results.FlaggedRecords.Should().Be(1);
         }
     }
 }
