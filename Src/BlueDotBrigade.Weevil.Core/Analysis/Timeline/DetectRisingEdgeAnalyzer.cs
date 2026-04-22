@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
       using System.Globalization;
@@ -81,6 +80,7 @@
 			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
 			var previous = new Dictionary<string, string>();
+			var isInRisingRun = new Dictionary<string, bool>();
 
 			ImmutableArray<IRecord> sortedRecords = analysisOrder == AnalysisOrder.Ascending
 					? records
@@ -100,40 +100,34 @@
 								{
 									if (!string.IsNullOrWhiteSpace(current.Value))
 									{
-										if (previous.ContainsKey(current.Key))
-										{
-                                  if (decimal.TryParse(previous[current.Key], NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
+                                  if (previous.TryGetValue(current.Key, out var previousRaw) &&
+										decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
 										decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
-											{
-												if (currentValue > previousValue)
-												{
-													var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
+									{
+										var isRising = currentValue > previousValue;
+										var wasRising = isInRisingRun.TryGetValue(current.Key, out var priorState) && priorState;
 
-													count++;
-
-													AnalysisHelper.UpdateRecordMetadata(
-														record,
-														true,
-														$"{parameterName}: {previous[current.Key]} => {current.Value}",
-														canUpdateMetadata);
-												}
-												previous[current.Key] = current.Value;
-											}
-										}
-										else
+										if (isRising && !wasRising)
 										{
 											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
 											count++;
 
-													AnalysisHelper.UpdateRecordMetadata(
-														record,
-														true,
-														$"{parameterName}: {current.Value}",
-														canUpdateMetadata);
-											
-											previous.Add(current.Key, current.Value);
+											AnalysisHelper.UpdateRecordMetadata(
+												record,
+												true,
+												$"{parameterName}: {previousRaw} => {current.Value}",
+												canUpdateMetadata);
 										}
+
+										isInRisingRun[current.Key] = isRising;
+										previous[current.Key] = current.Value;
+									}
+									else
+									{
+										previous[current.Key] = current.Value;
+										isInRisingRun[current.Key] = false;
+									}
 									}
 								}
 							}
