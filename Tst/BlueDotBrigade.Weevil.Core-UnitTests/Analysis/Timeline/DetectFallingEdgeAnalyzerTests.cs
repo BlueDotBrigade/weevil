@@ -68,15 +68,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         {
             var expectedFlags = new HashSet<int>(flaggedIndices);
 
-            records[3].Metadata.IsFlagged.Should().BeTrue();
-            records[3].Metadata.Comment.Should().Contain("64.1 => 32.1");
-          records[0].Metadata.IsFlagged.Should().BeFalse();
-            records[1].Metadata.IsFlagged.Should().BeFalse();
-            records[2].Metadata.IsFlagged.Should().BeFalse();
-            records[4].Metadata.IsFlagged.Should().BeFalse();
-            records[5].Metadata.IsFlagged.Should().BeFalse();
-            records[6].Metadata.IsFlagged.Should().BeFalse();
-            results.FlaggedRecords.Should().Be(1);
+            for (var i = 0; i < records.Length; i++)
+            {
+                records[i].Metadata.IsFlagged.Should().Be(expectedFlags.Contains(i));
+            }
         }
 
         [TestMethod]
@@ -286,12 +281,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
             Results results = Analyze(records, @"(?<Value>\d+\.\d+)$");
 
-            records[2].Metadata.IsFlagged.Should().BeTrue();
-            records[2].Metadata.Comment.Should().Contain("64 => 32");
-          records[0].Metadata.IsFlagged.Should().BeFalse();
-            records[1].Metadata.IsFlagged.Should().BeFalse();
-            records[3].Metadata.IsFlagged.Should().BeFalse();
-            records[4].Metadata.IsFlagged.Should().BeFalse();
+            AssertOnlyFlaggedIndices(records, 3);
+            records[3].Metadata.Comment.Should().Contain("2.2 => 1.2");
             results.FlaggedRecords.Should().Be(1);
         }
     }
