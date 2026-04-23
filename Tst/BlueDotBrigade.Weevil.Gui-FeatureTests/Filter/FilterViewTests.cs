@@ -14,5 +14,19 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			shouldNormalize.Should().BeTrue();
 		}
+
+		[DataTestMethod]
+		[DataRow(ModifierKeys.None)]
+		[DataRow(ModifierKeys.Control)]
+		[DataRow(ModifierKeys.Shift)]
+		[DataRow(ModifierKeys.Alt)]
+		[DataRow(ModifierKeys.Control | ModifierKeys.Alt)]
+		[DataRow(ModifierKeys.Shift | ModifierKeys.Alt)]
+		public void GivenMissingRequiredModifiers_WhenCheckingNavigationSelectionNormalization_ThenReturnsFalse(ModifierKeys modifiers)
+		{
+			var shouldNormalize = FilterView.ShouldNormalizeSelectionAfterKeyboardNavigation(modifiers);
+
+			shouldNormalize.Should().BeFalse();
+		}
 	}
 }
