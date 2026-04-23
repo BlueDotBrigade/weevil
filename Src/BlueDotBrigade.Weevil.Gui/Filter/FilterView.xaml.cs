@@ -6,6 +6,7 @@
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
+	using System.Windows.Input;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
@@ -133,10 +134,22 @@
 						if (this.ListView.ItemContainerGenerator.ContainerFromIndex(index) is ListViewItem item)
 						{
 							item.Focus();
+
+							if (ShouldNormalizeSelectionAfterKeyboardNavigation(Keyboard.Modifiers))
+							{
+								this.ListView.SelectedItems.Clear();
+								this.ListView.SelectedItems.Add(this.ListView.Items[index]);
+							}
 						}
 					}));
 				}
 			}
+		}
+
+		internal static bool ShouldNormalizeSelectionAfterKeyboardNavigation(ModifierKeys modifiers)
+		{
+			const ModifierKeys requiredModifiers = ModifierKeys.Control | ModifierKeys.Shift;
+			return (modifiers & requiredModifiers) == requiredModifiers;
 		}
 
 		private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
