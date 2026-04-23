@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenControlAndShiftModifiers_WhenCheckingNavigationSelectionNormalization_ThenReturnsTrue()
 		{
 			// Regression: Issue #768
-			var shouldNormalize = FilterView.ShouldNormalizeSelectionAfterKeyboardNavigation(
+			var shouldNormalize = FilterView.ShouldCollapseSelectionAfterCtrlShiftNavigation(
 				ModifierKeys.Control | ModifierKeys.Shift);
 
 			shouldNormalize.Should().BeTrue();
@@ -24,7 +24,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[DataRow(ModifierKeys.Shift | ModifierKeys.Alt)]
 		public void GivenMissingRequiredModifiers_WhenCheckingNavigationSelectionNormalization_ThenReturnsFalse(ModifierKeys modifiers)
 		{
-			var shouldNormalize = FilterView.ShouldNormalizeSelectionAfterKeyboardNavigation(modifiers);
+			var shouldNormalize = FilterView.ShouldCollapseSelectionAfterCtrlShiftNavigation(modifiers);
 
 			shouldNormalize.Should().BeFalse();
 		}

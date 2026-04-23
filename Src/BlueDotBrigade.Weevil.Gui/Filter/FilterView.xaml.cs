@@ -135,7 +135,7 @@
 						{
 							item.Focus();
 
-							if (ShouldNormalizeSelectionAfterKeyboardNavigation(Keyboard.Modifiers))
+							if (ShouldCollapseSelectionAfterCtrlShiftNavigation(Keyboard.Modifiers))
 							{
 								this.ListView.SelectedItems.Clear();
 								this.ListView.SelectedItems.Add(this.ListView.Items[index]);
@@ -146,7 +146,7 @@
 			}
 		}
 
-		internal static bool ShouldNormalizeSelectionAfterKeyboardNavigation(ModifierKeys modifiers)
+		internal static bool ShouldCollapseSelectionAfterCtrlShiftNavigation(ModifierKeys modifiers)
 		{
 			const ModifierKeys requiredModifiers = ModifierKeys.Control | ModifierKeys.Shift;
 			return (modifiers & requiredModifiers) == requiredModifiers;
