@@ -84,6 +84,7 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 - Math calculators round computed values to 3 decimal places using `System.Math.Round(..., 3)`.
 - In namespaces named `Math` (e.g., `BlueDotBrigade.Weevil.Math`), use fully qualified `System.Math.*` calls to avoid collision with the namespace name.
 - Documentation and code comments must be clear and concise. Avoid visual noise that obscures intent.
+- **Namespace alignment**: Place new classes in the same namespace you would expect to find them in the .NET Core library. For example: diagnostic and telemetry types belong in `BlueDotBrigade.Weevil.Diagnostics` (mirrors `System.Diagnostics`); SQL client implementation types belong in `BlueDotBrigade.Weevil.Data.SqlClient` (mirrors `Microsoft.Data.SqlClient`). This convention makes the codebase easier to navigate for developers already familiar with .NET Core.
 
 ## Documentation Conventions
 

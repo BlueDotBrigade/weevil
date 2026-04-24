@@ -127,6 +127,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+		<ProjectReference Include="..\BlueDotBrigade.Weevil.Telemetry\BlueDotBrigade.Weevil.Telemetry.csproj" />
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
 	</ItemGroup>
 	<ItemGroup>
