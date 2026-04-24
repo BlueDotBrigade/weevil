@@ -6,7 +6,6 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 
 	using System.IO;
 	using System.Linq;
-	using System.Reflection;
 	using System.Text;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Analysis;
@@ -28,12 +27,11 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 		public void Insight(string logPath, bool verbose = false)
 		{
 			var telemetry = TelemetrySessionLifecycle.Shared;
-			var version = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
-			telemetry.StartSessionOnFileOpen("WeevilCli.exe", version, logPath);
+			telemetry.StartSessionOnFileOpen("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
 			try
 			{
-				telemetry.RecordCliCommandExecution();
+				telemetry.RecordCliCommandActivity();
 
 				IEngine engine = Engine
 						.UsingPath(logPath)

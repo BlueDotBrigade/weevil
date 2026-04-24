@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-	using System.Reflection;
 	using System.Text;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Filter;
@@ -22,12 +21,11 @@
 		public void Filter(string logPath, string? include, string? exclude)
 		{
 			var telemetry = TelemetrySessionLifecycle.Shared;
-			var version = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
-			telemetry.StartSessionOnFileOpen("WeevilCli.exe", version, logPath);
+			telemetry.StartSessionOnFileOpen("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
 			try
 			{
-				telemetry.RecordCliCommandExecution();
+				telemetry.RecordCliCommandActivity();
 
 				IEngine engine = Engine
 						.UsingPath(logPath)

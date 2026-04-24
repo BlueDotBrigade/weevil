@@ -67,7 +67,7 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
-		public void RecordCliCommandExecution()
+		public void RecordCliCommandActivity()
 		{
 			RecordActivity();
 		}

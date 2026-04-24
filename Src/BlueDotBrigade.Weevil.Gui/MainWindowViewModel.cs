@@ -4,7 +4,6 @@
 	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
-	using System.Reflection;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
@@ -27,7 +26,6 @@
 			_uiDispatcher = uiDispatcher;
 			_uiMonitor = new UiResponsivenessMonitor();
 			_telemetry = TelemetrySessionLifecycle.Shared;
-			_applicationVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
 
 			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnSourceFileChanged(x));
 			bulletinMediator.Subscribe<FilterChangedBulletin>(this, _ => _telemetry.RecordFilterExecution());
@@ -38,14 +36,13 @@
 			this.FilterViewModel = new FilterViewModel(
 				uiDispatcher,
 				bulletinMediator);
+			_applicationVersion = this.FilterViewModel.WeevilVersion;
 
 			this.StatusBarViewModel = new StatusBarViewModel(
 				uiDispatcher,
 				bulletinMediator);
 
-			Version weevilVersion = Assembly.GetEntryAssembly()?.GetName().Version;
-			weevilVersion = weevilVersion ?? new Version(128, 128, 128);
-			this.ApplicationTitle = $"Weevil: v{weevilVersion.ToString(3)}";
+			this.ApplicationTitle = $"Weevil: v{_applicationVersion.ToString(3)}";
 		}
 
 		public void Start()
