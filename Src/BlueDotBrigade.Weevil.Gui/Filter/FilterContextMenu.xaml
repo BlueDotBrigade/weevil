@@ -4,7 +4,8 @@
   ResourceDictionary does not support d:DataContext for design-time resolution.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls">
     <Style x:Key="CommandMenuItemStyle"
                    TargetType="{x:Type MenuItem}">
         <Setter Property="Header"
@@ -17,11 +18,11 @@
 
     <!-- 
       Style for detection menu items with 2-column layout.
-      Each MenuItem.Tag holds a 6-character mnemonic displayed in Courier New:
-        Uppercase (A, B) = flagged record
-        lowercase (a, b) = unflagged participant in the pattern
-        hyphen (-)       = record not part of the detected pattern
-      Same letter = same value/match; different letter = different value.
+      Each MenuItem.Tag holds a pattern string displayed in Courier New.
+      Pattern notation:
+        [N]  = flagged record (rendered bold + underlined); same number = same value
+        N    = unflagged record participating in the pattern; same number = same value
+        x    = record whose content does not matter
     -->
     <Style x:Key="DetectionMenuItemStyle" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MaterialDesignMenuItem}">
         <Setter Property="HeaderTemplate">
@@ -33,12 +34,12 @@
                             <ColumnDefinition Width="100" SharedSizeGroup="Col3"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding}" Grid.Column="0"/>
-                        <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=MenuItem}, Path=Tag}" 
-                                   Grid.Column="1" 
-                                   Margin="12,0,0,0"  
+                        <TextBlock Grid.Column="1"
+                                   Margin="12,0,0,0"
                                    FontFamily="Courier New"
                                    FontSize="14"
-                                   HorizontalAlignment="Center"/>
+                                   HorizontalAlignment="Center"
+                                   guiControls:FormattedPatternBehavior.Pattern="{Binding RelativeSource={RelativeSource AncestorType=MenuItem}, Path=Tag}"/>
                     </Grid>
                 </DataTemplate>
             </Setter.Value>
@@ -151,24 +152,24 @@
             <MenuItem Header="First Occurrence"
                                       Command="{Binding DetectFirstCommand}"
                                       InputGestureText="F7"
-                                      Tag="A--B--"
+                                      Tag="[1]xx[2]xx"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Transitions"
                                       Command="{Binding DetectDataTransitionsCommand}"
                                       InputGestureText="F9"
-                                      Tag="AaaBbb"
+                                      Tag="[1]11[2]22"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Rising Edges"
                                       Command="{Binding DataTransitionsRisingEdgeCommand}"
-                                      Tag="AbcAbc"
+                                      Tag="1[2]1[3]xx"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Falling Edges"
                                       Command="{Binding DataTransitionsFallingEdgeCommand}"
-                                      Tag="abCabC"
+                                      Tag="3[2]3[1]xx"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Repeating Records"
                                       Command="{Binding DetectRepeatingRecordsCommand}"
-                                      Tag="-AaaA-"
+                                      Tag="x[1]1[1]xx"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
         </MenuItem>
         <MenuItem Header="Temporal Analysis">
@@ -181,7 +182,7 @@
             <MenuItem Header="Detect Stability"
                                       Command="{Binding DetectStableValuesCommand}"
                                       InputGestureText="F6"
-                                      Tag="AaABbB"
+                                      Tag="[1]1[1][2]2[2]"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
         </MenuItem>
         <MenuItem Header="Domain Specific Analysis"
