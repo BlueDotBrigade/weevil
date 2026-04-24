@@ -65,7 +65,7 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 			try
 			{
 				using TelemetryDbContext context = CreateContext(_options.CommandTimeoutSeconds);
-				context.Sessions.Add(ToRecord(session));
+				context.Sessions.Add(session);
 				await context.SaveChangesAsync(ct).ConfigureAwait(false);
 			}
 			catch (Exception)
@@ -87,7 +87,7 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 			try
 			{
 				using TelemetryDbContext context = CreateContext(_options.SyncTimeoutSeconds);
-				context.Sessions.Add(ToRecord(session));
+				context.Sessions.Add(session);
 				context.SaveChanges();
 			}
 			catch (Exception)
@@ -124,25 +124,6 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 			};
 
 			return builder.ConnectionString;
-		}
-
-		private static SessionRecord ToRecord(TelemetrySession session)
-		{
-			return new SessionRecord
-			{
-				SessionId = session.SessionId,
-				Application = session.Application,
-				Version = session.Version?.ToString() ?? string.Empty,
-				SessionStartUtc = session.SessionStartUtc,
-				SessionEndUtc = session.SessionEndUtc,
-				SessionActiveMinutes = session.SessionActiveMinutes,
-				LogFileSizeBytes = session.LogFileSizeBytes,
-				InstalledRamMb = session.InstalledRamMb,
-				FilterExecutionCount = session.FilterExecutionCount,
-				GraphOpenCount = session.GraphOpenCount,
-				DashboardOpenCount = session.DashboardOpenCount,
-				SchemaVersion = session.SchemaVersion,
-			};
 		}
 	}
 }

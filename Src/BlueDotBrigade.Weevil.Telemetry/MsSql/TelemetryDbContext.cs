@@ -1,5 +1,7 @@
 namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 {
+	using System;
+	using BlueDotBrigade.Weevil;
 	using Microsoft.EntityFrameworkCore;
 
 	/// <summary>
@@ -13,12 +15,14 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 		{
 		}
 
-		public DbSet<SessionRecord> Sessions => Set<SessionRecord>();
+		public DbSet<TelemetrySession> Sessions => Set<TelemetrySession>();
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<SessionRecord>(entity =>
+			modelBuilder.Entity<TelemetrySession>(entity =>
 			{
+				entity.ToTable("Session", "telemetry");
+
 				entity.HasKey(e => e.SessionId);
 
 				entity.Property(e => e.Application)
@@ -26,6 +30,9 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 					.IsRequired();
 
 				entity.Property(e => e.Version)
+					.HasConversion(
+						v => v != null ? v.ToString() : "0.0",
+						s => string.IsNullOrEmpty(s) ? new Version(0, 0) : new Version(s))
 					.HasMaxLength(32)
 					.IsRequired();
 
