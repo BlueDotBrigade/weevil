@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 	using System;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using Microsoft.Data.SqlClient;
 	using Microsoft.EntityFrameworkCore;
 
@@ -30,22 +31,25 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 	public sealed class MsSqlTelemetryClient : ITelemetryClient
 	{
 		private readonly MsSqlTelemetryClientOptions _options;
+		private readonly bool _isDisabled;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="MsSqlTelemetryClient"/>.
 		/// </summary>
 		/// <param name="options">Connection and timeout options.</param>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
-		/// <exception cref="ArgumentException">Thrown when <see cref="MsSqlTelemetryClientOptions.ConnectionString"/> is empty.</exception>
+		/// <remarks>
+		/// When <see cref="MsSqlTelemetryClientOptions.ConnectionString"/> is empty or whitespace,
+		/// telemetry is treated as disabled: a warning is logged and all send operations become no-ops.
+		/// </remarks>
 		public MsSqlTelemetryClient(MsSqlTelemetryClientOptions options)
 		{
 			_options = options ?? throw new ArgumentNullException(nameof(options));
 
 			if (string.IsNullOrWhiteSpace(options.ConnectionString))
 			{
-				throw new ArgumentException(
-					"Connection string must not be null or empty.",
-					nameof(options));
+				_isDisabled = true;
+				Log.Default.Write(LogSeverityType.Warning, "Telemetry has been disabled - no credentials were provided.");
 			}
 		}
 
@@ -53,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
 		public async Task SendAsync(TelemetrySession session, CancellationToken ct)
 		{
-			if (session == null)
+			if (_isDisabled || session == null)
 			{
 				return;
 			}
@@ -75,7 +79,7 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
 		public void SendSync(TelemetrySession session)
 		{
-			if (session == null)
+			if (_isDisabled || session == null)
 			{
 				return;
 			}

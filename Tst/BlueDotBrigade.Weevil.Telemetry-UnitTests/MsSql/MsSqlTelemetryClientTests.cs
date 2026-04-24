@@ -1,8 +1,10 @@
 namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using FluentAssertions;
 	using Microsoft.Data.SqlClient;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,23 +26,23 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 		}
 
 		[TestMethod]
-		public void GivenEmptyConnectionString_WhenConstructed_ThenThrowsArgumentException()
+		public void GivenEmptyConnectionString_WhenConstructed_ThenDoesNotThrow()
 		{
 			var options = new MsSqlTelemetryClientOptions { ConnectionString = string.Empty };
 
 			Action act = () => new MsSqlTelemetryClient(options);
 
-			act.Should().Throw<ArgumentException>();
+			act.Should().NotThrow();
 		}
 
 		[TestMethod]
-		public void GivenWhiteSpaceConnectionString_WhenConstructed_ThenThrowsArgumentException()
+		public void GivenWhiteSpaceConnectionString_WhenConstructed_ThenDoesNotThrow()
 		{
 			var options = new MsSqlTelemetryClientOptions { ConnectionString = "   " };
 
 			Action act = () => new MsSqlTelemetryClient(options);
 
-			act.Should().Throw<ArgumentException>();
+			act.Should().NotThrow();
 		}
 
 		// ─── BuildSecuredConnectionString ──────────────────────────────────────────
@@ -142,7 +144,57 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 			act.Should().NotThrow();
 		}
 
+		// ─── Disabled (no credentials) ────────────────────────────────────────────
+
+		[TestMethod]
+		public void GivenEmptyConnectionString_WhenConstructed_ThenLogsWarning()
+		{
+			var capture = new CapturingLogWriter();
+			var original = Log.Default;
+
+			try
+			{
+				Log.Register(capture);
+				var options = new MsSqlTelemetryClientOptions { ConnectionString = string.Empty };
+				_ = new MsSqlTelemetryClient(options);
+
+				capture.Warnings.Should().ContainSingle();
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenEmptyConnectionString_WhenSendAsyncCalled_ThenDoesNotThrow()
+		{
+			var client = CreateDisabledClient();
+			var session = CreateMinimalSession();
+
+			Func<Task> act = async () => await client.SendAsync(session, CancellationToken.None);
+
+			await act.Should().NotThrowAsync();
+		}
+
+		[TestMethod]
+		public void GivenEmptyConnectionString_WhenSendSyncCalled_ThenDoesNotThrow()
+		{
+			var client = CreateDisabledClient();
+			var session = CreateMinimalSession();
+
+			Action act = () => client.SendSync(session);
+
+			act.Should().NotThrow();
+		}
+
 		// ─── Helpers ───────────────────────────────────────────────────────────────
+
+		private static MsSqlTelemetryClient CreateDisabledClient()
+		{
+			var options = new MsSqlTelemetryClientOptions { ConnectionString = string.Empty };
+			return new MsSqlTelemetryClient(options);
+		}
 
 		private static MsSqlTelemetryClient CreateClientWithFakeConnection(
 			int commandTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultCommandTimeoutSeconds,
@@ -170,6 +222,33 @@ namespace BlueDotBrigade.Weevil.Telemetry.MsSql
 				SessionActiveMinutes = 5,
 				SchemaVersion = "1",
 			};
+		}
+
+		private sealed class CapturingLogWriter : ILogWriter
+		{
+			public List<string> Warnings { get; } = new List<string>();
+
+			public void Write(string message) { }
+			public void Write(string message, IEnumerable<KeyValuePair<string, object>> metadata) { }
+			public void Write(LogSeverityType severity, Exception exception) { }
+			public void Write(LogSeverityType severity, Exception exception, string message) { }
+			public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata) { }
+
+			public void Write(LogSeverityType severity, string message)
+			{
+				if (severity == LogSeverityType.Warning)
+				{
+					Warnings.Add(message);
+				}
+			}
+
+			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
+			{
+				if (severity == LogSeverityType.Warning)
+				{
+					Warnings.Add(message);
+				}
+			}
 		}
 	}
 }
