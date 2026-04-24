@@ -57,28 +57,28 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 				return;
 			}
 
-			var i = 0;
-			while (i < pattern.Length)
+			var position = 0;
+			while (position < pattern.Length)
 			{
-				if (pattern[i] == '[')
+				if (pattern[position] == '[')
 				{
-					var end = pattern.IndexOf(']', i + 1);
-					if (end > i + 1)
+					var closingBracket = pattern.IndexOf(']', position + 1);
+					if (closingBracket > position + 1)
 					{
-						var flaggedText = pattern.Substring(i + 1, end - i - 1);
+						var flaggedText = pattern.Substring(position + 1, closingBracket - position - 1);
 						var run = new Run(flaggedText)
 						{
 							FontWeight = FontWeights.Bold,
 							TextDecorations = TextDecorations.Underline,
 						};
 						textBlock.Inlines.Add(run);
-						i = end + 1;
+						position = closingBracket + 1;
 						continue;
 					}
 				}
 
-				textBlock.Inlines.Add(new Run(pattern[i].ToString()));
-				i++;
+				textBlock.Inlines.Add(new Run(pattern[position].ToString()));
+				position++;
 			}
 		}
 	}
