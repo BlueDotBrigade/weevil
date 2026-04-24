@@ -11,6 +11,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 	using BlueDotBrigade.Weevil.Analysis;
 
 	using BlueDotBrigade.Weevil.Cli.IO;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;

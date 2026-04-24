@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Telemetry.MsSql
+namespace BlueDotBrigade.Weevil.Data.SqlClient
 {
 	using System;
 	using System.Collections.Generic;

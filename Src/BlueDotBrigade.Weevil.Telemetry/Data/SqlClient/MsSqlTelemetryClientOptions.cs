@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Telemetry.MsSql
+namespace BlueDotBrigade.Weevil.Data.SqlClient
 {
 	/// <summary>
 	/// Configuration options for <see cref="MsSqlTelemetryClient"/>.

@@ -1,7 +1,7 @@
-namespace BlueDotBrigade.Weevil.Telemetry.MsSql
+namespace BlueDotBrigade.Weevil.Data.SqlClient
 {
 	using System;
-	using BlueDotBrigade.Weevil;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using Microsoft.EntityFrameworkCore;
 
 	/// <summary>

@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil
+namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System.Threading;
 	using System.Threading.Tasks;

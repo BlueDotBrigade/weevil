@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil
+namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
 	using System.Collections.Generic;
