@@ -60,7 +60,7 @@ namespace BlueDotBrigade.Weevil
 			try
 			{
 				tracker.StartSessionOnFileOpen("WeevilCli.exe", new Version(2, 0), sourcePath);
-				tracker.RecordCliCommandActivity();
+				tracker.RecordSessionHeartbeat();
 				tracker.RecordNavigationAction();
 				var endedSession = tracker.EndCurrentSession();
 

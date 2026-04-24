@@ -67,7 +67,7 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
-		public void RecordCliCommandActivity()
+		public void RecordSessionHeartbeat()
 		{
 			RecordActivity();
 		}

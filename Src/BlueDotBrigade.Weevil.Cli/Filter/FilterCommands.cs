@@ -25,7 +25,7 @@
 
 			try
 			{
-				telemetry.RecordCliCommandActivity();
+				telemetry.RecordSessionHeartbeat();
 
 				IEngine engine = Engine
 						.UsingPath(logPath)
