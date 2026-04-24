@@ -20,20 +20,32 @@
 			Description = "Filters the log file for records that include/exclude the specified text.")]
 		public void Filter(string logPath, string? include, string? exclude)
 		{
-			IEngine engine = Engine
-					.UsingPath(logPath)
-					.Open();
+			var telemetry = TelemetrySessionLifecycle.Shared;
+			telemetry.StartSessionOnFileOpen("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(include, exclude));
+			try
+			{
+				telemetry.RecordSessionHeartbeat();
 
-			var destinationFile =
-				Path.GetFileNameWithoutExtension(logPath) +
-				".Results" +
-				Path.GetExtension(logPath);
+				IEngine engine = Engine
+						.UsingPath(logPath)
+						.Open();
 
-			var destinationFilePath = Path.Combine(
-				Path.GetDirectoryName(logPath),
-				destinationFile);
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(include, exclude));
+
+				var destinationFile =
+					Path.GetFileNameWithoutExtension(logPath) +
+					".Results" +
+					Path.GetExtension(logPath);
+
+				var destinationFilePath = Path.Combine(
+					Path.GetDirectoryName(logPath),
+					destinationFile);
+			}
+			finally
+			{
+				telemetry.EndCurrentSession();
+			}
 		}
 	}
 }
