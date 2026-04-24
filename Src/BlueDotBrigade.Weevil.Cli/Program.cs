@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
+	using System.Reflection;
 	using System.Threading.Tasks;
 	using Analysis;
 	using BlueDotBrigade.Weevil.Configuration;
@@ -16,6 +17,8 @@
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
 	{
+		internal static Version ApplicationVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
+
 		public static void Main()
 		{
 			OutputWriterContext.Configure(new MarkdownFormatter(), new ConsoleWriter());
