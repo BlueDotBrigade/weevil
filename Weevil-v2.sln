@@ -55,6 +55,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Power
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\BlueDotBrigade.Weevil.Core-FunctionalTests.csproj", "{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Telemetry", "Src\BlueDotBrigade.Weevil.Telemetry\BlueDotBrigade.Weevil.Telemetry.csproj", "{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Telemetry-UnitTests", "Tst\BlueDotBrigade.Weevil.Telemetry-UnitTests\BlueDotBrigade.Weevil.Telemetry-UnitTests.csproj", "{83ACCB7E-8C2C-4798-A576-1E492572FD36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -117,6 +121,14 @@ Global
 		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Debug|x64.Build.0 = Debug|x64
 		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Release|x64.ActiveCfg = Release|x64
 		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Release|x64.Build.0 = Release|x64
+		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}.Debug|x64.ActiveCfg = Debug|x64
+		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}.Debug|x64.Build.0 = Debug|x64
+		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}.Release|x64.ActiveCfg = Release|x64
+		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}.Release|x64.Build.0 = Release|x64
+		{83ACCB7E-8C2C-4798-A576-1E492572FD36}.Debug|x64.ActiveCfg = Debug|x64
+		{83ACCB7E-8C2C-4798-A576-1E492572FD36}.Debug|x64.Build.0 = Debug|x64
+		{83ACCB7E-8C2C-4798-A576-1E492572FD36}.Release|x64.ActiveCfg = Release|x64
+		{83ACCB7E-8C2C-4798-A576-1E492572FD36}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +144,8 @@ Global
 		{8DD59BAD-4E11-45A9-861D-14A4046C1D96} = {7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}
 		{53951074-E2A4-4F3C-9CF4-76816578C6E1} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
 		{8D500B24-89E1-4D0D-A742-2A714CADBF66} = {A3271171-1CB7-4632-ABFF-6B45C47A4FFA}
+		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2} = {7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}
+		{83ACCB7E-8C2C-4798-A576-1E492572FD36} = {7BE64F6F-409A-4E9D-901D-4D92FFFD5DA4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94508D1B-CE45-43A7-8D41-50927BFA3696}

@@ -6,6 +6,7 @@
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
 	using Cocona;
