@@ -20,6 +20,7 @@
 	public partial class FilterView : UserControl
 	{
 		private bool _isLogFileOpening;
+		private bool _isProgrammaticSelectionUpdate;
 
 		public FilterView()
 		{
@@ -29,21 +30,21 @@
 				{
 					var viewModel = args.OldValue as FilterViewModel;
 
-                                        viewModel.FileOpened -= OnFileOpened;
-                                        viewModel.ResultsChanged -= OnResultsChanged;
-                                        viewModel.RegionsChanged -= OnRegionsChanged;
-                                        viewModel.BookmarksChanged -= OnBookmarksChanged;
-                                        viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+					viewModel.FileOpened -= OnFileOpened;
+					viewModel.ResultsChanged -= OnResultsChanged;
+					viewModel.RegionsChanged -= OnRegionsChanged;
+					viewModel.BookmarksChanged -= OnBookmarksChanged;
+					viewModel.PropertyChanged -= OnViewModelPropertyChanged;
 				}
 				if (args.NewValue != null)
 				{
 					var viewModel = args.NewValue as FilterViewModel;
 
-                                        viewModel.FileOpened += OnFileOpened;
-                                        viewModel.ResultsChanged += OnResultsChanged;
-                                        viewModel.RegionsChanged += OnRegionsChanged;
-                                        viewModel.BookmarksChanged += OnBookmarksChanged;
-                                        viewModel.PropertyChanged += OnViewModelPropertyChanged;
+					viewModel.FileOpened += OnFileOpened;
+					viewModel.ResultsChanged += OnResultsChanged;
+					viewModel.RegionsChanged += OnRegionsChanged;
+					viewModel.BookmarksChanged += OnBookmarksChanged;
+					viewModel.PropertyChanged += OnViewModelPropertyChanged;
 				}
 			};
 
@@ -80,17 +81,17 @@
 			_isLogFileOpening = true;
 		}
 
-                private void OnRegionsChanged(object sender, EventArgs e)
-                {
-                        // Force bindings (and converters) for only the visible items to be refreshed.
-                        this.ListView.Items.Refresh();
-                }
+		private void OnRegionsChanged(object sender, EventArgs e)
+		{
+			// Force bindings (and converters) for only the visible items to be refreshed.
+			this.ListView.Items.Refresh();
+		}
 
-                private void OnBookmarksChanged(object sender, EventArgs e)
-                {
-                        // Force bindings (and converters) for only the visible items to be refreshed.
-                        this.ListView.Items.Refresh();
-                }
+		private void OnBookmarksChanged(object sender, EventArgs e)
+		{
+			// Force bindings (and converters) for only the visible items to be refreshed.
+			this.ListView.Items.Refresh();
+		}
 
 		private void OnResultsChanged(object sender, EventArgs e)
 		{
@@ -137,8 +138,16 @@
 
 							if (ShouldCollapseSelectionAfterCtrlShiftNavigation(Keyboard.Modifiers))
 							{
-								this.ListView.SelectedItems.Clear();
-								this.ListView.SelectedItems.Add(this.ListView.Items[index]);
+								_isProgrammaticSelectionUpdate = true;
+								try
+								{
+									this.ListView.SelectedItems.Clear();
+									this.ListView.SelectedItems.Add(this.ListView.Items[index]);
+								}
+								finally
+								{
+									_isProgrammaticSelectionUpdate = false;
+								}
 							}
 						}
 					}));
@@ -152,8 +161,18 @@
 			return (modifiers & requiredModifiers) == requiredModifiers;
 		}
 
+		internal static bool ShouldSuppressSelectionChangedDuringProgrammaticUpdate(bool isProgrammaticSelectionUpdate)
+		{
+			return isProgrammaticSelectionUpdate;
+		}
+
 		private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
+			if (ShouldSuppressSelectionChangedDuringProgrammaticUpdate(_isProgrammaticSelectionUpdate))
+			{
+				return;
+			}
+
 			var added = e.AddedItems.Cast<IRecord>().ToList();
 			if (added.Count > 0)
 			{
@@ -305,7 +324,7 @@
 
 		private void OnProgressBarVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			if(_isLogFileOpening)
+			if (_isLogFileOpening)
 			{
 				_isLogFileOpening = false;
 
