@@ -126,6 +126,12 @@
 		{
 			if (e.PropertyName == nameof(FilterViewModel.ActiveRecordIndex))
 			{
+				if (ShouldSkipActiveRecordIndexHandlingDuringProgrammaticUpdate(_isProgrammaticSelectionUpdate))
+				{
+					// Prevent re-entrant processing when selection is being normalized during Ctrl+Shift navigation.
+					return;
+				}
+
 				var index = this.ViewModel.ActiveRecordIndex;
 				if (index >= 0 && index < this.ListView.Items.Count)
 				{
@@ -162,6 +168,11 @@
 		}
 
 		internal static bool ShouldSuppressSelectionChangedDuringProgrammaticUpdate(bool isProgrammaticSelectionUpdate)
+		{
+			return isProgrammaticSelectionUpdate;
+		}
+
+		internal static bool ShouldSkipActiveRecordIndexHandlingDuringProgrammaticUpdate(bool isProgrammaticSelectionUpdate)
 		{
 			return isProgrammaticSelectionUpdate;
 		}

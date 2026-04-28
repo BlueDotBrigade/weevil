@@ -28,5 +28,21 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			shouldNormalize.Should().BeFalse();
 		}
+
+		[TestMethod]
+		public void GivenProgrammaticSelectionUpdate_WhenCheckingActiveRecordIndexHandling_ThenReturnsTrue()
+		{
+			var shouldSkip = FilterView.ShouldSkipActiveRecordIndexHandlingDuringProgrammaticUpdate(true);
+
+			shouldSkip.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenNoProgrammaticSelectionUpdate_WhenCheckingActiveRecordIndexHandling_ThenReturnsFalse()
+		{
+			var shouldSkip = FilterView.ShouldSkipActiveRecordIndexHandlingDuringProgrammaticUpdate(false);
+
+			shouldSkip.Should().BeFalse();
+		}
 	}
 }
