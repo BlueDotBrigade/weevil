@@ -26,6 +26,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			shouldNormalize.Should().BeFalse();
 		}
 
+		[TestMethod]
+		public void GivenSingleSelectedRecordAtDifferentIndex_WhenCheckingSelectionNormalization_ThenReturnsTrue()
+		{
+			var shouldNormalize = FilterListViewBehavior.ShouldNormalizeSelection(
+				selectedItemCount: 1,
+				selectedIndex: 5,
+				activeRecordIndex: 9);
+
+			shouldNormalize.Should().BeTrue();
+		}
+
 		[DataTestMethod]
 		[DataRow(-1, 10)]
 		[DataRow(10, 10)]
