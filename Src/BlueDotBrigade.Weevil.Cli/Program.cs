@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Reflection;
@@ -19,6 +20,8 @@
 	internal class Program
 	{
 		internal static Version ApplicationVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
+		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
+		internal static string TelemetrySource { get; } = TelemetryConfiguration.GetSource();
 
 		public static void Main()
 		{
@@ -33,6 +36,7 @@
 
 			var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
 			TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
+			TelemetrySessionLifecycle.Shared.ConfigureStartupContext(TelemetrySource, IsDebuggerAttachedAtStartup);
 			Log.Default.Write(LogSeverityType.Debug,
 				$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 

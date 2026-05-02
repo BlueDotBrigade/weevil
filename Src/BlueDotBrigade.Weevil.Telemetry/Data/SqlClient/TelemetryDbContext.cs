@@ -29,6 +29,10 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 					.HasMaxLength(256)
 					.IsRequired();
 
+				entity.Property(e => e.Source)
+					.HasMaxLength(256)
+					.IsRequired();
+
 				entity.Property(e => e.Version)
 					.HasConversion(
 						v => v != null ? v.ToString() : "0.0",
