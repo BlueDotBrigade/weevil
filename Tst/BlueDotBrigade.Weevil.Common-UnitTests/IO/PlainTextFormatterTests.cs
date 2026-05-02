@@ -7,6 +7,34 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 public class PlainTextFormatterTests
 {
 [TestMethod]
+public void GivenMessage_WhenAsSubHeadingCalled_ThenReturnsMessageAsIs()
+{
+// Arrange
+var formatter = new PlainTextFormatter();
+
+// Act
+var result = formatter.AsSubHeading("Summary");
+
+// Assert
+Assert.AreEqual("Summary", result);
+}
+
+[TestMethod]
+public void GivenColumns_WhenAsTableHeaderAndAsTableRowCalled_ThenReturnsTabDelimitedLines()
+{
+// Arrange
+var formatter = new PlainTextFormatter();
+
+// Act
+var header = formatter.AsTableHeader(new[] { "Name", "Age" });
+var row = formatter.AsTableRow(new[] { "Alice", "30" });
+
+// Assert
+Assert.AreEqual("Name\tAge", header);
+Assert.AreEqual("Alice\t30", row);
+}
+
+[TestMethod]
 public void AsTable_WithValidData_ShouldGenerateTabDelimitedTable()
 {
 // Arrange

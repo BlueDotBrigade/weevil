@@ -1,5 +1,7 @@
 namespace BlueDotBrigade.Weevil.Math
 {
+	using MathNet.Numerics.Statistics;
+
 	public sealed class MeanCalculator : ICalculator
 	{
 		public string Name => "Mean";
@@ -10,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Math
 		{
 			if (values.Count == 0) return null;
 
-			return System.Math.Round(values.Average(), 3);
+			return System.Math.Round(values.Mean(), 3);
 		}
 	}
 }

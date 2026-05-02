@@ -5,8 +5,7 @@
     <RootNamespace>BlueDotBrigade.Weevil.PowerShell</RootNamespace>
     <AssemblyName>BlueDotBrigade.Weevil.PowerShell</AssemblyName>
     <OutputType>Library</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Version>2.12.0</Version>
+    <Version>$(WeevilReleaseVersion)</Version>
     <Authors>BlueDotBrigade;</Authors>
     <Copyright>© 2026 Blue Dot Brigade</Copyright>
     <Owners>Blue Dot Brigade</Owners>
@@ -17,11 +16,11 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>$(WeevilReleaseVersion)</PackageVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <AssemblyVersion>2.12.0.0</AssemblyVersion>
-    <FileVersion>2.12.0.0</FileVersion>
+    <AssemblyVersion>$(WeevilAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(WeevilFileVersion)</FileVersion>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Platforms>AnyCPU;x64</Platforms>
@@ -40,10 +39,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Compress-Logs.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Select-HttpErrors.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Select-Records.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Split-File.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Split-File-BySize.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

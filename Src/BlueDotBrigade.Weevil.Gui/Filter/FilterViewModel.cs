@@ -35,7 +35,6 @@
 	using BlueDotBrigade.Weevil.Reports;
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Utilities;
-	using GongSolutions.Wpf.DragDrop;
 	using Newtonsoft.Json.Linq;
 	using Metalama.Patterns.Observability;
 	using Directory = System.IO.Directory;
@@ -43,7 +42,7 @@
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
 	[Observable]
-	internal partial class FilterViewModel : IDropTarget
+	internal partial class FilterViewModel
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
 		const string RawFileName = "SelectedRecords.log";
@@ -456,11 +455,12 @@
 			{
 				var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 				ZipFile.ExtractToDirectory(sourceFilePath, tempFolder);
-				var files = Directory.GetFiles(tempFolder);
+				var files = Directory.GetFiles(tempFolder, "*", SearchOption.AllDirectories);
 
 				if (files.Length > 0)
 				{
-					temporarySourceFileName = await ShowListOfCompressedFiles(files);
+					var relativeNames = files.Select(f => Path.GetRelativePath(tempFolder, f)).ToArray();
+					temporarySourceFileName = await ShowListOfCompressedFiles(relativeNames);
 				}
 				if (!string.IsNullOrEmpty(temporarySourceFileName))
 				{
@@ -474,9 +474,9 @@
 			}
 			finally
 			{
-				if (isSourceFileCompressed && File.Exists(temporarySourceFileName))
+				if (isSourceFileCompressed && File.Exists(sourceFilePath))
 				{
-					File.Delete(temporarySourceFileName);
+					File.Delete(sourceFilePath);
 				}
 			}
 		}
@@ -866,14 +866,14 @@
 			}
 		}
 
-		public void DragOver(IDropInfo dropInfo)
+		public void DragOver(DragEventArgs e)
 		{
-			_dragAndDrop.Drag(dropInfo);
+			_dragAndDrop.DragOver(e);
 		}
 
-		public void Drop(IDropInfo dropInfo)
+		public void Drop(DragEventArgs e)
 		{
-			_dragAndDrop.Drop(dropInfo);
+			_dragAndDrop.Drop(e);
 		}
 
 		public void Exit()
@@ -1102,6 +1102,8 @@
 		private void Refresh()
 		{
 			_engine.Filter.ReApply();
+			RefreshFilterResults();
+			RaiseResultsChanged();
 		}
 
 		private void AbortFilter()
@@ -1957,11 +1959,12 @@
 			{
 				if (_engine.Selector.Selected.Count == 1)
 				{
-					var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+					var selectedRecord = _engine.Selector.Selected.Single().Value;
+					var selectedLineNumber = selectedRecord.LineNumber;
 
-					// Calculate default bookmark name based on total count after creation
-					int currentCount = _engine.Bookmarks.Bookmarks.Length;
-					string defaultName = $"Bookmark{currentCount + 1}";
+					var defaultName = selectedRecord.HasCreationTime
+						? selectedRecord.CreatedAt.ToString("HH:mm:ss")
+						: "Bookmark";
 
 					// Prompt user for bookmark name with default
 					string bookmarkName = _dialogBox.ShowUserPrompt(

@@ -7,6 +7,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	using Filter;
 	using Filter.Expressions.Regular;
 
+	/// <summary>
+	/// Extracts key-value pairs using regex named capture groups and flags only the first
+	/// record where each unique value appears. Subsequent records with the same value are ignored.
+	/// </summary>
 	internal class DetectFirstAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;

@@ -16,57 +16,57 @@
     </UserControl.Resources>
     <StackPanel DataContext="{Binding 
                RelativeSource={RelativeSource AncestorType={x:Type analysis:InsightControl}}}">
-      <GroupBox
+        <GroupBox
          Header="{Binding Value.Title}"
          Typography.Capitals="SmallCaps"
          Margin="16, 16, 8, 16"
          materialDesign:ColorZoneAssist.Mode="SecondaryDark"
          Width="225" MinHeight="200">
-         <Grid Typography.Capitals="Normal">
-            <Grid.RowDefinitions>
-               <RowDefinition Height="Auto" />
-               <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-               <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid Grid.Row="0">
-               <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto" />
-               </Grid.RowDefinitions>
-               <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="2*" />
-                  <ColumnDefinition Width="1*" />
-               </Grid.ColumnDefinitions>
-               <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0, 5">
-                  <TextBox Text="{Binding Value.MetricValue, Mode=OneWay}" 
-                             FontSize="32" FontWeight="Bold"  
+            <Grid Typography.Capitals="Normal">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0, 5">
+                        <TextBox Text="{Binding Value.MetricValue, Mode=OneWay}" 
+                             FontSize="30" FontWeight="Bold"  
                              VerticalAlignment="Center" TextAlignment="Justify"
                              controls:TextBoxBehavior.AutoSelectEnabled="True"/>
-                  <TextBlock Text=" "/>
-                  <TextBlock Text="{Binding Value.MetricUnit}" 
+                        <TextBlock Text=" "/>
+                        <TextBlock Text="{Binding Value.MetricUnit}" 
                              VerticalAlignment="Bottom" TextAlignment="Justify"/>
-               </StackPanel>
-               <Image Grid.Row="0" Grid.Column="1" 
+                    </StackPanel>
+                    <Image Grid.Row="0" Grid.Column="1" 
                       Height="48" Width="48"
                       HorizontalAlignment="Right"
                       Source="{Binding Image}">
-                  <Image.Style>
-                     <Style TargetType="{x:Type Image}">
-                        <Setter Property="ToolTip" Value=""/>
-                        <Style.Triggers>
-                           <DataTrigger Binding="{Binding Value.IsAttentionRequired}" Value="True">
-                              <Setter Property="ToolTip" Value="This insight requires user attention."/>
-                           </DataTrigger>
-                        </Style.Triggers>
-                     </Style>
-                  </Image.Style>
-               </Image>
-            </Grid>
-            <TextBox Grid.Row="1" 
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="ToolTip" Value=""/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Value.IsAttentionRequired}" Value="True">
+                                        <Setter Property="ToolTip" Value="This insight requires user attention."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </Grid>
+                <TextBox Grid.Row="1" 
                      Text="{Binding Value.Details, Mode=OneWay}" 
                      Style="{StaticResource TextBoxStyle}" />
-         </Grid>
-      </GroupBox>
-   </StackPanel>
+            </Grid>
+        </GroupBox>
+    </StackPanel>
 </UserControl>

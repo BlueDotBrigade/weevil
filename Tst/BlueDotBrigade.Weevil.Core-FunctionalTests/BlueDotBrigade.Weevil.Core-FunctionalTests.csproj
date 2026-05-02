@@ -51,6 +51,7 @@
 	  <None Include=".Daten\OpeningFileShould\FileWithOnlyWhitespace.txt" />
 	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log" />
 	  <None Include=".Daten\OpeningFileShould\LogWithSidecarContext.log.xml" />
+	  <None Include=".Daten\Navigation\NavigationShould\GoToTimestamp.log" />
 	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log" />
 	  <None Include=".Daten\SidecarDataShould\UseLineNumberWhenLoadingUserComment.log.xml" />
 	  <None Include=".Daten\.Global\Empty.txt" />

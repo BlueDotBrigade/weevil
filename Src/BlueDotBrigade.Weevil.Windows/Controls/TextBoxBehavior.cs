@@ -3,6 +3,8 @@
 	using System.Windows;
 	using System.Windows.Controls;
 	using System.Windows.Controls.Primitives;
+	using System.Windows.Input;
+	using System.Windows.Media;
 
 	/// <revisionHistory>
 	///     <revision date="2018/06/20" version="1.0.0" author="Clifford Nelson">
@@ -79,5 +81,6 @@
 			e.Handled = true;
 			frameworkElement.Focus();
 		}
+
 	}
 }

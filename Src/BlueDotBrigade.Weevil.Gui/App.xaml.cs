@@ -7,6 +7,7 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Threading;
+	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
@@ -105,6 +106,14 @@
 				Log.Default.Write(
 					LogSeverityType.Information,
 					"Weevil application is starting...");
+				
+				var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
+				Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
+
+				var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
+				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
+				Log.Default.Write(LogSeverityType.Debug,
+					$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 
 				Log.Default.Write(LogSeverityType.Debug,
 					$"The logging library has been registered. Type={nameof(NLogWriter)}");
@@ -156,5 +165,6 @@
 				LogSeverityType.Information,
 				"Weevil application is closing...");
 		}
+
 	}
 }
