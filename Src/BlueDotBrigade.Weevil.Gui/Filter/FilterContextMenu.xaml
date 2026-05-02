@@ -102,6 +102,7 @@
             <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
             <Separator/>
             <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
+            <MenuItem Header="Source Code" Command="{Binding NavigateToSourceCodeCommand}" />
             <Separator/>
             <MenuItem Header="Set Bookmark 1" Command="{Binding SetBookmark1Command}" InputGestureText="Ctrl+Shift+1" />
             <MenuItem Header="Set Bookmark 5" Command="{Binding SetBookmark5Command}" InputGestureText="Ctrl+Shift+5" />
