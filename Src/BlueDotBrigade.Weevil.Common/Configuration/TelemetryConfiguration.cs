@@ -9,10 +9,19 @@ namespace BlueDotBrigade.Weevil.Configuration
 	{
 		private const string RegistryPath = @"Software\BlueDotBrigade\Weevil";
 		private const string RegistryValueName = "TelemetryEnabled";
+		private const string ConnectionStringValueName = "TelemetryConnectionString";
 
 		public static bool IsEnabled()
 		{
 			return LoadIsEnabledFromRegistry();
+		}
+
+		/// <summary>
+		/// Returns the telemetry database connection string, or an empty string when no value is configured.
+		/// </summary>
+		public static string GetConnectionString()
+		{
+			return LoadConnectionStringFromRegistry();
 		}
 
 		private static bool ParseEnabledValue(string rawValue)
@@ -56,6 +65,28 @@ namespace BlueDotBrigade.Weevil.Configuration
 				exception is PlatformNotSupportedException)
 			{
 				return true;
+			}
+		}
+
+		private static string LoadConnectionStringFromRegistry()
+		{
+			if (!OperatingSystem.IsWindows())
+			{
+				return string.Empty;
+			}
+
+			try
+			{
+				using var registryKey = Registry.CurrentUser.OpenSubKey(RegistryPath);
+				return registryKey?.GetValue(ConnectionStringValueName)?.ToString() ?? string.Empty;
+			}
+			catch (Exception exception) when (
+				exception is SecurityException ||
+				exception is UnauthorizedAccessException ||
+				exception is IOException ||
+				exception is PlatformNotSupportedException)
+			{
+				return string.Empty;
 			}
 		}
 	}
