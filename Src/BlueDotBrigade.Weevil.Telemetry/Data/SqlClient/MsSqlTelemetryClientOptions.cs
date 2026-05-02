@@ -29,6 +29,16 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		public string ConnectionString { get; set; } = string.Empty;
 
 		/// <summary>
+		/// Optional SQL username supplied outside the connection string.
+		/// </summary>
+		public string UserName { get; set; } = string.Empty;
+
+		/// <summary>
+		/// Optional SQL password or API token supplied outside the connection string.
+		/// </summary>
+		public string PasswordOrApiToken { get; set; } = string.Empty;
+
+		/// <summary>
 		/// Command timeout in seconds applied to asynchronous send operations.
 		/// </summary>
 		public int CommandTimeoutSeconds { get; set; } = DefaultCommandTimeoutSeconds;

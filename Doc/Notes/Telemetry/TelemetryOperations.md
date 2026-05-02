@@ -9,7 +9,14 @@ Telemetry configuration is read from `HKEY_CURRENT_USER\Software\BlueDotBrigade\
 | Registry value | Type | Meaning |
 | --- | --- | --- |
 | `TelemetryEnabled` | integer or boolean-like value | Enables or disables telemetry. Missing or invalid values are intentionally treated as enabled so the default-enabled, opt-out installer behavior remains effective unless the user explicitly turns telemetry off. |
-| `TelemetryConnectionString` | string | Azure SQL connection string used by the telemetry adapter. Empty or missing disables upload. |
+| `TelemetryConnectionString` | string | Azure SQL connection string used by the telemetry adapter. Empty or missing disables upload. This value should contain server and database settings only. |
+
+Optional process/user environment variables:
+
+| Environment variable | Meaning |
+| --- | --- |
+| `WEEVIL_TELEMETRY_SQL_USERNAME` | Optional SQL username applied at runtime. |
+| `WEEVIL_TELEMETRY_SQL_PASSWORD_OR_API_TOKEN` | Optional SQL password/API token applied at runtime. |
 
 ## Installer behavior
 
@@ -28,13 +35,15 @@ Telemetry configuration is read from `HKEY_CURRENT_USER\Software\BlueDotBrigade\
 ## Connection string requirements
 
 Provide an Azure SQL connection string in `TelemetryConnectionString`.
+If credentials must be provided at runtime (development or CI), set `WEEVIL_TELEMETRY_SQL_USERNAME` and `WEEVIL_TELEMETRY_SQL_PASSWORD_OR_API_TOKEN`.
 
 Operational guidance:
 
 - Use a dedicated low-privilege SQL login.
 - Grant only `INSERT` permission on `telemetry.Session`.
 - Do not grant read, update, delete, or schema-change permissions.
-- Treat the connection string as an operational secret and provision it outside source control.
+- Treat credential values as operational secrets and provision them outside source control.
+- Prefer storing credentials in environment variables rather than persisting them as part of the connection string.
 
 The runtime provider enforces these settings even if the supplied connection string says otherwise:
 
@@ -62,12 +71,13 @@ Use this checklist after configuration changes.
 
 1. Confirm `TelemetryEnabled` is present and set to the expected value.
 2. Confirm `TelemetryConnectionString` is present for environments that should upload telemetry.
-3. Verify that opening a file starts a session and opening a different file ends the previous session.
-4. Verify that closing the application ends the current session once.
-5. Verify that a disabled install produces no upload attempts.
-6. Verify that an empty or invalid connection string does not crash the application.
-7. Verify that the database receives one row per ended session.
-8. Verify that the inserted row contains `Application`, `Version`, `SessionStartUtc`, `SessionEndUtc`, `SessionActiveMinutes`, `LogFileSizeBytes`, `InstalledRamMb`, `FilterExecutionCount`, `GraphOpenCount`, `DashboardOpenCount`, and `SchemaVersion`.
+3. Confirm environment credentials are present when SQL authentication is required.
+4. Verify that opening a file starts a session and opening a different file ends the previous session.
+5. Verify that closing the application ends the current session once.
+6. Verify that a disabled install produces no upload attempts.
+7. Verify that an empty or invalid connection string does not crash the application.
+8. Verify that the database receives one row per ended session.
+9. Verify that the inserted row contains `Application`, `Version`, `SessionStartUtc`, `SessionEndUtc`, `SessionActiveMinutes`, `LogFileSizeBytes`, `InstalledRamMb`, `FilterExecutionCount`, `GraphOpenCount`, `DashboardOpenCount`, and `SchemaVersion`.
 
 ## Regression checks
 
