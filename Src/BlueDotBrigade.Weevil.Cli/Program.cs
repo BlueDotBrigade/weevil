@@ -8,7 +8,6 @@
 	using System.Reflection;
 	using System.Threading.Tasks;
 	using Analysis;
-	using BlueDotBrigade.Weevil.Configuration;
 	using Cocona;
 	using Diagnostics;
 	using Filter;
@@ -21,7 +20,7 @@
 	{
 		internal static Version ApplicationVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
-		internal static string TelemetrySource { get; } = TelemetryConfiguration.GetSource();
+		internal static string TelemetrySource { get; } = "unknown";
 
 		public static void Main()
 		{

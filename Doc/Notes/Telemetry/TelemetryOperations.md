@@ -9,7 +9,6 @@ Telemetry configuration is read from `HKEY_CURRENT_USER\Software\BlueDotBrigade\
 | Registry value | Type | Meaning |
 | --- | --- | --- |
 | `TelemetryConnectionString` | string | Azure SQL connection string used by the telemetry adapter. Empty or missing disables upload. This value should contain server and database settings only. |
-| `TelemetrySource` | string | Non-PII installer/distribution source label included in each telemetry session row. Missing or empty values default to `unknown`. |
 
 Optional process/user environment variables:
 
@@ -18,17 +17,13 @@ Optional process/user environment variables:
 | `WEEVIL_TELEMETRY_USERNAME` | Optional SQL username (or API token) applied at runtime. |
 | `WEEVIL_TELEMETRY_SECRET` | Optional SQL secret applied at runtime. |
 
-## Installer behavior
-
-- The installer persists telemetry source metadata in the user registry.
-
 ## Application behavior
 
 - GUI and CLI configure telemetry at startup using connection string and environment credential settings.
 - Telemetry is treated as disabled when both `WEEVIL_TELEMETRY_USERNAME` and `WEEVIL_TELEMETRY_SECRET` are blank.
 - If telemetry is disabled, Weevil uses `NullTelemetryClient` and performs no upload work.
 - If `TelemetryConnectionString` is empty, the SQL client becomes a no-op and logs a warning.
-- On non-Windows platforms, the registry-backed configuration falls back to an empty connection string and source `unknown`.
+- The telemetry session source is fixed to `unknown`.
 
 ## Connection string requirements
 
