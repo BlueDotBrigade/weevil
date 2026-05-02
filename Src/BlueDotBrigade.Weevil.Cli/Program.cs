@@ -4,17 +4,22 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
+	using System.Reflection;
 	using System.Threading.Tasks;
 	using Analysis;
+	using BlueDotBrigade.Weevil.Configuration;
 	using Cocona;
 	using Diagnostics;
 	using Filter;
 	using IO;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
 	{
+		internal static Version ApplicationVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
+
 		public static void Main()
 		{
 			OutputWriterContext.Configure(new MarkdownFormatter(), new ConsoleWriter());
@@ -22,6 +27,14 @@
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application has started.");
 			Log.Register(new NLogWriter());
 			Log.Default.Write($"Weevil console application is initializing... Arguments={Environment.GetCommandLineArgs().Length}");
+
+			var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
+			Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
+
+			var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
+			TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
+			Log.Default.Write(LogSeverityType.Debug,
+				$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 
 			var builder = CoconaApp.CreateBuilder();
 
@@ -60,5 +73,6 @@
 
 			Environment.Exit(exception?.HResult ?? 1);
 		}
+
 	}		
 }

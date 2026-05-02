@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 	using System;
 	using System.Collections.Immutable;
 	using System.Linq;
+	using System.Windows.Media;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using FluentAssertions;
@@ -11,6 +12,40 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 	[TestClass]
 	public class GraphViewModelMetricsTests
 	{
+		[TestMethod]
+		public void SeriesMetrics_WithOneSeries_ShouldHavePurpleColor()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "Value=5.0"));
+			var expression = "Value=(?<value>\\d+\\.?\\d*)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+
+			// Assert – first series uses palette colour #744DA9 (Purple)
+			viewModel.SeriesMetrics.Should().HaveCount(1);
+			viewModel.SeriesMetrics[0].SeriesColor.Should().Be(Color.FromRgb(0x74, 0x4D, 0xA9));
+		}
+
+		[TestMethod]
+		public void SeriesMetrics_WithTwoSeries_ShouldHavePurpleAndRedColors()
+		{
+			// Arrange
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, DateTime.UtcNow, SeverityType.Information, "CPU=5"),
+				new Record(2, DateTime.UtcNow.AddSeconds(1), SeverityType.Information, "MEM=10"));
+			var expression = $"CPU=(?<cpu>\\d+){Constants.FilterOrOperator}MEM=(?<mem>\\d+)";
+
+			// Act
+			var viewModel = new GraphViewModel(records, expression, "title", "source");
+
+			// Assert – second series uses palette colour #E74856 (Red)
+			viewModel.SeriesMetrics.Should().HaveCount(2);
+			viewModel.SeriesMetrics[0].SeriesColor.Should().Be(Color.FromRgb(0x74, 0x4D, 0xA9));
+			viewModel.SeriesMetrics[1].SeriesColor.Should().Be(Color.FromRgb(0xE7, 0x48, 0x56));
+		}
+
 		[TestMethod]
 		public void SerializeMetrics_WithOneSeries_ShouldGenerateTabDelimitedText()
 		{

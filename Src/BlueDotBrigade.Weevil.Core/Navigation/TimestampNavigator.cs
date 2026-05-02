@@ -25,8 +25,12 @@
 					$"Unable to find record - the collection is empty. Value={timestamp}, SearchType={searchType}");
 			}
 
+			var referenceRecord = _activeRecord.Record.HasCreationTime
+				? _activeRecord.Record
+				: firstRecord;
+
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =
-				ConvertToDateTime(firstRecord, timestamp);
+				ConvertToDateTime(referenceRecord, timestamp);
 
 			var index = _activeRecord.DataSource.IndexOfCreatedAt(searchValue.referenceTime, searchType);
 			return _activeRecord.SetActiveIndex(index);
@@ -61,13 +65,11 @@
 				{
 					if (DateTime.TryParse(value, out var requestedTime))
 					{
-						referenceTime = new DateTime(
+						var referenceDate = new DateTime(
 							activeRecord.CreatedAt.Year,
 							activeRecord.CreatedAt.Month,
-							activeRecord.CreatedAt.Day,
-							requestedTime.Hour,
-							requestedTime.Minute,
-							requestedTime.Second);
+							activeRecord.CreatedAt.Day);
+						referenceTime = referenceDate + requestedTime.TimeOfDay;
 
 						if (value.Count(c => c == ':') == 1)
 						{
