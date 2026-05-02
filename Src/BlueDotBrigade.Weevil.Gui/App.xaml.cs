@@ -8,7 +8,6 @@
 	using System.Windows;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Configuration;
-	using BlueDotBrigade.Weevil.Data.SqlClient;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
@@ -111,7 +110,7 @@
 				var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
 				Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
 
-				var telemetryClient = BuildTelemetryClient(isTelemetryEnabled);
+				var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
 				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
 				Log.Default.Write(LogSeverityType.Debug,
 					$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
@@ -167,19 +166,5 @@
 				"Weevil application is closing...");
 		}
 
-		private static ITelemetryClient BuildTelemetryClient(bool isTelemetryEnabled)
-		{
-			if (!isTelemetryEnabled)
-			{
-				return NullTelemetryClient.Instance;
-			}
-
-			var connectionString = TelemetryConfiguration.GetConnectionString();
-
-			return new MsSqlTelemetryClient(new MsSqlTelemetryClientOptions
-			{
-				ConnectionString = connectionString,
-			});
-		}
 	}
 }

@@ -8,7 +8,6 @@
 	using System.Threading.Tasks;
 	using Analysis;
 	using BlueDotBrigade.Weevil.Configuration;
-	using BlueDotBrigade.Weevil.Data.SqlClient;
 	using Cocona;
 	using Diagnostics;
 	using Filter;
@@ -32,7 +31,7 @@
 			var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
 			Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
 
-			var telemetryClient = BuildTelemetryClient(isTelemetryEnabled);
+			var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
 			TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
 			Log.Default.Write(LogSeverityType.Debug,
 				$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
@@ -75,19 +74,5 @@
 			Environment.Exit(exception?.HResult ?? 1);
 		}
 
-		private static ITelemetryClient BuildTelemetryClient(bool isTelemetryEnabled)
-		{
-			if (!isTelemetryEnabled)
-			{
-				return NullTelemetryClient.Instance;
-			}
-
-			var connectionString = TelemetryConfiguration.GetConnectionString();
-
-			return new MsSqlTelemetryClient(new MsSqlTelemetryClientOptions
-			{
-				ConnectionString = connectionString,
-			});
-		}
 	}		
 }
