@@ -12,6 +12,7 @@
 	using System.Linq;
 	using System.Net.Http;
 	using System.Reflection;
+	using System.Text.RegularExpressions;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
@@ -1335,6 +1336,88 @@
 					}
 				}
 			}
+		}
+
+
+		private void NavigateToSourceCode()
+		{
+			try
+			{
+				var selectedRecord = this.SelectedItems?.Count == 1 ? this.SelectedItems[0] : null;
+				if (selectedRecord == null)
+				{
+					MessageBox.Show("A single record must be selected.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+					return;
+				}
+
+				var target = TryExtractSourceTarget(selectedRecord.Content);
+				if (string.IsNullOrWhiteSpace(target))
+				{
+					MessageBox.Show("No source code location or symbol could be extracted from the selected record.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+					return;
+				}
+
+				if (Process.GetProcessesByName("devenv").Length == 0)
+				{
+					MessageBox.Show("Visual Studio is not running. Please start Visual Studio 2026 and open the appropriate source code, then try again.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+					return;
+				}
+
+				Clipboard.SetText(target);
+				MessageBox.Show($"Target copied to clipboard:\r\n\r\n{target}\r\n\r\nPaste into Visual Studio navigation (e.g. Ctrl+T) to open the location.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(LogSeverityType.Error, e, "Unexpected error while navigating to source code.");
+			}
+		}
+
+		private string TryExtractSourceTarget(string logEntry)
+		{
+			if (string.IsNullOrWhiteSpace(logEntry))
+			{
+				return string.Empty;
+			}
+
+			try
+			{
+				var appSettingsPath = Path.Combine(EnvironmentHelper.GetExecutableDirectory(), "appsettings.json");
+				if (!File.Exists(appSettingsPath))
+				{
+					return string.Empty;
+				}
+
+				var json = JObject.Parse(File.ReadAllText(appSettingsPath));
+				var sourceSection = json["SourceCodeNavigation"];
+				var fileRegex = sourceSection?["FilePathAndLineRegex"]?.ToString();
+				var symbolRegex = sourceSection?["FullyQualifiedMemberRegex"]?.ToString();
+
+				if (!string.IsNullOrWhiteSpace(fileRegex))
+				{
+					var match = Regex.Match(logEntry, fileRegex);
+					if (match.Success && match.Groups["path"].Success && match.Groups["line"].Success)
+					{
+						var path = match.Groups["path"].Value.Trim();
+						var line = int.TryParse(match.Groups["line"].Value, out var rawLine) ? Math.Max(1, rawLine) : 1;
+						return $"{path}({line},1)";
+					}
+				}
+
+				if (!string.IsNullOrWhiteSpace(symbolRegex))
+				{
+					var match = Regex.Match(logEntry, symbolRegex);
+					if (match.Success)
+					{
+						return match.Groups["symbol"].Success ? match.Groups["symbol"].Value.Trim() : match.Value.Trim();
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, "Unable to extract source code target from appsettings or record content.");
+			}
+
+			return string.Empty;
 		}
 
 		private void OnNavigateToInsightRecord(NavigateToInsightRecordBulletin bulletin)
