@@ -81,6 +81,6 @@ The existing telemetry unit tests cover the main operational guarantees:
 - exactly-once upload behavior
 - connection-string hardening and timeout enforcement
 
-Run:
+Run from the repository root:
 
-`dotnet test /home/runner/work/weevil/weevil/Tst/BlueDotBrigade.Weevil.Telemetry-UnitTests/BlueDotBrigade.Weevil.Telemetry-UnitTests.csproj --configuration Debug -p:Platform=x64`
+`dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build`
