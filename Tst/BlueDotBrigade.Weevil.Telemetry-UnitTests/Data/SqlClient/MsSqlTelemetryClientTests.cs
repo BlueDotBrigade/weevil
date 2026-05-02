@@ -114,8 +114,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			// Regression: Issue #802
 			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(
 				FakeConnectionString,
-				userName: "telemetryUser",
-				passwordOrApiToken: "token-123");
+				usernameOrApiToken: "telemetryUser",
+				secret: "token-123");
 
 			var builder = new SqlConnectionStringBuilder(result);
 			builder.UserID.Should().Be("telemetryUser");
@@ -128,8 +128,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			// Regression: Issue #802
 			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(
 				$"{FakeConnectionString}User Id=fromConnectionString;Password=fromConnectionString;",
-				userName: "fromEnvironment",
-				passwordOrApiToken: "fromEnvironment");
+				usernameOrApiToken: "fromEnvironment",
+				secret: "fromEnvironment");
 
 			var builder = new SqlConnectionStringBuilder(result);
 			builder.UserID.Should().Be("fromEnvironment");

@@ -29,14 +29,14 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		public string ConnectionString { get; set; } = string.Empty;
 
 		/// <summary>
-		/// Optional SQL username supplied outside the connection string.
+		/// Optional SQL username or API token supplied outside the connection string.
 		/// </summary>
-		public string UserName { get; set; } = string.Empty;
+		public string UsernameOrApiToken { get; set; } = string.Empty;
 
 		/// <summary>
-		/// Optional SQL password or API token supplied outside the connection string.
+		/// Optional SQL secret supplied outside the connection string.
 		/// </summary>
-		public string PasswordOrApiToken { get; set; } = string.Empty;
+		public string Secret { get; set; } = string.Empty;
 
 		/// <summary>
 		/// Command timeout in seconds applied to asynchronous send operations.

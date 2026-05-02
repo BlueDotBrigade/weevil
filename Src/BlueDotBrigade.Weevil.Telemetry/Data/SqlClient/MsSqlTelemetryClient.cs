@@ -109,8 +109,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		{
 			var securedConnectionString = BuildSecuredConnectionString(
 				_options.ConnectionString,
-				_options.UserName,
-				_options.PasswordOrApiToken,
+				_options.UsernameOrApiToken,
+				_options.Secret,
 				_options.ConnectionTimeoutSeconds);
 
 			DbContextOptions<TelemetryDbContext> contextOptions = new DbContextOptionsBuilder<TelemetryDbContext>()
@@ -132,8 +132,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		/// </summary>
 		internal static string BuildSecuredConnectionString(
 			string connectionString,
-			string userName = "",
-			string passwordOrApiToken = "",
+			string usernameOrApiToken = "",
+			string secret = "",
 			int connectTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultConnectionTimeoutSeconds)
 		{
 			var builder = new SqlConnectionStringBuilder(connectionString)
@@ -143,14 +143,14 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 				ConnectTimeout = connectTimeoutSeconds,
 			};
 
-			if (!string.IsNullOrWhiteSpace(userName))
+			if (!string.IsNullOrWhiteSpace(usernameOrApiToken))
 			{
-				builder.UserID = userName;
+				builder.UserID = usernameOrApiToken;
 			}
 
-			if (!string.IsNullOrWhiteSpace(passwordOrApiToken))
+			if (!string.IsNullOrWhiteSpace(secret))
 			{
-				builder.Password = passwordOrApiToken;
+				builder.Password = secret;
 			}
 
 			return builder.ConnectionString;

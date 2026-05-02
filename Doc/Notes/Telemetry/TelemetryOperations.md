@@ -15,8 +15,8 @@ Optional process/user environment variables:
 
 | Environment variable | Meaning |
 | --- | --- |
-| `WEEVIL_TELEMETRY_SQL_USERNAME` | Optional SQL username applied at runtime. |
-| `WEEVIL_TELEMETRY_SQL_PASSWORD_OR_API_TOKEN` | Optional SQL password/API token applied at runtime. |
+| `WEEVIL_TELEMETRY_USERNAME` | Optional SQL username (or API token) applied at runtime. |
+| `WEEVIL_TELEMETRY_SECRET` | Optional SQL secret applied at runtime. |
 
 ## Installer behavior
 
@@ -28,6 +28,7 @@ Optional process/user environment variables:
 ## Application behavior
 
 - GUI and CLI both respect `TelemetryEnabled`.
+- Telemetry is treated as disabled when both `WEEVIL_TELEMETRY_USERNAME` and `WEEVIL_TELEMETRY_SECRET` are blank.
 - If telemetry is disabled, Weevil uses `NullTelemetryClient` and performs no upload work.
 - If telemetry is enabled but `TelemetryConnectionString` is empty, the SQL client becomes a no-op and logs a warning.
 - On non-Windows platforms, the registry-backed configuration falls back to enabled with no connection string.
@@ -35,7 +36,7 @@ Optional process/user environment variables:
 ## Connection string requirements
 
 Provide an Azure SQL connection string in `TelemetryConnectionString`.
-If credentials must be provided at runtime (development or CI), set `WEEVIL_TELEMETRY_SQL_USERNAME` and `WEEVIL_TELEMETRY_SQL_PASSWORD_OR_API_TOKEN`.
+If credentials must be provided at runtime (development or CI), set `WEEVIL_TELEMETRY_USERNAME` and `WEEVIL_TELEMETRY_SECRET`.
 
 Operational guidance:
 
