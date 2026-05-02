@@ -64,13 +64,17 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection is being attempted (async)...");
+
 				using TelemetryDbContext context = CreateContext(_options.CommandTimeoutSeconds);
 				context.Sessions.Add(session);
 				await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection succeeded (async).");
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				// Failure isolation: telemetry must never affect the user workflow.
+				Log.Default.Write(LogSeverityType.Warning, e, "Telemetry database connection failed (async).");
 			}
 		}
 #pragma warning restore CA1031
@@ -86,13 +90,17 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection is being attempted (sync)...");
+
 				using TelemetryDbContext context = CreateContext(_options.SyncTimeoutSeconds);
 				context.Sessions.Add(session);
 				context.SaveChanges();
+
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection succeeded (sync).");
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				// Failure isolation: telemetry must never affect the user workflow.
+				Log.Default.Write(LogSeverityType.Warning, e, "Telemetry database connection failed (sync).");
 			}
 		}
 #pragma warning restore CA1031
