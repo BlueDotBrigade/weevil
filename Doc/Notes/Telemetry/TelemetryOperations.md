@@ -10,6 +10,7 @@ Telemetry configuration is read from `HKEY_CURRENT_USER\Software\BlueDotBrigade\
 | --- | --- | --- |
 | `TelemetryEnabled` | integer or boolean-like value | Enables or disables telemetry. Missing or invalid values are intentionally treated as enabled so the default-enabled, opt-out installer behavior remains effective unless the user explicitly turns telemetry off. |
 | `TelemetryConnectionString` | string | Azure SQL connection string used by the telemetry adapter. Empty or missing disables upload. |
+| `TelemetrySource` | string | Non-PII installer/distribution source label included in each telemetry session row. Missing or empty values default to `unknown`. |
 
 ## Installer behavior
 
@@ -67,7 +68,7 @@ Use this checklist after configuration changes.
 5. Verify that a disabled install produces no upload attempts.
 6. Verify that an empty or invalid connection string does not crash the application.
 7. Verify that the database receives one row per ended session.
-8. Verify that the inserted row contains `Application`, `Version`, `SessionStartUtc`, `SessionEndUtc`, `SessionActiveMinutes`, `LogFileSizeBytes`, `InstalledRamMb`, `FilterExecutionCount`, `GraphOpenCount`, `DashboardOpenCount`, and `SchemaVersion`.
+8. Verify that the inserted row contains `Application`, `Source`, `Version`, `IsDebugging`, `SessionStartUtc`, `SessionEndUtc`, `SessionActiveMinutes`, `LogFileSizeBytes`, `InstalledRamMb`, `FilterExecutionCount`, `GraphOpenCount`, `DashboardOpenCount`, and `SchemaVersion`.
 
 ## Regression checks
 

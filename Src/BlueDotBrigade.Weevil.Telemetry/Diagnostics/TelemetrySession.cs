@@ -18,9 +18,19 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		public string Application { get; set; } = string.Empty;
 
 		/// <summary>
+		/// Distribution source associated with the running Weevil instance.
+		/// </summary>
+		public string Source { get; set; } = "unknown";
+
+		/// <summary>
 		/// Application version for the session.
 		/// </summary>
 		public Version Version { get; set; } = new Version(0, 0);
+
+		/// <summary>
+		/// Indicates whether a debugger was attached when the application started.
+		/// </summary>
+		public bool IsDebugging { get; set; }
 
 		/// <summary>
 		/// UTC timestamp when the session began.

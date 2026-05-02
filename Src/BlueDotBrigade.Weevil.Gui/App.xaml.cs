@@ -14,6 +14,9 @@
 
 	public partial class App : Application
 	{
+		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
+		internal static string TelemetrySource { get; } = TelemetryConfiguration.GetSource();
+
 		public App()
 		{
 			Startup += OnApplicationOpening;
@@ -112,6 +115,7 @@
 
 				var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
 				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
+				TelemetrySessionLifecycle.Shared.ConfigureStartupContext(TelemetrySource, IsDebuggerAttachedAtStartup);
 				Log.Default.Write(LogSeverityType.Debug,
 					$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 

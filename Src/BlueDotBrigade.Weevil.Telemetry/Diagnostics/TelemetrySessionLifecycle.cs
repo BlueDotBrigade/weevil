@@ -24,6 +24,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		private readonly TimeSpan _idleThreshold;
 		private DateTime? _lastActivityUtc;
 		private ITelemetryClient _client;
+		private StartupContext _startupContext;
 
 		public TelemetrySessionLifecycle() : this(() => DateTime.UtcNow, TimeSpan.FromMinutes(1))
 		{
@@ -37,6 +38,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				? throw new ArgumentOutOfRangeException(nameof(idleThreshold))
 				: idleThreshold;
 			_client = NullTelemetryClient.Instance;
+			_startupContext = StartupContext.Default;
 		}
 
 		public static TelemetrySessionLifecycle Shared { get; } = new TelemetrySessionLifecycle();
@@ -91,7 +93,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					{
 						SessionId = Guid.NewGuid(),
 						Application = string.IsNullOrWhiteSpace(application) ? "unknown" : application,
+						Source = _startupContext.Source,
 						Version = version ?? new Version(0, 0),
+						IsDebugging = _startupContext.IsDebugging,
 						SessionStartUtc = now,
 						SessionEndUtc = now,
 						LogFileSizeBytes = TryGetFileSize(sourceFilePath),
@@ -311,6 +315,16 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			CurrentSession.SessionActiveMinutes += elapsed.TotalMinutes;
 		}
 
+		public void ConfigureStartupContext(string source, bool isDebugging)
+		{
+			lock (_gate)
+			{
+				_startupContext = new StartupContext(
+					string.IsNullOrWhiteSpace(source) ? "unknown" : source,
+					isDebugging);
+			}
+		}
+
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
 		private async Task SafeSendAsync(TelemetrySession session)
@@ -396,5 +410,20 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 		}
 #pragma warning restore CA1031
+
+		private sealed class StartupContext
+		{
+			public StartupContext(string source, bool isDebugging)
+			{
+				Source = source;
+				IsDebugging = isDebugging;
+			}
+
+			public static StartupContext Default => new StartupContext("unknown", false);
+
+			public string Source { get; }
+
+			public bool IsDebugging { get; }
+		}
 	}
 }
