@@ -108,6 +108,53 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			builder.ConnectTimeout.Should().Be(MsSqlTelemetryClientOptions.DefaultConnectionTimeoutSeconds);
 		}
 
+		[TestMethod]
+		public void GivenCredentialsProvided_WhenBuildSecured_ThenCredentialsAreApplied()
+		{
+			// Regression: Issue #802
+			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(
+				FakeConnectionString,
+				usernameOrApiToken: "telemetryUser",
+				secret: "token-123");
+
+			var builder = new SqlConnectionStringBuilder(result);
+			builder.UserID.Should().Be("telemetryUser");
+			builder.Password.Should().Be("token-123");
+		}
+
+		[TestMethod]
+		public void GivenInlineCredentialsAndOverrideCredentials_WhenBuildSecured_ThenOverrideCredentialsWin()
+		{
+			// Regression: Issue #802
+			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(
+				$"{FakeConnectionString}User Id=fromConnectionString;Password=fromConnectionString;",
+				usernameOrApiToken: "fromEnvironment",
+				secret: "fromEnvironment");
+
+			var builder = new SqlConnectionStringBuilder(result);
+			builder.UserID.Should().Be("fromEnvironment");
+			builder.Password.Should().Be("fromEnvironment");
+		}
+
+		[TestMethod]
+		public void GivenCredentialContainingDelimiterCharacters_WhenBuildSecured_ThenSqlPropertiesRemainSafe()
+		{
+			// Regression: Issue #802
+			var maliciousUserName = "telemetry;Database=Injected";
+			var maliciousPassword = "pw;Encrypt=False";
+
+			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(
+				FakeConnectionString,
+				maliciousUserName,
+				maliciousPassword);
+
+			var builder = new SqlConnectionStringBuilder(result);
+			builder.InitialCatalog.Should().Be("Weevil");
+			builder.UserID.Should().Be(maliciousUserName);
+			builder.Password.Should().Be(maliciousPassword);
+			builder.Encrypt.Should().Be(SqlConnectionEncryptOption.Mandatory);
+		}
+
 		// ─── SendAsync ─────────────────────────────────────────────────────────────
 
 		[TestMethod]

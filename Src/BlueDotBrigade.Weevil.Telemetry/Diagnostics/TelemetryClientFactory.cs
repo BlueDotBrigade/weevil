@@ -1,5 +1,6 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
+	using System;
 	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Data.SqlClient;
 
@@ -8,20 +9,39 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	/// </summary>
 	public static class TelemetryClientFactory
 	{
+		private const string TelemetryUserNameEnvironmentVariable = "WEEVIL_TELEMETRY_USERNAME";
+		private const string TelemetrySecretEnvironmentVariable = "WEEVIL_TELEMETRY_SECRET";
+
 		/// <summary>
-		/// Creates a telemetry client based on the runtime enabled flag.
+		/// Creates a telemetry client based on runtime credential configuration.
 		/// </summary>
-		public static ITelemetryClient Create(bool isTelemetryEnabled)
+		public static ITelemetryClient Create()
 		{
-			if (!isTelemetryEnabled)
+			MsSqlTelemetryClientOptions options = CreateOptions(TelemetryConfiguration.GetConnectionString());
+
+			if (string.IsNullOrWhiteSpace(options.UsernameOrApiToken) &&
+				string.IsNullOrWhiteSpace(options.Secret))
 			{
 				return NullTelemetryClient.Instance;
 			}
 
-			return new MsSqlTelemetryClient(new MsSqlTelemetryClientOptions
+			return new MsSqlTelemetryClient(options);
+		}
+
+		internal static MsSqlTelemetryClientOptions CreateOptions(string connectionString)
+		{
+			return new MsSqlTelemetryClientOptions
 			{
-				ConnectionString = TelemetryConfiguration.GetConnectionString(),
-			});
+				ConnectionString = connectionString,
+				UsernameOrApiToken = GetOptionalEnvironmentValue(TelemetryUserNameEnvironmentVariable),
+				Secret = GetOptionalEnvironmentValue(TelemetrySecretEnvironmentVariable),
+			};
+		}
+
+		private static string GetOptionalEnvironmentValue(string variableName)
+		{
+			var value = Environment.GetEnvironmentVariable(variableName);
+			return string.IsNullOrWhiteSpace(value) ? string.Empty : value;
 		}
 	}
 }

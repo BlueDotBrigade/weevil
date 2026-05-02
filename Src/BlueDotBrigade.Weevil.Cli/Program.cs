@@ -8,7 +8,6 @@
 	using System.Reflection;
 	using System.Threading.Tasks;
 	using Analysis;
-	using BlueDotBrigade.Weevil.Configuration;
 	using Cocona;
 	using Diagnostics;
 	using Filter;
@@ -21,7 +20,7 @@
 	{
 		internal static Version ApplicationVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
-		internal static string TelemetrySource { get; } = TelemetryConfiguration.GetSource();
+		internal static string TelemetrySource { get; } = "unknown";
 
 		public static void Main()
 		{
@@ -31,10 +30,7 @@
 			Log.Register(new NLogWriter());
 			Log.Default.Write($"Weevil console application is initializing... Arguments={Environment.GetCommandLineArgs().Length}");
 
-			var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
-			Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
-
-			var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
+			var telemetryClient = TelemetryClientFactory.Create();
 			TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
 			TelemetrySessionLifecycle.Shared.ConfigureStartupContext(TelemetrySource, IsDebuggerAttachedAtStartup);
 			Log.Default.Write(LogSeverityType.Debug,

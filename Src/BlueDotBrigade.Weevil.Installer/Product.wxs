@@ -10,8 +10,6 @@
 		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
 		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
 		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
-		<Property Id="TELEMETRYENABLED" Value="1" />
-		<Property Id="TELEMETRYSOURCE" Value="Official" />
 		<WixVariable Id="WixUILicenseRtf" Value="License-Installation.rtf" />
 		<ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
 
@@ -60,28 +58,9 @@
 			<Component Id="RegistryComponent" Guid="BDB8AD0C-3284-4C23-8FFA-A41F7831F83E">
 				<RegistryKey Root="HKCU" Key="Software\BlueDotBrigade\Weevil">
 					<RegistryValue Type="string" Name="EnableBetaFeatures" Value="True" />
-					<RegistryValue Type="integer" Name="TelemetryEnabled" Value="[TELEMETRYENABLED]" />
-					<RegistryValue Type="string" Name="TelemetrySource" Value="[TELEMETRYSOURCE]" />
 				</RegistryKey>
 			</Component>
 		</ComponentGroup>
-	</Fragment>
-	<Fragment>
-		<UI>
-			<DialogRef Id="InstallDirDlg" />
-			<Dialog Id="InstallDirDlg">
-				<Control
-					Id="TelemetryEnabledCheckbox"
-					Type="CheckBox"
-					X="20"
-					Y="200"
-					Width="320"
-					Height="32"
-					Property="TELEMETRYENABLED"
-					CheckBoxValue="1"
-					Text="Telemetry data is used to improve the application. No personal identifying information will be collected." />
-			</Dialog>
-		</UI>
 	</Fragment>
 	<Fragment>
 		<DirectoryRef Id="WeevilShortcutDir">

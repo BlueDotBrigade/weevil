@@ -7,7 +7,6 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Threading;
-	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
@@ -15,7 +14,7 @@
 	public partial class App : Application
 	{
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
-		internal static string TelemetrySource { get; } = TelemetryConfiguration.GetSource();
+		internal static string TelemetrySource { get; } = "unknown";
 
 		public App()
 		{
@@ -110,10 +109,7 @@
 					LogSeverityType.Information,
 					"Weevil application is starting...");
 				
-				var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
-				Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
-
-				var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
+				var telemetryClient = TelemetryClientFactory.Create();
 				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
 				TelemetrySessionLifecycle.Shared.ConfigureStartupContext(TelemetrySource, IsDebuggerAttachedAtStartup);
 				Log.Default.Write(LogSeverityType.Debug,
