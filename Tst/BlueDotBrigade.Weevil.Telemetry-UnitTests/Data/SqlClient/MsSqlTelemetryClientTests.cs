@@ -147,6 +147,56 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			await act.Should().NotThrowAsync();
 		}
 
+		[TestMethod]
+		public async Task GivenValidSession_WhenSendAsyncCalled_ThenLogsConnectionAttempt()
+		{
+			// Arrange
+			var capture = new CapturingLogWriter();
+			var original = Log.Default;
+			var client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1, connectionTimeoutSeconds: 1);
+			var session = CreateMinimalSession();
+
+			try
+			{
+				Log.Register(capture);
+
+				// Act
+				await client.SendAsync(session, CancellationToken.None);
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			// Assert: a debug "connection is being attempted" entry must be written before any failure.
+			capture.DebugMessages.Should().ContainSingle(m => m.Contains("attempted"));
+		}
+
+		[TestMethod]
+		public async Task GivenUnavailableDatabase_WhenSendAsyncCalled_ThenLogsWarning()
+		{
+			// Arrange
+			var capture = new CapturingLogWriter();
+			var original = Log.Default;
+			var client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1, connectionTimeoutSeconds: 1);
+			var session = CreateMinimalSession();
+
+			try
+			{
+				Log.Register(capture);
+
+				// Act
+				await client.SendAsync(session, CancellationToken.None);
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			// Assert: failure must be logged as a warning.
+			capture.Warnings.Should().ContainSingle(m => m.Contains("failed"));
+		}
+
 		// ─── SendSync ──────────────────────────────────────────────────────────────
 
 		[TestMethod]
@@ -171,6 +221,56 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			// Assert: failure isolation — no exception may propagate.
 			act.Should().NotThrow();
+		}
+
+		[TestMethod]
+		public void GivenValidSession_WhenSendSyncCalled_ThenLogsConnectionAttempt()
+		{
+			// Arrange
+			var capture = new CapturingLogWriter();
+			var original = Log.Default;
+			var client = CreateClientWithFakeConnection(syncTimeoutSeconds: 1, connectionTimeoutSeconds: 1);
+			var session = CreateMinimalSession();
+
+			try
+			{
+				Log.Register(capture);
+
+				// Act
+				client.SendSync(session);
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			// Assert: a debug "connection is being attempted" entry must be written before any failure.
+			capture.DebugMessages.Should().ContainSingle(m => m.Contains("attempted"));
+		}
+
+		[TestMethod]
+		public void GivenUnavailableDatabase_WhenSendSyncCalled_ThenLogsWarning()
+		{
+			// Arrange
+			var capture = new CapturingLogWriter();
+			var original = Log.Default;
+			var client = CreateClientWithFakeConnection(syncTimeoutSeconds: 1, connectionTimeoutSeconds: 1);
+			var session = CreateMinimalSession();
+
+			try
+			{
+				Log.Register(capture);
+
+				// Act
+				client.SendSync(session);
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			// Assert: failure must be logged as a warning.
+			capture.Warnings.Should().ContainSingle(m => m.Contains("failed"));
 		}
 
 		// ─── Disabled (no credentials) ────────────────────────────────────────────
@@ -257,15 +357,14 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		private sealed class CapturingLogWriter : ILogWriter
 		{
+			public List<string> DebugMessages { get; } = new List<string>();
 			public List<string> Warnings { get; } = new List<string>();
 
 			public void Write(string message) { }
 			public void Write(string message, IEnumerable<KeyValuePair<string, object>> metadata) { }
 			public void Write(LogSeverityType severity, Exception exception) { }
-			public void Write(LogSeverityType severity, Exception exception, string message) { }
-			public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata) { }
 
-			public void Write(LogSeverityType severity, string message)
+			public void Write(LogSeverityType severity, Exception exception, string message)
 			{
 				if (severity == LogSeverityType.Warning)
 				{
@@ -273,9 +372,33 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 				}
 			}
 
-			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
+			public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 			{
 				if (severity == LogSeverityType.Warning)
+				{
+					Warnings.Add(message);
+				}
+			}
+
+			public void Write(LogSeverityType severity, string message)
+			{
+				if (severity == LogSeverityType.Debug)
+				{
+					DebugMessages.Add(message);
+				}
+				else if (severity == LogSeverityType.Warning)
+				{
+					Warnings.Add(message);
+				}
+			}
+
+			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
+			{
+				if (severity == LogSeverityType.Debug)
+				{
+					DebugMessages.Add(message);
+				}
+				else if (severity == LogSeverityType.Warning)
 				{
 					Warnings.Add(message);
 				}
