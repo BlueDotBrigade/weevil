@@ -8,7 +8,6 @@ Telemetry configuration is read from `HKEY_CURRENT_USER\Software\BlueDotBrigade\
 
 | Registry value | Type | Meaning |
 | --- | --- | --- |
-| `TelemetryEnabled` | integer or boolean-like value | Enables or disables telemetry. Missing or invalid values are intentionally treated as enabled so the default-enabled, opt-out installer behavior remains effective unless the user explicitly turns telemetry off. |
 | `TelemetryConnectionString` | string | Azure SQL connection string used by the telemetry adapter. Empty or missing disables upload. This value should contain server and database settings only. |
 | `TelemetrySource` | string | Non-PII installer/distribution source label included in each telemetry session row. Missing or empty values default to `unknown`. |
 
@@ -21,18 +20,15 @@ Optional process/user environment variables:
 
 ## Installer behavior
 
-- The installer exposes a telemetry checkbox.
-- Default value: enabled
-- Persisted registry value: `TelemetryEnabled`
-- Installer message: telemetry improves the application and does not collect personal identifying information.
+- The installer persists telemetry source metadata in the user registry.
 
 ## Application behavior
 
-- GUI and CLI both respect `TelemetryEnabled`.
+- GUI and CLI configure telemetry at startup using connection string and environment credential settings.
 - Telemetry is treated as disabled when both `WEEVIL_TELEMETRY_USERNAME` and `WEEVIL_TELEMETRY_SECRET` are blank.
 - If telemetry is disabled, Weevil uses `NullTelemetryClient` and performs no upload work.
-- If telemetry is enabled but `TelemetryConnectionString` is empty, the SQL client becomes a no-op and logs a warning.
-- On non-Windows platforms, the registry-backed configuration falls back to enabled with no connection string.
+- If `TelemetryConnectionString` is empty, the SQL client becomes a no-op and logs a warning.
+- On non-Windows platforms, the registry-backed configuration falls back to an empty connection string and source `unknown`.
 
 ## Connection string requirements
 
@@ -64,22 +60,21 @@ Current provider defaults:
 1. Deploy the `telemetry.Session` table using the schema documented in `TelemetrySchemaAndPrivacy.md`.
 2. Create a SQL login that can insert into `telemetry.Session` only.
 3. Set `TelemetryConnectionString` in `HKEY_CURRENT_USER\Software\BlueDotBrigade\Weevil`.
-4. Install Weevil with telemetry enabled, or set `TelemetryEnabled` to `1`.
+4. Set runtime credentials (`WEEVIL_TELEMETRY_USERNAME` and `WEEVIL_TELEMETRY_SECRET`) in the execution environment.
 5. Open and close a log file in Weevil to produce one ended session.
 
 ## Validation checklist
 
 Use this checklist after configuration changes.
 
-1. Confirm `TelemetryEnabled` is present and set to the expected value.
-2. Confirm `TelemetryConnectionString` is present for environments that should upload telemetry.
-3. Confirm environment credentials are present when SQL authentication is required.
-4. Verify that opening a file starts a session and opening a different file ends the previous session.
-5. Verify that closing the application ends the current session once.
-6. Verify that a disabled install produces no upload attempts.
-7. Verify that an empty or invalid connection string does not crash the application.
-8. Verify that the database receives one row per ended session.
-9. Verify that the inserted row contains `Application`, `Source`, `Version`, `IsDebugging`, `SessionStartUtc`, `SessionEndUtc`, `SessionActiveMinutes`, `LogFileSizeBytes`, `InstalledRamMb`, `FilterExecutionCount`, `GraphOpenCount`, `DashboardOpenCount`, and `SchemaVersion`.
+1. Confirm `TelemetryConnectionString` is present for environments that should upload telemetry.
+2. Confirm environment credentials are present when SQL authentication is required.
+3. Verify that opening a file starts a session and opening a different file ends the previous session.
+4. Verify that closing the application ends the current session once.
+5. Verify that a credentials-blank environment produces no upload attempts.
+6. Verify that an empty or invalid connection string does not crash the application.
+7. Verify that the database receives one row per ended session.
+8. Verify that the inserted row contains `Application`, `Source`, `Version`, `IsDebugging`, `SessionStartUtc`, `SessionEndUtc`, `SessionActiveMinutes`, `LogFileSizeBytes`, `InstalledRamMb`, `FilterExecutionCount`, `GraphOpenCount`, `DashboardOpenCount`, and `SchemaVersion`.
 
 ## Regression checks
 

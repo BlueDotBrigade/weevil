@@ -13,15 +13,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		private const string TelemetrySecretEnvironmentVariable = "WEEVIL_TELEMETRY_SECRET";
 
 		/// <summary>
-		/// Creates a telemetry client based on the runtime enabled flag.
+		/// Creates a telemetry client based on runtime credential configuration.
 		/// </summary>
-		public static ITelemetryClient Create(bool isTelemetryEnabled)
+		public static ITelemetryClient Create()
 		{
-			if (!isTelemetryEnabled)
-			{
-				return NullTelemetryClient.Instance;
-			}
-
 			MsSqlTelemetryClientOptions options = CreateOptions(TelemetryConfiguration.GetConnectionString());
 
 			if (string.IsNullOrWhiteSpace(options.UsernameOrApiToken) &&

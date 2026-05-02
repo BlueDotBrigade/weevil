@@ -110,10 +110,7 @@
 					LogSeverityType.Information,
 					"Weevil application is starting...");
 				
-				var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
-				Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
-
-				var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
+				var telemetryClient = TelemetryClientFactory.Create();
 				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
 				TelemetrySessionLifecycle.Shared.ConfigureStartupContext(TelemetrySource, IsDebuggerAttachedAtStartup);
 				Log.Default.Write(LogSeverityType.Debug,

@@ -8,14 +8,9 @@ namespace BlueDotBrigade.Weevil.Configuration
 	public static class TelemetryConfiguration
 	{
 		private const string RegistryPath = @"Software\BlueDotBrigade\Weevil";
-		private const string RegistryValueName = "TelemetryEnabled";
 		private const string ConnectionStringValueName = "TelemetryConnectionString";
 		private const string SourceValueName = "TelemetrySource";
 
-		public static bool IsEnabled()
-		{
-			return LoadIsEnabledFromRegistry();
-		}
 
 		/// <summary>
 		/// Returns the telemetry database connection string, or an empty string when no value is configured.
@@ -31,50 +26,6 @@ namespace BlueDotBrigade.Weevil.Configuration
 		public static string GetSource()
 		{
 			return LoadSourceFromRegistry();
-		}
-
-		private static bool ParseEnabledValue(string rawValue)
-		{
-			if (string.IsNullOrWhiteSpace(rawValue))
-			{
-				return true;
-			}
-
-			if (bool.TryParse(rawValue, out var isEnabled))
-			{
-				return isEnabled;
-			}
-
-			if (int.TryParse(rawValue, out var numericValue))
-			{
-				return numericValue != 0;
-			}
-
-			return true;
-		}
-
-		private static bool LoadIsEnabledFromRegistry()
-		{
-			if (!OperatingSystem.IsWindows())
-			{
-				return true;
-			}
-
-			try
-			{
-				using var registryKey = Registry.CurrentUser.OpenSubKey(RegistryPath);
-				var rawValue = registryKey?.GetValue(RegistryValueName)?.ToString();
-
-				return ParseEnabledValue(rawValue);
-			}
-			catch (Exception exception) when (
-				exception is SecurityException ||
-				exception is UnauthorizedAccessException ||
-				exception is IOException ||
-				exception is PlatformNotSupportedException)
-			{
-				return true;
-			}
 		}
 
 		private static string LoadConnectionStringFromRegistry()
