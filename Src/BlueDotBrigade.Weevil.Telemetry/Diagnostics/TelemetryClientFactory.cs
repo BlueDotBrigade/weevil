@@ -22,12 +22,18 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return NullTelemetryClient.Instance;
 			}
 
-			return new MsSqlTelemetryClient(new MsSqlTelemetryClientOptions
+			var options = CreateOptions(TelemetryConfiguration.GetConnectionString());
+			return new MsSqlTelemetryClient(options);
+		}
+
+		internal static MsSqlTelemetryClientOptions CreateOptions(string connectionString)
+		{
+			return new MsSqlTelemetryClientOptions
 			{
-				ConnectionString = TelemetryConfiguration.GetConnectionString(),
+				ConnectionString = connectionString,
 				UserName = GetOptionalEnvironmentValue(TelemetrySqlUserNameEnvironmentVariable),
 				PasswordOrApiToken = GetOptionalEnvironmentValue(TelemetrySqlPasswordOrApiTokenEnvironmentVariable),
-			});
+			};
 		}
 
 		private static string GetOptionalEnvironmentValue(string variableName)

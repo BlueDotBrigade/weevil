@@ -140,18 +140,18 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		public void GivenCredentialContainingDelimiterCharacters_WhenBuildSecured_ThenSqlPropertiesRemainSafe()
 		{
 			// Regression: Issue #802
-			var userName = "telemetry;Database=Injected";
-			var password = "pw;Encrypt=False";
+			var maliciousUserName = "telemetry;Database=Injected";
+			var maliciousPassword = "pw;Encrypt=False";
 
 			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(
 				FakeConnectionString,
-				userName,
-				password);
+				maliciousUserName,
+				maliciousPassword);
 
 			var builder = new SqlConnectionStringBuilder(result);
 			builder.InitialCatalog.Should().Be("Weevil");
-			builder.UserID.Should().Be(userName);
-			builder.Password.Should().Be(password);
+			builder.UserID.Should().Be(maliciousUserName);
+			builder.Password.Should().Be(maliciousPassword);
 			builder.Encrypt.Should().Be(SqlConnectionEncryptOption.Mandatory);
 		}
 

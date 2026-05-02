@@ -1,7 +1,6 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
-	using System.Reflection;
 	using BlueDotBrigade.Weevil.Data.SqlClient;
 	using FluentAssertions;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -41,12 +40,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(userNameVariable, "telemetry-user");
 				Environment.SetEnvironmentVariable(passwordVariable, "telemetry-secret");
 
-				var client = TelemetryClientFactory.Create(true).Should().BeOfType<MsSqlTelemetryClient>().Subject;
-
-				var optionsField = typeof(MsSqlTelemetryClient).GetField("_options", BindingFlags.Instance | BindingFlags.NonPublic);
-				optionsField.Should().NotBeNull();
-
-				var options = optionsField.GetValue(client).Should().BeOfType<MsSqlTelemetryClientOptions>().Subject;
+				var options = TelemetryClientFactory.CreateOptions("Server=localhost;Database=Weevil;");
 				options.UserName.Should().Be("telemetry-user");
 				options.PasswordOrApiToken.Should().Be("telemetry-secret");
 			}
