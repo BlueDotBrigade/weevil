@@ -1,8 +1,7 @@
-﻿namespace BlueDotBrigade.Weevil.Cli.IO
-{
-	using System.Diagnostics;
-	using System;
+using System.Diagnostics;
 
+namespace BlueDotBrigade.Weevil.IO
+{
 	internal class DebugWriter : IOutputWriter
 	{
 		public void WriteLine(string message)

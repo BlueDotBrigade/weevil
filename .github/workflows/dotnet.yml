@@ -1,4 +1,5 @@
-name: Build and Test (.NET 9)
+name: Master branch
+description: Compiles and runs unit tests for master branch using .NET 9 core environment.
 
 on:
   push:

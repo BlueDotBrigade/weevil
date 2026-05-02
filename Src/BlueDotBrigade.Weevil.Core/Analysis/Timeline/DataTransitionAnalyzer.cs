@@ -7,6 +7,10 @@
 	using Filter;
 	using Filter.Expressions.Regular;
 
+	/// <summary>
+	/// Extracts values via regex named capture groups and tracks the previous value per key.
+	/// Flags the record where a value first appears or changes from its previous value.
+	/// </summary>
 	internal class DataTransitionAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;

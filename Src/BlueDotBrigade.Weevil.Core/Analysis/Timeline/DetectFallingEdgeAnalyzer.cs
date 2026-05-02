@@ -3,12 +3,17 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+      using System.Globalization;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
 	using Filter.Expressions.Regular;
 
+	/// <summary>
+	/// Extracts numeric values via regex named capture groups and compares each to the previous value.
+	/// Flags records where the numeric value decreases compared to the preceding record.
+	/// </summary>
 	internal class DetectFallingEdgeAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
@@ -74,6 +79,7 @@
 			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
 			var previous = new Dictionary<string, string>();
+			var isInFallingRun = new Dictionary<string, bool>();
 
 			var sortedRecords = analysisOrder == AnalysisOrder.Ascending
 					? records
@@ -93,40 +99,34 @@
 								{
 									if (!string.IsNullOrWhiteSpace(current.Value))
 									{
-										if (previous.ContainsKey(current.Key))
-										{
-											if (long.TryParse(previous[current.Key], out var previousValue) &&
-												long.TryParse(current.Value, out var currentValue))
-											{
-												if (currentValue < previousValue)
-												{
-													var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
+                                  if (previous.TryGetValue(current.Key, out var previousRaw) &&
+										decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
+										decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
+									{
+										var isFalling = currentValue < previousValue;
+										var wasFalling = isInFallingRun.TryGetValue(current.Key, out var priorState) && priorState;
 
-													count++;
-
-													AnalysisHelper.UpdateRecordMetadata(
-														record,
-														true,
-														$"{parameterName}: {previous[current.Key]} => {current.Value}",
-														canUpdateMetadata);
-												}
-												previous[current.Key] = current.Value;
-											}
-										}
-										else
+										if (isFalling && !wasFalling)
 										{
 											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
 											count++;
 
-													AnalysisHelper.UpdateRecordMetadata(
-														record,
-														true,
-														$"{parameterName}: {current.Value}",
-														canUpdateMetadata);
-											
-											previous.Add(current.Key, current.Value);
+											AnalysisHelper.UpdateRecordMetadata(
+												record,
+												true,
+												$"{parameterName}: {previousRaw} => {current.Value}",
+												canUpdateMetadata);
 										}
+
+										isInFallingRun[current.Key] = isFalling;
+										previous[current.Key] = current.Value;
+									}
+									else
+									{
+										previous[current.Key] = current.Value;
+										isInFallingRun[current.Key] = false;
+									}
 									}
 								}
 							}

@@ -1,0 +1,32 @@
+namespace BlueDotBrigade.Weevil.Analysis.Timeline
+{
+	using BlueDotBrigade.Weevil.TestTools.Data;
+
+	[TestClass]
+	public class DataTransitionAnalyzerTests
+	{
+		[TestMethod]
+		public void GivenIntegerAndDecimalTransitions_WhenAnalyzeRuns_ThenTransitionRecordsAreFlagged()
+		{
+			var records = R.Create()
+				.WithContent("Value=0")
+				.WithContent("Value=0")
+				.WithContent("Value=2")
+				.WithContent("Value=2.5")
+				.GetRecords();
+
+			var analyzer = new DataTransitionAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
+
+			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			results.FlaggedRecords.Should().Be(3);
+			records[0].Metadata.IsFlagged.Should().BeTrue();
+			records[1].Metadata.IsFlagged.Should().BeFalse();
+			records[2].Metadata.IsFlagged.Should().BeTrue();
+			records[3].Metadata.IsFlagged.Should().BeTrue();
+			records[2].Metadata.Comment.Should().Contain("Value: 2");
+			records[3].Metadata.Comment.Should().Contain("Value: 2.5");
+		}
+	}
+}

@@ -1,10 +1,11 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Filter
+namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
 	using System.Data.Common;
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
+	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
@@ -26,19 +27,19 @@
 				{
 					var viewModel = args.OldValue as FilterViewModel;
 
-                                        viewModel.FileOpened -= OnFileOpened;
-                                        viewModel.ResultsChanged -= OnResultsChanged;
-                                        viewModel.RegionsChanged -= OnRegionsChanged;
-                                        viewModel.BookmarksChanged -= OnBookmarksChanged;
+					viewModel.FileOpened -= OnFileOpened;
+					viewModel.ResultsChanged -= OnResultsChanged;
+					viewModel.RegionsChanged -= OnRegionsChanged;
+					viewModel.BookmarksChanged -= OnBookmarksChanged;
 				}
 				if (args.NewValue != null)
 				{
 					var viewModel = args.NewValue as FilterViewModel;
 
-                                        viewModel.FileOpened += OnFileOpened;
-                                        viewModel.ResultsChanged += OnResultsChanged;
-                                        viewModel.RegionsChanged += OnRegionsChanged;
-                                        viewModel.BookmarksChanged += OnBookmarksChanged;
+					viewModel.FileOpened += OnFileOpened;
+					viewModel.ResultsChanged += OnResultsChanged;
+					viewModel.RegionsChanged += OnRegionsChanged;
+					viewModel.BookmarksChanged += OnBookmarksChanged;
 				}
 			};
 
@@ -75,17 +76,17 @@
 			_isLogFileOpening = true;
 		}
 
-                private void OnRegionsChanged(object sender, EventArgs e)
-                {
-                        // Force bindings (and converters) for only the visible items to be refreshed.
-                        this.ListView.Items.Refresh();
-                }
+		private void OnRegionsChanged(object sender, EventArgs e)
+		{
+			// Force bindings (and converters) for only the visible items to be refreshed.
+			this.ListView.Items.Refresh();
+		}
 
-                private void OnBookmarksChanged(object sender, EventArgs e)
-                {
-                        // Force bindings (and converters) for only the visible items to be refreshed.
-                        this.ListView.Items.Refresh();
-                }
+		private void OnBookmarksChanged(object sender, EventArgs e)
+		{
+			// Force bindings (and converters) for only the visible items to be refreshed.
+			this.ListView.Items.Refresh();
+		}
 
 		private void OnResultsChanged(object sender, EventArgs e)
 		{
@@ -97,6 +98,11 @@
 				{
 					this.ListView.SelectedItems.Add(record);
 				}
+
+				// Recalculate column widths after filter results change.
+				// Note: BeginInvoke at Background priority ensures that this runs after
+				// any pending progress bar hide and rendering operations are complete.
+				this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(UpdateLayout));
 			}
 			catch (Exception exception)
 			{
@@ -148,6 +154,22 @@
 						message);
 					throw;
 				}
+			}
+		}
+
+		private void OnWindowLayoutDragOver(object sender, DragEventArgs e)
+		{
+			if (this.ViewModel != null)
+			{
+				this.ViewModel.DragOver(e);
+			}
+		}
+
+		private void OnWindowLayoutDrop(object sender, DragEventArgs e)
+		{
+			if (this.ViewModel != null)
+			{
+				this.ViewModel.Drop(e);
 			}
 		}
 
@@ -248,7 +270,7 @@
 
 		private void OnProgressBarVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			if(_isLogFileOpening)
+			if (_isLogFileOpening)
 			{
 				_isLogFileOpening = false;
 

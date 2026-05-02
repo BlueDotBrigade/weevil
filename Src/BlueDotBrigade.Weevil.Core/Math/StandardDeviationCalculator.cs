@@ -1,5 +1,7 @@
 namespace BlueDotBrigade.Weevil.Math
 {
+	using MathNet.Numerics.Statistics;
+
 	public sealed class StandardDeviationCalculator : ICalculator
 	{
 		public string Name => "StdDev";
@@ -10,9 +12,7 @@ namespace BlueDotBrigade.Weevil.Math
 		{
 			if (values.Count == 0) return null;
 
-			var mean = values.Average();
-			var sumOfSquaredDifferences = values.Sum(v => (v - mean) * (v - mean));
-			var stdDev = System.Math.Sqrt(sumOfSquaredDifferences / values.Count);
+			var stdDev = values.PopulationStandardDeviation();
 
 			return System.Math.Round(stdDev, 3);
 		}

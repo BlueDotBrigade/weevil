@@ -24,7 +24,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			DateTime? rangeEnd)
 		{
 			this.SeriesName = seriesName;
-			this.SeriesColor = new SolidColorBrush(seriesColor);
+			this.SeriesColor = seriesColor;
 			this.Count = count;
 			this.Min = min;
 			this.Max = max;
@@ -36,8 +36,9 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		}
 
 		public string SeriesName { get; }
-		public Brush SeriesColor { get; }
-		public int Count { get; }
+			public Color SeriesColor { get; }
+			public SolidColorBrush SeriesBrush => new SolidColorBrush(SeriesColor);
+			public int Count { get; }
 		public double? Min { get; }
 		public double? Max { get; }
 		public double? Mean { get; }
@@ -58,3 +59,4 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		public string RangeEndFormatted => RangeEnd.HasValue ? RangeEnd.Value.ToString(DateTimeFormat) : "N/A";
 	}
 }
+

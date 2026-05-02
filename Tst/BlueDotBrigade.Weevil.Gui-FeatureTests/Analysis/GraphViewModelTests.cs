@@ -374,5 +374,74 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 			points.Should().ContainSingle();
 			points[0].Value.Should().Be(5.0);
 		}
+
+        [TestMethod]
+		public void GivenRecordTimestampContainsTenAm_WhenFormattingXAxisLabel_ThenUsesAmPmFormat()
+		{
+			// Regression: Issue #591
+			// Arrange
+			var timestamp = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Utc);
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, timestamp, SeverityType.Information, "2026-01-15 10:00:00 AM CPU=5"));
+
+			// Act
+			var viewModel = new GraphViewModel(records, "CPU=(?<cpu>\\d+)", "title", "source");
+			var axis = viewModel.XAxes.Single() as Axis;
+			var label = axis!.Labeler!(timestamp.Ticks);
+
+			// Assert
+			label.Should().Be("10:00:00 AM");
+		}
+
+		[TestMethod]
+		public void GivenRecordTimestampContainsTenPm_WhenFormattingXAxisLabel_ThenUsesAmPmFormat()
+		{
+			// Arrange
+			var timestamp = new DateTime(2026, 1, 15, 22, 0, 0, DateTimeKind.Utc);
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, timestamp, SeverityType.Information, "2026-01-15 10:00:00 PM CPU=5"));
+
+			// Act
+			var viewModel = new GraphViewModel(records, "CPU=(?<cpu>\\d+)", "title", "source");
+			var axis = viewModel.XAxes.Single() as Axis;
+			var label = axis!.Labeler!(timestamp.Ticks);
+
+			// Assert
+			label.Should().Be("10:00:00 PM");
+		}
+
+		[TestMethod]
+		public void GivenRecordTimestampContainsTenInTwentyFourHourFormat_WhenFormattingXAxisLabel_ThenUsesTwentyFourHourFormat()
+		{
+			// Arrange
+			var timestamp = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Utc);
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, timestamp, SeverityType.Information, "2026-01-15 10:00:00 CPU=5"));
+
+			// Act
+			var viewModel = new GraphViewModel(records, "CPU=(?<cpu>\\d+)", "title", "source");
+			var axis = viewModel.XAxes.Single() as Axis;
+			var label = axis!.Labeler!(timestamp.Ticks);
+
+			// Assert
+			label.Should().Be("10:00:00");
+		}
+
+		[TestMethod]
+		public void GivenRecordTimestampContainsTwentyTwoInTwentyFourHourFormat_WhenFormattingXAxisLabel_ThenUsesTwentyFourHourFormat()
+		{
+			// Arrange
+			var timestamp = new DateTime(2026, 1, 15, 22, 0, 0, DateTimeKind.Utc);
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, timestamp, SeverityType.Information, "2026-01-15 22:00:00 CPU=5"));
+
+			// Act
+			var viewModel = new GraphViewModel(records, "CPU=(?<cpu>\\d+)", "title", "source");
+			var axis = viewModel.XAxes.Single() as Axis;
+			var label = axis!.Labeler!(timestamp.Ticks);
+
+			// Assert
+			label.Should().Be("22:00:00");
+		}
 	}
 }
