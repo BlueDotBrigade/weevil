@@ -161,6 +161,9 @@ The first five slices are the first five implementation sub-tasks for this issue
 - Final schema/privacy docs.
 - Ops setup notes (keys/config/validation).
 - Final regression checks.
+- Deliverables:
+  - `TelemetrySchemaAndPrivacy.md`
+  - `TelemetryOperations.md`
 
 ---
 
