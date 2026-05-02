@@ -91,6 +91,7 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 - Use **user stories** to capture feature requests.
 - Use **EARS syntax** to capture formalized requirements.
 - Use **Gherkin scenarios** to capture test specifications.
+- For documentation aimed at Weevil users (e.g. Help), prefer clear and concise explanations in plain English for engineers who may be new to the product.
 
 ## Do Not Modify
 
