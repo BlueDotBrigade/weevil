@@ -99,7 +99,9 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		private TelemetryDbContext CreateContext(int commandTimeoutSeconds)
 		{
-			var securedConnectionString = BuildSecuredConnectionString(_options.ConnectionString);
+			var securedConnectionString = BuildSecuredConnectionString(
+				_options.ConnectionString,
+				_options.ConnectionTimeoutSeconds);
 
 			DbContextOptions<TelemetryDbContext> contextOptions = new DbContextOptionsBuilder<TelemetryDbContext>()
 				.UseSqlServer(securedConnectionString, sqlOptions =>
@@ -112,15 +114,21 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		}
 
 		/// <summary>
-		/// Parses <paramref name="connectionString"/> and enforces <c>Encrypt=True</c> and
-		/// <c>TrustServerCertificate=False</c>, overriding any caller-supplied values.
+		/// Parses <paramref name="connectionString"/> and enforces <c>Encrypt=True</c>,
+		/// <c>TrustServerCertificate=False</c>, and <c>Connect Timeout</c>, overriding
+		/// any caller-supplied values.
+		/// A short <paramref name="connectTimeoutSeconds"/> prevents telemetry from blocking
+		/// the application when the server is unreachable on the network.
 		/// </summary>
-		internal static string BuildSecuredConnectionString(string connectionString)
+		internal static string BuildSecuredConnectionString(
+			string connectionString,
+			int connectTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultConnectionTimeoutSeconds)
 		{
 			var builder = new SqlConnectionStringBuilder(connectionString)
 			{
 				Encrypt = SqlConnectionEncryptOption.Mandatory,
 				TrustServerCertificate = false,
+				ConnectTimeout = connectTimeoutSeconds,
 			};
 
 			return builder.ConnectionString;
