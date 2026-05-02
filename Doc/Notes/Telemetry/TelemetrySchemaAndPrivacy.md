@@ -23,7 +23,7 @@ Weevil telemetry is intentionally minimal.
 
 ## Phase 1 payload
 
-The runtime payload is `BlueDotBrigade.Weevil.Diagnostics.TelemetrySession`.
+The current runtime payload type is `TelemetrySession` in the `BlueDotBrigade.Weevil.Diagnostics` namespace.
 
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ The runtime payload is `BlueDotBrigade.Weevil.Diagnostics.TelemetrySession`.
 | `Version` | `Version` | Yes | Weevil application version. Persisted as a string. |
 | `SessionStartUtc` | `DateTime` | Yes | UTC timestamp when the session started. |
 | `SessionEndUtc` | `DateTime` | Yes | UTC timestamp when the session ended. |
-| `SessionActiveMinutes` | `double` | Yes | Active duration only, rounded to 3 decimal places. Idle periods over 1 minute are excluded. |
+| `SessionActiveMinutes` | `double` | Yes | Active duration only, rounded to 3 decimal places when the session ends, before upload/persistence. Idle periods over 1 minute are excluded. |
 | `LogFileSizeBytes` | `long` | Yes | Size of the opened log file. |
 | `InstalledRamMb` | `long` | Yes | Installed system memory in megabytes. |
 | `FilterExecutionCount` | `int` | Yes | Number of filter executions recorded in the session. |
