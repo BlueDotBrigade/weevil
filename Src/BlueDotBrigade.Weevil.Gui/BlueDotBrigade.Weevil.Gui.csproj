@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net9.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
@@ -6,6 +6,7 @@
 		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
 		<PlatformTarget>x64</PlatformTarget>
 		<OutputType>WinExe</OutputType>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x64</Platforms>
 		<Deterministic>false</Deterministic>
 		<PublishUrl>publish\</PublishUrl>
@@ -19,8 +20,8 @@
 		<UpdateRequired>false</UpdateRequired>
 		<MapFileExtensions>true</MapFileExtensions>
 		<ApplicationRevision>0</ApplicationRevision>
-		<Version>2.12.0</Version>
-		<ApplicationVersion>2.12.0</ApplicationVersion>
+		<Version>$(WeevilReleaseVersion)</Version>
+		<ApplicationVersion>$(WeevilReleaseVersion)</ApplicationVersion>
 		<IsWebBootstrapper>false</IsWebBootstrapper>
 		<UseApplicationTrust>false</UseApplicationTrust>
 		<BootstrapperEnabled>true</BootstrapperEnabled>
@@ -100,9 +101,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
-		<PackageReference Include="gong-wpf-dragdrop">
-			<Version>3.2.1</Version>
-		</PackageReference>
 		<PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
 		<PackageReference Include="MaterialDesignThemes">
 			<Version>4.0.0</Version>
@@ -129,6 +127,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+		<ProjectReference Include="..\BlueDotBrigade.Weevil.Telemetry\BlueDotBrigade.Weevil.Telemetry.csproj" />
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
 	</ItemGroup>
 	<ItemGroup>

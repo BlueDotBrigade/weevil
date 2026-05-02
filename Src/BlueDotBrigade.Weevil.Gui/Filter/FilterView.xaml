@@ -4,7 +4,6 @@
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             mc:Ignorable="d"
-            xmlns:dd="urn:gong-wpf-dragdrop"
             xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
             xmlns:system="clr-namespace:System;assembly=mscorlib"
@@ -112,7 +111,7 @@
         <KeyBinding Key="OemMinus" Modifiers="Ctrl+Shift" Command="{Binding GoToPreviousCommentCommand}" />
         <KeyBinding Key="OemPlus" Modifiers="Ctrl+Shift" Command="{Binding GoToNextCommentCommand}" />
     </UserControl.InputBindings>
-    <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
+    <Grid x:Name="WindowLayout" AllowDrop="True" DragOver="OnWindowLayoutDragOver" Drop="OnWindowLayoutDrop"
          FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -241,10 +240,10 @@
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 ScrollViewer.CanContentScroll="True"
                 ItemsSource="{Binding VisibleItems}"
-                             SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
+                             local:FilterListViewBehavior.ActiveRecordIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
                              AlternationCount="2"
-                             IsSynchronizedWithCurrentItem="True" 
-                             SelectionChanged="ListView_OnSelectionChanged" 
+                             IsSynchronizedWithCurrentItem="True"
+                             SelectionChanged="ListView_OnSelectionChanged"
                              SelectionMode="Extended" 
                              controls:ListViewBehavior.AutoScrollToCurrentItem="True">
             <ListView.Resources>
@@ -346,90 +345,107 @@
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
-                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <Run Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
-                                    <Border x:Name="RegionTag" 
+                                <StackPanel>
+                                    <TextBox
+                                        Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"
+                                        IsReadOnly="True"
+                                        IsUndoEnabled="False"
+                                        IsTabStop="False"
+                                        local:FilterListViewBehavior.ClickSelectsRow="True"
+                                        Style="{x:Null}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Padding="0"
+                                        TextWrapping="WrapWithOverflow"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        HorizontalScrollBarVisibility="Disabled"
+                                        VerticalScrollBarVisibility="Disabled"
+                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListViewItem}}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border x:Name="RegionTag" 
+                                                BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
+                                                Margin="0,2,4,0" 
+                                                Background="#3c3c3c">
+                                             <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=RegionTextBlock}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                                <TextBlock.ToolTip>
+                                                    <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                        <Binding Path="." />
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        <Binding Source="True" />
+                                                    </MultiBinding>
+                                                </TextBlock.ToolTip>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                        <!-- 1) The current item (record) -->
+                                                        <Binding Path="." />
+                                                        <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </Border>
+                                        <Border x:Name="BookmarkTag"
+                                                BorderBrush="#949494" BorderThickness="1" CornerRadius="4"
+                                                Margin="0,2,4,0"
+                                                Background="#3c3c3c">
+                                             <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=BookmarkTextBlock}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                                <TextBlock.ToolTip>
+                                                    <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
+                                                        <Binding Path="." />
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        <Binding Source="True" />
+                                                    </MultiBinding>
+                                                </TextBlock.ToolTip>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
+                                                        <Binding Path="." />
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </Border>
+                                        <Border 
+                                            x:Name="TruncatedTag"
                                             BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
-                                            Margin="0,0,0,-2" 
+                                            Margin="0,2,4,0" 
                                             Background="#3c3c3c">
-                                         <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=RegionTextBlock}" Value="">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
-                                            <TextBlock.ToolTip>
-                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                    <Binding Path="." />
-                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                    <Binding Source="True" />
-                                                </MultiBinding>
-                                            </TextBlock.ToolTip>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                    <!-- 1) The current item (record) -->
-                                                    <Binding Path="." />
-                                                    <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
-                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </Border>
-                                    <Border x:Name="BookmarkTag"
-                                            BorderBrush="#949494" BorderThickness="1" CornerRadius="4"
-                                            Margin="0,0,0,-2"
-                                            Background="#3c3c3c">
-                                         <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=BookmarkTextBlock}" Value="">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
-                                            <TextBlock.ToolTip>
-                                                <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
-                                                    <Binding Path="." />
-                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                    <Binding Source="True" />
-                                                </MultiBinding>
-                                            </TextBlock.ToolTip>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
-                                                    <Binding Path="." />
-                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </Border>
-                                    <Border 
-                                        x:Name="TruncatedTag"
-                                        BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
-                                        Margin="0,0,0,-2" 
-                                        Background="#3c3c3c">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=TruncatedTextBlock}" Value="">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
-                                                Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
-                                                ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
-                                    </Border>
-                                </TextBlock>
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=TruncatedTextBlock}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
+                                                    Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
+                                                    ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -504,4 +520,3 @@
         </Grid>
     </Grid>
 </UserControl>
-    

@@ -1,11 +1,6 @@
-﻿namespace BlueDotBrigade.Weevil.Cli.IO
+namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
-	using BlueDotBrigade.Weevil.IO;
 
 	public static class OutputWriterContext
 	{
@@ -32,6 +27,12 @@
 			_outputWriter.WriteLine(_outputFormatter.AsHeading(message));
 		}
 
+		public static void WriteSubHeading(string message)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(_outputFormatter.AsSubHeading(message));
+		}
+
 		public static void WriteBullet(string message)
 		{
 			_outputFormatter.ResetNumbering();
@@ -47,6 +48,29 @@
 		{
 			_outputFormatter.ResetNumbering();
 			_outputWriter.WriteLine(_outputFormatter.AsError(message));
+		}
+
+		public static void WriteWarning(string message)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(_outputFormatter.AsWarning(message));
+		}
+
+		public static void WriteTableHeader(string[] headers)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(_outputFormatter.AsTableHeader(headers));
+		}
+
+		public static void WriteTableRow(string[] columns)
+		{
+			_outputWriter.WriteLine(_outputFormatter.AsTableRow(columns));
+		}
+
+		public static void WriteTable(string[] headers, string[][] rows)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(_outputFormatter.AsTable(headers, rows));
 		}
 	}
 }

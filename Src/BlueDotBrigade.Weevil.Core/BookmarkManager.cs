@@ -11,7 +11,6 @@ namespace BlueDotBrigade.Weevil
 	{
 		private readonly List<Bookmark> _bookmarks;
 		private readonly object _gate;
-		private int _nextSequenceNumber;
 
 		internal BookmarkManager() : this(ImmutableArray<Bookmark>.Empty)
 		{
@@ -22,24 +21,6 @@ namespace BlueDotBrigade.Weevil
 		{
 			_bookmarks = new List<Bookmark>(bookmarks);
 			_gate = new object();
-			_nextSequenceNumber = CalculateNextSequenceNumber(bookmarks);
-		}
-
-		private static int CalculateNextSequenceNumber(ImmutableArray<Bookmark> bookmarks)
-		{
-			// Find the highest numeric bookmark name and start sequence from there
-			int maxSequence = 0;
-			foreach (var bookmark in bookmarks)
-			{
-				if (int.TryParse(bookmark.Name, out int sequenceNumber))
-				{
-					if (sequenceNumber > maxSequence)
-					{
-						maxSequence = sequenceNumber;
-					}
-				}
-			}
-			return maxSequence + 1;
 		}
 
 		public ImmutableArray<Bookmark> Bookmarks
@@ -57,9 +38,8 @@ namespace BlueDotBrigade.Weevil
 		{
 			lock (_gate)
 			{
-				// If no name provided, use the next sequential number
-				var effectiveName = string.IsNullOrEmpty(bookmarkName) 
-					? _nextSequenceNumber.ToString() 
+				var effectiveName = string.IsNullOrEmpty(bookmarkName)
+					? "Bookmark"
 					: bookmarkName;
 
 				var bookmark = new Bookmark(id, effectiveName, lineNumber);
@@ -81,12 +61,6 @@ namespace BlueDotBrigade.Weevil
 				}
 
 				_bookmarks.Add(bookmark);
-
-				// Increment sequence number if we used it
-				if (string.IsNullOrEmpty(bookmarkName))
-				{
-					_nextSequenceNumber++;
-				}
 			}
 		}
 
@@ -140,7 +114,6 @@ namespace BlueDotBrigade.Weevil
 			lock (_gate)
 			{
 				_bookmarks.Clear();
-				_nextSequenceNumber = 1;  // Reset sequence counter when clearing all bookmarks
 			}
 		}
 
@@ -153,8 +126,6 @@ namespace BlueDotBrigade.Weevil
 				if (bookmark != null)
 				{
 					_bookmarks.Remove(bookmark);
-					// Recalculate sequence number based on remaining bookmarks
-					_nextSequenceNumber = CalculateNextSequenceNumber(_bookmarks.ToImmutableArray());
 					return true;
 				}
 				return false;

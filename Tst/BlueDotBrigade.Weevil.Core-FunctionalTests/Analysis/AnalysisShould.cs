@@ -176,8 +176,8 @@
 				.Filter.Results
 				.Count(x => x.Metadata.IsFlagged);
 
-			// 8 transitions + 1 for the first value found
-			Assert.AreEqual(9, flaggedRecords);
+			// Falling edges only
+            Assert.AreEqual(8, flaggedRecords);
 		}
 
 		[TestMethod]
@@ -207,8 +207,8 @@
 				.Filter.Results
 				.Count(x => x.Metadata.IsFlagged);
 
-                        // 8 transitions + 1 for the first value found
-                        Assert.AreEqual(9, flaggedRecords);
+				// Start-of-run detection flags the first record in each falling sequence.
+				Assert.AreEqual(8, flaggedRecords);
                 }
 
                 private static string CreateStableValueLog()
