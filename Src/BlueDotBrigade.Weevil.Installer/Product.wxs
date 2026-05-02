@@ -11,6 +11,7 @@
 		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
 		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
 		<Property Id="TELEMETRYENABLED" Value="1" />
+		<Property Id="TELEMETRYSOURCE" Value="Official" />
 		<WixVariable Id="WixUILicenseRtf" Value="License-Installation.rtf" />
 		<ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
 
@@ -60,6 +61,7 @@
 				<RegistryKey Root="HKCU" Key="Software\BlueDotBrigade\Weevil">
 					<RegistryValue Type="string" Name="EnableBetaFeatures" Value="True" />
 					<RegistryValue Type="integer" Name="TelemetryEnabled" Value="[TELEMETRYENABLED]" />
+					<RegistryValue Type="string" Name="TelemetrySource" Value="[TELEMETRYSOURCE]" />
 				</RegistryKey>
 			</Component>
 		</ComponentGroup>

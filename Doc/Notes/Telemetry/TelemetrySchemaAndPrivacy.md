@@ -29,7 +29,9 @@ The current runtime payload type is `TelemetrySession` in the `BlueDotBrigade.We
 | --- | --- | --- | --- |
 | `SessionId` | `Guid` | Yes | Unique identifier for the ended session. |
 | `Application` | `string` | Yes | Executable name, currently `WeevilGui.exe` or `WeevilCli.exe`. |
+| `Source` | `string` | Yes | Installer/distribution source label (for example `Official` or another non-PII installer identifier). |
 | `Version` | `Version` | Yes | Weevil application version. Persisted as a string. |
+| `IsDebugging` | `bool` | Yes | `true` when Weevil started with a debugger attached; otherwise `false`. |
 | `SessionStartUtc` | `DateTime` | Yes | UTC timestamp when the session started. |
 | `SessionEndUtc` | `DateTime` | Yes | UTC timestamp when the session ended. |
 | `SessionActiveMinutes` | `double` | Yes | Active duration in fractional minutes so short activity bursts are preserved. The value is rounded to 3 decimal places when the session ends, before upload/persistence. Idle periods over 1 minute are excluded. |
@@ -65,6 +67,7 @@ The current provider stores session rows in Azure SQL through Entity Framework.
 ### Current column constraints
 
 - `Application`: required, max length 256
+- `Source`: required, max length 256
 - `Version`: required, max length 32
 - `SchemaVersion`: required, max length 16
 

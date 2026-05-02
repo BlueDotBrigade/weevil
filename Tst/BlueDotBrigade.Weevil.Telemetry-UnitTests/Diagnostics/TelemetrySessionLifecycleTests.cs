@@ -44,6 +44,55 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
+		public void GivenStartupTelemetryContext_WhenSessionStarts_ThenSessionContainsSourceAndDebuggingState()
+		{
+			// Regression: Issue #803
+			var start = new DateTime(2026, 5, 1, 11, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[] { start });
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+			tracker.ConfigureStartupContext("ContosoInstaller", true);
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), sourcePath);
+
+				tracker.CurrentSession.Should().NotBeNull();
+				tracker.CurrentSession!.Source.Should().Be("ContosoInstaller");
+				tracker.CurrentSession.IsDebugging.Should().BeTrue();
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenNoStartupTelemetryContext_WhenSessionStarts_ThenSessionUsesSafeDefaults()
+		{
+			// Regression: Issue #803
+			var start = new DateTime(2026, 5, 1, 12, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[] { start });
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), sourcePath);
+
+				tracker.CurrentSession.Should().NotBeNull();
+				tracker.CurrentSession!.Source.Should().Be("unknown");
+				tracker.CurrentSession.IsDebugging.Should().BeFalse();
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
 		public void GivenIdlePeriodOverThreshold_WhenSessionEnds_ThenIdleTimeIsExcludedFromActiveMinutes()
 		{
 			// Regression: Sub-task 3 (PR-3)
