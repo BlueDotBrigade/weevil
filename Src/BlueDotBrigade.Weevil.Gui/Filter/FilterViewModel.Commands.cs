@@ -205,6 +205,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand GoToNextFlagCommand => new UiBoundCommand(GoToNextFlag, () => this.IsMenuEnabled);
 		[NotObservable]
 		public ICommand GoToPreviousFlagCommand => new UiBoundCommand(GoToPreviousFlag, () => this.IsMenuEnabled);
+
+		[NotObservable]
+		public ICommand NavigateToSourceCodeCommand => new UiBoundCommand(NavigateToSourceCode, () => this.IsMenuEnabled);
 		#endregion
 
 		#region Commands: Analysis
