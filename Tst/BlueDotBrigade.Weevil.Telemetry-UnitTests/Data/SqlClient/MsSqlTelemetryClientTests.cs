@@ -169,7 +169,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			}
 
 			// Assert: a debug "connection is being attempted" entry must be written before any failure.
-			capture.DebugMessages.Should().ContainSingle(m => m.Contains("attempted"));
+			capture.DebugMessages.Should().ContainSingle(m => m.Contains("is being attempted"));
 		}
 
 		[TestMethod]
@@ -194,7 +194,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			}
 
 			// Assert: failure must be logged as a warning.
-			capture.Warnings.Should().ContainSingle(m => m.Contains("failed"));
+			capture.Warnings.Should().ContainSingle(m => m.Contains("connection failed"));
 		}
 
 		// ─── SendSync ──────────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			}
 
 			// Assert: a debug "connection is being attempted" entry must be written before any failure.
-			capture.DebugMessages.Should().ContainSingle(m => m.Contains("attempted"));
+			capture.DebugMessages.Should().ContainSingle(m => m.Contains("is being attempted"));
 		}
 
 		[TestMethod]
@@ -270,7 +270,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			}
 
 			// Assert: failure must be logged as a warning.
-			capture.Warnings.Should().ContainSingle(m => m.Contains("failed"));
+			capture.Warnings.Should().ContainSingle(m => m.Contains("connection failed"));
 		}
 
 		// ─── Disabled (no credentials) ────────────────────────────────────────────
