@@ -32,7 +32,7 @@ The current runtime payload type is `TelemetrySession` in the `BlueDotBrigade.We
 | `Version` | `Version` | Yes | Weevil application version. Persisted as a string. |
 | `SessionStartUtc` | `DateTime` | Yes | UTC timestamp when the session started. |
 | `SessionEndUtc` | `DateTime` | Yes | UTC timestamp when the session ended. |
-| `SessionActiveMinutes` | `double` | Yes | Active duration only, rounded to 3 decimal places when the session ends, before upload/persistence. Idle periods over 1 minute are excluded. |
+| `SessionActiveMinutes` | `double` | Yes | Active duration in fractional minutes so short activity bursts are preserved. The value is rounded to 3 decimal places when the session ends, before upload/persistence. Idle periods over 1 minute are excluded. |
 | `LogFileSizeBytes` | `long` | Yes | Size of the opened log file. |
 | `InstalledRamMb` | `long` | Yes | Installed system memory in megabytes. |
 | `FilterExecutionCount` | `int` | Yes | Number of filter executions recorded in the session. |
