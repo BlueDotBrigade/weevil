@@ -253,6 +253,111 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 		}
 
+		[TestMethod]
+		public void GivenFaultyClock_WhenStartSessionOnFileOpen_ThenDoesNotThrow()
+		{
+			// Regression: Issue #777 - telemetry exceptions must never propagate to the user workflow
+			var path = Path.GetTempFileName();
+
+			try
+			{
+				var lifecycle = new TelemetrySessionLifecycle(
+					() => throw new InvalidOperationException("Simulated clock failure"),
+					TimeSpan.FromMinutes(1));
+
+				Action act = () => lifecycle.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), path);
+
+				act.Should().NotThrow();
+			}
+			finally
+			{
+				File.Delete(path);
+			}
+		}
+
+		[TestMethod]
+		public void GivenFaultyClock_WhenEndCurrentSessionCalled_ThenDoesNotThrow()
+		{
+			// Regression: Issue #777 - telemetry exceptions must never propagate to the user workflow
+			var lifecycle = new TelemetrySessionLifecycle(
+				() => throw new InvalidOperationException("Simulated clock failure"),
+				TimeSpan.FromMinutes(1));
+
+			Action act = () => lifecycle.EndCurrentSession();
+
+			act.Should().NotThrow();
+		}
+
+		[TestMethod]
+		public void GivenFaultyClock_WhenRecordFilterExecution_ThenDoesNotThrow()
+		{
+			// Regression: Issue #777 - telemetry exceptions must never propagate to the user workflow
+			var lifecycle = new TelemetrySessionLifecycle(
+				() => throw new InvalidOperationException("Simulated clock failure"),
+				TimeSpan.FromMinutes(1));
+
+			Action act = () => lifecycle.RecordFilterExecution();
+
+			act.Should().NotThrow();
+		}
+
+		[TestMethod]
+		public async Task GivenThrowingTelemetryClient_WhenFileRolloverOccurs_ThenNoExceptionPropagates()
+		{
+			// Regression: Issue #777 - telemetry exceptions must never propagate to the user workflow
+			var t0 = new DateTime(2026, 5, 1, 10, 0, 0, DateTimeKind.Utc);
+			var t1 = t0.AddSeconds(10);
+			var times = new Queue<DateTime>(new[] { t0, t1 });
+			var lifecycle = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+			lifecycle.Configure(new ThrowingTelemetryClient());
+
+			var firstPath = Path.GetTempFileName();
+			var secondPath = Path.GetTempFileName();
+
+			try
+			{
+				lifecycle.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), firstPath);
+
+				Func<Task> act = async () =>
+				{
+					lifecycle.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), secondPath);
+					await Task.Delay(200);
+				};
+
+				await act.Should().NotThrowAsync();
+			}
+			finally
+			{
+				File.Delete(firstPath);
+				File.Delete(secondPath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenThrowingTelemetryClient_WhenEndCurrentSessionCalled_ThenNoExceptionPropagates()
+		{
+			// Regression: Issue #777 - telemetry exceptions must never propagate to the user workflow
+			var start = new DateTime(2026, 5, 1, 11, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[] { start, start.AddSeconds(5) });
+			var lifecycle = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+			lifecycle.Configure(new ThrowingTelemetryClient());
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				lifecycle.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), sourcePath);
+
+				Action act = () => lifecycle.EndCurrentSession();
+
+				act.Should().NotThrow();
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
 		private sealed class SpyTelemetryClient : ITelemetryClient
 		{
 			public List<TelemetrySession> AsyncSentSessions { get; } = new List<TelemetrySession>();
@@ -277,6 +382,19 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				{
 					SyncSentSessions.Add(session);
 				}
+			}
+		}
+
+		private sealed class ThrowingTelemetryClient : ITelemetryClient
+		{
+			public Task SendAsync(TelemetrySession session, CancellationToken ct)
+			{
+				throw new InvalidOperationException("Simulated telemetry client failure.");
+			}
+
+			public void SendSync(TelemetrySession session)
+			{
+				throw new InvalidOperationException("Simulated telemetry client failure.");
 			}
 		}
 	}

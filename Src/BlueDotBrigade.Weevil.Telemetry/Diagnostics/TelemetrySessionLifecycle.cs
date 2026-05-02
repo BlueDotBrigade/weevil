@@ -51,120 +51,210 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// <param name="client">
 		/// The client to use. Passing <see langword="null"/> restores the no-op default.
 		/// </param>
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void Configure(ITelemetryClient client)
 		{
-			lock (_gate)
+			try
 			{
-				_client = client ?? NullTelemetryClient.Instance;
+				lock (_gate)
+				{
+					_client = client ?? NullTelemetryClient.Instance;
+				}
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry configure failed.");
 			}
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void StartSessionOnFileOpen(string application, Version version, string sourceFilePath, long installedRamMb = 0)
 		{
-			if (string.IsNullOrWhiteSpace(sourceFilePath))
+			try
 			{
-				return;
-			}
-
-			TelemetrySession endedSession;
-
-			lock (_gate)
-			{
-				var now = _utcNow();
-				endedSession = EndCurrentSessionInternal(now);
-
-				CurrentSession = new TelemetrySession
+				if (string.IsNullOrWhiteSpace(sourceFilePath))
 				{
-					SessionId = Guid.NewGuid(),
-					Application = string.IsNullOrWhiteSpace(application) ? "unknown" : application,
-					Version = version ?? new Version(0, 0),
-					SessionStartUtc = now,
-					SessionEndUtc = now,
-					LogFileSizeBytes = TryGetFileSize(sourceFilePath),
-					InstalledRamMb = installedRamMb,
-					SchemaVersion = "1.0",
-				};
-				_lastActivityUtc = now;
-			}
+					return;
+				}
 
-			// Async upload on rollover: must not block the file-open flow.
-			if (endedSession != null)
+				TelemetrySession endedSession;
+
+				lock (_gate)
+				{
+					var now = _utcNow();
+					endedSession = EndCurrentSessionInternal(now);
+
+					CurrentSession = new TelemetrySession
+					{
+						SessionId = Guid.NewGuid(),
+						Application = string.IsNullOrWhiteSpace(application) ? "unknown" : application,
+						Version = version ?? new Version(0, 0),
+						SessionStartUtc = now,
+						SessionEndUtc = now,
+						LogFileSizeBytes = TryGetFileSize(sourceFilePath),
+						InstalledRamMb = installedRamMb,
+						SchemaVersion = "1.0",
+					};
+					_lastActivityUtc = now;
+				}
+
+				// Async upload on rollover: must not block the file-open flow.
+				if (endedSession != null)
+				{
+					_ = SafeSendAsync(endedSession);
+				}
+			}
+			catch (Exception exception)
 			{
-				_ = SafeSendAsync(endedSession);
+				TrySilentlyLogWarning(exception, "Telemetry start session failed.");
 			}
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public TelemetrySession EndCurrentSession()
 		{
-			TelemetrySession endedSession;
+			TelemetrySession endedSession = null;
 
-			lock (_gate)
+			try
 			{
-				endedSession = EndCurrentSessionInternal(_utcNow());
+				lock (_gate)
+				{
+					endedSession = EndCurrentSessionInternal(_utcNow());
+				}
+
+				// Sync best-effort upload on shutdown/crash.
+				if (endedSession != null)
+				{
+					SafeSendSync(endedSession);
+				}
 			}
-
-			// Sync best-effort upload on shutdown/crash.
-			if (endedSession != null)
+			catch (Exception exception)
 			{
-				SafeSendSync(endedSession);
+				TrySilentlyLogWarning(exception, "Telemetry end session failed.");
 			}
 
 			return endedSession;
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordSessionHeartbeat()
 		{
-			RecordActivity();
+			try
+			{
+				RecordActivity();
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry heartbeat recording failed.");
+			}
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordFilterExecution()
 		{
-			lock (_gate)
+			try
 			{
-				RecordActivityInternal(_utcNow());
-
-				if (CurrentSession is not null)
+				lock (_gate)
 				{
-					CurrentSession.FilterExecutionCount++;
+					RecordActivityInternal(_utcNow());
+
+					if (CurrentSession is not null)
+					{
+						CurrentSession.FilterExecutionCount++;
+					}
 				}
 			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry filter execution recording failed.");
+			}
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordNavigationAction()
 		{
-			RecordActivity();
+			try
+			{
+				RecordActivity();
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry navigation action recording failed.");
+			}
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordRecordAction()
 		{
-			RecordActivity();
+			try
+			{
+				RecordActivity();
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry record action recording failed.");
+			}
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordDashboardOpen()
 		{
-			lock (_gate)
+			try
 			{
-				RecordActivityInternal(_utcNow());
-
-				if (CurrentSession is not null)
+				lock (_gate)
 				{
-					CurrentSession.DashboardOpenCount++;
+					RecordActivityInternal(_utcNow());
+
+					if (CurrentSession is not null)
+					{
+						CurrentSession.DashboardOpenCount++;
+					}
 				}
 			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry dashboard open recording failed.");
+			}
 		}
+#pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordGraphOpen()
 		{
-			lock (_gate)
+			try
 			{
-				RecordActivityInternal(_utcNow());
-
-				if (CurrentSession is not null)
+				lock (_gate)
 				{
-					CurrentSession.GraphOpenCount++;
+					RecordActivityInternal(_utcNow());
+
+					if (CurrentSession is not null)
+					{
+						CurrentSession.GraphOpenCount++;
+					}
 				}
 			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry graph open recording failed.");
+			}
 		}
+#pragma warning restore CA1031
 
 		private void RecordActivity()
 		{
@@ -291,5 +381,20 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return 0;
 			}
 		}
+
+		// Intentional broad exception catching: logging failures must never propagate to the user workflow.
+#pragma warning disable CA1031
+		private static void TrySilentlyLogWarning(Exception exception, string message)
+		{
+			try
+			{
+				Log.Default.Write(LogSeverityType.Warning, exception, message);
+			}
+			catch
+			{
+				// Nothing to do.
+			}
+		}
+#pragma warning restore CA1031
 	}
 }
