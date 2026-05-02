@@ -42,7 +42,7 @@
 				uiDispatcher,
 				bulletinMediator);
 
-			this.ApplicationTitle = $"Weevil: v{_applicationVersion.ToString(3)}";
+          this.ApplicationTitle = $"Weevil: v{this.FilterViewModel.WeevilDisplayVersion}";
 		}
 
 		public void Start()

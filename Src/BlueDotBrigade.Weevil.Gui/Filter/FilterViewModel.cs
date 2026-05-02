@@ -148,7 +148,8 @@
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
 
-			this.WeevilVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
+          this.WeevilVersion = typeof(FilterViewModel).Assembly.GetName().Version ?? new Version(128, 128, 128);
+			this.WeevilDisplayVersion = GetWeevilDisplayVersion();
 
 			initializationTimer = new DispatcherTimer();
 			initializationTimer.Tick += (sender, args) => OnInitialize();
@@ -188,6 +189,31 @@
 
 			return result;
 		}
+
+		private static string GetWeevilDisplayVersion()
+		{
+			var guiAssembly = typeof(FilterViewModel).Assembly;
+			var informationalVersion = guiAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+			if (!string.IsNullOrWhiteSpace(informationalVersion))
+			{
+				return informationalVersion.Split('+')[0];
+			}
+
+			var fileVersion = guiAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+
+			if (!string.IsNullOrWhiteSpace(fileVersion))
+			{
+				var revisionSeparator = fileVersion.LastIndexOf('.');
+
+				if (revisionSeparator > 0)
+				{
+					return fileVersion.Substring(0, revisionSeparator);
+				}
+			}
+
+			return (guiAssembly.GetName().Version ?? new Version(128, 128, 128)).ToString(3);
+		}
 		#endregion
 
 		#region Properties
@@ -195,6 +221,8 @@
 		public IList<IRecord> VisibleItems { get; private set; }
 
 		public Version WeevilVersion { get; private set; }
+
+		public string WeevilDisplayVersion { get; private set; }
 
 		[NotObservable]
 		public bool IsMenuEnabled
