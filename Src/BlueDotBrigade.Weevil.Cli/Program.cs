@@ -13,6 +13,7 @@
 	using Filter;
 	using IO;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
@@ -26,8 +27,14 @@
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application has started.");
 			Log.Register(new NLogWriter());
 			Log.Default.Write($"Weevil console application is initializing... Arguments={Environment.GetCommandLineArgs().Length}");
+
 			var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
 			Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
+
+			var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
+			TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
+			Log.Default.Write(LogSeverityType.Debug,
+				$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 
 			var builder = CoconaApp.CreateBuilder();
 
@@ -66,5 +73,6 @@
 
 			Environment.Exit(exception?.HResult ?? 1);
 		}
+
 	}		
 }

@@ -240,10 +240,10 @@
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 ScrollViewer.CanContentScroll="True"
                 ItemsSource="{Binding VisibleItems}"
-                             SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
+                             local:FilterListViewBehavior.ActiveRecordIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
                              AlternationCount="2"
-                             IsSynchronizedWithCurrentItem="True" 
-                             SelectionChanged="ListView_OnSelectionChanged" 
+                             IsSynchronizedWithCurrentItem="True"
+                             SelectionChanged="ListView_OnSelectionChanged"
                              SelectionMode="Extended" 
                              controls:ListViewBehavior.AutoScrollToCurrentItem="True">
             <ListView.Resources>
@@ -520,4 +520,3 @@
         </Grid>
     </Grid>
 </UserControl>
-    

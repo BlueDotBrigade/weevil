@@ -79,6 +79,35 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			builder.TrustServerCertificate.Should().BeFalse();
 		}
 
+		[TestMethod]
+		public void GivenConnectionTimeout_WhenBuildSecured_ThenConnectTimeoutIsEnforced()
+		{
+			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(FakeConnectionString, connectTimeoutSeconds: 3);
+
+			var builder = new SqlConnectionStringBuilder(result);
+			builder.ConnectTimeout.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void GivenConnectionStringWithHighConnectTimeout_WhenBuildSecured_ThenConnectTimeoutIsOverridden()
+		{
+			var input = $"{FakeConnectionString}Connect Timeout=60;";
+
+			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(input, connectTimeoutSeconds: 5);
+
+			var builder = new SqlConnectionStringBuilder(result);
+			builder.ConnectTimeout.Should().Be(5);
+		}
+
+		[TestMethod]
+		public void GivenNoExplicitTimeout_WhenBuildSecured_ThenDefaultConnectionTimeoutIsApplied()
+		{
+			var result = MsSqlTelemetryClient.BuildSecuredConnectionString(FakeConnectionString);
+
+			var builder = new SqlConnectionStringBuilder(result);
+			builder.ConnectTimeout.Should().Be(MsSqlTelemetryClientOptions.DefaultConnectionTimeoutSeconds);
+		}
+
 		// ─── SendAsync ─────────────────────────────────────────────────────────────
 
 		[TestMethod]
@@ -198,13 +227,15 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		private static MsSqlTelemetryClient CreateClientWithFakeConnection(
 			int commandTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultCommandTimeoutSeconds,
-			int syncTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultSyncTimeoutSeconds)
+			int syncTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultSyncTimeoutSeconds,
+			int connectionTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultConnectionTimeoutSeconds)
 		{
 			var options = new MsSqlTelemetryClientOptions
 			{
 				ConnectionString = FakeConnectionString,
 				CommandTimeoutSeconds = commandTimeoutSeconds,
 				SyncTimeoutSeconds = syncTimeoutSeconds,
+				ConnectionTimeoutSeconds = connectionTimeoutSeconds,
 			};
 
 			return new MsSqlTelemetryClient(options);

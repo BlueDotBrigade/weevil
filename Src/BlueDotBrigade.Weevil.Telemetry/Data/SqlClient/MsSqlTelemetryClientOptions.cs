@@ -16,8 +16,15 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		public const int DefaultSyncTimeoutSeconds = 5;
 
 		/// <summary>
-		/// Azure SQL connection string. <c>Encrypt=True</c> and <c>TrustServerCertificate=False</c>
-		/// are enforced by <see cref="MsSqlTelemetryClient"/> regardless of what is specified here.
+		/// Default TCP connection timeout in seconds.
+		/// A short value prevents telemetry from blocking the application when the server is unreachable.
+		/// </summary>
+		public const int DefaultConnectionTimeoutSeconds = 5;
+
+		/// <summary>
+		/// Azure SQL connection string. <c>Encrypt=True</c>, <c>TrustServerCertificate=False</c>, and
+		/// <c>Connect Timeout</c> are enforced by <see cref="MsSqlTelemetryClient"/> regardless of what
+		/// is specified here.
 		/// </summary>
 		public string ConnectionString { get; set; } = string.Empty;
 
@@ -30,5 +37,12 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		/// Command timeout in seconds applied to synchronous best-effort send operations.
 		/// </summary>
 		public int SyncTimeoutSeconds { get; set; } = DefaultSyncTimeoutSeconds;
+
+		/// <summary>
+		/// TCP connection timeout in seconds applied when establishing a database connection.
+		/// A short value prevents a telemetry upload from blocking the application when the
+		/// server is unreachable on the network.
+		/// </summary>
+		public int ConnectionTimeoutSeconds { get; set; } = DefaultConnectionTimeoutSeconds;
 	}
 }

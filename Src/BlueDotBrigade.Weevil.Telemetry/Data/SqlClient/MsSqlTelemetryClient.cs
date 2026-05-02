@@ -64,13 +64,17 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection is being attempted (async)...");
+
 				using TelemetryDbContext context = CreateContext(_options.CommandTimeoutSeconds);
 				context.Sessions.Add(session);
 				await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection succeeded (async).");
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				// Failure isolation: telemetry must never affect the user workflow.
+				Log.Default.Write(LogSeverityType.Warning, e, "Telemetry database connection failed (async).");
 			}
 		}
 #pragma warning restore CA1031
@@ -86,20 +90,26 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection is being attempted (sync)...");
+
 				using TelemetryDbContext context = CreateContext(_options.SyncTimeoutSeconds);
 				context.Sessions.Add(session);
 				context.SaveChanges();
+
+				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection succeeded (sync).");
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				// Failure isolation: telemetry must never affect the user workflow.
+				Log.Default.Write(LogSeverityType.Warning, e, "Telemetry database connection failed (sync).");
 			}
 		}
 #pragma warning restore CA1031
 
 		private TelemetryDbContext CreateContext(int commandTimeoutSeconds)
 		{
-			var securedConnectionString = BuildSecuredConnectionString(_options.ConnectionString);
+			var securedConnectionString = BuildSecuredConnectionString(
+				_options.ConnectionString,
+				_options.ConnectionTimeoutSeconds);
 
 			DbContextOptions<TelemetryDbContext> contextOptions = new DbContextOptionsBuilder<TelemetryDbContext>()
 				.UseSqlServer(securedConnectionString, sqlOptions =>
@@ -112,15 +122,21 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		}
 
 		/// <summary>
-		/// Parses <paramref name="connectionString"/> and enforces <c>Encrypt=True</c> and
-		/// <c>TrustServerCertificate=False</c>, overriding any caller-supplied values.
+		/// Parses <paramref name="connectionString"/> and enforces <c>Encrypt=True</c>,
+		/// <c>TrustServerCertificate=False</c>, and <c>Connect Timeout</c>, overriding
+		/// any caller-supplied values.
+		/// A short <paramref name="connectTimeoutSeconds"/> prevents telemetry from blocking
+		/// the application when the server is unreachable on the network.
 		/// </summary>
-		internal static string BuildSecuredConnectionString(string connectionString)
+		internal static string BuildSecuredConnectionString(
+			string connectionString,
+			int connectTimeoutSeconds = MsSqlTelemetryClientOptions.DefaultConnectionTimeoutSeconds)
 		{
 			var builder = new SqlConnectionStringBuilder(connectionString)
 			{
 				Encrypt = SqlConnectionEncryptOption.Mandatory,
 				TrustServerCertificate = false,
+				ConnectTimeout = connectTimeoutSeconds,
 			};
 
 			return builder.ConnectionString;

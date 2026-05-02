@@ -110,6 +110,11 @@
 				var isTelemetryEnabled = TelemetryConfiguration.IsEnabled();
 				Log.Default.Write(LogSeverityType.Information, $"Telemetry enabled: {isTelemetryEnabled}");
 
+				var telemetryClient = TelemetryClientFactory.Create(isTelemetryEnabled);
+				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
+				Log.Default.Write(LogSeverityType.Debug,
+					$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
+
 				Log.Default.Write(LogSeverityType.Debug,
 					$"The logging library has been registered. Type={nameof(NLogWriter)}");
 
@@ -160,5 +165,6 @@
 				LogSeverityType.Information,
 				"Weevil application is closing...");
 		}
+
 	}
 }

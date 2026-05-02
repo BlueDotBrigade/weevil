@@ -1,12 +1,10 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Filter
+namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
-	using System.ComponentModel;
 	using System.Data.Common;
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
-	using System.Windows.Input;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
@@ -20,7 +18,6 @@
 	public partial class FilterView : UserControl
 	{
 		private bool _isLogFileOpening;
-		private bool _isProgrammaticSelectionUpdate;
 
 		public FilterView()
 		{
@@ -34,7 +31,6 @@
 					viewModel.ResultsChanged -= OnResultsChanged;
 					viewModel.RegionsChanged -= OnRegionsChanged;
 					viewModel.BookmarksChanged -= OnBookmarksChanged;
-					viewModel.PropertyChanged -= OnViewModelPropertyChanged;
 				}
 				if (args.NewValue != null)
 				{
@@ -44,7 +40,6 @@
 					viewModel.ResultsChanged += OnResultsChanged;
 					viewModel.RegionsChanged += OnRegionsChanged;
 					viewModel.BookmarksChanged += OnBookmarksChanged;
-					viewModel.PropertyChanged += OnViewModelPropertyChanged;
 				}
 			};
 
@@ -122,57 +117,8 @@
 			}
 		}
 
-		private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == nameof(FilterViewModel.ActiveRecordIndex))
-			{
-				var index = this.ViewModel.ActiveRecordIndex;
-				if (index >= 0 && index < this.ListView.Items.Count)
-				{
-					this.ListView.ScrollIntoView(this.ListView.Items[index]);
-					this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
-					{
-						if (this.ListView.ItemContainerGenerator.ContainerFromIndex(index) is ListViewItem item)
-						{
-							item.Focus();
-
-							if (ShouldCollapseSelectionAfterCtrlShiftNavigation(Keyboard.Modifiers))
-							{
-								_isProgrammaticSelectionUpdate = true;
-								try
-								{
-									this.ListView.SelectedItems.Clear();
-									this.ListView.SelectedItems.Add(this.ListView.Items[index]);
-								}
-								finally
-								{
-									_isProgrammaticSelectionUpdate = false;
-								}
-							}
-						}
-					}));
-				}
-			}
-		}
-
-		internal static bool ShouldCollapseSelectionAfterCtrlShiftNavigation(ModifierKeys modifiers)
-		{
-			const ModifierKeys requiredModifiers = ModifierKeys.Control | ModifierKeys.Shift;
-			return (modifiers & requiredModifiers) == requiredModifiers;
-		}
-
-		internal static bool ShouldSuppressSelectionChangedDuringProgrammaticUpdate(bool isProgrammaticSelectionUpdate)
-		{
-			return isProgrammaticSelectionUpdate;
-		}
-
 		private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if (ShouldSuppressSelectionChangedDuringProgrammaticUpdate(_isProgrammaticSelectionUpdate))
-			{
-				return;
-			}
-
 			var added = e.AddedItems.Cast<IRecord>().ToList();
 			if (added.Count > 0)
 			{

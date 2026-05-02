@@ -3,7 +3,7 @@
 	xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx"
 	xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 	
-	<Package Name="Weevil" Language="1033" Version="2.12.0" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079" InstallerVersion="200">
+	<Package Name="Weevil" Language="1033" Version="$(var.WeevilVersion)" Manufacturer="Blue Dot Brigade" UpgradeCode="ee20260f-f191-4bfc-9c60-242a12e40079" InstallerVersion="200">
 		<SummaryInformation Manufacturer="Blue Dot Brigade" Description="Weevil" />
 
 		<Property Id="ARPPRODUCTICON" Value="Weevil.ico" />

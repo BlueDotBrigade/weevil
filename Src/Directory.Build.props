@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">
+    <WeevilReleaseVersion>26.05.04</WeevilReleaseVersion>
+    <WeevilAssemblyVersion>26.05.04.*</WeevilAssemblyVersion>
+    <WeevilFileVersion>26.05.04.0</WeevilFileVersion>
+    <Deterministic>false</Deterministic>
+    <Version>$(WeevilReleaseVersion)</Version>
+    <AssemblyVersion>$(WeevilAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(WeevilFileVersion)</FileVersion>
+  </PropertyGroup>
+</Project>
