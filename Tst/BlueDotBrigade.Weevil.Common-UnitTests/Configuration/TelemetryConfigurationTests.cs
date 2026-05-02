@@ -12,8 +12,9 @@ namespace BlueDotBrigade.Weevil.Configuration
 			var connectionString = TelemetryConfiguration.GetConnectionString();
 
 			connectionString.Should().NotBeNullOrWhiteSpace();
-			connectionString.Should().Contain("Server=");
-			connectionString.Should().Contain("Initial Catalog=");
+			connectionString.Should().Contain("Server=tcp:");
+			connectionString.Should().Contain(".database.windows.net");
+			connectionString.Should().Contain("Initial Catalog=WeevilTelemetry");
 		}
 	}
 }
