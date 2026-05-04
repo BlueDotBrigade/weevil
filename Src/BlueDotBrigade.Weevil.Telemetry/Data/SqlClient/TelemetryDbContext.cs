@@ -21,7 +21,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		{
 			modelBuilder.Entity<TelemetrySession>(entity =>
 			{
-				entity.ToTable("Session", "telemetry");
+             entity.ToTable("Session", "dbo");
 
 				entity.HasKey(e => e.SessionId);
 
