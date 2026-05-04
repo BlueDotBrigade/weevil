@@ -8,6 +8,25 @@ Sample log file: /weevil/Tst/BlueDotBrigade.Weevil.Core-UnitTests/.Daten/.Global
 
 These tests ensure that a class' methods & properties are working as expected.
 
+### Naming Conventions
+
+Test method names follow Roy Osherove's `Method_Scenario_Expected` pattern (see *The Art of Unit Testing*). The three segments answer:
+
+1. **Method** — the method under test (e.g. `Analyze`).
+2. **Scenario** — the input shape or precondition (e.g. `Plateau`, `SharpPyramid`).
+3. **Expected** — the observable outcome (e.g. `FlagsNothing`, `FlagsThePeak`).
+
+Example:
+
+```csharp
+public void Analyze_SharpPyramid_FlagsThePeak(...)
+public void Analyze_PlateauPyramid_FlagsTheLastPeakValue(...)
+```
+
+Avoid the `Given_/When_/Then_` ceremony for unit tests — when every test in a fixture shares the same Given and When, those segments are pure visual noise. BDD-style phrasing belongs in scenario tests (Reqnroll), not unit tests.
+
+For a deeper treatment of test design, readability, and what makes a test valuable, see Vladimir Khorikov's *Unit Testing: Principles, Practices, and Patterns*.
+
 ## Functional Testing
 
 The Weevil core engine can be accessed via:

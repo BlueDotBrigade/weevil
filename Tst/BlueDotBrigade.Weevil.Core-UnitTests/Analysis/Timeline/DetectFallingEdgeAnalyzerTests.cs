@@ -1,289 +1,255 @@
 namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
-    using System.Collections.Concurrent;
-    using BlueDotBrigade.Weevil.Data;
-    using BlueDotBrigade.Weevil.Filter;
-    using BlueDotBrigade.Weevil.IO;
-    using BlueDotBrigade.Weevil.TestTools.Data;
-    using NSubstitute;
+	using System.Collections.Generic;
+	using System.Collections.Immutable;
+	using System.Linq;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.TestTools.Data;
 
-    [TestClass]
-    public class DetectFallingEdgeAnalyzerTests
-    {
-        private static FilterStrategy CreateFilterStrategy()
-        {
-            var coreExtension = Substitute.For<ICoreExtension>();
-            var context = new ContextDictionary();
-            var filterAliasExpander = Substitute.For<IFilterAliasExpander>();
-            filterAliasExpander.Expand(Arg.Any<string>()).Returns(x => x.Arg<string>());
+	[TestClass]
+	public class DetectFallingEdgeAnalyzerTests
+	{
+		private const string IntegerRegex = @"(?<Value>\d+)$";
+		private const string DecimalRegex = @"(?<Value>\d+\.\d+)$";
+		private const char FlagMarker = '^';
 
-            var filterCriteria = new FilterCriteria(string.Empty, string.Empty, new ConcurrentDictionary<string, object>());
-            var regionManager = Substitute.For<IRegionManager>();
-            var bookmarkManager = Substitute.For<IBookmarkManager>();
+		#region Setup helpers
 
-            return new FilterStrategy(
-                coreExtension,
-                context,
-                filterAliasExpander,
-                FilterType.RegularExpression,
-                filterCriteria,
-                regionManager,
-                bookmarkManager);
-        }
+		private static Results Analyze(ImmutableArray<IRecord> records, string regex)
+		{
+			var analyzer = new DetectFallingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
 
-        private static IUserDialog GetDialog(string regex)
-        {
-            var userDialog = Substitute.For<IUserDialog>();
+			return analyzer.Analyze(
+				records,
+				string.Empty,
+				userDialog,
+				canUpdateMetadata: true);
+		}
 
-            userDialog
-                .ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-                .Returns("Ascending");
+		#endregion
 
-            userDialog
-                .TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
-                .Returns(callInfo =>
-                {
-                    callInfo[2] = regex;
-                    return true;
-                });
+		#region Scenario helpers
 
-            return userDialog;
-        }
+		// Each scenario is expressed as two parallel strings:
+		//   pattern  : nine single-digit values, e.g. "123454321"
+		//   expected : same length as pattern, with '^' replacing any digit whose record should be flagged,
+		//              e.g. "1234^4321" means "flag the record at index 4 (the peak)"
+		// The same pattern is exercised twice: once as integers, once as decimals (".0" suffix).
 
-        private static Results Analyze(ImmutableArray<IRecord> records, string regex)
-        {
-            var analyzer = new DetectFallingEdgeAnalyzer(CreateFilterStrategy());
-            var userDialog = GetDialog(regex);
+		private static void AssertScenario(string pattern, string expected)
+		{
+			AssertIntegerScenario(pattern, expected);
+			AssertDecimalScenario(pattern, expected);
+		}
 
-            return analyzer.Analyze(
-                records,
-                string.Empty,
-                userDialog,
-                canUpdateMetadata: true);
-        }
+		private static void AssertIntegerScenario(string pattern, string expected)
+		{
+			var records = BuildIntegerRecords(pattern);
+			var results = Analyze(records, IntegerRegex);
 
-        private static void AssertOnlyFlaggedIndices(ImmutableArray<IRecord> records, params int[] flaggedIndices)
-        {
-            var expectedFlags = new HashSet<int>(flaggedIndices);
+			AssertFlagsMatchExpected(pattern, expected, records, results, label: "integer scenario");
+		}
 
-            for (var i = 0; i < records.Length; i++)
-            {
-                records[i].Metadata.IsFlagged.Should().Be(expectedFlags.Contains(i));
-            }
-        }
+		private static void AssertDecimalScenario(string pattern, string expected)
+		{
+			var records = BuildDecimalRecords(pattern);
+			var results = Analyze(records, DecimalRegex);
 
-        [TestMethod]
-        public void GivenFlatIntegers_WhenAnalyzed_ThenNoRecordsAreFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 10")
-                .WithContent("15:02:01.000 10")
-                .WithContent("15:02:02.000 10")
-                .WithContent("15:02:03.000 10")
-                .GetRecords();
+			AssertFlagsMatchExpected(pattern, expected, records, results, label: "decimal scenario");
+		}
 
-            Results results = Analyze(records, @"(?<Value>\d+)$");
+		private static void AssertFlagsMatchExpected(
+			string pattern,
+			string expected,
+			ImmutableArray<IRecord> records,
+			Results results,
+			string label)
+		{
+			pattern.Length.Should().Be(expected.Length,
+				because: $"[{label}] pattern '{pattern}' and expected '{expected}' must be the same length");
 
-            AssertOnlyFlaggedIndices(records);
-            results.FlaggedRecords.Should().Be(0);
-        }
+			var expectedIndices = ParseFlaggedIndices(expected);
+			var actualIndices = GetFlaggedIndices(records);
+			var actualRendered = RenderFlags(pattern, actualIndices);
 
-        [TestMethod]
-        public void GivenFlatDecimals_WhenAnalyzed_ThenNoRecordsAreFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 10.0")
-                .WithContent("15:02:01.000 10.0")
-                .WithContent("15:02:02.000 10.0")
-                .WithContent("15:02:03.000 10.0")
-                .GetRecords();
+			actualRendered.Should().Be(expected,
+				because: BuildDiagnostic(label, pattern, expected, actualRendered, records, expectedIndices, actualIndices));
 
-            Results results = Analyze(records, @"(?<Value>\d+\.\d+)$");
+			results.FlaggedRecords.Should().Be(expectedIndices.Length,
+				because: $"[{label}] pattern '{pattern}' should report {expectedIndices.Length} falling-edge transition(s)");
+		}
 
-            AssertOnlyFlaggedIndices(records);
-            results.FlaggedRecords.Should().Be(0);
-        }
+		private static int[] ParseFlaggedIndices(string expected) =>
+			Enumerable.Range(0, expected.Length)
+				.Where(i => expected[i] == FlagMarker)
+				.ToArray();
 
-        [TestMethod]
-        public void GivenIncreasingIntegers_WhenAnalyzed_ThenNoRecordsAreFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 1")
-                .WithContent("15:02:01.000 2")
-                .WithContent("15:02:02.000 3")
-                .WithContent("15:02:03.000 4")
-                .WithContent("15:02:04.000 4")
-                .GetRecords();
+		private static int[] GetFlaggedIndices(ImmutableArray<IRecord> records) =>
+			Enumerable.Range(0, records.Length)
+				.Where(i => records[i].Metadata.IsFlagged)
+				.ToArray();
 
-            Results results = Analyze(records, @"(?<Value>\d+)$");
+		private static string RenderFlags(string pattern, int[] flaggedIndices)
+		{
+			var chars = pattern.ToCharArray();
+			foreach (var i in flaggedIndices)
+			{
+				if (i >= 0 && i < chars.Length)
+				{
+					chars[i] = FlagMarker;
+				}
+			}
+			return new string(chars);
+		}
 
-            AssertOnlyFlaggedIndices(records);
-            results.FlaggedRecords.Should().Be(0);
-        }
+		private static string BuildDiagnostic(
+			string label,
+			string pattern,
+			string expected,
+			string actualRendered,
+			ImmutableArray<IRecord> records,
+			int[] expectedIndices,
+			int[] actualIndices)
+		{
+			var disagreements = expectedIndices
+				.Union(actualIndices)
+				.OrderBy(i => i)
+				.Where(i => System.Array.IndexOf(expectedIndices, i) < 0
+				         || System.Array.IndexOf(actualIndices, i) < 0)
+				.ToArray();
 
-        [TestMethod]
-        public void GivenIncreasingDecimals_WhenAnalyzed_ThenNoRecordsAreFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 1.1")
-                .WithContent("15:02:01.000 2.1")
-                .WithContent("15:02:02.000 3.1")
-                .WithContent("15:02:03.000 4.1")
-                .WithContent("15:02:04.000 4.1")
-                .GetRecords();
+			var details = new List<string>
+			{
+				$"[{label}] falling-edge flag mismatch.",
+				$"  Pattern : {pattern}",
+				$"  Expected: {expected}",
+				$"  Actual  : {actualRendered}",
+				$"  Expected indices: [{string.Join(", ", expectedIndices)}]",
+				$"  Actual indices  : [{string.Join(", ", actualIndices)}]",
+			};
 
-            Results results = Analyze(records, @"(?<Value>\d+\.\d+)$");
+			if (disagreements.Length > 0)
+			{
+				details.Add("  Disagreements:");
+				foreach (var i in disagreements)
+				{
+					var comment = records[i].Metadata.Comment ?? string.Empty;
+					details.Add($"    index {i} (value '{pattern[i]}'): comment=\"{comment}\"");
+				}
+			}
 
-            AssertOnlyFlaggedIndices(records);
-            results.FlaggedRecords.Should().Be(0);
-        }
+			return string.Join(System.Environment.NewLine, details);
+		}
 
-        [TestMethod]
-        public void GivenDecreasingIntegers_WhenAnalyzed_ThenFirstFallingTransitionIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 5")
-                .WithContent("15:02:01.000 4")
-                .WithContent("15:02:02.000 3")
-                .WithContent("15:02:03.000 2")
-                .WithContent("15:02:04.000 1")
-                .GetRecords();
+		private static ImmutableArray<IRecord> BuildIntegerRecords(string pattern)
+		{
+			var builder = R.Create();
+			for (var i = 0; i < pattern.Length; i++)
+			{
+				builder = builder.WithContent($"15:02:{i:D2}.000 {pattern[i]}");
+			}
+			return builder.GetRecords();
+		}
 
-            Results results = Analyze(records, @"(?<Value>\d+)$");
+		private static ImmutableArray<IRecord> BuildDecimalRecords(string pattern)
+		{
+			var builder = R.Create();
+			for (var i = 0; i < pattern.Length; i++)
+			{
+				builder = builder.WithContent($"15:02:{i:D2}.000 {pattern[i]}.0");
+			}
+			return builder.GetRecords();
+		}
 
-            AssertOnlyFlaggedIndices(records, 1);
-            records[1].Metadata.Comment.Should().Contain("5 => 4");
-            results.FlaggedRecords.Should().Be(1);
-        }
+		#endregion
 
-        [TestMethod]
-        public void GivenDecreasingDecimals_WhenAnalyzed_ThenFirstFallingTransitionIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 5.5")
-                .WithContent("15:02:01.000 4.5")
-                .WithContent("15:02:02.000 3.5")
-                .WithContent("15:02:03.000 2.5")
-                .WithContent("15:02:04.000 1.5")
-                .GetRecords();
+		#region Pattern catalogue
 
-            Results results = Analyze(records, @"(?<Value>\d+\.\d+)$");
+		// Each test runs the analyzer against a 9-value sequence (single digits, range 1-9) twice:
+		// once with integer values, once with decimal values. The expected string visualises the
+		// flagged record(s) using the '^' character — making test intent obvious at a glance.
 
-            AssertOnlyFlaggedIndices(records, 1);
-            records[1].Metadata.Comment.Should().Contain("5.5 => 4.5");
-            results.FlaggedRecords.Should().Be(1);
-        }
+		[TestMethod]
+		[DataRow("555555555", "555555555")]
+		public void Analyze_Plateau_FlagsNothing(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-        [TestMethod]
-        public void GivenPyramidIntegers_WhenAnalyzed_ThenOnlyMiddleFallingTransitionIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 1")
-                .WithContent("15:02:01.000 2")
-                .WithContent("15:02:02.000 3")
-                .WithContent("15:02:03.000 2")
-                .WithContent("15:02:04.000 1")
-                .WithContent("15:02:05.000 2")
-                .WithContent("15:02:06.000 3")
-                .GetRecords();
+		[TestMethod]
+		[DataRow("123456789", "123456789")]
+		public void Analyze_RisingValues_FlagsNothing(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-            Results results = Analyze(records, @"(?<Value>\d+)$");
+		[TestMethod]
+		[DataRow("987654321", "^87654321")]
+		public void Analyze_FallingValues_FlagsTheFirstRecord(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-            AssertOnlyFlaggedIndices(records, 3);
-            results.FlaggedRecords.Should().Be(1);
-        }
+		[TestMethod]
+		[DataRow("123454321", "1234^4321")]
+		public void Analyze_SharpPyramid_FlagsThePeak(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-        [TestMethod]
-        public void GivenPyramidDecimals_WhenAnalyzed_ThenOnlyMiddleFallingTransitionIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 1.1")
-                .WithContent("15:02:01.000 2.1")
-                .WithContent("15:02:02.000 3.1")
-                .WithContent("15:02:03.000 2.1")
-                .WithContent("15:02:04.000 1.1")
-                .WithContent("15:02:05.000 2.1")
-                .WithContent("15:02:06.000 3.1")
-                .GetRecords();
+		[TestMethod]
+		[DataRow("123444321", "12344^321")]
+		public void Analyze_PlateauPyramid_FlagsTheLastPeakValue(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-            Results results = Analyze(records, @"(?<Value>\d+\.\d+)$");
+		[TestMethod]
+		[DataRow("987656789", "^87656789")]
+		public void Analyze_SharpValley_FlagsTheFirstRecord(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-            AssertOnlyFlaggedIndices(records, 3);
-            results.FlaggedRecords.Should().Be(1);
-        }
+		[TestMethod]
+		[DataRow("987666789", "^87666789")]
+		public void Analyze_PlateauValley_FlagsTheFirstRecord(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-        [TestMethod]
-        public void GivenInversePyramidIntegers_WhenAnalyzed_ThenEachFallingRunStartIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 3")
-                .WithContent("15:02:01.000 2")
-                .WithContent("15:02:02.000 1")
-                .WithContent("15:02:03.000 2")
-                .WithContent("15:02:04.000 3")
-                .WithContent("15:02:05.000 2")
-                .WithContent("15:02:06.000 1")
-                .GetRecords();
+		[TestMethod]
+		[DataRow("123123123", "12^12^123")]
+		public void Analyze_Sawtooth_FlagsEachPeak(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-            Results results = Analyze(records, @"(?<Value>\d+)$");
+		[TestMethod]
+		[DataRow("321321321", "^21^21^21")]
+		public void Analyze_InvertedSawtooth_FlagsEachPeak(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-            AssertOnlyFlaggedIndices(records, 1, 5);
-            results.FlaggedRecords.Should().Be(2);
-        }
+		[TestMethod]
+		[DataRow("555555554", "5555555^4")]
+		public void Analyze_LateFallingEdge_FlagsTheLastPlateauValue(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
 
-        [TestMethod]
-        public void GivenInversePyramidDecimals_WhenAnalyzed_ThenEachFallingRunStartIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 3.3")
-                .WithContent("15:02:01.000 2.2")
-                .WithContent("15:02:02.000 1.1")
-                .WithContent("15:02:03.000 2.2")
-                .WithContent("15:02:04.000 3.3")
-                .WithContent("15:02:05.000 2.2")
-                .WithContent("15:02:06.000 1.1")
-                .GetRecords();
+		#endregion
 
-            Results results = Analyze(records, @"(?<Value>\d+\.\d+)$");
+		#region Real-world noise (decimal only)
 
-            AssertOnlyFlaggedIndices(records, 1, 5);
-            results.FlaggedRecords.Should().Be(2);
-        }
+		[TestMethod]
+		public void Analyze_NoisyDecimalPlateau_FlagsEachSubUnitDip()
+		{
+			// Mirrors a real UaAngle log: a "flat" plateau actually contains sub-unit dips that
+			// the analyzer reports as separate falling edges (no minimum-delta threshold).
+			// Sequence: 33.000 33.000 32.999 33.000 32.998 32.998 33.000 32.997 32.997
+			//                  ^           ^                   ^
+			// Under the "flag the record before the fall" convention, indices 1, 3, and 6 are flagged.
+			var records = R.Create()
+				.WithContent("15:02:00.000 33.000")
+				.WithContent("15:02:01.000 33.000")
+				.WithContent("15:02:02.000 32.999")
+				.WithContent("15:02:03.000 33.000")
+				.WithContent("15:02:04.000 32.998")
+				.WithContent("15:02:05.000 32.998")
+				.WithContent("15:02:06.000 33.000")
+				.WithContent("15:02:07.000 32.997")
+				.WithContent("15:02:08.000 32.997")
+				.GetRecords();
 
-        [TestMethod]
-        public void GivenLateFallingEdgeInIntegers_WhenAnalyzed_ThenOnlyLastRecordIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 2")
-                .WithContent("15:02:01.000 2")
-                .WithContent("15:02:02.000 2")
-                .WithContent("15:02:03.000 1")
-                .GetRecords();
+			var results = Analyze(records, DecimalRegex);
 
-            Results results = Analyze(records, @"(?<Value>\d+)$");
+			GetFlaggedIndices(records).Should().Equal(1, 3, 6);
+			results.FlaggedRecords.Should().Be(3);
+		}
 
-            AssertOnlyFlaggedIndices(records, 3);
-            records[3].Metadata.Comment.Should().Contain("2 => 1");
-            results.FlaggedRecords.Should().Be(1);
-        }
-
-        [TestMethod]
-        public void GivenLateFallingEdgeInDecimals_WhenAnalyzed_ThenOnlyLastRecordIsFlagged()
-        {
-            var records = R.Create()
-                .WithContent("15:02:00.000 2.2")
-                .WithContent("15:02:01.000 2.2")
-                .WithContent("15:02:02.000 2.2")
-                .WithContent("15:02:03.000 1.2")
-                .GetRecords();
-
-            Results results = Analyze(records, @"(?<Value>\d+\.\d+)$");
-
-            AssertOnlyFlaggedIndices(records, 3);
-            records[3].Metadata.Comment.Should().Contain("2.2 => 1.2");
-            results.FlaggedRecords.Should().Be(1);
-        }
-    }
+		#endregion
+	}
 }
