@@ -4,7 +4,7 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
-### Version 26.05.04
+### Version 2.12.0
 
 Planned release for May 4th, 2026.
 
