@@ -240,7 +240,7 @@
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 ScrollViewer.CanContentScroll="True"
                 ItemsSource="{Binding VisibleItems}"
-                             local:FilterListViewBehavior.ActiveRecordIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
+                             local:FilterListViewBehavior.ActiveRecordIndex="{Binding ActiveRecordIndex, Mode=OneWay}"
                              AlternationCount="2"
                              IsSynchronizedWithCurrentItem="True"
                              SelectionChanged="ListView_OnSelectionChanged"
@@ -357,7 +357,7 @@
                                                 BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
                                                 Margin="0,2,4,0" 
                                                 Background="#3c3c3c">
-                                             <Border.Style>
+                                            <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                     <Style.Triggers>
@@ -389,7 +389,7 @@
                                                 BorderBrush="#949494" BorderThickness="1" CornerRadius="4"
                                                 Margin="0,2,4,0"
                                                 Background="#3c3c3c">
-                                             <Border.Style>
+                                            <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                     <Style.Triggers>
@@ -509,4 +509,5 @@
                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
         </Grid>
     </Grid>
+    
 </UserControl>
