@@ -80,6 +80,7 @@
 			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
 			var previous = new Dictionary<string, string>();
+			var previousRecord = new Dictionary<string, IRecord>();
 			var isInRisingRun = new Dictionary<string, bool>();
 
 			ImmutableArray<IRecord> sortedRecords = analysisOrder == AnalysisOrder.Ascending
@@ -101,6 +102,7 @@
 									if (!string.IsNullOrWhiteSpace(current.Value))
 									{
                                   if (previous.TryGetValue(current.Key, out var previousRaw) &&
+										previousRecord.TryGetValue(current.Key, out var priorRecord) &&
 										decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
 										decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
 									{
@@ -109,12 +111,14 @@
 
 										if (isRising && !wasRising)
 										{
+											// Flag the record BEFORE the rise (the valley / last stable value).
+											// Mirrors DetectFallingEdgeAnalyzer for symmetric semantics.
 											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
 											count++;
 
 											AnalysisHelper.UpdateRecordMetadata(
-												record,
+												priorRecord,
 												true,
 												$"{parameterName}: {previousRaw} => {current.Value}",
 												canUpdateMetadata);
@@ -122,10 +126,12 @@
 
 										isInRisingRun[current.Key] = isRising;
 										previous[current.Key] = current.Value;
+										previousRecord[current.Key] = record;
 									}
 									else
 									{
 										previous[current.Key] = current.Value;
+										previousRecord[current.Key] = record;
 										isInRisingRun[current.Key] = false;
 									}
 									}

@@ -79,6 +79,7 @@
 			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
 			var previous = new Dictionary<string, string>();
+			var previousRecord = new Dictionary<string, IRecord>();
 			var isInFallingRun = new Dictionary<string, bool>();
 
 			var sortedRecords = analysisOrder == AnalysisOrder.Ascending
@@ -100,6 +101,7 @@
 									if (!string.IsNullOrWhiteSpace(current.Value))
 									{
                                   if (previous.TryGetValue(current.Key, out var previousRaw) &&
+										previousRecord.TryGetValue(current.Key, out var priorRecord) &&
 										decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
 										decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
 									{
@@ -108,12 +110,15 @@
 
 										if (isFalling && !wasFalling)
 										{
+											// Flag the record BEFORE the fall (the peak / last stable value).
+											// This points the user at the last "good" record, with the transition visible
+											// in the next record below it — natural for top-down log navigation.
 											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
 											count++;
 
 											AnalysisHelper.UpdateRecordMetadata(
-												record,
+												priorRecord,
 												true,
 												$"{parameterName}: {previousRaw} => {current.Value}",
 												canUpdateMetadata);
@@ -121,10 +126,12 @@
 
 										isInFallingRun[current.Key] = isFalling;
 										previous[current.Key] = current.Value;
+										previousRecord[current.Key] = record;
 									}
 									else
 									{
 										previous[current.Key] = current.Value;
+										previousRecord[current.Key] = record;
 										isInFallingRun[current.Key] = false;
 									}
 									}
