@@ -31,24 +31,24 @@
 				typeof(AboutDialog));
 
 		private readonly IUiDispatcher _uiDispatcher;
-		private readonly Version _weevilVersion;
+		private readonly string _weevilDisplayVersion;
 		private readonly string _thirdPartyNoticesPath;
 		private readonly string _sourceFilePath;
 		private readonly Timer _timer;
 
 		internal AboutDialog(
 			IUiDispatcher uiDispatcher,
-			Version weevilVersion, 
+			string weevilDisplayVersion, 
 			string licensePath, 
 			string thirdPartyNoticesPath, 
 			string sourceFilePath)
 		{
 			_uiDispatcher = uiDispatcher;
-			_weevilVersion = weevilVersion;
+			_weevilDisplayVersion = weevilDisplayVersion;
 			_thirdPartyNoticesPath = thirdPartyNoticesPath;
 			_sourceFilePath = sourceFilePath;
 
-			this.Details = GetHeader(_weevilVersion) + Environment.NewLine +
+			this.Details = GetHeader(_weevilDisplayVersion) + Environment.NewLine +
 			    Environment.NewLine +
 				"Loading metrics...";
 
@@ -72,7 +72,7 @@
 		{
 			_uiDispatcher.Invoke(() =>
 			{
-				this.Details = GetHeader(_weevilVersion) + Environment.NewLine +
+				this.Details = GetHeader(_weevilDisplayVersion) + Environment.NewLine +
 				               GetMetrics(_sourceFilePath);
 			});
 		}
@@ -89,10 +89,10 @@
 			set => SetValue(LicenseProperty, value);
 		}
 
-		private static string GetHeader(Version weevilVersion)
+		private static string GetHeader(string weevilDisplayVersion)
 		{
 			return
-				$"Weevil: {weevilVersion}" + Environment.NewLine +
+				$"Weevil: {weevilDisplayVersion}" + Environment.NewLine +
 				$"Weevil's core engine is powered by open source software." +
 				Environment.NewLine;
 		}
