@@ -978,7 +978,7 @@
 			{
 				var dialog = new AboutDialog(
 					_uiDispatcher,
-					this.WeevilVersion,
+					this.WeevilDisplayVersion,
 					LicensePath,
 					ThirdPartyNoticesPath,
 					_engine.SourceFilePath);
@@ -1880,7 +1880,7 @@
 						_uiDispatcher.Invoke(() =>
 						{
 							// Note: We can't set the property directly, because we would trigger the filter operation again. 
-							OnPropertyChanged(nameof(this.InclusiveFilter));
+													OnPropertyChanged(nameof(this.InclusiveFilter));
 							OnPropertyChanged(nameof(this.ExclusiveFilter));
 						});
 					}
