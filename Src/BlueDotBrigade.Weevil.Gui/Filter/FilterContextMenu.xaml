@@ -153,24 +153,24 @@
             <MenuItem Header="First Occurrence"
                                       Command="{Binding DetectFirstCommand}"
                                       InputGestureText="F7"
-                                      Tag="[1]xx[2]xx"
+                                      Tag="[1][2][3]123123"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Transitions"
                                       Command="{Binding DetectDataTransitionsCommand}"
                                       InputGestureText="F9"
-                                      Tag="[1]11[2]22"
+                                      Tag="[1]111[2]222[3]"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Rising Edges"
                                       Command="{Binding DataTransitionsRisingEdgeCommand}"
-                                      Tag="1[2]1[3]xx"
+                                      Tag="9876[5]6789"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Falling Edges"
                                       Command="{Binding DataTransitionsFallingEdgeCommand}"
-                                      Tag="3[2]3[1]xx"
+                                      Tag="1234[5]4321"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Repeating Records"
                                       Command="{Binding DetectRepeatingRecordsCommand}"
-                                      Tag="x[1]1[1]xx"
+                                      Tag="[1]11[1]x[2]22[2]"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
         </MenuItem>
         <MenuItem Header="Temporal Analysis">
@@ -183,7 +183,7 @@
             <MenuItem Header="Detect Stability"
                                       Command="{Binding DetectStableValuesCommand}"
                                       InputGestureText="F6"
-                                      Tag="[1]1[1][2]2[2]"
+                                      Tag="[1]111[1][2]22[2]"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
         </MenuItem>
         <MenuItem Header="Domain Specific Analysis"
