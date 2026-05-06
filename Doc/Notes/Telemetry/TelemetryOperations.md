@@ -11,7 +11,7 @@ Optional process/user environment variables:
 | Environment variable | Meaning |
 | --- | --- |
 | `WEEVIL_TELEMETRY_USERNAME` | Optional SQL username (or API token) applied at runtime. |
-| `WEEVIL_TELEMETRY_SECRET` | Optional SQL secret applied at runtime. |
+| `WEEVIL_TELEMETRY_SECRET` | Optional SQL secret applied at runtime. Supports encrypted values produced by `WeevilCli.exe protect-secret`. |
 
 ## Application behavior
 
@@ -50,6 +50,9 @@ Current provider defaults:
 1. Deploy the `telemetry.Session` table using the schema documented in `TelemetrySchemaAndPrivacy.md`.
 2. Create a SQL login that can insert into `telemetry.Session` only.
 3. Set runtime credentials (`WEEVIL_TELEMETRY_USERNAME` and `WEEVIL_TELEMETRY_SECRET`) in the execution environment.
+   - To avoid storing the secret in plaintext, encrypt it first: `WeevilCli.exe protect-secret --secret "YourPassword"`
+   - Copy the resulting `ENC:…` value into the `WEEVIL_TELEMETRY_SECRET` environment variable.
+   - Weevil decrypts the value automatically at startup using the Windows Data Protection API (DPAPI).
 4. Open and close a log file in Weevil to produce one ended session.
 
 ## Validation checklist

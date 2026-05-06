@@ -12,6 +12,7 @@
 	using Diagnostics;
 	using Filter;
 	using IO;
+	using Security;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Diagnostics;
 
@@ -42,6 +43,7 @@
 
 			application.AddCommands<FilterCommands>();
 			application.AddCommands<InsightCommands>();
+			application.AddCommands<SecureCommands>();
 
 			application.Run();
 
