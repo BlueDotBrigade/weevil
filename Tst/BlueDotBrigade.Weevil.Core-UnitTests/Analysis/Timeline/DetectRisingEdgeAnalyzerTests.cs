@@ -1,18 +1,12 @@
 namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
-	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using System.Linq;
-	using BlueDotBrigade.Weevil.Data;
+  using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
 	public class DetectRisingEdgeAnalyzerTests
 	{
-		private const string IntegerRegex = @"(?<Value>\d+)$";
-		private const string DecimalRegex = @"(?<Value>\d+\.\d+)$";
-		private const char FlagMarker = '^';
-
 		#region Setup helpers
 
 		private static Results Analyze(ImmutableArray<IRecord> records, string regex)
@@ -45,16 +39,16 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		private static void AssertIntegerScenario(string pattern, string expected)
 		{
-			var records = BuildIntegerRecords(pattern);
-			var results = Analyze(records, IntegerRegex);
+         var records = AnalysisHelper.BuildIntegerRecords(pattern);
+			var results = Analyze(records, AnalysisHelper.IntegerRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, results, label: "integer scenario");
 		}
 
 		private static void AssertDecimalScenario(string pattern, string expected)
 		{
-			var records = BuildDecimalRecords(pattern);
-			var results = Analyze(records, DecimalRegex);
+         var records = AnalysisHelper.BuildDecimalRecords(pattern);
+			var results = Analyze(records, AnalysisHelper.DecimalRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, results, label: "decimal scenario");
 		}
@@ -66,100 +60,16 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			Results results,
 			string label)
 		{
-			pattern.Length.Should().Be(expected.Length,
-				because: $"[{label}] pattern '{pattern}' and expected '{expected}' must be the same length");
+           AnalysisHelper.AssertFlagsMatchExpected(
+				pattern,
+				expected,
+				records,
+				label,
+				"rising-edge flag mismatch");
 
-			var expectedIndices = ParseFlaggedIndices(expected);
-			var actualIndices = GetFlaggedIndices(records);
-			var actualRendered = RenderFlags(pattern, actualIndices);
-
-			actualRendered.Should().Be(expected,
-				because: BuildDiagnostic(label, pattern, expected, actualRendered, records, expectedIndices, actualIndices));
-
-			results.FlaggedRecords.Should().Be(expectedIndices.Length,
-				because: $"[{label}] pattern '{pattern}' should report {expectedIndices.Length} rising-edge transition(s)");
-		}
-
-		private static int[] ParseFlaggedIndices(string expected) =>
-			Enumerable.Range(0, expected.Length)
-				.Where(i => expected[i] == FlagMarker)
-				.ToArray();
-
-		private static int[] GetFlaggedIndices(ImmutableArray<IRecord> records) =>
-			Enumerable.Range(0, records.Length)
-				.Where(i => records[i].Metadata.IsFlagged)
-				.ToArray();
-
-		private static string RenderFlags(string pattern, int[] flaggedIndices)
-		{
-			var chars = pattern.ToCharArray();
-			foreach (var i in flaggedIndices)
-			{
-				if (i >= 0 && i < chars.Length)
-				{
-					chars[i] = FlagMarker;
-				}
-			}
-			return new string(chars);
-		}
-
-		private static string BuildDiagnostic(
-			string label,
-			string pattern,
-			string expected,
-			string actualRendered,
-			ImmutableArray<IRecord> records,
-			int[] expectedIndices,
-			int[] actualIndices)
-		{
-			var disagreements = expectedIndices
-				.Union(actualIndices)
-				.OrderBy(i => i)
-				.Where(i => System.Array.IndexOf(expectedIndices, i) < 0
-				         || System.Array.IndexOf(actualIndices, i) < 0)
-				.ToArray();
-
-			var details = new List<string>
-			{
-				$"[{label}] rising-edge flag mismatch.",
-				$"  Pattern : {pattern}",
-				$"  Expected: {expected}",
-				$"  Actual  : {actualRendered}",
-				$"  Expected indices: [{string.Join(", ", expectedIndices)}]",
-				$"  Actual indices  : [{string.Join(", ", actualIndices)}]",
-			};
-
-			if (disagreements.Length > 0)
-			{
-				details.Add("  Disagreements:");
-				foreach (var i in disagreements)
-				{
-					var comment = records[i].Metadata.Comment ?? string.Empty;
-					details.Add($"    index {i} (value '{pattern[i]}'): comment=\"{comment}\"");
-				}
-			}
-
-			return string.Join(System.Environment.NewLine, details);
-		}
-
-		private static ImmutableArray<IRecord> BuildIntegerRecords(string pattern)
-		{
-			var builder = R.Create();
-			for (var i = 0; i < pattern.Length; i++)
-			{
-				builder = builder.WithContent($"15:02:{i:D2}.000 {pattern[i]}");
-			}
-			return builder.GetRecords();
-		}
-
-		private static ImmutableArray<IRecord> BuildDecimalRecords(string pattern)
-		{
-			var builder = R.Create();
-			for (var i = 0; i < pattern.Length; i++)
-			{
-				builder = builder.WithContent($"15:02:{i:D2}.000 {pattern[i]}.0");
-			}
-			return builder.GetRecords();
+			var expectedCount = AnalysisHelper.CountExpectedFlags(expected);
+			results.FlaggedRecords.Should().Be(expectedCount,
+				because: $"[{label}] pattern '{pattern}' should report {expectedCount} rising-edge transition(s)");
 		}
 
 		#endregion
@@ -245,9 +155,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.WithContent("15:02:08.000 32.997")
 				.GetRecords();
 
-			var results = Analyze(records, DecimalRegex);
+           var results = Analyze(records, AnalysisHelper.DecimalRegex);
 
-			GetFlaggedIndices(records).Should().Equal(2, 5);
+            AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2, 5);
 			results.FlaggedRecords.Should().Be(2);
 		}
 
