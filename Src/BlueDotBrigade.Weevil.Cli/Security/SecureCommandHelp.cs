@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Cli.Security
 				new HelpSection(
 					new HelpHeading("Examples:"),
 					new HelpSection(
-						new HelpParagraph(@"WeevilCli.exe protect-secret --secret ""MyP@ssword"""),
+						new HelpParagraph(@"WeevilCli.exe encrypt --secret ""MyP@ssword"""),
 						new HelpParagraph("")
 					)
 				));

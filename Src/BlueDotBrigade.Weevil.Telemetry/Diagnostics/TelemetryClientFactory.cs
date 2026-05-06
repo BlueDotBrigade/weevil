@@ -34,7 +34,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				ConnectionString = connectionString,
 				UsernameOrApiToken = GetOptionalEnvironmentValue(TelemetryUserNameEnvironmentVariable),
-				Secret = SecretProtector.Unprotect(GetOptionalEnvironmentValue(TelemetrySecretEnvironmentVariable)),
+				Secret = SecretProtector.Decrypt(GetOptionalEnvironmentValue(TelemetrySecretEnvironmentVariable)),
 			};
 		}
 
