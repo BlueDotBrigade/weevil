@@ -3,7 +3,7 @@
 		<TargetFramework>net9.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
+		<AssemblyName>WeevilGui</AssemblyName>
 		<PlatformTarget>x64</PlatformTarget>
 		<OutputType>WinExe</OutputType>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
