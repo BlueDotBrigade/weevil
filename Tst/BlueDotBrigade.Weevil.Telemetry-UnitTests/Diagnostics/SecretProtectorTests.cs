@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	using FluentAssertions;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+#pragma warning disable CA1416 // Platform-specific calls are guarded by OperatingSystem.IsWindows() in each test method.
 	[TestClass]
 	public class SecretProtectorTests
 	{
@@ -146,4 +147,5 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			result.Should().Be(original);
 		}
 	}
+#pragma warning restore CA1416
 }

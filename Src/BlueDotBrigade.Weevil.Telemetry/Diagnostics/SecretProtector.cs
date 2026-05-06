@@ -80,7 +80,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return value;
 			}
 
-			var base64 = value.Substring(EncryptedPrefix.Length);
+			var base64 = value[EncryptedPrefix.Length..];
 			var encryptedBytes = Convert.FromBase64String(base64);
 			var plainBytes = ProtectedData.Unprotect(encryptedBytes, null, DataProtectionScope.CurrentUser);
 			return Encoding.UTF8.GetString(plainBytes);

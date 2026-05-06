@@ -8,7 +8,7 @@ namespace BlueDotBrigade.Weevil.Cli.Security
 	internal class SecureCommands
 	{
 		[Command(
-			name: "ProtectSecret",
+			name: "protect-secret",
 			Aliases = new[] { "ps" },
 			Description = "Encrypts a telemetry secret so it can be stored safely in an environment variable.")]
 		public void ProtectSecret(
