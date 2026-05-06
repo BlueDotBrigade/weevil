@@ -13,23 +13,23 @@
             <Component Id="BlueDotBrigade.Weevil.Core.pdb" Guid="{E656608F-2F0A-4587-ADF9-50ECE19934CF}">
                 <File Id="BlueDotBrigade.Weevil.Core.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Core.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.deps.json" Guid="{F4B61320-C40C-489C-8A04-08A40B9405A5}">
-                <File Id="BlueDotBrigade.Weevil.Gui.deps.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.deps.json" />
+            <Component Id="WeevilGui.deps.json" Guid="{F4B61320-C40C-489C-8A04-08A40B9405A5}">
+                <File Id="WeevilGui.deps.json" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilGui.deps.json" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.dll" Guid="{F30E684F-FC1B-4071-B31C-5CC3AF0946C9}">
-                <File Id="BlueDotBrigade.Weevil.Gui.dll" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.dll" />
+            <Component Id="WeevilGui.dll" Guid="{F30E684F-FC1B-4071-B31C-5CC3AF0946C9}">
+                <File Id="WeevilGui.dll" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilGui.dll" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.dll.config" Guid="{A1089036-F6AC-4BAA-B38C-7DBA30041F99}">
-                <File Id="BlueDotBrigade.Weevil.Gui.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.dll.config" />
+            <Component Id="WeevilGui.dll.config" Guid="{A1089036-F6AC-4BAA-B38C-7DBA30041F99}">
+                <File Id="WeevilGui.dll.config" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilGui.dll.config" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.exe" Guid="{E7107B90-7C55-44AD-9955-D55DE70F7C58}">
-                <File Id="BlueDotBrigade.Weevil.Gui.exe" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.exe" />
+            <Component Id="WeevilGui.exe" Guid="{E7107B90-7C55-44AD-9955-D55DE70F7C58}">
+                <File Id="WeevilGui.exe" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilGui.exe" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.pdb" Guid="{81BDE419-6D92-4168-9B3B-47B2CF0A4082}">
-                <File Id="BlueDotBrigade.Weevil.Gui.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.pdb" />
+            <Component Id="WeevilGui.pdb" Guid="{81BDE419-6D92-4168-9B3B-47B2CF0A4082}">
+                <File Id="WeevilGui.pdb" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilGui.pdb" />
             </Component>
-            <Component Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" Guid="{F6D77353-0A05-49A8-B693-59774BEA97CD}">
-                <File Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
+            <Component Id="WeevilGui.runtimeconfig.json" Guid="{F6D77353-0A05-49A8-B693-59774BEA97CD}">
+                <File Id="WeevilGui.runtimeconfig.json" KeyPath="yes" Source="$(var.SourceDirPath)\WeevilGui.runtimeconfig.json" />
             </Component>
             <Component Id="BlueDotBrigade.Weevil.PowerShell.deps.json" Guid="{04930803-2AA8-4DC9-9841-0AF7876ABED9}">
                 <File Id="BlueDotBrigade.Weevil.PowerShell.deps.json" KeyPath="yes" Source="$(var.SourceDirPath)\BlueDotBrigade.Weevil.PowerShell.deps.json" />
@@ -298,12 +298,12 @@
             <ComponentRef Id="BlueDotBrigade.Weevil.Common.pdb" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Core.dll" />
             <ComponentRef Id="BlueDotBrigade.Weevil.Core.pdb" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.deps.json" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.dll" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.dll.config" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.exe" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.pdb" />
-            <ComponentRef Id="BlueDotBrigade.Weevil.Gui.runtimeconfig.json" />
+            <ComponentRef Id="WeevilGui.deps.json" />
+            <ComponentRef Id="WeevilGui.dll" />
+            <ComponentRef Id="WeevilGui.dll.config" />
+            <ComponentRef Id="WeevilGui.exe" />
+            <ComponentRef Id="WeevilGui.pdb" />
+            <ComponentRef Id="WeevilGui.runtimeconfig.json" />
             <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.deps.json" />
             <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.dll" />
             <ComponentRef Id="BlueDotBrigade.Weevil.PowerShell.pdb" />
