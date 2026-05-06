@@ -36,10 +36,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			SecretProtector.IsProtected(null).Should().BeFalse();
 		}
 
-		// ─── Protect ───────────────────────────────────────────────────────────────
+		// ─── Encrypt ───────────────────────────────────────────────────────────────
 
 		[TestMethod]
-		public void GivenNullSecret_WhenProtectCalled_ThenThrowsArgumentNullException()
+		public void GivenNullSecret_WhenEncryptCalled_ThenThrowsArgumentNullException()
 		{
 			if (!OperatingSystem.IsWindows())
 			{
@@ -47,13 +47,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return;
 			}
 
-			Action act = () => SecretProtector.Protect(null);
+			Action act = () => SecretProtector.Encrypt(null);
 
 			act.Should().Throw<ArgumentNullException>();
 		}
 
 		[TestMethod]
-		public void GivenEmptySecret_WhenProtectCalled_ThenThrowsArgumentException()
+		public void GivenEmptySecret_WhenEncryptCalled_ThenThrowsArgumentException()
 		{
 			if (!OperatingSystem.IsWindows())
 			{
@@ -61,13 +61,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return;
 			}
 
-			Action act = () => SecretProtector.Protect(string.Empty);
+			Action act = () => SecretProtector.Encrypt(string.Empty);
 
 			act.Should().Throw<ArgumentException>();
 		}
 
 		[TestMethod]
-		public void GivenWhiteSpaceSecret_WhenProtectCalled_ThenThrowsArgumentException()
+		public void GivenWhiteSpaceSecret_WhenEncryptCalled_ThenThrowsArgumentException()
 		{
 			if (!OperatingSystem.IsWindows())
 			{
@@ -75,13 +75,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return;
 			}
 
-			Action act = () => SecretProtector.Protect("   ");
+			Action act = () => SecretProtector.Encrypt("   ");
 
 			act.Should().Throw<ArgumentException>();
 		}
 
 		[TestMethod]
-		public void GivenValidSecret_WhenProtectCalled_ThenResultStartsWithEncryptedPrefix()
+		public void GivenValidSecret_WhenEncryptCalled_ThenResultStartsWithEncryptedPrefix()
 		{
 			if (!OperatingSystem.IsWindows())
 			{
@@ -89,13 +89,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return;
 			}
 
-			var result = SecretProtector.Protect("my-secret");
+			var result = SecretProtector.Encrypt("my-secret");
 
 			result.Should().StartWith(SecretProtector.EncryptedPrefix);
 		}
 
 		[TestMethod]
-		public void GivenValidSecret_WhenProtectCalled_ThenResultIsMarkedAsProtected()
+		public void GivenValidSecret_WhenEncryptCalled_ThenResultIsMarkedAsProtected()
 		{
 			if (!OperatingSystem.IsWindows())
 			{
@@ -103,34 +103,34 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return;
 			}
 
-			var result = SecretProtector.Protect("my-secret");
+			var result = SecretProtector.Encrypt("my-secret");
 
 			SecretProtector.IsProtected(result).Should().BeTrue();
 		}
 
-		// ─── Unprotect ─────────────────────────────────────────────────────────────
+		// ─── Decrypt ───────────────────────────────────────────────────────────────
 
 		[TestMethod]
-		public void GivenPlainTextValue_WhenUnprotectCalled_ThenValueIsReturnedUnchanged()
+		public void GivenPlainTextValue_WhenDecryptCalled_ThenValueIsReturnedUnchanged()
 		{
 			// Regression: Issue #867 — backward compatibility: plaintext values must pass through.
 			var plainText = "my-plain-secret";
 
-			var result = SecretProtector.Unprotect(plainText);
+			var result = SecretProtector.Decrypt(plainText);
 
 			result.Should().Be(plainText);
 		}
 
 		[TestMethod]
-		public void GivenEmptyString_WhenUnprotectCalled_ThenEmptyStringIsReturned()
+		public void GivenEmptyString_WhenDecryptCalled_ThenEmptyStringIsReturned()
 		{
-			var result = SecretProtector.Unprotect(string.Empty);
+			var result = SecretProtector.Decrypt(string.Empty);
 
 			result.Should().BeEmpty();
 		}
 
 		[TestMethod]
-		public void GivenEncryptedSecret_WhenUnprotectCalled_ThenOriginalSecretIsReturned()
+		public void GivenEncryptedSecret_WhenDecryptCalled_ThenOriginalSecretIsReturned()
 		{
 			// Regression: Issue #867
 			if (!OperatingSystem.IsWindows())
@@ -140,9 +140,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 
 			const string original = "super-secret-password";
-			var encrypted = SecretProtector.Protect(original);
+			var encrypted = SecretProtector.Encrypt(original);
 
-			var result = SecretProtector.Unprotect(encrypted);
+			var result = SecretProtector.Decrypt(encrypted);
 
 			result.Should().Be(original);
 		}

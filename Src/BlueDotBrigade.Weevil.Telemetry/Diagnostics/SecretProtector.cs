@@ -18,20 +18,20 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	/// encrypted the value can decrypt it.
 	/// </para>
 	/// <para>
-	/// This class is Windows-only. On other platforms, <see cref="Protect"/> throws
-	/// <see cref="PlatformNotSupportedException"/> and <see cref="Unprotect"/> returns
+	/// This class is Windows-only. On other platforms, <see cref="Encrypt"/> throws
+	/// <see cref="PlatformNotSupportedException"/> and <see cref="Decrypt"/> returns
 	/// the value unchanged.
 	/// </para>
 	/// </remarks>
 	public static class SecretProtector
 	{
 		/// <summary>
-		/// The prefix that identifies an encrypted value produced by <see cref="Protect"/>.
+		/// The prefix that identifies an encrypted value produced by <see cref="Encrypt"/>.
 		/// </summary>
 		public const string EncryptedPrefix = "ENC:";
 
 		/// <summary>
-		/// Returns <see langword="true"/> when <paramref name="value"/> was produced by <see cref="Protect"/>.
+		/// Returns <see langword="true"/> when <paramref name="value"/> was produced by <see cref="Encrypt"/>.
 		/// </summary>
 		public static bool IsProtected(string value) =>
 			!string.IsNullOrEmpty(value) && value.StartsWith(EncryptedPrefix, StringComparison.Ordinal);
@@ -46,7 +46,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// <exception cref="ArgumentException">Thrown when <paramref name="plainText"/> is empty or whitespace.</exception>
 		/// <exception cref="PlatformNotSupportedException">Thrown on non-Windows platforms.</exception>
 		[SupportedOSPlatform("windows")]
-		public static string Protect(string plainText)
+		public static string Encrypt(string plainText)
 		{
 			ArgumentNullException.ThrowIfNull(plainText);
 
@@ -64,11 +64,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// Returns the plaintext secret from <paramref name="value"/>.
 		/// </summary>
 		/// <param name="value">
-		/// An encrypted value produced by <see cref="Protect"/> (prefixed with <see cref="EncryptedPrefix"/>),
+		/// An encrypted value produced by <see cref="Encrypt"/> (prefixed with <see cref="EncryptedPrefix"/>),
 		/// or a plaintext value. Plaintext values are returned unchanged to support backward compatibility.
 		/// </param>
 		/// <returns>The decrypted plaintext, or <paramref name="value"/> if it was not encrypted.</returns>
-		public static string Unprotect(string value)
+		public static string Decrypt(string value)
 		{
 			if (!IsProtected(value))
 			{
