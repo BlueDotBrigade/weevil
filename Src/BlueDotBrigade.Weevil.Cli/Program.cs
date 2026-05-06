@@ -23,9 +23,10 @@
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
 		internal static string TelemetrySource { get; } = "unknown";
 
-		public static void Main()
+		public static void Main(string[] args)
 		{
-			OutputWriterContext.Configure(new MarkdownFormatter(), new ConsoleWriter());
+			var formatter = OutputAs.ResolveFormatter(args, new MarkdownFormatter());
+			OutputWriterContext.Configure(formatter, new ConsoleWriter());
 
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application has started.");
 			Log.Register(new NLogWriter());
@@ -45,7 +46,8 @@
 			application.AddCommands<InsightCommands>();
 			application.AddCommands<SecureCommands>();
 
-			application.Run();
+			var argumentsWithoutOutputAs = OutputAs.RemoveFromArguments(args);
+			application.Run(argumentsWithoutOutputAs);
 
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application is terminating...");
 		}
