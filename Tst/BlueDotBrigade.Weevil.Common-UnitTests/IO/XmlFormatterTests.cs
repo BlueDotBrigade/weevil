@@ -89,32 +89,6 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenMessage_WhenAsErrorCalled_ThenReturnsXmlErrorElement()
-		{
-			// Arrange
-			var formatter = new XmlFormatter();
-
-			// Act
-			var result = formatter.AsError("something failed");
-
-			// Assert
-			result.Should().Be("<Error>something failed</Error>");
-		}
-
-		[TestMethod]
-		public void GivenMessage_WhenAsWarningCalled_ThenReturnsXmlWarningElement()
-		{
-			// Arrange
-			var formatter = new XmlFormatter();
-
-			// Act
-			var result = formatter.AsWarning("pay attention");
-
-			// Assert
-			result.Should().Be("<Warning>pay attention</Warning>");
-		}
-
-		[TestMethod]
 		public void GivenSpecialCharacters_WhenAsTextCalled_ThenCharactersAreEscaped()
 		{
 			// Arrange

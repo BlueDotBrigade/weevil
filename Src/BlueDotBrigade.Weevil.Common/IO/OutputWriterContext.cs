@@ -44,18 +44,6 @@ namespace BlueDotBrigade.Weevil.IO
 			_outputWriter.WriteLine(_outputFormatter.AsNumbered(message));
 		}
 
-		public static void WriteError(string message)
-		{
-			_outputFormatter.ResetNumbering();
-			_outputWriter.WriteLine(_outputFormatter.AsError(message));
-		}
-
-		public static void WriteWarning(string message)
-		{
-			_outputFormatter.ResetNumbering();
-			_outputWriter.WriteLine(_outputFormatter.AsWarning(message));
-		}
-
 		public static void WriteTableHeader(string[] headers)
 		{
 			_outputFormatter.ResetNumbering();

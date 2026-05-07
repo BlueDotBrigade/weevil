@@ -11,8 +11,6 @@ namespace BlueDotBrigade.Weevil.IO
 		public string AsSubHeading(string message) => message;
 		public string AsBullet(string message) => $"- {message}";
 		public string AsNumbered(string message) => $"{_numberedItemCounter++}. {message}";
-		public string AsError(string message) => $"ERROR: {message}";
-		public string AsWarning(string message) => $"WARNING: {message}";
 		public string AsTableHeader(string[] headers) => string.Join("\t", headers);
 		public string AsTableRow(string[] columns) => string.Join("\t", columns);
 		
