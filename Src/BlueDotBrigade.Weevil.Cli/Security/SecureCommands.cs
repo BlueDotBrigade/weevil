@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Cli.Security
 {
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using IO;
 	using Cocona;
 	using Cocona.Help;
 

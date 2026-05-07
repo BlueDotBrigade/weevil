@@ -38,7 +38,8 @@
 			Log.Default.Write(LogSeverityType.Debug,
 				$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 
-			var builder = CoconaApp.CreateBuilder();
+			var argumentsWithoutOutputAs = OutputAs.RemoveFromArguments(args);
+			var builder = CoconaApp.CreateBuilder(argumentsWithoutOutputAs);
 
 			var application = builder.Build();
 
@@ -46,8 +47,7 @@
 			application.AddCommands<InsightCommands>();
 			application.AddCommands<SecureCommands>();
 
-			var argumentsWithoutOutputAs = OutputAs.RemoveFromArguments(args);
-			application.Run(argumentsWithoutOutputAs);
+			application.Run();
 
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application is terminating...");
 		}
