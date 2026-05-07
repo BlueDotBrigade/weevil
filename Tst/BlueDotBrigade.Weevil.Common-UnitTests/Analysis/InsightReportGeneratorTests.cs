@@ -4,9 +4,9 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 	using System.Collections.Immutable;
 	using System.Text.Json;
 	using System.Xml.Linq;
-	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.IO;
+	using global::BlueDotBrigade.Weevil.Analysis;
+	using global::BlueDotBrigade.Weevil.Data;
+	using global::BlueDotBrigade.Weevil.IO;
 	using FluentAssertions;
 	using NSubstitute;
 
@@ -63,8 +63,8 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 			var output = renderer.Render(report);
 
 			using var json = JsonDocument.Parse(output);
-			json.RootElement.GetProperty("title").GetString().Should().Be(report.Title);
-			json.RootElement.GetProperty("problemAreas").GetArrayLength().Should().Be(1);
+			json.RootElement.GetProperty("Title").GetString().Should().Be(report.Title);
+			json.RootElement.GetProperty("ProblemAreas").GetArrayLength().Should().Be(1);
 			json.RootElement.TryGetProperty("heading", out _).Should().BeFalse();
 		}
 
