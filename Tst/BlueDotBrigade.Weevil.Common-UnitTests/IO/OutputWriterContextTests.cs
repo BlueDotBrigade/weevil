@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -85,8 +86,48 @@ namespace BlueDotBrigade.Weevil.IO
 			OutputWriterContext.WriteNumbered("after-warning");
 
 			CollectionAssert.AreEqual(
-				new[] { "N1:first", "W:warning", "N1:after-warning" },
+				new[] { "N1:first", "N1:after-warning" },
 				writer.Messages.ToArray());
+		}
+
+		[TestMethod]
+		public void GivenWarningMessage_WhenWriteWarningCalled_ThenWarningIsLoggedAsDiagnostic()
+		{
+			// Regression: Issue #836
+			var previous = Log.Default;
+			var logWriter = new RecordingLogWriter();
+			Log.Register(logWriter);
+
+			try
+			{
+				OutputWriterContext.WriteWarning("warning");
+
+				CollectionAssert.AreEqual(new[] { "Warning:warning" }, logWriter.Messages.ToArray());
+			}
+			finally
+			{
+				Log.Register(previous);
+			}
+		}
+
+		[TestMethod]
+		public void GivenErrorMessage_WhenWriteErrorCalled_ThenErrorIsLoggedAsDiagnostic()
+		{
+			// Regression: Issue #836
+			var previous = Log.Default;
+			var logWriter = new RecordingLogWriter();
+			Log.Register(logWriter);
+
+			try
+			{
+				OutputWriterContext.WriteError("error");
+
+				CollectionAssert.AreEqual(new[] { "Error:error" }, logWriter.Messages.ToArray());
+			}
+			finally
+			{
+				Log.Register(previous);
+			}
 		}
 
 		private sealed class RecordingWriter : IOutputWriter
@@ -108,8 +149,6 @@ namespace BlueDotBrigade.Weevil.IO
 			public string AsSubHeading(string message) => $"SH:{message}";
 			public string AsBullet(string message) => $"B:{message}";
 			public string AsNumbered(string message) => $"N{_counter++}:{message}";
-			public string AsError(string message) => $"E:{message}";
-			public string AsWarning(string message) => $"W:{message}";
 			public string AsTableHeader(string[] headers) => $"TH:{string.Join(",", headers)}";
 			public string AsTableRow(string[] columns) => $"TR:{string.Join(",", columns)}";
 			public string AsTable(string[] headers, string[][] rows) => string.Empty;
@@ -117,6 +156,41 @@ namespace BlueDotBrigade.Weevil.IO
 			public void ResetNumbering()
 			{
 				_counter = 1;
+			}
+		}
+
+		private sealed class RecordingLogWriter : ILogWriter
+		{
+			public List<string> Messages { get; } = new();
+
+			public void Write(string message)
+			{
+			}
+
+			public void Write(string message, IEnumerable<KeyValuePair<string, object>> metadata)
+			{
+			}
+
+			public void Write(LogSeverityType severity, string message)
+			{
+				Messages.Add($"{severity}:{message}");
+			}
+
+			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
+			{
+				Messages.Add($"{severity}:{message}");
+			}
+
+			public void Write(LogSeverityType severity, Exception exception)
+			{
+			}
+
+			public void Write(LogSeverityType severity, Exception exception, string message)
+			{
+			}
+
+			public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata)
+			{
 			}
 		}
 

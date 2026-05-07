@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	public static class OutputWriterContext
 	{
@@ -47,13 +48,13 @@ namespace BlueDotBrigade.Weevil.IO
 		public static void WriteError(string message)
 		{
 			_outputFormatter.ResetNumbering();
-			_outputWriter.WriteLine(_outputFormatter.AsError(message));
+			Log.Default.Write(LogSeverityType.Error, message);
 		}
 
 		public static void WriteWarning(string message)
 		{
 			_outputFormatter.ResetNumbering();
-			_outputWriter.WriteLine(_outputFormatter.AsWarning(message));
+			Log.Default.Write(LogSeverityType.Warning, message);
 		}
 
 		public static void WriteTableHeader(string[] headers)

@@ -14,9 +14,6 @@ namespace BlueDotBrigade.Weevil.IO
 
 		public string AsNumbered(string message) => JsonSerializer.Serialize(new { number = _numberedItemCounter++, text = message });
 
-		public string AsError(string message) => JsonSerializer.Serialize(new { error = message });
-		public string AsWarning(string message) => JsonSerializer.Serialize(new { warning = message });
-
 		public string AsTableHeader(string[] headers) => JsonSerializer.Serialize(new { headers });
 
 		public string AsTableRow(string[] columns) => JsonSerializer.Serialize(new { row = columns });
