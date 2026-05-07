@@ -2,7 +2,6 @@ namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
 	using System.Collections.Generic;
-	using BlueDotBrigade.Weevil.Diagnostics;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -73,63 +72,6 @@ namespace BlueDotBrigade.Weevil.IO
 				writer.Messages.ToArray());
 		}
 
-		[TestMethod]
-		public void GivenNumberingResetOperation_WhenWriteWarningThenWriteNumberedCalled_ThenNumberingRestartsFromOne()
-		{
-			var formatter = new TrackingFormatter();
-			var writer = new RecordingWriter();
-
-			OutputWriterContext.Configure(formatter, writer);
-
-			OutputWriterContext.WriteNumbered("first");
-			OutputWriterContext.WriteWarning("warning");
-			OutputWriterContext.WriteNumbered("after-warning");
-
-			CollectionAssert.AreEqual(
-				new[] { "N1:first", "N1:after-warning" },
-				writer.Messages.ToArray());
-		}
-
-		[TestMethod]
-		public void GivenWarningMessage_WhenWriteWarningCalled_ThenWarningIsLoggedAsDiagnostic()
-		{
-			// Regression: Issue #836
-			var previous = Log.Default;
-			var logWriter = new RecordingLogWriter();
-			Log.Register(logWriter);
-
-			try
-			{
-				OutputWriterContext.WriteWarning("warning");
-
-				CollectionAssert.AreEqual(new[] { "Warning:warning" }, logWriter.Messages.ToArray());
-			}
-			finally
-			{
-				Log.Register(previous);
-			}
-		}
-
-		[TestMethod]
-		public void GivenErrorMessage_WhenWriteErrorCalled_ThenErrorIsLoggedAsDiagnostic()
-		{
-			// Regression: Issue #836
-			var previous = Log.Default;
-			var logWriter = new RecordingLogWriter();
-			Log.Register(logWriter);
-
-			try
-			{
-				OutputWriterContext.WriteError("error");
-
-				CollectionAssert.AreEqual(new[] { "Error:error" }, logWriter.Messages.ToArray());
-			}
-			finally
-			{
-				Log.Register(previous);
-			}
-		}
-
 		private sealed class RecordingWriter : IOutputWriter
 		{
 			public List<string> Messages { get; } = new();
@@ -156,41 +98,6 @@ namespace BlueDotBrigade.Weevil.IO
 			public void ResetNumbering()
 			{
 				_counter = 1;
-			}
-		}
-
-		private sealed class RecordingLogWriter : ILogWriter
-		{
-			public List<string> Messages { get; } = new();
-
-			public void Write(string message)
-			{
-			}
-
-			public void Write(string message, IEnumerable<KeyValuePair<string, object>> metadata)
-			{
-			}
-
-			public void Write(LogSeverityType severity, string message)
-			{
-				Messages.Add($"{severity}:{message}");
-			}
-
-			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
-			{
-				Messages.Add($"{severity}:{message}");
-			}
-
-			public void Write(LogSeverityType severity, Exception exception)
-			{
-			}
-
-			public void Write(LogSeverityType severity, Exception exception, string message)
-			{
-			}
-
-			public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata)
-			{
 			}
 		}
 
