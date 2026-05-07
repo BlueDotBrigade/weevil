@@ -11,7 +11,6 @@
 	using Cocona;
 	using Diagnostics;
 	using Filter;
-	using IO;
 	using Security;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Diagnostics;
@@ -61,7 +60,7 @@
 
 		private static void OnUnhandledTaskException(object sender, UnobservedTaskExceptionEventArgs e)
 		{
-			Write.Error(e.Exception.Message);
+			Log.Default.Write(LogSeverityType.Error, e.Exception.Message);
 			Environment.Exit(e.Exception.HResult);
 		}
 
@@ -73,7 +72,7 @@
 				? "Application is exiting due to an unexpected error."
 				: $"Application is exiting due to an unexpected error: {exception?.Message}";
 
-			Write.Error(message);
+			Log.Default.Write(LogSeverityType.Error, message);
 
 			Environment.Exit(exception?.HResult ?? 1);
 		}

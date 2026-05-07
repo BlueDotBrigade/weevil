@@ -84,34 +84,6 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenMessage_WhenAsErrorCalled_ThenReturnsJsonWithErrorProperty()
-		{
-			// Arrange
-			var formatter = new JsonFormatter();
-
-			// Act
-			var result = formatter.AsError("Something failed");
-
-			// Assert
-			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Something failed", doc.RootElement.GetProperty("error").GetString());
-		}
-
-		[TestMethod]
-		public void GivenMessage_WhenAsWarningCalled_ThenReturnsJsonWithWarningProperty()
-		{
-			// Arrange
-			var formatter = new JsonFormatter();
-
-			// Act
-			var result = formatter.AsWarning("Watch out");
-
-			// Assert
-			using var doc = JsonDocument.Parse(result);
-			Assert.AreEqual("Watch out", doc.RootElement.GetProperty("warning").GetString());
-		}
-
-		[TestMethod]
 		public void GivenHeaders_WhenAsTableHeaderCalled_ThenReturnsJsonWithHeadersArray()
 		{
 			// Arrange

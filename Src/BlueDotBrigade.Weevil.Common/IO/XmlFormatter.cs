@@ -26,8 +26,6 @@ namespace BlueDotBrigade.Weevil.IO
 				+ new XElement("Item", new XAttribute("Number", _numberedItemCounter++), message ?? string.Empty)
 					.ToString(SaveOptions.DisableFormatting);
 		}
-		public string AsError(string message) => CloseTableIfOpen() + CreateElement("Error", message);
-		public string AsWarning(string message) => CloseTableIfOpen() + CreateElement("Warning", message);
 
 		public string AsTableHeader(string[] headers)
 		{

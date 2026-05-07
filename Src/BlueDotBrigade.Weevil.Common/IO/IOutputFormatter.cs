@@ -9,8 +9,6 @@ namespace BlueDotBrigade.Weevil.IO
 		string AsSubHeading(string message);
 		string AsBullet(string message);
 		string AsNumbered(string message);
-		string AsError(string message);
-		string AsWarning(string message);
 		string AsTableHeader(string[] headers);
 		string AsTableRow(string[] columns);
 		string AsTable(string[] headers, string[][] rows);
