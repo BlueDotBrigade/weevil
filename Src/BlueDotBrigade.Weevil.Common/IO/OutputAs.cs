@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 
 	public static class OutputAs
 	{
@@ -17,9 +18,12 @@ namespace BlueDotBrigade.Weevil.IO
 				throw new ArgumentNullException(nameof(fallbackFormatter));
 			}
 
-			return TryGetValue(arguments, out var format) && TryCreateFormatter(format, out var formatter)
-				? formatter
-				: fallbackFormatter;
+			if (TryGetValue(arguments, out var format) && TryCreateFormatter(format, out var formatter))
+			{
+				return formatter;
+			}
+
+			return fallbackFormatter;
 		}
 
 		public static string[] RemoveFromArguments(IReadOnlyList<string> arguments)
@@ -80,7 +84,8 @@ namespace BlueDotBrigade.Weevil.IO
 					continue;
 				}
 
-				var nextArgument = arguments[++index];
+				index++;
+				var nextArgument = arguments[index];
 				if (IsValidValue(nextArgument))
 				{
 					value = nextArgument;
@@ -90,7 +95,7 @@ namespace BlueDotBrigade.Weevil.IO
 			return value.Length > 0;
 		}
 
-		private static bool TryCreateFormatter(string value, out IOutputFormatter formatter)
+		private static bool TryCreateFormatter(string value, [NotNullWhen(true)] out IOutputFormatter? formatter)
 		{
 			var normalized = Normalize(value);
 
@@ -116,7 +121,7 @@ namespace BlueDotBrigade.Weevil.IO
 					formatter = new XmlFormatter();
 					return true;
 				default:
-					formatter = null!;
+					formatter = null;
 					return false;
 			}
 		}
