@@ -10,12 +10,67 @@ namespace BlueDotBrigade.Weevil.Gui
 	{
 		[TestMethod]
 		// Regression: Insight icon should not animate indefinitely when attention is required.
-		public void GivenInsightAttentionTrigger_WhenIconAnimationIsConfigured_ThenAnimationRepeatsOnlyThreeTimes()
+		public void GivenInsightAttentionOpacityStyle_WhenIconAnimationIsConfigured_ThenAnimationRepeatsOnlyThreeTimes()
 		{
 			var statusBarViewPath = LocateStatusBarViewPath();
 			var xaml = XDocument.Load(statusBarViewPath);
 
-			var attentionTrigger = xaml
+			var attentionAnimation = FindAttentionAnimation(
+				xaml,
+				styleKey: "InsightIconStyleOpacityPulse",
+				targetProperty: "Opacity");
+
+			attentionAnimation.Should().NotBeNull();
+			attentionAnimation!
+				.Attribute("RepeatBehavior")?
+				.Value
+				.Should()
+				.Be("3x");
+		}
+
+		[TestMethod]
+		public void GivenInsightAttentionScaleStyle_WhenIconAnimationIsConfigured_ThenAnimationScalesAndRepeatsOnlyThreeTimes()
+		{
+			var statusBarViewPath = LocateStatusBarViewPath();
+			var xaml = XDocument.Load(statusBarViewPath);
+
+			var scaleXAnimation = FindAttentionAnimation(
+				xaml,
+				styleKey: "InsightIconStyleScalePulse",
+				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleX)");
+			var scaleYAnimation = FindAttentionAnimation(
+				xaml,
+				styleKey: "InsightIconStyleScalePulse",
+				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleY)");
+
+			scaleXAnimation.Should().NotBeNull();
+			scaleYAnimation.Should().NotBeNull();
+			scaleXAnimation!
+				.Attribute("RepeatBehavior")?
+				.Value
+				.Should()
+				.Be("3x");
+			scaleYAnimation!
+				.Attribute("RepeatBehavior")?
+				.Value
+				.Should()
+				.Be("3x");
+		}
+
+		private static XElement? FindAttentionAnimation(
+			XDocument xaml,
+			string styleKey,
+			string targetProperty)
+		{
+			var style = xaml
+				.Descendants()
+				.FirstOrDefault(element =>
+					element.Name.LocalName == "Style"
+					&& string.Equals((string?)element.Attribute(XName.Get("Key", "http://schemas.microsoft.com/winfx/2006/xaml")), styleKey, StringComparison.Ordinal));
+
+			style.Should().NotBeNull();
+
+			var attentionTrigger = style!
 				.Descendants()
 				.FirstOrDefault(element =>
 					element.Name.LocalName == "MultiDataTrigger"
@@ -32,14 +87,10 @@ namespace BlueDotBrigade.Weevil.Gui
 				.Descendants()
 				.FirstOrDefault(element =>
 					element.Name.LocalName == "DoubleAnimation"
-					&& string.Equals((string?)element.Attribute("Storyboard.TargetProperty"), "Opacity", StringComparison.Ordinal));
+					&& string.Equals((string?)element.Attribute("Storyboard.TargetProperty"), targetProperty, StringComparison.Ordinal));
 
 			attentionAnimation.Should().NotBeNull();
-			attentionAnimation!
-				.Attribute("RepeatBehavior")?
-				.Value
-				.Should()
-				.Be("3x");
+			return attentionAnimation;
 		}
 
 		private static string LocateStatusBarViewPath()
