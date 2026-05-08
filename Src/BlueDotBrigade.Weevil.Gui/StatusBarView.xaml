@@ -268,18 +268,33 @@
                                             <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
                                             <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
                            </MultiDataTrigger>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
-                                                <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                                            <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
-                           </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
+                                         <MultiDataTrigger>
+                                             <MultiDataTrigger.Conditions>
+                                                 <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                                                 <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
+                                             </MultiDataTrigger.Conditions>
+                                             <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                                             <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
+                                             <MultiDataTrigger.EnterActions>
+                                                 <BeginStoryboard Name="InsightAttentionPulseStoryboard">
+                                                     <Storyboard FillBehavior="Stop">
+                                                         <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                          From="1"
+                                                                          To="0.35"
+                                                                          Duration="0:0:0.2"
+                                                                          AutoReverse="True"
+                                                                          RepeatBehavior="3x" />
+                                                     </Storyboard>
+                                                 </BeginStoryboard>
+                                             </MultiDataTrigger.EnterActions>
+                                             <MultiDataTrigger.ExitActions>
+                                                 <RemoveStoryboard BeginStoryboardName="InsightAttentionPulseStoryboard" />
+                                             </MultiDataTrigger.ExitActions>
+                            </MultiDataTrigger>
+                                     </Style.Triggers>
+                                 </Style>
+                             </Image.Style>
+                         </Image>
                     </materialDesign:Badged>
                     <materialDesign:PopupBox
                           StaysOpen="True"
