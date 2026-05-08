@@ -39,7 +39,7 @@ namespace BlueDotBrigade.Weevil.Gui
 				.Attribute("RepeatBehavior")?
 				.Value
 				.Should()
-				Be("3x");
+				.Be("3x");
 		}
 
 		private static string LocateStatusBarViewPath()
