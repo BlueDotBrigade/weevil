@@ -11,6 +11,92 @@
         <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
         <converters1:ContextConverter x:Key="ContextConverter" />
         <converters:SelectionChangedBulletinConverter x:Key="SelectionChangedBulletinConverter" />
+        <Style x:Key="InsightIconStyleOpacityPulse" TargetType="{x:Type Image}">
+            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+            <Setter Property="ToolTip" Value="There is no insight at this time."/>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
+                    <MultiDataTrigger.EnterActions>
+                        <BeginStoryboard Name="InsightAttentionPulseStoryboard">
+                            <Storyboard FillBehavior="Stop">
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 From="1"
+                                                 To="0.35"
+                                                 Duration="0:0:0.2"
+                                                 AutoReverse="True"
+                                                 RepeatBehavior="3x" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <RemoveStoryboard BeginStoryboardName="InsightAttentionPulseStoryboard" />
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="InsightIconStyleScalePulse" TargetType="{x:Type Image}">
+            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+            <Setter Property="ToolTip" Value="There is no insight at this time."/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
+                    <MultiDataTrigger.EnterActions>
+                        <BeginStoryboard Name="InsightAttentionScalePulseStoryboard">
+                            <Storyboard FillBehavior="Stop">
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                 From="1"
+                                                 To="1.25"
+                                                 Duration="0:0:0.2"
+                                                 AutoReverse="True"
+                                                 RepeatBehavior="3x" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                 From="1"
+                                                 To="1.25"
+                                                 Duration="0:0:0.2"
+                                                 AutoReverse="True"
+                                                 RepeatBehavior="3x" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <RemoveStoryboard BeginStoryboardName="InsightAttentionScalePulseStoryboard" />
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <StatusBar 
@@ -254,47 +340,8 @@
                                 </Style.Triggers>
                             </Style>
                         </materialDesign:Badged.Style>
-                        <Image Margin="4,0,0,0">
-                            <Image.Style>
-                                <Style TargetType="{x:Type Image}">
-                                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
-                                    <Setter Property="ToolTip" Value="There is no insight at this time."/>
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
-                                                <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                                            <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
-                           </MultiDataTrigger>
-                                         <MultiDataTrigger>
-                                             <MultiDataTrigger.Conditions>
-                                                 <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
-                                                 <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
-                                             </MultiDataTrigger.Conditions>
-                                             <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                                             <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
-                                             <MultiDataTrigger.EnterActions>
-                                                 <BeginStoryboard Name="InsightAttentionPulseStoryboard">
-                                                     <Storyboard FillBehavior="Stop">
-                                                         <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                          From="1"
-                                                                          To="0.35"
-                                                                          Duration="0:0:0.2"
-                                                                          AutoReverse="True"
-                                                                          RepeatBehavior="3x" />
-                                                     </Storyboard>
-                                                 </BeginStoryboard>
-                                             </MultiDataTrigger.EnterActions>
-                                             <MultiDataTrigger.ExitActions>
-                                                 <RemoveStoryboard BeginStoryboardName="InsightAttentionPulseStoryboard" />
-                                             </MultiDataTrigger.ExitActions>
-                            </MultiDataTrigger>
-                                     </Style.Triggers>
-                                 </Style>
-                             </Image.Style>
-                         </Image>
+                        <Image Margin="4,0,0,0"
+                               Style="{StaticResource InsightIconStyleOpacityPulse}" />
                     </materialDesign:Badged>
                     <materialDesign:PopupBox
                           StaysOpen="True"
