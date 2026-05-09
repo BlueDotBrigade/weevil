@@ -132,7 +132,8 @@ namespace BlueDotBrigade.Weevil.Gui
 
 			statusBar.InsightDetails.HasInsightNeedingAttention.Should().BeTrue();
 
-			// Open a second file — this should reset insight state.
+			// Open a second file — this should reset insight state (False),
+			// so that the subsequent insight bulletin re-triggers the animation (True).
 			bulletinMediator.Post(new SourceFileOpenedBulletin
 			{
 				SourceFilePath = @"C:\Logs\second.log",
@@ -143,6 +144,17 @@ namespace BlueDotBrigade.Weevil.Gui
 
 			statusBar.InsightDetails.HasInsightNeedingAttention.Should().BeFalse(
 				"insight state must be reset when a new file is opened so the attention animation can re-trigger");
+
+			// Simulate second file triggering insight attention — the transition
+			// False → True is what causes the MultiDataTrigger to re-enter and fire the animation.
+			bulletinMediator.Post(new InsightChangedBulletin
+			{
+				HasInsight = true,
+				InsightNeedingAttention = 1,
+			});
+
+			statusBar.InsightDetails.HasInsightNeedingAttention.Should().BeTrue(
+				"the insight bulletin posted after file open must set HasInsightNeedingAttention back to true");
 		}
 
 		private static XElement? FindAttentionAnimation(
