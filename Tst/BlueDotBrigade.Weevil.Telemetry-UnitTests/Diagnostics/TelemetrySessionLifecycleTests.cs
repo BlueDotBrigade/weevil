@@ -88,7 +88,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					installedCpu: "   ");
 
 				tracker.CurrentSession.Should().NotBeNull();
-				tracker.CurrentSession!.InstalledCpu.Should().Be("Unknown");
+				tracker.CurrentSession!.InstalledCpu.Should().Be("");
 			}
 			finally
 			{
