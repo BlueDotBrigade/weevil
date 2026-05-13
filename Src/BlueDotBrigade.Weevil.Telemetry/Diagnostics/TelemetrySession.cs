@@ -20,7 +20,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// <summary>
 		/// Distribution source associated with the running Weevil instance.
 		/// </summary>
-		public string Source { get; set; } = "unknown";
+		/// <remarks>
+		/// Expected values: Development, CiPipeline, Production
+		/// </remarks>
+		public string Source { get; set; } = "Development";
 
 		/// <summary>
 		/// Application version for the session.
