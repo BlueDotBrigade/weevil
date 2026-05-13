@@ -20,6 +20,8 @@
 		private readonly UiResponsivenessMonitor _uiMonitor;
 		private readonly TelemetrySessionLifecycle _telemetry;
 		private readonly Version _applicationVersion;
+		private readonly long _installedRamMb;
+		private readonly string _installedCpu;
 
 		public MainWindowViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
@@ -37,6 +39,9 @@
 				uiDispatcher,
 				bulletinMediator);
 			_applicationVersion = this.FilterViewModel.WeevilVersion;
+			var computerSnapshot = ComputerSnapshot.Create();
+			_installedRamMb = (long)computerSnapshot.RamTotalInstalled.MetaBytes;
+			_installedCpu = computerSnapshot.CpuName;
 
 			this.StatusBarViewModel = new StatusBarViewModel(
 				uiDispatcher,
@@ -70,7 +75,12 @@
 			var title = Path.GetFileNameWithoutExtension(bulletin.SourceFilePath);
 
 			_uiDispatcher.Invoke(() => this.ApplicationTitle = title);
-			_telemetry.StartSessionOnFileOpen("WeevilGui.exe", _applicationVersion, bulletin.SourceFilePath);
+           _telemetry.StartSessionOnFileOpen(
+				"WeevilGui.exe",
+				_applicationVersion,
+				bulletin.SourceFilePath,
+				_installedRamMb,
+				_installedCpu);
 		}
 
 		public FilterViewModel FilterViewModel { get; }

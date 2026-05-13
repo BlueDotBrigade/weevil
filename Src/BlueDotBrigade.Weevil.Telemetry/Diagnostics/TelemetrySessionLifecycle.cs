@@ -73,7 +73,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
-		public void StartSessionOnFileOpen(string application, Version version, string sourceFilePath, long installedRamMb = 0)
+		public void StartSessionOnFileOpen(
+			string application,
+			Version version,
+			string sourceFilePath,
+			long installedRamMb = 0,
+			string installedCpu = "")
 		{
 			try
 			{
@@ -92,14 +97,15 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					CurrentSession = new TelemetrySession
 					{
 						SessionId = Guid.NewGuid(),
-						Application = string.IsNullOrWhiteSpace(application) ? "unknown" : application,
+						Application = string.IsNullOrWhiteSpace(application) ? "Weevil" : application,
 						Source = _startupContext.Source,
 						Version = version ?? new Version(0, 0),
 						IsDebugging = _startupContext.IsDebugging,
 						SessionStartUtc = now,
 						SessionEndUtc = now,
 						LogFileSizeBytes = TryGetFileSize(sourceFilePath),
-						InstalledRamMb = installedRamMb,
+                      InstalledRamMb = installedRamMb,
+						InstalledCpu = string.IsNullOrWhiteSpace(installedCpu) ? "" : installedCpu,
 						SchemaVersion = "1.0",
 					};
 					_lastActivityUtc = now;

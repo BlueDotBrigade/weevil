@@ -58,6 +58,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		public long InstalledRamMb { get; set; }
 
 		/// <summary>
+		/// Installed CPU model name reported by the operating system.
+		/// </summary>
+		public string InstalledCpu { get; set; } = "Unknown";
+
+		/// <summary>
 		/// Number of filter executions in the session.
 		/// </summary>
 		public int FilterExecutionCount { get; set; }
