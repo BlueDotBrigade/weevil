@@ -117,20 +117,20 @@
 				$"RAM Installed: {computerSnapshot.RamTotalInstalled.GigaBytes:0.0} GB" + Environment.NewLine +
 				Environment.NewLine +
 				$"RAM Available: {computerSnapshot.RamTotalFree.GigaBytes:0.0} GB" + Environment.NewLine +
-				$"RAM Used by Weevil {workingSet.MetaBytes:#,###,##0} MB ({workingSetPercentUsage:0.0} %) " + Environment.NewLine +
-				$"Weevil's Total Memory Footprint: {privateMemory.MetaBytes:#,###,##0} MB " + Environment.NewLine +
+				$"RAM Used by Weevil {workingSet.MegaBytes:#,###,##0} MB ({workingSetPercentUsage:0.0} %) " + Environment.NewLine +
+				$"Weevil's Total Memory Footprint: {privateMemory.MegaBytes:#,###,##0} MB " + Environment.NewLine +
 				Environment.NewLine;
 
 			if (sourceFileSize.Bytes > 0)
 			{
-				if (sourceFileSize.MetaBytes < 1)
+				if (sourceFileSize.MegaBytes < 1)
 				{
 					result += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine +
 					          Environment.NewLine;
 				}
 				else
 				{
-					result += $"Source File Size: {sourceFileSize.MetaBytes:#,###,##0} MB" + Environment.NewLine +
+					result += $"Source File Size: {sourceFileSize.MegaBytes:#,###,##0} MB" + Environment.NewLine +
 					          Environment.NewLine;
 				}
 			}

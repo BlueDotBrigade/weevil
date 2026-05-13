@@ -7,6 +7,7 @@
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
+	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.IO;
 	using BlueDotBrigade.Weevil.Gui.Navigation;
@@ -40,7 +41,7 @@
 				bulletinMediator);
 			_applicationVersion = this.FilterViewModel.WeevilVersion;
 			var computerSnapshot = ComputerSnapshot.Create();
-			_installedRamMb = (long)computerSnapshot.RamTotalInstalled.MetaBytes;
+			_installedRamMb = (long)computerSnapshot.RamTotalInstalled.MegaBytes;
 			_installedCpu = computerSnapshot.CpuName;
 
 			this.StatusBarViewModel = new StatusBarViewModel(
