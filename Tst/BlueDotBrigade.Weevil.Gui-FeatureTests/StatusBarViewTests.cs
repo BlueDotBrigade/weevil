@@ -159,7 +159,7 @@ namespace BlueDotBrigade.Weevil.Gui
 
 		[TestMethod]
 		// Regression #808: Status bar must show "Saving session..." when telemetry session is being saved on app close.
-		public void GivenApplicationIsClosing_WhenTelemetrySessionSavingBulletinPosted_ThenStatusMessageIsSavingSession()
+		public void GivenTelemetrySessionSavingBulletin_WhenPosted_ThenStatusMessageIsSavingSession()
 		{
 			var uiDispatcher = new UiDispatcherFake();
 			var bulletinMediator = new BulletinMediator();
