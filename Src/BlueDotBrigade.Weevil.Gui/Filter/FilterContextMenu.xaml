@@ -155,6 +155,11 @@
                                       InputGestureText="F7"
                                       Tag="[1][2][3]123123"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Last Occurrence"
+                                      Command="{Binding DetectLastCommand}"
+                                      InputGestureText="Shift+F7"
+                                      Tag="123123[1][2][3]"
+                                      Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Transitions"
                                       Command="{Binding DetectDataTransitionsCommand}"
                                       InputGestureText="F9"

@@ -240,6 +240,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
                         () => this.IsMenuEnabled);
 
                 [NotObservable]
+                public ICommand DetectLastCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.DetectLast),
+                        () => this.IsMenuEnabled);
+
+                [NotObservable]
                 public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
                         () => Analyze(AnalysisType.DetectDataTransition),
                         () => this.IsMenuEnabled);
