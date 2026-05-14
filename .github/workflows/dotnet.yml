@@ -1,5 +1,5 @@
-name: Master branch
-description: Compiles and runs unit tests for master branch using .NET 9 core environment.
+name: Main branch
+description: Compiles and runs unit tests for Weevil's main branch using .NET 9 core environment.
 
 on:
   push:

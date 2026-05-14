@@ -113,6 +113,10 @@
 				this.TotalRecordCount = bulletin.TotalRecordCount;
 				this.TotalRecordCountChanged = false;
 
+				// Regression #844: Reset insight state so the attention animation can re-trigger
+				// when a second log file is opened with insights requiring attention.
+				this.InsightDetails = new InsightChangedBulletin();
+
 				this.StatusMessage = $"Disk Loading Period: {bulletin.SourceFileLoadingPeriod.ToHumanReadable()}";
 			});
 
