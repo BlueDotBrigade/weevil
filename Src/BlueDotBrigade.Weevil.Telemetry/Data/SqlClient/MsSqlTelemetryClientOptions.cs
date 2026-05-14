@@ -19,7 +19,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		/// Default TCP connection timeout in seconds.
 		/// A short value prevents telemetry from blocking the application when the server is unreachable.
 		/// </summary>
-		public const int DefaultConnectionTimeoutSeconds = 5;
+		public const int DefaultConnectionTimeoutSeconds = 30;
 
 		/// <summary>
 		/// Azure SQL connection string. <c>Encrypt=True</c>, <c>TrustServerCertificate=False</c>, and

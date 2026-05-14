@@ -14,7 +14,6 @@
 	public partial class App : Application
 	{
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
-		internal static string TelemetrySource { get; } = "unknown";
 
 		public App()
 		{
@@ -108,10 +107,12 @@
 				Log.Default.Write(
 					LogSeverityType.Information,
 					"Weevil application is starting...");
-				
+
+				var telemetrySource = TelemetryClientFactory.GetTelemetrySource();
 				var telemetryClient = TelemetryClientFactory.Create();
+
 				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
-				TelemetrySessionLifecycle.Shared.ConfigureStartupContext(TelemetrySource, IsDebuggerAttachedAtStartup);
+				TelemetrySessionLifecycle.Shared.ConfigureStartupContext(telemetrySource, IsDebuggerAttachedAtStartup);
 				Log.Default.Write(LogSeverityType.Debug,
 					$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 

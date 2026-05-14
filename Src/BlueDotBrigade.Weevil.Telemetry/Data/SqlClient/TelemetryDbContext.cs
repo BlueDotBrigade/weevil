@@ -43,6 +43,10 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 				entity.Property(e => e.SchemaVersion)
 					.HasMaxLength(16)
 					.IsRequired();
+
+				entity.Property(e => e.InstalledCpu)
+					.HasMaxLength(256)
+					.IsRequired();
 			});
 		}
 	}

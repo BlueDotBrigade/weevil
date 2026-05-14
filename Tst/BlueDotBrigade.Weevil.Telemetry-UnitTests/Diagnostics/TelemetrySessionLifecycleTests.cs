@@ -44,6 +44,59 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
+		public void GivenInstalledCpuProvided_WhenSessionStarts_ThenSessionContainsInstalledCpu()
+		{
+			var start = new DateTime(2026, 5, 1, 12, 30, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[] { start });
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSessionOnFileOpen(
+					"WeevilGui.exe",
+					new Version(1, 0),
+					sourcePath,
+					installedRamMb: 8192,
+					installedCpu: "AMD Ryzen 7");
+
+				tracker.CurrentSession.Should().NotBeNull();
+				tracker.CurrentSession!.InstalledCpu.Should().Be("AMD Ryzen 7");
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenInstalledCpuMissing_WhenSessionStarts_ThenSessionUsesUnknownCpu()
+		{
+			var start = new DateTime(2026, 5, 1, 12, 45, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[] { start });
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSessionOnFileOpen(
+					"WeevilGui.exe",
+					new Version(1, 0),
+					sourcePath,
+					installedCpu: "   ");
+
+				tracker.CurrentSession.Should().NotBeNull();
+				tracker.CurrentSession!.InstalledCpu.Should().Be("");
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
 		public void GivenStartupTelemetryContext_WhenSessionStarts_ThenSessionContainsSourceAndDebuggingState()
 		{
 			// Regression: Issue #803

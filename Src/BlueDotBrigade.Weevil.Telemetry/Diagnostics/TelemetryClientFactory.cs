@@ -11,6 +11,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	{
 		private const string TelemetryUserNameEnvironmentVariable = "WEEVIL_TELEMETRY_USERNAME";
 		private const string TelemetrySecretEnvironmentVariable = "WEEVIL_TELEMETRY_SECRET";
+		private const string TelemetrySourceEnvironmentVariable = "WEEVIL_TELEMETRY_SOURCE";
+		private const string DevelopmentSource = "Development";
 
 		/// <summary>
 		/// Creates a telemetry client based on runtime credential configuration.
@@ -36,6 +38,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				UsernameOrApiToken = GetOptionalEnvironmentValue(TelemetryUserNameEnvironmentVariable),
 				Secret = SecretProtector.Decrypt(GetOptionalEnvironmentValue(TelemetrySecretEnvironmentVariable)),
 			};
+		}
+
+     public static string GetTelemetrySource()
+		{
+			var source = GetOptionalEnvironmentValue(TelemetrySourceEnvironmentVariable);
+			return string.IsNullOrWhiteSpace(source) ? DevelopmentSource : source;
 		}
 
 		private static string GetOptionalEnvironmentValue(string variableName)

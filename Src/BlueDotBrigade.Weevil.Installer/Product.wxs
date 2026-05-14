@@ -59,6 +59,12 @@
 				<RegistryKey Root="HKCU" Key="Software\BlueDotBrigade\Weevil">
 					<RegistryValue Type="string" Name="EnableBetaFeatures" Value="True" />
 				</RegistryKey>
+                <Environment Id="WeevilTelemetrySourceEnvironmentVariable"
+					Name="WEEVIL_TELEMETRY_SOURCE"
+					Value="Production"
+					Action="set"
+					Part="all"
+					System="yes" />
 			</Component>
 		</ComponentGroup>
 	</Fragment>

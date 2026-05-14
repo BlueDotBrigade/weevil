@@ -20,7 +20,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// <summary>
 		/// Distribution source associated with the running Weevil instance.
 		/// </summary>
-		public string Source { get; set; } = "unknown";
+		/// <remarks>
+		/// Expected values: Development, CiPipeline, Production
+		/// </remarks>
+		public string Source { get; set; } = "Development";
 
 		/// <summary>
 		/// Application version for the session.
@@ -56,6 +59,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// Installed machine memory in megabytes.
 		/// </summary>
 		public long InstalledRamMb { get; set; }
+
+		/// <summary>
+		/// Installed CPU model name reported by the operating system.
+		/// </summary>
+		public string InstalledCpu { get; set; } = "Unknown";
 
 		/// <summary>
 		/// Number of filter executions in the session.

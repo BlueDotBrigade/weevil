@@ -20,7 +20,7 @@
 	{
 		internal static Version ApplicationVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
-		internal static string TelemetrySource { get; } = "unknown";
+        internal static string TelemetrySource { get; } = TelemetryClientFactory.GetTelemetrySource();
 
 		public static void Main(string[] args)
 		{
