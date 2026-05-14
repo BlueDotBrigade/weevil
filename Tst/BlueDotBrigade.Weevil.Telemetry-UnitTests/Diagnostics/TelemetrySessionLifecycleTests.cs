@@ -355,10 +355,40 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 		}
 
+		[TestMethod]
+		public void GivenFileOpened_WhenSessionStarts_ThenWarmupIsInvoked()
+		{
+			// Regression: Issue #808
+			var start = new DateTime(2026, 5, 14, 10, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[] { start });
+			var spyClient = new SpyTelemetryClient();
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+			tracker.Configure(spyClient);
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), sourcePath);
+
+				spyClient.WarmupCallCount.Should().Be(1, "warmup must be called once when a log file is opened");
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
 		private sealed class SpyTelemetryClient : ITelemetryClient
 		{
+			public int WarmupCallCount { get; private set; }
 			public List<TelemetrySession> AsyncSentSessions { get; } = new List<TelemetrySession>();
 			public List<TelemetrySession> SyncSentSessions { get; } = new List<TelemetrySession>();
+
+			public void Warmup()
+			{
+				WarmupCallCount++;
+			}
 
 			public Task SendAsync(TelemetrySession session, CancellationToken ct)
 			{

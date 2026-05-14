@@ -62,5 +62,18 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			// Assert
 			act.Should().NotThrow();
 		}
+
+		[TestMethod]
+		public void GivenWarmupCalled_ThenDoesNotThrow()
+		{
+			// Arrange
+			var client = new NullTelemetryClient();
+
+			// Act
+			Action act = () => client.Warmup();
+
+			// Assert
+			act.Should().NotThrow();
+		}
 	}
 }

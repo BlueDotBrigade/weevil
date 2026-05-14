@@ -10,6 +10,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	{
 		public static ITelemetryClient Instance { get; } = new NullTelemetryClient();
 
+		public void Warmup()
+		{
+			// no-op
+		}
+
 		public Task SendAsync(TelemetrySession session, CancellationToken ct)
 		{
 			return Task.CompletedTask;

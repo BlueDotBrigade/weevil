@@ -87,10 +87,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					return;
 				}
 
+				ITelemetryClient client;
 				TelemetrySession endedSession;
 
 				lock (_gate)
 				{
+					client = _client;
 					var now = _utcNow();
 					endedSession = EndCurrentSessionInternal(now);
 
@@ -110,6 +112,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					};
 					_lastActivityUtc = now;
 				}
+
+				// Warm up the database connection on the thread pool (fire-and-forget).
+				client.Warmup();
 
 				// Async upload on rollover: must not block the file-open flow.
 				if (endedSession != null)

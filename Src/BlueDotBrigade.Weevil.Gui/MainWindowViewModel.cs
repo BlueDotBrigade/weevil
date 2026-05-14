@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Windows;
+	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
@@ -18,6 +19,7 @@
 	internal class MainWindowViewModel
 	{
 		private readonly IUiDispatcher _uiDispatcher;
+		private readonly IBulletinMediator _bulletinMediator;
 		private readonly UiResponsivenessMonitor _uiMonitor;
 		private readonly TelemetrySessionLifecycle _telemetry;
 		private readonly Version _applicationVersion;
@@ -27,6 +29,7 @@
 		public MainWindowViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
 			_uiDispatcher = uiDispatcher;
+			_bulletinMediator = bulletinMediator;
 			_uiMonitor = new UiResponsivenessMonitor();
 			_telemetry = TelemetrySessionLifecycle.Shared;
 
@@ -67,6 +70,8 @@
 
 		public void Stop()
 		{
+			_bulletinMediator.Post(new TelemetrySessionSavingBulletin());
+			_uiDispatcher.Invoke(() => { }, DispatcherPriority.Render);
 			_telemetry.EndCurrentSession();
 			_uiMonitor.Stop();
 		}

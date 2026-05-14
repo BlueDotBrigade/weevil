@@ -220,6 +220,29 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			act.Should().NotThrow();
 		}
 
+		// ─── Warmup ────────────────────────────────────────────────────────────────
+
+		[TestMethod]
+		public void GivenUnavailableDatabase_WhenWarmupCalled_ThenDoesNotThrow()
+		{
+			// Warmup is fire-and-forget; failure isolation must prevent any exception from propagating.
+			var client = CreateClientWithFakeConnection();
+
+			Action act = () => client.Warmup();
+
+			act.Should().NotThrow();
+		}
+
+		[TestMethod]
+		public void GivenEmptyConnectionString_WhenWarmupCalled_ThenDoesNotThrow()
+		{
+			var client = CreateDisabledClient();
+
+			Action act = () => client.Warmup();
+
+			act.Should().NotThrow();
+		}
+
 		// ─── Disabled (no credentials) ────────────────────────────────────────────
 
 		[TestMethod]

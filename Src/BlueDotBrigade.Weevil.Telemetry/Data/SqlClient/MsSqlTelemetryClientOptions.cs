@@ -8,18 +8,18 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		/// <summary>
 		/// Default command timeout in seconds for asynchronous sends.
 		/// </summary>
-		public const int DefaultCommandTimeoutSeconds = 30;
+		public const int DefaultCommandTimeoutSeconds = 15;
 
 		/// <summary>
 		/// Default command timeout in seconds for synchronous best-effort sends.
 		/// </summary>
-		public const int DefaultSyncTimeoutSeconds = 5;
+		public const int DefaultSyncTimeoutSeconds = 15;
 
 		/// <summary>
 		/// Default TCP connection timeout in seconds.
-		/// A short value prevents telemetry from blocking the application when the server is unreachable.
+		/// A longer value allows time for Azure SQL serverless to resume from a paused state.
 		/// </summary>
-		public const int DefaultConnectionTimeoutSeconds = 30;
+		public const int DefaultConnectionTimeoutSeconds = 60;
 
 		/// <summary>
 		/// Azure SQL connection string. <c>Encrypt=True</c>, <c>TrustServerCertificate=False</c>, and
@@ -50,8 +50,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		/// <summary>
 		/// TCP connection timeout in seconds applied when establishing a database connection.
-		/// A short value prevents a telemetry upload from blocking the application when the
-		/// server is unreachable on the network.
+		/// A longer value allows time for Azure SQL serverless to resume from a paused state.
 		/// </summary>
 		public int ConnectionTimeoutSeconds { get; set; } = DefaultConnectionTimeoutSeconds;
 	}

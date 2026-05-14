@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Data.SqlClient
 {
 	using System;
+	using System.Diagnostics;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Diagnostics;
@@ -55,6 +56,46 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		/// <inheritdoc/>
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
+		public void Warmup()
+		{
+			if (_isDisabled)
+			{
+				return;
+			}
+
+			var connectionString = BuildSecuredConnectionString(
+				_options.ConnectionString,
+				_options.UsernameOrApiToken,
+				_options.Secret,
+				_options.ConnectionTimeoutSeconds);
+
+			ThreadPool.QueueUserWorkItem(_ =>
+			{
+				try
+				{
+					Log.Default.Write(LogSeverityType.Information, "Telemetry warmup: connecting to database...");
+
+					var stopwatch = Stopwatch.StartNew();
+
+					using var connection = new SqlConnection(connectionString);
+					connection.Open();
+
+					stopwatch.Stop();
+
+					Log.Default.Write(
+						LogSeverityType.Information,
+						$"Telemetry warmup succeeded. Connection time: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
+				}
+				catch (Exception e)
+				{
+					Log.Default.Write(LogSeverityType.Error, e, "Telemetry warmup failed.");
+				}
+			});
+		}
+#pragma warning restore CA1031
+
+		/// <inheritdoc/>
+#pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
 		public async Task SendAsync(TelemetrySession session, CancellationToken ct)
 		{
 			if (_isDisabled || session == null)
@@ -64,17 +105,23 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
-				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection is being attempted (async)...");
+				Log.Default.Write(LogSeverityType.Debug, "Saving telemetry session (async)...");
+
+				var stopwatch = Stopwatch.StartNew();
 
 				using TelemetryDbContext context = CreateContext(_options.CommandTimeoutSeconds);
 				context.Sessions.Add(session);
 				await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
-				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection succeeded (async).");
+				stopwatch.Stop();
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"Telemetry session saved (async). Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
 			}
 			catch (Exception e)
 			{
-				Log.Default.Write(LogSeverityType.Warning, e, "Telemetry database connection failed (async).");
+				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session (async).");
 			}
 		}
 #pragma warning restore CA1031
@@ -90,17 +137,23 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
-				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection is being attempted (sync)...");
+				Log.Default.Write(LogSeverityType.Debug, "Saving telemetry session (sync)...");
+
+				var stopwatch = Stopwatch.StartNew();
 
 				using TelemetryDbContext context = CreateContext(_options.SyncTimeoutSeconds);
 				context.Sessions.Add(session);
 				context.SaveChanges();
 
-				Log.Default.Write(LogSeverityType.Debug, "Telemetry database connection succeeded (sync).");
+				stopwatch.Stop();
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"Telemetry session saved (sync). Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
 			}
 			catch (Exception e)
 			{
-				Log.Default.Write(LogSeverityType.Warning, e, "Telemetry database connection failed (sync).");
+				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session (sync).");
 			}
 		}
 #pragma warning restore CA1031
@@ -127,8 +180,6 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		/// Parses <paramref name="connectionString"/> and enforces <c>Encrypt=True</c>,
 		/// <c>TrustServerCertificate=False</c>, and <c>Connect Timeout</c>, overriding
 		/// any caller-supplied values.
-		/// A short <paramref name="connectTimeoutSeconds"/> prevents telemetry from blocking
-		/// the application when the server is unreachable on the network.
 		/// </summary>
 		internal static string BuildSecuredConnectionString(
 			string connectionString,
