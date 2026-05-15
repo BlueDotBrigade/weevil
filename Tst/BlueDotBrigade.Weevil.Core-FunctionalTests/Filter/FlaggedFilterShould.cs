@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Filter
+﻿namespace BlueDotBrigade.Weevil.Filter
 {
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Analysis;
@@ -20,7 +20,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				FilterType.RegularExpression,
 				new FilterCriteria(@"to new state (?<State>.*)"));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
+			engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
 			// Apply @Flagged filter
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("@Flagged"));
@@ -48,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				FilterType.RegularExpression,
 				new FilterCriteria(@"to new state (?<State>.*)"));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
+			engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
 			// Apply lowercase @flagged filter
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("@flagged"));
@@ -74,7 +74,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				FilterType.RegularExpression,
 				new FilterCriteria(@"to new state (?<State>.*)"));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
+			engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
 			// Apply combined filter: show records with "Error" OR flagged records
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Error||@Flagged"));
@@ -99,7 +99,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				FilterType.RegularExpression,
 				new FilterCriteria(@"to new state (?<State>.*)"));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
+			engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
 			// Apply filter with @Flagged
 			var initialFilter = "Error||@Flagged";

@@ -10,7 +10,7 @@
 	namespace BlueDotBrigade.Weevil.Common.Analysis.Tests
 	{
 		[TestClass]
-		public class TemporalAnomalyAnalyzerTests
+		public class OutOfOrderTimestampsAnalyzerTests
 		{
 			[TestMethod]
 			public void Analyze_NotInChronologicalOrder_CommentUpdated()
@@ -28,10 +28,10 @@
 					.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 					.Returns("0");
 
-				var analyzer = new TemporalAnomalyAnalyzer();
+				var analyzer = new OutOfOrderTimestampsAnalyzer();
 				analyzer.Analyze(records, string.Empty, dialog, canUpdateMetadata: true);
 
-				Assert.AreEqual("TemporalAnomaly: -00:15:00", records[3].Metadata.Comment);
+				Assert.AreEqual("OutOfOrderTimestamps: -00:15:00", records[3].Metadata.Comment);
 			}
 		}
 	}

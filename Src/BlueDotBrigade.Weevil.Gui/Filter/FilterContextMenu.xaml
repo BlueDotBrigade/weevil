@@ -1,4 +1,4 @@
-<!-- 
+﻿<!-- 
   This menu should be bound to the FilterViewModel.
   F12 (Go to Definition) on bound commands will not work here because 
   ResourceDictionary does not support d:DataContext for design-time resolution.
@@ -140,56 +140,55 @@
             <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
             <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
             <Separator/>
-            <MenuItem Header="Annotate Records"
-                                      Command="{Binding DetectDataCommand}"
-                                      InputGestureText="F8"
-                                      Style="{StaticResource DetectionMenuItemStyle}"/>
-            <Separator/>
             <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
             <Separator/>
             <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
         </MenuItem>
-        <MenuItem Header="Event Detection">
+        <MenuItem Header="Extraction">
+            <MenuItem Header="Annotate Records"
+                                       Command="{Binding DetectDataCommand}"
+                                       InputGestureText="F8"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
+        </MenuItem>
+        <MenuItem Header="Pattern">
             <MenuItem Header="First Occurrence"
-                                      Command="{Binding DetectFirstCommand}"
-                                      InputGestureText="F7"
-                                      Tag="[1][2][3]123123"
-                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+                                       Command="{Binding FirstOccurrenceCommand}"
+                                       InputGestureText="F7"
+                                       Tag="[1][2][3]123123"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Last Occurrence"
-                                      Command="{Binding DetectLastCommand}"
-                                      InputGestureText="Shift+F7"
-                                      Tag="123123[1][2][3]"
-                                      Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Transitions"
-                                      Command="{Binding DetectDataTransitionsCommand}"
-                                      InputGestureText="F9"
-                                      Tag="[1]111[2]222[3]"
-                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+                                       Command="{Binding LastOccurrenceCommand}"
+                                       InputGestureText="Shift+F7"
+                                       Tag="123123[1][2][3]"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="State Transitions"
+                                       Command="{Binding StateTransitionsCommand}"
+                                       InputGestureText="F9"
+                                       Tag="[1]111[2]222[3]"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Rising Edges"
-                                      Command="{Binding DataTransitionsRisingEdgeCommand}"
-                                      Tag="9876[5]6789"
-                                      Style="{StaticResource DetectionMenuItemStyle}"/>
+                                       Command="{Binding RisingEdgesCommand}"
+                                       Tag="9876[5]6789"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Falling Edges"
-                                      Command="{Binding DataTransitionsFallingEdgeCommand}"
-                                      Tag="1234[5]4321"
-                                      Style="{StaticResource DetectionMenuItemStyle}"/>
-            <MenuItem Header="Repeating Records"
-                                      Command="{Binding DetectRepeatingRecordsCommand}"
-                                      Tag="[1]11[1]x[2]22[2]"
-                                      Style="{StaticResource DetectionMenuItemStyle}"/>
-        </MenuItem>
-        <MenuItem Header="Temporal Analysis">
-            <MenuItem Header="Temporal Anomalies"
-                                      Command="{Binding DetectTemporalAnomalyCommand}"/>
-            <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
-            <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-        </MenuItem>
-        <MenuItem Header="Trend Analysis">
-            <MenuItem Header="Detect Stability"
-                                      Command="{Binding DetectStableValuesCommand}"
+                                       Command="{Binding FallingEdgesCommand}"
+                                       Tag="1234[5]4321"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Matching Record Runs"
+                                       Command="{Binding MatchingRecordRunsCommand}"
+                                       Tag="[1]11[1]x[2]22[2]"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Stable Value Runs"
+                                      Command="{Binding StableValueRunsCommand}"
                                       InputGestureText="F6"
                                       Tag="[1]111[1][2]22[2]"
                                       Style="{StaticResource DetectionMenuItemStyle}"/>
+        </MenuItem>
+        <MenuItem Header="Temporal">
+            <MenuItem Header="Out-of-Order Timestamps"
+                                      Command="{Binding OutOfOrderTimestampsCommand}"/>
+            <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
+            <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
         </MenuItem>
         <MenuItem Header="Domain Specific Analysis"
                               ItemsSource="{Binding Path=CustomAnalyzerCommands}"
