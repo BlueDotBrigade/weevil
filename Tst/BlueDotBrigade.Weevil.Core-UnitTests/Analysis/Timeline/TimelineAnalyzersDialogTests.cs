@@ -248,6 +248,55 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		#endregion
 
+		#region DetectLastAnalyzer Tests
+
+		[TestMethod]
+		public void DetectLastAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new DetectLastAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		[TestMethod]
+		public void DetectLastAnalyzer_BlankRegex_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new DetectLastAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		[TestMethod]
+		public void DetectLastAnalyzer_EmptyStringRegex_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new DetectLastAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			Assert.AreEqual(0, results.FlaggedRecords);
+		}
+
+		#endregion
+
 		#region StatisticalAnalyzer Tests
 
 		[TestMethod]

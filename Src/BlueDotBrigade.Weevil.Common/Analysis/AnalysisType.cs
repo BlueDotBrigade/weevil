@@ -11,6 +11,10 @@
 		/// </summary>
 		DetectFirst,
 		/// <summary>
+		/// Flags only the last record where each unique extracted value appears.
+		/// </summary>
+		DetectLast,
+		/// <summary>
 		/// Flags the start and end of consecutive records that share the same extracted value.
 		/// </summary>
 		DetectStableValues,

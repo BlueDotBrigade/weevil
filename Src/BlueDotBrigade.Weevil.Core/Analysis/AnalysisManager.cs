@@ -73,6 +73,7 @@
 					new TemporalAnomalyAnalyzer(),
 					new DetectDataAnalyzer(filterStrategy, aliasExpander),
 					new DetectFirstAnalyzer(filterStrategy, aliasExpander),
+					new DetectLastAnalyzer(filterStrategy, aliasExpander),
 					new StableValueAnalyzer(filterStrategy, aliasExpander),
 					new DataTransitionAnalyzer(filterStrategy, aliasExpander),
 					new DetectRisingEdgeAnalyzer(filterStrategy, aliasExpander),
