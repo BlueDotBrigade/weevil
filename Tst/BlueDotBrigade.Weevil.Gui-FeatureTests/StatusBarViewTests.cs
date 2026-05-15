@@ -112,6 +112,78 @@ namespace BlueDotBrigade.Weevil.Gui
 		}
 
 		[TestMethod]
+		public void GivenInsightAttentionCombinedStyle_WhenIconAnimationIsConfigured_ThenAnimationRunsThreeTimes()
+		{
+			var statusBarViewPath = LocateStatusBarViewPath();
+			var xaml = XDocument.Load(statusBarViewPath);
+
+			var opacityAnimation = FindAttentionAnimation(
+				xaml,
+				styleKey: "InsightIconStyleCombinedPulse",
+				targetProperty: "Opacity");
+			var scaleXAnimation = FindAttentionAnimation(
+				xaml,
+				styleKey: "InsightIconStyleCombinedPulse",
+				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleX)");
+			var scaleYAnimation = FindAttentionAnimation(
+				xaml,
+				styleKey: "InsightIconStyleCombinedPulse",
+				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleY)");
+
+			opacityAnimation.Should().NotBeNull();
+			scaleXAnimation.Should().NotBeNull();
+			scaleYAnimation.Should().NotBeNull();
+
+			opacityAnimation!
+				.Attribute("Duration")?
+				.Value
+				.Should()
+				.Be("0:0:0.4");
+			opacityAnimation!
+				.Attribute("RepeatBehavior")?
+				.Value
+				.Should()
+				.Be("3x");
+
+			scaleXAnimation!
+				.Attribute("Duration")?
+				.Value
+				.Should()
+				.Be("0:0:0.4");
+			scaleXAnimation!
+				.Attribute("RepeatBehavior")?
+				.Value
+				.Should()
+				.Be("3x");
+
+			scaleYAnimation!
+				.Attribute("Duration")?
+				.Value
+				.Should()
+				.Be("0:0:0.4");
+			scaleYAnimation!
+				.Attribute("RepeatBehavior")?
+				.Value
+				.Should()
+				.Be("3x");
+		}
+
+		[TestMethod]
+		public void GivenStatusBarInsightIcon_WhenConfigured_ThenCombinedPulseStyleIsUsed()
+		{
+			var statusBarViewPath = LocateStatusBarViewPath();
+			var xaml = XDocument.Load(statusBarViewPath);
+
+			var styleUsageExists = xaml
+				.Descendants()
+				.Any(element =>
+					element.Name.LocalName == "Image"
+					&& string.Equals((string?)element.Attribute("Style"), "{StaticResource InsightIconStyleCombinedPulse}", StringComparison.Ordinal));
+
+			styleUsageExists.Should().BeTrue("the status bar insight icon should use the combined attention animation style");
+		}
+
+		[TestMethod]
 		// Regression #844: Insight attention animation must re-trigger when a second log file is opened.
 		// The animation is driven by a WPF MultiDataTrigger on HasInsightNeedingAttention. If this property
 		// remains True across file transitions, the trigger never exits and re-enters, so the animation
