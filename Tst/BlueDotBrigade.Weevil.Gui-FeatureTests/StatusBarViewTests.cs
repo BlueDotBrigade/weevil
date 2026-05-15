@@ -134,38 +134,9 @@ namespace BlueDotBrigade.Weevil.Gui
 			scaleXAnimation.Should().NotBeNull();
 			scaleYAnimation.Should().NotBeNull();
 
-			opacityAnimation!
-				.Attribute("Duration")?
-				.Value
-				.Should()
-				.Be("0:0:0.4");
-			opacityAnimation!
-				.Attribute("RepeatBehavior")?
-				.Value
-				.Should()
-				.Be("3x");
-
-			scaleXAnimation!
-				.Attribute("Duration")?
-				.Value
-				.Should()
-				.Be("0:0:0.4");
-			scaleXAnimation!
-				.Attribute("RepeatBehavior")?
-				.Value
-				.Should()
-				.Be("3x");
-
-			scaleYAnimation!
-				.Attribute("Duration")?
-				.Value
-				.Should()
-				.Be("0:0:0.4");
-			scaleYAnimation!
-				.Attribute("RepeatBehavior")?
-				.Value
-				.Should()
-				.Be("3x");
+			AssertAnimationTiming(opacityAnimation!, expectedDuration: "0:0:0.4", expectedRepeatBehavior: "3x");
+			AssertAnimationTiming(scaleXAnimation!, expectedDuration: "0:0:0.4", expectedRepeatBehavior: "3x");
+			AssertAnimationTiming(scaleYAnimation!, expectedDuration: "0:0:0.4", expectedRepeatBehavior: "3x");
 		}
 
 		[TestMethod]
@@ -263,6 +234,23 @@ namespace BlueDotBrigade.Weevil.Gui
 
 			attentionAnimation.Should().NotBeNull();
 			return attentionAnimation;
+		}
+
+		private static void AssertAnimationTiming(
+			XElement animation,
+			string expectedDuration,
+			string expectedRepeatBehavior)
+		{
+			animation
+				.Attribute("Duration")?
+				.Value
+				.Should()
+				.Be(expectedDuration);
+			animation
+				.Attribute("RepeatBehavior")?
+				.Value
+				.Should()
+				.Be(expectedRepeatBehavior);
 		}
 
 		private static string LocateStatusBarViewPath()
