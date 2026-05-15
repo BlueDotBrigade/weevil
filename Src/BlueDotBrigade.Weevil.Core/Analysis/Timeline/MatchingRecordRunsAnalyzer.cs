@@ -104,7 +104,8 @@
 						{
 							if (lastMatch == null)
 							{
-								// WHAT DO WE DO HERE ???
+								// Single-record matches are ignored because this analyzer only flags
+								// runs containing at least two consecutive matching records.
 							}
 							else
 							{

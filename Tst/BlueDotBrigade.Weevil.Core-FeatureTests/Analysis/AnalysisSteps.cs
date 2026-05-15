@@ -13,7 +13,7 @@
 		}
 
 		[When($"using temporal anomaly analysis with a threshold of {X.TimePeriod}")]
-		public void WhenUsingOutOfOrderTimestampsAnalysisWithAThresholdOfSec(TimeSpan threshold)
+		public void WhenUsingOutOfOrderTimestampsAnalysisWithAThreshold(TimeSpan threshold)
 		{
 			var thresholdString = ((int)threshold.TotalMilliseconds).ToString();
 
