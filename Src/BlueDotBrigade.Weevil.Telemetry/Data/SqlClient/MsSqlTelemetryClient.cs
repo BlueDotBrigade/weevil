@@ -105,7 +105,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
-				Log.Default.Write(LogSeverityType.Debug, "Saving telemetry session (async)...");
+				Log.Default.Write(LogSeverityType.Debug, "Saving telemetry session...");
 
 				var stopwatch = Stopwatch.StartNew();
 
@@ -117,11 +117,11 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 				Log.Default.Write(
 					LogSeverityType.Information,
-					$"Telemetry session saved (async). Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
+					$"Telemetry session saved. Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
 			}
 			catch (Exception e)
 			{
-				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session (async).");
+				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session.");
 			}
 		}
 #pragma warning restore CA1031
@@ -137,7 +137,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			try
 			{
-				Log.Default.Write(LogSeverityType.Debug, "Saving telemetry session (sync)...");
+				Log.Default.Write(LogSeverityType.Debug, "Saving telemetry session...");
 
 				var stopwatch = Stopwatch.StartNew();
 
@@ -149,11 +149,11 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 				Log.Default.Write(
 					LogSeverityType.Information,
-					$"Telemetry session saved (sync). Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
+					$"Telemetry session saved. Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
 			}
 			catch (Exception e)
 			{
-				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session (sync).");
+				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session.");
 			}
 		}
 #pragma warning restore CA1031

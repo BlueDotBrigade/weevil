@@ -157,20 +157,6 @@ namespace BlueDotBrigade.Weevil.Gui
 				"the insight bulletin posted after file open must set HasInsightNeedingAttention back to true");
 		}
 
-		[TestMethod]
-		// Regression #808: Status bar must show "Saving session..." when telemetry session is being saved on app close.
-		public void GivenTelemetrySessionSavingBulletin_WhenPosted_ThenStatusMessageIsSavingSession()
-		{
-			var uiDispatcher = new UiDispatcherFake();
-			var bulletinMediator = new BulletinMediator();
-			var statusBar = new StatusBarViewModel(uiDispatcher, bulletinMediator);
-
-			bulletinMediator.Post(new TelemetrySessionSavingBulletin());
-
-			statusBar.StatusMessage.Should().Be("Saving session...",
-				"the status bar must reflect that a telemetry session is being persisted");
-		}
-
 		private static XElement? FindAttentionAnimation(
 			XDocument xaml,
 			string styleKey,

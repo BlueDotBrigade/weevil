@@ -5,7 +5,6 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Windows;
-	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Diagnostics;
@@ -71,7 +70,6 @@
 		public void Stop()
 		{
 			_bulletinMediator.Post(new TelemetrySessionSavingBulletin());
-			_uiDispatcher.Invoke(() => { }, DispatcherPriority.Render);
 			_telemetry.EndCurrentSession();
 			_uiMonitor.Stop();
 		}
