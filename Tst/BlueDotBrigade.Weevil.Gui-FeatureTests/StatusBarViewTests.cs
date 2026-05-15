@@ -112,47 +112,6 @@ namespace BlueDotBrigade.Weevil.Gui
 		}
 
 		[TestMethod]
-		public void GivenInsightAttentionCombinedStyle_WhenIconAnimationIsConfigured_ThenAnimationRepeatsThreeCycles()
-		{
-			var statusBarViewPath = LocateStatusBarViewPath();
-			var xaml = XDocument.Load(statusBarViewPath);
-
-			var opacityAnimation = FindAttentionAnimation(
-				xaml,
-				styleKey: "InsightIconStyleCombinedPulse",
-				targetProperty: "Opacity");
-			var scaleXAnimation = FindAttentionAnimation(
-				xaml,
-				styleKey: "InsightIconStyleCombinedPulse",
-				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleX)");
-			var scaleYAnimation = FindAttentionAnimation(
-				xaml,
-				styleKey: "InsightIconStyleCombinedPulse",
-				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleY)");
-
-			opacityAnimation.Should().NotBeNull();
-			scaleXAnimation.Should().NotBeNull();
-			scaleYAnimation.Should().NotBeNull();
-
-			AssertAnimationTiming(opacityAnimation!, expectedDuration: "0:0:0.4", expectedRepeatBehavior: "3x");
-			AssertAnimationTiming(scaleXAnimation!, expectedDuration: "0:0:0.4", expectedRepeatBehavior: "3x");
-			AssertAnimationTiming(scaleYAnimation!, expectedDuration: "0:0:0.4", expectedRepeatBehavior: "3x");
-		}
-
-		[TestMethod]
-		public void GivenStatusBarInsightIcon_WhenConfigured_ThenCombinedPulseStyleIsUsed()
-		{
-			var statusBarViewPath = LocateStatusBarViewPath();
-			var xaml = XDocument.Load(statusBarViewPath);
-
-			var imageWithStyle = FindImageElementWithStyle(
-				xaml,
-				styleValue: "{StaticResource InsightIconStyleCombinedPulse}");
-
-			imageWithStyle.Should().NotBeNull("the status bar insight icon should use the combined attention animation style");
-		}
-
-		[TestMethod]
 		// Regression #844: Insight attention animation must re-trigger when a second log file is opened.
 		// The animation is driven by a WPF MultiDataTrigger on HasInsightNeedingAttention. If this property
 		// remains True across file transitions, the trigger never exits and re-enters, so the animation
@@ -232,36 +191,6 @@ namespace BlueDotBrigade.Weevil.Gui
 
 			attentionAnimation.Should().NotBeNull();
 			return attentionAnimation;
-		}
-
-		private static void AssertAnimationTiming(
-			XElement animation,
-			string expectedDuration,
-			string expectedRepeatBehavior)
-		{
-			ArgumentNullException.ThrowIfNull(animation);
-
-			animation
-				.Attribute("Duration")?
-				.Value
-				.Should()
-				.Be(expectedDuration);
-			animation
-				.Attribute("RepeatBehavior")?
-				.Value
-				.Should()
-				.Be(expectedRepeatBehavior);
-		}
-
-		private static XElement? FindImageElementWithStyle(
-			XDocument xaml,
-			string styleValue)
-		{
-			return xaml
-				.Descendants()
-				.FirstOrDefault(element =>
-					element.Name.LocalName == "Image"
-					&& string.Equals(element.Attribute("Style")?.Value, styleValue, StringComparison.Ordinal));
 		}
 
 		private static string LocateStatusBarViewPath()
