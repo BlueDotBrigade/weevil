@@ -18,6 +18,7 @@
 	internal class MainWindowViewModel
 	{
 		private readonly IUiDispatcher _uiDispatcher;
+		private readonly IBulletinMediator _bulletinMediator;
 		private readonly UiResponsivenessMonitor _uiMonitor;
 		private readonly TelemetrySessionLifecycle _telemetry;
 		private readonly Version _applicationVersion;
@@ -27,6 +28,7 @@
 		public MainWindowViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
 			_uiDispatcher = uiDispatcher;
+			_bulletinMediator = bulletinMediator;
 			_uiMonitor = new UiResponsivenessMonitor();
 			_telemetry = TelemetrySessionLifecycle.Shared;
 
@@ -67,7 +69,8 @@
 
 		public void Stop()
 		{
-			_telemetry.EndCurrentSession();
+			_bulletinMediator.Post(new TelemetrySessionSavingBulletin());
+			_telemetry.EndSession();
 			_uiMonitor.Stop();
 		}
 
@@ -76,7 +79,7 @@
 			var title = Path.GetFileNameWithoutExtension(bulletin.SourceFilePath);
 
 			_uiDispatcher.Invoke(() => this.ApplicationTitle = title);
-           _telemetry.StartSessionOnFileOpen(
+           _telemetry.StartSession(
 				"WeevilGui.exe",
 				_applicationVersion,
 				bulletin.SourceFilePath,

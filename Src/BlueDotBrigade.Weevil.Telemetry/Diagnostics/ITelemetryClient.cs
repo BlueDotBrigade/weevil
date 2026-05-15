@@ -9,6 +9,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	public interface ITelemetryClient
 	{
 		/// <summary>
+		/// Warms up the connection to the telemetry backend asynchronously (fire-and-forget).
+		/// Call once when a log file is opened to ensure the backend is ready before the session ends.
+		/// </summary>
+		void Warmup();
+
+		/// <summary>
 		/// Sends telemetry asynchronously.
 		/// </summary>
 		/// <param name="session">

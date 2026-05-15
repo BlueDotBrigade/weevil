@@ -28,7 +28,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 		public void Insight(string logPath, bool verbose = false)
 		{
 			var telemetry = TelemetrySessionLifecycle.Shared;
-			telemetry.StartSessionOnFileOpen("WeevilCli.exe", Program.ApplicationVersion, logPath);
+			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
 			try
 			{
@@ -74,7 +74,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			}
 			finally
 			{
-				telemetry.EndCurrentSession();
+				telemetry.EndSession();
 			}
 		}
 	}

@@ -80,6 +80,7 @@
 			bulletinMediator.Subscribe<InsightChangedBulletin>(this, x => OnNewInsight(x));
 			bulletinMediator.Subscribe<SoftwareDetailsBulletin>(this, x => OnSoftwareDetailsReceived(x));
 			bulletinMediator.Subscribe<SourceFileRemarksChangedBulletin>(this, x => OnFileRemarksChanged(x));
+			bulletinMediator.Subscribe<TelemetrySessionSavingBulletin>(this, _ => OnTelemetrySessionSaving());
 		}
 
 		#region Event Handlers
@@ -201,6 +202,11 @@
 		private void OnFileRemarksChanged(SourceFileRemarksChangedBulletin bulletin)
 		{
 			_uiDispatcher.Invoke(() => this.HasSourceFileRemarks = bulletin.HasSourceFileRemarks);
+		}
+
+		private void OnTelemetrySessionSaving()
+		{
+			_uiDispatcher.Invoke(() => this.StatusMessage = "Saving session...");
 		}
 		#endregion
 

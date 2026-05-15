@@ -37,13 +37,13 @@ The runtime provider enforces these settings even if the supplied connection str
 
 - `Encrypt=True`
 - `TrustServerCertificate=False`
-- `Connect Timeout=5`
+- `Connect Timeout=60`
 
 Current provider defaults:
 
-- Async command timeout: 30 seconds
-- Sync best-effort command timeout: 5 seconds
-- Connection timeout: 5 seconds
+- Connection timeout: 60 seconds (allows Azure SQL serverless to resume from a paused state)
+- Async command timeout: 15 seconds
+- Sync best-effort command timeout: 15 seconds
 
 ## Recommended setup flow
 

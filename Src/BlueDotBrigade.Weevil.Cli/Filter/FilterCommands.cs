@@ -22,7 +22,7 @@
 		public void Filter(string logPath, string? include, string? exclude)
 		{
 			var telemetry = TelemetrySessionLifecycle.Shared;
-			telemetry.StartSessionOnFileOpen("WeevilCli.exe", Program.ApplicationVersion, logPath);
+			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
 			try
 			{
@@ -45,7 +45,7 @@
 			}
 			finally
 			{
-				telemetry.EndCurrentSession();
+				telemetry.EndSession();
 			}
 		}
 	}
