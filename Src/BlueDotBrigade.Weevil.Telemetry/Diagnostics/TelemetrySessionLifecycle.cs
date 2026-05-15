@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	/// Upload behavior:
 	/// <list type="bullet">
 	///   <item><description>Rollover (new file open): asynchronous, non-blocking.</description></item>
-	///   <item><description>Shutdown/crash (<see cref="EndCurrentSession"/>): synchronous, best-effort.</description></item>
+	///   <item><description>Shutdown/crash (<see cref="EndSession"/>): synchronous, best-effort.</description></item>
 	/// </list>
 	/// Exactly-once semantics are enforced naturally: a session can only be ended once,
 	/// so each ended session is dispatched to the client exactly once.
@@ -73,7 +73,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
-		public void StartSessionOnFileOpen(
+		public void StartSession(
 			string application,
 			Version version,
 			string sourceFilePath,
@@ -131,7 +131,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
-		public TelemetrySession EndCurrentSession()
+		public TelemetrySession EndSession()
 		{
 			TelemetrySession endedSession = null;
 

@@ -25,10 +25,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 2, 3), firstPath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 2, 3), firstPath);
 				var firstSessionId = tracker.CurrentSession.SessionId;
 
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 2, 3), secondPath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 2, 3), secondPath);
 
 				tracker.LastEndedSession.Should().NotBeNull();
 				tracker.LastEndedSession!.SessionId.Should().Be(firstSessionId);
@@ -54,7 +54,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen(
+				tracker.StartSession(
 					"WeevilGui.exe",
 					new Version(1, 0),
 					sourcePath,
@@ -81,7 +81,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen(
+				tracker.StartSession(
 					"WeevilGui.exe",
 					new Version(1, 0),
 					sourcePath,
@@ -109,7 +109,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 
 				tracker.CurrentSession.Should().NotBeNull();
 				tracker.CurrentSession!.Source.Should().Be("ContosoInstaller");
@@ -133,7 +133,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 
 				tracker.CurrentSession.Should().NotBeNull();
 				tracker.CurrentSession!.Source.Should().Be("unknown");
@@ -163,10 +163,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilCli.exe", new Version(2, 0), sourcePath);
+				tracker.StartSession("WeevilCli.exe", new Version(2, 0), sourcePath);
 				tracker.RecordSessionHeartbeat();
 				tracker.RecordNavigationAction();
-				var endedSession = tracker.EndCurrentSession();
+				var endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
 				endedSession!.SessionActiveMinutes.Should().BeApproximately(1.0, 0.0001);
@@ -195,10 +195,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(3, 1), sourcePath);
+				tracker.StartSession("WeevilGui.exe", new Version(3, 1), sourcePath);
 				tracker.RecordFilterExecution();
 				tracker.RecordFilterExecution();
-				var endedSession = tracker.EndCurrentSession();
+				var endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
 				endedSession!.FilterExecutionCount.Should().Be(2);
@@ -226,10 +226,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), firstPath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), firstPath);
 				var firstSessionId = tracker.CurrentSession.SessionId;
 
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), secondPath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), secondPath);
 
 				// Allow the fire-and-forget async send to complete.
 				await Task.Delay(200);
@@ -245,7 +245,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
-		public void GivenActiveSession_WhenEndCurrentSessionCalled_ThenSessionSentSync()
+		public void GivenActiveSession_WhenEndSessionCalled_ThenSessionSentSync()
 		{
 			// Regression: Sub-task 4 (PR-4) - sync upload on shutdown/crash
 			var start = new DateTime(2026, 4, 1, 13, 0, 0, DateTimeKind.Utc);
@@ -258,10 +258,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilCli.exe", new Version(2, 0), sourcePath);
+				tracker.StartSession("WeevilCli.exe", new Version(2, 0), sourcePath);
 				var sessionId = tracker.CurrentSession.SessionId;
 
-				var endedSession = tracker.EndCurrentSession();
+				var endedSession = tracker.EndSession();
 
 				spyClient.SyncSentSessions.Should().ContainSingle()
 					.Which.SessionId.Should().Be(sessionId);
@@ -290,15 +290,15 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), firstPath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), firstPath);
 				var firstSessionId = tracker.CurrentSession.SessionId;
 
 				// Rollover: ends first session (async upload) and starts second session.
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), secondPath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), secondPath);
 				var secondSessionId = tracker.CurrentSession.SessionId;
 
 				// Shutdown: ends second session (sync upload).
-				tracker.EndCurrentSession();
+				tracker.EndSession();
 
 				// Allow the fire-and-forget async send of the first session to complete.
 				await Task.Delay(200);
@@ -317,14 +317,14 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
-		public void GivenNoActiveSession_WhenEndCurrentSessionCalled_ThenNoUploadOccurs()
+		public void GivenNoActiveSession_WhenEndSessionCalled_ThenNoUploadOccurs()
 		{
 			// Regression: Sub-task 4 (PR-4) - exactly-once / guard against no-op end
 			var spyClient = new SpyTelemetryClient();
 			var tracker = new TelemetrySessionLifecycle();
 			tracker.Configure(spyClient);
 
-			tracker.EndCurrentSession();
+			tracker.EndSession();
 
 			spyClient.AsyncSentSessions.Should().BeEmpty();
 			spyClient.SyncSentSessions.Should().BeEmpty();
@@ -343,9 +343,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
-				tracker.StartSessionOnFileOpen("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 
-				Action act = () => tracker.EndCurrentSession();
+				Action act = () => tracker.EndSession();
 
 				act.Should().NotThrow();
 			}

@@ -70,7 +70,7 @@
 		public void Stop()
 		{
 			_bulletinMediator.Post(new TelemetrySessionSavingBulletin());
-			_telemetry.EndCurrentSession();
+			_telemetry.EndSession();
 			_uiMonitor.Stop();
 		}
 
@@ -79,7 +79,7 @@
 			var title = Path.GetFileNameWithoutExtension(bulletin.SourceFilePath);
 
 			_uiDispatcher.Invoke(() => this.ApplicationTitle = title);
-           _telemetry.StartSessionOnFileOpen(
+           _telemetry.StartSession(
 				"WeevilGui.exe",
 				_applicationVersion,
 				bulletin.SourceFilePath,
