@@ -112,7 +112,7 @@ namespace BlueDotBrigade.Weevil.Gui
 		}
 
 		[TestMethod]
-		public void GivenInsightAttentionCombinedStyle_WhenIconAnimationIsConfigured_ThenAnimationRunsThreeTimes()
+		public void GivenInsightAttentionCombinedStyle_WhenIconAnimationIsConfigured_ThenAnimationRepeatsThreeCycles()
 		{
 			var statusBarViewPath = LocateStatusBarViewPath();
 			var xaml = XDocument.Load(statusBarViewPath);
@@ -145,13 +145,11 @@ namespace BlueDotBrigade.Weevil.Gui
 			var statusBarViewPath = LocateStatusBarViewPath();
 			var xaml = XDocument.Load(statusBarViewPath);
 
-			var styleUsageExists = xaml
-				.Descendants()
-				.Any(element =>
-					element.Name.LocalName == "Image"
-					&& string.Equals((string?)element.Attribute("Style"), "{StaticResource InsightIconStyleCombinedPulse}", StringComparison.Ordinal));
+			var imageWithStyle = FindImageElementWithStyle(
+				xaml,
+				styleValue: "{StaticResource InsightIconStyleCombinedPulse}");
 
-			styleUsageExists.Should().BeTrue("the status bar insight icon should use the combined attention animation style");
+			imageWithStyle.Should().NotBeNull("the status bar insight icon should use the combined attention animation style");
 		}
 
 		[TestMethod]
@@ -251,6 +249,17 @@ namespace BlueDotBrigade.Weevil.Gui
 				.Value
 				.Should()
 				.Be(expectedRepeatBehavior);
+		}
+
+		private static XElement? FindImageElementWithStyle(
+			XDocument xaml,
+			string styleValue)
+		{
+			return xaml
+				.Descendants()
+				.FirstOrDefault(element =>
+					element.Name.LocalName == "Image"
+					&& string.Equals((string?)element.Attribute("Style"), styleValue, StringComparison.Ordinal));
 		}
 
 		private static string LocateStatusBarViewPath()
