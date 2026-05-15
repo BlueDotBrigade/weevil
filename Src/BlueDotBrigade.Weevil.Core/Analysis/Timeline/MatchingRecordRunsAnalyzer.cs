@@ -9,8 +9,8 @@
 	using Filter;
 
 	/// <summary>
-	/// Performs a binary match against each record and finds blocks of consecutive matching records.
-	/// Flags the first and last record of each block of two or more consecutive matches.
+	/// Evaluates records as match/no-match and identifies runs of consecutive matching records.
+	/// Flags the first and last record for each run containing two or more consecutive matches.
 	/// </summary>
 	internal class MatchingRecordRunsAnalyzer : IRecordAnalyzer
 	{

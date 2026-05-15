@@ -9,9 +9,9 @@
         using Filter.Expressions.Regular;
 
         /// <summary>
-        /// Extracts values via regex named capture groups and tracks each key independently over time.
-        /// Flags the start and end record of consecutive records that share the same extracted value.
-        /// When the value changes or disappears, the current stable run is finalized and a new run begins.
+        /// Parses regex named capture groups and tracks each captured key independently across records.
+        /// Flags the start and end boundaries of runs where consecutive records keep the same value.
+        /// When a value changes or disappears, the active run is finalized and a new run begins when applicable.
         /// </summary>
         internal class StableValueRunsAnalyzer : IRecordAnalyzer
         {
@@ -197,4 +197,3 @@
                 }
         }
 }
-

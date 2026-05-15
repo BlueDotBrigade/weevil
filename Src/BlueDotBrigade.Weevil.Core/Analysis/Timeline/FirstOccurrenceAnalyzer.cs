@@ -8,8 +8,8 @@
 	using Filter.Expressions.Regular;
 
 	/// <summary>
-	/// Extracts key-value pairs using regex named capture groups and flags only the first
-	/// record where each unique value appears. Subsequent records with the same value are ignored.
+	/// Parses regex named capture groups and flags only the first record where each unique key/value appears.
+	/// Subsequent records with the same extracted value are ignored.
 	/// </summary>
 	internal class FirstOccurrenceAnalyzer : IRecordAnalyzer
 	{

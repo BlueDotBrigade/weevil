@@ -6,6 +6,9 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
+	/// <summary>
+	/// Flags records whose timestamp is earlier than the previously observed timestamp beyond a configured tolerance.
+	/// </summary>
 	public class OutOfOrderTimestampsAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.Zero;

@@ -3,7 +3,7 @@
 	public enum AnalysisType
 	{
 		/// <summary>
-		/// Flags every record where the regex captures data, annotating each with the extracted value.
+		/// Flags every record that matches the expression and annotates it with extracted named-group values.
 		/// </summary>
 		DetectData,
 		/// <summary>
@@ -15,11 +15,11 @@
 		/// </summary>
 		LastOccurrence,
 		/// <summary>
-		/// Flags the start and end of consecutive records that share the same extracted value.
+		/// Flags the start and end boundaries of runs where consecutive records share the same extracted value.
 		/// </summary>
 		StableValueRuns,
 		/// <summary>
-		/// Flags the record where an extracted value first appears or changes from the previous value.
+		/// Flags each record where an extracted value first appears or changes from the previous value.
 		/// </summary>
 		StateTransitions,
 		/// <summary>
@@ -31,7 +31,7 @@
 		/// </summary>
 		DetectRisingEdges,
 		/// <summary>
-		/// Flags the first and last record in a block of consecutive records that match the expression.
+		/// Flags the first and last record in each run of two or more consecutive records that match the expression.
 		/// </summary>
 		MatchingRecordRuns,
 		/// <summary>
@@ -43,7 +43,7 @@
 		/// </summary>
 		ElapsedTime,
 		/// <summary>
-		/// Flags records whose timestamps go backwards, indicating out-of-order logging.
+		/// Flags records whose timestamps move backwards beyond the configured tolerance.
 		/// </summary>
 		OutOfOrderTimestamps,
 		/// <summary>

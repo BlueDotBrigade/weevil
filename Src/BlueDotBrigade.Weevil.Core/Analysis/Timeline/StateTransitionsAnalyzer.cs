@@ -8,8 +8,8 @@
 	using Filter.Expressions.Regular;
 
 	/// <summary>
-	/// Extracts values via regex named capture groups and tracks the previous value per key.
-	/// Flags the record where a value first appears or changes from its previous value.
+	/// Parses regex named capture groups and tracks the previous value for each captured key.
+	/// Flags the record where a value first appears or changes from the prior captured value.
 	/// </summary>
 	internal class StateTransitionsAnalyzer : IRecordAnalyzer
 	{
