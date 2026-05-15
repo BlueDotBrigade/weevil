@@ -1,75 +1,70 @@
-﻿namespace BlueDotBrigade.Weevil.Analysis
+namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
 	using System.Collections.Immutable;
 	using System.IO;
-	using System.Text;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 
 	public class InsightReportGenerator
 	{
-		private static string GetTableOfContents()
+		public InsightReport Generate(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, DateTime from, DateTime to)
 		{
-			var output = new StringBuilder();
+			if (weevilVersion is null)
+			{
+				throw new ArgumentNullException(nameof(weevilVersion));
+			}
 
-			output.AppendLine($"- [General](#general)");
-			output.AppendLine($"- [Insight](#insight)");
-			output.AppendLine($"   - [Problem Areas](#problem-areas)");
-			output.AppendLine($"   - [More Information](#more-information)");
-
-			return output.ToString();
-		}
-
-		private static string ToMarkdown(IInsight insight)
-		{
-			var output = new StringBuilder();
-
-			output.AppendLine($"{insight.Title}");
-			output.AppendLine($"");
-			output.AppendLine($"- Key Metric: {insight.MetricValue} {insight.MetricUnit}");
-			output.AppendLine($"- Details: {insight.Details}");
-
-			return output.ToString();
-		}
-
-		public string Generate(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, DateTime from, DateTime to)
-		{
-			var output = new StringBuilder();
+			if (engine is null)
+			{
+				throw new ArgumentNullException(nameof(engine));
+			}
 
 			var fileName = Path.GetFileName(engine.SourceFilePath);
 			var context = engine.Context.Count == 0 ? "Not specified" : engine.Context.ToString();
 
-			output.AppendLine($"# Weevil Insight: {fileName}");
-			output.AppendLine($"");
-			output.AppendLine(GetTableOfContents());
-			output.AppendLine($"## General");
-			output.AppendLine($"");
-			output.AppendLine($" - Context: {context}");
-			output.AppendLine($" - Time period analyzed: {from} to {to}");
-			output.AppendLine($" - Insight collected by: Weevil {weevilVersion}"); 
-			output.AppendLine($"");
-			output.AppendLine($"## Insight");
-			output.AppendLine($"");
-			output.AppendLine($"### Problem Areas");
-			output.AppendLine($"");
-			foreach (IInsight insight in insights)
+			var reportItems = insights
+				.Where(insight => insight is not null)
+				.Select(ToReportItem)
+				.ToImmutableArray();
+
+			return new InsightReport
 			{
-				if (insight.IsAttentionRequired)
-				{
-					output.AppendLine(ToMarkdown(insight));
-				}
-			}
-			output.AppendLine($"### More Information");
-			output.AppendLine($"");
-			foreach (IInsight insight in insights)
+				Title = $"Weevil Insight: {fileName}",
+				SourceFileName = fileName,
+				Context = context,
+				WeevilVersion = weevilVersion,
+				From = from,
+				To = to,
+				ProblemAreas = reportItems.Where(item => item.IsAttentionRequired).ToImmutableArray(),
+				MoreInformation = reportItems.Where(item => !item.IsAttentionRequired).ToImmutableArray()
+			};
+		}
+
+		private static InsightReportItem ToReportItem(IInsight insight)
+		{
+			if (insight is null)
 			{
-				if (!insight.IsAttentionRequired)
-				{
-					output.AppendLine(ToMarkdown(insight));
-				}
+				throw new ArgumentNullException(nameof(insight));
 			}
 
-			return output.ToString();
+			return new InsightReportItem
+			{
+				Title = insight.Title,
+				MetricValue = insight.MetricValue,
+				MetricUnit = insight.MetricUnit,
+				Details = insight.Details,
+				IsAttentionRequired = insight.IsAttentionRequired,
+				RelatedRecords = insight.RelatedRecords
+					.Where(Record.IsGenuine)
+					.Select(record => new InsightRelatedRecord
+					{
+						LineNumber = record.LineNumber,
+						CreatedAt = record.HasCreationTime ? record.CreatedAt : null,
+						Preview = record.Content
+					})
+					.ToImmutableArray()
+			};
 		}
 	}
 }
