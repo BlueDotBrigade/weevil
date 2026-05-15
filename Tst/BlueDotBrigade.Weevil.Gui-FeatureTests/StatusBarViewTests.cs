@@ -239,6 +239,8 @@ namespace BlueDotBrigade.Weevil.Gui
 			string expectedDuration,
 			string expectedRepeatBehavior)
 		{
+			ArgumentNullException.ThrowIfNull(animation);
+
 			animation
 				.Attribute("Duration")?
 				.Value
@@ -259,7 +261,7 @@ namespace BlueDotBrigade.Weevil.Gui
 				.Descendants()
 				.FirstOrDefault(element =>
 					element.Name.LocalName == "Image"
-					&& string.Equals((string?)element.Attribute("Style"), styleValue, StringComparison.Ordinal));
+					&& string.Equals(element.Attribute("Style")?.Value, styleValue, StringComparison.Ordinal));
 		}
 
 		private static string LocateStatusBarViewPath()
