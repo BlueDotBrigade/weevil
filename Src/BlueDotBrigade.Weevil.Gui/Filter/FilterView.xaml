@@ -84,7 +84,6 @@
         <KeyBinding Key="G" Modifiers="Ctrl+Shift" Command="{Binding GraphDataCommand}" />
         <KeyBinding Key="F6" Command="{Binding DetectStableValuesCommand}" />
         <KeyBinding Key="F7" Command="{Binding DetectFirstCommand}" />
-        <KeyBinding Key="F7" Modifiers="Shift" Command="{Binding DetectLastCommand}" />
         <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
         <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
         <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
