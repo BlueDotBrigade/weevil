@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
@@ -11,25 +11,25 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	/// Extracts key-value pairs using regex named capture groups and flags only the last
 	/// record where each unique value appears. Earlier records with the same value are ignored.
 	/// </summary>
-	internal class DetectLastAnalyzer : IRecordAnalyzer
+	internal class LastOccurrenceAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
 		private readonly IFilterAliasExpander _aliasExpander;
 
-		public DetectLastAnalyzer(FilterStrategy filterStrategy)
+		public LastOccurrenceAnalyzer(FilterStrategy filterStrategy)
 			: this(filterStrategy, null)
 		{
 		}
 
-		public DetectLastAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
+		public LastOccurrenceAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
 			_aliasExpander = aliasExpander;
 		}
 
-		public string Key => AnalysisType.DetectLast.ToString();
+		public string Key => AnalysisType.LastOccurrence.ToString();
 
-		public string DisplayName => "Detect Last";
+		public string DisplayName => "Last Occurrence";
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{

@@ -11,25 +11,25 @@
 	/// Extracts values via regex named capture groups and tracks the previous value per key.
 	/// Flags the record where a value first appears or changes from its previous value.
 	/// </summary>
-	internal class DataTransitionAnalyzer : IRecordAnalyzer
+	internal class StateTransitionsAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
 		private readonly IFilterAliasExpander _aliasExpander;
 
-		public DataTransitionAnalyzer(FilterStrategy filterStrategy)
+		public StateTransitionsAnalyzer(FilterStrategy filterStrategy)
 			: this(filterStrategy, null)
 		{
 		}
 
-		public DataTransitionAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
+		public StateTransitionsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
 			_aliasExpander = aliasExpander;
 		}
 
-		public string Key => AnalysisType.DetectDataTransition.ToString();
+		public string Key => AnalysisType.StateTransitions.ToString();
 
-		public string DisplayName => "Detect Data Transitions";
+		public string DisplayName => "State Transitions";
 
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).

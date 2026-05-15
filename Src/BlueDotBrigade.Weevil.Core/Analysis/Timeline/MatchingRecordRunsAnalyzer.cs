@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Immutable;
 	using System.Linq;
@@ -12,25 +12,25 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	/// Performs a binary match against each record and finds blocks of consecutive matching records.
 	/// Flags the first and last record of each block of two or more consecutive matches.
 	/// </summary>
-	internal class DetectRepeatingRecordsAnalyzer : IRecordAnalyzer
+	internal class MatchingRecordRunsAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
 		private readonly IFilterAliasExpander _aliasExpander;
 
-		public DetectRepeatingRecordsAnalyzer(FilterStrategy filterStrategy)
+		public MatchingRecordRunsAnalyzer(FilterStrategy filterStrategy)
 			: this(filterStrategy, null)
 		{
 		}
 
-		public DetectRepeatingRecordsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
+		public MatchingRecordRunsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
 			_aliasExpander = aliasExpander;
 		}
 
-		public string Key => AnalysisType.DetectRepeatingRecords.ToString();
+		public string Key => AnalysisType.MatchingRecordRuns.ToString();
 
-		public string DisplayName => "Detect Both Edges";
+		public string DisplayName => "Matching Record Runs";
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
         {

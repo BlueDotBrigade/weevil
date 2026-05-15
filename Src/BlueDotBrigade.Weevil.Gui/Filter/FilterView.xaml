@@ -82,10 +82,10 @@
 
         <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ShowDashboardCommand}" />
         <KeyBinding Key="G" Modifiers="Ctrl+Shift" Command="{Binding GraphDataCommand}" />
-        <KeyBinding Key="F6" Command="{Binding DetectStableValuesCommand}" />
-        <KeyBinding Key="F7" Command="{Binding DetectFirstCommand}" />
+        <KeyBinding Key="F6" Command="{Binding StableValueRunsCommand}" />
+        <KeyBinding Key="F7" Command="{Binding FirstOccurrenceCommand}" />
         <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
-        <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
+        <KeyBinding Key="F9" Command="{Binding StateTransitionsCommand}" />
         <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
         <KeyBinding Key="F11" Command="{Binding MeasureElapsedTimeCommand}" />
         <KeyBinding Key="F12" Command="{Binding CalculateStatisticsCommand}" />

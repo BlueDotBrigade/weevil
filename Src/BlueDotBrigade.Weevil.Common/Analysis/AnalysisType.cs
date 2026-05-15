@@ -9,19 +9,19 @@
 		/// <summary>
 		/// Flags only the first record where each unique extracted value appears.
 		/// </summary>
-		DetectFirst,
+		FirstOccurrence,
 		/// <summary>
 		/// Flags only the last record where each unique extracted value appears.
 		/// </summary>
-		DetectLast,
+		LastOccurrence,
 		/// <summary>
 		/// Flags the start and end of consecutive records that share the same extracted value.
 		/// </summary>
-		DetectStableValues,
+		StableValueRuns,
 		/// <summary>
 		/// Flags the record where an extracted value first appears or changes from the previous value.
 		/// </summary>
-		DetectDataTransition,
+		StateTransitions,
 		/// <summary>
 		/// Flags records where a numeric extracted value decreases compared to the previous record.
 		/// </summary>
@@ -33,7 +33,7 @@
 		/// <summary>
 		/// Flags the first and last record in a block of consecutive records that match the expression.
 		/// </summary>
-		DetectRepeatingRecords,
+		MatchingRecordRuns,
 		/// <summary>
 		/// Flags records preceded by an unexpectedly long gap in timestamps, indicating UI thread delays.
 		/// </summary>
@@ -45,7 +45,7 @@
 		/// <summary>
 		/// Flags records whose timestamps go backwards, indicating out-of-order logging.
 		/// </summary>
-		TemporalAnomaly,
+		OutOfOrderTimestamps,
 		/// <summary>
 		/// Calculates statistics (e.g. mean value, standard deviation, etc.) for the selected records.
 		/// </summary>

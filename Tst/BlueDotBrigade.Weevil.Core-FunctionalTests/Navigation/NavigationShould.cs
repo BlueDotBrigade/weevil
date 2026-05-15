@@ -192,7 +192,7 @@
 				FilterType.RegularExpression,
 				new FilterCriteria(@"This is a sample log message\. Id=(?<Hundredths>\d)"));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectDataTransition);
+			engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
 			IRecord record = engine.Navigate.NextFlag();
 			Assert.AreEqual(1, record.LineNumber);

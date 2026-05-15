@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Analysis
+﻿namespace BlueDotBrigade.Weevil.Analysis
 {
         using System.Linq;
         using BlueDotBrigade.Weevil.IO;
@@ -13,7 +13,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[When($"using temporal anomaly analysis with a threshold of {X.TimePeriod}")]
-		public void WhenUsingTemporalAnomalyAnalysisWithAThresholdOfSec(TimeSpan threshold)
+		public void WhenUsingOutOfOrderTimestampsAnalysisWithAThresholdOfSec(TimeSpan threshold)
 		{
 			var thresholdString = ((int)threshold.TotalMilliseconds).ToString();
 
@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns(thresholdString);
 
-			this.Context.Engine.Analyzer.Analyze(AnalysisType.TemporalAnomaly, parameterProvider);
+			this.Context.Engine.Analyzer.Analyze(AnalysisType.OutOfOrderTimestamps, parameterProvider);
 		}
 
 
@@ -56,13 +56,13 @@ namespace BlueDotBrigade.Weevil.Analysis
                                 .TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
                                 .Returns(x => { x[2] = regularExpression; return true; });
 
-                        this.Context.Engine.Analyzer.Analyze(AnalysisType.DetectRepeatingRecords, parameterProvider);
+                        this.Context.Engine.Analyzer.Analyze(AnalysisType.MatchingRecordRuns, parameterProvider);
                 }
 
                 [When("detecting stable values using the include filter expressions")]
                 public void WhenDetectingStableValuesUsingTheIncludeFilterExpressions()
                 {
-                        this.Context.Engine.Analyzer.Analyze(AnalysisType.DetectStableValues);
+                        this.Context.Engine.Analyzer.Analyze(AnalysisType.StableValueRuns);
                 }
 
                 [Then($"the flagged record count will be {X.WholeNumber}")]

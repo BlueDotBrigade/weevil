@@ -1,4 +1,4 @@
-Feature: Detect Stable Values
+﻿Feature: Stable Value Runs
 
 A short summary of the feature
 

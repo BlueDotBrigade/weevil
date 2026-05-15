@@ -1,9 +1,9 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
-	public class DetectRepeatingRecordsAnalyzerTests
+	public class MatchingRecordRunsAnalyzerTests
 	{
 		[TestMethod]
 		public void GivenIntegerAndDecimalRepeatedBlock_WhenAnalyzeRuns_ThenBlockEdgesAreFlagged()
@@ -17,7 +17,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.WithContent("Value=8")
 				.GetRecords();
 
-			var analyzer = new DetectRepeatingRecordsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new MatchingRecordRunsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?:2|2\.5)");
 
 			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);

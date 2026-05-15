@@ -1,17 +1,17 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
-	public class DetectLastAnalyzerTests
+	public class FirstOccurrenceAnalyzerTests
 	{
 		#region Setup helpers
 
 		private static Results Analyze(ImmutableArray<IRecord> records, string regex)
 		{
-			var analyzer = new DetectLastAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new FirstOccurrenceAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
 
 			return analyzer.Analyze(
@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		#region Scenario helpers
 
-		// DetectLastAnalyzer flags the last record where each unique value appears.
+		// FirstOccurrenceAnalyzer flags the first record where each unique value appears.
 		// Each scenario is two parallel strings:
 		//   pattern  : nine single-digit values, e.g. "123454321"
 		//   expected : same length as pattern, with '^' replacing each digit whose record should be flagged.
@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		private static void AssertIntegerScenario(string pattern, string expected)
 		{
-			var records = AnalysisHelper.BuildIntegerRecords(pattern);
+         var records = AnalysisHelper.BuildIntegerRecords(pattern);
 			var results = Analyze(records, AnalysisHelper.IntegerRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, results, label: "integer scenario");
@@ -46,7 +46,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		private static void AssertDecimalScenario(string pattern, string expected)
 		{
-			var records = AnalysisHelper.BuildDecimalRecords(pattern);
+         var records = AnalysisHelper.BuildDecimalRecords(pattern);
 			var results = Analyze(records, AnalysisHelper.DecimalRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, results, label: "decimal scenario");
@@ -59,16 +59,16 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			Results results,
 			string label)
 		{
-			AnalysisHelper.AssertFlagsMatchExpected(
+         AnalysisHelper.AssertFlagsMatchExpected(
 				pattern,
 				expected,
 				records,
 				label,
-				"last-occurrence flag mismatch");
+				"first-occurrence flag mismatch");
 
 			var expectedCount = AnalysisHelper.CountExpectedFlags(expected);
 			results.FlaggedRecords.Should().Be(expectedCount,
-				because: $"[{label}] pattern '{pattern}' should report {expectedCount} unique-value last occurrence(s)");
+				because: $"[{label}] pattern '{pattern}' should report {expectedCount} unique-value first occurrence(s)");
 		}
 
 		#endregion
@@ -76,8 +76,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		#region Pattern catalogue
 
 		[TestMethod]
-		[DataRow("555555555", "55555555^")]
-		public void Analyze_Plateau_FlagsTheLastRecord(string pattern, string expected)
+		[DataRow("555555555", "^55555555")]
+		public void Analyze_Plateau_FlagsTheFirstRecord(string pattern, string expected)
 			=> AssertScenario(pattern, expected);
 
 		[TestMethod]
@@ -91,40 +91,37 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			=> AssertScenario(pattern, expected);
 
 		[TestMethod]
-		[DataRow("123454321", "1234^^^^^")]
-		public void Analyze_SharpPyramid_FlagsFromThePeakBack(string pattern, string expected)
+		[DataRow("123454321", "^^^^^4321")]
+		public void Analyze_SharpPyramid_FlagsThroughThePeak(string pattern, string expected)
 			=> AssertScenario(pattern, expected);
 
 		[TestMethod]
-		[DataRow("123444321", "12344^^^^")]
-		public void Analyze_PlateauPyramid_FlagsFromThePlateauEnd(string pattern, string expected)
+		[DataRow("123444321", "^^^^44321")]
+		public void Analyze_PlateauPyramid_FlagsThroughThePeakStart(string pattern, string expected)
 			=> AssertScenario(pattern, expected);
 
 		[TestMethod]
-		[DataRow("987656789", "9876^^^^^")]
-		public void Analyze_SharpValley_FlagsFromTheValleyBack(string pattern, string expected)
+		[DataRow("987656789", "^^^^^6789")]
+		public void Analyze_SharpValley_FlagsThroughTheValley(string pattern, string expected)
 			=> AssertScenario(pattern, expected);
 
 		[TestMethod]
-		[DataRow("987666789", "98766^^^^")]
-		public void Analyze_PlateauValley_FlagsFromTheValleyEnd(string pattern, string expected)
+		[DataRow("987666789", "^^^^66789")]
+		public void Analyze_PlateauValley_FlagsThroughTheValleyStart(string pattern, string expected)
 			=> AssertScenario(pattern, expected);
 
 		[TestMethod]
-		[DataRow("123123123", "123123^^^")]
-		public void Analyze_Sawtooth_FlagsTheLastCycle(string pattern, string expected)
-		{
-			// Regression: Issue #529
-			AssertScenario(pattern, expected);
-		}
-
-		[TestMethod]
-		[DataRow("321321321", "321321^^^")]
-		public void Analyze_InvertedSawtooth_FlagsTheLastCycle(string pattern, string expected)
+		[DataRow("123123123", "^^^123123")]
+		public void Analyze_Sawtooth_FlagsTheFirstCycle(string pattern, string expected)
 			=> AssertScenario(pattern, expected);
 
 		[TestMethod]
-		[DataRow("555555554", "5555555^^")]
+		[DataRow("321321321", "^^^321321")]
+		public void Analyze_InvertedSawtooth_FlagsTheFirstCycle(string pattern, string expected)
+			=> AssertScenario(pattern, expected);
+
+		[TestMethod]
+		[DataRow("555555554", "^5555555^")]
 		public void Analyze_LateFallingEdge_FlagsBothUniqueValues(string pattern, string expected)
 			=> AssertScenario(pattern, expected);
 
@@ -133,11 +130,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		#region Real-world noise (decimal only)
 
 		[TestMethod]
-		public void Analyze_NoisyDecimalPlateau_FlagsEachUniqueValueAtItsLastOccurrence()
+		public void Analyze_NoisyDecimalPlateau_FlagsEachUniqueValue()
 		{
-			// Same noisy sequence as the other analyzers. DetectLastAnalyzer flags the last
-			// occurrence of each distinct decimal value: 32.999 (idx 2), 32.998 (idx 5),
-			// 33.000 (idx 6), 32.997 (idx 8).
+			// Same noisy sequence as the falling/rising tests. FirstOccurrenceAnalyzer flags the first
+			// occurrence of each distinct decimal value: 33.000 (idx 0), 32.999 (idx 2),
+			// 32.998 (idx 4), 32.997 (idx 7).
 			var records = R.Create()
 				.WithContent("15:02:00.000 33.000")
 				.WithContent("15:02:01.000 33.000")
@@ -150,9 +147,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.WithContent("15:02:08.000 32.997")
 				.GetRecords();
 
-			var results = Analyze(records, AnalysisHelper.DecimalRegex);
+           var results = Analyze(records, AnalysisHelper.DecimalRegex);
 
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2, 5, 6, 8);
+          AnalysisHelper.GetFlaggedIndices(records).Should().Equal(0, 2, 4, 7);
 			results.FlaggedRecords.Should().Be(4);
 		}
 

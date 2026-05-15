@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System;
 	using System.Collections.Generic;
@@ -48,13 +48,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			return FilterStrategy.KeepAllRecords;
 		}
 
-		#region DataTransitionAnalyzer Tests
+		#region StateTransitionsAnalyzer Tests
 
 		[TestMethod]
-		public void DataTransitionAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		public void StateTransitionsAnalyzer_UserCancelsDialog_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DataTransitionAnalyzer(GetFilterStrategy());
+			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -66,10 +66,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		public void DataTransitionAnalyzer_BlankRegex_ReturnsZeroResults()
+		public void StateTransitionsAnalyzer_BlankRegex_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DataTransitionAnalyzer(GetFilterStrategy());
+			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -81,10 +81,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		public void DataTransitionAnalyzer_EmptyStringRegex_ReturnsZeroResults()
+		public void StateTransitionsAnalyzer_EmptyStringRegex_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DataTransitionAnalyzer(GetFilterStrategy());
+			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -97,13 +97,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		#endregion
 
-		#region StableValueAnalyzer Tests
+		#region StableValueRunsAnalyzer Tests
 
 		[TestMethod]
-		public void StableValueAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		public void StableValueRunsAnalyzer_UserCancelsDialog_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new StableValueAnalyzer(GetFilterStrategy());
+			var analyzer = new StableValueRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -115,10 +115,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		public void StableValueAnalyzer_BlankRegex_ReturnsZeroResults()
+		public void StableValueRunsAnalyzer_BlankRegex_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new StableValueAnalyzer(GetFilterStrategy());
+			var analyzer = new StableValueRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -199,13 +199,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		#endregion
 
-		#region DetectRepeatingRecordsAnalyzer Tests
+		#region MatchingRecordRunsAnalyzer Tests
 
 		[TestMethod]
-		public void DetectRepeatingRecordsAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		public void MatchingRecordRunsAnalyzer_UserCancelsDialog_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DetectRepeatingRecordsAnalyzer(GetFilterStrategy());
+			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -217,10 +217,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		public void DetectRepeatingRecordsAnalyzer_BlankRegex_ReturnsZeroResults()
+		public void MatchingRecordRunsAnalyzer_BlankRegex_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DetectRepeatingRecordsAnalyzer(GetFilterStrategy());
+			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -232,10 +232,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		public void DetectRepeatingRecordsAnalyzer_EmptyStringRegex_ReturnsZeroResults()
+		public void MatchingRecordRunsAnalyzer_EmptyStringRegex_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DetectRepeatingRecordsAnalyzer(GetFilterStrategy());
+			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -248,13 +248,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		#endregion
 
-		#region DetectLastAnalyzer Tests
+		#region LastOccurrenceAnalyzer Tests
 
 		[TestMethod]
-		public void DetectLastAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		public void LastOccurrenceAnalyzer_UserCancelsDialog_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DetectLastAnalyzer(GetFilterStrategy());
+			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -266,10 +266,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		public void DetectLastAnalyzer_BlankRegex_ReturnsZeroResults()
+		public void LastOccurrenceAnalyzer_BlankRegex_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DetectLastAnalyzer(GetFilterStrategy());
+			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
 			var records = ImmutableArray<IRecord>.Empty;
 
@@ -281,10 +281,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		public void DetectLastAnalyzer_EmptyStringRegex_ReturnsZeroResults()
+		public void LastOccurrenceAnalyzer_EmptyStringRegex_ReturnsZeroResults()
 		{
 			// Arrange
-			var analyzer = new DetectLastAnalyzer(GetFilterStrategy());
+			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
 			var records = ImmutableArray<IRecord>.Empty;
 
