@@ -70,15 +70,15 @@
 				{
 					new TimeGapAnalyzer(),
 					new TimeGapUiAnalyzer(),
-					new TemporalAnomalyAnalyzer(),
+					new OutOfOrderTimestampsAnalyzer(),
 					new DetectDataAnalyzer(filterStrategy, aliasExpander),
-					new DetectFirstAnalyzer(filterStrategy, aliasExpander),
-					new DetectLastAnalyzer(filterStrategy, aliasExpander),
-					new StableValueAnalyzer(filterStrategy, aliasExpander),
-					new DataTransitionAnalyzer(filterStrategy, aliasExpander),
+					new FirstOccurrenceAnalyzer(filterStrategy, aliasExpander),
+					new LastOccurrenceAnalyzer(filterStrategy, aliasExpander),
+					new StableValueRunsAnalyzer(filterStrategy, aliasExpander),
+					new StateTransitionsAnalyzer(filterStrategy, aliasExpander),
 					new DetectRisingEdgeAnalyzer(filterStrategy, aliasExpander),
 					new DetectFallingEdgeAnalyzer(filterStrategy, aliasExpander),
-					new DetectRepeatingRecordsAnalyzer(filterStrategy, aliasExpander),
+					new MatchingRecordRunsAnalyzer(filterStrategy, aliasExpander),
 					new StatisticalAnalyzer(filterStrategy, aliasExpander),
 				});
 			}

@@ -25,7 +25,7 @@
 
 			engine
 				.Analyzer
-				.Analyze(AnalysisType.DetectDataTransition);
+				.Analyze(AnalysisType.StateTransitions);
 
 			foreach (IRecord record in engine.Filter.Results)
 			{
@@ -59,7 +59,7 @@
 
                         engine
                                 .Analyzer
-                                .Analyze(AnalysisType.DetectDataTransition);
+                                .Analyze(AnalysisType.StateTransitions);
 
                         foreach (IRecord record in engine.Filter.Results)
                         {
@@ -91,7 +91,7 @@
                                         FilterType.RegularExpression,
                                         new FilterCriteria(@"Temperature=(?<State>\w+)"));
 
-                                engine.Analyzer.Analyze(AnalysisType.DetectStableValues);
+                                engine.Analyzer.Analyze(AnalysisType.StableValueRuns);
 
                                 int[] flaggedLines = engine
                                         .Filter
@@ -129,7 +129,7 @@
 
                                 engine
                                         .Analyzer
-                                        .Analyze(AnalysisType.DetectStableValues);
+                                        .Analyze(AnalysisType.StableValueRuns);
 
                                 var recordsByLineNumber = engine
                                         .Filter

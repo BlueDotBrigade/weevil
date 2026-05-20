@@ -230,43 +230,43 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
                         () => this.IsMenuEnabled);
 
                 [NotObservable]
-                public ICommand DetectStableValuesCommand => new UiBoundCommand(
-                        () => Analyze(AnalysisType.DetectStableValues),
+                public ICommand StableValueRunsCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.StableValueRuns),
                         () => this.IsMenuEnabled);
 
                 [NotObservable]
-                public ICommand DetectFirstCommand => new UiBoundCommand(
-                        () => Analyze(AnalysisType.DetectFirst),
+                public ICommand FirstOccurrenceCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.FirstOccurrence),
                         () => this.IsMenuEnabled);
 
                 [NotObservable]
-                public ICommand DetectLastCommand => new UiBoundCommand(
-                        () => Analyze(AnalysisType.DetectLast),
+                public ICommand LastOccurrenceCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.LastOccurrence),
                         () => this.IsMenuEnabled);
 
                 [NotObservable]
-                public ICommand DetectDataTransitionsCommand => new UiBoundCommand(
-                        () => Analyze(AnalysisType.DetectDataTransition),
+                public ICommand StateTransitionsCommand => new UiBoundCommand(
+                        () => Analyze(AnalysisType.StateTransitions),
                         () => this.IsMenuEnabled);
 
 		[NotObservable]
-		public ICommand DataTransitionsFallingEdgeCommand => new UiBoundCommand(
+		public ICommand FallingEdgesCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectFallingEdges),
 			() => this.IsMenuEnabled);
 
 		[NotObservable]
-		public ICommand DataTransitionsRisingEdgeCommand => new UiBoundCommand(
+		public ICommand RisingEdgesCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.DetectRisingEdges),
 			() => this.IsMenuEnabled);
 
 		[NotObservable]
-		public ICommand DetectTemporalAnomalyCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.TemporalAnomaly),
+		public ICommand OutOfOrderTimestampsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.OutOfOrderTimestamps),
 			() => this.IsMenuEnabled);
 
 		[NotObservable]
-		public ICommand DetectRepeatingRecordsCommand => new UiBoundCommand(
-			() => Analyze(AnalysisType.DetectRepeatingRecords),
+		public ICommand MatchingRecordRunsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.MatchingRecordRuns),
 			() => this.IsMenuEnabled);
 
 		[NotObservable]

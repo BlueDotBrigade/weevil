@@ -6,15 +6,18 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
-	public class TemporalAnomalyAnalyzer : IRecordAnalyzer
+	/// <summary>
+	/// Flags records whose timestamp is earlier than the previously observed timestamp beyond a configured tolerance.
+	/// </summary>
+	public class OutOfOrderTimestampsAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.Zero;
 
-		private const string CommentLabel = "TemporalAnomaly";
+		private const string CommentLabel = "OutOfOrderTimestamps";
 
-		public string Key => AnalysisType.TemporalAnomaly.ToString();
+		public string Key => AnalysisType.OutOfOrderTimestamps.ToString();
 
-		public string DisplayName => "Temporal Anomaly";
+		public string DisplayName => "Out-of-Order Timestamps";
 
 		private Results Analyze(ImmutableArray<IRecord> records, TimeSpan tolerance, bool canUpdateMetadata)
 		{
@@ -60,7 +63,7 @@
 		protected bool TryGetTolerance(IUserDialog user, out TimeSpan tolerance)
 		{
 			var userInput = user.ShowUserPrompt(
-				"Temporal Anomaly",
+				"Out-of-Order Timestamps",
 				"Threshold (ms):",
 				DefaultThreshold.TotalMilliseconds.ToString("-0"));
 

@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
@@ -8,28 +8,28 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	using Filter.Expressions.Regular;
 
 	/// <summary>
-	/// Extracts key-value pairs using regex named capture groups and flags only the first
-	/// record where each unique value appears. Subsequent records with the same value are ignored.
+	/// Parses regex named capture groups and flags only the first record where each unique key/value appears.
+	/// Subsequent records with the same extracted value are ignored.
 	/// </summary>
-	internal class DetectFirstAnalyzer : IRecordAnalyzer
+	internal class FirstOccurrenceAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
 		private readonly IFilterAliasExpander _aliasExpander;
 
-		public DetectFirstAnalyzer(FilterStrategy filterStrategy)
+		public FirstOccurrenceAnalyzer(FilterStrategy filterStrategy)
 			: this(filterStrategy, null)
 		{
 		}
 
-		public DetectFirstAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
+		public FirstOccurrenceAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
 			_aliasExpander = aliasExpander;
 		}
 
-		public string Key => AnalysisType.DetectFirst.ToString();
+		public string Key => AnalysisType.FirstOccurrence.ToString();
 
-		public string DisplayName => "Detect First";
+		public string DisplayName => "First Occurrence";
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{

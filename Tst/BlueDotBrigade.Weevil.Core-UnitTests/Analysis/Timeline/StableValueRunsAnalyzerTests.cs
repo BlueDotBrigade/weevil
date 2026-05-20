@@ -1,17 +1,17 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
-	public class StableValueAnalyzerTests
+	public class StableValueRunsAnalyzerTests
 	{
 		#region Setup helpers
 
 		private static Results Analyze(ImmutableArray<IRecord> records, string regex)
 		{
-			var analyzer = new StableValueAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new StableValueRunsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
 
 			return analyzer.Analyze(
@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		#region Scenario helpers
 
-		// StableValueAnalyzer flags the start AND end record of every consecutive same-value run.
+		// StableValueRunsAnalyzer flags the start AND end record of every consecutive same-value run.
 		// Single-value runs (length 1) flag the same record twice (idempotent — one flag, one record).
 
 		private static void AssertScenario(string pattern, string expected)

@@ -1,17 +1,17 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Immutable;
  using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
-	public class DataTransitionAnalyzerTests
+	public class StateTransitionsAnalyzerTests
 	{
 		#region Setup helpers
 
 		private static Results Analyze(ImmutableArray<IRecord> records, string regex)
 		{
-			var analyzer = new DataTransitionAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new StateTransitionsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
 
 			return analyzer.Analyze(
@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		#region Scenario helpers
 
-		// DataTransitionAnalyzer flags the record where each value first appears
+		// StateTransitionsAnalyzer flags the record where each value first appears
 		// or where the value differs from its previous value (per regex group key).
 
 		private static void AssertScenario(string pattern, string expected)
@@ -130,7 +130,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		[TestMethod]
 		public void Analyze_NoisyDecimalPlateau_FlagsEveryDistinctValueChange()
 		{
-			// Same noisy sequence as the other analyzers. DataTransitionAnalyzer flags every
+			// Same noisy sequence as the other analyzers. StateTransitionsAnalyzer flags every
 			// record where the value differs from the previous record (plus the first record).
 			// 33.000(0,first) 33.000(1) 32.999(2,change) 33.000(3,change) 32.998(4,change)
 			// 32.998(5) 33.000(6,change) 32.997(7,change) 32.997(8)

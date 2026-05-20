@@ -1,4 +1,4 @@
-namespace BlueDotBrigade.Weevil.Analysis.Timeline
+﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
         using System.Collections.Generic;
         using System.Collections.Immutable;
@@ -9,29 +9,29 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         using Filter.Expressions.Regular;
 
         /// <summary>
-        /// Extracts values via regex named capture groups and tracks each key independently over time.
-        /// Flags the start and end record of consecutive records that share the same extracted value.
-        /// When the value changes or disappears, the current stable run is finalized and a new run begins.
+        /// Parses regex named capture groups and tracks each captured key independently across records.
+        /// Flags the start and end boundaries of runs where consecutive records keep the same value.
+        /// When a value changes or disappears, the active run is finalized and a new run begins when applicable.
         /// </summary>
-        internal class StableValueAnalyzer : IRecordAnalyzer
+        internal class StableValueRunsAnalyzer : IRecordAnalyzer
         {
                 private readonly FilterStrategy _filterStrategy;
                 private readonly IFilterAliasExpander _aliasExpander;
 
-                public StableValueAnalyzer(FilterStrategy filterStrategy)
+                public StableValueRunsAnalyzer(FilterStrategy filterStrategy)
                         : this(filterStrategy, null)
                 {
                 }
 
-                public StableValueAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
+                public StableValueRunsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
                 {
                         _filterStrategy = filterStrategy;
                         _aliasExpander = aliasExpander;
                 }
 
-                public string Key => AnalysisType.DetectStableValues.ToString();
+                public string Key => AnalysisType.StableValueRuns.ToString();
 
-                public string DisplayName => "Detect Stable Values";
+                public string DisplayName => "Stable Value Runs";
 
                 public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
                 {
@@ -197,4 +197,3 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 }
         }
 }
-
