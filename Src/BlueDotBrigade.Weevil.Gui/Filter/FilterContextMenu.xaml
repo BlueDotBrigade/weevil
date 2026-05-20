@@ -144,6 +144,22 @@
             <Separator/>
             <MenuItem Header="Calculate Statistics" Command="{Binding CalculateStatisticsCommand}" InputGestureText="F12"  />
         </MenuItem>
+        <MenuItem Header="Domain Specific"
+                              ItemsSource="{Binding Path=CustomAnalyzerCommands}"
+                              ItemContainerStyle="{StaticResource CommandMenuItemStyle}">
+            <MenuItem.Style>
+                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MaterialDesignMenuItem}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Setter Property="IsEnabled" Value="True"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding CustomAnalyzerCommands.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MenuItem.Style>
+        </MenuItem>
         <MenuItem Header="Extraction">
             <MenuItem Header="Annotate Records"
                                        Command="{Binding DetectDataCommand}"
@@ -189,22 +205,6 @@
                                       Command="{Binding OutOfOrderTimestampsCommand}"/>
             <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
             <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-        </MenuItem>
-        <MenuItem Header="Domain Specific Analysis"
-                              ItemsSource="{Binding Path=CustomAnalyzerCommands}"
-                              ItemContainerStyle="{StaticResource CommandMenuItemStyle}">
-            <MenuItem.Style>
-                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MaterialDesignMenuItem}">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Setter Property="IsEnabled" Value="True"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding CustomAnalyzerCommands.Count}" Value="0">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </MenuItem.Style>
         </MenuItem>
         <Separator/>
         <MenuItem Header="Help" Command="{Binding ShowHelpCommand}" InputGestureText="F1" />
