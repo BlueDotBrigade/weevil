@@ -4,22 +4,42 @@
     <ProductVersion>2.12.0</ProductVersion>
     <OutputName>Weevil-$(ProductVersion)</OutputName>
     <Name>BlueDotBrigade.Weevil.Installer</Name>
+    <RepoRootDir Condition=" '$(SolutionDir)' != '' ">$(SolutionDir)</RepoRootDir>
+    <RepoRootDir Condition=" '$(RepoRootDir)' == '' ">$(MSBuildProjectDirectory)\..\..\</RepoRootDir>
+    <InstallerLayoutRoot>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)installer-layout\</InstallerLayoutRoot>
+    <InstallerBinLayoutDir>$(InstallerLayoutRoot)Bin\</InstallerBinLayoutDir>
+    <InstallerDocLayoutDir>$(InstallerLayoutRoot)Doc\</InstallerDocLayoutDir>
+    <InstallerLicenseLayoutDir>$(InstallerLayoutRoot)Licenses\</InstallerLicenseLayoutDir>
+    <InstallerPluginLayoutDir>$(InstallerBinLayoutDir)Plugins\</InstallerPluginLayoutDir>
+    <GuiOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.Gui\bin\$(Platform)\$(Configuration)\net9.0-windows\</GuiOutputPath>
+    <CliOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.Cli\bin\$(Platform)\$(Configuration)\net9.0\</CliOutputPath>
+    <PowerShellOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.PowerShell\bin\$(Platform)\$(Configuration)\net9.0\</PowerShellOutputPath>
+    <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' and '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\</PluginSourcePath>
+    <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' ">$(RepoRootDir)Src\BlueDotBrigade.Weevil.Plugins\</PluginSourcePath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DefineConstants>Debug;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;ScriptsSrcPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.PowerShell;</DefineConstants>
+    <DefineConstants>Debug;WeevilVersion=$(ProductVersion);InstallerBinSourceDir=$(InstallerBinLayoutDir);InstallerDocSourceDir=$(InstallerDocLayoutDir);InstallerLicenseSourceDir=$(InstallerLicenseLayoutDir);InstallerLicenseRtfPath=$(RepoRootDir)Doc\Notes\Release\Licenses\License-Installation.rtf</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DefineConstants>Release;WeevilVersion=$(ProductVersion);SourceDirPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.Gui\bin\x64\$(Configuration)\net9.0-windows;ScriptsSrcPath=$(SolutionDir)Src\BlueDotBrigade.Weevil.PowerShell;</DefineConstants>
+    <DefineConstants>Release;WeevilVersion=$(ProductVersion);InstallerBinSourceDir=$(InstallerBinLayoutDir);InstallerDocSourceDir=$(InstallerDocLayoutDir);InstallerLicenseSourceDir=$(InstallerLicenseLayoutDir);InstallerLicenseRtfPath=$(RepoRootDir)Doc\Notes\Release\Licenses\License-Installation.rtf</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <None Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="WixToolset.Heat" Version="6.0.2" />
     <PackageReference Include="WixToolset.Netfx.wixext" Version="6.0.2" />
     <PackageReference Include="WixToolset.UI.wixext" Version="6.0.2" />
     <PackageReference Include="WixToolset.Util.wixext" Version="6.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Cli\BlueDotBrigade.Weevil.Cli.csproj">
+      <Name>BlueDotBrigade.Weevil.Cli</Name>
+      <Project>{305f87fd-a19a-42be-8876-e7a14e133cb2}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+    </ProjectReference>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Gui\BlueDotBrigade.Weevil.Gui.csproj">
       <Name>BlueDotBrigade.Weevil.Gui</Name>
       <Project>{87387c7c-089e-4f58-a4c4-a7adf2e18e6a}</Project>
@@ -28,6 +48,38 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.PowerShell\BlueDotBrigade.Weevil.PowerShell.csproj">
+      <Name>BlueDotBrigade.Weevil.PowerShell</Name>
+      <Project>{9f80d040-e900-4bfd-b80f-a0fddcbb6c82}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <HarvestDirectory Include="$(InstallerBinLayoutDir)">
+      <ComponentGroupName>generated_weevil_bin_files</ComponentGroupName>
+      <DirectoryRefId>InstallFolderBin</DirectoryRefId>
+      <PreprocessorVariable>var.InstallerBinSourceDir</PreprocessorVariable>
+      <SuppressCom>true</SuppressCom>
+      <SuppressRegistry>true</SuppressRegistry>
+      <SuppressRootDirectory>true</SuppressRootDirectory>
+    </HarvestDirectory>
+    <HarvestDirectory Include="$(InstallerDocLayoutDir)">
+      <ComponentGroupName>generated_documentation_doc_files</ComponentGroupName>
+      <DirectoryRefId>DocDir</DirectoryRefId>
+      <PreprocessorVariable>var.InstallerDocSourceDir</PreprocessorVariable>
+      <SuppressCom>true</SuppressCom>
+      <SuppressRegistry>true</SuppressRegistry>
+      <SuppressRootDirectory>true</SuppressRootDirectory>
+    </HarvestDirectory>
+    <HarvestDirectory Include="$(InstallerLicenseLayoutDir)">
+      <ComponentGroupName>generated_documentation_license_files</ComponentGroupName>
+      <DirectoryRefId>LicenseDir</DirectoryRefId>
+      <PreprocessorVariable>var.InstallerLicenseSourceDir</PreprocessorVariable>
+      <SuppressCom>true</SuppressCom>
+      <SuppressRegistry>true</SuppressRegistry>
+      <SuppressRootDirectory>true</SuppressRootDirectory>
+    </HarvestDirectory>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\BlueDotBrigade.Weevil.Gui\Resources\Icons\Weevil.ico">
@@ -37,6 +89,7 @@
   <ItemGroup>
     <None Include="..\..\Doc\Notes\Release\Licenses\License-Installation.rtf">
       <Link>License-Installation.rtf</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <!-- 
@@ -46,4 +99,25 @@
 	https://github.com/firegiant/HeatWaveSupport/issues/73
 	-->
   <Target Name="CollectSuggestedVisualStudioComponentIds" />
+  <Target Name="StageInstallerLayout" BeforeTargets="GetHarvestDirectoryContent">
+    <RemoveDir Directories="$(InstallerLayoutRoot)" Condition="Exists('$(InstallerLayoutRoot)')" />
+    <Delete Files="$(IntermediateOutputPath)_generated_weevil_bin_files_dir.wxs;$(IntermediateOutputPath)_generated_documentation_doc_files_dir.wxs;$(IntermediateOutputPath)_generated_documentation_license_files_dir.wxs" ContinueOnError="true" />
+    <MakeDir Directories="$(InstallerBinLayoutDir);$(InstallerDocLayoutDir);$(InstallerLicenseLayoutDir);$(InstallerPluginLayoutDir)" />
+    <ItemGroup>
+      <GuiRuntimeFiles Include="$(GuiOutputPath)**\*" Exclude="$(GuiOutputPath)Plugins\**\*" />
+      <CliRuntimeFiles Include="$(CliOutputPath)**\*" Exclude="$(CliOutputPath)Plugins\**\*" />
+      <PowerShellRuntimeFiles Include="$(PowerShellOutputPath)**\*" />
+      <PluginRuntimeFiles Include="$(PluginSourcePath)*.dll;$(PluginSourcePath)*.dll.config;$(PluginSourcePath)*.pdb;$(PluginSourcePath)ReadMe.md" Condition="Exists('$(PluginSourcePath)')" />
+      <DocumentationFiles Include="$(RepoRootDir)Doc\Notes\Release\Help.html" />
+      <LicenseFiles Include="$(RepoRootDir)Doc\Notes\Release\Licenses\**\*" />
+      <RootLicenseFiles Include="$(RepoRootDir)LICENSE.md" />
+    </ItemGroup>
+    <Copy SourceFiles="@(GuiRuntimeFiles)" DestinationFiles="@(GuiRuntimeFiles->'$(InstallerBinLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(CliRuntimeFiles)" DestinationFiles="@(CliRuntimeFiles->'$(InstallerBinLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PowerShellRuntimeFiles)" DestinationFiles="@(PowerShellRuntimeFiles->'$(InstallerBinLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginRuntimeFiles)" DestinationFiles="@(PluginRuntimeFiles->'$(InstallerPluginLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="Exists('$(PluginSourcePath)')" />
+    <Copy SourceFiles="@(DocumentationFiles)" DestinationFiles="@(DocumentationFiles->'$(InstallerDocLayoutDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(LicenseFiles)" DestinationFiles="@(LicenseFiles->'$(InstallerLicenseLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(RootLicenseFiles)" DestinationFiles="@(RootLicenseFiles->'$(InstallerLicenseLayoutDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

@@ -10,7 +10,7 @@
 		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
 		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
 		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
-		<WixVariable Id="WixUILicenseRtf" Value="License-Installation.rtf" />
+		<WixVariable Id="WixUILicenseRtf" Value="$(var.InstallerLicenseRtfPath)" />
 		<ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
 
 		<!-- Check installed .NET Core Runtime on the target computer. -->
@@ -24,11 +24,12 @@
 		<MediaTemplate EmbedCab="yes" />
 
 		<Feature Id="ProductFeature" Title="Weevil" Level="1">
-			<ComponentGroupRef Id="weevil_bin_files" />
-			<ComponentGroupRef Id="documentation_files" />
-			<ComponentGroupRef Id="scripts_files" />
+			<ComponentGroupRef Id="generated_weevil_bin_files" />
+			<ComponentGroupRef Id="generated_documentation_doc_files" />
+			<ComponentGroupRef Id="generated_documentation_license_files" />
 			
 			<ComponentRef Id="WeevilShortcut" />
+			<ComponentRef Id="ScriptsPathComponent" />
 			<ComponentGroupRef Id="RegistryKeys" />
 		</Feature>
 	</Package>
