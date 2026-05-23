@@ -6,15 +6,29 @@ The following summarizes the changes that have been made to Weevil's core engine
 
 ### Version 2.12.0
 
-Planned release for May 4th, 2026.
+Released for May 24th, 2026.
 
 #### What's New?
 
-- To be added.
+  * Analysis:
+    * Graphs now support multiple data series, making it easier to compare related values over time. #604
+    * Analysts can choose which graph series appear on the secondary Y-axis. #619
+    * Graph metric summaries now include additional statistical details, including standard deviation. #656 #666
+    * Detect menu items now include examples to make each operation easier to understand. #659
+  * Filtering:
+    * Improved include/exclude filtering behavior to better match expected analyst workflows. #591
+    * Added PowerShell filtering support for scripting, automated analysis, and CI pipeline integration. #258
+    * Improved Find behavior. #622
+  * Navigation:
+    * Added bookmark support to make it easier to mark, name, configure, and revisit important log entries. #587
+    * Improved record ordering after clearing records outside selected regions. #640
 
 #### Bug Fixes
 
-- To be added.
+  * Improved filtering accuracy when using include and exclude criteria together. #591
+  * Improved Find dialog behavior. #622
+  * Improved record ordering after clearing records outside selected regions. #640
+  * Improved compressed log file handling. #647
 
 ### Version 2.11.0
 
