@@ -51,12 +51,12 @@ One or more filter criteria can be used to show or hide log file records.
 2. Filter Criteria
      1. Plain Text
      2. Regular Expressions
-     3. Aliases
-          - Frequently used or complex filters can be assigned a unique key to speed up filtering.
-          - For example, the `#IpAddress` key could be assigned to the following filter criteria: `^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`.
-     4. Monikers
-         - Monikers are built-in keys that can be used to query metadata collected by _Weevil_.
-         - For example, `@Comment` can be used to identify records that have a user comment.
+     3. Saved Keywords
+          - Frequently used or complex filters can be saved as reusable keywords to speed up filtering.
+          - For example, `#IpAddress` could be used as a shortcut for this filter: `^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`.
+     4. Built-in Keywords
+         - Built-in keywords can be used to search metadata collected by _Weevil_.
+         - For example, `@Comment` identifies records that have a user comment.
 3. Multiple Criteria
      - Multiple filter criteria can be combined together using a logical "OR" operator (`||`).
 4. Pinned Records
