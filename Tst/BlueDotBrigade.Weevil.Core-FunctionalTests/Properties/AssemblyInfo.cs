@@ -3,7 +3,13 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("BlueDotBrigade.Weevil.IntegrationTest")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+[assembly: AssemblyInformationalVersion("2.12.0 (debug build)")]
+#else
+[assembly: AssemblyConfiguration("Release")]
+[assembly: AssemblyInformationalVersion("2.12.0 (release build)")]
+#endif
 [assembly: AssemblyCompany("Blue Dot Brigade")]
 [assembly: AssemblyProduct("BlueDotBrigade.Weevil.IntegrationTest")]
 [assembly: AssemblyCopyright("© 2025 Blue Dot Brigade")]
