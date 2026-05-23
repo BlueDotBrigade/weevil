@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Cli.Security
 		{
 			helpMessage.Children.Add(
 				new HelpSection(
-					new HelpHeading("Examples:"),
+					new HelpHeading("General Examples:"),
 					new HelpSection(
 						new HelpParagraph(@"WeevilCli.exe encrypt --secret ""MyP@ssword"""),
 						new HelpParagraph("")
