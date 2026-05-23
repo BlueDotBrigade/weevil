@@ -125,24 +125,21 @@
                     <MultiDataTrigger.EnterActions>
                         <BeginStoryboard Name="InsightAttentionCombinedPulseStoryboard">
                             <Storyboard FillBehavior="Stop">
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 From="1"
-                                                 To="0.35"
-                                                 Duration="0:0:0.4"
-                                                 AutoReverse="True"
-                                                 RepeatBehavior="3x" />
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                 From="1"
-                                                 To="1.25"
-                                                 Duration="0:0:0.4"
-                                                 AutoReverse="True"
-                                                 RepeatBehavior="3x" />
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                 From="1"
-                                                 To="1.25"
-                                                 Duration="0:0:0.4"
-                                                 AutoReverse="True"
-                                                 RepeatBehavior="3x" />
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                                               RepeatBehavior="3x">
+                                    <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0.5" />
+                                    <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1.5" />
+                                </DoubleAnimationUsingKeyFrames>
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                               RepeatBehavior="3x">
+                                    <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0.5" />
+                                    <LinearDoubleKeyFrame Value="4" KeyTime="0:0:1.5" />
+                                </DoubleAnimationUsingKeyFrames>
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                               RepeatBehavior="3x">
+                                    <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0.5" />
+                                    <LinearDoubleKeyFrame Value="4" KeyTime="0:0:1.5" />
+                                </DoubleAnimationUsingKeyFrames>
                             </Storyboard>
                         </BeginStoryboard>
                     </MultiDataTrigger.EnterActions>
@@ -232,7 +229,7 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-                        
+
                         <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Represents the amount of time between the first and last selected records."/>
 
                         <TextBox Text="{Binding Path=SelectionDetails.SelectionPeriod, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
@@ -404,8 +401,8 @@
                           Visibility="{Binding SoftwareDetails.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <materialDesign:PopupBox.ToggleContent>
                             <Image Height="24" Width="24" Margin="6,0,0,0"
-                            Source="/Resources/Icons/NewReleaseAvailable-24.png"
-                            ToolTip="New version is available! Click for details."/>
+                                Source="/Resources/Icons/NewReleaseAvailable-24.png"
+                                ToolTip="New version is available! Click for details."/>
                         </materialDesign:PopupBox.ToggleContent>
                         <Grid Margin="20">
                             <Grid.ColumnDefinitions>
