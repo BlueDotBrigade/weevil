@@ -51,9 +51,9 @@ One or more filter criteria can be used to show or hide log file records.
 2. Filter Criteria
      1. Plain Text
      2. Regular Expressions
-     3. Saved Keywords
-          - Frequently used or complex filters can be saved as reusable keywords to speed up filtering.
-          - For example, `#IpAddress` could be used as a shortcut for this filter: `^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`.
+     3. Aliases
+          - _Weevil_ includes built-in complex filters that are used to speed up the filtering process.
+          - For example, the `#IPv4` alias detects IP addresses using the following regular expression: `(?<IPv4>((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4})`.
      4. Built-in Keywords
          - Built-in keywords can be used to search metadata collected by _Weevil_.
          - For example, `@Comment` identifies records that have a user comment.
