@@ -9,8 +9,6 @@
 		<Owners>Blue Dot Brigade</Owners>
 		<Description>This project dynamically detects the plugin files from %WEEVIL_PLUGINS_PATH%, so that thay can be added to the installation package.</Description>
 		<IsPackable>False</IsPackable>
-		<AssemblyVersion>$(WeevilAssemblyVersion)</AssemblyVersion>
-		<FileVersion>$(WeevilFileVersion)</FileVersion>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<Company>Blue Dot Brigade</Company>
 	</PropertyGroup>

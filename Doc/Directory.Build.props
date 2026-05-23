@@ -1,5 +1,5 @@
 <Project>
-  <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">
+  <PropertyGroup>
     <WeevilReleaseVersion>2.12.0</WeevilReleaseVersion>
     <VersionPrefix>$(WeevilReleaseVersion)</VersionPrefix>
     <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
@@ -8,10 +8,5 @@
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).$(BuildNumber)</FileVersion>
     <InformationalVersion>$(VersionPrefix)+$(Configuration)</InformationalVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(MSBuildProjectExtension)' != '.wixproj'">
-    <Optimize>true</Optimize>
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 </Project>

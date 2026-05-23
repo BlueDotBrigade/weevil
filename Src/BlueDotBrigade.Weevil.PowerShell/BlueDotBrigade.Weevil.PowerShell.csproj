@@ -19,8 +19,6 @@
     <PackageVersion>$(WeevilReleaseVersion)</PackageVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <AssemblyVersion>$(WeevilAssemblyVersion)</AssemblyVersion>
-    <FileVersion>$(WeevilFileVersion)</FileVersion>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Platforms>AnyCPU;x64</Platforms>
