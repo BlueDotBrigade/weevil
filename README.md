@@ -55,8 +55,8 @@ One or more filter criteria can be used to show or hide log file records.
           - _Weevil_ includes built-in aliases for common complex filters to speed up the filtering process.
           - For example, the `#IPv4` alias detects IP addresses using the following regular expression: `(?<IPv4>((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4})`.
      4. Built-in Keywords
-         - Built-in keywords can be used to search metadata collected by _Weevil_.
-         - For example, `@Comment` identifies records that have a user comment.
+         - Prefixed with `@`, built-in keywords let you quickly filter by metadata collected by _Weevil_.
+         - For example, `@Comment` helps you instantly find records that already have user comments, making it easy to revisit notes during an investigation.
 3. Multiple Criteria
      - Multiple filter criteria can be combined together using a logical "OR" operator (`||`).
 4. Pinned Records
