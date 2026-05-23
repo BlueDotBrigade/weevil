@@ -1,5 +1,5 @@
 <Project>
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
     <WeevilReleaseVersion>2.12.0</WeevilReleaseVersion>
     <VersionPrefix>$(WeevilReleaseVersion)</VersionPrefix>
     <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
