@@ -67,12 +67,6 @@
 					Action="set"
 					Part="all"
 					System="yes" />
-				<Environment Id="WeevilTelemetrySecretEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_SECRET"
-					Value=""
-					Action="set"
-					Part="all"
-					System="yes" />
 			</Component>
 			<Component Id="TelemetryUsernameEnabledComponent" Guid="1D8C66F0-8E03-4F06-B575-58254B6F35BE">
 				<Condition>WEEVIL_COLLECT_ANONYMOUS_METRICS = "1"</Condition>
@@ -82,11 +76,23 @@
 					Action="set"
 					Part="all"
 					System="yes" />
+				<Environment Id="WeevilTelemetrySecretEnabledEnvironmentVariable"
+					Name="WEEVIL_TELEMETRY_SECRET"
+					Value=""
+					Action="set"
+					Part="all"
+					System="yes" />
 			</Component>
 			<Component Id="TelemetryUsernameDisabledComponent" Guid="8AFBB0A6-E049-4D07-91FB-E38A90CA7E92">
 				<Condition>WEEVIL_COLLECT_ANONYMOUS_METRICS &lt;&gt; "1"</Condition>
 				<Environment Id="WeevilTelemetryUsernameDisabledEnvironmentVariable"
 					Name="WEEVIL_TELEMETRY_USERNAME"
+					Value=""
+					Action="set"
+					Part="all"
+					System="yes" />
+				<Environment Id="WeevilTelemetrySecretDisabledEnvironmentVariable"
+					Name="WEEVIL_TELEMETRY_SECRET"
 					Value=""
 					Action="set"
 					Part="all"
