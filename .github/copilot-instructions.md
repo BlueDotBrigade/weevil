@@ -38,6 +38,7 @@ Doc/                                  # Documentation, design notes, and UI styl
 - GUI ViewModels (`BlueDotBrigade.Weevil.Gui`) use the **Metalama.Patterns.Observability** aspect-oriented framework to implement `INotifyPropertyChanged`. Classes decorated with `[Observable]` (e.g. `FilterViewModel`, `MainWindowViewModel`, `StatusBarViewModel`) get `PropertyChanged` woven in at build time for plain auto-properties — do **not** add manual `OnPropertyChanged` calls or backing fields. Use `[NotObservable]` to opt out a specific member. **Caveat:** Metalama suppresses `PropertyChanged` when the new value equals the current; if a binding must refresh on every assignment (even to the same value), the auto-property approach is insufficient and a manual property is required.
 - The majority of business logic must reside in `Core` so the application can run headless. Weevil's UI layer is interchangeable — it could be a WPF application, CLI, PowerShell module, or a test framework like Reqnroll.
 - Apply the DRY (Don't Repeat Yourself) principle to code, configuration, and documentation. Avoid duplicating logic, data, or rules across multiple locations.
+- When reorganizing Weevil build outputs, preserve a debugging workflow where both the GUI and CLI run against the latest built assemblies and include plugins from `WEEVIL_PLUGINS_PATH` in Visual Studio 2026, whether or not the debugger is attached.
 
 ## Design Principles
 
