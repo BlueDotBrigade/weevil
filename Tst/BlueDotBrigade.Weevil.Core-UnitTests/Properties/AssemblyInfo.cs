@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
-[assembly: AssemblyInformationalVersion("2.12.0 (debug build)")]
+[assembly: AssemblyInformationalVersion("2.12.0+Debug")]
 #else
 [assembly: AssemblyConfiguration("Release")]
-[assembly: AssemblyInformationalVersion("2.12.0 (release build)")]
+[assembly: AssemblyInformationalVersion("2.12.0+Release")]
 #endif
 [assembly: AssemblyCompany("Blue Dot Brigade")]
 [assembly: AssemblyProduct("BlueDotBrigade.Weevil.UnitTest")]
@@ -20,5 +20,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("3183e2a5-5f81-4bc8-a2e4-20cc99d95dfb")]
 
-[assembly: AssemblyVersion("2.12.0.*")]
-[assembly: AssemblyFileVersion("2.12.0")]
+[assembly: AssemblyVersion("2.12.0.0")]
+[assembly: AssemblyFileVersion("2.12.0.0")]

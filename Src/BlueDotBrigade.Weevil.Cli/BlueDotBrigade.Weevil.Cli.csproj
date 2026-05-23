@@ -4,8 +4,8 @@
 		<OutputType>Exe</OutputType>
 		<Platforms>x64</Platforms>
 		<AssemblyName>WeevilCli</AssemblyName>
-		<Deterministic>false</Deterministic>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Deterministic>true</Deterministic>
+		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject>BlueDotBrigade.Weevil.Cli.Program</StartupObject>

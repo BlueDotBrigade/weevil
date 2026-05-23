@@ -8,7 +8,7 @@
 		<OutputType>WinExe</OutputType>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x64</Platforms>
-		<Deterministic>false</Deterministic>
+		<Deterministic>true</Deterministic>
 		<PublishUrl>publish\</PublishUrl>
 		<Install>true</Install>
 		<InstallFrom>Disk</InstallFrom>
