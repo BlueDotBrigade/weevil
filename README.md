@@ -54,9 +54,9 @@ One or more filter criteria can be used to show or hide log file records.
      3. Pattern Keywords
           - Prefixed with `#`, pattern keywords turn common advanced searches into simple shortcuts, helping you find high-value records without writing the regular expression yourself.
           - For example, `#IPv4` instantly surfaces records containing IPv4 addresses by applying _Weevil_'s built-in address-matching expression behind the scenes.
-     4. Investigation Keywords
-         - Prefixed with `@`, investigation keywords let you filter by metadata captured during your review so you can quickly return to the records that already carry useful context.
-         - For example, `@Comment` brings back records with analyst notes, making it easy to resume an investigation or review earlier findings.
+     4. Monikers
+         - Prefixed with `@`, monikers can be used to filter by metadata collected by _Weevil_.
+         - For example, the `@Comment` can be used to identify records that have a user comment.
 3. Multiple Criteria
      - Multiple filter criteria can be combined together using a logical "OR" operator (`||`).
 4. Pinned Records
