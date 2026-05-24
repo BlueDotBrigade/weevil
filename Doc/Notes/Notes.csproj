@@ -4,7 +4,6 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Platforms>x64</Platforms>
 		<RootNamespace>Notes</RootNamespace>
-		<Version>2.12.0</Version>
 		<Authors>BlueDotBrigade;</Authors>
 		<Copyright>© 2026 Blue Dot Brigade</Copyright>
 		<Owners>Blue Dot Brigade</Owners>

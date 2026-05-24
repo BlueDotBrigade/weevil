@@ -10,8 +10,7 @@
 		<_Parameter1 Condition="'$(Configuration)' != 'Debug'">Release</_Parameter1>
 	 </AssemblyAttribute>
 	 <AssemblyAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute">
-		<_Parameter1 Condition="'$(Configuration)' == 'Debug'">2.12.0 (debug build)</_Parameter1>
-		<_Parameter1 Condition="'$(Configuration)' != 'Debug'">2.12.0 (release build)</_Parameter1>
+		<_Parameter1>$(VersionPrefix)+$(Configuration)</_Parameter1>
 	 </AssemblyAttribute>
   </ItemGroup>
 </Project>

@@ -4,8 +4,9 @@
 		<OutputType>Exe</OutputType>
 		<Platforms>x64</Platforms>
 		<AssemblyName>WeevilCli</AssemblyName>
-		<Deterministic>false</Deterministic>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<AssemblyTitle>WeevilCli</AssemblyTitle>
+		<Description>Command-line host for the Weevil log analysis platform.</Description>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject>BlueDotBrigade.Weevil.Cli.Program</StartupObject>

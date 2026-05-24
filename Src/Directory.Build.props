@@ -1,14 +1,4 @@
 <Project>
-  <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">
-    <WeevilReleaseVersion>2.12.0</WeevilReleaseVersion>
-    <!-- Only assembly version can have a wild card. -->
-    <WeevilAssemblyVersion>2.12.0.*</WeevilAssemblyVersion>
-    <WeevilFileVersion>2.12.0</WeevilFileVersion>
-    <Deterministic>false</Deterministic>
-    <Version>$(WeevilReleaseVersion)</Version>
-    <AssemblyVersion>$(WeevilAssemblyVersion)</AssemblyVersion>
-    <FileVersion>$(WeevilFileVersion)</FileVersion>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(MSBuildProjectExtension)' != '.wixproj'">
     <Optimize>true</Optimize>
     <DebugType>portable</DebugType>
