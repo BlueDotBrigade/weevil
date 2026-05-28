@@ -9,6 +9,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		RecordSelectionChanged,
 		RecordAnnotationChanged,
 		ViewportChanged,
+		GraphOpen,
+		DashboardOpen,
 		CommandEntered,
 		CommandCompleted,
 		Unknown,

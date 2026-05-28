@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			var elapsed = activityObservedAtUtc - _lastActivityUtc.Value;
 			if (elapsed > TimeSpan.Zero)
 			{
-				ActiveMinutes += Math.Min(elapsed.TotalMinutes, _maxLeaseMinutes);
+				ActiveMinutes += System.Math.Min(elapsed.TotalMinutes, _maxLeaseMinutes);
 			}
 
 			_lastActivityUtc = activityObservedAtUtc;

@@ -176,15 +176,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				lock (_gate)
-				{
-					RecordActivityInternal(_utcNow());
-
-					if (CurrentSession is not null)
-					{
-						CurrentSession.FilterExecutionCount++;
-					}
-				}
+				RecordActivity(TelemetryActivityKind.FilterApplied);
 			}
 			catch (Exception exception)
 			{
@@ -197,7 +189,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				RecordActivity();
+				lock (_gate)
+				{
+					RecordActivityInternal(_utcNow(), activityKind);
+				}
 			}
 			catch (Exception exception)
 			{
@@ -241,15 +236,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				lock (_gate)
-				{
-					RecordActivityInternal(_utcNow());
-
-					if (CurrentSession is not null)
-					{
-						CurrentSession.DashboardOpenCount++;
-					}
-				}
+				RecordActivity(TelemetryActivityKind.DashboardOpen);
 			}
 			catch (Exception exception)
 			{
@@ -264,15 +251,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				lock (_gate)
-				{
-					RecordActivityInternal(_utcNow());
-
-					if (CurrentSession is not null)
-					{
-						CurrentSession.GraphOpenCount++;
-					}
-				}
+				RecordActivity(TelemetryActivityKind.GraphOpen);
 			}
 			catch (Exception exception)
 			{
@@ -281,15 +260,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 #pragma warning restore CA1031
 
-		private void RecordActivity()
-		{
-			lock (_gate)
-			{
-				RecordActivityInternal(_utcNow());
-			}
-		}
-
-		private void RecordActivityInternal(DateTime now)
+		private void RecordActivityInternal(DateTime now, TelemetryActivityKind activityKind)
 		{
 			if (CurrentSession is null)
 			{
@@ -298,6 +269,19 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			_activeUsageAccumulator.Renew(now);
 			CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
+
+			switch (activityKind)
+			{
+				case TelemetryActivityKind.FilterApplied:
+					CurrentSession.FilterExecutionCount++;
+					break;
+				case TelemetryActivityKind.GraphOpen:
+					CurrentSession.GraphOpenCount++;
+					break;
+				case TelemetryActivityKind.DashboardOpen:
+					CurrentSession.DashboardOpenCount++;
+					break;
+			}
 		}
 
 		private TelemetrySession EndCurrentSessionInternal(DateTime endedAtUtc)
