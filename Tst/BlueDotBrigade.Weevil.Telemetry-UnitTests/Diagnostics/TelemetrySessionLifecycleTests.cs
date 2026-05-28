@@ -146,30 +146,169 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
-		public void GivenIdlePeriodOverThreshold_WhenSessionEnds_ThenIdleTimeIsExcludedFromActiveMinutes()
+		public void GivenGapLongerThanLease_WhenSessionEnds_ThenGapIsCappedToLeaseDuration()
 		{
-			// Regression: Sub-task 3 (PR-3)
 			var start = new DateTime(2026, 4, 1, 11, 0, 0, DateTimeKind.Utc);
 			var times = new Queue<DateTime>(new[]
 			{
 				start,
-				start.AddSeconds(30),
-				start.AddMinutes(2),
-				start.AddMinutes(2.5),
+				start.AddMinutes(5),
+				start.AddMinutes(50),
 			});
-			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(15));
 
 			var sourcePath = Path.GetTempFileName();
 
 			try
 			{
 				tracker.StartSession("WeevilCli.exe", new Version(2, 0), sourcePath);
-				tracker.RecordSessionHeartbeat();
-				tracker.RecordNavigationAction();
+				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
 				var endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
-				endedSession!.SessionActiveMinutes.Should().BeApproximately(1.0, 0.0001);
+				endedSession!.SessionActiveMinutes.Should().Be(20);
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenReadingIntervalsWithinLease_WhenSessionEnds_ThenReadingTimeIsCounted()
+		{
+			var start = new DateTime(2026, 6, 1, 9, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[]
+			{
+				start,
+				start.AddMinutes(8),
+				start.AddMinutes(12),
+			});
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(15));
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
+				var ended = tracker.EndSession();
+
+				ended.Should().NotBeNull();
+				ended!.SessionActiveMinutes.Should().Be(12);
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenRepeatedScrollingActivity_WhenSessionEnds_ThenActiveUsageExtendsAcrossIntervals()
+		{
+			var start = new DateTime(2026, 6, 1, 10, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[]
+			{
+				start,
+				start.AddMinutes(10),
+				start.AddMinutes(20),
+				start.AddMinutes(30),
+			});
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(15));
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.RecordActivity(TelemetryActivityKind.ViewportChanged);
+				tracker.RecordActivity(TelemetryActivityKind.ViewportChanged);
+				var ended = tracker.EndSession();
+
+				ended.Should().NotBeNull();
+				ended!.SessionActiveMinutes.Should().Be(30);
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenLunchGapBetweenActivities_WhenSessionEnds_ThenLunchGapIsCapped()
+		{
+			var start = new DateTime(2026, 6, 1, 11, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[]
+			{
+				start,
+				start.AddMinutes(5),
+				start.AddMinutes(45),
+				start.AddMinutes(50),
+			});
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(15));
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.RecordActivity(TelemetryActivityKind.FilterApplied);
+				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
+				var ended = tracker.EndSession();
+
+				ended.Should().NotBeNull();
+				ended!.SessionActiveMinutes.Should().Be(25);
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenOvernightSessionEnd_WhenSessionEnds_ThenOvernightGapIsCapped()
+		{
+			var start = new DateTime(2026, 6, 1, 23, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[]
+			{
+				start,
+				start.AddMinutes(2),
+				start.AddHours(8),
+			});
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(15));
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
+				var ended = tracker.EndSession();
+
+				ended.Should().NotBeNull();
+				ended!.SessionActiveMinutes.Should().Be(17);
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenNoFurtherActivity_WhenSessionEnds_ThenInactiveWindowIsCappedToLease()
+		{
+			var start = new DateTime(2026, 6, 2, 9, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[]
+			{
+				start,
+				start.AddMinutes(40),
+			});
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(15));
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
+				var ended = tracker.EndSession();
+
+				ended.Should().NotBeNull();
+				ended!.SessionActiveMinutes.Should().Be(15);
 			}
 			finally
 			{

@@ -21,22 +21,20 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	{
 		private readonly object _gate;
 		private readonly Func<DateTime> _utcNow;
-		private readonly TimeSpan _idleThreshold;
-		private DateTime? _lastActivityUtc;
+		private readonly TelemetryActiveUsageAccumulator _activeUsageAccumulator;
 		private ITelemetryClient _client;
 		private StartupContext _startupContext;
+		private static readonly TimeSpan DefaultActivityLeaseDuration = TimeSpan.FromMinutes(15);
 
-		public TelemetrySessionLifecycle() : this(() => DateTime.UtcNow, TimeSpan.FromMinutes(1))
+		public TelemetrySessionLifecycle() : this(() => DateTime.UtcNow, DefaultActivityLeaseDuration)
 		{
 		}
 
-		public TelemetrySessionLifecycle(Func<DateTime> utcNow, TimeSpan idleThreshold)
+		public TelemetrySessionLifecycle(Func<DateTime> utcNow, TimeSpan activityLeaseDuration)
 		{
 			_gate = new object();
 			_utcNow = utcNow ?? throw new ArgumentNullException(nameof(utcNow));
-			_idleThreshold = idleThreshold <= TimeSpan.Zero
-				? throw new ArgumentOutOfRangeException(nameof(idleThreshold))
-				: idleThreshold;
+			_activeUsageAccumulator = new TelemetryActiveUsageAccumulator(activityLeaseDuration);
 			_client = NullTelemetryClient.Instance;
 			_startupContext = StartupContext.Default;
 		}
@@ -110,7 +108,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 						InstalledCpu = string.IsNullOrWhiteSpace(installedCpu) ? "" : installedCpu,
 						SchemaVersion = "1.0",
 					};
-					_lastActivityUtc = now;
+					_activeUsageAccumulator.Reset(now);
 				}
 
 				// Warm up the database connection on the thread pool (fire-and-forget).
@@ -163,7 +161,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				RecordActivity();
+				RecordActivity(TelemetryActivityKind.Unknown);
 			}
 			catch (Exception exception)
 			{
@@ -195,13 +193,25 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 #pragma warning restore CA1031
 
+		public void RecordActivity(TelemetryActivityKind activityKind)
+		{
+			try
+			{
+				RecordActivity();
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, $"Telemetry activity recording failed for '{activityKind}'.");
+			}
+		}
+
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
 		public void RecordNavigationAction()
 		{
 			try
 			{
-				RecordActivity();
+				RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
 			}
 			catch (Exception exception)
 			{
@@ -216,7 +226,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				RecordActivity();
+				RecordActivity(TelemetryActivityKind.RecordAnnotationChanged);
 			}
 			catch (Exception exception)
 			{
@@ -286,8 +296,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return;
 			}
 
-			AccumulateActiveMinutes(now);
-			_lastActivityUtc = now;
+			_activeUsageAccumulator.Renew(now);
+			CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
 		}
 
 		private TelemetrySession EndCurrentSessionInternal(DateTime endedAtUtc)
@@ -297,33 +307,16 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return null;
 			}
 
-			AccumulateActiveMinutes(endedAtUtc);
+			_activeUsageAccumulator.Renew(endedAtUtc);
 
 			CurrentSession.SessionEndUtc = endedAtUtc;
-			CurrentSession.SessionActiveMinutes = System.Math.Round(CurrentSession.SessionActiveMinutes, 3);
+			CurrentSession.SessionActiveMinutes = System.Math.Round(_activeUsageAccumulator.ActiveMinutes, 3);
 
 			LastEndedSession = CurrentSession;
 			CurrentSession = null;
-			_lastActivityUtc = null;
+			_activeUsageAccumulator.Clear();
 
 			return LastEndedSession;
-		}
-
-		private void AccumulateActiveMinutes(DateTime now)
-		{
-			if (_lastActivityUtc is null || CurrentSession is null)
-			{
-				return;
-			}
-
-			var elapsed = now - _lastActivityUtc.Value;
-
-			if (elapsed <= TimeSpan.Zero || elapsed > _idleThreshold)
-			{
-				return;
-			}
-
-			CurrentSession.SessionActiveMinutes += elapsed.TotalMinutes;
 		}
 
 		public void ConfigureStartupContext(string source, bool isDebugging)
