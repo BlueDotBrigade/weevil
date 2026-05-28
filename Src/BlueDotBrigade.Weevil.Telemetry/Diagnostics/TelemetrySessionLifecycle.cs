@@ -185,6 +185,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 #pragma warning restore CA1031
 
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordActivity(TelemetryActivityKind activityKind)
 		{
 			try
@@ -199,6 +201,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				TrySilentlyLogWarning(exception, $"Telemetry activity recording failed for '{activityKind}'.");
 			}
 		}
+#pragma warning restore CA1031
 
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
