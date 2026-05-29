@@ -13,15 +13,9 @@
 		public void Analyze_0Records_DoesNotThrow()
 		{
 			var records = new List<IRecord>();
+			Action act = () => new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			try
-			{
-				new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
-			}
-			catch (Exception)
-			{
-				false.Should().BeTrue("Analyzer should not throw an exception.");
-			}
+			act.Should().NotThrow("Analyzer should not throw an exception.");
 		}
 
 		[TestMethod]
