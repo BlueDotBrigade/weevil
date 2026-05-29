@@ -36,11 +36,11 @@
 					case 300:
 					case 400:
 					case 500:
-						Assert.IsTrue(record.Metadata.IsFlagged);
+						(record.Metadata.IsFlagged).Should().BeTrue();
 						break;
 
 					default:
-						Assert.IsFalse(record.Metadata.IsFlagged);
+						(record.Metadata.IsFlagged).Should().BeFalse();
 						break;
 				}
 			}
@@ -70,7 +70,7 @@
                                         case 300:
                                         case 400:
                                         case 500:
-                                                Assert.IsTrue(record.Metadata.HasComment);
+                                                (record.Metadata.HasComment).Should().BeTrue();
                                                 break;
                                 }
                         }
@@ -104,7 +104,7 @@
                                         new[] { 1, 3, 4, 5, 6 },
                                         flaggedLines);
 
-                                Assert.AreEqual(5, engine.Filter.Results.Count(r => r.Metadata.IsFlagged));
+                                (engine.Filter.Results.Count(r => r.Metadata.IsFlagged)).Should().Be(5);
                         }
                         finally
                         {
@@ -136,11 +136,11 @@
                                         .Results
                                         .ToDictionary(record => record.LineNumber);
 
-                                Assert.AreEqual("Start State: Cold", recordsByLineNumber[1].Metadata.Comment);
-                                Assert.AreEqual("Stop State: Cold", recordsByLineNumber[3].Metadata.Comment);
-                                Assert.AreEqual("Start State: Warm", recordsByLineNumber[4].Metadata.Comment);
-                                Assert.AreEqual("Stop State: Warm", recordsByLineNumber[5].Metadata.Comment);
-                                Assert.AreEqual("Start State: Hot, Stop State: Hot", recordsByLineNumber[6].Metadata.Comment);
+                                (recordsByLineNumber[1].Metadata.Comment).Should().Be("Start State: Cold");
+                                (recordsByLineNumber[3].Metadata.Comment).Should().Be("Stop State: Cold");
+                                (recordsByLineNumber[4].Metadata.Comment).Should().Be("Start State: Warm");
+                                (recordsByLineNumber[5].Metadata.Comment).Should().Be("Stop State: Warm");
+                                (recordsByLineNumber[6].Metadata.Comment).Should().Be("Start State: Hot, Stop State: Hot");
                         }
                         finally
                         {
@@ -177,7 +177,7 @@
 				.Count(x => x.Metadata.IsFlagged);
 
 			// Falling edges only
-            Assert.AreEqual(8, flaggedRecords);
+            (flaggedRecords).Should().Be(8);
 		}
 
 		[TestMethod]
@@ -208,7 +208,7 @@
 				.Count(x => x.Metadata.IsFlagged);
 
 				// Start-of-run detection flags the first record in each falling sequence.
-				Assert.AreEqual(8, flaggedRecords);
+				(flaggedRecords).Should().Be(8);
                 }
 
                 private static string CreateStableValueLog()

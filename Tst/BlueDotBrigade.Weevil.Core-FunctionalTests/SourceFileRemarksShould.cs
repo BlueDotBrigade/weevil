@@ -12,7 +12,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			Assert.AreEqual("These are file level comments.", engine.SourceFileRemarks);
+			(engine.SourceFileRemarks).Should().Be("These are file level comments.");
 		}
 	}
 }

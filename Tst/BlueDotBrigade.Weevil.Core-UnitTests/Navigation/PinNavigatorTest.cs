@@ -44,9 +44,7 @@
 			records[8].Metadata.IsPinned = true; // Line: 58 is pinned
 			records[2].Metadata.IsPinned = true; // Line: 52 is pinned
 
-			Assert.AreEqual(
-				52, 
-				new PinNavigator(new ActiveRecord(records)).FindNext().LineNumber);
+			(new PinNavigator(new ActiveRecord(records)).FindNext().LineNumber).Should().Be(52);
 		}
 
 		[TestMethod]
@@ -68,9 +66,9 @@
 
 			var navigator = new PinNavigator(new ActiveRecord(records));
 
-			Assert.AreEqual(52, navigator.FindNext().LineNumber);
-			Assert.AreEqual(58, navigator.FindNext().LineNumber);
-			Assert.AreEqual(52, navigator.FindNext().LineNumber);
+			(navigator.FindNext().LineNumber).Should().Be(52);
+			(navigator.FindNext().LineNumber).Should().Be(58);
+			(navigator.FindNext().LineNumber).Should().Be(52);
 		}
 	}
 }

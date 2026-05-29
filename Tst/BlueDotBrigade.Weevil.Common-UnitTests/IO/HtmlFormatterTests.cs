@@ -16,7 +16,7 @@ var formatter = new HtmlFormatter();
 var result = formatter.AsSubHeading("Summary");
 
 // Assert
-Assert.AreEqual("<h2>Summary</h2>", result);
+(result).Should().Be("<h2>Summary</h2>");
 }
 
 [TestMethod]
@@ -30,10 +30,10 @@ var header = formatter.AsTableHeader(new[] { "Name", "Age" });
 var row = formatter.AsTableRow(new[] { "Alice", "30" });
 
 // Assert
-Assert.IsTrue(header.Contains("<thead>"));
-Assert.IsTrue(header.Contains("<th>Name</th>"));
-Assert.IsTrue(header.Contains("<th>Age</th>"));
-Assert.AreEqual("    <tr>" + Environment.NewLine + "      <td>Alice</td>" + Environment.NewLine + "      <td>30</td>" + Environment.NewLine + "    </tr>", row);
+(header.Contains("<thead>")).Should().BeTrue();
+(header.Contains("<th>Name</th>")).Should().BeTrue();
+(header.Contains("<th>Age</th>")).Should().BeTrue();
+(row).Should().Be("    <tr>" + Environment.NewLine + "      <td>Alice</td>" + Environment.NewLine + "      <td>30</td>" + Environment.NewLine + "    </tr>");
 }
 
 [TestMethod]
@@ -52,12 +52,12 @@ new[] { "Bob", "25", "Los Angeles" }
 var result = formatter.AsTable(headers, rows);
 
 // Assert
-Assert.IsTrue(result.Contains("<table>"));
-Assert.IsTrue(result.Contains("<thead>"));
-Assert.IsTrue(result.Contains("<tbody>"));
-Assert.IsTrue(result.Contains("</table>"));
-Assert.IsTrue(result.Contains("<th>Name</th>"));
-Assert.IsTrue(result.Contains("<td>Alice</td>"));
+(result.Contains("<table>")).Should().BeTrue();
+(result.Contains("<thead>")).Should().BeTrue();
+(result.Contains("<tbody>")).Should().BeTrue();
+(result.Contains("</table>")).Should().BeTrue();
+(result.Contains("<th>Name</th>")).Should().BeTrue();
+(result.Contains("<td>Alice</td>")).Should().BeTrue();
 }
 
 [TestMethod]
@@ -72,12 +72,12 @@ var rows = new string[0][];
 var result = formatter.AsTable(headers, rows);
 
 // Assert
-Assert.IsTrue(result.Contains("<table>"));
-Assert.IsTrue(result.Contains("<thead>"));
-Assert.IsTrue(result.Contains("<tbody>"));
-Assert.IsTrue(result.Contains("</table>"));
-Assert.IsTrue(result.Contains("<th>Name</th>"));
-Assert.IsTrue(result.Contains("<th>Age</th>"));
+(result.Contains("<table>")).Should().BeTrue();
+(result.Contains("<thead>")).Should().BeTrue();
+(result.Contains("<tbody>")).Should().BeTrue();
+(result.Contains("</table>")).Should().BeTrue();
+(result.Contains("<th>Name</th>")).Should().BeTrue();
+(result.Contains("<th>Age</th>")).Should().BeTrue();
 }
 }
 }

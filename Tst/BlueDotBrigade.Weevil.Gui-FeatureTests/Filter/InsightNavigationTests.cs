@@ -35,7 +35,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				Thread.Sleep(TimeSpan.FromMilliseconds(100));
 			}
 
-			Assert.IsTrue(viewModel.IsLogFileOpen, "Log file should be open before test continues");
+			(viewModel.IsLogFileOpen).Should().BeTrue("Log file should be open before test continues");
 
 			// Create mock records that exist in the log
 			var record1 = Substitute.For<IRecord>();
@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			// Assert
 			// All records should be available, so navigation proceeds without warnings
-			Assert.IsTrue(true, "Insight navigation should proceed normally when all records are available");
+			(true).Should().BeTrue("Insight navigation should proceed normally when all records are available");
 		}
 	}
 }

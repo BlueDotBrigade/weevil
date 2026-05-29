@@ -16,7 +16,7 @@
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -27,7 +27,7 @@
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -38,7 +38,7 @@
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100");
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 	}
 }

@@ -31,10 +31,7 @@
 
 			var actualLine = records[index].LineNumber;
 
-			Assert.AreEqual(
-				expectedLine,
-				actualLine,
-				$"Requested={requestedLine}, Expected={expectedLine}, Actual={actualLine}");
+			(actualLine).Should().Be(expectedLine, $"Requested={requestedLine}, Expected={expectedLine}, Actual={actualLine}");
 		}
 
 		[TestMethod]
@@ -57,10 +54,7 @@
 
 			var actualLine = records[index].LineNumber;
 
-			Assert.AreEqual(
-				expectedLine,
-				actualLine,
-				$"Requested={requestedLine}, Expected={expectedLine}, Actual={actualLine}");
+			(actualLine).Should().Be(expectedLine, $"Requested={requestedLine}, Expected={expectedLine}, Actual={actualLine}");
 		}
 
 		[TestMethod]
@@ -87,10 +81,7 @@
 
 			var actualLine = records[index].LineNumber;
 
-			Assert.AreEqual(
-				expectedLine,
-				actualLine,
-				$"Requested={requestedLine}, Expected={expectedLine}, Actual={actualLine}");
+			(actualLine).Should().Be(expectedLine, $"Requested={requestedLine}, Expected={expectedLine}, Actual={actualLine}");
 		}	
 
 		[TestMethod]
@@ -114,9 +105,7 @@
 
 			var actualIndex = RecordSearch.IndexOfCreatedAt(records, createdAtTimestamp, RecordSearchType.NearestNeighbor);
 
-			Assert.AreEqual(
-				expectedIndex,
-				actualIndex);
+			(actualIndex).Should().Be(expectedIndex);
 		}
 	}
 }

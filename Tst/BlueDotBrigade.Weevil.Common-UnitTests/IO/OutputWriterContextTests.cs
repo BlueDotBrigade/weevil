@@ -112,7 +112,7 @@ namespace BlueDotBrigade.Weevil.IO
 				return;
 			}
 
-			Assert.Fail($"Expected exception of type {typeof(TException).Name}.");
+			false.Should().BeTrue($"Expected exception of type {typeof(TException).Name}.");
 		}
 	}
 }

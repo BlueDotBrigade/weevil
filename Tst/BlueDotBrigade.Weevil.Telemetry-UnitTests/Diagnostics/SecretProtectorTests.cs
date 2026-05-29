@@ -43,7 +43,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			if (!OperatingSystem.IsWindows())
 			{
-				Assert.Inconclusive("DPAPI is only supported on Windows.");
+				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
 				return;
 			}
 
@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			if (!OperatingSystem.IsWindows())
 			{
-				Assert.Inconclusive("DPAPI is only supported on Windows.");
+				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
 				return;
 			}
 
@@ -71,7 +71,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			if (!OperatingSystem.IsWindows())
 			{
-				Assert.Inconclusive("DPAPI is only supported on Windows.");
+				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
 				return;
 			}
 
@@ -85,7 +85,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			if (!OperatingSystem.IsWindows())
 			{
-				Assert.Inconclusive("DPAPI is only supported on Windows.");
+				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
 				return;
 			}
 
@@ -99,7 +99,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			if (!OperatingSystem.IsWindows())
 			{
-				Assert.Inconclusive("DPAPI is only supported on Windows.");
+				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
 				return;
 			}
 
@@ -135,7 +135,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			// Regression: Issue #867
 			if (!OperatingSystem.IsWindows())
 			{
-				Assert.Inconclusive("DPAPI is only supported on Windows.");
+				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
 				return;
 			}
 

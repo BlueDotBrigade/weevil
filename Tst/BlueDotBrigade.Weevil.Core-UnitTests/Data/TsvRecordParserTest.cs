@@ -14,8 +14,8 @@
 			var content = new Daten().AsString();
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
-			Assert.IsFalse(wasSuccessful);
-			Assert.AreEqual(Record.Dummy, record);
+			(wasSuccessful).Should().BeFalse();
+			(record).Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -25,11 +25,10 @@
 
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
-			Assert.IsTrue(wasSuccessful);
-			Assert.AreEqual(LineOne, record.LineNumber);
-			Assert.AreEqual(SeverityType.Warning, record.Severity);
-			Assert.AreEqual(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface	Application is initializing...",
-				record.Content);
+			(wasSuccessful).Should().BeTrue();
+			(record.LineNumber).Should().Be(LineOne);
+			(record.Severity).Should().Be(SeverityType.Warning);
+			(record.Content).Should().Be(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface	Application is initializing...");
 		}
 
 		[TestMethod]
@@ -39,7 +38,7 @@
 
 			new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
-			Assert.IsTrue(record.Content.EndsWith("            "));
+			(record.Content.EndsWith("            ")).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -49,8 +48,8 @@
 
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
-			Assert.IsTrue(wasSuccessful);
-			Assert.AreEqual(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface", record.Content);
+			(wasSuccessful).Should().BeTrue();
+			(record.Content).Should().Be(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface");
 		}
 
 		[TestMethod]
@@ -58,7 +57,7 @@
 		{
 			var content = new Daten().AsString();
 
-			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
+			(new TsvRecordParser().TryParse(LineOne, content, out _)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -66,7 +65,7 @@
 		{
 			var content = new Daten().AsString();
 
-			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
+			(new TsvRecordParser().TryParse(LineOne, content, out _)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -74,7 +73,7 @@
 		{
 			var content = new Daten().AsString();
 
-			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
+			(new TsvRecordParser().TryParse(LineOne, content, out _)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -82,7 +81,7 @@
 		{
 			var content = new Daten().AsString();
 
-			Assert.IsFalse(new TsvRecordParser().TryParse(LineOne, content, out _));
+			(new TsvRecordParser().TryParse(LineOne, content, out _)).Should().BeFalse();
 		}
 	}
 }

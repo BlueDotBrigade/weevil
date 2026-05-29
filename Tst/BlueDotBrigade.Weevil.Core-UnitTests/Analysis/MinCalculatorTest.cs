@@ -18,8 +18,8 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNotNull(result);
-			Assert.AreEqual(1.0, result.Value, 0.001);
+			(result).Should().NotBeNull();
+			(result.Value).Should().BeApproximately(1.0, 0.001);
 		}
 
 		[TestMethod]
@@ -33,7 +33,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNull(result);
+			(result).Should().BeNull();
 		}
 
 		[TestMethod]
@@ -47,7 +47,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual(42.5, result.Value, 0.001);
+			(result.Value).Should().BeApproximately(42.5, 0.001);
 		}
 	}
 }

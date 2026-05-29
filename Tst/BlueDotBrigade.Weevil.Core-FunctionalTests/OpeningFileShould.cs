@@ -14,7 +14,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath("EmptyFile.txt"))
 				.Open();
 
-			Assert.AreEqual(0, engine.Count);
+			(engine.Count).Should().Be(0);
 		}
 
 		[TestMethod]
@@ -24,7 +24,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath("FileWithOnlyWhitespace.txt"))
 				.Open();
 
-			Assert.AreEqual(1, engine.Count);
+			(engine.Count).Should().Be(1);
 		}
 
 		[TestMethod]
@@ -34,8 +34,8 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault), startAtLineNumber: 100)
 				.Open();
 
-			Assert.AreEqual(100, engine[0].LineNumber);
-			Assert.IsTrue(engine[0].Content.Contains("Section100"));
+			(engine[0].LineNumber).Should().Be(100);
+			(engine[0].Content.Contains("Section100")).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -47,7 +47,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath("LogWithSidecarContext.log"))
 				.Open();
 
-			Assert.AreEqual("1.2.3.4", engine.Context[fileFormatKey]);
+			(engine.Context[fileFormatKey]).Should().Be("1.2.3.4");
 		}
 
 		[TestMethod]
@@ -66,7 +66,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingContext(context)
 				.Open();
 
-			Assert.AreEqual(fileFormatValue, engine.Context[fileFormatKey]);
+			(engine.Context[fileFormatKey]).Should().Be(fileFormatValue);
 		}
 	}
 }

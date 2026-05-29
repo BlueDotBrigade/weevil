@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			// Assert
-			Assert.IsTrue(result.IsEmpty);
+			(result.IsEmpty).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -48,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			// Assert
-			Assert.IsTrue(result.IsEmpty);
+			(result.IsEmpty).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -64,7 +64,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			// Assert
-			Assert.IsTrue(result.IsEmpty);
+			(result.IsEmpty).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -79,7 +79,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			// Assert - with null expressionBuilder, it won't parse but shouldn't throw
-			Assert.IsTrue(result.IsEmpty);
+			(result.IsEmpty).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -95,7 +95,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			// Assert
-			Assert.IsTrue(result.IsEmpty);
+			(result.IsEmpty).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -111,7 +111,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			// Assert
-			Assert.IsTrue(result.IsEmpty);
+			(result.IsEmpty).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -127,7 +127,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			// Assert
-			Assert.IsTrue(result.IsEmpty);
+			(result.IsEmpty).Should().BeTrue();
 		}
 	}
 }

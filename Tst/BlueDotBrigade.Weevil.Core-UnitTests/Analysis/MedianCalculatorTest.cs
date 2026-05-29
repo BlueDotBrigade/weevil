@@ -18,8 +18,8 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNotNull(result);
-			Assert.AreEqual(3.0, result.Value, 0.001);
+			(result).Should().NotBeNull();
+			(result.Value).Should().BeApproximately(3.0, 0.001);
 		}
 
 		[TestMethod]
@@ -34,7 +34,7 @@ namespace BlueDotBrigade.Weevil.Math
 
 			// Assert
 			// Median of [1, 2, 3, 4] = (2 + 3) / 2 = 2.5
-			Assert.AreEqual(2.5, result.Value, 0.001);
+			(result.Value).Should().BeApproximately(2.5, 0.001);
 		}
 
 		[TestMethod]
@@ -48,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNull(result);
+			(result).Should().BeNull();
 		}
 
 		[TestMethod]
@@ -62,7 +62,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual(7.0, result.Value, 0.001);
+			(result.Value).Should().BeApproximately(7.0, 0.001);
 		}
 	}
 }

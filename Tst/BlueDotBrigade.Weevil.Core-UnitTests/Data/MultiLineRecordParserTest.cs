@@ -37,9 +37,9 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.IsTrue(record.Content.StartsWith("2019-12-31 23:59:58"));
-			Assert.IsTrue(record.Content.EndsWith("sapiente alienos esse arbitrantur."));
-			Assert.AreEqual(258, record.Content.Length);
+			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
+			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
+			(record.Content.Length).Should().Be(258);
 		}
 
 		[TestMethod]
@@ -51,8 +51,8 @@
 			IRecord multilineRecord = multilineParser.GetNext();
 			IRecord singleLineRecord = multilineParser.GetNext();
 
-			Assert.AreEqual(1, multilineRecord.LineNumber);
-			Assert.AreEqual(4, singleLineRecord.LineNumber);
+			(multilineRecord.LineNumber).Should().Be(1);
+			(singleLineRecord.LineNumber).Should().Be(4);
 		}
 
 		[TestMethod]
@@ -63,9 +63,9 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.IsTrue(record.Content.StartsWith("2019-12-31 23:59:58"));
-			Assert.IsTrue(record.Content.EndsWith("sapiente alienos esse arbitrantur."));
-			Assert.AreEqual(258, record.Content.Length);
+			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
+			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
+			(record.Content.Length).Should().Be(258);
 		}
 
 		[TestMethod]
@@ -76,9 +76,9 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.IsTrue(record.Content.StartsWith("2019-12-31 23:59:58"));
-			Assert.IsTrue(record.Content.EndsWith("sapiente alienos esse arbitrantur."));
-			Assert.AreEqual(258, record.Content.Length);
+			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
+			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
+			(record.Content.Length).Should().Be(258);
 		}
 
 		[TestMethod]
@@ -89,9 +89,9 @@
 
 			var multilineParser = new MultilineRecordParser(dataSource, recordParser);
 
-			Assert.IsTrue(multilineParser.GetNext().Content.EndsWith("First Record"));
-			Assert.IsTrue(multilineParser.GetNext().Content.EndsWith("Second Record"));
-			Assert.IsTrue(multilineParser.GetNext().Content.EndsWith("Third Record"));
+			(multilineParser.GetNext().Content.EndsWith("First Record")).Should().BeTrue();
+			(multilineParser.GetNext().Content.EndsWith("Second Record")).Should().BeTrue();
+			(multilineParser.GetNext().Content.EndsWith("Third Record")).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -102,7 +102,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.AreEqual(Record.Dummy, record);
+			(record).Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -120,8 +120,8 @@
 				firstRecordLineNumber: 1,
 				isLoggingEnabled: true).GetNext();
 
-			Assert.AreEqual(33, CountNumberOfNewLines(dataSource));
-			Assert.AreEqual(Record.Dummy, record);
+			(CountNumberOfNewLines(dataSource)).Should().Be(33);
+			(record).Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -139,8 +139,8 @@
 				firstRecordLineNumber: 1,
 				isLoggingEnabled: true).GetNext();
 
-			Assert.AreEqual(12, CountNumberOfNewLines(dataSource));
-			Assert.AreEqual(12, record.LineNumber);
+			(CountNumberOfNewLines(dataSource)).Should().Be(12);
+			(record.LineNumber).Should().Be(12);
 		}
 
 		[TestMethod]
@@ -151,8 +151,8 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.AreEqual(256, MultilineRecordParser.MaximumLinesToSearch);
-			Assert.AreEqual(MultilineRecordParser.MaximumLinesToSearch, record.LineNumber);
+			(MultilineRecordParser.MaximumLinesToSearch).Should().Be(256);
+			(record.LineNumber).Should().Be(MultilineRecordParser.MaximumLinesToSearch);
 		}
 
 		[TestMethod]
@@ -165,7 +165,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.AreEqual(Record.Dummy, record);
+			(record).Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -176,7 +176,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.IsTrue(Convert.ToBoolean(record.LineNumber));
+			(Convert.ToBoolean(record.LineNumber)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -187,7 +187,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			Assert.IsFalse(record.Metadata.IsMultiLine);
+			(record.Metadata.IsMultiLine).Should().BeFalse();
 		}
 	}
 }

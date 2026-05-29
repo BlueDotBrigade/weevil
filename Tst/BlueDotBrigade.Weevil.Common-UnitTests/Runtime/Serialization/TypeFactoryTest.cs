@@ -41,7 +41,7 @@
 			{
 				TypeFactory.SaveAsXml(metadata, filePath);
 
-				Assert.IsTrue(File.Exists(filePath));
+				(File.Exists(filePath)).Should().BeTrue();
 			}
 			finally
 			{
@@ -55,7 +55,7 @@
 			Stream inputData = new Daten().AsStream();
 			Mammal metadata = TypeFactory.LoadFromXml<TypeFactoryTest.Mammal>(inputData);
 
-			Assert.IsNotNull(metadata);
+			(metadata).Should().NotBeNull();
 		}
 	}
 }

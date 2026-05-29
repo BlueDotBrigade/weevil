@@ -20,7 +20,7 @@
 			}
 			catch (Exception)
 			{
-				Assert.Fail("Analyzer should not throw an exception.");
+				false.Should().BeTrue("Analyzer should not throw an exception.");
 			}
 		}
 
@@ -34,7 +34,7 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			Assert.IsFalse(records[0].Metadata.HasElapsedTime);
+			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -48,8 +48,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			Assert.IsFalse(records[0].Metadata.HasElapsedTime);
-			Assert.IsFalse(records[1].Metadata.HasElapsedTime);
+			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
+			(records[1].Metadata.HasElapsedTime).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -63,8 +63,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			Assert.IsFalse(records[0].Metadata.HasElapsedTime);
-			Assert.IsFalse(records[1].Metadata.HasElapsedTime);
+			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
+			(records[1].Metadata.HasElapsedTime).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -78,8 +78,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			Assert.IsFalse(records[0].Metadata.HasElapsedTime);
-			Assert.IsTrue(records[1].Metadata.HasElapsedTime);
+			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
+			(records[1].Metadata.HasElapsedTime).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -93,8 +93,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			Assert.AreEqual(Metadata.ElapsedTimeUnknown, records[0].Metadata.ElapsedTime);
-			Assert.AreEqual(Metadata.ElapsedTimeUnknown, records[1].Metadata.ElapsedTime);
+			(records[0].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
+			(records[1].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
 		}
 
 		[TestMethod]
@@ -108,8 +108,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			Assert.AreEqual(Metadata.ElapsedTimeUnknown, records[0].Metadata.ElapsedTime);
-			Assert.AreEqual(Metadata.ElapsedTimeUnknown, records[1].Metadata.ElapsedTime);
+			(records[0].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
+			(records[1].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
 		}
 
 		[TestMethod]
@@ -125,8 +125,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			Assert.AreEqual(Metadata.ElapsedTimeUnknown, records[0].Metadata.ElapsedTime);
-			Assert.AreEqual(TimeSpan.FromMilliseconds(200), records[1].Metadata.ElapsedTime);
+			(records[0].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
+			(records[1].Metadata.ElapsedTime).Should().Be(TimeSpan.FromMilliseconds(200));
 		}
 	}
 }

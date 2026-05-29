@@ -32,9 +32,7 @@
 				R.WithLineNumber(9),
 			};
 
-			Assert.AreEqual(
-				8,
-				new LineNumberNavigator(new ActiveRecord(records)).Find(8).LineNumber);
+			(new LineNumberNavigator(new ActiveRecord(records)).Find(8).LineNumber).Should().Be(8);
 		}
 
 		[TestMethod]
@@ -65,9 +63,9 @@
 				R.WithLineNumber(20),
 			};
 
-			Assert.AreEqual(10, new LineNumberNavigator(new ActiveRecord(records))
+			(new LineNumberNavigator(new ActiveRecord(records))
 				.Find(12, RecordSearchType.NearestNeighbor)
-				.LineNumber);
+				.LineNumber).Should().Be(10);
 		}
 	}
 }

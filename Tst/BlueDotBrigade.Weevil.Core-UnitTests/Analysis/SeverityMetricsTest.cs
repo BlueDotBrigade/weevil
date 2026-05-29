@@ -23,7 +23,7 @@
 
 			SeverityMetrics result = metricsA + metricsB;
 
-			Assert.AreEqual(4, result.Information);
+			(result.Information).Should().Be(4);
 		}
 	}
 }

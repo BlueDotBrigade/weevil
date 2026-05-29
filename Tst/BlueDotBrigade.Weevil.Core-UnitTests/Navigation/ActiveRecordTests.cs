@@ -39,9 +39,7 @@
 
 			navigator.UpdateDataSource(ImmutableArray.Create<IRecord>());
 
-			Assert.AreEqual(
-				Record.Dummy,
-				navigator.Record);
+			(navigator.Record).Should().Be(Record.Dummy);
 		}
 	}
 }

@@ -23,9 +23,9 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(timestamps);
 
 			// Assert
-			Assert.IsNotNull(result);
-			Assert.AreEqual(new DateTime(2024, 1, 1, 10, 0, 0), result.StartAt);
-			Assert.AreEqual(new DateTime(2024, 1, 1, 10, 0, 10), result.EndAt);
+			(result).Should().NotBeNull();
+			(result.StartAt).Should().Be(new DateTime(2024, 1, 1, 10, 0, 0));
+			(result.EndAt).Should().Be(new DateTime(2024, 1, 1, 10, 0, 10));
 		}
 
 		[TestMethod]
@@ -39,8 +39,8 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(timestamps);
 
 			// Assert
-			Assert.IsNull(result.StartAt);
-			Assert.IsNull(result.EndAt);
+			(result.StartAt).Should().BeNull();
+			(result.EndAt).Should().BeNull();
 		}
 
 		[TestMethod]
@@ -54,8 +54,8 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(timestamps);
 
 			// Assert
-			Assert.AreEqual(new DateTime(2024, 6, 15, 12, 0, 0), result.StartAt);
-			Assert.AreEqual(new DateTime(2024, 6, 15, 12, 0, 0), result.EndAt);
+			(result.StartAt).Should().Be(new DateTime(2024, 6, 15, 12, 0, 0));
+			(result.EndAt).Should().Be(new DateTime(2024, 6, 15, 12, 0, 0));
 		}
 	}
 }

@@ -39,8 +39,8 @@
 
 			var range = records.GetEstimatedRange();
 
-			Assert.AreEqual(Record.CreationTimeUnknown, range.From);
-			Assert.AreEqual(Record.CreationTimeUnknown, range.To);
+			(range.From).Should().Be(Record.CreationTimeUnknown);
+			(range.To).Should().Be(Record.CreationTimeUnknown);
 		}
 
 		[TestMethod]
@@ -52,8 +52,8 @@
 
 			var range = records.GetEstimatedRange();
 
-			Assert.AreEqual(now, range.From);
-			Assert.AreEqual(now, range.To);
+			(range.From).Should().Be(now);
+			(range.To).Should().Be(now);
 		}
 
 		[TestMethod]
@@ -68,7 +68,7 @@
 
 			var range = records.GetEstimatedRange();
 
-			Assert.AreEqual(new DateTime(2021, 04, 11), range.From);
+			(range.From).Should().Be(new DateTime(2021, 04, 11));
 		}
 
 		[TestMethod]
@@ -83,7 +83,7 @@
 
 			var range = records.GetEstimatedRange();
 
-			Assert.AreEqual(new DateTime(2021, 04, 12), range.To);
+			(range.To).Should().Be(new DateTime(2021, 04, 12));
 		}
 
 		[TestMethod]
@@ -102,9 +102,7 @@
 				.ToImmutableArray()
 				.GoToNext(UnknownStartingPosition, record => record.LineNumber > 0);
 
-			Assert.AreEqual(
-				10,
-				records[indexOfResult].LineNumber);
+			(records[indexOfResult].LineNumber).Should().Be(10);
 		}
 
 		[TestMethod]
@@ -123,9 +121,7 @@
 				.ToImmutableArray()
 				.GoToNext(IndexOfFirstRecord, record => record.LineNumber > 0);
 
-			Assert.AreEqual(
-				20,
-				records[indexOfResult].LineNumber);
+			(records[indexOfResult].LineNumber).Should().Be(20);
 		}
 
 		[TestMethod]
@@ -144,9 +140,7 @@
 				.ToImmutableArray()
 				.GoToPrevious(UnknownStartingPosition, record => record.LineNumber > 0);
 
-			Assert.AreEqual(
-				30,
-				records[indexOfResult].LineNumber);
+			(records[indexOfResult].LineNumber).Should().Be(30);
 		}
 
 		[TestMethod]
@@ -165,9 +159,7 @@
 				.ToImmutableArray()
 				.GoToPrevious(IndexOfLastRecord, record => record.LineNumber > 0);
 
-			Assert.AreEqual(
-				20,
-				records[indexOfResult].LineNumber);
+			(records[indexOfResult].LineNumber).Should().Be(20);
 		}
 
 		private ImmutableArray<IRecord> GetRecords(int startAt, int count)
@@ -205,13 +197,13 @@
 				.GetSectionRecords(sections.First(x => x.Name.Equals("Part2")), toc)
 				.ToImmutableArray();
 
-			Assert.AreEqual(10, recordsInSection.Length);
+			(recordsInSection.Length).Should().Be(10);
 
-			Assert.AreEqual(120, recordsInSection[0].LineNumber);
-			Assert.AreEqual(121, recordsInSection[1].LineNumber);
+			(recordsInSection[0].LineNumber).Should().Be(120);
+			(recordsInSection[1].LineNumber).Should().Be(121);
 			// ...
-			Assert.AreEqual(128, recordsInSection[8].LineNumber);
-			Assert.AreEqual(129, recordsInSection[9].LineNumber);
+			(recordsInSection[8].LineNumber).Should().Be(128);
+			(recordsInSection[9].LineNumber).Should().Be(129);
 		}
 
 		[TestMethod]
@@ -233,13 +225,13 @@
 				.GetSectionRecords(sections.First(x => x.Name.Equals("Part2")), toc)
 				.ToImmutableArray();
 
-			Assert.AreEqual(5, recordsInSection.Length);
+			(recordsInSection.Length).Should().Be(5);
 
-			Assert.AreEqual(121, recordsInSection[0].LineNumber);
-			Assert.AreEqual(123, recordsInSection[1].LineNumber);			
-			Assert.AreEqual(125, recordsInSection[2].LineNumber);
-			Assert.AreEqual(127, recordsInSection[3].LineNumber);
-			Assert.AreEqual(129, recordsInSection[4].LineNumber);
+			(recordsInSection[0].LineNumber).Should().Be(121);
+			(recordsInSection[1].LineNumber).Should().Be(123);			
+			(recordsInSection[2].LineNumber).Should().Be(125);
+			(recordsInSection[3].LineNumber).Should().Be(127);
+			(recordsInSection[4].LineNumber).Should().Be(129);
 		}
 	}
 }

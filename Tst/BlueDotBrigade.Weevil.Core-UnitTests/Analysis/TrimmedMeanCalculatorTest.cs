@@ -18,12 +18,12 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNotNull(result);
+			(result).Should().NotBeNull();
 			
 			// With 10% trim on 10 values: trimCount = 1
 			// Trimmed values should be [2, 3, 4, 5, 6, 7, 8, 9]
 			// Mean of these 8 values = 44/8 = 5.5
-			Assert.AreEqual(5.5, result.Value, 0.001);
+			(result.Value).Should().BeApproximately(5.5, 0.001);
 		}
 
 		[TestMethod]
@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNull(result);
+			(result).Should().BeNull();
 		}
 
 		[TestMethod]
@@ -51,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNull(result); // Should return null when trim count is too large
+			(result).Should().BeNull(); // Should return null when trim count is too large
 		}
 
 		[TestMethod]
@@ -66,13 +66,13 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNotNull(result);
+			(result).Should().NotBeNull();
 			
 			// With 20% trim on 5 values: trimCount = 1 (floor of 5*0.2)
 			// Sorted: [1, 3, 5, 7, 9]
 			// After trimming 1 from each end: [3, 5, 7]
 			// Mean = 15/3 = 5.0
-			Assert.AreEqual(5.0, result.Value, 0.001);
+			(result.Value).Should().BeApproximately(5.0, 0.001);
 		}
 	}
 }

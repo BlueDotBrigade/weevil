@@ -28,12 +28,12 @@
 			// Verify only flagged records are shown
 			foreach (IRecord record in engine.Filter.Results)
 			{
-				Assert.IsTrue(record.Metadata.IsFlagged, $"Record {record.LineNumber} should be flagged");
+				(record.Metadata.IsFlagged).Should().BeTrue($"Record {record.LineNumber} should be flagged");
 			}
 
 			// Verify we have the expected flagged records
 			var expectedFlaggedLines = new[] { 100, 200, 300, 400, 500 };
-			Assert.AreEqual(expectedFlaggedLines.Length, engine.Filter.Results.Length);
+			(engine.Filter.Results.Length).Should().Be(expectedFlaggedLines.Length);
 		}
 
 		[TestMethod]
@@ -56,10 +56,10 @@
 			// Should still show flagged records (case-insensitive)
 			foreach (IRecord record in engine.Filter.Results)
 			{
-				Assert.IsTrue(record.Metadata.IsFlagged, $"Record {record.LineNumber} should be flagged");
+				(record.Metadata.IsFlagged).Should().BeTrue($"Record {record.LineNumber} should be flagged");
 			}
 
-			Assert.IsTrue(engine.Filter.Results.Length > 0, "Should find flagged records with lowercase moniker");
+			(engine.Filter.Results.Length > 0).Should().BeTrue("Should find flagged records with lowercase moniker");
 		}
 
 		[TestMethod]
@@ -83,8 +83,7 @@
 			var hasErrorRecord = engine.Filter.Results.Any(r => r.Content.Contains("Error"));
 			var hasFlaggedRecord = engine.Filter.Results.Any(r => r.Metadata.IsFlagged);
 
-			Assert.IsTrue(hasErrorRecord || hasFlaggedRecord, 
-				"Should have either Error records or flagged records");
+			(hasErrorRecord || hasFlaggedRecord).Should().BeTrue("Should have either Error records or flagged records");
 		}
 
 		[TestMethod]
@@ -108,13 +107,12 @@
 			var initialCount = engine.Filter.Results.Length;
 
 			// Verify the filter criteria is stored correctly
-			Assert.AreEqual(initialFilter, engine.Filter.Criteria.Include);
+			(engine.Filter.Criteria.Include).Should().Be(initialFilter);
 
 			// If we were to append @Flagged again (simulating the bug), 
 			// the filter would be "Error||@Flagged||@Flagged"
 			// But this test just verifies the current filter state is correct
-			Assert.IsFalse(engine.Filter.Criteria.Include.Contains("@Flagged||@Flagged"), 
-				"Filter should not have duplicate @Flagged monikers");
+			(engine.Filter.Criteria.Include.Contains("@Flagged||@Flagged")).Should().BeFalse("Filter should not have duplicate @Flagged monikers");
 		}
 	}
 }

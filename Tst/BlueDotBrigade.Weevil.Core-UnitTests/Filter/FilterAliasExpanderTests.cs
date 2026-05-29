@@ -20,7 +20,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand("test expression");
 
 			// Assert
-			Assert.AreEqual("test expression", result);
+			(result).Should().Be("test expression");
 		}
 
 		[TestMethod]
@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand("#Critical");
 
 			// Assert
-			Assert.AreEqual(@"(?<State>Critical|Error)", result);
+			(result).Should().Be(@"(?<State>Critical|Error)");
 		}
 
 		[TestMethod]
@@ -54,7 +54,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand("#Warning");
 
 			// Assert
-			Assert.AreEqual("#Warning", result);
+			(result).Should().Be("#Warning");
 		}
 
 		[TestMethod]
@@ -72,7 +72,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand("#Critical||#Error");
 
 			// Assert
-			Assert.AreEqual(@"(?<State>Critical)||(?<State>Error)", result);
+			(result).Should().Be(@"(?<State>Critical)||(?<State>Error)");
 		}
 
 		[TestMethod]
@@ -89,7 +89,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand("#Critical||(?<State>Warning)");
 
 			// Assert
-			Assert.AreEqual(@"(?<State>Critical)||(?<State>Warning)", result);
+			(result).Should().Be(@"(?<State>Critical)||(?<State>Warning)");
 		}
 
 		[TestMethod]
@@ -106,7 +106,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand(string.Empty);
 
 			// Assert
-			Assert.AreEqual(string.Empty, result);
+			(result).Should().Be(string.Empty);
 		}
 
 		[TestMethod]
@@ -123,7 +123,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand("   ");
 
 			// Assert
-			Assert.AreEqual(string.Empty, result);
+			(result).Should().Be(string.Empty);
 		}
 
 		[TestMethod]
@@ -138,9 +138,9 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand(expressions);
 
 			// Assert
-			Assert.AreEqual(2, result.Length);
-			Assert.AreEqual("test1", result[0]);
-			Assert.AreEqual("test2", result[1]);
+			(result.Length).Should().Be(2);
+			(result[0]).Should().Be("test1");
+			(result[1]).Should().Be("test2");
 		}
 
 		[TestMethod]
@@ -159,9 +159,9 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand(expressions);
 
 			// Assert
-			Assert.AreEqual(2, result.Length);
-			Assert.AreEqual(@"(?<State>Critical)", result[0]);
-			Assert.AreEqual(@"(?<State>Error)", result[1]);
+			(result.Length).Should().Be(2);
+			(result[0]).Should().Be(@"(?<State>Critical)");
+			(result[1]).Should().Be(@"(?<State>Error)");
 		}
 
 		[TestMethod]
@@ -178,7 +178,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			var result = expander.Expand("#CRITICAL");
 
 			// Assert
-			Assert.AreEqual(@"(?<State>Critical)", result);
+			(result).Should().Be(@"(?<State>Critical)");
 		}
 	}
 }

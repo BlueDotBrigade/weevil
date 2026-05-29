@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 
 			var expression = new LineNumberExpression("@Line=25");
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -26,7 +26,7 @@ namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 
 			var expression = new LineNumberExpression("@Line=25");
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 
 			var expression = new LineNumberExpression("@Line=1,234");
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -48,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 
 			var expression = new LineNumberExpression("@Line=1,234,567");
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -59,7 +59,7 @@ namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 
 			var expression = new LineNumberExpression("@Line=invalid");
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -70,7 +70,7 @@ namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 
 			var expression = new LineNumberExpression("@Line");
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 	}
 }

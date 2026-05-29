@@ -14,10 +14,10 @@
 				.Open();
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2"));
-			Assert.AreEqual("Id=2", engine.Filter.IncludeHistory[0]);
+			(engine.Filter.IncludeHistory[0]).Should().Be("Id=2");
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=3"));
-			Assert.AreEqual("Id=3", engine.Filter.IncludeHistory[0]);
+			(engine.Filter.IncludeHistory[0]).Should().Be("Id=3");
 		}
 
 		[TestMethod]
@@ -28,10 +28,10 @@
 				.Open();
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria(string.Empty, "Id=4"));
-			Assert.AreEqual("Id=4", engine.Filter.ExcludeHistory[0]);
+			(engine.Filter.ExcludeHistory[0]).Should().Be("Id=4");
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria(string.Empty, "Id=5"));
-			Assert.AreEqual("Id=5", engine.Filter.ExcludeHistory[0]);
+			(engine.Filter.ExcludeHistory[0]).Should().Be("Id=5");
 		}
 
 
@@ -51,8 +51,8 @@
 
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			Assert.AreEqual(filtersBeforeClear, engine.Filter.IncludeHistory.Count);
-			Assert.AreEqual(uniqueFilter, engine.Filter.IncludeHistory[0]);
+			(engine.Filter.IncludeHistory.Count).Should().Be(filtersBeforeClear);
+			(engine.Filter.IncludeHistory[0]).Should().Be(uniqueFilter);
 		}
 	}
 }

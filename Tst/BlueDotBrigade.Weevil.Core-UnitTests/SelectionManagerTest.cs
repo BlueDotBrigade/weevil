@@ -17,8 +17,8 @@
 
 			System.Collections.Immutable.ImmutableArray<Data.IRecord> selectedRecords = engine.Selector.GetSelected();
 
-			Assert.AreEqual(1, selectedRecords.Length);
-			Assert.AreEqual(1, selectedRecords[0].LineNumber);
+			(selectedRecords.Length).Should().Be(1);
+			(selectedRecords[0].LineNumber).Should().Be(1);
 		}
 		[TestMethod]
 		public void Select_LastRecord_Line32Selected()
@@ -31,8 +31,8 @@
 
 			System.Collections.Immutable.ImmutableArray<Data.IRecord> selectedRecords = engine.Selector.GetSelected();
 
-			Assert.AreEqual(1, selectedRecords.Length);
-			Assert.AreEqual(32, selectedRecords[0].LineNumber);
+			(selectedRecords.Length).Should().Be(1);
+			(selectedRecords[0].LineNumber).Should().Be(32);
 		}
 
 		[TestMethod]
@@ -45,7 +45,7 @@
 			Action act = () => engine.Selector.Select(lineNumber: int.MaxValue);
 			act.Should().Throw<RecordNotFoundException>();
 
-			Assert.AreEqual(0, engine.Selector.Selected.Count);
+			(engine.Selector.Selected.Count).Should().Be(0);
 		}
 	}
 }

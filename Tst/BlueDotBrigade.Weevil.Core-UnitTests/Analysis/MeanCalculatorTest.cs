@@ -18,8 +18,8 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNotNull(result);
-			Assert.AreEqual(3.0, result.Value, 0.001);
+			(result).Should().NotBeNull();
+			(result.Value).Should().BeApproximately(3.0, 0.001);
 		}
 
 		[TestMethod]
@@ -33,7 +33,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.IsNull(result);
+			(result).Should().BeNull();
 		}
 
 		[TestMethod]
@@ -47,7 +47,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			Assert.AreEqual(42.5, result.Value, 0.001);
+			(result.Value).Should().BeApproximately(42.5, 0.001);
 		}
 
 		[TestMethod]
@@ -62,7 +62,7 @@ namespace BlueDotBrigade.Weevil.Math
 
 			// Assert
 			// Mean of [1, 2, 3] = 2.0 (exact)
-			Assert.AreEqual(2.0, result.Value, 0.001);
+			(result.Value).Should().BeApproximately(2.0, 0.001);
 		}
 	}
 }

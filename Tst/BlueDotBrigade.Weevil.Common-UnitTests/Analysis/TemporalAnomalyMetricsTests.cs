@@ -26,7 +26,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(0, metrics.Counter);
+			(metrics.Counter).Should().Be(0);
 		}
 
 		[TestMethod]
@@ -44,7 +44,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreSame(Record.Dummy, metrics.FirstOccurredAt);
+			(metrics.FirstOccurredAt).Should().BeSameAs(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -62,7 +62,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(0, metrics.Counter);
+			(metrics.Counter).Should().Be(0);
 		}
 
 		[TestMethod]
@@ -80,7 +80,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(1, metrics.Counter);
+			(metrics.Counter).Should().Be(1);
 		}
 
 		[TestMethod]
@@ -98,7 +98,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(1, metrics.Counter);
+			(metrics.Counter).Should().Be(1);
 		}
 
 		[TestMethod]
@@ -116,7 +116,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(3, metrics.FirstOccurredAt.LineNumber);
+			(metrics.FirstOccurredAt.LineNumber).Should().Be(3);
 		}
 
 
@@ -135,7 +135,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(-9.0, metrics.BiggestAnomaly.TotalMinutes);
+			(metrics.BiggestAnomaly.TotalMinutes).Should().Be(-9.0);
 		}
 
 		[TestMethod]
@@ -153,7 +153,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			Assert.AreEqual(1, metrics.BiggestAnomalyAt.LineNumber);
+			(metrics.BiggestAnomalyAt.LineNumber).Should().Be(1);
 		}
 	}
 }
