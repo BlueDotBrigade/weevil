@@ -15,14 +15,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			// no-op
 		}
 
-		public Task SendAsync(TelemetrySession session, CancellationToken ct)
+		public Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 		{
-			return Task.CompletedTask;
-		}
-
-		public void SendSync(TelemetrySession session)
-		{
-			// no-op
+			return Task.FromResult(TelemetryUploadStatus.Disabled);
 		}
 	}
 }

@@ -17,7 +17,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			var session = new TelemetrySession();
 
 			// Act
-			Func<Task> act = async () => await client.SendAsync(session, CancellationToken.None);
+			Func<Task> act = async () => await client.UploadAsync(session, CancellationToken.None);
 
 			// Assert
 			await act.Should().NotThrowAsync();
@@ -30,37 +30,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			var client = new NullTelemetryClient();
 
 			// Act
-			Func<Task> act = async () => await client.SendAsync(null, new CancellationToken(canceled: true));
+			Func<Task> act = async () => await client.UploadAsync(null, new CancellationToken(canceled: true));
 
 			// Assert
 			await act.Should().NotThrowAsync();
-		}
-
-		[TestMethod]
-		public void GivenTelemetrySession_WhenSendSyncCalled_ThenDoesNotThrow()
-		{
-			// Arrange
-			var client = new NullTelemetryClient();
-			var session = new TelemetrySession();
-
-			// Act
-			Action act = () => client.SendSync(session);
-
-			// Assert
-			act.Should().NotThrow();
-		}
-
-		[TestMethod]
-		public void GivenNullTelemetrySession_WhenSendSyncCalled_ThenDoesNotThrow()
-		{
-			// Arrange
-			var client = new NullTelemetryClient();
-
-			// Act
-			Action act = () => client.SendSync(null);
-
-			// Assert
-			act.Should().NotThrow();
 		}
 	}
 }

@@ -155,14 +155,14 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			builder.Encrypt.Should().Be(SqlConnectionEncryptOption.Mandatory);
 		}
 
-		// ─── SendAsync ─────────────────────────────────────────────────────────────
+		// ─── UploadAsync ───────────────────────────────────────────────────────────
 
 		[TestMethod]
 		public async Task GivenNullSession_WhenSendAsyncCalled_ThenDoesNotThrow()
 		{
 			var client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1);
 
-			Func<Task> act = async () => await client.SendAsync(null, CancellationToken.None);
+			Func<Task> act = async () => await client.UploadAsync(null, CancellationToken.None);
 
 			await act.Should().NotThrowAsync();
 		}
@@ -175,7 +175,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			using var cts = new CancellationTokenSource();
 			cts.Cancel();
 
-			Func<Task> act = async () => await client.SendAsync(session, cts.Token);
+			Func<Task> act = async () => await client.UploadAsync(session, cts.Token);
 
 			await act.Should().NotThrowAsync();
 		}
@@ -188,36 +188,10 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			var session = CreateMinimalSession();
 
 			// Act
-			Func<Task> act = async () => await client.SendAsync(session, CancellationToken.None);
+			Func<Task> act = async () => await client.UploadAsync(session, CancellationToken.None);
 
 			// Assert: failure isolation — no exception may propagate.
 			await act.Should().NotThrowAsync();
-		}
-
-		// ─── SendSync ──────────────────────────────────────────────────────────────
-
-		[TestMethod]
-		public void GivenNullSession_WhenSendSyncCalled_ThenDoesNotThrow()
-		{
-			var client = CreateClientWithFakeConnection(syncTimeoutSeconds: 1);
-
-			Action act = () => client.SendSync(null);
-
-			act.Should().NotThrow();
-		}
-
-		[TestMethod]
-		public void GivenUnavailableDatabase_WhenSendSyncCalled_ThenDoesNotThrow()
-		{
-			// Arrange: use a short sync timeout so the test finishes quickly.
-			var client = CreateClientWithFakeConnection(syncTimeoutSeconds: 1);
-			var session = CreateMinimalSession();
-
-			// Act
-			Action act = () => client.SendSync(session);
-
-			// Assert: failure isolation — no exception may propagate.
-			act.Should().NotThrow();
 		}
 
 		// ─── Disabled (no credentials) ────────────────────────────────────────────
@@ -248,20 +222,9 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			var client = CreateDisabledClient();
 			var session = CreateMinimalSession();
 
-			Func<Task> act = async () => await client.SendAsync(session, CancellationToken.None);
+			Func<Task> act = async () => await client.UploadAsync(session, CancellationToken.None);
 
 			await act.Should().NotThrowAsync();
-		}
-
-		[TestMethod]
-		public void GivenEmptyConnectionString_WhenSendSyncCalled_ThenDoesNotThrow()
-		{
-			var client = CreateDisabledClient();
-			var session = CreateMinimalSession();
-
-			Action act = () => client.SendSync(session);
-
-			act.Should().NotThrow();
 		}
 
 		// ─── Helpers ───────────────────────────────────────────────────────────────

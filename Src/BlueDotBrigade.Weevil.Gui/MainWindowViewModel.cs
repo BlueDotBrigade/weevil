@@ -70,8 +70,8 @@
 		public void Stop()
 		{
 			_bulletinMediator.Post(new TelemetrySessionSavingBulletin());
-			_telemetry.EndSession();
 			_uiMonitor.Stop();
+			_telemetry.EndSession();
 		}
 
 		private void OnSourceFileChanged(SourceFileOpenedBulletin bulletin)
