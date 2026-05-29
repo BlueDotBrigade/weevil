@@ -26,7 +26,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			(metrics.Counter).Should().Be(0);
+			metrics.Counter.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -62,7 +62,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			(metrics.Counter).Should().Be(0);
+			metrics.Counter.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -80,7 +80,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			(metrics.Counter).Should().Be(1);
+			metrics.Counter.Should().Be(1);
 		}
 
 		[TestMethod]
@@ -98,7 +98,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			(metrics.Counter).Should().Be(1);
+			metrics.Counter.Should().Be(1);
 		}
 
 		[TestMethod]
