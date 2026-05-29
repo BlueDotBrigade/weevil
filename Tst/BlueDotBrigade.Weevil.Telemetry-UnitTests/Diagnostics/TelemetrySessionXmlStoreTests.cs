@@ -52,6 +52,20 @@ Directory.Delete(pendingDirectory, true);
 }
 }
 
+[TestMethod]
+public void GivenDefaultPendingDirectoryPath_WhenRequested_ThenPathUsesProgramDataTempSubdirectory()
+{
+var path = TelemetrySessionXmlStore.GetDefaultPendingDirectoryPath();
+
+path.Should().Be(Path.Combine(
+Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+"BlueDotBrigade",
+"Weevil",
+"Temp",
+"Telemetry",
+"Pending"));
+}
+
 private static string CreateTemporaryDirectory()
 {
 var path = Path.Combine(Path.GetTempPath(), "weevil-telemetry-tests", Guid.NewGuid().ToString("N"));

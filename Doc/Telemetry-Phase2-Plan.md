@@ -184,7 +184,7 @@ Use local XML files as a pending telemetry outbox.
 Recommended location:
 
 ```text
-%LocalAppData%\BlueDotBrigade\Weevil\Telemetry\Pending
+%ProgramData%\BlueDotBrigade\Weevil\Temp\Telemetry\Pending
 ```
 
 Recommended filename:

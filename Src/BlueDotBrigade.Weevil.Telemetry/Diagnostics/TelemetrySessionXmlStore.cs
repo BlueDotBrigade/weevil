@@ -93,9 +93,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		internal static string GetDefaultPendingDirectoryPath()
 		{
 			return Path.Combine(
-				Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+				Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
 				"BlueDotBrigade",
 				"Weevil",
+				"Temp",
 				"Telemetry",
 				"Pending");
 		}
