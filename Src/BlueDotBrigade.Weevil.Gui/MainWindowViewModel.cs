@@ -34,9 +34,9 @@
 
 			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnSourceFileChanged(x));
 			bulletinMediator.Subscribe<FilterChangedBulletin>(this, _ => _telemetry.RecordFilterExecution());
-			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, _ => _telemetry.RecordNavigationAction());
-			bulletinMediator.Subscribe<BookmarksChangedBulletin>(this, _ => _telemetry.RecordRecordAction());
-			bulletinMediator.Subscribe<RegionsChangedBulletin>(this, _ => _telemetry.RecordRecordAction());
+			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordSelectionChanged));
+			bulletinMediator.Subscribe<BookmarksChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordAnnotationChanged));
+			bulletinMediator.Subscribe<RegionsChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordAnnotationChanged));
 
 			this.FilterViewModel = new FilterViewModel(
 				uiDispatcher,

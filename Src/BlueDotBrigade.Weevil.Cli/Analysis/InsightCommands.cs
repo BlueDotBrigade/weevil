@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 
 			try
 			{
-				telemetry.RecordSessionHeartbeat();
+				telemetry.RecordActivity(TelemetryActivityKind.CommandEntered);
 
 				IEngine engine = Engine
 						.UsingPath(logPath)
