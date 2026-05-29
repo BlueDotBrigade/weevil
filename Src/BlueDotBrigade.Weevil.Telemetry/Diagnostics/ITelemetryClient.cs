@@ -15,22 +15,14 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		void Warmup();
 
 		/// <summary>
-		/// Sends telemetry asynchronously.
+		/// Uploads telemetry asynchronously.
 		/// </summary>
 		/// <param name="session">
-		/// Session payload to send.
+		/// Session payload to upload.
 		/// </param>
 		/// <param name="ct">
 		/// Cancellation token for cooperative cancellation.
 		/// </param>
-		Task SendAsync(TelemetrySession session, CancellationToken ct);
-
-		/// <summary>
-		/// Sends telemetry synchronously using best-effort semantics.
-		/// </summary>
-		/// <param name="session">
-		/// Session payload to send.
-		/// </param>
-		void SendSync(TelemetrySession session);
+		Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct);
 	}
 }

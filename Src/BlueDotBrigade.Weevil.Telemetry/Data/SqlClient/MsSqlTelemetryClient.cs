@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 	public sealed class MsSqlTelemetryClient : ITelemetryClient
 	{
 		private readonly MsSqlTelemetryClientOptions _options;
-		private readonly bool _isDisabled;
+		private int _isUploadDisabled;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="MsSqlTelemetryClient"/>.
@@ -49,8 +49,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 			if (string.IsNullOrWhiteSpace(options.ConnectionString))
 			{
-				_isDisabled = true;
-				Log.Default.Write(LogSeverityType.Warning, "Telemetry has been disabled - no credentials were provided.");
+				DisableUpload();
+				Log.Default.Write(LogSeverityType.Warning, "Telemetry has been disabled - no connection string was provided.");
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
 		public void Warmup()
 		{
-			if (_isDisabled)
+			if (IsUploadDisabled)
 			{
 				return;
 			}
@@ -88,6 +88,11 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 				}
 				catch (Exception e)
 				{
+					if (ClassifyUploadException(e) == TelemetryUploadStatus.InvalidCredentials)
+					{
+						DisableUpload();
+					}
+
 					Log.Default.Write(LogSeverityType.Error, e, "Telemetry warmup failed.");
 				}
 			});
@@ -96,11 +101,16 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		/// <inheritdoc/>
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
-		public async Task SendAsync(TelemetrySession session, CancellationToken ct)
+		public async Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 		{
-			if (_isDisabled || session == null)
+			if (IsUploadDisabled)
 			{
-				return;
+				return TelemetryUploadStatus.Disabled;
+			}
+
+			if (session == null)
+			{
+				return TelemetryUploadStatus.Success;
 			}
 
 			try
@@ -118,42 +128,18 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 				Log.Default.Write(
 					LogSeverityType.Information,
 					$"Telemetry session saved. Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
+				return TelemetryUploadStatus.Success;
 			}
 			catch (Exception e)
 			{
-				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session.");
-			}
-		}
-#pragma warning restore CA1031
+				var uploadStatus = ClassifyUploadException(e);
+				if (uploadStatus == TelemetryUploadStatus.InvalidCredentials)
+				{
+					DisableUpload();
+				}
 
-		/// <inheritdoc/>
-#pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
-		public void SendSync(TelemetrySession session)
-		{
-			if (_isDisabled || session == null)
-			{
-				return;
-			}
-
-			try
-			{
-				Log.Default.Write(LogSeverityType.Debug, "Saving telemetry session...");
-
-				var stopwatch = Stopwatch.StartNew();
-
-				using TelemetryDbContext context = CreateContext(_options.SyncTimeoutSeconds);
-				context.Sessions.Add(session);
-				context.SaveChanges();
-
-				stopwatch.Stop();
-
-				Log.Default.Write(
-					LogSeverityType.Information,
-					$"Telemetry session saved. Duration: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
-			}
-			catch (Exception e)
-			{
-				Log.Default.Write(LogSeverityType.Error, e, "Failed to save telemetry session.");
+				Log.Default.Write(LogSeverityType.Error, e, $"Failed to save telemetry session. Status={uploadStatus}.");
+				return uploadStatus;
 			}
 		}
 #pragma warning restore CA1031
@@ -205,6 +191,48 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			}
 
 			return builder.ConnectionString;
+		}
+
+		private bool IsUploadDisabled => Volatile.Read(ref _isUploadDisabled) == 1;
+
+		private void DisableUpload()
+		{
+			Interlocked.Exchange(ref _isUploadDisabled, 1);
+		}
+
+		private static TelemetryUploadStatus ClassifyUploadException(Exception exception)
+		{
+			if (TryGetSqlException(exception, out var sqlException))
+			{
+				if (sqlException.Number == 2601 || sqlException.Number == 2627)
+				{
+					return TelemetryUploadStatus.DuplicateSession;
+				}
+
+				if (sqlException.Number == 18456)
+				{
+					return TelemetryUploadStatus.InvalidCredentials;
+				}
+			}
+
+			return exception.Message.IndexOf("login failed", StringComparison.OrdinalIgnoreCase) >= 0
+				? TelemetryUploadStatus.InvalidCredentials
+				: TelemetryUploadStatus.Failed;
+		}
+
+		private static bool TryGetSqlException(Exception exception, out SqlException sqlException)
+		{
+			for (var current = exception; current != null; current = current.InnerException)
+			{
+				if (current is SqlException foundException)
+				{
+					sqlException = foundException;
+					return true;
+				}
+			}
+
+			sqlException = null;
+			return false;
 		}
 	}
 }

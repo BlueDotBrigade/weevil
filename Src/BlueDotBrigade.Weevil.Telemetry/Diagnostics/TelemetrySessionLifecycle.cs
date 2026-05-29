@@ -2,26 +2,21 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
 	using System.IO;
-	using System.Threading;
-	using System.Threading.Tasks;
 
 	/// <summary>
 	/// Tracks telemetry session lifecycle and active time based on meaningful activity.
 	/// </summary>
 	/// <remarks>
-	/// Upload behavior:
-	/// <list type="bullet">
-	///   <item><description>Rollover (new file open): asynchronous, non-blocking.</description></item>
-	///   <item><description>Shutdown/crash (<see cref="EndSession"/>): synchronous, best-effort.</description></item>
-	/// </list>
-	/// Exactly-once semantics are enforced naturally: a session can only be ended once,
-	/// so each ended session is dispatched to the client exactly once.
+	/// Ended sessions are first written to the local XML outbox. Upload happens only in the background
+	/// when safe entry points such as log open trigger the upload worker.
 	/// </remarks>
 	public sealed class TelemetrySessionLifecycle
 	{
 		private readonly object _gate;
 		private readonly Func<DateTime> _utcNow;
 		private readonly TelemetryActiveUsageAccumulator _activeUsageAccumulator;
+		private readonly ITelemetrySessionStore _sessionStore;
+		private readonly ITelemetryUploadWorker _uploadWorker;
 		private ITelemetryClient _client;
 		private StartupContext _startupContext;
 		private static readonly TimeSpan DefaultActivityLeaseDuration = TimeSpan.FromMinutes(15);
@@ -30,12 +25,18 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 		}
 
-		public TelemetrySessionLifecycle(Func<DateTime> utcNow, TimeSpan activityLeaseDuration)
+		public TelemetrySessionLifecycle(
+			Func<DateTime> utcNow,
+			TimeSpan activityLeaseDuration,
+			ITelemetrySessionStore sessionStore = null,
+			ITelemetryUploadWorker uploadWorker = null)
 		{
 			_gate = new object();
 			_utcNow = utcNow ?? throw new ArgumentNullException(nameof(utcNow));
 			_activeUsageAccumulator = new TelemetryActiveUsageAccumulator(activityLeaseDuration);
+			_sessionStore = sessionStore ?? new TelemetrySessionXmlStore();
 			_client = NullTelemetryClient.Instance;
+			_uploadWorker = uploadWorker ?? new TelemetryUploadWorker(GetConfiguredClient, _sessionStore);
 			_startupContext = StartupContext.Default;
 		}
 
@@ -106,19 +107,20 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 						LogFileSizeBytes = TryGetFileSize(sourceFilePath),
                       InstalledRamMb = installedRamMb,
 						InstalledCpu = string.IsNullOrWhiteSpace(installedCpu) ? "" : installedCpu,
-						SchemaVersion = "1.0",
+                      SchemaVersion = "2.0",
 					};
 					_activeUsageAccumulator.Reset(now);
+				}
+
+				if (endedSession != null)
+				{
+					TrySaveEndedSession(endedSession);
 				}
 
 				// Warm up the database connection on the thread pool (fire-and-forget).
 				client.Warmup();
 
-				// Async upload on rollover: must not block the file-open flow.
-				if (endedSession != null)
-				{
-					_ = SafeSendAsync(endedSession);
-				}
+				_uploadWorker.TriggerUpload();
 			}
 			catch (Exception exception)
 			{
@@ -140,10 +142,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					endedSession = EndCurrentSessionInternal(_utcNow());
 				}
 
-				// Sync best-effort upload on shutdown/crash.
 				if (endedSession != null)
 				{
-					SafeSendSync(endedSession);
+					TrySaveEndedSession(endedSession);
 				}
 			}
 			catch (Exception exception)
@@ -306,6 +307,29 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			return LastEndedSession;
 		}
 
+		private ITelemetryClient GetConfiguredClient()
+		{
+			lock (_gate)
+			{
+				return _client;
+			}
+		}
+
+		// Intentional broad exception catching: telemetry persistence failures must never propagate to the user workflow.
+#pragma warning disable CA1031
+		private void TrySaveEndedSession(TelemetrySession session)
+		{
+			try
+			{
+				_sessionStore.Save(TelemetrySessionMapper.ToDto(session));
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry XML save failed.");
+			}
+		}
+#pragma warning restore CA1031
+
 		public void ConfigureStartupContext(string source, bool isDebugging)
 		{
 			lock (_gate)
@@ -315,61 +339,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					isDebugging);
 			}
 		}
-
-		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
-#pragma warning disable CA1031
-		private async Task SafeSendAsync(TelemetrySession session)
-		{
-			ITelemetryClient client;
-
-			lock (_gate)
-			{
-				client = _client;
-			}
-
-			try
-			{
-				await client.SendAsync(session, CancellationToken.None).ConfigureAwait(false);
-			}
-			catch (Exception exception)
-			{
-				try
-				{
-					Log.Default.Write(LogSeverityType.Warning, exception, "Telemetry async upload failed.");
-				}
-				catch
-				{
-					// Nothing to do.
-				}
-			}
-		}
-
-		private void SafeSendSync(TelemetrySession session)
-		{
-			ITelemetryClient client;
-
-			lock (_gate)
-			{
-				client = _client;
-			}
-
-			try
-			{
-				client.SendSync(session);
-			}
-			catch (Exception exception)
-			{
-				try
-				{
-					Log.Default.Write(LogSeverityType.Warning, exception, "Telemetry sync upload failed.");
-				}
-				catch
-				{
-					// Nothing to do.
-				}
-			}
-		}
-#pragma warning restore CA1031
 
 		private static long TryGetFileSize(string sourceFilePath)
 		{

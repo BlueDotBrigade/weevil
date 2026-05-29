@@ -3,8 +3,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Threading;
-	using System.Threading.Tasks;
 	using FluentAssertions;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -350,15 +348,14 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
-		public async Task GivenActiveSession_WhenNewFileOpened_ThenPreviousSessionSentAsync()
+		public void GivenActiveSession_WhenNewFileOpened_ThenPreviousSessionIsSavedAndUploadTriggered()
 		{
-			// Regression: Sub-task 4 (PR-4) - async upload on rollover
 			var t0 = new DateTime(2026, 4, 1, 10, 0, 0, DateTimeKind.Utc);
 			var t1 = t0.AddSeconds(10);
 			var times = new Queue<DateTime>(new[] { t0, t1 });
-			var spyClient = new SpyTelemetryClient();
-			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
-			tracker.Configure(spyClient);
+			var store = new SpyTelemetrySessionStore();
+			var uploadWorker = new SpyTelemetryUploadWorker();
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1), store, uploadWorker);
 
 			var firstPath = Path.GetTempFileName();
 			var secondPath = Path.GetTempFileName();
@@ -367,14 +364,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), firstPath);
 				var firstSessionId = tracker.CurrentSession.SessionId;
+				uploadWorker.Reset();
 
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), secondPath);
 
-				// Allow the fire-and-forget async send to complete.
-				await Task.Delay(200);
-
-				spyClient.AsyncSentSessions.Should().ContainSingle()
+				store.SavedSessions.Should().ContainSingle()
 					.Which.SessionId.Should().Be(firstSessionId);
+				uploadWorker.TriggerCount.Should().Be(1);
 			}
 			finally
 			{
@@ -384,14 +380,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
-		public void GivenActiveSession_WhenEndSessionCalled_ThenSessionSentSync()
+		public void GivenActiveSession_WhenEndSessionCalled_ThenSessionIsSavedWithoutTriggeringUpload()
 		{
-			// Regression: Sub-task 4 (PR-4) - sync upload on shutdown/crash
 			var start = new DateTime(2026, 4, 1, 13, 0, 0, DateTimeKind.Utc);
 			var times = new Queue<DateTime>(new[] { start, start.AddSeconds(5) });
-			var spyClient = new SpyTelemetryClient();
-			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
-			tracker.Configure(spyClient);
+			var store = new SpyTelemetrySessionStore();
+			var uploadWorker = new SpyTelemetryUploadWorker();
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1), store, uploadWorker);
 
 			var sourcePath = Path.GetTempFileName();
 
@@ -399,11 +394,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				tracker.StartSession("WeevilCli.exe", new Version(2, 0), sourcePath);
 				var sessionId = tracker.CurrentSession.SessionId;
+				uploadWorker.Reset();
 
 				var endedSession = tracker.EndSession();
 
-				spyClient.SyncSentSessions.Should().ContainSingle()
+				store.SavedSessions.Should().ContainSingle()
 					.Which.SessionId.Should().Be(sessionId);
+				uploadWorker.TriggerCount.Should().Be(0);
 				endedSession.Should().NotBeNull();
 			}
 			finally
@@ -413,60 +410,16 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
-		public async Task GivenRolloverThenShutdown_WhenBothOccur_ThenEachSessionSentExactlyOnce()
+		public void GivenNoActiveSession_WhenEndSessionCalled_ThenNoSaveOrUploadOccurs()
 		{
-			// Regression: Sub-task 4 (PR-4) - exactly-once enforcement
-			var t0 = new DateTime(2026, 4, 1, 14, 0, 0, DateTimeKind.Utc);
-			var t1 = t0.AddSeconds(10);
-			var t2 = t1.AddSeconds(10);
-			var times = new Queue<DateTime>(new[] { t0, t1, t2 });
-			var spyClient = new SpyTelemetryClient();
-			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
-			tracker.Configure(spyClient);
-
-			var firstPath = Path.GetTempFileName();
-			var secondPath = Path.GetTempFileName();
-
-			try
-			{
-				tracker.StartSession("WeevilGui.exe", new Version(1, 0), firstPath);
-				var firstSessionId = tracker.CurrentSession.SessionId;
-
-				// Rollover: ends first session (async upload) and starts second session.
-				tracker.StartSession("WeevilGui.exe", new Version(1, 0), secondPath);
-				var secondSessionId = tracker.CurrentSession.SessionId;
-
-				// Shutdown: ends second session (sync upload).
-				tracker.EndSession();
-
-				// Allow the fire-and-forget async send of the first session to complete.
-				await Task.Delay(200);
-
-				spyClient.AsyncSentSessions.Should().ContainSingle()
-					.Which.SessionId.Should().Be(firstSessionId);
-
-				spyClient.SyncSentSessions.Should().ContainSingle()
-					.Which.SessionId.Should().Be(secondSessionId);
-			}
-			finally
-			{
-				File.Delete(firstPath);
-				File.Delete(secondPath);
-			}
-		}
-
-		[TestMethod]
-		public void GivenNoActiveSession_WhenEndSessionCalled_ThenNoUploadOccurs()
-		{
-			// Regression: Sub-task 4 (PR-4) - exactly-once / guard against no-op end
-			var spyClient = new SpyTelemetryClient();
-			var tracker = new TelemetrySessionLifecycle();
-			tracker.Configure(spyClient);
+			var store = new SpyTelemetrySessionStore();
+			var uploadWorker = new SpyTelemetryUploadWorker();
+			var tracker = new TelemetrySessionLifecycle(() => DateTime.UtcNow, TimeSpan.FromMinutes(1), store, uploadWorker);
 
 			tracker.EndSession();
 
-			spyClient.AsyncSentSessions.Should().BeEmpty();
-			spyClient.SyncSentSessions.Should().BeEmpty();
+			store.SavedSessions.Should().BeEmpty();
+			uploadWorker.TriggerCount.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -494,35 +447,38 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 		}
 
-		private sealed class SpyTelemetryClient : ITelemetryClient
+		private sealed class SpyTelemetrySessionStore : ITelemetrySessionStore
 		{
-			public List<TelemetrySession> AsyncSentSessions { get; } = new List<TelemetrySession>();
-			public List<TelemetrySession> SyncSentSessions { get; } = new List<TelemetrySession>();
+			public List<TelemetrySessionDto> SavedSessions { get; } = new List<TelemetrySessionDto>();
 
-			public void Warmup()
+			public void Save(TelemetrySessionDto session)
+			{
+				SavedSessions.Add(session);
+			}
+
+			public IReadOnlyList<PendingTelemetrySession> GetPendingSessions(int maxCount)
+			{
+				return Array.Empty<PendingTelemetrySession>();
+			}
+
+			public void Delete(PendingTelemetrySession session)
 			{
 				// no-op
 			}
+		}
 
-			public Task SendAsync(TelemetrySession session, CancellationToken ct)
+		private sealed class SpyTelemetryUploadWorker : ITelemetryUploadWorker
+		{
+			public int TriggerCount { get; private set; }
+
+			public void TriggerUpload()
 			{
-				if (session != null)
-				{
-					lock (AsyncSentSessions)
-					{
-						AsyncSentSessions.Add(session);
-					}
-				}
-
-				return Task.CompletedTask;
+				TriggerCount++;
 			}
 
-			public void SendSync(TelemetrySession session)
+			public void Reset()
 			{
-				if (session != null)
-				{
-					SyncSentSessions.Add(session);
-				}
+				TriggerCount = 0;
 			}
 		}
 	}
