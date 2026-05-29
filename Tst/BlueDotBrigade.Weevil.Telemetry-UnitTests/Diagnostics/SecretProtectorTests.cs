@@ -44,7 +44,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			if (!OperatingSystem.IsWindows())
 			{
 				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-				return;
 			}
 
 			Action act = () => SecretProtector.Encrypt(null);
@@ -58,7 +57,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			if (!OperatingSystem.IsWindows())
 			{
 				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-				return;
 			}
 
 			Action act = () => SecretProtector.Encrypt(string.Empty);
@@ -72,7 +70,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			if (!OperatingSystem.IsWindows())
 			{
 				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-				return;
 			}
 
 			Action act = () => SecretProtector.Encrypt("   ");
@@ -86,7 +83,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			if (!OperatingSystem.IsWindows())
 			{
 				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-				return;
 			}
 
 			var result = SecretProtector.Encrypt("my-secret");
@@ -100,7 +96,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			if (!OperatingSystem.IsWindows())
 			{
 				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-				return;
 			}
 
 			var result = SecretProtector.Encrypt("my-secret");
@@ -136,7 +131,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			if (!OperatingSystem.IsWindows())
 			{
 				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-				return;
 			}
 
 			const string original = "super-secret-password";
