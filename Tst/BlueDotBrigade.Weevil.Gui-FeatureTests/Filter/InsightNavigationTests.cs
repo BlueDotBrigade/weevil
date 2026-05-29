@@ -50,8 +50,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var bulletin = new NavigateToInsightRecordBulletin(insightRecords);
 
 			// Act - trigger the insight navigation
-			Action act = () => bulletinMediator.Post(bulletin);
-			act.Should().NotThrow("insight navigation should proceed normally when all records are available");
+			Action navigationAction = () => bulletinMediator.Post(bulletin);
+			navigationAction.Should().NotThrow("insight navigation should proceed normally when all records are available");
 
 			// Give time for async operations to complete
 			Thread.Sleep(TimeSpan.FromSeconds(1));
