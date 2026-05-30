@@ -18,9 +18,9 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			(result).Should().NotBeNull();
+			result.Should().NotBeNull();
 			// Population std dev of [1,2,3,4,5]: sqrt(2) ≈ 1.414
-			(result.Value).Should().BeApproximately(1.414, 0.001);
+			result.Value.Should().BeApproximately(1.414, 0.001);
 		}
 
 		[TestMethod]
@@ -34,7 +34,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			(result).Should().BeNull();
+			result.Should().BeNull();
 		}
 
 		[TestMethod]
@@ -48,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var result = calculator.Calculate(values);
 
 			// Assert
-			(result.Value).Should().BeApproximately(0.0, 0.001);
+			result.Value.Should().BeApproximately(0.0, 0.001);
 		}
 
 		[TestMethod]
@@ -63,7 +63,7 @@ namespace BlueDotBrigade.Weevil.Math
 
 			// Assert
 			// Mean = 10, deviations: [-5, 0, 5], sum of squares = 50, variance = 50/3 ≈ 16.667, stddev ≈ 4.082
-			(result.Value).Should().BeApproximately(4.082, 0.001);
+			result.Value.Should().BeApproximately(4.082, 0.001);
 		}
 	}
 }

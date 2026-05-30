@@ -28,7 +28,7 @@
 					.UsingPath(newPath)
 					.Open();
 
-				(newEngine.Count).Should().Be(originalEngine.Count);
+				newEngine.Count.Should().Be(originalEngine.Count);
 			}
 			finally
 			{

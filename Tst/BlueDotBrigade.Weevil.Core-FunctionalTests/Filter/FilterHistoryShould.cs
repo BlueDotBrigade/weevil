@@ -14,10 +14,10 @@
 				.Open();
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2"));
-			(engine.Filter.IncludeHistory[0]).Should().Be("Id=2");
+			engine.Filter.IncludeHistory[0].Should().Be("Id=2");
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=3"));
-			(engine.Filter.IncludeHistory[0]).Should().Be("Id=3");
+			engine.Filter.IncludeHistory[0].Should().Be("Id=3");
 		}
 
 		[TestMethod]
@@ -28,10 +28,10 @@
 				.Open();
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria(string.Empty, "Id=4"));
-			(engine.Filter.ExcludeHistory[0]).Should().Be("Id=4");
+			engine.Filter.ExcludeHistory[0].Should().Be("Id=4");
 
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria(string.Empty, "Id=5"));
-			(engine.Filter.ExcludeHistory[0]).Should().Be("Id=5");
+			engine.Filter.ExcludeHistory[0].Should().Be("Id=5");
 		}
 
 
@@ -51,8 +51,8 @@
 
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			(engine.Filter.IncludeHistory.Count).Should().Be(filtersBeforeClear);
-			(engine.Filter.IncludeHistory[0]).Should().Be(uniqueFilter);
+			engine.Filter.IncludeHistory.Count.Should().Be(filtersBeforeClear);
+			engine.Filter.IncludeHistory[0].Should().Be(uniqueFilter);
 		}
 	}
 }

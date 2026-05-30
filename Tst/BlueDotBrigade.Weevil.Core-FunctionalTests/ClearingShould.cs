@@ -20,7 +20,7 @@
 
 			engine.Clear(ClearOperation.Selected);
 
-			(engine.Count).Should().Be(512 - 1);
+			engine.Count.Should().Be(512 - 1);
 			(engine.Filter.Results.First().LineNumber).Should().Be(1);
 			(engine.Filter.Results.Last().LineNumber).Should().Be(512);
 		}
@@ -38,7 +38,7 @@
 
 			engine.Clear(ClearOperation.Unselected);
 
-			(engine.Count).Should().Be(1);
+			engine.Count.Should().Be(1);
 			(engine.Filter.Results.First().LineNumber).Should().Be(9);
 		}
 
@@ -72,7 +72,7 @@
 
 			engine.Clear(ClearOperation.AfterSelected);
 
-			(engine.Count).Should().Be(32);
+			engine.Count.Should().Be(32);
 			(engine.Filter.Results.First().LineNumber).Should().Be(1);
 			(engine.Filter.Results.Last().LineNumber).Should().Be(32);
 		}
@@ -94,11 +94,11 @@
 			
 			engine.Clear(ClearOperation.BetweenSelected);
 
-			(engine.Count).Should().Be(4);
-			(engine.Filter.Results[0].LineNumber).Should().Be(1);
-			(engine.Filter.Results[1].LineNumber).Should().Be(2);
-			(engine.Filter.Results[2].LineNumber).Should().Be(511);
-			(engine.Filter.Results[3].LineNumber).Should().Be(512);
+			engine.Count.Should().Be(4);
+			engine.Filter.Results[0].LineNumber.Should().Be(1);
+			engine.Filter.Results[1].LineNumber.Should().Be(2);
+			engine.Filter.Results[2].LineNumber.Should().Be(511);
+			engine.Filter.Results[3].LineNumber.Should().Be(512);
 		}
 
 		[TestMethod]
@@ -114,7 +114,7 @@
 
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			(engine.Count).Should().Be(512 - 8);
+			engine.Count.Should().Be(512 - 8);
 			(engine.Filter.Results.First().LineNumber).Should().Be(9);
 			(engine.Filter.Results.Last().LineNumber).Should().Be(512);
 		}
@@ -136,7 +136,7 @@
 
 			engine.Clear(ClearOperation.BeforeAndAfterSelected);
 
-			(engine.Count).Should().Be(201);
+			engine.Count.Should().Be(201);
 			(engine.Filter.Results.First().LineNumber).Should().Be(200);
 			(engine.Filter.Results.Last().LineNumber).Should().Be(400);
 		}
@@ -154,7 +154,7 @@
 
 			engine.Clear(ClearOperation.AfterSelected);
 
-			(engine.Count).Should().Be(9);
+			engine.Count.Should().Be(9);
 			(engine.Filter.Results.First().LineNumber).Should().Be(1);
 			(engine.Filter.Results.Last().LineNumber).Should().Be(9);
 		}
@@ -170,9 +170,9 @@
 				.Selector
 				.Select(lineNumber: 9);
 
-			(engine.HasBeenCleared).Should().BeFalse();
+			engine.HasBeenCleared.Should().BeFalse();
 			engine.Clear(ClearOperation.AfterSelected);
-			(engine.HasBeenCleared).Should().BeTrue();
+			engine.HasBeenCleared.Should().BeTrue();
 		}
 	}
 }

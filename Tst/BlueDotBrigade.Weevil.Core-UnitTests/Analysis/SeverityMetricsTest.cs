@@ -23,7 +23,7 @@
 
 			SeverityMetrics result = metricsA + metricsB;
 
-			(result.Information).Should().Be(4);
+			result.Information.Should().Be(4);
 		}
 	}
 }

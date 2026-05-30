@@ -28,7 +28,7 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
+			records[0].Metadata.HasElapsedTime.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -42,8 +42,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
-			(records[1].Metadata.HasElapsedTime).Should().BeFalse();
+			records[0].Metadata.HasElapsedTime.Should().BeFalse();
+			records[1].Metadata.HasElapsedTime.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -57,8 +57,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
-			(records[1].Metadata.HasElapsedTime).Should().BeFalse();
+			records[0].Metadata.HasElapsedTime.Should().BeFalse();
+			records[1].Metadata.HasElapsedTime.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -72,8 +72,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			(records[0].Metadata.HasElapsedTime).Should().BeFalse();
-			(records[1].Metadata.HasElapsedTime).Should().BeTrue();
+			records[0].Metadata.HasElapsedTime.Should().BeFalse();
+			records[1].Metadata.HasElapsedTime.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -87,8 +87,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			(records[0].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
-			(records[1].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
+			records[0].Metadata.ElapsedTime.Should().Be(Metadata.ElapsedTimeUnknown);
+			records[1].Metadata.ElapsedTime.Should().Be(Metadata.ElapsedTimeUnknown);
 		}
 
 		[TestMethod]
@@ -102,8 +102,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			(records[0].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
-			(records[1].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
+			records[0].Metadata.ElapsedTime.Should().Be(Metadata.ElapsedTimeUnknown);
+			records[1].Metadata.ElapsedTime.Should().Be(Metadata.ElapsedTimeUnknown);
 		}
 
 		[TestMethod]
@@ -119,8 +119,8 @@
 
 			new ElapsedTimeAnalyzer(records.ToImmutableArray()).Analyze();
 
-			(records[0].Metadata.ElapsedTime).Should().Be(Metadata.ElapsedTimeUnknown);
-			(records[1].Metadata.ElapsedTime).Should().Be(TimeSpan.FromMilliseconds(200));
+			records[0].Metadata.ElapsedTime.Should().Be(Metadata.ElapsedTimeUnknown);
+			records[1].Metadata.ElapsedTime.Should().Be(TimeSpan.FromMilliseconds(200));
 		}
 	}
 }

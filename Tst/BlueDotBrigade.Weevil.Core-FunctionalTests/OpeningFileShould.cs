@@ -14,7 +14,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath("EmptyFile.txt"))
 				.Open();
 
-			(engine.Count).Should().Be(0);
+			engine.Count.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -24,7 +24,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath("FileWithOnlyWhitespace.txt"))
 				.Open();
 
-			(engine.Count).Should().Be(1);
+			engine.Count.Should().Be(1);
 		}
 
 		[TestMethod]
@@ -34,7 +34,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault), startAtLineNumber: 100)
 				.Open();
 
-			(engine[0].LineNumber).Should().Be(100);
+			engine[0].LineNumber.Should().Be(100);
 			(engine[0].Content.Contains("Section100")).Should().BeTrue();
 		}
 
@@ -47,7 +47,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingPath(new Daten().AsFilePath("LogWithSidecarContext.log"))
 				.Open();
 
-			(engine.Context[fileFormatKey]).Should().Be("1.2.3.4");
+			engine.Context[fileFormatKey].Should().Be("1.2.3.4");
 		}
 
 		[TestMethod]
@@ -66,7 +66,7 @@ namespace BlueDotBrigade.Weevil
 				.UsingContext(context)
 				.Open();
 
-			(engine.Context[fileFormatKey]).Should().Be(fileFormatValue);
+			engine.Context[fileFormatKey].Should().Be(fileFormatValue);
 		}
 	}
 }

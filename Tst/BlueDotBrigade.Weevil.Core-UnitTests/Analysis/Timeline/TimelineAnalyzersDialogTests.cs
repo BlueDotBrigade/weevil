@@ -62,7 +62,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -77,7 +77,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -92,7 +92,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		#endregion
@@ -111,7 +111,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -126,7 +126,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		#endregion
@@ -145,7 +145,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -160,7 +160,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		#endregion
@@ -179,7 +179,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -194,7 +194,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		#endregion
@@ -213,7 +213,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -228,7 +228,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -243,7 +243,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		#endregion
@@ -262,7 +262,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -277,7 +277,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -292,7 +292,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		#endregion
@@ -311,7 +311,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -326,7 +326,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -341,7 +341,7 @@
 			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
-			(results.FlaggedRecords).Should().Be(0);
+			results.FlaggedRecords.Should().Be(0);
 		}
 
 		#endregion

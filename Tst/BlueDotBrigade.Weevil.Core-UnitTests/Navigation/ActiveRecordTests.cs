@@ -39,7 +39,7 @@
 
 			navigator.UpdateDataSource(ImmutableArray.Create<IRecord>());
 
-			(navigator.Record).Should().Be(Record.Dummy);
+			navigator.Record.Should().Be(Record.Dummy);
 		}
 	}
 }

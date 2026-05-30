@@ -81,9 +81,9 @@
 				GetUserDialog(3000),
 				canUpdateMetadata: true);
 
-			(records[0].Metadata.IsFlagged).Should().BeFalse();
-			(records[1].Metadata.IsFlagged).Should().BeTrue();
-			(records[2].Metadata.IsFlagged).Should().BeFalse();
+			records[0].Metadata.IsFlagged.Should().BeFalse();
+			records[1].Metadata.IsFlagged.Should().BeTrue();
+			records[2].Metadata.IsFlagged.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -110,9 +110,9 @@
 				GetUserDialog(500),
 				canUpdateMetadata: true);
 
-			(records[2].Metadata.IsFlagged).Should().BeFalse();
-			(records[3].Metadata.IsFlagged).Should().BeTrue();
-			(records[4].Metadata.IsFlagged).Should().BeTrue();
+			records[2].Metadata.IsFlagged.Should().BeFalse();
+			records[3].Metadata.IsFlagged.Should().BeTrue();
+			records[4].Metadata.IsFlagged.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -136,8 +136,8 @@
 				GetUserDialog(3000),
 				canUpdateMetadata: true);
 
-			(results.FlaggedRecords).Should().Be(1);
-			(analyzer.Count).Should().Be(1);
+			results.FlaggedRecords.Should().Be(1);
+			analyzer.Count.Should().Be(1);
 		}
 
 		[TestMethod]
@@ -161,9 +161,9 @@
 				GetUserDialog(2000),
 				canUpdateMetadata: true);
 
-			(records[0].Metadata.IsFlagged).Should().BeFalse();
-			(records[1].Metadata.IsFlagged).Should().BeFalse();
-			(records[2].Metadata.IsFlagged).Should().BeTrue();
+			records[0].Metadata.IsFlagged.Should().BeFalse();
+			records[1].Metadata.IsFlagged.Should().BeFalse();
+			records[2].Metadata.IsFlagged.Should().BeTrue();
 		}
 	}
 }

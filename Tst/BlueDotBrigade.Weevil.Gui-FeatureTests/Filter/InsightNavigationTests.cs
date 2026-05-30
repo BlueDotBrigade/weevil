@@ -35,7 +35,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				Thread.Sleep(TimeSpan.FromMilliseconds(100));
 			}
 
-			(viewModel.IsLogFileOpen).Should().BeTrue("Log file should be open before test continues");
+			viewModel.IsLogFileOpen.Should().BeTrue("Log file should be open before test continues");
 
 			// Create mock records that exist in the log
 			var record1 = Substitute.For<IRecord>();

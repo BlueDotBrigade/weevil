@@ -20,7 +20,7 @@
 
 			IRecord result = engine.Navigate.GoTo("06:59:39.0207", RecordSearchType.NearestNeighbor);
 
-			(result.LineNumber).Should().Be(4);
+			result.LineNumber.Should().Be(4);
 		}
 
 		// Regression: Issue #499 - GoTo timestamp does not always appear to work
@@ -36,7 +36,7 @@
 			// Search for a time 7ms before line 4 (06:59:39.0207); line 4 is the nearest neighbor
 			IRecord result = engine.Navigate.GoTo("06:59:39.020", RecordSearchType.NearestNeighbor);
 
-			(result.LineNumber).Should().Be(4);
+			result.LineNumber.Should().Be(4);
 		}
 
 		// Regression: Issue #499 - GoTo timestamp does not always appear to work
@@ -52,7 +52,7 @@
 			// Search for a time 3ms after line 4 (06:59:39.0207); line 4 is the nearest neighbor
 			IRecord result = engine.Navigate.GoTo("06:59:39.021", RecordSearchType.NearestNeighbor);
 
-			(result.LineNumber).Should().Be(4);
+			result.LineNumber.Should().Be(4);
 		}
 
 
@@ -69,7 +69,7 @@
 			IRecord pinnedRecord = engine.Navigate.NextPin();
 
 			// Reminder: although they are often similar, the line number and index are NOT the same!
-			(pinnedRecord.LineNumber).Should().Be(10);
+			pinnedRecord.LineNumber.Should().Be(10);
 		}
 
 		[TestMethod]
@@ -87,10 +87,10 @@
 			engine.Selector.Select(1);
 
 			IRecord record = engine.Navigate.NextComment();
-			(record.Metadata.Comment).Should().Be("First");
+			record.Metadata.Comment.Should().Be("First");
 
 			record = engine.Navigate.NextComment();
-			(record.Metadata.Comment).Should().Be("Second");
+			record.Metadata.Comment.Should().Be("Second");
 		}
 
 		[TestMethod]
@@ -110,10 +110,10 @@
 
 			// Search for "note" - should find records 12 and 36
 			IRecord record = engine.Navigate.NextCommentWithText("note", false);
-			(record.Metadata.Comment).Should().Be("First note");
+			record.Metadata.Comment.Should().Be("First note");
 
 			record = engine.Navigate.NextCommentWithText("note", false);
-			(record.Metadata.Comment).Should().Be("Third note");
+			record.Metadata.Comment.Should().Be("Third note");
 		}
 
 		[TestMethod]
@@ -133,10 +133,10 @@
 
 			// Search backwards for "note" - should find records 36 and 12
 			IRecord record = engine.Navigate.PreviousCommentWithText("note", false);
-			(record.Metadata.Comment).Should().Be("Third note");
+			record.Metadata.Comment.Should().Be("Third note");
 
 			record = engine.Navigate.PreviousCommentWithText("note", false);
-			(record.Metadata.Comment).Should().Be("First note");
+			record.Metadata.Comment.Should().Be("First note");
 		}
 
 		[TestMethod]
@@ -155,7 +155,7 @@
 
 			// Case-sensitive search for "note" (lowercase) should only find record 24
 			IRecord record = engine.Navigate.NextCommentWithText("note", true);
-			(record.Metadata.Comment).Should().Be("Second note");
+			record.Metadata.Comment.Should().Be("Second note");
 		}
 
 		[TestMethod]
@@ -175,10 +175,10 @@
 
 			// Regex search for bug numbers
 			IRecord record = engine.Navigate.NextCommentWithText(@"Bug #\d+", false, true);
-			(record.Metadata.Comment).Should().Be("Bug #123");
+			record.Metadata.Comment.Should().Be("Bug #123");
 
 			record = engine.Navigate.NextCommentWithText(@"Bug #\d+", false, true);
-			(record.Metadata.Comment).Should().Be("Bug #456");
+			record.Metadata.Comment.Should().Be("Bug #456");
 		}
 
 		[TestMethod]
@@ -195,10 +195,10 @@
 			engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
 			IRecord record = engine.Navigate.NextFlag();
-			(record.LineNumber).Should().Be(1);
+			record.LineNumber.Should().Be(1);
 
 			record = engine.Navigate.NextFlag();
-			(record.LineNumber).Should().Be(101);
+			record.LineNumber.Should().Be(101);
 		}
 
 		[TestMethod]

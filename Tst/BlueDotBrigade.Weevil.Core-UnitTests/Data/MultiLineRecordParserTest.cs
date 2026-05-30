@@ -39,7 +39,7 @@
 
 			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
 			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
-			(record.Content.Length).Should().Be(258);
+			record.Content.Length.Should().Be(258);
 		}
 
 		[TestMethod]
@@ -51,8 +51,8 @@
 			IRecord multilineRecord = multilineParser.GetNext();
 			IRecord singleLineRecord = multilineParser.GetNext();
 
-			(multilineRecord.LineNumber).Should().Be(1);
-			(singleLineRecord.LineNumber).Should().Be(4);
+			multilineRecord.LineNumber.Should().Be(1);
+			singleLineRecord.LineNumber.Should().Be(4);
 		}
 
 		[TestMethod]
@@ -65,7 +65,7 @@
 
 			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
 			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
-			(record.Content.Length).Should().Be(258);
+			record.Content.Length.Should().Be(258);
 		}
 
 		[TestMethod]
@@ -78,7 +78,7 @@
 
 			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
 			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
-			(record.Content.Length).Should().Be(258);
+			record.Content.Length.Should().Be(258);
 		}
 
 		[TestMethod]
@@ -102,7 +102,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			(record).Should().Be(Record.Dummy);
+			record.Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -121,7 +121,7 @@
 				isLoggingEnabled: true).GetNext();
 
 			(CountNumberOfNewLines(dataSource)).Should().Be(33);
-			(record).Should().Be(Record.Dummy);
+			record.Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -140,7 +140,7 @@
 				isLoggingEnabled: true).GetNext();
 
 			(CountNumberOfNewLines(dataSource)).Should().Be(12);
-			(record.LineNumber).Should().Be(12);
+			record.LineNumber.Should().Be(12);
 		}
 
 		[TestMethod]
@@ -151,8 +151,8 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			(MultilineRecordParser.MaximumLinesToSearch).Should().Be(256);
-			(record.LineNumber).Should().Be(MultilineRecordParser.MaximumLinesToSearch);
+			MultilineRecordParser.MaximumLinesToSearch.Should().Be(256);
+			record.LineNumber.Should().Be(MultilineRecordParser.MaximumLinesToSearch);
 		}
 
 		[TestMethod]
@@ -165,7 +165,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			(record).Should().Be(Record.Dummy);
+			record.Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -187,7 +187,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			(record.Metadata.IsMultiLine).Should().BeFalse();
+			record.Metadata.IsMultiLine.Should().BeFalse();
 		}
 	}
 }

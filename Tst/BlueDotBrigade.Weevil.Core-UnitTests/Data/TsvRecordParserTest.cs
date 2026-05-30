@@ -14,8 +14,8 @@
 			var content = new Daten().AsString();
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
-			(wasSuccessful).Should().BeFalse();
-			(record).Should().Be(Record.Dummy);
+			wasSuccessful.Should().BeFalse();
+			record.Should().Be(Record.Dummy);
 		}
 
 		[TestMethod]
@@ -25,10 +25,10 @@
 
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
-			(wasSuccessful).Should().BeTrue();
-			(record.LineNumber).Should().Be(LineOne);
-			(record.Severity).Should().Be(SeverityType.Warning);
-			(record.Content).Should().Be(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface	Application is initializing...");
+			wasSuccessful.Should().BeTrue();
+			record.LineNumber.Should().Be(LineOne);
+			record.Severity.Should().Be(SeverityType.Warning);
+			record.Content.Should().Be(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface	Application is initializing...");
 		}
 
 		[TestMethod]
@@ -48,8 +48,8 @@
 
 			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
 
-			(wasSuccessful).Should().BeTrue();
-			(record.Content).Should().Be(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface");
+			wasSuccessful.Should().BeTrue();
+			record.Content.Should().Be(@"2019-12-31 23:59:59.000	123	7890	Warning	UserInterface");
 		}
 
 		[TestMethod]

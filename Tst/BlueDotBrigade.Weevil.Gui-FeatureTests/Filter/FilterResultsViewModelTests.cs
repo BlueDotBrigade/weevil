@@ -35,7 +35,7 @@
 				Thread.Sleep(TimeSpan.FromMilliseconds(100));
 			} while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5));
 
-			(viewModel.VisibleItems.Count).Should().Be(512);
+			viewModel.VisibleItems.Count.Should().Be(512);
 		}
 	}
 }

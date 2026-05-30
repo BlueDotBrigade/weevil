@@ -118,7 +118,7 @@ namespace BlueDotBrigade.Weevil.Integration
 					.UsingPath(logFilePath)
 					.Open();
 				
-				(engine2.Records[0].Metadata.Comment).Should().Be("Test comment", "Comment should be loaded from sidecar");
+				engine2.Records[0].Metadata.Comment.Should().Be("Test comment", "Comment should be loaded from sidecar");
 			}
 			finally
 			{

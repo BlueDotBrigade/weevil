@@ -28,12 +28,12 @@
 			// Verify only flagged records are shown
 			foreach (IRecord record in engine.Filter.Results)
 			{
-				(record.Metadata.IsFlagged).Should().BeTrue($"Record {record.LineNumber} should be flagged");
+				record.Metadata.IsFlagged.Should().BeTrue($"Record {record.LineNumber} should be flagged");
 			}
 
 			// Verify we have the expected flagged records
 			var expectedFlaggedLines = new[] { 100, 200, 300, 400, 500 };
-			(engine.Filter.Results.Length).Should().Be(expectedFlaggedLines.Length);
+			engine.Filter.Results.Length.Should().Be(expectedFlaggedLines.Length);
 		}
 
 		[TestMethod]
@@ -56,7 +56,7 @@
 			// Should still show flagged records (case-insensitive)
 			foreach (IRecord record in engine.Filter.Results)
 			{
-				(record.Metadata.IsFlagged).Should().BeTrue($"Record {record.LineNumber} should be flagged");
+				record.Metadata.IsFlagged.Should().BeTrue($"Record {record.LineNumber} should be flagged");
 			}
 
 			(engine.Filter.Results.Length > 0).Should().BeTrue("Should find flagged records with lowercase moniker");
@@ -107,7 +107,7 @@
 			var initialCount = engine.Filter.Results.Length;
 
 			// Verify the filter criteria is stored correctly
-			(engine.Filter.Criteria.Include).Should().Be(initialFilter);
+			engine.Filter.Criteria.Include.Should().Be(initialFilter);
 
 			// If we were to append @Flagged again (simulating the bug), 
 			// the filter would be "Error||@Flagged||@Flagged"

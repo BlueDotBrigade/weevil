@@ -16,8 +16,8 @@
 
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			(engine.Filter.Results[1].LineNumber).Should().Be(32);
-			(engine.Filter.Results[1].Metadata.Comment).Should().Be("Index31");
+			engine.Filter.Results[1].LineNumber.Should().Be(32);
+			engine.Filter.Results[1].Metadata.Comment.Should().Be("Index31");
 		}
 
 		[TestMethod]
@@ -27,7 +27,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			(firstEngine[0].Metadata.Comment).Should().Be("First");
+			firstEngine[0].Metadata.Comment.Should().Be("First");
 
 			firstEngine.Selector.Select(5);
 			firstEngine.Clear(ClearOperation.BeforeSelected);
@@ -38,7 +38,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			(secondEngine[0].Metadata.Comment).Should().Be("First");
+			secondEngine[0].Metadata.Comment.Should().Be("First");
 		}
 	}
 }

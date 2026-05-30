@@ -55,7 +55,7 @@
 			Stream inputData = new Daten().AsStream();
 			Mammal metadata = TypeFactory.LoadFromXml<TypeFactoryTest.Mammal>(inputData);
 
-			(metadata).Should().NotBeNull();
+			metadata.Should().NotBeNull();
 		}
 	}
 }

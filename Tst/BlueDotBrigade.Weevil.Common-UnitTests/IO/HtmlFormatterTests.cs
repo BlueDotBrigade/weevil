@@ -16,7 +16,7 @@ var formatter = new HtmlFormatter();
 var result = formatter.AsSubHeading("Summary");
 
 // Assert
-(result).Should().Be("<h2>Summary</h2>");
+result.Should().Be("<h2>Summary</h2>");
 }
 
 [TestMethod]
@@ -33,7 +33,7 @@ var row = formatter.AsTableRow(new[] { "Alice", "30" });
 (header.Contains("<thead>")).Should().BeTrue();
 (header.Contains("<th>Name</th>")).Should().BeTrue();
 (header.Contains("<th>Age</th>")).Should().BeTrue();
-(row).Should().Be("    <tr>" + Environment.NewLine + "      <td>Alice</td>" + Environment.NewLine + "      <td>30</td>" + Environment.NewLine + "    </tr>");
+row.Should().Be("    <tr>" + Environment.NewLine + "      <td>Alice</td>" + Environment.NewLine + "      <td>30</td>" + Environment.NewLine + "    </tr>");
 }
 
 [TestMethod]

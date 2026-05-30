@@ -11,7 +11,7 @@
 		{
 			// Failing to initialize static member fields properly
 			// ... can result in an unexpected `null` value.
-			(FilterCriteria.None.Configuration).Should().NotBeNull();
+			FilterCriteria.None.Configuration.Should().NotBeNull();
 		}
 
 		[TestMethod]
@@ -19,7 +19,7 @@
 		{
 			var sampleCriteria = new FilterCriteria(string.Empty, string.Empty, new ConcurrentDictionary<string, object>());
 
-			(sampleCriteria).Should().Be(FilterCriteria.None);
+			sampleCriteria.Should().Be(FilterCriteria.None);
 		}
 	}
 }

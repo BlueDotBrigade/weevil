@@ -12,7 +12,7 @@
 				new ShortenedRecordFormatter(maximumLength: 45, truncatedLength: 19).Format(
 					"The quick brown fox jumps over the lazy dog.");
 
-			(result).Should().Be("The quick brown fox jumps over the lazy dog.");
+			result.Should().Be("The quick brown fox jumps over the lazy dog.");
 		}
 
 		[TestMethod]
@@ -21,7 +21,7 @@
 			var result = new ShortenedRecordFormatter(maximumLength: 44, truncatedLength: 19)
 				.Format("The quick brown fox jumps over the lazy dog.");
 
-			(result).Should().Be(("The quick brown fox" + ShortenedRecordFormatter.EndOfLine));
+			result.Should().Be(("The quick brown fox" + ShortenedRecordFormatter.EndOfLine));
 		}
 	}
 }

@@ -15,7 +15,7 @@
 
 			var actualResult = new SimpleCallStackFormatter().Format(record);
 
-			(actualResult).Should().Be("Debug 2021-15-21 12:59:59 AcmeAssembly.dll Something bad happened. System.ObjectDisposedException: Cannot access a disposed object.\r\n" +
+			actualResult.Should().Be("Debug 2021-15-21 12:59:59 AcmeAssembly.dll Something bad happened. System.ObjectDisposedException: Cannot access a disposed object.\r\n" +
 				"   at Company.Product.Component.DataCollector.Fetch()");
 		}
 
