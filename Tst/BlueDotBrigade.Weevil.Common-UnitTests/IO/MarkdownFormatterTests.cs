@@ -16,7 +16,7 @@ var formatter = new MarkdownFormatter();
 var result = formatter.AsSubHeading("Summary");
 
 // Assert
-Assert.AreEqual("## Summary", result);
+result.Should().Be("## Summary");
 }
 
 [TestMethod]
@@ -31,10 +31,10 @@ var row = formatter.AsTableRow(new[] { "Alice", "30" });
 var lines = header.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
 // Assert
-Assert.AreEqual(2, lines.Length);
-Assert.AreEqual("| Name | Age |", lines[0]);
-Assert.AreEqual("| --- | --- |", lines[1]);
-Assert.AreEqual("| Alice | 30 |", row);
+lines.Length.Should().Be(2);
+lines[0].Should().Be("| Name | Age |");
+lines[1].Should().Be("| --- | --- |");
+row.Should().Be("| Alice | 30 |");
 }
 
 [TestMethod]
@@ -54,11 +54,11 @@ var result = formatter.AsTable(headers, rows);
 
 // Assert
 var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-Assert.AreEqual(4, lines.Length); // Header + separator + 2 data rows
-Assert.AreEqual("| Name | Age | City |", lines[0]);
-Assert.AreEqual("| --- | --- | --- |", lines[1]);
-Assert.AreEqual("| Alice | 30 | New York |", lines[2]);
-Assert.AreEqual("| Bob | 25 | Los Angeles |", lines[3]);
+lines.Length.Should().Be(4); // Header + separator + 2 data rows
+lines[0].Should().Be("| Name | Age | City |");
+lines[1].Should().Be("| --- | --- | --- |");
+lines[2].Should().Be("| Alice | 30 | New York |");
+lines[3].Should().Be("| Bob | 25 | Los Angeles |");
 }
 
 [TestMethod]
@@ -74,9 +74,9 @@ var result = formatter.AsTable(headers, rows);
 
 // Assert
 var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-Assert.AreEqual(2, lines.Length); // Header + separator
-Assert.AreEqual("| Name | Age |", lines[0]);
-Assert.AreEqual("| --- | --- |", lines[1]);
+lines.Length.Should().Be(2); // Header + separator
+lines[0].Should().Be("| Name | Age |");
+lines[1].Should().Be("| --- | --- |");
 }
 }
 }

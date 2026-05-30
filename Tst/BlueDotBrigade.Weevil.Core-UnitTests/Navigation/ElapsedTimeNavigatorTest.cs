@@ -55,7 +55,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 			// Should find the first matching record with 2000ms elapsed time (lineNumber 52)
 			var result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(2000, 4000);
 			
-			Assert.AreEqual(52, result.LineNumber);
+			result.LineNumber.Should().Be(52);
 		}
 
 		[TestMethod]
@@ -84,7 +84,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 			// Should find the first record with 200ms elapsed time (lineNumber 52)
 			var result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(200, null);
 			
-			Assert.AreEqual(52, result.LineNumber);
+			result.LineNumber.Should().Be(52);
 		}
 
 		[TestMethod]
@@ -113,7 +113,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 			// Should find the first record with 100ms elapsed time (lineNumber 51)
 			var result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(null, 200);
 			
-			Assert.AreEqual(51, result.LineNumber);
+			result.LineNumber.Should().Be(51);
 		}
 
 		[TestMethod]
@@ -146,7 +146,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 			// Should find the first matching record going backwards with 4000ms elapsed time (lineNumber 54)
 			var result = new ElapsedTimeNavigator(activeRecord).FindPrevious(2000, 4000);
 			
-			Assert.AreEqual(54, result.LineNumber);
+			result.LineNumber.Should().Be(54);
 		}
 
 		[TestMethod]
@@ -176,10 +176,10 @@ namespace BlueDotBrigade.Weevil.Navigation
 
 			// Find records with elapsed time between 200ms and 500ms
 			// Should find records at line 52, 53, 54, 55 in order
-			Assert.AreEqual(52, navigator.FindNext(200, 500).LineNumber);
-			Assert.AreEqual(53, navigator.FindNext(200, 500).LineNumber);
-			Assert.AreEqual(54, navigator.FindNext(200, 500).LineNumber);
-			Assert.AreEqual(55, navigator.FindNext(200, 500).LineNumber);
+			(navigator.FindNext(200, 500).LineNumber).Should().Be(52);
+			(navigator.FindNext(200, 500).LineNumber).Should().Be(53);
+			(navigator.FindNext(200, 500).LineNumber).Should().Be(54);
+			(navigator.FindNext(200, 500).LineNumber).Should().Be(55);
 		}
 	}
 }

@@ -16,7 +16,7 @@
 
 			var expression = new RegularExpression("fox", Microsoft.RegexOptions.None); // default: case sensitive
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -27,7 +27,7 @@
 
 			var expression = new RegularExpression("FOX", Microsoft.RegexOptions.None); // default: case sensitive
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -38,7 +38,7 @@
 
 			var expression = new RegularExpression("FoX", Microsoft.RegexOptions.IgnoreCase);
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -49,7 +49,7 @@
 
 			var expression = new RegularExpression("dinosaur");
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -60,7 +60,7 @@
 
 			var v = new RegularExpression("^The");
 
-			Assert.IsTrue(v.IsMatch(record));
+			(v.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -71,7 +71,7 @@
 
 			var expression = new RegularExpression("dog$");
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -82,7 +82,7 @@
 
 			var expression = new RegularExpression("fox");
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 	}
 }

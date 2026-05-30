@@ -48,7 +48,7 @@
 			// Navigate using time-only (no date) - should use the active record's date (Jan 2)
 			var result = new TimestampNavigator(activeRecord).Find("11:00:00");
 
-			Assert.AreEqual(2, result.LineNumber);
+			result.LineNumber.Should().Be(2);
 		}
 	}
 }

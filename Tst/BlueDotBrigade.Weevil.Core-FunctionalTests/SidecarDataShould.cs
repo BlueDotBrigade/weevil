@@ -16,8 +16,8 @@
 
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			Assert.AreEqual(32, engine.Filter.Results[1].LineNumber);
-			Assert.AreEqual("Index31", engine.Filter.Results[1].Metadata.Comment);
+			engine.Filter.Results[1].LineNumber.Should().Be(32);
+			engine.Filter.Results[1].Metadata.Comment.Should().Be("Index31");
 		}
 
 		[TestMethod]
@@ -27,7 +27,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			Assert.AreEqual("First", firstEngine[0].Metadata.Comment);
+			firstEngine[0].Metadata.Comment.Should().Be("First");
 
 			firstEngine.Selector.Select(5);
 			firstEngine.Clear(ClearOperation.BeforeSelected);
@@ -38,7 +38,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			Assert.AreEqual("First", secondEngine[0].Metadata.Comment);
+			secondEngine[0].Metadata.Comment.Should().Be("First");
 		}
 	}
 }

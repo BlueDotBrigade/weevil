@@ -14,13 +14,13 @@
 			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString());
 			record.Metadata.IsMultiLine = true;
 
-			Assert.AreEqual(2379476, record.Content.Length);
+			record.Content.Length.Should().Be(2379476);
 
 			var actualResult = new ContentConverter()
 				.Convert(record, typeof(string), true, CultureInfo.InvariantCulture)
 				?.ToString();
 
-			Assert.AreEqual(257, actualResult.Length);
+			actualResult.Length.Should().Be(257);
 		}
 	}
 }

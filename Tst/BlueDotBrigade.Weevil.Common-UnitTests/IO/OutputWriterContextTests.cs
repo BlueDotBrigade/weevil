@@ -103,16 +103,9 @@ namespace BlueDotBrigade.Weevil.IO
 
 		private static void ExpectThrows<TException>(Action action) where TException : Exception
 		{
-			try
-			{
-				action();
-			}
-			catch (TException)
-			{
-				return;
-			}
-
-			Assert.Fail($"Expected exception of type {typeof(TException).Name}.");
+			action
+				.Should()
+				.Throw<TException>($"Expected exception of type {typeof(TException).Name}.");
 		}
 	}
 }

@@ -20,9 +20,9 @@
 
 			engine.Clear(ClearOperation.Selected);
 
-			Assert.AreEqual(512 - 1, engine.Count);
-			Assert.AreEqual(1, engine.Filter.Results.First().LineNumber);
-			Assert.AreEqual(512, engine.Filter.Results.Last().LineNumber);
+			engine.Count.Should().Be(512 - 1);
+			(engine.Filter.Results.First().LineNumber).Should().Be(1);
+			(engine.Filter.Results.Last().LineNumber).Should().Be(512);
 		}
 
 		[TestMethod]
@@ -38,8 +38,8 @@
 
 			engine.Clear(ClearOperation.Unselected);
 
-			Assert.AreEqual(1, engine.Count);
-			Assert.AreEqual(9, engine.Filter.Results.First().LineNumber);
+			engine.Count.Should().Be(1);
+			(engine.Filter.Results.First().LineNumber).Should().Be(9);
 		}
 
 		[TestMethod]
@@ -55,8 +55,8 @@
 
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			Assert.AreEqual(1, engine.Filter.Results.First().LineNumber);
-			Assert.AreEqual(512, engine.Filter.Results.Last().LineNumber);
+			(engine.Filter.Results.First().LineNumber).Should().Be(1);
+			(engine.Filter.Results.Last().LineNumber).Should().Be(512);
 		}
 
 		[TestMethod]
@@ -72,9 +72,9 @@
 
 			engine.Clear(ClearOperation.AfterSelected);
 
-			Assert.AreEqual(32, engine.Count);
-			Assert.AreEqual(1, engine.Filter.Results.First().LineNumber);
-			Assert.AreEqual(32, engine.Filter.Results.Last().LineNumber);
+			engine.Count.Should().Be(32);
+			(engine.Filter.Results.First().LineNumber).Should().Be(1);
+			(engine.Filter.Results.Last().LineNumber).Should().Be(32);
 		}
 
 		[TestMethod]
@@ -94,11 +94,11 @@
 			
 			engine.Clear(ClearOperation.BetweenSelected);
 
-			Assert.AreEqual(4, engine.Count);
-			Assert.AreEqual(1, engine.Filter.Results[0].LineNumber);
-			Assert.AreEqual(2, engine.Filter.Results[1].LineNumber);
-			Assert.AreEqual(511, engine.Filter.Results[2].LineNumber);
-			Assert.AreEqual(512, engine.Filter.Results[3].LineNumber);
+			engine.Count.Should().Be(4);
+			engine.Filter.Results[0].LineNumber.Should().Be(1);
+			engine.Filter.Results[1].LineNumber.Should().Be(2);
+			engine.Filter.Results[2].LineNumber.Should().Be(511);
+			engine.Filter.Results[3].LineNumber.Should().Be(512);
 		}
 
 		[TestMethod]
@@ -114,9 +114,9 @@
 
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			Assert.AreEqual(512 - 8, engine.Count);
-			Assert.AreEqual(9, engine.Filter.Results.First().LineNumber);
-			Assert.AreEqual(512, engine.Filter.Results.Last().LineNumber);
+			engine.Count.Should().Be(512 - 8);
+			(engine.Filter.Results.First().LineNumber).Should().Be(9);
+			(engine.Filter.Results.Last().LineNumber).Should().Be(512);
 		}
 
 		[TestMethod]
@@ -136,9 +136,9 @@
 
 			engine.Clear(ClearOperation.BeforeAndAfterSelected);
 
-			Assert.AreEqual(201, engine.Count);
-			Assert.AreEqual(200, engine.Filter.Results.First().LineNumber);
-			Assert.AreEqual(400, engine.Filter.Results.Last().LineNumber);
+			engine.Count.Should().Be(201);
+			(engine.Filter.Results.First().LineNumber).Should().Be(200);
+			(engine.Filter.Results.Last().LineNumber).Should().Be(400);
 		}
 
 		[TestMethod]
@@ -154,9 +154,9 @@
 
 			engine.Clear(ClearOperation.AfterSelected);
 
-			Assert.AreEqual(9, engine.Count);
-			Assert.AreEqual(1, engine.Filter.Results.First().LineNumber);
-			Assert.AreEqual(9, engine.Filter.Results.Last().LineNumber);
+			engine.Count.Should().Be(9);
+			(engine.Filter.Results.First().LineNumber).Should().Be(1);
+			(engine.Filter.Results.Last().LineNumber).Should().Be(9);
 		}
 
 		[TestMethod]
@@ -170,9 +170,9 @@
 				.Selector
 				.Select(lineNumber: 9);
 
-			Assert.IsFalse(engine.HasBeenCleared);
+			engine.HasBeenCleared.Should().BeFalse();
 			engine.Clear(ClearOperation.AfterSelected);
-			Assert.IsTrue(engine.HasBeenCleared);
+			engine.HasBeenCleared.Should().BeTrue();
 		}
 	}
 }

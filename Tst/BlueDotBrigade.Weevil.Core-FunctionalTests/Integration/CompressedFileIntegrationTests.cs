@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Integration
 
 				// Assert - no sidecar should be created in temp directory
 				var sidecarPath = $"{extractedLogPath}.xml";
-				Assert.IsFalse(System.IO.File.Exists(sidecarPath), "Sidecar should not be created in temp directory");
+				(System.IO.File.Exists(sidecarPath)).Should().BeFalse("Sidecar should not be created in temp directory");
 			}
 			finally
 			{
@@ -111,14 +111,14 @@ namespace BlueDotBrigade.Weevil.Integration
 
 				// Assert
 				var sidecarPath = $"{logFilePath}.xml";
-				Assert.IsTrue(System.IO.File.Exists(sidecarPath), "Sidecar file should be created in non-temp directory");
+				(System.IO.File.Exists(sidecarPath)).Should().BeTrue("Sidecar file should be created in non-temp directory");
 
 				// Verify the comment was saved
 				var engine2 = Engine
 					.UsingPath(logFilePath)
 					.Open();
 				
-				Assert.AreEqual("Test comment", engine2.Records[0].Metadata.Comment, "Comment should be loaded from sidecar");
+				engine2.Records[0].Metadata.Comment.Should().Be("Test comment", "Comment should be loaded from sidecar");
 			}
 			finally
 			{

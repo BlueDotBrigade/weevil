@@ -31,7 +31,7 @@
 				var analyzer = new OutOfOrderTimestampsAnalyzer();
 				analyzer.Analyze(records, string.Empty, dialog, canUpdateMetadata: true);
 
-				Assert.AreEqual("OutOfOrderTimestamps: -00:15:00", records[3].Metadata.Comment);
+				records[3].Metadata.Comment.Should().Be("OutOfOrderTimestamps: -00:15:00");
 			}
 		}
 	}

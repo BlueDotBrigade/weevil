@@ -19,7 +19,7 @@
 			var activeRecord = new ActiveRecord(records);
 			var result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: false);
 
-			Assert.AreEqual(2, result.LineNumber);
+			result.LineNumber.Should().Be(2);
 		}
 
 		[TestMethod]
@@ -48,7 +48,7 @@
 			var activeRecord = new ActiveRecord(records);
 			var result = new ContentNavigator(activeRecord).FindNext(@"\d+", isCaseSensitive: false, useRegex: true);
 
-			Assert.AreEqual(2, result.LineNumber);
+			result.LineNumber.Should().Be(2);
 		}
 
 		[TestMethod]
@@ -63,7 +63,7 @@
 			var activeRecord = new ActiveRecord(records);
 			var result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: false, useRegex: true);
 
-			Assert.AreEqual(2, result.LineNumber);
+			result.LineNumber.Should().Be(2);
 		}
 
 		[TestMethod]
@@ -93,7 +93,7 @@
 			activeRecord.SetActiveIndex(2); // Start from the last record
 			var result = new ContentNavigator(activeRecord).FindPrevious(@"\d+", isCaseSensitive: false, useRegex: true);
 
-			Assert.AreEqual(2, result.LineNumber);
+			result.LineNumber.Should().Be(2);
 		}
 	}
 }

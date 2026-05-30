@@ -46,7 +46,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				Thread.Sleep(TimeSpan.FromMilliseconds(100));
 			}
 
-			Assert.IsTrue(viewModel.IsLogFileOpen, "Log file should be open before the test continues.");
+			viewModel.IsLogFileOpen.Should().BeTrue("Log file should be open before the test continues.");
 
 			// GlobalDefault.log is 1-indexed and sequential, so line N is at 0-based index N-1.
 			viewModel.VisibleItems[LineNumberA - 1].Metadata.IsPinned = true;
@@ -54,13 +54,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			// Act & Assert — first "Next Pinned" should land on line 10 (index 9)
 			viewModel.GoToNextPin();
-			Assert.AreEqual(LineNumberA - 1, viewModel.ActiveRecordIndex,
-				$"After first GoToNextPin(), ActiveRecordIndex should be {LineNumberA - 1} (line {LineNumberA}).");
+			viewModel.ActiveRecordIndex.Should().Be(LineNumberA - 1, $"After first GoToNextPin(), ActiveRecordIndex should be {LineNumberA - 1} (line {LineNumberA}).");
 
 			// Act & Assert — second "Next Pinned" should land on line 20 (index 19)
 			viewModel.GoToNextPin();
-			Assert.AreEqual(LineNumberB - 1, viewModel.ActiveRecordIndex,
-				$"After second GoToNextPin(), ActiveRecordIndex should be {LineNumberB - 1} (line {LineNumberB}).");
+			viewModel.ActiveRecordIndex.Should().Be(LineNumberB - 1, $"After second GoToNextPin(), ActiveRecordIndex should be {LineNumberB - 1} (line {LineNumberB}).");
 		}
 	}
 }

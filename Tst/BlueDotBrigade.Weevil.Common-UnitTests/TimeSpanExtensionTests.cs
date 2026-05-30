@@ -11,7 +11,7 @@
 		{
 			var period = TimeSpan.MinValue;
 
-			Assert.AreEqual("--.---", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("--.---");
 		}
 
 		[TestMethod]
@@ -19,7 +19,7 @@
 		{
 			var period = TimeSpan.MaxValue;
 
-			Assert.AreEqual("--.---", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("--.---");
 		}
 
 		[TestMethod]
@@ -27,7 +27,7 @@
 		{
 			var period = TimeSpan.FromMilliseconds(1);
 
-			Assert.AreEqual("00.001s", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("00.001s");
 		}
 
 		[TestMethod]
@@ -35,7 +35,7 @@
 		{
 			var period = TimeSpan.FromMinutes(2);
 
-			Assert.AreEqual("00:02:00", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("00:02:00");
 		}
 
 		[TestMethod]
@@ -43,7 +43,7 @@
 		{
 			var period = TimeSpan.FromDays(3);
 
-			Assert.AreEqual("3.00:00:00", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("3.00:00:00");
 		}
 
 		[TestMethod]
@@ -51,7 +51,7 @@
 		{
 			var period = TimeSpan.FromMilliseconds(-1);
 
-			Assert.AreEqual("-00.001s", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("-00.001s");
 		}
 
 		[TestMethod]
@@ -59,7 +59,7 @@
 		{
 			var period = TimeSpan.FromMinutes(-2);
 
-			Assert.AreEqual("-00:02:00", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("-00:02:00");
 		}
 
 		[TestMethod]
@@ -67,7 +67,7 @@
 		{
 			var period = TimeSpan.FromDays(-3);
 
-			Assert.AreEqual("-3.00:00:00", period.ToHumanReadable());
+			(period.ToHumanReadable()).Should().Be("-3.00:00:00");
 		}
 	}
 }

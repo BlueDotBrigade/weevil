@@ -16,7 +16,7 @@ var formatter = new PlainTextFormatter();
 var result = formatter.AsSubHeading("Summary");
 
 // Assert
-Assert.AreEqual("Summary", result);
+result.Should().Be("Summary");
 }
 
 [TestMethod]
@@ -30,8 +30,8 @@ var header = formatter.AsTableHeader(new[] { "Name", "Age" });
 var row = formatter.AsTableRow(new[] { "Alice", "30" });
 
 // Assert
-Assert.AreEqual("Name\tAge", header);
-Assert.AreEqual("Alice\t30", row);
+header.Should().Be("Name\tAge");
+row.Should().Be("Alice\t30");
 }
 
 [TestMethod]
@@ -50,12 +50,12 @@ new[] { "Bob", "25", "Los Angeles" }
 var result = formatter.AsTable(headers, rows);
 
 // Assert
-Assert.IsTrue(result.Contains("\t"));
+(result.Contains("\t")).Should().BeTrue();
 var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-Assert.AreEqual(3, lines.Length); // Header + 2 data rows
-Assert.AreEqual("Name\tAge\tCity", lines[0]);
-Assert.AreEqual("Alice\t30\tNew York", lines[1]);
-Assert.AreEqual("Bob\t25\tLos Angeles", lines[2]);
+lines.Length.Should().Be(3); // Header + 2 data rows
+lines[0].Should().Be("Name\tAge\tCity");
+lines[1].Should().Be("Alice\t30\tNew York");
+lines[2].Should().Be("Bob\t25\tLos Angeles");
 }
 
 [TestMethod]
@@ -71,8 +71,8 @@ var result = formatter.AsTable(headers, rows);
 
 // Assert
 var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-Assert.AreEqual(1, lines.Length);
-Assert.AreEqual("Name\tAge", lines[0]);
+lines.Length.Should().Be(1);
+lines[0].Should().Be("Name\tAge");
 }
 }
 }

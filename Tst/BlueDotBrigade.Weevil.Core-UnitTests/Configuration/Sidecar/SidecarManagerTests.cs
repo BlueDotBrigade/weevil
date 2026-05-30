@@ -31,7 +31,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 			sidecarManager.Save(sidecarData, false);
 
 			// Assert - test passes if no exception is thrown and no file is created
-			Assert.IsFalse(System.IO.File.Exists($"{tempPath}.xml"), "Sidecar should not be created in temp directory");
+			(System.IO.File.Exists($"{tempPath}.xml")).Should().BeFalse("Sidecar should not be created in temp directory");
 		}
 
 		[TestMethod]
@@ -61,7 +61,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 
 				// Assert
 				var sidecarPath = $"{tempFile}.xml";
-				Assert.IsTrue(System.IO.File.Exists(sidecarPath), "Sidecar file should be created in non-temp directory");
+				(System.IO.File.Exists(sidecarPath)).Should().BeTrue("Sidecar file should be created in non-temp directory");
 			}
 			finally
 			{
