@@ -19,6 +19,7 @@
 	using System;
 	using System.Globalization;
 	using System.Windows.Data;
+	using global::BlueDotBrigade.Weevil;
 	using global::BlueDotBrigade.Weevil.Data;
 	using global::BlueDotBrigade.Weevil.Gui.Filter;
 	
@@ -52,13 +53,14 @@
                                 // Display format: * {Id} : {Name} (if ID is set)
                                 // Tooltip format: Bookmark: {Name} (Ctrl+{Id})
                                 // Otherwise: * {Name} or Bookmark: {Name}
+                                var symbol = BookmarkSymbol.GetSymbol(bookmark.Name);
                                 if (bookmark.Id > 0)
                                 {
-                                        return isToolTip ? $"Bookmark: {bookmark.Name} (Ctrl+{bookmark.Id})" : $"★ {bookmark.Id} : {bookmark.Name} ";
+                                        return isToolTip ? $"Bookmark: {bookmark.Name} (Ctrl+{bookmark.Id})" : $"{symbol} {bookmark.Id} : {bookmark.Name} ";
                                 }
                                 else
                                 {
-                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"★ {bookmark.Name} ";
+                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"{symbol} {bookmark.Name} ";
                                 }
                         }
 
