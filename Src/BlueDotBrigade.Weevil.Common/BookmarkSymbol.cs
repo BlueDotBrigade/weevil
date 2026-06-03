@@ -24,31 +24,37 @@ namespace BlueDotBrigade.Weevil
 		{
 			"bug",
 		};
+		private static readonly string[] NormalizedBugKeywords = NormalizeKeywords(BugKeywords);
 
 		private static readonly string[] QuestionKeywords =
 		{
 			"question", "unknown", "investigate", "why", "how",
 		};
+		private static readonly string[] NormalizedQuestionKeywords = NormalizeKeywords(QuestionKeywords);
 
 		private static readonly string[] TheoryKeywords =
 		{
 			"theory", "hypothesis", "clue", "evidence", "observation",
 		};
+		private static readonly string[] NormalizedTheoryKeywords = NormalizeKeywords(TheoryKeywords);
 
 		private static readonly string[] RootCauseKeywords =
 		{
 			"root cause", "rca", "culprit", "defect", "regression",
 		};
+		private static readonly string[] NormalizedRootCauseKeywords = NormalizeKeywords(RootCauseKeywords);
 
 		private static readonly string[] FixKeywords =
 		{
 			"fix", "workaround", "mitigation", "patch", "resolution",
 		};
+		private static readonly string[] NormalizedFixKeywords = NormalizeKeywords(FixKeywords);
 
 		private static readonly string[] VerifiedKeywords =
 		{
 			"verified", "confirmed", "validated", "retested", "resolved",
 		};
+		private static readonly string[] NormalizedVerifiedKeywords = NormalizeKeywords(VerifiedKeywords);
 
 		/// <summary>
 		/// Returns the symbol that best represents the workflow stage described by
@@ -67,32 +73,32 @@ namespace BlueDotBrigade.Weevil
 			var normalizedLabel = NormalizeForMatching(bookmarkLabel);
 
 			// Evaluate in descending priority order; return as soon as a match is found.
-			if (ContainsAny(normalizedLabel, BugKeywords))
+			if (ContainsAny(normalizedLabel, NormalizedBugKeywords))
 			{
 				return Bug;
 			}
 
-			if (ContainsAny(normalizedLabel, VerifiedKeywords))
+			if (ContainsAny(normalizedLabel, NormalizedVerifiedKeywords))
 			{
 				return Verified;
 			}
 
-			if (ContainsAny(normalizedLabel, FixKeywords))
+			if (ContainsAny(normalizedLabel, NormalizedFixKeywords))
 			{
 				return Fix;
 			}
 
-			if (ContainsAny(normalizedLabel, RootCauseKeywords))
+			if (ContainsAny(normalizedLabel, NormalizedRootCauseKeywords))
 			{
 				return RootCause;
 			}
 
-			if (ContainsAny(normalizedLabel, TheoryKeywords))
+			if (ContainsAny(normalizedLabel, NormalizedTheoryKeywords))
 			{
 				return Theory;
 			}
 
-			if (ContainsAny(normalizedLabel, QuestionKeywords))
+			if (ContainsAny(normalizedLabel, NormalizedQuestionKeywords))
 			{
 				return Question;
 			}
@@ -104,7 +110,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			foreach (var keyword in keywords)
 			{
-				if (normalizedLabel.IndexOf(NormalizeForMatching(keyword), StringComparison.OrdinalIgnoreCase) >= 0)
+				if (normalizedLabel.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0)
 				{
 					return true;
 				}
@@ -124,6 +130,17 @@ namespace BlueDotBrigade.Weevil
 				.Replace(" ", string.Empty, StringComparison.Ordinal)
 				.Replace("_", string.Empty, StringComparison.Ordinal)
 				.Replace("-", string.Empty, StringComparison.Ordinal);
+		}
+
+		private static string[] NormalizeKeywords(string[] keywords)
+		{
+			var normalizedKeywords = new string[keywords.Length];
+			for (var i = 0; i < keywords.Length; i++)
+			{
+				normalizedKeywords[i] = NormalizeForMatching(keywords[i]);
+			}
+
+			return normalizedKeywords;
 		}
 	}
 }

@@ -63,6 +63,11 @@
                                 }
 
                                 var displayPart = parameter as string;
+                                if (string.IsNullOrEmpty(displayPart))
+                                {
+                                        return $"{symbol} {bookmarkText}";
+                                }
+
                                 if (string.Equals(displayPart, "Symbol", StringComparison.OrdinalIgnoreCase))
                                 {
                                         return symbol;
