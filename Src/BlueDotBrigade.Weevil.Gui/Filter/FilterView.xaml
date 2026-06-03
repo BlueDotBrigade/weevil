@@ -54,6 +54,7 @@
         <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding GoToBookmark3Command}" />
         <KeyBinding Key="D4" Modifiers="Ctrl" Command="{Binding GoToBookmark4Command}" />
         <KeyBinding Key="D5" Modifiers="Ctrl" Command="{Binding GoToBookmark5Command}" />
+        <KeyBinding Key="F2" Command="{Binding RenameBookmarkCommand}" />
 
         <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
         <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />

@@ -117,6 +117,7 @@
             <MenuItem Header="Go To Bookmark 1" Command="{Binding GoToBookmark1Command}" InputGestureText="Ctrl+1" />
             <MenuItem Header="Go To Bookmark 5" Command="{Binding GoToBookmark5Command}" InputGestureText="Ctrl+5" />
             <MenuItem Header="Remove Bookmark" Command="{Binding RemoveBookmarkCommand}"/>
+            <MenuItem Header="Rename Bookmark" Command="{Binding RenameBookmarkCommand}" InputGestureText="F2"/>
             <MenuItem Header="Remove All Bookmarks" Command="{Binding RemoveAllBookmarksCommand}" />
             <Separator/>
             <MenuItem Header="Previous Comment" Command="{Binding GoToPreviousCommentCommand}" InputGestureText="Ctrl+Shift+Minus" />

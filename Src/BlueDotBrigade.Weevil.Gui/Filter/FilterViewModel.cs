@@ -2048,6 +2048,38 @@
 			}
 		}
 
+		private void RenameBookmark()
+		{
+			if (_engine.Selector.Selected.Count == 1)
+			{
+				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+				if (_engine.Bookmarks.TryGetBookmark(selectedLineNumber, out var bookmark))
+				{
+					string newName = _dialogBox.ShowUserPrompt(
+						"Rename Bookmark",
+						"Name:",
+						bookmark.Name);
+
+					// If user cancels dialog, do not rename bookmark (standard Windows behavior)
+					if (!string.IsNullOrWhiteSpace(newName))
+					{
+						_engine.Bookmarks.Rename(selectedLineNumber, newName);
+						RaiseBookmarksChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+					}
+				}
+				else
+				{
+					MessageBox.Show("The selected record does not have a bookmark.", "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+				}
+			}
+			else
+			{
+				MessageBox.Show("A single record must be selected in order to rename a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+		}
+
 		private void RemoveAllBookmarks()
 		{
 			MessageBoxResult userSelection = MessageBox.Show(

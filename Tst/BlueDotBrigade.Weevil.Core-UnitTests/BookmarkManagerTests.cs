@@ -183,5 +183,50 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                         found.Should().BeFalse();
                         bookmark.Should().BeNull();
                 }
+
+                [TestMethod]
+                public void Rename_ExistingBookmark_UpdatesName()
+                {
+                        // Arrange
+                        _bookmarkManager.Create(1, "OldName", 42);
+
+                        // Act
+                        var wasRenamed = _bookmarkManager.Rename(42, "NewName");
+
+                        // Assert
+                        wasRenamed.Should().BeTrue();
+                        _bookmarkManager.Bookmarks.Length.Should().Be(1);
+                        _bookmarkManager.Bookmarks[0].Name.Should().Be("NewName");
+                        _bookmarkManager.Bookmarks[0].Id.Should().Be(1);
+                        _bookmarkManager.Bookmarks[0].Record.LineNumber.Should().Be(42);
+                }
+
+                [TestMethod]
+                public void Rename_NonExistingLineNumber_ReturnsFalse()
+                {
+                        // Arrange
+                        _bookmarkManager.Create(1, "Test", 10);
+
+                        // Act
+                        var wasRenamed = _bookmarkManager.Rename(999, "NewName");
+
+                        // Assert
+                        wasRenamed.Should().BeFalse();
+                        _bookmarkManager.Bookmarks[0].Name.Should().Be("Test");
+                }
+
+                [TestMethod]
+                public void Rename_EmptyName_UsesFallbackName()
+                {
+                        // Arrange
+                        _bookmarkManager.Create(-1, "OriginalName", 10);
+
+                        // Act
+                        var wasRenamed = _bookmarkManager.Rename(10, string.Empty);
+
+                        // Assert
+                        wasRenamed.Should().BeTrue();
+                        _bookmarkManager.Bookmarks[0].Name.Should().Be("Bookmark");
+                }
         }
 }
