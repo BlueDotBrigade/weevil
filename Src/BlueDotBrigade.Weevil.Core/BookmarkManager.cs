@@ -79,7 +79,7 @@ namespace BlueDotBrigade.Weevil
 					? "Bookmark"
 					: newName;
 
-				var renamed = new Bookmark(existing.Id, effectiveName, lineNumber);
+				var renamed = new Bookmark(existing.Id, effectiveName, existing.Record);
 				_bookmarks.Remove(existing);
 				_bookmarks.Add(renamed);
 				return true;
