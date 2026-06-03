@@ -8,6 +8,7 @@
 
     <SolidColorBrush  x:Key="TextForeground" Color="{StaticResource TextColor}" />
     <SolidColorBrush  x:Key="TextAccentForeground" Color="Gray" />
+    <SolidColorBrush x:Key="BookmarkSymbolForeground" Color="{StaticResource PrimaryColor}" />
 
     <system:Double x:Key="ButtonWidth">100</system:Double>
     <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>
@@ -15,4 +16,5 @@
 
     <system:Double x:Key="ApplicationFontSize">12</system:Double>
     <system:Double x:Key="RowFontSize">11</system:Double>
+    <system:Double x:Key="BookmarkSymbolFontSize">13</system:Double>
 </ResourceDictionary>

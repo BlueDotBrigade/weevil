@@ -50,18 +50,30 @@
 
                         if (viewModel.TryGetBookmark(record, out var bookmark))
                         {
-                                // Display format: * {Id} : {Name} (if ID is set)
-                                // Tooltip format: Bookmark: {Name} (Ctrl+{Id})
-                                // Otherwise: * {Name} or Bookmark: {Name}
                                 var symbol = BookmarkSymbol.GetSymbol(bookmark.Name);
-                                if (bookmark.Id > 0)
+                                var bookmarkText = bookmark.Id > 0
+                                        ? $"{bookmark.Id} : {bookmark.Name} "
+                                        : $"{bookmark.Name} ";
+
+                                if (isToolTip)
                                 {
-                                        return isToolTip ? $"Bookmark: {bookmark.Name} (Ctrl+{bookmark.Id})" : $"{symbol} {bookmark.Id} : {bookmark.Name} ";
+                                        return bookmark.Id > 0
+                                                ? $"Bookmark: {bookmark.Name} (Ctrl+{bookmark.Id})"
+                                                : $"Bookmark: {bookmark.Name}";
                                 }
-                                else
+
+                                var displayPart = parameter as string;
+                                if (string.Equals(displayPart, "Symbol", StringComparison.OrdinalIgnoreCase))
                                 {
-                                        return isToolTip ? $"Bookmark: {bookmark.Name}" : $"{symbol} {bookmark.Name} ";
+                                        return symbol;
                                 }
+
+                                if (string.Equals(displayPart, "Details", StringComparison.OrdinalIgnoreCase))
+                                {
+                                        return bookmarkText;
+                                }
+
+                                return $"{symbol} {bookmarkText}";
                         }
 
                         return string.Empty;

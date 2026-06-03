@@ -400,21 +400,34 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
-                                                <TextBlock.ToolTip>
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel.ToolTip>
                                                     <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
                                                         <Binding Path="." />
                                                         <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
                                                         <Binding Source="True" />
                                                     </MultiBinding>
-                                                </TextBlock.ToolTip>
-                                                <TextBlock.Text>
-                                                    <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
-                                                        <Binding Path="." />
-                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
+                                                </StackPanel.ToolTip>
+                                                <TextBlock FontWeight="Heavy"
+                                                           FontSize="{DynamicResource BookmarkSymbolFontSize}"
+                                                           Foreground="{StaticResource BookmarkSymbolForeground}"
+                                                           Margin="0,0,2,0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Symbol">
+                                                            <Binding Path="." />
+                                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Details">
+                                                            <Binding Path="." />
+                                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </Border>
                                         <Border 
                                             x:Name="TruncatedTag"
