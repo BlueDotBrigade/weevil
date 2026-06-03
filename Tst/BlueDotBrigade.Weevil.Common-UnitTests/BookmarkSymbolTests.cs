@@ -21,6 +21,14 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 			BookmarkSymbol.GetSymbol("Interesting sequence of events").Should().Be(BookmarkSymbol.Default);
 		}
 
+		[DataTestMethod]
+		[DataRow("bug found in parser")]
+		[DataRow("Bug investigation")]
+		public void GetSymbol_BugKeyword_ReturnsBug(string label)
+		{
+			BookmarkSymbol.GetSymbol(label).Should().Be(BookmarkSymbol.Bug);
+		}
+
 		// ── Question keywords ────────────────────────────────────────────────
 
 		[DataTestMethod]
@@ -58,6 +66,22 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 		public void GetSymbol_RootCauseKeyword_ReturnsRootCause(string label)
 		{
 			BookmarkSymbol.GetSymbol(label).Should().Be(BookmarkSymbol.RootCause);
+		}
+
+		[DataTestMethod]
+		[DataRow("root-cause identified")]
+		[DataRow("root_cause identified")]
+		public void GetSymbol_RootCauseKeywordsWithSpacesUnderscoresOrHyphens_AreMatched(string label)
+		{
+			BookmarkSymbol.GetSymbol(label).Should().Be(BookmarkSymbol.RootCause);
+		}
+
+		[DataTestMethod]
+		[DataRow("work-around for customer")]
+		[DataRow("work_around for customer")]
+		public void GetSymbol_FixKeywordsWithSpacesUnderscoresOrHyphens_AreMatched(string label)
+		{
+			BookmarkSymbol.GetSymbol(label).Should().Be(BookmarkSymbol.Fix);
 		}
 
 		// ── Fix keywords ──────────────────────────────────────────────────────
@@ -130,6 +154,12 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 		{
 			// "Theory" has higher priority than "Question"
 			BookmarkSymbol.GetSymbol("Theory: why did this fail?").Should().Be(BookmarkSymbol.Theory);
+		}
+
+		[TestMethod]
+		public void GetSymbol_BugAndVerifiedKeywords_ReturnsBug()
+		{
+			BookmarkSymbol.GetSymbol("Verified bug after retest").Should().Be(BookmarkSymbol.Bug);
 		}
 	}
 }
