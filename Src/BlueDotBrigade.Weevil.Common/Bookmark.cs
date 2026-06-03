@@ -39,5 +39,12 @@ namespace BlueDotBrigade.Weevil
 				ByteOffset = -1
 			};
 		}
+
+		public Bookmark(int id, string name, RelatesTo record)
+		{
+			this.Id = id;
+			this.Name = name;
+			this.Record = record;
+		}
 	}
 }

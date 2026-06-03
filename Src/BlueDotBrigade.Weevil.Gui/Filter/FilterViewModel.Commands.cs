@@ -331,6 +331,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand RemoveBookmarkCommand => new UiBoundCommand(RemoveBookmark, () => this.IsMenuEnabled);
 
 		[NotObservable]
+		public ICommand RenameBookmarkCommand => new UiBoundCommand(RenameBookmark, () => this.IsMenuEnabled);
+
+		[NotObservable]
                 public ICommand RemoveAllBookmarksCommand => new UiBoundCommand(RemoveAllBookmarks, () => this.IsMenuEnabled);
 
                 [NotObservable]

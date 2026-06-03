@@ -64,6 +64,28 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
+		public bool Rename(int lineNumber, string newName)
+		{
+			lock (_gate)
+			{
+				var existing = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
+
+				if (existing == null)
+				{
+					return false;
+				}
+
+				var effectiveName = string.IsNullOrEmpty(newName)
+					? "Bookmark"
+					: newName;
+
+				var renamed = new Bookmark(existing.Id, effectiveName, existing.Record);
+				_bookmarks.Remove(existing);
+				_bookmarks.Add(renamed);
+				return true;
+			}
+		}
+
 		public bool TryGetBookmarkName(int lineNumber, out string bookmarkName)
 		{			
 			lock (_gate)

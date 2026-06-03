@@ -8,6 +8,8 @@
 
 		void Create(int id, string bookmarkName, int lineNumber);
 
+		bool Rename(int lineNumber, string newName);
+
 		void Clear();
 
 		bool Clear(int lineNumber);
