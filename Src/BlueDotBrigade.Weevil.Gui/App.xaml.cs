@@ -13,6 +13,13 @@
 
 	public partial class App : Application
 	{
+		private const string BuildConfiguration =
+#if DEBUG
+			"DEBUG";
+#else
+			"RELEASE";
+#endif
+
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
 
 		public App()
@@ -103,6 +110,8 @@
 
 				Log.Default.Write(LogSeverityType.Information, "Weevil application is initializing logging...");
 				Log.Register(new NLogWriter());
+				Log.Default.Write(LogSeverityType.Information, $"Build configuration={BuildConfiguration}");
+				Log.Default.Write($"Weevil command line parameters. Arguments={Environment.GetCommandLineArgs().Length}");
 
 				Log.Default.Write(
 					LogSeverityType.Information,
