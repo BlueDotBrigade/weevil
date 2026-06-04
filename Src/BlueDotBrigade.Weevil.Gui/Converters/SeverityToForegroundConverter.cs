@@ -10,6 +10,8 @@
 	[ValueConversion(typeof(SeverityType), typeof(SolidColorBrush))]
 	internal class SeverityToForegroundConverter : IValueConverter
 	{
+		private static readonly SolidColorBrush FallbackSeverityBrush = Brushes.Transparent;
+
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			var result = DependencyProperty.UnsetValue; // signal that conversion failed
@@ -22,15 +24,15 @@
 					{
 
 						case SeverityType.Warning:
-							result = ResolveBrush("SeverityWarningForegroundBrush");
+							result = ResolveBrush("SeverityWarningForegroundBrush", FallbackSeverityBrush);
 							break;
 
 						case SeverityType.Error:
-							result = ResolveBrush("SeverityErrorForegroundBrush");
+							result = ResolveBrush("SeverityErrorForegroundBrush", FallbackSeverityBrush);
 							break;
 
 						case SeverityType.Critical:
-							result = ResolveBrush("SeverityCriticalForegroundBrush");
+							result = ResolveBrush("SeverityCriticalForegroundBrush", FallbackSeverityBrush);
 							break;
 
 						default:
@@ -48,9 +50,9 @@
 			throw new NotImplementedException();
 		}
 
-		private static object ResolveBrush(string resourceKey)
+		private static object ResolveBrush(string resourceKey, SolidColorBrush fallback)
 		{
-			return Application.Current?.TryFindResource(resourceKey) as SolidColorBrush ?? DependencyProperty.UnsetValue;
+			return Application.Current?.TryFindResource(resourceKey) as SolidColorBrush ?? fallback ?? DependencyProperty.UnsetValue;
 		}
 	}
 }
