@@ -18,6 +18,13 @@
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
 	{
+		private const string BuildConfiguration =
+#if DEBUG
+			"DEBUG";
+#else
+			"RELEASE";
+#endif
+
 		internal static Version ApplicationVersion { get; } = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0);
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
         internal static string TelemetrySource { get; } = TelemetryClientFactory.GetTelemetrySource();
@@ -29,7 +36,8 @@
 
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application has started.");
 			Log.Register(new NLogWriter());
-			Log.Default.Write($"Weevil console application is initializing... Arguments={Environment.GetCommandLineArgs().Length}");
+			Log.Default.Write(LogSeverityType.Information, $"Build configuration={BuildConfiguration}");
+			Log.Default.Write($"Weevil command line parameters. Arguments={Environment.GetCommandLineArgs().Length}");
 
 			var telemetryClient = TelemetryClientFactory.Create();
 			TelemetrySessionLifecycle.Shared.Configure(telemetryClient);

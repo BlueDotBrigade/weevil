@@ -2,11 +2,16 @@
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">
     <WeevilReleaseVersion>2.12.0</WeevilReleaseVersion>
     <VersionPrefix>$(WeevilReleaseVersion)</VersionPrefix>
-    <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
+    <BuildRevisionRaw Condition="'$(BuildRevisionRaw)' == '' and '$(BUILD_BUILDID)' != ''">$(BUILD_BUILDID)</BuildRevisionRaw>
+    <BuildRevisionRaw Condition="'$(BuildRevisionRaw)' == '' and '$(GITHUB_RUN_NUMBER)' != ''">$(GITHUB_RUN_NUMBER)</BuildRevisionRaw>
+    <BuildRevisionRaw Condition="'$(BuildRevisionRaw)' == ''">$([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds())</BuildRevisionRaw>
+    <BuildRevision Condition="'$(BuildRevision)' == ''">$([MSBuild]::Modulo($([System.Int64]::Parse('$(BuildRevisionRaw)')), 65535))</BuildRevision>
     <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(BUILD_BUILDID)' != '' or '$(GITHUB_RUN_NUMBER)' != ''">true</ContinuousIntegrationBuild>
     <Version>$(VersionPrefix)</Version>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
-    <FileVersion>$(VersionPrefix).$(BuildNumber)</FileVersion>
-    <InformationalVersion>$(VersionPrefix)+$(Configuration)</InformationalVersion>
+    <FileVersion>$(VersionPrefix).$(BuildRevision)</FileVersion>
+    <InformationalVersion>$(VersionPrefix)+$(Configuration).$(BuildRevision)</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>
