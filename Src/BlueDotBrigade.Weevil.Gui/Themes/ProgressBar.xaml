@@ -19,11 +19,11 @@
                              EndPoint="1,0"
                              StartPoint="0,0">
       <LinearGradientBrush.GradientStops>
-         <GradientStop Color="{StaticResource ProgressGradientBackgroundStartColor}"
+         <GradientStop Color="{StaticResource ProgressGradientBackgroundEdgeColor}"
 		                      Offset="0"/>
          <GradientStop Color="{StaticResource ProgressGradientBackgroundMiddleColor}"
 		                      Offset="0.5"/>
-         <GradientStop Color="{StaticResource ProgressGradientBackgroundEndColor}"
+         <GradientStop Color="{StaticResource ProgressGradientBackgroundEdgeColor}"
 		                      Offset="1"/>
       </LinearGradientBrush.GradientStops>
    </LinearGradientBrush>
