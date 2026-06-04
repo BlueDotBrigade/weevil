@@ -7,7 +7,7 @@
 		 - WelcomeDlg
 		 - LicenseAgreementDlg
 		 - InstallDirDlg
-		 - TelemetryDialog   <-- inserted
+		 - TelemetryDialog   <<< inserted
 		 - VerifyReadyDlg
 		 - DiskCostDlg
 
@@ -15,7 +15,7 @@
 		 - MaintenanceWelcomeDlg
 		 - MaintenanceTypeDlg
 		 - InstallDirDlg
-		 - TelemetryDialog   <-- inserted
+		 - TelemetryDialog   <<< inserted
 		 - VerifyReadyDlg
 
 		Patch dialog sequence:
