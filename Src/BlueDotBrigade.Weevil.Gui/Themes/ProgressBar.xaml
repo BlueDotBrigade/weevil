@@ -9,9 +9,9 @@
                              EndPoint="0,1"
                              StartPoint="0,0">
       <LinearGradientBrush.GradientStops>
-         <GradientStop Color="{StaticResource ProgressBarBorderStartColor}"
+         <GradientStop Color="{StaticResource ProgressGradientBorderStartColor}"
 		                      Offset="0"/>
-         <GradientStop Color="{StaticResource ProgressBarBorderEndColor}"
+         <GradientStop Color="{StaticResource ProgressGradientBorderEndColor}"
 		                      Offset="1"/>
       </LinearGradientBrush.GradientStops>
    </LinearGradientBrush>
@@ -19,11 +19,11 @@
                              EndPoint="1,0"
                              StartPoint="0,0">
       <LinearGradientBrush.GradientStops>
-         <GradientStop Color="{StaticResource ProgressBarBackgroundStartColor}"
+         <GradientStop Color="{StaticResource ProgressGradientBackgroundStartColor}"
 		                      Offset="0"/>
-         <GradientStop Color="{StaticResource ProgressBarBackgroundMiddleColor}"
+         <GradientStop Color="{StaticResource ProgressGradientBackgroundMiddleColor}"
 		                      Offset="0.5"/>
-         <GradientStop Color="{StaticResource ProgressBarBackgroundEndColor}"
+         <GradientStop Color="{StaticResource ProgressGradientBackgroundEndColor}"
 		                      Offset="1"/>
       </LinearGradientBrush.GradientStops>
    </LinearGradientBrush>
@@ -41,7 +41,7 @@
                            <VisualState x:Name="Indeterminate" />
                         </VisualStateGroup>
                      </VisualStateManager.VisualStateGroups>
-                     <Border x:Name="PART_Track" Margin="0" BorderThickness="0" CornerRadius="2" BorderBrush="{StaticResource ProgressBarTrackBorderBrush}" />
+                     <Border x:Name="PART_Track" Margin="0" BorderThickness="0" CornerRadius="2" BorderBrush="{StaticResource ProgressTrackBorderBrush}" />
                      <Border x:Name="PART_Indicator" Margin="0" BorderThickness="0" CornerRadius="2" Background="{StaticResource ProgressBarTrackBackgroundBrush}" HorizontalAlignment="Left" ClipToBounds="True">
                         <Border x:Name="DiagonalDecorator" Width="5000">
                            <Border.Background>
@@ -50,7 +50,7 @@
                                     <TranslateTransform X="0" Y="0" />
                                  </DrawingBrush.RelativeTransform>
                                  <DrawingBrush.Drawing>
-                                    <GeometryDrawing Brush="{StaticResource ProgressBarOverlayBrush}" Geometry="M10,0 22,0 12,25 0,22 Z" />
+                                    <GeometryDrawing Brush="{StaticResource ProgressOverlayBrush}" Geometry="M10,0 22,0 12,25 0,22 Z" />
                                  </DrawingBrush.Drawing>
                               </DrawingBrush>
                            </Border.Background>

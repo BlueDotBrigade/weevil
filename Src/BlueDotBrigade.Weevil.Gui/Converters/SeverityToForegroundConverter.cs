@@ -24,15 +24,15 @@
 					{
 
 						case SeverityType.Warning:
-							result = ResolveBrush("SeverityWarningForegroundBrush", FallbackSeverityBrush);
+							result = Application.Current?.TryFindResource("SeverityWarningForegroundBrush") as SolidColorBrush ?? FallbackSeverityBrush ?? DependencyProperty.UnsetValue;
 							break;
 
 						case SeverityType.Error:
-							result = ResolveBrush("SeverityErrorForegroundBrush", FallbackSeverityBrush);
+							result = Application.Current?.TryFindResource("SeverityErrorForegroundBrush") as SolidColorBrush ?? FallbackSeverityBrush ?? DependencyProperty.UnsetValue;
 							break;
 
 						case SeverityType.Critical:
-							result = ResolveBrush("SeverityCriticalForegroundBrush", FallbackSeverityBrush);
+							result = Application.Current?.TryFindResource("SeverityCriticalForegroundBrush") as SolidColorBrush ?? FallbackSeverityBrush ?? DependencyProperty.UnsetValue;
 							break;
 
 						default:
@@ -50,9 +50,5 @@
 			throw new NotImplementedException();
 		}
 
-		private static object ResolveBrush(string resourceKey, SolidColorBrush fallback)
-		{
-			return Application.Current?.TryFindResource(resourceKey) as SolidColorBrush ?? fallback ?? DependencyProperty.UnsetValue;
-		}
 	}
 }
