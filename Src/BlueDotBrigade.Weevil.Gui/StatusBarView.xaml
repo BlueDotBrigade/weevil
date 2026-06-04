@@ -238,7 +238,7 @@
                               VerticalAlignment="Center" 
                               IsReadOnly="True" 
                               BorderThickness="0,0,0,0" 
-                              Background="Transparent"/>
+                              Background="{StaticResource TransparentBrush}"/>
 
                     </StackPanel>
                     <!-- Container for line number controls -->
@@ -262,7 +262,7 @@
                              VerticalAlignment="Center" 
                              IsReadOnly="True" 
                              BorderThickness="0,0,0,0" 
-                             Background="Transparent"/>
+                             Background="{StaticResource TransparentBrush}"/>
 
                     </StackPanel>
                 </Grid>

@@ -157,7 +157,7 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   guiControls:MdixComboBoxBehavior.CaretBrush="Yellow"
+                   guiControls:MdixComboBoxBehavior.CaretBrush="{StaticResource FilterComboBoxCaretBrush}"
                    materialDesign:HintAssist.Hint="Include (Alt+I)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
@@ -187,7 +187,7 @@
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
-                   guiControls:MdixComboBoxBehavior.CaretBrush="Yellow"
+                   guiControls:MdixComboBoxBehavior.CaretBrush="{StaticResource FilterComboBoxCaretBrush}"
                    materialDesign:HintAssist.Hint="Exclude (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
@@ -271,8 +271,8 @@
                     <Setter Property="FontSize" Value="{DynamicResource RowFontSize}" />
                     <Setter Property="SnapsToDevicePixels" Value="True" />
                     <Setter Property="OverridesDefaultStyle" Value="True" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource TransparentBrush}" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
@@ -296,12 +296,12 @@
                         </Trigger>
                         <Trigger Property="ItemsControl.AlternationIndex" Value="1">
                             <Setter Property="Foreground" Value="{Binding Severity, Converter={StaticResource SeverityForegroundConverter}, FallbackValue={StaticResource MaterialDesignBody}, Mode=OneWay}"/>
-                            <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue=Transparent, Mode=OneWay}"/>
+                            <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue={StaticResource TransparentBrush}, Mode=OneWay}"/>
                         </Trigger>
 
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground" Value="WhiteSmoke"/>
-                            <Setter Property="Background" Value="Black"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+                            <Setter Property="Background" Value="{StaticResource FilterSelectedBackgroundBrush}"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
@@ -325,7 +325,7 @@
                                     IsEnabled="True" 
                                     MinWidth="150"
                                     TextWrapping="Wrap" 
-                                    guiControls:MdixComboBoxBehavior.CaretBrush="Yellow"
+                                    guiControls:MdixComboBoxBehavior.CaretBrush="{StaticResource FilterComboBoxCaretBrush}"
                                     controls:TextBoxBehavior.AutoSelectEnabled="True">
                                 </TextBox>
                             </DataTemplate>
@@ -355,9 +355,9 @@
                                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListViewItem}}" />
                                     <StackPanel Orientation="Horizontal">
                                         <Border x:Name="RegionTag" 
-                                                BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
+                                                BorderBrush="{StaticResource FilterTagBorderBrush}" BorderThickness="1" CornerRadius="4" 
                                                 Margin="0,2,4,0" 
-                                                Background="#3c3c3c">
+                                                Background="{StaticResource FilterTagBackgroundBrush}">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Visible"/>
@@ -368,7 +368,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                            <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource FilterTagForegroundBrush}">
                                                 <TextBlock.ToolTip>
                                                     <MultiBinding Converter="{StaticResource RegionStringConverter}">
                                                         <Binding Path="." />
@@ -387,9 +387,9 @@
                                             </TextBlock>
                                         </Border>
                                         <Border x:Name="BookmarkTag"
-                                                BorderBrush="#949494" BorderThickness="1" CornerRadius="4"
+                                                BorderBrush="{StaticResource FilterTagBorderBrush}" BorderThickness="1" CornerRadius="4"
                                                 Margin="0,2,4,0"
-                                                Background="#3c3c3c">
+                                                Background="{StaticResource FilterTagBackgroundBrush}">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Visible"/>
@@ -419,7 +419,7 @@
                                                         </MultiBinding>
                                                     </TextBlock.Text>
                                                 </TextBlock>
-                                                <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
+                                                <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource FilterTagForegroundBrush}">
                                                     <TextBlock.Text>
                                                         <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Details">
                                                             <Binding Path="." />
@@ -431,9 +431,9 @@
                                         </Border>
                                         <Border 
                                             x:Name="TruncatedTag"
-                                            BorderBrush="#949494" BorderThickness="1" CornerRadius="4" 
+                                            BorderBrush="{StaticResource FilterTagBorderBrush}" BorderThickness="1" CornerRadius="4" 
                                             Margin="0,2,4,0" 
-                                            Background="#3c3c3c">
+                                            Background="{StaticResource FilterTagBackgroundBrush}">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Visible"/>
@@ -444,7 +444,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
+                                            <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="{StaticResource FilterTagForegroundBrush}"
                                                     Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
                                                     ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
                                         </Border>
@@ -461,7 +461,7 @@
                   VerticalAlignment="Center" HorizontalAlignment="Center" 
                   IsVisibleChanged="OnProgressBarVisibilityChanged">
             <TextBlock Text="Boring log file for tasty bytes..." />
-            <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
+            <ProgressBar Width="200" Height="15" Foreground="{StaticResource FilterProgressForegroundBrush}" BorderBrush="{StaticResource FilterProgressBorderBrush}" 
                       Value="0" 
                       Maximum="100"
                       IsIndeterminate="True"  />

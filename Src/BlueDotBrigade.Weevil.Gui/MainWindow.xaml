@@ -9,7 +9,7 @@
         Title="{Binding ApplicationTitle}" Height="450" Width="800"
 		  WindowStartupLocation="CenterScreen" WindowState="Maximized"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        TextElement.Foreground="WhiteSmoke"
+        TextElement.Foreground="{StaticResource TextForeground}"
         TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.FontWeight="Regular"
         TextOptions.TextFormattingMode="Ideal"

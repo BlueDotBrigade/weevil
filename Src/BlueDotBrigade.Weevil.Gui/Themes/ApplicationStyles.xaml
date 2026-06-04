@@ -5,10 +5,49 @@
     <Color x:Key="PrimaryColor">#900A22</Color>
     <Color x:Key="SecondaryColor">Gray</Color>
     <Color x:Key="TextColor">WhiteSmoke</Color>
+    <Color x:Key="SeverityWarningBackgroundColor">#fff5cf</Color>
+    <Color x:Key="SeverityErrorBackgroundColor">#ffe1e4</Color>
+    <Color x:Key="SeverityCriticalBackgroundColor">#9C0006</Color>
+    <Color x:Key="SeverityWarningForegroundColor">#9C6500</Color>
+    <Color x:Key="SeverityErrorForegroundColor">#900A22</Color>
+    <Color x:Key="SeverityCriticalForegroundColor">WhiteSmoke</Color>
+    <Color x:Key="FilterTagBorderColor">#949494</Color>
+    <Color x:Key="FilterTagBackgroundColor">#3c3c3c</Color>
+    <Color x:Key="FilterTagForegroundColor">#C0C0C0</Color>
+    <Color x:Key="FilterComboBoxCaretColor">Yellow</Color>
+    <Color x:Key="FilterProgressForegroundColor">LightSkyBlue</Color>
+    <Color x:Key="FilterProgressBorderColor">Blue</Color>
+    <Color x:Key="FilterSelectedBackgroundColor">Black</Color>
+    <Color x:Key="ValidationErrorColor">Red</Color>
+    <Color x:Key="ProgressBarBorderStartColor">#B2B2B2</Color>
+    <Color x:Key="ProgressBarBorderEndColor">#8C8C8C</Color>
+    <Color x:Key="ProgressBarBackgroundStartColor">#BABABA</Color>
+    <Color x:Key="ProgressBarBackgroundMiddleColor">#C7C7C7</Color>
+    <Color x:Key="ProgressBarBackgroundEndColor">#BABABA</Color>
+    <Color x:Key="ProgressBarTrackBorderColor">Orange</Color>
+    <Color x:Key="ProgressBarOverlayColor">#20FFFFFF</Color>
+    <Color x:Key="TransparentColor">Transparent</Color>
 
     <SolidColorBrush  x:Key="TextForeground" Color="{StaticResource TextColor}" />
     <SolidColorBrush  x:Key="TextAccentForeground" Color="Gray" />
     <SolidColorBrush x:Key="BookmarkSymbolForeground" Color="{StaticResource PrimaryColor}" />
+    <SolidColorBrush x:Key="SeverityWarningBackgroundBrush" Color="{StaticResource SeverityWarningBackgroundColor}" />
+    <SolidColorBrush x:Key="SeverityErrorBackgroundBrush" Color="{StaticResource SeverityErrorBackgroundColor}" />
+    <SolidColorBrush x:Key="SeverityCriticalBackgroundBrush" Color="{StaticResource SeverityCriticalBackgroundColor}" />
+    <SolidColorBrush x:Key="SeverityWarningForegroundBrush" Color="{StaticResource SeverityWarningForegroundColor}" />
+    <SolidColorBrush x:Key="SeverityErrorForegroundBrush" Color="{StaticResource SeverityErrorForegroundColor}" />
+    <SolidColorBrush x:Key="SeverityCriticalForegroundBrush" Color="{StaticResource SeverityCriticalForegroundColor}" />
+    <SolidColorBrush x:Key="FilterTagBorderBrush" Color="{StaticResource FilterTagBorderColor}" />
+    <SolidColorBrush x:Key="FilterTagBackgroundBrush" Color="{StaticResource FilterTagBackgroundColor}" />
+    <SolidColorBrush x:Key="FilterTagForegroundBrush" Color="{StaticResource FilterTagForegroundColor}" />
+    <SolidColorBrush x:Key="FilterComboBoxCaretBrush" Color="{StaticResource FilterComboBoxCaretColor}" />
+    <SolidColorBrush x:Key="FilterProgressForegroundBrush" Color="{StaticResource FilterProgressForegroundColor}" />
+    <SolidColorBrush x:Key="FilterProgressBorderBrush" Color="{StaticResource FilterProgressBorderColor}" />
+    <SolidColorBrush x:Key="FilterSelectedBackgroundBrush" Color="{StaticResource FilterSelectedBackgroundColor}" />
+    <SolidColorBrush x:Key="ValidationErrorBrush" Color="{StaticResource ValidationErrorColor}" />
+    <SolidColorBrush x:Key="ProgressBarTrackBorderBrush" Color="{StaticResource ProgressBarTrackBorderColor}" />
+    <SolidColorBrush x:Key="ProgressBarOverlayBrush" Color="{StaticResource ProgressBarOverlayColor}" />
+    <SolidColorBrush x:Key="TransparentBrush" Color="{StaticResource TransparentColor}" />
 
     <system:Double x:Key="ButtonWidth">100</system:Double>
     <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>

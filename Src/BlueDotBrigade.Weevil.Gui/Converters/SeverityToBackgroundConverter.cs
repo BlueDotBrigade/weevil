@@ -10,10 +10,6 @@
 	[ValueConversion(typeof(SeverityType), typeof(SolidColorBrush))]
 	public class SeverityToBackgroundConverter : IValueConverter
 	{
-		private static readonly SolidColorBrush LightYellow = new BrushConverter().ConvertFrom("#fff5cf") as SolidColorBrush;
-		private static readonly SolidColorBrush LightRed = new BrushConverter().ConvertFrom("#ffe1e4") as SolidColorBrush;
-		private static readonly SolidColorBrush DarkRed = new BrushConverter().ConvertFrom("#9C0006") as SolidColorBrush;
-
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			var result = DependencyProperty.UnsetValue; // signal that conversion failed
@@ -25,15 +21,15 @@
 					switch (severity)
 					{
 						case SeverityType.Warning:
-							result = LightYellow;
+							result = ResolveBrush("SeverityWarningBackgroundBrush");
 							break;
 
 						case SeverityType.Error:
-							result = LightRed;
+							result = ResolveBrush("SeverityErrorBackgroundBrush");
 							break;
 
 						case SeverityType.Critical:
-							result = DarkRed;
+							result = ResolveBrush("SeverityCriticalBackgroundBrush");
 							break;
 
 						default:
@@ -49,6 +45,11 @@
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			throw new NotImplementedException();
+		}
+
+		private static object ResolveBrush(string resourceKey)
+		{
+			return Application.Current?.TryFindResource(resourceKey) as SolidColorBrush ?? DependencyProperty.UnsetValue;
 		}
 	}
 }

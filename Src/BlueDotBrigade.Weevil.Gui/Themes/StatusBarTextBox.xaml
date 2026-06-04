@@ -9,7 +9,7 @@
       <Setter Property="IsReadOnly" Value="True" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="Margin" Value="4, 0, 4, 0" />
-      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
       <Setter Property="controls:TextBoxBehavior.AutoSelectEnabled" Value="True" />
       <Setter Property="VerticalAlignment" Value="Center" />
    </Style>
