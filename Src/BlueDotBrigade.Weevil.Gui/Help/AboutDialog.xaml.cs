@@ -18,6 +18,13 @@
 	/// </summary>
 	public partial class AboutDialog : Window
 	{
+		private const string BuildConfiguration =
+#if DEBUG
+			"Debug";
+#else
+			"Release";
+#endif
+
 		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromMilliseconds(200);
 
 		internal static readonly DependencyProperty DetailsProperty =
@@ -93,8 +100,8 @@
 		{
 			return
 				$"Weevil: {weevilDisplayVersion}" + Environment.NewLine +
-				$"Weevil's core engine is powered by open source software." +
-				Environment.NewLine;
+				$"Weevil's core engine is powered by open source software." + Environment.NewLine +
+				$"Build Configuration: {BuildConfiguration}" + Environment.NewLine;
 		}
 
 		private static string GetMetrics(string sourceFilePath)
