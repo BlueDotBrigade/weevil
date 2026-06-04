@@ -9,6 +9,8 @@
     <Color x:Key="SeverityErrorBackgroundColor">#ffe1e4</Color>
     <Color x:Key="SeverityCriticalBackgroundColor">#9C0006</Color>
     <Color x:Key="SeverityWarningForegroundColor">#9C6500</Color>
+    <Color x:Key="SeverityErrorForegroundColor">#900A22</Color>
+    <Color x:Key="SeverityCriticalForegroundColor">WhiteSmoke</Color>
     <Color x:Key="BadgeBorderColor">#949494</Color>
     <Color x:Key="BadgeBackgroundColor">#3c3c3c</Color>
     <Color x:Key="BadgeForegroundColor">#C0C0C0</Color>
@@ -32,8 +34,8 @@
     <SolidColorBrush x:Key="SeverityErrorBackgroundBrush" Color="{StaticResource SeverityErrorBackgroundColor}" />
     <SolidColorBrush x:Key="SeverityCriticalBackgroundBrush" Color="{StaticResource SeverityCriticalBackgroundColor}" />
     <SolidColorBrush x:Key="SeverityWarningForegroundBrush" Color="{StaticResource SeverityWarningForegroundColor}" />
-    <SolidColorBrush x:Key="SeverityErrorForegroundBrush" Color="{StaticResource PrimaryColor}" />
-    <SolidColorBrush x:Key="SeverityCriticalForegroundBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="SeverityErrorForegroundBrush" Color="{StaticResource SeverityErrorForegroundColor}" />
+    <SolidColorBrush x:Key="SeverityCriticalForegroundBrush" Color="{StaticResource SeverityCriticalForegroundColor}" />
     <SolidColorBrush x:Key="BadgeBorderBrush" Color="{StaticResource BadgeBorderColor}" />
     <SolidColorBrush x:Key="BadgeBackgroundBrush" Color="{StaticResource BadgeBackgroundColor}" />
     <SolidColorBrush x:Key="BadgeForegroundBrush" Color="{StaticResource BadgeForegroundColor}" />
