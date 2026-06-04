@@ -11,6 +11,9 @@
 	public class SeverityToBackgroundConverter : IValueConverter
 	{
 		private static readonly SolidColorBrush FallbackSeverityBrush = Brushes.Transparent;
+		public SolidColorBrush WarningBrush { get; set; }
+		public SolidColorBrush ErrorBrush { get; set; }
+		public SolidColorBrush CriticalBrush { get; set; }
 
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
@@ -23,15 +26,15 @@
 					switch (severity)
 					{
 						case SeverityType.Warning:
-							result = Application.Current?.TryFindResource("SeverityWarningBackgroundBrush") as SolidColorBrush ?? FallbackSeverityBrush ?? DependencyProperty.UnsetValue;
+							result = this.WarningBrush ?? FallbackSeverityBrush;
 							break;
 
 						case SeverityType.Error:
-							result = Application.Current?.TryFindResource("SeverityErrorBackgroundBrush") as SolidColorBrush ?? FallbackSeverityBrush ?? DependencyProperty.UnsetValue;
+							result = this.ErrorBrush ?? FallbackSeverityBrush;
 							break;
 
 						case SeverityType.Critical:
-							result = Application.Current?.TryFindResource("SeverityCriticalBackgroundBrush") as SolidColorBrush ?? FallbackSeverityBrush ?? DependencyProperty.UnsetValue;
+							result = this.CriticalBrush ?? FallbackSeverityBrush;
 							break;
 
 						default:

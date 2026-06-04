@@ -19,8 +19,14 @@
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter" />
-            <converters:SeverityToForegroundConverter x:Key="SeverityForegroundConverter" />
+            <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter"
+                                                      WarningBrush="{StaticResource SeverityWarningBackgroundBrush}"
+                                                      ErrorBrush="{StaticResource SeverityErrorBackgroundBrush}"
+                                                      CriticalBrush="{StaticResource SeverityCriticalBackgroundBrush}" />
+            <converters:SeverityToForegroundConverter x:Key="SeverityForegroundConverter"
+                                                      WarningBrush="{StaticResource SeverityWarningForegroundBrush}"
+                                                      ErrorBrush="{StaticResource SeverityErrorForegroundBrush}"
+                                                      CriticalBrush="{StaticResource SeverityCriticalForegroundBrush}" />
             <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
             <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
