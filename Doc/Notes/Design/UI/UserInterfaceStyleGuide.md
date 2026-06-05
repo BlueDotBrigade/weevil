@@ -13,10 +13,10 @@
 ## Color Palette
 
 - Dialog box
-	- left side: #3c3c3c (dark grey)
+	- left side: #161B22 (near-black slate)
 - Dashboard
 	- Insight
-		- border + title bar: #3c3c3c (dark grey)
+		- border + title bar: #161B22 (near-black slate)
 
 ### Image Size
 
@@ -56,9 +56,10 @@ Has Data Requiring Attention
 
 ### Appendix C: Color Palette
 
-- Dark Mode Backgrounds → #1A1A1A, #2C2C2C, #3C3C3C
-- Text on Dark UI → #C0C0C0 (for contrast)
-- Borders & Dividers → #6B6B6B, #7F7F7F
+- Dark Mode Backgrounds → #0D1117, #161B22, #21262D
+- Text on Dark UI → #C9D1D9, #E6EDF3
+- Borders & Dividers → #30363D, #8B949E
+- Accent / Selection → #900A22 (burgundy)
 - Disabled States → #949494, #A9A9A9
 - Light Mode Backgrounds → #EEEEEE, #FAFAFA, #FFFFFF
 - Hover Effects → Slightly lighter or darker versions of primary elements
