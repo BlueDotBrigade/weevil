@@ -6,10 +6,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System.Xml.Linq;
 
 	[TestClass]
-	public class FilterViewPaletteTests
+	public class FilterViewXamlResourcesTests
 	{
 		[TestMethod]
-		public void GivenApplicationResources_WhenDarkPaletteOverridesAreConfigured_ThenNearBlackSurfacesRemainCentralized()
+		public void GivenApplicationResources_WhenInspected_ThenNearBlackSurfacesRemainCentralized()
 		{
 			var applicationStyles = XDocument.Load(LocateRepositoryFilePath("Src", "BlueDotBrigade.Weevil.Gui", "Themes", "ApplicationStyles.xaml"));
 			var app = XDocument.Load(LocateRepositoryFilePath("Src", "BlueDotBrigade.Weevil.Gui", "App.xaml"));
@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public void GivenFilterView_WhenResultsListRowsAreStyled_ThenAlternatingRowsAndSelectionUseDistinctPaletteBrushes()
+		public void GivenFilterView_WhenInspected_ThenAlternatingRowsAndSelectionUseDistinctPaletteBrushes()
 		{
 			var filterView = XDocument.Load(LocateRepositoryFilePath("Src", "BlueDotBrigade.Weevil.Gui", "Filter", "FilterView.xaml"));
 
