@@ -361,7 +361,7 @@
                                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListViewItem}}" />
                                     <StackPanel Orientation="Horizontal">
                                         <Border x:Name="RegionTag" 
-                                                BorderBrush="{StaticResource SubtleOutlineBrush}" BorderThickness="1" CornerRadius="4" 
+                                                BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4" 
                                                 Margin="0,2,4,0" 
                                                 Background="{StaticResource SecondaryBackgroundBrush}">
                                             <Border.Style>
@@ -374,7 +374,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource SecondaryForegroundBrush}">
+                                            <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource TextForeground}">
                                                 <TextBlock.ToolTip>
                                                     <MultiBinding Converter="{StaticResource RegionStringConverter}">
                                                         <Binding Path="." />
@@ -393,7 +393,7 @@
                                             </TextBlock>
                                         </Border>
                                         <Border x:Name="BookmarkTag"
-                                                BorderBrush="{StaticResource SubtleOutlineBrush}" BorderThickness="1" CornerRadius="4"
+                                                BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4"
                                                 Margin="0,2,4,0"
                                                 Background="{StaticResource SecondaryBackgroundBrush}">
                                             <Border.Style>
@@ -415,8 +415,8 @@
                                                     </MultiBinding>
                                                 </StackPanel.ToolTip>
                                                 <TextBlock FontWeight="Heavy"
-                                                           FontSize="{DynamicResource BookmarkSymbolFontSize}"
-                                                           Foreground="{StaticResource BookmarkSymbolForeground}"
+                                                          FontSize="{DynamicResource RowFontSize}"
+                                                          Foreground="{StaticResource TextForeground}"
                                                            Margin="0,0,2,0">
                                                     <TextBlock.Text>
                                                         <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Symbol">
@@ -425,7 +425,7 @@
                                                         </MultiBinding>
                                                     </TextBlock.Text>
                                                 </TextBlock>
-                                                <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource SecondaryForegroundBrush}">
+                                                <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource TextForeground}">
                                                     <TextBlock.Text>
                                                         <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Details">
                                                             <Binding Path="." />
@@ -437,7 +437,7 @@
                                         </Border>
                                         <Border 
                                             x:Name="TruncatedTag"
-                                            BorderBrush="{StaticResource SubtleOutlineBrush}" BorderThickness="1" CornerRadius="4" 
+                                            BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4" 
                                             Margin="0,2,4,0" 
                                             Background="{StaticResource SecondaryBackgroundBrush}">
                                             <Border.Style>
@@ -450,7 +450,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="{StaticResource SecondaryForegroundBrush}"
+                                            <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="{StaticResource TextForeground}"
                                                     Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
                                                     ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
                                         </Border>
