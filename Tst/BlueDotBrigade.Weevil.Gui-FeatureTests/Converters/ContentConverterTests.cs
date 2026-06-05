@@ -11,7 +11,7 @@
 		[WorkItem(200)]
 		public void Convert_LongMultiLineRecord_ReturnsTruncatedString()
 		{
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString());
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString("LongMultiLineRecord.log"));
 			record.Metadata.IsMultiLine = true;
 
 			record.Content.Length.Should().Be(2379476);
