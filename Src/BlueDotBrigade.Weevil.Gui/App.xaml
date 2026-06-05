@@ -11,6 +11,13 @@
                 <materialDesign:CustomColorTheme BaseTheme="Dark" PrimaryColor="{StaticResource PrimaryColor}" SecondaryColor="{StaticResource SecondaryColor}" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TabControl.xaml" />
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="MaterialDesignPaper" Color="{StaticResource SurfaceBackgroundColor}" />
+                    <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="{StaticResource SurfaceCardColor}" />
+                    <SolidColorBrush x:Key="MaterialDesignBody" Color="{StaticResource TextColor}" />
+                    <SolidColorBrush x:Key="MaterialDesignDivider" Color="{StaticResource SubtleOutlineColor}" />
+                    <SolidColorBrush x:Key="MaterialDesignTextBoxBorder" Color="{StaticResource InputOutlineColor}" />
+                </ResourceDictionary>
 
                 <ResourceDictionary Source="pack://application:,,,/Themes/StatusBarTextBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Themes/ProgressBar.xaml" />

@@ -4,21 +4,26 @@
 
     <Color x:Key="PrimaryColor">#900A22</Color>
     <Color x:Key="SecondaryColor">Gray</Color>
-    <Color x:Key="TextColor">WhiteSmoke</Color>
+    <Color x:Key="TextColor">#E6EDF3</Color>
     <Color x:Key="SeverityWarningBackgroundColor">#fff5cf</Color>
     <Color x:Key="SeverityErrorBackgroundColor">#ffe1e4</Color>
     <Color x:Key="SeverityCriticalBackgroundColor">#9C0006</Color>
     <Color x:Key="SeverityWarningForegroundColor">#9C6500</Color>
     <Color x:Key="SeverityErrorForegroundColor">#900A22</Color>
     <Color x:Key="SeverityCriticalForegroundColor">WhiteSmoke</Color>
-    <Color x:Key="SubtleOutlineColor">#949494</Color>
-    <Color x:Key="SecondaryBackgroundColor">#3c3c3c</Color>
-    <Color x:Key="SecondaryForegroundColor">#C0C0C0</Color>
+    <Color x:Key="SubtleOutlineColor">#30363D</Color>
+    <Color x:Key="SecondaryBackgroundColor">#21262D</Color>
+    <Color x:Key="SecondaryForegroundColor">#C9D1D9</Color>
     <Color x:Key="HighlightColor">Yellow</Color>
     <Color x:Key="PrimaryCommandColor">LightSkyBlue</Color>
     <Color x:Key="SecondaryCommandColor">Blue</Color>
-    <Color x:Key="RowHighlightedColor">Black</Color>
+    <Color x:Key="RowHighlightedColor">#900A22</Color>
     <Color x:Key="ValidationErrorColor">Red</Color>
+    <Color x:Key="SurfaceBackgroundColor">#0D1117</Color>
+    <Color x:Key="SurfaceCardColor">#161B22</Color>
+    <Color x:Key="RowBackgroundColor">#0D1117</Color>
+    <Color x:Key="AlternatingRowBackgroundColor">#161B22</Color>
+    <Color x:Key="InputOutlineColor">#8B949E</Color>
     <Color x:Key="OutlineGradientStartColor">#B2B2B2</Color>
     <Color x:Key="OutlineGradientEndColor">#8C8C8C</Color>
     <Color x:Key="BackgroundGradientEdgeColor">#BABABA</Color>
@@ -43,6 +48,8 @@
     <SolidColorBrush x:Key="PrimaryCommandBrush" Color="{StaticResource PrimaryCommandColor}" />
     <SolidColorBrush x:Key="SecondaryCommandBrush" Color="{StaticResource SecondaryCommandColor}" />
     <SolidColorBrush x:Key="RowHighlightedBrush" Color="{StaticResource RowHighlightedColor}" />
+    <SolidColorBrush x:Key="RowBackgroundBrush" Color="{StaticResource RowBackgroundColor}" />
+    <SolidColorBrush x:Key="AlternatingRowBackgroundBrush" Color="{StaticResource AlternatingRowBackgroundColor}" />
     <SolidColorBrush x:Key="ValidationErrorBrush" Color="{StaticResource ValidationErrorColor}" />
     <SolidColorBrush x:Key="EmphasisOutlineBrush" Color="{StaticResource EmphasisOutlineColor}" />
     <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
