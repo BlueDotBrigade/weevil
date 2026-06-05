@@ -3,6 +3,10 @@ using Reqnroll.Bindings.CucumberExpressions;
 using Reqnroll.Plugins;
 using Reqnroll.UnitTestProvider;
 
+// Reqnroll discovers runtime plugins via assembly attributes; keep registration next to the plugin type
+// instead of the old .csproj AssemblyAttribute entry that referenced a removed type (ReqnrollExtension).
+[assembly: RuntimePlugin(typeof(BlueDotBrigade.Weevil.ReqnrollPlugin))]
+
 namespace BlueDotBrigade.Weevil
 {
 	internal class ReqnrollPlugin : IRuntimePlugin
