@@ -5,10 +5,48 @@
     <Color x:Key="PrimaryColor">#900A22</Color>
     <Color x:Key="SecondaryColor">Gray</Color>
     <Color x:Key="TextColor">WhiteSmoke</Color>
+    <Color x:Key="SeverityWarningBackgroundColor">#fff5cf</Color>
+    <Color x:Key="SeverityErrorBackgroundColor">#ffe1e4</Color>
+    <Color x:Key="SeverityCriticalBackgroundColor">#9C0006</Color>
+    <Color x:Key="SeverityWarningForegroundColor">#9C6500</Color>
+    <Color x:Key="SeverityErrorForegroundColor">#900A22</Color>
+    <Color x:Key="SeverityCriticalForegroundColor">WhiteSmoke</Color>
+    <Color x:Key="SubtleOutlineColor">#949494</Color>
+    <Color x:Key="SecondaryBackgroundColor">#3c3c3c</Color>
+    <Color x:Key="SecondaryForegroundColor">#C0C0C0</Color>
+    <Color x:Key="HighlightColor">Yellow</Color>
+    <Color x:Key="PrimaryCommandColor">LightSkyBlue</Color>
+    <Color x:Key="SecondaryCommandColor">Blue</Color>
+    <Color x:Key="RowHighlightedColor">Black</Color>
+    <Color x:Key="ValidationErrorColor">Red</Color>
+    <Color x:Key="OutlineGradientStartColor">#B2B2B2</Color>
+    <Color x:Key="OutlineGradientEndColor">#8C8C8C</Color>
+    <Color x:Key="BackgroundGradientEdgeColor">#BABABA</Color>
+    <Color x:Key="BackgroundGradientMiddleColor">#C7C7C7</Color>
+    <Color x:Key="EmphasisOutlineColor">Orange</Color>
+    <Color x:Key="OverlayColor">#20FFFFFF</Color>
+    <Color x:Key="TransparentColor">Transparent</Color>
 
     <SolidColorBrush  x:Key="TextForeground" Color="{StaticResource TextColor}" />
     <SolidColorBrush  x:Key="TextAccentForeground" Color="Gray" />
     <SolidColorBrush x:Key="BookmarkSymbolForeground" Color="{StaticResource PrimaryColor}" />
+    <SolidColorBrush x:Key="SeverityWarningBackgroundBrush" Color="{StaticResource SeverityWarningBackgroundColor}" />
+    <SolidColorBrush x:Key="SeverityErrorBackgroundBrush" Color="{StaticResource SeverityErrorBackgroundColor}" />
+    <SolidColorBrush x:Key="SeverityCriticalBackgroundBrush" Color="{StaticResource SeverityCriticalBackgroundColor}" />
+    <SolidColorBrush x:Key="SeverityWarningForegroundBrush" Color="{StaticResource SeverityWarningForegroundColor}" />
+    <SolidColorBrush x:Key="SeverityErrorForegroundBrush" Color="{StaticResource SeverityErrorForegroundColor}" />
+    <SolidColorBrush x:Key="SeverityCriticalForegroundBrush" Color="{StaticResource SeverityCriticalForegroundColor}" />
+    <SolidColorBrush x:Key="SubtleOutlineBrush" Color="{StaticResource SubtleOutlineColor}" />
+    <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{StaticResource SecondaryBackgroundColor}" />
+    <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="{StaticResource SecondaryForegroundColor}" />
+    <SolidColorBrush x:Key="HighlightBrush" Color="{StaticResource HighlightColor}" />
+    <SolidColorBrush x:Key="PrimaryCommandBrush" Color="{StaticResource PrimaryCommandColor}" />
+    <SolidColorBrush x:Key="SecondaryCommandBrush" Color="{StaticResource SecondaryCommandColor}" />
+    <SolidColorBrush x:Key="RowHighlightedBrush" Color="{StaticResource RowHighlightedColor}" />
+    <SolidColorBrush x:Key="ValidationErrorBrush" Color="{StaticResource ValidationErrorColor}" />
+    <SolidColorBrush x:Key="EmphasisOutlineBrush" Color="{StaticResource EmphasisOutlineColor}" />
+    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
+    <SolidColorBrush x:Key="TransparentBrush" Color="{StaticResource TransparentColor}" />
 
     <system:Double x:Key="ButtonWidth">100</system:Double>
     <Thickness x:Key="ButtonMargin" Left="4" Top="4" Right="4" Bottom="4"/>

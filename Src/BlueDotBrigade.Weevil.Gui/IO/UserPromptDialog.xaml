@@ -63,7 +63,7 @@
         <Rectangle Grid.Row="1" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
         <TextBlock Grid.Row="1" Grid.Column="1"
            Text="{Binding ValidationMessage}"
-           Foreground="Red"
+           Foreground="{StaticResource ValidationErrorBrush}"
            Visibility="{Binding IsValidationMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 
         <Rectangle Grid.Row="2" Grid.Column="0" Fill="{StaticResource MaterialDesignCardBackground}" />
