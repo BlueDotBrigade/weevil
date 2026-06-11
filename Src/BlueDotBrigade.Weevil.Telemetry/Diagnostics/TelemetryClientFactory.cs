@@ -24,8 +24,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			if (string.IsNullOrWhiteSpace(options.UsernameOrApiToken) &&
 				string.IsNullOrWhiteSpace(options.Secret))
 			{
+				Log.Default.Write(LogSeverityType.Warning, "Telemetry credentials have not been provided - telemetry will not be saved in the centralied repository.");
 				return NullTelemetryClient.Instance;
 			}
+
+			Log.Default.Write(LogSeverityType.Information, "Telemetry credentials have been provided.");
 
 			return new MsSqlTelemetryClient(options);
 		}
