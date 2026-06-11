@@ -251,6 +251,21 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
+		public void RecordHelpOpen()
+		{
+			try
+			{
+				RecordActivity(TelemetryActivityKind.HelpOpen);
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry help open recording failed.");
+			}
+		}
+#pragma warning restore CA1031
+
+		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public void RecordGraphOpen()
 		{
 			try
@@ -284,6 +299,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					break;
 				case TelemetryActivityKind.DashboardOpen:
 					CurrentSession.DashboardOpenCount++;
+					break;
+				case TelemetryActivityKind.HelpOpen:
+					CurrentSession.HelpOpenCount++;
 					break;
 			}
 		}

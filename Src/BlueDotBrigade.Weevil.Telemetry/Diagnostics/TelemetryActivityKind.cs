@@ -42,6 +42,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// </summary>
 		DashboardOpen,
 		/// <summary>
+		/// The help view was opened.
+		/// </summary>
+		HelpOpen,
+		/// <summary>
 		/// A command was entered.
 		/// </summary>
 		CommandEntered,

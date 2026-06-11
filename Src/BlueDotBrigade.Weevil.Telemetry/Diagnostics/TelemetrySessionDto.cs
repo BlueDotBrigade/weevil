@@ -35,6 +35,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		public int DashboardOpenCount { get; set; }
 
+		public int HelpOpenCount { get; set; }
+
 		public string SchemaVersion { get; set; } = "2.0";
 	}
 }
