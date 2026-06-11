@@ -91,6 +91,7 @@ InstalledCpu = "AMD Ryzen 7",
 FilterExecutionCount = 2,
 GraphOpenCount = 1,
 DashboardOpenCount = 1,
+HelpOpenCount = 3,
 SchemaVersion = "2.0",
 };
 }

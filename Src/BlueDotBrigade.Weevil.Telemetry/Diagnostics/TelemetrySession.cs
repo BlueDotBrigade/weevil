@@ -81,6 +81,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		public int DashboardOpenCount { get; set; }
 
 		/// <summary>
+		/// Number of times help was opened in the session.
+		/// </summary>
+		public int HelpOpenCount { get; set; }
+
+		/// <summary>
 		/// Telemetry schema version for the payload.
 		/// </summary>
 		public string SchemaVersion { get; set; } = string.Empty;

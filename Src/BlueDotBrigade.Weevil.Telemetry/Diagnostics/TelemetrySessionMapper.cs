@@ -27,6 +27,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				FilterExecutionCount = session.FilterExecutionCount,
 				GraphOpenCount = session.GraphOpenCount,
 				DashboardOpenCount = session.DashboardOpenCount,
+				HelpOpenCount = session.HelpOpenCount,
 				SchemaVersion = string.IsNullOrWhiteSpace(session.SchemaVersion) ? "2.0" : session.SchemaVersion,
 			};
 		}
@@ -54,6 +55,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				FilterExecutionCount = session.FilterExecutionCount,
 				GraphOpenCount = session.GraphOpenCount,
 				DashboardOpenCount = session.DashboardOpenCount,
+				HelpOpenCount = session.HelpOpenCount,
 				SchemaVersion = string.IsNullOrWhiteSpace(session.SchemaVersion) ? "2.0" : session.SchemaVersion,
 			};
 		}

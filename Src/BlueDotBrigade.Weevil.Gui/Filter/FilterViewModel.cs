@@ -960,6 +960,8 @@
 
 		public void ShowHelp()
 		{
+			TelemetrySessionLifecycle.Shared.RecordHelpOpen();
+
 			if (File.Exists(HelpFilePath))
 			{
 				WindowsProcess.Start(

@@ -34,10 +34,43 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				tracker.CurrentSession.Should().NotBeNull();
 				tracker.CurrentSession!.SessionId.Should().NotBe(firstSessionId);
 			}
+
 			finally
 			{
 				File.Delete(firstPath);
 				File.Delete(secondPath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenHelpActivities_WhenRecorded_ThenHelpOpenCountIsTracked()
+		{
+			var start = new DateTime(2026, 6, 3, 9, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[]
+			{
+				start,
+				start.AddSeconds(20),
+				start.AddSeconds(40),
+				start.AddSeconds(40),
+			});
+			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSession("WeevilGui.exe", new Version(3, 1), sourcePath);
+				tracker.RecordHelpOpen();
+				tracker.RecordHelpOpen();
+				var endedSession = tracker.EndSession();
+
+				endedSession.Should().NotBeNull();
+				endedSession!.HelpOpenCount.Should().Be(2);
+				endedSession.SessionActiveMinutes.Should().Be(0.667);
+			}
+			finally
+			{
+				File.Delete(sourcePath);
 			}
 		}
 

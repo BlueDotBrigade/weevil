@@ -73,7 +73,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			{
 				try
 				{
-					Log.Default.Write(LogSeverityType.Information, "Telemetry warmup: connecting to database...");
+					Log.Default.Write(LogSeverityType.Information, "Telemetry warmup: connecting to database to wake up the virtual host machine...");
 
 					var stopwatch = Stopwatch.StartNew();
 
@@ -91,9 +91,12 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 					if (ClassifyUploadException(e) == TelemetryUploadStatus.InvalidCredentials)
 					{
 						DisableUpload();
+						Log.Default.Write(LogSeverityType.Error, e, "Telemetry warmup failed - MS SQL credentials are invalid.");
 					}
-
-					Log.Default.Write(LogSeverityType.Error, e, "Telemetry warmup failed.");
+					else
+					{
+						Log.Default.Write(LogSeverityType.Warning, e, "Telemetry warmup failed - MS SQL virtual machine was likely hibernating.");
+					}
 				}
 			});
 		}
