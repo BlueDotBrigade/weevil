@@ -10,7 +10,6 @@ Weevil is a .NET 9 log analysis platform.
 - Persisted state is stored in XML sidecar files.
 
 ## Directory Structure
-
 ```
 Src/BlueDotBrigade.Weevil.Core        # Core log parsing, filtering, and analysis logic
 Src/BlueDotBrigade.Weevil.Common      # Shared infrastructure used across projects
@@ -24,7 +23,6 @@ Src/BlueDotBrigade.Weevil.Windows     # Windows-specific platform abstractions
 Tst/                                  # Unit tests, feature tests, and functional tests
 Doc/                                  # Documentation, design notes, and UI style guides
 ```
-
 ## Architectural Rules
 
 - Prefer small, targeted changes. Avoid broad refactors unless explicitly required.
@@ -40,6 +38,7 @@ Doc/                                  # Documentation, design notes, and UI styl
 - Apply the DRY (Don't Repeat Yourself) principle to code, configuration, and documentation. Avoid duplicating logic, data, or rules across multiple locations.
 - Prefer simplifying repository configuration so all .csproj files are configured consistently when feasible (avoid special-case project settings unless required).
 - When reorganizing Weevil build outputs, preserve a debugging workflow where both the GUI and CLI run against the latest built assemblies and include plugins from `WEEVIL_PLUGINS_PATH` in Visual Studio 2026, whether or not the debugger is attached.
+- **Simplify developer setup**: Automate setup processes to ensure contributors can easily get started without needing extensive documentation. This is crucial as contributors may skip documentation.
 
 ## Design Principles
 
@@ -55,7 +54,6 @@ These concepts should **not** be applied if they will make the source code unnec
 ## Build and Test Commands
 
 CI builds and tests using .NET 9, Debug configuration, x64 platform on Windows.
-
 ```
 dotnet restore Weevil-v2.sln
 
@@ -63,9 +61,7 @@ dotnet build Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-restore
 
 dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 ```
-
-> **Note:** The GUI project contains post-build scripts and must be built on Windows.
-> All projects using `InternalsVisibleTo` restrict it to DEBUG builds, so CI always uses `--configuration Debug`. If the build fails in this workspace, likely cause is a running Weevil instance; close any running Weevil instances before attempting a build.
+> **Note:** The GUI project contains post-build scripts and must be built on Windows. All projects using `InternalsVisibleTo` restrict it to DEBUG builds, so CI always uses `--configuration Debug`. If the build fails in this workspace, likely cause is a running Weevil instance; close any running Weevil instances before attempting a build.
 
 ## Testing Expectations
 

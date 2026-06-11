@@ -14,7 +14,7 @@
    - [NuGet Packages](#nuget-packages)
 - [Development](#development)
    - [Guidelines](#guidelines)
-   - [Compiling](#compiling)
+   - [Environment](#environment)
    - [Verification](#verification)
 - [Recognition](#recognition)
    - [Open Source Projects](#open-source-projects)
@@ -177,7 +177,14 @@ foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == 
 
 - When working on the WPF application, please follow the [Style Guide][StyleGuide] for the user interface.
 
-### Compiling
+### Prerequisites
+
+Visual Studio Extensions
+
+- [WiX][WixExtension] installer for building MSI packagesV
+- [MetaLama][MetaLamaExtension] aspect oriented programming (AOP) framework
+
+### Environment
 
 The following steps outline how to build Weevil's WPF application:
 
@@ -197,13 +204,12 @@ Software integrity is verified through a number of automated tests that can be f
 
 ## Recognition
 
-- [Metalama](https://www.postsharp.net/metalama)
-   - *Metalama*'s [aspect-oriented][AOP] library helps simplify the codebase by reducing [boilerplate][]. Special thanks to the PostSharp Technologies team for creating this successor to PostSharp.
-- [GitHub](https://www.GitHub.com)
-   - Free Git repository hosting for this project and many others.
-
 ### Open Source Projects
 
+- [WiX Toolset][Wix]
+   - The WiX Toolset is an open-source project that provides a powerful set of tools for creating Windows Installer (MSI) packages.
+- [Metalama][MetaLama)
+   - *Metalama*'s [aspect-oriented][AOP] library helps simplify the codebase by reducing [boilerplate][].
 - [Live Charts](https://github.com/beto-rodriguez/LiveCharts2)
     - Beto Rodriguez et al. have developed an impressive WPF charting library. We look forward to future releases.
 - [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
@@ -228,3 +234,9 @@ A special thanks to everyone who has contributed to this project.
 [AOP]: https://en.m.wikipedia.org/wiki/Aspect-oriented_programming
 
 [AutomatedTests]: https://github.com/BlueDotBrigade/weevil/tree/main/Tst
+
+[Metalama]: https://www.postsharp.net/metalama
+[MetaLamaExtension]: https://marketplace.visualstudio.com/items?itemName=PostSharpTechnologies.PostSharp
+
+[Wix]: https://wixtoolset.org/
+[WixExtension]: https://marketplace.visualstudio.com/items?itemName=WixToolset.WixToolsetVisualStudio2022Extension

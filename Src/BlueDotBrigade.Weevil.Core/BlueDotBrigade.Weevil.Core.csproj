@@ -59,4 +59,7 @@
       <_Parameter1>BlueDotBrigade.Weevil.Core-FeatureTests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing.&#xD;&#xA;)" />
+  </Target>
 </Project>
