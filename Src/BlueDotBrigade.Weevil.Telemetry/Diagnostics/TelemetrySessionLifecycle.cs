@@ -107,7 +107,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 						LogFileSizeBytes = TryGetFileSize(sourceFilePath),
                       InstalledRamMb = installedRamMb,
 						InstalledCpu = string.IsNullOrWhiteSpace(installedCpu) ? "" : installedCpu,
-                      SchemaVersion = "2.0",
+                      SchemaVersion = "1.0",
 					};
 					_activeUsageAccumulator.Reset(now);
 				}
@@ -292,16 +292,16 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			switch (activityKind)
 			{
 				case TelemetryActivityKind.FilterApplied:
-					CurrentSession.FilterExecutionCount++;
+					CurrentSession.Increment("Filter.Applied");
 					break;
 				case TelemetryActivityKind.GraphOpen:
-					CurrentSession.GraphOpenCount++;
+					CurrentSession.Increment("Graph.Opened");
 					break;
 				case TelemetryActivityKind.DashboardOpen:
-					CurrentSession.DashboardOpenCount++;
+					CurrentSession.Increment("Dashboard.Opened");
 					break;
 				case TelemetryActivityKind.HelpOpen:
-					CurrentSession.HelpOpenCount++;
+					CurrentSession.Increment("Help.Opened");
 					break;
 			}
 		}

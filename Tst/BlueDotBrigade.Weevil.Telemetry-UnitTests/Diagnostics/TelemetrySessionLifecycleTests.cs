@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Linq;
 	using FluentAssertions;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -65,7 +66,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				var endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
-				endedSession!.HelpOpenCount.Should().Be(2);
+				endedSession!.Metrics.Single(m => m.MetricKey == "Help.Opened").MetricCount.Should().Be(2);
 				endedSession.SessionActiveMinutes.Should().Be(0.667);
 			}
 			finally
@@ -371,7 +372,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				var endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
-				endedSession!.FilterExecutionCount.Should().Be(2);
+				endedSession!.Metrics.Single(m => m.MetricKey == "Filter.Applied").MetricCount.Should().Be(2);
 				endedSession.SessionActiveMinutes.Should().Be(0.667);
 			}
 			finally

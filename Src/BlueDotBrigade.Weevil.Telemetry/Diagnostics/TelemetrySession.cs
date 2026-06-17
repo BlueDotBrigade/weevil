@@ -1,6 +1,8 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 
 	/// <summary>
 	/// Represents the session-level telemetry payload for a single application session.
@@ -66,28 +68,42 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		public string InstalledCpu { get; set; } = "Unknown";
 
 		/// <summary>
-		/// Number of filter executions in the session.
-		/// </summary>
-		public int FilterExecutionCount { get; set; }
-
-		/// <summary>
-		/// Number of times the graph view was opened in the session.
-		/// </summary>
-		public int GraphOpenCount { get; set; }
-
-		/// <summary>
-		/// Number of times the dashboard was opened in the session.
-		/// </summary>
-		public int DashboardOpenCount { get; set; }
-
-		/// <summary>
-		/// Number of times help was opened in the session.
-		/// </summary>
-		public int HelpOpenCount { get; set; }
-
-		/// <summary>
 		/// Telemetry schema version for the payload.
 		/// </summary>
-		public string SchemaVersion { get; set; } = string.Empty;
+		public string SchemaVersion { get; set; } = "1.0";
+
+		/// <summary>
+		/// Extensible per-session usage counters, keyed by metric name.
+		/// </summary>
+		/// <remarks>
+		/// Adding a new metric does not require a database schema change: each key/count pair
+		/// is stored as a row in <c>dbo.telemetry_session_metric</c>.
+		/// </remarks>
+		public IList<TelemetrySessionMetric> Metrics { get; } = new List<TelemetrySessionMetric>();
+
+		/// <summary>
+		/// Increments the count for the supplied metric, creating it on first use.
+		/// </summary>
+		/// <param name="metricKey">The metric name (for example, <c>Filter.Applied</c>).</param>
+		public void Increment(string metricKey)
+		{
+			ArgumentException.ThrowIfNullOrWhiteSpace(metricKey);
+
+			TelemetrySessionMetric metric = Metrics.SingleOrDefault(x => x.MetricKey == metricKey);
+
+			if (metric is null)
+			{
+				Metrics.Add(new TelemetrySessionMetric
+				{
+					SessionId = SessionId,
+					MetricKey = metricKey,
+					MetricCount = 1,
+				});
+			}
+			else
+			{
+				metric.MetricCount++;
+			}
+		}
 	}
 }

@@ -159,7 +159,7 @@ Version = "2.12.0.0",
 SessionStartUtc = new DateTime(2026, 5, 28, 12, 0, 0, DateTimeKind.Utc),
 SessionEndUtc = new DateTime(2026, 5, 28, 12, 5, 0, DateTimeKind.Utc),
 SessionActiveMinutes = 5,
-SchemaVersion = "2.0",
+SchemaVersion = "1.0",
 };
 }
 

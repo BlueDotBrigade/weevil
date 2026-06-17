@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
+	using System.Collections.Generic;
 
 	/// <summary>
 	/// XML-friendly telemetry session payload stored in the local outbox.
@@ -29,14 +30,18 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		public string InstalledCpu { get; set; } = string.Empty;
 
-		public int FilterExecutionCount { get; set; }
+		public string SchemaVersion { get; set; } = "1.0";
 
-		public int GraphOpenCount { get; set; }
+		public List<TelemetrySessionMetricDto> Metrics { get; set; } = new List<TelemetrySessionMetricDto>();
+	}
 
-		public int DashboardOpenCount { get; set; }
+	/// <summary>
+	/// XML-friendly usage counter belonging to a <see cref="TelemetrySessionDto"/>.
+	/// </summary>
+	public sealed class TelemetrySessionMetricDto
+	{
+		public string MetricKey { get; set; } = string.Empty;
 
-		public int HelpOpenCount { get; set; }
-
-		public string SchemaVersion { get; set; } = "2.0";
+		public int MetricCount { get; set; }
 	}
 }

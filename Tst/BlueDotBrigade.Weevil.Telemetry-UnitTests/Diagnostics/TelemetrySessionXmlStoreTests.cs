@@ -88,11 +88,12 @@ SessionActiveMinutes = 5,
 LogFileSizeBytes = 4096,
 InstalledRamMb = 8192,
 InstalledCpu = "AMD Ryzen 7",
-FilterExecutionCount = 2,
-GraphOpenCount = 1,
-DashboardOpenCount = 1,
-HelpOpenCount = 3,
-SchemaVersion = "2.0",
+SchemaVersion = "1.0",
+Metrics =
+{
+new TelemetrySessionMetricDto { MetricKey = "Filter.Applied", MetricCount = 2 },
+new TelemetrySessionMetricDto { MetricKey = "Help.Opened", MetricCount = 3 },
+},
 };
 }
 }
