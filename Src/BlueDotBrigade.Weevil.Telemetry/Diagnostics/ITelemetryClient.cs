@@ -9,14 +9,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	public interface ITelemetryClient
 	{
 		/// <summary>
-		/// Warms up the connection to the telemetry backend asynchronously (fire-and-forget).
-		/// Call once when a log file is opened to ensure the backend is ready before the session ends.
-		/// </summary>
-		void Warmup();
-
-		/// <summary>
 		/// Uploads telemetry asynchronously.
 		/// </summary>
+		/// <remarks>
+		/// The backend (Azure SQL serverless) may be paused; the first attempt typically fails while it
+		/// resumes. Callers are expected to retry after a short delay rather than pre-warming the database.
+		/// </remarks>
 		/// <param name="session">
 		/// Session payload to upload.
 		/// </param>

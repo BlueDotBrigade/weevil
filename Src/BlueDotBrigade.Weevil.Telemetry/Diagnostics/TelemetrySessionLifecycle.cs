@@ -86,12 +86,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					return;
 				}
 
-				ITelemetryClient client;
 				TelemetrySession endedSession;
 
 				lock (_gate)
 				{
-					client = _client;
 					var now = _utcNow();
 					endedSession = EndCurrentSessionInternal(now);
 
@@ -117,9 +115,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					TrySaveEndedSession(endedSession);
 				}
 
-				// Warm up the database connection on the thread pool (fire-and-forget).
-				client.Warmup();
-
+				// Trigger a background upload of any pending sessions. The upload itself tolerates a
+				// paused Azure SQL instance by retrying after a delay, so there is no separate wake-up step.
 				_uploadWorker.TriggerUpload();
 			}
 			catch (Exception exception)

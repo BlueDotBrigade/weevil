@@ -36,6 +36,32 @@ Directory.Delete(pendingDirectory, true);
 }
 
 [TestMethod]
+public async Task GivenPausedDatabase_WhenFirstAttemptFailsThenRetrySucceeds_ThenPendingXmlIsDeleted()
+{
+// Models Azure SQL serverless: the first connection fails while the instance resumes,
+// then the retry (after the delay) succeeds.
+var pendingDirectory = CreateTemporaryDirectory();
+
+try
+{
+var store = new TelemetrySessionXmlStore(pendingDirectory);
+store.Save(CreateSessionDto());
+var client = new StubTelemetryClient(TelemetryUploadStatus.Failed, TelemetryUploadStatus.Success);
+var worker = new TelemetryUploadWorker(() => client, store, retryDelay: TimeSpan.FromMilliseconds(1));
+
+worker.TriggerUpload();
+await worker.ActiveUploadTask;
+
+Directory.EnumerateFiles(pendingDirectory, "*.xml").Should().BeEmpty();
+client.UploadCallCount.Should().Be(2);
+}
+finally
+{
+Directory.Delete(pendingDirectory, true);
+}
+}
+
+[TestMethod]
 public async Task GivenPendingSession_WhenUploadFails_ThenPendingXmlRemains()
 {
 var pendingDirectory = CreateTemporaryDirectory();
@@ -174,10 +200,6 @@ _statuses = new Queue<TelemetryUploadStatus>(statuses);
 
 public int UploadCallCount { get; private set; }
 
-public void Warmup()
-{
-}
-
 public Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 {
 UploadCallCount++;
@@ -197,10 +219,6 @@ _releaseUpload = releaseUpload;
 }
 
 public int UploadCallCount { get; private set; }
-
-public void Warmup()
-{
-}
 
 public async Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 {
