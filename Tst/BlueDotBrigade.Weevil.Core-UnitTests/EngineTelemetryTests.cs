@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Navigation;
@@ -50,6 +51,38 @@ namespace BlueDotBrigade.Weevil
 
 			recorder.Metrics.Should().ContainSingle()
 				.Which.Should().Be(TelemetryMetrics.NavigationGoToLine);
+		}
+
+		[TestMethod]
+		public void GivenEngineWithRecorder_WhenAnalyzerRuns_ThenPerAnalyzerMetricRecorded()
+		{
+			var recorder = new FakeTelemetryMetricRecorder();
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
+				.UsingTelemetry(recorder)
+				.Open();
+
+			engine.Analyzer.Analyze(AnalysisType.StableValueRuns);
+
+			recorder.Metrics.Should().ContainSingle()
+				.Which.Should().Be("Analysis.Run.StableValueRuns");
+		}
+
+		[TestMethod]
+		public void GivenPluginAnalyzerKey_WhenBuildingMetricKey_ThenKeyIsPrefixedWithAnalysisRun()
+		{
+			// A plugin analyzer's key flows through unchanged - no schema or code change is required.
+			string key = AnalysisManager.BuildAnalysisMetricKey("Contoso.SignalQuality");
+
+			key.Should().Be("Analysis.Run.Contoso.SignalQuality");
+		}
+
+		[TestMethod]
+		public void GivenOverlyLongAnalyzerKey_WhenBuildingMetricKey_ThenKeyIsCappedToColumnLength()
+		{
+			string key = AnalysisManager.BuildAnalysisMetricKey(new string('x', 200));
+
+			key.Length.Should().Be(128);
 		}
 
 		private sealed class FakeTelemetryMetricRecorder : ITelemetryMetricRecorder

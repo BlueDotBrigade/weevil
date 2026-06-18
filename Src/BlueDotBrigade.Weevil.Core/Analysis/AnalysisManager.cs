@@ -13,13 +13,17 @@
 
 	internal class AnalysisManager : IAnalyze
 	{
+		private const int MetricKeyMaxLength = 128;
+
 		private readonly ICoreExtension _coreExtension;
 		private readonly CoreEngine _coreEngine;
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
-		internal AnalysisManager(CoreEngine coreEngine, ICoreExtension coreExtension)
+		internal AnalysisManager(CoreEngine coreEngine, ICoreExtension coreExtension, ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_coreEngine = coreEngine;
 			_coreExtension = coreExtension;
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 		}
 
 		public void UnpinAll()
@@ -156,7 +160,21 @@
 				userDialog,
 				true);
 
+			// Records which analyzer the user ran. Works for plugin analyzers too: their key flows
+			// through unchanged and becomes a new metric_key row (no schema/code change required).
+			_telemetryRecorder.Increment(BuildAnalysisMetricKey(analyzerKey));
+
 			return results;
+		}
+
+		/// <summary>
+		/// Composes the per-analyzer metric key, e.g. <c>Analysis.Run.DetectData</c>, capped to the
+		/// <c>metric_key</c> column length.
+		/// </summary>
+		internal static string BuildAnalysisMetricKey(string analyzerKey)
+		{
+			var key = $"{TelemetryMetrics.AnalysisRun}.{analyzerKey}";
+			return key.Length <= MetricKeyMaxLength ? key : key.Substring(0, MetricKeyMaxLength);
 		}
 	}
 }

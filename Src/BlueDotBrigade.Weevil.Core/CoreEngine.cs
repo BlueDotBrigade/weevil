@@ -134,7 +134,7 @@
 
 			new ElapsedTimeAnalyzer(_allRecords).Analyze();
 
-			_analysisManager = new AnalysisManager(this, _coreExtension);
+			_analysisManager = new AnalysisManager(this, _coreExtension, _telemetryRecorder);
 
 			var filterAliases = _coreExtension.GetFilterAliases(_context);
 			var filterAliasExpander = new FilterAliasExpander(filterAliases);
