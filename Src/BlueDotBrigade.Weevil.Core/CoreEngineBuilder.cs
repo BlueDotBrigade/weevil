@@ -55,6 +55,11 @@
 			/// </summary>
 			private Range _range = Range.All;
 
+			/// <summary>
+			/// Records semantic usage metrics. Defaults to a no-op recorder when the host does not supply one.
+			/// </summary>
+			private ITelemetryMetricRecorder _telemetryRecorder = NullTelemetryMetricRecorder.Instance;
+
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
 				// nothing to do
@@ -83,11 +88,20 @@
 				_clearOperation = clearOperation;
 				_hasBeenCleared = true;
 
+				// A cleared/derived engine keeps recording to the same telemetry session as its source.
+				_telemetryRecorder = source._telemetryRecorder;
+
 				_startAtLineNumber = NotSet;
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
 					$"Core engine construction will read records from an existing instance. OriginalFilename={Path.GetFileName(source.SourceFilePath)}, Operation={clearOperation}");
+			}
+
+			public CoreEngineBuilder UsingTelemetry(ITelemetryMetricRecorder recorder)
+			{
+				_telemetryRecorder = recorder ?? NullTelemetryMetricRecorder.Instance;
+				return this;
 			}
 
 			public CoreEngineBuilder UsingContext(ContextDictionary context)
@@ -267,7 +281,8 @@
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
 					regions.ToImmutableArray(),
-					bookmarks.ToImmutableArray());
+					bookmarks.ToImmutableArray(),
+					_telemetryRecorder);
 
 				if (inclusiveFilterHistory.Count > 0)
 				{

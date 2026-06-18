@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	/// Ended sessions are first written to the local XML outbox. Upload happens only in the background
 	/// when safe entry points such as log open trigger the upload worker.
 	/// </remarks>
-	public sealed class TelemetrySessionLifecycle
+	public sealed class TelemetrySessionLifecycle : ITelemetryMetricRecorder
 	{
 		private readonly object _gate;
 		private readonly Func<DateTime> _utcNow;
@@ -170,15 +170,31 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		// Intentional broad exception catching: telemetry failures must never propagate to the user workflow.
 #pragma warning disable CA1031
-		public void RecordFilterExecution()
+		public void Increment(string metricKey)
 		{
 			try
 			{
-				RecordActivity(TelemetryActivityKind.FilterApplied);
+				if (string.IsNullOrWhiteSpace(metricKey))
+				{
+					return;
+				}
+
+				lock (_gate)
+				{
+					if (CurrentSession is null)
+					{
+						return;
+					}
+
+					var now = _utcNow();
+					_activeUsageAccumulator.Renew(now);
+					CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
+					CurrentSession.Increment(metricKey);
+				}
 			}
 			catch (Exception exception)
 			{
-				TrySilentlyLogWarning(exception, "Telemetry filter execution recording failed.");
+				TrySilentlyLogWarning(exception, $"Telemetry metric increment failed for '{metricKey}'.");
 			}
 		}
 #pragma warning restore CA1031
@@ -191,7 +207,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				lock (_gate)
 				{
-					RecordActivityInternal(_utcNow(), activityKind);
+					RecordActivityInternal(_utcNow());
 				}
 			}
 			catch (Exception exception)
@@ -237,7 +253,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				RecordActivity(TelemetryActivityKind.DashboardOpen);
+				Increment(TelemetryMetrics.DashboardOpened);
 			}
 			catch (Exception exception)
 			{
@@ -252,7 +268,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				RecordActivity(TelemetryActivityKind.HelpOpen);
+				Increment(TelemetryMetrics.HelpOpened);
 			}
 			catch (Exception exception)
 			{
@@ -267,7 +283,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				RecordActivity(TelemetryActivityKind.GraphOpen);
+				Increment(TelemetryMetrics.GraphOpened);
 			}
 			catch (Exception exception)
 			{
@@ -276,7 +292,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 #pragma warning restore CA1031
 
-		private void RecordActivityInternal(DateTime now, TelemetryActivityKind activityKind)
+		// Heartbeat only: keeps the active-usage window alive. Metric counts are recorded via Increment(...).
+		private void RecordActivityInternal(DateTime now)
 		{
 			if (CurrentSession is null)
 			{
@@ -285,22 +302,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			_activeUsageAccumulator.Renew(now);
 			CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
-
-			switch (activityKind)
-			{
-				case TelemetryActivityKind.FilterApplied:
-					CurrentSession.Increment("Filter.Applied");
-					break;
-				case TelemetryActivityKind.GraphOpen:
-					CurrentSession.Increment("Graph.Opened");
-					break;
-				case TelemetryActivityKind.DashboardOpen:
-					CurrentSession.Increment("Dashboard.Opened");
-					break;
-				case TelemetryActivityKind.HelpOpen:
-					CurrentSession.Increment("Help.Opened");
-					break;
-			}
 		}
 
 		private TelemetrySession EndCurrentSessionInternal(DateTime endedAtUtc)

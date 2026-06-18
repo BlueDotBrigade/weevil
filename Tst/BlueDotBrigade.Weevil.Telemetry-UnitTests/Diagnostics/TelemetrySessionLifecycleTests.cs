@@ -367,8 +367,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			try
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(3, 1), sourcePath);
-				tracker.RecordFilterExecution();
-				tracker.RecordFilterExecution();
+				tracker.Increment(TelemetryMetrics.FilterApplied);
+				tracker.Increment(TelemetryMetrics.FilterApplied);
 				var endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();

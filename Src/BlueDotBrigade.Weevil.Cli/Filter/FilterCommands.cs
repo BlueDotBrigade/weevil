@@ -26,10 +26,11 @@
 
 			try
 			{
-				telemetry.RecordActivity(TelemetryActivityKind.CommandEntered);
+				telemetry.Increment(TelemetryMetrics.CliFilterCommand);
 
 				IEngine engine = Engine
 						.UsingPath(logPath)
+						.UsingTelemetry(telemetry)
 						.Open();
 
 				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(include, exclude));

@@ -22,6 +22,8 @@
 		#region Fields
 		private readonly ICoreExtension _coreExtension;
 
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
+
 		private readonly string _sourceFilePath;
 		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
@@ -83,9 +85,12 @@
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
 			ImmutableArray<Region> regions,
-			ImmutableArray<Bookmark> bookmarks)
+			ImmutableArray<Bookmark> bookmarks,
+			ITelemetryMetricRecorder telemetryRecorder)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
+
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 
 			if (string.IsNullOrWhiteSpace(sourceFilePath))
 			{
@@ -145,12 +150,14 @@
 				_allRecords,
 				GetRecordCounters(),
 				_regionManager,
-				_bookmarkManager);
+				_bookmarkManager,
+				_telemetryRecorder);
 
-			_filterManager.Apply(FilterType.PlainText, FilterCriteria.None);
+			// Construction-time default filter: applied without recording telemetry (not a user action).
+			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None);
 			_filterManager.ResultsChanged += OnResultsChanged;
 
-			_navigationManager = new NavigationManager(_sourceFilePath, _coreExtension, _allRecords, tableOfContents);
+			_navigationManager = new NavigationManager(_sourceFilePath, _coreExtension, _allRecords, tableOfContents, _telemetryRecorder);
 
 			_selectionManager = new SelectionManager(
 				_allRecords,

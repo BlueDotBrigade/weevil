@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	public class EngineBuilder : IEngineBuilder
 	{
@@ -19,6 +20,12 @@
 		public IEngineBuilder UsingContext(ContextDictionary context)
 		{
 			_coreEngineBuilder.UsingContext(context);
+			return this;
+		}
+
+		public IEngineBuilder UsingTelemetry(ITelemetryMetricRecorder recorder)
+		{
+			_coreEngineBuilder.UsingTelemetry(recorder);
 			return this;
 		}
 

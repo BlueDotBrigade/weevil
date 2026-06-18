@@ -32,10 +32,11 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 
 			try
 			{
-				telemetry.RecordActivity(TelemetryActivityKind.CommandEntered);
+				telemetry.Increment(TelemetryMetrics.CliInsightCommand);
 
 				IEngine engine = Engine
 						.UsingPath(logPath)
+						.UsingTelemetry(telemetry)
 						.Open();
 
 				var severityMetrics =  engine.Filter.GetMetrics();

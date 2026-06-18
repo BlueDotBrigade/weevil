@@ -588,6 +588,7 @@
 
 						_engine = Engine
 							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
+							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
 							.Open();
@@ -1003,6 +1004,8 @@
 
 		private void ShowDashboard()
 		{
+			TelemetrySessionLifecycle.Shared.RecordDashboardOpen();
+
 			IPlugin plugin = new PluginFactory().Create(_engine.SourceFilePath);
 
 			if (plugin.CanShowDashboard)
@@ -1022,6 +1025,8 @@
 
 			if (_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
 			{
+				TelemetrySessionLifecycle.Shared.RecordGraphOpen();
+
 				_dialogBox.ShowGraph(
 					records,
 					confirmedFilter,
