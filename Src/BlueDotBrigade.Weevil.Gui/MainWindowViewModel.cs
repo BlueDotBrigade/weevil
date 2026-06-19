@@ -33,7 +33,7 @@
 			_telemetry = TelemetrySessionLifecycle.Shared;
 
 			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnSourceFileChanged(x));
-			bulletinMediator.Subscribe<FilterChangedBulletin>(this, _ => _telemetry.RecordFilterExecution());
+			// Filter.Applied is now recorded by Core (see EngineBuilder.UsingTelemetry); avoid double counting here.
 			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordSelectionChanged));
 			bulletinMediator.Subscribe<BookmarksChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordAnnotationChanged));
 			bulletinMediator.Subscribe<RegionsChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordAnnotationChanged));

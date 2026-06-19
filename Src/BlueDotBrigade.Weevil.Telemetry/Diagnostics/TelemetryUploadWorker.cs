@@ -33,7 +33,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			_sessionStore = sessionStore ?? throw new ArgumentNullException(nameof(sessionStore));
 			_maxRetryAttempts = maxRetryAttempts > 0 ? maxRetryAttempts : throw new ArgumentOutOfRangeException(nameof(maxRetryAttempts));
 			_maxPendingSessionsPerBatch = maxPendingSessionsPerBatch > 0 ? maxPendingSessionsPerBatch : throw new ArgumentOutOfRangeException(nameof(maxPendingSessionsPerBatch));
-			_retryDelay = retryDelay ?? TimeSpan.FromMinutes(1);
+			// Azure SQL serverless may be paused: the first attempt typically fails while the instance
+			// resumes, so wait long enough for the resume to complete before retrying.
+			_retryDelay = retryDelay ?? TimeSpan.FromMinutes(2);
 			_taskGate = new object();
 			_activeUploadTask = Task.CompletedTask;
 		}

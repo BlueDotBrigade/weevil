@@ -56,54 +56,6 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		/// <inheritdoc/>
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
-		public void Warmup()
-		{
-			if (IsUploadDisabled)
-			{
-				return;
-			}
-
-			var connectionString = BuildSecuredConnectionString(
-				_options.ConnectionString,
-				_options.UsernameOrApiToken,
-				_options.Secret,
-				_options.ConnectionTimeoutSeconds);
-
-			ThreadPool.QueueUserWorkItem(_ =>
-			{
-				try
-				{
-					Log.Default.Write(LogSeverityType.Information, "Telemetry warmup: connecting to database to wake up the virtual host machine...");
-
-					var stopwatch = Stopwatch.StartNew();
-
-					using var connection = new SqlConnection(connectionString);
-					connection.Open();
-
-					stopwatch.Stop();
-
-					Log.Default.Write(
-						LogSeverityType.Information,
-						$"Telemetry warmup succeeded. Connection time: {stopwatch.Elapsed.TotalSeconds:0.000}s.");
-				}
-				catch (Exception e)
-				{
-					if (ClassifyUploadException(e) == TelemetryUploadStatus.InvalidCredentials)
-					{
-						DisableUpload();
-						Log.Default.Write(LogSeverityType.Error, e, "Telemetry warmup failed - MS SQL credentials are invalid.");
-					}
-					else
-					{
-						Log.Default.Write(LogSeverityType.Warning, e, "Telemetry warmup failed - MS SQL virtual machine was likely hibernating.");
-					}
-				}
-			});
-		}
-#pragma warning restore CA1031
-
-		/// <inheritdoc/>
-#pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
 		public async Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 		{
 			if (IsUploadDisabled)

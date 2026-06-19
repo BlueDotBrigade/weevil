@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
+	using System.Linq;
 
 	internal static class TelemetrySessionMapper
 	{
@@ -11,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				throw new ArgumentNullException(nameof(session));
 			}
 
-			return new TelemetrySessionDto
+			var dto = new TelemetrySessionDto
 			{
 				SessionId = session.SessionId,
 				Application = session.Application ?? string.Empty,
@@ -24,12 +25,17 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				LogFileSizeBytes = session.LogFileSizeBytes,
 				InstalledRamMb = session.InstalledRamMb,
 				InstalledCpu = session.InstalledCpu ?? string.Empty,
-				FilterExecutionCount = session.FilterExecutionCount,
-				GraphOpenCount = session.GraphOpenCount,
-				DashboardOpenCount = session.DashboardOpenCount,
-				HelpOpenCount = session.HelpOpenCount,
-				SchemaVersion = string.IsNullOrWhiteSpace(session.SchemaVersion) ? "2.0" : session.SchemaVersion,
+				SchemaVersion = string.IsNullOrWhiteSpace(session.SchemaVersion) ? "1.0" : session.SchemaVersion,
+				Metrics = session.Metrics
+					.Select(metric => new TelemetrySessionMetricDto
+					{
+						MetricKey = metric.MetricKey,
+						MetricCount = metric.MetricCount,
+					})
+					.ToList(),
 			};
+
+			return dto;
 		}
 
 		public static TelemetrySession ToSession(TelemetrySessionDto session)
@@ -39,7 +45,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				throw new ArgumentNullException(nameof(session));
 			}
 
-			return new TelemetrySession
+			var result = new TelemetrySession
 			{
 				SessionId = session.SessionId,
 				Application = session.Application ?? string.Empty,
@@ -52,12 +58,21 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				LogFileSizeBytes = session.LogFileSizeBytes,
 				InstalledRamMb = session.InstalledRamMb,
 				InstalledCpu = session.InstalledCpu ?? string.Empty,
-				FilterExecutionCount = session.FilterExecutionCount,
-				GraphOpenCount = session.GraphOpenCount,
-				DashboardOpenCount = session.DashboardOpenCount,
-				HelpOpenCount = session.HelpOpenCount,
-				SchemaVersion = string.IsNullOrWhiteSpace(session.SchemaVersion) ? "2.0" : session.SchemaVersion,
+				SchemaVersion = string.IsNullOrWhiteSpace(session.SchemaVersion) ? "1.0" : session.SchemaVersion,
 			};
+
+			foreach (TelemetrySessionMetricDto metric in session.Metrics ?? Enumerable.Empty<TelemetrySessionMetricDto>())
+			{
+				result.Metrics.Add(new TelemetrySessionMetric
+				{
+					SessionId = result.SessionId,
+					MetricKey = metric.MetricKey,
+					MetricCount = metric.MetricCount,
+					Session = result,
+				});
+			}
+
+			return result;
 		}
 	}
 }

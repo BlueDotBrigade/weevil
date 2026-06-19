@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.IO;
 	using System.Linq;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using File = System.IO.File;
@@ -19,11 +20,14 @@
 
 		private TableOfContents _tableOfContents;
 
-		public NavigationManager(string sourceFilePath, ICoreExtension coreExtension, ImmutableArray<IRecord> allRecords, TableOfContents tableOfContents)
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
+
+		public NavigationManager(string sourceFilePath, ICoreExtension coreExtension, ImmutableArray<IRecord> allRecords, TableOfContents tableOfContents, ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_sourceFilePath = sourceFilePath;
 			_coreCoreExtension = coreExtension;
 			_tableOfContents = tableOfContents;
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 
 			_activeRecord = new ActiveRecord(allRecords);
 
@@ -81,6 +85,8 @@
 
 		public IRecord GoTo(int lineNumber, RecordSearchType recordSearchType)
 		{
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationGoToLine);
+
 			return this
 				.Using<ILineNumberNavigator>()
 				.Find(lineNumber, recordSearchType);
@@ -88,6 +94,8 @@
 
 		public IRecord GoTo(string timestamp, RecordSearchType recordSearchType)
 		{
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationGoToTimestamp);
+
 			return this
 				.Using<ITimestampNavigator>()
 				.Find(timestamp, recordSearchType);
@@ -100,6 +108,8 @@
 				throw new ArgumentNullException(nameof(text));
 			}
 
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationFindPreviousContent);
+
 			return this
 				.Using<IContentNavigator>()
 				.FindPrevious(text, isCaseSensitive, useRegex);
@@ -111,6 +121,8 @@
 			{
 				throw new ArgumentNullException(nameof(text));
 			}
+
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationFindNextContent);
 
 			return this
 				.Using<IContentNavigator>()

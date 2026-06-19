@@ -17,21 +17,45 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// <summary>
 		/// Creates a telemetry client based on runtime credential configuration.
 		/// </summary>
+		/// <remarks>
+		/// Telemetry must never crash the host application: any failure while reading configuration or
+		/// decrypting credentials (for example, a secret encrypted on a different machine) is swallowed
+		/// and the no-op <see cref="NullTelemetryClient"/> is returned instead.
+		/// </remarks>
+		// Intentional broad exception catching: telemetry setup must never propagate to the user workflow.
+#pragma warning disable CA1031
 		public static ITelemetryClient Create()
 		{
-			MsSqlTelemetryClientOptions options = CreateOptions(TelemetryConfiguration.GetConnectionString());
-
-			if (string.IsNullOrWhiteSpace(options.UsernameOrApiToken) &&
-				string.IsNullOrWhiteSpace(options.Secret))
+			try
 			{
-				Log.Default.Write(LogSeverityType.Warning, "Telemetry credentials have not been provided - telemetry will not be saved in the centralied repository.");
+				MsSqlTelemetryClientOptions options = CreateOptions(TelemetryConfiguration.GetConnectionString());
+
+				if (string.IsNullOrWhiteSpace(options.UsernameOrApiToken) &&
+					string.IsNullOrWhiteSpace(options.Secret))
+				{
+					Log.Default.Write(LogSeverityType.Warning, "Telemetry credentials have not been provided - telemetry will not be saved in the centralied repository.");
+					return NullTelemetryClient.Instance;
+				}
+
+				Log.Default.Write(LogSeverityType.Information, "Telemetry credentials have been provided.");
+
+				return new MsSqlTelemetryClient(options);
+			}
+			catch (Exception exception)
+			{
+				try
+				{
+					Log.Default.Write(LogSeverityType.Error, exception, "Telemetry client creation failed - telemetry is disabled for this session.");
+				}
+				catch
+				{
+					// Logging must not crash the host either.
+				}
+
 				return NullTelemetryClient.Instance;
 			}
-
-			Log.Default.Write(LogSeverityType.Information, "Telemetry credentials have been provided.");
-
-			return new MsSqlTelemetryClient(options);
 		}
+#pragma warning restore CA1031
 
 		internal static MsSqlTelemetryClientOptions CreateOptions(string connectionString)
 		{

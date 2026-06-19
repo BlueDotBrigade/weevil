@@ -23,6 +23,8 @@
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IMetricCollector> _metricCollectors;
 
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
+
 		private FilterStrategy _latestFilterStrategy;
 		private ImmutableArray<IRecord> _latestFilterResults;
 
@@ -47,10 +49,12 @@
 			IFilterAliasExpander filterAliasExpander,
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IMetricCollector> metricCollectors,
-			IRegionManager regionManager, 
-			IBookmarkManager bookmarkManager)
+			IRegionManager regionManager,
+			IBookmarkManager bookmarkManager,
+			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_coreExtension = coreExtension;
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 			_context = context;
 			_filterAliasExpander = filterAliasExpander;
 			_allRecords = allRecords;
@@ -274,10 +278,17 @@
 				LogSeverityType.Information,
 				"Re-applying the most recent filter to the in-memory records...");
 
-			return Apply(_currentFilter.Type, _currentFilter.Criteria);
+			// Re-applying is not a user-initiated filter action, so it is not recorded as telemetry.
+			return ApplyInternal(_currentFilter.Type, _currentFilter.Criteria);
 		}
 
 		public IFilter Apply(FilterType filterType, IFilterCriteria criteria)
+		{
+			_telemetryRecorder.Increment(TelemetryMetrics.FilterApplied);
+			return ApplyInternal(filterType, criteria);
+		}
+
+		internal IFilter ApplyInternal(FilterType filterType, IFilterCriteria criteria)
 		{
 			if (criteria is null)
 			{
