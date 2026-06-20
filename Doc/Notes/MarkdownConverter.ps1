@@ -17,11 +17,12 @@ $TemplateFile =
 # Files to convert
 # --------------------------------------------------------------------------------------
 
-$MarkdownFiles = @(
-    "Release\ChangeLog.md",
-    "Release\Help.md",
-    "Release\InstallationGuide.md"
-)
+$ReleaseDirectory =
+    Join-Path $ProjectDirectory "Release"
+
+$MarkdownFiles =
+    Get-ChildItem -Path $ReleaseDirectory -Filter "*.md" -File |
+    ForEach-Object { Join-Path "Release" $_.Name }
 
 # --------------------------------------------------------------------------------------
 # Locate Markdig assembly from NuGet package cache
