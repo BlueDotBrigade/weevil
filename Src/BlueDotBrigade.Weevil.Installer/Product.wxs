@@ -71,7 +71,7 @@
 			<Component Id="TelemetryUsernameEnabledComponent" Guid="1D8C66F0-8E03-4F06-B575-58254B6F35BE" Condition="WEEVIL_COLLECT_ANONYMOUS_METRICS = &quot;1&quot;">
 				<Environment Id="WeevilTelemetryUsernameEnabledEnvironmentVariable"
 					Name="WEEVIL_TELEMETRY_USERNAME"
-					Value="weevil_telemetry"
+					Value="weevil_telemetry_producer"
 					Action="set"
 					Part="all"
 					System="yes" />
