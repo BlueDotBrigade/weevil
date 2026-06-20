@@ -75,9 +75,13 @@
 					Action="set"
 					Part="all"
 					System="yes" />
+				<!--
+					An empty string will result in a compiler error.
+					WIX0006 : The Environment/@Value attribute's value cannot be an empty string. If a value is not required, simply remove the entire attribute.
+				-->
 				<Environment Id="WeevilTelemetrySecretEnabledEnvironmentVariable"
 					Name="WEEVIL_TELEMETRY_SECRET"
-					Value=""
+					Value="NOT_SET"
 					Action="set"
 					Part="all"
 					System="yes" />
@@ -100,10 +104,10 @@
 		<UI>
 			<Dialog Id="TelemetryDialog" Width="370" Height="270" Title="[ProductName] Setup">
 				<Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Telemetry" />
-				<Control Id="Description" Type="Text" X="20" Y="23" Width="330" Height="30" Transparent="yes" NoPrefix="yes" Text="We collect anonymous usage data to improve the application." />
+				<Control Id="Description" Type="Text" X="20" Y="23" Width="330" Height="30" Transparent="yes" NoPrefix="yes" Text="Knowing how the application is being used helps to improve the user experience.&#xD;&#xA;For example: How often is the dashboard opened?" />
 				<Control Id="TelemetryOptInCheckbox" Type="CheckBox" X="20" Y="90" Width="330" Height="17" Property="WEEVIL_COLLECT_ANONYMOUS_METRICS" CheckBoxValue="1" Text="Collect anonymous metrics?" />
 				<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-				<Control Id="TelemetryExplanation" Type="Text" X="20" Y="202" Width="330" Height="30" Transparent="yes" NoPrefix="yes" Text="No personal identifying information will be collected." />
+				<Control Id="TelemetryExplanation" Type="Text" X="20" Y="202" Width="330" Height="30" Transparent="yes" NoPrefix="yes" Text="No personal or proprientary information will be collected (e.g. filters, filenames, etc.)." />
 				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
 				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
 				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)" />
