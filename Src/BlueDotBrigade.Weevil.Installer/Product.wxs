@@ -77,7 +77,8 @@
 					System="yes" />
 				<Environment Id="WeevilTelemetrySecretEnabledEnvironmentVariable"
 					Name="WEEVIL_TELEMETRY_SECRET"
-					Action="remove"
+					Value=""
+					Action="set"
 					Part="all"
 					System="yes" />
 			</Component>
