@@ -13,7 +13,7 @@
 	[DebuggerDisplay("Results={Results.Length}, InclusiveFilter={_currentFilter.Criteria.Include}")]
 	internal class FilterManager : IClonableInternally<FilterManager>, IFilter
 	{
-		public const int MaxFilterHistory = 20;
+		public const int MaxFilterHistory = 32;
 
 		#region Fields
 		private readonly ICoreExtension _coreExtension;
@@ -23,10 +23,14 @@
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IMetricCollector> _metricCollectors;
 
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
+
 		private FilterStrategy _latestFilterStrategy;
 		private ImmutableArray<IRecord> _latestFilterResults;
 
 		private IRegionManager _regionManager;
+
+		private IBookmarkManager _bookmarkManager;
 
 		private Filter _currentFilter;
 
@@ -45,14 +49,18 @@
 			IFilterAliasExpander filterAliasExpander,
 			ImmutableArray<IRecord> allRecords,
 			ImmutableArray<IMetricCollector> metricCollectors,
-			IRegionManager regionManager)
+			IRegionManager regionManager,
+			IBookmarkManager bookmarkManager,
+			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_coreExtension = coreExtension;
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 			_context = context;
 			_filterAliasExpander = filterAliasExpander;
 			_allRecords = allRecords;
 
 			_regionManager = regionManager;
+			_bookmarkManager = bookmarkManager;
 
 			_metricCollectors = metricCollectors;
 
@@ -82,6 +90,8 @@
 		public IFilterCriteria Criteria => _currentFilter.Criteria;
 
 		public TimeSpan FilterExecutionTime => _filterExecutionTime;
+
+		public IFilterAliasExpander AliasExpander => _filterAliasExpander;
 
 		public event EventHandler<ResultsChangedEventArgs> ResultsChanged;
 		public event EventHandler<HistoryChangedEventArgs> HistoryChanged;
@@ -268,10 +278,17 @@
 				LogSeverityType.Information,
 				"Re-applying the most recent filter to the in-memory records...");
 
-			return Apply(_currentFilter.Type, _currentFilter.Criteria);
+			// Re-applying is not a user-initiated filter action, so it is not recorded as telemetry.
+			return ApplyInternal(_currentFilter.Type, _currentFilter.Criteria);
 		}
 
 		public IFilter Apply(FilterType filterType, IFilterCriteria criteria)
+		{
+			_telemetryRecorder.Increment(TelemetryMetrics.FilterApplied);
+			return ApplyInternal(filterType, criteria);
+		}
+
+		internal IFilter ApplyInternal(FilterType filterType, IFilterCriteria criteria)
 		{
 			if (criteria is null)
 			{
@@ -290,7 +307,7 @@
 					});
 
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();

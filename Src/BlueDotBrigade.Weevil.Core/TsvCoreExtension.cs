@@ -25,6 +25,7 @@
 			_recordParser = new TsvRecordParser();
 			_filterAliases = new Dictionary<string, string>
 			{
+				{ "#AllRecords", @".*" },
 				{ "#Trace", @"@Severity=Trace" },
 				{ "#Debug", @"@Severity=Debug" },
 				{ "#Information", @"@Severity=Information" },

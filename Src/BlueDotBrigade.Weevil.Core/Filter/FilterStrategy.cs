@@ -22,11 +22,16 @@
 		private const string HideDebugRecords = "HideDebugRecords";
 		private const string HideTraceRecords = "HideTraceRecords";
 		private const string IncludePinned = "IncludePinned";
+		private const string IncludeBookmarks = "IncludeBookmarks";
 
 		private readonly LogicalOrOperation _inclusiveFilter;
 		private readonly LogicalOrOperation _exclusiveFilter;
 
+		private readonly ExpressionBuilder _expressionBuilder;
+
 		private readonly bool _includePinned;
+		private readonly bool _includeBookmarks;
+		private readonly IBookmarkManager _bookmarkManager;
 
 		static FilterStrategy()
 		{
@@ -47,16 +52,17 @@
 			IFilterAliasExpander filterAliasExpander,
 			FilterType filterType,
 			IFilterCriteria filterCriteria,
-			IRegionManager regionManager)
+			IRegionManager regionManager,
+			IBookmarkManager bookmarkManager)
 		{
 			_filterType = filterType;
 			_filterCriteria = filterCriteria;
+			_bookmarkManager = bookmarkManager;
 
+            _expressionBuilder = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager, bookmarkManager);
 
-			var expressionFactory = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager);
-
-			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, true);
-			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, expressionFactory, filterCriteria, false);
+			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, true);
+			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, false);
 
 			exclusiveExpressions.AddRange(ConvertConfigurationIntoExpressions(filterCriteria.Configuration));
 
@@ -70,6 +76,19 @@
 					_includePinned = userConfigurationValue;
 				}
 			}
+
+			if (filterCriteria.Configuration.ContainsKey(IncludeBookmarks))
+			{
+				if (bool.TryParse(filterCriteria.Configuration[IncludeBookmarks].ToString(), out var userConfigurationValue))
+				{
+					_includeBookmarks = userConfigurationValue;
+				}
+			}
+		}
+
+		public ExpressionBuilder GetExpressionBuilder()
+		{
+			return _expressionBuilder;
 		}
 
 		public FilterType FilterType => _filterType;
@@ -80,35 +99,57 @@
 
 		public LogicalOrOperation ExclusiveFilter => _exclusiveFilter;
 
+		/// <summary>
+		/// Determines if a record should be kept based on filter criteria and special record settings.
+		/// 
+		/// Filter Logic:
+		/// 1. No include, no exclude: all records visible
+		/// 2. Only include: matching records are visible
+		/// 3. Only exclude: all records visible except those matching exclude filter
+		/// 4. Include and exclude: records matching include filter, then exclude matching records
+		/// 
+		/// Special Records (override EXCLUDE filter):
+		/// - If "show pinned" is enabled: pinned records are ALWAYS visible (even if they match exclude filter)
+		/// - If "show bookmarks" is enabled: bookmarked records are ALWAYS visible (even if they match exclude filter)
+		/// </summary>
 		public bool CanKeep(IRecord record)
 		{
 			var canKeepRecord = false;
 
 			if (_inclusiveFilter.Count == 0 && _exclusiveFilter.Count == 0)
 			{
+				// No filters applied, so show everything.
 				canKeepRecord = true;
 			}
 			else
 			{
-				if (_includePinned && record.Metadata.IsPinned)
+				// Check if record should be kept due to pinned or bookmarked status first
+				var isPinned = _includePinned && record.Metadata.IsPinned;
+				var hasBookmark = _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
+				var isBookmarked = _includeBookmarks && hasBookmark;
+
+				if (isPinned || isBookmarked)
 				{
+					// When configured, ALWAYS show pinned or bookmarked records.
 					canKeepRecord = true;
 				}
 				else
 				{
+					// Filters exist and only one (or neither) special option is enabled
+					// Apply normal filtering logic
 					if (_inclusiveFilter.Count > 0 && _exclusiveFilter.Count == 0)
 					{
-						canKeepRecord = _inclusiveFilter.ReturnsTrue(record);
+						canKeepRecord = _inclusiveFilter.IsMatch(record);
 					}
 					else if (_inclusiveFilter.Count == 0 && _exclusiveFilter.Count > 0)
 					{
-						canKeepRecord = !_exclusiveFilter.ReturnsTrue(record);
+						canKeepRecord = !_exclusiveFilter.IsMatch(record);
 					}
 					else
 					{
-						if (_inclusiveFilter.ReturnsTrue(record))
+						if (_inclusiveFilter.IsMatch(record))
 						{
-							var isRecordIgnored = _exclusiveFilter.ReturnsTrue(record);
+							var isRecordIgnored = _exclusiveFilter.IsMatch(record);
 							canKeepRecord = !isRecordIgnored;
 						}
 					}

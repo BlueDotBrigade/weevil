@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Platforms>x64</Platforms>
+    <PackageId>BlueDotBrigade.Weevil.Telemetry</PackageId>
+    <RootNamespace>BlueDotBrigade.Weevil.Telemetry</RootNamespace>
+    <Version>$(WeevilReleaseVersion)</Version>
+    <Authors>BlueDotBrigade;</Authors>
+    <Copyright>© 2026 Blue Dot Brigade</Copyright>
+    <Owners>Blue Dot Brigade</Owners>
+    <Description>Azure MSSQL telemetry adapter for the Weevil log analysis platform.</Description>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>BlueDotBrigade.Weevil.Telemetry</AssemblyName>
+    <Company>Blue Dot Brigade</Company>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>BlueDotBrigade.Weevil.Telemetry-UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
+      <Link>Properties\DomainSpecificTerminology.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="IF &quot;%25WEEVIL_TELEMETRY_USERNAME%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_TELEMETRY_USERNAME` environment variable is missing.&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_TELEMETRY_SECRET%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_TELEMETRY_SECRET` environment variable is missing.&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_TELEMETRY_SOURCE%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_TELEMETRY_SOURCE` environment variable is missing.&#xD;&#xA;)" />
+  </Target>
+</Project>

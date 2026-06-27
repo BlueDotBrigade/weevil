@@ -55,6 +55,11 @@
 			/// </summary>
 			private Range _range = Range.All;
 
+			/// <summary>
+			/// Records semantic usage metrics. Defaults to a no-op recorder when the host does not supply one.
+			/// </summary>
+			private ITelemetryMetricRecorder _telemetryRecorder = NullTelemetryMetricRecorder.Instance;
+
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
 				// nothing to do
@@ -83,11 +88,20 @@
 				_clearOperation = clearOperation;
 				_hasBeenCleared = true;
 
+				// A cleared/derived engine keeps recording to the same telemetry session as its source.
+				_telemetryRecorder = source._telemetryRecorder;
+
 				_startAtLineNumber = NotSet;
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
 					$"Core engine construction will read records from an existing instance. OriginalFilename={Path.GetFileName(source.SourceFilePath)}, Operation={clearOperation}");
+			}
+
+			public CoreEngineBuilder UsingTelemetry(ITelemetryMetricRecorder recorder)
+			{
+				_telemetryRecorder = recorder ?? NullTelemetryMetricRecorder.Instance;
+				return this;
 			}
 
 			public CoreEngineBuilder UsingContext(ContextDictionary context)
@@ -167,6 +181,7 @@
 				var exclusiveFilterHistory = new List<string>();
 				var tableOfContents = new List<Section>();
 				var regions = new List<Region>();
+				var bookmarks = new List<Bookmark>();
 
 				if (this.UseExistingInstance)
 				{
@@ -179,6 +194,7 @@
 
 					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
 					regions.AddRange(_sourceInstance._regionManager.Regions);
+					bookmarks.AddRange(_sourceInstance._bookmarkManager.Bookmarks);
 
 					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
 					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);
@@ -235,7 +251,8 @@
 							out inclusiveFilterHistory,
 							out exclusiveFilterHistory,
 							out tableOfContents,
-							out regions);
+							out regions,
+							out bookmarks);
 
 						if (inclusiveFilterHistory.Count == 0)
 						{
@@ -263,7 +280,9 @@
 					records,
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
-					regions.ToImmutableArray());
+					regions.ToImmutableArray(),
+					bookmarks.ToImmutableArray(),
+					_telemetryRecorder);
 
 				if (inclusiveFilterHistory.Count > 0)
 				{

@@ -1,17 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net9.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-		<!-- If `AssemblyName` is set to any other value (e.g. WeevilGui.exe) you may experience -->
-		<!-- PostSharp `No valid license key has been installed` compiler errors (PS0242) -->
-		<!-- when using GitHub actions. -->
-		<!-- See issue: #336 -->
-		<AssemblyName>BlueDotBrigade.Weevil.Gui</AssemblyName>
+		<AssemblyName>WeevilGui</AssemblyName>
 		<PlatformTarget>x64</PlatformTarget>
 		<OutputType>WinExe</OutputType>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x64</Platforms>
-		<Deterministic>false</Deterministic>
+		<Deterministic>true</Deterministic>
 		<PublishUrl>publish\</PublishUrl>
 		<Install>true</Install>
 		<InstallFrom>Disk</InstallFrom>
@@ -22,16 +19,14 @@
 		<UpdatePeriodically>false</UpdatePeriodically>
 		<UpdateRequired>false</UpdateRequired>
 		<MapFileExtensions>true</MapFileExtensions>
-		<ApplicationRevision>0</ApplicationRevision>
-		<Version>2.11.0</Version>
-		<ApplicationVersion>2.10.0</ApplicationVersion>
+		<Version>$(WeevilReleaseVersion)</Version>
 		<IsWebBootstrapper>false</IsWebBootstrapper>
 		<UseApplicationTrust>false</UseApplicationTrust>
 		<BootstrapperEnabled>true</BootstrapperEnabled>
 		<Authors>BlueDotBrigade;</Authors>
 		<Company>Blue Dot Brigade</Company>
 		<Description>An open-source C# library &amp; WPF application that facilitates the analysis of log file data, while automatically detecting known issues.</Description>
-		<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+		<Copyright>© 2026 Blue Dot Brigade</Copyright>
 		<PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
 		<PackageIcon>Weevil-100.png</PackageIcon>
 		<RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
@@ -60,10 +55,19 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="nlog.config" />
-		<None Remove="PostSharp.license" />
+		<None Remove="Resources\Icons\Bookmarks-Data-24.png" />
+		<None Remove="Resources\Icons\Bookmarks-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\Bookmarks-NoData-24.png" />
 		<None Remove="Resources\Icons\Insight\Timestamp-Data-48.png" />
 		<None Remove="Resources\Icons\Insight\Timestamp-DataRequiresAttention-48.png" />
 		<None Remove="Resources\Icons\LineNumber-Data-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-Data-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-Data-24.png.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\LogEntry-Fatal-NoData-24.png" />
+		<None Remove="Resources\Icons\Regions-Data-24.png" />
+		<None Remove="Resources\Icons\Regions-DataRequiresAttention-24.png" />
+		<None Remove="Resources\Icons\Regions-NoData-24.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Filter\FilterViewModel.Commands.cs">
@@ -94,45 +98,49 @@
 		</CodeAnalysisDictionary>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="FluentValidation" Version="11.11.0" />
-		<PackageReference Include="gong-wpf-dragdrop">
-			<Version>3.2.1</Version>
-		</PackageReference>
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
 		<PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
 		<PackageReference Include="MaterialDesignThemes">
 			<Version>4.0.0</Version>
 		</PackageReference>
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Newtonsoft.Json">
-			<Version>13.0.3</Version>
+			<Version>13.0.4</Version>
 		</PackageReference>
 		<PackageReference Include="NLog">
-			<Version>5.3.4</Version>
+			<Version>6.0.7</Version>
 		</PackageReference>
-		<PackageReference Include="PostSharp">
-			<Version>2024.1.6</Version>
-		</PackageReference>
-		<PackageReference Include="PostSharp.Patterns.Model">
-			<Version>2024.1.6</Version>
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
+		<PackageReference Include="Metalama.Patterns.Observability">
+			<Version>2026.1.18</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="System.Collections.Immutable">
-			<Version>9.0.0</Version>
+			<Version>10.0.2</Version>
 		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-		<PackageReference Include="System.Management" Version="9.0.0" />
+		<PackageReference Include="System.Management" Version="10.0.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+		<ProjectReference Include="..\BlueDotBrigade.Weevil.Telemetry\BlueDotBrigade.Weevil.Telemetry.csproj" />
 		<ProjectReference Include="..\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<Resource Include="Resources\Icons\Bookmarks-Data-24.png" />
+		<Resource Include="Resources\Icons\Bookmarks-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\Bookmarks-NoData-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-Data-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\LogEntry-Fatal-NoData-24.png" />
+		<Resource Include="Resources\Icons\Regions-Data-24.png" />
+		<Resource Include="Resources\Icons\Regions-DataRequiresAttention-24.png" />
+		<Resource Include="Resources\Icons\Regions-NoData-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-Data-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-DataRequiresAttention-24.png" />
 		<Resource Include="Resources\Icons\SourceFileRemarks-NoData-24.png" />
-		<Resource Include="Resources\Icons\LogEntry-Fatal.png" />
 		<Resource Include="Resources\Icons\Records-Pinned.png" />
 	</ItemGroup>
 	<ItemGroup>
@@ -204,7 +212,7 @@
 		<Resource Include="Resources\Icons\OpenDocument-Button-24.png" />
 	</ItemGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;&#xD;&#xA;&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing&#xD;&#xA;)" />
+		<Exec Command="ECHO If missing or newer, copy application's configuration file template...&#xD;&#xA;COPY /-Y &quot;$(ProjectDir)App.config.Template&quot; &quot;$(ProjectDir)App.config&quot;" />
 	</Target>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Help.html&quot; &quot;$(TargetDir)..\Doc\\&quot;  /D /Y&#xD;&#xA;&#xD;&#xA;REM Create directory and copy third-party licenses&#xD;&#xA;XCOPY &quot;$(SolutionDir)Doc\\Notes\\Release\\Licenses&quot; &quot;$(TargetDir)..\Licenses&quot;  /D /I /E /Y&#xD;&#xA;&#xD;&#xA;COPY /A /Y &quot;$(SolutionDir)LICENSE.md&quot; &quot;$(TargetDir)..\Licenses\\License.md&quot;&#xD;&#xA;&#xD;&#xA;REM To minimize coupling, Weevil must NEVER have direct knowledge of the plugins.&#xD;&#xA;REM This is why `BlueDotBrigade.Weevil.Plugins` is not added as a project reference.&#xD;&#xA;IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   REM Nothing more to do.&#xD;&#xA;) else (&#xD;&#xA;   ECHO Copying plugins to Bin directory...&#xD;&#xA;   XCOPY &quot;%25WEEVIL_PLUGINS_PATH%25\\*.*&quot; &quot;$(TargetDir)Plugins&quot;  /D /I /E /Y&#xD;&#xA;)" />

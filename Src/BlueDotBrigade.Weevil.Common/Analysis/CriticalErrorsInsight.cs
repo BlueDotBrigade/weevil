@@ -29,6 +29,12 @@
 				this.Details =
 					$"Fatal and/or critical errors have been detected, with the first occurrence at: {analyzer.FatalFirstOccurredAt.CreatedAt:HH:mm:ss}.";
 				this.IsAttentionRequired = true;
+
+				// Store the first fatal record so users can navigate to it
+				if (analyzer.FatalFirstOccurredAt != null)
+				{
+					this.RelatedRecords = ImmutableArray.Create(analyzer.FatalFirstOccurredAt);
+				}
 			}
 		}
 	}

@@ -164,13 +164,13 @@
 		{
 			var results = new IRecord[records.Length - selectedRecords.Length];
 
-			var blacklist = selectedRecords.ToImmutableHashSet();
+			var blacklist = selectedRecords.Select(r => r.LineNumber).ToImmutableHashSet();
 
 			var insertAt = 0;
 
-			for (var i = 0; i <= results.Length; i++)
-			{
-				if (blacklist.Contains(records[i]))
+            for (var i = 0; i < records.Length; i++)
+            {
+				if (blacklist.Contains(records[i].LineNumber))
 				{
 					// consider the record cleared
 				}
@@ -209,7 +209,8 @@
 			{
 				var filteredRecords = new List<IRecord>();
 
-				foreach (Region region in regions)
+				// Sort regions by line number to maintain sequential order (Bug #647)
+			foreach (Region region in regions.OrderBy(r => r.Minimum.LineNumber))
 				{
 					// Add all records that fall within the current region of interest
 					filteredRecords.AddRange(allRecords.Where(record =>

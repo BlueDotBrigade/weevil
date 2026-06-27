@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
+	using System;
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,16 +9,17 @@
 	public class LineNumberNavigatorTests
 	{
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void GoTo_EmptyRecordCollection_ThrowsRecordNotFound()
 		{
 			var emptyRecordCollection = new List<IRecord>();
 
-			_ = new LineNumberNavigator(new ActiveRecord(emptyRecordCollection))
-				.Find(8)
-				.LineNumber;
-
-			Assert.Fail("Test shouldn't reach here.");
+			Action act = () =>
+			{
+				_ = new LineNumberNavigator(new ActiveRecord(emptyRecordCollection))
+					.Find(8)
+					.LineNumber;
+			};
+			act.Should().Throw<RecordNotFoundException>();
 		}
 
 		[TestMethod]
@@ -30,13 +32,10 @@
 				R.WithLineNumber(9),
 			};
 
-			Assert.AreEqual(
-				8,
-				new LineNumberNavigator(new ActiveRecord(records)).Find(8).LineNumber);
+			(new LineNumberNavigator(new ActiveRecord(records)).Find(8).LineNumber).Should().Be(8);
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(RecordNotFoundException))]
 		public void GoTo_MissingLineNumber_ThrowsRecordNotFound()
 		{
 			var records = new List<IRecord>
@@ -46,11 +45,13 @@
 				R.WithLineNumber(9),
 			};
 
-			_ = new LineNumberNavigator(new ActiveRecord(records))
-				.Find(8)
-				.LineNumber;
-
-			Assert.Fail("Test shouldn't reach here.");
+			Action act = () =>
+			{
+				_ = new LineNumberNavigator(new ActiveRecord(records))
+					.Find(8)
+					.LineNumber;
+			};
+			act.Should().Throw<RecordNotFoundException>();
 		}
 
 		[TestMethod]
@@ -62,9 +63,9 @@
 				R.WithLineNumber(20),
 			};
 
-			Assert.AreEqual(10, new LineNumberNavigator(new ActiveRecord(records))
+			(new LineNumberNavigator(new ActiveRecord(records))
 				.Find(12, RecordSearchType.NearestNeighbor)
-				.LineNumber);
+				.LineNumber).Should().Be(10);
 		}
 	}
 }

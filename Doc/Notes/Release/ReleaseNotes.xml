@@ -2,8 +2,8 @@
 <!-- Don't forget to escape characters like ampersand. -->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
-	<CodeName>Sucker for Pain</CodeName>
-	<Description>Configurable font size, regions of interest, simplified UI, and more!</Description>
+	<CodeName>Steady, As She Goes</CodeName>
+	<Description>Bookmark navigation, more analytical tools, improved graphing, and more!</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.11.0</LatestRelease>
+	<LatestRelease>2.12.0</LatestRelease>
 </ApplicationInfo>

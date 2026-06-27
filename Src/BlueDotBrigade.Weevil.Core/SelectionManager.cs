@@ -113,8 +113,6 @@
 				throw new ArgumentNullException(nameof(record));
 			}
 
-			IRecord firstRecord = Record.Dummy;
-
 			var added = 0;
 			var count = -1;
 
@@ -124,7 +122,6 @@
 				{
 					added++;
 					_selectedRecords.Add(record.LineNumber, record);
-					firstRecord = record;
 				}
 
 				count = _selectedRecords.Count;
@@ -136,10 +133,9 @@
 
 			_selectionPeriod = CalculateTimePeriod(_selectedRecords);
 
-			if (!Record.IsDummyOrNull(firstRecord))
-			{
-				_navigationManager.SetActiveLineNumber(record.LineNumber);
-			}
+			// Always update the active line number to keep navigation in sync,
+			// even if the record was already in the selection dictionary.
+			_navigationManager.SetActiveLineNumber(record.LineNumber);
 
 			return this;
 		}
@@ -151,7 +147,7 @@
 				throw new ArgumentNullException(nameof(records));
 			}
 
-			IRecord firstRecord = Record.Dummy;
+			IRecord lastRecord = Record.Dummy;
 			var added = 0;
 			var count = -1;
 
@@ -163,12 +159,10 @@
 					{
 						added++;
 						_selectedRecords.Add(record.LineNumber, record);
-
-						if (Record.IsDummyOrNull(firstRecord))
-						{
-							firstRecord = record;
-						}
 					}
+
+					// Track the last record regardless of whether it was newly added.
+					lastRecord = record;
 				}
 
 				count = _selectedRecords.Count;
@@ -178,9 +172,11 @@
 				LogSeverityType.Trace,
 				$"The number of selected records has changed. Added={added}, Current={count}");
 
-			if (!Record.IsDummyOrNull(firstRecord))
+			// Always update the active line number to keep navigation in sync,
+			// even if the record was already in the selection dictionary.
+			if (!Record.IsDummyOrNull(lastRecord))
 			{
-				_navigationManager.SetActiveLineNumber(firstRecord.LineNumber);
+				_navigationManager.SetActiveLineNumber(lastRecord.LineNumber);
 			}
 
 			_selectionPeriod = CalculateTimePeriod(_selectedRecords);

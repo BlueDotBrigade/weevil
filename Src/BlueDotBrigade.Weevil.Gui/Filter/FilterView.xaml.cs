@@ -1,10 +1,11 @@
-﻿namespace BlueDotBrigade.Weevil.Gui.Filter
+namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
 	using System.Data.Common;
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
+	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Properties;
@@ -29,6 +30,7 @@
 					viewModel.FileOpened -= OnFileOpened;
 					viewModel.ResultsChanged -= OnResultsChanged;
 					viewModel.RegionsChanged -= OnRegionsChanged;
+					viewModel.BookmarksChanged -= OnBookmarksChanged;
 				}
 				if (args.NewValue != null)
 				{
@@ -37,6 +39,7 @@
 					viewModel.FileOpened += OnFileOpened;
 					viewModel.ResultsChanged += OnResultsChanged;
 					viewModel.RegionsChanged += OnRegionsChanged;
+					viewModel.BookmarksChanged += OnBookmarksChanged;
 				}
 			};
 
@@ -44,6 +47,7 @@
 
 			Loaded += OnControlLoaded;
 		}
+
 
 		private FilterViewModel ViewModel => (FilterViewModel)this.DataContext;
 
@@ -78,6 +82,12 @@
 			this.ListView.Items.Refresh();
 		}
 
+		private void OnBookmarksChanged(object sender, EventArgs e)
+		{
+			// Force bindings (and converters) for only the visible items to be refreshed.
+			this.ListView.Items.Refresh();
+		}
+
 		private void OnResultsChanged(object sender, EventArgs e)
 		{
 			try
@@ -88,6 +98,11 @@
 				{
 					this.ListView.SelectedItems.Add(record);
 				}
+
+				// Recalculate column widths after filter results change.
+				// Note: BeginInvoke at Background priority ensures that this runs after
+				// any pending progress bar hide and rendering operations are complete.
+				this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(UpdateLayout));
 			}
 			catch (Exception exception)
 			{
@@ -139,6 +154,22 @@
 						message);
 					throw;
 				}
+			}
+		}
+
+		private void OnWindowLayoutDragOver(object sender, DragEventArgs e)
+		{
+			if (this.ViewModel != null)
+			{
+				this.ViewModel.DragOver(e);
+			}
+		}
+
+		private void OnWindowLayoutDrop(object sender, DragEventArgs e)
+		{
+			if (this.ViewModel != null)
+			{
+				this.ViewModel.Drop(e);
 			}
 		}
 
@@ -197,7 +228,7 @@
 
 					if (i == gridView.Columns.Count - 1)
 					{
-						var remainingWidth = Math.Max(0, ListView.ActualWidth - SystemParameters.VerticalScrollBarWidth - totalWidth - 2);
+						var remainingWidth = System.Math.Max(0, ListView.ActualWidth - SystemParameters.VerticalScrollBarWidth - totalWidth - 2);
 						column.Width = 0; // Setting to 0 first to force recalculation
 						column.Width = remainingWidth;
 					}
@@ -239,7 +270,7 @@
 
 		private void OnProgressBarVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			if(_isLogFileOpening)
+			if (_isLogFileOpening)
 			{
 				_isLogFileOpening = false;
 

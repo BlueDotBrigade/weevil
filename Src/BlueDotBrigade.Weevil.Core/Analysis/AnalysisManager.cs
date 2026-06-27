@@ -7,18 +7,23 @@
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
 	using Timeline;
 
 	internal class AnalysisManager : IAnalyze
 	{
+		private const int MetricKeyMaxLength = 128;
+
 		private readonly ICoreExtension _coreExtension;
 		private readonly CoreEngine _coreEngine;
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
-		internal AnalysisManager(CoreEngine coreEngine, ICoreExtension coreExtension)
+		internal AnalysisManager(CoreEngine coreEngine, ICoreExtension coreExtension, ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_coreEngine = coreEngine;
 			_coreExtension = coreExtension;
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 		}
 
 		public void UnpinAll()
@@ -62,15 +67,23 @@
 
 			if ((componentType & ComponentType.Core) == ComponentType.Core)
 			{
+				var filterStrategy = _coreEngine.Filter.FilterStrategy;
+				var aliasExpander = _coreEngine.Filter.AliasExpander;
+
 				analyzers.AddRange(new List<IRecordAnalyzer>()
 				{
 					new TimeGapAnalyzer(),
 					new TimeGapUiAnalyzer(),
-					new TemporalAnomalyAnalyzer(),
-					new DetectDataAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new DataTransitionAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new DetectRisingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
-					new DetectFallingEdgeAnalyzer(_coreEngine.Filter.FilterStrategy),
+					new OutOfOrderTimestampsAnalyzer(),
+					new DetectDataAnalyzer(filterStrategy, aliasExpander),
+					new FirstOccurrenceAnalyzer(filterStrategy, aliasExpander),
+					new LastOccurrenceAnalyzer(filterStrategy, aliasExpander),
+					new StableValueRunsAnalyzer(filterStrategy, aliasExpander),
+					new StateTransitionsAnalyzer(filterStrategy, aliasExpander),
+					new DetectRisingEdgeAnalyzer(filterStrategy, aliasExpander),
+					new DetectFallingEdgeAnalyzer(filterStrategy, aliasExpander),
+					new MatchingRecordRunsAnalyzer(filterStrategy, aliasExpander),
+					new StatisticalAnalyzer(filterStrategy, aliasExpander),
 				});
 			}
 
@@ -127,13 +140,13 @@
 			Analyze(analyzerKey, new UserDialogNotRequired());
 		}
 
-		public int  Analyze(AnalysisType analysisType, IUserDialog userDialog)
+		public Results Analyze(AnalysisType analysisType, IUserDialog userDialog)
 		{
 			var analyzerKey = analysisType.ToString();
 			return Analyze(analyzerKey, userDialog);
 		}
 
-		public int Analyze(string analyzerKey, IUserDialog userDialog)
+		public Results Analyze(string analyzerKey, IUserDialog userDialog)
 		{
 			ImmutableArray<IRecord> records = _coreEngine.Selector.HasSelectionPeriod
 				? _coreEngine.Selector.GetSelected()
@@ -141,13 +154,27 @@
 
 			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
 
-			var recordCount = analyzer.Analyze(
+			Results results = analyzer.Analyze(
 				records,
 				_coreEngine.SourceDirectory,
 				userDialog,
 				true);
 
-			return recordCount;
+			// Records which analyzer the user ran. Works for plugin analyzers too: their key flows
+			// through unchanged and becomes a new metric_key row (no schema/code change required).
+			_telemetryRecorder.Increment(BuildAnalysisMetricKey(analyzerKey));
+
+			return results;
+		}
+
+		/// <summary>
+		/// Composes the per-analyzer metric key, e.g. <c>Analysis.Run.DetectData</c>, capped to the
+		/// <c>metric_key</c> column length.
+		/// </summary>
+		internal static string BuildAnalysisMetricKey(string analyzerKey)
+		{
+			var key = $"{TelemetryMetrics.AnalysisRun}.{analyzerKey}";
+			return key.Length <= MetricKeyMaxLength ? key : key.Substring(0, MetricKeyMaxLength);
 		}
 	}
 }

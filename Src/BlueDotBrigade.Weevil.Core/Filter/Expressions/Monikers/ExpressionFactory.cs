@@ -12,7 +12,7 @@
 			_creators = monikerActivators;
 		}
 
-		public ExpressionFactory(IRegionManager regionManager)
+		public ExpressionFactory(IRegionManager regionManager, IBookmarkManager bookmarkManager)
 		{
 			_creators = new List<MonikerActivator>
 			{
@@ -20,11 +20,13 @@
 				new MonikerActivator(PinnedExpression.Moniker, (e) => new PinnedExpression(e)),
 				new MonikerActivator(IsMultiLineExpression.Moniker, (e) => new IsMultiLineExpression(e)),
 				new MonikerActivator(SeverityTypeExpression.Moniker, (e) => new SeverityTypeExpression(e)),
+				new MonikerActivator(LineNumberExpression.Moniker, (e) => new LineNumberExpression(e)),
 				new MonikerActivator(UiThreadExpression.Moniker, (e) => new UiThreadExpression(e)),
 				new MonikerActivator(UserCommentExpression.Moniker, (e) => new UserCommentExpression(e)),
 				new MonikerActivator(ContentLengthExpression.Moniker, (e) => new ContentLengthExpression(e)),
 				new MonikerActivator(ElapsedGreaterThanExpression.Moniker, (e) => new ElapsedGreaterThanExpression(e)),
 				new MonikerActivator(RegionExpression.Moniker, (e) => new RegionExpression(e, regionManager)),
+				new MonikerActivator(BookmarkExpression.Moniker, (e) => new BookmarkExpression(e, bookmarkManager)),
 			};
 		}
 

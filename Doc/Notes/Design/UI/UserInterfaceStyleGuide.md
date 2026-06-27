@@ -13,17 +13,17 @@
 ## Color Palette
 
 - Dialog box
-	- left side: #3c3c3c (dark grey)
+	- left side: #161B22 (near-black slate)
 - Dashboard
 	- Insight
-		- border + title bar: #3c3c3c (dark grey)
+		- border + title bar: #161B22 (near-black slate)
 
 ### Image Size
 
-| Type       | DPI | Dimensions |
-| ---------- | --- | ---------- |
-| Status Bar | 96  | 24x24      |
-| Insight    | 96  | 48x48      |
+| Type       | DPI | Dimensions | Comments                                                            |
+| ---------- | --- | ---------- | ------------------------------------------------------------------- |
+| Status Bar | 96  | 24x24      | Icons have 20% padding within the image canvas. See: Icons8 Padding |
+| Insight    | 96  | 48x48      |                                                                     |
 
 
 ## Icons
@@ -31,9 +31,9 @@
 ### General
 
 - The file name should end with a post fix which represents the icon's dimensions
-	- For example: `-24.png` is used for a 24x24 pixel icon.  
+	- For example: `-24.png` is used for a 24x24 pixel icon.
 
-### Icons Having State
+### Icon State
 
 No data available:
 
@@ -56,9 +56,10 @@ Has Data Requiring Attention
 
 ### Appendix C: Color Palette
 
-- Dark Mode Backgrounds → #1A1A1A, #2C2C2C, #3C3C3C
-- Text on Dark UI → #C0C0C0 (for contrast)
-- Borders & Dividers → #6B6B6B, #7F7F7F
+- Dark Mode Backgrounds → #0D1117, #161B22, #21262D
+- Text on Dark UI → #C9D1D9, #E6EDF3
+- Borders & Dividers → #30363D, #8B949E
+- Accent / Selection → #900A22 (burgundy)
 - Disabled States → #949494, #A9A9A9
 - Light Mode Backgrounds → #EEEEEE, #FAFAFA, #FFFFFF
 - Hover Effects → Slightly lighter or darker versions of primary elements

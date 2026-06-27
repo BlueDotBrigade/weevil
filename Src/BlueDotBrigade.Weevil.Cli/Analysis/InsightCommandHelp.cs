@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 		{
 			helpMessage.Children.Add(
 				new HelpSection(
-					new HelpHeading("Examples:"),
+					new HelpHeading("Insight Examples:"),
 					new HelpSection(
 						new HelpParagraph(@"WeevilCli.exe insight --log-path ""C:\Temp\Http.log"""),
 						new HelpParagraph("")

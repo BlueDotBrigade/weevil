@@ -11,6 +11,144 @@
         <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
         <converters1:ContextConverter x:Key="ContextConverter" />
         <converters:SelectionChangedBulletinConverter x:Key="SelectionChangedBulletinConverter" />
+        <Style x:Key="InsightIconStyleOpacityPulse" TargetType="{x:Type Image}">
+            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+            <Setter Property="ToolTip" Value="There is no insight at this time."/>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
+                    <MultiDataTrigger.EnterActions>
+                        <BeginStoryboard Name="InsightAttentionPulseStoryboard">
+                            <Storyboard FillBehavior="Stop">
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 From="1"
+                                                 To="0.35"
+                                                 Duration="0:0:0.4"
+                                                 AutoReverse="True"
+                                                 RepeatBehavior="0:0:5" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <RemoveStoryboard BeginStoryboardName="InsightAttentionPulseStoryboard" />
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="InsightIconStyleScalePulse" TargetType="{x:Type Image}">
+            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+            <Setter Property="ToolTip" Value="There is no insight at this time."/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
+                    <MultiDataTrigger.EnterActions>
+                        <BeginStoryboard Name="InsightAttentionScalePulseStoryboard">
+                            <Storyboard FillBehavior="Stop">
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                 From="1"
+                                                 To="1.25"
+                                                 Duration="0:0:0.4"
+                                                 AutoReverse="True"
+                                                 RepeatBehavior="0:0:5" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                 From="1"
+                                                 To="1.25"
+                                                 Duration="0:0:0.4"
+                                                 AutoReverse="True"
+                                                 RepeatBehavior="0:0:5" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <RemoveStoryboard BeginStoryboardName="InsightAttentionScalePulseStoryboard" />
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="InsightIconStyleCombinedPulse" TargetType="{x:Type Image}">
+            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
+            <Setter Property="ToolTip" Value="There is no insight at this time."/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
+                        <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
+                    <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
+                    <MultiDataTrigger.EnterActions>
+                        <BeginStoryboard Name="InsightAttentionCombinedPulseStoryboard">
+                            <Storyboard FillBehavior="Stop">
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                                               RepeatBehavior="3x">
+                                    <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0.5" />
+                                    <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1.5" />
+                                </DoubleAnimationUsingKeyFrames>
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                               RepeatBehavior="3x">
+                                    <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0.5" />
+                                    <LinearDoubleKeyFrame Value="4" KeyTime="0:0:1.5" />
+                                </DoubleAnimationUsingKeyFrames>
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                               RepeatBehavior="3x">
+                                    <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0.5" />
+                                    <LinearDoubleKeyFrame Value="4" KeyTime="0:0:1.5" />
+                                </DoubleAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <RemoveStoryboard BeginStoryboardName="InsightAttentionCombinedPulseStoryboard" />
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <StatusBar 
@@ -91,7 +229,7 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-                        
+
                         <Image Source="/Resources/Icons/TimeElapsed-Data-24.png" ToolTip="Represents the amount of time between the first and last selected records."/>
 
                         <TextBox Text="{Binding Path=SelectionDetails.SelectionPeriod, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
@@ -100,7 +238,7 @@
                               VerticalAlignment="Center" 
                               IsReadOnly="True" 
                               BorderThickness="0,0,0,0" 
-                              Background="Transparent"/>
+                              Background="{StaticResource TransparentBrush}"/>
 
                     </StackPanel>
                     <!-- Container for line number controls -->
@@ -124,7 +262,7 @@
                              VerticalAlignment="Center" 
                              IsReadOnly="True" 
                              BorderThickness="0,0,0,0" 
-                             Background="Transparent"/>
+                             Background="{StaticResource TransparentBrush}"/>
 
                     </StackPanel>
                 </Grid>
@@ -146,19 +284,23 @@
             <Separator Grid.Column="5" />
             <StatusBarItem Grid.Column="6" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
+                    <Image Source="/Resources/Icons/Bookmarks-Data-24.png" ToolTip="Number of bookmarks created." />
+                    <TextBox Text="{Binding BookmarkDetails.BookmarkCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                             ToolTip="Number of bookmarks created."
+                             Style="{StaticResource StatusBarTextBox}"/>
+                    <Image Source="/Resources/Icons/Regions-Data-24.png" ToolTip="Number of regions created." />
+                    <TextBox Text="{Binding RegionDetails.RegionCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                             ToolTip="Number of regions created."
+                             Style="{StaticResource StatusBarTextBox}"/>
                     <Image Source="/Resources/Icons/Flagged-24.png" ToolTip="Records flagged by built-in or custom analyzers."/>
-                    <TextBox Text="{Binding AnalysisDetails.FlaggedRecordCount, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
-                           ToolTip="Records flagged by built-in or custom analyzers."
-                           Style="{StaticResource StatusBarTextBox}"/>
+                    <TextBox Text="{Binding AnalysisDetails.FlaggedRecords, StringFormat='{}{0:#,###,##0}', FallbackValue=0, Mode=OneWay}" 
+                        ToolTip="Records flagged by built-in or custom analyzers."
+                        Style="{StaticResource StatusBarTextBox}"/>
                 </StackPanel>
             </StatusBarItem>
             <Separator Grid.Column="7" />
             <StatusBarItem Grid.Column="8" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="/Resources/Icons/LogEntry-Information-Data-24.png" ToolTip="Number of informational messages in filter results." />
-                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Information], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
-                             ToolTip="Number of informational messages in filter results"
-                             Style="{StaticResource StatusBarTextBox}"/>
                     <Image Source="/Resources/Icons/LogEntry-Warning-Data-24.png" ToolTip="Number of warning messages in filter results." />
                     <TextBox Text="{Binding FilterDetails.SeverityMetrics[Warnings], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of warning messages in filter results."
@@ -178,6 +320,22 @@
                     </Image>
                     <TextBox Text="{Binding FilterDetails.SeverityMetrics[Errors], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
                              ToolTip="Number of error messages in filter results."
+                             Style="{StaticResource StatusBarTextBox}"/>
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Resources/Icons/LogEntry-Fatal-DataRequiresAttention-24.png" />
+                                <Setter Property="ToolTip" Value="Number of critical messages in filter results."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FilterDetails.SeverityMetrics[Fatals], FallbackValue=0, TargetNullValue=0, Mode=OneWay}" Value="0">
+                                        <Setter Property="Source" Value="/Resources/Icons/LogEntry-Fatal-Data-24.png"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <TextBox Text="{Binding FilterDetails.SeverityMetrics[Fatals], StringFormat='{}{0:#,###,##0}', FallbackValue=0, TargetNullValue=0, Mode=OneWay}" 
+                             ToolTip="Number of critical messages in filter results."
                              Style="{StaticResource StatusBarTextBox}"/>
                 </StackPanel>
             </StatusBarItem>
@@ -234,32 +392,8 @@
                                 </Style.Triggers>
                             </Style>
                         </materialDesign:Badged.Style>
-                        <Image Margin="4,0,0,0">
-                            <Image.Style>
-                                <Style TargetType="{x:Type Image}">
-                                    <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-NoData-24.png" />
-                                    <Setter Property="ToolTip" Value="There is no insight at this time."/>
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
-                                                <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="False" />
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-Data-24.png" />
-                                            <Setter Property="ToolTip" xml:space="preserve" Value="View insights on the dashboard (Ctrl+D)."/>
-                           </MultiDataTrigger>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding InsightDetails.HasInsight}" Value="True" />
-                                                <Condition Binding="{Binding InsightDetails.HasInsightNeedingAttention}" Value="True" />
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Source" Value="/Resources/Icons/Insight/Insight-DataRequiresAttention-24.png" />
-                                            <Setter Property="ToolTip" xml:space="preserve" Value="Insights require attention: Open the dashboard (Ctrl+D)."/>
-                           </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
+                        <Image Margin="4,0,0,0"
+                               Style="{StaticResource InsightIconStyleCombinedPulse}" />
                     </materialDesign:Badged>
                     <materialDesign:PopupBox
                           StaysOpen="True"
@@ -267,8 +401,8 @@
                           Visibility="{Binding SoftwareDetails.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <materialDesign:PopupBox.ToggleContent>
                             <Image Height="24" Width="24" Margin="6,0,0,0"
-                            Source="/Resources/Icons/NewReleaseAvailable-24.png"
-                            ToolTip="New version is available! Click for details."/>
+                                Source="/Resources/Icons/NewReleaseAvailable-24.png"
+                                ToolTip="New version is available! Click for details."/>
                         </materialDesign:PopupBox.ToggleContent>
                         <Grid Margin="20">
                             <Grid.ColumnDefinitions>

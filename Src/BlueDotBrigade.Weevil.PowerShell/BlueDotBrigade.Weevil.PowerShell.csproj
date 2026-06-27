@@ -5,10 +5,9 @@
     <RootNamespace>BlueDotBrigade.Weevil.PowerShell</RootNamespace>
     <AssemblyName>BlueDotBrigade.Weevil.PowerShell</AssemblyName>
     <OutputType>Library</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Version>2.11.0</Version>
+    <Version>$(WeevilReleaseVersion)</Version>
     <Authors>BlueDotBrigade;</Authors>
-    <Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+    <Copyright>© 2026 Blue Dot Brigade</Copyright>
     <Owners>Blue Dot Brigade</Owners>
 	<Company>Blue Dot Brigade</Company>
     <Description>PowerShell Cmdlets for the Weevil log viewer application.</Description>
@@ -17,11 +16,9 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>$(WeevilReleaseVersion)</PackageVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <AssemblyVersion>2.11.0.0</AssemblyVersion>
-    <FileVersion>2.11.0.0</FileVersion>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Platforms>AnyCPU;x64</Platforms>
@@ -33,16 +30,33 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.6" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.5.4" />
+    <PackageReference Include="NLog" Version="6.0.7" />
+    <PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Compress-Logs.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Find-Line.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Select-HttpErrors.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Select-Records.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Split-File.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Split-File-BySize.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+	<None Update="Get-FirstLastLines.ps1">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 </Project>

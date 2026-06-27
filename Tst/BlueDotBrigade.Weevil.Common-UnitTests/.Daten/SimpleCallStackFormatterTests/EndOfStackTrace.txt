@@ -1,0 +1,8 @@
+Error 2025-10-13 19:54:33.1405 38 BlueDotBrigade.Weevil.Core Sample log entry
+   at BlueDotBrigade.Weevil.Core.Before() in C:\Temp\Example.cs:line 10
+   --- End of stack trace from previous location ---
+--- End of stack trace from previous location ---
+    --- End of stack trace from previous location where exception was thrown ---
+--- End of stack trace from previous location where exception was thrown ---
+   at BlueDotBrigade.Weevil.Core.After() in C:\Temp\Example.cs:line 20
+System.Exception : An error occurred

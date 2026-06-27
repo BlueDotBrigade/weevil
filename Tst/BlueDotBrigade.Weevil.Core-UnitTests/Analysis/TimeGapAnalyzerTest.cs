@@ -81,9 +81,9 @@
 				GetUserDialog(3000),
 				canUpdateMetadata: true);
 
-			Assert.IsFalse(records[0].Metadata.IsFlagged);
-			Assert.IsTrue(records[1].Metadata.IsFlagged);
-			Assert.IsFalse(records[2].Metadata.IsFlagged);
+			records[0].Metadata.IsFlagged.Should().BeFalse();
+			records[1].Metadata.IsFlagged.Should().BeTrue();
+			records[2].Metadata.IsFlagged.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -110,9 +110,9 @@
 				GetUserDialog(500),
 				canUpdateMetadata: true);
 
-			Assert.IsFalse(records[2].Metadata.IsFlagged);
-			Assert.IsTrue(records[3].Metadata.IsFlagged);
-			Assert.IsTrue(records[4].Metadata.IsFlagged);
+			records[2].Metadata.IsFlagged.Should().BeFalse();
+			records[3].Metadata.IsFlagged.Should().BeTrue();
+			records[4].Metadata.IsFlagged.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -130,14 +130,14 @@
 
 			var analyzer = new TimeGapAnalyzer();
 
-			var result = analyzer.Analyze(
+			var results = analyzer.Analyze(
 				records.ToImmutableArray(),
 				EnvironmentHelper.GetExecutableDirectory(),
 				GetUserDialog(3000),
 				canUpdateMetadata: true);
 
-			Assert.AreEqual(1, result);
-			Assert.AreEqual(1, analyzer.Count);
+			results.FlaggedRecords.Should().Be(1);
+			analyzer.Count.Should().Be(1);
 		}
 
 		[TestMethod]
@@ -161,9 +161,9 @@
 				GetUserDialog(2000),
 				canUpdateMetadata: true);
 
-			Assert.IsFalse(records[0].Metadata.IsFlagged);
-			Assert.IsFalse(records[1].Metadata.IsFlagged);
-			Assert.IsTrue(records[2].Metadata.IsFlagged);
+			records[0].Metadata.IsFlagged.Should().BeFalse();
+			records[1].Metadata.IsFlagged.Should().BeFalse();
+			records[2].Metadata.IsFlagged.Should().BeTrue();
 		}
 	}
 }

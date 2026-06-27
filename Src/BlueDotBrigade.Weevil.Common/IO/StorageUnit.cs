@@ -54,7 +54,7 @@
 
 		public double KiloBytes => (_bytes / (double)BytesPerKilobyte);
 
-		public double MetaBytes => (_bytes / (double)BytesPerMegabyte);
+		public double MegaBytes => (_bytes / (double)BytesPerMegabyte);
 
 		public double GigaBytes => (_bytes / (double)BytesPerGigabyte);
 

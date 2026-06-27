@@ -19,7 +19,11 @@
 			this.Regions = new List<RegionInfo>();
 			this.FilterHistory = new FilterHistory();
 			this.Records = new List<RecordInfo>();
+			this.Bookmarks = new List<BookmarkInfo>();
 		}
+
+		[DataMember]
+		public List<BookmarkInfo> Bookmarks { get; set; }
 
 		[DataMember]
 		public ContextDictionary Context { get; set; }

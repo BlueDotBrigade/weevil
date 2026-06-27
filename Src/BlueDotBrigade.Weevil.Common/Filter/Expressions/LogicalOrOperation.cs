@@ -1,6 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions
 {
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using Data;
 
 	public class LogicalOrOperation
@@ -17,7 +19,7 @@
 		/// <summary>
 		/// This operator returns <see langword="True"/> if any of the <see cref="IExpression"/> values match the given <see cref="IRecord"/>.
 		/// </summary>
-		public bool ReturnsTrue(IRecord record)
+		public bool IsMatch(IRecord record)
 		{
 			var isMatch = false;
 
@@ -32,9 +34,24 @@
 			return isMatch;
 		}
 
-		public ImmutableArray<IExpression> GetExpressions()
+		public ImmutableArray<IExpression> GetAllExpressions()
 		{
 			return _expressions;
+		}
+
+		public ImmutableArray<RegularExpression> GetRegularExpressions()
+		{
+			var results = new List<RegularExpression>();
+
+			foreach (IExpression expression in _expressions)
+			{
+				if (expression is RegularExpression)
+				{
+					results.Add(expression as RegularExpression);
+				}
+			}
+
+			return results.ToImmutableArray();
 		}
 	}
 }

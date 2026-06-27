@@ -16,7 +16,7 @@
 
 			var expression = new SeverityTypeExpression(SeverityType.Error);
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod] // TODO: Move severity to metadata? Check UI first.
@@ -28,7 +28,7 @@
 			
 			var expression = new SeverityTypeExpression(SeverityType.Error);
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 	}
 }

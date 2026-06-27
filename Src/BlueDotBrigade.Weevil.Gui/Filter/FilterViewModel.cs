@@ -10,14 +10,15 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using System.Net.Http;
 	using System.Reflection;
+	using System.Text.RegularExpressions;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
+	using System.Windows.Input;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil;
-	using GongSolutions.Wpf.DragDrop;
-	using PostSharp.Patterns.Model;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Configuration;
 	using BlueDotBrigade.Weevil.Data;
@@ -27,22 +28,22 @@
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Help;
 	using BlueDotBrigade.Weevil.Gui.IO;
+	using BlueDotBrigade.Weevil.Gui.Navigation;
+	using BlueDotBrigade.Weevil.Gui.Properties;
+	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.Reports;
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
-	using BlueDotBrigade.Weevil.Gui.Properties;
-	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.Utilities;
+	using Newtonsoft.Json.Linq;
+	using Metalama.Patterns.Observability;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
-	using System.Windows.Input;
-	using PostSharp.Extensibility;
-	using System.Net.Http;
 
-	[NotifyPropertyChanged()]
-	internal partial class FilterViewModel : IDropTarget, INotifyPropertyChanged
+	[Observable]
+	internal partial class FilterViewModel
 	{
 		const string TsvFileName = "SelectedRecords.tsv";
 		const string RawFileName = "SelectedRecords.log";
@@ -50,7 +51,7 @@
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 
-		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/EKCf6T/4");
+		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/dRrRat/1");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
@@ -88,14 +89,23 @@
 		private string _inclusiveFilter;
 		private string _exclusiveFilter;
 
-		private FilterCriteria _previousFilterCriteria;
+                private FilterCriteria _previousFilterCriteria;
+                private FilterType _previousFilterType;
 
 		private string _findText;
 		private bool _findIsCaseSensitive;
+		private bool _findUseRegex;
+		private bool _findSearchComments;
+		private bool _findSearchElapsedTime;
+		private int? _findMinElapsedMs;
+		private int? _findMaxElapsedMs;
 
-		private FilterType _currentfilterType;
+                private FilterType _currentfilterType;
+                private FilterType _filterExpressionType;
 		private IFilterCriteria _currentfilterCriteria;
 
+		// Prevent Metalama from converting this to a property, which cannot be passed into `Interlocked`.
+		[NotObservable]
 		private int _concurrentFilterCount;
 
 		private ITableOfContents _tableOfContents;
@@ -113,31 +123,33 @@
 
 			this.IsLogFileOpen = false;
 			this.CanOpenLogFile = true;
+			this.AreInsightsReady = false;
 
-			this.IncludePinned = true;
+			this.FilterOptionsViewModel = new FilterOptionsViewModel();
+			this.FilterOptionsViewModel.OptionsChanged += OnFilterOptionsChanged;
 
 			_inclusiveFilter = string.Empty;
 			_exclusiveFilter = string.Empty;
 
-			_concurrentFilterCount = 0;
-			_currentfilterCriteria = FilterCriteria.None;
-			_previousFilterCriteria = FilterCriteria.None;
+                        _concurrentFilterCount = 0;
+                        _currentfilterCriteria = FilterCriteria.None;
+                        _currentfilterType = FilterType.RegularExpression;
+                        _previousFilterCriteria = FilterCriteria.None;
+                        _previousFilterType = FilterType.RegularExpression;
 
 			_findText = string.Empty;
 			_findIsCaseSensitive = false;
 
-			this.IsManualFilter = false;
-			this.IsFilterCaseSensitive = true;
+                        _filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
 			this.AreFilterOptionsVisible = false;
-			this.IncludeDebugRecords = true;
-			this.IncludeTraceRecords = true;
 
 			this.IsFilterToolboxEnabled = false;
 
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
 
-			this.WeevilVersion = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(128, 128, 128);
+          this.WeevilVersion = typeof(FilterViewModel).Assembly.GetName().Version ?? new Version(128, 128, 128);
+			this.WeevilDisplayVersion = GetWeevilDisplayVersion();
 
 			initializationTimer = new DispatcherTimer();
 			initializationTimer.Tick += (sender, args) => OnInitialize();
@@ -150,6 +162,9 @@
 			_tableOfContents = new TableOfContents();
 
 			this.CustomAnalyzerCommands = new ObservableCollection<MenuItemViewModel>();
+
+			// Subscribe to navigation requests from the Dashboard
+			_bulletinMediator.Subscribe<NavigateToInsightRecordBulletin>(this, OnNavigateToInsightRecord);
 		}
 
 		private static ApplicationInfo GetApplicationInfo()
@@ -166,13 +181,38 @@
 					result = TypeFactory.LoadFromXml<ApplicationInfo>(response.Content.ReadAsStream());
 				}
 			}
-			catch (Exception e) 
+			catch (Exception e)
 			{
 				var message = $"Unable to determine the latest official release. Reason=`{e.Message}`";
 				Log.Default.Write(LogSeverityType.Warning, message);
 			}
 
 			return result;
+		}
+
+		private static string GetWeevilDisplayVersion()
+		{
+			var guiAssembly = typeof(FilterViewModel).Assembly;
+			var informationalVersion = guiAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+			if (!string.IsNullOrWhiteSpace(informationalVersion))
+			{
+				return informationalVersion.Split('+')[0];
+			}
+
+			var fileVersion = guiAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+
+			if (!string.IsNullOrWhiteSpace(fileVersion))
+			{
+				var revisionSeparator = fileVersion.LastIndexOf('.');
+
+				if (revisionSeparator > 0)
+				{
+					return fileVersion.Substring(0, revisionSeparator);
+				}
+			}
+
+			return (guiAssembly.GetName().Version ?? new Version(128, 128, 128)).ToString(3);
 		}
 		#endregion
 
@@ -182,16 +222,13 @@
 
 		public Version WeevilVersion { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		public string WeevilDisplayVersion { get; private set; }
+
+		[NotObservable]
 		public bool IsMenuEnabled
 		{
 			get
 			{
-				if (Depends.Guard)
-				{
-					Depends.On(this.IsLogFileOpen, this.CanOpenLogFile);
-				}
-
 				return this.IsLogFileOpen && this.CanOpenLogFile;
 			}
 		}
@@ -199,10 +236,53 @@
 		public bool IsLogFileOpen { get; private set; }
 
 		public bool CanOpenLogFile { get; private set; }
-		public bool IncludePinned { get; set; }
-		public bool IsManualFilter { get; set; }
+		
+		public bool AreInsightsReady { get; private set; }
 
-		public bool IsFilterCaseSensitive { get; set; }
+		[NotObservable]
+		public bool IsDashboardEnabled
+		{
+			get
+			{
+				return this.IsMenuEnabled && this.AreInsightsReady;
+			}
+		}
+		
+		public bool IncludePinned
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludePinned ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludePinned = value;
+				}
+			}
+		}
+
+		public bool IncludeBookmarks
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludeBookmarks ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeBookmarks = value;
+				}
+			}
+		}
+
+		public bool IsFilterCaseSensitive
+		{
+			get => this.FilterOptionsViewModel?.Options.IsFilterCaseSensitive ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IsFilterCaseSensitive = value;
+				}
+			}
+		}
 
 		public bool IsFilterInProgress { get; private set; }
 
@@ -223,14 +303,6 @@
 				if (value != _inclusiveFilter)
 				{
 					_inclusiveFilter = value;
-
-					// Automatic filtering?
-					if (!this.IsManualFilter)
-					{
-						var filterCriteria = new FilterCriteria(value, _exclusiveFilter, GetFilterConfiguration());
-
-						FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
-					}
 				}
 			}
 		}
@@ -248,14 +320,6 @@
 				if (value != _exclusiveFilter)
 				{
 					_exclusiveFilter = value;
-
-					// Automatic filtering?
-					if (!this.IsManualFilter)
-					{
-						var filterCriteria = new FilterCriteria(_inclusiveFilter, value, GetFilterConfiguration());
-
-						FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
-					}
 				}
 			}
 		}
@@ -263,7 +327,7 @@
 		public ObservableCollection<string> InclusiveFilterHistory { get; }
 		public ObservableCollection<string> ExclusiveFilterHistory { get; }
 
-		[SafeForDependencyAnalysis]
+		[NotObservable]
 		public string SourceFileRemarks
 		{
 			get
@@ -279,25 +343,62 @@
 					{
 						HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
 					});
-					RaisePropertyChanged(nameof(this.SourceFileRemarks));
+					OnPropertyChanged(nameof(this.SourceFileRemarks));
 				}
 			}
 		}
 
 		public int ActiveRecordIndex { get; set; }
 
-		public bool IncludeDebugRecords { get; set; }
+		public bool IncludeDebugRecords
+		{
+			get => this.FilterOptionsViewModel?.Options.IncludeDebugRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeDebugRecords = value;
+				}
+			}
+		}
 
-		public bool IncludeTraceRecords { get; set; }
+                public bool IncludeTraceRecords
+                {
+			get => this.FilterOptionsViewModel?.Options.IncludeTraceRecords ?? true;
+			set
+			{
+				if (this.FilterOptionsViewModel?.Options != null)
+				{
+					this.FilterOptionsViewModel.Options.IncludeTraceRecords = value;
+				}
+			}
+		}
+
+                public FilterType FilterExpressionType
+                {
+                        get => this.FilterOptionsViewModel?.Options.FilterExpressionType ?? _filterExpressionType;
+                        set
+                        {
+                                if (_filterExpressionType != value)
+                                {
+                                        _filterExpressionType = value;
+                                        if (this.FilterOptionsViewModel?.Options != null)
+                                        {
+                                                this.FilterOptionsViewModel.Options.FilterExpressionType = value;
+                                        }
+										OnPropertyChanged(nameof(this.FilterExpressionType));
+                                }
+                        }
+                }
 
 		public bool IsProcessingLongOperation { get; private set; }
 
-		[SafeForDependencyAnalysis]
+		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
+
+		[NotObservable]
 		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
 
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
-
-		public event PropertyChangedEventHandler PropertyChanged;
 
 		/// <summary>
 		/// Indicates that the records have changed due to either:
@@ -312,6 +413,11 @@
 		/// Indicates that a region of interest has been added, removed, or modified.
 		/// </summary>
 		public event EventHandler RegionsChanged;
+
+		/// <summary>
+		/// Indicates that a bookmark has been added or removed.
+		/// </summary>
+		public event EventHandler BookmarksChanged;
 
 		public event EventHandler FileOpened;
 		#endregion
@@ -341,10 +447,16 @@
 			OpenCompressedAsync(e.FilePath);
 		}
 
-		protected void RaisePropertyChanged(string name)
+		private void OnFilterOptionsChanged(object sender, EventArgs e)
 		{
-			this?.PropertyChanged(this, new PropertyChangedEventArgs(name));
+			// Update the backing field for FilterExpressionType
+			this._filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
+
+			// Re-apply the filter with the new filter options
+			var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
+			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
+
 		#endregion
 
 		#region Commands: General
@@ -372,11 +484,12 @@
 			{
 				var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 				ZipFile.ExtractToDirectory(sourceFilePath, tempFolder);
-				var files = Directory.GetFiles(tempFolder);
+				var files = Directory.GetFiles(tempFolder, "*", SearchOption.AllDirectories);
 
 				if (files.Length > 0)
 				{
-					temporarySourceFileName = await ShowListOfCompressedFiles(files);
+					var relativeNames = files.Select(f => Path.GetRelativePath(tempFolder, f)).ToArray();
+					temporarySourceFileName = await ShowListOfCompressedFiles(relativeNames);
 				}
 				if (!string.IsNullOrEmpty(temporarySourceFileName))
 				{
@@ -390,9 +503,9 @@
 			}
 			finally
 			{
-				if (isSourceFileCompressed && File.Exists(temporarySourceFileName))
+				if (isSourceFileCompressed && File.Exists(sourceFilePath))
 				{
-					File.Delete(temporarySourceFileName);
+					File.Delete(sourceFilePath);
 				}
 			}
 		}
@@ -426,6 +539,7 @@
 			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
+			this.AreInsightsReady = false;
 
 			var openAsResult = new OpenAsResult();
 			var wasOpenRequested = false;
@@ -474,11 +588,22 @@
 
 						_engine = Engine
 							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
+							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
 							.Open();
 
 						this.FileOpened?.Invoke(this, EventArgs.Empty);
+
+						_bulletinMediator.Post(new BookmarksChangedBulletin
+						{
+							BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+						});
+
+						_bulletinMediator.Post(new RegionsChangedBulletin
+						{
+							RegionCount = _engine.Regions.Regions.Length,
+						});
 
 						_bulletinMediator.Post(new SourceFileOpenedBulletin
 						{
@@ -502,10 +627,7 @@
 
 						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 
-						_bulletinMediator.Post(new AnalysisCompleteBulletin
-						{
-							FlaggedRecordCount = 0
-						});
+						_bulletinMediator.Post(new AnalysisCompleteBulletin(0));
 
 						Log.Default.Write("Updating filter history on the UI.");
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
@@ -537,7 +659,8 @@
 							}
 						});
 
-						this.IsFilterToolboxEnabled = true;
+						// Marshal UI updates to dispatcher to avoid cross-thread issues
+						_uiDispatcher.Invoke(() => this.IsFilterToolboxEnabled = true);
 
 						Log.Default.Write(
 							LogSeverityType.Information,
@@ -556,12 +679,20 @@
 						MessageBox.Show(e.Message, message);
 					}
 					finally
-					{ 
-						this.IsProcessingLongOperation = false;
-						this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+					{
+						// Immediately enable UI on dispatcher so menus become actionable without waiting for insights
+						_uiDispatcher.Invoke(() =>
+						{
+							this.IsProcessingLongOperation = false;      // show records
+							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+							this.CanOpenLogFile = true;                  // enable menus now
+							OnPropertyChanged(nameof(IsMenuEnabled));  // force re-evaluation
+							CommandManager.InvalidateRequerySuggested();  // refresh commands
+						});
 					}
 				}).ContinueWith((x) =>
 					{
+						// Continue computing insights asynchronously (UI is already enabled)
 						if (_engine.Navigate.TableOfContents.Sections.Count == 0)
 						{
 							_engine.Navigate.RebuildTableOfContents();
@@ -570,14 +701,17 @@
 						_tableOfContents = _engine.Navigate.TableOfContents;
 						_insights = _engine.Analyzer.GetInsights();
 
-						_bulletinMediator.Post(new InsightChangedBulletin{
+						_bulletinMediator.Post(new InsightChangedBulletin
+						{
 							HasInsight = _insights.Length > 0,
 							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
 
+						// Set insights ready and requery commands after insights are ready
 						_uiDispatcher.Invoke(() =>
 						{
-							this.CanOpenLogFile = true;
+							this.AreInsightsReady = true;
+							OnPropertyChanged(nameof(IsDashboardEnabled));
 							CommandManager.InvalidateRequerySuggested();
 						});
 					}
@@ -762,14 +896,14 @@
 			}
 		}
 
-		public void DragOver(IDropInfo dropInfo)
+		public void DragOver(DragEventArgs e)
 		{
-			_dragAndDrop.Drag(dropInfo);
+			_dragAndDrop.DragOver(e);
 		}
 
-		public void Drop(IDropInfo dropInfo)
+		public void Drop(DragEventArgs e)
 		{
-			_dragAndDrop.Drop(dropInfo);
+			_dragAndDrop.Drop(e);
 		}
 
 		public void Exit()
@@ -809,7 +943,7 @@
 		public void ShowFileExplorer()
 		{
 			WindowsProcess.Start(
-				WindowsProcessType.FileExplorer, 
+				WindowsProcessType.FileExplorer,
 				Path.GetDirectoryName(_engine.SourceFilePath));
 		}
 
@@ -827,10 +961,12 @@
 
 		public void ShowHelp()
 		{
+			TelemetrySessionLifecycle.Shared.RecordHelpOpen();
+
 			if (File.Exists(HelpFilePath))
 			{
 				WindowsProcess.Start(
-					WindowsProcessType.DefaultApplication, 
+					WindowsProcessType.DefaultApplication,
 					HelpFilePath);
 			}
 			else
@@ -845,7 +981,7 @@
 			{
 				var dialog = new AboutDialog(
 					_uiDispatcher,
-					this.WeevilVersion,
+					this.WeevilDisplayVersion,
 					LicensePath,
 					ThirdPartyNoticesPath,
 					_engine.SourceFilePath);
@@ -868,6 +1004,8 @@
 
 		private void ShowDashboard()
 		{
+			TelemetrySessionLifecycle.Shared.RecordDashboardOpen();
+
 			IPlugin plugin = new PluginFactory().Create(_engine.SourceFilePath);
 
 			if (plugin.CanShowDashboard)
@@ -876,15 +1014,24 @@
 			}
 			else
 			{
-				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights);
+				_dialogBox.ShowDashboard(this.WeevilVersion, _engine, _insights, _bulletinMediator);
 			}
 		}
 
 		private void GraphData()
 		{
-			_dialogBox.ShowGraph(
-				_engine.Selector.GetSelected(), 
-				_inclusiveFilter);
+			var records = _engine.Selector.GetSelected();
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
+			{
+				TelemetrySessionLifecycle.Shared.RecordGraphOpen();
+
+				_dialogBox.ShowGraph(
+					records,
+					confirmedFilter,
+					_engine.SourceFilePath);
+			}
 		}
 
 		private void ForceGarbageCollection()
@@ -927,7 +1074,7 @@
 
 			var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
 
-			FilterAsynchronously(FilterType.RegularExpression, filterCriteria);
+                        FilterAsynchronously(this.FilterExpressionType, filterCriteria);
 		}
 
 		public void FilterOrCancel(object[] filters)
@@ -946,7 +1093,7 @@
 		{
 			var configuration = GetFilterConfiguration();
 			var filter = new FilterCriteria("@Comment", string.Empty, configuration);
-			
+
 			FilterAsynchronously(FilterType.PlainText, filter);
 		}
 
@@ -966,22 +1113,33 @@
 			FilterAsynchronously(FilterType.PlainText, filter);
 		}
 
+		private void FilterByBookmarks()
+		{
+			var configuration = GetFilterConfiguration();
+			var filter = new FilterCriteria("@Bookmarks", string.Empty, configuration);
+
+			FilterAsynchronously(FilterType.PlainText, filter);
+		}
+
 		public void ToggleFilters()
 		{
 			if (_engine.Filter.Criteria.Equals(FilterCriteria.None))
 			{
-				FilterAsynchronously(FilterType.RegularExpression, _previousFilterCriteria);
+                                FilterAsynchronously(_previousFilterType, _previousFilterCriteria);
 			}
 			else
 			{
-				_previousFilterCriteria = (FilterCriteria) _engine.Filter.Criteria;
-				FilterAsynchronously(FilterType.RegularExpression, FilterCriteria.None);
+                                _previousFilterCriteria = (FilterCriteria)_engine.Filter.Criteria;
+                                _previousFilterType = _currentfilterType;
+                                FilterAsynchronously(FilterType.RegularExpression, FilterCriteria.None);
 			}
 		}
 
 		private void Refresh()
 		{
 			_engine.Filter.ReApply();
+			RefreshFilterResults();
+			RaiseResultsChanged();
 		}
 
 		private void AbortFilter()
@@ -994,43 +1152,164 @@
 
 		private void FindText()
 		{
-			if (_dialogBox.TryShowFind(_findText, out _findIsCaseSensitive, out var findNext, out _findText))
+			// Use local variables for out parameters since Metalama converts fields to properties
+			bool isCaseSensitive;
+			bool findNext;
+			bool useRegex;
+			string findText;
+			bool searchElapsedTime;
+			int? minElapsedMs;
+			int? maxElapsedMs;
+			bool searchComments;
+			
+			if (_dialogBox.TryShowFind(
+				_findText, 
+				out isCaseSensitive, 
+				out findNext, 
+				out useRegex, 
+				out findText,
+				out searchElapsedTime,
+				out minElapsedMs,
+				out maxElapsedMs,
+				out searchComments))
 			{
-				if (findNext)
+				// Assign to fields after the method call
+				_findIsCaseSensitive = isCaseSensitive;
+				_findUseRegex = useRegex;
+				_findText = findText;
+				_findSearchElapsedTime = searchElapsedTime;
+				_findMinElapsedMs = minElapsedMs;
+				_findMaxElapsedMs = maxElapsedMs;
+				_findSearchComments = searchComments;
+				
+				if (_findSearchElapsedTime)
 				{
-					FindNext();
+					if (findNext)
+					{
+						FindNextElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+					}
+					else
+					{
+						FindPreviousElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+					}
+				}
+				else if (_findSearchComments)
+				{
+					if (findNext)
+					{
+						FindNextComment();
+					}
+					else
+					{
+						FindPreviousComment();
+					}
 				}
 				else
 				{
-					FindPrevious();
+					if (findNext)
+					{
+						FindNext();
+					}
+					else
+					{
+						FindPrevious();
+					}
 				}
 			}
 		}
 
 		private void FindNext()
 		{
-			if (!string.IsNullOrWhiteSpace(_findText))
+			if (_findSearchElapsedTime)
+			{
+				FindNextElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+			}
+			else if (_findSearchComments)
+			{
+				FindNextComment();
+			}
+			else if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
 					() => _engine
 						.Navigate
-						.NextContent(_findText, _findIsCaseSensitive)
+						.NextContent(_findText, _findIsCaseSensitive, _findUseRegex)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
 		}
 
 		private void FindPrevious()
 		{
+			if (_findSearchElapsedTime)
+			{
+				FindPreviousElapsedTime(_findMinElapsedMs, _findMaxElapsedMs);
+			}
+			else if (_findSearchComments)
+			{
+				FindPreviousComment();
+			}
+			else if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
+					() => _engine
+						.Navigate
+						.PreviousContent(_findText, _findIsCaseSensitive, _findUseRegex)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		private void FindNextComment()
+		{
 			if (!string.IsNullOrWhiteSpace(_findText))
 			{
 				SearchFilterResults(
-					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}",
+					$"Unable to find the provided text in comments.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
 					() => _engine
 						.Navigate
-						.PreviousContent(_findText, _findIsCaseSensitive)
+						.NextCommentWithText(_findText, _findIsCaseSensitive, _findUseRegex)
 						.ToIndexUsing(_engine.Filter.Results));
 			}
+		}
+
+		private void FindPreviousComment()
+		{
+			if (!string.IsNullOrWhiteSpace(_findText))
+			{
+				SearchFilterResults(
+					$"Unable to find the provided text in comments.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
+					() => _engine
+						.Navigate
+						.PreviousCommentWithText(_findText, _findIsCaseSensitive, _findUseRegex)
+						.ToIndexUsing(_engine.Filter.Results));
+			}
+		}
+
+		private void FindNextElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			var minDesc = minMilliseconds.HasValue ? minMilliseconds.Value.ToString() : "none";
+			var maxDesc = maxMilliseconds.HasValue ? maxMilliseconds.Value.ToString() : "none";
+			
+			SearchFilterResults(
+				$"Unable to find a record with the specified elapsed time in the search results.\r\n\r\nMinimum (ms): {minDesc}\r\nMaximum (ms): {maxDesc}",
+				() => _engine
+					.Navigate
+					.NextElapsedTime(minMilliseconds, maxMilliseconds)
+					.ToIndexUsing(_engine.Filter.Results));
+		}
+
+		private void FindPreviousElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			var minDesc = minMilliseconds.HasValue ? minMilliseconds.Value.ToString() : "none";
+			var maxDesc = maxMilliseconds.HasValue ? maxMilliseconds.Value.ToString() : "none";
+			
+			SearchFilterResults(
+				$"Unable to find a record with the specified elapsed time in the search results.\r\n\r\nMinimum (ms): {minDesc}\r\nMaximum (ms): {maxDesc}",
+				() => _engine
+					.Navigate
+					.PreviousElapsedTime(minMilliseconds, maxMilliseconds)
+					.ToIndexUsing(_engine.Filter.Results));
 		}
 
 		public void GoTo()
@@ -1093,6 +1372,185 @@
 						}
 					}
 				}
+			}
+		}
+
+
+		private void NavigateToSourceCode()
+		{
+			try
+			{
+				var selectedRecord = this.SelectedItems?.Count == 1 ? this.SelectedItems[0] : null;
+				if (selectedRecord == null)
+				{
+					MessageBox.Show("A single record must be selected.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+					return;
+				}
+
+				var target = TryExtractSourceTarget(selectedRecord.Content);
+				if (string.IsNullOrWhiteSpace(target))
+				{
+					MessageBox.Show("No source code location or symbol could be extracted from the selected record.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+					return;
+				}
+
+				if (Process.GetProcessesByName("devenv").Length == 0)
+				{
+					MessageBox.Show("Visual Studio is not running. Please start Visual Studio 2026 and open the appropriate source code, then try again.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+					return;
+				}
+
+				Clipboard.SetText(target);
+				MessageBox.Show($"Target copied to clipboard:\r\n\r\n{target}\r\n\r\nPaste into Visual Studio navigation (e.g. Ctrl+T) to open the location.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(LogSeverityType.Error, e, "Unexpected error while navigating to source code.");
+			}
+		}
+
+		private string TryExtractSourceTarget(string logEntry)
+		{
+			if (string.IsNullOrWhiteSpace(logEntry))
+			{
+				return string.Empty;
+			}
+
+			try
+			{
+				var appSettingsPath = Path.Combine(EnvironmentHelper.GetExecutableDirectory(), "appsettings.json");
+				if (!File.Exists(appSettingsPath))
+				{
+					return string.Empty;
+				}
+
+				var json = JObject.Parse(File.ReadAllText(appSettingsPath));
+				var sourceSection = json["SourceCodeNavigation"];
+				var fileRegex = sourceSection?["FilePathAndLineRegex"]?.ToString();
+				var symbolRegex = sourceSection?["FullyQualifiedMemberRegex"]?.ToString();
+
+				if (!string.IsNullOrWhiteSpace(fileRegex))
+				{
+					var match = Regex.Match(logEntry, fileRegex);
+					if (match.Success && match.Groups["path"].Success && match.Groups["line"].Success)
+					{
+						var path = match.Groups["path"].Value.Trim();
+						var line = int.TryParse(match.Groups["line"].Value, out var rawLine) ? Math.Max(1, rawLine) : 1;
+						return $"{path}({line},1)";
+					}
+				}
+
+				if (!string.IsNullOrWhiteSpace(symbolRegex))
+				{
+					var match = Regex.Match(logEntry, symbolRegex);
+					if (match.Success)
+					{
+						return match.Groups["symbol"].Success ? match.Groups["symbol"].Value.Trim() : match.Value.Trim();
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, "Unable to extract source code target from appsettings or record content.");
+			}
+
+			return string.Empty;
+		}
+
+		private void OnNavigateToInsightRecord(NavigateToInsightRecordBulletin bulletin)
+		{
+			if (bulletin?.RelatedRecords != null && bulletin.RelatedRecords.Length > 0)
+			{
+				// Option 6: Flag insight records and add @Flagged to filter
+				
+				// Step 1: Clear all existing flags
+				foreach (var record in _engine.Records)
+				{
+					record.Metadata.IsFlagged = false;
+				}
+
+				// Step 2: Flag all insight-related records and count successfully flagged
+				var insightRecordCount = bulletin.RelatedRecords.Length;
+				var successfullyFlaggedCount = 0;
+
+				// Create a set of line numbers from the insight for efficient lookup
+				var insightLineNumbers = new HashSet<int>();
+				foreach (var record in bulletin.RelatedRecords)
+				{
+					insightLineNumbers.Add(record.LineNumber);
+				}
+
+				// Flag records that are still available in memory
+				foreach (var record in _engine.Records)
+				{
+					if (insightLineNumbers.Contains(record.LineNumber))
+					{
+						record.Metadata.IsFlagged = true;
+						successfullyFlaggedCount++;
+					}
+				}
+
+				// Check if any records were missing and notify user
+				if (successfullyFlaggedCount < insightRecordCount)
+				{
+					var missingRecordCount = insightRecordCount - successfullyFlaggedCount;
+					var message = $"{missingRecordCount} insight-related record(s) were cleared and could not be flagged.";
+
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						$"Insight navigation: {missingRecordCount} out of {insightRecordCount} records are no longer available in memory.");
+
+					_uiDispatcher.Invoke(() =>
+					{
+						MessageBox.Show(
+							$"Some insight-related records were cleared and are no longer available. Flagging has been adjusted.\n\n{message}",
+							"Records Not Available",
+							MessageBoxButton.OK,
+							MessageBoxImage.Information);
+					});
+				}
+
+				// Step 3: Append @Flagged to include filter
+				var currentIncludeFilter = _inclusiveFilter ?? string.Empty;
+				string newIncludeFilter;
+
+				// Check if @Flagged already exists in the filter (case-insensitive)
+				if (currentIncludeFilter.Contains("@Flagged", StringComparison.OrdinalIgnoreCase))
+				{
+					// Already has @Flagged, no need to append
+					newIncludeFilter = currentIncludeFilter;
+				}
+				else if (string.IsNullOrWhiteSpace(currentIncludeFilter))
+				{
+					// Empty filter, just set to @Flagged
+					newIncludeFilter = "@Flagged";
+				}
+				else
+				{
+					// Append ||@Flagged to existing filter
+					newIncludeFilter = $"{currentIncludeFilter}||@Flagged";
+				}
+
+				// Step 4: Apply the filter (this will trigger FilterAsynchronously via the property setter)
+				_uiDispatcher.Invoke(() =>
+				{
+					this.InclusiveFilter = newIncludeFilter;
+				});
+
+				// Step 5: Navigate to the first record (after a brief delay to allow filter to apply)
+				Task.Delay(500).ContinueWith(_ =>
+				{
+					_uiDispatcher.Invoke(() =>
+					{
+						var firstRecord = bulletin.RelatedRecords[0];
+						SearchFilterResults(
+							$"Unable to find the insight's related record in the search results. Line={firstRecord.LineNumber}",
+							() => _engine
+								.Navigate
+								.GoTo(firstRecord.LineNumber, RecordSearchType.NearestNeighbor)
+								.ToIndexUsing(_engine.Filter.Results));
+					});
+				});
 			}
 		}
 
@@ -1169,13 +1627,12 @@
 		{
 			try
 			{
-				var flagCount = _engine
+				var results = _engine
 					.Analyzer.Analyze(analysisType, _dialogBox);
 
-				_bulletinMediator.Post(new AnalysisCompleteBulletin
-				{
-					FlaggedRecordCount = flagCount
-				});
+				_bulletinMediator.Post(new AnalysisCompleteBulletin(
+					results.FlaggedRecords,
+					results.Data));
 			}
 			catch (Exception e)
 			{
@@ -1187,13 +1644,12 @@
 		{
 			try
 			{
-				var flagCount = _engine
+				Results results = _engine
 					.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
 
-				_bulletinMediator.Post(new AnalysisCompleteBulletin
-				{
-					FlaggedRecordCount = flagCount
-				});
+				_bulletinMediator.Post(new AnalysisCompleteBulletin(
+					results.FlaggedRecords,
+					results.Data));
 			}
 			catch (Exception e)
 			{
@@ -1253,6 +1709,11 @@
 						$"Raising the {nameof(RegionsChanged)} event.");
 
 					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+
+					_bulletinMediator.Post(new RegionsChangedBulletin
+					{
+						RegionCount = _engine.Regions.Regions.Length,
+					});
 				}
 				catch (Exception exception)
 				{
@@ -1260,6 +1721,35 @@
 						LogSeverityType.Error,
 						exception,
 						$"An unexpected error occurred while raising the {nameof(RegionsChanged)} event.");
+				}
+			}
+		}
+
+		protected virtual void RaiseBookmarksChanged()
+		{
+			EventHandler threadSafeHandler = this.BookmarksChanged;
+
+			if (threadSafeHandler != null)
+			{
+				try
+				{
+					Log.Default.Write(
+							LogSeverityType.Debug,
+							$"Raising the {nameof(BookmarksChanged)} event.");
+
+					_uiDispatcher.Invoke(() => threadSafeHandler(this, EventArgs.Empty));
+
+					_bulletinMediator.Post(new BookmarksChangedBulletin
+					{
+						BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+					});
+				}
+				catch (Exception exception)
+				{
+					Log.Default.Write(
+							LogSeverityType.Error,
+							exception,
+							$"An unexpected error occurred while raising the {nameof(BookmarksChanged)} event.");
 				}
 			}
 		}
@@ -1318,16 +1808,15 @@
 					_engine.Filter.Abort();
 				}
 
-				var queuedFilters = Interlocked.Increment(ref _concurrentFilterCount);
-				this.IsFilterInProgress = _concurrentFilterCount >= 1;
-
-				// Force UI to ensure that the screen has been refreshed
-				// ... so that the user knows a filter operation is in progress.
-				_uiDispatcher.Invoke(delegate() { }, DispatcherPriority.Render);
-
 				// First filter to execute?
-				if (queuedFilters == 1)
+				if (Interlocked.Increment(ref _concurrentFilterCount) == 1)
 				{
+					this.IsFilterInProgress = true;
+
+					// Force UI to ensure that the screen has been refreshed
+					// ... so that the user knows a filter operation is in progress.
+					_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
+
 					Log.Default.Write(
 						LogSeverityType.Debug,
 						$"Filter operation is displaying the progress bar.");
@@ -1364,12 +1853,11 @@
 					});
 				}
 
-				queuedFilters = Interlocked.Decrement(ref _concurrentFilterCount);
-				this.IsFilterInProgress = _concurrentFilterCount >= 1;
-
 				// Last filter to execute?
-				if (queuedFilters == 0)
+				if (Interlocked.Decrement(ref _concurrentFilterCount) == 0)
 				{
+					this.IsFilterInProgress = false;
+
 					// Was the filter applied?
 					// ... if not, then display the original 
 					if (wasFilterApplied)
@@ -1399,8 +1887,8 @@
 						_uiDispatcher.Invoke(() =>
 						{
 							// Note: We can't set the property directly, because we would trigger the filter operation again. 
-							RaisePropertyChanged(nameof(this.InclusiveFilter));
-							RaisePropertyChanged(nameof(this.ExclusiveFilter));
+													OnPropertyChanged(nameof(this.InclusiveFilter));
+							OnPropertyChanged(nameof(this.ExclusiveFilter));
 						});
 					}
 
@@ -1444,12 +1932,12 @@
 			_uiDispatcher.Invoke(() =>
 			{
 				// Note: We can't set the property directly, because we would trigger the filter operation again. 
-				RaisePropertyChanged(nameof(this.InclusiveFilter));
-				RaisePropertyChanged(nameof(this.ExclusiveFilter));
+				OnPropertyChanged(nameof(this.InclusiveFilter));
+				OnPropertyChanged(nameof(this.ExclusiveFilter));
 
 				this.VisibleItems = _engine.Filter.Results;
 
-				RaisePropertyChanged(nameof(this.VisibleItems));
+				OnPropertyChanged(nameof(this.VisibleItems));
 			});
 
 			_bulletinMediator.Post(new FilterChangedBulletin
@@ -1457,7 +1945,7 @@
 				SelectedRecordCount = _engine.Selector.Selected.Count,
 				VisibleRecordCount = this.VisibleItems?.Count ?? 0,
 				SeverityMetrics = _engine.Filter.GetMetrics(),
-				ExecutionTime = _engine.Filter.FilterExecutionTime
+				ExecutionTime = _engine.Filter.FilterExecutionTime,
 			});
 
 			// Remember: filtering can impact the number of selected records.
@@ -1468,8 +1956,6 @@
 		{
 			var selectedItemCount = coreEngine.Selector.Selected.Count;
 			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
-
-			
 
 			var lineNumber = 0;
 			var sectionName = string.Empty;
@@ -1497,35 +1983,16 @@
 
 		private Dictionary<string, object> GetFilterConfiguration()
 		{
-			var configuration = new Dictionary<string, object>();
-
-			if (this.IncludePinned)
-			{
-				configuration.Add("IncludePinned", this.IncludePinned);
-			}
-
-			configuration.Add("IsCaseSensitive", this.IsFilterCaseSensitive);
-
-			if (!this.IncludeDebugRecords)
-			{
-				configuration.Add("HideDebugRecords", true);
-			}
-
-			if (!this.IncludeTraceRecords)
-			{
-				configuration.Add("HideTraceRecords", true);
-			}
-
-			return configuration;
+			return this.FilterOptionsViewModel.Options.ToConfiguration();
 		}
-		
+
 		private void AddRegion()
 		{
 			try
 			{
 				if (_engine.Selector.HasSelectionPeriod)
 				{
-					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9]{1,5}$", "Must be between 1 and 5 characters.", out var regionName))
+					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var regionName))
 					{
 						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
 						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
@@ -1572,6 +2039,128 @@
 			}
 		}
 
+		private void RemoveBookmark()
+		{
+			if (_engine.Selector.Selected.Count == 1)
+			{
+				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+				_engine.Bookmarks.Clear(selectedLineNumber);
+				RaiseBookmarksChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
+			else
+			{
+				MessageBox.Show("A single record must be selected in order to remove a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+		}
+
+		private void RenameBookmark()
+		{
+			if (_engine.Selector.Selected.Count == 1)
+			{
+				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+
+				if (_engine.Bookmarks.TryGetBookmark(selectedLineNumber, out var bookmark))
+				{
+					string newName = _dialogBox.ShowUserPrompt(
+						"Rename Bookmark",
+						"Name:",
+						bookmark.Name);
+
+					// If user cancels dialog, do not rename bookmark (standard Windows behavior)
+					if (!string.IsNullOrWhiteSpace(newName))
+					{
+						_engine.Bookmarks.Rename(selectedLineNumber, newName);
+						RaiseBookmarksChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+					}
+				}
+				else
+				{
+					MessageBox.Show("The selected record does not have a bookmark.", "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+				}
+			}
+			else
+			{
+				MessageBox.Show("A single record must be selected in order to rename a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+		}
+
+		private void RemoveAllBookmarks()
+		{
+			MessageBoxResult userSelection = MessageBox.Show(
+					 "Remove all bookmarks?",
+					 "Confirmation",
+					 MessageBoxButton.YesNo,
+					 MessageBoxImage.Question);
+
+			if (userSelection == MessageBoxResult.Yes)
+			{
+				_engine.Bookmarks.Clear();
+				RaiseBookmarksChanged();
+				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			}
+		}
+
+		private void SetBookmark(int slot)
+		{
+			try
+			{
+				if (_engine.Selector.Selected.Count == 1)
+				{
+					var selectedRecord = _engine.Selector.Selected.Single().Value;
+					var selectedLineNumber = selectedRecord.LineNumber;
+
+					var defaultName = selectedRecord.HasCreationTime
+						? selectedRecord.CreatedAt.ToString("HH:mm:ss")
+						: "Bookmark";
+
+					// Prompt user for bookmark name with default
+					string bookmarkName = _dialogBox.ShowUserPrompt(
+						"Create Bookmark",
+						"Name:",
+						defaultName);
+
+					// If user cancels dialog, do not create bookmark (standard Windows behavior)
+					if (!string.IsNullOrWhiteSpace(bookmarkName))
+					{
+						// Pass the slot (1-5) as the bookmark ID
+						_engine.Bookmarks.Create(slot, bookmarkName, selectedLineNumber);
+
+						RaiseBookmarksChanged();
+						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+					}
+				}
+				else
+				{
+					MessageBox.Show("A single record must be selected in order to create a bookmark.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+				}
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		private void GoToBookmark(int slot)
+		{
+			// Use the bookmark ID (slot) to find the bookmark, instead of using array index
+			if (_engine.Bookmarks.TryGetBookmarkById(slot, out var bookmark))
+			{
+				SearchFilterResults(
+						$"Bookmark {slot} is not visible in the current results.",
+						() => _engine
+								.Navigate
+								.GoTo(bookmark.Record.LineNumber, RecordSearchType.NearestNeighbor)
+								.ToIndexUsing(_engine.Filter.Results));
+			}
+			else
+			{
+				MessageBox.Show($"Bookmark {slot} has not been set.", "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+		}
+
 		public bool RegionStartsWith(IRecord record, out string regionName)
 		{
 			return _engine.Regions.TryStartsWith(record.LineNumber, out regionName);
@@ -1585,6 +2174,16 @@
 		public bool RegionContains(IRecord record)
 		{
 			return _engine.Regions.Contains(record.LineNumber);
+		}
+
+		public bool TryGetBookmarkName(IRecord record, out string bookmarkName)
+		{
+			return _engine.Bookmarks.TryGetBookmarkName(record.LineNumber, out bookmarkName);
+		}
+
+		public bool TryGetBookmark(IRecord record, out Bookmark bookmark)
+		{
+			return _engine.Bookmarks.TryGetBookmark(record.LineNumber, out bookmark);
 		}
 	}
 }

@@ -1,42 +1,46 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Linq;
 	using System.Timers;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.IO;
+	using BlueDotBrigade.Weevil.Gui.Navigation;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 
 	/// <summary>
 	/// Listens for application events, and updates the status bar as needed.
 	/// </summary>
-	[NotifyPropertyChanged()]
+	[Observable]
 	internal class StatusBarViewModel
 	{
 		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromSeconds(0.5);
 		private static readonly TimeSpan DisplayMetricsDuration = TimeSpan.FromSeconds(8);
-	
+
 		private readonly Timer _timer;
 		private readonly Stopwatch _filterChangedStopwatch;
 
 		private readonly IUiDispatcher _uiDispatcher;
 
 		private bool _wasFileJustOpened;
-
-		public event PropertyChangedEventHandler PropertyChanged;
+		private bool _wereStatisticsJustPublished;
 
 		public StatusBarViewModel()
 		{
 			this.SourceFileDetails = new SourceFileOpenedBulletin();
 			this.FilterDetails = new FilterChangedBulletin();
+			this.BookmarkDetails = new BookmarksChangedBulletin();
+			this.RegionDetails = new RegionsChangedBulletin();
 			this.SelectionDetails = new SelectionChangedBulletin();
-			this.AnalysisDetails = new AnalysisCompleteBulletin();
+			this.AnalysisDetails = new AnalysisCompleteBulletin(0);
 			this.InsightDetails = new InsightChangedBulletin();
 			this.SoftwareDetails = new SoftwareDetailsBulletin();
 
@@ -53,8 +57,8 @@
 
 			_timer = new Timer
 			{
-				Interval = DefaultTimerPeriod.TotalMilliseconds, 
-				AutoReset = true, 
+				Interval = DefaultTimerPeriod.TotalMilliseconds,
+				AutoReset = true,
 				Enabled = false,
 			};
 			_timer.Elapsed += OnTimerElapsed;
@@ -69,11 +73,14 @@
 			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnFileChanged(x));
 			bulletinMediator.Subscribe<ClearRecordsBulletin>(this, x => OnClearOperation(x));
 			bulletinMediator.Subscribe<FilterChangedBulletin>(this, x => OnFilterChanged(x));
+			bulletinMediator.Subscribe<BookmarksChangedBulletin>(this, x => OnBookmarksChanged(x));
+			bulletinMediator.Subscribe<RegionsChangedBulletin>(this, x => OnRegionsChanged(x));
 			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, x => OnSelectionChanged(x));
 			bulletinMediator.Subscribe<AnalysisCompleteBulletin>(this, x => OnAnalysisComplete(x));
 			bulletinMediator.Subscribe<InsightChangedBulletin>(this, x => OnNewInsight(x));
 			bulletinMediator.Subscribe<SoftwareDetailsBulletin>(this, x => OnSoftwareDetailsReceived(x));
 			bulletinMediator.Subscribe<SourceFileRemarksChangedBulletin>(this, x => OnFileRemarksChanged(x));
+			bulletinMediator.Subscribe<TelemetrySessionSavingBulletin>(this, _ => OnTelemetrySessionSaving());
 		}
 
 		#region Event Handlers
@@ -82,7 +89,17 @@
 			if (_filterChangedStopwatch.Elapsed >= DisplayMetricsDuration)
 			{
 				_filterChangedStopwatch.Reset();
-				_uiDispatcher.Invoke(() => this.StatusMessage = this.SourceFileDetails.SourceFilePath);
+				_uiDispatcher.Invoke(() =>
+				{
+					if (_wereStatisticsJustPublished)
+					{
+						_wereStatisticsJustPublished = false;
+					}
+					else
+					{
+						this.StatusMessage = this.SourceFileDetails.SourceFilePath;
+					}
+				});
 			}
 		}
 
@@ -96,6 +113,10 @@
 				this.StatusMessage = bulletin.SourceFilePath;
 				this.TotalRecordCount = bulletin.TotalRecordCount;
 				this.TotalRecordCountChanged = false;
+
+				// Regression #844: Reset insight state so the attention animation can re-trigger
+				// when a second log file is opened with insights requiring attention.
+				this.InsightDetails = new InsightChangedBulletin();
 
 				this.StatusMessage = $"Disk Loading Period: {bulletin.SourceFileLoadingPeriod.ToHumanReadable()}";
 			});
@@ -133,6 +154,22 @@
 			_filterChangedStopwatch.Restart();
 		}
 
+		private void OnBookmarksChanged(BookmarksChangedBulletin bulletin)
+		{
+			_uiDispatcher.Invoke(() =>
+			{
+				this.BookmarkDetails = bulletin;
+			});
+		}
+
+		private void OnRegionsChanged(RegionsChangedBulletin bulletin)
+		{
+			_uiDispatcher.Invoke(() =>
+			{
+				this.RegionDetails = bulletin;
+			});
+		}
+
 		private void OnSelectionChanged(SelectionChangedBulletin bulletin)
 		{
 			_uiDispatcher.Invoke(() => this.SelectionDetails = bulletin);
@@ -140,7 +177,16 @@
 
 		private void OnAnalysisComplete(AnalysisCompleteBulletin bulletin)
 		{
-			_uiDispatcher.Invoke(() => this.AnalysisDetails = bulletin);
+			_uiDispatcher.Invoke(() =>
+			{
+				this.AnalysisDetails = bulletin;
+
+				if (bulletin.Data.Count > 0)
+				{
+					_wereStatisticsJustPublished = true;
+					this.StatusMessage = string.Join("; ", bulletin.Data.Select(x => $"{x.Key}={x.Value}"));
+				}
+			});
 		}
 
 		private void OnNewInsight(InsightChangedBulletin bulletin)
@@ -157,12 +203,21 @@
 		{
 			_uiDispatcher.Invoke(() => this.HasSourceFileRemarks = bulletin.HasSourceFileRemarks);
 		}
+
+		private void OnTelemetrySessionSaving()
+		{
+			_uiDispatcher.Invoke(() => this.StatusMessage = "Saving session...");
+		}
 		#endregion
 
 		#region Properties
 		public SourceFileOpenedBulletin SourceFileDetails { get; private set; }
 
 		public FilterChangedBulletin FilterDetails { get; private set; }
+
+		public BookmarksChangedBulletin BookmarkDetails { get; private set; }
+
+		public RegionsChangedBulletin RegionDetails { get; private set; }
 
 		public SelectionChangedBulletin SelectionDetails { get; private set; }
 
@@ -179,6 +234,7 @@
 		public bool TotalRecordCountChanged { get; private set; }
 
 		public bool HasSourceFileRemarks { get; private set; }
+
 		#endregion
 	}
 }

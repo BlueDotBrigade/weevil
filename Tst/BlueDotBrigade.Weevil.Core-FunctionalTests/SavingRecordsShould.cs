@@ -28,7 +28,7 @@
 					.UsingPath(newPath)
 					.Open();
 
-				Assert.AreEqual(originalEngine.Count, newEngine.Count);
+				newEngine.Count.Should().Be(originalEngine.Count);
 			}
 			finally
 			{
@@ -55,9 +55,7 @@
 			{
 				originalEngine.Selector.SaveSelection(newPath, FileFormatType.Raw);
 
-				Assert.AreEqual(
-					EncodingHelper.GetEncoding(originalPath), 
-					EncodingHelper.GetEncoding(newPath));
+				(EncodingHelper.GetEncoding(newPath)).Should().Be(EncodingHelper.GetEncoding(originalPath));
 			}
 			finally
 			{

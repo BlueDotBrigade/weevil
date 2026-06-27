@@ -10,10 +10,10 @@
 	[ValueConversion(typeof(SeverityType), typeof(SolidColorBrush))]
 	internal class SeverityToForegroundConverter : IValueConverter
 	{
-		private static readonly SolidColorBrush DarkGrey = new BrushConverter().ConvertFrom("#666666") as SolidColorBrush;
-		private static readonly SolidColorBrush DarkYellow = new BrushConverter().ConvertFrom("#9C6500") as SolidColorBrush;
-		private static readonly SolidColorBrush DarkRed = new BrushConverter().ConvertFrom("#900A22") as SolidColorBrush;
-		private static readonly SolidColorBrush White = Brushes.WhiteSmoke;
+		private static readonly SolidColorBrush FallbackSeverityBrush = Brushes.Transparent;
+		public SolidColorBrush WarningBrush { get; set; }
+		public SolidColorBrush ErrorBrush { get; set; }
+		public SolidColorBrush CriticalBrush { get; set; }
 
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
@@ -27,15 +27,15 @@
 					{
 
 						case SeverityType.Warning:
-							result = DarkYellow;
+							result = this.WarningBrush ?? FallbackSeverityBrush;
 							break;
 
 						case SeverityType.Error:
-							result = DarkRed;
+							result = this.ErrorBrush ?? FallbackSeverityBrush;
 							break;
 
 						case SeverityType.Critical:
-							result = White;
+							result = this.CriticalBrush ?? FallbackSeverityBrush;
 							break;
 
 						default:
@@ -52,5 +52,6 @@
 		{
 			throw new NotImplementedException();
 		}
+
 	}
 }

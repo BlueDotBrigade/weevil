@@ -1,0 +1,16 @@
+<Project>
+	 <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj' and '$(GenerateAssemblyInfo)' != 'false'">
+	 <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+	 <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj' and '$(GenerateAssemblyInfo)' != 'false'">
+	 <AssemblyAttribute Include="System.Reflection.AssemblyConfigurationAttribute">
+		<_Parameter1 Condition="'$(Configuration)' == 'Debug'">Debug</_Parameter1>
+		<_Parameter1 Condition="'$(Configuration)' != 'Debug'">Release</_Parameter1>
+	 </AssemblyAttribute>
+	 <AssemblyAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute">
+		<_Parameter1>$(VersionPrefix)+$(Configuration)</_Parameter1>
+	 </AssemblyAttribute>
+  </ItemGroup>
+</Project>

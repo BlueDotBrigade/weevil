@@ -14,7 +14,8 @@
 			out List<string> inclusiveFilterHistory,
 			out List<string> exclusiveFilterHistory,
 			out List<Section> tableOfContents,
-			out List<Region> regions);
+			out List<Region> regions, 
+			out List<Bookmark>bookmarks);
 
 		void Save(SidecarData data, bool deleteBackup);
 

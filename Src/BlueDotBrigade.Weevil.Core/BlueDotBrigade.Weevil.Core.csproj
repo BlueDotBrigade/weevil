@@ -4,9 +4,9 @@
     <Platforms>x64</Platforms>
     <PackageId>BlueDotBrigade.Weevil.Core</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.11.0</Version>
+    <Version>$(WeevilReleaseVersion)</Version>
     <Authors>BlueDotBrigade;</Authors>
-    <Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+    <Copyright>© 2026 Blue Dot Brigade</Copyright>
     <Owners>Blue Dot Brigade</Owners>
     <Description>The Weevil library facilitates the parsing, filtering and analysis of log files.</Description>
     <IsPackable>true</IsPackable>
@@ -32,8 +32,10 @@
     <None Remove="Resources\Images\Weevil.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.3.4" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="NLog" Version="6.0.7" />
+    <PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
@@ -46,15 +48,18 @@
       </PackagePath>
     </Resource>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>BlueDotBrigade.Weevil.Core-UnitTests</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>BlueDotBrigade.Weevil.Core-FunctionalTests</_Parameter1>
     </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>BlueDotBrigade.Weevil.Core-FeatureTests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing.&#xD;&#xA;)" />
+  </Target>
 </Project>

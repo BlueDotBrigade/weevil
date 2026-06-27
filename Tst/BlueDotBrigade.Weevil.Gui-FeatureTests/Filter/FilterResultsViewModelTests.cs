@@ -23,7 +23,6 @@
 
 			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
 
-			viewModel.IsManualFilter = true;
 			viewModel.FilterManually(new object[]
 			{
 				"@IsPinned",
@@ -36,7 +35,7 @@
 				Thread.Sleep(TimeSpan.FromMilliseconds(100));
 			} while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5));
 
-			Assert.AreEqual(512, viewModel.VisibleItems.Count);
+			viewModel.VisibleItems.Count.Should().Be(512);
 		}
 	}
 }

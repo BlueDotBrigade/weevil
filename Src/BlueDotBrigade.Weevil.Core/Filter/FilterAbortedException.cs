@@ -25,6 +25,7 @@
 			// nothing to do
 		}
 
+		[Obsolete("This API supports obsolete formatter-based serialization. It should not be called or extended by application code.", DiagnosticId = "SYSLIB0051")]
 		protected FilterAbortedException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
@@ -32,6 +33,7 @@
 		}
 
 
+		[Obsolete("This API supports obsolete formatter-based serialization. It should not be called or extended by application code.", DiagnosticId = "SYSLIB0051")]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)

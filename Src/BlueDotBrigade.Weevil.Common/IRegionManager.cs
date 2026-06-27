@@ -10,7 +10,7 @@
 
 		void Clear();
 
-		bool Clear(int recordIndex);
+		bool Clear(int lineNumber);
 
 		void MarkEnd(int lineNumber);
 

@@ -9,17 +9,40 @@
 	{
 		public string ShowUserPrompt(string title, string prompt)
 		{
-			throw new NotImplementedException();
+			return string.Empty;
 		}
 
 		public string ShowUserPrompt(string title, string prompt, string defaultValue)
 		{
-			throw new NotImplementedException();
+			return defaultValue ?? string.Empty;
 		}
 
-		public bool TryShowFind(string defaultValue, out bool isCaseSensitive, out bool findNext, out string findText)
+		public bool TryShowFind(
+			string defaultValue, 
+			out bool isCaseSensitive, 
+			out bool findNext, 
+			out bool useRegex, 
+			out string findText,
+			out bool searchElapsedTime,
+			out int? minElapsedMs,
+			out int? maxElapsedMs,
+			out bool searchComments)
 		{
-			throw new NotImplementedException();
+			isCaseSensitive = false;
+			findNext = true;
+			useRegex = false;
+			findText = defaultValue ?? string.Empty;
+			searchElapsedTime = false;
+			minElapsedMs = null;
+			maxElapsedMs = null;
+			searchComments = false;
+			return !string.IsNullOrWhiteSpace(findText);
+		}
+
+		public bool TryGetExpressions(string defaultRegex, string recordsDescription, out string regularExpression)
+		{
+			regularExpression = defaultRegex ?? string.Empty;
+			return !string.IsNullOrWhiteSpace(regularExpression);
 		}
 	}
 }

@@ -3,44 +3,36 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+      using System.Globalization;
 	using System.Linq;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
 	using Filter.Expressions.Regular;
 
+	/// <summary>
+	/// Extracts numeric values via regex named capture groups and compares each to the previous value.
+	/// Flags records where the numeric value decreases compared to the preceding record.
+	/// </summary>
 	internal class DetectFallingEdgeAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectFallingEdgeAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectFallingEdgeAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectFallingEdges.ToString();
 
 		public string DisplayName => "Detect Falling Edges";
-
-		private static AnalysisOrder GetAnalysisOrder(IUserDialog userDialog)
-		{
-			var userInput = userDialog.ShowUserPrompt(
-				"Analysis Details",
-				"Analysis order (Ascending/Descending):",
-				"Ascending");
-
-			if (Enum.TryParse(userInput, true, out AnalysisOrder direction))
-			{
-				return direction;
-			}
-
-			throw new ArgumentOutOfRangeException(
-				$"{nameof(direction)}",
-				direction,
-				"Unable to perform operation. The analysis order was expected to be either: Ascending or Descending");
-		}
-
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
 		/// </summary>
@@ -50,31 +42,55 @@
 		/// 2. an appropriate comment is added to the record
 		/// </remarks>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var count = 0;
 
-			var analysisOrder = GetAnalysisOrder(userDialog);
+			// Get default regex from current inclusive filter
+			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
 			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Parse expressions with alias expansion and || support
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
+			{
+				return new Results(0);
+			}
+
+			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
+
+			var previous = new Dictionary<string, string>();
+			var previousRecord = new Dictionary<string, IRecord>();
+			var isInFallingRun = new Dictionary<string, bool>();
+
+			var sortedRecords = analysisOrder == AnalysisOrder.Ascending
+					? records
+					: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
+
+				foreach (IRecord record in sortedRecords)
 				{
-					var previous = new Dictionary<string, string>();
-					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
+					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
-					var sortedRecords = analysisOrder == AnalysisOrder.Ascending
-						? records
-						: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
-
-					foreach (IRecord record in sortedRecords)
-					{
-						if (canUpdateMetadata)
-						{
-							record.Metadata.IsFlagged = false;
-						}
-
-						foreach (RegularExpression expression in expressions)
+					foreach (RegularExpression expression in expressions)
 						{
 							IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
 
@@ -84,64 +100,47 @@
 								{
 									if (!string.IsNullOrWhiteSpace(current.Value))
 									{
-										if (previous.ContainsKey(current.Key))
-										{
-											if (long.TryParse(previous[current.Key], out var previousValue) &&
-												long.TryParse(current.Value, out var currentValue))
-											{
-												if (currentValue < previousValue)
-												{
-													var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
+                                  if (previous.TryGetValue(current.Key, out var previousRaw) &&
+										previousRecord.TryGetValue(current.Key, out var priorRecord) &&
+										decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
+										decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
+									{
+										var isFalling = currentValue < previousValue;
+										var wasFalling = isInFallingRun.TryGetValue(current.Key, out var priorState) && priorState;
 
-													count++;
-
-													if (canUpdateMetadata)
-													{
-														record.Metadata.IsFlagged = true;
-														record.Metadata.UpdateUserComment($"{parameterName}: {previous[current.Key]} => {current.Value}");
-													}
-												}
-												previous[current.Key] = current.Value;
-											}
-										}
-										else
+										if (isFalling && !wasFalling)
 										{
+											// Flag the record BEFORE the fall (the peak / last stable value).
+											// This points the user at the last "good" record, with the transition visible
+											// in the next record below it — natural for top-down log navigation.
 											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
 											count++;
 
-											if (canUpdateMetadata)
-											{
-												record.Metadata.IsFlagged = true;
-												record.Metadata.UpdateUserComment($"{parameterName}: {current.Value}");
-											}
-											
-											previous.Add(current.Key, current.Value);
+											AnalysisHelper.UpdateRecordMetadata(
+												priorRecord,
+												true,
+												$"{parameterName}: {previousRaw} => {current.Value}",
+												canUpdateMetadata);
 										}
+
+										isInFallingRun[current.Key] = isFalling;
+										previous[current.Key] = current.Value;
+										previousRecord[current.Key] = record;
+									}
+									else
+									{
+										previous[current.Key] = current.Value;
+										previousRecord[current.Key] = record;
+										isInFallingRun[current.Key] = false;
+									}
 									}
 								}
 							}
 						}
-					}
 				}
-			}
 
-			return count;
-		}
-
-		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)
-		{
-			var results = new List<RegularExpression>();
-
-			foreach (IExpression expression in expressions)
-			{
-				if (expression is RegularExpression)
-				{
-					results.Add(expression as RegularExpression);
-				}
-			}
-
-			return results;
+			return new Results(count);
 		}
 	}
 }

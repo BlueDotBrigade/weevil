@@ -19,6 +19,7 @@
 			this.MetricUnit = metricUnit ?? throw new ArgumentNullException(nameof(metricUnit));
 			this.MetricValue = _defaultMetricValue;
 			this.Details = _defaultDetails;
+			this.RelatedRecords = ImmutableArray<IRecord>.Empty;
 		}
 
 		public string Title { get; }
@@ -26,11 +27,14 @@
 		public string MetricUnit { get; }
 		public string Details { get; protected set; }
 		public bool IsAttentionRequired { get; protected set; }
+		public ImmutableArray<IRecord> RelatedRecords { get; protected set; }
+
 		public void Refresh(ImmutableArray<IRecord> records)
 		{
 			this.IsAttentionRequired = false;
 			this.MetricValue = _defaultMetricValue;
 			this.Details = _defaultDetails;
+			this.RelatedRecords = ImmutableArray<IRecord>.Empty;
 
 			OnRefresh(records);
 		}

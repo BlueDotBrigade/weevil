@@ -1,20 +1,30 @@
-﻿namespace BlueDotBrigade.Weevil.Analysis
+namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
 	using Filter.Expressions.Regular;
 
+	/// <summary>
+	/// Extracts key-value pairs from every record using regex named capture groups,
+	/// flagging each matching record and annotating it with the extracted values.
+	/// </summary>
 	internal class DetectDataAnalyzer : IRecordAnalyzer
 	{
 		private readonly FilterStrategy _filterStrategy;
+		private readonly IFilterAliasExpander _aliasExpander;
 
 		public DetectDataAnalyzer(FilterStrategy filterStrategy)
+			: this(filterStrategy, null)
+		{
+		}
+
+		public DetectDataAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
 		{
 			_filterStrategy = filterStrategy;
+			_aliasExpander = aliasExpander;
 		}
 
 		public string Key => AnalysisType.DetectData.ToString();
@@ -25,66 +35,87 @@
 		/// Extracts key/value pairs defined by regular expression "groups", and then updates the corresponding <see cref="Metadata.Comment"/>.
 		/// </summary>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public int Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var count = 0;
 
-			if (_filterStrategy != FilterStrategy.KeepAllRecords)
+			// Get default regex from current inclusive filter
+			var defaultRegex = Timeline.AnalysisHelper.GetDefaultRegex(_filterStrategy);
+
+			// Show analysis dialog to get custom regex
+			var recordsDescription = records.Length.ToString("N0");
+
+			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
 			{
-				if (_filterStrategy.InclusiveFilter.Count > 0)
+				// User cancelled
+				return new Results(0);
+			}
+
+			if (string.IsNullOrWhiteSpace(customRegex))
+			{
+				// No regex provided
+				return new Results(0);
+			}
+
+			// Parse expressions with alias expansion and || support
+			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
+				customRegex,
+				_aliasExpander,
+				expressionBuilder);
+
+			if (expressions.IsDefaultOrEmpty)
+			{
+				return new Results(0);
+			}
+
+			foreach (IRecord record in records)
+			{
+				if (canUpdateMetadata)
 				{
-					List<RegularExpression> expressions = GetRegularExpressions(_filterStrategy.InclusiveFilter.GetExpressions());
+					record.Metadata.IsFlagged = false;
+				}
 
-					foreach (IRecord record in records)
+				// Track unique key/value pairs per record to avoid duplicates using tuple-based key
+				var seenKeyValues = new HashSet<(string Key, string Value)>();
+
+				foreach (RegularExpression regexExpression in expressions)
+				{
+					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+
+					if (keyValuePairs.Count > 0)
 					{
-						if (canUpdateMetadata)
+						foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
 						{
-							record.Metadata.IsFlagged = false;
-						}
-
-						foreach (RegularExpression expression in expressions)
-						{
-							IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
-
-							if (keyValuePairs.Count > 0)
+							if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
 							{
-								foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
+								var compositeKey = (keyValuePair.Key, keyValuePair.Value);
+
+								// Skip duplicate key/value pairs within the same record
+								if (seenKeyValues.Contains(compositeKey))
 								{
-									if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
-									{
-										var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
-
-										if (canUpdateMetadata)
-										{
-											record.Metadata.IsFlagged = true;
-											record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
-										}
-
-										count++;
-									}
+									continue;
 								}
+
+								seenKeyValues.Add(compositeKey);
+
+								var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
+
+								if (canUpdateMetadata)
+								{
+									record.Metadata.IsFlagged = true;
+									record.Metadata.UpdateUserComment($"{parameterName}: {keyValuePair.Value}");
+								}
+
+								count++;
 							}
 						}
 					}
 				}
 			}
 
-			return count;
-		}
-
-		private static List<RegularExpression> GetRegularExpressions(ImmutableArray<IExpression> expressions)
-		{
-			var results = new List<RegularExpression>();
-
-			foreach (IExpression expression in expressions)
-			{
-				if (expression is RegularExpression)
-				{
-					results.Add(expression as RegularExpression);
-				}
-			}
-
-			return results;
+			return new Results(count);
 		}
 	}
 }
+

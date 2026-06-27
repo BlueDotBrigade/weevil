@@ -5,6 +5,7 @@
         Title="Dashboard" Height="600" Width="800"
         WindowStartupLocation="CenterOwner"
         WindowState="Maximized"
+        ShowInTaskbar="True"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:analysis="clr-namespace:BlueDotBrigade.Weevil.Windows.Analysis;assembly=BlueDotBrigade.Weevil.Windows"
         xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Windows.Converters;assembly=BlueDotBrigade.Weevil.Windows"
@@ -42,7 +43,26 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                <DataTemplate>
-                  <analysis:InsightControl Value="{Binding}" Style="{StaticResource DashboardInsightStyle}"/>
+                  <StackPanel>
+                     <analysis:InsightControl Value="{Binding}" Style="{StaticResource DashboardInsightStyle}"/>
+                     <Button Content="Go to Record" 
+                             Click="OnNavigateToRecord"
+                             Margin="16,0,8,16"
+                             Width="225"
+                             HorizontalAlignment="Left"
+                             ToolTip="Navigate to the first related record in the main window">
+                        <Button.Style>
+                           <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                              <Style.Triggers>
+                                 <DataTrigger Binding="{Binding IsAttentionRequired}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                 </DataTrigger>
+                              </Style.Triggers>
+                           </Style>
+                        </Button.Style>
+                     </Button>
+                  </StackPanel>
                </DataTemplate>
             </ItemsControl.ItemTemplate>
          </ItemsControl>

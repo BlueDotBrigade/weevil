@@ -18,6 +18,13 @@
 	/// </summary>
 	public partial class AboutDialog : Window
 	{
+		private const string BuildConfiguration =
+#if DEBUG
+			"Debug";
+#else
+			"Release";
+#endif
+
 		private static readonly TimeSpan DefaultTimerPeriod = TimeSpan.FromMilliseconds(200);
 
 		internal static readonly DependencyProperty DetailsProperty =
@@ -31,24 +38,24 @@
 				typeof(AboutDialog));
 
 		private readonly IUiDispatcher _uiDispatcher;
-		private readonly Version _weevilVersion;
+		private readonly string _weevilDisplayVersion;
 		private readonly string _thirdPartyNoticesPath;
 		private readonly string _sourceFilePath;
 		private readonly Timer _timer;
 
 		internal AboutDialog(
 			IUiDispatcher uiDispatcher,
-			Version weevilVersion, 
+			string weevilDisplayVersion, 
 			string licensePath, 
 			string thirdPartyNoticesPath, 
 			string sourceFilePath)
 		{
 			_uiDispatcher = uiDispatcher;
-			_weevilVersion = weevilVersion;
+			_weevilDisplayVersion = weevilDisplayVersion;
 			_thirdPartyNoticesPath = thirdPartyNoticesPath;
 			_sourceFilePath = sourceFilePath;
 
-			this.Details = GetHeader(_weevilVersion) + Environment.NewLine +
+			this.Details = GetHeader(_weevilDisplayVersion) + Environment.NewLine +
 			    Environment.NewLine +
 				"Loading metrics...";
 
@@ -72,7 +79,7 @@
 		{
 			_uiDispatcher.Invoke(() =>
 			{
-				this.Details = GetHeader(_weevilVersion) + Environment.NewLine +
+				this.Details = GetHeader(_weevilDisplayVersion) + Environment.NewLine +
 				               GetMetrics(_sourceFilePath);
 			});
 		}
@@ -89,12 +96,12 @@
 			set => SetValue(LicenseProperty, value);
 		}
 
-		private static string GetHeader(Version weevilVersion)
+		private static string GetHeader(string weevilDisplayVersion)
 		{
 			return
-				$"Weevil: {weevilVersion}" + Environment.NewLine +
-				$"Weevil's core engine is powered by open source software." +
-				Environment.NewLine;
+				$"Weevil: {weevilDisplayVersion}" + Environment.NewLine +
+				$"Weevil's core engine is powered by open source software." + Environment.NewLine +
+				$"Build Configuration: {BuildConfiguration}" + Environment.NewLine;
 		}
 
 		private static string GetMetrics(string sourceFilePath)
@@ -117,20 +124,20 @@
 				$"RAM Installed: {computerSnapshot.RamTotalInstalled.GigaBytes:0.0} GB" + Environment.NewLine +
 				Environment.NewLine +
 				$"RAM Available: {computerSnapshot.RamTotalFree.GigaBytes:0.0} GB" + Environment.NewLine +
-				$"RAM Used by Weevil {workingSet.MetaBytes:#,###,##0} MB ({workingSetPercentUsage:0.0} %) " + Environment.NewLine +
-				$"Weevil's Total Memory Footprint: {privateMemory.MetaBytes:#,###,##0} MB " + Environment.NewLine +
+				$"RAM Used by Weevil {workingSet.MegaBytes:#,###,##0} MB ({workingSetPercentUsage:0.0} %) " + Environment.NewLine +
+				$"Weevil's Total Memory Footprint: {privateMemory.MegaBytes:#,###,##0} MB " + Environment.NewLine +
 				Environment.NewLine;
 
 			if (sourceFileSize.Bytes > 0)
 			{
-				if (sourceFileSize.MetaBytes < 1)
+				if (sourceFileSize.MegaBytes < 1)
 				{
 					result += $"Source File Size: {sourceFileSize.Bytes:#,###,##0} Bytes" + Environment.NewLine +
 					          Environment.NewLine;
 				}
 				else
 				{
-					result += $"Source File Size: {sourceFileSize.MetaBytes:#,###,##0} MB" + Environment.NewLine +
+					result += $"Source File Size: {sourceFileSize.MegaBytes:#,###,##0} MB" + Environment.NewLine +
 					          Environment.NewLine;
 				}
 			}

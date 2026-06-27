@@ -6,6 +6,7 @@
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
 	using Cocona;
@@ -20,20 +21,33 @@
 			Description = "Filters the log file for records that include/exclude the specified text.")]
 		public void Filter(string logPath, string? include, string? exclude)
 		{
-			IEngine engine = Engine
-					.UsingPath(logPath)
-					.Open();
+			var telemetry = TelemetrySessionLifecycle.Shared;
+			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(include, exclude));
+			try
+			{
+				telemetry.Increment(TelemetryMetrics.CliFilterCommand);
 
-			var destinationFile =
-				Path.GetFileNameWithoutExtension(logPath) +
-				".Results" +
-				Path.GetExtension(logPath);
+				IEngine engine = Engine
+						.UsingPath(logPath)
+						.UsingTelemetry(telemetry)
+						.Open();
 
-			var destinationFilePath = Path.Combine(
-				Path.GetDirectoryName(logPath),
-				destinationFile);
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(include, exclude));
+
+				var destinationFile =
+					Path.GetFileNameWithoutExtension(logPath) +
+					".Results" +
+					Path.GetExtension(logPath);
+
+				var destinationFilePath = Path.Combine(
+					Path.GetDirectoryName(logPath),
+					destinationFile);
+			}
+			finally
+			{
+				telemetry.EndSession();
+			}
 		}
 	}
 }

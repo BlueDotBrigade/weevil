@@ -4,41 +4,53 @@
 	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
-	using System.Reflection;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Analysis;
+	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Filter;
 	using BlueDotBrigade.Weevil.Gui.IO;
+	using BlueDotBrigade.Weevil.Gui.Navigation;
 	using BlueDotBrigade.Weevil.Gui.Threading;
-	using PostSharp.Patterns.Model;
+	using Metalama.Patterns.Observability;
 
-	[NotifyPropertyChanged()]
+	[Observable]
 	internal class MainWindowViewModel
 	{
 		private readonly IUiDispatcher _uiDispatcher;
+		private readonly IBulletinMediator _bulletinMediator;
 		private readonly UiResponsivenessMonitor _uiMonitor;
-
-		public event PropertyChangedEventHandler PropertyChanged;
+		private readonly TelemetrySessionLifecycle _telemetry;
+		private readonly Version _applicationVersion;
+		private readonly long _installedRamMb;
+		private readonly string _installedCpu;
 
 		public MainWindowViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
 		{
 			_uiDispatcher = uiDispatcher;
+			_bulletinMediator = bulletinMediator;
 			_uiMonitor = new UiResponsivenessMonitor();
+			_telemetry = TelemetrySessionLifecycle.Shared;
 
 			bulletinMediator.Subscribe<SourceFileOpenedBulletin>(this, x => OnSourceFileChanged(x));
+			// Filter.Applied is now recorded by Core (see EngineBuilder.UsingTelemetry); avoid double counting here.
+			bulletinMediator.Subscribe<SelectionChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordSelectionChanged));
+			bulletinMediator.Subscribe<BookmarksChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordAnnotationChanged));
+			bulletinMediator.Subscribe<RegionsChangedBulletin>(this, _ => _telemetry.RecordActivity(TelemetryActivityKind.RecordAnnotationChanged));
 
 			this.FilterViewModel = new FilterViewModel(
 				uiDispatcher,
 				bulletinMediator);
+			_applicationVersion = this.FilterViewModel.WeevilVersion;
+			var computerSnapshot = ComputerSnapshot.Create();
+			_installedRamMb = (long)computerSnapshot.RamTotalInstalled.MegaBytes;
+			_installedCpu = computerSnapshot.CpuName;
 
 			this.StatusBarViewModel = new StatusBarViewModel(
 				uiDispatcher,
 				bulletinMediator);
 
-			Version weevilVersion = Assembly.GetEntryAssembly()?.GetName().Version;
-			weevilVersion = weevilVersion ?? new Version(128, 128, 128);
-			this.ApplicationTitle = $"Weevil: v{weevilVersion.ToString(3)}";
+          this.ApplicationTitle = $"Weevil: v{this.FilterViewModel.WeevilDisplayVersion}";
 		}
 
 		public void Start()
@@ -57,7 +69,9 @@
 
 		public void Stop()
 		{
+			_bulletinMediator.Post(new TelemetrySessionSavingBulletin());
 			_uiMonitor.Stop();
+			_telemetry.EndSession();
 		}
 
 		private void OnSourceFileChanged(SourceFileOpenedBulletin bulletin)
@@ -65,6 +79,12 @@
 			var title = Path.GetFileNameWithoutExtension(bulletin.SourceFilePath);
 
 			_uiDispatcher.Invoke(() => this.ApplicationTitle = title);
+           _telemetry.StartSession(
+				"WeevilGui.exe",
+				_applicationVersion,
+				bulletin.SourceFilePath,
+				_installedRamMb,
+				_installedCpu);
 		}
 
 		public FilterViewModel FilterViewModel { get; }

@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh.exe repo:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh repo *)",
+      "mcp__plugin_github_github__issue_read",
+      "mcp__plugin_github_github__search_pull_requests",
+      "Bash(node *)",
+      "mcp__plugin_github_github__pull_request_read",
+      "Bash(dotnet build *)",
+      "Bash(git log *)",
+      "Bash(git stash *)",
+      "PowerShell(Get-Process *)",
+      "Bash(tasklist)",
+      "Bash(start *)",
+      "Bash(gh pr *)",
+      "Bash(gh issue *)",
+      "Bash(dotnet test *)",
+      "PowerShell(Get-Item *)",
+      "Bash(findstr *)",
+      "mcp__plugin_github_github__get_me",
+      "mcp__plugin_github_github__issue_write"
+    ]
+  }
+}

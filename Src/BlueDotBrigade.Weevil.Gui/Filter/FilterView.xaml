@@ -4,33 +4,38 @@
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             mc:Ignorable="d"
-            xmlns:dd="urn:gong-wpf-dragdrop"
             xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
             xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
             xmlns:system="clr-namespace:System;assembly=mscorlib"
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
             xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
+            xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.Filter"
             d:DesignHeight="200" d:DesignWidth="900" FontSize="{DynamicResource ApplicationFontSize}">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter" />
-        <converters:SeverityToForegroundConverter x:Key="SeverityForegroundConverter" />
-        <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
-        <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
-        <converters:ContentConverter x:Key="ContentConverter" />
-        <converters:ContentToTruncationIconConverter x:Key="ContentToTruncationIconConverter" />
-        <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
-        <converters:RegionStringConverter x:Key="RegionStringConverter" />
-        <Style x:Key="CommandMenuItemStyle"
-               TargetType="{x:Type MenuItem}">
-            <Setter Property="Header"
-                   Value="{Binding Path=DisplayText}"/>
-            <Setter Property="Command"
-                   Value="{Binding Path=Command}"/>
-            <Setter Property="CommandParameter"
-                   Value="{Binding Path=CommandParameter}"/>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="FilterContextMenu.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter"
+                                                      WarningBrush="{StaticResource SeverityWarningBackgroundBrush}"
+                                                      ErrorBrush="{StaticResource SeverityErrorBackgroundBrush}"
+                                                      CriticalBrush="{StaticResource SeverityCriticalBackgroundBrush}" />
+            <converters:SeverityToForegroundConverter x:Key="SeverityForegroundConverter"
+                                                      WarningBrush="{StaticResource SeverityWarningForegroundBrush}"
+                                                      ErrorBrush="{StaticResource SeverityErrorForegroundBrush}"
+                                                      CriticalBrush="{StaticResource SeverityCriticalForegroundBrush}" />
+            <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
+            <converters:FilterMultiValueConverter x:Key="FiltersMultiValueConverter" />
+            <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+            <converters:ContentConverter x:Key="ContentConverter" />
+            <converters:ContentToTruncationIconConverter x:Key="ContentToTruncationIconConverter" />
+            <converters:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
+            <converters:RegionStringConverter x:Key="RegionStringConverter" />
+            <converters:BookmarkStringConverter x:Key="BookmarkStringConverter" />
+        </ResourceDictionary>
     </UserControl.Resources>
     <UserControl.InputBindings>
         <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenLogCommand}" />
@@ -45,6 +50,18 @@
         <KeyBinding Key="F12" Modifiers="Ctrl+Alt+Shift" Command="{Binding ForceGarbageCollectionCommand}" />
         <KeyBinding Key="B" Modifiers="Ctrl" Command="{Binding AddRegionCommand}" />
 
+        <KeyBinding Key="D1" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark1Command}" />
+        <KeyBinding Key="D2" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark2Command}" />
+        <KeyBinding Key="D3" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark3Command}" />
+        <KeyBinding Key="D4" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark4Command}" />
+        <KeyBinding Key="D5" Modifiers="Ctrl+Shift" Command="{Binding SetBookmark5Command}" />
+        <KeyBinding Key="D1" Modifiers="Ctrl" Command="{Binding GoToBookmark1Command}" />
+        <KeyBinding Key="D2" Modifiers="Ctrl" Command="{Binding GoToBookmark2Command}" />
+        <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding GoToBookmark3Command}" />
+        <KeyBinding Key="D4" Modifiers="Ctrl" Command="{Binding GoToBookmark4Command}" />
+        <KeyBinding Key="D5" Modifiers="Ctrl" Command="{Binding GoToBookmark5Command}" />
+        <KeyBinding Key="F2" Command="{Binding RenameBookmarkCommand}" />
+
         <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindTextCommand}" />
         <KeyBinding Key="F3" Command="{Binding FindNextCommand}" />
         <KeyBinding Key="F3" Modifiers="Shift" Command="{Binding FindPreviousCommand}" />
@@ -55,14 +72,14 @@
         <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding ClipboardCopyCommentCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ClipboardPasteCommand}" />
         <KeyBinding Key="V" Modifiers="Ctrl+Shift" Command="{Binding ClipboardPasteOverwriteCommand}" />
-        <KeyBinding Key="F5" Command="{Binding ReApplyFiltersCommand}" />
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
         <KeyBinding Key="O" Modifiers="Ctrl+Shift" Command="{Binding ToggleFilterOptionsVisibilityCommand}" />
         <KeyBinding Key="T" Modifiers="Ctrl+Shift" Command="{Binding ToggleFiltersCommand}" />
         <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding ShowFileExplorerCommand}" />
         <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ShowRegExToolCommand}" />
         <KeyBinding Key="OemTilde" Modifiers="Ctrl" Command="{Binding ShowApplicationLogFileCommand}" />
         <KeyBinding Key="Escape" Command="{Binding AbortFilterCommand}" />
-        <!--<KeyBinding Key="Delete" Command="{Binding ClearSelectedRecordsCommand}" />-->
+
         <KeyBinding Key="Back" Command="{Binding RemoveSelectedCommentsCommand}" />
         <KeyBinding Key="Back" Modifiers="Ctrl+Shift"  Command="{Binding RemoveAllCommentsCommand}" />
 
@@ -72,14 +89,18 @@
 
         <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ShowDashboardCommand}" />
         <KeyBinding Key="G" Modifiers="Ctrl+Shift" Command="{Binding GraphDataCommand}" />
+        <KeyBinding Key="F6" Command="{Binding StableValueRunsCommand}" />
+        <KeyBinding Key="F7" Command="{Binding FirstOccurrenceCommand}" />
         <KeyBinding Key="F8" Command="{Binding DetectDataCommand}" />
-        <KeyBinding Key="F9" Command="{Binding DetectDataTransitionsCommand}" />
+        <KeyBinding Key="F9" Command="{Binding StateTransitionsCommand}" />
         <KeyBinding Key="F10" Command="{Binding MeasureElapsedTimeUiThreadCommand}" />
         <KeyBinding Key="F11" Command="{Binding MeasureElapsedTimeCommand}" />
+        <KeyBinding Key="F12" Command="{Binding CalculateStatisticsCommand}" />
 
         <KeyBinding Key="M" Modifiers="Ctrl+Shift" Command="{Binding FilterByCommentCommand}" />
         <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding FilterByPinnedCommand}" />
         <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding FilterByRegionsCommand}" />
+        <KeyBinding Key="B" Modifiers="Ctrl+Shift" Command="{Binding FilterByBookmarksCommand}" />
 
         <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding ClipboardCopyTimestampsCommand}" />
 
@@ -97,7 +118,7 @@
         <KeyBinding Key="OemMinus" Modifiers="Ctrl+Shift" Command="{Binding GoToPreviousCommentCommand}" />
         <KeyBinding Key="OemPlus" Modifiers="Ctrl+Shift" Command="{Binding GoToNextCommentCommand}" />
     </UserControl.InputBindings>
-    <Grid x:Name="WindowLayout" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"
+    <Grid x:Name="WindowLayout" AllowDrop="True" DragOver="OnWindowLayoutDragOver" Drop="OnWindowLayoutDrop"
          FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -135,13 +156,14 @@
                    Grid.Column="1" 
                    Margin="{StaticResource ComboBoxMargin}"
                    ItemsSource="{Binding InclusiveFilterHistory}"
-                   Text="{Binding InclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
+                   Text="{Binding InclusiveFilter, UpdateSourceTrigger=PropertyChanged}" 
                    SelectedValue="{Binding InclusiveFilter}" 
                    IsEnabled="{Binding IsFilterToolboxEnabled}" 
                    IsEditable="True"
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                   guiControls:MdixComboBoxBehavior.CaretBrush="{StaticResource HighlightBrush}"
                    materialDesign:HintAssist.Hint="Include (Alt+I)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
@@ -155,7 +177,6 @@
                         </KeyBinding.CommandParameter>
                     </KeyBinding>
                 </ComboBox.InputBindings>
-
             </ComboBox>
             <!-- 
          HACK: WPF ComboBoxes do not support access keys. The `Label` is being used to receive focus on behalf of the ComboBox. See: #36
@@ -165,13 +186,14 @@
                    Grid.Column="2"   
                    Margin="{StaticResource ComboBoxMargin}"
                    ItemsSource="{Binding ExclusiveFilterHistory}"
-                   Text="{Binding ExclusiveFilter, Delay=1500, UpdateSourceTrigger=PropertyChanged}" 
+                   Text="{Binding ExclusiveFilter, UpdateSourceTrigger=PropertyChanged}" 
                    SelectedValue="{Binding ExclusiveFilter}" 
                    IsEnabled="{Binding IsFilterToolboxEnabled}" 
                    IsEditable="True"
                    IsTextSearchEnabled="False"
                    StaysOpenOnEdit="False"
                    guiControls:MdixComboBoxBehavior.UseMicrosoftBehavior="True"
+                   guiControls:MdixComboBoxBehavior.CaretBrush="{StaticResource HighlightBrush}"
                    materialDesign:HintAssist.Hint="Exclude (Alt+E)"
                    materialDesign:TextFieldAssist.HasClearButton="True"
                    GotFocus="OnGotFocus">
@@ -225,10 +247,10 @@
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 ScrollViewer.CanContentScroll="True"
                 ItemsSource="{Binding VisibleItems}"
-                             SelectedIndex="{Binding ActiveRecordIndex, Mode=TwoWay}"
+                             local:FilterListViewBehavior.ActiveRecordIndex="{Binding ActiveRecordIndex, Mode=OneWay}"
                              AlternationCount="2"
-                             IsSynchronizedWithCurrentItem="True" 
-                             SelectionChanged="ListView_OnSelectionChanged" 
+                             IsSynchronizedWithCurrentItem="True"
+                             SelectionChanged="ListView_OnSelectionChanged"
                              SelectionMode="Extended" 
                              controls:ListViewBehavior.AutoScrollToCurrentItem="True">
             <ListView.Resources>
@@ -248,128 +270,15 @@
                 </Style>
             </ListView.Style>
             <ListView.ContextMenu>
-                <ContextMenu FontSize="{DynamicResource ApplicationFontSize}">
-                    <MenuItem Header="File">
-                        <MenuItem Header="Open..." Command="{Binding OpenLogCommand}" InputGestureText="Ctrl+O"/>
-                        <MenuItem Header="Save" Command="{Binding SaveLogCommand}" InputGestureText="Ctrl+S"/>
-                        <Separator />
-                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+F5" />
-                        <Separator />
-                        <MenuItem Header="EXPORT" IsEnabled="False" FontWeight="Bold"/>
-                        <MenuItem Header="Original Records" Command="{Binding SaveSelectedAsRawCommand}" InputGestureText="Ctrl+Shift+S" />
-                        <MenuItem Header="Records &amp; Metadata" Command="{Binding SaveSelectedAsTsvCommand}" InputGestureText="Ctrl+Alt+S"/>
-                        <MenuItem Header="Comment Timeline" Command="{Binding SaveCommentSummaryCommand}" />
-                    </MenuItem>
-
-                    <MenuItem Header="Edit">
-                        <MenuItem Header="COPY" IsEnabled="False" FontWeight="Bold"/>
-                        <MenuItem Header="Original Records" Command="{Binding ClipboardCopyRawCommand}" InputGestureText="Ctrl+C"/>
-                        <MenuItem Header="Simplified Records" Command="{Binding ClipboardCopySimpleCallStackCommand}" InputGestureText="Ctrl+Alt+C" />
-                        <MenuItem Header="Comment Timeline" Command="{Binding ClipboardCopyCommentCommand}" InputGestureText="Ctrl+Shift+C" />
-                        <MenuItem Header="Line Numbers" Command="{Binding ClipboardCopyLineNumbersCommand}" />
-                        <MenuItem Header="Timestamps" Command="{Binding ClipboardCopyTimestampsCommand}" InputGestureText="Ctrl+T"/>
-                        <Separator/>
-                        <MenuItem Header="PASTE" IsEnabled="False" FontWeight="Bold"/>
-                        <MenuItem Header="Comments" Command="{Binding ClipboardPasteCommand}" InputGestureText="Ctrl+V" />
-                        <MenuItem Header="Comments (Overwrite)" Command="{Binding ClipboardPasteOverwriteCommand}" InputGestureText="Ctrl+Shift+V" />
-                    </MenuItem>
-
-                    <MenuItem Header="View">
-                        <MenuItem Header="Regular Expression Tool" Command="{Binding ShowRegExToolCommand}" InputGestureText="Ctrl+R" />
-                        <MenuItem Header="Windows File Explorer" Command="{Binding ShowFileExplorerCommand}" InputGestureText="Ctrl+E" />
-                    </MenuItem>
-
-                    <Separator/>
-
-                    <MenuItem Header="Clear">
-                        <MenuItem Header="Before Selected Record" Command="{Binding ClearBeforeSelectedRecordCommand}" />
-                        <MenuItem Header="Before &#38; After Selection" Command="{Binding ClearBeforeAndAfterSelectionCommand}" />
-                        <MenuItem Header="Between Selected Records" Command="{Binding ClearBetweenSelectedRecordsCommand}" />
-                        <MenuItem Header="After Selected Record" Command="{Binding ClearAfterSelectedRecordCommand}" />
-                        <Separator/>
-                        <MenuItem Header="Outside Regions" Command="{Binding ClearBeyondRegionsCommand}" />
-                        <Separator/>
-                        <MenuItem Header="Selected Comments" Command="{Binding RemoveSelectedCommentsCommand}" InputGestureText="Back" />
-                        <MenuItem Header="All Comments" Command="{Binding RemoveAllCommentsCommand}" InputGestureText="Ctrl+Shift+Back"/>
-                    </MenuItem>
-                    
-                    <Separator/>
-
-                    <MenuItem Header="Filter">
-                        <MenuItem Header="Toggle Filters" Command="{Binding ToggleFiltersCommand}" InputGestureText="Ctrl+Shift+T" />
-                        <Separator/>
-                        <MenuItem Header="Show Comments" Command="{Binding FilterByCommentCommand}" InputGestureText="Ctrl+Shift+M" />
-                        <MenuItem Header="Show Pinned Records" Command="{Binding FilterByPinnedCommand}" InputGestureText="Ctrl+Shift+P" />
-                        <MenuItem Header="Show Regions" Command="{Binding FilterByRegionsCommand}" InputGestureText="Ctrl+Shift+R" />
-                        <Separator/>
-                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5" />
-                    </MenuItem>
-
-                    <MenuItem Header="Navigate">
-                        <MenuItem Header="Find" Command="{Binding FindTextCommand}" InputGestureText="Ctrl+F" />
-                        <MenuItem Header="Find Previous" Command="{Binding FindPreviousCommand}" InputGestureText="Shift+F3" />
-                        <MenuItem Header="Find Next" Command="{Binding FindNextCommand}" InputGestureText="F3" />
-                        <Separator/>
-                        <MenuItem Header="Go To" Command="{Binding GoToCommand}" InputGestureText="Ctrl+G" />
-                        <Separator/>
-                        <MenuItem Header="Previous Comment" Command="{Binding GoToPreviousCommentCommand}" InputGestureText="Ctrl+Shift+Minus" />
-                        <MenuItem Header="Next Comment" Command="{Binding GoToNextCommentCommand}" InputGestureText="Ctrl+Shift+Plus" />
-                        <Separator/>
-                        <MenuItem Header="Previous Flag" Command="{Binding GoToPreviousFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Minus" />
-                        <MenuItem Header="Next Flag" Command="{Binding GoToNextFlagCommand}" InputGestureText="Ctrl+Shift+Alt+Plus" />
-                        <Separator/>
-                        <MenuItem Header="Previous Pinned" Command="{Binding GoToPreviousPinCommand}" InputGestureText="Ctrl+Minus" />
-                        <MenuItem Header="Next Pinned" Command="{Binding GoToNextPinCommand}" InputGestureText="Ctrl+Plus" />
-                        <MenuItem Header="Toggle Pin On/Off" Command="{Binding ToggleIsPinnedCommand}" InputGestureText="Ctrl+P" />
-                        <MenuItem Header="Unpin All" Command="{Binding UnpinAllCommand}" />
-                    </MenuItem>
-                    <MenuItem Header="Analyze">
-                        <MenuItem Header="Dashboard" Command="{Binding ShowDashboardCommand}" InputGestureText="Ctrl+D" />
-                        <MenuItem Header="Graph" Command="{Binding GraphDataCommand}" InputGestureText="Ctrl+Shift+G" />
-                        <Separator />
-                        <MenuItem Header="Add Region" Command="{Binding AddRegionCommand}" InputGestureText="Ctrl+B" />
-                        <MenuItem Header="Remove Region" Command="{Binding RemoveRegionCommand}"/>
-                        <MenuItem Header="Remove All Regions" Command="{Binding RemoveAllRegionsCommand}" />
-                        <Separator/>
-                        <MenuItem Header="Detect Data" Command="{Binding DetectDataCommand}" InputGestureText="F8"  />
-                        <MenuItem Header="Detect Data Changes" Command="{Binding DetectDataTransitionsCommand}" InputGestureText="F9" />
-                        <MenuItem Header="Detect Rising Edges" Command="{Binding DataTransitionsRisingEdgeCommand}" />
-                        <MenuItem Header="Detect Falling Edges" Command="{Binding DataTransitionsFallingEdgeCommand}" />
-                        <Separator/>
-                        <MenuItem Header="Measure UI Thread Time" Command="{Binding MeasureElapsedTimeUiThreadCommand}" InputGestureText="F10" />
-                        <MenuItem Header="Measure Elapsed Time" Command="{Binding MeasureElapsedTimeCommand}" InputGestureText="F11" />
-                        <MenuItem Header="Detect Temporal Anomaly" Command="{Binding DetectTemporalAnomaly}" />
-                        <Separator />
-                        <MenuItem Header="Remove Flags" Command="{Binding RemoveAllFlagsCommand}"/>
-                    </MenuItem>
-                    <MenuItem Header="Analyze More..."
-                              ItemsSource="{Binding Path=CustomAnalyzerCommands}"
-                              ItemContainerStyle="{StaticResource CommandMenuItemStyle}">
-                        <MenuItem.Style>
-                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource MaterialDesignMenuItem}">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Setter Property="IsEnabled" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding CustomAnalyzerCommands.Count}" Value="0">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </MenuItem.Style>
-                    </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="Help" Command="{Binding ShowHelpCommand}" InputGestureText="F1" />
-                    <MenuItem Header="About" Command="{Binding ShowAboutCommand}" InputGestureText="Ctrl+F1" />
-                </ContextMenu>
+                <StaticResource ResourceKey="FilterViewContextMenu" />
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="FontSize" Value="{DynamicResource RowFontSize}" />
                     <Setter Property="SnapsToDevicePixels" Value="True" />
                     <Setter Property="OverridesDefaultStyle" Value="True" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource TransparentBrush}" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
@@ -389,16 +298,16 @@
                         </Trigger>
                         <Trigger Property="ItemsControl.AlternationIndex" Value="0">
                             <Setter Property="Foreground" Value="{Binding Severity, Converter={StaticResource SeverityForegroundConverter}, FallbackValue={StaticResource MaterialDesignBody}, Mode=OneWay}"/>
-                            <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue={StaticResource MaterialDesignDivider}, Mode=OneWay}"/>
+                            <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue={StaticResource RowBackgroundBrush}, Mode=OneWay}"/>
                         </Trigger>
                         <Trigger Property="ItemsControl.AlternationIndex" Value="1">
                             <Setter Property="Foreground" Value="{Binding Severity, Converter={StaticResource SeverityForegroundConverter}, FallbackValue={StaticResource MaterialDesignBody}, Mode=OneWay}"/>
-                            <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue=Transparent, Mode=OneWay}"/>
+                            <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue={StaticResource AlternatingRowBackgroundBrush}, Mode=OneWay}"/>
                         </Trigger>
 
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground" Value="WhiteSmoke"/>
-                            <Setter Property="Background" Value="Black"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="Background" Value="{StaticResource RowHighlightedBrush}"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
@@ -422,6 +331,7 @@
                                     IsEnabled="True" 
                                     MinWidth="150"
                                     TextWrapping="Wrap" 
+                                    guiControls:MdixComboBoxBehavior.CaretBrush="{StaticResource HighlightBrush}"
                                     controls:TextBoxBehavior.AutoSelectEnabled="True">
                                 </TextBox>
                             </DataTemplate>
@@ -442,54 +352,111 @@
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="data:IRecord">
-                                <TextBlock TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <Run Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"/>
-                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
-                                         <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=RegionTextBlock}" Value="">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="#C0C0C0">
-                                            <TextBlock.ToolTip>
-                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                    <Binding Path="." />
-                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                    <Binding Source="True" />
-                                                </MultiBinding>
-                                            </TextBlock.ToolTip>
-                                            <TextBlock.Text>
-                                                <MultiBinding Converter="{StaticResource RegionStringConverter}">
-                                                    <!-- 1) The current item (record) -->
-                                                    <Binding Path="." />
-                                                    <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
-                                                    <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </Border>
-                                    <Border BorderBrush="#949494" BorderThickness="1" CornerRadius="4" Margin="0,0,0,-2" Background="#3c3c3c">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=TruncatedTextBlock}" Value="">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="#C0C0C0"
-                                                Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
-                                                ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
-                                    </Border>
-                                </TextBlock>
-                                    
+                                <StackPanel>
+                                    <TextBlock
+                                        Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"
+                                        TextWrapping="WrapWithOverflow"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListViewItem}}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border x:Name="RegionTag" 
+                                                BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4" 
+                                                Margin="0,2,4,0" 
+                                                Background="{StaticResource SecondaryBackgroundBrush}">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=RegionTextBlock}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource TextForeground}">
+                                                <TextBlock.ToolTip>
+                                                    <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                        <Binding Path="." />
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        <Binding Source="True" />
+                                                    </MultiBinding>
+                                                </TextBlock.ToolTip>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                        <!-- 1) The current item (record) -->
+                                                        <Binding Path="." />
+                                                        <!-- 2) The parent ViewModel (the UserControl.DataContext) -->
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </Border>
+                                        <Border x:Name="BookmarkTag"
+                                                BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4"
+                                                Margin="0,2,4,0"
+                                                Background="{StaticResource SecondaryBackgroundBrush}">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=BookmarkTextBlock}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel.ToolTip>
+                                                    <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
+                                                        <Binding Path="." />
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        <Binding Source="True" />
+                                                    </MultiBinding>
+                                                </StackPanel.ToolTip>
+                                                <TextBlock FontWeight="Heavy"
+                                                          FontSize="{DynamicResource RowFontSize}"
+                                                          Foreground="{StaticResource TextForeground}"
+                                                          Margin="0,0,2,0"
+                                                          FontFamily="Segoe UI Emoji">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Symbol">
+                                                            <Binding Path="." />
+                                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource TextForeground}">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Details">
+                                                            <Binding Path="." />
+                                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border 
+                                            x:Name="TruncatedTag"
+                                            BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4" 
+                                            Margin="0,2,4,0" 
+                                            Background="{StaticResource SecondaryBackgroundBrush}">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=TruncatedTextBlock}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="{StaticResource TextForeground}"
+                                                    Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
+                                                    ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -501,7 +468,7 @@
                   VerticalAlignment="Center" HorizontalAlignment="Center" 
                   IsVisibleChanged="OnProgressBarVisibilityChanged">
             <TextBlock Text="Boring log file for tasty bytes..." />
-            <ProgressBar Width="200" Height="15" Foreground="LightSkyBlue" BorderBrush="Blue" 
+            <ProgressBar Width="200" Height="15" Foreground="{StaticResource PrimaryCommandBrush}" BorderBrush="{StaticResource SecondaryCommandBrush}"
                       Value="0" 
                       Maximum="100"
                       IsIndeterminate="True"  />
@@ -518,24 +485,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Row="0">
-                <CheckBox
-                        IsChecked="{Binding IncludeDebugRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Debug` records are always hidden.">
-                    <AccessText Text="Can Include _Debug"></AccessText>
-                </CheckBox>
-                <CheckBox
-                        IsChecked="{Binding IncludeTraceRecords}" Margin="0,4,8,4" ToolTip="When checked, filter criteria must be satisfied. When unchecked, `Trace` records are always hidden.">
-                    <AccessText Text="Can Include _Trace"></AccessText>
-                </CheckBox>
-                <CheckBox
-                        IsChecked="{Binding IncludePinned}" Margin="0,4,8,4" ToolTip="When checked, pinned records are always included in filter results.">
-                    <AccessText Text="Must Include _Pinned"></AccessText>
-                </CheckBox>
-                <CheckBox IsChecked="{Binding IsManualFilter}" Margin="0,4,8,4" ToolTip="When checked, the user will have to press `Enter` to apply the filters.">
-                    <AccessText Text="_Manual Filtering"></AccessText>
-                </CheckBox>
-                <CheckBox IsChecked="{Binding IsFilterCaseSensitive}" Margin="0,4,8,4" ToolTip="When checked, filters will distinguish between upper &amp; lowercase letters.">
-                    <AccessText Text="_Case Sensitive Filtering"></AccessText>
-                </CheckBox>
+                <local:FilterOptionsView DataContext="{Binding FilterOptionsViewModel}" />
 
                 <ComboBox x:Name="ApplicationFontSizeComboBox"
                   Width="100" Margin="100,4,8,4"
@@ -580,4 +530,5 @@
                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
         </Grid>
     </Grid>
+
 </UserControl>

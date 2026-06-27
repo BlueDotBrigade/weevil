@@ -17,8 +17,8 @@
 
 		void Analyze(AnalysisType analysisType);
 
-		int Analyze(AnalysisType analysisType, IUserDialog userDialog);
+		Results Analyze(AnalysisType analysisType, IUserDialog userDialog);
 
-		int Analyze(string analyzerKey, IUserDialog userDialog);
+		Results Analyze(string analyzerKey, IUserDialog userDialog);
 	}
 }

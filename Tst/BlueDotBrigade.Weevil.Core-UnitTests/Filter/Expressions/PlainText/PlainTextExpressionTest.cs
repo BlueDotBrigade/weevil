@@ -15,7 +15,7 @@
 
 			var expression = new PlainTextExpression("FOX", false);
 
-			Assert.IsTrue(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -26,7 +26,7 @@
 
 			var expression = new PlainTextExpression("FOX", true);
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -37,7 +37,7 @@
 
 			var expression = new PlainTextExpression("dinosaur", true);
 
-			Assert.IsFalse(expression.IsMatch(record));
+			(expression.IsMatch(record)).Should().BeFalse();
 		}
 	}
 }

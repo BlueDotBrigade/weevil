@@ -15,7 +15,7 @@
 		{
 			helpMessage.Children.Add(
 				new HelpSection(
-					new HelpHeading("Examples:"),
+					new HelpHeading("Filter Examples:"),
 					new HelpSection(
 						new HelpParagraph(@"WeevilCli.exe filter --log-path ""C:\Temp\Http.log"" --Include ""Error 404"""),
 						new HelpParagraph("")

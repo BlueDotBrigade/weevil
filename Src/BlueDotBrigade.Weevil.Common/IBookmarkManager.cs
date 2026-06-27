@@ -1,0 +1,23 @@
+﻿namespace BlueDotBrigade.Weevil
+{
+	using System.Collections.Immutable;
+
+	public interface IBookmarkManager
+	{
+		ImmutableArray<Bookmark> Bookmarks { get; }
+
+		void Create(int id, string bookmarkName, int lineNumber);
+
+		bool Rename(int lineNumber, string newName);
+
+		void Clear();
+
+		bool Clear(int lineNumber);
+
+		public bool TryGetBookmarkName(int lineNumber, out string bookmarkName);
+
+		public bool TryGetBookmarkById(int id, out Bookmark bookmark);
+
+		public bool TryGetBookmark(int lineNumber, out Bookmark bookmark);
+	}
+}

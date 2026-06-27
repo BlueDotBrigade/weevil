@@ -4,9 +4,9 @@
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.Common</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
-    <Version>2.11.1</Version>
+    <Version>$(WeevilReleaseVersion)</Version>
     <Authors>BlueDotBrigade;</Authors>
-	<Copyright>© 2022 Blue Dot Brigade. All rights reserved.</Copyright>
+	<Copyright>© 2026 Blue Dot Brigade</Copyright>
 	<Owners>Blue Dot Brigade</Owners>
     <Description>Includes types, interfaces, and utilities that are shared by all of the Weevil assemblies.</Description>
     <IsPackable>true</IsPackable>
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="10.0.2" />
     <PackageReference Include="Text.Analyzers" Version="3.11.0-beta1.23364.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -52,7 +52,7 @@
     </Resource>
   </ItemGroup>
   
-  	<ItemGroup>
+  	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>BlueDotBrigade.Weevil.Common-UnitTests</_Parameter1>
 		</AssemblyAttribute>

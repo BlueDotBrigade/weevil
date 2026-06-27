@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(MSBuildProjectExtension)' != '.wixproj'">
+    <Optimize>true</Optimize>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+</Project>

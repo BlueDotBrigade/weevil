@@ -4,14 +4,17 @@
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls;assembly=BlueDotBrigade.Weevil.Windows"
+        xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters"
         Title="GraphDialog" 
         Height="450" Width="800" WindowState="Maximized"
+        ShowInTaskbar="True"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="{DynamicResource ApplicationFontSize}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         FontFamily="{materialDesign:MaterialDesignFont}"
         Background="{DynamicResource MaterialDesignPaper}">
     <Window.Resources>
+        <converters:StringToBooleanConverter x:Key="StringToBooleanConverter" />
         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
             <Setter Property="Margin" Value="5" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -22,6 +25,8 @@
           FocusManager.FocusedElement="{Binding ElementName=RegularExpressionTextBox}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -35,7 +40,62 @@
             TooltipPosition="Bottom">
         </lvc:CartesianChart>
 
-        <Expander Grid.Row="1" Grid.Column="0" ExpandDirection="Down" IsExpanded="True">
+        <!-- Metrics Table -->
+        <Grid Grid.Row="1" Grid.Column="0" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                      ItemsSource="{Binding SeriesMetrics}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Extended"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="All"
+                      MaxHeight="200"
+                      VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="" Width="24" CanUserResize="False" CanUserSort="False">
+                        <DataGridTemplateColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </DataGridTemplateColumn.CellStyle>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="12" Height="12"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Fill="{Binding SeriesBrush}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Series Name" Binding="{Binding SeriesName}" Width="*" />
+                    <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="Auto" />
+                    <DataGridTextColumn Header="Min" Binding="{Binding MinFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Max" Binding="{Binding MaxFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Mean" Binding="{Binding MeanFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Median" Binding="{Binding MedianFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="StdDev" Binding="{Binding StandardDeviationFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Range Start" Binding="{Binding RangeStartFormatted}" Width="Auto" />
+                    <DataGridTextColumn Header="Range End" Binding="{Binding RangeEndFormatted}" Width="Auto" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Button Grid.Row="1" Grid.Column="1" Content="Copy All" 
+                    Command="{Binding CopyMetricsCommand}" 
+                    Margin="5,0,5,5"
+                    ToolTip="Copy metrics to clipboard as tab-delimited text" />
+        </Grid>
+
+        <Expander Grid.Row="2" Grid.Column="0" ExpandDirection="Down" IsExpanded="False">
             <StackPanel Orientation="Vertical">
                 <TextBox
                     x:Name="RegularExpressionTextBox" Grid.Column="1" 
@@ -69,14 +129,107 @@
                          VerticalAlignment="Center" 
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          controls:TextBoxBehavior.AutoSelectEnabled="True"/>
-                <TextBox x:Name="YAxisLabelTextBox" 
-                         Text="{Binding YAxisLabel}"
-                         materialDesign:HintAssist.Hint="Y-Axis"
+                <Separator/>
+                <TextBox x:Name="Series1NameTextBox" 
+                         Text="{Binding Series1Name}"
+                         materialDesign:HintAssist.Hint="Series 1 Name"
                          VerticalAlignment="Center" 
-                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 1 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series1Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series1Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series1Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series1Axis"/>
+                </StackPanel>
+                <TextBox x:Name="Series2NameTextBox" 
+                         Text="{Binding Series2Name}"
+                         materialDesign:HintAssist.Hint="Series 2 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 2 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series2Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series2Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series2Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series2Axis"/>
+                </StackPanel>
+                <TextBox x:Name="Series3NameTextBox" 
+                         Text="{Binding Series3Name}"
+                         materialDesign:HintAssist.Hint="Series 3 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 3 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series3Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series3Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series3Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series3Axis"/>
+                </StackPanel>
+                <TextBox x:Name="Series4NameTextBox" 
+                         Text="{Binding Series4Name}"
+                         materialDesign:HintAssist.Hint="Series 4 Name"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Series 4 Y-Axis:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="Left" 
+                                 IsChecked="{Binding Series4Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Left}"
+                                 GroupName="Series4Axis" 
+                                 Margin="0,0,10,0"/>
+                    <RadioButton Content="Right" 
+                                 IsChecked="{Binding Series4Axis, Converter={StaticResource StringToBooleanConverter}, ConverterParameter=Right}"
+                                 GroupName="Series4Axis"/>
+                </StackPanel>
+                <Separator/>
+                <TextBox x:Name="WindowTitleTextBox" 
+                         Text="{Binding WindowTitle}"
+                         materialDesign:HintAssist.Hint="Graph Window Title"
+                         VerticalAlignment="Center" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         controls:TextBoxBehavior.AutoSelectEnabled="True"/>
 
                 <Button Content="Update" Command="{Binding UpdateCommand}" Margin="5"/>
             </StackPanel>
         </Expander>
+
+        <StatusBar Grid.Row="3" Grid.Column="0"
+                   Background="{StaticResource MaterialDesignPaper}" 
+                   Foreground="{StaticResource TextForeground}"
+                   TextElement.FontWeight="Regular"
+                   TextOptions.TextFormattingMode="Ideal"
+                   TextOptions.TextRenderingMode="Auto">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/BlueDotBrigade.Weevil.Windows;component/Resources/Icons/OpenDocument-Data-24.png" ToolTip="Source file path."/>
+                    <TextBox Text="{Binding SourceFilePath}"
+                             ToolTip="Source file path."
+                             Style="{StaticResource StatusBarTextBox}">
+                    </TextBox>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

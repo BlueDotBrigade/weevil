@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.IO;
 	using Data;
 	using Diagnostics;
 	using IO;
@@ -20,7 +21,27 @@
 			_sidecarFilePath = string.IsNullOrEmpty(logFilePath)
 				 ? throw new ArgumentNullException(nameof(logFilePath))
 				 : $"{logFilePath}.{MetadataFileExtension}";
-			_file = new File();
+			_file = new IO.File();
+		}
+
+		/// <summary>
+		/// Determines if the sidecar file path is in a temporary directory.
+		/// </summary>
+		private bool IsInTemporaryDirectory()
+		{
+			try
+			{
+				var tempPath = Path.GetTempPath();
+				var sidecarDirectory = Path.GetDirectoryName(_sidecarFilePath);
+				
+				// Check if the sidecar path starts with the temp path
+				return sidecarDirectory?.StartsWith(tempPath, StringComparison.OrdinalIgnoreCase) ?? false;
+			}
+			catch
+			{
+				// If we can't determine, assume it's not in temp directory
+				return false;
+			}
 		}
 
 		public void Load(
@@ -30,7 +51,8 @@
 			out List<string> inclusiveFilterHistory,
 			out List<string> exclusiveFilterHistory,
 			out List<Section> tableOfContents,
-			out List<Region> regions)
+			out List<Region> regions,
+			out List<Bookmark> bookmarks)
 		{
 			context = new ContextDictionary();
 			sourceFileRemarks = string.Empty;
@@ -38,6 +60,7 @@
 			exclusiveFilterHistory = new List<string>();
 			tableOfContents = new List<Section>();
 			regions = new List<Region>();
+			bookmarks = new List<Bookmark>();
 
 			if (_file.Exists(_sidecarFilePath))
 			{
@@ -49,6 +72,7 @@
 				string actualSourceFileRemarks = sourceFileRemarks;
 				List<Section> toc = tableOfContents;
 				List<Region> regionsRef = regions;
+				List<Bookmark> bookmarkRef = bookmarks;
 
 				var loaders = new List<IExecute>
 				{
@@ -62,7 +86,8 @@
 							inclusiveHistory, 
 							exclusiveHistory, 
 							toc,
-							regionsRef)),
+							regionsRef,
+							bookmarkRef)),
 
 					Executor.Create(
 						new v1.LogMetadataLoader(_sidecarFilePath),
@@ -105,6 +130,15 @@
 
 		public void Save(SidecarData data, bool deleteBackup)
 		{
+			// Skip save operation if the file is from a compressed archive (in temp directory)
+			if (IsInTemporaryDirectory())
+			{
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"Skipping sidecar save for file from compressed archive. File={_sidecarFilePath}");
+				return;
+			}
+
 			var backupFilePath = $"{_sidecarFilePath}~";
 
 			Log.Default.Write(LogSeverityType.Debug, $"Sidecar data is being saved... File={_sidecarFilePath}");

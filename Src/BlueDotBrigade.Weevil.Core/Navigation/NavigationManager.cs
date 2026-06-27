@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.IO;
 	using System.Linq;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using File = System.IO.File;
@@ -19,11 +20,14 @@
 
 		private TableOfContents _tableOfContents;
 
-		public NavigationManager(string sourceFilePath, ICoreExtension coreExtension, ImmutableArray<IRecord> allRecords, TableOfContents tableOfContents)
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
+
+		public NavigationManager(string sourceFilePath, ICoreExtension coreExtension, ImmutableArray<IRecord> allRecords, TableOfContents tableOfContents, ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_sourceFilePath = sourceFilePath;
 			_coreCoreExtension = coreExtension;
 			_tableOfContents = tableOfContents;
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 
 			_activeRecord = new ActiveRecord(allRecords);
 
@@ -35,6 +39,7 @@
 				new PinNavigator(_activeRecord),
 				new CommentNavigator(_activeRecord),
 				new FlagNavigator(_activeRecord),
+				new ElapsedTimeNavigator(_activeRecord),
 			}.ToImmutableArray();
 		}
 
@@ -80,6 +85,8 @@
 
 		public IRecord GoTo(int lineNumber, RecordSearchType recordSearchType)
 		{
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationGoToLine);
+
 			return this
 				.Using<ILineNumberNavigator>()
 				.Find(lineNumber, recordSearchType);
@@ -87,33 +94,39 @@
 
 		public IRecord GoTo(string timestamp, RecordSearchType recordSearchType)
 		{
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationGoToTimestamp);
+
 			return this
 				.Using<ITimestampNavigator>()
 				.Find(timestamp, recordSearchType);
 		}
 
-		public IRecord PreviousContent(string text, bool isCaseSensitive)
+		public IRecord PreviousContent(string text, bool isCaseSensitive, bool useRegex = false)
 		{
 			if (text == null)
 			{
 				throw new ArgumentNullException(nameof(text));
 			}
 
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationFindPreviousContent);
+
 			return this
 				.Using<IContentNavigator>()
-				.FindPrevious(text, isCaseSensitive);
+				.FindPrevious(text, isCaseSensitive, useRegex);
 		}
 
-		public IRecord NextContent(string text, bool isCaseSensitive)
+		public IRecord NextContent(string text, bool isCaseSensitive, bool useRegex = false)
 		{
 			if (text == null)
 			{
 				throw new ArgumentNullException(nameof(text));
 			}
 
+			_telemetryRecorder.Increment(TelemetryMetrics.NavigationFindNextContent);
+
 			return this
 				.Using<IContentNavigator>()
-				.FindNext(text, isCaseSensitive);
+				.FindNext(text, isCaseSensitive, useRegex);
 		}
 
 		public IRecord PreviousPin()
@@ -144,6 +157,30 @@
 				.FindNext();
 		}
 
+		public IRecord PreviousCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<ICommentNavigator>()
+				.FindPrevious(text, isCaseSensitive, useRegex);
+		}
+
+		public IRecord NextCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			if (text == null)
+			{
+				throw new ArgumentNullException(nameof(text));
+			}
+
+			return this
+				.Using<ICommentNavigator>()
+				.FindNext(text, isCaseSensitive, useRegex);
+		}
+
 		public IRecord PreviousFlag()
 		{
 			return this
@@ -156,6 +193,20 @@
 			return this
 				.Using<IFlagNavigator>()
 				.FindNext();
+		}
+
+		public IRecord PreviousElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			return this
+				.Using<IElapsedTimeNavigator>()
+				.FindPrevious(minMilliseconds, maxMilliseconds);
+		}
+
+		public IRecord NextElapsedTime(int? minMilliseconds, int? maxMilliseconds)
+		{
+			return this
+				.Using<IElapsedTimeNavigator>()
+				.FindNext(minMilliseconds, maxMilliseconds);
 		}
 	}
 }

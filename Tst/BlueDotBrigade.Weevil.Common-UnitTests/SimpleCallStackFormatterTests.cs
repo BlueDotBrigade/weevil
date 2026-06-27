@@ -15,10 +15,8 @@
 
 			var actualResult = new SimpleCallStackFormatter().Format(record);
 
-			Assert.AreEqual<string>(
-				"Debug 2021-15-21 12:59:59 AcmeAssembly.dll Something bad happened. System.ObjectDisposedException: Cannot access a disposed object.\r\n" +
-				"   at Company.Product.Component.DataCollector.Fetch()",
-				actualResult);
+			actualResult.Should().Be("Debug 2021-15-21 12:59:59 AcmeAssembly.dll Something bad happened. System.ObjectDisposedException: Cannot access a disposed object.\r\n" +
+				"   at Company.Product.Component.DataCollector.Fetch()");
 		}
 
 		[TestMethod]
@@ -30,7 +28,7 @@
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
-			Assert.IsTrue(originalContent.Length > formattedResult.Length);
+			(originalContent.Length > formattedResult.Length).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -42,7 +40,7 @@
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
-			Assert.IsTrue(originalContent.Length == formattedResult.Length);
+			(originalContent.Length == formattedResult.Length).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -54,7 +52,31 @@
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
-			Assert.IsTrue(originalContent.Length > formattedResult.Length);
+			(originalContent.Length > formattedResult.Length).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Format_EndOfInnerException_ReturnsCompressedCallStack()
+		{
+			var originalContent = new Daten().AsString();
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
+			record.Metadata.IsMultiLine = true;
+
+			var formattedResult = new SimpleCallStackFormatter().Format(record);
+
+			(formattedResult.Contains("End of inner exception")).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void Format_EndOfStackTrace_ReturnsCompressedCallStack()
+		{
+			var originalContent = new Daten().AsString();
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
+			record.Metadata.IsMultiLine = true;
+
+			var formattedResult = new SimpleCallStackFormatter().Format(record);
+
+			(formattedResult.Contains("End of stack trace from previous location")).Should().BeFalse();
 		}
 	}
 }

@@ -13,6 +13,15 @@
 
 	public partial class App : Application
 	{
+		private const string BuildConfiguration =
+#if DEBUG
+			"DEBUG";
+#else
+			"RELEASE";
+#endif
+
+		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
+
 		public App()
 		{
 			Startup += OnApplicationOpening;
@@ -101,10 +110,20 @@
 
 				Log.Default.Write(LogSeverityType.Information, "Weevil application is initializing logging...");
 				Log.Register(new NLogWriter());
+				Log.Default.Write(LogSeverityType.Information, $"Build configuration={BuildConfiguration}");
+				Log.Default.Write($"Weevil command line parameters. Arguments={Environment.GetCommandLineArgs().Length}");
 
 				Log.Default.Write(
 					LogSeverityType.Information,
 					"Weevil application is starting...");
+
+				var telemetrySource = TelemetryClientFactory.GetTelemetrySource();
+				var telemetryClient = TelemetryClientFactory.Create();
+
+				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
+				TelemetrySessionLifecycle.Shared.ConfigureStartupContext(telemetrySource, IsDebuggerAttachedAtStartup);
+				Log.Default.Write(LogSeverityType.Debug,
+					$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 
 				Log.Default.Write(LogSeverityType.Debug,
 					$"The logging library has been registered. Type={nameof(NLogWriter)}");
@@ -156,5 +175,6 @@
 				LogSeverityType.Information,
 				"Weevil application is closing...");
 		}
+
 	}
 }

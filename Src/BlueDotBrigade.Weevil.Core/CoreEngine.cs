@@ -22,6 +22,8 @@
 		#region Fields
 		private readonly ICoreExtension _coreExtension;
 
+		private readonly ITelemetryMetricRecorder _telemetryRecorder;
+
 		private readonly string _sourceFilePath;
 		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
@@ -36,6 +38,7 @@
 		private readonly SelectionManager _selectionManager;
 		private readonly NavigationManager _navigationManager;
 		private readonly IRegionManager _regionManager;
+		private readonly IBookmarkManager _bookmarkManager;
 		private readonly IAnalyze _analysisManager;
 
 		private readonly int _originalRecordCount;
@@ -81,9 +84,13 @@
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
-			ImmutableArray<Region> regions)
+			ImmutableArray<Region> regions,
+			ImmutableArray<Bookmark> bookmarks,
+			ITelemetryMetricRecorder telemetryRecorder)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
+
+			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 
 			if (string.IsNullOrWhiteSpace(sourceFilePath))
 			{
@@ -127,12 +134,14 @@
 
 			new ElapsedTimeAnalyzer(_allRecords).Analyze();
 
-			_analysisManager = new AnalysisManager(this, _coreExtension);
+			_analysisManager = new AnalysisManager(this, _coreExtension, _telemetryRecorder);
 
 			var filterAliases = _coreExtension.GetFilterAliases(_context);
 			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
 			_regionManager = new RegionManager(regions);
+
+			_bookmarkManager = new BookmarkManager(bookmarks);
 
 			_filterManager = new FilterManager(
 				_coreExtension,
@@ -140,12 +149,15 @@
 				filterAliasExpander,
 				_allRecords,
 				GetRecordCounters(),
-				_regionManager);
+				_regionManager,
+				_bookmarkManager,
+				_telemetryRecorder);
 
-			_filterManager.Apply(FilterType.PlainText, FilterCriteria.None);
+			// Construction-time default filter: applied without recording telemetry (not a user action).
+			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None);
 			_filterManager.ResultsChanged += OnResultsChanged;
 
-			_navigationManager = new NavigationManager(_sourceFilePath, _coreExtension, _allRecords, tableOfContents);
+			_navigationManager = new NavigationManager(_sourceFilePath, _coreExtension, _allRecords, tableOfContents, _telemetryRecorder);
 
 			_selectionManager = new SelectionManager(
 				_allRecords,
@@ -223,6 +235,8 @@
 
 		public IRegionManager Regions => _regionManager;
 
+		public IBookmarkManager Bookmarks => _bookmarkManager;
+
 		public ImmutableArray<IRecord> Records => _allRecords;
 
 		public int Count => _allRecords.Length;
@@ -295,6 +309,7 @@
 				SourceFileRemarks = _sourceFileRemarks,
 				TableOfContents = _navigationManager.TableOfContents,
 				Regions = _regionManager.Regions,
+				Bookmarks = _bookmarkManager.Bookmarks,
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);
