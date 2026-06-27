@@ -17,7 +17,7 @@
     <Color x:Key="HighlightColor">Yellow</Color>
     <Color x:Key="PrimaryCommandColor">LightSkyBlue</Color>
     <Color x:Key="SecondaryCommandColor">Blue</Color>
-    <Color x:Key="RowHighlightedColor">#900A22</Color>
+    <Color x:Key="RowHighlightedColor">#949494</Color>
     <Color x:Key="ValidationErrorColor">Red</Color>
     <Color x:Key="SurfaceBackgroundColor">#0D1117</Color>
     <Color x:Key="SurfaceCardColor">#161B22</Color>
