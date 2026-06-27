@@ -25,6 +25,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			if (session == null)
 			{
+				Log.Default.Write(LogSeverityType.Warning, "Telemetry session is null - nothing to cache.");
 				throw new ArgumentNullException(nameof(session));
 			}
 
@@ -33,6 +34,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			var fileName = $"{session.SessionId}.xml";
 			var finalPath = Path.Combine(_pendingDirectoryPath, fileName);
 			var temporaryPath = $"{finalPath}.tmp";
+
+			Log.Default.Write(LogSeverityType.Information, $"Caching telemetry session. SessionId={session.SessionId}; Path='{finalPath}'");
 
 			using (var stream = File.Open(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None))
 			{
@@ -46,6 +49,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			if (maxCount <= 0 || !Directory.Exists(_pendingDirectoryPath))
 			{
+				Log.Default.Write(LogSeverityType.Information, $"No pending telemetry sessions found. Directory='{_pendingDirectoryPath}'");
 				return Array.Empty<PendingTelemetrySession>();
 			}
 
@@ -73,6 +77,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					Log.Default.Write(LogSeverityType.Warning, exception, $"Telemetry XML load failed for '{filePath}'.");
 				}
 			}
+
+			Log.Default.Write(LogSeverityType.Information, $"Found {sessions.Count} pending telemetry session(s). Path='{_pendingDirectoryPath}'.");
 
 			return sessions;
 		}

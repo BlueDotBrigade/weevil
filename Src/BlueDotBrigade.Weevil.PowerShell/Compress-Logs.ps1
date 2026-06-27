@@ -100,7 +100,7 @@ try {
 
     Write-Info "Scanning for log files..."
 
-    $logFiles = Get-ChildItem -Path $Path -Recurse -File -Filter "*.log"
+    $logFiles = @(Get-ChildItem -Path $Path -Recurse -File -Filter "*.log")
 
     $logsFound = $logFiles.Count
     $compressionList = @()

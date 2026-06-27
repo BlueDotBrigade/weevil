@@ -1,6 +1,6 @@
 param (
     [string]$inputFilePath,
-    [string]$delimiter = "VVVVVVVV"
+    [string]$delimiter = "------"
 )
 
 # Resolve the full path of the input file

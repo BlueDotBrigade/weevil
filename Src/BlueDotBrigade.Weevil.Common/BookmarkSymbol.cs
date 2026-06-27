@@ -12,13 +12,13 @@ namespace BlueDotBrigade.Weevil
 	/// </remarks>
 	public static class BookmarkSymbol
 	{
-		public const string Bug = "🪰";
+		public const string Bug = "🪰"; // 🐝🐛🐜🐞 🪰
 		public const string Question = "❓";
 		public const string Theory = "🧩";
 		public const string RootCause = "🎯";
 		public const string Fix = "🔧";
 		public const string Verified = "✅";
-		public const string Default = "⭐";
+		public const string Default = "★"; // ★ ✻
 
 		private static readonly string[] BugKeywords =
 		{
