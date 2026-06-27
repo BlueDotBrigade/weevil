@@ -306,7 +306,7 @@
                         </Trigger>
 
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+                            <Setter Property="Foreground" Value="Black"/>
                             <Setter Property="Background" Value="{StaticResource RowHighlightedBrush}"/>
                         </Trigger>
                     </Style.Triggers>
@@ -417,7 +417,8 @@
                                                 <TextBlock FontWeight="Heavy"
                                                           FontSize="{DynamicResource RowFontSize}"
                                                           Foreground="{StaticResource TextForeground}"
-                                                           Margin="0,0,2,0">
+                                                          Margin="0,0,2,0"
+                                                          FontFamily="Segoe UI Emoji">
                                                     <TextBlock.Text>
                                                         <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Symbol">
                                                             <Binding Path="." />
@@ -529,5 +530,5 @@
                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
         </Grid>
     </Grid>
-    
+
 </UserControl>
