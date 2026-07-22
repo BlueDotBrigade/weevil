@@ -105,11 +105,11 @@
 		<DirectoryRef Id="INSTALLFOLDER">
 			<Component Id="WeevilLogFileAssociation" Guid="84FACF5A-7EF5-4285-84B6-FC96F4A08177">
 				<RegistryKey Root="HKLM" Key="Software\RegisteredApplications">
-					<RegistryValue Name="Weevil" Type="string" Value="Software\BlueDotBrigade\Weevil\Capabilities" KeyPath="yes" />
+					<RegistryValue Name="Weevil" Type="string" Value="Software\BlueDotBrigade\Weevil\Capabilities" />
 				</RegistryKey>
 
 				<RegistryKey Root="HKLM" Key="Software\BlueDotBrigade\Weevil\Capabilities">
-					<RegistryValue Name="ApplicationName" Type="string" Value="Weevil" />
+					<RegistryValue Name="ApplicationName" Type="string" Value="Weevil" KeyPath="yes" />
 					<RegistryValue Name="ApplicationDescription" Type="string" Value="View and analyze log files using Weevil." />
 					<RegistryKey Key="FileAssociations">
 						<RegistryValue Name=".log" Type="string" Value="BlueDotBrigade.Weevil.LogFile" />
