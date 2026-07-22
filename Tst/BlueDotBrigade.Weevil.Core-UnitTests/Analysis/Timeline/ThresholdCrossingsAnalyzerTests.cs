@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	[TestClass]
 	public class ThresholdCrossingsAnalyzerTests
 	{
-		private static Results Analyze(ImmutableArray<IRecord> records, string regex, string threshold, string direction)
+		private static Results Analyze(ImmutableArray<IRecord> records, string threshold, string comparison)
 		{
 			var analyzer = new ThresholdCrossingsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = Substitute.For<IUserDialog>();
@@ -18,67 +18,91 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
 				.Returns(callInfo =>
 				{
-					callInfo[2] = regex;
+					callInfo[2] = AnalysisHelper.IntegerRegex;
 					return true;
 				});
 
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-				.Returns(threshold, direction);
+				.Returns(threshold, comparison);
 
 			return analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 		}
 
-		[TestMethod]
-		public void GivenValues_WhenAboveThresholdSelected_ThenFlagsOnlyValuesAboveThreshold()
+		private static ImmutableArray<IRecord> BuildRecords(params int[] values)
 		{
-			// Regression: Issue #911
-			var records = R.Create()
-				.WithContent("15:02:00.000 9")
-				.WithContent("15:02:01.000 10")
-				.WithContent("15:02:02.000 11")
-				.WithContent("15:02:03.000 8")
-				.WithContent("15:02:04.000 12")
-				.GetRecords();
+			var builder = R.Create();
+			for (var i = 0; i < values.Length; i++)
+			{
+				builder = builder.WithContent($"15:02:{i:D2}.000 {values[i]}");
+			}
 
-			var results = Analyze(records, AnalysisHelper.IntegerRegex, "10", "Above");
+			return builder.GetRecords();
+		}
 
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2, 4);
-			results.FlaggedRecords.Should().Be(2);
+		private static void AssertScenario(int[] values, string threshold, string comparison, params int[] expectedFlaggedIndices)
+		{
+			var records = BuildRecords(values);
+			var results = Analyze(records, threshold, comparison);
+
+			var actualFlaggedIndices = AnalysisHelper.GetFlaggedIndices(records);
+			actualFlaggedIndices.Should().Equal(expectedFlaggedIndices,
+				because: $"comparison '{comparison} {threshold}' should flag only the expected threshold crossings");
+			results.FlaggedRecords.Should().Be(expectedFlaggedIndices.Length);
 		}
 
 		[TestMethod]
-		public void GivenValues_WhenBelowThresholdSelected_ThenFlagsOnlyValuesBelowThreshold()
+		public void GivenValues_WhenComparisonIsGreaterThan_ThenOnlyValuesGreaterThanThresholdAreFlagged()
 		{
 			// Regression: Issue #911
-			var records = R.Create()
-				.WithContent("15:02:00.000 9")
-				.WithContent("15:02:01.000 10")
-				.WithContent("15:02:02.000 11")
-				.WithContent("15:02:03.000 8")
-				.WithContent("15:02:04.000 12")
-				.GetRecords();
-
-			var results = Analyze(records, AnalysisHelper.IntegerRegex, "10", "Below");
-
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(0, 3);
-			results.FlaggedRecords.Should().Be(2);
+			AssertScenario([9, 10, 11, 8, 12], "10", ">", 2, 4);
 		}
 
 		[TestMethod]
-		public void GivenDecimalThreshold_WhenAboveThresholdSelected_ThenFlagsDecimalValuesAboveThreshold()
+		public void GivenValues_WhenComparisonIsLessThan_ThenOnlyValuesLessThanThresholdAreFlagged()
+		{
+			// Regression: Issue #911
+			AssertScenario([9, 10, 11, 8, 12], "10", "<", 0, 3);
+		}
+
+		[TestMethod]
+		public void GivenValues_WhenComparisonIsGreaterThanOrEqual_ThenThresholdAndHigherValuesAreFlagged()
+		{
+			// Regression: Issue #911
+			AssertScenario([9, 10, 11, 8, 12], "10", ">=", 1, 2, 4);
+		}
+
+		[TestMethod]
+		public void GivenValues_WhenComparisonIsLessThanOrEqual_ThenThresholdAndLowerValuesAreFlagged()
+		{
+			// Regression: Issue #911
+			AssertScenario([9, 10, 11, 8, 12], "10", "<=", 0, 1, 3);
+		}
+
+		[TestMethod]
+		[DataRow(">", false)]
+		[DataRow("<", false)]
+		[DataRow(">=", true)]
+		[DataRow("<=", true)]
+		public void GivenValueEqualsThreshold_WhenRunningAnalysis_ThenInclusivityIsApplied(string comparison, bool shouldFlag)
 		{
 			// Regression: Issue #911
 			var records = R.Create()
-				.WithContent("15:02:00.000 10.4")
-				.WithContent("15:02:01.000 10.5")
-				.WithContent("15:02:02.000 10.6")
+				.WithContent("15:02:00.000 10")
 				.GetRecords();
 
-			var results = Analyze(records, AnalysisHelper.DecimalRegex, "10.5", "Above");
+			var results = Analyze(records, "10", comparison);
 
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2);
-			results.FlaggedRecords.Should().Be(1);
+			if (shouldFlag)
+			{
+				AnalysisHelper.GetFlaggedIndices(records).Should().Equal(0);
+				results.FlaggedRecords.Should().Be(1);
+			}
+			else
+			{
+				AnalysisHelper.GetFlaggedIndices(records).Should().BeEmpty();
+				results.FlaggedRecords.Should().Be(0);
+			}
 		}
 	}
 }
