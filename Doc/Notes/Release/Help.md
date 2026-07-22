@@ -270,7 +270,11 @@ A record is flagged and a comment is created when:
 - `Detect Data Transitions`: the captured value changes from one record to the next
 - `Detect Rising Edges`: the captured value increases from one record to the next
 - `Detect Falling Edges`: the captured value decreases from one record to the next
-- `Threshold Crossings`: the captured numeric value is greater than (`>`), greater than or equal to (`>=`), less than (`<`), or less than or equal to (`<=`) a threshold
+- `Threshold Crossings`: the captured numeric value satisfies a threshold comparison:
+  - greater than (`>`)
+  - greater than or equal to (`>=`)
+  - less than (`<`)
+  - less than or equal to (`<=`)
 - `Detect Temporal Anomalies`: record timestamps appear out of order
 
 Typical workflow:
@@ -303,6 +307,8 @@ Steps:
 3. Enter:
    - a numeric threshold value
    - a comparison operator: `>`, `>=`, `<`, or `<=`
+   - `>` and `<` exclude values equal to the threshold
+   - `>=` and `<=` include values equal to the threshold
 4. Review flagged records with `@Flagged` or review generated comments with `@Comment`.
 
 ### Detecting an Unresponsive UI
