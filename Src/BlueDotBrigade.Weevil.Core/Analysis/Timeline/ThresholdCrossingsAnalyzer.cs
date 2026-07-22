@@ -140,7 +140,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private enum ThresholdDirection
 		{
 			Above,
-			Below,
+			Below
 		}
 	}
 }
