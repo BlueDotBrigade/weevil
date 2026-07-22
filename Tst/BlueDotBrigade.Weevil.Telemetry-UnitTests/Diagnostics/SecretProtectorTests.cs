@@ -8,6 +8,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	[TestClass]
 	public class SecretProtectorTests
 	{
+		// Decodes to "01234567890123456789012345678901" (32 ASCII bytes).
 		private const string TestEncryptionKeyBase64 = "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=";
 
 		[TestInitialize]
