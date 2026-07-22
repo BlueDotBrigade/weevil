@@ -82,8 +82,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		[TestMethod]
 		public void GivenUndecryptableSecret_WhenCreateCalled_ThenDoesNotThrowAndReturnsAClient()
 		{
-			// Telemetry must never crash Weevil - e.g. a secret encrypted on a different machine
-			// cannot be decrypted here and would otherwise throw during startup.
+			// Telemetry must never crash Weevil when a protected secret is malformed
+			// and would otherwise throw during startup.
 			var originalUserName = Environment.GetEnvironmentVariable(UserNameVariable);
 			var originalSecret = Environment.GetEnvironmentVariable(SecretVariable);
 
