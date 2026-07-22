@@ -193,7 +193,7 @@
                                        Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Threshold Crossings"
                                        Command="{Binding ThresholdCrossingsCommand}"
-                                       Tag="12[3]4[5]"
+                                       Tag="123[4]3[4][5][6][7]"
                                        Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Matching Record Runs"
                                        Command="{Binding MatchingRecordRunsCommand}"

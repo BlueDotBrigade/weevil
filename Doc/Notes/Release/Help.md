@@ -12,6 +12,7 @@
   - [Named Groups](#named-groups)
 - [Data Analysis](#data-analysis)
   - [Detecting Data](#detecting-data)
+  - [Detecting Threshold Crossings](#detecting-threshold-crossings)
   - [Detecting an Unresponsive UI](#detecting-an-unresponsive-ui)
   - [Detecting Gaps in Logging](#detecting-gaps-in-logging)
 - [Creating a Line Graph](#creating-a-line-graph)
@@ -269,6 +270,7 @@ A record is flagged and a comment is created when:
 - `Detect Data Transitions`: the captured value changes from one record to the next
 - `Detect Rising Edges`: the captured value increases from one record to the next
 - `Detect Falling Edges`: the captured value decreases from one record to the next
+- `Threshold Crossings`: the captured numeric value is greater than (`>`), greater than or equal to (`>=`), less than (`<`), or less than or equal to (`<=`) a threshold
 - `Detect Temporal Anomalies`: record timestamps appear out of order
 
 Typical workflow:
@@ -286,6 +288,22 @@ Example use cases:
 - detect the first time a user or session appears
 - detect when a counter starts increasing rapidly
 - detect when records appear out of timestamp order
+
+### Detecting Threshold Crossings
+
+Use this analyzer when you need to answer questions like:
+
+- "When was latency greater than 200?"
+- "When was CPU less than or equal to 20?"
+
+Steps:
+
+1. Filter records with a regular expression that captures a numeric named group.
+2. Choose **Analyzers => Threshold Crossings**.
+3. Enter:
+   - a numeric threshold value
+   - a comparison operator: `>`, `>=`, `<`, or `<=`
+4. Review flagged records with `@Flagged` or review generated comments with `@Comment`.
 
 ### Detecting an Unresponsive UI
 
