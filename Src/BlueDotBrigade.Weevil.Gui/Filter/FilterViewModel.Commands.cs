@@ -260,6 +260,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			() => this.IsMenuEnabled);
 
 		[NotObservable]
+		public ICommand ThresholdCrossingsCommand => new UiBoundCommand(
+			() => Analyze(AnalysisType.ThresholdCrossings),
+			() => this.IsMenuEnabled);
+
+		[NotObservable]
 		public ICommand OutOfOrderTimestampsCommand => new UiBoundCommand(
 			() => Analyze(AnalysisType.OutOfOrderTimestamps),
 			() => this.IsMenuEnabled);
