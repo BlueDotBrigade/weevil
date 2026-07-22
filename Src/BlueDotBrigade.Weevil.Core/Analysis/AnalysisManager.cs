@@ -82,6 +82,7 @@
 					new StateTransitionsAnalyzer(filterStrategy, aliasExpander),
 					new DetectRisingEdgeAnalyzer(filterStrategy, aliasExpander),
 					new DetectFallingEdgeAnalyzer(filterStrategy, aliasExpander),
+					new ThresholdCrossingsAnalyzer(filterStrategy, aliasExpander),
 					new MatchingRecordRunsAnalyzer(filterStrategy, aliasExpander),
 					new StatisticalAnalyzer(filterStrategy, aliasExpander),
 				});

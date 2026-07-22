@@ -191,6 +191,10 @@
                                        Command="{Binding FallingEdgesCommand}"
                                        Tag="1234[5]4321"
                                        Style="{StaticResource DetectionMenuItemStyle}"/>
+            <MenuItem Header="Threshold Crossings"
+                                       Command="{Binding ThresholdCrossingsCommand}"
+                                       Tag="12[3]4[5]"
+                                       Style="{StaticResource DetectionMenuItemStyle}"/>
             <MenuItem Header="Matching Record Runs"
                                        Command="{Binding MatchingRecordRunsCommand}"
                                        Tag="[1]11[1]x[2]22[2]"
