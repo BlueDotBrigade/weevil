@@ -73,13 +73,20 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			var cipherText = new byte[plainTextBytes.Length];
 			var authenticationTag = new byte[TagSize];
 
-			using (var aes = new AesGcm(key, TagSize))
+			try
 			{
-				aes.Encrypt(
-					nonce,
-					plainTextBytes,
-					cipherText,
-					authenticationTag);
+				using (var aes = new AesGcm(key, TagSize))
+				{
+					aes.Encrypt(
+						nonce,
+						plainTextBytes,
+						cipherText,
+						authenticationTag);
+				}
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(key);
 			}
 
 			var payload = new byte[1 + NonceSize + TagSize + cipherText.Length];
@@ -157,13 +164,20 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			var plainTextBytes = new byte[cipherText.Length];
 			var key = GetEncryptionKey();
 
-			using (var aes = new AesGcm(key, TagSize))
+			try
 			{
-				aes.Decrypt(
-					nonce,
-					cipherText,
-					authenticationTag,
-					plainTextBytes);
+				using (var aes = new AesGcm(key, TagSize))
+				{
+					aes.Decrypt(
+						nonce,
+						cipherText,
+						authenticationTag,
+						plainTextBytes);
+				}
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(key);
 			}
 
 			return Encoding.UTF8.GetString(plainTextBytes);
