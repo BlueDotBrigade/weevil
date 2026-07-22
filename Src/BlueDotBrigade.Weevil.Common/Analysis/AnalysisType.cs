@@ -31,6 +31,14 @@
 		/// </summary>
 		DetectRisingEdges,
 		/// <summary>
+		/// Flags records whose extracted numeric values satisfy a user-provided threshold comparison.
+		/// </summary>
+		/// <remarks>
+		/// Supported comparisons are greater-than (<c>&gt;</c>), greater-than-or-equal (<c>&gt;=</c>),
+		/// less-than (<c>&lt;</c>), and less-than-or-equal (<c>&lt;=</c>).
+		/// </remarks>
+		ThresholdCrossings,
+		/// <summary>
 		/// Flags the first and last record in each run of two or more consecutive records that match the expression.
 		/// </summary>
 		MatchingRecordRuns,
