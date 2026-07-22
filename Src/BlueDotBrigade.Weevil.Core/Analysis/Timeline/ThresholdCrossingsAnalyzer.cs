@@ -140,6 +140,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		private static bool TryMapComparison(string input, out ThresholdComparison comparison)
 		{
+			// Keep legacy aliases for compatibility with older scripts/tests that used
+			// Above/Below naming before explicit operator-based input was introduced.
 			switch ((input ?? string.Empty).Trim())
 			{
 				case ">":

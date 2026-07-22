@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	[TestClass]
 	public class ThresholdCrossingsAnalyzerTests
 	{
-		private static Results Analyze(ImmutableArray<IRecord> records, string threshold, string comparison)
+		private static Results Analyze(ImmutableArray<IRecord> records, string regex, string threshold, string comparison)
 		{
 			var analyzer = new ThresholdCrossingsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = Substitute.For<IUserDialog>();
@@ -18,7 +18,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
 				.Returns(callInfo =>
 				{
-					callInfo[2] = AnalysisHelper.IntegerRegex;
+					callInfo[2] = regex;
 					return true;
 				});
 
@@ -43,7 +43,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private static void AssertScenario(int[] values, string threshold, string comparison, params int[] expectedFlaggedIndices)
 		{
 			var records = BuildRecords(values);
-			var results = Analyze(records, threshold, comparison);
+			var results = Analyze(records, AnalysisHelper.IntegerRegex, threshold, comparison);
 
 			var actualFlaggedIndices = AnalysisHelper.GetFlaggedIndices(records);
 			actualFlaggedIndices.Should().Equal(expectedFlaggedIndices,
@@ -80,6 +80,38 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
+		public void GivenDecimalValues_WhenComparisonIsGreaterThan_ThenOnlyValuesGreaterThanThresholdAreFlagged()
+		{
+			// Regression: Issue #911
+			var records = R.Create()
+				.WithContent("15:02:00.000 10.4")
+				.WithContent("15:02:01.000 10.5")
+				.WithContent("15:02:02.000 10.6")
+				.GetRecords();
+
+			var results = Analyze(records, AnalysisHelper.DecimalRegex, "10.5", ">");
+
+			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2);
+			results.FlaggedRecords.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void GivenDecimalValues_WhenComparisonIsGreaterThanOrEqual_ThenThresholdAndHigherValuesAreFlagged()
+		{
+			// Regression: Issue #911
+			var records = R.Create()
+				.WithContent("15:02:00.000 10.4")
+				.WithContent("15:02:01.000 10.5")
+				.WithContent("15:02:02.000 10.6")
+				.GetRecords();
+
+			var results = Analyze(records, AnalysisHelper.DecimalRegex, "10.5", ">=");
+
+			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(1, 2);
+			results.FlaggedRecords.Should().Be(2);
+		}
+
+		[TestMethod]
 		[DataRow(">", false)]
 		[DataRow("<", false)]
 		[DataRow(">=", true)]
@@ -91,7 +123,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.WithContent("15:02:00.000 10")
 				.GetRecords();
 
-			var results = Analyze(records, "10", comparison);
+			var results = Analyze(records, AnalysisHelper.IntegerRegex, "10", comparison);
 
 			if (shouldFlag)
 			{
