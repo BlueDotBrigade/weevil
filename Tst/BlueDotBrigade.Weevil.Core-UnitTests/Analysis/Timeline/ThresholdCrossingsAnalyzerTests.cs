@@ -89,11 +89,12 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		[DataRow("123434567", "123^3^^^^")]
-		public void GivenValues_WhenComparisonIsGreaterThan_ThenOnlyValuesAboveThresholdAreFlagged(string pattern, string expected)
+		[DataRow("123434567", "3", "123^3^^^^")]
+		[DataRow("123434567", "5", "1234345^^")]
+		public void GivenValues_WhenComparisonIsGreaterThan_ThenOnlyValuesAboveThresholdAreFlagged(string pattern, string threshold, string expected)
 		{
 			// Regression: Issue #911
-			AssertIntegerScenario(pattern, "3", ">", expected);
+			AssertIntegerScenario(pattern, threshold, ">", expected);
 		}
 
 		[TestMethod]

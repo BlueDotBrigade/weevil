@@ -306,9 +306,7 @@ Steps:
 2. Choose **Analyzers => Threshold Crossings**.
 3. Enter:
    - a numeric threshold value
-   - a comparison operator: `>`, `>=`, `<`, or `<=`
-   - `>` and `<` exclude values equal to the threshold
-   - `>=` and `<=` include values equal to the threshold
+   - a comparison operator: `>`, `>=`, `<`, or `<=` (`>` and `<` exclude equality, `>=` and `<=` include equality)
 4. Review flagged records with `@Flagged` or review generated comments with `@Comment`.
 
 ### Detecting an Unresponsive UI
