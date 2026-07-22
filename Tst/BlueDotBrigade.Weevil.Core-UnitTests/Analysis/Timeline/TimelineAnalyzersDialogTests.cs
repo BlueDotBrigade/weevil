@@ -199,6 +199,40 @@
 
 		#endregion
 
+		#region ThresholdCrossingsAnalyzer Tests
+
+		[TestMethod]
+		public void ThresholdCrossingsAnalyzer_UserCancelsDialog_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new ThresholdCrossingsAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			results.FlaggedRecords.Should().Be(0);
+		}
+
+		[TestMethod]
+		public void ThresholdCrossingsAnalyzer_BlankRegex_ReturnsZeroResults()
+		{
+			// Arrange
+			var analyzer = new ThresholdCrossingsAnalyzer(GetFilterStrategy());
+			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: " ");
+			var records = ImmutableArray<IRecord>.Empty;
+
+			// Act
+			var results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+
+			// Assert
+			results.FlaggedRecords.Should().Be(0);
+		}
+
+		#endregion
+
 		#region MatchingRecordRunsAnalyzer Tests
 
 		[TestMethod]
