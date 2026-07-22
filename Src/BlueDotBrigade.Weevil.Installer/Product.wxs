@@ -31,6 +31,7 @@
 			
 			<ComponentRef Id="WeevilShortcut" />
 			<ComponentRef Id="ScriptsPathComponent" />
+			<ComponentRef Id="WeevilLogFileAssociation" />
 			<ComponentGroupRef Id="RegistryKeys" />
 		</Feature>
 	</Package>
@@ -99,6 +100,53 @@
 					System="yes" />
 			</Component>
 		</ComponentGroup>
+	</Fragment>
+	<Fragment>
+		<DirectoryRef Id="INSTALLFOLDER">
+			<Component Id="WeevilLogFileAssociation" Guid="84FACF5A-7EF5-4285-84B6-FC96F4A08177">
+				<RegistryKey Root="HKLM" Key="Software\RegisteredApplications">
+					<RegistryValue Name="Weevil" Type="string" Value="Software\BlueDotBrigade\Weevil\Capabilities" KeyPath="yes" />
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\BlueDotBrigade\Weevil\Capabilities">
+					<RegistryValue Name="ApplicationName" Type="string" Value="Weevil" />
+					<RegistryValue Name="ApplicationDescription" Type="string" Value="View and analyze log files using Weevil." />
+					<RegistryKey Key="FileAssociations">
+						<RegistryValue Name=".log" Type="string" Value="BlueDotBrigade.Weevil.LogFile" />
+					</RegistryKey>
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\Classes\BlueDotBrigade.Weevil.LogFile">
+					<RegistryValue Type="string" Value="Log File" />
+					<RegistryValue Name="FriendlyTypeName" Type="string" Value="Log File" />
+					<RegistryKey Key="DefaultIcon">
+						<RegistryValue Type="string" Value="&quot;[InstallFolderBin]WeevilGui.exe&quot;,0" />
+					</RegistryKey>
+					<RegistryKey Key="shell">
+						<RegistryValue Type="string" Value="open" />
+						<RegistryKey Key="open">
+							<RegistryKey Key="command">
+								<RegistryValue Type="string" Value="&quot;[InstallFolderBin]WeevilGui.exe&quot; &quot;%1&quot;" />
+							</RegistryKey>
+						</RegistryKey>
+					</RegistryKey>
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\Classes\.log\OpenWithProgids">
+					<RegistryValue Name="BlueDotBrigade.Weevil.LogFile" Type="string" Value="" />
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\Classes\Applications\WeevilGui.exe">
+					<RegistryValue Name="FriendlyAppName" Type="string" Value="Weevil" />
+					<RegistryKey Key="SupportedTypes">
+						<RegistryValue Name=".log" Type="string" Value="" />
+					</RegistryKey>
+					<RegistryKey Key="shell\open\command">
+						<RegistryValue Type="string" Value="&quot;[InstallFolderBin]WeevilGui.exe&quot; &quot;%1&quot;" />
+					</RegistryKey>
+				</RegistryKey>
+			</Component>
+		</DirectoryRef>
 	</Fragment>
 	<Fragment>
 		<UI>
