@@ -73,19 +73,21 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		#endregion
 
 		[TestMethod]
-		[DataRow("123434567", "^^3434567")]
-		public void GivenValues_WhenComparisonIsLessThan_ThenOnlyValuesBelowThresholdAreFlagged(string pattern, string expected)
+		[DataRow("123434567", "3", "^^3434567")]
+		[DataRow("123434567", "4", "^^^4^4567")]
+		public void GivenValues_WhenComparisonIsLessThan_ThenOnlyValuesBelowThresholdAreFlagged(string pattern, string threshold, string expected)
 		{
 			// Regression: Issue #911
-			AssertIntegerScenario(pattern, "3", "<", expected);
+			AssertIntegerScenario(pattern, threshold, "<", expected);
 		}
 
 		[TestMethod]
-		[DataRow("123434567", "^^^4^4567")]
-		public void GivenValues_WhenComparisonIsLessThanOrEqual_ThenThresholdAndLowerValuesAreFlagged(string pattern, string expected)
+		[DataRow("123434567", "3", "^^^4^4567")]
+		[DataRow("123434567", "4", "^^^^^^567")]
+		public void GivenValues_WhenComparisonIsLessThanOrEqual_ThenThresholdAndLowerValuesAreFlagged(string pattern, string threshold, string expected)
 		{
 			// Regression: Issue #911
-			AssertIntegerScenario(pattern, "3", "<=", expected);
+			AssertIntegerScenario(pattern, threshold, "<=", expected);
 		}
 
 		[TestMethod]
@@ -98,11 +100,12 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
-		[DataRow("123434567", "12^^^^^^^")]
-		public void GivenValues_WhenComparisonIsGreaterThanOrEqual_ThenThresholdAndHigherValuesAreFlagged(string pattern, string expected)
+		[DataRow("123434567", "3", "12^^^^^^^")]
+		[DataRow("123434567", "5", "123434^^^")]
+		public void GivenValues_WhenComparisonIsGreaterThanOrEqual_ThenThresholdAndHigherValuesAreFlagged(string pattern, string threshold, string expected)
 		{
 			// Regression: Issue #911
-			AssertIntegerScenario(pattern, "3", ">=", expected);
+			AssertIntegerScenario(pattern, threshold, ">=", expected);
 		}
 
 		[TestMethod]
