@@ -75,6 +75,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		[TestMethod]
 		[DataRow("123434567", "3", "^^3434567")]
 		[DataRow("123434567", "4", "^^^4^4567")]
+		[DataRow("123434567", "5", "^^^^^^567")]
 		public void GivenValues_WhenComparisonIsLessThan_ThenOnlyValuesBelowThresholdAreFlagged(string pattern, string threshold, string expected)
 		{
 			// Regression: Issue #911
@@ -84,6 +85,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		[TestMethod]
 		[DataRow("123434567", "3", "^^^4^4567")]
 		[DataRow("123434567", "4", "^^^^^^567")]
+		[DataRow("123434567", "5", "^^^^^^^67")]
 		public void GivenValues_WhenComparisonIsLessThanOrEqual_ThenThresholdAndLowerValuesAreFlagged(string pattern, string threshold, string expected)
 		{
 			// Regression: Issue #911
