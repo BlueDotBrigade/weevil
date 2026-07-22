@@ -3,12 +3,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
-	using BlueDotBrigade.Weevil.TestTools.Data;
 	using NSubstitute;
 
 	[TestClass]
 	public class ThresholdCrossingsAnalyzerTests
 	{
+		#region Setup helpers
+
 		private static Results Analyze(ImmutableArray<IRecord> records, string regex, string threshold, string comparison)
 		{
 			var analyzer = new ThresholdCrossingsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
@@ -29,112 +30,97 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			return analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 		}
 
-		private static ImmutableArray<IRecord> BuildRecords(params int[] values)
-		{
-			var builder = R.Create();
-			for (var i = 0; i < values.Length; i++)
-			{
-				builder = builder.WithContent($"15:02:{i:D2}.000 {values[i]}");
-			}
+		#endregion
 
-			return builder.GetRecords();
-		}
+		#region Scenario helpers
 
-		private static void AssertScenario(int[] values, string threshold, string comparison, params int[] expectedFlaggedIndices)
+		private static void AssertIntegerScenario(string pattern, string threshold, string comparison, string expected)
 		{
-			var records = BuildRecords(values);
+			var records = AnalysisHelper.BuildIntegerRecords(pattern);
 			var results = Analyze(records, AnalysisHelper.IntegerRegex, threshold, comparison);
 
-			var actualFlaggedIndices = AnalysisHelper.GetFlaggedIndices(records);
-			actualFlaggedIndices.Should().Equal(expectedFlaggedIndices,
-				because: $"comparison '{comparison} {threshold}' should flag only the expected threshold crossings");
-			results.FlaggedRecords.Should().Be(expectedFlaggedIndices.Length);
+			AssertFlagsMatchExpected(pattern, expected, records, results, $"integer scenario ({comparison} {threshold})");
+		}
+
+		private static void AssertDecimalScenario(string pattern, string threshold, string comparison, string expected)
+		{
+			var records = AnalysisHelper.BuildDecimalRecords(pattern);
+			var results = Analyze(records, AnalysisHelper.DecimalRegex, threshold, comparison);
+
+			AssertFlagsMatchExpected(pattern, expected, records, results, $"decimal scenario ({comparison} {threshold})");
+		}
+
+		private static void AssertFlagsMatchExpected(
+			string pattern,
+			string expected,
+			ImmutableArray<IRecord> records,
+			Results results,
+			string label)
+		{
+			AnalysisHelper.AssertFlagsMatchExpected(
+				pattern,
+				expected,
+				records,
+				label,
+				"threshold-crossing flag mismatch");
+
+			var expectedCount = AnalysisHelper.CountExpectedFlags(expected);
+
+			results.FlaggedRecords.Should().Be(expectedCount,
+				because: $"[{label}] should report {expectedCount} threshold crossing(s)");
+		}
+
+		#endregion
+
+		[TestMethod]
+		[DataRow("123434567", "^^3434567")]
+		public void GivenValues_WhenComparisonIsLessThan_ThenOnlyValuesBelowThresholdAreFlagged(string pattern, string expected)
+		{
+			// Regression: Issue #911
+			AssertIntegerScenario(pattern, "3", "<", expected);
 		}
 
 		[TestMethod]
-		public void GivenValues_WhenComparisonIsGreaterThan_ThenOnlyValuesGreaterThanThresholdAreFlagged()
+		[DataRow("123434567", "^^^4^4567")]
+		public void GivenValues_WhenComparisonIsLessThanOrEqual_ThenThresholdAndLowerValuesAreFlagged(string pattern, string expected)
 		{
 			// Regression: Issue #911
-			AssertScenario([9, 10, 11, 8, 12], "10", ">", 2, 4);
+			AssertIntegerScenario(pattern, "3", "<=", expected);
 		}
 
 		[TestMethod]
-		public void GivenValues_WhenComparisonIsLessThan_ThenOnlyValuesLessThanThresholdAreFlagged()
+		[DataRow("123434567", "123^3^^^^")]
+		public void GivenValues_WhenComparisonIsGreaterThan_ThenOnlyValuesAboveThresholdAreFlagged(string pattern, string expected)
 		{
 			// Regression: Issue #911
-			AssertScenario([9, 10, 11, 8, 12], "10", "<", 0, 3);
+			AssertIntegerScenario(pattern, "3", ">", expected);
 		}
 
 		[TestMethod]
-		public void GivenValues_WhenComparisonIsGreaterThanOrEqual_ThenThresholdAndHigherValuesAreFlagged()
+		[DataRow("123434567", "12^^^^^^^")]
+		public void GivenValues_WhenComparisonIsGreaterThanOrEqual_ThenThresholdAndHigherValuesAreFlagged(string pattern, string expected)
 		{
 			// Regression: Issue #911
-			AssertScenario([9, 10, 11, 8, 12], "10", ">=", 1, 2, 4);
+			AssertIntegerScenario(pattern, "3", ">=", expected);
 		}
 
 		[TestMethod]
-		public void GivenValues_WhenComparisonIsLessThanOrEqual_ThenThresholdAndLowerValuesAreFlagged()
+		[DataRow(">", "3")]
+		[DataRow("<", "3")]
+		[DataRow(">=", "^")]
+		[DataRow("<=", "^")]
+		public void GivenValueEqualsThreshold_WhenApplyingComparison_ThenInclusivityBehaviorIsClear(string comparison, string expected)
 		{
 			// Regression: Issue #911
-			AssertScenario([9, 10, 11, 8, 12], "10", "<=", 0, 1, 3);
+			AssertIntegerScenario("3", "3", comparison, expected);
 		}
 
 		[TestMethod]
-		public void GivenDecimalValues_WhenComparisonIsGreaterThan_ThenOnlyValuesGreaterThanThresholdAreFlagged()
+		[DataRow("123434567", "123^3^^^^")]
+		public void GivenDecimalValues_WhenComparisonIsGreaterThan_ThenOnlyValuesAboveThresholdAreFlagged(string pattern, string expected)
 		{
 			// Regression: Issue #911
-			var records = R.Create()
-				.WithContent("15:02:00.000 10.4")
-				.WithContent("15:02:01.000 10.5")
-				.WithContent("15:02:02.000 10.6")
-				.GetRecords();
-
-			var results = Analyze(records, AnalysisHelper.DecimalRegex, "10.5", ">");
-
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2);
-			results.FlaggedRecords.Should().Be(1);
-		}
-
-		[TestMethod]
-		public void GivenDecimalValues_WhenComparisonIsGreaterThanOrEqual_ThenThresholdAndHigherValuesAreFlagged()
-		{
-			// Regression: Issue #911
-			var records = R.Create()
-				.WithContent("15:02:00.000 10.4")
-				.WithContent("15:02:01.000 10.5")
-				.WithContent("15:02:02.000 10.6")
-				.GetRecords();
-
-			var results = Analyze(records, AnalysisHelper.DecimalRegex, "10.5", ">=");
-
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(1, 2);
-			results.FlaggedRecords.Should().Be(2);
-		}
-
-		[TestMethod]
-		[DataRow(">", false)]
-		[DataRow("<", false)]
-		[DataRow(">=", true)]
-		[DataRow("<=", true)]
-		public void GivenValueEqualsThreshold_WhenRunningAnalysis_ThenInclusivityIsApplied(string comparison, bool shouldFlag)
-		{
-			// Regression: Issue #911
-			var records = R.Create()
-				.WithContent("15:02:00.000 10")
-				.GetRecords();
-
-			var results = Analyze(records, AnalysisHelper.IntegerRegex, "10", comparison);
-
-			if (shouldFlag)
-			{
-				AnalysisHelper.GetFlaggedIndices(records).Should().Equal(0);
-				results.FlaggedRecords.Should().Be(1);
-			}
-			else
-			{
-				AnalysisHelper.GetFlaggedIndices(records).Should().BeEmpty();
-				results.FlaggedRecords.Should().Be(0);
-			}
+			AssertDecimalScenario(pattern, "3", ">", expected);
 		}
 	}
 }
