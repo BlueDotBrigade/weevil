@@ -61,7 +61,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
-			if (!TryGetDirection(userDialog, out var direction))
+			if (!TryGetComparison(userDialog, out var comparison))
 			{
 				return new Results(0);
 			}
@@ -87,9 +87,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 							continue;
 						}
 
-						var doesCrossThreshold = direction == ThresholdDirection.Above
-							? value > threshold
-							: value < threshold;
+						var doesCrossThreshold = DoesCrossThreshold(value, threshold, comparison);
 
 						if (!doesCrossThreshold)
 						{
@@ -97,12 +95,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 						}
 
 						var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
-						var comparison = direction == ThresholdDirection.Above ? ">" : "<";
-
 						AnalysisHelper.UpdateRecordMetadata(
 							record,
 							true,
-							$"{parameterName}: {current.Value} {comparison} {threshold.ToString(CultureInfo.InvariantCulture)}",
+							$"{parameterName}: {current.Value} {GetComparisonSymbol(comparison)} {threshold.ToString(CultureInfo.InvariantCulture)}",
 							canUpdateMetadata);
 
 						if (!wasFlagged)
@@ -127,20 +123,91 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			return decimal.TryParse(userInput, NumberStyles.Float, CultureInfo.InvariantCulture, out threshold);
 		}
 
-		private static bool TryGetDirection(IUserDialog userDialog, out ThresholdDirection direction)
+		private static bool TryGetComparison(IUserDialog userDialog, out ThresholdComparison comparison)
 		{
 			var userInput = userDialog.ShowUserPrompt(
 				"Threshold Crossings",
-				"Direction (Above/Below):",
-				"Above");
+				"Comparison (>, >=, <, <=):",
+				">");
 
-			return Enum.TryParse(userInput, true, out direction);
+			if (TryMapComparison(userInput, out comparison))
+			{
+				return true;
+			}
+
+			return Enum.TryParse(userInput, true, out comparison);
 		}
 
-		private enum ThresholdDirection
+		private static bool TryMapComparison(string input, out ThresholdComparison comparison)
 		{
-			Above,
-			Below
+			switch ((input ?? string.Empty).Trim())
+			{
+				case ">":
+				case "Above":
+				case "GreaterThan":
+					comparison = ThresholdComparison.GreaterThan;
+					return true;
+				case ">=":
+				case "AboveOrEqual":
+				case "GreaterThanOrEqual":
+					comparison = ThresholdComparison.GreaterThanOrEqual;
+					return true;
+				case "<":
+				case "Below":
+				case "LessThan":
+					comparison = ThresholdComparison.LessThan;
+					return true;
+				case "<=":
+				case "BelowOrEqual":
+				case "LessThanOrEqual":
+					comparison = ThresholdComparison.LessThanOrEqual;
+					return true;
+				default:
+					comparison = default;
+					return false;
+			}
+		}
+
+		private static bool DoesCrossThreshold(decimal value, decimal threshold, ThresholdComparison comparison)
+		{
+			switch (comparison)
+			{
+				case ThresholdComparison.GreaterThan:
+					return value > threshold;
+				case ThresholdComparison.GreaterThanOrEqual:
+					return value >= threshold;
+				case ThresholdComparison.LessThan:
+					return value < threshold;
+				case ThresholdComparison.LessThanOrEqual:
+					return value <= threshold;
+				default:
+					return false;
+			}
+		}
+
+		private static string GetComparisonSymbol(ThresholdComparison comparison)
+		{
+			switch (comparison)
+			{
+				case ThresholdComparison.GreaterThan:
+					return ">";
+				case ThresholdComparison.GreaterThanOrEqual:
+					return ">=";
+				case ThresholdComparison.LessThan:
+					return "<";
+				case ThresholdComparison.LessThanOrEqual:
+					return "<=";
+				default:
+					return "?";
+			}
+		}
+
+		private enum ThresholdComparison
+		{
+			GreaterThan,
+			GreaterThanOrEqual,
+			LessThan,
+			LessThanOrEqual
 		}
 	}
 }
