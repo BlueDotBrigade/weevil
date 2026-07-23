@@ -486,7 +486,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			// Regression: Issue #919
 			var start = new DateTime(2026, 7, 1, 9, 0, 0, DateTimeKind.Utc);
-			var times = new Queue<DateTime>(new[] { start, start.AddSeconds(20), start.AddSeconds(20) });
+			var activityRecordedAt = start.AddSeconds(20);
+			var times = new Queue<DateTime>(new[] { start, activityRecordedAt, activityRecordedAt });
 			var store = new SpyTelemetrySessionStore();
 			var uploadWorker = new SpyTelemetryUploadWorker();
 			var tracker = new TelemetrySessionLifecycle(
