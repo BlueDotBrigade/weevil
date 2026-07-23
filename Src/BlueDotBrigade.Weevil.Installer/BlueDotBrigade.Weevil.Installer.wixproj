@@ -17,7 +17,7 @@
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' and '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\</PluginSourcePath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' ">$(RepoRootDir)Src\BlueDotBrigade.Weevil.Plugins\</PluginSourcePath>
     <TelemetryCredentialsSourcePath Condition=" '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\TelemetryCredentials.wxs</TelemetryCredentialsSourcePath>
-    <TelemetryCredentialsDestinationPath>$(MSBuildProjectDirectory)\TelemetryCredentials.wxs</TelemetryCredentialsDestinationPath>
+    <TelemetryCredentialsDestinationPath>$(IntermediateOutputPath)TelemetryCredentials.wxs</TelemetryCredentialsDestinationPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug;WeevilVersion=$(ProductVersion);InstallerBinSourceDir=$(InstallerBinLayoutDir);InstallerDocSourceDir=$(InstallerDocLayoutDir);InstallerLicenseSourceDir=$(InstallerLicenseLayoutDir);InstallerLicenseRtfPath=$(RepoRootDir)Doc\Notes\Release\Licenses\License-Installation.rtf</DefineConstants>
@@ -106,6 +106,10 @@
     <Message Text="Telemetry credentials override must define ComponentGroup Id='TelemetryCredentialsComponents' and expected component IDs; invalid markup will fail WiX compilation." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
     <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
     <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+    <ItemGroup Condition="Exists('$(TelemetryCredentialsSourcePath)')">
+      <Compile Remove="TelemetryCredentials.wxs;$(MSBuildProjectDirectory)\TelemetryCredentials.wxs" />
+      <Compile Include="$(TelemetryCredentialsDestinationPath)" />
+    </ItemGroup>
   </Target>
   <Target Name="StageInstallerLayout" BeforeTargets="GetHarvestDirectoryContent">
     <RemoveDir Directories="$(InstallerLayoutRoot)" Condition="Exists('$(InstallerLayoutRoot)')" />
