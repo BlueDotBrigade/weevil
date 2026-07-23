@@ -16,6 +16,7 @@
     <PowerShellOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.PowerShell\bin\$(Platform)\$(Configuration)\net9.0\</PowerShellOutputPath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' and '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\</PluginSourcePath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' ">$(RepoRootDir)Src\BlueDotBrigade.Weevil.Plugins\</PluginSourcePath>
+    <TelemetryCredentialsDefaultPath>$(MSBuildProjectDirectory)\TelemetryCredentials.wxs</TelemetryCredentialsDefaultPath>
     <TelemetryCredentialsSourcePath Condition=" '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\TelemetryCredentials.wxs</TelemetryCredentialsSourcePath>
     <TelemetryCredentialsDestinationPath>$(IntermediateOutputPath)TelemetryCredentials.wxs</TelemetryCredentialsDestinationPath>
   </PropertyGroup>
@@ -103,10 +104,11 @@
   <Target Name="CollectSuggestedVisualStudioComponentIds" />
   <Target Name="StageTelemetryCredentials" BeforeTargets="Compile">
     <Message Text="Telemetry credentials override detected at '$(TelemetryCredentialsSourcePath)'. Using override fragment." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
-    <Message Text="Telemetry credentials override must define ComponentGroup Id='TelemetryCredentialsComponents' and component IDs 'TelemetryUsernameEnabledComponent' and 'TelemetryUsernameDisabledComponent'; invalid markup will fail WiX compilation." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Message Text="Telemetry credentials override detected. Ensure it defines the required ComponentGroup; see TelemetryCredentials.wxs for expected schema." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
     <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Copy SourceFiles="$(TelemetryCredentialsDefaultPath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
-    <ItemGroup Condition="Exists('$(TelemetryCredentialsSourcePath)')">
+    <ItemGroup>
       <Compile Remove="TelemetryCredentials.wxs" />
       <Compile Include="$(TelemetryCredentialsDestinationPath)" />
     </ItemGroup>
