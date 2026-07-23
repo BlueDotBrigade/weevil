@@ -14,6 +14,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	{
 		private readonly object _gate;
 		private readonly Func<DateTime> _utcNow;
+		private readonly Func<bool> _isTelemetryEnabled;
 		private readonly TelemetryActiveUsageAccumulator _activeUsageAccumulator;
 		private readonly ITelemetrySessionStore _sessionStore;
 		private readonly ITelemetryUploadWorker _uploadWorker;
@@ -29,10 +30,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			Func<DateTime> utcNow,
 			TimeSpan activityLeaseDuration,
 			ITelemetrySessionStore sessionStore = null,
-			ITelemetryUploadWorker uploadWorker = null)
+			ITelemetryUploadWorker uploadWorker = null,
+			Func<bool> isTelemetryEnabled = null)
 		{
 			_gate = new object();
 			_utcNow = utcNow ?? throw new ArgumentNullException(nameof(utcNow));
+			_isTelemetryEnabled = isTelemetryEnabled ?? (() => true);
 			_activeUsageAccumulator = new TelemetryActiveUsageAccumulator(activityLeaseDuration);
 			_sessionStore = sessionStore ?? new TelemetrySessionXmlStore();
 			_client = NullTelemetryClient.Instance;
@@ -40,7 +43,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			_startupContext = StartupContext.Default;
 		}
 
-		public static TelemetrySessionLifecycle Shared { get; } = new TelemetrySessionLifecycle();
+		public static TelemetrySessionLifecycle Shared { get; } = new TelemetrySessionLifecycle(
+			() => DateTime.UtcNow,
+			DefaultActivityLeaseDuration,
+			isTelemetryEnabled: TelemetryConsent.IsEnabled);
 
 		public TelemetrySession CurrentSession { get; private set; }
 
@@ -81,6 +87,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
+				if (!IsTelemetryEnabled())
+				{
+					ClearCurrentSession();
+					return;
+				}
+
 				if (string.IsNullOrWhiteSpace(sourceFilePath))
 				{
 					return;
@@ -134,6 +146,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			try
 			{
+				if (!IsTelemetryEnabled())
+				{
+					ClearCurrentSession();
+					return null;
+				}
+
 				lock (_gate)
 				{
 					endedSession = EndCurrentSessionInternal(_utcNow());
@@ -174,6 +192,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
+				if (!IsTelemetryEnabled())
+				{
+					return;
+				}
+
 				if (string.IsNullOrWhiteSpace(metricKey))
 				{
 					return;
@@ -205,6 +228,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
+				if (!IsTelemetryEnabled())
+				{
+					return;
+				}
+
 				lock (_gate)
 				{
 					RecordActivityInternal(_utcNow());
@@ -328,6 +356,28 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			lock (_gate)
 			{
 				return _client;
+			}
+		}
+
+		private void ClearCurrentSession()
+		{
+			lock (_gate)
+			{
+				CurrentSession = null;
+				_activeUsageAccumulator.Clear();
+			}
+		}
+
+		private bool IsTelemetryEnabled()
+		{
+			try
+			{
+				return _isTelemetryEnabled();
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry consent evaluation failed.");
+				return false;
 			}
 		}
 

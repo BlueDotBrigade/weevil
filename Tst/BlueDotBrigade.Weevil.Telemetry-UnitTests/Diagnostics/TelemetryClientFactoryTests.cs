@@ -8,18 +8,21 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	[TestClass]
 	public class TelemetryClientFactoryTests
 	{
+		private const string EnabledVariable = "WEEVIL_TELEMETRY_ENABLED";
 		private const string UserNameVariable = "WEEVIL_TELEMETRY_USERNAME";
 		private const string SecretVariable = "WEEVIL_TELEMETRY_SECRET";
 
 		[TestMethod]
-		public void GivenCredentialsMissing_WhenCreateCalled_ThenNullTelemetryClientIsReturned()
+		public void GivenTelemetryConsentEnabledAndCredentialsMissing_WhenCreateCalled_ThenNullTelemetryClientIsReturned()
 		{
-			// Regression: Issue #761
+			// Regression: Issue #919
+			var originalEnabled = Environment.GetEnvironmentVariable(EnabledVariable);
 			var originalUserName = Environment.GetEnvironmentVariable(UserNameVariable);
 			var originalSecret = Environment.GetEnvironmentVariable(SecretVariable);
 
 			try
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, "1");
 				Environment.SetEnvironmentVariable(UserNameVariable, null);
 				Environment.SetEnvironmentVariable(SecretVariable, null);
 
@@ -28,20 +31,23 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 			finally
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, originalEnabled);
 				Environment.SetEnvironmentVariable(UserNameVariable, originalUserName);
 				Environment.SetEnvironmentVariable(SecretVariable, originalSecret);
 			}
 		}
 
 		[TestMethod]
-		public void GivenCredentialsProvided_WhenCreateCalled_ThenMsSqlTelemetryClientIsReturned()
+		public void GivenTelemetryConsentEnabledAndCredentialsProvided_WhenCreateCalled_ThenMsSqlTelemetryClientIsReturned()
 		{
-			// Regression: Issue #761
+			// Regression: Issue #919
+			var originalEnabled = Environment.GetEnvironmentVariable(EnabledVariable);
 			var originalUserName = Environment.GetEnvironmentVariable(UserNameVariable);
 			var originalSecret = Environment.GetEnvironmentVariable(SecretVariable);
 
 			try
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, "1");
 				Environment.SetEnvironmentVariable(UserNameVariable, "telemetry-user");
 				Environment.SetEnvironmentVariable(SecretVariable, "telemetry-secret");
 
@@ -51,6 +57,33 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 			finally
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, originalEnabled);
+				Environment.SetEnvironmentVariable(UserNameVariable, originalUserName);
+				Environment.SetEnvironmentVariable(SecretVariable, originalSecret);
+			}
+		}
+
+		[TestMethod]
+		public void GivenTelemetryConsentDisabledAndCredentialsProvided_WhenCreateCalled_ThenNullTelemetryClientIsReturned()
+		{
+			// Regression: Issue #919
+			var originalEnabled = Environment.GetEnvironmentVariable(EnabledVariable);
+			var originalUserName = Environment.GetEnvironmentVariable(UserNameVariable);
+			var originalSecret = Environment.GetEnvironmentVariable(SecretVariable);
+
+			try
+			{
+				Environment.SetEnvironmentVariable(EnabledVariable, "false");
+				Environment.SetEnvironmentVariable(UserNameVariable, "telemetry-user");
+				Environment.SetEnvironmentVariable(SecretVariable, "telemetry-secret");
+
+				var client = TelemetryClientFactory.Create();
+
+				client.Should().BeSameAs(NullTelemetryClient.Instance);
+			}
+			finally
+			{
+				Environment.SetEnvironmentVariable(EnabledVariable, originalEnabled);
 				Environment.SetEnvironmentVariable(UserNameVariable, originalUserName);
 				Environment.SetEnvironmentVariable(SecretVariable, originalSecret);
 			}
@@ -84,11 +117,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			// Telemetry must never crash Weevil when a protected secret is malformed
 			// and would otherwise throw during startup.
+			var originalEnabled = Environment.GetEnvironmentVariable(EnabledVariable);
 			var originalUserName = Environment.GetEnvironmentVariable(UserNameVariable);
 			var originalSecret = Environment.GetEnvironmentVariable(SecretVariable);
 
 			try
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, "true");
 				Environment.SetEnvironmentVariable(UserNameVariable, "telemetry-user");
 				Environment.SetEnvironmentVariable(SecretVariable, "ENC:not-valid-base64$$");
 
@@ -100,20 +135,23 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 			finally
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, originalEnabled);
 				Environment.SetEnvironmentVariable(UserNameVariable, originalUserName);
 				Environment.SetEnvironmentVariable(SecretVariable, originalSecret);
 			}
 		}
 
 		[TestMethod]
-		public void GivenCredentialsBlank_WhenCreateCalled_ThenNullTelemetryClientIsReturned()
+		public void GivenTelemetryConsentEnabledAndCredentialsBlank_WhenCreateCalled_ThenNullTelemetryClientIsReturned()
 		{
-			// Regression: Issue #802
+			// Regression: Issue #919
+			var originalEnabled = Environment.GetEnvironmentVariable(EnabledVariable);
 			var originalUserName = Environment.GetEnvironmentVariable(UserNameVariable);
 			var originalSecret = Environment.GetEnvironmentVariable(SecretVariable);
 
 			try
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, "1");
 				Environment.SetEnvironmentVariable(UserNameVariable, string.Empty);
 				Environment.SetEnvironmentVariable(SecretVariable, string.Empty);
 
@@ -122,6 +160,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 			finally
 			{
+				Environment.SetEnvironmentVariable(EnabledVariable, originalEnabled);
 				Environment.SetEnvironmentVariable(UserNameVariable, originalUserName);
 				Environment.SetEnvironmentVariable(SecretVariable, originalSecret);
 			}

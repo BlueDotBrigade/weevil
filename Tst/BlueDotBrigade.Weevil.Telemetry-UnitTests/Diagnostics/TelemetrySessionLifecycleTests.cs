@@ -481,6 +481,40 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			}
 		}
 
+		[TestMethod]
+		public void GivenTelemetryConsentDisabled_WhenSessionStartsAndEnds_ThenNoSessionIsCreatedSavedOrUploaded()
+		{
+			// Regression: Issue #919
+			var start = new DateTime(2026, 7, 1, 9, 0, 0, DateTimeKind.Utc);
+			var times = new Queue<DateTime>(new[] { start, start.AddSeconds(5) });
+			var store = new SpyTelemetrySessionStore();
+			var uploadWorker = new SpyTelemetryUploadWorker();
+			var tracker = new TelemetrySessionLifecycle(
+				() => times.Dequeue(),
+				TimeSpan.FromMinutes(1),
+				store,
+				uploadWorker,
+				() => false);
+
+			var sourcePath = Path.GetTempFileName();
+
+			try
+			{
+				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
+				tracker.RecordHelpOpen();
+				var endedSession = tracker.EndSession();
+
+				tracker.CurrentSession.Should().BeNull();
+				endedSession.Should().BeNull();
+				store.SavedSessions.Should().BeEmpty();
+				uploadWorker.TriggerCount.Should().Be(0);
+			}
+			finally
+			{
+				File.Delete(sourcePath);
+			}
+		}
+
 		private sealed class SpyTelemetrySessionStore : ITelemetrySessionStore
 		{
 			public List<TelemetrySessionDto> SavedSessions { get; } = new List<TelemetrySessionDto>();
