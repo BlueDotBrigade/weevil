@@ -16,6 +16,8 @@
     <PowerShellOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.PowerShell\bin\$(Platform)\$(Configuration)\net9.0\</PowerShellOutputPath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' and '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\</PluginSourcePath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' ">$(RepoRootDir)Src\BlueDotBrigade.Weevil.Plugins\</PluginSourcePath>
+    <TelemetryCredentialsSourcePath Condition=" '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\TelemetryCredentials.wxs</TelemetryCredentialsSourcePath>
+    <TelemetryCredentialsDestinationPath>$(MSBuildProjectDirectory)\TelemetryCredentials.wxs</TelemetryCredentialsDestinationPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug;WeevilVersion=$(ProductVersion);InstallerBinSourceDir=$(InstallerBinLayoutDir);InstallerDocSourceDir=$(InstallerDocLayoutDir);InstallerLicenseSourceDir=$(InstallerLicenseLayoutDir);InstallerLicenseRtfPath=$(RepoRootDir)Doc\Notes\Release\Licenses\License-Installation.rtf</DefineConstants>
@@ -99,6 +101,9 @@
 	https://github.com/firegiant/HeatWaveSupport/issues/73
 	-->
   <Target Name="CollectSuggestedVisualStudioComponentIds" />
+  <Target Name="StageTelemetryCredentials" BeforeTargets="Compile">
+    <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+  </Target>
   <Target Name="StageInstallerLayout" BeforeTargets="GetHarvestDirectoryContent">
     <RemoveDir Directories="$(InstallerLayoutRoot)" Condition="Exists('$(InstallerLayoutRoot)')" />
     <Delete Files="$(IntermediateOutputPath)_generated_weevil_bin_files_dir.wxs;$(IntermediateOutputPath)_generated_documentation_doc_files_dir.wxs;$(IntermediateOutputPath)_generated_documentation_license_files_dir.wxs" ContinueOnError="true" />

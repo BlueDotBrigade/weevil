@@ -28,6 +28,7 @@
 			<ComponentGroupRef Id="generated_weevil_bin_files" />
 			<ComponentGroupRef Id="generated_documentation_doc_files" />
 			<ComponentGroupRef Id="generated_documentation_license_files" />
+			<ComponentGroupRef Id="TelemetryCredentialsComponents" />
 			
 			<ComponentRef Id="WeevilShortcut" />
 			<ComponentRef Id="ScriptsPathComponent" />
@@ -66,36 +67,6 @@
 					Name="WEEVIL_TELEMETRY_SOURCE"
 					Value="Production"
 					Action="set"
-					Part="all"
-					System="yes" />
-			</Component>
-			<Component Id="TelemetryUsernameEnabledComponent" Guid="1D8C66F0-8E03-4F06-B575-58254B6F35BE" Condition="WEEVIL_COLLECT_ANONYMOUS_METRICS = &quot;1&quot;">
-				<Environment Id="WeevilTelemetryUsernameEnabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_USERNAME"
-					Value="weevil_telemetry_producer"
-					Action="set"
-					Part="all"
-					System="yes" />
-				<!--
-					An empty string will result in a compiler error.
-					WIX0006 : The Environment/@Value attribute's value cannot be an empty string. If a value is not required, simply remove the entire attribute.
-				-->
-				<Environment Id="WeevilTelemetrySecretEnabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_SECRET"
-					Value="NOT_SET"
-					Action="set"
-					Part="all"
-					System="yes" />
-			</Component>
-			<Component Id="TelemetryUsernameDisabledComponent" Guid="8AFBB0A6-E049-4D07-91FB-E38A90CA7E92" Condition="WEEVIL_COLLECT_ANONYMOUS_METRICS &lt;&gt; &quot;1&quot;">
-				<Environment Id="WeevilTelemetryUsernameDisabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_USERNAME"
-					Action="remove"
-					Part="all"
-					System="yes" />
-				<Environment Id="WeevilTelemetrySecretDisabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_SECRET"
-					Action="remove"
 					Part="all"
 					System="yes" />
 			</Component>

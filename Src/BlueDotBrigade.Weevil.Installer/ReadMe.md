@@ -14,7 +14,8 @@ Current flow:
 	- PowerShell scripts
 	- release documentation and licenses
 	- plugins from `WEEVIL_PLUGINS_PATH`
-4. WiX Heat harvests the staged `Bin`, `Doc`, and `Licenses` directories during the build.
+4. Before WiX compiles, the installer checks `WEEVIL_PLUGINS_PATH` for an optional `TelemetryCredentials.wxs` file and copies it over the default installer credentials fragment when present.
+5. WiX Heat harvests the staged `Bin`, `Doc`, and `Licenses` directories during the build.
 
 This keeps Visual Studio debug outputs independent while generating installer payload authoring from the assembled runtime layout.
 
