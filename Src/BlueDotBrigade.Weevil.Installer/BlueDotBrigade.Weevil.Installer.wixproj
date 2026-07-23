@@ -103,11 +103,14 @@
 	-->
   <Target Name="CollectSuggestedVisualStudioComponentIds" />
   <Target Name="StageTelemetryCredentials" BeforeTargets="Compile">
+    <PropertyGroup>
+      <TelemetryCredentialsEffectiveSourcePath Condition="Exists('$(TelemetryCredentialsSourcePath)')">$(TelemetryCredentialsSourcePath)</TelemetryCredentialsEffectiveSourcePath>
+      <TelemetryCredentialsEffectiveSourcePath Condition=" '$(TelemetryCredentialsEffectiveSourcePath)' == '' ">$(TelemetryCredentialsDefaultPath)</TelemetryCredentialsEffectiveSourcePath>
+    </PropertyGroup>
     <Message Text="Telemetry credentials override detected at '$(TelemetryCredentialsSourcePath)'. Using override fragment." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
-    <Message Text="Telemetry credentials override detected. Ensure it defines the required ComponentGroup; see TelemetryCredentials.wxs for expected schema." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Message Text="Telemetry credentials override detected. Ensure it defines ComponentGroup Id='TelemetryCredentialsComponents'; see TelemetryCredentials.wxs for expected schema." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
     <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
-    <Copy SourceFiles="$(TelemetryCredentialsDefaultPath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Copy SourceFiles="$(TelemetryCredentialsEffectiveSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" />
     <ItemGroup>
       <Compile Remove="TelemetryCredentials.wxs" />
       <Compile Include="$(TelemetryCredentialsDestinationPath)" />
