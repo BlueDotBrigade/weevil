@@ -360,6 +360,10 @@ MigrationBackup/
 !/Src/BlueDotBrigade.Weevil.Plugins/ReadMe.md
 !/Src/BlueDotBrigade.Weevil.Plugins/BlueDotBrigade.Weevil.Plugins.csproj
 
+# Prevent accidentally committing real telemetry credentials from a local override fragment.
+**/TelemetryCredentials.wxs
+!/Src/BlueDotBrigade.Weevil.Installer/TelemetryCredentials.wxs
+
 # We require log files for testing purposes (logs were previously blocked by global gitignore):
 !*.log
 
