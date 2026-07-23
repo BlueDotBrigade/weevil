@@ -6,13 +6,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	{
 		internal const string TelemetryEnabledEnvironmentVariable = "WEEVIL_TELEMETRY_ENABLED";
 
-		public static bool IsEnabled()
+		internal static bool IsEnabled()
 		{
 			var value = Environment.GetEnvironmentVariable(TelemetryEnabledEnvironmentVariable);
 			return IsEnabled(value);
 		}
 
-		public static bool IsEnabled(string value)
+		internal static bool IsEnabled(string value)
 		{
 			if (string.IsNullOrWhiteSpace(value))
 			{
