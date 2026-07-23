@@ -102,6 +102,8 @@
 	-->
   <Target Name="CollectSuggestedVisualStudioComponentIds" />
   <Target Name="StageTelemetryCredentials" BeforeTargets="Compile">
+    <Message Text="Telemetry credentials override detected at '$(TelemetryCredentialsSourcePath)'. Using override fragment." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
     <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
   </Target>
   <Target Name="StageInstallerLayout" BeforeTargets="GetHarvestDirectoryContent">
