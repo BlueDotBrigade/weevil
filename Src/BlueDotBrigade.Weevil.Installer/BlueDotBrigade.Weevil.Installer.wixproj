@@ -107,8 +107,7 @@
       <TelemetryCredentialsEffectiveSourcePath Condition="Exists('$(TelemetryCredentialsSourcePath)')">$(TelemetryCredentialsSourcePath)</TelemetryCredentialsEffectiveSourcePath>
       <TelemetryCredentialsEffectiveSourcePath Condition=" '$(TelemetryCredentialsEffectiveSourcePath)' == '' ">$(TelemetryCredentialsDefaultPath)</TelemetryCredentialsEffectiveSourcePath>
     </PropertyGroup>
-    <Message Text="Telemetry credentials override detected at '$(TelemetryCredentialsSourcePath)'. Using override fragment." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
-    <Message Text="Telemetry credentials override detected. Ensure it defines ComponentGroup Id='TelemetryCredentialsComponents'; see TelemetryCredentials.wxs for expected schema." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Message Text="Telemetry credentials override detected at '$(TelemetryCredentialsSourcePath)'. Using override fragment. Ensure it defines ComponentGroup Id='TelemetryCredentialsComponents'; see TelemetryCredentials.wxs for expected schema." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
     <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
     <Copy SourceFiles="$(TelemetryCredentialsEffectiveSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" />
     <ItemGroup>
