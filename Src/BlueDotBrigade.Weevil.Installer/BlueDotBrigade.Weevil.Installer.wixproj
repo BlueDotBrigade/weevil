@@ -103,6 +103,7 @@
   <Target Name="CollectSuggestedVisualStudioComponentIds" />
   <Target Name="StageTelemetryCredentials" BeforeTargets="Compile">
     <Message Text="Telemetry credentials override detected at '$(TelemetryCredentialsSourcePath)'. Using override fragment." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Message Text="Telemetry credentials override must define ComponentGroup Id='TelemetryCredentialsComponents' and expected component IDs; invalid markup will fail WiX compilation." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
     <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
     <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
   </Target>
