@@ -16,9 +16,12 @@
     <PowerShellOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.PowerShell\bin\$(Platform)\$(Configuration)\net9.0\</PowerShellOutputPath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' and '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\</PluginSourcePath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' ">$(RepoRootDir)Src\BlueDotBrigade.Weevil.Plugins\</PluginSourcePath>
-    <TelemetryCredentialsDefaultPath>$(MSBuildProjectDirectory)\TelemetryCredentials.wxs</TelemetryCredentialsDefaultPath>
+    <TelemetryCredentialsDefaultPath>$(MSBuildProjectDirectory)\TelemetryCredentials.Default.wxs</TelemetryCredentialsDefaultPath>
     <TelemetryCredentialsSourcePath Condition=" '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\TelemetryCredentials.wxs</TelemetryCredentialsSourcePath>
-    <TelemetryCredentialsDestinationPath>$(IntermediateOutputPath)TelemetryCredentials.wxs</TelemetryCredentialsDestinationPath>
+    <TelemetryCredentialsIntermediatePath Condition=" '$(IntermediateOutputPath)' != '' ">$(IntermediateOutputPath)</TelemetryCredentialsIntermediatePath>
+    <TelemetryCredentialsIntermediatePath Condition=" '$(TelemetryCredentialsIntermediatePath)' == '' ">obj\$(Platform)\$(Configuration)\</TelemetryCredentialsIntermediatePath>
+    <TelemetryCredentialsDestinationDir>$(MSBuildProjectDirectory)\$(TelemetryCredentialsIntermediatePath)</TelemetryCredentialsDestinationDir>
+    <TelemetryCredentialsDestinationPath>$(TelemetryCredentialsDestinationDir)TelemetryCredentials.wxs</TelemetryCredentialsDestinationPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug;WeevilVersion=$(ProductVersion);InstallerBinSourceDir=$(InstallerBinLayoutDir);InstallerDocSourceDir=$(InstallerDocLayoutDir);InstallerLicenseSourceDir=$(InstallerLicenseLayoutDir);InstallerLicenseRtfPath=$(RepoRootDir)Doc\Notes\Release\Licenses\License-Installation.rtf</DefineConstants>
@@ -96,7 +99,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="TelemetryCredentials.wxs" />
+    <Compile Remove="TelemetryCredentials.Default.wxs" />
     <Compile Include="$(TelemetryCredentialsDestinationPath)" />
   </ItemGroup>
   <!-- 
@@ -112,7 +115,8 @@
       <TelemetryCredentialsEffectiveSourcePath Condition=" '$(TelemetryCredentialsEffectiveSourcePath)' == '' ">$(TelemetryCredentialsDefaultPath)</TelemetryCredentialsEffectiveSourcePath>
     </PropertyGroup>
     <Message Text="Telemetry override detected at '$(TelemetryCredentialsSourcePath)'. It must define ComponentGroup Id='TelemetryCredentialsComponents'." Importance="high" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
-    <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
+    <Message Text="Telemetry credentials override not found. Using default TelemetryCredentials.Default.wxs from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
+    <MakeDir Directories="$(TelemetryCredentialsDestinationDir)" />
     <Copy SourceFiles="$(TelemetryCredentialsEffectiveSourcePath)" DestinationFiles="$(TelemetryCredentialsDestinationPath)" SkipUnchangedFiles="true" />
   </Target>
   <Target Name="StageInstallerLayout" BeforeTargets="GetHarvestDirectoryContent">
