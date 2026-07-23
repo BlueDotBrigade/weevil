@@ -482,11 +482,11 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		}
 
 		[TestMethod]
-		public void GivenTelemetryConsentDisabled_WhenSessionStartsAndEnds_ThenNoSessionIsCreatedSavedOrUploaded()
+		public void GivenTelemetryConsentDisabled_WhenSessionStartsAndEnds_ThenSessionIsTrackedButNotSavedOrUploaded()
 		{
 			// Regression: Issue #919
 			var start = new DateTime(2026, 7, 1, 9, 0, 0, DateTimeKind.Utc);
-			var times = new Queue<DateTime>(new[] { start, start.AddSeconds(5) });
+			var times = new Queue<DateTime>(new[] { start, start.AddSeconds(20), start.AddSeconds(20) });
 			var store = new SpyTelemetrySessionStore();
 			var uploadWorker = new SpyTelemetryUploadWorker();
 			var tracker = new TelemetrySessionLifecycle(
@@ -505,7 +505,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				var endedSession = tracker.EndSession();
 
 				tracker.CurrentSession.Should().BeNull();
-				endedSession.Should().BeNull();
+				endedSession.Should().NotBeNull();
+				endedSession!.Metrics.Single(m => m.MetricKey == TelemetryMetrics.HelpOpened).MetricCount.Should().Be(1);
+				endedSession.SessionActiveMinutes.Should().Be(0.333);
 				store.SavedSessions.Should().BeEmpty();
 				uploadWorker.TriggerCount.Should().Be(0);
 			}
