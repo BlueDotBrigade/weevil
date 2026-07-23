@@ -1,12 +1,11 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
-	using System.Runtime.Versioning;
 	using System.Security.Cryptography;
 	using System.Text;
 
 	/// <summary>
-	/// Encrypts and decrypts credential secrets using the Windows Data Protection API (DPAPI).
+	/// Encrypts and decrypts credential secrets using AES-256-GCM.
 	/// </summary>
 	/// <remarks>
 	/// <para>
@@ -14,21 +13,36 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	/// encryption was introduced continue to work without modification.
 	/// </para>
 	/// <para>
-	/// Encryption is scoped to the current Windows user account: only the same user who
-	/// encrypted the value can decrypt it.
-	/// </para>
-	/// <para>
-	/// This class is Windows-only. On other platforms, <see cref="Encrypt"/> throws
-	/// <see cref="PlatformNotSupportedException"/> and <see cref="Decrypt"/> returns
-	/// the value unchanged.
+	/// The production encryption key must be supplied by the private client build configuration
+	/// and must not be committed to the public repository.
 	/// </para>
 	/// </remarks>
 	public static class SecretProtector
 	{
+		private const int KeySize = 32;
+		private const int NonceSize = 12;
+		private const int TagSize = 16;
+
+		/*
+		 * IMPORTANT:
+		 *
+		 * This is a SAMPLE key only.
+		 *
+		 * The production key must not be committed to the public Weevil
+		 * repository. It must be supplied automatically by the private
+		 * client build configuration.
+		 *
+		 * The decoded value must contain exactly 32 bytes.
+		 */
+		private const string EncryptionKeyBase64 =
+			"REPLACE_WITH_PRIVATE_32_BYTE_BASE64_KEY";
+
 		/// <summary>
 		/// The prefix that identifies an encrypted value produced by <see cref="Encrypt"/>.
 		/// </summary>
 		public const string EncryptedPrefix = "ENC:";
+
+		internal static string EncryptionKeyBase64Override { get; set; }
 
 		/// <summary>
 		/// Returns <see langword="true"/> when <paramref name="value"/> was produced by <see cref="Encrypt"/>.
@@ -37,15 +51,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			!string.IsNullOrEmpty(value) && value.StartsWith(EncryptedPrefix, StringComparison.Ordinal);
 
 		/// <summary>
-		/// Encrypts <paramref name="plainText"/> using DPAPI and returns a portable,
+		/// Encrypts <paramref name="plainText"/> using AES-256-GCM and returns a portable,
 		/// prefixed Base64 string that can be stored in an environment variable.
 		/// </summary>
 		/// <param name="plainText">The secret to encrypt. Must not be null or empty.</param>
 		/// <returns>An encrypted string prefixed with <see cref="EncryptedPrefix"/>.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="plainText"/> is <see langword="null"/>.</exception>
 		/// <exception cref="ArgumentException">Thrown when <paramref name="plainText"/> is empty or whitespace.</exception>
-		/// <exception cref="PlatformNotSupportedException">Thrown on non-Windows platforms.</exception>
-		[SupportedOSPlatform("windows")]
 		public static string Encrypt(string plainText)
 		{
 			ArgumentNullException.ThrowIfNull(plainText);
@@ -55,9 +67,59 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				throw new ArgumentException("Secret must not be empty or whitespace.", nameof(plainText));
 			}
 
-			var plainBytes = Encoding.UTF8.GetBytes(plainText);
-			var encryptedBytes = ProtectedData.Protect(plainBytes, null, DataProtectionScope.CurrentUser);
-			return EncryptedPrefix + Convert.ToBase64String(encryptedBytes);
+			var key = GetEncryptionKey();
+			var nonce = RandomNumberGenerator.GetBytes(NonceSize);
+			var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+			var cipherText = new byte[plainTextBytes.Length];
+			var authenticationTag = new byte[TagSize];
+
+			try
+			{
+				using (var aes = new AesGcm(key, TagSize))
+				{
+					aes.Encrypt(
+						nonce,
+						plainTextBytes,
+						cipherText,
+						authenticationTag);
+				}
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(key);
+			}
+
+			var payload = new byte[1 + NonceSize + TagSize + cipherText.Length];
+			var offset = 0;
+
+			payload[offset++] = 1;
+
+			Buffer.BlockCopy(
+				nonce,
+				0,
+				payload,
+				offset,
+				nonce.Length);
+
+			offset += nonce.Length;
+
+			Buffer.BlockCopy(
+				authenticationTag,
+				0,
+				payload,
+				offset,
+				authenticationTag.Length);
+
+			offset += authenticationTag.Length;
+
+			Buffer.BlockCopy(
+				cipherText,
+				0,
+				payload,
+				offset,
+				cipherText.Length);
+
+			return EncryptedPrefix + Convert.ToBase64String(payload);
 		}
 
 		/// <summary>
@@ -75,15 +137,75 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return value;
 			}
 
-			if (!OperatingSystem.IsWindows())
+			var encodedPayload = value[EncryptedPrefix.Length..];
+			var payload = Convert.FromBase64String(encodedPayload);
+			var minimumPayloadSize = 1 + NonceSize + TagSize + 1;
+
+			if (payload.Length < minimumPayloadSize)
 			{
-				return value;
+				throw new CryptographicException("The encrypted secret is malformed.");
 			}
 
-			var base64 = value[EncryptedPrefix.Length..];
-			var encryptedBytes = Convert.FromBase64String(base64);
-			var plainBytes = ProtectedData.Unprotect(encryptedBytes, null, DataProtectionScope.CurrentUser);
-			return Encoding.UTF8.GetString(plainBytes);
+			var offset = 0;
+			var version = payload[offset++];
+
+			if (version != 1)
+			{
+				throw new CryptographicException($"Unsupported encrypted secret version: {version}.");
+			}
+
+			ReadOnlySpan<byte> nonce = payload.AsSpan(offset, NonceSize);
+			offset += NonceSize;
+
+			ReadOnlySpan<byte> authenticationTag = payload.AsSpan(offset, TagSize);
+			offset += TagSize;
+
+			ReadOnlySpan<byte> cipherText = payload.AsSpan(offset);
+			var plainTextBytes = new byte[cipherText.Length];
+			var key = GetEncryptionKey();
+
+			try
+			{
+				using (var aes = new AesGcm(key, TagSize))
+				{
+					aes.Decrypt(
+						nonce,
+						cipherText,
+						authenticationTag,
+						plainTextBytes);
+				}
+			}
+			finally
+			{
+				CryptographicOperations.ZeroMemory(key);
+			}
+
+			return Encoding.UTF8.GetString(plainTextBytes);
+		}
+
+		private static byte[] GetEncryptionKey()
+		{
+			var encodedKey = EncryptionKeyBase64Override ?? EncryptionKeyBase64;
+			byte[] key;
+
+			try
+			{
+				key = Convert.FromBase64String(encodedKey);
+			}
+			catch (FormatException exception)
+			{
+				throw new InvalidOperationException(
+					"The telemetry encryption key is not valid Base64.",
+					exception);
+			}
+
+			if (key.Length != KeySize)
+			{
+				throw new InvalidOperationException(
+					$"The telemetry encryption key must contain exactly {KeySize} bytes.");
+			}
+
+			return key;
 		}
 	}
 }

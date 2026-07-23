@@ -1,13 +1,28 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
 	using System;
+	using System.Security.Cryptography;
 	using FluentAssertions;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-#pragma warning disable CA1416 // Platform-specific calls are guarded by OperatingSystem.IsWindows() in each test method.
 	[TestClass]
 	public class SecretProtectorTests
 	{
+		// Decodes to "01234567890123456789012345678901" (32 ASCII bytes).
+		private const string TestEncryptionKeyBase64 = "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=";
+
+		[TestInitialize]
+		public void TestInitialize()
+		{
+			SecretProtector.EncryptionKeyBase64Override = TestEncryptionKeyBase64;
+		}
+
+		[TestCleanup]
+		public void TestCleanup()
+		{
+			SecretProtector.EncryptionKeyBase64Override = null;
+		}
+
 		// ─── IsProtected ───────────────────────────────────────────────────────────
 
 		[TestMethod]
@@ -41,11 +56,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		[TestMethod]
 		public void GivenNullSecret_WhenEncryptCalled_ThenThrowsArgumentNullException()
 		{
-			if (!OperatingSystem.IsWindows())
-			{
-				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-			}
-
 			Action act = () => SecretProtector.Encrypt(null);
 
 			act.Should().Throw<ArgumentNullException>();
@@ -54,11 +64,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		[TestMethod]
 		public void GivenEmptySecret_WhenEncryptCalled_ThenThrowsArgumentException()
 		{
-			if (!OperatingSystem.IsWindows())
-			{
-				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-			}
-
 			Action act = () => SecretProtector.Encrypt(string.Empty);
 
 			act.Should().Throw<ArgumentException>();
@@ -67,11 +72,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		[TestMethod]
 		public void GivenWhiteSpaceSecret_WhenEncryptCalled_ThenThrowsArgumentException()
 		{
-			if (!OperatingSystem.IsWindows())
-			{
-				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-			}
-
 			Action act = () => SecretProtector.Encrypt("   ");
 
 			act.Should().Throw<ArgumentException>();
@@ -80,11 +80,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		[TestMethod]
 		public void GivenValidSecret_WhenEncryptCalled_ThenResultStartsWithEncryptedPrefix()
 		{
-			if (!OperatingSystem.IsWindows())
-			{
-				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-			}
-
 			var result = SecretProtector.Encrypt("my-secret");
 
 			result.Should().StartWith(SecretProtector.EncryptedPrefix);
@@ -93,11 +88,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		[TestMethod]
 		public void GivenValidSecret_WhenEncryptCalled_ThenResultIsMarkedAsProtected()
 		{
-			if (!OperatingSystem.IsWindows())
-			{
-				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-			}
-
 			var result = SecretProtector.Encrypt("my-secret");
 
 			SecretProtector.IsProtected(result).Should().BeTrue();
@@ -128,11 +118,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		public void GivenEncryptedSecret_WhenDecryptCalled_ThenOriginalSecretIsReturned()
 		{
 			// Regression: Issue #867
-			if (!OperatingSystem.IsWindows())
-			{
-				throw new AssertInconclusiveException("DPAPI is only supported on Windows.");
-			}
-
 			const string original = "super-secret-password";
 			var encrypted = SecretProtector.Encrypt(original);
 
@@ -140,6 +125,32 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			result.Should().Be(original);
 		}
+
+		[TestMethod]
+		public void GivenMalformedEncryptedSecret_WhenDecryptCalled_ThenThrowsCryptographicException()
+		{
+			// Regression: Issue #916
+			var malformedPayload = SecretProtector.EncryptedPrefix + Convert.ToBase64String(new byte[] { 1, 2, 3 });
+
+			Action act = () => SecretProtector.Decrypt(malformedPayload);
+
+			act.Should().Throw<CryptographicException>()
+				.WithMessage("The encrypted secret is malformed.");
+		}
+
+		[TestMethod]
+		public void GivenUnsupportedEncryptedSecretVersion_WhenDecryptCalled_ThenThrowsCryptographicException()
+		{
+			// Regression: Issue #916
+			var payload = new byte[1 + 12 + 16 + 1];
+			payload[0] = 2;
+			payload[^1] = 1;
+			var encrypted = SecretProtector.EncryptedPrefix + Convert.ToBase64String(payload);
+
+			Action act = () => SecretProtector.Decrypt(encrypted);
+
+			act.Should().Throw<CryptographicException>()
+				.WithMessage("Unsupported encrypted secret version: 2.");
+		}
 	}
-#pragma warning restore CA1416
 }

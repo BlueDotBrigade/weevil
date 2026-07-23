@@ -52,7 +52,7 @@ Current provider defaults:
 3. Set runtime credentials (`WEEVIL_TELEMETRY_USERNAME` and `WEEVIL_TELEMETRY_SECRET`) in the execution environment.
    - To avoid storing the secret in plaintext, encrypt it first: `WeevilCli.exe protect-secret --secret "YourPassword"`
    - Copy the resulting `ENC:…` value into the `WEEVIL_TELEMETRY_SECRET` environment variable.
-   - Weevil decrypts the value automatically at startup using the Windows Data Protection API (DPAPI).
+   - Weevil decrypts the value automatically at startup using the application’s AES-256-GCM secret protection scheme.
 4. Open and close a log file in Weevil to produce one ended session.
 
 ## Validation checklist

@@ -19,7 +19,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// </summary>
 		/// <remarks>
 		/// Telemetry must never crash the host application: any failure while reading configuration or
-		/// decrypting credentials (for example, a secret encrypted on a different machine) is swallowed
+		/// decrypting credentials (for example, a malformed or unsupported encrypted secret) is swallowed
 		/// and the no-op <see cref="NullTelemetryClient"/> is returned instead.
 		/// </remarks>
 		// Intentional broad exception catching: telemetry setup must never propagate to the user workflow.
