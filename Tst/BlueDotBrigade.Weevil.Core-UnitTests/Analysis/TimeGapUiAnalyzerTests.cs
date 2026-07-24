@@ -65,6 +65,11 @@
 		{
 			// Regression: Issue #925
 			var analyzer = new TimeGapUiAnalyzer();
+			IRecord firstUntimestampedUiRecord = _records[1];
+			IRecord firstTimestampedUiRecordAfterUnknownTime = _records[2];
+			IRecord laterTimestampedUiRecordWithGap = _records[6];
+			IRecord secondUntimestampedUiRecord = _records[7];
+			IRecord finalTimestampedUiRecordAfterUnknownTime = _records[8];
 
 			analyzer.Analyze(
 				_records,
@@ -72,13 +77,13 @@
 				GetUserDialog(90000),
 				canUpdateMetadata: true);
 
-			_records[1].Metadata.IsFlagged.Should().BeFalse();
-			_records[2].Metadata.IsFlagged.Should().BeTrue();
-			_records[6].Metadata.IsFlagged.Should().BeTrue();
-			_records[7].Metadata.IsFlagged.Should().BeFalse();
-			_records[8].Metadata.IsFlagged.Should().BeTrue();
+			firstUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
+			firstTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
+			laterTimestampedUiRecordWithGap.Metadata.IsFlagged.Should().BeTrue();
+			secondUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
+			finalTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
 			analyzer.Count.Should().Be(3);
-			analyzer.FirstOccurrenceAt.Should().Be(_records[2].CreatedAt);
+			analyzer.FirstOccurrenceAt.Should().Be(firstTimestampedUiRecordAfterUnknownTime.CreatedAt);
 		}
 	}
 }
