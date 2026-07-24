@@ -9,10 +9,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	{
 		#region Setup helpers
 
-		private static Results Analyze(ImmutableArray<IRecord> records, string regex)
+		private static Results Analyze(ImmutableArray<IRecord> records, string regex, string analysisOrder = "Ascending")
 		{
 			var analyzer = new DetectRisingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
+			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex, analysisOrder);
 
 			return analyzer.Analyze(
 				records,
@@ -159,6 +159,52 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
             AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2, 5);
 			results.FlaggedRecords.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void GivenOutOfOrderTimestampsAndUnknownTimestamp_WhenAnalyzeAscending_ThenUsesChronologicalOrder()
+		{
+			// Regression: Issue #927
+			var records = AnalysisHelper.BuildRecords(
+				(1, "2024-01-01 00:00:02", "Value=2"),
+				(2, null, "Value=9"),
+				(3, "2024-01-01 00:00:01", "Value=1"),
+				(4, "2024-01-01 00:00:03", "Value=0"));
+
+			var results = Analyze(records, @"(?<Value>\d+)$");
+
+			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2);
+			results.FlaggedRecords.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void GivenOutOfOrderTimestamps_WhenAnalyzeDescending_ThenUsesReverseChronologicalOrder()
+		{
+			// Regression: Issue #927
+			var records = AnalysisHelper.BuildRecords(
+				(1, "2024-01-01 00:00:02", "Value=2"),
+				(2, "2024-01-01 00:00:03", "Value=1"),
+				(3, "2024-01-01 00:00:01", "Value=0"));
+
+			var results = Analyze(records, @"(?<Value>\d+)$", "Descending");
+
+			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(1);
+			results.FlaggedRecords.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void GivenMatchingTimestamps_WhenAnalyzeDescending_ThenUsesLineNumberAsStableTieBreaker()
+		{
+			// Regression: Issue #927
+			var records = AnalysisHelper.BuildRecords(
+				(1, "2024-01-01 00:00:03", "Value=1"),
+				(2, "2024-01-01 00:00:03", "Value=2"),
+				(3, "2024-01-01 00:00:01", "Value=0"));
+
+			var results = Analyze(records, @"(?<Value>\d+)$", "Descending");
+
+			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(0);
+			results.FlaggedRecords.Should().Be(1);
 		}
 
 		#endregion

@@ -1,7 +1,9 @@
 namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
+    using System.Globalization;
     using System.Linq;
     using BlueDotBrigade.Weevil.Data;
     using BlueDotBrigade.Weevil.TestTools.Data;
@@ -40,6 +42,20 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             }
 
             return builder.GetRecords();
+        }
+
+        internal static ImmutableArray<IRecord> BuildRecords(params (int LineNumber, string Timestamp, string Content)[] entries)
+        {
+            return entries
+                .Select(record => (IRecord)new Record(
+                    record.LineNumber,
+                    string.IsNullOrWhiteSpace(record.Timestamp)
+                        ? Record.CreationTimeUnknown
+                        : DateTime.Parse(record.Timestamp, CultureInfo.InvariantCulture),
+                    SeverityType.Information,
+                    record.Content,
+                    new Metadata()))
+                .ToImmutableArray();
         }
 
         internal static void AssertFlagsMatchExpected(
