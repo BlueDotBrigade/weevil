@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.TestTools.Data;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using NSubstitute;
@@ -171,24 +172,21 @@
 		{
 			// Regression: Issue #935
 			DateTime now = DateTime.Now;
-			SeverityType severity = SeverityType.Debug;
 
-			var recordsWithGap = new List<IRecord>
-			{
-				new Record(10, now.AddSeconds(0), severity, "content"),
-				new Record(20, now.AddSeconds(10), severity, "content"),
-			};
+			var recordsWithGap = R.Create()
+				.WithCreatedAt(10, now.AddSeconds(0))
+				.WithCreatedAt(20, now.AddSeconds(10))
+				.GetRecords();
 
-			var recordsWithNoGap = new List<IRecord>
-			{
-				new Record(30, now.AddSeconds(0), severity, "content"),
-				new Record(40, now.AddSeconds(1), severity, "content"),
-			};
+			var recordsWithNoGap = R.Create()
+				.WithCreatedAt(30, now.AddSeconds(0))
+				.WithCreatedAt(40, now.AddSeconds(1))
+				.GetRecords();
 
 			var analyzer = new TimeGapAnalyzer();
 
-			analyzer.Analyze(recordsWithGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
-			analyzer.Analyze(recordsWithNoGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithGap, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithNoGap, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
 
 			analyzer.Count.Should().Be(0);
 			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
