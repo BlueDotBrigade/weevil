@@ -59,5 +59,31 @@
 
 			_records.Clear();
 		}
+
+		[TestMethod]
+		public void GivenUiRecordsWithUnknownTimestamps_WhenAnalyzeCalled_ThenUnknownTimestampsAreIgnoredForGapDetection()
+		{
+			// Regression: Issue #925
+			var analyzer = new TimeGapUiAnalyzer();
+			IRecord firstUntimestampedUiRecord = _records[1];
+			IRecord firstTimestampedUiRecordAfterUnknownTime = _records[2];
+			IRecord laterTimestampedUiRecordWithGap = _records[6];
+			IRecord secondUntimestampedUiRecord = _records[7];
+			IRecord finalTimestampedUiRecordAfterUnknownTime = _records[8];
+
+			analyzer.Analyze(
+				_records,
+				EnvironmentHelper.GetExecutableDirectory(),
+				GetUserDialog(90000),
+				canUpdateMetadata: true);
+
+			firstUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
+			firstTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
+			laterTimestampedUiRecordWithGap.Metadata.IsFlagged.Should().BeTrue();
+			secondUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
+			finalTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
+			analyzer.Count.Should().Be(3);
+			analyzer.FirstOccurrenceAt.Should().Be(firstTimestampedUiRecordAfterUnknownTime.CreatedAt);
+		}
 	}
 }

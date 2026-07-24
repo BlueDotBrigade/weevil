@@ -100,7 +100,7 @@
 						currentRecord.Metadata.IsFlagged = false;
 					}
 
-					if (currentRecord.Metadata.WasGeneratedByUi)
+					if (currentRecord.HasCreationTime && currentRecord.Metadata.WasGeneratedByUi)
 					{
 						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
 
