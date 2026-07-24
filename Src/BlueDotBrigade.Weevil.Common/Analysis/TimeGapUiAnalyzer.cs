@@ -76,6 +76,7 @@
 
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = 0;
+			_firstOccurrenceAt = DateTime.MaxValue;
 
 			var previous = IndexOfFirstTimestamp(records);
 

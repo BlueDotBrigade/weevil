@@ -85,5 +85,34 @@
 			analyzer.Count.Should().Be(3);
 			analyzer.FirstOccurrenceAt.Should().Be(firstTimestampedUiRecordAfterUnknownTime.CreatedAt);
 		}
+
+		[TestMethod]
+		[WorkItem(935)]
+		public void GivenFirstRunHasGaps_WhenSecondRunHasNoGaps_ThenFirstOccurrenceAtIsReset()
+		{
+			// Regression: Issue #935
+			DateTime now = DateTime.Now;
+			SeverityType severity = SeverityType.Debug;
+
+			var recordsWithGap = new List<IRecord>
+			{
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(20, now.AddSeconds(10), severity, "content", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var recordsWithNoGap = new List<IRecord>
+			{
+				new Record(30, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(40, now.AddSeconds(1), severity, "content", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var analyzer = new TimeGapUiAnalyzer();
+
+			analyzer.Analyze(recordsWithGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithNoGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+
+			analyzer.Count.Should().Be(0);
+			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
+		}
 	}
 }
