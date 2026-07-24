@@ -14,6 +14,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	{
 		private readonly object _gate;
 		private readonly Func<DateTime> _utcNow;
+		private readonly Func<bool> _isTelemetryEnabled;
 		private readonly TelemetryActiveUsageAccumulator _activeUsageAccumulator;
 		private readonly ITelemetrySessionStore _sessionStore;
 		private readonly ITelemetryUploadWorker _uploadWorker;
@@ -29,10 +30,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			Func<DateTime> utcNow,
 			TimeSpan activityLeaseDuration,
 			ITelemetrySessionStore sessionStore = null,
-			ITelemetryUploadWorker uploadWorker = null)
+			ITelemetryUploadWorker uploadWorker = null,
+			Func<bool> isTelemetryEnabled = null)
 		{
 			_gate = new object();
 			_utcNow = utcNow ?? throw new ArgumentNullException(nameof(utcNow));
+			_isTelemetryEnabled = isTelemetryEnabled ?? (() => true);
 			_activeUsageAccumulator = new TelemetryActiveUsageAccumulator(activityLeaseDuration);
 			_sessionStore = sessionStore ?? new TelemetrySessionXmlStore();
 			_client = NullTelemetryClient.Instance;
@@ -40,7 +43,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			_startupContext = StartupContext.Default;
 		}
 
-		public static TelemetrySessionLifecycle Shared { get; } = new TelemetrySessionLifecycle();
+		public static TelemetrySessionLifecycle Shared { get; } = new TelemetrySessionLifecycle(
+			() => DateTime.UtcNow,
+			DefaultActivityLeaseDuration,
+			isTelemetryEnabled: TelemetryConsent.IsEnabled);
 
 		public TelemetrySession CurrentSession { get; private set; }
 
@@ -112,12 +118,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 				if (endedSession != null)
 				{
-					TrySaveEndedSession(endedSession);
+					TrySaveEndedSessionIfEnabled(endedSession);
 				}
 
 				// Trigger a background upload of any pending sessions. The upload itself tolerates a
 				// paused Azure SQL instance by retrying after a delay, so there is no separate wake-up step.
-				_uploadWorker.TriggerUpload();
+				TryTriggerUploadIfEnabled();
 			}
 			catch (Exception exception)
 			{
@@ -141,7 +147,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 				if (endedSession != null)
 				{
-					TrySaveEndedSession(endedSession);
+					TrySaveEndedSessionIfEnabled(endedSession);
 				}
 			}
 			catch (Exception exception)
@@ -329,6 +335,39 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				return _client;
 			}
+		}
+
+		private bool IsTelemetryEnabled()
+		{
+			try
+			{
+				return _isTelemetryEnabled();
+			}
+			catch (Exception exception)
+			{
+				TrySilentlyLogWarning(exception, "Telemetry consent evaluation failed.");
+				return false;
+			}
+		}
+
+		private void TrySaveEndedSessionIfEnabled(TelemetrySession session)
+		{
+			if (!IsTelemetryEnabled())
+			{
+				return;
+			}
+
+			TrySaveEndedSession(session);
+		}
+
+		private void TryTriggerUploadIfEnabled()
+		{
+			if (!IsTelemetryEnabled())
+			{
+				return;
+			}
+
+			_uploadWorker.TriggerUpload();
 		}
 
 		// Intentional broad exception catching: telemetry persistence failures must never propagate to the user workflow.
