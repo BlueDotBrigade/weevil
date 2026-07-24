@@ -3,7 +3,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using Data;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;

@@ -160,17 +160,7 @@
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(dectectMinuteIncreasing));
 
-			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
-			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
-			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var userDialog = Substitute.For<IUserDialog>();
-			userDialog
-				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
-				.Returns(x => { x[2] = dectectMinuteIncreasing; return true; });
-			userDialog
-				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-				.Returns("Ascending");
-			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, userDialog);
+			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(dectectMinuteIncreasing));
 
 			var flaggedRecords = engine
 				.Filter.Results
@@ -191,17 +181,7 @@
 
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectSecondRollover));
 
-			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
-			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
-			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var userDialog = Substitute.For<IUserDialog>();
-			userDialog
-				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
-				.Returns(x => { x[2] = detectSecondRollover; return true; });
-			userDialog
-				.ShowUserPrompt(Arg.Any<string>(),Arg.Any<string>(),Arg.Any<string>())
-				.Returns("Ascending"); 
-			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, userDialog);
+			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(detectSecondRollover));
 
 			var flaggedRecords = engine
 				.Filter.Results
