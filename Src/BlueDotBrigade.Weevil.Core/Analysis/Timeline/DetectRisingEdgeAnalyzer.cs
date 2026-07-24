@@ -87,58 +87,49 @@
 					? records
 					: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
 
-				foreach (IRecord record in sortedRecords)
+			foreach (IRecord record in sortedRecords)
+			{
+				AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
+
+				IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+
+				foreach (KeyValuePair<string, string> current in keyValuePairs)
 				{
-					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
+					if (previous.TryGetValue(current.Key, out var previousRaw) &&
+						previousRecord.TryGetValue(current.Key, out var priorRecord) &&
+						decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
+						decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
+					{
+						var isRising = currentValue > previousValue;
+						var wasRising = isInRisingRun.TryGetValue(current.Key, out var priorState) && priorState;
 
-						foreach (RegularExpression expression in expressions)
+						if (isRising && !wasRising)
 						{
-							IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
+							// Flag the record BEFORE the rise (the valley / last stable value).
+							// Mirrors DetectFallingEdgeAnalyzer for symmetric semantics.
+							var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
-							if (keyValuePairs.Count > 0)
-							{
-								foreach (KeyValuePair<string, string> current in keyValuePairs)
-								{
-									if (!string.IsNullOrWhiteSpace(current.Value))
-									{
-                                  if (previous.TryGetValue(current.Key, out var previousRaw) &&
-										previousRecord.TryGetValue(current.Key, out var priorRecord) &&
-										decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
-										decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
-									{
-										var isRising = currentValue > previousValue;
-										var wasRising = isInRisingRun.TryGetValue(current.Key, out var priorState) && priorState;
+							count++;
 
-										if (isRising && !wasRising)
-										{
-											// Flag the record BEFORE the rise (the valley / last stable value).
-											// Mirrors DetectFallingEdgeAnalyzer for symmetric semantics.
-											var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
-
-											count++;
-
-											AnalysisHelper.UpdateRecordMetadata(
-												priorRecord,
-												true,
-												$"{parameterName}: {previousRaw} => {current.Value}",
-												canUpdateMetadata);
-										}
-
-										isInRisingRun[current.Key] = isRising;
-										previous[current.Key] = current.Value;
-										previousRecord[current.Key] = record;
-									}
-									else
-									{
-										previous[current.Key] = current.Value;
-										previousRecord[current.Key] = record;
-										isInRisingRun[current.Key] = false;
-									}
-									}
-								}
-							}
+							AnalysisHelper.UpdateRecordMetadata(
+								priorRecord,
+								true,
+								$"{parameterName}: {previousRaw} => {current.Value}",
+								canUpdateMetadata);
 						}
+
+						isInRisingRun[current.Key] = isRising;
+						previous[current.Key] = current.Value;
+						previousRecord[current.Key] = record;
+					}
+					else
+					{
+						previous[current.Key] = current.Value;
+						previousRecord[current.Key] = record;
+						isInRisingRun[current.Key] = false;
+					}
 				}
+			}
 
 			return new Results(count);
 		}
