@@ -28,7 +28,7 @@
 
 		public void UnpinAll()
 		{
-			Parallel.For(0, _coreEngine.Records.Length - 1, i =>
+			Parallel.For(0, _coreEngine.Records.Length, i =>
 			{
 				_coreEngine.Records[i].Metadata.IsPinned = false;
 			});
@@ -36,7 +36,7 @@
 
 		public void RemoveAllFlags()
 		{
-			Parallel.For(0, _coreEngine.Records.Length - 1, i =>
+			Parallel.For(0, _coreEngine.Records.Length, i =>
 			{
 				_coreEngine.Records[i].Metadata.IsFlagged = false;
 			});
