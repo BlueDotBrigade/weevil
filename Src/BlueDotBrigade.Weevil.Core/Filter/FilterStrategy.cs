@@ -98,7 +98,7 @@
 				return _expressionBuilder;
 			}
 
-			return ExpressionBuilder.CreateRegularExpressionBuilder(_filterCriteria ?? global::BlueDotBrigade.Weevil.Filter.FilterCriteria.None);
+			return ExpressionBuilder.CreateRegularExpressionBuilder(_filterCriteria);
 		}
 
 		public FilterType FilterType => _filterType;
