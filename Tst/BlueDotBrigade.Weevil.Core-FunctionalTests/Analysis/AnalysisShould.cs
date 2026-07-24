@@ -152,43 +152,57 @@
                 [TestMethod]
                 public void DetectRisingEdges()
                 {
-			var dectectMinuteIncreasing = @"\s12:(?<Minute>[0-9]{2})";
+			var detectRisingValue = @"Value=(?<Value>\d+)";
+			var filePath = CreateRisingEdgeLog();
 
-			var engine = Engine
-				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
-				.Open();
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(dectectMinuteIncreasing));
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectRisingValue));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(dectectMinuteIncreasing));
+				engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(detectRisingValue));
 
-			var flaggedRecords = engine
-				.Filter.Results
-				.Count(x => x.Metadata.IsFlagged);
+				var flaggedRecords = engine
+					.Filter.Results
+					.Count(x => x.Metadata.IsFlagged);
 
-			// Records without timestamps are ignored by timeline analyzers.
-            flaggedRecords.Should().Be(0);
+				flaggedRecords.Should().Be(1);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
 		}
 
 		[TestMethod]
                 public void DetectFallingEdges()
                 {
-                        var detectSecondRollover = @"\s12:[0-9]{2}:(?<Second>[0-9]{2})";
+                        var detectFallingValue = @"Value=(?<Value>\d+)";
+			var filePath = CreateFallingEdgeLog();
 
-                        var engine = Engine
-				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
-				.Open();
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectSecondRollover));
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectFallingValue));
 
-			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(detectSecondRollover));
+				engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(detectFallingValue));
 
-			var flaggedRecords = engine
-				.Filter.Results
-				.Count(x => x.Metadata.IsFlagged);
+				var flaggedRecords = engine
+					.Filter.Results
+					.Count(x => x.Metadata.IsFlagged);
 
-				// Records without timestamps are ignored by timeline analyzers.
-				flaggedRecords.Should().Be(0);
+				flaggedRecords.Should().Be(1);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
                 }
 
 		[TestMethod]
@@ -319,6 +333,40 @@
 			{
 				"Info 1900-01-01 12:00:00.0000 248 A=1 B=2",
 				"Info 1900-01-01 12:00:01.0000 248 A=1 B=2",
+			};
+
+			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
+			System.IO.File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+
+			return filePath;
+		}
+
+		private static string CreateRisingEdgeLog()
+		{
+			var lines = new[]
+			{
+				"1900-01-01 12:00:00.0000\t248\t1\tInformation\tValue=5",
+				"1900-01-01 12:00:01.0000\t248\t1\tInformation\tValue=4",
+				"1900-01-01 12:00:02.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=4",
+				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=5",
+			};
+
+			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
+			System.IO.File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+
+			return filePath;
+		}
+
+		private static string CreateFallingEdgeLog()
+		{
+			var lines = new[]
+			{
+				"1900-01-01 12:00:00.0000\t248\t1\tInformation\tValue=1",
+				"1900-01-01 12:00:01.0000\t248\t1\tInformation\tValue=2",
+				"1900-01-01 12:00:02.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=2",
+				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=1",
 			};
 
 			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
