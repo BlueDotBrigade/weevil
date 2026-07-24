@@ -152,7 +152,7 @@
                 [TestMethod]
                 public void DetectRisingEdges()
                 {
-			var detectRisingValue = @"Value=(?<Value>\d+)";
+			var detectRisingValuePattern = @"Value=(?<Value>\d+)";
 			var filePath = CreateRisingEdgeLog();
 
 			try
@@ -161,9 +161,9 @@
 					.UsingPath(filePath)
 					.Open();
 
-				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectRisingValue));
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectRisingValuePattern));
 
-				engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(detectRisingValue));
+				engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(detectRisingValuePattern));
 
 				var flaggedRecords = engine
 					.Filter.Results
@@ -180,7 +180,7 @@
 		[TestMethod]
                 public void DetectFallingEdges()
                 {
-                        var detectFallingValue = @"Value=(?<Value>\d+)";
+                        var detectFallingValuePattern = @"Value=(?<Value>\d+)";
 			var filePath = CreateFallingEdgeLog();
 
 			try
@@ -189,9 +189,9 @@
 					.UsingPath(filePath)
 					.Open();
 
-				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectFallingValue));
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectFallingValuePattern));
 
-				engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(detectFallingValue));
+				engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(detectFallingValuePattern));
 
 				var flaggedRecords = engine
 					.Filter.Results
