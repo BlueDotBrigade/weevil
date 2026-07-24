@@ -129,5 +129,19 @@ namespace BlueDotBrigade.Weevil.Analysis
 			// Assert
 			result.IsEmpty.Should().BeTrue();
 		}
+
+		[TestMethod]
+		public void GivenExpressionText_WhenParseAllExpressionsUsesNullBuilder_ThenReturnsEmptyArray()
+		{
+			// Regression: Issue #923
+			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
+
+			var result = AnalyzerExpressionHelper.ParseAllExpressions(
+				"Value=.*",
+				aliasExpander,
+				null);
+
+			result.IsEmpty.Should().BeTrue();
+		}
 	}
 }
