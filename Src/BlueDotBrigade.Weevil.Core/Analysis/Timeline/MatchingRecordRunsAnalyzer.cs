@@ -56,7 +56,7 @@
             }
 
             // Parse expressions with alias expansion and || support
-            var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+            var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
             ImmutableArray<IExpression> expressions = AnalyzerExpressionHelper.ParseAllExpressions(
                 customRegex,
                 _aliasExpander,

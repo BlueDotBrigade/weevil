@@ -91,6 +91,16 @@
 			return _expressionBuilder;
 		}
 
+		public ExpressionBuilder GetAnalyzerExpressionBuilder()
+		{
+			if (_filterType == FilterType.RegularExpression && _expressionBuilder != null)
+			{
+				return _expressionBuilder;
+			}
+
+			return ExpressionBuilder.CreateRegularExpressionBuilder(_filterCriteria);
+		}
+
 		public FilterType FilterType => _filterType;
 
 		public IFilterCriteria FilterCriteria => _filterCriteria;
