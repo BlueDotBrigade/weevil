@@ -211,6 +211,110 @@
 				flaggedRecords.Should().Be(8);
                 }
 
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingStateTransitions_ThenDoesNotCreateTransitionsWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.StateTransitions);
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingStableValueRuns_ThenDoesNotStartOrStopRunsWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.StableValueRuns);
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingRisingEdges_ThenDoesNotCreateEdgesWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingFallingEdges_ThenDoesNotCreateEdgesWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
+
                 private static string CreateStableValueLog()
                 {
                         var lines = new[]
@@ -228,6 +332,33 @@
 
                         return filePath;
                 }
+
+		private static string CreateOverlappingOrLog()
+		{
+			var lines = new[]
+			{
+				"Info 1900-01-01 12:00:00.0000 248 A=1 B=2",
+				"Info 1900-01-01 12:00:01.0000 248 A=1 B=2",
+			};
+
+			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
+			System.IO.File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+
+			return filePath;
+		}
+
+		private static IUserDialog CreateAscendingAnalysisDialog(string expression)
+		{
+			var userDialog = Substitute.For<IUserDialog>();
+			userDialog
+				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.Returns(x => { x[2] = expression; return true; });
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns("Ascending");
+
+			return userDialog;
+		}
 
                 private static void TryDelete(string filePath)
                 {

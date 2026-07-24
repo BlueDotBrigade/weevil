@@ -80,49 +80,40 @@
 				{
 					AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
-						foreach (RegularExpression expression in expressions)
+						IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+
+						foreach (KeyValuePair<string, string> currentState in keyValuePairs)
 						{
-							IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
-
-							if (keyValuePairs.Count > 0)
+							if (previousState.ContainsKey(currentState.Key))
 							{
-								foreach (KeyValuePair<string, string> currentState in keyValuePairs)
+								if (previousState[currentState.Key] != currentState.Value)
 								{
-									if (!string.IsNullOrWhiteSpace(currentState.Value))
-									{
-										if (previousState.ContainsKey(currentState.Key))
-										{
-											if (previousState[currentState.Key] != currentState.Value)
-											{
-												var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
+									var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
-												count++;
+									count++;
 
-												AnalysisHelper.UpdateRecordMetadata(
-													record,
-													true,
-													$"{parameterName}: {currentState.Value}",
-													canUpdateMetadata);
+									AnalysisHelper.UpdateRecordMetadata(
+										record,
+										true,
+										$"{parameterName}: {currentState.Value}",
+										canUpdateMetadata);
 
-												previousState[currentState.Key] = currentState.Value;
-											}
-										}
-										else
-										{
-											var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
-
-											count++;
-
-											AnalysisHelper.UpdateRecordMetadata(
-												record,
-												true,
-												$"{parameterName}: {currentState.Value}",
-												canUpdateMetadata);
-
-											previousState.Add(currentState.Key, currentState.Value);
-										}
-									}
+									previousState[currentState.Key] = currentState.Value;
 								}
+							}
+							else
+							{
+								var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
+
+								count++;
+
+								AnalysisHelper.UpdateRecordMetadata(
+									record,
+									true,
+									$"{parameterName}: {currentState.Value}",
+									canUpdateMetadata);
+
+								previousState.Add(currentState.Key, currentState.Value);
 							}
 						}
 				}
