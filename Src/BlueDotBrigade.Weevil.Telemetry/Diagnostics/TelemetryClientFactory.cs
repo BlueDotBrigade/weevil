@@ -28,6 +28,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
+				if (!TelemetryConsent.IsEnabled())
+				{
+					Log.Default.Write(LogSeverityType.Information, "Telemetry consent is disabled - telemetry client will not be created.");
+					return NullTelemetryClient.Instance;
+				}
+
 				MsSqlTelemetryClientOptions options = CreateOptions(TelemetryConfiguration.GetConnectionString());
 
 				if (string.IsNullOrWhiteSpace(options.UsernameOrApiToken) &&
@@ -67,7 +73,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			};
 		}
 
-     public static string GetTelemetrySource()
+		public static string GetTelemetrySource()
 		{
 			var source = GetOptionalEnvironmentValue(TelemetrySourceEnvironmentVariable);
 			return string.IsNullOrWhiteSpace(source) ? DevelopmentSource : source;

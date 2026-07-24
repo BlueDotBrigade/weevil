@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Globalization;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
@@ -109,7 +110,11 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 					if (keyValuePairs.Count == 1)
 					{
-						if (double.TryParse(keyValuePairs.First().Value, out var value))
+						if (double.TryParse(
+							keyValuePairs.First().Value,
+							NumberStyles.Float,
+							CultureInfo.InvariantCulture,
+							out var value))
 						{
 							foundValue = value;
 							break; // Take first numeric value found

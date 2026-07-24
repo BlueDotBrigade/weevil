@@ -70,49 +70,30 @@
                                         {
                                                 AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
 
-                                                        var matchedKeys = new HashSet<string>();
+                                                var matchedKeys = new HashSet<string>();
+                                                IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
 
-                                                        foreach (RegularExpression expression in expressions)
+                                                foreach (KeyValuePair<string, string> currentState in keyValuePairs)
+                                                {
+                                                        matchedKeys.Add(currentState.Key);
+
+                                                        if (activeRuns.TryGetValue(currentState.Key, out var existingRun))
                                                         {
-                                                                IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
-
-                                                                if (keyValuePairs.Count == 0)
+                                                                if (existingRun.ValueEquals(currentState.Value))
                                                                 {
-                                                                        continue;
+                                                                        existingRun.UpdateLastRecord(record);
                                                                 }
-
-                                                                foreach (KeyValuePair<string, string> currentState in keyValuePairs)
+                                                                else
                                                                 {
-                                                                        if (string.IsNullOrWhiteSpace(currentState.Value))
-                                                                        {
-                                                                                if (activeRuns.TryGetValue(currentState.Key, out var run))
-                                                                                {
-                                                                                        FinalizeRun(currentState.Key, run);
-                                                                                }
-
-                                                                                continue;
-                                                                        }
-
-                                                                        matchedKeys.Add(currentState.Key);
-
-                                                                        if (activeRuns.TryGetValue(currentState.Key, out var existingRun))
-                                                                        {
-                                                                                if (existingRun.ValueEquals(currentState.Value))
-                                                                                {
-                                                                                        existingRun.UpdateLastRecord(record);
-                                                                                }
-                                                                                else
-                                                                                {
-                                                                                        FinalizeRun(currentState.Key, existingRun);
-                                                                                        StartNewRun(currentState.Key, currentState.Value, record);
-                                                                                }
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                                StartNewRun(currentState.Key, currentState.Value, record);
-                                                                        }
+                                                                        FinalizeRun(currentState.Key, existingRun);
+                                                                        StartNewRun(currentState.Key, currentState.Value, record);
                                                                 }
                                                         }
+                                                        else
+                                                        {
+                                                                StartNewRun(currentState.Key, currentState.Value, record);
+                                                        }
+                                                }
 
                                                         if (activeRuns.Count > 0)
                                                         {
