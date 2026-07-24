@@ -348,8 +348,9 @@
 				"1900-01-01 12:00:00.0000\t248\t1\tInformation\tValue=5",
 				"1900-01-01 12:00:01.0000\t248\t1\tInformation\tValue=4",
 				"1900-01-01 12:00:02.0000\t248\t1\tInformation\tValue=3",
-				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=4",
-				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=5",
+				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=4",
+				"1900-01-01 12:00:05.0000\t248\t1\tInformation\tValue=4",
 			};
 
 			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
@@ -365,8 +366,9 @@
 				"1900-01-01 12:00:00.0000\t248\t1\tInformation\tValue=1",
 				"1900-01-01 12:00:01.0000\t248\t1\tInformation\tValue=2",
 				"1900-01-01 12:00:02.0000\t248\t1\tInformation\tValue=3",
-				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=2",
-				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=1",
+				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=2",
+				"1900-01-01 12:00:05.0000\t248\t1\tInformation\tValue=2",
 			};
 
 			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
