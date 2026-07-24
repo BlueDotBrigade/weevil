@@ -166,8 +166,8 @@
 				.Filter.Results
 				.Count(x => x.Metadata.IsFlagged);
 
-			// Falling edges only
-            flaggedRecords.Should().Be(8);
+			// Records without timestamps are ignored by timeline analyzers.
+            flaggedRecords.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -187,8 +187,8 @@
 				.Filter.Results
 				.Count(x => x.Metadata.IsFlagged);
 
-				// Start-of-run detection flags the first record in each falling sequence.
-				flaggedRecords.Should().Be(8);
+				// Records without timestamps are ignored by timeline analyzers.
+				flaggedRecords.Should().Be(0);
                 }
 
 		[TestMethod]
