@@ -86,7 +86,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			}
 
 			// Parse expressions with alias expansion and || support
-			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
 			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
 				customRegex,
 				_aliasExpander,
