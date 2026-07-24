@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
       using System.Globalization;
-	using System.Linq;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
