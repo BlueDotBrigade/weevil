@@ -82,14 +82,15 @@
 			var previousRecord = new Dictionary<string, IRecord>();
 			var isInFallingRun = new Dictionary<string, bool>();
 
-			var sortedRecords = analysisOrder == AnalysisOrder.Ascending
-					? records
-					: records.OrderByDescending((x => x.LineNumber)).ToImmutableArray();
+			foreach (IRecord record in records)
+			{
+				AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
+			}
+
+			var sortedRecords = AnalysisHelper.OrderRecordsForAnalysis(records, analysisOrder);
 
 			foreach (IRecord record in sortedRecords)
 			{
-				AnalysisHelper.ClearRecordFlag(record, canUpdateMetadata);
-
 				IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
 
 				foreach (KeyValuePair<string, string> current in keyValuePairs)
