@@ -192,6 +192,21 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			results.FlaggedRecords.Should().Be(1);
 		}
 
+		[TestMethod]
+		public void GivenMatchingTimestamps_WhenAnalyzeDescending_ThenUsesLineNumberAsStableTieBreaker()
+		{
+			// Regression: Issue #927
+			var records = AnalysisHelper.BuildRecords(
+				(1, "2024-01-01 00:00:03", "Value=2"),
+				(2, "2024-01-01 00:00:03", "Value=1"),
+				(3, "2024-01-01 00:00:01", "Value=3"));
+
+			var results = Analyze(records, @"(?<Value>\d+)$", "Descending");
+
+			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(0);
+			results.FlaggedRecords.Should().Be(1);
+		}
+
 		#endregion
 	}
 }

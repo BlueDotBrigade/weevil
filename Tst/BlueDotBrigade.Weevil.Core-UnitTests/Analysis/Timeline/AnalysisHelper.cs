@@ -44,9 +44,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             return builder.GetRecords();
         }
 
-        internal static ImmutableArray<IRecord> BuildRecords(params (int LineNumber, string Timestamp, string Content)[] records)
+        internal static ImmutableArray<IRecord> BuildRecords(params (int LineNumber, string Timestamp, string Content)[] entries)
         {
-            return records
+            return entries
                 .Select(record => (IRecord)new Record(
                     record.LineNumber,
                     string.IsNullOrWhiteSpace(record.Timestamp)
