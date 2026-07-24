@@ -59,5 +59,26 @@
 
 			_records.Clear();
 		}
+
+		[TestMethod]
+		public void GivenUiRecordsWithUnknownTimestamps_WhenAnalyzeCalled_ThenUnknownTimestampsAreIgnoredForGapDetection()
+		{
+			// Regression: Issue #925
+			var analyzer = new TimeGapUiAnalyzer();
+
+			analyzer.Analyze(
+				_records,
+				EnvironmentHelper.GetExecutableDirectory(),
+				GetUserDialog(90000),
+				canUpdateMetadata: true);
+
+			_records[1].Metadata.IsFlagged.Should().BeFalse();
+			_records[2].Metadata.IsFlagged.Should().BeTrue();
+			_records[6].Metadata.IsFlagged.Should().BeTrue();
+			_records[7].Metadata.IsFlagged.Should().BeFalse();
+			_records[8].Metadata.IsFlagged.Should().BeTrue();
+			analyzer.Count.Should().Be(3);
+			analyzer.FirstOccurrenceAt.Should().Be(_records[2].CreatedAt);
+		}
 	}
 }
