@@ -114,5 +114,26 @@
 			analyzer.Count.Should().Be(0);
 			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
 		}
+
+		[TestMethod]
+		[WorkItem(934)]
+		public void GivenInvalidThreshold_WhenAnalyzeCalled_ThenResultsNoneIsReturned()
+		{
+			// Regression: Issue #934
+			var userDialog = Substitute.For<IUserDialog>();
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns("not-a-number");
+
+			var analyzer = new TimeGapUiAnalyzer();
+
+			var results = analyzer.Analyze(
+				_records,
+				string.Empty,
+				userDialog,
+				canUpdateMetadata: false);
+
+			results.FlaggedRecords.Should().Be(0);
+		}
 	}
 }
