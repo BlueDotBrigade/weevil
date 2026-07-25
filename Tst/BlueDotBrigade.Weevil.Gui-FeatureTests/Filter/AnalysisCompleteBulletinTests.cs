@@ -6,7 +6,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	public class AnalysisCompleteBulletinTests
 	{
 		[TestMethod]
-		public void GivenDataWithNullValues_WhenBulletinCreated_ThenNullValuesDisplayAsNotApplicable()
+		public void GivenDataWithNullValues_WhenBulletinCreated_ThenNullValuesDisplayAsNA()
 		{
 			// Regression: Issue #931
 			var data = new Dictionary<string, object>
@@ -14,12 +14,18 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				{ "Count", 0d },
 				{ "Min", null },
 				{ "Max", null },
+				{ "Mean", null },
+				{ "Median", null },
+				{ "StdDev", null },
 			};
 
 			var bulletin = new AnalysisCompleteBulletin(flaggedRecords: 0, data: data);
 
 			bulletin.Data["Min"].Should().Be("N/A");
 			bulletin.Data["Max"].Should().Be("N/A");
+			bulletin.Data["Mean"].Should().Be("N/A");
+			bulletin.Data["Median"].Should().Be("N/A");
+			bulletin.Data["StdDev"].Should().Be("N/A");
 		}
 
 		[TestMethod]
