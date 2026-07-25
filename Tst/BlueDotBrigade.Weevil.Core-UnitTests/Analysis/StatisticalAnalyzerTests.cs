@@ -1,6 +1,10 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
+	using System.Collections.Immutable;
 	using System.Globalization;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Math;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
@@ -59,6 +63,46 @@ namespace BlueDotBrigade.Weevil.Analysis
 				CultureInfo.CurrentCulture = originalCulture;
 				CultureInfo.CurrentUICulture = originalUiCulture;
 			}
+		}
+
+		[TestMethod]
+		public void GivenRecordsWithoutCreationTime_WhenAnalyzeRuns_ThenRangeHasNoTimestamps()
+		{
+			// Regression: Issue #929
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, Record.CreationTimeUnknown, SeverityType.Information, "Value=10", new Metadata()),
+				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=20", new Metadata()));
+
+			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
+
+			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+
+			var range = (RangeResult)results.Data["Range"];
+			range.StartAt.Should().BeNull();
+			range.EndAt.Should().BeNull();
+		}
+
+		[TestMethod]
+		public void GivenMixedTimestampedAndUntimestampedRecords_WhenAnalyzeRuns_ThenRangeOnlyIncludesValidTimestamps()
+		{
+			// Regression: Issue #929
+			var knownTime1 = new DateTime(2024, 1, 1, 10, 0, 0);
+			var knownTime2 = new DateTime(2024, 1, 1, 10, 0, 5);
+
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(1, knownTime1, SeverityType.Information, "Value=1", new Metadata()),
+				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=2", new Metadata()),
+				new Record(3, knownTime2, SeverityType.Information, "Value=3", new Metadata()));
+
+			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
+
+			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+
+			var range = (RangeResult)results.Data["Range"];
+			range.StartAt.Should().Be(knownTime1);
+			range.EndAt.Should().Be(knownTime2);
 		}
 	}
 }
