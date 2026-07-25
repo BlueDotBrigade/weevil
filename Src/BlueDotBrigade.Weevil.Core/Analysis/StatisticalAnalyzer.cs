@@ -131,7 +131,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 				if (foundValue.HasValue)
 				{
 					count++;
-					timestamps.Add(record.CreatedAt);
+					if (record.HasCreationTime)
+					{
+						timestamps.Add(record.CreatedAt);
+					}
 					values.Add(foundValue.Value);
 
 					if (canUpdateMetadata)
