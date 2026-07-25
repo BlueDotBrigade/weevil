@@ -11,6 +11,27 @@ namespace BlueDotBrigade.Weevil.Analysis
 	public class StatisticalAnalyzerTests
 	{
 		[TestMethod]
+		public void GivenRecordsWithNoNumericMatches_WhenAnalyzeRuns_ThenResultContainsNullableMetrics()
+		{
+			// Regression: Issue #931
+			var records = R.Create()
+				.WithContent("NoNumbers")
+				.WithContent("AlsoNoNumbers")
+				.GetRecords();
+
+			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
+
+			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+
+			results.FlaggedRecords.Should().Be(0);
+			results.Data.Should().ContainKey("Min");
+			results.Data["Min"].Should().BeNull();
+			results.Data.Should().ContainKey("Max");
+			results.Data["Max"].Should().BeNull();
+		}
+
+		[TestMethod]
 		public void GivenIntegerAndDecimalValues_WhenAnalyzeRuns_ThenStatisticsAreCalculated()
 		{
 			var records = R.Create()

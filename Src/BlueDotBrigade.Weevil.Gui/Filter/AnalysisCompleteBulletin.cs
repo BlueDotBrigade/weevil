@@ -37,6 +37,10 @@
 				{
 					result.Add(kvp.Key, intValue.ToString("N0", CultureInfo.InvariantCulture));
 				}
+				else if (kvp.Value is null)
+				{
+					result.Add(kvp.Key, "N/A");
+				}
 				else
 				{
 					result.Add(kvp.Key, kvp.Value.ToString());
