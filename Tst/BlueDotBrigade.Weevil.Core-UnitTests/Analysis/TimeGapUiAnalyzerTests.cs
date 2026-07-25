@@ -134,6 +134,7 @@
 				canUpdateMetadata: false);
 
 			results.FlaggedRecords.Should().Be(0);
+			results.Should().BeSameAs(Results.None);
 		}
 	}
 }
