@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.TestTools.Data;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using NSubstitute;
@@ -26,7 +27,6 @@
 
 			return userDialog;
 		}
-
 		[TestInitialize]
 		public void PreTest()
 		{
@@ -164,6 +164,32 @@
 			records[0].Metadata.IsFlagged.Should().BeFalse();
 			records[1].Metadata.IsFlagged.Should().BeFalse();
 			records[2].Metadata.IsFlagged.Should().BeTrue();
+		}
+
+		[TestMethod]
+		[WorkItem(935)]
+		public void GivenFirstRunHasGaps_WhenSecondRunHasNoGaps_ThenFirstOccurrenceAtIsReset()
+		{
+			// Regression: Issue #935
+			DateTime now = DateTime.Now;
+
+			var recordsWithGap = R.Create()
+				.WithCreatedAt(10, now.AddSeconds(0))
+				.WithCreatedAt(20, now.AddSeconds(10))
+				.GetRecords();
+
+			var recordsWithNoGap = R.Create()
+				.WithCreatedAt(30, now.AddSeconds(0))
+				.WithCreatedAt(40, now.AddSeconds(1))
+				.GetRecords();
+
+			var analyzer = new TimeGapAnalyzer();
+
+			analyzer.Analyze(recordsWithGap, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithNoGap, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+
+			analyzer.Count.Should().Be(0);
+			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
 		}
 	}
 }
