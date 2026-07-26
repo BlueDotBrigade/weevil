@@ -253,4 +253,37 @@ internal class DialogBoxService : IDialogBoxService
 
 		return wasSuccessful;
 	}
+
+	public bool TryGetThreshold(
+		string defaultRegex,
+		string recordsDescription,
+		string defaultThreshold,
+		string defaultComparison,
+		out string regularExpression,
+		out string threshold,
+		out string comparison)
+	{
+		regularExpression = string.Empty;
+		threshold = defaultThreshold ?? "0";
+		comparison = defaultComparison ?? ">";
+		var wasSuccessful = false;
+
+		var dialog = new ThresholdDialog
+		{
+			RegularExpression = defaultRegex ?? string.Empty,
+			RecordsDescription = recordsDescription ?? "All",
+			ThresholdValue = threshold,
+			Comparison = comparison
+		};
+
+		if (dialog.ShowDialog() == true)
+		{
+			regularExpression = dialog.RegularExpression;
+			threshold = dialog.ThresholdValue;
+			comparison = dialog.Comparison;
+			wasSuccessful = true;
+		}
+
+		return wasSuccessful;
+	}
 }

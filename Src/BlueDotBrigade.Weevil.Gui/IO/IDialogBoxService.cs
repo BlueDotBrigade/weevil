@@ -23,5 +23,14 @@
 		bool TryShowGoTo(string defaultValue, out string userValue);
 
 		bool TryGetExpressions(string defaultRegex, string recordsDescription, out string regularExpression);
+
+		bool TryGetThreshold(
+			string defaultRegex,
+			string recordsDescription,
+			string defaultThreshold,
+			string defaultComparison,
+			out string regularExpression,
+			out string threshold,
+			out string comparison);
 	}
 }

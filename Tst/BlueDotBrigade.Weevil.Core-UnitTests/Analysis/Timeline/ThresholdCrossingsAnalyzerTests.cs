@@ -16,16 +16,21 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			var userDialog = Substitute.For<IUserDialog>();
 
 			userDialog
-				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.TryGetThreshold(
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					out Arg.Any<string>(),
+					out Arg.Any<string>(),
+					out Arg.Any<string>())
 				.Returns(callInfo =>
 				{
-					callInfo[2] = regex;
+					callInfo[4] = regex;
+					callInfo[5] = threshold;
+					callInfo[6] = comparison;
 					return true;
 				});
-
-			userDialog
-				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-				.Returns(threshold, comparison);
 
 			return analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 		}
@@ -71,6 +76,16 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		#endregion
+
+		[TestMethod]
+		public void GivenDialogReturnsBlankThresholdAndComparison_WhenAnalyze_ThenDefaultsAreApplied()
+		{
+			var records = AnalysisHelper.BuildIntegerRecords("1");
+			var results = Analyze(records, AnalysisHelper.IntegerRegex, string.Empty, string.Empty);
+
+			results.FlaggedRecords.Should().Be(1);
+			records[0].Metadata.IsFlagged.Should().BeTrue();
+		}
 
 		[TestMethod]
 		[DataRow("123434567", "3", "^^3434567")]

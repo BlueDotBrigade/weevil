@@ -44,5 +44,20 @@
 			regularExpression = defaultRegex ?? string.Empty;
 			return !string.IsNullOrWhiteSpace(regularExpression);
 		}
+
+		public bool TryGetThreshold(
+			string defaultRegex,
+			string recordsDescription,
+			string defaultThreshold,
+			string defaultComparison,
+			out string regularExpression,
+			out string threshold,
+			out string comparison)
+		{
+			regularExpression = defaultRegex ?? string.Empty;
+			threshold = defaultThreshold ?? "0";
+			comparison = defaultComparison ?? ">";
+			return !string.IsNullOrWhiteSpace(regularExpression);
+		}
 	}
 }
