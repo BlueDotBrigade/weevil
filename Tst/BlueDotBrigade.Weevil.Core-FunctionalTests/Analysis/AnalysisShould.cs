@@ -152,64 +152,162 @@
                 [TestMethod]
                 public void DetectRisingEdges()
                 {
-			var dectectMinuteIncreasing = @"\s12:(?<Minute>[0-9]{2})";
+			var detectRisingValuePattern = @"Value=(?<Value>\d+)";
+			var filePath = CreateRisingEdgeLog();
 
-			var engine = Engine
-				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
-				.Open();
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(dectectMinuteIncreasing));
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectRisingValuePattern));
 
-			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
-			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
-			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var userDialog = Substitute.For<IUserDialog>();
-			userDialog
-				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
-				.Returns(x => { x[2] = dectectMinuteIncreasing; return true; });
-			userDialog
-				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-				.Returns("Ascending");
-			engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, userDialog);
+				engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(detectRisingValuePattern));
 
-			var flaggedRecords = engine
-				.Filter.Results
-				.Count(x => x.Metadata.IsFlagged);
+				var flaggedRecords = engine
+					.Filter.Results
+					.Count(x => x.Metadata.IsFlagged);
 
-			// Falling edges only
-            flaggedRecords.Should().Be(8);
+				flaggedRecords.Should().Be(1);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
 		}
 
 		[TestMethod]
                 public void DetectFallingEdges()
                 {
-                        var detectSecondRollover = @"\s12:[0-9]{2}:(?<Second>[0-9]{2})";
+                        var detectFallingValuePattern = @"Value=(?<Value>\d+)";
+			var filePath = CreateFallingEdgeLog();
 
-                        var engine = Engine
-				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
-				.Open();
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
 
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectSecondRollover));
+				engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(detectFallingValuePattern));
 
-			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
-			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
-			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var userDialog = Substitute.For<IUserDialog>();
-			userDialog
-				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
-				.Returns(x => { x[2] = detectSecondRollover; return true; });
-			userDialog
-				.ShowUserPrompt(Arg.Any<string>(),Arg.Any<string>(),Arg.Any<string>())
-				.Returns("Ascending"); 
-			engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, userDialog);
+				engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(detectFallingValuePattern));
 
-			var flaggedRecords = engine
-				.Filter.Results
-				.Count(x => x.Metadata.IsFlagged);
+				var flaggedRecords = engine
+					.Filter.Results
+					.Count(x => x.Metadata.IsFlagged);
 
-				// Start-of-run detection flags the first record in each falling sequence.
-				flaggedRecords.Should().Be(8);
+				flaggedRecords.Should().Be(1);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
                 }
+
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingStateTransitions_ThenDoesNotCreateTransitionsWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.StateTransitions);
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingStableValueRuns_ThenDoesNotStartOrStopRunsWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.StableValueRuns);
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingRisingEdges_ThenDoesNotCreateEdgesWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
+
+		[TestMethod]
+		public void GivenOverlappingOrExpressions_WhenDetectingFallingEdges_ThenDoesNotCreateEdgesWithinOneRecord()
+		{
+			// Regression: Issue #926
+			var filePath = CreateOverlappingOrLog();
+
+			try
+			{
+				var engine = Engine
+					.UsingPath(filePath)
+					.Open();
+
+				engine.Filter.Apply(
+					FilterType.RegularExpression,
+					new FilterCriteria(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
+
+				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+			}
+			finally
+			{
+				TryDelete(filePath);
+			}
+		}
 
                 private static string CreateStableValueLog()
                 {
@@ -228,6 +326,69 @@
 
                         return filePath;
                 }
+
+		private static string CreateOverlappingOrLog()
+		{
+			var lines = new[]
+			{
+				"Info 1900-01-01 12:00:00.0000 248 A=1 B=2",
+				"Info 1900-01-01 12:00:01.0000 248 A=1 B=2",
+			};
+
+			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
+			System.IO.File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+
+			return filePath;
+		}
+
+		private static string CreateRisingEdgeLog()
+		{
+			var lines = new[]
+			{
+				"1900-01-01 12:00:00.0000\t248\t1\tInformation\tValue=5",
+				"1900-01-01 12:00:01.0000\t248\t1\tInformation\tValue=4",
+				"1900-01-01 12:00:02.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=4",
+				"1900-01-01 12:00:05.0000\t248\t1\tInformation\tValue=4",
+			};
+
+			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
+			System.IO.File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+
+			return filePath;
+		}
+
+		private static string CreateFallingEdgeLog()
+		{
+			var lines = new[]
+			{
+				"1900-01-01 12:00:00.0000\t248\t1\tInformation\tValue=1",
+				"1900-01-01 12:00:01.0000\t248\t1\tInformation\tValue=2",
+				"1900-01-01 12:00:02.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:03.0000\t248\t1\tInformation\tValue=3",
+				"1900-01-01 12:00:04.0000\t248\t1\tInformation\tValue=2",
+				"1900-01-01 12:00:05.0000\t248\t1\tInformation\tValue=2",
+			};
+
+			var filePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.log");
+			System.IO.File.WriteAllText(filePath, string.Join(Environment.NewLine, lines));
+
+			return filePath;
+		}
+
+		private static IUserDialog CreateAscendingAnalysisDialog(string expression)
+		{
+			var userDialog = Substitute.For<IUserDialog>();
+			userDialog
+				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.Returns(x => { x[2] = expression; return true; });
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns("Ascending");
+
+			return userDialog;
+		}
 
                 private static void TryDelete(string filePath)
                 {

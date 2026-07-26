@@ -19,7 +19,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// </summary>
 		/// <remarks>
 		/// Telemetry must never crash the host application: any failure while reading configuration or
-		/// decrypting credentials (for example, a secret encrypted on a different machine) is swallowed
+		/// decrypting credentials (for example, a malformed or unsupported encrypted secret) is swallowed
 		/// and the no-op <see cref="NullTelemetryClient"/> is returned instead.
 		/// </remarks>
 		// Intentional broad exception catching: telemetry setup must never propagate to the user workflow.
@@ -28,6 +28,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
+				if (!TelemetryConsent.IsEnabled())
+				{
+					Log.Default.Write(LogSeverityType.Information, "Telemetry consent is disabled - telemetry client will not be created.");
+					return NullTelemetryClient.Instance;
+				}
+
 				MsSqlTelemetryClientOptions options = CreateOptions(TelemetryConfiguration.GetConnectionString());
 
 				if (string.IsNullOrWhiteSpace(options.UsernameOrApiToken) &&
@@ -67,7 +73,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			};
 		}
 
-     public static string GetTelemetrySource()
+		public static string GetTelemetrySource()
 		{
 			var source = GetOptionalEnvironmentValue(TelemetrySourceEnvironmentVariable);
 			return string.IsNullOrWhiteSpace(source) ? DevelopmentSource : source;

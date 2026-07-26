@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Filter;
 
 	internal class ExpressionBuilder
 	{
@@ -52,6 +53,13 @@
 
 
 			return new ExpressionBuilder(ImmutableArray.Create(factories.ToArray()));
+		}
+
+		public static ExpressionBuilder CreateRegularExpressionBuilder(IFilterCriteria criteria)
+		{
+			return new ExpressionBuilder(
+				ImmutableArray.Create<IExpressionFactory>(
+					new Regular.ExpressionFactory(criteria ?? FilterCriteria.None)));
 		}
 	}
 }

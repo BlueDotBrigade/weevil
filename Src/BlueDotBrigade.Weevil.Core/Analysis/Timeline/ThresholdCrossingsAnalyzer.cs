@@ -45,7 +45,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
-			var expressionBuilder = _filterStrategy.GetExpressionBuilder();
+			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
 			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
 				customRegex,
 				_aliasExpander,

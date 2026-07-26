@@ -2,6 +2,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System;
 	using System.Collections.Immutable;
+	using System.Linq;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 	using Filter;
 	using Filter.Expressions.Regular;
@@ -54,6 +56,28 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				nameof(userInput),
 				userInput,
 				"Unable to perform operation. The analysis order was expected to be either: Ascending or Descending");
+		}
+
+		/// <summary>
+		/// Orders records chronologically for timeline analysis.
+		/// </summary>
+		/// <remarks>
+		/// Records without timestamps are ignored because they cannot be placed in a deterministic chronological order.
+		/// Records sharing the same timestamp are ordered by <see cref="IRecord.LineNumber"/> to preserve file order.
+		/// </remarks>
+		public static ImmutableArray<IRecord> OrderRecordsForAnalysis(ImmutableArray<IRecord> records, AnalysisOrder analysisOrder)
+		{
+			IOrderedEnumerable<IRecord> orderedRecords = analysisOrder == AnalysisOrder.Ascending
+				? records
+					.Where(record => record.HasCreationTime)
+					.OrderBy(record => record.CreatedAt)
+				: records
+					.Where(record => record.HasCreationTime)
+					.OrderByDescending(record => record.CreatedAt);
+
+			return orderedRecords
+				.ThenBy(record => record.LineNumber)
+				.ToImmutableArray();
 		}
 
 		/// <summary>

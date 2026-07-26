@@ -59,5 +59,82 @@
 
 			_records.Clear();
 		}
+
+		[TestMethod]
+		public void GivenUiRecordsWithUnknownTimestamps_WhenAnalyzeCalled_ThenUnknownTimestampsAreIgnoredForGapDetection()
+		{
+			// Regression: Issue #925
+			var analyzer = new TimeGapUiAnalyzer();
+			IRecord firstUntimestampedUiRecord = _records[1];
+			IRecord firstTimestampedUiRecordAfterUnknownTime = _records[2];
+			IRecord laterTimestampedUiRecordWithGap = _records[6];
+			IRecord secondUntimestampedUiRecord = _records[7];
+			IRecord finalTimestampedUiRecordAfterUnknownTime = _records[8];
+
+			analyzer.Analyze(
+				_records,
+				EnvironmentHelper.GetExecutableDirectory(),
+				GetUserDialog(90000),
+				canUpdateMetadata: true);
+
+			firstUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
+			firstTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
+			laterTimestampedUiRecordWithGap.Metadata.IsFlagged.Should().BeTrue();
+			secondUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
+			finalTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
+			analyzer.Count.Should().Be(3);
+			analyzer.FirstOccurrenceAt.Should().Be(firstTimestampedUiRecordAfterUnknownTime.CreatedAt);
+		}
+
+		[TestMethod]
+		[WorkItem(935)]
+		public void GivenFirstRunHasGaps_WhenSecondRunHasNoGaps_ThenFirstOccurrenceAtIsReset()
+		{
+			// Regression: Issue #935
+			DateTime now = DateTime.Now;
+			SeverityType severity = SeverityType.Debug;
+
+			var recordsWithGap = new List<IRecord>
+			{
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(20, now.AddSeconds(10), severity, "content", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var recordsWithNoGap = new List<IRecord>
+			{
+				new Record(30, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(40, now.AddSeconds(1), severity, "content", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var analyzer = new TimeGapUiAnalyzer();
+
+			analyzer.Analyze(recordsWithGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithNoGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+
+			analyzer.Count.Should().Be(0);
+			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
+		}
+
+		[TestMethod]
+		[WorkItem(934)]
+		public void GivenInvalidThreshold_WhenAnalyzeCalled_ThenResultsNoneIsReturned()
+		{
+			// Regression: Issue #934
+			var userDialog = Substitute.For<IUserDialog>();
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns("not-a-number");
+
+			var analyzer = new TimeGapUiAnalyzer();
+
+			var results = analyzer.Analyze(
+				_records,
+				string.Empty,
+				userDialog,
+				canUpdateMetadata: false);
+
+			results.FlaggedRecords.Should().Be(0);
+			results.Should().BeSameAs(Results.None);
+		}
 	}
 }

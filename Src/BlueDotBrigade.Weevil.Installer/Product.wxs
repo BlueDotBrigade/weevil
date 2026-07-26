@@ -10,7 +10,7 @@
 		<Property Id="ARPHELPLINK" Value="http://Weevil.BlueDotBrigade.com" />
 		<Property Id="ARPCONTACT" Value="Blue Dot Brigade" />
 		<Property Id="ARPURLINFOABOUT" Value="http://Weevil.BlueDotBrigade.com" />
-		<Property Id="WEEVIL_COLLECT_ANONYMOUS_METRICS" Value="1" />
+		<Property Id="WEEVIL_TELEMETRY_ENABLED" Value="1" />
 		<WixVariable Id="WixUILicenseRtf" Value="$(var.InstallerLicenseRtfPath)" />
 		<ui:WixUI Id="WixUI_InstallDir_TelemetryDlg" InstallDirectory="INSTALLFOLDER" />
 
@@ -28,9 +28,11 @@
 			<ComponentGroupRef Id="generated_weevil_bin_files" />
 			<ComponentGroupRef Id="generated_documentation_doc_files" />
 			<ComponentGroupRef Id="generated_documentation_license_files" />
+			<ComponentGroupRef Id="TelemetryCredentialsComponents" />
 			
 			<ComponentRef Id="WeevilShortcut" />
 			<ComponentRef Id="ScriptsPathComponent" />
+			<ComponentRef Id="WeevilLogFileAssociation" />
 			<ComponentGroupRef Id="RegistryKeys" />
 		</Feature>
 	</Package>
@@ -67,45 +69,68 @@
 					Action="set"
 					Part="all"
 					System="yes" />
-			</Component>
-			<Component Id="TelemetryUsernameEnabledComponent" Guid="1D8C66F0-8E03-4F06-B575-58254B6F35BE" Condition="WEEVIL_COLLECT_ANONYMOUS_METRICS = &quot;1&quot;">
-				<Environment Id="WeevilTelemetryUsernameEnabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_USERNAME"
-					Value="weevil_telemetry_producer"
+				<Environment Id="WeevilTelemetryEnabledEnvironmentVariable"
+					Name="WEEVIL_TELEMETRY_ENABLED"
+					Value="[WEEVIL_TELEMETRY_ENABLED]"
 					Action="set"
-					Part="all"
-					System="yes" />
-				<!--
-					An empty string will result in a compiler error.
-					WIX0006 : The Environment/@Value attribute's value cannot be an empty string. If a value is not required, simply remove the entire attribute.
-				-->
-				<Environment Id="WeevilTelemetrySecretEnabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_SECRET"
-					Value="NOT_SET"
-					Action="set"
-					Part="all"
-					System="yes" />
-			</Component>
-			<Component Id="TelemetryUsernameDisabledComponent" Guid="8AFBB0A6-E049-4D07-91FB-E38A90CA7E92" Condition="WEEVIL_COLLECT_ANONYMOUS_METRICS &lt;&gt; &quot;1&quot;">
-				<Environment Id="WeevilTelemetryUsernameDisabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_USERNAME"
-					Action="remove"
-					Part="all"
-					System="yes" />
-				<Environment Id="WeevilTelemetrySecretDisabledEnvironmentVariable"
-					Name="WEEVIL_TELEMETRY_SECRET"
-					Action="remove"
 					Part="all"
 					System="yes" />
 			</Component>
 		</ComponentGroup>
 	</Fragment>
 	<Fragment>
+		<DirectoryRef Id="INSTALLFOLDER">
+			<Component Id="WeevilLogFileAssociation" Guid="84FACF5A-7EF5-4285-84B6-FC96F4A08177">
+				<RegistryKey Root="HKLM" Key="Software\RegisteredApplications">
+					<RegistryValue Name="Weevil" Type="string" Value="Software\BlueDotBrigade\Weevil\Capabilities" />
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\BlueDotBrigade\Weevil\Capabilities">
+					<RegistryValue Name="ApplicationName" Type="string" Value="Weevil" KeyPath="yes" />
+					<RegistryValue Name="ApplicationDescription" Type="string" Value="View and analyze log files using Weevil." />
+					<RegistryKey Key="FileAssociations">
+						<RegistryValue Name=".log" Type="string" Value="BlueDotBrigade.Weevil.LogFile" />
+					</RegistryKey>
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\Classes\BlueDotBrigade.Weevil.LogFile">
+					<RegistryValue Type="string" Value="Log File" />
+					<RegistryValue Name="FriendlyTypeName" Type="string" Value="Log File" />
+					<RegistryKey Key="DefaultIcon">
+						<RegistryValue Type="string" Value="&quot;[InstallFolderBin]WeevilGui.exe&quot;,0" />
+					</RegistryKey>
+					<RegistryKey Key="shell">
+						<RegistryValue Type="string" Value="open" />
+						<RegistryKey Key="open">
+							<RegistryKey Key="command">
+								<RegistryValue Type="string" Value="&quot;[InstallFolderBin]WeevilGui.exe&quot; &quot;%1&quot;" />
+							</RegistryKey>
+						</RegistryKey>
+					</RegistryKey>
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\Classes\.log\OpenWithProgids">
+					<RegistryValue Name="BlueDotBrigade.Weevil.LogFile" Type="string" Value="" />
+				</RegistryKey>
+
+				<RegistryKey Root="HKLM" Key="Software\Classes\Applications\WeevilGui.exe">
+					<RegistryValue Name="FriendlyAppName" Type="string" Value="Weevil" />
+					<RegistryKey Key="SupportedTypes">
+						<RegistryValue Name=".log" Type="string" Value="" />
+					</RegistryKey>
+					<RegistryKey Key="shell\open\command">
+						<RegistryValue Type="string" Value="&quot;[InstallFolderBin]WeevilGui.exe&quot; &quot;%1&quot;" />
+					</RegistryKey>
+				</RegistryKey>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+	<Fragment>
 		<UI>
 			<Dialog Id="TelemetryDialog" Width="370" Height="270" Title="[ProductName] Setup">
 				<Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Telemetry" />
 				<Control Id="Description" Type="Text" X="20" Y="23" Width="330" Height="30" Transparent="yes" NoPrefix="yes" Text="Knowing how the application is being used helps to improve the user experience.&#xD;&#xA;For example: How often is the dashboard opened?" />
-				<Control Id="TelemetryOptInCheckbox" Type="CheckBox" X="20" Y="90" Width="330" Height="17" Property="WEEVIL_COLLECT_ANONYMOUS_METRICS" CheckBoxValue="1" Text="Collect anonymous metrics?" />
+				<Control Id="TelemetryOptInCheckbox" Type="CheckBox" X="20" Y="90" Width="330" Height="17" Property="WEEVIL_TELEMETRY_ENABLED" CheckBoxValue="1" Text="Collect anonymous metrics?" />
 				<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 				<Control Id="TelemetryExplanation" Type="Text" X="20" Y="202" Width="330" Height="30" Transparent="yes" NoPrefix="yes" Text="No personal or proprientary information will be collected (e.g. filters, filenames, etc.)." />
 				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />

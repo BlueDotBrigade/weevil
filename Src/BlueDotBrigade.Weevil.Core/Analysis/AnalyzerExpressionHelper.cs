@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
@@ -99,13 +100,61 @@ namespace BlueDotBrigade.Weevil.Analysis
 					continue;
 				}
 
-				if (expressionBuilder.TryGetExpression(trimmedSegment, out var expression))
+				if (expressionBuilder != null && expressionBuilder.TryGetExpression(trimmedSegment, out var expression))
 				{
 					results.Add(expression);
 				}
 			}
 
 			return results.ToImmutableArray();
+		}
+
+		/// <summary>
+		/// Collects non-empty named-group values for a single record across multiple expressions.
+		/// Conflicting values for the same key are treated as ambiguous and ignored for that record.
+		/// </summary>
+		/// <param name="expressions">The expressions to evaluate.</param>
+		/// <param name="record">The record being analyzed.</param>
+		/// <returns>A dictionary containing at most one resolved value per key for the record.</returns>
+		public static Dictionary<string, string> GetResolvedKeyValuePairs(
+			ImmutableArray<RegularExpression> expressions,
+			IRecord record)
+		{
+			var resolvedValues = new Dictionary<string, string>();
+			var ambiguousKeys = new HashSet<string>();
+
+			foreach (RegularExpression expression in expressions)
+			{
+				IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
+
+				if (keyValuePairs.Count == 0)
+				{
+					continue;
+				}
+
+				foreach (KeyValuePair<string, string> currentState in keyValuePairs)
+				{
+					if (string.IsNullOrWhiteSpace(currentState.Value) || ambiguousKeys.Contains(currentState.Key))
+					{
+						continue;
+					}
+
+					if (resolvedValues.TryGetValue(currentState.Key, out var existingValue))
+					{
+						if (existingValue != currentState.Value)
+						{
+							resolvedValues.Remove(currentState.Key);
+							ambiguousKeys.Add(currentState.Key);
+						}
+					}
+					else
+					{
+						resolvedValues.Add(currentState.Key, currentState.Value);
+					}
+				}
+			}
+
+			return resolvedValues;
 		}
 	}
 }

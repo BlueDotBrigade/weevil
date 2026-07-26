@@ -39,12 +39,14 @@
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
+			Results results = Results.None;
+
 			if (TryGetTolerance(userDialog, out TimeSpan maximumAllowedPeriod))
 			{
-				Analyze(records, maximumAllowedPeriod, canUpdateMetadata);
+				results = Analyze(records, maximumAllowedPeriod, canUpdateMetadata);
 			}
 
-			return new Results(this.Count);
+			return results;
 		}
 
 		private static int IndexOfFirstTimestamp(ImmutableArray<IRecord> records)
@@ -76,6 +78,7 @@
 
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = 0;
+			_firstOccurrenceAt = DateTime.MaxValue;
 
 			var previous = IndexOfFirstTimestamp(records);
 
@@ -100,7 +103,7 @@
 						currentRecord.Metadata.IsFlagged = false;
 					}
 
-					if (currentRecord.Metadata.WasGeneratedByUi)
+					if (currentRecord.HasCreationTime && currentRecord.Metadata.WasGeneratedByUi)
 					{
 						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
 
@@ -151,6 +154,13 @@
 				DefaultThreshold.TotalMilliseconds.ToString("0.#"));
 
 			var wasSuccessful = int.TryParse(userInput, out var timePeriodInMs);
+
+			if (!wasSuccessful)
+			{
+				Log.Default.Write(
+					LogSeverityType.Error,
+					$"Unable to perform the temporal analysis because an unexpected input was received. Input={userInput}");
+			}
 
 			unresponsivenessPeriod = wasSuccessful ? TimeSpan.FromMilliseconds(timePeriodInMs) : TimeSpan.Zero;
 

@@ -7,7 +7,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 	internal static class RecordAnalyzerTestContext
 	{
-		public static FilterStrategy CreateFilterStrategy()
+		public static FilterStrategy CreateFilterStrategy(FilterType filterType = FilterType.RegularExpression)
 		{
 			var coreExtension = Substitute.For<ICoreExtension>();
 			var context = new ContextDictionary();
@@ -22,7 +22,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				coreExtension,
 				context,
 				filterAliasExpander,
-				FilterType.RegularExpression,
+				filterType,
 				filterCriteria,
 				regionManager,
 				bookmarkManager);
