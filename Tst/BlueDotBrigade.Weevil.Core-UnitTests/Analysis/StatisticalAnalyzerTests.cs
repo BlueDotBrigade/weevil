@@ -45,7 +45,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
-			results.FlaggedRecords.Should().Be(3);
+			results.FlaggedRecords.Should().Be(0);
+			records.Should().NotContain(record => record.Metadata.IsFlagged);
 			results.Data.Should().ContainKey("Mean");
 			results.Data["Mean"].Should().Be(2.167d);
 			results.Data["Count"].Should().Be(3d);
@@ -75,7 +76,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 				Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 
-				results.FlaggedRecords.Should().Be(1);
+				results.FlaggedRecords.Should().Be(0);
+				records.Should().NotContain(record => record.Metadata.IsFlagged);
 				results.Data["Count"].Should().Be(1d);
 				results.Data["Mean"].Should().Be(2.5d);
 			}
@@ -99,6 +101,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
 
+			results.Data["Count"].Should().Be(2d);
+			results.Data["Mean"].Should().Be(15d);
 			var range = (RangeResult)results.Data["Range"];
 			range.StartAt.Should().BeNull();
 			range.EndAt.Should().BeNull();
@@ -121,6 +125,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
 
+			results.Data["Count"].Should().Be(3d);
+			results.Data["Mean"].Should().Be(2d);
 			var range = (RangeResult)results.Data["Range"];
 			range.StartAt.Should().Be(knownTime1);
 			range.EndAt.Should().Be(knownTime2);
