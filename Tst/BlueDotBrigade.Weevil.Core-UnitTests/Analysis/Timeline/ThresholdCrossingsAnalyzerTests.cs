@@ -16,16 +16,21 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			var userDialog = Substitute.For<IUserDialog>();
 
 			userDialog
-				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.TryGetThreshold(
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					out Arg.Any<string>(),
+					out Arg.Any<string>(),
+					out Arg.Any<string>())
 				.Returns(callInfo =>
 				{
-					callInfo[2] = regex;
+					callInfo[4] = regex;
+					callInfo[5] = threshold;
+					callInfo[6] = comparison;
 					return true;
 				});
-
-			userDialog
-				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-				.Returns(threshold, comparison);
 
 			return analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
 		}
