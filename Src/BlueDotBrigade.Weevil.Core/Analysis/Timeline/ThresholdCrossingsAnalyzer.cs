@@ -34,8 +34,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			var count = 0;
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
 			var recordsDescription = records.Length.ToString("N0");
+			const string defaultThreshold = "0";
+			const string defaultComparison = ">";
 
-			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
+			if (!userDialog.TryGetThreshold(
+				defaultRegex,
+				recordsDescription,
+				defaultThreshold,
+				defaultComparison,
+				out var customRegex,
+				out var thresholdInput,
+				out var comparisonInput))
 			{
 				return new Results(0);
 			}
@@ -56,12 +65,12 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
-			if (!TryGetThreshold(userDialog, out var threshold))
+			if (!decimal.TryParse(thresholdInput, NumberStyles.Float, CultureInfo.InvariantCulture, out var threshold))
 			{
 				return new Results(0);
 			}
 
-			if (!TryGetComparison(userDialog, out var comparison))
+			if (!TryGetComparison(comparisonInput, out var comparison))
 			{
 				return new Results(0);
 			}
@@ -113,23 +122,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			return new Results(count);
 		}
 
-		private static bool TryGetThreshold(IUserDialog userDialog, out decimal threshold)
+		private static bool TryGetComparison(string userInput, out ThresholdComparison comparison)
 		{
-			var userInput = userDialog.ShowUserPrompt(
-				"Threshold Crossings",
-				"Threshold value:",
-				"0");
-
-			return decimal.TryParse(userInput, NumberStyles.Float, CultureInfo.InvariantCulture, out threshold);
-		}
-
-		private static bool TryGetComparison(IUserDialog userDialog, out ThresholdComparison comparison)
-		{
-			var userInput = userDialog.ShowUserPrompt(
-				"Threshold Crossings",
-				"Comparison (>, >=, <, <=):",
-				">");
-
 			if (TryMapComparison(userInput, out comparison))
 			{
 				return true;
