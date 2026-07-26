@@ -360,6 +360,9 @@ MigrationBackup/
 !/Src/BlueDotBrigade.Weevil.Plugins/ReadMe.md
 !/Src/BlueDotBrigade.Weevil.Plugins/BlueDotBrigade.Weevil.Plugins.csproj
 
+# Never commit telemetry credential authoring files (contains secrets).
+**/TelemetryCredentials.wxs
+
 # We require log files for testing purposes (logs were previously blocked by global gitignore):
 !*.log
 
