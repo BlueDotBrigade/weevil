@@ -78,6 +78,16 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		#endregion
 
 		[TestMethod]
+		public void GivenDialogReturnsBlankThresholdAndComparison_WhenAnalyze_ThenDefaultsAreApplied()
+		{
+			var records = AnalysisHelper.BuildIntegerRecords("1");
+			var results = Analyze(records, AnalysisHelper.IntegerRegex, string.Empty, string.Empty);
+
+			results.FlaggedRecords.Should().Be(1);
+			records[0].Metadata.IsFlagged.Should().BeTrue();
+		}
+
+		[TestMethod]
 		[DataRow("123434567", "3", "^^3434567")]
 		[DataRow("123434567", "4", "^^^4^4567")]
 		[DataRow("123434567", "5", "^^^^^^567")]
