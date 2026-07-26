@@ -8,21 +8,6 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	[TestClass]
 	public class SecretProtectorTests
 	{
-		// Decodes to "01234567890123456789012345678901" (32 ASCII bytes).
-		private const string TestEncryptionKeyBase64 = "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=";
-
-		[TestInitialize]
-		public void TestInitialize()
-		{
-			SecretProtector.EncryptionKeyBase64Override = TestEncryptionKeyBase64;
-		}
-
-		[TestCleanup]
-		public void TestCleanup()
-		{
-			SecretProtector.EncryptionKeyBase64Override = null;
-		}
-
 		// ─── IsProtected ───────────────────────────────────────────────────────────
 
 		[TestMethod]
@@ -91,6 +76,17 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			var result = SecretProtector.Encrypt("my-secret");
 
 			SecretProtector.IsProtected(result).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenPlaceholderEncryptionKey_WhenEncryptCalled_ThenValueCanBeEncryptedAndDecrypted()
+		{
+			// Regression: Issue #915
+			var encrypted = SecretProtector.Encrypt("my-secret");
+			var decrypted = SecretProtector.Decrypt(encrypted);
+
+			encrypted.Should().StartWith(SecretProtector.EncryptedPrefix);
+			decrypted.Should().Be("my-secret");
 		}
 
 		// ─── Decrypt ───────────────────────────────────────────────────────────────
