@@ -49,6 +49,14 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
+			thresholdInput = string.IsNullOrWhiteSpace(thresholdInput)
+				? defaultThreshold
+				: thresholdInput;
+
+			comparisonInput = string.IsNullOrWhiteSpace(comparisonInput)
+				? defaultComparison
+				: comparisonInput;
+
 			if (string.IsNullOrWhiteSpace(customRegex))
 			{
 				return new Results(0);
