@@ -165,5 +165,33 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(SecretVariable, originalSecret);
 			}
 		}
+
+		[TestMethod]
+		[DataRow("", "")]
+		[DataRow("NOT_SET", "")]
+		[DataRow("Secret", "Secret")]
+		public void CreateOptions_UsingDifferentPasswords_ReturnsPasswordOnlyWhenSet(string password, string actualPassword)
+		{
+			// Regression: Issue #919
+			var originalEnabled = Environment.GetEnvironmentVariable(EnabledVariable);
+			var originalUserName = Environment.GetEnvironmentVariable(UserNameVariable);
+			var originalSecret = Environment.GetEnvironmentVariable(SecretVariable);
+
+			try
+			{
+				Environment.SetEnvironmentVariable(EnabledVariable, "1");
+				Environment.SetEnvironmentVariable(UserNameVariable, "j.doe");
+				Environment.SetEnvironmentVariable(SecretVariable, password);
+
+				var options = TelemetryClientFactory.CreateOptions("Server=localhost;Database=Weevil;");
+				options.Secret.Should().Be(actualPassword);
+			}
+			finally
+			{
+				Environment.SetEnvironmentVariable(EnabledVariable, originalEnabled);
+				Environment.SetEnvironmentVariable(UserNameVariable, originalUserName);
+				Environment.SetEnvironmentVariable(SecretVariable, originalSecret);
+			}
+		}
 	}
 }

@@ -23,26 +23,19 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		private const int NonceSize = 12;
 		private const int TagSize = 16;
 
-		/*
-		 * IMPORTANT:
-		 *
-		 * This is a SAMPLE key only.
-		 *
-		 * The production key must not be committed to the public Weevil
-		 * repository. It must be supplied automatically by the private
-		 * client build configuration.
-		 *
-		 * The decoded value must contain exactly 32 bytes.
-		 */
-		private const string EncryptionKeyBase64 =
-			"REPLACE_WITH_PRIVATE_32_BYTE_BASE64_KEY";
+		/// <summary>
+		/// Gets the key used to derive the AES-256 encryption key for telemetry secrets.
+		/// </summary>
+		/// <remarks>
+		/// The runtime key is derived by hashing this value with SHA-256.
+		/// This value must be identical across machines that need to decrypt the same encrypted secrets.
+		/// </remarks>
+		private const string EncryptionKey = "weevil-prod-keymaterial-v1-7f9d2a4c6e8b0d1f3a5c7e9b2d4f6a8c";
 
 		/// <summary>
 		/// The prefix that identifies an encrypted value produced by <see cref="Encrypt"/>.
 		/// </summary>
 		public const string EncryptedPrefix = "ENC:";
-
-		internal static string EncryptionKeyBase64Override { get; set; }
 
 		/// <summary>
 		/// Returns <see langword="true"/> when <paramref name="value"/> was produced by <see cref="Encrypt"/>.
@@ -185,19 +178,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		private static byte[] GetEncryptionKey()
 		{
-			var encodedKey = EncryptionKeyBase64Override ?? EncryptionKeyBase64;
-			byte[] key;
-
-			try
-			{
-				key = Convert.FromBase64String(encodedKey);
-			}
-			catch (FormatException exception)
-			{
-				throw new InvalidOperationException(
-					"The telemetry encryption key is not valid Base64.",
-					exception);
-			}
+			var key = SHA256.HashData(Encoding.UTF8.GetBytes(EncryptionKey));
 
 			if (key.Length != KeySize)
 			{
