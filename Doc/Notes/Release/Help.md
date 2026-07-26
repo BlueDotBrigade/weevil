@@ -15,6 +15,7 @@
   - [Detecting Threshold Crossings](#detecting-threshold-crossings)
   - [Detecting an Unresponsive UI](#detecting-an-unresponsive-ui)
   - [Detecting Gaps in Logging](#detecting-gaps-in-logging)
+  - [Summarizing Numeric Data](#summarizing-numeric-data)
 - [Creating a Line Graph](#creating-a-line-graph)
 - [Dashboard](#dashboard)
 - [Appendices](#appendices)
@@ -261,21 +262,13 @@ Analysis is most useful when your filter includes a named group, because Weevil 
 
 ### Detecting Data
 
-Weevil includes several analyzers that flag relevant records and can copy named-group values into the record comment field.
+Most analyzers in this section work best when your filter contains a named group.
 
-A record is flagged and a comment is created when:
+Example filter:
 
-- `Detect Data`: the regular expression matches the record content
-- `Detect First`: the first occurrence of a unique value is found
-- `Detect Data Transitions`: the captured value changes from one record to the next
-- `Detect Rising Edges`: the captured value increases from one record to the next
-- `Detect Falling Edges`: the captured value decreases from one record to the next
-- `Threshold Crossings`: the captured numeric value satisfies a threshold comparison:
-  - greater than (`>`)
-  - greater than or equal to (`>=`)
-  - less than (`<`)
-  - less than or equal to (`<=`)
-- `Detect Temporal Anomalies`: record timestamps appear out of order
+```text
+User=(?<User>[a-zA-Z0-9_]+)
+```
 
 Typical workflow:
 
@@ -286,19 +279,108 @@ Typical workflow:
    - `@Comment` to show all records with extracted comments
    - `@Flagged` to show records matched by the previous analysis
 
-Example use cases:
+#### `Detect Data`
 
-- detect when a serial number changes
-- detect the first time a user or session appears
-- detect when a counter starts increasing rapidly
-- detect when records appear out of timestamp order
+Flags every matching record and copies the captured value into the comment.
+
+```text
+User=alice
+User=bob
+```
+
+#### `First Occurrence`
+
+Flags the first time each distinct value appears. Use it to find when a user, session, or ID first showed up.
+
+```text
+User=alice   <- flagged
+User=alice
+User=bob     <- flagged
+```
+
+#### `Last Occurrence`
+
+Flags the last time each distinct value appears. Use it to find when a user, session, or ID was seen for the final time.
+
+```text
+User=alice
+User=alice   <- flagged
+User=bob     <- flagged
+```
+
+#### `State Transitions`
+
+Flags the first matching value and every later change. Use it when a state flips between values such as `Starting`, `Ready`, and `Stopped`.
+
+```text
+State=Starting   <- flagged
+State=Starting
+State=Ready      <- flagged
+State=Stopped    <- flagged
+```
+
+#### `Detect Rising Edges`
+
+Flags the record immediately before a rise starts. Use it to find valleys or the point where a counter began climbing.
+
+```text
+Queue=7
+Queue=5   <- flagged
+Queue=8
+Queue=9
+```
+
+#### `Detect Falling Edges`
+
+Flags the record immediately before a drop starts. Use it to find peaks or the point where a value began falling.
+
+```text
+Cpu=70
+Cpu=74   <- flagged
+Cpu=72
+Cpu=71
+```
+
+#### `Stable Value Runs`
+
+This is a **run** analyzer. It flags the start and end of each consecutive same-value stretch, so you can see where a steady period began and ended.
+
+```text
+Mode=Loading   <- flagged: run starts
+Mode=Loading
+Mode=Loading   <- flagged: run ends
+Mode=Ready
+```
+
+Use this when you care about the boundaries of a stable period, for example "when were we stuck in `Retrying`?".
+
+#### `Matching Record Runs`
+
+This is a **run** analyzer. It flags the start and end of each block of **2 or more** consecutive matching records. A one-off isolated match is ignored.
+
+```text
+ERROR Timeout   <- flagged: run starts
+ERROR Timeout
+ERROR Timeout   <- flagged: run ends
+INFO Recovered
+```
+
+Use this when repeated matching lines matter more than isolated one-off lines.
 
 ### Detecting Threshold Crossings
 
-Use this analyzer when you need to answer questions like:
+Flags records whose captured numeric value satisfies a comparison such as `>`, `>=`, `<`, or `<=`.
+
+Use it for questions like:
 
 - "When was latency greater than 200?"
 - "When was CPU less than or equal to 20?"
+
+```text
+LatencyMs=120
+LatencyMs=260   <- flagged when threshold is > 200
+LatencyMs=180
+```
 
 Steps:
 
@@ -312,6 +394,13 @@ Steps:
 4. Review flagged records with `@Flagged` or review generated comments with `@Comment`.
 
 ### Detecting an Unresponsive UI
+
+`Measure Elapsed Time (UI Only)` compares timestamped records written by the UI thread and flags the current record when the gap is larger than your threshold.
+
+```text
+10:00:00 UI Click
+10:00:02 UI PaintComplete   <- flagged when threshold is 500ms
+```
 
 This analyzer is useful when:
 
@@ -333,16 +422,43 @@ Suggested thresholds:
 
 ### Detecting Gaps in Logging
 
-Weevil can also detect when an application stopped writing to the log.
+Weevil can also detect when logging pauses or when timestamps move backwards.
 
-Available analyzers:
+#### `Measure Elapsed Time`
 
-- `Measure Elapsed Time`
-  - Flags records when the time gap between consecutive records exceeds a threshold.
-- `Measure Elapsed Time (UI)`
-  - Similar to `Measure Elapsed Time`, but only evaluates records produced by the UI thread (`ThreadId=1`).
+Flags the current record when the gap since the previous timestamped record is larger than your threshold.
 
-This is useful when diagnosing pauses, hangs, startup delays, or blocked background work.
+```text
+10:00:00 Service started
+10:05:00 Heartbeat   <- flagged when threshold is 60s
+```
+
+Use it to find pauses, hangs, startup delays, or blocked background work.
+
+#### `Out-of-Order Timestamps`
+
+Flags a record when its timestamp moves backwards more than the tolerance you entered.
+
+```text
+10:00:00 Start
+10:15:00 Connected
+10:45:00 Timeout
+10:30:00 Retrying   <- flagged
+```
+
+Use it when you suspect clock issues, merged logs from different sources, or records written in the wrong order.
+
+### Summarizing Numeric Data
+
+`Statistics` is different from the detection tools above. It does **not** flag records. Instead, it calculates summary values such as count, range, min, max, mean, median, trimmed mean, and standard deviation for one captured numeric value.
+
+```text
+LatencyMs=120
+LatencyMs=180
+LatencyMs=240
+```
+
+Use it when you want a quick numeric summary before drilling further into the log.
 
 ---
 
