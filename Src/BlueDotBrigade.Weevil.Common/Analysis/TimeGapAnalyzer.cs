@@ -50,6 +50,10 @@
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
+			_maximumPeriodDetected = TimeSpan.Zero;
+			_count = 0;
+			_firstOccurrenceAt = DateTime.MaxValue;
+
 			Results results = Results.None;
 
 			if (TryGetTolerance(userDialog, out TimeSpan maximumAllowedPeriod))
@@ -91,30 +95,23 @@
 			_count = 0;
 			_firstOccurrenceAt = DateTime.MaxValue;
 
-			var previous = GetIndexOfNextTimestamp(records,0);
-
-			if (previous == UnknownIndex)
+			if (canUpdateMetadata)
 			{
-				if (canUpdateMetadata)
+				foreach (IRecord record in records)
 				{
-					foreach (IRecord record in records)
-					{
-						record.Metadata.IsFlagged = false;
-					}
+					record.Metadata.IsFlagged = false;
 				}
 			}
-			else
+
+			var previous = GetIndexOfNextTimestamp(records,0);
+
+			if (previous != UnknownIndex)
 			{
 				for (var current = previous; current < records.Length; current++)
 				{
 					IRecord currentRecord = records[current];
 
-					if (canUpdateMetadata)
-					{
-						currentRecord.Metadata.IsFlagged = false;
-					}
-
-					if (records[current].HasCreationTime)
+					if (currentRecord.HasCreationTime)
 					{
 						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
 						previous = current;

@@ -10,8 +10,9 @@
 	using Filter.Expressions.Regular;
 
 	/// <summary>
-	/// Extracts numeric values via regex named capture groups and compares each to the previous value.
-	/// Flags records where the numeric value decreases compared to the preceding record.
+	/// Extracts numeric values via regex named capture groups and compares each with the previous matching value.
+	/// Flags the record immediately before the first decrease in each run of consecutive decreases.
+	/// Non-matching records are ignored; an equal or increasing value ends the current falling run.
 	/// </summary>
 	internal class DetectFallingEdgeAnalyzer : IRecordAnalyzer
 	{
@@ -43,7 +44,7 @@
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var count = 0;
+			var flaggedLineNumbers = new HashSet<int>();
 
 			// Get default regex from current inclusive filter
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
@@ -109,7 +110,7 @@
 							// in the next record below it — natural for top-down log navigation.
 							var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 
-							count++;
+							flaggedLineNumbers.Add(priorRecord.LineNumber);
 
 							AnalysisHelper.UpdateRecordMetadata(
 								priorRecord,
@@ -131,7 +132,7 @@
 				}
 			}
 
-			return new Results(count);
+			return new Results(flaggedLineNumbers.Count);
 		}
 	}
 }
