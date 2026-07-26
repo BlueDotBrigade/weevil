@@ -38,6 +38,31 @@
 					return true;
 				});
 
+			userDialog
+				.TryGetThreshold(
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					Arg.Any<string>(),
+					out Arg.Any<string>(),
+					out Arg.Any<string>(),
+					out Arg.Any<string>())
+				.Returns(x =>
+				{
+					if (shouldCancel)
+					{
+						x[4] = null;
+						x[5] = null;
+						x[6] = null;
+						return false;
+					}
+
+					x[4] = regexToReturn;
+					x[5] = "0";
+					x[6] = ">";
+					return true;
+				});
+
 			return userDialog;
 		}
 
