@@ -161,8 +161,10 @@
 <li><a href="#data-analysis">Data Analysis</a>
 <ul>
 <li><a href="#detecting-data">Detecting Data</a></li>
+<li><a href="#detecting-threshold-crossings">Detecting Threshold Crossings</a></li>
 <li><a href="#detecting-an-unresponsive-ui">Detecting an Unresponsive UI</a></li>
 <li><a href="#detecting-gaps-in-logging">Detecting Gaps in Logging</a></li>
+<li><a href="#summarizing-numeric-data">Summarizing Numeric Data</a></li>
 </ul>
 </li>
 <li><a href="#creating-a-line-graph">Creating a Line Graph</a></li>
@@ -411,16 +413,10 @@ How quickly daft jumping zebras vex!
 <p>After filtering, Weevil can analyze the visible or selected records.</p>
 <p>Analysis is most useful when your filter includes a named group, because Weevil can compare the captured values over time.</p>
 <h3 id="detecting-data">Detecting Data</h3>
-<p>Weevil includes several analyzers that flag relevant records and can copy named-group values into the record comment field.</p>
-<p>A record is flagged and a comment is created when:</p>
-<ul>
-<li><code>Detect Data</code>: the regular expression matches the record content</li>
-<li><code>Detect First</code>: the first occurrence of a unique value is found</li>
-<li><code>Detect Data Transitions</code>: the captured value changes from one record to the next</li>
-<li><code>Detect Rising Edges</code>: the captured value increases from one record to the next</li>
-<li><code>Detect Falling Edges</code>: the captured value decreases from one record to the next</li>
-<li><code>Detect Temporal Anomalies</code>: record timestamps appear out of order</li>
-</ul>
+<p>Most analyzers in this section work best when your filter contains a named group.</p>
+<p>Example filter:</p>
+<pre><code>User=(?&lt;User&gt;[a-zA-Z0-9_]+)
+</code></pre>
 <p>Typical workflow:</p>
 <ol>
 <li>Filter using a regular expression with a named group.
@@ -436,14 +432,93 @@ How quickly daft jumping zebras vex!
 </ul>
 </li>
 </ol>
-<p>Example use cases:</p>
+<h4 id="detect-data"><code>Detect Data</code></h4>
+<p>Flags every matching record and copies the captured value into the comment.</p>
+<pre><code>User=alice
+User=bob
+</code></pre>
+<h4 id="first-occurrence"><code>First Occurrence</code></h4>
+<p>Flags the first time each distinct value appears. Use it to find when a user, session, or ID first showed up.</p>
+<pre><code>User=alice   &lt;- flagged
+User=alice
+User=bob     &lt;- flagged
+</code></pre>
+<h4 id="last-occurrence"><code>Last Occurrence</code></h4>
+<p>Flags the last time each distinct value appears. Use it to find when a user, session, or ID was seen for the final time.</p>
+<pre><code>User=alice
+User=alice   &lt;- flagged
+User=bob     &lt;- flagged
+</code></pre>
+<h4 id="state-transitions"><code>State Transitions</code></h4>
+<p>Flags the first matching value and every later change. Use it when a state flips between values such as <code>Starting</code>, <code>Ready</code>, and <code>Stopped</code>.</p>
+<pre><code>State=Starting   &lt;- flagged
+State=Starting
+State=Ready      &lt;- flagged
+State=Stopped    &lt;- flagged
+</code></pre>
+<h4 id="detect-rising-edges"><code>Detect Rising Edges</code></h4>
+<p>Flags the record immediately before a rise starts. Use it to find valleys or the point where a counter began climbing.</p>
+<pre><code>Queue=7
+Queue=5   &lt;- flagged
+Queue=8
+Queue=9
+</code></pre>
+<h4 id="detect-falling-edges"><code>Detect Falling Edges</code></h4>
+<p>Flags the record immediately before a drop starts. Use it to find peaks or the point where a value began falling.</p>
+<pre><code>Cpu=70
+Cpu=74   &lt;- flagged
+Cpu=72
+Cpu=71
+</code></pre>
+<h4 id="stable-value-runs"><code>Stable Value Runs</code></h4>
+<p>This is a <strong>run</strong> analyzer. It flags the start and end of each consecutive same-value stretch, so you can see where a steady period began and ended.</p>
+<pre><code>Mode=Loading   &lt;- flagged: run starts
+Mode=Loading
+Mode=Loading   &lt;- flagged: run ends
+Mode=Ready
+</code></pre>
+<p>Use this when you care about the boundaries of a stable period, for example &quot;when were we stuck in <code>Retrying</code>?&quot;.</p>
+<h4 id="matching-record-runs"><code>Matching Record Runs</code></h4>
+<p>This is a <strong>run</strong> analyzer. It flags the start and end of each block of <strong>2 or more</strong> consecutive matching records. A one-off isolated match is ignored.</p>
+<pre><code>ERROR Timeout   &lt;- flagged: run starts
+ERROR Timeout
+ERROR Timeout   &lt;- flagged: run ends
+INFO Recovered
+</code></pre>
+<p>Use this when repeated matching lines matter more than isolated one-off lines.</p>
+<h3 id="detecting-threshold-crossings">Detecting Threshold Crossings</h3>
+<p>Flags records whose captured numeric value satisfies a comparison such as <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, or <code>&lt;=</code>.</p>
+<p>Use it for questions like:</p>
 <ul>
-<li>detect when a serial number changes</li>
-<li>detect the first time a user or session appears</li>
-<li>detect when a counter starts increasing rapidly</li>
-<li>detect when records appear out of timestamp order</li>
+<li>&quot;When was latency greater than 200?&quot;</li>
+<li>&quot;When was CPU less than or equal to 20?&quot;</li>
 </ul>
+<pre><code>LatencyMs=120
+LatencyMs=260   &lt;- flagged when threshold is &gt; 200
+LatencyMs=180
+</code></pre>
+<p>Steps:</p>
+<ol>
+<li>Filter records with a regular expression that captures a numeric named group.</li>
+<li>Choose <strong>Analyzers =&gt; Threshold Crossings</strong>.</li>
+<li>Enter:
+<ul>
+<li>a numeric threshold value</li>
+<li>a comparison operator: <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, or <code>&lt;=</code>
+<ul>
+<li><code>&gt;</code> and <code>&lt;</code> exclude equality</li>
+<li><code>&gt;=</code> and <code>&lt;=</code> include equality</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Review flagged records with <code>@Flagged</code> or review generated comments with <code>@Comment</code>.</li>
+</ol>
 <h3 id="detecting-an-unresponsive-ui">Detecting an Unresponsive UI</h3>
+<p><code>Measure Elapsed Time (UI Only)</code> compares timestamped records written by the UI thread and flags the current record when the gap is larger than your threshold.</p>
+<pre><code>10:00:00 UI Click
+10:00:02 UI PaintComplete   &lt;- flagged when threshold is 500ms
+</code></pre>
 <p>This analyzer is useful when:</p>
 <ul>
 <li>the application writes many log records from the UI thread, and</li>
@@ -466,21 +541,28 @@ How quickly daft jumping zebras vex!
 <li>about <code>1000ms</code> when using this indirect log-based analysis method</li>
 </ul>
 <h3 id="detecting-gaps-in-logging">Detecting Gaps in Logging</h3>
-<p>Weevil can also detect when an application stopped writing to the log.</p>
-<p>Available analyzers:</p>
-<ul>
-<li><code>Measure Elapsed Time</code>
-<ul>
-<li>Flags records when the time gap between consecutive records exceeds a threshold.</li>
-</ul>
-</li>
-<li><code>Measure Elapsed Time (UI)</code>
-<ul>
-<li>Similar to <code>Measure Elapsed Time</code>, but only evaluates records produced by the UI thread (<code>ThreadId=1</code>).</li>
-</ul>
-</li>
-</ul>
-<p>This is useful when diagnosing pauses, hangs, startup delays, or blocked background work.</p>
+<p>Weevil can also detect when logging pauses or when timestamps move backwards.</p>
+<h4 id="measure-elapsed-time"><code>Measure Elapsed Time</code></h4>
+<p>Flags the current record when the gap since the previous timestamped record is larger than your threshold.</p>
+<pre><code>10:00:00 Service started
+10:05:00 Heartbeat   &lt;- flagged when threshold is 60s
+</code></pre>
+<p>Use it to find pauses, hangs, startup delays, or blocked background work.</p>
+<h4 id="out-of-order-timestamps"><code>Out-of-Order Timestamps</code></h4>
+<p>Flags a record when its timestamp moves backwards more than the tolerance you entered.</p>
+<pre><code>10:00:00 Start
+10:15:00 Connected
+10:45:00 Timeout
+10:30:00 Retrying   &lt;- flagged
+</code></pre>
+<p>Use it when you suspect clock issues, merged logs from different sources, or records written in the wrong order.</p>
+<h3 id="summarizing-numeric-data">Summarizing Numeric Data</h3>
+<p><code>Statistics</code> is different from the detection tools above. It does <strong>not</strong> flag records. Instead, it calculates summary values such as count, range, min, max, mean, median, trimmed mean, and standard deviation for one captured numeric value.</p>
+<pre><code>LatencyMs=120
+LatencyMs=180
+LatencyMs=240
+</code></pre>
+<p>Use it when you want a quick numeric summary before drilling further into the log.</p>
 <hr />
 <h2 id="creating-a-line-graph">Creating a Line Graph</h2>
 <p>Use a graph when you want to visualize how a numeric value changes over time.</p>
