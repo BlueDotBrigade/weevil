@@ -35,15 +35,15 @@
 
 			var records = new List<IRecord>
 			{
-				new Record(0, now.AddMinutes(0), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no record to compare against
-				new Record(1, Record.CreationTimeUnknown, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
-				new Record(2, now.AddMinutes(2), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no timestamps for comparison
-				new Record(3, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 
-				new Record(4, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; not enough time since last record
-				new Record(5, now.AddMinutes(5), severity, "content", new Metadata { WasGeneratedByUi = false }), // IsFlagged=false; record not from UI thread
-				new Record(6, now.AddMinutes(6), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; lots of time between two UI records
-				new Record(7, Record.CreationTimeUnknown, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
-				new Record(8, now.AddMinutes(8), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; nothing to reference
+				new Record(0, now.AddMinutes(0), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; first timestamped UI record
+				new Record(1, Record.CreationTimeUnknown, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; unknown timestamp is ignored
+				new Record(2, now.AddMinutes(2), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 2-minute gap from record 0
+				new Record(3, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; 1-minute gap is below the 90-second threshold
+				new Record(4, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; zero elapsed time
+				new Record(5, now.AddMinutes(5), severity, "content", new Metadata { WasGeneratedByUi = false }), // IsFlagged=false; non-UI record is ignored
+				new Record(6, now.AddMinutes(6), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 3-minute gap from record 4
+				new Record(7, Record.CreationTimeUnknown, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; unknown timestamp is ignored
+				new Record(8, now.AddMinutes(8), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 2-minute gap from record 6
 			};
 
 			_records = ImmutableArray.Create(records.ToArray());
@@ -87,6 +87,23 @@
 		}
 
 		[TestMethod]
+		public void GivenUntimestampedUiPrefixWasFlagged_WhenAnalyzeRuns_ThenPrefixFlagIsCleared()
+		{
+			DateTime now = DateTime.Now;
+			var records = new List<IRecord>
+			{
+				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", new Metadata { IsFlagged = true, WasGeneratedByUi = true }),
+				new Record(20, now, SeverityType.Debug, "first", new Metadata { WasGeneratedByUi = true }),
+				new Record(30, now.AddSeconds(1), SeverityType.Debug, "second", new Metadata { WasGeneratedByUi = true }),
+			};
+
+			var analyzer = new TimeGapUiAnalyzer();
+			analyzer.Analyze(records.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+
+			records[0].Metadata.IsFlagged.Should().BeFalse();
+		}
+
+		[TestMethod]
 		[WorkItem(935)]
 		public void GivenFirstRunHasGaps_WhenSecondRunHasNoGaps_ThenFirstOccurrenceAtIsReset()
 		{
@@ -117,7 +134,7 @@
 
 		[TestMethod]
 		[WorkItem(934)]
-		public void GivenInvalidThreshold_WhenAnalyzeCalled_ThenResultsNoneIsReturned()
+		public void GivenPreviousRunHasGapsAndInvalidThreshold_WhenAnalyzeCalled_ThenResultsAndPublicStateAreReset()
 		{
 			// Regression: Issue #934
 			var userDialog = Substitute.For<IUserDialog>();
@@ -126,6 +143,8 @@
 				.Returns("not-a-number");
 
 			var analyzer = new TimeGapUiAnalyzer();
+			analyzer.Analyze(_records, TimeSpan.FromMilliseconds(1), canUpdateMetadata: false);
+			analyzer.Count.Should().BeGreaterThan(0);
 
 			var results = analyzer.Analyze(
 				_records,
@@ -135,6 +154,9 @@
 
 			results.FlaggedRecords.Should().Be(0);
 			results.Should().BeSameAs(Results.None);
+			analyzer.Count.Should().Be(0);
+			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.Zero);
+			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
 		}
 	}
 }

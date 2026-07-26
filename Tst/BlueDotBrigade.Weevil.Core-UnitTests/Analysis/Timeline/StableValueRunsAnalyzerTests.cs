@@ -64,9 +64,9 @@
 				label,
 				"stable-value flag mismatch");
 
-			// Note: results.FlaggedRecords counts run-boundary EVENTS (one for start, one for finalize),
-			// which is roughly twice the number of distinct flagged records. We only assert flag positions,
-			// not the event count, since the event count is an internal accounting detail.
+			var expectedCount = AnalysisHelper.CountExpectedFlags(expected);
+			results.FlaggedRecords.Should().Be(expectedCount,
+				because: $"[{label}] pattern '{pattern}' should report {expectedCount} distinct flagged record(s)");
 		}
 
 
