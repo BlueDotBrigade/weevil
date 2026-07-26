@@ -10,8 +10,9 @@
 
         /// <summary>
         /// Parses regex named capture groups and tracks each captured key independently across records.
-        /// Flags the start and end boundaries of runs where consecutive records keep the same value.
-        /// When a value changes or disappears, the active run is finalized and a new run begins when applicable.
+        /// Flags the first and last records in every maximal contiguous run with the same captured value.
+        /// A changed value finalizes the current run and starts a new one; a non-matching record finalizes
+        /// the current run without starting another.
         /// </summary>
         internal class StableValueRunsAnalyzer : IRecordAnalyzer
         {
@@ -35,7 +36,7 @@
 
                 public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
                 {
-                        var count = 0;
+                        var flaggedLineNumbers = new HashSet<int>();
 
                         // Get default regex from current inclusive filter
                         var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
@@ -122,7 +123,7 @@
                                                         var run = ValueRun.Start(friendlyName, value, record);
                                                         activeRuns[key] = run;
 
-                                                        count++;
+                                                        flaggedLineNumbers.Add(record.LineNumber);
                                                         AnalysisHelper.UpdateRecordMetadata(
                                                                 record,
                                                                 true,
@@ -132,7 +133,7 @@
 
                                                 void FinalizeRun(string key, ValueRun run)
                                                 {
-                                                        count++;
+                                                        flaggedLineNumbers.Add(run.LastRecord.LineNumber);
                                                         AnalysisHelper.UpdateRecordMetadata(
                                                                 run.LastRecord,
                                                                 true,
@@ -143,7 +144,7 @@
                                                 }
                         }
 
-                        return new Results(count);
+                        return new Results(flaggedLineNumbers.Count);
                 }
 
                 private sealed class ValueRun
