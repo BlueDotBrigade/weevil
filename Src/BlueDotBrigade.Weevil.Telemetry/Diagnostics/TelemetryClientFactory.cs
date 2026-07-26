@@ -12,7 +12,19 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		private const string TelemetryUserNameEnvironmentVariable = "WEEVIL_TELEMETRY_USERNAME";
 		private const string TelemetrySecretEnvironmentVariable = "WEEVIL_TELEMETRY_SECRET";
 		private const string TelemetrySourceEnvironmentVariable = "WEEVIL_TELEMETRY_SOURCE";
+
 		private const string DevelopmentSource = "Development";
+
+		/// <summary>
+		/// Effectively represents an empty string or value that has not been set.
+		/// </summary>
+		/// <remarks>
+		/// WiX installer will generate a compiler error is an XML attribute is set to an empty string.
+		/// <code>
+		/// WIX0006 : The Environment/@Value attribute's value cannot be an empty string. If a value is not required, simply remove the entire attribute.
+		/// </code>
+		/// </remarks>
+		private const string Placeholder = "NOT_SET";
 
 		/// <summary>
 		/// Creates a telemetry client based on runtime credential configuration.
@@ -82,7 +94,17 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		private static string GetOptionalEnvironmentValue(string variableName)
 		{
 			var value = Environment.GetEnvironmentVariable(variableName);
-			return string.IsNullOrWhiteSpace(value) ? string.Empty : value;
+
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return string.Empty;
+			}
+			else
+			{
+				value = value.Replace(Placeholder, string.Empty, StringComparison.OrdinalIgnoreCase);
+
+				return string.IsNullOrWhiteSpace(value) ? string.Empty : value;
+			}
 		}
 	}
 }
