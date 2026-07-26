@@ -33,7 +33,7 @@
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var count = 0;
+			var flaggedLineNumbers = new HashSet<int>();
 
 			// Get default regex from current inclusive filter
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
@@ -98,7 +98,7 @@
 									}
 
 									foundValues.Add(uniqueKey);
-									count++;
+									flaggedLineNumbers.Add(record.LineNumber);
 								}
 							}
 						}
@@ -106,7 +106,7 @@
 				}
 			}
 
-			return new Results(count);
+			return new Results(flaggedLineNumbers.Count);
 		}
 	}
 }

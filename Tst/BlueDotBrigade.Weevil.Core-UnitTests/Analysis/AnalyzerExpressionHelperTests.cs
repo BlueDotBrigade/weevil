@@ -1,8 +1,10 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
+	using BlueDotBrigade.Weevil.TestTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using NSubstitute;
 
@@ -142,6 +144,35 @@ namespace BlueDotBrigade.Weevil.Analysis
 				null);
 
 			result.IsEmpty.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenEqualValuesForOneKeyAcrossExpressions_WhenValuesAreResolved_ThenOneValueIsReturned()
+		{
+			// Regression coverage: Issue #926
+			var expressions = ImmutableArray.Create(
+				new RegularExpression(@"A=(?<Value>\d+)"),
+				new RegularExpression(@"B=(?<Value>\d+)"));
+			var record = R.Create().WithContent("A=1 B=1").GetRecords()[0];
+
+			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+
+			result.Should().ContainSingle();
+			result["Value"].Should().Be("1");
+		}
+
+		[TestMethod]
+		public void GivenConflictingValuesForOneKeyAcrossExpressions_WhenValuesAreResolved_ThenKeyIsOmitted()
+		{
+			// Regression coverage: Issue #926
+			var expressions = ImmutableArray.Create(
+				new RegularExpression(@"A=(?<Value>\d+)"),
+				new RegularExpression(@"B=(?<Value>\d+)"));
+			var record = R.Create().WithContent("A=1 B=2").GetRecords()[0];
+
+			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+
+			result.Should().NotContainKey("Value");
 		}
 	}
 }

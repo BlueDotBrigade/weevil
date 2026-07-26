@@ -9,8 +9,9 @@
 	using Filter;
 
 	/// <summary>
-	/// Evaluates records as match/no-match and identifies runs of consecutive matching records.
-	/// Flags the first and last record for each run containing two or more consecutive matches.
+	/// Evaluates records as match/no-match and identifies maximal contiguous runs of matching records.
+	/// Flags the first and last records in each run containing two or more matches.
+	/// A non-matching record terminates the current run.
 	/// </summary>
 	internal class MatchingRecordRunsAnalyzer : IRecordAnalyzer
 	{

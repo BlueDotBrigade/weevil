@@ -7,8 +7,11 @@
 	using BlueDotBrigade.Weevil.IO;
 
 	/// <summary>
-	/// Analyzes a file looking for time periods where logging appears to have stopped.
+	/// Analyzes timestamped UI-thread records for periods where UI logging appears to have stopped.
 	/// </summary>
+	/// <remarks>
+	/// Untimestamped and non-UI records are ignored and do not replace the previous comparison record.
+	/// </remarks>
 	public class TimeGapUiAnalyzer : IRecordAnalyzer
 	{
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(60);
@@ -39,6 +42,10 @@
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
+			_maximumPeriodDetected = TimeSpan.Zero;
+			_count = 0;
+			_firstOccurrenceAt = DateTime.MaxValue;
+
 			Results results = Results.None;
 
 			if (TryGetTolerance(userDialog, out TimeSpan maximumAllowedPeriod))
@@ -80,28 +87,21 @@
 			_count = 0;
 			_firstOccurrenceAt = DateTime.MaxValue;
 
-			var previous = IndexOfFirstTimestamp(records);
-
-			if (previous == UnknownIndex)
+			if (canUpdateMetadata)
 			{
-				if (canUpdateMetadata)
+				foreach (IRecord record in records)
 				{
-					foreach (IRecord record in records)
-					{
-						record.Metadata.IsFlagged = false;
-					}
+					record.Metadata.IsFlagged = false;
 				}
 			}
-			else
+
+			var previous = IndexOfFirstTimestamp(records);
+
+			if (previous != UnknownIndex)
 			{
 				for (var current = previous; current < records.Length; current++)
 				{
 					IRecord currentRecord = records[current];
-
-					if (canUpdateMetadata)
-					{
-						currentRecord.Metadata.IsFlagged = false;
-					}
 
 					if (currentRecord.HasCreationTime && currentRecord.Metadata.WasGeneratedByUi)
 					{

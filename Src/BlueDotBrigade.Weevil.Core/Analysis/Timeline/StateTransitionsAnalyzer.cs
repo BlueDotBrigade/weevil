@@ -8,8 +8,9 @@
 	using Filter.Expressions.Regular;
 
 	/// <summary>
-	/// Parses regex named capture groups and tracks the previous value for each captured key.
-	/// Flags the record where a value first appears or changes from the prior captured value.
+	/// Parses regex named capture groups and tracks the previous matching value for each captured key.
+	/// Flags the record where a value first appears or changes from that previous matching value.
+	/// Records that do not capture a key are ignored and do not reset its previous value.
 	/// </summary>
 	internal class StateTransitionsAnalyzer : IRecordAnalyzer
 	{
@@ -42,7 +43,7 @@
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var count = 0;
+			var flaggedLineNumbers = new HashSet<int>();
 
 			// Get default regex from current inclusive filter
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
@@ -90,7 +91,7 @@
 								{
 									var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
-									count++;
+									flaggedLineNumbers.Add(record.LineNumber);
 
 									AnalysisHelper.UpdateRecordMetadata(
 										record,
@@ -105,7 +106,7 @@
 							{
 								var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
-								count++;
+								flaggedLineNumbers.Add(record.LineNumber);
 
 								AnalysisHelper.UpdateRecordMetadata(
 									record,
@@ -118,7 +119,7 @@
 						}
 				}
 
-			return new Results(count);
+			return new Results(flaggedLineNumbers.Count);
 		}
 	}
 }

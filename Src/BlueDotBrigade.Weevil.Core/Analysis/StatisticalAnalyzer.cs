@@ -63,8 +63,6 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
-			var count = 0;
-
 			var timestamps = new List<DateTime>();
 			var values = new List<double>();
 
@@ -100,6 +98,11 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			foreach (IRecord record in records)
 			{
+				if (canUpdateMetadata)
+				{
+					record.Metadata.IsFlagged = false;
+				}
+
 				// Collect all key-value pairs from all expressions for this record
 				// For statistical analysis, we take the first numeric value found
 				double? foundValue = null;
@@ -130,17 +133,11 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 				if (foundValue.HasValue)
 				{
-					count++;
 					if (record.HasCreationTime)
 					{
 						timestamps.Add(record.CreatedAt);
 					}
 					values.Add(foundValue.Value);
-
-					if (canUpdateMetadata)
-					{
-						record.Metadata.IsFlagged = false;
-					}
 				}
 			}
 
@@ -150,7 +147,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var rangeCalc = new RangeCalculator();
 			data["Range"] = rangeCalc.Calculate(timestamps);
 
-			return new Results(count, data);
+			return new Results(0, data);
 		}
 	}
 }

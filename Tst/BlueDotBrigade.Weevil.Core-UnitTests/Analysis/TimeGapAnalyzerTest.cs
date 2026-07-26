@@ -167,6 +167,47 @@
 		}
 
 		[TestMethod]
+		public void GivenUntimestampedPrefixWasFlagged_WhenAnalyzeRuns_ThenPrefixFlagIsCleared()
+		{
+			DateTime now = DateTime.Now;
+			var records = new List<IRecord>
+			{
+				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", new Metadata { IsFlagged = true }),
+				new Record(20, now, SeverityType.Debug, "first"),
+				new Record(30, now.AddSeconds(1), SeverityType.Debug, "second"),
+			};
+
+			var analyzer = new TimeGapAnalyzer();
+			analyzer.Analyze(records.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+
+			records[0].Metadata.IsFlagged.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenPreviousRunHasGapsAndInvalidThreshold_WhenAnalyzeCalled_ThenPublicStateIsReset()
+		{
+			DateTime now = DateTime.Now;
+			var records = R.Create()
+				.WithCreatedAt(10, now)
+				.WithCreatedAt(20, now.AddSeconds(10))
+				.GetRecords();
+			var userDialog = Substitute.For<IUserDialog>();
+			userDialog
+				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+				.Returns("not-a-number");
+			var analyzer = new TimeGapAnalyzer();
+
+			analyzer.Analyze(records, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Count.Should().Be(1);
+			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+
+			results.Should().BeSameAs(Results.None);
+			analyzer.Count.Should().Be(0);
+			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.Zero);
+			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
+		}
+
+		[TestMethod]
 		[WorkItem(935)]
 		public void GivenFirstRunHasGaps_WhenSecondRunHasNoGaps_ThenFirstOccurrenceAtIsReset()
 		{
