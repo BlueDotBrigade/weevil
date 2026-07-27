@@ -4,6 +4,30 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+### Version 2.12.1
+
+Released for June 27th, 2026.
+
+#### What's New?
+
+- Support a threshold crossings tool. #911
+- Updated help manual documentation. #950
+- Windows "Open With" context menu now includes Weevil. #913
+
+#### Bug Fixes
+
+- Passwords decryption now works across different computers #915
+- Analyzer RegEx parsing depends on the active filter type #923
+- UI time-gap analysis treats unknown timestamps as real timestamps #925
+- Time-gap analyzer state is not fully reset between runs #935
+- Invalid UI-gap threshold returns -1 flagged records #934
+- “Remove All Flags” and “Unpin All” skip the final record #932
+- Statistics with zero numeric matches throws in the GUI result path #931
+- Statistics includes unknown timestamps in the reported range #929
+- Statistics parses numbers using the workstation’s current culture #928
+- Rising/Falling “analysis order” is not timestamp order #927
+- Overlapping || expressions can create transitions inside one record #926
+
 ### Version 2.12.0
 
 Released for June 27th, 2026.
