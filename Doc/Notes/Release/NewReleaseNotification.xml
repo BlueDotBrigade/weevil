@@ -8,8 +8,8 @@
 -->
 <ApplicationInfo>
 	<ChangeLogUrl>https://github.com/BlueDotBrigade/weevil/releases</ChangeLogUrl>
-	<CodeName>Steady, As She Goes</CodeName>
-	<Description>Bookmark navigation, more analytical tools, improved graphing, and more!</Description>
+	<CodeName>Tighten Up</CodeName>
+	<Description>Data analyzer features and bug fixes.</Description>
 	<InstallerUrl>http://Weevil.BlueDotBrigade.com</InstallerUrl>
-	<LatestRelease>2.12.0</LatestRelease>
+	<LatestRelease>2.12.1</LatestRelease>
 </ApplicationInfo>
