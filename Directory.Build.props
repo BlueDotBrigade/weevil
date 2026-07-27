@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">
-    <WeevilReleaseVersion>2.12.0</WeevilReleaseVersion>
+    <WeevilReleaseVersion>2.12.1</WeevilReleaseVersion>
     <VersionPrefix>$(WeevilReleaseVersion)</VersionPrefix>
     <BuildRevisionRaw Condition="'$(BuildRevisionRaw)' == '' and '$(BUILD_BUILDID)' != ''">$(BUILD_BUILDID)</BuildRevisionRaw>
     <BuildRevisionRaw Condition="'$(BuildRevisionRaw)' == '' and '$(GITHUB_RUN_NUMBER)' != ''">$(GITHUB_RUN_NUMBER)</BuildRevisionRaw>
