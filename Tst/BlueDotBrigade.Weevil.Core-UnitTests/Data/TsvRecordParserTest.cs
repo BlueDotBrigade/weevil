@@ -83,5 +83,28 @@
 
 			(new TsvRecordParser().TryParse(LineOne, content, out _)).Should().BeFalse();
 		}
+
+		// Issue #959: a number too large for the header field must not stop loading.
+		[TestMethod]
+		public void GivenProcessIdLargerThanInt32_WhenParsing_ThenReturnsFalse()
+		{
+			const string content = "2026-10-16 10:00:00.12345\t99999999999\t1\tInformation\tmessage";
+
+			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
+
+			wasSuccessful.Should().BeFalse();
+			record.Should().Be(Record.Dummy);
+		}
+
+		[TestMethod]
+		public void GivenThreadIdLargerThanInt32_WhenParsing_ThenReturnsFalse()
+		{
+			const string content = "2026-10-16 10:00:00.12345\t123\t99999999999\tInformation\tmessage";
+
+			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
+
+			wasSuccessful.Should().BeFalse();
+			record.Should().Be(Record.Dummy);
+		}
 	}
 }

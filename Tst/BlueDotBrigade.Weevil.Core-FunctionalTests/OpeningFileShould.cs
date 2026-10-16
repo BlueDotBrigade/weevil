@@ -27,6 +27,19 @@ namespace BlueDotBrigade.Weevil
 			engine.Count.Should().Be(1);
 		}
 
+		// Issue #959: a header with a number too large to parse is treated as part of the previous record.
+		[TestMethod]
+		public void GivenTsvHeaderWithOversizedProcessId_WhenOpening_ThenLoadingContinues()
+		{
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("TsvLogWithOversizedProcessId.log"))
+				.Open();
+
+			engine.Count.Should().Be(2);
+			engine[0].Content.Should().EndWith("Process ID is too large");
+			engine[1].LineNumber.Should().Be(3);
+		}
+
 		[TestMethod]
 		public void LoadStartingAtLineNumber()
 		{
