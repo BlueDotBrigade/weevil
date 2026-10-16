@@ -24,22 +24,27 @@
 
 				if (isValidRecord)
 				{
-					DateTime createdAt = DateTime.MaxValue;
-					var metadata = new Metadata();
+					// TryParse methods are used so that malformed values, including numbers that are
+					// too large, never throw an exception (#959).
+					var isTimestampValid = DateTime.TryParseExact(
+						fields[0],
+						"yyyy-MM-dd HH:mm:ss.FFFFF", CultureInfo.InvariantCulture, DateTimeStyles.None,
+						out DateTime createdAt);
 
-					try
+					var isProcessIdValid = int.TryParse(fields[1],
+						NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
+						CultureInfo.InvariantCulture,
+						out _);
+
+					var isThreadIdValid = int.TryParse(fields[2],
+						NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
+						CultureInfo.InvariantCulture,
+						out var threadId);
+
+					if (isTimestampValid && isProcessIdValid && isThreadIdValid)
 					{
-						createdAt = DateTime.ParseExact(
-							fields[0],
-							"yyyy-MM-dd HH:mm:ss.FFFFF", CultureInfo.InvariantCulture);
+						var metadata = new Metadata();
 
-						var processId = int.Parse(fields[1],
-							NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
-							CultureInfo.InvariantCulture);
-
-						var threadId = int.Parse(fields[2],
-							NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
-							CultureInfo.InvariantCulture);
 						if (threadId == 1)
 						{
 							metadata.WasGeneratedByUi = true;
@@ -47,14 +52,12 @@
 
 						SeverityTypeHelpers.TryParse(fields[3], out SeverityType severityType);
 
-						var context = fields[4];
-
 						record = new Record(line, createdAt, severityType, content, metadata);
 					}
-					catch (FormatException e)
+					else
 					{
 						Log.Default.Write(LogSeverityType.Warning,
-							$"Unable to parse record. Line={line}, Reason=`{e.Message}`");
+							$"Unable to parse record. Line={line}, IsTimestampValid={isTimestampValid}, IsProcessIdValid={isProcessIdValid}, IsThreadIdValid={isThreadIdValid}");
 					}
 				}
 			}
