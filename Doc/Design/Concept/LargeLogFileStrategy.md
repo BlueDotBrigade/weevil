@@ -9,7 +9,7 @@ Weevil loads every record of a log into memory as an object. For large logs this
 
 - **Slow to open.** A 1 GB log (7.6 million records) takes about 32 s to parse. The parser allocates 12 GB of temporary objects to keep 3 GB.
 - **Too much memory.** Records use about 3× the file size in RAM, so on a 32 GB machine logs above roughly 8–10 GB cannot be opened. Analysts have needed logs up to 25 GB.
-- **No reliable record locations.** Weevil does not know where each record starts in the file. Byte offsets saved in the sidecar are often a default value, and the one feature that relies on them can number lines wrongly.
+- **No reliable record locations.** Weevil does not know where each record starts in the file. Only table-of-contents sections save a byte offset, and until #958 it was used without being checked.
 
 Filtering must not get slower: analysts filter the same log many times.
 
@@ -36,7 +36,7 @@ Filtering must not get slower: analysts filter the same log many times.
 ### Compatibility
 
 - **Line numbers must not change,** or existing sidecars point at the wrong records. Today's parser treats `\n`, `\r` and `\r\n` as line ends, skips a byte order mark, and gives up after 256 lines without a record start.
-- **Sidecar byte offsets are unreliable.** Records, bookmarks and regions always save -1; sections save whatever the plugin set, including 0 or -1. Opening from a start line trusts them. See [Sidecar byte offsets today](#sidecar-byte-offsets-today).
+- **Most sidecar byte offsets are unset.** Records, bookmarks and regions always save -1. Section offsets are set by the plugin and are generally correct, but nothing verifies them. See [Sidecar byte offsets today](#sidecar-byte-offsets-today).
 - **Filter behaviour must not change.** Multiline records are rejoined with `\r\n`, and the regex sees the whole record, including the header fields.
 - **Any encoding.** UTF-16 and UTF-32 newlines span several bytes. Files without a byte order mark are read as UTF-8, and invalid characters are replaced.
 - **Growing files.** The last record may be incomplete, or gain more lines later.
@@ -105,7 +105,7 @@ The index comes before disk mode, because disk mode depends on it.
    - Skip the extra string copy and second `Record` for single-line records.
    - Parse TSV fields without `Split` or exceptions. This also fixes an uncaught `OverflowException` that stops loading.
    - Remove four forced garbage collections, build the record array once, and use larger read buffers.
-   - Decision pending: stop seeking to sidecar offsets when opening from a start line. Partial loads get slower, but line numbers become correct.
+   - Done (#958): opening from a start line checks the section's saved byte offset before using it, and reads from the top of the file when it does not check out.
 2. **Record index.**
    - 2a: build the index while loading and save it. Locate sidecar items by line number, and write offsets from the index. When a reopened log has grown, re-index from its last record.
    - 2b: keep raw bytes in RAM (in chunks) and create records on demand. Replace record arrays in the API with lists of record numbers. Move annotations into one store with change events, and save the sidecar from it. Calculate elapsed time on display, store analyzer flags in a bitset, and implement clear as narrowing the index.
@@ -140,15 +140,15 @@ Application.log.idx    record index: binary
 |---|---|
 | Records (comments, pins) | Always -1 |
 | Bookmarks and regions | Always -1 |
-| Sections | Whatever the plugin set: maybe correct, 0, or -1 |
+| Sections | Set by the plugin; generally correct (all 11 in the `GlobalDefault.log` test data match), but not verified |
 
-Opening from a start line (`SidecarManager.GetByteOffsetOrDefault`) seeks to the offset of a section on that line and numbers the first line read as the start line:
+Opening from a start line uses the byte offset of a section on that line. Before #958 the offset was used unchecked:
 
-- No matching section, or offset 0: reading starts at the top, so every line number is shifted.
-- A wrong offset: reading starts at the wrong place, possibly mid-line.
-- -1: the file fails to open.
+- No matching section, or offset 0: reading started at the top, so every line number was shifted.
+- A wrong offset: reading started at the wrong place, possibly mid-line.
+- -1: the file failed to open.
 
-This runs when a plugin's Open As dialog starts after line 1, or when a section on line 1 has a non-zero offset. No tests cover it.
+Since #958, the offset is used only when a line begins there; otherwise reading starts at the top of the file and skips to the start line. An offset that is wrong but still lands at the start of a line cannot be detected without a record index.
 
 ### Future: immutable core
 

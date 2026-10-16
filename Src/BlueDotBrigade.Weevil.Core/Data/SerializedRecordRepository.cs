@@ -31,7 +31,7 @@
 			// nothing to do
 		}
 
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch)
+		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch)
 		{
 			_source = source;
 			_firstRecordByteOffset = firstRecordByteOffset;

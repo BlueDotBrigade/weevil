@@ -24,6 +24,14 @@
 					<LineNumber>150</LineNumber>
 				</RelatesTo>
 			</Section>
+			<Section>
+				<Level>1</Level>
+				<Name>Byte offset points into the middle of a line</Name>
+				<RelatesTo>
+					<ByteOffset>5</ByteOffset>
+					<LineNumber>180</LineNumber>
+				</RelatesTo>
+			</Section>
 		</TableOfContents>
 		<UserRemarks />
 	</CommonData>

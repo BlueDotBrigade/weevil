@@ -231,14 +231,22 @@
 
 						loadingStopwatch.Restart();
 
-						// Sidecar byte offsets are unreliable (#958), so reading always starts at the top of the file.
-						// Records before the start line are skipped by the line number range.
+						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 						Range lineNumberRange = GetLineNumberRange();
 
-						var repository = new SerializedRecordRepository(
-							 dataSource,
-							 coreExtension.GetRecordParser(),
-							 GetMaximumLinesToSearch(lineNumberRange));
+						// Reading starts at the start line's saved byte offset only when it checks out (#958).
+						// Otherwise it starts at the top of the file, and records before the start line are skipped.
+						var repository = TryGetStartLineByteOffset(dataSource, sidecarManager, startAtLineNumber, out var byteOffset)
+							? new SerializedRecordRepository(
+								 dataSource,
+								 coreExtension.GetRecordParser(),
+								 byteOffset,
+								 startAtLineNumber,
+								 true)
+							: new SerializedRecordRepository(
+								 dataSource,
+								 coreExtension.GetRecordParser(),
+								 GetMaximumLinesToSearch(lineNumberRange));
 
 						records = repository.Get(lineNumberRange, maxRecords);
 
@@ -317,6 +325,37 @@
 				}
 
 				return new Range(System.Math.Max(_range.Start.Value, _startAtLineNumber), _range.End);
+			}
+
+			/// <summary>
+			/// Returns <see langword="true"/> when the sidecar's table of contents has a usable byte offset for the start line.
+			/// </summary>
+			/// <remarks>
+			/// Saved byte offsets are not verified (#958), so an offset is used only when a line begins there.
+			/// Only the first line begins at zero, so zero means the start line's offset is missing.
+			/// </remarks>
+			private static bool TryGetStartLineByteOffset(Stream source, SidecarManager sidecarManager, int startAtLineNumber, out long byteOffset)
+			{
+				byteOffset = SerializedRecordRepository.FirstRecordByteOffset;
+
+				if (startAtLineNumber <= FirstRecordLineNumber)
+				{
+					return false;
+				}
+
+				var savedByteOffset = sidecarManager.GetByteOffsetOrDefault(startAtLineNumber);
+
+				if (savedByteOffset > 0 && source.IsStartOfLine(savedByteOffset))
+				{
+					byteOffset = savedByteOffset;
+					return true;
+				}
+
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					$"The saved byte offset of the start line is not usable, so reading will start at the top of the file. LineNumber={startAtLineNumber}, ByteOffset={savedByteOffset}");
+
+				return false;
 			}
 
 			/// <summary>

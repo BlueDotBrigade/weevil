@@ -334,5 +334,28 @@
 
 			return snapshot;
 		}
+
+		internal long GetByteOffsetOrDefault(int lineNumber)
+		{
+			if (lineNumber <= 0)
+			{
+				throw new ArgumentOutOfRangeException(
+					nameof(lineNumber),
+					$"Value is expected to be greater than zero. Value={lineNumber}");
+			}
+			long offset = 0;
+
+			SectionInfo sectionInfo = _sidecar
+				.CommonData
+				.TableOfContents
+				?.FirstOrDefault(r => r.RelatesTo.LineNumber == lineNumber);
+
+			if (sectionInfo != null)
+			{
+				offset = sectionInfo.RelatesTo.ByteOffset;
+			}
+
+			return offset;
+		}
 	}
 }

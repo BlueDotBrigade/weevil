@@ -163,5 +163,21 @@
 				_file.Copy(_sidecarFilePath, backupFilePath);
 			}
 		}
+
+		public long GetByteOffsetOrDefault(int lineNumber)
+		{
+			long offset = 0;
+
+			if (_file.Exists(_sidecarFilePath))
+			{
+				var loader = new v2.SidecarLoader(_sidecarFilePath);
+				if (loader.Load())
+				{
+					offset = loader.GetByteOffsetOrDefault(lineNumber);
+				}
+			}
+
+			return offset;
+		}
 	}
 }
