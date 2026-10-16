@@ -21,7 +21,7 @@ Status: draft for discussion, 2026-10-16. No production code has changed.
 | Encoding | No guarantees; any encoding may appear. |
 | File changes | Log files only grow by appending. No truncation, rotation or circular logs. |
 | Plugins | Compatibility with external plugins is not required. |
-| Index file | Weevil may save the index next to the log; rebuild it when the folder is read-only. |
+| Index file | Raw binary file named like the sidecar: `Application.log.idx` beside `Application.log` and `Application.log.xml`. Rebuilt when missing, stale or unwritable. See [Index file](#index-file). |
 | Network drives | Allowed, with a warning in disk mode. |
 | Default mode | RAM. |
 
@@ -46,7 +46,7 @@ Goal: know where every record is, and stop keeping one object per record.
 
 This is the largest phase. It can be split:
 
-- **2a: index alongside today's records.** Build the index during loading, save it, and reuse it on reopen. Locate records, bookmarks, regions and sections by line number, ignoring any byte offset stored in the sidecar. Write offsets taken from the index when the sidecar is saved.
+- **2a: index alongside today's records.** Build the index during loading, save it as an [index file](#index-file), and reuse it on reopen. Locate records, bookmarks, regions and sections by line number, ignoring any byte offset stored in the sidecar. Write offsets taken from the index when the sidecar is saved.
 - **2b: records on demand.** RAM mode keeps the raw bytes in memory (in chunks; one .NET array cannot exceed about 2 GB) and creates `Record` objects only when needed.
 
 Design notes:
@@ -68,6 +68,25 @@ Goal: open files larger than RAM.
 - Filter in parallel: each worker reads a chunk, decodes it and runs the regex.
 - Warn when RAM is chosen but the file plus its index would not fit, and when a disk-mode file is on a network drive.
 - Before starting, add a disk-backed case to the benchmark to confirm the 10-second target.
+
+## Index file
+
+User data (comments, pins, bookmarks, regions, filter history) stays in the XML sidecar. The record index goes in its own file, named and placed like the sidecar so that all of a log's files can be copied to another developer together:
+
+```
+Application.log        the log file (never modified)
+Application.log.xml    sidecar: user data, XML
+Application.log.idx    record index: binary
+```
+
+- **Format:** raw binary. A header holds the format version, the log's encoding, the parser that built it, the record count and a fingerprint of the log. Each field (offset, line number, timestamp, severity and flags) is stored as its own column, so a severity filter reads 1 byte per record. Text formats would be several times larger and as slow to read as re-indexing the log; SQLite would take minutes to insert hundreds of millions of rows.
+- **It is a cache:** if the file is missing, stale, corrupt or from an older format, Weevil rebuilds it from the log. Deleting it is always safe. This is why binary is acceptable here, while persisted user state stays in XML.
+- **Fingerprint:** based only on content (the length indexed, plus a hash of the first few KB and of the last indexed record), not on the path or timestamps, so an index copied to another computer stays valid.
+- **Growth:** new entries are appended, as described under phase 2's append-only refresh.
+- **Crash safety:** write to `Application.log.idx.tmp`, then replace `Application.log.idx`, so a crash never leaves a partial index.
+- **When not saved:** if the folder is read-only, or the log was opened from a compressed archive (temporary folder), the index is not saved, matching the sidecar's rule. Weevil rebuilds it on every open.
+- **Size:** about 21 bytes per record, roughly 5 GB for a 25 GB log. See phase 2's index contents for how larger indexes are handled.
+- **Developers:** a CLI command prints the index as text, since the file itself is not human-readable.
 
 ## Investigation: clear operations
 
@@ -155,7 +174,10 @@ Requirements:
 - When a log file is opened from a start line, Weevil shall find the starting position from the record index.
 - When a log file is reopened and its saved index matches, Weevil shall reuse the saved index.
 - If the saved index does not match the log file, then Weevil shall rebuild the index.
+- Weevil shall save the record index in the log file's folder, named after the log file with an `.idx` extension.
+- When a copied index file matches its log file, Weevil shall reuse it, regardless of the file's path or timestamps.
 - If the index file cannot be written, then Weevil shall continue without saving it.
+- If the log file was opened from a compressed archive, then Weevil shall not save the index file.
 - When a reopened log file has grown, Weevil shall index only the content after the start of the last indexed record.
 
 ### Phase 3
