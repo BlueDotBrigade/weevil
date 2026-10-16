@@ -1,6 +1,8 @@
 // Exploratory storage benchmark for Weevil (.NET 9, x64).
-// Put this project in <weevil-repo>/Benchmarks/StorageBenchmarks/.
+// Self-contained: the Weevil parser classes it needs are copied into WeevilCopies/.
 // See README.md for usage, constraints and memory-measurement interpretation.
+
+#nullable enable
 
 using System;
 using System.Buffers;
@@ -198,17 +200,10 @@ internal static class Program
     }
 }
 
-// Avoids a custom/stub implementation: this invokes the ACTUAL internal
-// MultilineRecordParser + TsvRecordParser from BlueDotBrigade.Weevil.Core.
-// The cached delegate avoids MethodInfo.Invoke on every record.
+// Avoids a custom/stub implementation: this runs unmodified copies of Weevil's
+// MultilineRecordParser + TsvRecordParser (see WeevilCopies/ and README.md).
 internal static class WeevilParserAdapter
 {
-    private static readonly Assembly Core = Assembly.Load("BlueDotBrigade.Weevil.Core");
-    private static readonly Type MultilineType = Core.GetType(
-        "BlueDotBrigade.Weevil.Data.MultilineRecordParser", throwOnError: true)!;
-    private static readonly Type TsvType = Core.GetType(
-        "BlueDotBrigade.Weevil.Data.TsvRecordParser", throwOnError: true)!;
-
     public static List<IRecord> Load(string path)
     {
         var records = new List<IRecord>();
@@ -217,19 +212,14 @@ internal static class WeevilParserAdapter
         using var reader = new StreamReader(stream, TextStorage.Utf8, detectEncodingFromByteOrderMarks: true,
             bufferSize: 64 * 1024);
 
-        object tsv = Activator.CreateInstance(TsvType, nonPublic: true)!;
-        object parser = Activator.CreateInstance(MultilineType,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            args: [reader, tsv, 256, 1, false], // maximumLinesToSearch, firstRecordLineNumber, logging disabled
-            culture: null)!;
-        var method = MultilineType.GetMethod("GetNext", BindingFlags.Public | BindingFlags.Instance)
-            ?? throw new MissingMethodException(MultilineType.FullName, "GetNext");
-        var getNext = method.CreateDelegate<Func<IRecord>>(parser);
+        var parser = new MultilineRecordParser(reader, new TsvRecordParser(),
+            MultilineRecordParser.MaximumLinesToSearch,
+            MultilineRecordParser.FirstRecordLineNumber,
+            isLoggingEnabled: false);
 
         while (true)
         {
-            IRecord record = getNext();
+            IRecord record = parser.GetNext();
             if (!Record.IsGenuine(record)) break;
             records.Add(record);
         }
