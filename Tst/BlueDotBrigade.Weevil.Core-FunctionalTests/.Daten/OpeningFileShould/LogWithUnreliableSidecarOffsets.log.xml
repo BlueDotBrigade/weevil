@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WeevilSidecar xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Configuration.Sidecar.v2">
+	<CommonData>
+		<Context />
+		<FilterHistory>
+			<ExclusiveFilters />
+			<InclusiveFilters />
+		</FilterHistory>
+		<Records />
+		<TableOfContents>
+			<Section>
+				<Level>1</Level>
+				<Name>Byte offset is the default value of zero</Name>
+				<RelatesTo>
+					<ByteOffset>0</ByteOffset>
+					<LineNumber>100</LineNumber>
+				</RelatesTo>
+			</Section>
+			<Section>
+				<Level>1</Level>
+				<Name>Byte offset was never set</Name>
+				<RelatesTo>
+					<ByteOffset>-1</ByteOffset>
+					<LineNumber>150</LineNumber>
+				</RelatesTo>
+			</Section>
+			<Section>
+				<Level>1</Level>
+				<Name>Byte offset points into the middle of a line</Name>
+				<RelatesTo>
+					<ByteOffset>5</ByteOffset>
+					<LineNumber>180</LineNumber>
+				</RelatesTo>
+			</Section>
+		</TableOfContents>
+		<UserRemarks />
+	</CommonData>
+	<Header>
+		<SavedAt>2026-10-16T12:00:00.0000000-04:00</SavedAt>
+		<SchemaVersion xmlns:d3p1="http://schemas.datacontract.org/2004/07/System">
+			<d3p1:_Build>0</d3p1:_Build>
+			<d3p1:_Major>4</d3p1:_Major>
+			<d3p1:_Minor>0</d3p1:_Minor>
+			<d3p1:_Revision>-1</d3p1:_Revision>
+		</SchemaVersion>
+	</Header>
+	<PluginData i:nil="true" />
+</WeevilSidecar>
