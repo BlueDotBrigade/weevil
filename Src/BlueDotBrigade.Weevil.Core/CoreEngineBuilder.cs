@@ -233,11 +233,14 @@
 
 						// Sidecar byte offsets are unreliable (#958), so reading always starts at the top of the file.
 						// Records before the start line are skipped by the line number range.
+						Range lineNumberRange = GetLineNumberRange();
+
 						var repository = new SerializedRecordRepository(
 							 dataSource,
-							 coreExtension.GetRecordParser());
+							 coreExtension.GetRecordParser(),
+							 GetMaximumLinesToSearch(lineNumberRange));
 
-						records = repository.Get(GetLineNumberRange(), maxRecords);
+						records = repository.Get(lineNumberRange, maxRecords);
 
 						loadingStopwatch.Stop();
 
@@ -314,6 +317,20 @@
 				}
 
 				return new Range(System.Math.Max(_range.Start.Value, _startAtLineNumber), _range.End);
+			}
+
+			/// <summary>
+			/// Returns the number of lines that can be read while searching for the first record.
+			/// </summary>
+			/// <remarks>
+			/// Reading starts at the top of the file, so the search must be able to reach the start line,
+			/// plus the usual allowance for lines that do not start a record.
+			/// </remarks>
+			private static int GetMaximumLinesToSearch(Range lineNumberRange)
+			{
+				long linesBeforeStart = System.Math.Max(lineNumberRange.Start.Value, FirstRecordLineNumber) - 1;
+
+				return (int)System.Math.Min(linesBeforeStart + MultilineRecordParser.MaximumLinesToSearch, int.MaxValue);
 			}
 
 			private ImmutableArray<IRecord> GetVisibleRecordSelection(ImmutableArray<IRecord> visibleRecords, ImmutableArray<IRecord>  selectedRecords)
