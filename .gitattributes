@@ -47,7 +47,7 @@
 *.7Z filter=lfs diff=lfs merge=lfs -text
 
 # Test Data
-# Byte offsets saved in test sidecars assume CRLF, as Windows CI checks out (#961).
+# GlobalDefault.log is stored with CRLF line endings, which Git must not convert:
+# the byte offsets saved in its sidecar assume CRLF (#961).
 
-Tst/**/.Daten/**/*.log text=auto eol=crlf
-Tst/**/.Daten/**/*.txt text=auto eol=crlf
+Tst/BlueDotBrigade.Weevil.Core-FunctionalTests/.Daten/.Global/GlobalDefault.log -text
