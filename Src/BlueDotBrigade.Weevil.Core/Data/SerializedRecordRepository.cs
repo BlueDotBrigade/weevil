@@ -19,12 +19,19 @@
 		private readonly MultilineRecordParser _recordParser;
 
 		public SerializedRecordRepository(Stream source, IRecordParser recordParser)
-			: this(source, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled)
+			: this(source, recordParser, MultilineRecordParser.MaximumLinesToSearch)
 		{
 			// nothing to do
 		}
 
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled)
+		/// <param name="maximumLinesToSearch">Represents the number of lines that will be read while searching for the first record.</param>
+		public SerializedRecordRepository(Stream source, IRecordParser recordParser, int maximumLinesToSearch)
+			: this(source, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled, maximumLinesToSearch)
+		{
+			// nothing to do
+		}
+
+		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch)
 		{
 			_source = source;
 			_firstRecordByteOffset = firstRecordByteOffset;
@@ -39,7 +46,7 @@
 			_recordParser = new MultilineRecordParser(
 				new StreamReader(_source),
 				recordParser,
-				MultilineRecordParser.MaximumLinesToSearch,
+				maximumLinesToSearch,
 				firstRecordLineNumber,
 				loggingEnabled);
 		}
