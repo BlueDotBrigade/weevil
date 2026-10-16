@@ -9,6 +9,7 @@ Status: draft for discussion, 2026-10-16. No production code has changed.
 - **Clear operations do not block disk mode.** Only six GUI commands call them; no internal class does. Clearing never changes the log file today, and once the index exists it can be rebuilt as "narrow the index", which works in both modes.
 - **Biggest obstacle:** arrays of fully loaded records are the currency of the public API (`ICoreEngine.Records`, `IFilter.Results`, analyzers, selection). They must become lists that load records on demand.
 - **Second obstacle:** `Metadata` mixes user annotations, parsed facts and per-filter values, and the grid edits it directly. It must be split.
+- **Sidecar byte offsets cannot be trusted.** Some are correct; others hold a default value. Line numbers are the only reliable key, and the record index becomes the only source of byte offsets. See [Byte offsets in sidecars today](#byte-offsets-in-sidecars-today).
 
 ## Decisions so far
 
@@ -35,6 +36,7 @@ Goal: open files faster and allocate less, with no change in behaviour or API.
 - Remove the forced full garbage collections in `SerializedRecordRepository.Get`, the `CoreEngine` constructor, `InMemoryRecordRepository.Get` and `FilterManager.ApplyInternal`.
 - Build the record array once instead of copying it twice (`SerializedRecordRepository.Get`).
 - Use a larger read buffer and a sequential-scan hint.
+- Optional bug fix: stop seeking to a sidecar byte offset when opening from a start line. Read from the start of the file and skip to the requested range instead. Partial loads get slower, but line numbers become correct. See [Byte offsets in sidecars today](#byte-offsets-in-sidecars-today).
 
 Done when: existing and new parser tests pass, and the benchmark's Weevil case shows fewer allocations and a faster open. RAM stays about 3× the file size, because `Record` objects remain.
 
@@ -44,7 +46,7 @@ Goal: know where every record is, and stop keeping one object per record.
 
 This is the largest phase. It can be split:
 
-- **2a: index alongside today's records.** Build the index during loading and fill the byte offsets that bookmarks, regions and sections already have room for (`RelatesTo.ByteOffset`, currently -1). Save it and reuse it on reopen.
+- **2a: index alongside today's records.** Build the index during loading, save it, and reuse it on reopen. Locate records, bookmarks, regions and sections by line number, ignoring any byte offset stored in the sidecar. Write offsets taken from the index when the sidecar is saved.
 - **2b: records on demand.** RAM mode keeps the raw bytes in memory (in chunks; one .NET array cannot exceed about 2 GB) and creates `Record` objects only when needed.
 
 Design notes:
@@ -84,6 +86,27 @@ Options:
 
 Recommendation: implement clear as "narrow the index" in phase 2b. If disk mode ships before 2b, disable clear in disk mode until then.
 
+## Byte offsets in sidecars today
+
+The sidecar has a byte offset field (`RelatesTo.ByteOffset`) for records, bookmarks, regions and sections, but it is not reliable:
+
+| Item | Byte offset written |
+|---|---|
+| Records (comments, pins) | Always the default, -1 |
+| Bookmarks | Always -1 |
+| Regions | Always -1 |
+| Sections (table of contents) | Whatever the plugin set: possibly correct, 0 if the section was built without one, or -1 |
+
+Only one code path uses a stored offset: opening from a start line. `CoreEngineBuilder` asks `SidecarManager.GetByteOffsetOrDefault` for the offset of a section starting on that line, seeks there, and numbers the first line read as the start line. Consequences:
+
+- No matching section, or a section saved with offset 0: reading starts at the top of the file, but numbering starts at the start line, so every line number is shifted and the wrong records are kept.
+- A wrong non-zero offset: reading starts at the wrong place, possibly mid-line, with wrong numbering.
+- An offset of -1: setting the stream position fails, so the file does not open.
+
+This path runs when a plugin's Open As dialog returns a range starting after line 1, or when a sidecar holds a section on line 1 with a non-zero offset. No tests cover it.
+
+Approach: treat every stored offset as unverified. Line numbers are the key; offsets come only from the record index, and are written back to the sidecar from it. Keeping the existing field means no sidecar format change.
+
 ## Other disk-mode challenges
 
 | Challenge | Where | Approach | Phase |
@@ -100,7 +123,8 @@ Recommendation: implement clear as "narrow the index" in phase 2b. If disk mode 
 | Selection holds record objects | `SelectionManager`; WPF `ListView` | Store line numbers; make `IndexOf` a binary search so WPF selection doesn't load every record | 2b |
 | Analyzers and graphs read every filtered record and set flags | `Analysis/*`, `GraphViewModel` | Iterate the record list; store flags in a bitset | 2b |
 | Export and save selected | `DiskWriter`, `LogFileSplitter` | Stream from content storage | 2b |
-| Partial loads | `OpenAsResult.Range`, start line via sidecar section offsets | Use a sub-range of the index | 2a |
+| Sidecar byte offsets are unreliable | `RelatesTo.ByteOffset` for records, bookmarks, regions and sections | Key on line numbers; take offsets only from the index | 2a |
+| Partial loads seek to an unverified offset | `OpenAsResult.Range`; `SidecarManager.GetByteOffsetOrDefault` | Use a sub-range of the index. Optionally fix in phase 1 by reading from the start. | 1 or 2a |
 | No Weevil Open As dialog | `FilterViewModel.OpenAsync` shows only plugin dialogs | New dialog | 3 |
 | Filter speed depends on the drive | Disk mode | An NVMe drive reads 20 GB in about 6 s, so 10 s is reachable with parallel filtering. A SATA SSD (about 36 s), hard drive or network share will miss it; warn. | 3 |
 | File handle | `FileHelper.Open` shares read/write but not delete | Reopen per read, or add delete sharing | 3 |
@@ -126,6 +150,9 @@ Requirements:
 Requirements:
 
 - When a log file is opened, Weevil shall record the byte offset and line number of every record.
+- When a sidecar is loaded, Weevil shall locate records, bookmarks, regions and sections by line number, and shall ignore stored byte offsets.
+- When a sidecar is saved, Weevil shall write byte offsets taken from the record index.
+- When a log file is opened from a start line, Weevil shall find the starting position from the record index.
 - When a log file is reopened and its saved index matches, Weevil shall reuse the saved index.
 - If the saved index does not match the log file, then Weevil shall rebuild the index.
 - If the index file cannot be written, then Weevil shall continue without saving it.
