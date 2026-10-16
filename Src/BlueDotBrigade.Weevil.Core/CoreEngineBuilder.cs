@@ -229,18 +229,15 @@
 
 						sidecarManager = new SidecarManager(_sourceFilePath);
 
-						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : 1;
-
 						loadingStopwatch.Restart();
 
+						// Sidecar byte offsets are unreliable (#958), so reading always starts at the top of the file.
+						// Records before the start line are skipped by the line number range.
 						var repository = new SerializedRecordRepository(
 							 dataSource,
-							 coreExtension.GetRecordParser(),
-							 sidecarManager.GetByteOffsetOrDefault(startAtLineNumber),
-							 startAtLineNumber,
-							 true);
+							 coreExtension.GetRecordParser());
 
-						records = repository.Get(_range, maxRecords);
+						records = repository.Get(GetLineNumberRange(), maxRecords);
 
 						loadingStopwatch.Stop();
 
@@ -299,6 +296,24 @@
 				coreEngine.Selector.Select(selectedRecords);
 
 				return coreEngine;
+			}
+
+			/// <summary>
+			/// Returns the line numbers to load, combining the start line with the requested range.
+			/// </summary>
+			private Range GetLineNumberRange()
+			{
+				if (_startAtLineNumber <= FirstRecordLineNumber)
+				{
+					return _range;
+				}
+
+				if (_range.Equals(Range.All))
+				{
+					return new Range(_startAtLineNumber, int.MaxValue);
+				}
+
+				return new Range(System.Math.Max(_range.Start.Value, _startAtLineNumber), _range.End);
 			}
 
 			private ImmutableArray<IRecord> GetVisibleRecordSelection(ImmutableArray<IRecord> visibleRecords, ImmutableArray<IRecord>  selectedRecords)
