@@ -45,3 +45,9 @@
 *.RAR filter=lfs diff=lfs merge=lfs -text
 *.7z filter=lfs diff=lfs merge=lfs -text
 *.7Z filter=lfs diff=lfs merge=lfs -text
+
+# Test Data
+# Byte offsets saved in test sidecars assume CRLF, as Windows CI checks out (#961).
+
+Tst/**/.Daten/**/*.log text=auto eol=crlf
+Tst/**/.Daten/**/*.txt text=auto eol=crlf
