@@ -1,5 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
+	using System;
+
 	[TestClass]
 	public class TsvRecordParserTest
 	{
@@ -82,6 +84,20 @@
 			var content = new Daten().AsString();
 
 			(new TsvRecordParser().TryParse(LineOne, content, out _)).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenMessageContainingTabs_WhenParsing_ThenContentIsTheWholeLine()
+		{
+			const string content = "2026-10-16 10:00:00.12345\t123\t1\tWarn\tColumn A\tColumn B\tColumn C";
+
+			var wasSuccessful = new TsvRecordParser().TryParse(LineOne, content, out IRecord record);
+
+			wasSuccessful.Should().BeTrue();
+			record.Content.Should().Be(content);
+			record.Severity.Should().Be(SeverityType.Warning);
+			record.CreatedAt.Should().Be(new DateTime(2026, 10, 16, 10, 0, 0, 123).AddTicks(4500));
+			record.Metadata.WasGeneratedByUi.Should().BeTrue();
 		}
 
 		// Issue #959: a number too large for the header field must not stop loading.

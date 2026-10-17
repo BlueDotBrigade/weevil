@@ -6,7 +6,7 @@
 
 	internal class TsvRecordParser : IRecordParser
 	{
-		private static readonly char[] FieldDelimiter = new[] { '\t' };
+		private const char FieldDelimiter = '\t';
 
 		public bool TryParse(int line, string content, out IRecord record)
 		{
@@ -18,25 +18,28 @@
 
 			if (!string.IsNullOrWhiteSpace(content))
 			{
-				var fields = content.Split(FieldDelimiter, ExpectedFieldCount);
+				// The fields are located as ranges, so no string is allocated for each field (#967).
+				// When there are more delimiters, the last range holds the rest of the line.
+				ReadOnlySpan<char> text = content.AsSpan();
+				Span<Range> fields = stackalloc Range[ExpectedFieldCount];
 
-				isValidRecord = fields.Length >= ExpectedFieldCount;
+				isValidRecord = text.Split(fields, FieldDelimiter) >= ExpectedFieldCount;
 
 				if (isValidRecord)
 				{
 					// TryParse methods are used so that malformed values, including numbers that are
 					// too large, never throw an exception (#959).
 					var isTimestampValid = DateTime.TryParseExact(
-						fields[0],
+						text[fields[0]],
 						"yyyy-MM-dd HH:mm:ss.FFFFF", CultureInfo.InvariantCulture, DateTimeStyles.None,
 						out DateTime createdAt);
 
-					var isProcessIdValid = int.TryParse(fields[1],
+					var isProcessIdValid = int.TryParse(text[fields[1]],
 						NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
 						CultureInfo.InvariantCulture,
 						out _);
 
-					var isThreadIdValid = int.TryParse(fields[2],
+					var isThreadIdValid = int.TryParse(text[fields[2]],
 						NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
 						CultureInfo.InvariantCulture,
 						out var threadId);
@@ -50,7 +53,7 @@
 							metadata.WasGeneratedByUi = true;
 						}
 
-						SeverityTypeHelpers.TryParse(fields[3], out SeverityType severityType);
+						SeverityTypeHelpers.TryParse(text[fields[3]], out SeverityType severityType);
 
 						record = new Record(line, createdAt, severityType, content, metadata);
 					}
