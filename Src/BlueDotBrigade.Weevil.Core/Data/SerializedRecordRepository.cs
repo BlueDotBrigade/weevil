@@ -95,7 +95,7 @@
 
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 
-			return ImmutableArray.Create(results.ToArray());
+			return results.ToImmutableArray();
 		}
 	}
 }

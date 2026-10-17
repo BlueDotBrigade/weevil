@@ -233,5 +233,42 @@
 			recordsInSection[3].LineNumber.Should().Be(127);
 			recordsInSection[4].LineNumber.Should().Be(129);
 		}
+
+		[TestMethod]
+		public void GivenArrayWithNulls_WhenCompacting_ThenNullsAreRemovedAndOrderIsKept()
+		{
+			var records = ImmutableArray.Create<IRecord>(
+				null,
+				R.WithLineNumber(2),
+				null,
+				R.WithLineNumber(4),
+				R.WithLineNumber(5),
+				null);
+
+			ImmutableArray<IRecord> results = records.Compact(3);
+
+			results.Select(r => r.LineNumber).Should().Equal(2, 4, 5);
+		}
+
+		[TestMethod]
+		public void GivenArrayWithoutNulls_WhenCompacting_ThenAllRecordsAreKept()
+		{
+			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 4);
+
+			ImmutableArray<IRecord> results = records.Compact(records.Length);
+
+			results.Should().Equal(records);
+		}
+
+		[TestMethod]
+		public void GivenOnlyNulls_WhenCompacting_ThenReturnsEmptyArray()
+		{
+			var records = ImmutableArray.Create<IRecord>(null, null);
+
+			ImmutableArray<IRecord> results = records.Compact(0);
+
+			results.IsDefault.Should().BeFalse();
+			results.Should().BeEmpty();
+		}
 	}
 }

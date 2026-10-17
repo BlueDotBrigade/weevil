@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
+	using System.Runtime.InteropServices;
 	using BlueDotBrigade.Weevil.Navigation;
 
 	public static class RecordCollectionExtensions
@@ -76,7 +77,8 @@
 				}
 			}
 
-			return ImmutableArray.Create(compressedResults);
+			// `compressedResults` is never exposed, so it is wrapped rather than copied.
+			return ImmutableCollectionsMarshal.AsImmutableArray(compressedResults);
 		}
 
 		/// <summary>
