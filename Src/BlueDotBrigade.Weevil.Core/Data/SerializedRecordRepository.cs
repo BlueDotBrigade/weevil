@@ -93,7 +93,7 @@
 				}
 			} while (Record.IsGenuine(record) && results.Count < maximumCount);
 
-			return ImmutableArray.Create(results.ToArray());
+			return results.ToImmutableArray();
 		}
 	}
 }
