@@ -32,21 +32,19 @@ namespace BlueDotBrigade.Weevil.IO
 		private static readonly byte[] Signature = "WIDX"u8.ToArray();
 
 		private readonly int _checkpointInterval;
-		private readonly int _unitSize;
-		private readonly bool _isBigEndian;
-		private readonly int _preambleLength;
 		private readonly List<long> _checkpoints;
+
+		private int _unitSize;
+		private bool _isBigEndian;
+		private int _preambleLength;
 
 		private ScanState _endState;
 		private byte[] _headHash;
 		private byte[] _tailHash;
 
-		private LineIndex(int checkpointInterval, int unitSize, bool isBigEndian, int preambleLength, List<long> checkpoints)
+		private LineIndex(int checkpointInterval, List<long> checkpoints)
 		{
 			_checkpointInterval = checkpointInterval;
-			_unitSize = unitSize;
-			_isBigEndian = isBigEndian;
-			_preambleLength = preambleLength;
 			_checkpoints = checkpoints;
 		}
 
@@ -72,26 +70,10 @@ namespace BlueDotBrigade.Weevil.IO
 				throw new ArgumentOutOfRangeException(nameof(checkpointInterval), checkpointInterval, "At least one line per checkpoint was expected.");
 			}
 
-			var originalPosition = source.Position;
+			var index = new LineIndex(checkpointInterval, new List<long>());
+			index.Update(source, bufferSize);
 
-			try
-			{
-				(int unitSize, bool isBigEndian, int preambleLength) = DetectEncoding(source);
-
-				var index = new LineIndex(checkpointInterval, unitSize, isBigEndian, preambleLength, new List<long>())
-				{
-					IndexedLength = preambleLength,
-					_endState = ScanState.AtLineStart,
-				};
-
-				index.Update(source, bufferSize);
-
-				return index;
-			}
-			finally
-			{
-				source.Position = originalPosition;
-			}
+			return index;
 		}
 
 		/// <summary>
@@ -107,6 +89,14 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
+				// When the log was last scanned, its byte order mark may not have been written yet, or only in part.
+				(int UnitSize, bool IsBigEndian, int PreambleLength) encoding = DetectEncoding(source);
+
+				if (encoding != (_unitSize, _isBigEndian, _preambleLength))
+				{
+					Reset(encoding);
+				}
+
 				var lineCount = LineCount;
 				ScanState state = _endState;
 
@@ -130,6 +120,18 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				source.Position = originalPosition;
 			}
+		}
+
+		/// <summary>
+		/// Forgets everything scanned, so that scanning restarts after the byte order mark of the given encoding.
+		/// </summary>
+		private void Reset((int UnitSize, bool IsBigEndian, int PreambleLength) encoding)
+		{
+			(_unitSize, _isBigEndian, _preambleLength) = encoding;
+			_checkpoints.Clear();
+			LineCount = 0;
+			IndexedLength = encoding.PreambleLength;
+			_endState = ScanState.AtLineStart;
 		}
 
 		/// <summary>
@@ -185,7 +187,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public void Write(Stream destination)
 		{
-			using var writer = new BinaryWriter(destination, Encoding.UTF8, leaveOpen: true);
+			using var payload = new MemoryStream();
+			using var writer = new BinaryWriter(payload, Encoding.UTF8, leaveOpen: true);
 
 			writer.Write(Signature);
 			writer.Write(FormatVersion);
@@ -205,6 +208,13 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				writer.Write(checkpoint);
 			}
+
+			writer.Flush();
+
+			// The checksum identifies a damaged index file, so that it is rebuilt.
+			var payloadBytes = payload.GetBuffer().AsSpan(0, (int)payload.Length);
+			destination.Write(payloadBytes);
+			destination.Write(SHA256.HashData(payloadBytes));
 		}
 
 		/// <summary>
@@ -218,9 +228,26 @@ namespace BlueDotBrigade.Weevil.IO
 		{
 			index = null;
 
+			var length = indexSource.Length - indexSource.Position;
+
+			if (length < HashLength || length > int.MaxValue)
+			{
+				return false;
+			}
+
+			var bytes = new byte[length];
+			indexSource.ReadExactly(bytes);
+
+			var payloadLength = bytes.Length - HashLength;
+
+			if (!SHA256.HashData(bytes.AsSpan(0, payloadLength)).AsSpan().SequenceEqual(bytes.AsSpan(payloadLength)))
+			{
+				return false;
+			}
+
 			try
 			{
-				using var reader = new BinaryReader(indexSource, Encoding.UTF8, leaveOpen: true);
+				using var reader = new BinaryReader(new MemoryStream(bytes, 0, payloadLength));
 
 				if (!reader.ReadBytes(Signature.Length).AsSpan().SequenceEqual(Signature) ||
 				    reader.ReadInt32() != FormatVersion)
@@ -247,7 +274,7 @@ namespace BlueDotBrigade.Weevil.IO
 					checkpointInterval >= 1 &&
 					lineCount >= 0 &&
 					checkpointCount == (lineCount + (long)checkpointInterval - 1) / checkpointInterval &&
-					indexSource.Length - indexSource.Position == checkpointCount * (long)sizeof(long) &&
+					reader.BaseStream.Length - reader.BaseStream.Position == checkpointCount * (long)sizeof(long) &&
 					headHash.Length == HashLength &&
 					tailHash.Length == HashLength &&
 					indexedLength >= preambleLength &&
@@ -286,8 +313,11 @@ namespace BlueDotBrigade.Weevil.IO
 					logSource.Position = originalPosition;
 				}
 
-				index = new LineIndex(checkpointInterval, unitSize, isBigEndian, preambleLength, checkpoints)
+				index = new LineIndex(checkpointInterval, checkpoints)
 				{
+					_unitSize = unitSize,
+					_isBigEndian = isBigEndian,
+					_preambleLength = preambleLength,
 					LineCount = lineCount,
 					IndexedLength = indexedLength,
 					_endState = endState,
