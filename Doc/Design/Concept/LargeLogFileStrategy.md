@@ -44,7 +44,7 @@ Filtering must not get slower: analysts filter the same log many times.
 ### Scale
 
 - **.NET size limits.** A string holds at most about 1 billion characters and an array about 2 GB, so content must be stored in chunks.
-- **Index size.** About 21 bytes per record: roughly 5 GB for a 25 GB log, and 13 GB for a 64 GB log.
+- **Index size.** Per-record columns take about 21 bytes per record: roughly 5 GB for a 25 GB log, and 13 GB for a 64 GB log. The phase 2a line index stores one offset per 64 lines: about 20 MB for a 20 GB log.
 - **32-bit line numbers.** Fine up to about 2.1 billion lines; a 64 GB log would overflow only if its lines averaged under 30 bytes.
 - **Disk speed.** Disk mode re-reads the file on every filter. An NVMe drive reads 20 GB in about 6 s, a SATA SSD in about 36 s; network shares are slower still.
 
@@ -111,7 +111,7 @@ The index comes before disk mode, because disk mode depends on it.
    - Results on test logs: opening is 35–43% faster, 62–74% less memory is allocated while opening, memory in use after opening is 7–11% lower, and filtering is about 40% faster.
    - Follow-up, outside phase 1: filters still allocate about 300 bytes per record ([#976](https://github.com/BlueDotBrigade/weevil/issues/976)).
 2. **Record index.**
-   - 2a ([#977](https://github.com/BlueDotBrigade/weevil/issues/977)): build the index while loading, save it, and use it to open a log from a section. Write sidecar offsets from the index. When a reopened log has grown, re-index from its last record.
+   - 2a ([#977](https://github.com/BlueDotBrigade/weevil/issues/977)): build a line index by scanning the log's bytes, save it, and use it to open a log from a section. Write sidecar offsets from the index. When a reopened log has grown, scan only its new content.
    - 2b ([#978](https://github.com/BlueDotBrigade/weevil/issues/978)): keep raw bytes in RAM (in chunks) and create records on demand. Replace record arrays in the API with lists of record numbers. Move annotations into one store with change events, and save the sidecar from it. Calculate elapsed time on display, store analyzer flags in a bitset, and implement clear as narrowing the index.
 3. **Disk mode.**
    - Add a Weevil Open As dialog with RAM / Disk, defaulting to RAM.
@@ -126,17 +126,19 @@ The index comes before disk mode, because disk mode depends on it.
 ```
 Application.log        log file, never modified
 Application.log.xml    sidecar: user data, XML
-Application.log.idx    record index: binary
+Application.log.idx    index: binary
 ```
 
 - Named and placed like the sidecar, so a log's files can be copied to another developer together.
-- Header: format version, encoding, parser, record count and a fingerprint of the log. Then one column per field: byte offset (8 bytes), line number (4), timestamp (8), severity and flags (1).
+- Phase 2a stores a line index: the byte offset of every 64th line, found by scanning the log's bytes for line breaks, without parsing. Other lines are found by scanning forward from the nearest stored offset. Lines are counted as `StreamReader.ReadLine` counts them, so line numbers match the parser's.
+- A line index depends only on the log's bytes, so a parser or plugin change never makes it stale. A record's line number is the line it starts on, so the line index also locates every record.
+- Header: format version, encoding, line count, length indexed and a fingerprint of the log. Phase 2b adds per-record columns: timestamp (8 bytes), severity and flags (1), and which lines start records.
 - It is a cache: if missing, stale, corrupt or from an older format, Weevil rebuilds it. Deleting it is always safe.
-- The fingerprint uses only content (the length indexed, plus hashes of the first few KB and of the last record), not the path or timestamps, so a copied index stays valid.
+- The fingerprint uses only content (the length indexed, plus hashes of the first and last 4 KB indexed), not the path or timestamps, so a copied index stays valid.
 - Written to `Application.log.idx.tmp` first, then swapped in, so a crash never leaves a partial index.
 - Not saved when the folder is read-only or the log was opened from a compressed archive, matching the sidecar. Weevil then rebuilds it on every open.
-- When a reopened log has grown, check that the start and the last indexed record still match; if not, warn and rebuild.
-- For large indexes (13 GB for a 64 GB log), compact the columns or memory-map the `.idx` file. Mapping Weevil's own file is safe, unlike mapping the log.
+- When a reopened log has grown, check that the first and last 4 KB indexed still match, then scan only the new content; if not, warn and rebuild.
+- For large per-record columns (13 GB for a 64 GB log), compact them or memory-map the `.idx` file. Mapping Weevil's own file is safe, unlike mapping the log.
 
 ### Sidecar byte offsets today
 
@@ -152,7 +154,7 @@ Opening from a start line uses the byte offset of a section on that line. Before
 - A wrong offset: reading started at the wrong place, possibly mid-line.
 - -1: the file failed to open.
 
-Since #958, the offset is used only when a line begins there; otherwise reading starts at the top of the file and skips to the start line. An offset that is wrong but still lands at the start of a line cannot be detected without a record index.
+Since #958, the offset is used only when a line begins there; otherwise reading starts at the top of the file and skips to the start line. An offset that is wrong but still lands at the start of a line cannot be detected without an index.
 
 ### Future: immutable core
 
