@@ -52,5 +52,25 @@ namespace BlueDotBrigade.Weevil.Data
 			records[0].LineNumber.Should().Be(PreambleLineCount + 1);
 			records[0].Content.Should().EndWith($"Record {PreambleLineCount + 1}");
 		}
+
+		// Issue #977: the byte order mark is only at the top of the file, so reading from an offset must still decode UTF-16.
+		[TestMethod]
+		[DataRow(false, DisplayName = "UTF-16 little-endian")]
+		[DataRow(true, DisplayName = "UTF-16 big-endian")]
+		public void GivenUtf16Log_WhenReadingFromLineOffset_ThenContentIsDecoded(bool isBigEndian)
+		{
+			var encoding = new UnicodeEncoding(isBigEndian, byteOrderMark: true);
+			const string firstLine = "2026-10-16 10:00:00.00000\t1\t2\tInformation\tRecord 1\n";
+			const string secondLine = "2026-10-16 10:00:01.00000\t1\t2\tInformation\tRecord 2 \u00e9\n";
+			var source = new MemoryStream(encoding.GetPreamble().Concat(encoding.GetBytes(firstLine + secondLine)).ToArray());
+			var secondLineOffset = encoding.GetPreamble().Length + encoding.GetByteCount(firstLine);
+
+			var repository = new SerializedRecordRepository(source, new TsvRecordParser(), secondLineOffset, 2, true);
+			var records = repository.Get(int.MaxValue);
+
+			records.Should().HaveCount(1);
+			records[0].LineNumber.Should().Be(2);
+			records[0].Content.Should().Be(secondLine.TrimEnd('\n'));
+		}
 	}
 }

@@ -98,6 +98,18 @@ namespace BlueDotBrigade.Weevil
 			engine[0].Content.Should().Be("Line 180");
 		}
 
+		// Issue #977: an offset at the start of the wrong line could not be detected without a line index.
+		[TestMethod]
+		public void GivenSidecarOffsetIsStartOfAnotherLine_WhenOpeningAtLineNumber_ThenFirstRecordIsThatLine()
+		{
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath(LogWithUnreliableSidecarOffsets), startAtLineNumber: 200)
+				.Open();
+
+			engine[0].LineNumber.Should().Be(200);
+			engine[0].Content.Should().Be("Line 200");
+		}
+
 		[TestMethod]
 		public void GivenUnreliableSidecarOffset_WhenOpeningLineRange_ThenOnlyThatRangeIsLoaded()
 		{
