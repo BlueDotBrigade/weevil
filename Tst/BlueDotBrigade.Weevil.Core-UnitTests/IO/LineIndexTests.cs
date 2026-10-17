@@ -162,6 +162,39 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
+		[DataRow("", DisplayName = "Empty log")]
+		[DataRow("\u00ef\u00bb", DisplayName = "Part of a byte order mark")]
+		public void GivenByteOrderMarkCompletedLater_WhenUpdating_ThenMatchesIndexOfWholeLog(string originalLatin1)
+		{
+			var completeLog = new UTF8Encoding(true).GetPreamble().Concat(Encoding.UTF8.GetBytes("a\nb\n")).ToArray();
+			var originalLength = Encoding.Latin1.GetByteCount(originalLatin1);
+			using var source = new MemoryStream();
+			source.Write(completeLog, 0, originalLength);
+
+			var index = LineIndex.Build(source, checkpointInterval: 1);
+
+			source.Write(completeLog, originalLength, completeLog.Length - originalLength);
+			index.Update(source);
+
+			ShouldMatchReadLine(index, source, new UTF8Encoding(false));
+			index.GetByteOffset(source, 1).Should().Be(3);
+		}
+
+		[TestMethod]
+		public void GivenEmptyLog_WhenUtf16ContentIsAppended_ThenUpdateMatchesReadLine()
+		{
+			using var source = new MemoryStream();
+			var index = LineIndex.Build(source);
+
+			var encoding = new UnicodeEncoding(bigEndian: false, byteOrderMark: true);
+			source.Write(encoding.GetPreamble());
+			source.Write(encoding.GetBytes("First\r\nSecond\n"));
+			index.Update(source);
+
+			ShouldMatchReadLine(index, source, new UnicodeEncoding(false, false));
+		}
+
+		[TestMethod]
 		public void GivenSavedIndex_WhenReading_ThenOffsetsAreTheSame()
 		{
 			using MemoryStream source = ToStream("a\nbb\nccc\ndddd\neeeee", new UTF8Encoding(false));
@@ -240,6 +273,23 @@ namespace BlueDotBrigade.Weevil.IO
 			var truncated = new MemoryStream(saved.ToArray(), 0, (int)saved.Length - 1);
 
 			LineIndex.TryRead(truncated, source, out _).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenAnyByteOfSavedIndexChanged_WhenReading_ThenReturnsFalse()
+		{
+			using MemoryStream source = ToStream("a\nb\nc\nd\n", new UTF8Encoding(false));
+			using var saved = new MemoryStream();
+			LineIndex.Build(source, checkpointInterval: 1).Write(saved);
+			var original = saved.ToArray();
+
+			for (var i = 0; i < original.Length; i++)
+			{
+				var damaged = original.ToArray();
+				damaged[i] ^= 0x01;
+
+				LineIndex.TryRead(new MemoryStream(damaged), source, out _).Should().BeFalse($"byte {i} was changed");
+			}
 		}
 
 		[TestMethod]
