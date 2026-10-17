@@ -1,21 +1,24 @@
-# Large log files: draft user stories
+# Large log files: user stories
 
-Status: draft, 2026-10-16. Phases follow the [design concept](LargeLogFileStrategy.md).
+Phases follow the [design concept](LargeLogFileStrategy.md). User stories for phases 1 and 2 are in GitHub; phase 3 is still a draft. The requirements below are the formal reference for each phase.
 
 ## Phase 1: faster parser
 
-- As an analyst, I want large log files to open faster, so that I can start investigating sooner.
-- As an analyst, I want Weevil to use less memory while opening a file, so that I can open larger files.
+- [#975](https://github.com/BlueDotBrigade/weevil/issues/975): open large log files faster, with less memory. Done.
 
 Requirements:
 
 - When a log file is opened, Weevil shall produce the same records, line numbers and content as version 2.12.1.
 - If a numeric field in a record header cannot be parsed, then Weevil shall treat the line as part of the previous record and continue loading.
 
+## Follow-up: faster filtering
+
+- [#976](https://github.com/BlueDotBrigade/weevil/issues/976): apply filters faster on large log files.
+
 ## Phase 2: record index
 
-- As an analyst, I want comments, bookmarks and regions to stay attached to the right records, so that my annotations remain correct.
-- As an analyst, I want a log file I have opened before to reopen quickly, so that I do not wait for it to be read again.
+- [#977](https://github.com/BlueDotBrigade/weevil/issues/977): opening a log from a section always starts at the right record.
+- [#978](https://github.com/BlueDotBrigade/weevil/issues/978): keep a log file in much less memory, and reopen it without parsing it again.
 
 Requirements:
 
@@ -31,7 +34,7 @@ Requirements:
 - If the log file was opened from a compressed archive, then Weevil shall not save the index file.
 - When a reopened log file has grown, Weevil shall index only the content after the start of the last indexed record.
 
-## Phase 3: disk mode
+## Phase 3: disk mode (draft)
 
 - As an analyst, I want to choose whether a log file is kept in RAM or read from disk, so that I can open log files larger than my computer's memory.
 
