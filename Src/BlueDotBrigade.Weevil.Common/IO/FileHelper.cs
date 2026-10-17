@@ -10,6 +10,24 @@
 		private static readonly TimeSpan DelayBetweenAttempts = TimeSpan.FromMilliseconds(100);
 		private static readonly TimeSpan TryOpenPeriod = TimeSpan.FromSeconds(2);
 
+		/// <summary>
+		/// Indicates whether the file is in a folder within the temporary folder, which is where files from a compressed archive are extracted.
+		/// </summary>
+		public static bool IsInTemporaryDirectory(string path)
+		{
+			try
+			{
+				var directory = Path.GetDirectoryName(path);
+
+				return directory?.StartsWith(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase) ?? false;
+			}
+			catch
+			{
+				// If we can't determine, assume it's not in temp directory
+				return false;
+			}
+		}
+
 		/// <summary>Opens a read-only <see cref="T:System.IO.FileStream" /> on the specified path.</summary>
 		/// <param name="path">The file to open.</param>
 		/// <returns>An unshared <see cref="T:System.IO.FileStream" /> that provides access to the specified file, with the specified mode and access.</returns>

@@ -1,6 +1,7 @@
 ﻿
 namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 {
+	using System;
 	using System.Collections.Immutable;
 	using Data;
 	using Filter;
@@ -17,5 +18,10 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 		public ImmutableArray<Region> Regions{ get; set; }
 
 		public ImmutableArray<Bookmark> Bookmarks { get; set; }
+
+		/// <summary>
+		/// Returns the byte offset where a line begins, or -1 when it is not known.
+		/// </summary>
+		public Func<int, long> ByteOffsetOfLine { get; set; }
 	}
 }

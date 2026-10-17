@@ -376,3 +376,7 @@ MigrationBackup/
 /Tst/BlueDotBrigade.Weevil.Core-FunctionalTests/OpeningFileShould.feature.cs
 /Src/BlueDotBrigade.Weevil.Cli/Properties/launchSettings.json
 /Src/BlueDotBrigade.Weevil.Installer/installer-layout
+
+# Weevil line index: a cache beside each log, rebuilt when missing (#977)
+*.idx
+*.idx.tmp

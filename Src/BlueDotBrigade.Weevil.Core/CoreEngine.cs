@@ -13,6 +13,7 @@
 	using Data;
 	using Diagnostics;
 	using Filter;
+	using IO;
 	using Navigation;
 	using Reports;
 
@@ -35,6 +36,7 @@
 
 		private readonly FilterManager _filterManager;
 		private readonly SidecarManager _sidecarManager;
+		private readonly LineIndex _lineIndex;
 		private readonly SelectionManager _selectionManager;
 		private readonly NavigationManager _navigationManager;
 		private readonly IRegionManager _regionManager;
@@ -81,6 +83,7 @@
 			ContextDictionary context,
 			string sourceFileRemarks,
 			SidecarManager sidecarManager,
+			LineIndex lineIndex,
 			ImmutableArray<IRecord> records,
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
@@ -131,6 +134,7 @@
 				});
 
 			_sidecarManager = sidecarManager;
+			_lineIndex = lineIndex;
 
 			_originalRecordCount = _allRecords.Length;
 
@@ -303,6 +307,8 @@
 
 		public void Save(bool deleteBackup)
 		{
+			using FileStream logSource = TryOpenSourceFile();
+
 			var sidecarData = new SidecarData
 			{
 				Records = _allRecords,
@@ -312,9 +318,33 @@
 				TableOfContents = _navigationManager.TableOfContents,
 				Regions = _regionManager.Regions,
 				Bookmarks = _bookmarkManager.Bookmarks,
+				ByteOffsetOfLine = lineNumber => GetByteOffset(logSource, lineNumber),
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);
+		}
+
+		/// <summary>
+		/// Opens the log so that byte offsets can be taken from the line index, or returns <see langword="null"/> if it is gone.
+		/// </summary>
+		private FileStream TryOpenSourceFile()
+		{
+			try
+			{
+				return System.IO.File.Exists(_sourceFilePath) ? FileHelper.Open(_sourceFilePath) : null;
+			}
+			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
+			{
+				Log.Default.Write(LogSeverityType.Warning, exception, $"The log could not be opened, so the sidecar will not include byte offsets. SourceFilePath={_sourceFilePath}");
+				return null;
+			}
+		}
+
+		private long GetByteOffset(Stream logSource, int lineNumber)
+		{
+			return logSource != null && lineNumber >= 1 && lineNumber <= _lineIndex.LineCount
+				? _lineIndex.GetByteOffset(logSource, lineNumber)
+				: -1;
 		}
 
 		public void GenerateReport(ReportType report, string destinationFolder)

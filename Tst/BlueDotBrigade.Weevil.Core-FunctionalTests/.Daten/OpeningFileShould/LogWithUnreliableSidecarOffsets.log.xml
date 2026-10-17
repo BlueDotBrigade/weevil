@@ -32,6 +32,14 @@
 					<LineNumber>180</LineNumber>
 				</RelatesTo>
 			</Section>
+			<Section>
+				<Level>1</Level>
+				<Name>Byte offset is the start of another line (190)</Name>
+				<RelatesTo>
+					<ByteOffset>1701</ByteOffset>
+					<LineNumber>200</LineNumber>
+				</RelatesTo>
+			</Section>
 		</TableOfContents>
 		<UserRemarks />
 	</CommonData>

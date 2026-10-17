@@ -177,17 +177,28 @@
 			}
 		}
 
-		private static RecordInfo ToRecordInfo(IRecord record)
+		private static RecordInfo ToRecordInfo(IRecord record, Func<int, long> byteOffsetOfLine)
 		{
 			return new RecordInfo()
 			{
 				Id = record.LineNumber,
-				RelatesTo = new RelatesTo
-				{
-					LineNumber = record.LineNumber,
-				},
+				RelatesTo = Locate(new RelatesTo { LineNumber = record.LineNumber }, byteOffsetOfLine),
 				Comment = record.Metadata.Comment,
 				IsPinned = record.Metadata.IsPinned,
+			};
+		}
+
+		/// <summary>
+		/// Returns a copy of the location, with the byte offset of its line when that is known.
+		/// </summary>
+		private static RelatesTo Locate(RelatesTo location, Func<int, long> byteOffsetOfLine)
+		{
+			var byteOffset = byteOffsetOfLine?.Invoke(location.LineNumber) ?? -1;
+
+			return new RelatesTo
+			{
+				LineNumber = location.LineNumber,
+				ByteOffset = byteOffset >= 0 ? byteOffset : location.ByteOffset,
 			};
 		}
 
@@ -205,9 +216,11 @@
 				// ... otherwise merge the old with the new
 				if (newData.Records.Length == 0)
 				{
-					var oldRecords = oldData.CommonData.Records
-						.ToDictionary(k => k.RelatesTo.LineNumber, v => v);
-					masterRecords.AddRange(oldRecords);
+					foreach (RecordInfo oldRecord in oldData.CommonData.Records)
+					{
+						oldRecord.RelatesTo = Locate(oldRecord.RelatesTo, newData.ByteOffsetOfLine);
+						masterRecords.Add(oldRecord.RelatesTo.LineNumber, oldRecord);
+					}
 				}
 				else
 				{
@@ -218,11 +231,12 @@
 							if (!string.IsNullOrWhiteSpace(newRecord.Metadata.Comment) ||
 								newRecord.Metadata.IsPinned)
 							{
-								masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord));
+								masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord, newData.ByteOffsetOfLine));
 							}
 						}
 						else
 						{
+							oldRecord.RelatesTo = Locate(oldRecord.RelatesTo, newData.ByteOffsetOfLine);
 							masterRecords.Add(oldRecord.RelatesTo.LineNumber, oldRecord);
 						}
 					}
@@ -239,7 +253,7 @@
 					{
 						if (!masterRecords.ContainsKey(newRecord.LineNumber))
 						{
-							masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord));
+							masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord, newData.ByteOffsetOfLine));
 						}
 					}
 				}
@@ -275,11 +289,13 @@
 					{
 						Name = section.Name,
 						Level = section.Level,
-						RelatesTo = new RelatesTo
-						{
-							ByteOffset = section.ByteOffset,
-							LineNumber = section.LineNumber,
-						},
+						RelatesTo = Locate(
+							new RelatesTo
+							{
+								ByteOffset = section.ByteOffset,
+								LineNumber = section.LineNumber,
+							},
+							newData.ByteOffsetOfLine),
 					});
 				}
 			}
@@ -291,8 +307,8 @@
 					snapshot.CommonData.Regions.Add(new RegionInfo
 					{
 						Name = region.Name,
-						Minimum = region.Minimum,
-						Maximum = region.Maximum,
+						Minimum = Locate(region.Minimum, newData.ByteOffsetOfLine),
+						Maximum = Locate(region.Maximum, newData.ByteOffsetOfLine),
 					});
 				}
 			}
@@ -305,7 +321,7 @@
 					{
 						Id = bookmark.Id,
 						Name = bookmark.Name,
-						Record = bookmark.Record,
+						Record = Locate(bookmark.Record, newData.ByteOffsetOfLine),
 					});
 				}
 			}
@@ -333,29 +349,6 @@
 			}
 
 			return snapshot;
-		}
-
-		internal long GetByteOffsetOrDefault(int lineNumber)
-		{
-			if (lineNumber <= 0)
-			{
-				throw new ArgumentOutOfRangeException(
-					nameof(lineNumber),
-					$"Value is expected to be greater than zero. Value={lineNumber}");
-			}
-			long offset = 0;
-
-			SectionInfo sectionInfo = _sidecar
-				.CommonData
-				.TableOfContents
-				?.FirstOrDefault(r => r.RelatesTo.LineNumber == lineNumber);
-
-			if (sectionInfo != null)
-			{
-				offset = sectionInfo.RelatesTo.ByteOffset;
-			}
-
-			return offset;
 		}
 	}
 }

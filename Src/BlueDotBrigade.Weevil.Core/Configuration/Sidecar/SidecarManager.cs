@@ -27,23 +27,6 @@
 		/// <summary>
 		/// Determines if the sidecar file path is in a temporary directory.
 		/// </summary>
-		private bool IsInTemporaryDirectory()
-		{
-			try
-			{
-				var tempPath = Path.GetTempPath();
-				var sidecarDirectory = Path.GetDirectoryName(_sidecarFilePath);
-				
-				// Check if the sidecar path starts with the temp path
-				return sidecarDirectory?.StartsWith(tempPath, StringComparison.OrdinalIgnoreCase) ?? false;
-			}
-			catch
-			{
-				// If we can't determine, assume it's not in temp directory
-				return false;
-			}
-		}
-
 		public void Load(
 			ImmutableArray<IRecord> allRecords,
 			out ContextDictionary context,
@@ -131,7 +114,7 @@
 		public void Save(SidecarData data, bool deleteBackup)
 		{
 			// Skip save operation if the file is from a compressed archive (in temp directory)
-			if (IsInTemporaryDirectory())
+			if (FileHelper.IsInTemporaryDirectory(_sidecarFilePath))
 			{
 				Log.Default.Write(
 					LogSeverityType.Information,
@@ -162,22 +145,6 @@
 
 				_file.Copy(_sidecarFilePath, backupFilePath);
 			}
-		}
-
-		public long GetByteOffsetOrDefault(int lineNumber)
-		{
-			long offset = 0;
-
-			if (_file.Exists(_sidecarFilePath))
-			{
-				var loader = new v2.SidecarLoader(_sidecarFilePath);
-				if (loader.Load())
-				{
-					offset = loader.GetByteOffsetOrDefault(lineNumber);
-				}
-			}
-
-			return offset;
 		}
 	}
 }

@@ -170,6 +170,7 @@
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
+				LineIndex lineIndex;
 
 				var maxRecords = _maxRecords;
 				ImmutableArray<IRecord> records;
@@ -201,6 +202,7 @@
 
 					coreExtension = _sourceInstance._coreExtension;
 					sidecarManager = _sourceInstance._sidecarManager;
+					lineIndex = _sourceInstance._lineIndex;
 
 					selectedRecords = _sourceInstance._selectionManager.GetSelected();
 
@@ -231,16 +233,18 @@
 
 						loadingStopwatch.Restart();
 
+						lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
+
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 						Range lineNumberRange = GetLineNumberRange();
 
-						// Reading starts at the start line's saved byte offset only when it checks out (#958).
-						// Otherwise it starts at the top of the file, and records before the start line are skipped.
-						var repository = TryGetStartLineByteOffset(dataSource, sidecarManager, startAtLineNumber, out var byteOffset)
+						// Reading starts at the start line's byte offset, taken from the line index (#977).
+						// A start line beyond the end of the log reads from the top, which finds no records to keep.
+						var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
 							? new SerializedRecordRepository(
 								 dataSource,
 								 coreExtension.GetRecordParser(),
-								 byteOffset,
+								 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
 								 startAtLineNumber,
 								 true)
 							: new SerializedRecordRepository(
@@ -285,6 +289,7 @@
 					context,
 					sourceFileRemarks,
 					sidecarManager,
+					lineIndex,
 					records,
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
@@ -325,37 +330,6 @@
 				}
 
 				return new Range(System.Math.Max(_range.Start.Value, _startAtLineNumber), _range.End);
-			}
-
-			/// <summary>
-			/// Returns <see langword="true"/> when the sidecar's table of contents has a usable byte offset for the start line.
-			/// </summary>
-			/// <remarks>
-			/// Saved byte offsets are not verified (#958), so an offset is used only when a line begins there.
-			/// Only the first line begins at zero, so zero means the start line's offset is missing.
-			/// </remarks>
-			private static bool TryGetStartLineByteOffset(Stream source, SidecarManager sidecarManager, int startAtLineNumber, out long byteOffset)
-			{
-				byteOffset = SerializedRecordRepository.FirstRecordByteOffset;
-
-				if (startAtLineNumber <= FirstRecordLineNumber)
-				{
-					return false;
-				}
-
-				var savedByteOffset = sidecarManager.GetByteOffsetOrDefault(startAtLineNumber);
-
-				if (savedByteOffset > 0 && source.IsStartOfLine(savedByteOffset))
-				{
-					byteOffset = savedByteOffset;
-					return true;
-				}
-
-				Log.Default.Write(
-					LogSeverityType.Warning,
-					$"The saved byte offset of the start line is not usable, so reading will start at the top of the file. LineNumber={startAtLineNumber}, ByteOffset={savedByteOffset}");
-
-				return false;
 			}
 
 			/// <summary>
