@@ -1,7 +1,7 @@
 # Large log files: design concept
 
-Status: draft, 2026-10-16. No production code has changed.
-Related: [storage benchmark](StorageBenchmarks/README.md), [draft user stories](LargeLogFileUserStories.md).
+Status: draft, 2026-10-16. Phase 1 done 2026-10-17.
+Related: [storage benchmark](StorageBenchmarks/README.md), [user stories](LargeLogFileUserStories.md).
 
 ## Problems
 
@@ -101,15 +101,18 @@ Why:
 
 The index comes before disk mode, because disk mode depends on it.
 
-1. **Faster parser.** No change in behaviour or API.
-   - Skip the extra string copy and second `Record` for single-line records.
-   - Parse TSV fields without `Split` or exceptions. This also fixes an uncaught `OverflowException` that stops loading.
-   - Remove the forced garbage collections that run after every filter and twice while opening a file (#969). Keep the one at the end of opening, in a mode that returns freed memory to the operating system, and the one after a Clear, which exists to free memory.
-   - Build the record array once, and use larger read buffers.
-   - Done (#958): opening from a start line checks the section's saved byte offset before using it, and reads from the top of the file when it does not check out.
+1. **Faster parser** ([#975](https://github.com/BlueDotBrigade/weevil/issues/975), done). No change in behaviour or API.
+   - Single-line records skip the extra string copy and second `Record` ([#965](https://github.com/BlueDotBrigade/weevil/issues/965)).
+   - TSV fields are parsed without `Split` or exceptions ([#967](https://github.com/BlueDotBrigade/weevil/issues/967)), and an oversized number no longer stops loading ([#959](https://github.com/BlueDotBrigade/weevil/issues/959)).
+   - Forced garbage collections no longer run after every filter or twice while opening ([#969](https://github.com/BlueDotBrigade/weevil/issues/969)). One remains at the end of opening, in a mode that returns freed memory to the operating system, plus the one after a Clear.
+   - Each record array is built once ([#971](https://github.com/BlueDotBrigade/weevil/issues/971)).
+   - Opening from a start line checks the section's saved byte offset before using it ([#958](https://github.com/BlueDotBrigade/weevil/issues/958)).
+   - Larger read buffers were dropped: parsing runs at about 40 MB/s, far below disk speed, so they made no measurable difference.
+   - Results on test logs: opening is 35–43% faster, 62–74% less memory is allocated while opening, memory in use after opening is 7–11% lower, and filtering is about 40% faster.
+   - Follow-up, outside phase 1: filters still allocate about 300 bytes per record ([#976](https://github.com/BlueDotBrigade/weevil/issues/976)).
 2. **Record index.**
-   - 2a: build the index while loading and save it. Locate sidecar items by line number, and write offsets from the index. When a reopened log has grown, re-index from its last record.
-   - 2b: keep raw bytes in RAM (in chunks) and create records on demand. Replace record arrays in the API with lists of record numbers. Move annotations into one store with change events, and save the sidecar from it. Calculate elapsed time on display, store analyzer flags in a bitset, and implement clear as narrowing the index.
+   - 2a ([#977](https://github.com/BlueDotBrigade/weevil/issues/977)): build the index while loading, save it, and use it to open a log from a section. Write sidecar offsets from the index. When a reopened log has grown, re-index from its last record.
+   - 2b ([#978](https://github.com/BlueDotBrigade/weevil/issues/978)): keep raw bytes in RAM (in chunks) and create records on demand. Replace record arrays in the API with lists of record numbers. Move annotations into one store with change events, and save the sidecar from it. Calculate elapsed time on display, store analyzer flags in a bitset, and implement clear as narrowing the index.
 3. **Disk mode.**
    - Add a Weevil Open As dialog with RAM / Disk, defaulting to RAM.
    - Read content with normal file reads that never block the app writing the log: no memory-mapping, and the file is shared for deletion too. Filter in parallel.
