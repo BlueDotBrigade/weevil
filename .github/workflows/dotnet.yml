@@ -8,6 +8,10 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+# Both jobs only check out, build and test.
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     runs-on: windows-latest
