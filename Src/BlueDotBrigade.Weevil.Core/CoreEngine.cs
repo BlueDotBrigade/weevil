@@ -115,7 +115,9 @@
 
 			var recordAndMetadataLoadingStopwatch = Stopwatch.StartNew();
 
-			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+			// The only forced collection while opening a file: it frees the memory used while parsing,
+			// and Aggressive mode returns that memory to the operating system, so memory right after opening stays low (#969).
+			GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
 
 			Log.Default.Write(
 				LogSeverityType.Information,

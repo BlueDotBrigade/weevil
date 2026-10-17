@@ -326,8 +326,6 @@
 				exectionTimeStopwatch.Stop();
 				_filterExecutionTime = exectionTimeStopwatch.Elapsed;
 
-				GC.Collect();
-
 				Log.Default.Write(
 					LogSeverityType.Information,
 					$"Filtering complete.",
