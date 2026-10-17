@@ -126,7 +126,7 @@
 		{
 			IList<IRecord> headlessResults = ClearBeforeSelected(records, selectedRecords);
 
-			var immutableHeadlessResults = ImmutableArray.Create(headlessResults.ToArray());
+			var immutableHeadlessResults = headlessResults.ToImmutableArray();
 
 			return ClearAfterSelected(immutableHeadlessResults, selectedRecords);
 		}
@@ -314,7 +314,7 @@
 				_operationState = OperationInactive;
 			}
 
-			return ImmutableArray.Create(visibleRecords.ToArray());
+			return visibleRecords.ToImmutableArray();
 		}
 
 		public ImmutableArray<IRecord> Get(Range range, int maximumCount)

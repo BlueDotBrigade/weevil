@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
+	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Analysis;
@@ -180,7 +181,8 @@
 				LogSeverityType.Debug,
 				$"Filter results are being compressed... Before={resultsCache.Length}");
 
-			ImmutableArray<IRecord> compressedResults = ImmutableArray.Create(resultsCache).Compact(resultsCount);
+			// `resultsCache` does not change after this point, so it is wrapped rather than copied.
+			ImmutableArray<IRecord> compressedResults = ImmutableCollectionsMarshal.AsImmutableArray(resultsCache).Compact(resultsCount);
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
