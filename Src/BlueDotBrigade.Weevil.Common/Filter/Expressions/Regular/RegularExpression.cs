@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using System.Threading;
 	using Data;
@@ -43,7 +44,21 @@
 
 				// A `Regex` reuses one internal runner. When filter threads match at the same time,
 				// all but one would allocate a new runner for every record, so each thread gets its own `Regex`.
-				_threadExpression = new ThreadLocal<Regex>(() => new Regex(expression, RegexOptions.Compiled | options));
+				// Case-insensitive matching uses the culture current when a `Regex` is created, so each copy uses this one.
+				CultureInfo culture = CultureInfo.CurrentCulture;
+				_threadExpression = new ThreadLocal<Regex>(() =>
+				{
+					CultureInfo threadCulture = CultureInfo.CurrentCulture;
+					CultureInfo.CurrentCulture = culture;
+					try
+					{
+						return new Regex(expression, RegexOptions.Compiled | options);
+					}
+					finally
+					{
+						CultureInfo.CurrentCulture = threadCulture;
+					}
+				});
 			}
 			catch (Exception e)
 			{
