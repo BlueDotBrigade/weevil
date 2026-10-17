@@ -1,6 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Regular
 {
+	using System.Globalization;
 	using System.Linq;
+	using System.Threading;
 	using System.Threading.Tasks;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -99,6 +101,34 @@
 			Parallel.For(0, records.Length, i => results[i] = expression.IsMatch(records[i]));
 
 			results.Should().Equal(records.Select(r => r.Content.Contains("fox")));
+		}
+
+		[TestMethod]
+		public void GivenCaseInsensitiveExpressionCreatedInTurkish_WhenMatchingOnEnglishThread_ThenTurkishCasingApplies()
+		{
+			// In Turkish, the upper case of "i" is "İ", so "I" does not match "i".
+			RegularExpression expression;
+			CultureInfo originalCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+				expression = new RegularExpression("i", Microsoft.RegexOptions.IgnoreCase);
+			}
+			finally
+			{
+				CultureInfo.CurrentCulture = originalCulture;
+			}
+
+			var isMatch = true;
+			var thread = new Thread(() =>
+			{
+				CultureInfo.CurrentCulture = new CultureInfo("en-US");
+				isMatch = expression.IsMatch(R.WithContent(1, "I"));
+			});
+			thread.Start();
+			thread.Join();
+
+			isMatch.Should().BeFalse();
 		}
 	}
 }
