@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
+	using System;
 	using System.Collections.Generic;
 
 	public static class SeverityTypeHelpers
@@ -17,6 +18,23 @@
 			{"Critical", SeverityType.Critical},
 			{"Fatal", SeverityType.Critical},
 		};
+
+		private static readonly Dictionary<string, SeverityType>.AlternateLookup<ReadOnlySpan<char>> SeveritySpanLookup =
+			SeverityMap.GetAlternateLookup<ReadOnlySpan<char>>();
+
+		/// <summary>
+		/// Converts part of a line to a <see cref="SeverityType"/> without allocating a string.
+		/// </summary>
+		public static bool TryParse(ReadOnlySpan<char> value, out SeverityType severityType)
+		{
+			if (SeveritySpanLookup.TryGetValue(value, out severityType))
+			{
+				return true;
+			}
+
+			severityType = SeverityType.Information;
+			return false;
+		}
 
 		public static bool TryParse(string value, out SeverityType severityType)
 		{

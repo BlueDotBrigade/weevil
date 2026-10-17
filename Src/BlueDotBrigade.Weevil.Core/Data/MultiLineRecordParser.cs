@@ -141,11 +141,8 @@
 		{
 			var isLoading = true;
 
-			// TODO: How much does this improve performance by turning variable into a member field?
-			var stringBuilder = new StringBuilder();
-			stringBuilder.Append(_currentRecord.Content);
-
-			var isMultilineRecord = false;
+			// Created only when continuation lines are found, because most records are a single line.
+			StringBuilder multilineContent = null;
 
 			do
 			{
@@ -158,37 +155,42 @@
 					if (_recordParser.TryParse(_lineNumber, temp, out _nextRecord))
 					{
 						isLoading = false;
-
-						_currentRecord = new Record(
-							 _currentRecord.LineNumber,
-							 _currentRecord.CreatedAt,
-							 _currentRecord.Severity,
-							 stringBuilder.ToString(),
-							 _currentRecord.Metadata);
-
-						_currentRecord.Metadata.IsMultiLine = isMultilineRecord;
+						CompleteCurrentRecord(multilineContent);
 					}
 					else
 					{
-						isMultilineRecord = true;
-						stringBuilder.Append("\r\n");
-						stringBuilder.Append(temp);
+						multilineContent ??= new StringBuilder(_currentRecord.Content);
+						multilineContent.Append("\r\n");
+						multilineContent.Append(temp);
 					}
 				}
 				else
 				{
 					isLoading = false;
-
-					_currentRecord = new Record(
-						 _currentRecord.LineNumber,
-						 _currentRecord.CreatedAt,
-						 _currentRecord.Severity,
-						 stringBuilder.ToString(),
-						 _currentRecord.Metadata);
-
-					_currentRecord.Metadata.IsMultiLine = isMultilineRecord;
+					CompleteCurrentRecord(multilineContent);
 				}
 			} while (isLoading);
+		}
+
+		/// <summary>
+		/// Finalizes the current record once all of its lines have been read.
+		/// </summary>
+		/// <remarks>
+		/// A single-line <see cref="Record"/> is kept as the parser created it; it is immutable, so no copy is needed.
+		/// </remarks>
+		private void CompleteCurrentRecord(StringBuilder multilineContent)
+		{
+			if (multilineContent != null || !(_currentRecord is Record))
+			{
+				_currentRecord = new Record(
+					 _currentRecord.LineNumber,
+					 _currentRecord.CreatedAt,
+					 _currentRecord.Severity,
+					 multilineContent?.ToString() ?? _currentRecord.Content,
+					 _currentRecord.Metadata);
+			}
+
+			_currentRecord.Metadata.IsMultiLine = multilineContent != null;
 		}
 	}
 }

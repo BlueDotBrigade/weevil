@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.IO;
+	using System.Text;
+	using NSubstitute;
 
 	[TestClass]
 	public class MultiLineRecordParserTest
@@ -176,7 +178,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			(Convert.ToBoolean(record.LineNumber)).Should().BeTrue();
+			record.Metadata.IsMultiLine.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -188,6 +190,87 @@
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
 			record.Metadata.IsMultiLine.Should().BeFalse();
+		}
+
+		private const string FirstLine = "2026-10-16 10:00:00.00000\t123\t2\tInformation\tFirst record";
+		private const string SecondLine = "2026-10-16 10:00:01.00000\t123\t2\tWarning\tSecond record";
+		private const string ContinuationLine1 = "   at Weevil.Component.Method()";
+		private const string ContinuationLine2 = "   at Weevil.Component.Caller()";
+
+		private static MultilineRecordParser CreateParser(params string[] lines)
+		{
+			var content = string.Join("\n", lines);
+			var dataSource = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(content)));
+
+			return new MultilineRecordParser(dataSource, new TsvRecordParser());
+		}
+
+		[TestMethod]
+		public void GivenSingleLineRecords_WhenReading_ThenEachRecordIsItsLine()
+		{
+			var parser = CreateParser(FirstLine, SecondLine);
+
+			IRecord first = parser.GetNext();
+			IRecord second = parser.GetNext();
+
+			first.Content.Should().Be(FirstLine);
+			first.LineNumber.Should().Be(1);
+			first.Metadata.IsMultiLine.Should().BeFalse();
+			second.Content.Should().Be(SecondLine);
+			second.LineNumber.Should().Be(2);
+			second.Severity.Should().Be(SeverityType.Warning);
+			second.Metadata.IsMultiLine.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenMultilineRecord_WhenReading_ThenContinuationLinesAreJoinedWithCrLf()
+		{
+			var parser = CreateParser(FirstLine, ContinuationLine1, ContinuationLine2, SecondLine);
+
+			IRecord first = parser.GetNext();
+			IRecord second = parser.GetNext();
+
+			first.Content.Should().Be($"{FirstLine}\r\n{ContinuationLine1}\r\n{ContinuationLine2}");
+			first.Metadata.IsMultiLine.Should().BeTrue();
+			second.LineNumber.Should().Be(4);
+			second.Metadata.IsMultiLine.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenMultilineRecordAtEndOfFile_WhenReading_ThenContinuationLinesAreKept()
+		{
+			var parser = CreateParser(FirstLine, SecondLine, ContinuationLine1);
+
+			parser.GetNext();
+			IRecord last = parser.GetNext();
+
+			last.Content.Should().Be($"{SecondLine}\r\n{ContinuationLine1}");
+			last.Metadata.IsMultiLine.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenParserReturnsCustomRecordType_WhenReading_ThenRecordIsReturned()
+		{
+			var customRecord = Substitute.For<IRecord>();
+			customRecord.LineNumber.Returns(1);
+			customRecord.Content.Returns("Custom record");
+			customRecord.Metadata.Returns(new Metadata());
+
+			var recordParser = Substitute.For<IRecordParser>();
+			recordParser
+				.TryParse(Arg.Any<int>(), Arg.Any<string>(), out Arg.Any<IRecord>())
+				.Returns(call =>
+				{
+					call[2] = customRecord;
+					return true;
+				});
+
+			var dataSource = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes("line 1\nline 2")));
+
+			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+
+			record.Should().BeOfType<Record>();
+			record.Content.Should().Be("Custom record");
 		}
 	}
 }
