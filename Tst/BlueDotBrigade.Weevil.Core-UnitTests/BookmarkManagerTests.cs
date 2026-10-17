@@ -171,6 +171,29 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                 }
 
                 [TestMethod]
+                public void GivenBookmarkOnLine_WhenGettingBookmarkName_ThenReturnsName()
+                {
+                        _bookmarkManager.Create(1, "First", 10);
+                        _bookmarkManager.Create(2, "Second", 20);
+
+                        var found = _bookmarkManager.TryGetBookmarkName(20, out var bookmarkName);
+
+                        found.Should().BeTrue();
+                        bookmarkName.Should().Be("Second");
+                }
+
+                [TestMethod]
+                public void GivenNoBookmarkOnLine_WhenGettingBookmarkName_ThenReturnsFalse()
+                {
+                        _bookmarkManager.Create(1, "First", 10);
+
+                        var found = _bookmarkManager.TryGetBookmarkName(999, out var bookmarkName);
+
+                        found.Should().BeFalse();
+                        bookmarkName.Should().BeEmpty();
+                }
+
+                [TestMethod]
                 public void TryGetBookmark_NonExistingLineNumber_ReturnsFalse()
                 {
                         // Arrange

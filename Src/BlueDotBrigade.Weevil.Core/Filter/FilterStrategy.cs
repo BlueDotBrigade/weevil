@@ -135,8 +135,7 @@
 			{
 				// Check if record should be kept due to pinned or bookmarked status first
 				var isPinned = _includePinned && record.Metadata.IsPinned;
-				var hasBookmark = _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
-				var isBookmarked = _includeBookmarks && hasBookmark;
+				var isBookmarked = _includeBookmarks && _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
 
 				if (isPinned || isBookmarked)
 				{
