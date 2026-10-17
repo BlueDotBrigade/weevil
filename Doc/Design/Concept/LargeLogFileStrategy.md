@@ -104,7 +104,8 @@ The index comes before disk mode, because disk mode depends on it.
 1. **Faster parser.** No change in behaviour or API.
    - Skip the extra string copy and second `Record` for single-line records.
    - Parse TSV fields without `Split` or exceptions. This also fixes an uncaught `OverflowException` that stops loading.
-   - Remove four forced garbage collections, build the record array once, and use larger read buffers.
+   - Remove the forced garbage collections that run after every filter and twice while opening a file (#969). Keep the one at the end of opening and the one after a Clear, which exists to free memory.
+   - Build the record array once, and use larger read buffers.
    - Done (#958): opening from a start line checks the section's saved byte offset before using it, and reads from the top of the file when it does not check out.
 2. **Record index.**
    - 2a: build the index while loading and save it. Locate sidecar items by line number, and write offsets from the index. When a reopened log has grown, re-index from its last record.

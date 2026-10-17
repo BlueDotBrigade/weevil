@@ -115,6 +115,8 @@
 
 			var recordAndMetadataLoadingStopwatch = Stopwatch.StartNew();
 
+			// The only forced collection while opening a file: it frees the memory used while parsing,
+			// so memory right after opening stays low (#969).
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 
 			Log.Default.Write(

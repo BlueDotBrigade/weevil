@@ -93,8 +93,6 @@
 				}
 			} while (Record.IsGenuine(record) && results.Count < maximumCount);
 
-			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
-
 			return ImmutableArray.Create(results.ToArray());
 		}
 	}
