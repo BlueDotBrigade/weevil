@@ -51,3 +51,6 @@
 # the byte offsets saved in its sidecar assume CRLF (#961).
 
 Tst/BlueDotBrigade.Weevil.Core-FunctionalTests/.Daten/.Global/GlobalDefault.log -text
+
+# SimpleCallStack.txt is stored with CRLF line endings, like the multiline records Weevil builds (#973).
+Tst/BlueDotBrigade.Weevil.Common-UnitTests/.Daten/SimpleCallStackFormatterTests/SimpleCallStack.txt -text

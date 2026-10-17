@@ -33,3 +33,24 @@ jobs:
 
       - name: Test (Debug, x64)
         run: dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal
+
+  # Everything except the WPF GUI and its tests must also build and pass on Linux (#973).
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Test (Debug, x64)
+        run: |
+          for project in Tst/*/*.csproj; do
+            if [[ "$project" == *Gui* ]]; then continue; fi
+            dotnet test "$project" --configuration Debug -p:Platform=x64 --verbosity normal
+          done

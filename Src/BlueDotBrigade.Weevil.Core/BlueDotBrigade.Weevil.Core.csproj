@@ -60,6 +60,6 @@
     </AssemblyAttribute>
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="IF &quot;%25WEEVIL_PLUGINS_PATH%25&quot;==&quot;&quot;  (&#xD;&#xA;   ECHO $(ProjectFileName): warning BDB: `WEEVIL_PLUGINS_PATH` environment variable is missing.&#xD;&#xA;)" />
+    <Warning Condition="'$(WEEVIL_PLUGINS_PATH)' == ''" Code="BDB" Text="`WEEVIL_PLUGINS_PATH` environment variable is missing." />
   </Target>
 </Project>
