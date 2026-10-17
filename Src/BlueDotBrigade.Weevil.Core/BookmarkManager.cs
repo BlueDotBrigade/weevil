@@ -90,18 +90,18 @@ namespace BlueDotBrigade.Weevil
 		{			
 			lock (_gate)
 			{
-				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
+				// A loop rather than LINQ: filtering calls this for every record, and a lambda would allocate each time.
+				foreach (Bookmark bookmark in _bookmarks)
+				{
+					if (bookmark.Record.LineNumber == lineNumber)
+					{
+						bookmarkName = bookmark.Name;
+						return true;
+					}
+				}
 
-				if (bookmark == null)
-				{
-					bookmarkName = string.Empty;
-					return false;
-				}
-				else
-				{
-					bookmarkName = bookmark.Name;
-					return true;
-				}
+				bookmarkName = string.Empty;
+				return false;
 			}
 		}
 
