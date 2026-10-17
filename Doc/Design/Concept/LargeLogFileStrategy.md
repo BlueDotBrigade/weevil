@@ -109,7 +109,7 @@ The index comes before disk mode, because disk mode depends on it.
    - Opening from a start line checks the section's saved byte offset before using it ([#958](https://github.com/BlueDotBrigade/weevil/issues/958)).
    - Larger read buffers were dropped: parsing runs at about 40 MB/s, far below disk speed, so they made no measurable difference.
    - Results on test logs: opening is 35–43% faster, 62–74% less memory is allocated while opening, memory in use after opening is 7–11% lower, and filtering is about 40% faster.
-   - Next: filters still allocate about 300 bytes per record ([#976](https://github.com/BlueDotBrigade/weevil/issues/976)).
+   - Follow-up, outside phase 1: filters still allocate about 300 bytes per record ([#976](https://github.com/BlueDotBrigade/weevil/issues/976)).
 2. **Record index.**
    - 2a ([#977](https://github.com/BlueDotBrigade/weevil/issues/977)): build the index while loading, save it, and use it to open a log from a section. Write sidecar offsets from the index. When a reopened log has grown, re-index from its last record.
    - 2b ([#978](https://github.com/BlueDotBrigade/weevil/issues/978)): keep raw bytes in RAM (in chunks) and create records on demand. Replace record arrays in the API with lists of record numbers. Move annotations into one store with change events, and save the sidecar from it. Calculate elapsed time on display, store analyzer flags in a bitset, and implement clear as narrowing the index.

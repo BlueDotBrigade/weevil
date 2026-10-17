@@ -5,12 +5,15 @@ Phases follow the [design concept](LargeLogFileStrategy.md). User stories for ph
 ## Phase 1: faster parser
 
 - [#975](https://github.com/BlueDotBrigade/weevil/issues/975): open large log files faster, with less memory. Done.
-- [#976](https://github.com/BlueDotBrigade/weevil/issues/976): apply filters faster on large log files.
 
 Requirements:
 
 - When a log file is opened, Weevil shall produce the same records, line numbers and content as version 2.12.1.
 - If a numeric field in a record header cannot be parsed, then Weevil shall treat the line as part of the previous record and continue loading.
+
+## Follow-up: faster filtering
+
+- [#976](https://github.com/BlueDotBrigade/weevil/issues/976): apply filters faster on large log files.
 
 ## Phase 2: record index
 
