@@ -1,5 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Regular
 {
+	using System.Linq;
+	using System.Threading.Tasks;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using Microsoft = System.Text.RegularExpressions;
@@ -83,6 +85,20 @@
 			var expression = new RegularExpression("fox");
 
 			(expression.IsMatch(record)).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenManyThreads_WhenMatching_ThenEachResultIsCorrect()
+		{
+			var expression = new RegularExpression("fox");
+			IRecord[] records = Enumerable.Range(1, 10_000)
+				.Select(lineNumber => R.WithContent(lineNumber, lineNumber % 2 == 0 ? "The quick brown fox" : "The lazy dog"))
+				.ToArray();
+			var results = new bool[records.Length];
+
+			Parallel.For(0, records.Length, i => results[i] = expression.IsMatch(records[i]));
+
+			results.Should().Equal(records.Select(r => r.Content.Contains("fox")));
 		}
 	}
 }

@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Text.RegularExpressions;
+	using System.Threading;
 	using Data;
 	using Diagnostics;
 
@@ -11,6 +12,7 @@
 	public class RegularExpression : IExpression
 	{
 		private readonly Regex _expression;
+		private readonly ThreadLocal<Regex> _threadExpression;
 		private readonly string _expressionValue;
 
 		/// <summary>
@@ -38,6 +40,10 @@
 			{
 				_expressionValue = expression;
 				_expression = new Regex(expression, RegexOptions.Compiled | options);
+
+				// A `Regex` reuses one internal runner. When filter threads match at the same time,
+				// all but one would allocate a new runner for every record, so each thread gets its own `Regex`.
+				_threadExpression = new ThreadLocal<Regex>(() => new Regex(expression, RegexOptions.Compiled | options));
 			}
 			catch (Exception e)
 			{
@@ -55,7 +61,7 @@
 
 		public bool IsMatch(IRecord record)
 		{
-			return _expression.IsMatch(record.Content);
+			return _threadExpression.Value.IsMatch(record.Content);
 		}
 
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record)
