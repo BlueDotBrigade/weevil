@@ -17,3 +17,5 @@ A rule set can still hide them. `Weevil.ruleset`, used by the CLI, the GUI and t
 Found in #983 by adding a method named `lowerCaseMethod` to Core and to the CLI and building with the .NET 10 SDK. Neither reported IDE1006 until the `dotnet_diagnostic` line was added; the CLI also needed the rule set entry removed.
 
 Style options written as `option = value:warning` (for example `csharp_style_var_elsewhere = false:warning`) are reported by the build once `EnforceCodeStyleInBuild` is on.
+
+Metalama is the exception. Its compiler cannot load the .NET SDK's code style analyzers (`error LAMA0625`), so `Directory.Build.targets` turns `EnforceCodeStyleInBuild` off for every project Metalama compiles (`RoslynCompilerType` is `Metalama`): the GUI and its feature tests. Those projects check code style in the IDE only.
