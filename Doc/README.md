@@ -40,7 +40,7 @@ Every plan starts with a status note, directly under its title:
 | Draft | Being written; not approved |
 | Approved | Approved; work has not started |
 | In progress | Being implemented |
-| Done | Implemented. Describe the result in `Design/`; leave the plan as a record |
+| Done | Implemented. Describe the result in `Design/`; the plan can then be deleted, since git history keeps it |
 | Abandoned | Will not be implemented |
 
 ## Lessons Learned
