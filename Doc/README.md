@@ -17,6 +17,8 @@ Supporting documentation for developers. Pick the folder by the question you are
 
 When a tool can check a rule, the tool's configuration is the source of truth, and documents only explain why. For example, code style lives in [`.editorconfig`](../.editorconfig), not in a guide.
 
+AI agent instructions live in [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) and [`.github/instructions/`](../.github/instructions/), shared by GitHub Copilot and Claude Code. See [AiAgentInstructionFiles.md](LessonsLearned/AiAgentInstructionFiles.md).
+
 ## Research
 
 Start with the question and the issue number. End with the decision and its status, so a reader knows whether the idea was adopted.

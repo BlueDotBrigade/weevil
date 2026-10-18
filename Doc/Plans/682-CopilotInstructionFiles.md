@@ -1,5 +1,9 @@
 Plan for Using GitHub Copilot Instruction Files Effectively
 
+> **Status:** In progress. Steps 1 and 2 are done (#684, #685); steps 3 to 10 are open sub-issues of #682.
+>
+> **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
+
 Objective
 
 Create a structured set of instruction and context files in the repository to improve Copilot performance for:

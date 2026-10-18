@@ -1,0 +1,45 @@
+# Which Instruction Files Each AI Agent Reads
+
+No single instruction file is read by Claude Code and by every GitHub Copilot feature:
+
+- `.github/copilot-instructions.md` is the only file every Copilot feature reads. `AGENTS.md` looks like the shared standard, but Copilot Chat on github.com, Copilot in Visual Studio, and Copilot code review in VS Code and Visual Studio ignore it.
+- Claude Code reads `CLAUDE.md`. It reads `AGENTS.md` only when there is no `CLAUDE.md`, and it never reads `.github/copilot-instructions.md` or `.github/instructions/` on its own.
+
+> Notes from #983, 2026-10-18.
+
+## How Weevil Keeps One Source
+
+The instructions live in Copilot's files, and Claude Code imports them with `@path` lines:
+
+| File | Read by | Contains |
+|---|---|---|
+| `.github/copilot-instructions.md` | Every Copilot feature; Claude Code through `CLAUDE.md` | The rules for the whole repository |
+| `.github/instructions/*.instructions.md` | Copilot, for files matching `applyTo`; Claude Code through the `CLAUDE.md` in that folder | The rules for one folder |
+| `CLAUDE.md` | Claude Code | Only imports: the repository rules and the review rules |
+| `Src/BlueDotBrigade.Weevil.Common/CLAUDE.md`, `Src/BlueDotBrigade.Weevil.Core/CLAUDE.md`, `Src/BlueDotBrigade.Weevil.Gui/CLAUDE.md`, `Tst/CLAUDE.md` | Claude Code, once it reads or edits a file in that folder | Only an import of that folder's instructions file |
+
+To add rules for another folder, create `.github/instructions/<name>.instructions.md` with an `applyTo` pattern, and a `CLAUDE.md` in that folder containing `@<relative path>/.github/instructions/<name>.instructions.md`.
+
+Claude Code strips HTML comments (`<!-- -->`) from `CLAUDE.md`, so the `CLAUDE.md` files explain themselves in a comment without adding to Claude's context. Copilot features that read `CLAUDE.md` see only the comment and the import lines.
+
+Claude Code also saves the plans it writes in plan mode to `Doc/Plans/`, set by `plansDirectory` in `.claude/settings.json`.
+
+## Which Copilot Feature Reads What
+
+From [Support for different types of custom instructions][CopilotSupport]:
+
+| Copilot feature | `.github/copilot-instructions.md` | `.github/instructions/` | `AGENTS.md` / `CLAUDE.md` |
+|---|---|---|---|
+| Chat on github.com | Yes | No | No |
+| Cloud agent (all environments) | Yes | Yes | Yes |
+| Code review on github.com | Yes | Yes | Yes |
+| Chat in VS Code | Yes | Yes | `AGENTS.md` only |
+| Code review in VS Code | Yes | No | No |
+| Chat in Visual Studio | Yes | Yes | No |
+| Code review in Visual Studio | Yes | No | No |
+
+Claude Code: [How Claude remembers your project][ClaudeMemory] (`CLAUDE.md`, `@path` imports, `AGENTS.md`) and [`plansDirectory`][ClaudePlans].
+
+[CopilotSupport]: https://docs.github.com/en/copilot/reference/custom-instructions-support
+[ClaudeMemory]: https://code.claude.com/docs/en/memory
+[ClaudePlans]: https://code.claude.com/docs/en/settings-reference#plansdirectory

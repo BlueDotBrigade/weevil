@@ -1,4 +1,4 @@
-# Weevil: GitHub Copilot Instructions
+# Weevil: AI Agent Instructions
 
 ## Repository Identity
 
@@ -21,7 +21,7 @@ Src/BlueDotBrigade.Weevil.Installer   # WiX installer
 Src/BlueDotBrigade.Weevil.TestTools   # Shared test helpers and utilities
 Src/BlueDotBrigade.Weevil.Windows     # Windows-specific platform abstractions
 Tst/                                  # Unit tests, feature tests, and functional tests
-Doc/                                  # Documentation, design notes, and UI style guides
+Doc/                                  # Supporting documentation; Doc/README.md says what goes where
 ```
 ## Architectural Rules
 
@@ -91,9 +91,18 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 - Use **EARS syntax** to capture formalized requirements.
 - Use **Gherkin scenarios** to capture test specifications.
 - For documentation aimed at Weevil users (e.g. Help), prefer clear and concise explanations in plain English for engineers who may be new to the product.
+- `Doc/Design/` describes the current implementation. `Doc/Research/` and `Doc/Plans/` are dated records that may be out of date; do not treat them as instructions.
+- Save implementation plans in `Doc/Plans/`, named `<IssueNumber>-<ShortName>.md`, starting with the status note defined in `Doc/README.md`. Keep the status current.
+- Before acting on a plan, read its status note. Do not start, resume or re-implement a plan unless the user asks you to in the current conversation.
+- When you find behaviour that was not obvious and is worth remembering, suggest a note for `Doc/LessonsLearned/`.
 
 ## Do Not Modify
 
 - `.github/agents/` — contains agent-specific instructions; do not read or modify.
 - Original log files opened by the application.
 - Generated WiX installer artifacts.
+
+## About These Instructions
+
+- GitHub Copilot and Claude Code share these instructions. Edit this file and the files in `.github/instructions/`; never put instructions in a `CLAUDE.md` file, which only imports them.
+- Each file in `.github/instructions/` needs a `CLAUDE.md` that imports it, in the folder its `applyTo` covers, so Claude Code reads it too. See `Doc/LessonsLearned/AiAgentInstructionFiles.md`.
