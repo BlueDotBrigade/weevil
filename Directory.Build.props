@@ -13,5 +13,7 @@
     <FileVersion>$(VersionPrefix).$(BuildRevision)</FileVersion>
     <InformationalVersion>$(VersionPrefix)+$(Configuration).$(BuildRevision)</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Report the code style rules in .editorconfig during the build, not only in the IDE. -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 </Project>
