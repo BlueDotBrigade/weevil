@@ -42,7 +42,6 @@ Every plan starts with a status note, directly under its title:
 | In progress | Being implemented |
 | Done | Implemented. Describe the result in `Design/`; leave the plan as a record |
 | Abandoned | Will not be implemented |
-| Unconfirmed | Written before plans had a status note; ask before relying on it |
 
 ## Lessons Learned
 

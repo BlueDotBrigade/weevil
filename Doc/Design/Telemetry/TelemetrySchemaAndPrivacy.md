@@ -91,4 +91,4 @@ The following are not part of Phase 1:
 
 ## Future extension
 
-Appendix A of `TelemetryRolloutPlan.md` remains the additive roadmap for future entities such as `SessionFilterExecution`, `SessionEvent`, and `SessionAnalyzerExecution`.
+[TelemetryFutureSchema.md](../../Research/TelemetryFutureSchema.md) holds the additive roadmap for future entities such as `SessionFilterExecution`, `SessionEvent`, and `SessionAnalyzerExecution`.
