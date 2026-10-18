@@ -88,7 +88,3 @@ The following are not part of Phase 1:
 - Local disk queue or retry persistence
 - Complex schema migration support
 - Upload of filter expressions, comments, or log record payloads
-
-## Future extension
-
-[TelemetryFutureSchema.md](../../Research/TelemetryFutureSchema.md) holds the additive roadmap for future entities such as `SessionFilterExecution`, `SessionEvent`, and `SessionAnalyzerExecution`.
