@@ -7,7 +7,7 @@ Issue types and labels look alike, but they do different jobs:
 
 GitHub does not define epics, user stories or requirements. Those are Agile terms, and they map onto issue types and sub-issues.
 
-> Notes from #983, 2026-10-18. The Weevil setup at the end is a proposal, not yet adopted.
+> Notes from #983, 2026-10-18. The Weevil setup at the end is a proposal, partly adopted: the rules in use are in `.github/copilot-instructions.md`, under "GitHub Issues and Pull Requests".
 
 ## What GitHub Documents
 
@@ -53,7 +53,7 @@ From [Best practices for Projects][ProjectBestPractices]:
 
 ## Proposed Setup for Weevil
 
-Not adopted yet. On 2026-10-18 Weevil had:
+Partly adopted: epics with the `epic` label, pull requests linked to the story, task or bug they deliver, and milestones per release. On 2026-10-18 Weevil had:
 
 - Labels `user_story`, `bug` and `bug_report`. The last two mean the same thing: the bug template adds `bug`, while triaged bugs use `bug_report`.
 - An `epic` label used by no issue.

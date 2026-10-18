@@ -96,6 +96,12 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 - Before acting on a plan, read its status note. Do not start, resume or re-implement a plan unless the user asks you to in the current conversation.
 - When you find behaviour that was not obvious and is worth remembering, suggest a note for `Doc/LessonsLearned/`.
 
+## GitHub Issues and Pull Requests
+
+- An epic (label `epic`) groups related work. User stories, tasks and bugs are its sub-issues. A user story may also stand alone, without an epic.
+- Link a pull request to the user story, task or bug it delivers, never to an epic or a milestone: put `Closes #<number>` in the description, and end each commit message with the issue number.
+- Milestones group issues by release. Assign issues to a milestone, not pull requests.
+
 ## Do Not Modify
 
 - `.github/agents/` — contains agent-specific instructions; do not read or modify.
