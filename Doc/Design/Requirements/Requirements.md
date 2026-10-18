@@ -23,4 +23,4 @@ REQUIREMENTS
 
 For the most up-to-date documentation see:
 https://github.com/BlueDotBrigade/weevil/issues/413
-Related design note: [VisualStudioTargetLocation.md](./VisualStudioTargetLocation.md)
+Related design note: [VisualStudioTargetLocation.md](../../Research/VisualStudioTargetLocation/VisualStudioTargetLocation.md)

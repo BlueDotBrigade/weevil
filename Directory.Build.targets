@@ -13,4 +13,9 @@
 		<_Parameter1>$(VersionPrefix)+$(Configuration)</_Parameter1>
 	 </AssemblyAttribute>
   </ItemGroup>
+
+  <!-- Metalama's compiler cannot load the .NET SDK's code style analyzers (LAMA0625), so the projects it compiles check code style in the IDE only. -->
+  <PropertyGroup Condition="'$(RoslynCompilerType)' == 'Metalama'">
+	 <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
 </Project>

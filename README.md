@@ -223,7 +223,7 @@ A special thanks to everyone who has contributed to this project.
 
 [InstallationGuide]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/InstallationGuide.md
 [Help]: https://github.com/BlueDotBrigade/weevil/blob/Releases/2.x/Doc/Notes/Release/Help.md
-[StyleGuide]: https://github.com/BlueDotBrigade/weevil/blob/main/Doc/Notes/Design/UI/UserInterfaceStyleGuide.md
+[StyleGuide]: https://github.com/BlueDotBrigade/weevil/blob/main/Doc/Guides/UI/UserInterfaceStyleGuide.md
 
 [RegEx101]: https://regex101.com/
 [Sidecar]: https://en.wikipedia.org/wiki/Sidecar_file

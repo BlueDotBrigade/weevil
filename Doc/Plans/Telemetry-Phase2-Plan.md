@@ -1,5 +1,9 @@
 # Weevil Telemetry Phase 2 Plan
 
+> **Status:** Unconfirmed. Written before plans had a status note. The code suggests it was implemented: `TelemetryActiveUsageAccumulator` and `SessionActiveMinutes` exist in `Src/BlueDotBrigade.Weevil.Telemetry`.
+>
+> **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
+
 ## Background
 
 Weevil telemetry is session-based. One opened log file should represent one telemetry session:
@@ -682,7 +686,7 @@ Recommended test groups:
 
 ### Issue 1: Telemetry Phase 2: Estimate active usage with activity lease
 
-Reference this plan: `Doc/Telemetry-Phase2-Plan.md`.
+Reference this plan: `Doc/Plans/Telemetry-Phase2-Plan.md`.
 
 Scope:
 
@@ -705,7 +709,7 @@ Acceptance criteria:
 
 ### Issue 2: Telemetry Phase 2: Save session metrics to XML and upload to MS SQL in background
 
-Reference this plan: `Doc/Telemetry-Phase2-Plan.md`.
+Reference this plan: `Doc/Plans/Telemetry-Phase2-Plan.md`.
 
 Scope:
 

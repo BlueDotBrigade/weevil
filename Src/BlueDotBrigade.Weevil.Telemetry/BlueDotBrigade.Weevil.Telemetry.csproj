@@ -15,7 +15,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-all</AnalysisLevel>
   </PropertyGroup>
 

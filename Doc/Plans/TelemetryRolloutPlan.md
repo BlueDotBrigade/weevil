@@ -1,5 +1,9 @@
 # Weevil Telemetry Plan (Peer-Reviewed, AI-Executable)
 
+> **Status:** Unconfirmed. Written before plans had a status note. The code suggests phase 1 was implemented: telemetry ships in `Src/BlueDotBrigade.Weevil.Telemetry` (#915, #920, #922).
+>
+> **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
+
 ## Why this version
 This plan has been peer-reviewed against .NET telemetry best practices with one guiding question:
 **What is the simplest non-brittle approach that preserves privacy and future flexibility?**
@@ -201,7 +205,7 @@ The first five slices are the first five implementation sub-tasks for this issue
 ## 7) Copy/paste prompt template for AI agents
 Use this prompt for each PR:
 
-> Implement **PR-X** from `Doc/Notes/Telemetry/TelemetryRolloutPlan.md` only.
+> Implement **PR-X** from `Doc/Plans/TelemetryRolloutPlan.md` only.
 > Constraints:
 > - Keep changes within PR-X scope.
 > - Preserve existing behavior outside scope.
