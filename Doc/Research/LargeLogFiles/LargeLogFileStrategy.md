@@ -1,6 +1,6 @@
 # Large log files: design concept
 
-Status: draft, 2026-10-16. Phase 1 done 2026-10-17.
+Status: draft, 2026-10-16. Phase 1 done 2026-10-17. Phases 2b and 3 are re-planned in [Weevil 3.0: Is It Feasible?](../Weevil3/Feasibility.md) (2026-10-18).
 Related: [storage benchmark](StorageBenchmarks/README.md), [user stories](LargeLogFileUserStories.md).
 
 ## Problems
