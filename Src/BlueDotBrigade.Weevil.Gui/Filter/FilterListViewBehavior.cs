@@ -24,7 +24,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	/// back-write would leave <see cref="FilterViewModel.ActiveRecordIndex"/> stale, and
 	/// Metalama <c>[Observable]</c> would then silently suppress the next "wrap-to-self"
 	/// assignment because the new value matches the back-written anchor. See:
-	/// <c>Doc/Notes/Design/Issue806-CommentNavigationBug.md</c>.
+	/// <see href="https://github.com/BlueDotBrigade/weevil/issues/806">issue #806</see>.
 	/// </para>
 	/// </remarks>
 	public class FilterListViewBehavior : DependencyObject

@@ -13,7 +13,7 @@ The lightweight indexer recognizes five-column Weevil TSV headers and supports r
 The project is self-contained: it does not reference any Weevil project and is not part of `Weevil-v2.sln`. It requires the .NET 9 SDK, an x64 environment and the `BenchmarkDotNet` NuGet package (restored automatically by `dotnet restore`). Do **not** add the harness to the Weevil shipping application.
 
 ```powershell
-cd Doc/Design/Concept/StorageBenchmarks
+cd Doc/Research/LargeLogFiles/StorageBenchmarks
 dotnet restore
 # Fast smoke test: 10 MB, three approaches, verifies equivalent results
 dotnet run -c Release -- --size-mb 10
@@ -42,7 +42,7 @@ dotnet run -c Release -- --mode profile --case Bytes --file "C:\Logs\my.log"
 To check whether a copy has drifted from Weevil, run from the repository root, for example:
 
 ```powershell
-git diff --no-index Src/BlueDotBrigade.Weevil.Core/Data/TsvRecordParser.cs Doc/Design/Concept/StorageBenchmarks/WeevilCopies/TsvRecordParser.cs
+git diff --no-index Src/BlueDotBrigade.Weevil.Core/Data/TsvRecordParser.cs Doc/Research/LargeLogFiles/StorageBenchmarks/WeevilCopies/TsvRecordParser.cs
 ```
 
 ## Read the results correctly

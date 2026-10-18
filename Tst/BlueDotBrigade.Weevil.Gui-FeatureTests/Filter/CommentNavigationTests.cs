@@ -17,7 +17,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	/// the WPF range-extend behavior under <c>Ctrl+Shift+Plus</c> can only be reproduced
 	/// against a live <see cref="System.Windows.Controls.ListView"/>. The matching manual
 	/// regression test is documented in
-	/// <c>Doc/Notes/Design/Issue806-CommentNavigationBug.md</c>.
+	/// <see href="https://github.com/BlueDotBrigade/weevil/issues/806">issue #806</see>.
 	/// </para>
 	/// <para>
 	/// The wrap-around assertion below pins down the engine-side contract that the View

@@ -1,5 +1,9 @@
 # Telemetry Refactoring Plan
 
+> **Status:** Unconfirmed. Written before plans had a status note. The code suggests it was implemented: [CreateDbSchema.sql](../Design/Telemetry/CreateDbSchema.sql) has the `telemetry_session_metric` table this plan describes.
+>
+> **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
+
 ## Background
 
 The existing telemetry implementation has not been deployed to production, so backwards compatibility is not required. The telemetry schema and code can be simplified without migration support for older telemetry payloads.
