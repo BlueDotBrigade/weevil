@@ -8,7 +8,7 @@ Phase 2 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 ## Goal
 
-- Records hold no mutable state. Everything that changes lives in the session (annotations) or the view (filter results, selection, elapsed time).
+- Records hold no mutable state. Everything that changes lives in the session (annotations) or the view (record scope, filter results, selection, elapsed time).
 - One lock guards every write to the session.
 - The GUI subscribes to events once per window, not again after each Open, Clear or Reload.
 - Behaviour is unchanged, apart from the decisions below. The sidecar format does not change.
@@ -16,6 +16,10 @@ Phase 2 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 - Filtering is no slower.
 
 [MutableStateInCore.md](../Research/Weevil3/MutableStateInCore.md) lists every value that moves, and what writes it today.
+
+## Engine API
+
+Callers open and use an engine without ever seeing its state. `LogSession` holds the log, annotations, bookmarks, regions and the sidecar, and is internal to Core. An `IEngine` is one view of it, with its own record scope, filter and selection, so no operation takes a token. This phase has one view per log; #991 adds `CreateView()`. See [EngineApi.md](../Research/Weevil3/EngineApi.md).
 
 ## Decisions Needed First
 
@@ -33,7 +37,10 @@ One sub-issue and one pull request per step, in order. Each step keeps every tes
 5. **Row view-models.** The grid binds to one view-model per realized row: pin check box, comment box and elapsed-time column. A row writes to the session, and refreshes when the session reports a change to its line.
 6. **Elapsed time comes from the view.** It is calculated for shown rows from the record before it in the results, and `@Elapsed` follows decision 1. This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
 7. **`Metadata` removed from `IRecord`.** Filters, analyzers, navigators and reports use the session's annotation API, which is injected the way bookmarks already are. Records are now immutable.
-8. **Clear without rebuilding.** Clear narrows the record set held by the session. The engine, its events and the annotations stay.
+8. **Clear without rebuilding.**
+   - Clear narrows the engine's record scope, a short list of record-number ranges, using today's rules for each clear operation. The engine, its events and the annotations stay.
+   - Memory: as today, records outside the scope are dropped. This is safe because records are immutable and annotations live in the session. #988 replaces it with releasing content chunks.
+   - Today, unsaved comments and pins on cleared records appear to be lost on save (from reading `SidecarLoader.PackSidecar`). Confirm this with a test first, and keep that test as the regression test.
 
 ## Compatibility
 

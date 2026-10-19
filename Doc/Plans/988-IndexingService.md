@@ -15,7 +15,7 @@ From #978's acceptance criteria:
 - Opening a log produces the same records, line numbers and content as before.
 - An open log uses about a third of today's memory: about 1.1 GB per GB of log.
 - Filtering is no slower.
-- Comments, pins, flags, bookmarks, regions, Clear and the sidecar work as before.
+- Comments, pins, flags, bookmarks, regions, Clear and the sidecar work as before. Clear still frees memory.
 - Reopening a log whose saved index matches does not parse the whole log again.
 
 ## Steps
@@ -28,6 +28,7 @@ One sub-issue of #978 and one pull request per step, in order. Each step is meas
    - Regular expression and plain-text filters match a `ReadOnlySpan<char>` decoded into a reused buffer per thread, keeping today's culture and case rules exactly.
    - Content is stored exactly as `Content` returns it today, including multi-line records rejoined with `\r\n`.
    - A record that cannot round-trip through UTF-8 (an unpaired surrogate in a UTF-16 log) keeps its string.
+   - Decide here whether chunks hold converted UTF-8 or the file's raw bytes. #986 and #991 read released chunks back from the file. With raw bytes that is a plain file read; with converted UTF-8 the conversion must be run again for that part of the file.
    - Estimate: −38% memory on the test log.
 2. **Proof of concept: timestamps.**
    - The question: parse timestamps from content when needed, or keep an 8-byte column?
@@ -38,7 +39,12 @@ One sub-issue of #978 and one pull request per step, in order. Each step is meas
    - `IRecord` objects are created for shown rows, a selection or an export, and compare equal by line number.
    - A read-only record list replaces `ImmutableArray<IRecord>`, with `IndexOf` by line number. Filter results and the Clear record set become lists of record numbers.
    - This is the largest step: 147 references in 60 source files and 83 in 21 test files. When writing its sub-issue, split it, for example Core behind an adapter first, then the GUI, then the tests.
-4. **Reopen without parsing.**
+4. **Clear frees memory.**
+   - Clear narrows the view's record scope (#990 step 8). Content chunks that the scope no longer includes are released, followed by one compacting garbage collection, as Clear does today. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
+   - Only whole chunks are released: up to about 16 MB stays at each edge of a kept range, and `Clear Selected` frees nothing.
+   - Released chunks are not read back until #986, so cleared records return after Reload, as today.
+   - This needs only one view, so it does not depend on #991.
+5. **Reopen without parsing.**
    - The `.idx` file gains the record table: which lines start records, the facts byte and timestamps if kept.
    - When the saved index matches the log, Weevil builds the table from it instead of parsing. The index format version increases, and older index files are rebuilt.
 

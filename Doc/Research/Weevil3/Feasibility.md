@@ -49,13 +49,13 @@ For the test log used in the #978 plan, which averages 131 bytes per record. Sho
 | Writes from the grid, filters and analyzers run on different threads, with no locking | Session writes take one lock. A filter reads the annotation byte without a lock, so a pin changed mid-filter counts either before or after, as today. | #990 |
 | Analyzers and insights overwrite each other's flags | Flags live in the session. Whether one replaces or adds to the other is a behaviour decision. | #990 |
 | The `@Elapsed` filter reads values left by the previous filter | Decide what elapsed means for a filter: since the previous record in the log, or since the previous record kept by this filter. Filter semantics need approval. | #990 |
-| Clear rebuilds the engine | Clear narrows the record set; annotations stay in the session | #990 |
+| Clear rebuilds the engine | Clear narrows the view's record scope, a short list of record-number ranges; annotations stay in the session. In RAM mode, content chunks that no scope includes are released, and read back from the file when needed. See [EngineApi.md](EngineApi.md). | #990, #988, #986 |
 | Content is 73% of memory | UTF-8 chunks; filters match on spans (#978 step 1) | #988 |
 | Record arrays throughout the API | A read-only record list that creates records on demand, with `IndexOf` by line number (a binary search), so WPF selection never scans | #988 |
 | A WPF list of hundreds of millions of rows | The list is already virtualized with recycling. A proof of concept checks scrolling, Shift/Ctrl selection (#806) and editing at 100 M rows. | #990, #988 |
 | Logs larger than RAM | Disk mode: filters stream the file in parallel ranges, and shown rows are read through the line index. Never memory-map the log; Weevil's own `.idx` may be mapped. | #986 |
 | Disk speed | Warn when a disk-mode log is on a network drive. A proof of concept measures NVMe and SATA. | #986 |
-| Several views of one log | Views share the log source and session. Decide whether Clear and flags belong to a view or to the log. | #991 |
+| Several views of one log | Views share the log source and session. Each view has its own record scope, so two views can clear different records. Decide whether flags belong to a view or to the log. | #991 |
 | Sidecar compatibility | Format unchanged. It is saved from the session; byte offsets come from the line index (#977). | All |
 
 ## Phases: One per Epic
@@ -66,7 +66,7 @@ For the test log used in the #978 plan, which averages 131 bytes per record. Sho
 | 2 | #990 Immutable core | Records without mutable state; session and view; the GUI subscribes once; Clear without rebuilding; no `Metadata` objects (−12% memory) | |
 | 3 | #988 Indexing service (#978) | Compact content, records on demand, record table in `.idx`: about a third of today's memory, and reopening without parsing | #990 |
 | 4 | #986 RAM or SSD | Disk mode and an Open As dialog | #988 |
-| 5 | #991 Multiple views | Several views of one log, if time permits | #990; easier after #988 |
+| 5 | #991 Multiple views | Several views of one log. Implemented last, so the release does not depend on it. | #990, #988, #986 |
 
 #990 comes first because records can be created on demand only once they hold no mutable state.
 
@@ -86,8 +86,8 @@ Not needed: annotation byte versus bit arrays (the arithmetic above decides), an
 
 1. What elapsed time means for the `@Elapsed` filter (#990).
 2. Whether analyzers and insights replace or add to each other's flags (#990).
-3. Whether Clear and flags belong to a view or to the log (#991).
+3. Whether flags belong to a view or to the log (#991). Clear belongs to the view.
 
 ## Status
 
-Draft, 2026-10-18. Plans: [#990](../../Plans/990-ImmutableCore.md), [#988](../../Plans/988-IndexingService.md), [#986](../../Plans/986-DiskMode.md), [#991](../../Plans/991-MultipleViews.md).
+Draft, 2026-10-18. Engine API and Clear: [EngineApi.md](EngineApi.md). Plans: [#990](../../Plans/990-ImmutableCore.md), [#988](../../Plans/988-IndexingService.md), [#986](../../Plans/986-DiskMode.md), [#991](../../Plans/991-MultipleViews.md).
