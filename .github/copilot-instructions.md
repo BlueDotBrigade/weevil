@@ -99,6 +99,7 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 ## GitHub Issues and Pull Requests
 
 - An epic (label `epic`) groups related work. User stories, tasks and bugs are its sub-issues. A user story may also stand alone, without an epic.
+- Name a branch after its issue: `BugFix/<IssueNumber>-<ShortName>` for a bug, `Feature/<IssueNumber>-<ShortName>` for anything else. Keep the capitals: Windows ignores case in branch names, so `feature/` and `Feature/` would clash.
 - Link a pull request to the user story, task or bug it delivers, never to an epic or a milestone: put `Closes #<number>` in the description, and end each commit message with the issue number.
 - Milestones group issues by release. Assign issues to a milestone, not pull requests.
 
