@@ -27,7 +27,7 @@ public interface IEngine : IDisposable
     INavigate Navigate { get; }
     ISelect Selector { get; }
     IAnalyze Analyzer { get; }     // runs on this view's results and sets this view's flags
-    IFlags Flags { get; }          // set by analyzers and insights in this view
+    IFlags Flags { get; }          // set by analyzers in this view
     int Count { get; }             // records in this view's scope
     bool HasBeenCleared { get; }   // true when the scope is not the whole log
     void Clear(ClearOperation clearOperation);   // narrows this view's scope only

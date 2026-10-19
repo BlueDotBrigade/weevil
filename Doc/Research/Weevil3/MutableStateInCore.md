@@ -61,7 +61,7 @@ These come from reading the code; none has been tested.
 
 - **An aborted filter can erase elapsed times that are still shown.** The filter resets `ElapsedTime` on each record it hides, before it checks for an abort (`FilterManager.cs:151`, `166`). After an abort the previous results stay on screen, but some of their records have already lost their elapsed time.
 - **The `@Elapsed` filter depends on the filter before it.** It reads elapsed times calculated between the previous filter's visible records. Records hidden by the previous filter have no elapsed time, so they never match. This is intended: elapsed time is the time between two visible records (confirmed 2026-10-19).
-- **Flags have two owners.** Analyzers clear the flags on the records they analyze, and opening an insight clears every flag, so each replaces the other's flags.
+- **Flags have two owners.** Analyzers clear the flags on the records they analyze, and opening an insight clears every flag, so each replaces the other's flags. Logged as bug #994.
 
 ## What This Means for #990
 
