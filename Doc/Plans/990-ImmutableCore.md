@@ -21,10 +21,11 @@ Phase 2 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 Callers open and use an engine without ever seeing its state. `LogSession` holds the log, annotations, bookmarks, regions and the sidecar, and is internal to Core. An `IEngine` is one view of it, with its own record scope, filter and selection, so no operation takes a token. This phase has one view per log; #991 adds `CreateView()`. See [EngineApi.md](../Research/Weevil3/EngineApi.md).
 
-## Decisions Needed First
+## Decisions
 
-1. **What elapsed time means for the `@Elapsed` filter.** Today it reads values left by the previous filter. The options are: since the previous record in the log, or since the previous record kept by this filter. Needed by step 6.
-2. **Flags from analyzers and insights.** Today each clears the other's. The options are: keep that, or add to them. Needed by step 3.
+1. **Elapsed time** is the time between two consecutive visible records, the records that meet the filter (decided 2026-10-19). An `@Elapsed` filter therefore compares the records visible when it is applied, as it does today; afterwards, elapsed times are calculated for the new results.
+2. **Flags belong to the view** (decided 2026-10-19 for #991), so different analyzers can run in different views. With one view in this phase, nothing changes for the user.
+3. **Analyzers and insights replacing each other's flags.** Proposed: keep today's behaviour, awaiting confirmation. An analyzer clears the flags on the records it analyzes before setting its own, and opening an insight clears every flag, so the latest one wins.
 
 ## Steps
 
@@ -32,10 +33,10 @@ One sub-issue and one pull request per step, in order. Each step keeps every tes
 
 1. **Subscribe once.** `Engine` forwards the filter's `ResultsChanged` and `HistoryChanged` events. Clear and Reload already swap the engine behind it, so the GUI's three re-subscriptions (`FilterViewModel.cs`) go away.
 2. **Parsing facts are immutable.** Multi-line and UI thread are set when a record is created, in a facts byte with the severity, and cannot change afterwards.
-3. **Annotation store.** Comments, pins and flags move to a store in the session: an annotation byte per record (pinned, flagged, has comment) and a comment table keyed by line number. `Metadata` forwards to the store, so callers and bindings keep working. The sidecar is saved from the store, not by scanning every record. The store keeps the rule that adding a comment pins the record.
+3. **Annotation store.** Comments and pins move to a store in the session: an annotation byte per record (pinned, has comment) and a comment table keyed by line number. Flags move to the engine, one bit per record, because they belong to the view. `Metadata` forwards to both, so callers and bindings keep working. The sidecar is saved from the store, not by scanning every record. The store keeps the rule that adding a comment pins the record.
 4. **Proof of concept: WPF virtual list.** On Windows, outside the product: a `ListView` bound to a virtual list of row view-models with 100 M rows. Check scrolling, Shift and Ctrl selection (keeping the #806 behaviour), comment editing, and the cost of `IndexOf`. This decides the row design for step 5 and for #988. Record the result in `Research/Weevil3/`.
 5. **Row view-models.** The grid binds to one view-model per realized row: pin check box, comment box and elapsed-time column. A row writes to the session, and refreshes when the session reports a change to its line.
-6. **Elapsed time comes from the view.** It is calculated for shown rows from the record before it in the results, and `@Elapsed` follows decision 1. This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
+6. **Elapsed time comes from the view.** It is calculated for shown rows from the record before it in the results, as decision 1 describes. This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
 7. **`Metadata` removed from `IRecord`.** Filters, analyzers, navigators and reports use the session's annotation API, which is injected the way bookmarks already are. Records are now immutable.
 8. **Clear without rebuilding.**
    - Clear narrows the engine's record scope, a short list of record-number ranges, using today's rules for each clear operation. The engine, its events and the annotations stay.

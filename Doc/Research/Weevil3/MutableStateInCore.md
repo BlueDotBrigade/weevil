@@ -60,7 +60,7 @@ None of this is saved. In a design with several views of one log, each view woul
 These come from reading the code; none has been tested.
 
 - **An aborted filter can erase elapsed times that are still shown.** The filter resets `ElapsedTime` on each record it hides, before it checks for an abort (`FilterManager.cs:151`, `166`). After an abort the previous results stay on screen, but some of their records have already lost their elapsed time.
-- **The `@Elapsed` filter depends on the filter before it.** It reads elapsed times calculated between the previous filter's visible records. Records hidden by the previous filter have no elapsed time, so they never match.
+- **The `@Elapsed` filter depends on the filter before it.** It reads elapsed times calculated between the previous filter's visible records. Records hidden by the previous filter have no elapsed time, so they never match. This is intended: elapsed time is the time between two visible records (confirmed 2026-10-19).
 - **Flags have two owners.** Analyzers clear the flags on the records they analyze, and opening an insight clears every flag, so each replaces the other's flags.
 
 ## What This Means for #990
@@ -71,7 +71,7 @@ Grouped by how the data behaves:
 |---|---|---|
 | Facts from parsing; never change | `IsMultiLine`, `WasGeneratedByUi`, line index, context | The immutable part, shared by every view |
 | User annotations; rare, saved in the sidecar | `Comment`, `IsPinned`, bookmarks, regions, remarks, table of contents, filter history | A session store keyed by line number |
-| Analysis results; may cover most records, not saved | `IsFlagged` | A bit per record, owned by the session or the view: to be decided |
+| Analysis results; may cover most records, not saved | `IsFlagged` | A bit per record, owned by the view (decided 2026-10-19) |
 | Depends on the current filter | `ElapsedTime`, filter results, metric counts, selection, active record | The view, or calculated when needed |
 
 Behaviour that a new store must keep:

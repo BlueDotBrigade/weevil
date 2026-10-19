@@ -18,7 +18,7 @@ The data is split by who owns it:
 | Part | One per | Contains | Changes? |
 |---|---|---|---|
 | Log source | Log, shared by every view | Line index; a record table (first line, plus a facts byte holding severity, multi-line and UI thread); content, held in RAM as chunks or read from the file | Never. A grown log gets a new source that shares the old part. |
-| Session | Open log | An annotation byte per record (pinned, flagged, has comment); a comment table; bookmarks, regions, remarks, table of contents, filter history and context. It loads and saves the sidecar and raises change events. | Yes. It is the only mutable part, and one lock guards its writes. |
+| Session | Open log | An annotation byte per record (pinned, has comment); a comment table; bookmarks, regions, remarks, table of contents, filter history and context. It loads and saves the sidecar and raises change events. | Yes. It is the only mutable part, and one lock guards its writes. |
 | View | Window | Filter, results as record numbers, selection, active record and metric counts. Elapsed time is calculated for the rows shown. | Yes, by the UI thread. |
 
 Records become small immutable objects, created only when needed (visible rows, a selection, an export) and equal by line number.
@@ -47,15 +47,15 @@ For the test log used in the #978 plan, which averages 131 bytes per record. Sho
 | The GUI subscribes to events again after Open, Clear and Reload ([lesson](../../LessonsLearned/ImmutableCoreLibrary.md)) | The GUI subscribes once, to `Engine`. `Engine` already swaps the engine behind it on Clear and Reload; it also forwards the events. | #990 |
 | The grid edits `Metadata` through two-way bindings | One view-model per realized row. It reads the record and the session, writes to the session, and raises `PropertyChanged` when the session reports a change to its line. | #990 |
 | Writes from the grid, filters and analyzers run on different threads, with no locking | Session writes take one lock. A filter reads the annotation byte without a lock, so a pin changed mid-filter counts either before or after, as today. | #990 |
-| Analyzers and insights overwrite each other's flags | Flags live in the session. Whether one replaces or adds to the other is a behaviour decision. | #990 |
-| The `@Elapsed` filter reads values left by the previous filter | Decide what elapsed means for a filter: since the previous record in the log, or since the previous record kept by this filter. Filter semantics need approval. | #990 |
+| Analyzers and insights overwrite each other's flags | Flags live in the view, one bit per record, so different analyzers can run in different views. Proposed: keep "the latest one wins". | #990 |
+| The `@Elapsed` filter reads values left by the previous filter | Elapsed time is the time between two consecutive visible records (decided). The view calculates it from its results, so nothing is stored per record and an `@Elapsed` filter behaves as today. | #990 |
 | Clear rebuilds the engine | Clear narrows the view's record scope, a short list of record-number ranges; annotations stay in the session. In RAM mode, content chunks that no scope includes are released, and read back from the file when needed. See [EngineApi.md](EngineApi.md). | #990, #988, #986 |
 | Content is 73% of memory | UTF-8 chunks; filters match on spans (#978 step 1) | #988 |
 | Record arrays throughout the API | A read-only record list that creates records on demand, with `IndexOf` by line number (a binary search), so WPF selection never scans | #988 |
 | A WPF list of hundreds of millions of rows | The list is already virtualized with recycling. A proof of concept checks scrolling, Shift/Ctrl selection (#806) and editing at 100 M rows. | #990, #988 |
 | Logs larger than RAM | Disk mode: filters stream the file in parallel ranges, and shown rows are read through the line index. Never memory-map the log; Weevil's own `.idx` may be mapped. | #986 |
 | Disk speed | Warn when a disk-mode log is on a network drive. A proof of concept measures NVMe and SATA. | #986 |
-| Several views of one log | Views share the log source and session. Each view has its own record scope, so two views can clear different records. Decide whether flags belong to a view or to the log. | #991 |
+| Several views of one log | Views share the log source and session. Each view has its own record scope, so two views can clear different records. Each view also has its own flags. | #991 |
 | Sidecar compatibility | Format unchanged. It is saved from the session; byte offsets come from the line index (#977). | All |
 
 ## Phases: One per Epic
@@ -84,9 +84,9 @@ Not needed: annotation byte versus bit arrays (the arithmetic above decides), an
 
 ## Decisions Needed
 
-1. What elapsed time means for the `@Elapsed` filter (#990).
-2. Whether analyzers and insights replace or add to each other's flags (#990).
-3. Whether flags belong to a view or to the log (#991). Clear belongs to the view.
+1. Whether analyzers and insights keep replacing each other's flags (#990). Proposed: yes, as today.
+
+Decided 2026-10-19: elapsed time is the time between two consecutive visible records; Clear and flags belong to each view; RAM or disk is chosen in the Open As dialog.
 
 ## Status
 

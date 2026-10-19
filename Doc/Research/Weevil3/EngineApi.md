@@ -26,14 +26,15 @@ public interface IEngine : IDisposable
     IFilter Filter { get; }        // filter and results; the same object for the view's lifetime
     INavigate Navigate { get; }
     ISelect Selector { get; }
-    IAnalyze Analyzer { get; }     // runs on this view's results; writes flags to the session
+    IAnalyze Analyzer { get; }     // runs on this view's results and sets this view's flags
+    IFlags Flags { get; }          // set by analyzers and insights in this view
     int Count { get; }             // records in this view's scope
     bool HasBeenCleared { get; }   // true when the scope is not the whole log
     void Clear(ClearOperation clearOperation);   // narrows this view's scope only
     void RestoreRecords();         // the scope becomes the whole log again (#986)
 
     // Shared by every view of the log
-    IAnnotations Annotations { get; }   // comments, pins, flags; replaces record.Metadata
+    IAnnotations Annotations { get; }   // comments and pins; replaces record.Metadata
     IBookmarkManager Bookmarks { get; }
     IRegionManager Regions { get; }
     string SourceFilePath { get; }
@@ -52,7 +53,6 @@ public interface IAnnotations
     bool IsPinned(int lineNumber);
     void Pin(int lineNumber);
     void Unpin(int lineNumber);
-    bool IsFlagged(int lineNumber);
 }
 ```
 
@@ -179,9 +179,9 @@ Delivered in three steps, so the release never depends on multiple views:
 | Shared: in the session | Per view: in the engine |
 |---|---|
 | Log content, line index, record table | Record scope (Clear) |
-| Comments, pins, flags (flags: decision for #991) | Filter, results, elapsed times |
+| Comments, pins | Filter, results, elapsed times, flags |
 | Bookmarks, regions, remarks, table of contents | Selection, active record, navigation |
-| Filter history, context, sidecar save, Reload | Analyzer runs (their flags go to the session) |
+| Filter history, context, sidecar save, Reload | Analyzer runs |
 
 ## Rejected: A Public Log Object
 
@@ -189,6 +189,6 @@ Delivered in three steps, so the release never depends on multiple views:
 
 ## Status
 
-Proposed, 2026-10-19. Clear per view is agreed. Still open: whether `IEngine` becomes `IDisposable` with the last view closing the session; what a new view starts with; whether Reload from one view reloads every view; and whether the GUI offers a Restore command.
+Proposed, 2026-10-19. Clear and flags per view are agreed. Still open: whether `IEngine` becomes `IDisposable` with the last view closing the session; what a new view starts with; whether Reload from one view reloads every view; and whether the GUI offers a Restore command.
 
 The plans for [#990](../../Plans/990-ImmutableCore.md), [#988](../../Plans/988-IndexingService.md), [#986](../../Plans/986-DiskMode.md) and [#991](../../Plans/991-MultipleViews.md) follow this design.

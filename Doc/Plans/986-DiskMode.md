@@ -17,8 +17,10 @@ Phase 4 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 ## Decisions Needed First
 
-1. **Where the choice is made.** Today only plugins can show an Open As dialog (`IPlugin.ShowOpenAs`), and the built-in plugins don't. The options are: Weevil shows its own dialog and passes the choice on, or the choice is added to `OpenAsResult` so plugin dialogs can offer it. Needed by step 5.
+1. **When Weevil's own Open As dialog appears.** The built-in plugins have no Open As dialog today, so opening their logs shows none. The options are: on every open, or only for logs that may not fit in RAM. Needed by step 5.
 2. **A Restore command in the GUI.** `RestoreRecords()` becomes possible in step 2. Should the GUI offer "Restore cleared records"? Needed by step 3.
+
+Decided 2026-10-19: RAM or Disk is chosen in the Open As dialog shown before the log loads.
 
 ## Steps
 
@@ -33,7 +35,7 @@ One sub-issue and one pull request per step, in order.
    - Never memory-map the log. Weevil's own `.idx` may be mapped if the record table is too large to hold.
 3. **Restore cleared records.** `IEngine.RestoreRecords()` resets the view's scope to the whole log; in RAM mode, its chunks are read back from the file. The GUI command follows decision 2.
 4. **Streaming work.** In disk mode, filters, analyzers and export read the log in parallel ranges split at record boundaries. Abort stops them.
-5. **Choose the mode when opening.** RAM / Disk, defaulting to RAM, as decided above. Weevil warns when RAM is chosen for a log that won't fit, and when a disk-mode log is on a network drive.
+5. **Choose the mode when opening.** The Open As dialog shown before loading offers RAM (the default) or Disk. A plugin with its own dialog returns the choice in `OpenAsResult`. For a plugin without one, such as the built-in plugins, the GUI shows Weevil's own dialog, as decision 1 says. Weevil warns when RAM is chosen for a log that won't fit, and when a disk-mode log is on a network drive.
 
 ## Compatibility
 
