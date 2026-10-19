@@ -19,7 +19,7 @@ Question for #990: which data in `Core` changes after a log is opened, and what 
 | `WasGeneratedByUi` | TSV parser, when the thread ID is 1: `TsvRecordParser.cs:53` | No | No | No | `@UiThread` filter, `TimeGapUiAnalyzer` |
 | `Comment` | Sidecar: `SidecarLoader.cs:74` (v1: `LogMetadataLoader.cs:60`) | Grid text box (`FilterView.xaml:330`, two-way); Paste (`ClipboardHelper.cs:123`); Remove comments (`AnalysisManager.cs:45`) | Analyzers append text with `UpdateUserComment` | Yes | `@Comment` filter, comment navigation, comment report |
 | `IsPinned` | Sidecar: `SidecarLoader.cs:75` | Grid check box (`FilterView.xaml:321`); Toggle pin (`SelectionManager.cs:330`); Unpin all (`AnalysisManager.cs:29`) | Adding a comment pins the record; clearing it unpins (`Metadata.cs:61`, `68`) | Yes | Filter (pinned records stay visible), `@Pinned` filter, pin navigation |
-| `IsFlagged` | No | Remove all flags (`AnalysisManager.cs:37`); opening an insight (`FilterViewModel.cs:1469-1488`) | 13 analyzers in `Core/Analysis` and `Common/Analysis` clear and set flags on the records they analyze | No | `@Flagged` filter, flag navigation |
+| `IsFlagged` | No | Remove all flags (`AnalysisManager.cs:37`); Go to Record on a dashboard insight (`FilterViewModel.cs:1469-1488`) | 13 analyzers in `Core/Analysis` and `Common/Analysis` clear and set flags on the records they analyze | No | `@Flagged` filter, flag navigation |
 | `ElapsedTime` | Calculated for every record: `CoreEngine.cs:141` | No | Every filter: reset on hidden records (`FilterManager.cs:151`), recalculated between visible records (`FilterManager.cs:324`) | No | `@Elapsed` filter, elapsed-time navigation, grid column |
 
 Analyzers run on the selected records when the selection spans a period of time, otherwise on the filter results (`AnalysisManager.cs:152-154`).
@@ -61,7 +61,7 @@ These come from reading the code; none has been tested.
 
 - **An aborted filter can erase elapsed times that are still shown.** The filter resets `ElapsedTime` on each record it hides, before it checks for an abort (`FilterManager.cs:151`, `166`). After an abort the previous results stay on screen, but some of their records have already lost their elapsed time.
 - **The `@Elapsed` filter depends on the filter before it.** It reads elapsed times calculated between the previous filter's visible records. Records hidden by the previous filter have no elapsed time, so they never match. This is intended: elapsed time is the time between two visible records (confirmed 2026-10-19).
-- **Flags have two owners.** Analyzers clear the flags on the records they analyze, and opening an insight clears every flag, so each replaces the other's flags. Logged as bug #994.
+- **Go to Record clears every flag.** On a dashboard insight, it clears every flag before flagging the insight's record, as designed in #552, so it erases an analyzer's flags. Insights themselves never set flags.
 
 ## What This Means for #990
 

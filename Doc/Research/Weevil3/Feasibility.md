@@ -47,7 +47,7 @@ For the test log used in the #978 plan, which averages 131 bytes per record. Sho
 | The GUI subscribes to events again after Open, Clear and Reload ([lesson](../../LessonsLearned/ImmutableCoreLibrary.md)) | The GUI subscribes once, to `Engine`. `Engine` already swaps the engine behind it on Clear and Reload; it also forwards the events. | #990 |
 | The grid edits `Metadata` through two-way bindings | One view-model per realized row. It reads the record and the session, writes to the session, and raises `PropertyChanged` when the session reports a change to its line. | #990 |
 | Writes from the grid, filters and analyzers run on different threads, with no locking | Session writes take one lock. A filter reads the annotation byte without a lock, so a pin changed mid-filter counts either before or after, as today. | #990 |
-| Analyzers and insights overwrite each other's flags | Flags live in the view, one bit per record, so different analyzers can run in different views. Only analyzers set flags; opening an insight stops using them (bug #994). | #990 |
+| Analyzers set flags on the records themselves | Flags live in the view, one bit per record, so different analyzers can run in different views. | #990 |
 | The `@Elapsed` filter reads values left by the previous filter | Elapsed time is the time between two consecutive visible records (decided). The view calculates it from its results, so nothing is stored per record and an `@Elapsed` filter behaves as today. | #990 |
 | Clear rebuilds the engine | Clear narrows the view's record scope, a short list of record-number ranges; annotations stay in the session. In RAM mode, content chunks that no scope includes are released, and read back from the file when needed. See [EngineApi.md](EngineApi.md). | #990, #988, #986 |
 | Content is 73% of memory | UTF-8 chunks; filters match on spans (#978 step 1) | #988 |
@@ -88,7 +88,6 @@ Decided 2026-10-19:
 
 - Elapsed time is the time between two consecutive visible records.
 - Clear and flags belong to each view.
-- Analyzers and insights must not interfere: only analyzers set flags (bug #994).
 - RAM or disk is chosen in Weevil's Open As dialog, shown on every open after the Windows file dialog.
 
 ## Status

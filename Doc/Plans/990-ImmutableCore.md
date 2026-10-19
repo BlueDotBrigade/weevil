@@ -25,7 +25,6 @@ Callers open and use an engine without ever seeing its state. `LogSession` holds
 
 1. **Elapsed time** is the time between two consecutive visible records, the records that meet the filter (decided 2026-10-19). An `@Elapsed` filter therefore compares the records visible when it is applied, as it does today; afterwards, elapsed times are calculated for the new results.
 2. **Flags belong to the view** (decided 2026-10-19 for #991), so different analyzers can run in different views. With one view in this phase, nothing changes for the user.
-3. **Analyzers and insights must not interfere** (decided 2026-10-19). Today opening an insight erases the flags an analyzer set, and the reverse (bug #994). Only analyzers set flags; opening an insight stops using them. Fix #994 before step 3, or as part of it.
 
 ## Steps
 
