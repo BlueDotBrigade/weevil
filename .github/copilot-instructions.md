@@ -99,7 +99,13 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 ## GitHub Issues and Pull Requests
 
 - An epic (label `epic`) groups related work. User stories, tasks and bugs are its sub-issues. A user story may also stand alone, without an epic.
-- Link a pull request to the user story, task or bug it delivers, never to an epic or a milestone: put `Closes #<number>` in the description, and end each commit message with the issue number.
+- Name a branch after its issue: `BugFix/<IssueNumber>-<ShortName>` for a bug, `Feature/<IssueNumber>-<ShortName>` for anything else. Keep the capitals: Windows ignores case in branch names, so `feature/` and `Feature/` would clash.
+- Start each commit message with its kind and end it with the issue number, for example `Fix : <What changed>. #<IssueNumber>`:
+  - `New :` adds a feature or behaviour.
+  - `Fix :` fixes a bug.
+  - `Doc :` mostly improves documentation: a `.md` file or comments in source code.
+  - `Refactor :` neither fixes a bug nor adds behaviour. It improves the code, or prepares for an upcoming change.
+- Link a pull request to the user story, task or bug it delivers, never to an epic or a milestone: put `Closes #<number>` in the description.
 - Milestones group issues by release. Assign issues to a milestone, not pull requests.
 
 ## Do Not Modify
