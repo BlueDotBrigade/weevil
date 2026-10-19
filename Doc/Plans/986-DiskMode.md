@@ -17,10 +17,9 @@ Phase 4 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 ## Decisions Needed First
 
-1. **When Weevil's own Open As dialog appears.** The built-in plugins have no Open As dialog today, so opening their logs shows none. The options are: on every open, or only for logs that may not fit in RAM. Needed by step 5.
-2. **A Restore command in the GUI.** `RestoreRecords()` becomes possible in step 2. Should the GUI offer "Restore cleared records"? Needed by step 3.
+1. **A Restore command in the GUI.** `RestoreRecords()` becomes possible in step 2. Should the GUI offer "Restore cleared records"? Needed by step 3.
 
-Decided 2026-10-19: RAM or Disk is chosen in the Open As dialog shown before the log loads.
+Decided 2026-10-19: RAM or Disk is chosen in Weevil's Open As dialog, which appears on every open: the user clicks Open, picks the log in the Windows file dialog, and then Weevil shows Open As.
 
 ## Steps
 
@@ -33,9 +32,9 @@ One sub-issue and one pull request per step, in order.
    - A chunk that is not in memory, released by Clear (#988) or never loaded in disk mode, is read back from the file when needed.
    - File reads are ordinary reads, shared for reading, writing and deletion, so the writing application is never blocked.
    - Never memory-map the log. Weevil's own `.idx` may be mapped if the record table is too large to hold.
-3. **Restore cleared records.** `IEngine.RestoreRecords()` resets the view's scope to the whole log; in RAM mode, its chunks are read back from the file. The GUI command follows decision 2.
+3. **Restore cleared records.** `IEngine.RestoreRecords()` resets the view's scope to the whole log; in RAM mode, its chunks are read back from the file. The GUI command follows decision 1.
 4. **Streaming work.** In disk mode, filters, analyzers and export read the log in parallel ranges split at record boundaries. Abort stops them.
-5. **Choose the mode when opening.** The Open As dialog shown before loading offers RAM (the default) or Disk. A plugin with its own dialog returns the choice in `OpenAsResult`. For a plugin without one, such as the built-in plugins, the GUI shows Weevil's own dialog, as decision 1 says. Weevil warns when RAM is chosen for a log that won't fit, and when a disk-mode log is on a network drive.
+5. **Open As dialog.** After the Windows file dialog, Weevil always shows its own Open As dialog, with the ways to open the log, starting with RAM (the default) or Disk. Today only plugins can show an Open As dialog (`IPlugin.ShowOpenAs`), and the built-in plugins don't. A plugin's own options, such as a line range, join Weevil's dialog rather than opening a second one; settle how when writing this step's sub-issue. Weevil warns when RAM is chosen for a log that won't fit, and when a disk-mode log is on a network drive.
 
 ## Compatibility
 
