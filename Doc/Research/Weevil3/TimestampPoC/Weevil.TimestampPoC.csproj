@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <!-- Runs on the .NET 9 or .NET 10 runtime, whichever is installed. -->
+    <RollForward>Major</RollForward>
+    <LangVersion>latest</LangVersion>
+    <!-- Disabled so the verbatim WeevilCopies/ files build cleanly; Program.cs opts in with #nullable enable. -->
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <Optimize>true</Optimize>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Fully optimized code from the first call, so short runs time the same code as long ones. -->
+    <TieredCompilation>false</TieredCompilation>
+  </PropertyGroup>
+</Project>
