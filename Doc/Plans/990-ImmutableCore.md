@@ -31,15 +31,15 @@ Callers open and use an engine without ever seeing its state. `LogSession` holds
 
 ## Steps
 
-One sub-issue and one pull request per step, in order. Each step keeps every test passing.
+One sub-issue of #990 and one pull request per step, in order. Each step keeps every test passing. The step issues were created on 2026-10-20, so a change to the plan can be traced through them.
 
-1. **Subscribe once.**
+1. **Subscribe once (#1011).**
    - `Engine` forwards the filter's `HistoryChanged` and `ResultsChanged` through new events on `IEngine`, which is public, in Common.
    - On Clear and Reload, `Engine` moves its subscription from the old filter to the new one, before Reload re-applies the filter.
    - The forwarded `HistoryChanged` keeps the history list as its sender; `OnFilterHistoryChanged` relies on it.
    - The GUI's re-subscriptions after Clear and Reload (`FilterViewModel.cs`) go away. Open still builds a new `Engine`, so the GUI subscribes once per Open.
-2. **Parsing facts are immutable.** Multi-line and UI thread are set when a record is created, in a facts byte with the severity, and cannot change afterwards.
-3. **Annotation store.**
+2. **Parsing facts are immutable (#1012).** Multi-line and UI thread are set when a record is created, in a facts byte with the severity, and cannot change afterwards.
+3. **Annotation store (#1013).**
    - Comments and pins move to a store in the session, kept by line number (decision 3): an annotation byte per line (pinned, has comment) and a comment table.
    - Flags move to the engine, one bit per line, because they belong to the view.
    - `Metadata` forwards to both, so callers and bindings keep working.
@@ -47,27 +47,27 @@ One sub-issue and one pull request per step, in order. Each step keeps every tes
    - The store loads every sidecar entry, including lines not in memory (an open from a start line, or a cleared line), so the sidecar can be saved from the store without losing them.
    - The store and the flags carry across Clear and Reload, as bookmarks and regions do today.
    - Unpin All, Remove All Flags and Remove Comments touch only records in memory today. The sub-issue decides whether they include cleared lines.
-4. **Proof of concept: WPF virtual list.** On Windows, outside the product: a `ListView` bound to a virtual list of row view-models with 100 M rows, using the real row template, whose row heights vary.
+4. **Proof of concept: WPF virtual list (#1014).** On Windows, outside the product: a `ListView` bound to a virtual list of row view-models with 100 M rows, using the real row template, whose row heights vary.
    - Check scrolling, Shift and Ctrl selection (keeping the #806 behaviour), Ctrl+A, Shift+End, filtering with a large selection, comment editing, and the cost of `IndexOf`.
    - The list implements the non-generic `IList`, or WPF copies every item. Rows are equal by line number, because WPF finds items with `IndexOf`.
    - This decides the row design for step 5 and for #988. Record the result in `Research/Weevil3/`.
-5. **Row view-models and selection.**
+5. **Row view-models and selection (#1015).**
    - The grid binds to one view-model per realized row: pin check box, comment box and elapsed-time column. A row writes to the session, and refreshes when the session reports a change to its line (decision 4).
    - A row ignores its own writes, so the comment box (two-way, with a 250 ms delay) does not overwrite text still being typed.
    - Larger than it looks: the row style binds `Severity`, four converters expect an `IRecord`, and code-behind casts items to `IRecord`.
    - Core's `SelectionManager` stores ranges instead of one record per selected row (decision 5).
    - Keeping the selection after a filter uses `IndexOf`, instead of comparing every result with every selected record.
    - Copy stops at 100,000 records (decision 5).
-6. **Elapsed time comes from the view.**
+6. **Elapsed time comes from the view (#1016).**
    - After each filter, the view calculates elapsed times for all its results (decision 1).
    - An `@Elapsed` filter reads the elapsed times of the previous results, which the view passes in. Iterating by elapsed time reads the current ones.
    - This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
    - Add a test for `@Elapsed` applied after another filter, which nothing covers today.
-7. **`Metadata` removed from `IRecord`.**
+7. **`Metadata` removed from `IRecord` (#1017).**
    - Filters, analyzers, navigators and reports use the session's annotation API, which is injected the way bookmarks already are. Records are now immutable.
    - This also changes `IRecordAnalyzer.Analyze`, `ICoreExtension.GetAnalyzers`, and readers such as `DiskWriter` and `ClipboardHelper`.
    - Tests use `.Metadata.` 173 times in 35 files.
-8. **Clear without rebuilding.**
+8. **Clear without rebuilding (#1018).**
    - Clear narrows the engine's record scope, using today's rules for each clear operation. The engine, its events and the annotations stay.
    - Clear keeps doing what it does today: it resets the filter (the GUI re-applies its own), drops cleared records from the selection, recounts the metrics and sets `HasBeenCleared`.
    - Every manager holds the record array, set in its constructor, so each reads the scope instead.

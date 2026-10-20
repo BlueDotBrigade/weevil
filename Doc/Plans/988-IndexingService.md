@@ -13,7 +13,7 @@ This plan replaces an earlier draft, `978-CompactRecordStorage.md`, which was ne
 From #978's acceptance criteria:
 
 - Opening a log produces the same records, line numbers and content as before.
-- An open log uses about 40% of today's memory: about 1.2 GB per GB of log. #978 says about a third; keeping timestamps (step 2) adds 60 MB per GB.
+- An open log uses less memory than with Weevil 2.12.1. About 40% of today's is expected: about 1.2 GB per GB of log, including 60 MB per GB for timestamps (step 2). #978 records memory before and after.
 - Filtering is no slower.
 - Comments, pins, flags, bookmarks, regions, Clear and the sidecar work as before. Clear still frees memory.
 - Reopening a log whose saved index matches does not parse the whole log again.
@@ -22,9 +22,11 @@ A first open may take as long as today: about 2 minutes for a 20 GB log on an NV
 
 ## Steps
 
-One sub-issue of #978 and one pull request per step, in order. Each step is measured with the phase 1 harness before and after.
+One sub-issue of #978 and one pull request per step, in order. The step issues were created on 2026-10-20, so a change to the plan can be traced through them.
 
-1. **Compact content.**
+Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8 GB logs measured, noting any too big for the RAM, and 12, 16, 20 and 24 GB estimated. Its harness measures memory again after each step.
+
+1. **Compact content (#1020).**
    - Content is held as the file's raw bytes, as the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md) and [LargeLogFileStrategy.md](../Research/LargeLogFiles/LargeLogFileStrategy.md) recommend. It is kept in shared, read-only 16 MB chunks split at record boundaries, so no array reaches .NET's 2 GB limit. A record larger than a chunk gets a chunk of its own.
    - A record keeps an offset and a length instead of a string.
    - `Content` decodes on each access with the log's encoding, rejoining multi-line records with `\r\n`, so it returns exactly what it returns today. Invalid bytes become U+FFFD, as today. Reading a released chunk back (#986) is then a plain file read.
@@ -37,17 +39,17 @@ One sub-issue of #978 and one pull request per step, in order. Each step is meas
 2. **Proof of concept: timestamps (#1008). Done 2026-10-20: keep an 8-byte timestamp column.**
    - The question was whether to keep each record's timestamp in a column, as today, or parse it from the content each time it is needed.
    - Even the fastest re-read added 5.2 s to opening a 20 GB log and up to 3.8 s to each filter. The column costs 60 MB per GB of log. See the [results](../Research/Weevil3/TimestampPoC/README.md#results).
-3. **Records on demand.**
+3. **Records on demand (#1021).**
    - Records live in a record table: line number, content offset, the facts byte and the timestamp.
    - `IRecord` objects are created for shown rows, a selection or an export, and compare equal by line number.
    - A read-only record list replaces `ImmutableArray<IRecord>`, with `IndexOf` by line number. Filter results and the Clear record set become lists of record numbers.
    - This is the largest step. In October 2026 there were 156 references in 60 source files and 81 in 20 test files, and `ISelect` also exposes records as a dictionary and a list. When writing its sub-issue, split it: for example Core behind an adapter first, then the GUI, then the tests.
-4. **Clear frees memory.**
+4. **Clear frees memory (#1022).**
    - Clear narrows the view's record scope (#990 step 8). Content chunks that the scope no longer includes are released, followed by one compacting garbage collection, as Clear does today. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
    - Only whole chunks are released: up to about 16 MB stays at each edge of a kept range, and `Clear Selected` frees nothing.
    - Released chunks are not read back until #986, so cleared records return after Reload, as today.
    - This needs only one view, so it does not depend on #991.
-5. **Reopen without parsing.**
+5. **Reopen without parsing (#1023).**
    - The `.idx` file gains the record table: which lines start records, the facts byte and the timestamps.
    - The header already holds a format version, the encoding, the line count, the length indexed, and hashes of the first and last 4 KB. Those are how it detects a grown log and indexes only the new part.
    - The header also gains the plugin's name and version and its Open As settings, so a change of plugin rebuilds the record table.
