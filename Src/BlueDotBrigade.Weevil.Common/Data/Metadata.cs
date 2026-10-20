@@ -11,19 +11,54 @@
 		/// </summary>
 		public static readonly TimeSpan ElapsedTimeUnknown = TimeSpan.MinValue;
 
-		private string _comment;
 		private TimeSpan _elapsedTime;
-		private bool _isPinned;
-		private bool _isFlagged;
+
+		// The comment, pin and flag live in stores kept by line number (#1013).
+		// Until Core attaches this record to a view of its log, they are kept in stores of its own.
+		private ViewAnnotations _view;
+		private int _lineNumber;
+		private bool _isAttached;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		public Metadata()
 		{
-			_comment = string.Empty;
 			_elapsedTime = ElapsedTimeUnknown;
-			_isPinned = false;
-			_isFlagged = false;
+		}
+
+		/// <summary>
+		/// Makes this record's comment and pin read and write the log's annotations, and its flag the view's flags.
+		/// Values set before are copied to them. Called by Core when a log is opened.
+		/// </summary>
+		public void Attach(ViewAnnotations view, int lineNumber)
+		{
+			if (view is null)
+			{
+				throw new ArgumentNullException(nameof(view));
+			}
+
+			if (!_isAttached)
+			{
+				if (this.Comment.Length > 0)
+				{
+					view.Annotations.SetComment(lineNumber, this.Comment);
+				}
+
+				// After the comment, which may have pinned the record.
+				if (this.Comment.Length > 0 || this.IsPinned)
+				{
+					view.Annotations.SetPinned(lineNumber, this.IsPinned);
+				}
+
+				if (this.IsFlagged)
+				{
+					view.Flags.SetFlagged(lineNumber, true);
+				}
+			}
+
+			_view = view;
+			_lineNumber = lineNumber;
+			_isAttached = true;
 		}
 
 		/// <summary>
@@ -46,27 +81,22 @@
 		/// </summary>
 		public string Comment
 		{
-			get => _comment;
+			get => _view?.Annotations.GetComment(_lineNumber) ?? string.Empty;
 
 			set
 			{
-				if (_comment != value)
+				var previous = this.Comment;
+
+				if (previous != value)
 				{
-					if (string.IsNullOrWhiteSpace(value) && !string.IsNullOrWhiteSpace(_comment))
+					// The store pins the record when a comment is added, and unpins it when the comment is removed.
+					GetView().Annotations.SetComment(_lineNumber, value);
+
+					if (string.IsNullOrWhiteSpace(value) != string.IsNullOrWhiteSpace(previous))
 					{
-						this.IsPinned = false;
 						RaisePropertyChanged(nameof(this.IsPinned));
 					}
-					else
-					{
-						if (!string.IsNullOrWhiteSpace(value) && string.IsNullOrWhiteSpace(_comment))
-						{
-							this.IsPinned = true;
-							RaisePropertyChanged(nameof(this.IsPinned));
-						}
-					}
 
-					_comment = value ?? string.Empty;
 					RaisePropertyChanged();
 					RaisePropertyChanged(nameof(this.HasComment));
 				}
@@ -104,12 +134,12 @@
 		/// </summary>
 		public bool IsPinned
 		{
-			get => _isPinned;
+			get => _view?.Annotations.IsPinned(_lineNumber) ?? false;
 			set
 			{
-				if (_isPinned != value)
+				if (this.IsPinned != value)
 				{
-					_isPinned = value;
+					GetView().Annotations.SetPinned(_lineNumber, value);
 					RaisePropertyChanged();
 				}
 			}
@@ -117,15 +147,21 @@
 
 		public bool IsFlagged
 		{
-			get => _isFlagged;
+			get => _view?.Flags.IsFlagged(_lineNumber) ?? false;
 			set
 			{
-				if (_isFlagged != value)
+				if (this.IsFlagged != value)
 				{
-					_isFlagged = value;
+					GetView().Flags.SetFlagged(_lineNumber, value);
 					RaisePropertyChanged();
 				}
 			}
+		}
+
+		// A record that is not attached keeps its values in stores of its own, created when a value is first set.
+		private ViewAnnotations GetView()
+		{
+			return _view ??= new ViewAnnotations();
 		}
 
 		private void RaisePropertyChanged([CallerMemberName] string propertyName = null)

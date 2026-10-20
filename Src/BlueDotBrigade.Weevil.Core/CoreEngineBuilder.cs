@@ -55,6 +55,8 @@
 			/// </summary>
 			private Range _range = Range.All;
 
+			private ViewAnnotations _annotations;
+
 			/// <summary>
 			/// Records semantic usage metrics. Defaults to a no-op recorder when the host does not supply one.
 			/// </summary>
@@ -139,6 +141,17 @@
 			/// During the loading process the records whose line number are within range will be loaded.
 			/// </summary>
 			/// <param name="range">Represents the line numbers that will be loaded.</param>
+			/// <summary>
+			/// Keeps the comments, pins and flags of an engine this one replaces, as Reload does (#1013).
+			/// The sidecar's comments and pins are then not loaded again.
+			/// </summary>
+			public CoreEngineBuilder UsingAnnotations(ViewAnnotations annotations)
+			{
+				_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+
+				return this;
+			}
+
 			public CoreEngineBuilder UsingRange(Range range)
 			{
 				_range = range;
@@ -178,6 +191,8 @@
 
 				var knownContext = new ContextDictionary();
 
+				ViewAnnotations annotations;
+
 				var inclusiveFilterHistory = new List<string>();
 				var exclusiveFilterHistory = new List<string>();
 				var tableOfContents = new List<Section>();
@@ -203,6 +218,9 @@
 					coreExtension = _sourceInstance._coreExtension;
 					sidecarManager = _sourceInstance._sidecarManager;
 					lineIndex = _sourceInstance._lineIndex;
+
+					// The records are the source's, already attached to these stores.
+					annotations = _sourceInstance._annotations;
 
 					selectedRecords = _sourceInstance._selectionManager.GetSelected();
 
@@ -256,8 +274,14 @@
 
 						loadingStopwatch.Stop();
 
+						var isKeepingAnnotations = _annotations != null;
+						annotations = _annotations ?? new ViewAnnotations(new AnnotationStore(lineIndex.LineCount), new FlagSet(lineIndex.LineCount));
+
+						Attach(records, annotations);
+
 						sidecarManager.Load(
 							records,
+							isKeepingAnnotations ? null : annotations.Annotations,
 							out knownContext,
 							out sourceFileRemarks,
 							out inclusiveFilterHistory,
@@ -291,6 +315,7 @@
 					sidecarManager,
 					lineIndex,
 					records,
+					annotations,
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
 					regions.ToImmutableArray(),
@@ -317,6 +342,14 @@
 			/// <summary>
 			/// Returns the line numbers to load, combining the start line with the requested range.
 			/// </summary>
+			private static void Attach(ImmutableArray<IRecord> records, ViewAnnotations annotations)
+			{
+				foreach (IRecord record in records)
+				{
+					record.Metadata?.Attach(annotations, record.LineNumber);
+				}
+			}
+
 			private Range GetLineNumberRange()
 			{
 				if (_startAtLineNumber <= FirstRecordLineNumber)

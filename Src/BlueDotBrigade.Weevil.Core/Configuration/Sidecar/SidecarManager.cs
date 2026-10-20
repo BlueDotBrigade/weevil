@@ -29,6 +29,7 @@
 		/// </summary>
 		public void Load(
 			ImmutableArray<IRecord> allRecords,
+			AnnotationStore annotations,
 			out ContextDictionary context,
 			out string sourceFileRemarks,
 			out List<string> inclusiveFilterHistory,
@@ -63,7 +64,7 @@
 						new v2.SidecarLoader(_sidecarFilePath),
 						x => x.Load(),
 						x => x.Load(
-							allRecords, 
+							annotations,
 							contextProperties,
 							out actualSourceFileRemarks, 
 							inclusiveHistory, 
@@ -75,7 +76,13 @@
 					Executor.Create(
 						new v1.LogMetadataLoader(_sidecarFilePath),
 						x => x.Load(),
-						x => x.Apply(allRecords)),
+						x =>
+						{
+							if (annotations != null)
+							{
+								x.Apply(allRecords);
+							}
+						}),
 				};
 
 				var sidecarLoaded = false;

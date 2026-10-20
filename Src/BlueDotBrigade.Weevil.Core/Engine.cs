@@ -163,7 +163,11 @@
 			FilterType filterType = _coreEngine.Filter.FilterType;
 			IFilterCriteria filterCriteria = _coreEngine.Filter.Criteria;
 
-			Replace(CoreEngine.FromPath(sourcePath).Build());
+			// The comments, pins and flags carry across Reload, as they do across Clear (#1013).
+			Replace(CoreEngine
+				.FromPath(sourcePath)
+				.UsingAnnotations(_coreEngine.Annotations)
+				.Build());
 			_coreEngine.Filter.Apply(filterType, filterCriteria);
 		}
 

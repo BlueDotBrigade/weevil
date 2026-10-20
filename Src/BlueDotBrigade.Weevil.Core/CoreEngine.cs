@@ -34,6 +34,9 @@
 
 		private readonly ImmutableArray<IRecord> _allRecords;
 
+		// Comments and pins are shared by every view of the log; flags belong to the view (#1013).
+		private readonly ViewAnnotations _annotations;
+
 		private readonly FilterManager _filterManager;
 		private readonly SidecarManager _sidecarManager;
 		private readonly LineIndex _lineIndex;
@@ -85,6 +88,7 @@
 			SidecarManager sidecarManager,
 			LineIndex lineIndex,
 			ImmutableArray<IRecord> records,
+			ViewAnnotations annotations,
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
 			ImmutableArray<Region> regions,
@@ -110,6 +114,7 @@
 			_sourceFileEncoding = sourceFileEncoding;
 
 			_allRecords = records;
+			_annotations = annotations;
 			_hasBeenCleared = hasBeenCleared;
 
 			Log.Default.Write(
@@ -232,6 +237,8 @@
 		public LogFileMetrics Metrics => _logFileMetrics;
 
 		public FilterManager Filter => _filterManager;
+
+		internal ViewAnnotations Annotations => _annotations;
 
 		public NavigationManager Navigate => _navigationManager;
 
