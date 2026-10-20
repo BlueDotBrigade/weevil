@@ -64,18 +64,20 @@ dotnet run -c Release -- --size-mb 1000,4000,8000 --delete-logs --report after.m
 
 ### Before: Weevil 2.12.1 (2026-10-20)
 
-Weevil 2.12.1 holds about **3.2 GB of RAM per GB of log**: about 430 bytes per record, for records averaging 132 bytes. The peak while opening equals the working set afterwards: memory only grows while a log opens.
+Weevil 2.12.1 needs about **3.25 GB of RAM per GB of log** at the peak while opening, and about 3.0 GB per GB once the log is open: about 430 bytes per record, for records averaging 132 bytes. The peak decides whether a log fits. For the 4 GB log the extra 0.8 GB at the peak is temporary, probably from the record lists growing while the log is parsed.
 
-Measured on a 4-vCPU Linux container with 14.2 GB of RAM available to .NET, 11.9 GB of it free, with .NET 10. The 4 and 8 GB logs passed the harness's limit of 10.7 GB (90% of the free RAM), so they are estimated like the larger sizes. The full report is in [Results-2026-10-20-Before.md](Results-2026-10-20-Before.md).
+Measured on a 4-vCPU Linux container with 14.2 GB of RAM available to .NET, all of it free, with .NET 10 and `--ram-percent 99`. The full report is in [Results-2026-10-20-Before.md](Results-2026-10-20-Before.md).
 
 | Log | Working set after opening | Peak while opening | Source |
 |---|---|---|---|
-| 1 GB | 3.3 GB | 3.3 GB | Measured: 7,547,742 records, opened in 32 s |
-| 4 GB | 12.9 GB | 13.0 GB | **Estimate.** Over the harness's limit: stopped at 10.7 GB after 90 s |
-| 8 GB | 25.9 GB | 25.9 GB | **Estimate.** Over the harness's limit: stopped at 10.7 GB after 100 s |
-| 12 GB | 38.8 GB | 38.8 GB | **Estimate** |
-| 16 GB | 51.7 GB | 51.7 GB | **Estimate** |
-| 20 GB | 64.6 GB | 64.6 GB | **Estimate** |
-| 24 GB | 77.5 GB | 77.5 GB | **Estimate** |
+| 1 GB | 3.3 GB | 3.3 GB | Measured: 7,547,742 records, opened in 41 s |
+| 4 GB | 12.2 GB | 13.0 GB | Measured: 30,014,396 records, opened in 158 s |
+| 8 GB | 24.3 GB | 26.0 GB | **Estimate.** Too big for this machine |
+| 12 GB | 36.4 GB | 39.0 GB | **Estimate** |
+| 16 GB | 48.5 GB | 52.0 GB | **Estimate** |
+| 20 GB | 60.7 GB | 64.9 GB | **Estimate** |
+| 24 GB | 72.8 GB | 77.9 GB | **Estimate** |
 
-The estimates assume memory grows in step with the number of records. On a PC with 32 GB of RAM, the largest log that fits is about 8 GB, before Windows and the WPF window take their share. Running the harness there would measure the 4 and 8 GB logs instead of estimating them.
+- **The estimates hold.** Memory grows in step with the number of records: estimated from the 1 GB log alone, the 4 GB log's peak was 13.0 GB, exactly as measured. The larger sizes are estimated from the 4 GB log.
+- **On a PC:** with 16 GB of RAM, a 4 GB log does not fit once Windows and the WPF window take their share. With 32 GB, the largest log that fits is about 8 GB.
+- **Free RAM matters.** An earlier run reported the 4 GB log as too big, because other processes held 2.3 GB of the RAM and the log passed the harness's limit. Close other applications before measuring.
