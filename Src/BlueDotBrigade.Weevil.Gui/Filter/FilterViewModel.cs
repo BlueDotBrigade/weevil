@@ -113,9 +113,15 @@
 		private ImmutableArray<IInsight> _insights;
 
 		public FilterViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
+			: this(uiDispatcher, bulletinMediator, new DialogBoxService())
+		{
+			// nothing to do
+		}
+
+		public FilterViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator, IDialogBoxService dialogBox)
 		{
 			_uiDispatcher = uiDispatcher;
-			_dialogBox = new DialogBoxService();
+			_dialogBox = dialogBox;
 
 			_bulletinMediator = bulletinMediator;
 
@@ -1623,38 +1629,70 @@
 			_engine.GenerateReport(ReportType.CommentSummary, destinationFolder);
 		}
 
-		public void Analyze(AnalysisType analysisType)
+		public Task Analyze(AnalysisType analysisType)
 		{
-			try
-			{
-				var results = _engine
-					.Analyzer.Analyze(analysisType, _dialogBox);
-
-				_bulletinMediator.Post(new AnalysisCompleteBulletin(
-					results.FlaggedRecords,
-					results.Data));
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
+			return AnalyzeInBackground(userDialog => _engine.Analyzer.Analyze(analysisType, userDialog));
 		}
 
-		public void Analyze(string customAnalyzerKey)
+		public Task Analyze(string customAnalyzerKey)
 		{
-			try
-			{
-				Results results = _engine
-					.Analyzer.Analyze(customAnalyzerKey, _dialogBox);
+			return AnalyzeInBackground(userDialog => _engine.Analyzer.Analyze(customAnalyzerKey, userDialog));
+		}
 
-				_bulletinMediator.Post(new AnalysisCompleteBulletin(
-					results.FlaggedRecords,
-					results.Data));
-			}
-			catch (Exception e)
+		/// <summary>
+		/// Runs an analyzer on a background thread, so the window stays responsive (#996).
+		/// </summary>
+		/// <remarks>
+		/// The menus and the filter are disabled until the analyzer finishes. Its prompts are shown on the UI thread,
+		/// with the records visible. Once a prompt closes, the progress bar replaces the records,
+		/// so the user cannot edit a comment or a pin that the analyzer may be writing to.
+		/// </remarks>
+		private Task AnalyzeInBackground(Func<IUserDialog, Results> analyze)
+		{
+			// Another analysis, a filter or an open is in progress.
+			if (!this.IsMenuEnabled)
 			{
-				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				return Task.CompletedTask;
 			}
+
+			var wasFilterToolboxEnabled = this.IsFilterToolboxEnabled;
+
+			this.CanOpenLogFile = false;
+			this.IsFilterToolboxEnabled = false;
+
+			var userDialog = new UiThreadUserDialog(
+				_dialogBox,
+				_uiDispatcher,
+				promptOpening: () => this.IsProcessingLongOperation = false,
+				promptClosed: () => this.IsProcessingLongOperation = true);
+
+			return Task.Run(() =>
+			{
+				try
+				{
+					Results results = analyze(userDialog);
+
+					_bulletinMediator.Post(new AnalysisCompleteBulletin(
+						results.FlaggedRecords,
+						results.Data));
+				}
+				catch (Exception e)
+				{
+					Log.Default.Write(LogSeverityType.Error, e, "Unable to complete the analysis.");
+					_uiDispatcher.Invoke(() => MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error));
+				}
+				finally
+				{
+					_uiDispatcher.Invoke(() =>
+					{
+						this.IsProcessingLongOperation = false;
+						this.IsFilterToolboxEnabled = wasFilterToolboxEnabled;
+						this.CanOpenLogFile = true;
+						OnPropertyChanged(nameof(IsMenuEnabled));
+						CommandManager.InvalidateRequerySuggested();
+					});
+				}
+			});
 		}
 
 		private void ToggleIsPinned()
