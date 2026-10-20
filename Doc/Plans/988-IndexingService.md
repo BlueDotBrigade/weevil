@@ -6,7 +6,7 @@
 
 Phase 3 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md). Epic #988; the remaining work is user story #978. It needs #990: records can be created on demand only once they hold no mutable state.
 
-This plan replaces an earlier draft, `978-CompactRecordStorage.md` on branch `Feature/978-CompactRecords`, which was never merged. Its steps 2 and 3 moved into #990.
+This plan replaces an earlier draft, `978-CompactRecordStorage.md`, which was never merged. Its steps 2 and 3 moved into #990.
 
 ## Goal
 
@@ -18,27 +18,39 @@ From #978's acceptance criteria:
 - Comments, pins, flags, bookmarks, regions, Clear and the sidecar work as before. Clear still frees memory.
 - Reopening a log whose saved index matches does not parse the whole log again.
 
+A first open may take as long as today: about 2 minutes for a 20 GB log on an NVMe drive (accepted 2026-10-20). See [Future Considerations](#future-considerations).
+
 ## Steps
 
 One sub-issue of #978 and one pull request per step, in order. Each step is measured with the phase 1 harness before and after.
 
 1. **Compact content.**
-   - Content is stored as UTF-8 in shared, read-only 16 MB chunks, so no array reaches .NET's 2 GB limit. A record keeps an offset and a length instead of a string.
-   - `Content` decodes on each access.
-   - Regular expression and plain-text filters match a `ReadOnlySpan<char>` decoded into a reused buffer per thread, keeping today's culture and case rules exactly.
-   - Content is stored exactly as `Content` returns it today, including multi-line records rejoined with `\r\n`.
-   - A record that cannot round-trip through UTF-8 (an unpaired surrogate in a UTF-16 log) keeps its string.
-   - Decide here whether chunks hold converted UTF-8 or the file's raw bytes. #986 and #991 read released chunks back from the file. With raw bytes that is a plain file read; with converted UTF-8 the conversion must be run again for that part of the file.
+   - Content is held as the file's raw bytes, as the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md) and [LargeLogFileStrategy.md](../Research/LargeLogFiles/LargeLogFileStrategy.md) recommend. It is kept in shared, read-only 16 MB chunks split at record boundaries, so no array reaches .NET's 2 GB limit. A record larger than a chunk gets a chunk of its own.
+   - A record keeps an offset and a length instead of a string.
+   - `Content` decodes on each access with the log's encoding, rejoining multi-line records with `\r\n`, so it returns exactly what it returns today. Invalid bytes become U+FFFD, as today. Reading a released chunk back (#986) is then a plain file read.
+   - A filter decodes each record once, into a buffer reused per thread, and passes that text to every expression; `IExpression.IsMatch` takes the text (decided 2026-10-20). The rules for each filter type stay as they are:
+     - Regular expressions and plain text keep today's culture and case rules exactly.
+     - Aliases (`#`) expand to text or regular expressions first.
+     - Monikers (`@`) read the facts byte, annotations, flags or elapsed times, and never decode content.
+   - Check that every filter type keeps exactly the same records. The storage benchmark measured regular expressions on UTF-8 only, so also time plain text and a UTF-16 log.
    - Estimate: −38% memory on the test log.
 2. **Proof of concept: timestamps.**
-   - The question: parse timestamps from content when needed, or keep an 8-byte column?
-   - Measure on a 1 GB log: an `@Elapsed` filter, the elapsed-time analyzer, and a go-to-timestamp search, each both ways.
+   - The question: keep each record's timestamp in an 8-byte column, as today, or parse it from the content each time it is needed?
+   - It matters because insights read every record's timestamp on every open, as do the `@Elapsed` filter, the graph and the edge analyzers.
+   - Build a standalone console app with no reference to Weevil, like the storage benchmark: copy the classes it needs.
+   - Measure on a 1 GB log, both ways, and scale the results to 20 GB:
+     - insights at open;
+     - an `@Elapsed` filter;
+     - go to timestamp;
+     - elapsed times for the rows on screen.
+   - Decision rule (2026-10-20): keep the column, unless parsing on demand adds under 5 s to opening a 20 GB log and keeps an `@Elapsed` filter under 10 s.
+   - If the column goes, plugin parsers need a way to parse only a timestamp.
    - This decides the record table in step 3. Record the result in `Research/Weevil3/`.
 3. **Records on demand.**
    - Records live in a record table: line number, content offset, the facts byte, and a timestamp if step 2 says so.
    - `IRecord` objects are created for shown rows, a selection or an export, and compare equal by line number.
    - A read-only record list replaces `ImmutableArray<IRecord>`, with `IndexOf` by line number. Filter results and the Clear record set become lists of record numbers.
-   - This is the largest step: 147 references in 60 source files and 83 in 21 test files. When writing its sub-issue, split it, for example Core behind an adapter first, then the GUI, then the tests.
+   - This is the largest step. In October 2026 there were 156 references in 60 source files and 81 in 20 test files, and `ISelect` also exposes records as a dictionary and a list. When writing its sub-issue, split it: for example Core behind an adapter first, then the GUI, then the tests.
 4. **Clear frees memory.**
    - Clear narrows the view's record scope (#990 step 8). Content chunks that the scope no longer includes are released, followed by one compacting garbage collection, as Clear does today. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
    - Only whole chunks are released: up to about 16 MB stays at each edge of a kept range, and `Clear Selected` frees nothing.
@@ -46,7 +58,10 @@ One sub-issue of #978 and one pull request per step, in order. Each step is meas
    - This needs only one view, so it does not depend on #991.
 5. **Reopen without parsing.**
    - The `.idx` file gains the record table: which lines start records, the facts byte and timestamps if kept.
-   - When the saved index matches the log, Weevil builds the table from it instead of parsing. The index format version increases, and older index files are rebuilt.
+   - The header already holds a format version, the encoding, the line count, the length indexed, and hashes of the first and last 4 KB. Those are how it detects a grown log and indexes only the new part.
+   - The header also gains the plugin's name and version and its Open As settings, so a change of plugin rebuilds the record table.
+   - This needs a new layout, not just a new version number. Today the whole index is written through one memory buffer, and files over 2 GB are rejected; a 64 GB log's record table takes several GB.
+   - When the saved index matches the log, Weevil builds the table from it instead of parsing. Older index files are rebuilt.
 
 ## Compatibility
 
@@ -57,3 +72,10 @@ One sub-issue of #978 and one pull request per step, in order. Each step is meas
 
 - After step 1, `Content` allocates a string on every access. Hot paths that read it repeatedly must move to spans.
 - Step 3 relies on the row design proven in #990 step 4.
+
+## Future Considerations
+
+- **Parallel parser.**
+  - Parsing runs on one thread. Splitting the log at line-index checkpoints and parsing the parts in parallel could bring a first open of 20 GB well under a minute.
+  - Plugin parsers would need to read spans instead of strings, allocate nothing per line, and be thread-safe.
+- **One pass on a first open.** The line index is built in a pass of its own before parsing, so a first open reads the file twice. Building both in one pass saves one read: about 6 s per 20 GB on NVMe, or 36 s on SATA.
