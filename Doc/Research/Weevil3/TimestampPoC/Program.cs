@@ -14,13 +14,6 @@ using BlueDotBrigade.Weevil.Data;
 
 internal static class Program
 {
-	private const double TwentyGigabytes = 20_000_000_000;
-	private const double SixtyFourGigabytes = 64_000_000_000;
-
-	// Decision rule from the #988 plan, step 2.
-	private const double MaxExtraSecondsAtOpen = 5;
-	private const double MaxElapsedFilterSeconds = 10;
-
 	public static int Main(string[] args)
 	{
 		Arguments arguments;
@@ -41,7 +34,7 @@ internal static class Program
 			return 0;
 		}
 
-		var path = arguments.FilePath ?? SyntheticLog.EnsureExists(arguments.SizeMegabytes);
+		var path = arguments.FilePath ?? SyntheticLog.EnsureExists(arguments);
 		var log = IndexedLog.Load(path);
 
 		if (log.Count < 100)
@@ -50,32 +43,46 @@ internal static class Program
 			return 1;
 		}
 
-		var inputs = Inputs.Create(log);
+		var inputs = Inputs.Create(log, arguments.FilterPercent);
 
-		VariantResult[] variants =
-		[
-			Measure("Column", new ColumnSource(log), log, inputs, arguments.Runs),
-			Measure("Plugin parse", new PluginParseSource(log), log, inputs, arguments.Runs),
-			Measure("Span parse", new SpanParseSource(log), log, inputs, arguments.Runs),
-			Measure("Fast parse", new FastParseSource(log), log, inputs, arguments.Runs),
-		];
+		VariantResult[] variants = arguments.Ways
+			.Select(way => way switch
+			{
+				Way.Column => Measure("Column", new ColumnSource(log), log, inputs, arguments),
+				Way.Plugin => Measure("Plugin parse", new PluginParseSource(log), log, inputs, arguments),
+				Way.Span => Measure("Span parse", new SpanParseSource(log), log, inputs, arguments),
+				Way.Fast => Measure("Fast parse", new FastParseSource(log), log, inputs, arguments),
+				_ => throw new InvalidOperationException($"Unknown way: {way}"),
+			})
+			.ToArray();
 
-		Report.Write(arguments, log, variants);
+		var report = Report.Create(args, arguments, log, variants);
+		Console.WriteLine();
+		Console.Write(report);
+
+		if (arguments.ReportPath is not null)
+		{
+			File.WriteAllText(arguments.ReportPath, report);
+			Console.Error.WriteLine($"Report saved: {Path.GetFullPath(arguments.ReportPath)}");
+		}
+
 		return variants.All(v => v.HasSameAnswersAs(variants[0])) ? 0 : 1;
 	}
 
-	private static VariantResult Measure<T>(string name, T source, IndexedLog log, Inputs inputs, int runs)
+	private static VariantResult Measure<T>(string name, T source, IndexedLog log, Inputs inputs, Arguments arguments)
 		where T : struct, ITimestampSource
 	{
 		Console.Error.WriteLine($"Measuring: {name}...");
+		var runs = arguments.Runs;
 
 		return new VariantResult(name,
 		[
 			Measure(() => Workloads.Insights(source, log), runs),
-			Measure(() => Workloads.ElapsedFilter(source, inputs.TenPercent), runs),
+			Measure(() => Workloads.ElapsedFilter(source, inputs.FilterResults), runs),
 			Measure(() => Workloads.ElapsedFilter(source, inputs.AllRecords), runs),
 			Measure(() => Workloads.GoToTimestamp(source, inputs.Targets, log.Count), runs),
 			Measure(() => Workloads.RowsOnScreen(source, inputs.ScreenPositions), runs),
+			Measure(() => Workloads.ReadAllInParallel(source, log.Count, arguments.Threads), runs),
 		]);
 	}
 
@@ -96,109 +103,14 @@ internal static class Program
 		Array.Sort(milliseconds);
 		return new Measurement(answer, milliseconds[runs / 2]);
 	}
+}
 
-	internal static double ScaleTo(IndexedLog log, double bytes) => bytes / log.FileBytes;
-
-	internal static class Report
-	{
-		private static readonly string[] WorkloadNames =
-		[
-			"Insights at open",
-			"`@Elapsed` filter, 10% of records",
-			"`@Elapsed` filter, all records",
-			"Go to timestamp, ×1,000",
-			"Rows on screen, ×10,000 screens",
-		];
-
-		public static void Write(Arguments arguments, IndexedLog log, VariantResult[] variants)
-		{
-			var scale = ScaleTo(log, TwentyGigabytes);
-			var uiShare = (double)log.IsUiThread.Count(x => x) / log.Count;
-
-			Console.WriteLine();
-			Console.WriteLine("# Timestamp proof of concept (#1008)");
-			Console.WriteLine();
-			Console.WriteLine("| | |");
-			Console.WriteLine("|---|---|");
-			Console.WriteLine($"| Log | {(arguments.FilePath is null ? "Synthetic" : "Real")}, {log.FileBytes / 1_000_000.0:N0} MB |");
-			Console.WriteLine($"| Records | {log.Count:N0}, averaging {(double)log.FileBytes / log.Count:N0} bytes |");
-			Console.WriteLine($"| UI-thread records | {uiShare:P1} |");
-			Console.WriteLine($"| Indexing, which also fills the column | {log.IndexingTime.TotalSeconds:N1} s |");
-			Console.WriteLine($"| Machine | {Environment.ProcessorCount} logical processors, {RuntimeInformation.OSDescription}, {RuntimeInformation.FrameworkDescription} |");
-			Console.WriteLine($"| Timing | Single thread, median of {arguments.Runs} {(arguments.Runs == 1 ? "run" : "runs")} |");
-
-			Console.WriteLine();
-			Console.WriteLine("## Measured (ms)");
-			WriteTable(variants, [0, 1, 2, 3, 4], m => m.Milliseconds.ToString("N0", CultureInfo.InvariantCulture));
-
-			Console.WriteLine();
-			Console.WriteLine("## Scaled to a 20 GB log (s)");
-			Console.WriteLine();
-			Console.WriteLine("Only the workloads that read every record grow with the log.");
-			WriteTable(variants, [0, 1, 2], m => (m.Milliseconds * scale / 1000).ToString("N1", CultureInfo.InvariantCulture));
-
-			Console.WriteLine();
-			Console.WriteLine("## Per action (µs)");
-			Console.WriteLine();
-			Console.WriteLine("These hardly grow with the log: a search in a 20 GB log takes about 10 more steps.");
-			Console.WriteLine();
-			Console.WriteLine($"| Action | {string.Join(" | ", variants.Select(v => v.Name))} |");
-			Console.WriteLine($"|---|{string.Concat(variants.Select(_ => "---|"))}");
-			Console.WriteLine($"| Go to timestamp | {string.Join(" | ", variants.Select(v => (v.Measurements[3].Milliseconds * 1000 / Inputs.TargetCount).ToString("N1", CultureInfo.InvariantCulture)))} |");
-			Console.WriteLine($"| Elapsed times for one screen of 50 rows | {string.Join(" | ", variants.Select(v => (v.Measurements[4].Milliseconds * 1000 / Inputs.ScreenCount).ToString("N1", CultureInfo.InvariantCulture)))} |");
-
-			Console.WriteLine();
-			Console.WriteLine("## Memory for the column");
-			Console.WriteLine();
-			Console.WriteLine("| Log | Records | Column |");
-			Console.WriteLine("|---|---|---|");
-			Console.WriteLine($"| This log | {log.Count:N0} | {log.Count * 8 / 1_000_000.0:N0} MB |");
-			Console.WriteLine($"| 20 GB | {log.Count * scale:N0} | {log.Count * scale * 8 / 1_000_000_000:N1} GB |");
-			Console.WriteLine($"| 64 GB | {log.Count * ScaleTo(log, SixtyFourGigabytes):N0} | {log.Count * ScaleTo(log, SixtyFourGigabytes) * 8 / 1_000_000_000:N1} GB |");
-
-			Console.WriteLine();
-			Console.WriteLine("## Decision rule");
-			Console.WriteLine();
-			Console.WriteLine($"Keep the column, unless parsing on demand adds under {MaxExtraSecondsAtOpen} s to opening a 20 GB log and keeps an `@Elapsed` filter under {MaxElapsedFilterSeconds} s.");
-			Console.WriteLine();
-			Console.WriteLine("| Way | Extra at open | `@Elapsed` filter, all records | Within the rule? |");
-			Console.WriteLine("|---|---|---|---|");
-
-			string? fastEnough = null;
-			foreach (VariantResult variant in variants.Skip(1))
-			{
-				var extraAtOpen = (variant.Measurements[0].Milliseconds - variants[0].Measurements[0].Milliseconds) * scale / 1000;
-				var elapsedFilter = variant.Measurements[2].Milliseconds * scale / 1000;
-				var isWithinRule = extraAtOpen < MaxExtraSecondsAtOpen && elapsedFilter < MaxElapsedFilterSeconds;
-				fastEnough ??= isWithinRule ? variant.Name : null;
-
-				Console.WriteLine($"| {variant.Name} | +{extraAtOpen:N1} s | {elapsedFilter:N1} s | {(isWithinRule ? "Yes" : "No")} |");
-			}
-
-			Console.WriteLine();
-			Console.WriteLine(fastEnough is null
-				? "**Answer:** keep the column. No way of parsing on demand is within the rule."
-				: $"**Answer:** parsing on demand is fast enough with \"{fastEnough}\". The column can go.");
-
-			var mismatches = variants.Skip(1).Where(v => !v.HasSameAnswersAs(variants[0])).Select(v => v.Name).ToList();
-			Console.WriteLine();
-			Console.WriteLine(mismatches.Count == 0
-				? "All ways gave the same answers."
-				: $"**Warning:** different answers from: {string.Join(", ", mismatches)}. The timings are not comparable.");
-		}
-
-		private static void WriteTable(VariantResult[] variants, int[] workloads, Func<Measurement, string> format)
-		{
-			Console.WriteLine();
-			Console.WriteLine($"| Workload | {string.Join(" | ", variants.Select(v => v.Name))} |");
-			Console.WriteLine($"|---|{string.Concat(variants.Select(_ => "---|"))}");
-
-			foreach (var i in workloads)
-			{
-				Console.WriteLine($"| {WorkloadNames[i]} | {string.Join(" | ", variants.Select(v => format(v.Measurements[i])))} |");
-			}
-		}
-	}
+internal enum Way
+{
+	Column,
+	Plugin,
+	Span,
+	Fast,
 }
 
 internal sealed record Measurement(object Answer, double Milliseconds);
@@ -207,6 +119,141 @@ internal sealed record VariantResult(string Name, Measurement[] Measurements)
 {
 	public bool HasSameAnswersAs(VariantResult other) =>
 		this.Measurements.Zip(other.Measurements).All(pair => pair.First.Answer.Equals(pair.Second.Answer));
+}
+
+internal static class Report
+{
+	private const double TwentyGigabytes = 20_000_000_000;
+	private const double SixtyFourGigabytes = 64_000_000_000;
+
+	// Decision rule from the #988 plan, step 2.
+	private const double MaxExtraSecondsAtOpen = 5;
+	private const double MaxElapsedFilterSeconds = 10;
+
+	// Indexes into VariantResult.Measurements, in the order Program.Measure adds them.
+	private const int Insights = 0;
+	private const int FilterSubset = 1;
+	private const int FilterAll = 2;
+	private const int GoTo = 3;
+	private const int Rows = 4;
+	private const int ParallelRead = 5;
+
+	public static string Create(string[] args, Arguments arguments, IndexedLog log, VariantResult[] variants)
+	{
+		var w = new StringWriter(CultureInfo.InvariantCulture);
+		var scale = TwentyGigabytes / log.FileBytes;
+		var uiShare = (double)log.IsUiThread.Count(x => x) / log.Count;
+
+		string[] workloadNames =
+		[
+			"Insights at open",
+			$"`@Elapsed` filter, {arguments.FilterPercent}% of records",
+			"`@Elapsed` filter, all records",
+			$"Go to timestamp, ×{Inputs.TargetCount:N0}",
+			$"Rows on screen, ×{Inputs.ScreenCount:N0} screens",
+			$"Read every timestamp once, {arguments.Threads} threads",
+		];
+
+		w.WriteLine("# Timestamp proof of concept (#1008)");
+		w.WriteLine();
+		w.WriteLine("| | |");
+		w.WriteLine("|---|---|");
+		w.WriteLine($"| Options | `{(args.Length == 0 ? "(defaults)" : string.Join(' ', args))}` |");
+		w.WriteLine($"| Log | {(arguments.FilePath is null ? "Synthetic" : "Real")}, {log.FileBytes / 1_000_000.0:N0} MB |");
+		w.WriteLine($"| Records | {log.Count:N0}, averaging {(double)log.FileBytes / log.Count:N0} bytes |");
+		w.WriteLine($"| UI-thread records | {uiShare:P1} |");
+		w.WriteLine($"| Indexing, which also fills the column | {log.IndexingTime.TotalSeconds:N1} s |");
+		w.WriteLine($"| Machine | {Environment.ProcessorCount} logical processors, {RuntimeInformation.OSDescription}, {RuntimeInformation.FrameworkDescription} |");
+		w.WriteLine($"| Timing | Median of {arguments.Runs} {(arguments.Runs == 1 ? "run" : "runs")}; one thread unless stated |");
+
+		w.WriteLine();
+		w.WriteLine("## Measured (ms)");
+		WriteTable(w, variants, workloadNames, [Insights, FilterSubset, FilterAll, GoTo, Rows, ParallelRead],
+			m => m.Milliseconds.ToString("N0", CultureInfo.InvariantCulture));
+
+		w.WriteLine();
+		w.WriteLine("## Scaled to a 20 GB log (s)");
+		w.WriteLine();
+		w.WriteLine("Only the workloads that read every record grow with the log. Records of the same average size are assumed.");
+		WriteTable(w, variants, workloadNames, [Insights, FilterSubset, FilterAll, ParallelRead],
+			m => (m.Milliseconds * scale / 1000).ToString("N1", CultureInfo.InvariantCulture));
+
+		w.WriteLine();
+		w.WriteLine("## Per action (µs)");
+		w.WriteLine();
+		w.WriteLine("These hardly grow with the log: a search in a 20 GB log takes about 10 more steps.");
+		w.WriteLine();
+		w.WriteLine($"| Action | {string.Join(" | ", variants.Select(v => v.Name))} |");
+		w.WriteLine($"|---|{string.Concat(variants.Select(_ => "---|"))}");
+		w.WriteLine($"| Go to timestamp | {PerAction(variants, GoTo, Inputs.TargetCount)} |");
+		w.WriteLine($"| Elapsed times for one screen of 50 rows | {PerAction(variants, Rows, Inputs.ScreenCount)} |");
+
+		var sixtyFourScale = SixtyFourGigabytes / log.FileBytes;
+		w.WriteLine();
+		w.WriteLine("## Memory for the column");
+		w.WriteLine();
+		w.WriteLine("| Log | Records | Column |");
+		w.WriteLine("|---|---|---|");
+		w.WriteLine($"| This log | {log.Count:N0} | {log.Count * 8 / 1_000_000.0:N0} MB |");
+		w.WriteLine($"| 20 GB | {log.Count * scale:N0} | {log.Count * scale * 8 / 1_000_000_000:N1} GB |");
+		w.WriteLine($"| 64 GB | {log.Count * sixtyFourScale:N0} | {log.Count * sixtyFourScale * 8 / 1_000_000_000:N1} GB |");
+
+		w.WriteLine();
+		w.WriteLine("## Decision rule");
+		w.WriteLine();
+		w.WriteLine($"Keep the column, unless parsing on demand adds under {MaxExtraSecondsAtOpen} s to opening a 20 GB log and keeps an `@Elapsed` filter under {MaxElapsedFilterSeconds} s. Insights run on one thread today.");
+		w.WriteLine();
+		w.WriteLine($"| Way | Extra at open | `@Elapsed` filter, all records | Within the rule? | Reading every timestamp, {arguments.Threads} threads |");
+		w.WriteLine("|---|---|---|---|---|");
+
+		VariantResult column = variants[0];
+		string? fastEnough = null;
+		foreach (VariantResult variant in variants.Skip(1))
+		{
+			var extraAtOpen = (variant.Measurements[Insights].Milliseconds - column.Measurements[Insights].Milliseconds) * scale / 1000;
+			var elapsedFilter = variant.Measurements[FilterAll].Milliseconds * scale / 1000;
+			var parallelRead = variant.Measurements[ParallelRead].Milliseconds * scale / 1000;
+			var isWithinRule = extraAtOpen < MaxExtraSecondsAtOpen && elapsedFilter < MaxElapsedFilterSeconds;
+			fastEnough ??= isWithinRule ? variant.Name : null;
+
+			w.WriteLine($"| {variant.Name} | +{extraAtOpen:N1} s | {elapsedFilter:N1} s | {(isWithinRule ? "Yes" : "No")} | {parallelRead:N1} s |");
+		}
+
+		w.WriteLine();
+		if (variants.Length == 1)
+		{
+			w.WriteLine("**Answer:** none: only the column was measured.");
+		}
+		else
+		{
+			w.WriteLine(fastEnough is null
+				? "**Answer:** keep the column. No way of parsing on demand is within the rule."
+				: $"**Answer:** parsing on demand is fast enough with \"{fastEnough}\". The column can go.");
+		}
+
+		var mismatches = variants.Skip(1).Where(v => !v.HasSameAnswersAs(column)).Select(v => v.Name).ToList();
+		w.WriteLine();
+		w.WriteLine(mismatches.Count == 0
+			? "All ways gave the same answers."
+			: $"**Warning:** different answers from: {string.Join(", ", mismatches)}. The timings are not comparable.");
+
+		return w.ToString();
+	}
+
+	private static string PerAction(VariantResult[] variants, int workload, int actions) =>
+		string.Join(" | ", variants.Select(v => (v.Measurements[workload].Milliseconds * 1000 / actions).ToString("N1", CultureInfo.InvariantCulture)));
+
+	private static void WriteTable(TextWriter w, VariantResult[] variants, string[] workloadNames, int[] workloads, Func<Measurement, string> format)
+	{
+		w.WriteLine();
+		w.WriteLine($"| Workload | {string.Join(" | ", variants.Select(v => v.Name))} |");
+		w.WriteLine($"|---|{string.Concat(variants.Select(_ => "---|"))}");
+
+		foreach (var i in workloads)
+		{
+			w.WriteLine($"| {workloadNames[i]} | {string.Join(" | ", variants.Select(v => format(v.Measurements[i])))} |");
+		}
+	}
 }
 
 /// <summary>
@@ -358,6 +405,34 @@ internal static class Workloads
 
 		return elapsedSum;
 	}
+
+	/// <summary>
+	/// Reads every record's timestamp once, split across threads: how fast a whole-log pass could parse in parallel.
+	/// </summary>
+	public static long ReadAllInParallel<T>(T source, int count, int threads)
+		where T : struct, ITimestampSource
+	{
+		long tickSum = 0;
+
+		Parallel.For(0, threads, new ParallelOptions { MaxDegreeOfParallelism = threads }, part =>
+		{
+			var first = (int)((long)count * part / threads);
+			var end = (int)((long)count * (part + 1) / threads);
+			long partSum = 0;
+
+			for (var i = first; i < end; i++)
+			{
+				unchecked
+				{
+					partSum += source.Ticks(i);
+				}
+			}
+
+			Interlocked.Add(ref tickSum, partSum);
+		});
+
+		return tickSum;
+	}
 }
 
 internal sealed class Inputs
@@ -366,11 +441,11 @@ internal sealed class Inputs
 	public const int ScreenCount = 10_000;
 
 	public required int[] AllRecords { get; init; }
-	public required int[] TenPercent { get; init; }
+	public required int[] FilterResults { get; init; }
 	public required long[] Targets { get; init; }
 	public required int[] ScreenPositions { get; init; }
 
-	public static Inputs Create(IndexedLog log)
+	public static Inputs Create(IndexedLog log, int filterPercent)
 	{
 		var sample = new Random(7);
 		var targets = new Random(11);
@@ -379,10 +454,12 @@ internal sealed class Inputs
 		var first = log.Ticks.Min();
 		var last = log.Ticks.Max();
 
+		var filterResults = Enumerable.Range(0, log.Count).Where(_ => sample.Next(100) < filterPercent).ToArray();
+
 		return new Inputs
 		{
 			AllRecords = Enumerable.Range(0, log.Count).ToArray(),
-			TenPercent = Enumerable.Range(0, log.Count).Where(_ => sample.Next(10) == 0).ToArray(),
+			FilterResults = filterResults.Length >= 2 ? filterResults : [0, log.Count - 1],
 			Targets = Enumerable.Range(0, TargetCount).Select(_ => first + (long)(targets.NextDouble() * (last - first))).ToArray(),
 			ScreenPositions = Enumerable.Range(0, ScreenCount).Select(_ => screens.Next(1, log.Count - 50)).ToArray(),
 		};
@@ -692,11 +769,14 @@ internal sealed class IndexedLog
 
 /// <summary>
 /// A repeatable Weevil TSV log: times that mostly move forward, occasional gaps of 1–10 s,
-/// occasional out-of-order records, and about 20% of records on the UI thread (thread 1).
+/// occasional out-of-order records, and a chosen share of records on the UI thread (thread 1).
 /// </summary>
 internal static class SyntheticLog
 {
-	private const int Version = 1;
+	private const int Version = 2;
+
+	// Bytes in a record besides its words: timestamp, IDs, severity, tabs, "sequence=N" and the line break.
+	private const double FixedRecordBytes = 62;
 
 	private static readonly string[] Words =
 	[
@@ -704,18 +784,27 @@ internal static class SyntheticLog
 		"sensor", "value", "updated", "cache", "miss", "session", "opened", "closed", "frame", "rendered",
 	];
 
-	public static string EnsureExists(int megabytes)
+	private static readonly double AverageWordBytes = Words.Average(word => word.Length + 1);
+
+	public static string EnsureExists(Arguments arguments)
 	{
-		var path = Path.Combine(Path.GetTempPath(), $"Weevil.TimestampPoC.v{Version}.{megabytes}MB.log");
+		var megabytes = arguments.SizeMegabytes;
+		var folder = arguments.LogFolder ?? Path.GetTempPath();
+		var path = Path.Combine(folder, $"Weevil.TimestampPoC.v{Version}.{megabytes}MB.{arguments.RecordBytes}B.{arguments.UiPercent}UI.log");
 		var targetBytes = megabytes * 1_000_000L;
 
-		if (File.Exists(path) && new FileInfo(path).Length > targetBytes - 1_000)
+		if (File.Exists(path) && new FileInfo(path).Length > targetBytes - 10_000)
 		{
 			Console.Error.WriteLine($"Reusing {path}");
 			return path;
 		}
 
 		Console.Error.WriteLine($"Generating a {megabytes:N0} MB log: {path}");
+		Directory.CreateDirectory(folder);
+
+		// Word counts are drawn evenly from 0 to twice the average, to vary record lengths.
+		var averageWords = Math.Max(0, (arguments.RecordBytes - FixedRecordBytes) / AverageWordBytes);
+		var maxWords = (int)Math.Round(averageWords * 2);
 
 		var random = new Random(42);
 		var time = new DateTime(2026, 10, 8, 10, 0, 0);
@@ -735,7 +824,7 @@ internal static class SyntheticLog
 			}
 
 			DateTime timestamp = random.Next(2_000) == 0 ? time.AddMilliseconds(-random.Next(1, 2_000)) : time;
-			var threadId = random.Next(5) == 0 ? 1 : random.Next(2, 25);
+			var threadId = random.Next(100) < arguments.UiPercent ? 1 : random.Next(2, 25);
 
 			line.Clear();
 			line.Append(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fffff", CultureInfo.InvariantCulture)).Append('\t')
@@ -743,7 +832,7 @@ internal static class SyntheticLog
 				.Append(threadId).Append('\t')
 				.Append(PickSeverity(random)).Append('\t');
 
-			var wordCount = random.Next(6, 16);
+			var wordCount = random.Next(0, maxWords + 1);
 			for (var word = 0; word < wordCount; word++)
 			{
 				line.Append(Words[random.Next(Words.Length)]).Append(' ');
@@ -777,8 +866,15 @@ internal static class SyntheticLog
 internal sealed class Arguments
 {
 	public int SizeMegabytes { get; private set; } = 1_000;
+	public int RecordBytes { get; private set; } = 131;
+	public int UiPercent { get; private set; } = 20;
+	public string? LogFolder { get; private set; }
 	public string? FilePath { get; private set; }
+	public int FilterPercent { get; private set; } = 10;
+	public int Threads { get; private set; } = Environment.ProcessorCount;
+	public IReadOnlyList<Way> Ways { get; private set; } = [Way.Column, Way.Plugin, Way.Span, Way.Fast];
 	public int Runs { get; private set; } = 3;
+	public string? ReportPath { get; private set; }
 	public bool ShowHelp { get; private set; }
 
 	public static Arguments Parse(string[] args)
@@ -787,42 +883,95 @@ internal sealed class Arguments
 
 		for (var i = 0; i < args.Length; i++)
 		{
-			string Value() => i + 1 < args.Length ? args[++i] : throw new ArgumentException($"{args[i]} needs a value.");
+			var name = args[i];
+			string Value() => i + 1 < args.Length ? args[++i] : throw new ArgumentException($"{name} needs a value.");
+			int Number(int minimum, int maximum) => int.TryParse(Value(), out var number) && number >= minimum && number <= maximum
+				? number
+				: throw new ArgumentException($"{name} must be a number from {minimum} to {maximum}.");
 
-			switch (args[i])
+			switch (name)
 			{
 				case "--size-mb":
-					arguments.SizeMegabytes = int.TryParse(Value(), out var size) && size is >= 10 and <= 2_000
-						? size
-						: throw new ArgumentException("--size-mb must be between 10 and 2000.");
+					arguments.SizeMegabytes = Number(10, 2_000);
+					break;
+				case "--record-bytes":
+					arguments.RecordBytes = Number(70, 4_000);
+					break;
+				case "--ui-percent":
+					arguments.UiPercent = Number(0, 100);
+					break;
+				case "--log-folder":
+					arguments.LogFolder = Value();
 					break;
 				case "--file":
 					var file = Value();
 					arguments.FilePath = File.Exists(file) ? file : throw new ArgumentException($"File not found: {file}");
 					break;
+				case "--filter-percent":
+					arguments.FilterPercent = Number(1, 100);
+					break;
+				case "--threads":
+					arguments.Threads = Number(1, 256);
+					break;
+				case "--ways":
+					arguments.Ways = ParseWays(Value());
+					break;
 				case "--runs":
-					arguments.Runs = int.TryParse(Value(), out var runs) && runs is >= 1 and <= 20
-						? runs
-						: throw new ArgumentException("--runs must be between 1 and 20.");
+					arguments.Runs = Number(1, 20);
+					break;
+				case "--report":
+					arguments.ReportPath = Value();
 					break;
 				case "--help":
 				case "-h":
 					arguments.ShowHelp = true;
 					break;
 				default:
-					throw new ArgumentException($"Unknown argument: {args[i]}");
+					throw new ArgumentException($"Unknown option: {name}");
 			}
 		}
 
 		return arguments;
 	}
 
+	/// <summary>
+	/// The column always comes first: it is the baseline the other ways are compared with.
+	/// </summary>
+	private static List<Way> ParseWays(string value)
+	{
+		var ways = new List<Way> { Way.Column };
+
+		foreach (var name in value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+		{
+			Way way = Enum.TryParse(name, ignoreCase: true, out Way parsed)
+				? parsed
+				: throw new ArgumentException($"Unknown way: {name}. Use column, plugin, span or fast.");
+
+			if (!ways.Contains(way))
+			{
+				ways.Add(way);
+			}
+		}
+
+		return ways;
+	}
+
 	public static void PrintHelp()
 	{
 		Console.WriteLine("Weevil timestamp proof of concept (#1008)");
 		Console.WriteLine();
-		Console.WriteLine("  --size-mb <10-2000>  Size of the synthetic log, in MB (default 1000).");
-		Console.WriteLine("  --file <path>        Use a real Weevil TSV log (UTF-8, under 2 GB) instead.");
-		Console.WriteLine("  --runs <1-20>        Timed runs per workload; the median is reported (default 3).");
+		Console.WriteLine("The log:");
+		Console.WriteLine("  --size-mb <10-2000>        Size of the synthetic log, in MB. Default 1000.");
+		Console.WriteLine("  --record-bytes <70-4000>   Average record size in the synthetic log. Default 131.");
+		Console.WriteLine("  --ui-percent <0-100>       Share of synthetic records on the UI thread. Default 20.");
+		Console.WriteLine("  --log-folder <path>        Where the synthetic log is written. Default: the temporary folder.");
+		Console.WriteLine("  --file <path>              Use a real Weevil TSV log instead: UTF-8, under 2 GB.");
+		Console.WriteLine();
+		Console.WriteLine("The measurements:");
+		Console.WriteLine("  --filter-percent <1-100>   Share of records the previous filter kept, for the @Elapsed filter. Default 10.");
+		Console.WriteLine($"  --threads <1-256>          Threads for the parallel read. Default {Environment.ProcessorCount}, this computer's processors.");
+		Console.WriteLine("  --ways <list>              Ways to compare, from column, plugin, span and fast. Default all.");
+		Console.WriteLine("  --runs <1-20>              Timed runs per workload; the median is reported. Default 3.");
+		Console.WriteLine("  --report <path>            Also save the report to this file.");
 	}
 }
