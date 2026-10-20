@@ -1,6 +1,6 @@
 # 990: Immutable Core
 
-> **Status:** Draft
+> **Status:** In progress
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 

@@ -584,6 +584,8 @@
 							_engine.Save(true);
 						}
 
+						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
+
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
 
 						_engine = Engine
@@ -633,8 +635,8 @@
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
 						RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
 
-						_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-						_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
+						// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
+						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
 
 						RefreshFilterResults();
 
@@ -822,9 +824,6 @@
 						Context = _engine.Context,
 						TotalRecordCount = _engine.Count
 					});
-
-					_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-					_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 
 					var newRecordSelection = _engine.Filter.Results
 						.Where(a => oldRecordSelection.Any(b => b.LineNumber == a.LineNumber)).ToList();
@@ -1055,10 +1054,6 @@
 
 			RefreshFilterResults();
 			RaiseResultsChanged();
-
-			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
-			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
 		public void Filter()
