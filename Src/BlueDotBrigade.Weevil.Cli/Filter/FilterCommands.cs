@@ -9,6 +9,7 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Test;
 	using Cocona;
 	using Cocona.Help;
 
@@ -43,6 +44,12 @@
 				var destinationFilePath = Path.Combine(
 					Path.GetDirectoryName(logPath),
 					destinationFile);
+
+				// Saved as the GUI saves records in raw format: one record per line, in the log's encoding (#1001).
+				System.IO.File.WriteAllLines(
+					destinationFilePath,
+					engine.Filter.Results.Select(record => record.Content),
+					EncodingHelper.GetEncoding(FileHelper.Open(logPath)));
 			}
 			finally
 			{

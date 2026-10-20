@@ -64,6 +64,11 @@
 	<ItemGroup>
 		<Resource Include="Resources\Icons\Weevil.ico" />
 	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>BlueDotBrigade.Weevil.Cli-FunctionalTests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Analysis\" />
 	</ItemGroup>
