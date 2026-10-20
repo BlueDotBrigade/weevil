@@ -75,6 +75,8 @@ While a filter runs, it also holds a temporary array of 4 bytes per record.
 
 #990 comes first because records can be created on demand only once they hold no mutable state.
 
+Before phase 2 (decided 2026-10-20): the bugs #1001, #1002 and #996, then the upgrade to .NET 10 (#1003), so #990 is built and tested on .NET 10. Every step of phases 2 to 4 has an issue: #1011–#1018 under #990, #1019–#1023 and #1008 under #978, and #1024–#1028 under #421.
+
 ## Proofs of Concept
 
 Only where a decision depends on a measurement or on behaviour nobody has checked:
