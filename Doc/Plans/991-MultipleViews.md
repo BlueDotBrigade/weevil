@@ -8,23 +8,24 @@ Phase 5 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 **Implemented last,** so the release does not depend on it. No earlier phase needs anything from this plan. Freeing RAM with one view (#988) and reading cleared content back from the file (#986) work without it; this plan only extends them to several views.
 
+**This milestone builds the Core only** (decided 2026-10-20). The GUI for several views comes in the next milestone, built with the latest [MaterialDesignInXamlToolkit](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit).
+
 The API, Clear and memory design is in [EngineApi.md](../Research/Weevil3/EngineApi.md).
 
 ## Goal
 
-- An analyst opens another view of an open log. Each view has its own record scope, filter, results, selection and elapsed times.
+- Core can open another view of an open log. Each view has its own record scope, filter, results, selection and elapsed times.
 - Two views can clear different records, and run different analyzers: each view has its own flags.
 - All views share one copy of the log and one session: a comment, pin, bookmark or region added in one view appears in every view.
 - In RAM mode, content is released only when no view still includes it.
 - Another view adds only its own state: its scope, its results as record numbers, its selection and its active record.
 - The sidecar is saved once per log.
 
-## Decisions Needed First
+## Decisions
 
-1. **Window or tab:** #195 describes a new window.
-2. **What a new view starts with:** the whole log and no filter (suggested), or a copy of the current view's scope and filter.
-
-Decided 2026-10-19: Clear and flags belong to each view.
+- Decided 2026-10-19: Clear and flags belong to each view.
+- Decided 2026-10-20: the GUI questions wait for the next milestone: a window or a tab (#195 describes a window), what a new view starts with, and how Reload works with several views.
+- Whether `IEngine` is `IDisposable`, and what closing a view means: #1030.
 
 ## Steps
 
@@ -34,13 +35,13 @@ One sub-issue and one pull request per step, in order.
    - `IEngine.CreateView()` returns another engine that shares the internal `LogSession`. Callers never see the session.
    - Each engine owns its record scope, filter, results, flags, selection, active record and metric counts. Flags already live in the engine (#990 step 3).
    - Filter history stays in the session, because the sidecar saves it per log.
-   - A new view starts as decided in decision 2.
+   - A new view starts with the whole log and no filter; the caller can apply a filter. The GUI may choose otherwise in the next milestone.
 2. **Free RAM across views.**
    - A content chunk is released only when it lies outside every view's scope. The combined scope is recalculated whenever a view clears, restores, opens or closes; scopes are short range lists, so this is cheap.
-   - A view whose scope grows, through `RestoreRecords()` or as a new view, reads the chunks it needs back from the file (#986).
+   - A view whose scope grows, through Reload or as a new view, reads the chunks it needs back from the file (#986).
    - Test: two views clear different ranges; only the chunks both exclude are released; closing one view releases the chunks only it kept.
-3. **Open another view in the GUI,** as a window or a tab (decision 1). Annotation changes already reach every row through session events (#990), so all views stay in step.
-4. **Closing.** Disposing a view frees its state and recalculates which chunks are still needed. Disposing the last view closes the session. Saving stays explicit, as today.
+3. **Open another view in the GUI:** next milestone. Annotation changes already reach every row through session events (#990), so all views will stay in step.
+4. **Closing.** Closing a view frees its state and recalculates which chunks are still needed. Closing the last view closes the session. Saving stays explicit, as today. Whether closing means `Dispose` is #1030.
 
 No proof of concept is needed: the design follows from #990, #988 and #986.
 

@@ -20,7 +20,7 @@ engine.CreateView()           ──► IEngine (view 2, own record scope) ─�
 ## Public API Sketch
 
 ```csharp
-public interface IEngine : IDisposable
+public interface IEngine   // whether it is IDisposable: #1030
 {
     // This view only
     IFilter Filter { get; }        // filter and results; the same object for the view's lifetime
@@ -31,14 +31,13 @@ public interface IEngine : IDisposable
     int Count { get; }             // records in this view's scope
     bool HasBeenCleared { get; }   // true when the scope is not the whole log
     void Clear(ClearOperation clearOperation);   // narrows this view's scope only
-    void RestoreRecords();         // the scope becomes the whole log again (#986)
 
     // Shared by every view of the log
     IAnnotations Annotations { get; }   // comments and pins; replaces record.Metadata
     IBookmarkManager Bookmarks { get; }
     IRegionManager Regions { get; }
     string SourceFilePath { get; }
-    void Reload();     // reloads the log for every view; each view keeps its scope and re-applies its filter
+    void Reload();     // reloads the log; the scope becomes the whole log again, as Ctrl+F5 does today
     void Save();
 
     IEngine CreateView();   // #991
@@ -86,9 +85,8 @@ _engine.Clear(ClearOperation.BeforeSelected);   // same engine afterwards: no re
 IEngine second = _engine.CreateView();          // its own scope and filter; shared annotations
 second.Annotations.GetComment(nextPin.LineNumber);   // "Retry starts here"
 
-second.Dispose();
 _engine.Save();
-_engine.Dispose();   // the last view closes the session
+// How a view is closed, and whether IEngine is IDisposable: #1030
 ```
 
 ## Inside Core
@@ -132,7 +130,7 @@ The log on disk, its index and its content never change. Clear changes only what
 | What Clear does | Builds a new engine from the records left in memory | Narrows the view's scope |
 | Other views | Not applicable | Unaffected: two views can clear different records |
 | Line numbers | Unchanged | Unchanged |
-| Undo | Re-open the log | `RestoreRecords()` (#986) |
+| Undo | Reload (Ctrl+F5) | Reload (Ctrl+F5), as today |
 | Comments and pins on cleared records | Unsaved changes are lost on save, because the old sidecar values win (bug #1004) | Kept and saved: they live in the session |
 | Events | The GUI subscribes again | Same engine: no re-subscribing |
 
@@ -171,7 +169,7 @@ Delivered in three steps, so the release never depends on multiple views:
 | Epic | What it adds |
 |---|---|
 | #988 | With one view, Clear releases chunks outside the scope. Cleared records return after Reload, as today. |
-| #986 | A released chunk is read back from the file, so `RestoreRecords()` works. RAM and disk mode share one content store with two caching rules: RAM keeps every chunk a scope includes, disk keeps only the chunks being read. |
+| #986 | A released chunk is read back from the file, so Reload brings cleared records back without re-reading what is still in memory. RAM and disk mode share one content store with two caching rules: RAM keeps every chunk a scope includes, disk keeps only the chunks being read. |
 | #991 | Only chunks outside every view's scope are released; a new view reads back what it needs. |
 
 ## Shared or Per View
@@ -189,6 +187,6 @@ Delivered in three steps, so the release never depends on multiple views:
 
 ## Status
 
-Proposed, 2026-10-19. Clear and flags per view are agreed. Still open: whether `IEngine` becomes `IDisposable` with the last view closing the session; what a new view starts with; whether Reload from one view reloads every view; and whether the GUI offers a Restore command.
+Proposed, 2026-10-19. Clear and flags per view are agreed. Decided 2026-10-20: Reload (Ctrl+F5) brings cleared records back, so there is no Restore command; what a new view starts with, and how Reload works with several views, wait for the multiple-view GUI in the next milestone. Still open: whether `IEngine` is `IDisposable` (#1030).
 
 The plans for [#990](../../Plans/990-ImmutableCore.md), [#988](../../Plans/988-IndexingService.md), [#986](../../Plans/986-DiskMode.md) and [#991](../../Plans/991-MultipleViews.md) follow this design.
