@@ -164,7 +164,7 @@ After view 2 closes:             ███████████████�
 - **Releasing is safe during a filter.** The chunk table is immutable: releasing publishes a new table. A running filter keeps the old one and finishes; the garbage collector frees the chunk afterwards.
 - **Memory returns to Windows** after one compacting garbage collection, as Clear does today.
 - **Limits:** only whole chunks are released, so up to about 16 MB stays at each edge of a kept range. `Clear Selected` removes scattered records and frees nothing.
-- **The record table and annotation byte stay,** about 14 bytes per record. Line numbers, navigation and the sidecar need them.
+- **The record table and annotation byte stay,** about 22 bytes per record. Line numbers, navigation and the sidecar need them.
 
 Delivered in three steps, so the release never depends on multiple views:
 
