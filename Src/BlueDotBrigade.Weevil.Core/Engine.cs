@@ -141,6 +141,12 @@
 
 		public void Clear(ClearOperation clearOperation)
 		{
+			// Saved first: once cleared, a record's comment and pin are no longer in memory to be saved (#1004).
+			if (Engine.IsRealInstance(this))
+			{
+				_coreEngine.Save();
+			}
+
 			_coreEngine = _coreEngine.FromInstance(clearOperation).Build();
 		}
 
