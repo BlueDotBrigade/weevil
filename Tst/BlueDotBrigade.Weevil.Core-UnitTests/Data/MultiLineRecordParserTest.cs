@@ -178,7 +178,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			record.Metadata.IsMultiLine.Should().BeTrue();
+			record.IsMultiLine.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -189,7 +189,7 @@
 
 			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
 
-			record.Metadata.IsMultiLine.Should().BeFalse();
+			record.IsMultiLine.Should().BeFalse();
 		}
 
 		private const string FirstLine = "2026-10-16 10:00:00.00000\t123\t2\tInformation\tFirst record";
@@ -215,11 +215,11 @@
 
 			first.Content.Should().Be(FirstLine);
 			first.LineNumber.Should().Be(1);
-			first.Metadata.IsMultiLine.Should().BeFalse();
+			first.IsMultiLine.Should().BeFalse();
 			second.Content.Should().Be(SecondLine);
 			second.LineNumber.Should().Be(2);
 			second.Severity.Should().Be(SeverityType.Warning);
-			second.Metadata.IsMultiLine.Should().BeFalse();
+			second.IsMultiLine.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -231,9 +231,23 @@
 			IRecord second = parser.GetNext();
 
 			first.Content.Should().Be($"{FirstLine}\r\n{ContinuationLine1}\r\n{ContinuationLine2}");
-			first.Metadata.IsMultiLine.Should().BeTrue();
+			first.IsMultiLine.Should().BeTrue();
 			second.LineNumber.Should().Be(4);
-			second.Metadata.IsMultiLine.Should().BeFalse();
+			second.IsMultiLine.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenMultilineRecordFromUiThread_WhenReading_ThenItIsStillFromTheUiThread()
+		{
+			const string UiThreadLine = "2026-10-16 10:00:00.00000\t123\t1\tError\tFirst record";
+			var parser = CreateParser(UiThreadLine, ContinuationLine1, SecondLine);
+
+			IRecord first = parser.GetNext();
+
+			// The record is created again once its continuation lines are read, keeping the parser's facts (#1012).
+			first.IsMultiLine.Should().BeTrue();
+			first.WasGeneratedByUi.Should().BeTrue();
+			first.Severity.Should().Be(SeverityType.Error);
 		}
 
 		[TestMethod]
@@ -245,7 +259,7 @@
 			IRecord last = parser.GetNext();
 
 			last.Content.Should().Be($"{SecondLine}\r\n{ContinuationLine1}");
-			last.Metadata.IsMultiLine.Should().BeTrue();
+			last.IsMultiLine.Should().BeTrue();
 		}
 
 		[TestMethod]

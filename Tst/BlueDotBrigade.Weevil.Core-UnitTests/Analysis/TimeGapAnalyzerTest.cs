@@ -35,15 +35,15 @@
 
 			var records = new List<IRecord>
 			{
-				new Record(0, now.AddMinutes(0), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no record to compare against
-				new Record(1, Record.CreationTimeUnknown, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
-				new Record(2, now.AddMinutes(2), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; no timestamps for comparison
-				new Record(3, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 
-				new Record(4, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; not enough time since last record
-				new Record(5, now.AddMinutes(5), severity, "content", new Metadata { WasGeneratedByUi = false }), // IsFlagged=false; record not from UI thread
-				new Record(6, now.AddMinutes(6), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; lots of time between two UI records
-				new Record(7, Record.CreationTimeUnknown, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; `MaxValue` represents an unknown timestamp
-				new Record(8, now.AddMinutes(8), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; nothing to reference
+				new Record(0, now.AddMinutes(0), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; no record to compare against
+				new Record(1, Record.CreationTimeUnknown, severity, "application initializing", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; `MaxValue` represents an unknown timestamp
+				new Record(2, now.AddMinutes(2), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; no timestamps for comparison
+				new Record(3, now.AddMinutes(3), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=true; 
+				new Record(4, now.AddMinutes(3), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; not enough time since last record
+				new Record(5, now.AddMinutes(5), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: false), // IsFlagged=false; record not from UI thread
+				new Record(6, now.AddMinutes(6), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=true; lots of time between two UI records
+				new Record(7, Record.CreationTimeUnknown, severity, "application terminating", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; `MaxValue` represents an unknown timestamp
+				new Record(8, now.AddMinutes(8), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; nothing to reference
 			};
 
 			_records = ImmutableArray.Create(records.ToArray());
@@ -68,9 +68,9 @@
 
 			var records = new List<IRecord>
 			{
-				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
-				new Record(20, now.AddSeconds(7), severity, "content", new Metadata { WasGeneratedByUi = false }),
-				new Record(30, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
+				new Record(20, now.AddSeconds(7), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: false),
+				new Record(30, now.AddSeconds(8), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 			};
 
 			var analyzer = new TimeGapAnalyzer();
@@ -123,9 +123,9 @@
 
 			var records = new List<IRecord>
 			{
-				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
-				new Record(20, now.AddSeconds(7), severity, "content", new Metadata { WasGeneratedByUi = false }),
-				new Record(30, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
+				new Record(20, now.AddSeconds(7), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: false),
+				new Record(30, now.AddSeconds(8), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 			};
 
 			var analyzer = new TimeGapAnalyzer();
@@ -148,9 +148,9 @@
 
 			var records = new List<IRecord>
 			{
-				new Record(0, Record.CreationTimeUnknown, severity, "fake header", new Metadata { WasGeneratedByUi = false }),
-				new Record(1, now.AddSeconds(4), severity, "content", new Metadata { WasGeneratedByUi = false }),
-				new Record(2, now.AddSeconds(8), severity, "content", new Metadata { WasGeneratedByUi = false }),
+				new Record(0, Record.CreationTimeUnknown, severity, "fake header", new Metadata(), isMultiLine: false, wasGeneratedByUi: false),
+				new Record(1, now.AddSeconds(4), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: false),
+				new Record(2, now.AddSeconds(8), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: false),
 			};
 
 			var analyzer = new TimeGapAnalyzer();

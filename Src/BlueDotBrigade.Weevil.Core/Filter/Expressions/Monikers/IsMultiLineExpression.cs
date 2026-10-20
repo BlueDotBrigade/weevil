@@ -25,7 +25,7 @@
 
 		public bool IsMatch(IRecord record)
 		{
-			var isMatch = record.Metadata.IsMultiLine == _isMultiLine;
+			var isMatch = record.IsMultiLine == _isMultiLine;
 			return isMatch;
 		}
 	}

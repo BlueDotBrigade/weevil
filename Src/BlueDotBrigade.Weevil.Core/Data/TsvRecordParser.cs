@@ -46,16 +46,9 @@
 
 					if (isTimestampValid && isProcessIdValid && isThreadIdValid)
 					{
-						var metadata = new Metadata();
-
-						if (threadId == 1)
-						{
-							metadata.WasGeneratedByUi = true;
-						}
-
 						SeverityTypeHelpers.TryParse(text[fields[3]], out SeverityType severityType);
 
-						record = new Record(line, createdAt, severityType, content, metadata);
+						record = new Record(line, createdAt, severityType, content, new Metadata(), isMultiLine: false, wasGeneratedByUi: threadId == 1);
 					}
 					else
 					{

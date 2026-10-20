@@ -10,8 +10,7 @@
 		[TestMethod]
 		public void Format_SimpleCallStack_ReturnsContentWithoutSystemNamespaces()
 		{
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString());
-			record.Metadata.IsMultiLine = true;
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString(), new Metadata(), isMultiLine: true, wasGeneratedByUi: false);
 
 			var actualResult = new SimpleCallStackFormatter().Format(record);
 
@@ -23,8 +22,7 @@
 		public void Format_SimpleCallStack_ReturnsTrue()
 		{
 			var originalContent = new Daten().AsString();
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
-			record.Metadata.IsMultiLine = true;
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent, new Metadata(), isMultiLine: true, wasGeneratedByUi: false);
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
@@ -35,8 +33,7 @@
 		public void Format_NoCallStack_ReturnsFalse()
 		{
 			var originalContent = "The quick brown fox jumps over the lazy dog.";
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
-			record.Metadata.IsMultiLine = true;
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent, new Metadata(), isMultiLine: true, wasGeneratedByUi: false);
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
@@ -47,8 +44,7 @@
 		public void Format_CallStackWithPaths_ReturnsCallStackWithoutPaths()
 		{
 			var originalContent = new Daten().AsString();
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
-			record.Metadata.IsMultiLine = true;
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent, new Metadata(), isMultiLine: true, wasGeneratedByUi: false);
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
@@ -59,8 +55,7 @@
 		public void Format_EndOfInnerException_ReturnsCompressedCallStack()
 		{
 			var originalContent = new Daten().AsString();
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
-			record.Metadata.IsMultiLine = true;
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent, new Metadata(), isMultiLine: true, wasGeneratedByUi: false);
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 
@@ -71,8 +66,7 @@
 		public void Format_EndOfStackTrace_ReturnsCompressedCallStack()
 		{
 			var originalContent = new Daten().AsString();
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent);
-			record.Metadata.IsMultiLine = true;
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, originalContent, new Metadata(), isMultiLine: true, wasGeneratedByUi: false);
 
 			var formattedResult = new SimpleCallStackFormatter().Format(record);
 

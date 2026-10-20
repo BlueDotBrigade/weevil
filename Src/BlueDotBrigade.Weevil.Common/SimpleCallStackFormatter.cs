@@ -40,7 +40,7 @@
 		{
 			var result = record.Content;
 
-			if (record.Metadata.IsMultiLine)
+			if (record.IsMultiLine)
 			{
 				foreach (var pattern in CallStackPatterns)
 				{

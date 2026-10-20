@@ -62,7 +62,7 @@
 
 			for (var i = 0; i < records.Length; i++)
 			{
-				if (records[i].HasCreationTime && records[i].Metadata.WasGeneratedByUi)
+				if (records[i].HasCreationTime && records[i].WasGeneratedByUi)
 				{
 					result = i;
 					break;
@@ -103,7 +103,7 @@
 				{
 					IRecord currentRecord = records[current];
 
-					if (currentRecord.HasCreationTime && currentRecord.Metadata.WasGeneratedByUi)
+					if (currentRecord.HasCreationTime && currentRecord.WasGeneratedByUi)
 					{
 						CheckForTimeGap(currentRecord, records[previous], maximumAllowedPeriod, canUpdateMetadata);
 

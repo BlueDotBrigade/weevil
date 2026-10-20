@@ -35,15 +35,15 @@
 
 			var records = new List<IRecord>
 			{
-				new Record(0, now.AddMinutes(0), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; first timestamped UI record
-				new Record(1, Record.CreationTimeUnknown, severity, "application initializing", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; unknown timestamp is ignored
-				new Record(2, now.AddMinutes(2), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 2-minute gap from record 0
-				new Record(3, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; 1-minute gap is below the 90-second threshold
-				new Record(4, now.AddMinutes(3), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; zero elapsed time
-				new Record(5, now.AddMinutes(5), severity, "content", new Metadata { WasGeneratedByUi = false }), // IsFlagged=false; non-UI record is ignored
-				new Record(6, now.AddMinutes(6), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 3-minute gap from record 4
-				new Record(7, Record.CreationTimeUnknown, severity, "application terminating", new Metadata { WasGeneratedByUi = true }), // IsFlagged=false; unknown timestamp is ignored
-				new Record(8, now.AddMinutes(8), severity, "content", new Metadata { WasGeneratedByUi = true }), // IsFlagged=true; 2-minute gap from record 6
+				new Record(0, now.AddMinutes(0), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; first timestamped UI record
+				new Record(1, Record.CreationTimeUnknown, severity, "application initializing", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; unknown timestamp is ignored
+				new Record(2, now.AddMinutes(2), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=true; 2-minute gap from record 0
+				new Record(3, now.AddMinutes(3), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; 1-minute gap is below the 90-second threshold
+				new Record(4, now.AddMinutes(3), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; zero elapsed time
+				new Record(5, now.AddMinutes(5), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: false), // IsFlagged=false; non-UI record is ignored
+				new Record(6, now.AddMinutes(6), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=true; 3-minute gap from record 4
+				new Record(7, Record.CreationTimeUnknown, severity, "application terminating", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=false; unknown timestamp is ignored
+				new Record(8, now.AddMinutes(8), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true), // IsFlagged=true; 2-minute gap from record 6
 			};
 
 			_records = ImmutableArray.Create(records.ToArray());
@@ -92,9 +92,9 @@
 			DateTime now = DateTime.Now;
 			var records = new List<IRecord>
 			{
-				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", new Metadata { IsFlagged = true, WasGeneratedByUi = true }),
-				new Record(20, now, SeverityType.Debug, "first", new Metadata { WasGeneratedByUi = true }),
-				new Record(30, now.AddSeconds(1), SeverityType.Debug, "second", new Metadata { WasGeneratedByUi = true }),
+				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", new Metadata { IsFlagged = true }, isMultiLine: false, wasGeneratedByUi: true),
+				new Record(20, now, SeverityType.Debug, "first", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
+				new Record(30, now.AddSeconds(1), SeverityType.Debug, "second", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 			};
 
 			var analyzer = new TimeGapUiAnalyzer();
@@ -113,14 +113,14 @@
 
 			var recordsWithGap = new List<IRecord>
 			{
-				new Record(10, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
-				new Record(20, now.AddSeconds(10), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(10, now.AddSeconds(0), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
+				new Record(20, now.AddSeconds(10), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 			};
 
 			var recordsWithNoGap = new List<IRecord>
 			{
-				new Record(30, now.AddSeconds(0), severity, "content", new Metadata { WasGeneratedByUi = true }),
-				new Record(40, now.AddSeconds(1), severity, "content", new Metadata { WasGeneratedByUi = true }),
+				new Record(30, now.AddSeconds(0), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
+				new Record(40, now.AddSeconds(1), severity, "content", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 			};
 
 			var analyzer = new TimeGapUiAnalyzer();
