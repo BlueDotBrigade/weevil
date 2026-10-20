@@ -125,7 +125,7 @@ public sealed class Engine : IEngine             // one view
 
 ## Clear
 
-The log on disk, its index and its content never change. Clear changes only what one view includes: its **record scope**, a short list of record-number ranges. Filtering, navigation and the record count work inside the scope.
+The log on disk, its index and its content never change. Clear changes only what one view includes: its **record scope**, a list of record-number ranges. The list is usually short; Clear Selected and Clear Unselected can make millions of ranges, so a scope may need to be a bitmap. Filtering, navigation and the record count work inside the scope.
 
 | | Today | Proposed |
 |---|---|---|
@@ -133,7 +133,7 @@ The log on disk, its index and its content never change. Clear changes only what
 | Other views | Not applicable | Unaffected: two views can clear different records |
 | Line numbers | Unchanged | Unchanged |
 | Undo | Re-open the log | `RestoreRecords()` (#986) |
-| Comments and pins on cleared records | Unsaved changes appear to be lost on save, because the old sidecar values win (from reading `SidecarLoader.PackSidecar`; not tested) | Kept and saved: they live in the session |
+| Comments and pins on cleared records | Unsaved changes are lost on save, because the old sidecar values win (bug #1004) | Kept and saved: they live in the session |
 | Events | The GUI subscribes again | Same engine: no re-subscribing |
 
 Every clear operation becomes a range rule, with today's rules:
@@ -160,7 +160,7 @@ Combined:      █████████████████████�
 After view 2 closes:             ████████████████████████████████████   → chunks 0 and 1 released
 ```
 
-- **Comparing views is cheap.** Scopes are short sorted range lists, merged whenever a view clears, restores, opens or closes.
+- **Comparing views is cheap.** Scopes are sorted range lists, or bitmaps, merged whenever a view clears, restores, opens or closes.
 - **Releasing is safe during a filter.** The chunk table is immutable: releasing publishes a new table. A running filter keeps the old one and finishes; the garbage collector frees the chunk afterwards.
 - **Memory returns to Windows** after one compacting garbage collection, as Clear does today.
 - **Limits:** only whole chunks are released, so up to about 16 MB stays at each edge of a kept range. `Clear Selected` removes scattered records and frees nothing.
