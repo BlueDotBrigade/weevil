@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(WeevilTargetFramework)</TargetFramework>
     <OutputType>Library</OutputType>
     <RootNamespace>BlueDotBrigade.Weevil.Common</RootNamespace>
     <PlatformTarget>x64</PlatformTarget>

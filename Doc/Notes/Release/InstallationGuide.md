@@ -4,7 +4,7 @@
 
 - 8GB of RAM
   - 16GB of RAM is strongly recommended.
-- [.NET Core 9 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-9.0.200-windows-x64-installer)
+- [.NET 10 Desktop Runtime, x64](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 	- This dependency must be installed before starting *Weevil*.
 
 ## Installation

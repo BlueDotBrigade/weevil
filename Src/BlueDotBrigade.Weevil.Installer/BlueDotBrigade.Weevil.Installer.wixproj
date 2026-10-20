@@ -11,9 +11,9 @@
     <InstallerDocLayoutDir>$(InstallerLayoutRoot)Doc\</InstallerDocLayoutDir>
     <InstallerLicenseLayoutDir>$(InstallerLayoutRoot)Licenses\</InstallerLicenseLayoutDir>
     <InstallerPluginLayoutDir>$(InstallerBinLayoutDir)Plugins\</InstallerPluginLayoutDir>
-    <GuiOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.Gui\bin\$(Platform)\$(Configuration)\net9.0-windows\</GuiOutputPath>
-    <CliOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.Cli\bin\$(Platform)\$(Configuration)\net9.0\</CliOutputPath>
-    <PowerShellOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.PowerShell\bin\$(Platform)\$(Configuration)\net9.0\</PowerShellOutputPath>
+    <GuiOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.Gui\bin\$(Platform)\$(Configuration)\$(WeevilTargetFramework)-windows\</GuiOutputPath>
+    <CliOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.Cli\bin\$(Platform)\$(Configuration)\$(WeevilTargetFramework)\</CliOutputPath>
+    <PowerShellOutputPath>$(RepoRootDir)Src\BlueDotBrigade.Weevil.PowerShell\bin\$(Platform)\$(Configuration)\$(WeevilTargetFramework)\</PowerShellOutputPath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' and '$(WEEVIL_PLUGINS_PATH)' != '' ">$(WEEVIL_PLUGINS_PATH)\</PluginSourcePath>
     <PluginSourcePath Condition=" '$(PluginSourcePath)' == '' ">$(RepoRootDir)Src\BlueDotBrigade.Weevil.Plugins\</PluginSourcePath>
     <TelemetryCredentialsDefaultPath>$(MSBuildProjectDirectory)\TelemetryCredentials.wxs_</TelemetryCredentialsDefaultPath>

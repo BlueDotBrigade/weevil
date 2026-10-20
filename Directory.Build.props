@@ -1,4 +1,8 @@
 <Project>
+  <PropertyGroup>
+    <!-- The .NET version of every project, and of the installer's paths. Windows projects append `-windows`. -->
+    <WeevilTargetFramework>net10.0</WeevilTargetFramework>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">
     <WeevilReleaseVersion>2.12.1</WeevilReleaseVersion>
     <VersionPrefix>$(WeevilReleaseVersion)</VersionPrefix>

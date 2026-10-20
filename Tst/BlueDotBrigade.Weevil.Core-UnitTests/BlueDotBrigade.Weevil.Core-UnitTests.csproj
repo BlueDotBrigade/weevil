@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>$(WeevilTargetFramework)</TargetFramework>
 		<OutputType>Library</OutputType>
 		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
 		<Platforms>x64</Platforms>
@@ -31,7 +31,7 @@
 		<PackageReference Include="NLog" Version="6.0.7" />
 		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
 		<PackageReference Include="NSubstitute" Version="5.3.0" />
-		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.13" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
