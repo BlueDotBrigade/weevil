@@ -96,6 +96,13 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 - Before acting on a plan, read its status note. Do not start, resume or re-implement a plan unless the user asks you to in the current conversation.
 - When you find behaviour that was not obvious and is worth remembering, suggest a note for `Doc/LessonsLearned/`.
 
+## Development Workflow
+
+1. Write a high-level plan.
+2. Break the plan into user stories.
+3. Implement one user story at a time: create its GitHub issue first, then implement it. Commits reference the issue (see below).
+4. Write formal requirements once an epic is complete: every user story is implemented, the user and you are satisfied with the result, and all automated tests pass. Write each requirement in EARS syntax as a GitHub issue that references the user stories it formalizes.
+
 ## GitHub Issues and Pull Requests
 
 - An epic (label `epic`) groups related work. User stories, tasks and bugs are its sub-issues. A user story may also stand alone, without an epic.
