@@ -76,5 +76,95 @@
 				Directory.Delete(directory, recursive: true);
 			}
 		}
+
+		// Regression: Issue #1004
+		[TestMethod]
+		public void GivenUnsavedComment_WhenItsRecordIsClearedAndSaved_ThenSidecarKeepsTheComment()
+		{
+			var logFilePath = CreateLogFile(out var directory);
+
+			try
+			{
+				IEngine engine = Engine.UsingPath(logFilePath).Open();
+				engine[11].Metadata.Comment = "hello world";
+				ClearLinesOneToTwelve(engine);
+				engine.Save(true);
+
+				Engine.UsingPath(logFilePath).Open()[11].Metadata.Comment.Should().Be("hello world");
+			}
+			finally
+			{
+				Directory.Delete(directory, recursive: true);
+			}
+		}
+
+		// Regression: Issue #1004
+		[TestMethod]
+		public void GivenSavedComment_WhenEditedThenClearedAndSaved_ThenSidecarHasTheEdit()
+		{
+			var logFilePath = CreateLogFile(out var directory);
+
+			try
+			{
+				IEngine engine = Engine.UsingPath(logFilePath).Open();
+				engine[11].Metadata.Comment = "before";
+				engine.Save(true);
+
+				engine[11].Metadata.Comment = "after";
+				ClearLinesOneToTwelve(engine);
+				engine.Save(true);
+
+				Engine.UsingPath(logFilePath).Open()[11].Metadata.Comment.Should().Be("after");
+			}
+			finally
+			{
+				Directory.Delete(directory, recursive: true);
+			}
+		}
+
+		// Regression: Issue #1004
+		[TestMethod]
+		public void GivenSavedPin_WhenUnpinnedThenClearedAndSaved_ThenSidecarHasNoPin()
+		{
+			var logFilePath = CreateLogFile(out var directory);
+
+			try
+			{
+				IEngine engine = Engine.UsingPath(logFilePath).Open();
+				engine[11].Metadata.IsPinned = true;
+				engine.Save(true);
+
+				engine[11].Metadata.IsPinned = false;
+				ClearLinesOneToTwelve(engine);
+				engine.Save(true);
+
+				Engine.UsingPath(logFilePath).Open()[11].Metadata.IsPinned.Should().BeFalse();
+			}
+			finally
+			{
+				Directory.Delete(directory, recursive: true);
+			}
+		}
+
+		/// <summary>
+		/// Writes a 300-line log, one record per line, outside the temporary folder, where the sidecar would not be saved.
+		/// </summary>
+		private static string CreateLogFile(out string directory)
+		{
+			directory = Path.Combine(AppContext.BaseDirectory, nameof(SidecarDataShould), Guid.NewGuid().ToString("N"));
+			Directory.CreateDirectory(directory);
+
+			var logFilePath = Path.Combine(directory, "Application.log");
+			File.WriteAllText(logFilePath, string.Concat(Enumerable.Range(1, 300).Select(lineNumber => $"Line {lineNumber:000}\n")));
+
+			return logFilePath;
+		}
+
+		private static void ClearLinesOneToTwelve(IEngine engine)
+		{
+			engine.Selector.Select(13);
+			engine.Clear(ClearOperation.BeforeSelected);
+			engine.Filter.Results[0].LineNumber.Should().Be(13);
+		}
 	}
 }
