@@ -24,7 +24,7 @@ A first open may take as long as today: about 2 minutes for a 20 GB log on an NV
 
 One sub-issue of #978 and one pull request per step, in order. The step issues were created on 2026-10-20, so a change to the plan can be traced through them.
 
-Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8 GB logs measured, noting any too big for the RAM, and 12, 16, 20 and 24 GB estimated. Its harness measures memory again after each step.
+Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8 GB logs measured, noting any too big for the RAM, and 12, 16, 20 and 24 GB estimated. Its harness measures memory again after each step. **Done 2026-10-20:** 2.12.1 holds about 3.3 GB of RAM per GB of log; a 20 GB log needs about 65 GB. The 4 and 8 GB logs were too big for the 14.2 GB test machine, so they are estimated too. See the [results](../Research/Weevil3/MemoryHarness/README.md#results).
 
 1. **Compact content (#1020).**
    - Content is held as the file's raw bytes, as the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md) and [LargeLogFileStrategy.md](../Research/LargeLogFiles/LargeLogFileStrategy.md) recommend. It is kept in shared, read-only 16 MB chunks split at record boundaries, so no array reaches .NET's 2 GB limit. A record larger than a chunk gets a chunk of its own.
