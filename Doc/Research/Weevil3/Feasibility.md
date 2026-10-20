@@ -71,7 +71,7 @@ While a filter runs, it also holds a temporary array of 4 bytes per record.
 | 2 | #990 Immutable core | Records without mutable state; session and view; the GUI subscribes once; Clear without rebuilding; no `Metadata` objects (−12% memory) | |
 | 3 | #988 Indexing service (#978) | Compact content, records on demand, record table in `.idx`: about 40% of today's memory, and reopening without parsing | #990 |
 | 4 | #986 RAM or SSD | Disk mode and an Open As dialog | #988 |
-| 5 | #991 Multiple views | Several views of one log. Implemented last, so the release does not depend on it. | #990, #988, #986 |
+| 5 | #991 Multiple views | Core support for several views of one log; the GUI follows in the next milestone. Implemented last, so the release does not depend on it. | #990, #988, #986 |
 
 #990 comes first because records can be created on demand only once they hold no mutable state.
 
@@ -110,6 +110,9 @@ Decided 2026-10-20:
 - **Disk mode:** filters read the file in parallel; analyzers, export and Find read it once, in order.
 - **Zipped logs:** out of scope for this release (#1005).
 - **Timestamps:** kept in an 8-byte column, in RAM and disk mode (#1008). Re-reading them, even with the fastest parse, added 5.2 s to opening a 20 GB log and up to 3.8 s to each filter.
+- **Restoring cleared records:** Reload (Ctrl+F5) already brings them back, so there is no separate Restore command.
+- **Multiple views (#991):** this milestone builds the Core only. The GUI, with the latest MaterialDesignInXamlToolkit, comes in the next milestone, which also decides how Reload works with several views.
+- **`IDisposable`:** whether `IEngine` needs it is #1030.
 
 ## Status
 
