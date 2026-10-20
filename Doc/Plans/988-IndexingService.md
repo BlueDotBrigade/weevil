@@ -1,4 +1,4 @@
-# 988: Keep a Log in a Third of the Memory
+# 988: Keep a Log in Much Less Memory
 
 > **Status:** Draft
 >
@@ -13,7 +13,7 @@ This plan replaces an earlier draft, `978-CompactRecordStorage.md`, which was ne
 From #978's acceptance criteria:
 
 - Opening a log produces the same records, line numbers and content as before.
-- An open log uses about a third of today's memory: about 1.1 GB per GB of log.
+- An open log uses about 40% of today's memory: about 1.2 GB per GB of log. #978 says about a third; keeping timestamps (step 2) adds 60 MB per GB.
 - Filtering is no slower.
 - Comments, pins, flags, bookmarks, regions, Clear and the sidecar work as before. Clear still frees memory.
 - Reopening a log whose saved index matches does not parse the whole log again.
@@ -34,20 +34,11 @@ One sub-issue of #978 and one pull request per step, in order. Each step is meas
      - Monikers (`@`) read the facts byte, annotations, flags or elapsed times, and never decode content.
    - Check that every filter type keeps exactly the same records. The storage benchmark measured regular expressions on UTF-8 only, so also time plain text and a UTF-16 log.
    - Estimate: −38% memory on the test log.
-2. **Proof of concept: timestamps.**
-   - The question: keep each record's timestamp in an 8-byte column, as today, or parse it from the content each time it is needed?
-   - It matters because insights read every record's timestamp on every open, as do the `@Elapsed` filter, the graph and the edge analyzers.
-   - Build a standalone console app with no reference to Weevil, like the storage benchmark: copy the classes it needs.
-   - Measure on a 1 GB log, both ways, and scale the results to 20 GB:
-     - insights at open;
-     - an `@Elapsed` filter;
-     - go to timestamp;
-     - elapsed times for the rows on screen.
-   - Decision rule (2026-10-20): keep the column, unless parsing on demand adds under 5 s to opening a 20 GB log and keeps an `@Elapsed` filter under 10 s.
-   - If the column goes, plugin parsers need a way to parse only a timestamp.
-   - This decides the record table in step 3. Record the result in `Research/Weevil3/`.
+2. **Proof of concept: timestamps (#1008). Done 2026-10-20: keep an 8-byte timestamp column.**
+   - The question was whether to keep each record's timestamp in a column, as today, or parse it from the content each time it is needed.
+   - Even the fastest re-read added 5.2 s to opening a 20 GB log and up to 3.8 s to each filter. The column costs 60 MB per GB of log. See the [results](../Research/Weevil3/TimestampPoC/README.md#results).
 3. **Records on demand.**
-   - Records live in a record table: line number, content offset, the facts byte, and a timestamp if step 2 says so.
+   - Records live in a record table: line number, content offset, the facts byte and the timestamp.
    - `IRecord` objects are created for shown rows, a selection or an export, and compare equal by line number.
    - A read-only record list replaces `ImmutableArray<IRecord>`, with `IndexOf` by line number. Filter results and the Clear record set become lists of record numbers.
    - This is the largest step. In October 2026 there were 156 references in 60 source files and 81 in 20 test files, and `ISelect` also exposes records as a dictionary and a list. When writing its sub-issue, split it: for example Core behind an adapter first, then the GUI, then the tests.
@@ -57,7 +48,7 @@ One sub-issue of #978 and one pull request per step, in order. Each step is meas
    - Released chunks are not read back until #986, so cleared records return after Reload, as today.
    - This needs only one view, so it does not depend on #991.
 5. **Reopen without parsing.**
-   - The `.idx` file gains the record table: which lines start records, the facts byte and timestamps if kept.
+   - The `.idx` file gains the record table: which lines start records, the facts byte and the timestamps.
    - The header already holds a format version, the encoding, the line count, the length indexed, and hashes of the first and last 4 KB. Those are how it detects a grown log and indexes only the new part.
    - The header also gains the plugin's name and version and its Open As settings, so a change of plugin rebuilds the record table.
    - This needs a new layout, not just a new version number. Today the whole index is written through one memory buffer, and files over 2 GB are rejected; a 64 GB log's record table takes several GB.

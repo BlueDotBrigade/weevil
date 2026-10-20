@@ -100,6 +100,46 @@ Copy the `publish` folder (about 75 MB) to the other computer, then run `publish
 
 ## Results
 
+### Decision: Keep the Timestamps (2026-10-20)
+
+Weevil keeps every record's timestamp in an 8-byte column, in RAM and disk mode. The decision rule gave the same answer: even the fastest re-read added 5.2 s to opening a 20 GB log, over the 5 s limit.
+
+Every record has a timestamp. Weevil can remember it, or look it up again each time it is needed:
+
+- **A. Remember it (chosen; today's approach).** Weevil already parses every timestamp to find where records start, so it keeps them. It is the fastest and the simplest. It costs memory: 1.2 GB for a 20 GB log (about 5% more in RAM mode) and 3.9 GB for a 64 GB log in disk mode.
+- **B. Look it up again, one record at a time.** It saves the memory, but every open of a 20 GB log takes 5.2 s longer, and every plugin needs a new "parse the timestamp only" method.
+- **C. Look it up again, on every processor at once.** It is as fast as A, but much harder to build, and it needs the same memory as A while the insights run.
+
+Timestamps are not only needed when opening. Deciding which records match a filter rarely needs them: only `@Elapsed` compares times. But after every filter, Weevil calculates the Elapsed column for every record the filter shows. With B, a filter on a 20 GB log spends up to 3.8 s on that, of its 10 s target.
+
+### Developer PC: 2026-10-20
+
+An i9-9900K (16 logical processors) with 32 GB of RAM and an NVMe drive, on Windows with .NET 10, using the default options: a 1,000 MB synthetic log averaging 132 bytes per record. The full report is in [Results-2026-10-20.md](Results-2026-10-20.md).
+
+Time spent on timestamps when a log opens, scaled from the 1 GB run. Values marked `~` are estimates: the proof of concept did not read from disk, so the disk-mode times for B and C assume the drive reads about 3.3 GB/s. On a SATA SSD, multiply them by about 6.
+
+| Log | Mode | Open | A: keep the column | B: re-read, 1 thread | C: re-read, 16 threads |
+|---|---|---|---|---|---|
+| 1 GB | RAM | First or re-open | <0.1 s | 0.3 s | <0.1 s |
+| 20 GB | RAM | First | 0.5 s | 5.7 s | 1.0 s |
+| 20 GB | RAM | Re-open | 0.9 s | 5.7 s | 1.0 s |
+| 20 GB | Disk | First | 0.5 s | ~6–12 s | ~6 s |
+| 20 GB | Disk | Re-open | 0.9 s | ~6–12 s | ~6 s |
+| 64 GB | Disk | First | 1.5 s | ~19–37 s | ~19 s |
+| 64 GB | Disk | Re-open | 2.7 s | ~19–37 s | ~19 s |
+
+Re-opening with A loads the saved timestamps from the `.idx` file, about 0.4 s per 20 GB; nothing else is parsed. 64 GB in RAM mode does not fit in 32 GB with any approach.
+
+| | A: keep the column | B: re-read, 1 thread | C: re-read, 16 threads |
+|---|---|---|---|
+| Memory for timestamps: 1, 20 and 64 GB logs | 60 MB, 1.2 GB, 3.9 GB | 0 | 0, except as much as A while the insights run |
+| Elapsed times after a 20 GB filter that shows every record, RAM | 0.1 s | 3.8 s | ~0.7 s |
+| The same, when the filter shows 10% of records | 0.0 s | 1.0 s | ~0.1 s |
+| The same, every record, disk | 0.1 s | ~6–10 s | ~6 s |
+| Source code | **Simple**: as today | **Medium**: a timestamp-only parse in every plugin, and every feature re-parses | **Complex**: B, plus parallel passes and restructured insights |
+
+C's RAM-mode times add the parallel read to A's single pass. Today's plugin contract re-reads far more slowly than B: 87 s at open and 71 s per filter, because it builds a whole record to get a timestamp.
+
 ### Smoke Test: 2026-10-20
 
 On a 4-vCPU Linux VM with .NET 10, using a 100 MB synthetic log, scaled to 20 GB:
@@ -109,5 +149,3 @@ On a 4-vCPU Linux VM with .NET 10, using a 100 MB synthetic log, scaled to 20 GB
 | Plugin parse | +115 s | 91 s |
 | Span parse | +51 s | 46 s |
 | Fast parse | +9.5 s | 5.4 s |
-
-The answer was to keep the column: even the fast parse added more than 5 s at open. The decision waits for the run on the developer PC.

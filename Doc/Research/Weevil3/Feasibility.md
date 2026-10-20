@@ -17,13 +17,13 @@ The data is split by who owns it:
 
 | Part | One per | Contains | Changes? |
 |---|---|---|---|
-| Log source | Log, shared by every view | Line index; a record table (first line, plus a facts byte holding severity, multi-line and UI thread); content, held in RAM as chunks of the file's raw bytes, or read from the file | Never. A grown log gets a new source that shares the old part. |
+| Log source | Log, shared by every view | Line index; a record table (first line, timestamp, and a facts byte holding severity, multi-line and UI thread); content, held in RAM as chunks of the file's raw bytes, or read from the file | Never. A grown log gets a new source that shares the old part. |
 | Session | Open log | An annotation byte per line (pinned, has comment); a comment table; bookmarks, regions, remarks, table of contents, filter history and context. It loads and saves the sidecar and raises change events. | Yes. It is the only mutable part, and one lock guards its writes. |
 | View | Window | Filter, results as record numbers, elapsed times for every result, flags (one bit per line), selection as ranges, active record and metric counts | Yes, by the UI thread. |
 
 Records become small immutable objects, created only when needed (visible rows, a selection, an export) and equal by line number.
 
-Whether timestamps are stored is not decided. Insights read every record's timestamp on every open, as do the `@Elapsed` filter, the graph and the edge analyzers. A proof of concept decides between parsing them when needed and an 8-byte column (#988 step 2).
+Timestamps are kept: an 8-byte column, filled when the log is indexed (decided 2026-10-20 after the [timestamp proof of concept](TimestampPoC/README.md#results), #1008). Re-reading them would slow every open and every filter: insights read every timestamp on every open, and every filter calculates the Elapsed column for the records it shows.
 
 ## Memory per Record
 
@@ -33,12 +33,12 @@ For the test log used in the #978 plan, which averages 131 bytes per record. Sho
 |---|---|---|---|
 | Content | 288 (UTF-16 string) | ~131 (raw bytes) | 0: read from the file |
 | `Record`, `Metadata` and array slot | 104 | 0 | 0 |
-| Record table: line number (4), content offset (8), facts (1) | | 13 | 5: offsets come from the line index |
+| Record table: line number (4), content offset (8), facts (1), timestamp (8) | | 21 | 13: offsets come from the line index |
 | Annotation byte | | 1 | 1 |
 | Filter results, with no filter | 8 | 4 | 4 |
-| **Bytes per record** | **400** | **~149** | **~10** |
-| 1 GB log | 3.1 GB | ~1.1 GB | ~76 MB |
-| 64 GB log | Does not fit | Does not fit in 32 GB | ~4.9 GB, or ~8.8 GB with a timestamp column |
+| **Bytes per record** | **400** | **~157** | **~18** |
+| 1 GB log | 3.1 GB | ~1.2 GB | ~137 MB |
+| 64 GB log | Does not fit | Does not fit in 32 GB | ~8.8 GB |
 
 While a filter runs, it also holds a temporary array of 4 bytes per record.
 
@@ -56,7 +56,7 @@ While a filter runs, it also holds a temporary array of 4 bytes per record.
 | Content is 73% of memory | Chunks of the file's raw bytes. A filter decodes each record once and passes the text to every expression (#978 step 1). | #988 |
 | Record arrays throughout the API | A read-only record list that creates records on demand, with `IndexOf` by line number (a binary search), so WPF selection never scans. Selection is stored as ranges, and Copy is limited to 100,000 records. | #990, #988 |
 | A WPF list of hundreds of millions of rows | The list is already virtualized with recycling. A proof of concept checks scrolling, Shift/Ctrl selection (#806), Ctrl+A and editing at 100 M rows. | #990, #988 |
-| Insights read every record's timestamp on every open | A proof of concept decides whether to keep an 8-byte timestamp column (#988 step 2) | #988 |
+| Insights read every record's timestamp on every open, and every filter calculates elapsed times | Keep an 8-byte timestamp column, chosen after a proof of concept (#1008) | #988 |
 | Logs larger than RAM | Disk mode: filters read the file in parallel ranges; analyzers, export and Find read it once, in order; shown rows are read through the line index. Never memory-map the log; Weevil's own `.idx` may be mapped. | #986 |
 | Disk speed | Warn when a disk-mode log is on a network drive. A proof of concept measures NVMe and SATA. | #986 |
 | A log opened from a zip file is deleted right after opening | Out of scope for this release (#1005). Disk mode and restoring cleared records need the file. | #986 |
@@ -69,7 +69,7 @@ While a filter runs, it also holds a temporary array of 4 bytes per record.
 |---|---|---|---|
 | 1 | #987 Faster loading and filtering | Done | |
 | 2 | #990 Immutable core | Records without mutable state; session and view; the GUI subscribes once; Clear without rebuilding; no `Metadata` objects (−12% memory) | |
-| 3 | #988 Indexing service (#978) | Compact content, records on demand, record table in `.idx`: about a third of today's memory, and reopening without parsing | #990 |
+| 3 | #988 Indexing service (#978) | Compact content, records on demand, record table in `.idx`: about 40% of today's memory, and reopening without parsing | #990 |
 | 4 | #986 RAM or SSD | Disk mode and an Open As dialog | #988 |
 | 5 | #991 Multiple views | Several views of one log. Implemented last, so the release does not depend on it. | #990, #988, #986 |
 
@@ -82,7 +82,7 @@ Only where a decision depends on a measurement or on behaviour nobody has checke
 | Proof of concept | Question | Decides | Plan |
 |---|---|---|---|
 | WPF virtual list | Do scrolling, selection ranges, Ctrl+A and editing work with a virtual list of row view-models at 100 M rows? | The GUI design | #990 |
-| Timestamps | Is parsing timestamps when needed fast enough for insights at open and an `@Elapsed` filter on a 20 GB log, or is an 8-byte column needed? | The record table | #988 |
+| Timestamps | Is parsing timestamps when needed fast enough for insights at open and an `@Elapsed` filter on a 20 GB log, or is an 8-byte column needed? | The record table. Done: keep the column ([results](TimestampPoC/README.md#results)) | #988 |
 | Disk filtering | Does a parallel streaming filter read 20 GB in under 10 s on NVMe, and how slow is SATA? | The disk-mode design | #986 |
 
 Not needed:
@@ -107,6 +107,7 @@ Decided 2026-10-20:
 - **Content and filtering:** content is held as the file's raw bytes, and a filter decodes each record once for all its expressions.
 - **Disk mode:** filters read the file in parallel; analyzers, export and Find read it once, in order.
 - **Zipped logs:** out of scope for this release (#1005).
+- **Timestamps:** kept in an 8-byte column, in RAM and disk mode (#1008). Re-reading them, even with the fastest parse, added 5.2 s to opening a 20 GB log and up to 3.8 s to each filter.
 
 ## Status
 
