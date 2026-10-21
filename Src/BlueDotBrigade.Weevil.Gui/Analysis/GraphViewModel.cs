@@ -986,7 +986,6 @@
 						Fill = new SolidColorPaint(color.WithAlpha(51)),
 						GeometryStroke = new SolidColorPaint(color),
 						GeometryFill = new SolidColorPaint(color),
-						TooltipLabelFormatter = (chartPoint) => $"{chartPoint.Context.Series.Name} at {chartPoint.Model.DateTime:hh:mm:ss} was {chartPoint.PrimaryValue.ToString(FloatFormat)}",
 					});
 				}
 			}
