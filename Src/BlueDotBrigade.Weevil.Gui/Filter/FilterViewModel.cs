@@ -399,6 +399,12 @@
 
 		public bool IsProcessingLongOperation { get; private set; }
 
+		/// <summary>
+		/// Completes when the latest analysis has finished.
+		/// </summary>
+		[NotObservable]
+		public Task AnalysisTask { get; private set; } = Task.CompletedTask;
+
 		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
 		[NotObservable]
@@ -448,8 +454,14 @@
 			}
 		}
 
-		private void OnFileDropped(object sender, DroppedFileEventArgs e)
+		internal void OnFileDropped(object sender, DroppedFileEventArgs e)
 		{
+			// An analysis, a filter or an open is in progress (#996).
+			if (!this.CanOpenLogFile)
+			{
+				return;
+			}
+
 			OpenCompressedAsync(e.FilePath);
 		}
 
@@ -905,6 +917,12 @@
 		public void DragOver(DragEventArgs e)
 		{
 			_dragAndDrop.DragOver(e);
+
+			// The drop will be ignored, because another operation is in progress (#996).
+			if (!this.CanOpenLogFile)
+			{
+				e.Effects = DragDropEffects.None;
+			}
 		}
 
 		public void Drop(DragEventArgs e)
@@ -1465,6 +1483,12 @@
 
 		private void OnNavigateToInsightRecord(NavigateToInsightRecordBulletin bulletin)
 		{
+			// An analysis, a filter or an open is in progress, and may be changing the same flags (#996).
+			if (!this.IsMenuEnabled)
+			{
+				return;
+			}
+
 			if (bulletin?.RelatedRecords != null && bulletin.RelatedRecords.Length > 0)
 			{
 				// Option 6: Flag insight records and add @Flagged to filter
@@ -1643,9 +1667,9 @@
 		/// Runs an analyzer on a background thread, so the window stays responsive (#996).
 		/// </summary>
 		/// <remarks>
-		/// The menus and the filter are disabled until the analyzer finishes. Its prompts are shown on the UI thread,
-		/// with the records visible. Once a prompt closes, the progress bar replaces the records,
+		/// Until the analyzer finishes, the menus and the filter are disabled and the progress bar replaces the records,
 		/// so the user cannot edit a comment or a pin that the analyzer may be writing to.
+		/// Its prompts are shown on the UI thread, with the records visible behind the modal prompt.
 		/// </remarks>
 		private Task AnalyzeInBackground(Func<IUserDialog, Results> analyze)
 		{
@@ -1659,6 +1683,7 @@
 
 			this.CanOpenLogFile = false;
 			this.IsFilterToolboxEnabled = false;
+			this.IsProcessingLongOperation = true;
 
 			var userDialog = new UiThreadUserDialog(
 				_dialogBox,
@@ -1666,7 +1691,7 @@
 				promptOpening: () => this.IsProcessingLongOperation = false,
 				promptClosed: () => this.IsProcessingLongOperation = true);
 
-			return Task.Run(() =>
+			this.AnalysisTask = Task.Run(() =>
 			{
 				try
 				{
@@ -1693,6 +1718,8 @@
 					});
 				}
 			});
+
+			return this.AnalysisTask;
 		}
 
 		private void ToggleIsPinned()
