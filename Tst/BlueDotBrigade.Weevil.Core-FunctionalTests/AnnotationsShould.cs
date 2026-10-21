@@ -77,6 +77,21 @@ namespace BlueDotBrigade.Weevil
 			Line(engine, 5).Metadata.Comment.Should().Be("Before the retry");
 		}
 
+		[TestMethod]
+		public void GivenFlagOnClearedLine_WhenAllFlagsRemovedAndReloaded_ThenTheLineIsNotFlagged()
+		{
+			// Regression: Issue #1013. Remove All Flags must also reach lines no longer in memory.
+			IEngine engine = Open();
+			Line(engine, 5).Metadata.IsFlagged = true;
+			engine.Selector.Select(13);
+			engine.Clear(ClearOperation.BeforeSelected);
+
+			engine.Analyzer.RemoveAllFlags();
+			engine.Reload();
+
+			Line(engine, 5).Metadata.IsFlagged.Should().BeFalse();
+		}
+
 		private IEngine Open()
 		{
 			var logFilePath = Path.Combine(_directory, "Application.log");

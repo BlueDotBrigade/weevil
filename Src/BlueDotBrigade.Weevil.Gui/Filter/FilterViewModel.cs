@@ -1470,11 +1470,8 @@
 			{
 				// Option 6: Flag insight records and add @Flagged to filter
 				
-				// Step 1: Clear all existing flags
-				foreach (var record in _engine.Records)
-				{
-					record.Metadata.IsFlagged = false;
-				}
+				// Step 1: Clear all existing flags, including those on cleared lines (#1013)
+				_engine.Analyzer.RemoveAllFlags();
 
 				// Step 2: Flag all insight-related records and count successfully flagged
 				var insightRecordCount = bulletin.RelatedRecords.Length;

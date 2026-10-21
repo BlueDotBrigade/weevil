@@ -17,7 +17,8 @@ namespace BlueDotBrigade.Weevil.Data
 		private const byte CommentBit = 0b10;
 
 		private readonly object _padlock = new object();
-		private readonly ConcurrentDictionary<int, string> _comments = new ConcurrentDictionary<int, string>();
+		// One lock and no capacity up front: writes are already serialized by _padlock, and most lines have no comment.
+		private readonly ConcurrentDictionary<int, string> _comments = new ConcurrentDictionary<int, string>(concurrencyLevel: 1, capacity: 0);
 		private byte[] _lines;
 
 		public AnnotationStore()
@@ -104,8 +105,12 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 		}
 
+		// Called while holding the lock, before SetBits.
 		private void SetCommentText(int lineNumber, string comment, ref byte bits)
 		{
+			// Checked before the text changes, so a rejected line is left without a comment.
+			ThrowIfNegative(lineNumber);
+
 			if (comment.Length == 0)
 			{
 				_comments.TryRemove(lineNumber, out _);
@@ -129,10 +134,7 @@ namespace BlueDotBrigade.Weevil.Data
 		// Called while holding the lock.
 		private void SetBits(int lineNumber, byte bits)
 		{
-			if (lineNumber < 0)
-			{
-				throw new ArgumentOutOfRangeException(nameof(lineNumber), lineNumber, "A line number cannot be negative.");
-			}
+			ThrowIfNegative(lineNumber);
 
 			if (lineNumber >= _lines.Length)
 			{
@@ -142,6 +144,14 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 
 			_lines[lineNumber] = bits;
+		}
+
+		private static void ThrowIfNegative(int lineNumber)
+		{
+			if (lineNumber < 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(lineNumber), lineNumber, "A line number cannot be negative.");
+			}
 		}
 	}
 }

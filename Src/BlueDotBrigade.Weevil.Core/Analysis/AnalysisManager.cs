@@ -36,10 +36,14 @@
 
 		public void RemoveAllFlags()
 		{
+			// The records in memory first, so they raise PropertyChanged.
 			Parallel.For(0, _coreEngine.Records.Length, i =>
 			{
 				_coreEngine.Records[i].Metadata.IsFlagged = false;
 			});
+
+			// Then the cleared lines, or their flags would come back on Reload (#1013).
+			_coreEngine.Annotations.Flags.Clear();
 		}
 
 		public void RemoveComments(bool clearAll)

@@ -138,10 +138,6 @@
 			}
 
 			/// <summary>
-			/// During the loading process the records whose line number are within range will be loaded.
-			/// </summary>
-			/// <param name="range">Represents the line numbers that will be loaded.</param>
-			/// <summary>
 			/// Keeps the comments, pins and flags of an engine this one replaces, as Reload does (#1013).
 			/// The sidecar's comments and pins are then not loaded again.
 			/// </summary>
@@ -152,6 +148,10 @@
 				return this;
 			}
 
+			/// <summary>
+			/// During the loading process the records whose line number are within range will be loaded.
+			/// </summary>
+			/// <param name="range">Represents the line numbers that will be loaded.</param>
 			public CoreEngineBuilder UsingRange(Range range)
 			{
 				_range = range;
@@ -253,6 +253,11 @@
 
 						lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
 
+						// Created before parsing, so they age with the records: attaching then stores no young reference
+						// in every record, which would slow the next garbage collections (#1013).
+						var isKeepingAnnotations = _annotations != null;
+						annotations = _annotations ?? new ViewAnnotations(new AnnotationStore(lineIndex.LineCount), new FlagSet(lineIndex.LineCount));
+
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 						Range lineNumberRange = GetLineNumberRange();
 
@@ -273,9 +278,6 @@
 						records = repository.Get(lineNumberRange, maxRecords);
 
 						loadingStopwatch.Stop();
-
-						var isKeepingAnnotations = _annotations != null;
-						annotations = _annotations ?? new ViewAnnotations(new AnnotationStore(lineIndex.LineCount), new FlagSet(lineIndex.LineCount));
 
 						Attach(records, annotations);
 
@@ -340,7 +342,7 @@
 			}
 
 			/// <summary>
-			/// Returns the line numbers to load, combining the start line with the requested range.
+			/// Attaches each record's metadata to the view's annotations, by line number.
 			/// </summary>
 			private static void Attach(ImmutableArray<IRecord> records, ViewAnnotations annotations)
 			{
@@ -350,6 +352,9 @@
 				}
 			}
 
+			/// <summary>
+			/// Returns the line numbers to load, combining the start line with the requested range.
+			/// </summary>
 			private Range GetLineNumberRange()
 			{
 				if (_startAtLineNumber <= FirstRecordLineNumber)

@@ -19,6 +19,30 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenWhiteSpaceComment_WhenSet_ThenTheRecordHasNoComment()
+		{
+			var metadata = new Metadata();
+			metadata.Attach(new ViewAnnotations(), lineNumber: 7);
+
+			metadata.Comment = "  ";
+
+			metadata.Comment.Should().Be("  ");
+			metadata.HasComment.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenLineCommentedThroughTheStore_WhenRecordRead_ThenItHasAComment()
+		{
+			var view = new ViewAnnotations();
+			var metadata = new Metadata();
+			metadata.Attach(view, lineNumber: 7);
+
+			view.Annotations.Load(7, "Saved comment", isPinned: false);
+
+			metadata.HasComment.Should().BeTrue();
+		}
+
+		[TestMethod]
 		public void GivenValuesSetBeforeAttaching_WhenAttached_ThenTheStoresHaveThem()
 		{
 			var metadata = new Metadata { Comment = "Retry starts here", IsFlagged = true };

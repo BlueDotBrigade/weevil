@@ -65,6 +65,17 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 		}
 
+		/// <summary>
+		/// Unflags every line, including lines whose records are no longer in memory.
+		/// </summary>
+		public void Clear()
+		{
+			lock (_padlock)
+			{
+				Array.Clear(_words, 0, _words.Length);
+			}
+		}
+
 		private static long Mask(int lineNumber)
 		{
 			return 1L << (lineNumber % BitsPerWord);

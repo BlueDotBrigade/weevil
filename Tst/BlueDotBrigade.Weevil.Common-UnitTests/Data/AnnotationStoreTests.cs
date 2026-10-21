@@ -1,5 +1,7 @@
 namespace BlueDotBrigade.Weevil.Data
 {
+	using System;
+
 	[TestClass]
 	public class AnnotationStoreTests
 	{
@@ -61,6 +63,17 @@ namespace BlueDotBrigade.Weevil.Data
 
 			store.GetComment(5).Should().Be("Saved comment");
 			store.IsPinned(5).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenNegativeLine_WhenCommented_ThenItIsRejectedAndNoCommentIsKept()
+		{
+			var store = new AnnotationStore(10);
+
+			Action setComment = () => store.SetComment(-1, "Retry starts here");
+
+			setComment.Should().Throw<ArgumentOutOfRangeException>();
+			store.GetComment(-1).Should().BeEmpty();
 		}
 
 		[TestMethod]

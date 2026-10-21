@@ -106,7 +106,10 @@
 		/// <summary>
 		/// When <see langword="True"/>, indicates the record has a user comment assigned to it.
 		/// </summary>
-		public bool HasComment => !string.IsNullOrWhiteSpace(this.Comment);
+		/// <remarks>
+		/// Read from the store's comment bit, which is set only for a comment that is not white space.
+		/// </remarks>
+		public bool HasComment => _view?.Annotations.HasComment(_lineNumber) ?? false;
 
 		public void UpdateUserComment(string comment)
 		{
