@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>$(WeevilTargetFramework)</TargetFramework>
 		<OutputType>Library</OutputType>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -20,9 +20,9 @@
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.4.0" />
 		<!-- NOTE: Upgrading FluentAssertions to v8 requires a license. #475 -->
 		<PackageReference Include="FluentAssertions" Version="[7.0.0]" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-		<PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
-		<PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+		<PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
+		<PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Cli\BlueDotBrigade.Weevil.Cli.csproj" />
