@@ -1,4 +1,4 @@
-// Exploratory storage benchmark for Weevil (.NET 9, x64).
+// Exploratory storage benchmark for Weevil (.NET 10, x64).
 // Self-contained: the Weevil parser classes it needs are copied into WeevilCopies/.
 // See README.md for usage, constraints and memory-measurement interpretation.
 

@@ -1,5 +1,5 @@
 name: Main branch
-description: Compiles and runs unit tests for Weevil's main branch using .NET 9 core environment.
+description: Compiles and runs unit tests for Weevil's main branch using .NET 10.
 
 on:
   push:
@@ -21,10 +21,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET 9
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
 
       - name: Restore
         run: dotnet restore Weevil-v2.sln
@@ -47,10 +47,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET 9
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
 
       - name: Test (Debug, x64)
         run: |
