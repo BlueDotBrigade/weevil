@@ -107,9 +107,9 @@
 			<Version>13.0.4</Version>
 		</PackageReference>
 		<PackageReference Include="NLog">
-			<Version>6.0.7</Version>
+			<Version>6.2.2</Version>
 		</PackageReference>
-		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.2.2" />
 		<PackageReference Include="Metalama.Patterns.Observability">
 			<Version>2026.1.18</Version>
 		</PackageReference>
