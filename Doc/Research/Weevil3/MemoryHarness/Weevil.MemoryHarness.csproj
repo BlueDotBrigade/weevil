@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!--
+    Which Weevil to measure:
+    - By default, this repository's Core project: the "after" figures.
+    - With -p:WeevilVersion=2.12.1, that release from NuGet: the "before" figures.
+  -->
+  <ItemGroup Condition="'$(WeevilVersion)' == ''">
+    <ProjectReference Include="..\..\..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(WeevilVersion)' != ''">
+    <PackageReference Include="BlueDotBrigade.Weevil.Core" Version="$(WeevilVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>WeevilSource</_Parameter1>
+      <_Parameter2 Condition="'$(WeevilVersion)' == ''">this repository's Core project</_Parameter2>
+      <_Parameter2 Condition="'$(WeevilVersion)' != ''">NuGet package $(WeevilVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
