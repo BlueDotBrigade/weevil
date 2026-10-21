@@ -1,0 +1,9 @@
+Info 1900-01-01 12:00:01.0000 248 Application started. Id=001
+Info 1900-01-01 12:00:02.0000 248 Connecting to the database. Id=002
+Error 1900-01-01 12:00:03.0000 248 Unable to connect to the database. Id=003
+Info 1900-01-01 12:00:04.0000 248 Retrying the connection. Id=004
+Error 1900-01-01 12:00:05.0000 248 Unable to connect to the database. Id=005
+Info 1900-01-01 12:00:06.0000 248 Connected to the database. Id=006
+Warning 1900-01-01 12:00:07.0000 248 The query took longer than expected. Id=007
+Error 1900-01-01 12:00:08.0000 248 The query was cancelled. Id=008
+Info 1900-01-01 12:00:09.0000 248 Application stopped. Id=009

@@ -35,9 +35,10 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
                 var filterCriteria = new FilterCriteria(this.Include, this.Exclude);
 
-                var filteredEntries = engine.Filter.Apply(this.FilterType, filterCriteria);
+                engine.Filter.Apply(this.FilterType, filterCriteria);
 
-                this.WriteObject(filteredEntries, enumerateCollection: true);
+                // `Apply` returns the filter itself, so the matching records are read from its results (#1002).
+                this.WriteObject(engine.Filter.Results, enumerateCollection: true);
             }
             catch (Exception ex)
             {
