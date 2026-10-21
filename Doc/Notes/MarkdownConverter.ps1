@@ -1,4 +1,9 @@
-﻿Set-StrictMode -Version Latest
+﻿param(
+    # The Markdig.dll to load. Notes.csproj passes the version it restores (#1044); when omitted, the NuGet cache is searched.
+    [string] $MarkdigAssemblyPath
+)
+
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 Write-Host "Converting Markdown to HTML..."
@@ -28,20 +33,32 @@ $MarkdownFiles =
 # Locate Markdig assembly from NuGet package cache
 # --------------------------------------------------------------------------------------
 
-$NuGetPackageRoot =
-    Join-Path $env:USERPROFILE ".nuget\packages\markdig"
-
-if (-not (Test-Path $NuGetPackageRoot))
+if ($MarkdigAssemblyPath)
 {
-    throw "Unable to locate NuGet package cache for Markdig."
-}
+    $MarkdigAssembly = Get-Item -Path $MarkdigAssemblyPath -ErrorAction SilentlyContinue
 
-$MarkdigAssembly = Get-ChildItem `
-    -Path $NuGetPackageRoot `
-    -Filter "Markdig.dll" `
-    -Recurse |
-    Where-Object { $_.FullName -match "netstandard2\.0" } |
-    Select-Object -First 1
+    if (-not $MarkdigAssembly)
+    {
+        throw "Unable to locate Markdig.dll: $MarkdigAssemblyPath"
+    }
+}
+else
+{
+    $NuGetPackageRoot =
+        Join-Path $env:USERPROFILE ".nuget\packages\markdig"
+
+    if (-not (Test-Path $NuGetPackageRoot))
+    {
+        throw "Unable to locate NuGet package cache for Markdig."
+    }
+
+    $MarkdigAssembly = Get-ChildItem `
+        -Path $NuGetPackageRoot `
+        -Filter "Markdig.dll" `
+        -Recurse |
+        Where-Object { $_.FullName -match "netstandard2\.0" } |
+        Select-Object -First 1
+}
 
 if (-not $MarkdigAssembly)
 {
