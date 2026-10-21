@@ -2,7 +2,7 @@
 
 ## Repository Identity
 
-Weevil is a .NET 9 log analysis platform.
+Weevil is a .NET 10 log analysis platform.
 
 - Primary UI is a WPF desktop application (`BlueDotBrigade.Weevil.Gui`).
 - The repository includes core libraries, a CLI tool, PowerShell modules, plugins, and a WiX installer.
@@ -53,7 +53,7 @@ These concepts should **not** be applied if they will make the source code unnec
 
 ## Build and Test Commands
 
-CI builds and tests using .NET 9, Debug configuration, x64 platform on Windows.
+CI builds and tests using .NET 10, Debug configuration, x64 platform on Windows.
 ```
 dotnet restore Weevil-v2.sln
 
