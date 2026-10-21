@@ -12,6 +12,8 @@
 
 		string ShowSaveFile(string targetDirectory, string targetFileName);
 
+		void ShowMessage(string message, string caption);
+
 		string ShowUserPrompt(string title, string userPrompt);
 
 		bool TryShowUserPrompt(string title, string userPrompt, string validationPattern, string validationError, out string userValue);

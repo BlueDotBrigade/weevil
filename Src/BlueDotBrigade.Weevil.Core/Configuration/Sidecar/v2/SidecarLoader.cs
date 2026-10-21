@@ -54,32 +54,16 @@
 			return canLoad;
 		}
 
-		public void Load(ImmutableArray<IRecord> records, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents, List<Region> regions, List<Bookmark> bookmarks)
+		public void Load(AnnotationStore annotations, Dictionary<string, string> fileParserConfiguration, out string sourceFileRemarks, List<string> inclusiveFilterHistory, List<string> exclusiveFilterHistory, List<Section> tableOfContents, List<Region> regions, List<Bookmark> bookmarks)
 		{
 			sourceFileRemarks = _sidecar?.CommonData?.UserRemarks;
 
-			if (_sidecar.CommonData.Records != null)
+			// Every entry is loaded, including lines not in memory: an open from a start line, or a cleared line (#1013).
+			if (annotations != null && _sidecar.CommonData.Records != null)
 			{
 				foreach (RecordInfo recordInfo in _sidecar.CommonData.Records)
 				{
-					if (records.TryRecordOfLineNumber(recordInfo.RelatesTo.LineNumber, out IRecord record))
-					{
-						if (!string.IsNullOrWhiteSpace(record.Metadata.Comment))
-						{
-							Log.Default.Write(
-								LogSeverityType.Warning,
-								$"Overwriting current user comment with the value found in the sidecar. LineNumber={recordInfo.RelatesTo.LineNumber}");
-						}
-
-						record.Metadata.Comment = recordInfo.Comment;
-						record.Metadata.IsPinned = recordInfo.IsPinned;
-					}
-					else
-					{
-						Log.Default.Write(
-							LogSeverityType.Warning,
-							$"Sidecar references a record that cannot be found in this log file. LineNumber={recordInfo.RelatesTo.LineNumber}");
-					}
+					annotations.Load(recordInfo.RelatesTo.LineNumber, recordInfo.Comment, recordInfo.IsPinned);
 				}
 			}
 

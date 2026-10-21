@@ -32,5 +32,15 @@
 		Metadata Metadata { get; }
 
 		SeverityType Severity { get; }
+
+		/// <summary>
+		/// The record spans several lines of the log. Set by the parser; never changes.
+		/// </summary>
+		bool IsMultiLine { get; }
+
+		/// <summary>
+		/// The record was written by the application's user interface thread. Set by the parser; never changes.
+		/// </summary>
+		bool WasGeneratedByUi { get; }
 	}
 }

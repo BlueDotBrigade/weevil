@@ -97,7 +97,7 @@
 			record.Content.Should().Be(content);
 			record.Severity.Should().Be(SeverityType.Warning);
 			record.CreatedAt.Should().Be(new DateTime(2026, 10, 16, 10, 0, 0, 123).AddTicks(4500));
-			record.Metadata.WasGeneratedByUi.Should().BeTrue();
+			record.WasGeneratedByUi.Should().BeTrue();
 		}
 
 		// Issue #959: a number too large for the header field must not stop loading.

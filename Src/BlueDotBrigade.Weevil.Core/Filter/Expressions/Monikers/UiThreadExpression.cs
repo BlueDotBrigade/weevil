@@ -25,7 +25,7 @@
 
 		public bool IsMatch(IRecord record)
 		{
-			return record.Metadata.WasGeneratedByUi == _isUiRecord;
+			return record.WasGeneratedByUi == _isUiRecord;
 		}
 	}
 }

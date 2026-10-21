@@ -177,6 +177,7 @@
 		/// </summary>
 		/// <remarks>
 		/// A single-line <see cref="Record"/> is kept as the parser created it; it is immutable, so no copy is needed.
+		/// A multi-line record is created again, because whether it is multi-line is fixed when a record is created (#1012).
 		/// </remarks>
 		private void CompleteCurrentRecord(StringBuilder multilineContent)
 		{
@@ -187,10 +188,10 @@
 					 _currentRecord.CreatedAt,
 					 _currentRecord.Severity,
 					 multilineContent?.ToString() ?? _currentRecord.Content,
-					 _currentRecord.Metadata);
+					 _currentRecord.Metadata,
+					 isMultiLine: multilineContent != null,
+					 _currentRecord.WasGeneratedByUi);
 			}
-
-			_currentRecord.Metadata.IsMultiLine = multilineContent != null;
 		}
 	}
 }

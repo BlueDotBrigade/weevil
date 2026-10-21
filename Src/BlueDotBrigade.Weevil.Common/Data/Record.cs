@@ -24,6 +24,13 @@
 		/// </summary>
 		public static readonly DateTime CreationTimeUnknown = DateTime.MaxValue;
 
+		// The facts the parser found, in one byte: the severity in the low bits, then one bit per flag.
+		private const byte SeverityMask = 0b0000_0111;
+		private const byte MultiLineFlag = 0b0000_1000;
+		private const byte UserInterfaceThreadFlag = 0b0001_0000;
+
+		private readonly byte _facts;
+
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content)
 		: this(lineNumber, createdAt, severity, content, new Metadata())
 		{
@@ -32,19 +39,40 @@
 
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content,
 			 Metadata metadata)
+		: this(lineNumber, createdAt, severity, content, metadata, isMultiLine: false, wasGeneratedByUi: false)
 		{
+			// nothing to do
+		}
+
+		/// <param name="isMultiLine">The record spans several lines of the log.</param>
+		/// <param name="wasGeneratedByUi">The record was written by the application's user interface thread.</param>
+		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content,
+			 Metadata metadata, bool isMultiLine, bool wasGeneratedByUi)
+		{
+			if ((uint)severity > SeverityMask)
+			{
+				throw new ArgumentOutOfRangeException(nameof(severity), severity, "The severity is not a known value.");
+			}
+
 			this.LineNumber = lineNumber;
 			this.CreatedAt = createdAt;
-			this.Severity = severity;
 			this.Content = content ?? string.Empty;
 			this.Metadata = metadata;
+
+			_facts = (byte)((byte)severity
+				| (isMultiLine ? MultiLineFlag : 0)
+				| (wasGeneratedByUi ? UserInterfaceThreadFlag : 0));
 		}
 
 		public int LineNumber { get; }
 
 		public DateTime CreatedAt { get; }
 
-		public SeverityType Severity { get; }
+		public SeverityType Severity => (SeverityType)(_facts & SeverityMask);
+
+		public bool IsMultiLine => (_facts & MultiLineFlag) != 0;
+
+		public bool WasGeneratedByUi => (_facts & UserInterfaceThreadFlag) != 0;
 
 		public string Content { get; }
 
@@ -103,7 +131,7 @@
 
 		public override string ToString()
 		{
-			return $@"LineNumber={this.LineNumber}, Severity={this.Severity}, HasContent={this.HasContent}, CreatedAt={this.CreatedAt}, Metadata={{{this.Metadata.ToString()}}}";
+			return $@"LineNumber={this.LineNumber}, Severity={this.Severity}, HasContent={this.HasContent}, CreatedAt={this.CreatedAt}, IsMultiLine={this.IsMultiLine}, WasGeneratedByUi={this.WasGeneratedByUi}, Metadata={{{this.Metadata.ToString()}}}";
 		}
 	}
 }

@@ -111,6 +111,11 @@ internal class DialogBoxService : IDialogBoxService
 		dialog.Show();
 	}
 
+	public void ShowMessage(string message, string caption)
+	{
+		MessageBox.Show(message, caption);
+	}
+
 	public void ShowGraph(ImmutableArray<IRecord> records, string selectedPattern, string sourceFilePath)
 	{
 		var windowNumber = GraphWindowCounter.GetNext();

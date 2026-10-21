@@ -21,7 +21,14 @@
 		internal Engine(CoreEngine coreEngine)
 		{
 			_coreEngine = coreEngine;
+			SubscribeTo(_coreEngine);
 		}
+
+		/// <inheritdoc />
+		public event EventHandler<ResultsChangedEventArgs> FilterResultsChanged;
+
+		/// <inheritdoc />
+		public event EventHandler<HistoryChangedEventArgs> FilterHistoryChanged;
 
 		[SuppressMessage("Performance", "CA1810:Initialize reference type static fields inline", Justification = "Method required to build complex instance.")]
 		static Engine()
@@ -147,7 +154,7 @@
 				_coreEngine.Save();
 			}
 
-			_coreEngine = _coreEngine.FromInstance(clearOperation).Build();
+			Replace(_coreEngine.FromInstance(clearOperation).Build());
 		}
 
 		public void Reload()
@@ -156,8 +163,45 @@
 			FilterType filterType = _coreEngine.Filter.FilterType;
 			IFilterCriteria filterCriteria = _coreEngine.Filter.Criteria;
 
-			_coreEngine = CoreEngine.FromPath(sourcePath).Build();
+			// The comments, pins and flags carry across Reload, as they do across Clear (#1013).
+			Replace(CoreEngine
+				.FromPath(sourcePath)
+				.UsingAnnotations(_coreEngine.Annotations)
+				.Build());
 			_coreEngine.Filter.Apply(filterType, filterCriteria);
+		}
+
+		/// <summary>
+		/// Moves the subscriptions to the new engine's filter, so callers subscribe to this engine only once (#1011).
+		/// </summary>
+		private void Replace(CoreEngine coreEngine)
+		{
+			UnsubscribeFrom(_coreEngine);
+			_coreEngine = coreEngine;
+			SubscribeTo(_coreEngine);
+		}
+
+		private void SubscribeTo(CoreEngine coreEngine)
+		{
+			coreEngine.Filter.ResultsChanged += OnFilterResultsChanged;
+			coreEngine.Filter.HistoryChanged += OnFilterHistoryChanged;
+		}
+
+		private void UnsubscribeFrom(CoreEngine coreEngine)
+		{
+			coreEngine.Filter.ResultsChanged -= OnFilterResultsChanged;
+			coreEngine.Filter.HistoryChanged -= OnFilterHistoryChanged;
+		}
+
+		private void OnFilterResultsChanged(object sender, ResultsChangedEventArgs e)
+		{
+			FilterResultsChanged?.Invoke(sender, e);
+		}
+
+		private void OnFilterHistoryChanged(object sender, HistoryChangedEventArgs e)
+		{
+			// The sender stays the history list, which callers use to tell the include history from the exclude history.
+			FilterHistoryChanged?.Invoke(sender, e);
 		}
 
 		public void GenerateReport(ReportType report, string destinationFolder)

@@ -604,12 +604,18 @@
 
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
 
-						_engine = Engine
+						IEngine openedEngine = Engine
 							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
 							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
 							.Open();
+
+						// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
+						// Moved only once the open succeeds, so a failed open leaves the open log subscribed.
+						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
+						_engine = openedEngine;
+						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
 
 						this.FileOpened?.Invoke(this, EventArgs.Empty);
 
@@ -651,9 +657,6 @@
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
 						RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
 
-						_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-						_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
-
 						RefreshFilterResults();
 
 						var analyzers = _engine
@@ -688,13 +691,13 @@
 					{
 						var message = "Unknown File Format";
 						Log.Default.Write(LogSeverityType.Error, e, message);
-						MessageBox.Show(e.Message, message);
+						_dialogBox.ShowMessage(e.Message, message);
 					}
 					catch (Exception e)
 					{
 						var message = "Unable to open the log file.";
 						Log.Default.Write(LogSeverityType.Error, e, message);
-						MessageBox.Show(e.Message, message);
+						_dialogBox.ShowMessage(e.Message, message);
 					}
 					finally
 					{
@@ -833,6 +836,10 @@
 					_engine.Save();
 					_engine.Reload();
 
+					// Reload replaces the engine's history, which can differ from the one shown (#1011).
+					RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
+					RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
+
 					_bulletinMediator.Post(new SourceFileOpenedBulletin
 					{
 						SourceFilePath = _engine.SourceFilePath,
@@ -840,9 +847,6 @@
 						Context = _engine.Context,
 						TotalRecordCount = _engine.Count
 					});
-
-					_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-					_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 
 					var newRecordSelection = _engine.Filter.Results
 						.Where(a => oldRecordSelection.Any(b => b.LineNumber == a.LineNumber)).ToList();
@@ -1079,10 +1083,6 @@
 
 			RefreshFilterResults();
 			RaiseResultsChanged();
-
-			// HACK: As a developer using the API, how would I know to re-register for existing events. It's not intuitive.
-			_engine.Filter.HistoryChanged -= OnFilterHistoryChanged;
-			_engine.Filter.HistoryChanged += OnFilterHistoryChanged;
 		}
 
 		public void Filter()
@@ -1493,11 +1493,8 @@
 			{
 				// Option 6: Flag insight records and add @Flagged to filter
 				
-				// Step 1: Clear all existing flags
-				foreach (var record in _engine.Records)
-				{
-					record.Metadata.IsFlagged = false;
-				}
+				// Step 1: Clear all existing flags, including those on cleared lines (#1013)
+				_engine.Analyzer.RemoveAllFlags();
 
 				// Step 2: Flag all insight-related records and count successfully flagged
 				var insightRecordCount = bulletin.RelatedRecords.Length;
