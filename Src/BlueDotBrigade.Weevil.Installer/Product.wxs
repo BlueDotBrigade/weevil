@@ -16,10 +16,10 @@
 
 		<!-- Check installed .NET Core Runtime on the target computer. -->
 		<netfx:DotNetCompatibilityCheck Id="netCoreStatus"
-										Property="NETCORESTATUS" RollForward="latestMajor"
-										RuntimeType="desktop" Version="10.0.0" Platform="x64" />
+										Property="NETCORESTATUS" RollForward="minor"
+										RuntimeType="desktop" Version="$(var.DotNetVersion).0" Platform="x64" />
 		<Launch Condition="Installed OR NETCORESTATUS=&quot;0&quot;"
-				Message="[ProductName] requires the Microsoft .NET 10.0 Desktop Runtime (or later) to be installed.  [\[]Desktop, x64[\]]" />
+				Message="[ProductName] requires the Microsoft .NET $(var.DotNetVersion) Desktop Runtime to be installed.  [\[]Desktop, x64[\]]" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of Weevil is already installed." />
 		<MediaTemplate EmbedCab="yes" />

@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <!-- The .NET version of every project, and of the installer's paths. Windows projects append `-windows`. -->
+    <!-- The .NET version of every project, and of the installer's paths and runtime check. Windows projects append `-windows`. -->
     <WeevilTargetFramework>net10.0</WeevilTargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">

@@ -6,6 +6,8 @@
   - 16GB of RAM is strongly recommended.
 - [.NET 10 Desktop Runtime, x64](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 	- This dependency must be installed before starting *Weevil*.
+- [PowerShell 7.6 or later](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows)
+	- Only needed for the Weevil PowerShell cmdlets and the `Select-Records.ps1` and `Select-HttpErrors.ps1` scripts. Windows PowerShell 5.1, and PowerShell 7.5 or earlier, cannot load Weevil's .NET 10 assemblies.
 
 ## Installation
 
