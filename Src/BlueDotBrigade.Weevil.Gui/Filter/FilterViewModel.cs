@@ -113,9 +113,16 @@
 		private ImmutableArray<IInsight> _insights;
 
 		public FilterViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator)
+			: this(uiDispatcher, bulletinMediator, new DialogBoxService())
+		{
+			// nothing to do
+		}
+
+		/// <remarks>Tests supply the dialog box, so that a failed open does not wait for a user to close a message box.</remarks>
+		internal FilterViewModel(IUiDispatcher uiDispatcher, IBulletinMediator bulletinMediator, IDialogBoxService dialogBox)
 		{
 			_uiDispatcher = uiDispatcher;
-			_dialogBox = new DialogBoxService();
+			_dialogBox = dialogBox;
 
 			_bulletinMediator = bulletinMediator;
 
@@ -584,16 +591,20 @@
 							_engine.Save(true);
 						}
 
-						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
-
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
 
-						_engine = Engine
+						IEngine openedEngine = Engine
 							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
 							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
 							.Open();
+
+						// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
+						// Moved only once the open succeeds, so a failed open leaves the open log subscribed.
+						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
+						_engine = openedEngine;
+						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
 
 						this.FileOpened?.Invoke(this, EventArgs.Empty);
 
@@ -635,9 +646,6 @@
 						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
 						RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
 
-						// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
-						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
-
 						RefreshFilterResults();
 
 						var analyzers = _engine
@@ -672,13 +680,13 @@
 					{
 						var message = "Unknown File Format";
 						Log.Default.Write(LogSeverityType.Error, e, message);
-						MessageBox.Show(e.Message, message);
+						_dialogBox.ShowMessage(e.Message, message);
 					}
 					catch (Exception e)
 					{
 						var message = "Unable to open the log file.";
 						Log.Default.Write(LogSeverityType.Error, e, message);
-						MessageBox.Show(e.Message, message);
+						_dialogBox.ShowMessage(e.Message, message);
 					}
 					finally
 					{
@@ -816,6 +824,10 @@
 
 					_engine.Save();
 					_engine.Reload();
+
+					// Reload replaces the engine's history, which can differ from the one shown (#1011).
+					RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
+					RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
 
 					_bulletinMediator.Post(new SourceFileOpenedBulletin
 					{
