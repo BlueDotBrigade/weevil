@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(WeevilTargetFramework)</TargetFramework>
 	<Platforms>x64</Platforms>
 	<PackageId>BlueDotBrigade.Weevil.TestingTools</PackageId>
     <RootNamespace>BlueDotBrigade.Weevil.TestTools</RootNamespace>
@@ -14,8 +14,8 @@
 	<Company>Blue Dot Brigade</Company>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />

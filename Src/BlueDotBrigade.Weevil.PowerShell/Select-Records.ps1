@@ -1,4 +1,4 @@
-
+#Requires -Version 7.6
 
 param (
     [string]$logFilePath,   # Path to the log file

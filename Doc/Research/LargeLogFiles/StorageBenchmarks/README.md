@@ -10,7 +10,7 @@ The lightweight indexer recognizes five-column Weevil TSV headers and supports r
 
 ## Setup
 
-The project is self-contained: it does not reference any Weevil project and is not part of `Weevil-v2.sln`. It requires the .NET 9 SDK, an x64 environment and the `BenchmarkDotNet` NuGet package (restored automatically by `dotnet restore`). Do **not** add the harness to the Weevil shipping application.
+The project is self-contained: it does not reference any Weevil project and is not part of `Weevil-v2.sln`. It requires the .NET 10 SDK, an x64 environment and the `BenchmarkDotNet` NuGet package (restored automatically by `dotnet restore`). Do **not** add the harness to the Weevil shipping application.
 
 ```powershell
 cd Doc/Research/LargeLogFiles/StorageBenchmarks
