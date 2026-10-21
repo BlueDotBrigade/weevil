@@ -1,6 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
-	using System.ComponentModel;
+	using System;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 
@@ -25,7 +25,7 @@
 			this.DataContext = _viewModel;
 
 			base.Loaded += OnMainWindowLoaded;
-			base.Closing += OnMainWindowClosing;
+			base.Closed += OnMainWindowClosed;
 		}
 
 		private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
@@ -36,8 +36,10 @@
 			_viewModel.Start();
 		}
 
-		private void OnMainWindowClosing(object sender, CancelEventArgs e)
+		private void OnMainWindowClosed(object sender, EventArgs e)
 		{
+			// Stop once the window has closed, because a close requested during an analysis
+			// is cancelled and repeated when the analysis finishes (#996).
 			_viewModel.Stop();
 		}
 	}
