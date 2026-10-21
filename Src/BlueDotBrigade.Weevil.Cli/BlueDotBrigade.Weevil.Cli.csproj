@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>$(WeevilTargetFramework)</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<Platforms>x64</Platforms>
 		<AssemblyName>WeevilCli</AssemblyName>
@@ -52,13 +52,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Cocona" Version="2.2.0" />
-		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="NLog" Version="6.0.7" />
-		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.7" />
-		<PackageReference Include="System.Collections.Immutable">
-			<Version>10.0.2</Version>
-		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.2" />
+		<PackageReference Include="NLog" Version="6.2.2" />
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.2.2" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.13" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
 	</ItemGroup>
 	<ItemGroup>
