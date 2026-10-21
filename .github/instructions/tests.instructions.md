@@ -25,6 +25,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 | `BlueDotBrigade.Weevil.Core-FunctionalTests` | Functional tests with real I/O and persistence |
 | `BlueDotBrigade.Weevil.Gui-FeatureTests` | Feature tests for genuine GUI-specific user journeys |
 | `BlueDotBrigade.Weevil.Cli-FunctionalTests` | Functional tests for the command-line interface's commands, with real I/O |
+| `BlueDotBrigade.Weevil.PowerShell-FunctionalTests` | Functional tests for the PowerShell cmdlets, with real I/O |
 
 ## Test Placement
 
