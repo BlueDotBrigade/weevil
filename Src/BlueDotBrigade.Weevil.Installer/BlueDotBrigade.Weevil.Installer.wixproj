@@ -28,6 +28,10 @@
     <DefineConstants>Release;WeevilVersion=$(ProductVersion);InstallerBinSourceDir=$(InstallerBinLayoutDir);InstallerDocSourceDir=$(InstallerDocLayoutDir);InstallerLicenseSourceDir=$(InstallerLicenseLayoutDir);InstallerLicenseRtfPath=$(RepoRootDir)Doc\Notes\Release\Licenses\License-Installation.rtf</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- The .NET runtime the installer requires, such as 10.0 for net10.0. -->
+    <DefineConstants>$(DefineConstants);DotNetVersion=$(WeevilTargetFramework.Substring(3))</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="ReadMe.md" />
     <None Include="TelemetryCredentials.wxs_" />
