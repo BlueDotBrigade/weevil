@@ -111,7 +111,7 @@
 		</PackageReference>
 		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.2.2" />
 		<PackageReference Include="Metalama.Patterns.Observability">
-			<Version>2026.1.18</Version>
+			<Version>2026.1.30</Version>
 		</PackageReference>
 		<PackageReference Include="Prism.Core" Version="9.0.537" />
 		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.13" />
