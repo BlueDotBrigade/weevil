@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Data.Common;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Controls;
 	using System.Windows.Threading;
@@ -18,6 +19,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	public partial class FilterView : UserControl
 	{
 		private bool _isLogFileOpening;
+		private bool _isCloseDeferred;
 
 		public FilterView()
 		{
@@ -64,7 +66,29 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			if (this.ViewModel != null)
 			{
-				if (this.ViewModel.ExitCommand.CanExecute(null))
+				Task analysis = this.ViewModel.AnalysisTask;
+
+				if (!analysis.IsCompleted)
+				{
+					// Closing now would skip saving the sidecar, so close once the analysis has finished (#996).
+					// Do not wait for it here: the analysis needs the UI thread for its prompts and to finish.
+					e.Cancel = true;
+
+					if (!_isCloseDeferred)
+					{
+						_isCloseDeferred = true;
+
+						var window = (Window)sender;
+						analysis.ContinueWith(
+							_ =>
+							{
+								_isCloseDeferred = false;
+								window.Close();
+							},
+							TaskScheduler.FromCurrentSynchronizationContext());
+					}
+				}
+				else if (this.ViewModel.ExitCommand.CanExecute(null))
 				{
 					this.ViewModel.ExitCommand.Execute(null);
 				}
