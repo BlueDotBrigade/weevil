@@ -140,9 +140,40 @@ dotnet run -c Release
 
 ## Results
 
-### Status (2026-10-22)
+### Decision (Proposed, 2026-10-22)
 
-Built and self-tested on Linux. **Not yet run on Windows**: the decision waits for `RunAll.cmd` and the by-hand checks on a Windows PC.
+Build #1015 and #988 on this design: a row view-model only for the rows WPF asks for, and the selection as ranges, with the window handling clicks and keys itself. At 100 million rows it met 20 of its 23 targets and missed the other 3 by less than 50 ms.
+
+WPF's own selection, as Weevil 2.12 uses it, does not scale. Ctrl+A on 1 million rows took 1.3 s, added 311 MB and created every row: at 100 million rows that is about 2 minutes and 31 GB. Carrying 500,000 selected rows across a filter froze the window, because Weevil 2.12 selects each one again with its own `SelectedItems.Add`.
+
+Waiting for approval, and for the by-hand checks.
+
+### Developer PC: 2026-10-22
+
+An i9-9900K (16 logical processors) with 32 GB of RAM, on Windows with .NET 10.0.13, using `RunAll.cmd`. The full reports are in [Results-2026-10-22-Ranges.md](Results-2026-10-22-Ranges.md) and [Results-2026-10-22-WpfSelection.md](Results-2026-10-22-WpfSelection.md); the second stopped where the window froze.
+
+| Action | Ranges, 100 M rows | WPF's own selection, 1 M rows |
+|---|---|---|
+| Open: build the results and show the first rows | 413 ms | 346 ms |
+| Drag the scroll bar, to 5 positions | 36 to 65 ms each | 31 to 53 ms each |
+| Page Down, 100 times | 67 ms on average, 134 ms at most | Not run |
+| Scroll a random row into view, 1,000 times | 44 ms on average, 116 ms at most | Not run |
+| Ctrl+A | 21 ms, no extra memory | 1,287 ms, 311 MB more, every row created |
+| Shift+End from row 10 | 97 ms | Not run: needs real keys |
+| Keep the selection after a filter | 2 to 274 ms, on a background thread | Froze with 500,000 rows to select again |
+| `IndexOf` | 287 ns per call | |
+| #806: Ctrl+Shift+Plus three times | Lines 10, 20, 10, one row selected each time | Not run: needs real keys |
+| Type a comment, fast then slow | Nothing lost | |
+| Copy | 50,000 rows in 143 ms; every row refused | |
+| Row view-models alive after a garbage collection | 31; 35,352 created during the whole run | |
+
+What the run shows:
+
+- **WPF asks only for rows near the screen.** A jump of the scroll bar asked for 400 to 550 rows and created about 30 row view-models, wherever it landed in 100 million rows. WPF called `GetEnumerator` once but did not walk the whole list: only 35,352 row view-models were created during the whole run.
+- **Ranges make a large selection free.** Selecting every row is one range. The worst case, every 10th record selected and then the filter removed, made 10 million ranges in 274 ms, about 80 MB.
+- **The three misses** are two pauses of the window during filters at 100 million rows, 266 ms and 295 ms against 250 ms, and Ctrl+Plus to a pin 110 million lines away, 254 ms. The work on the UI thread in those filters was small: fewer than 2,000 row lookups, while filtering and keeping the selection ran on a background thread. The pauses are probably the garbage collector freeing and allocating the 400 MB results arrays; the report now shows each step's garbage collection pause, to confirm it in the next run. If so, #988 can reuse the results buffers.
+
+After this run, the automatic run with WPF's own selection measures selecting 1,000, 2,000, 4,000 rows and so on again, one `Add` each, and stops after the first count that takes 5 s, instead of freezing.
 
 ### Self-Test: 2026-10-22
 

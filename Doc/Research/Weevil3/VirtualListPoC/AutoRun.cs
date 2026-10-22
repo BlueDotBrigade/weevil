@@ -17,7 +17,8 @@ using Microsoft.Win32;
 /// </summary>
 /// <param name="Milliseconds">From the start of the action until the window has finished its layout.</param>
 /// <param name="Passed">Null when the step has no target.</param>
-internal sealed record Step(string Name, double Milliseconds, string Target, bool? Passed, LookupCounters Lookups, double ManagedMegabytes, string Result);
+/// <param name="GcPauseMilliseconds">How long the garbage collector paused every thread, the UI thread included; NaN when not measured.</param>
+internal sealed record Step(string Name, double Milliseconds, string Target, bool? Passed, LookupCounters Lookups, double ManagedMegabytes, string Result, double GcPauseMilliseconds = double.NaN);
 
 /// <summary>
 /// Runs every scenario of #1014 through the same methods the keys and the mouse call, then writes a Markdown report.
@@ -190,14 +191,49 @@ internal sealed class AutoRun
 			measuresMemory: true,
 			maximumMegabytes: SelectAllMegabytes);
 
-		await MeasureFilterAsync(FilterKind.EverySecondRecord, "Filter: every 2nd record, all rows selected");
-		await MeasureFilterAsync(FilterKind.AllRecords, "Filter: all records, every 2nd record selected");
-
 		await MeasureAsync("Copy", () => _viewModel.Copy(isInteractive: false), () => _viewModel.LastAction, string.Empty);
+
+		await MeasureReselectionAsync();
 
 		await CountLiveRowsAsync();
 
 		_notes.Add("Shift+End and Ctrl+Shift+Plus (#806) are not run automatically with WPF's own selection: WPF reads the real state of the Shift and Ctrl keys. Try them by hand.");
+	}
+
+	/// <summary>
+	/// After each filter, Weevil 2.12 selects the remembered records again with one <c>SelectedItems.Add</c> each
+	/// (<c>FilterView.OnResultsChanged</c>). With 500,000 rows to select again, that froze the window on 2026-10-22,
+	/// so this measures doubling counts instead, and stops after the first that takes 5 s or more.
+	/// </summary>
+	private async Task MeasureReselectionAsync()
+	{
+		for (var count = 1_000; count <= this.RowCount; count *= 2)
+		{
+			_window.RowList.UnselectAll();
+			await IdleAsync();
+			var rows = Enumerable.Range(0, count).Select(_viewModel.Rows.GetRow).ToList();
+
+			await MeasureAsync(
+				$"Select {count:N0} rows again after a filter, one Add each (Weevil 2.12)",
+				() =>
+				{
+					foreach (RowViewModel row in rows)
+					{
+						_window.RowList.SelectedItems.Add(row);
+					}
+				},
+				() => $"{_window.RowList.SelectedItems.Count:N0} selected",
+				ResponsiveTarget());
+
+			if (_steps[^1].Milliseconds >= 5_000)
+			{
+				_notes.Add($"Selecting rows again stopped at {count:N0}: it took {_steps[^1].Milliseconds / 1_000:N1} s. Weevil 2.12 does this after every filter, for every selected row.");
+				break;
+			}
+		}
+
+		_window.RowList.UnselectAll();
+		await IdleAsync();
 	}
 
 	private async Task RunFiltersAsync()
@@ -220,12 +256,14 @@ internal sealed class AutoRun
 		var before = ManagedMegabytes(collect: measuresMemory);
 		LookupCounters counters = _viewModel.Rows.Counters.Snapshot();
 		_viewModel.UiDelay.Reset();
+		TimeSpan gcPause = GC.GetTotalPauseDuration();
 		var stopwatch = Stopwatch.StartNew();
 
 		FilterTimings? timings = await _viewModel.ApplyFilterAsync(filter);
 		await IdleAsync();
 
 		var milliseconds = stopwatch.Elapsed.TotalMilliseconds;
+		var gcMilliseconds = (GC.GetTotalPauseDuration() - gcPause).TotalMilliseconds;
 		LookupCounters lookups = _viewModel.Rows.Counters.Snapshot().Subtract(counters);
 		var after = ManagedMegabytes(collect: measuresMemory);
 		var pause = _viewModel.UiDelay.LongestMilliseconds;
@@ -247,7 +285,8 @@ internal sealed class AutoRun
 			timings.KeepSelectionMilliseconds < KeepSelectionMilliseconds && pause < ResponsiveMilliseconds,
 			lookups,
 			after,
-			result));
+			result,
+			gcMilliseconds));
 	}
 
 	private async Task MeasureIndexOfAsync(Random random)
@@ -365,7 +404,8 @@ internal sealed class AutoRun
 		await IdleAsync();
 
 		var stored = _viewModel.Annotations.GetComment(row.LineNumber);
-		var typingKept = box.Text == typed && stored == typed && row.IsPinned;
+		var pinnedWhileTyping = row.IsPinned;
+		var typingKept = box.Text == typed && stored == typed && pinnedWhileTyping;
 
 		_viewModel.Annotations.SetComment(row.LineNumber, "Changed elsewhere", source: null);
 		await IdleAsync();
@@ -382,7 +422,7 @@ internal sealed class AutoRun
 			typingKept && changeShown,
 			new LookupCounters(),
 			ManagedMegabytes(collect: false),
-			$"box \"{box.Text}\" after the reset; typed \"{typed}\", stored \"{stored}\", pinned {row.IsPinned}; change from elsewhere shown: {changeShown}"));
+			$"typed \"{typed}\", stored \"{stored}\", pinned {pinnedWhileTyping}; change from elsewhere shown: {changeShown}"));
 	}
 
 	private async Task RunBulkChangeAsync()
@@ -438,7 +478,7 @@ internal sealed class AutoRun
 			ManagedMegabytes(collect: false),
 			$"{live:N0} alive; {total.RowsCreated:N0} created during the run"));
 
-		_notes.Add($"WPF enumerated the whole list {total.Enumerations:N0} time(s) and called CopyTo {total.CopyTo:N0} time(s) during the run. Either would create every row.");
+		_notes.Add($"WPF called GetEnumerator {total.Enumerations:N0} time(s) and walked {total.EnumeratedRows:N0} rows with it, and called CopyTo {total.CopyTo:N0} time(s), during the run. Walking the whole list would create every row.");
 		if (!_viewModel.UsesWpfSelection)
 		{
 			_notes.Add($"WPF selected a row on its own {_window.WpfSelectionsUndone:N0} time(s), and the range selection undid it.");
@@ -461,12 +501,14 @@ internal sealed class AutoRun
 		await IdleAsync();
 		var before = ManagedMegabytes(collect: measuresMemory);
 		LookupCounters counters = _viewModel.Rows.Counters.Snapshot();
+		TimeSpan gcPause = GC.GetTotalPauseDuration();
 		var stopwatch = Stopwatch.StartNew();
 
 		action();
 		await IdleAsync();
 
 		var milliseconds = stopwatch.Elapsed.TotalMilliseconds;
+		var gcMilliseconds = (GC.GetTotalPauseDuration() - gcPause).TotalMilliseconds;
 		LookupCounters lookups = _viewModel.Rows.Counters.Snapshot().Subtract(counters);
 		var after = ManagedMegabytes(collect: measuresMemory);
 		var result = describe() + (measuresMemory ? $"; {after - before:N1} MB more" : string.Empty);
@@ -485,13 +527,14 @@ internal sealed class AutoRun
 			target += $"; < {maximumMegabytes:N0} MB more";
 		}
 
-		AddStep(new Step(name, milliseconds, target, passed, lookups, after, result));
+		AddStep(new Step(name, milliseconds, target, passed, lookups, after, result, gcMilliseconds));
 	}
 
 	private async Task MeasureRepeatedAsync(string name, int times, Func<Task> action)
 	{
 		await IdleAsync();
 		LookupCounters counters = _viewModel.Rows.Counters.Snapshot();
+		TimeSpan gcPause = GC.GetTotalPauseDuration();
 		var longest = 0.0;
 		var total = Stopwatch.StartNew();
 		for (var i = 0; i < times; i++)
@@ -509,7 +552,8 @@ internal sealed class AutoRun
 			longest < ResponsiveMilliseconds,
 			lookups,
 			ManagedMegabytes(collect: false),
-			$"average {total.Elapsed.TotalMilliseconds / times:N1} ms, longest {longest:N1} ms"));
+			$"average {total.Elapsed.TotalMilliseconds / times:N1} ms, longest {longest:N1} ms",
+			(GC.GetTotalPauseDuration() - gcPause).TotalMilliseconds));
 	}
 
 	private string SelectionResult()
@@ -571,13 +615,14 @@ internal sealed class AutoRun
 			: $"**{failed} of {checkedSteps} steps with a target missed it.**");
 		report.AppendLine();
 
-		report.AppendLine("| Step | Time (ms) | Target | Met | WPF asked for rows | IndexOf | Rows created | Managed heap (MB) | Result |");
-		report.AppendLine("|---|---:|---|---|---:|---:|---:|---:|---|");
+		report.AppendLine("| Step | Time (ms) | Target | Met | GC pause (ms) | WPF asked for rows | IndexOf | Rows created | Managed heap (MB) | Result |");
+		report.AppendLine("|---|---:|---|---|---:|---:|---:|---:|---:|---|");
 		foreach (Step step in _steps)
 		{
 			var met = step.Passed switch { true => "yes", false => "**no**", null => string.Empty };
 			report.AppendLine(
-				$"| {step.Name} | {step.Milliseconds:N1} | {step.Target} | {met} | {step.Lookups.Indexer:N0} | {step.Lookups.IndexOf:N0} | " +
+				$"| {step.Name} | {step.Milliseconds:N1} | {step.Target} | {met} | {(double.IsNaN(step.GcPauseMilliseconds) ? string.Empty : step.GcPauseMilliseconds.ToString("N1", CultureInfo.InvariantCulture))} | " +
+				$"{step.Lookups.Indexer:N0} | {step.Lookups.IndexOf:N0} | " +
 				$"{step.Lookups.RowsCreated:N0} | {step.ManagedMegabytes:N0} | {step.Result.Replace("|", "\\|")} |");
 		}
 

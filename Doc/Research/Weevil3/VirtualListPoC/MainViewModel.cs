@@ -442,7 +442,7 @@ internal sealed class MainViewModel : INotifyPropertyChanged, IDisposable
 	{
 		LookupCounters counters = this.Rows.Counters;
 		counters.Indexer = counters.IndexOf = counters.Contains = counters.Count = 0;
-		counters.Enumerations = counters.CopyTo = counters.RowsCreated = 0;
+		counters.Enumerations = counters.EnumeratedRows = counters.CopyTo = counters.RowsCreated = 0;
 		this.UiDelay.Reset();
 		RefreshStatus();
 	}
@@ -472,7 +472,7 @@ internal sealed class MainViewModel : INotifyPropertyChanged, IDisposable
 			? $"Selected: {this.SelectedCount:N0}"
 			: $"Selected: {this.SelectedCount:N0} in {_selection.RangeCount:N0} range(s)";
 		this.LookupsText = $"WPF asked for: rows {counters.Indexer:N0}, IndexOf {counters.IndexOf:N0}, Contains {counters.Contains:N0}, " +
-			$"Count {counters.Count:N0}, enumerations {counters.Enumerations:N0}, CopyTo {counters.CopyTo:N0} | rows created {counters.RowsCreated:N0}";
+			$"Count {counters.Count:N0}, enumerations {counters.Enumerations:N0} ({counters.EnumeratedRows:N0} rows), CopyTo {counters.CopyTo:N0} | rows created {counters.RowsCreated:N0}";
 		using var process = Process.GetCurrentProcess();
 		this.MemoryText = $"Managed {GC.GetTotalMemory(false) / 1_048_576.0:N0} MB, working set {process.WorkingSet64 / 1_048_576.0:N0} MB | " +
 			$"longest UI pause {this.UiDelay.LongestMilliseconds:N0} ms";

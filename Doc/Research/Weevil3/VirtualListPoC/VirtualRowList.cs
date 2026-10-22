@@ -16,6 +16,7 @@ internal sealed class LookupCounters
 	public long Contains;
 	public long Count;
 	public long Enumerations;
+	public long EnumeratedRows;
 	public long CopyTo;
 	public long RowsCreated;
 
@@ -33,6 +34,7 @@ internal sealed class LookupCounters
 			Contains = this.Contains - earlier.Contains,
 			Count = this.Count - earlier.Count,
 			Enumerations = this.Enumerations - earlier.Enumerations,
+			EnumeratedRows = this.EnumeratedRows - earlier.EnumeratedRows,
 			CopyTo = this.CopyTo - earlier.CopyTo,
 			RowsCreated = this.RowsCreated - earlier.RowsCreated,
 		};
@@ -227,6 +229,7 @@ internal sealed class VirtualRowList : IList, INotifyCollectionChanged
 		this.Counters.Enumerations++;
 		for (var position = 0; position < _results.Length; position++)
 		{
+			this.Counters.EnumeratedRows++;
 			yield return GetRow(position);
 		}
 	}
