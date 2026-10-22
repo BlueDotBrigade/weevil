@@ -53,13 +53,14 @@
 			FilterType filterType,
 			IFilterCriteria filterCriteria,
 			IRegionManager regionManager,
-			IBookmarkManager bookmarkManager)
+			IBookmarkManager bookmarkManager,
+			ElapsedTimes previousElapsedTimes = null)
 		{
 			_filterType = filterType;
 			_filterCriteria = filterCriteria;
 			_bookmarkManager = bookmarkManager;
 
-            _expressionBuilder = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager, bookmarkManager);
+            _expressionBuilder = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager, bookmarkManager, previousElapsedTimes ?? ElapsedTimes.None);
 
 			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, true);
 			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, false);

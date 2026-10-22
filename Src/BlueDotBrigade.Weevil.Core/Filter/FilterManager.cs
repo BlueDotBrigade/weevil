@@ -23,6 +23,7 @@
 		private readonly IFilterAliasExpander _filterAliasExpander;
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IMetricCollector> _metricCollectors;
+		private readonly ViewAnnotations _viewAnnotations;
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
@@ -52,6 +53,7 @@
 			ImmutableArray<IMetricCollector> metricCollectors,
 			IRegionManager regionManager,
 			IBookmarkManager bookmarkManager,
+			ViewAnnotations viewAnnotations,
 			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_coreExtension = coreExtension;
@@ -64,6 +66,7 @@
 			_bookmarkManager = bookmarkManager;
 
 			_metricCollectors = metricCollectors;
+			_viewAnnotations = viewAnnotations ?? throw new ArgumentNullException(nameof(viewAnnotations));
 
 			_latestFilterStrategy = FilterStrategy.KeepAllRecords;
 			_latestFilterResults = allRecords;
@@ -113,8 +116,6 @@
 				collector.Reset();
 			}
 
-			TimeSpan ElapsedTimeUnknown = TimeSpan.MinValue;
-
 			var resultsCache = new IRecord[_allRecords.Length];
 			var resultsCount = 0;
 
@@ -148,7 +149,6 @@
 						  }
 						  else
 						  {
-							  record.Metadata.ElapsedTime = ElapsedTimeUnknown;
 							  // this record does not meet the search criteria
 							  // ... it will not be included in the results
 							  resultsCache[index] = null;
@@ -189,6 +189,27 @@
 				$"Filter results have been compressed. Before={resultsCache.Length}, After={compressedResults.Length}");
 
 			return compressedResults;
+		}
+
+		/// <summary>
+		/// Replaces the view's elapsed times with those of the new results, then tells each record whose elapsed time
+		/// changed, so the grid shows the new value (#1016).
+		/// </summary>
+		/// <remarks>
+		/// An aborted filter never gets here, so the results still shown keep their elapsed times.
+		/// </remarks>
+		private void PublishElapsedTimes(ElapsedTimes elapsedTimes)
+		{
+			ElapsedTimes previous = _viewAnnotations.ElapsedTimes;
+			_viewAnnotations.ElapsedTimes = elapsedTimes;
+
+			Parallel.ForEach(_allRecords, record =>
+			{
+				if (previous.Get(record.LineNumber) != elapsedTimes.Get(record.LineNumber))
+				{
+					record.Metadata?.RaiseElapsedTimeChanged();
+				}
+			});
 		}
 
 		private void UpdateFilterHistory(IList<string> history, string newValue)
@@ -309,7 +330,7 @@
 					});
 
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _viewAnnotations.ElapsedTimes);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();
@@ -321,7 +342,7 @@
 				UpdateFilterHistory(_includeHistory, criteria.Include);
 				UpdateFilterHistory(_excludeHistory, criteria.Exclude);
 
-				new ElapsedTimeAnalyzer(_latestFilterResults).Analyze();
+				PublishElapsedTimes(ElapsedTimes.Calculate(_latestFilterResults));
 
 				exectionTimeStopwatch.Stop();
 				_filterExecutionTime = exectionTimeStopwatch.Elapsed;

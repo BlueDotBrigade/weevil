@@ -33,6 +33,8 @@ Callers open and use an engine without ever seeing its state. `LogSession` holds
 
 One sub-issue of #990 and one pull request per step, in order. Each step keeps every test passing. The step issues were created on 2026-10-20, so a change to the plan can be traced through them.
 
+Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row design, while step 5 waits for the results of the proof of concept in step 4. Until step 5, `Metadata.ElapsedTime` reads the view's elapsed times, as step 3 made `Metadata` read comments, pins and flags from their stores, so the grid binds as before.
+
 1. **Subscribe once (#1011).**
    - `Engine` forwards the filter's `HistoryChanged` and `ResultsChanged` through new events on `IEngine`, which is public, in Common.
    - On Clear and Reload, `Engine` moves its subscription from the old filter to the new one, before Reload re-applies the filter.

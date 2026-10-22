@@ -11,9 +11,7 @@
 		/// </summary>
 		public static readonly TimeSpan ElapsedTimeUnknown = TimeSpan.MinValue;
 
-		private TimeSpan _elapsedTime;
-
-		// The comment, pin and flag live in stores kept by line number (#1013).
+		// The comment, pin and flag live in stores kept by line number (#1013), and the elapsed time in the view (#1016).
 		// Until Core attaches this record to a view of its log, they are kept in stores of its own.
 		private ViewAnnotations _view;
 		private int _lineNumber;
@@ -23,7 +21,7 @@
 
 		public Metadata()
 		{
-			_elapsedTime = ElapsedTimeUnknown;
+			// nothing to do
 		}
 
 		/// <summary>
@@ -119,17 +117,18 @@
 		/// <summary>
 		/// Represents the amount of time that has elapsed between the current the preceeding record.
 		/// </summary>
-		public TimeSpan ElapsedTime
+		/// <remarks>
+		/// Read from the view, which calculates it after each filter for the records it shows (#1016).
+		/// A record that is not attached to a view has none.
+		/// </remarks>
+		public TimeSpan ElapsedTime => _view?.ElapsedTimes.Get(_lineNumber) ?? ElapsedTimeUnknown;
+
+		/// <summary>
+		/// Tells bindings that <see cref="ElapsedTime"/> has changed. Called by the view after it calculates new elapsed times.
+		/// </summary>
+		public void RaiseElapsedTimeChanged()
 		{
-			get => _elapsedTime;
-			set
-			{
-				if (_elapsedTime != value)
-				{
-					_elapsedTime = value;
-					RaisePropertyChanged();
-				}
-			}
+			RaisePropertyChanged(nameof(this.ElapsedTime));
 		}
 
 		/// <summary>
