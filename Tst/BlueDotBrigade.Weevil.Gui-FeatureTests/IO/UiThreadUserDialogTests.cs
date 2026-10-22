@@ -85,6 +85,11 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			{
 				Invoke(callback);
 			}
+
+			public void BeginInvoke(Action callback, DispatcherPriority priority)
+			{
+				Invoke(callback);
+			}
 		}
 	}
 }

@@ -1,0 +1,101 @@
+namespace BlueDotBrigade.Weevil.Gui.Filter
+{
+	using System;
+	using System.ComponentModel;
+	using BlueDotBrigade.Weevil.Data;
+
+	/// <summary>
+	/// One row of the results grid, created only when WPF asks for it (#1015).
+	/// </summary>
+	/// <remarks>
+	/// The pin and the comment live in the annotation store: the row reads them from it and writes them to it.
+	/// It raises <see cref="PropertyChanged"/> by hand, because the values change in the store, which Metalama cannot see.
+	/// Rows are equal by line number: WPF finds a row with <c>IndexOf</c> and <c>Equals</c>, and a row may be created more than once for the same record.
+	/// </remarks>
+	internal sealed class RowViewModel : INotifyPropertyChanged, IEquatable<RowViewModel>
+	{
+		private readonly IAnnotations _annotations;
+
+		public RowViewModel(IRecord record, IAnnotations annotations)
+		{
+			this.Record = record ?? throw new ArgumentNullException(nameof(record));
+			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		public IRecord Record { get; }
+
+		public int LineNumber => this.Record.LineNumber;
+
+		public SeverityType Severity => this.Record.Severity;
+
+		/// <remarks>
+		/// The view calculates elapsed times after each filter, and each filter creates new rows.
+		/// </remarks>
+		public TimeSpan ElapsedTime => this.Record.Metadata?.ElapsedTime ?? Metadata.ElapsedTimeUnknown;
+
+		public bool IsPinned
+		{
+			get => _annotations.IsPinned(this.LineNumber);
+			set => _annotations.SetPinned(this.LineNumber, value, this);
+		}
+
+		public string Comment
+		{
+			get => _annotations.GetComment(this.LineNumber);
+			set
+			{
+				_annotations.SetComment(this.LineNumber, value, this);
+
+				// Adding a comment pins the record, and removing it unpins the record.
+				RaisePropertyChanged(nameof(this.IsPinned));
+			}
+		}
+
+		/// <summary>
+		/// Returns the record that a grid binding passes to a converter: the row's record, or the record itself.
+		/// </summary>
+		public static IRecord ToRecord(object item)
+		{
+			return item is RowViewModel row ? row.Record : item as IRecord;
+		}
+
+		/// <summary>
+		/// Shows a change made to the row's line in the annotation store.
+		/// </summary>
+		/// <param name="source">The object that made the change.</param>
+		/// <remarks>
+		/// A row ignores its own writes. The comment box sends its text 250 ms after the last key, so reading the comment
+		/// back after the row's own write could overwrite text that is still being typed.
+		/// </remarks>
+		public void Refresh(object source)
+		{
+			if (!ReferenceEquals(source, this))
+			{
+				RaisePropertyChanged(nameof(this.IsPinned));
+				RaisePropertyChanged(nameof(this.Comment));
+			}
+		}
+
+		public bool Equals(RowViewModel other)
+		{
+			return other is not null && other.LineNumber == this.LineNumber;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return Equals(obj as RowViewModel);
+		}
+
+		public override int GetHashCode()
+		{
+			return this.LineNumber;
+		}
+
+		private void RaisePropertyChanged(string propertyName)
+		{
+			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+	}
+}

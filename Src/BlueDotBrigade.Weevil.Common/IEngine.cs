@@ -27,6 +27,11 @@
 		/// </remarks>
 		event EventHandler<HistoryChangedEventArgs> FilterHistoryChanged;
 
+		/// <summary>
+		/// The comments and pins of the open log. The same object for the log's lifetime: <see cref="Clear"/> and <see cref="Reload"/> keep it.
+		/// </summary>
+		IAnnotations Annotations { get; }
+
 		void Clear(ClearOperation clearOperation);
 
 		void Reload();

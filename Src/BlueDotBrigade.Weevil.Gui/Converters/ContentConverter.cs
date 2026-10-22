@@ -5,6 +5,7 @@
 	using System.Windows;
 	using System.Windows.Data;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Gui.Filter;
 
 	[ValueConversion(typeof(string), typeof(string))]
 	public class ContentConverter : IValueConverter
@@ -27,7 +28,7 @@
 		{
 			var result = DependencyProperty.UnsetValue; // signal that conversion failed
 
-			if (record is IRecord concreteRecord)
+			if (RowViewModel.ToRecord(record) is IRecord concreteRecord)
 			{
 				var content = CallStackFormatter.Format(concreteRecord);
 				result = ShortenedRecordFormatter.Format(content);

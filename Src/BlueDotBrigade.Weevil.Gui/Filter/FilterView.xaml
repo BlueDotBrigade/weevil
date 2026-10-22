@@ -9,7 +9,6 @@
             xmlns:system="clr-namespace:System;assembly=mscorlib"
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:guiControls="clr-namespace:BlueDotBrigade.Weevil.Gui.Controls"
-            xmlns:data="clr-namespace:BlueDotBrigade.Weevil.Data;assembly=BlueDotBrigade.Weevil.Common"
             xmlns:local="clr-namespace:BlueDotBrigade.Weevil.Gui.Filter"
             d:DesignHeight="200" d:DesignWidth="900" FontSize="{DynamicResource ApplicationFontSize}">
     <UserControl.Resources>
@@ -246,7 +245,7 @@
                 VirtualizingStackPanel.IsVirtualizing="True"
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 ScrollViewer.CanContentScroll="True"
-                ItemsSource="{Binding VisibleItems}"
+                ItemsSource="{Binding Rows}"
                              local:FilterListViewBehavior.ActiveRecordIndex="{Binding ActiveRecordIndex, Mode=OneWay}"
                              AlternationCount="2"
                              IsSynchronizedWithCurrentItem="True"
@@ -317,17 +316,17 @@
                     <GridViewColumn Width="Auto">
                         <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="data:IRecord">
-                                <CheckBox IsChecked="{Binding Path=Metadata.IsPinned, TargetNullValue=false, Converter={StaticResource CheckBoxValidationErrorConverter}}"  HorizontalAlignment="Center"/>
+                            <DataTemplate DataType="local:RowViewModel">
+                                <CheckBox IsChecked="{Binding Path=IsPinned, TargetNullValue=false, Converter={StaticResource CheckBoxValidationErrorConverter}}"  HorizontalAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn  Width="Auto">
                         <GridViewColumnHeader Content="Comment" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="data:IRecord">
+                            <DataTemplate DataType="local:RowViewModel">
                                 <TextBox 
-                                    Text="{Binding Path=Metadata.Comment, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
+                                    Text="{Binding Path=Comment, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
                                     IsEnabled="True" 
                                     MinWidth="150"
                                     TextWrapping="Wrap" 
@@ -340,9 +339,9 @@
                     <GridViewColumn  Width="Auto">
                         <GridViewColumnHeader Content="Elapsed" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="data:IRecord">
+                            <DataTemplate DataType="local:RowViewModel">
                                 <TextBlock 
-                                    Text="{Binding Metadata.ElapsedTime, Converter={StaticResource TimeSpanConverter}}"
+                                    Text="{Binding ElapsedTime, Converter={StaticResource TimeSpanConverter}}"
                                     TextAlignment="Right">
                                 </TextBlock>
                             </DataTemplate>
@@ -351,7 +350,7 @@
                     <GridViewColumn Width="1100">
                         <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
                         <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="data:IRecord">
+                            <DataTemplate DataType="local:RowViewModel">
                                 <StackPanel>
                                     <TextBlock
                                         Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"
