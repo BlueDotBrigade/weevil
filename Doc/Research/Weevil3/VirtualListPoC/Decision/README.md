@@ -28,9 +28,13 @@ This folder holds:
 
 ## The Explanation
 
-The project owner asked for the design in plain English, with an illustration. This was the answer, as written; the link to the illustrated page, which is private, is replaced by its copy in this folder.
+The project owner asked for the design in plain English, with an illustration. This was the answer, as written. The page at the artifact link is private to the project owner; its copy is [RowDesign.html](RowDesign.html) in this folder.
 
-> I've made an illustrated page that explains the design: [RowDesign.html](RowDesign.html).
+> I'll make a short illustrated page; diagrams will explain this better than terminal text.
+>
+> I'll write the page: three small diagrams, plain words and the key numbers. It uses Weevil's own colours from its UI style guide.
+>
+> I've made an illustrated page that explains the design: https://claude.ai/artifact/596QC9KaNCeY2CGz8fS4w7 (private to you).
 >
 > **The short version**
 >
