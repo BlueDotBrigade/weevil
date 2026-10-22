@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Checks the parts of the proof of concept that need no window, on any operating system. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\AnnotationStore.cs" Link="AnnotationStore.cs" />
+    <Compile Include="..\RangeSelection.cs" Link="RangeSelection.cs" />
+    <Compile Include="..\RowViewModel.cs" Link="RowViewModel.cs" />
+    <Compile Include="..\SyntheticLog.cs" Link="SyntheticLog.cs" />
+    <Compile Include="..\VirtualRowList.cs" Link="VirtualRowList.cs" />
+  </ItemGroup>
+</Project>
