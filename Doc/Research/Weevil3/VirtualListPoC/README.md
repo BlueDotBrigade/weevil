@@ -140,7 +140,7 @@ dotnet run -c Release
 
 ## Results
 
-### Decision (Proposed, 2026-10-22)
+### Decision: 2026-10-22
 
 Build #1015 and #988 on this design: a row view-model only for the rows WPF asks for, and the selection as ranges, with the window handling clicks and keys itself. At 100 million rows it met 20 of its 23 targets in the first run and 21 in the second, and missed the others by less than 50 ms.
 
@@ -153,7 +153,7 @@ Checked by hand on the developer PC, 2026-10-22, with the range selection and 10
 - Shift+Down twice from line 3 selected lines 3 to 5; Ctrl+A selected 100,000,000 rows at once.
 - Typing a comment quickly kept every character and pinned its record, while the selected row stayed selected.
 
-Waiting for approval.
+Approved 2026-10-22. What #1015 still has to build is listed in step 5 of the [#990 plan](../../../Plans/990-ImmutableCore.md#steps).
 
 ### Developer PC: 2026-10-22
 
