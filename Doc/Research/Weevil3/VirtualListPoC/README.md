@@ -89,7 +89,7 @@ With `--wpf-selection`, Ctrl+A is expected to miss its targets; the report shows
 
 ## By Hand
 
-Some things only a person can judge. Run `dotnet run -c Release` and check:
+Some things only a person can judge. Start `Weevil.VirtualListPoC.exe` from a built copy, or `dotnet run -c Release` from the source code, and check:
 
 1. **Scrolling feels smooth.** Drag the scroll bar from top to bottom and back, use the mouse wheel, and hold Page Down. Rows of different heights should not make the scroll bar jump.
 2. **Click selection.** Click, Shift+click, Ctrl+click and Ctrl+Shift+click behave as in Weevil. The status bar shows the selected count and the number of ranges.
@@ -98,7 +98,7 @@ Some things only a person can judge. Run `dotnet run -c Release` and check:
 5. **Comment editing.** Type in a comment box, quickly and slowly: no characters disappear, and the record is pinned. Click the pin box: it toggles without selecting the row. Select all, then type in a comment: the selection stays.
 6. **Filtering with a large selection.** Ctrl+A, then filter on every 2nd record, then every 10th, then all records: the right rows stay selected, and the window says how long keeping the selection took.
 7. **Copy.** Select a few rows and press Ctrl+C, then paste into Notepad. Ctrl+A then Ctrl+C shows a message pointing to Export.
-8. **WPF's own selection.** Repeat steps 3 and 4 with `--wpf-selection` (1 million rows), and note what breaks.
+8. **WPF's own selection.** Repeat steps 3 and 4 with `Weevil.VirtualListPoC.exe --wpf-selection` (1 million rows), and note what breaks.
 
 ## Limits
 
