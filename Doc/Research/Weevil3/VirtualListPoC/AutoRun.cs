@@ -39,6 +39,7 @@ internal sealed class AutoRun
 	private readonly Options _options;
 	private readonly List<Step> _steps = new List<Step>();
 	private readonly List<string> _notes = new List<string>();
+	private DateTime _started;
 
 	public AutoRun(MainWindow window, MainViewModel viewModel, Options options)
 	{
@@ -51,10 +52,10 @@ internal sealed class AutoRun
 
 	public async Task RunAsync()
 	{
-		DateTime started = DateTime.Now;
+		_started = DateTime.Now;
 		try
 		{
-			_steps.Add(new Step(
+			AddStep(new Step(
 				$"Open: build the results and show the first rows",
 				_window.OpenMilliseconds,
 				string.Empty,
@@ -77,7 +78,28 @@ internal sealed class AutoRun
 			_notes.Add("**The run stopped early:** " + exception.GetType().Name + ": " + exception.Message);
 		}
 
-		await File.WriteAllTextAsync(_options.ReportPath, BuildReport(started));
+		SaveReport(isFinished: true);
+	}
+
+	/// <summary>
+	/// Adds a step and saves the report at once, so a crash or a hang in a later step keeps the steps before it.
+	/// </summary>
+	private void AddStep(Step step)
+	{
+		_steps.Add(step);
+		SaveReport(isFinished: false);
+	}
+
+	private void SaveReport(bool isFinished)
+	{
+		try
+		{
+			File.WriteAllText(_options.ReportPath, BuildReport(isFinished));
+		}
+		catch (IOException exception)
+		{
+			_notes.Add("Could not save the report: " + exception.Message);
+		}
 	}
 
 	private async Task RunWithRangeSelectionAsync()
@@ -218,7 +240,7 @@ internal sealed class AutoRun
 			$"{timings.SelectedCount:N0} selected" + (_viewModel.UsesWpfSelection ? string.Empty : $" in {timings.RangeCount:N0} range(s)") +
 			$"; longest UI pause {pause:N0} ms" + (measuresMemory ? $"; {after - before:N0} MB more" : string.Empty);
 
-		_steps.Add(new Step(
+		AddStep(new Step(
 			name,
 			milliseconds,
 			$"keep the selection < {KeepSelectionMilliseconds:N0} ms; UI pause < {ResponsiveMilliseconds:N0} ms",
@@ -242,7 +264,7 @@ internal sealed class AutoRun
 		}
 
 		var nanoseconds = stopwatch.Elapsed.TotalMilliseconds * 1_000_000 / calls;
-		_steps.Add(new Step(
+		AddStep(new Step(
 			$"IndexOf, {calls:N0} calls over {this.RowCount:N0} rows",
 			stopwatch.Elapsed.TotalMilliseconds,
 			"< 1 µs per call",
@@ -278,7 +300,7 @@ internal sealed class AutoRun
 			passed &= caretLine == expectedLine && _viewModel.SelectedCount == 1 && isFocused;
 		}
 
-		_steps.Add(new Step(
+		AddStep(new Step(
 			"#806: Ctrl+Shift+Plus three times, from line 5",
 			stopwatch.Elapsed.TotalMilliseconds,
 			"lines 10, 20, 10; one row selected and focused each time",
@@ -353,7 +375,7 @@ internal sealed class AutoRun
 		_window.RowList.Focus();
 		await IdleAsync();
 
-		_steps.Add(new Step(
+		AddStep(new Step(
 			"Type a comment, fast then slow",
 			stopwatch.Elapsed.TotalMilliseconds,
 			"no typed text lost; a change from elsewhere is shown",
@@ -407,7 +429,7 @@ internal sealed class AutoRun
 		var live = _viewModel.Rows.CountLiveRows();
 		LookupCounters total = _viewModel.Rows.Counters;
 
-		_steps.Add(new Step(
+		AddStep(new Step(
 			"Row view-models alive after a full garbage collection",
 			0,
 			$"< {MaximumLiveRows:N0}",
@@ -463,7 +485,7 @@ internal sealed class AutoRun
 			target += $"; < {maximumMegabytes:N0} MB more";
 		}
 
-		_steps.Add(new Step(name, milliseconds, target, passed, lookups, after, result));
+		AddStep(new Step(name, milliseconds, target, passed, lookups, after, result));
 	}
 
 	private async Task MeasureRepeatedAsync(string name, int times, Func<Task> action)
@@ -480,7 +502,7 @@ internal sealed class AutoRun
 		}
 
 		LookupCounters lookups = _viewModel.Rows.Counters.Snapshot().Subtract(counters);
-		_steps.Add(new Step(
+		AddStep(new Step(
 			name,
 			longest,
 			ResponsiveTarget() + " (the longest)",
@@ -518,7 +540,7 @@ internal sealed class AutoRun
 		return GC.GetTotalMemory(collect) / 1_048_576.0;
 	}
 
-	private string BuildReport(DateTime started)
+	private string BuildReport(bool isFinished)
 	{
 		var processor = Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString", null) as string;
 		var memory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / 1_073_741_824.0;
@@ -533,8 +555,14 @@ internal sealed class AutoRun
 		report.AppendLine($"| Computer | {processor?.Trim() ?? "Unknown processor"}, {Environment.ProcessorCount} logical processors, {memory:N1} GB of RAM |");
 		report.AppendLine($"| Windows | {RuntimeInformation.OSDescription} |");
 		report.AppendLine($"| .NET | {RuntimeInformation.FrameworkDescription} |");
-		report.AppendLine($"| Run | {started.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)} |");
+		report.AppendLine($"| Run | {_started.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)} |");
 		report.AppendLine();
+
+		if (!isFinished)
+		{
+			report.AppendLine("**Unfinished:** the run is still going, or it stopped during the step after the last one below.");
+			report.AppendLine();
+		}
 
 		var failed = _steps.Count(s => s.Passed == false);
 		var checkedSteps = _steps.Count(s => s.Passed.HasValue);

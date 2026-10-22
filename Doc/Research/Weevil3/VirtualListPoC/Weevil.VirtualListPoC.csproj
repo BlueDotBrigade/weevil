@@ -10,6 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x64</PlatformTarget>
     <RootNamespace>Weevil.VirtualListPoC</RootNamespace>
+    <!-- Fully optimized code from the first call, so the first steps are timed with the same code as the last ones. -->
+    <TieredCompilation>false</TieredCompilation>
   </PropertyGroup>
 
   <ItemGroup>
