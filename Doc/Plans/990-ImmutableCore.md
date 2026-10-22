@@ -55,17 +55,17 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - Check scrolling, Shift and Ctrl selection (keeping the #806 behaviour), Ctrl+A, Shift+End, filtering with a large selection, comment editing, and the cost of `IndexOf`.
    - The list implements the non-generic `IList`, or WPF copies every item. Rows are equal by line number, because WPF finds items with `IndexOf`.
    - This decides the row design for step 5 and for #988. Record the result in `Research/Weevil3/`.
-5. **Row view-models and selection (#1015).**
+5. **Row view-models and selection (#1015).** Split into four pull requests: Core keeps the selection as ranges (#1055), GUI row view-models, GUI selection input, GUI feature tests.
    - The grid binds to one view-model per realized row: pin check box, comment box and elapsed-time column. A row writes to the session, and refreshes when the session reports a change to its line (decision 4).
    - A row ignores its own writes, so the comment box (two-way, with a 250 ms delay) does not overwrite text still being typed.
    - Larger than it looks: the row style binds `Severity`, four converters expect an `IRecord`, and code-behind casts items to `IRecord`.
    - Core's `SelectionManager` stores ranges instead of one record per selected row (decision 5).
    - Keeping the selection after a filter uses binary searches, or a merge of the old and new results where the old ones had gaps, as in the proof of concept, instead of comparing every result with every selected record.
    - WPF never selects a row: the grid handles clicks and the selection keys itself, as the proof of concept does for click, Shift, Ctrl, the arrow keys, Page Up, Page Down, Home, End and Ctrl+A. It also needs what the proof of concept left out: selecting by dragging the mouse, a right-click that selects its row before the context menu opens, keeping the anchor across a filter, and reporting the selection to UI Automation.
-   - Decide whether a selected record that a filter hides is still selected when a later filter shows it again. The proof of concept drops it.
+   - Decided 2026-10-22: a selected record that a filter hides is no longer selected, and stays unselected when a later filter shows it again. After the filter, a bulletin tells listeners that the selection count changed.
    - GUI feature tests cover the selection journeys, because the Core tests cannot see focus or key handling.
    - Copy stops at 100,000 records (decision 5).
-6. **Elapsed time comes from the view (#1016).**
+6. **Elapsed time comes from the view (#1016). Done 2026-10-22.**
    - After each filter, the view calculates elapsed times for all its results (decision 1).
    - An `@Elapsed` filter reads the elapsed times of the previous results, which the view passes in. Iterating by elapsed time reads the current ones.
    - This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
