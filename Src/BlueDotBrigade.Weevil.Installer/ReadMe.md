@@ -15,26 +15,19 @@ Current flow:
 	- release documentation and licenses
 	- plugins from `WEEVIL_PLUGINS_PATH`
 4. Before WiX compiles, the installer checks `WEEVIL_PLUGINS_PATH` for an optional `TelemetryCredentials.wxs` file and copies it; otherwise it stages the committed `TelemetryCredentials.wxs_` template.
-5. WiX Heat harvests the staged `Bin`, `Doc`, and `Licenses` directories during the build.
+5. WiX `Files` authoring includes the staged `Bin`, `Doc`, and `Licenses` directories during the build.
 
 This keeps Visual Studio debug outputs independent while generating installer payload authoring from the assembled runtime layout.
 
-## How Heat Updates WiX Authoring
+## How WiX `Files` Authoring Updates Installer Content
 
-Heat scans the staged installer folders and generates temporary WiX source files in the installer project's `obj` directory. Those generated `.wxs` files contain the file-to-component mappings that WiX compiles into the MSI.
+The installer uses WiX `Files` authoring against the staged runtime folders. WiX expands those file patterns during compile to generate the file-to-component mappings included in the MSI.
 
 Sequence:
 
 1. The installer project stages `Bin`, `Doc`, and `Licenses` into the intermediate layout.
-2. Heat scans each staged directory.
-3. Heat generates harvested `.wxs` files in `obj` for those directories.
-4. WiX compiles the generated `.wxs` files together with the hand-authored installer files.
-
-Current generated files:
-
-- `_generated_weevil_bin_files_dir.wxs`
-- `_generated_documentation_doc_files_dir.wxs`
-- `_generated_documentation_license_files_dir.wxs`
+2. WiX `Files` patterns include each staged directory.
+3. WiX compiles the resulting file mappings together with the hand-authored installer files.
 
 ## Upgrading to WiX Toolset 7
 

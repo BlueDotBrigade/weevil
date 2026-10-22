@@ -1,6 +1,7 @@
-﻿<Project Sdk="WixToolset.Sdk/6.0.2">
+﻿<Project Sdk="WixToolset.Sdk/7.0.0">
   <PropertyGroup>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <AcceptEula>wix7</AcceptEula>
     <ProductVersion>2.12.1</ProductVersion>
     <OutputName>Weevil-$(ProductVersion)</OutputName>
     <Name>BlueDotBrigade.Weevil.Installer</Name>
@@ -37,10 +38,9 @@
     <None Include="TelemetryCredentials.wxs_" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.Heat" Version="6.0.2" />
-    <PackageReference Include="WixToolset.Netfx.wixext" Version="6.0.2" />
-    <PackageReference Include="WixToolset.UI.wixext" Version="6.0.2" />
-    <PackageReference Include="WixToolset.Util.wixext" Version="6.0.2" />
+    <PackageReference Include="WixToolset.Netfx.wixext" Version="7.0.0" />
+    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Cli\BlueDotBrigade.Weevil.Cli.csproj">
@@ -65,32 +65,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <HarvestDirectory Include="$(InstallerBinLayoutDir)">
-      <ComponentGroupName>generated_weevil_bin_files</ComponentGroupName>
-      <DirectoryRefId>InstallFolderBin</DirectoryRefId>
-      <PreprocessorVariable>var.InstallerBinSourceDir</PreprocessorVariable>
-      <SuppressCom>true</SuppressCom>
-      <SuppressRegistry>true</SuppressRegistry>
-      <SuppressRootDirectory>true</SuppressRootDirectory>
-    </HarvestDirectory>
-    <HarvestDirectory Include="$(InstallerDocLayoutDir)">
-      <ComponentGroupName>generated_documentation_doc_files</ComponentGroupName>
-      <DirectoryRefId>DocDir</DirectoryRefId>
-      <PreprocessorVariable>var.InstallerDocSourceDir</PreprocessorVariable>
-      <SuppressCom>true</SuppressCom>
-      <SuppressRegistry>true</SuppressRegistry>
-      <SuppressRootDirectory>true</SuppressRootDirectory>
-    </HarvestDirectory>
-    <HarvestDirectory Include="$(InstallerLicenseLayoutDir)">
-      <ComponentGroupName>generated_documentation_license_files</ComponentGroupName>
-      <DirectoryRefId>LicenseDir</DirectoryRefId>
-      <PreprocessorVariable>var.InstallerLicenseSourceDir</PreprocessorVariable>
-      <SuppressCom>true</SuppressCom>
-      <SuppressRegistry>true</SuppressRegistry>
-      <SuppressRootDirectory>true</SuppressRootDirectory>
-    </HarvestDirectory>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="..\BlueDotBrigade.Weevil.Gui\Resources\Icons\Weevil.ico">
       <Link>Weevil.ico</Link>
     </Content>
@@ -108,13 +82,6 @@
     <Compile Remove="C:\Code\BlueDotBrigade\OpenSource\weevil\Src\BlueDotBrigade.Weevil.Installer\TelemetryCredentials.wxs" />
     <Compile Include="$(TelemetryCredentialsProjectPath)" />
   </ItemGroup>
-  <!-- 
-	KNOWN ISSUE 
-	The Visual Studio team confirmed this issue is a breaking change in VS2022 17.13. 
-	We'll address the breaking change when one of our customers requires it. 
-	https://github.com/firegiant/HeatWaveSupport/issues/73
-	-->
-  <Target Name="CollectSuggestedVisualStudioComponentIds" />
   <Target Name="StageTelemetryCredentials" BeforeTargets="BeforeBuild">
     <Message Text="Staging default telemetry credentials template to '$(TelemetryCredentialsProjectPath)'." Importance="normal" />
     <Copy SourceFiles="$(TelemetryCredentialsDefaultPath)" DestinationFiles="$(TelemetryCredentialsProjectPath)" SkipUnchangedFiles="true" />
@@ -122,9 +89,8 @@
     <Message Text="Telemetry credentials override not found. Using template TelemetryCredentials.wxs_ from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
     <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsProjectPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
   </Target>
-  <Target Name="StageInstallerLayout" BeforeTargets="GetHarvestDirectoryContent">
+  <Target Name="StageInstallerLayout" BeforeTargets="BeforeBuild">
     <RemoveDir Directories="$(InstallerLayoutRoot)" Condition="Exists('$(InstallerLayoutRoot)')" />
-    <Delete Files="$(IntermediateOutputPath)_generated_weevil_bin_files_dir.wxs;$(IntermediateOutputPath)_generated_documentation_doc_files_dir.wxs;$(IntermediateOutputPath)_generated_documentation_license_files_dir.wxs" ContinueOnError="true" />
     <MakeDir Directories="$(InstallerBinLayoutDir);$(InstallerDocLayoutDir);$(InstallerLicenseLayoutDir);$(InstallerPluginLayoutDir)" />
     <ItemGroup>
       <GuiRuntimeFiles Include="$(GuiOutputPath)**\*" Exclude="$(GuiOutputPath)Plugins\**\*" />
