@@ -13,9 +13,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		public void GivenSelectedPositions_WhenRead_ThenTheRecordsAreKeyedByLineNumberInOrder()
 		{
 			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
-			var selection = new PositionRanges();
-			selection.Add(1, 2);
-			selection.Add(5, 5);
+			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 1, 2, 5 });
 
 			var selected = new SelectedRecords(selection, results);
 
@@ -30,8 +28,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		public void GivenALineThatIsNotSelected_WhenLookedUp_ThenItIsNotFound()
 		{
 			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
-			var selection = new PositionRanges();
-			selection.Add(1, 1);
+			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 1 });
 
 			var selected = new SelectedRecords(selection, results);
 

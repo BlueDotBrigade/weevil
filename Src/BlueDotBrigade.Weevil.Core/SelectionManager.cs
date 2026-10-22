@@ -120,30 +120,30 @@
 		/// Adds or removes the positions of the given records, then publishes the new selection.
 		/// </summary>
 		/// <returns>How many records were added or removed, and how many are selected afterwards.</returns>
+		/// <remarks>
+		/// The records change the selection in one pass, not one at a time, which would cost the number of records times
+		/// the number of ranges.
+		/// </remarks>
 		private (int Changed, int Count) Change(IEnumerable<IRecord> records, bool isSelected)
 		{
 			lock (_selectionPadlock)
 			{
-				PositionRanges selection = _selection.Clone();
-				var changed = 0;
+				var positions = new List<int>();
 
 				foreach (IRecord record in records)
 				{
 					var position = FindPosition(_visibleRecords, record);
-					if (position >= 0 && selection.Contains(position) != isSelected)
+					if (position >= 0)
 					{
-						if (isSelected)
-						{
-							selection.Add(position, position);
-						}
-						else
-						{
-							selection.Remove(position, position);
-						}
-
-						changed++;
+						positions.Add(position);
 					}
 				}
+
+				var changes = PositionRanges.FromPositions(positions);
+				PositionRanges selection = isSelected
+					? PositionRanges.Union(_selection, changes)
+					: PositionRanges.Except(_selection, changes);
+				var changed = System.Math.Abs(selection.Count - _selection.Count);
 
 				_selection = selection;
 				_selectionPeriod = CalculateTimePeriod(selection, _visibleRecords);
@@ -203,11 +203,13 @@
 
 		public ISelect Select(int lineNumber)
 		{
-			var index = _visibleRecords.IndexOfLineNumber(lineNumber);
+			// One read: a filter may replace the results meanwhile.
+			ImmutableArray<IRecord> visibleRecords = _visibleRecords;
+			var index = visibleRecords.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
 			{
-				Select(_visibleRecords[index]);
+				Select(visibleRecords[index]);
 			}
 
 			return this;
@@ -265,11 +267,13 @@
 
 		public ISelect Unselect(int lineNumber)
 		{
-			var index = _visibleRecords.IndexOfLineNumber(lineNumber);
+			// One read: a filter may replace the results meanwhile.
+			ImmutableArray<IRecord> visibleRecords = _visibleRecords;
+			var index = visibleRecords.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
 			{
-				Unselect(_visibleRecords[index]);
+				Unselect(visibleRecords[index]);
 			}
 
 			return this;
