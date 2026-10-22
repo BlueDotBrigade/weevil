@@ -142,9 +142,9 @@ dotnet run -c Release
 
 ### Decision (Proposed, 2026-10-22)
 
-Build #1015 and #988 on this design: a row view-model only for the rows WPF asks for, and the selection as ranges, with the window handling clicks and keys itself. At 100 million rows it met 20 of its 23 targets and missed the other 3 by less than 50 ms.
+Build #1015 and #988 on this design: a row view-model only for the rows WPF asks for, and the selection as ranges, with the window handling clicks and keys itself. At 100 million rows it met 20 of its 23 targets in the first run and 21 in the second, and missed the others by less than 50 ms.
 
-WPF's own selection, as Weevil 2.12 uses it, does not scale. Ctrl+A on 1 million rows took 1.3 s, added 311 MB and created every row: at 100 million rows that is about 2 minutes and 31 GB. Carrying 500,000 selected rows across a filter froze the window, because Weevil 2.12 selects each one again with its own `SelectedItems.Add`.
+WPF's own selection, as Weevil 2.12 uses it, does not scale. Ctrl+A on 1 million rows took 1.3 s, added 311 MB and created every row: at 100 million rows that is about 2 minutes and 31 GB. Carrying 500,000 selected rows across a filter froze the window, because Weevil 2.12 selects each one again with its own `SelectedItems.Add`, and each `Add` makes WPF look at every row selected before it: 8,000 rows took 8 s, and the time grows with the square of the count.
 
 Checked by hand on the developer PC, 2026-10-22, with the range selection and 100 million rows; all passed:
 
@@ -178,9 +178,25 @@ What the run shows:
 
 - **WPF asks only for rows near the screen.** A jump of the scroll bar asked for 400 to 550 rows and created about 30 row view-models, wherever it landed in 100 million rows. WPF called `GetEnumerator` once but did not walk the whole list: only 35,352 row view-models were created during the whole run.
 - **Ranges make a large selection free.** Selecting every row is one range. The worst case, every 10th record selected and then the filter removed, made 10 million ranges in 274 ms, about 80 MB.
-- **The three misses** are two pauses of the window during filters at 100 million rows, 266 ms and 295 ms against 250 ms, and Ctrl+Plus to a pin 110 million lines away, 254 ms. The work on the UI thread in those filters was small: fewer than 2,000 row lookups, while filtering and keeping the selection ran on a background thread. The pauses are probably the garbage collector freeing and allocating the 400 MB results arrays; the report now shows each step's garbage collection pause, to confirm it in the next run. If so, #988 can reuse the results buffers.
+- **The three misses** are two pauses of the window during filters at 100 million rows, 266 ms and 295 ms against 250 ms, and Ctrl+Plus to a pin 110 million lines away, 254 ms. See the second run.
 
-After this run, the automatic run with WPF's own selection measures selecting 1,000, 2,000, 4,000 rows and so on again, one `Add` each, and stops after the first count that takes 5 s, instead of freezing.
+### Developer PC, Second Run: 2026-10-22
+
+The same PC, 20 minutes later, after the report gained a garbage collection column and the run with WPF's own selection stopped freezing. The full reports are in [Results-2026-10-22-SecondRun-Ranges.md](Results-2026-10-22-SecondRun-Ranges.md) and [Results-2026-10-22-SecondRun-WpfSelection.md](Results-2026-10-22-SecondRun-WpfSelection.md).
+
+- **Ranges: 21 of 23 targets met.** Ctrl+Plus to the far pin took 142 ms this time. The two misses are again pauses of the window during filters to 100 million rows: 257 and 258 ms against 250 ms.
+- **The garbage collector is not the cause:** it paused for 17 to 34 ms during those filters. The pause hardly depends on the selection, or on the number of rows: 162 ms with 4 million rows, 239 to 258 ms with 10 to 100 million. So it is most likely the fixed cost of showing new results: WPF rebuilding the rows on screen after the list resets, and showing the list again after hiding it while filtering, as Weevil does. Any row design pays it; the proof of concept does not separate the two parts.
+- **WPF never walked the list:** it called `GetEnumerator` once and read no rows from it.
+- **WPF's own selection, selecting rows again after a filter, one `Add` each:**
+
+  | Rows | Time | Rows WPF looked up |
+  |---:|---:|---:|
+  | 1,000 | 231 ms | 501,500 |
+  | 2,000 | 640 ms | 2,003,000 |
+  | 4,000 | 2,135 ms | 8,006,000 |
+  | 8,000 | 7,965 ms | 32,012,000 |
+
+  Each `Add` looks up every row selected before it, so doubling the rows takes about 3.5 times as long. At this rate, 500,000 rows would take about 9 hours. Weevil 2.12 does this after every filter, for every selected record, so a large selection freezes it today.
 
 ### Self-Test: 2026-10-22
 
