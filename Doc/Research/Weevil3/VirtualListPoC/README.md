@@ -146,7 +146,14 @@ Build #1015 and #988 on this design: a row view-model only for the rows WPF asks
 
 WPF's own selection, as Weevil 2.12 uses it, does not scale. Ctrl+A on 1 million rows took 1.3 s, added 311 MB and created every row: at 100 million rows that is about 2 minutes and 31 GB. Carrying 500,000 selected rows across a filter froze the window, because Weevil 2.12 selects each one again with its own `SelectedItems.Add`.
 
-Waiting for approval, and for the by-hand checks.
+Checked by hand on the developer PC, 2026-10-22, with the range selection and 100 million rows; all passed:
+
+- Dragging the scroll bar end to end and holding Page Down stayed smooth.
+- #806 with real keys: from line 5, Ctrl+Shift+Plus three times, quickly, went to lines 10, 20 and 10, with only that row selected each time.
+- Shift+Down twice from line 3 selected lines 3 to 5; Ctrl+A selected 100,000,000 rows at once.
+- Typing a comment quickly kept every character and pinned its record, while the selected row stayed selected.
+
+Waiting for approval.
 
 ### Developer PC: 2026-10-22
 
