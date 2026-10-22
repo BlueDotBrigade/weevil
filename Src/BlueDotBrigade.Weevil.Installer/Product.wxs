@@ -48,6 +48,7 @@
 			<Files Include="$(var.InstallerLicenseSourceDir)**\*" />
 		</ComponentGroup>
 	</Fragment>
+
 	<Fragment>
 			<StandardDirectory Id="ProgramMenuFolder">
 				<Directory Id="BlueDotBrigadeShortcutDir" Name="Blue Dot Brigade">
