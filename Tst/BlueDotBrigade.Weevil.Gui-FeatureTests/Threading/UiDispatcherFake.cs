@@ -22,5 +22,10 @@
 		{
 			callback.Invoke();
 		}
+
+		public void BeginInvoke(Action callback, DispatcherPriority priority)
+		{
+			callback.Invoke();
+		}
 	}
 }

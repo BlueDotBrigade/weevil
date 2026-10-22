@@ -226,6 +226,11 @@
 
 		public IList<IRecord> VisibleItems { get; private set; }
 
+		/// <summary>
+		/// The grid's rows for <see cref="VisibleItems"/> (#1015).
+		/// </summary>
+		public RowList Rows { get; private set; }
+
 		public Version WeevilVersion { get; private set; }
 
 		public string WeevilDisplayVersion { get; private set; }
@@ -614,8 +619,10 @@
 						// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
 						// Moved only once the open succeeds, so a failed open leaves the open log subscribed.
 						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
+						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						_engine = openedEngine;
 						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
+						_engine.Annotations.Changed += OnAnnotationsChanged;
 
 						this.FileOpened?.Invoke(this, EventArgs.Empty);
 
@@ -743,6 +750,12 @@
 				this.CanOpenLogFile = true;
 				this.IsProcessingLongOperation = false;
 			}
+		}
+
+		private void OnAnnotationsChanged(object sender, AnnotationChangedEventArgs e)
+		{
+			// On the thread that made the change: the rows refresh later, on the UI thread (decision 4).
+			this.Rows?.QueueRefresh(e);
 		}
 
 		private void OnFilterHistoryChanged(object sender, HistoryChangedEventArgs e)
@@ -1998,6 +2011,7 @@
 				OnPropertyChanged(nameof(this.ExclusiveFilter));
 
 				this.VisibleItems = _engine.Filter.Results;
+				this.Rows = new RowList(_engine.Filter.Results, _engine.Annotations, _uiDispatcher);
 
 				OnPropertyChanged(nameof(this.VisibleItems));
 			});

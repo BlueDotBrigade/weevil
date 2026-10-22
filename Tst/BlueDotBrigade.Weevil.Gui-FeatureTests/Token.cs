@@ -31,6 +31,10 @@
 				.When(x => x.Invoke(Arg.Any<Action>(), Arg.Any<DispatcherPriority>()))
 				.Do(callInfo => callInfo.Arg<Action>()());
 
+			uiDispatcher
+				.When(x => x.BeginInvoke(Arg.Any<Action>(), Arg.Any<DispatcherPriority>()))
+				.Do(callInfo => callInfo.Arg<Action>()());
+
 			var bulletinMediator = new BulletinMediator();
 
 			_mainViewModel = new MainWindowViewModel(

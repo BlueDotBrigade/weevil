@@ -25,5 +25,10 @@
 		{
 			_dispatcher.Invoke(callback, priority);
 		}
+
+		public void BeginInvoke(Action callback, DispatcherPriority priority)
+		{
+			_dispatcher.InvokeAsync(callback, priority);
+		}
 	}
 }

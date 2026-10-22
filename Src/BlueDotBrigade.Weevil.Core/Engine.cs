@@ -100,6 +100,8 @@
 
 		public IBookmarkManager Bookmarks => _coreEngine.Bookmarks;
 
+		public IAnnotations Annotations => _coreEngine.Annotations.Annotations;
+
 		public int Count => _coreEngine.Count;
 
 		public ContextDictionary Context => _coreEngine.Context;

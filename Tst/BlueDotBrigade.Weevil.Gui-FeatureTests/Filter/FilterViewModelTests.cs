@@ -319,6 +319,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				Invoke(callback);
 			}
 
+			public void BeginInvoke(Action callback, DispatcherPriority priority)
+			{
+				Invoke(callback);
+			}
+
 			public void Dispose()
 			{
 				_isRunning.Dispose();

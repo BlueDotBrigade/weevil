@@ -5,6 +5,7 @@
 	using System.Windows;
 	using System.Windows.Data;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Gui.Filter;
 
 	[ValueConversion(typeof(string), typeof(string))]
 	public class ContentToTruncationIconConverter : IValueConverter
@@ -21,7 +22,7 @@
 		{
 			var result = DependencyProperty.UnsetValue; // signal that conversion failed
 
-			if (record is IRecord concreteRecord)
+			if (RowViewModel.ToRecord(record) is IRecord concreteRecord)
 			{
 				var convertedText = ContentConverter.Convert(record, targetType, parameter, culture);
 

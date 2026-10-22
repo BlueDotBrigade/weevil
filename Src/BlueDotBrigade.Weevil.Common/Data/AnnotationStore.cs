@@ -9,8 +9,9 @@ namespace BlueDotBrigade.Weevil.Data
 	/// </summary>
 	/// <remarks>
 	/// Writes are serialized by one lock. Reads never wait, so filters can read from many threads.
+	/// <see cref="Changed"/> is raised after the lock is released.
 	/// </remarks>
-	public sealed class AnnotationStore
+	public sealed class AnnotationStore : IAnnotations
 	{
 		// One byte per line.
 		private const byte PinnedBit = 0b01;
@@ -33,6 +34,8 @@ namespace BlueDotBrigade.Weevil.Data
 			_lines = new byte[System.Math.Max(lineCount, 0) + 1];
 		}
 
+		public event EventHandler<AnnotationChangedEventArgs> Changed;
+
 		public string GetComment(int lineNumber)
 		{
 			return _comments.TryGetValue(lineNumber, out var comment) ? comment : string.Empty;
@@ -51,10 +54,8 @@ namespace BlueDotBrigade.Weevil.Data
 			return (GetBits(lineNumber) & PinnedBit) != 0;
 		}
 
-		/// <summary>
-		/// Adding a comment pins the record, and removing it unpins the record.
-		/// </summary>
-		public void SetComment(int lineNumber, string comment)
+		/// <inheritdoc />
+		public void SetComment(int lineNumber, string comment, object source = null)
 		{
 			comment ??= string.Empty;
 
@@ -81,15 +82,29 @@ namespace BlueDotBrigade.Weevil.Data
 				SetCommentText(lineNumber, comment, ref bits);
 				SetBits(lineNumber, bits);
 			}
+
+			this.Changed?.Invoke(this, new AnnotationChangedEventArgs(lineNumber, source));
 		}
 
-		public void SetPinned(int lineNumber, bool isPinned)
+		/// <inheritdoc />
+		public void SetPinned(int lineNumber, bool isPinned, object source = null)
 		{
+			ThrowIfNegative(lineNumber);
+
 			lock (_padlock)
 			{
 				var bits = GetBits(lineNumber);
-				SetBits(lineNumber, isPinned ? (byte)(bits | PinnedBit) : (byte)(bits & ~PinnedBit));
+				var changed = isPinned ? (byte)(bits | PinnedBit) : (byte)(bits & ~PinnedBit);
+
+				if (changed == bits)
+				{
+					return;
+				}
+
+				SetBits(lineNumber, changed);
 			}
+
+			this.Changed?.Invoke(this, new AnnotationChangedEventArgs(lineNumber, source));
 		}
 
 		/// <summary>

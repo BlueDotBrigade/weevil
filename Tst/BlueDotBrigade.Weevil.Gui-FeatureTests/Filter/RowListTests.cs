@@ -1,0 +1,120 @@
+namespace BlueDotBrigade.Weevil.Gui.Filter
+{
+	using System;
+	using System.Collections.Generic;
+	using System.Collections.Immutable;
+	using System.Linq;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Gui.Threading;
+	using BlueDotBrigade.Weevil.TestTools.Data;
+
+	[TestClass]
+	public class RowListTests
+	{
+		[TestMethod]
+		public void GivenARowThatIsStillHeld_WhenAskedForAgain_ThenTheSameRowIsReturned()
+		{
+			var rows = new RowList(R.WithLineNumbers(1, 10), new AnnotationStore(), new UiDispatcherFake());
+
+			var row = rows[3];
+
+			rows[3].Should().BeSameAs(row);
+			((RowViewModel)row).LineNumber.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void GivenRecordsWithGapsInTheirLineNumbers_WhenARowIsLookedUp_ThenItsPositionIsFound()
+		{
+			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 20).Where(r => r.LineNumber % 2 == 0).ToImmutableArray();
+			var annotations = new AnnotationStore();
+			var rows = new RowList(results, annotations, new UiDispatcherFake());
+
+			rows.IndexOf(new RowViewModel(R.WithLineNumber(6), annotations)).Should().Be(2);
+			rows.IndexOf(new RowViewModel(R.WithLineNumber(7), annotations)).Should().Be(-1);
+			rows.IndexOf(R.WithLineNumber(6)).Should().Be(-1);
+			rows.IndexOfLineNumber(20).Should().Be(9);
+			rows.IndexOfLineNumber(21).Should().Be(-1);
+		}
+
+		[TestMethod]
+		public void GivenTwoRowsForTheSameLine_WhenCompared_ThenTheyAreEqual()
+		{
+			var annotations = new AnnotationStore();
+			var first = new RowViewModel(R.WithLineNumber(5), annotations);
+			var second = new RowViewModel(R.WithLineNumber(5), annotations);
+
+			first.Should().Be(second);
+			first.GetHashCode().Should().Be(second.GetHashCode());
+			first.Should().NotBe(new RowViewModel(R.WithLineNumber(6), annotations));
+		}
+
+		[TestMethod]
+		public void GivenAPinMadeElsewhere_WhenTheUiThreadRunsTheRefresh_ThenTheRowReportsIt()
+		{
+			var annotations = new AnnotationStore();
+			var dispatcher = new DeferredUiDispatcherFake();
+			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, dispatcher);
+			annotations.Changed += (_, e) => rows.QueueRefresh(e);
+			RowViewModel row = rows.GetRow(4);
+			var changedProperties = new List<string>();
+			row.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
+
+			annotations.SetPinned(row.LineNumber, true);
+
+			changedProperties.Should().BeEmpty("the UI thread has not run the refresh yet");
+			dispatcher.RunQueued();
+			changedProperties.Should().Contain(nameof(RowViewModel.IsPinned));
+			row.IsPinned.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenManyChanges_WhenTheyArrive_ThenTheUiThreadRefreshesTheRowsOnce()
+		{
+			var annotations = new AnnotationStore();
+			var dispatcher = new DeferredUiDispatcherFake();
+			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, dispatcher);
+			annotations.Changed += (_, e) => rows.QueueRefresh(e);
+
+			for (var lineNumber = 1; lineNumber <= 10; lineNumber++)
+			{
+				annotations.SetPinned(lineNumber, true);
+			}
+
+			dispatcher.QueuedCount.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void GivenMoreChangesThanTheQueueHolds_WhenTheUiThreadRunsTheRefresh_ThenEveryRowStillHeldRefreshes()
+		{
+			var annotations = new AnnotationStore();
+			var dispatcher = new DeferredUiDispatcherFake();
+			var rows = new RowList(R.WithLineNumbers(1, 5_000), annotations, dispatcher);
+			annotations.Changed += (_, e) => rows.QueueRefresh(e);
+			RowViewModel row = rows.GetRow(0);
+			var changedProperties = new List<string>();
+			row.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
+
+			// None of them is the row's own line.
+			for (var lineNumber = 2; lineNumber <= 2_000; lineNumber++)
+			{
+				annotations.SetPinned(lineNumber, true);
+			}
+
+			dispatcher.RunQueued();
+
+			changedProperties.Should().Contain(nameof(RowViewModel.IsPinned));
+			GC.KeepAlive(row);
+		}
+
+		[TestMethod]
+		public void GivenTheRows_WhenChangedDirectly_ThenTheChangeIsRefused()
+		{
+			var rows = new RowList(R.WithLineNumbers(1, 3), new AnnotationStore(), new UiDispatcherFake());
+
+			Action add = () => rows.Add(new RowViewModel(R.WithLineNumber(4), new AnnotationStore()));
+
+			rows.IsReadOnly.Should().BeTrue();
+			add.Should().Throw<NotSupportedException>();
+		}
+	}
+}

@@ -80,6 +80,24 @@ namespace BlueDotBrigade.Weevil
 			values.Should().Equal("Id=2");
 		}
 
+		[TestMethod]
+		public void GivenSubscribedToAnnotations_WhenARecordIsPinnedAfterClearAndReload_ThenEngineRaisesTheEvent()
+		{
+			IEngine engine = OpenCopy();
+			IAnnotations annotations = engine.Annotations;
+			var lines = new List<int>();
+			annotations.Changed += (sender, e) => lines.Add(e.LineNumber);
+
+			engine.Selector.Select(lineNumber: 101);
+			engine.Clear(ClearOperation.BeforeSelected);
+			engine.Reload();
+			engine.Records[0].Metadata.IsPinned = true;
+
+			engine.Annotations.Should().BeSameAs(annotations);
+			lines.Should().Equal(engine.Records[0].LineNumber);
+			annotations.IsPinned(engine.Records[0].LineNumber).Should().BeTrue();
+		}
+
 		private IEngine OpenCopy()
 		{
 			var logPath = Path.Combine(_folder, "SampleData.log");

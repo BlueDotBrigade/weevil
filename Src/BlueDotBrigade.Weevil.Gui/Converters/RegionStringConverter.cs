@@ -26,7 +26,7 @@
 	{
 		/// <summary>
 		/// Expects:
-		///   values[0]: The current IRecord (the item in the ListView)
+		///   values[0]: The current row (the item in the ListView), or an IRecord
 		///   values[1]: The parent FilterViewModel (the DataContext of the UserControl/Window)
 		///   values[2]: True indicates that a tooltip is being created.
 		/// </summary>
@@ -36,7 +36,7 @@
 				return string.Empty;
 
 			var isToolTip = false;
-			var record = values[0] as IRecord;
+			IRecord record = RowViewModel.ToRecord(values[0]);
 			var viewModel = values[1] as FilterViewModel;
 
 			if (record == null || viewModel == null)

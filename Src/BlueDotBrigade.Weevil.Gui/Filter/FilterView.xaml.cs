@@ -118,9 +118,16 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			{
 				this.ListView.SelectedItems.Clear();
 
+				RowList rows = this.ViewModel.Rows;
+
 				foreach (IRecord record in this.ViewModel.SelectedItems)
 				{
-					this.ListView.SelectedItems.Add(record);
+					var position = rows.IndexOfLineNumber(record.LineNumber);
+
+					if (position >= 0)
+					{
+						this.ListView.SelectedItems.Add(rows.GetRow(position));
+					}
 				}
 
 				// Recalculate column widths after filter results change.
@@ -143,7 +150,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			var added = e.AddedItems.Cast<IRecord>().ToList();
+			var added = e.AddedItems.Cast<RowViewModel>().Select(row => row.Record).ToList();
 			if (added.Count > 0)
 			{
 				try
@@ -161,7 +168,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				}
 			}
 
-			var removed = e.RemovedItems.Cast<IRecord>().ToList();
+			var removed = e.RemovedItems.Cast<RowViewModel>().Select(row => row.Record).ToList();
 			if (removed.Count > 0)
 			{
 				try
