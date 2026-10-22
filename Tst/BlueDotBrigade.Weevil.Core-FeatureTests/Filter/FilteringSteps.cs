@@ -170,4 +170,38 @@ internal sealed class FilteringSteps : ReqnrollSteps
 
 		index.Should().BeGreaterOrEqualTo(0);
 	}
+
+	[When($"selecting the records on lines {X.WholeNumber} to {X.WholeNumber}")]
+	public void WhenSelectingTheRecordsOnLines(int firstLineNumber, int lastLineNumber)
+	{
+		var records = this.Context.Engine.Filter.Results
+			.Where(r => r.LineNumber >= firstLineNumber && r.LineNumber <= lastLineNumber)
+			.ToList();
+
+		this.Context.Engine.Selector.Select(records);
+	}
+
+	[Then($"{X.WholeNumber} records will be selected")]
+	public void ThenRecordsWillBeSelected(int count)
+	{
+		this.Context.Engine.Selector.Selected.Count.Should().Be(count);
+	}
+
+	[Then($"line number {X.WholeNumber} will be selected")]
+	public void ThenLineNumberWillBeSelected(int lineNumber)
+	{
+		this.Context.Engine.Selector.Selected.ContainsKey(lineNumber).Should().BeTrue();
+	}
+
+	[Then($"line number {X.WholeNumber} will not be selected")]
+	public void ThenLineNumberWillNotBeSelected(int lineNumber)
+	{
+		this.Context.Engine.Selector.Selected.ContainsKey(lineNumber).Should().BeFalse();
+	}
+
+	[Then($"the selection period will be {X.WholeNumber} seconds")]
+	public void ThenTheSelectionPeriodWillBe(int seconds)
+	{
+		this.Context.Engine.Selector.SelectionPeriod.Should().Be(TimeSpan.FromSeconds(seconds));
+	}
 }
