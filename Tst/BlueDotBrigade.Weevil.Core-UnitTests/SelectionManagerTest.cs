@@ -47,5 +47,19 @@
 
 			engine.Selector.Selected.Count.Should().Be(0);
 		}
+
+		[TestMethod]
+		public void GivenALineTheFilterHides_WhenSelectedByLineNumber_ThenRecordNotFoundIsThrown()
+		{
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
+				.Open();
+			engine.Filter.Apply(Filter.FilterType.PlainText, new Filter.FilterCriteria("Id=002"));
+
+			Action act = () => engine.Selector.Select(lineNumber: 1);
+
+			act.Should().Throw<RecordNotFoundException>();
+			engine.Selector.Selected.Count.Should().Be(0);
+		}
 	}
 }
