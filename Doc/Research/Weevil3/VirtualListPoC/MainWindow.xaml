@@ -1,0 +1,287 @@
+<Window x:Class="Weevil.VirtualListPoC.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Weevil.VirtualListPoC"
+        xmlns:controls="clr-namespace:BlueDotBrigade.Weevil.Windows.Controls"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        Title="Weevil: a WPF list of 100 million rows (#1014)"
+        Height="900" Width="1500"
+        Background="{DynamicResource MaterialDesignPaper}"
+        Foreground="{DynamicResource MaterialDesignBody}"
+        FontSize="{DynamicResource ApplicationFontSize}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:SeverityToBackgroundConverter x:Key="SeverityBackgroundConverter"
+                                             WarningBrush="{StaticResource SeverityWarningBackgroundBrush}"
+                                             ErrorBrush="{StaticResource SeverityErrorBackgroundBrush}"
+                                             CriticalBrush="{StaticResource SeverityCriticalBackgroundBrush}" />
+        <local:SeverityToForegroundConverter x:Key="SeverityForegroundConverter"
+                                             WarningBrush="{StaticResource SeverityWarningForegroundBrush}"
+                                             ErrorBrush="{StaticResource SeverityErrorForegroundBrush}"
+                                             CriticalBrush="{StaticResource SeverityCriticalForegroundBrush}" />
+        <local:TimeSpanConverter x:Key="TimeSpanConverter" />
+        <local:ContentConverter x:Key="ContentConverter" />
+        <local:ContentToTruncationIconConverter x:Key="ContentToTruncationIconConverter" />
+        <local:CheckBoxValidationErrorConverter x:Key="CheckBoxValidationErrorConverter" />
+        <local:RegionStringConverter x:Key="RegionStringConverter" />
+        <local:BookmarkStringConverter x:Key="BookmarkStringConverter" />
+
+        <!-- Weevil's ListView.ItemContainerStyle (FilterView.xaml), without its IsSelected trigger:
+             the range selection marks a row through the row's own IsSelected. -->
+        <Style x:Key="RowStyle" TargetType="ListViewItem">
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="OnRowPreviewMouseLeftButtonDown" />
+            <Setter Property="FontSize" Value="{DynamicResource RowFontSize}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource TransparentBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="0,0,0,1"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                            <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignTextBoxBorder}" />
+                </Trigger>
+                <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                    <Setter Property="Foreground" Value="{Binding Severity, Converter={StaticResource SeverityForegroundConverter}, FallbackValue={StaticResource MaterialDesignBody}, Mode=OneWay}"/>
+                    <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue={StaticResource RowBackgroundBrush}, Mode=OneWay}"/>
+                </Trigger>
+                <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                    <Setter Property="Foreground" Value="{Binding Severity, Converter={StaticResource SeverityForegroundConverter}, FallbackValue={StaticResource MaterialDesignBody}, Mode=OneWay}"/>
+                    <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue={StaticResource AlternatingRowBackgroundBrush}, Mode=OneWay}"/>
+                </Trigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="Background" Value="{StaticResource RowHighlightedBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- With WPF's own selection: Weevil's IsSelected trigger, unchanged. -->
+        <Style x:Key="WpfSelectionRowStyle" TargetType="ListViewItem" BasedOn="{StaticResource RowStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="Background" Value="{StaticResource RowHighlightedBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Add" Modifiers="Ctrl" Command="{Binding NextPinCommand}" />
+        <KeyBinding Key="OemPlus" Modifiers="Ctrl" Command="{Binding NextPinCommand}" />
+        <KeyBinding Key="Add" Modifiers="Ctrl+Shift" Command="{Binding NextCommentCommand}" />
+        <KeyBinding Key="OemPlus" Modifiers="Ctrl+Shift" Command="{Binding NextCommentCommand}" />
+        <KeyBinding Key="Enter" Modifiers="Alt" Command="{Binding ApplyFilterCommand}" />
+    </Window.InputBindings>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <ComboBox Width="180" Margin="4"
+                      ItemsSource="{Binding FilterOptions}"
+                      DisplayMemberPath="Name"
+                      SelectedValuePath="Kind"
+                      SelectedValue="{Binding SelectedFilter}" />
+            <Button Content="Filter (Alt+Enter)" Margin="4" Command="{Binding ApplyFilterCommand}" />
+            <Button Content="Copy (Ctrl+C)" Margin="4" Command="{Binding CopyCommand}" />
+            <Button Content="Next pin (Ctrl+Plus)" Margin="4" Command="{Binding NextPinCommand}" />
+            <Button Content="Next comment (Ctrl+Shift+Plus)" Margin="4" Command="{Binding NextCommentCommand}" />
+            <Button Content="Unpin all" Margin="4" Command="{Binding UnpinAllCommand}" />
+            <Button Content="Remove comments" Margin="4" Command="{Binding RemoveCommentsCommand}" />
+            <Button Content="Reset counters" Margin="4" Command="{Binding ResetCountersCommand}" />
+            <TextBlock Text="{Binding ModeText}" Margin="12,4" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" Margin="8,4">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding RowsText}" Margin="0,0,24,0" />
+                <TextBlock Text="{Binding SelectionText}" Margin="0,0,24,0" />
+                <TextBlock Text="{Binding LastAction}" />
+            </StackPanel>
+            <TextBlock Text="{Binding LookupsText}" />
+            <TextBlock Text="{Binding MemoryText}" />
+        </StackPanel>
+        <Grid>
+            <ListView x:Name="ListView"
+                      FontSize="{DynamicResource ApplicationFontSize}"
+                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      ItemsSource="{Binding Rows}"
+                      AlternationCount="2"
+                      PreviewKeyDown="OnListViewPreviewKeyDown"
+                      SelectionChanged="OnListViewSelectionChanged">
+                <ListView.Resources>
+                    <Thickness x:Key="ColumnHeaderPadding" Left="4" Top="4" Right="4" Bottom="4" />
+                </ListView.Resources>
+                <ListView.Style>
+                    <Style TargetType="ListView" BasedOn="{StaticResource MaterialDesignListView}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.Style>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="Auto">
+                            <GridViewColumnHeader Content="Pinned" Padding="{StaticResource ColumnHeaderPadding}"/>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding Path=IsPinned, TargetNullValue=false, Converter={StaticResource CheckBoxValidationErrorConverter}}" HorizontalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto">
+                            <GridViewColumnHeader Content="Comment" Padding="{StaticResource ColumnHeaderPadding}"/>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox
+                                        Text="{Binding Path=Comment, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"
+                                        IsEnabled="True"
+                                        MinWidth="150"
+                                        TextWrapping="Wrap"
+                                        CaretBrush="{StaticResource HighlightBrush}"
+                                        controls:TextBoxBehavior.AutoSelectEnabled="True">
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="Auto">
+                            <GridViewColumnHeader Content="Elapsed" Padding="{StaticResource ColumnHeaderPadding}"/>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Text="{Binding ElapsedTime, Converter={StaticResource TimeSpanConverter}}"
+                                        TextAlignment="Right">
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="1100">
+                            <GridViewColumnHeader Content="Content" Padding="{StaticResource ColumnHeaderPadding}"/>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock
+                                            Text="{Binding Mode=OneWay, Converter={StaticResource ContentConverter}}"
+                                            TextWrapping="WrapWithOverflow"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListViewItem}}" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border x:Name="RegionTag"
+                                                    BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4"
+                                                    Margin="0,2,4,0"
+                                                    Background="{StaticResource SecondaryBackgroundBrush}">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Text, ElementName=RegionTextBlock}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock x:Name="RegionTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource TextForeground}">
+                                                    <TextBlock.ToolTip>
+                                                        <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                            <Binding Path="." />
+                                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                            <Binding Source="True" />
+                                                        </MultiBinding>
+                                                    </TextBlock.ToolTip>
+                                                    <TextBlock.Text>
+                                                        <MultiBinding Converter="{StaticResource RegionStringConverter}">
+                                                            <Binding Path="." />
+                                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </Border>
+                                            <Border x:Name="BookmarkTag"
+                                                    BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4"
+                                                    Margin="0,2,4,0"
+                                                    Background="{StaticResource SecondaryBackgroundBrush}">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Text, ElementName=BookmarkTextBlock}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <StackPanel.ToolTip>
+                                                        <MultiBinding Converter="{StaticResource BookmarkStringConverter}">
+                                                            <Binding Path="." />
+                                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                            <Binding Source="True" />
+                                                        </MultiBinding>
+                                                    </StackPanel.ToolTip>
+                                                    <TextBlock FontWeight="Heavy"
+                                                               FontSize="{DynamicResource RowFontSize}"
+                                                               Foreground="{StaticResource TextForeground}"
+                                                               Margin="0,0,2,0"
+                                                               FontFamily="Segoe UI Emoji">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Symbol">
+                                                                <Binding Path="." />
+                                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                    <TextBlock x:Name="BookmarkTextBlock" FontWeight="Heavy" FontSize="{DynamicResource RowFontSize}" Foreground="{StaticResource TextForeground}">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource BookmarkStringConverter}" ConverterParameter="Details">
+                                                                <Binding Path="." />
+                                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border
+                                                x:Name="TruncatedTag"
+                                                BorderBrush="{StaticResource TextForeground}" BorderThickness="1" CornerRadius="4"
+                                                Margin="0,2,4,0"
+                                                Background="{StaticResource SecondaryBackgroundBrush}">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Text, ElementName=TruncatedTextBlock}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock x:Name="TruncatedTextBlock" FontSize="{DynamicResource RowFontSize}" FontWeight="Heavy" Foreground="{StaticResource TextForeground}"
+                                                           Text="{Binding Mode=OneWay, Converter={StaticResource ContentToTruncationIconConverter}}"
+                                                           ToolTip="This record has been shortened for readability. Press Ctrl+C to copy the original record content."/>
+                                            </Border>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <TextBlock Text="Filtering..." HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </Grid>
+    </DockPanel>
+</Window>

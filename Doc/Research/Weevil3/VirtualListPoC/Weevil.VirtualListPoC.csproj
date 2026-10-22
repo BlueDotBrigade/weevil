@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- Lets the project build on Linux too; it only runs on Windows. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>Weevil.VirtualListPoC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The self-test is a project of its own. -->
+    <Compile Remove="SelfTest\**" />
+    <None Remove="SelfTest\**" />
+    <Page Remove="SelfTest\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The version Weevil's GUI uses, so the row template looks and costs the same. -->
+    <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
+  </ItemGroup>
+</Project>

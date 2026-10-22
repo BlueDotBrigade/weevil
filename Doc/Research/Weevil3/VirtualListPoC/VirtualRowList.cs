@@ -160,6 +160,35 @@ internal sealed class VirtualRowList : IList, INotifyCollectionChanged
 		return position >= 0 ? position : -1;
 	}
 
+	/// <summary>
+	/// Returns the position of a line in the results, or -1: a binary search, as line numbers grow with record numbers.
+	/// </summary>
+	public int FindPositionOfLine(int lineNumber)
+	{
+		var low = 0;
+		var high = _results.Length - 1;
+		while (low <= high)
+		{
+			var middle = low + ((high - low) / 2);
+			var line = SyntheticLog.GetLineNumber(_results[middle]);
+			if (line == lineNumber)
+			{
+				return middle;
+			}
+
+			if (line < lineNumber)
+			{
+				low = middle + 1;
+			}
+			else
+			{
+				high = middle - 1;
+			}
+		}
+
+		return -1;
+	}
+
 	public int IndexOf(object? value)
 	{
 		this.Counters.IndexOf++;
