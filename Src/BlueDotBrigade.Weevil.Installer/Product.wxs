@@ -39,13 +39,13 @@
 
 	<Fragment>
 		<ComponentGroup Id="generated_weevil_bin_files" Directory="InstallFolderBin">
-			<Files Include="$(var.InstallerBinSourceDir)**" />
+			<Files Include="$(var.InstallerBinSourceDir)**\*" />
 		</ComponentGroup>
 		<ComponentGroup Id="generated_documentation_doc_files" Directory="DocDir">
-			<Files Include="$(var.InstallerDocSourceDir)**" />
+			<Files Include="$(var.InstallerDocSourceDir)**\*" />
 		</ComponentGroup>
 		<ComponentGroup Id="generated_documentation_license_files" Directory="LicenseDir">
-			<Files Include="$(var.InstallerLicenseSourceDir)**" />
+			<Files Include="$(var.InstallerLicenseSourceDir)**\*" />
 		</ComponentGroup>
 	</Fragment>
 	<Fragment>
