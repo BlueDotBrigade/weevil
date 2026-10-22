@@ -20,12 +20,27 @@ A window like Weevil's filter results, over a synthetic log that exists only as 
 
 ## Run It
 
-The project is self-contained: it does not reference any Weevil project and is not part of `Weevil-v2.sln`. Building it needs the .NET 10 SDK. It runs only on Windows, but also builds on Linux.
+The project is self-contained: it does not reference any Weevil project and is not part of `Weevil-v2.sln`. It runs only on Windows, but also builds on Linux.
+
+What the Windows PC needs:
+
+- **To run a built copy:** the .NET 10 Desktop Runtime, x64, which Weevil 2.12 also needs. If Weevil runs on the PC, it is already there. Otherwise install it from the [.NET 10 download page](https://dotnet.microsoft.com/download/dotnet/10.0) (".NET Desktop Runtime", Windows x64), or with `winget install Microsoft.DotNet.DesktopRuntime.10`.
+- **To run from the source code:** the .NET 10 SDK, which includes that runtime.
+
+A built copy is made with:
+
+```powershell
+dotnet publish -c Release -r win-x64 --self-contained false -o publish
+```
+
+Copy `publish`, `RunAll.cmd` and this README to the PC, keeping `publish` as a folder next to `RunAll.cmd` (or put the files of `publish` next to it), then double-click `RunAll.cmd`. It runs both automatic runs, one after the other, and leaves `results-ranges.md` and `results-wpf-selection.md` next to it. Each report is saved after every step, so if a run crashes or hangs, the report still holds the steps before it. From the source code, `RunAll.cmd` uses `dotnet run` instead.
+
+Or run it yourself:
 
 ```powershell
 cd Doc\Research\Weevil3\VirtualListPoC
 
-# The automatic run: about a minute, then the window closes and results.md holds the report.
+# The automatic run: a few minutes, then the window closes and results.md holds the report.
 dotnet run -c Release -- --auto
 
 # The same with WPF's own selection, on 1 million rows.
@@ -97,7 +112,7 @@ Some things only a person can judge. Run `dotnet run -c Release` and check:
 
 ## Copied Weevil Files
 
-`WeevilCopies/` holds unmodified copies taken from `main` at `1b128ae` (2026-10-21, after #1013 merged).
+`WeevilCopies/` holds unmodified copies taken from `main` at `1b128ae` (2026-10-21, after #1013 merged). They behave as in release 2.12.1 (`Releases/2.x` at `e8f2e91`): of every Weevil file copied or adapted here, only two differ from that release, `FilterListViewBehavior.cs` in a comment and `SimpleCallStackFormatter` in reading `IsMultiLine` from the record instead of `Metadata` (#1012).
 
 | File | Copied from |
 |---|---|
@@ -127,7 +142,7 @@ dotnet run -c Release
 
 ### Status (2026-10-22)
 
-Built and self-tested on Linux. **Not yet run on Windows**: the decision waits for `--auto` and the by-hand checks on the developer PC.
+Built and self-tested on Linux. **Not yet run on Windows**: the decision waits for `RunAll.cmd` and the by-hand checks on a Windows PC.
 
 ### Self-Test: 2026-10-22
 

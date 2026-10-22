@@ -6,6 +6,8 @@ cd /d "%~dp0"
 
 if exist "Weevil.VirtualListPoC.exe" (
     set "POC=Weevil.VirtualListPoC.exe"
+) else if exist "publish\Weevil.VirtualListPoC.exe" (
+    set "POC=publish\Weevil.VirtualListPoC.exe"
 ) else (
     rem From the source code: needs the .NET 10 SDK.
     set "POC=dotnet run -c Release --"
