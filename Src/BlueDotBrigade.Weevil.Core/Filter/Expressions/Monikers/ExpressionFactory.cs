@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 {
 	using System.Collections.Generic;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 
 	internal class ExpressionFactory : IExpressionFactory
@@ -12,7 +13,7 @@
 			_creators = monikerActivators;
 		}
 
-		public ExpressionFactory(IRegionManager regionManager, IBookmarkManager bookmarkManager)
+		public ExpressionFactory(IRegionManager regionManager, IBookmarkManager bookmarkManager, ElapsedTimes previousElapsedTimes)
 		{
 			_creators = new List<MonikerActivator>
 			{
@@ -24,7 +25,7 @@
 				new MonikerActivator(UiThreadExpression.Moniker, (e) => new UiThreadExpression(e)),
 				new MonikerActivator(UserCommentExpression.Moniker, (e) => new UserCommentExpression(e)),
 				new MonikerActivator(ContentLengthExpression.Moniker, (e) => new ContentLengthExpression(e)),
-				new MonikerActivator(ElapsedGreaterThanExpression.Moniker, (e) => new ElapsedGreaterThanExpression(e)),
+				new MonikerActivator(ElapsedGreaterThanExpression.Moniker, (e) => new ElapsedGreaterThanExpression(e, previousElapsedTimes)),
 				new MonikerActivator(RegionExpression.Moniker, (e) => new RegionExpression(e, regionManager)),
 				new MonikerActivator(BookmarkExpression.Moniker, (e) => new BookmarkExpression(e, bookmarkManager)),
 			};

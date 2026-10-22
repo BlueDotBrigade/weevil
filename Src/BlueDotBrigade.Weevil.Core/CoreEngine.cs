@@ -143,8 +143,6 @@
 
 			_originalRecordCount = _allRecords.Length;
 
-			new ElapsedTimeAnalyzer(_allRecords).Analyze();
-
 			_analysisManager = new AnalysisManager(this, _coreExtension, _telemetryRecorder);
 
 			var filterAliases = _coreExtension.GetFilterAliases(_context);
@@ -162,6 +160,7 @@
 				GetRecordCounters(),
 				_regionManager,
 				_bookmarkManager,
+				_annotations,
 				_telemetryRecorder);
 
 			// Construction-time default filter: applied without recording telemetry (not a user action).
