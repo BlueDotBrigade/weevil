@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 752 242" width="752" height="242" role="img" aria-labelledby="todayTitle">
+  <style>
+    text { font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif; fill: #1A1A1A; }
+    .label { font: 600 10px Consolas, "IBM Plex Mono", monospace; letter-spacing: 0.06em; fill: #525252; }
+    .note { font-size: 12px; fill: #525252; }
+    .boxtitle { font: 600 15px "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif; fill: #1A1A1A; }
+    .action { font-size: 13px; font-weight: 600; fill: #1A1A1A; }
+    .mono { font: 12px Consolas, "IBM Plex Mono", monospace; fill: #1A1A1A; }
+    .strong { font-weight: 600; fill: #900A22; }
+    .box { fill: #FFFFFF; stroke: #C0C0C0; stroke-width: 1; }
+    .accentbox { stroke: #900A22; stroke-width: 2; }
+    .bar { fill: #C0C0C0; }
+    .row { fill: #EEEEEE; }
+    .rowsel { fill: #949494; }
+    .obj { fill: #525252; opacity: 0.55; }
+    .objsel { fill: #949494; }
+    .cell { fill: #FFFFFF; stroke: #C0C0C0; }
+    .cellsel { fill: #949494; stroke: #949494; }
+    .celltext { font: 10px Consolas, "IBM Plex Mono", monospace; fill: #525252; }
+    .celltextsel { font: 600 10px Consolas, "IBM Plex Mono", monospace; fill: #000000; }
+    .link { stroke: #525252; stroke-width: 1.5; fill: none; }
+    .dashed { stroke-dasharray: 4 4; }
+    .arrowhead { fill: #525252; }
+  </style>
+  <rect x="-16" y="-16" width="752" height="242" fill="#FFFFFF"/>
+  <title id="todayTitle">Weevil 2.12: every record is an object in memory, and Ctrl+A puts every one of them in WPF's selected list</title>
+    <defs><marker id="arrowToday" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+    <text class="label" x="10" y="20">IN MEMORY</text>
+    <rect class="box" x="10" y="30" width="220" height="150" rx="6"/>
+    <rect class="obj" x="24" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="49" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="74" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="99" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="124" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="149" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="174" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="199" y="44" width="20" height="12" rx="2"/>
+    <rect class="obj" x="24" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="49" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="74" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="99" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="124" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="149" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="174" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="199" y="61" width="20" height="12" rx="2"/>
+    <rect class="obj" x="24" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="49" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="74" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="99" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="124" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="149" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="174" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="199" y="78" width="20" height="12" rx="2"/>
+    <rect class="obj" x="24" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="49" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="74" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="99" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="124" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="149" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="174" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="199" y="95" width="20" height="12" rx="2"/>
+    <rect class="obj" x="24" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="49" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="74" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="99" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="124" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="149" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="174" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="199" y="112" width="20" height="12" rx="2"/>
+    <rect class="obj" x="24" y="129" width="20" height="12" rx="2"/>
+    <rect class="obj" x="49" y="129" width="20" height="12" rx="2"/>
+    <rect class="obj" x="74" y="129" width="20" height="12" rx="2"/>
+    <rect class="obj" x="99" y="129" width="20" height="12" rx="2"/>
+    <rect class="obj" x="124" y="129" width="20" height="12" rx="2"/>
+    <rect class="obj" x="149" y="129" width="20" height="12" rx="2"/>
+    <rect class="obj" x="174" y="129" width="20" height="12" rx="2"/>
+    <rect class="obj" x="199" y="129" width="20" height="12" rx="2"/>
+    <text class="note" x="120" y="166" text-anchor="middle">… 100,000,000 record objects</text>
+    <line class="link" x1="234" y1="105" x2="266" y2="105" marker-end="url(#arrowToday)"/>
+    <text class="label" x="270" y="20">ON SCREEN</text>
+    <rect class="box" x="270" y="30" width="180" height="150" rx="6"/>
+    <rect class="bar" x="270" y="30" width="180" height="14" rx="6"/>
+    <rect class="bar" x="270" y="38" width="180" height="6"/>
+    <rect class="row" x="280" y="52" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="68" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="84" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="100" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="116" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="132" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="148" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="164" width="160" height="11" rx="2"/>
+    <rect class="row" x="280" y="180" width="160" height="11" rx="2"/>
+    <text class="note" x="360" y="200" text-anchor="middle">about 30 rows</text>
+    <line class="link" x1="454" y1="105" x2="486" y2="105" marker-end="url(#arrowToday)"/>
+    <text class="label" x="490" y="20">SELECTED, AFTER CTRL+A</text>
+    <rect class="box" x="490" y="30" width="220" height="150" rx="6"/>
+    <rect class="objsel" x="504" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="529" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="554" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="579" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="604" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="629" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="654" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="679" y="44" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="504" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="529" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="554" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="579" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="604" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="629" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="654" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="679" y="61" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="504" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="529" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="554" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="579" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="604" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="629" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="654" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="679" y="78" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="504" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="529" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="554" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="579" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="604" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="629" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="654" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="679" y="95" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="504" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="529" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="554" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="579" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="604" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="629" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="654" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="679" y="112" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="504" y="129" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="529" y="129" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="554" y="129" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="579" y="129" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="604" y="129" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="629" y="129" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="654" y="129" width="20" height="12" rx="2"/>
+    <rect class="objsel" x="679" y="129" width="20" height="12" rx="2"/>
+    <text class="note" x="600" y="166" text-anchor="middle">… 100,000,000 entries</text>
+</svg>

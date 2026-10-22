@@ -153,7 +153,7 @@ Checked by hand on the developer PC, 2026-10-22, with the range selection and 10
 - Shift+Down twice from line 3 selected lines 3 to 5; Ctrl+A selected 100,000,000 rows at once.
 - Typing a comment quickly kept every character and pinned its record, while the selected row stayed selected.
 
-Approved 2026-10-22. What #1015 still has to build is listed in step 5 of the [#990 plan](../../../Plans/990-ImmutableCore.md#steps).
+Approved 2026-10-22. The [decision record](Decision/README.md) holds the explanation, the illustrated page and the recommendation it was based on. What #1015 still has to build is listed in step 5 of the [#990 plan](../../../Plans/990-ImmutableCore.md#steps).
 
 ### Developer PC: 2026-10-22
 

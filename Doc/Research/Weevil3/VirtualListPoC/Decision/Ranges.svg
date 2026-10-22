@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 752 252" width="752" height="252" role="img" aria-labelledby="rangesTitle">
+  <style>
+    text { font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif; fill: #1A1A1A; }
+    .label { font: 600 10px Consolas, "IBM Plex Mono", monospace; letter-spacing: 0.06em; fill: #525252; }
+    .note { font-size: 12px; fill: #525252; }
+    .boxtitle { font: 600 15px "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif; fill: #1A1A1A; }
+    .action { font-size: 13px; font-weight: 600; fill: #1A1A1A; }
+    .mono { font: 12px Consolas, "IBM Plex Mono", monospace; fill: #1A1A1A; }
+    .strong { font-weight: 600; fill: #900A22; }
+    .box { fill: #FFFFFF; stroke: #C0C0C0; stroke-width: 1; }
+    .accentbox { stroke: #900A22; stroke-width: 2; }
+    .bar { fill: #C0C0C0; }
+    .row { fill: #EEEEEE; }
+    .rowsel { fill: #949494; }
+    .obj { fill: #525252; opacity: 0.55; }
+    .objsel { fill: #949494; }
+    .cell { fill: #FFFFFF; stroke: #C0C0C0; }
+    .cellsel { fill: #949494; stroke: #949494; }
+    .celltext { font: 10px Consolas, "IBM Plex Mono", monospace; fill: #525252; }
+    .celltextsel { font: 600 10px Consolas, "IBM Plex Mono", monospace; fill: #000000; }
+    .link { stroke: #525252; stroke-width: 1.5; fill: none; }
+    .dashed { stroke-dasharray: 4 4; }
+    .arrowhead { fill: #525252; }
+  </style>
+  <rect x="-16" y="-16" width="752" height="252" fill="#FFFFFF"/>
+  <title id="rangesTitle">How the selection is stored as ranges after each action</title>
+    <text class="label" x="10" y="18">WHAT YOU DO</text>
+    <text class="label" x="190" y="18">ROWS 0 TO 11, OF 100,000,000</text>
+    <text class="label" x="600" y="18">WHAT IS STORED</text>
+        <text class="action" x="10" y="52">Click row 3</text>
+    <rect class="cell" x="190" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="204" y="51" text-anchor="middle">0</text>
+    <rect class="cell" x="222" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="236" y="51" text-anchor="middle">1</text>
+    <rect class="cell" x="254" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="268" y="51" text-anchor="middle">2</text>
+    <rect class="cellsel" x="286" y="34" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="300" y="51" text-anchor="middle">3</text>
+    <rect class="cell" x="318" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="332" y="51" text-anchor="middle">4</text>
+    <rect class="cell" x="350" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="364" y="51" text-anchor="middle">5</text>
+    <rect class="cell" x="382" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="396" y="51" text-anchor="middle">6</text>
+    <rect class="cell" x="414" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="428" y="51" text-anchor="middle">7</text>
+    <rect class="cell" x="446" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="460" y="51" text-anchor="middle">8</text>
+    <rect class="cell" x="478" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="492" y="51" text-anchor="middle">9</text>
+    <rect class="cell" x="510" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="524" y="51" text-anchor="middle">10</text>
+    <rect class="cell" x="542" y="34" width="28" height="26" rx="3"/>
+    <text class="celltext" x="556" y="51" text-anchor="middle">11</text>
+    <text class="mono strong" x="600" y="52">[3–3]</text>
+    <text class="action" x="10" y="98">Shift+Down, twice</text>
+    <rect class="cell" x="190" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="204" y="97" text-anchor="middle">0</text>
+    <rect class="cell" x="222" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="236" y="97" text-anchor="middle">1</text>
+    <rect class="cell" x="254" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="268" y="97" text-anchor="middle">2</text>
+    <rect class="cellsel" x="286" y="80" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="300" y="97" text-anchor="middle">3</text>
+    <rect class="cellsel" x="318" y="80" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="332" y="97" text-anchor="middle">4</text>
+    <rect class="cellsel" x="350" y="80" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="364" y="97" text-anchor="middle">5</text>
+    <rect class="cell" x="382" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="396" y="97" text-anchor="middle">6</text>
+    <rect class="cell" x="414" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="428" y="97" text-anchor="middle">7</text>
+    <rect class="cell" x="446" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="460" y="97" text-anchor="middle">8</text>
+    <rect class="cell" x="478" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="492" y="97" text-anchor="middle">9</text>
+    <rect class="cell" x="510" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="524" y="97" text-anchor="middle">10</text>
+    <rect class="cell" x="542" y="80" width="28" height="26" rx="3"/>
+    <text class="celltext" x="556" y="97" text-anchor="middle">11</text>
+    <text class="mono strong" x="600" y="98">[3–5]</text>
+    <text class="action" x="10" y="144">Ctrl+click row 9</text>
+    <rect class="cell" x="190" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="204" y="143" text-anchor="middle">0</text>
+    <rect class="cell" x="222" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="236" y="143" text-anchor="middle">1</text>
+    <rect class="cell" x="254" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="268" y="143" text-anchor="middle">2</text>
+    <rect class="cellsel" x="286" y="126" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="300" y="143" text-anchor="middle">3</text>
+    <rect class="cellsel" x="318" y="126" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="332" y="143" text-anchor="middle">4</text>
+    <rect class="cellsel" x="350" y="126" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="364" y="143" text-anchor="middle">5</text>
+    <rect class="cell" x="382" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="396" y="143" text-anchor="middle">6</text>
+    <rect class="cell" x="414" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="428" y="143" text-anchor="middle">7</text>
+    <rect class="cell" x="446" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="460" y="143" text-anchor="middle">8</text>
+    <rect class="cellsel" x="478" y="126" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="492" y="143" text-anchor="middle">9</text>
+    <rect class="cell" x="510" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="524" y="143" text-anchor="middle">10</text>
+    <rect class="cell" x="542" y="126" width="28" height="26" rx="3"/>
+    <text class="celltext" x="556" y="143" text-anchor="middle">11</text>
+    <text class="mono strong" x="600" y="144">[3–5]  [9–9]</text>
+    <text class="action" x="10" y="190">Ctrl+A</text>
+    <rect class="cellsel" x="190" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="204" y="189" text-anchor="middle">0</text>
+    <rect class="cellsel" x="222" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="236" y="189" text-anchor="middle">1</text>
+    <rect class="cellsel" x="254" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="268" y="189" text-anchor="middle">2</text>
+    <rect class="cellsel" x="286" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="300" y="189" text-anchor="middle">3</text>
+    <rect class="cellsel" x="318" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="332" y="189" text-anchor="middle">4</text>
+    <rect class="cellsel" x="350" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="364" y="189" text-anchor="middle">5</text>
+    <rect class="cellsel" x="382" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="396" y="189" text-anchor="middle">6</text>
+    <rect class="cellsel" x="414" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="428" y="189" text-anchor="middle">7</text>
+    <rect class="cellsel" x="446" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="460" y="189" text-anchor="middle">8</text>
+    <rect class="cellsel" x="478" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="492" y="189" text-anchor="middle">9</text>
+    <rect class="cellsel" x="510" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="524" y="189" text-anchor="middle">10</text>
+    <rect class="cellsel" x="542" y="172" width="28" height="26" rx="3"/>
+    <text class="celltextsel" x="556" y="189" text-anchor="middle">11</text>
+    <text class="note" x="576" y="190">…</text>
+    <text class="mono strong" x="600" y="190">[0–99,999,999]</text>
+</svg>
