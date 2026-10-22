@@ -89,7 +89,7 @@
     <Message Text="Telemetry credentials override not found. Using template TelemetryCredentials.wxs_ from installer project." Importance="normal" Condition="!Exists('$(TelemetryCredentialsSourcePath)')" />
     <Copy SourceFiles="$(TelemetryCredentialsSourcePath)" DestinationFiles="$(TelemetryCredentialsProjectPath)" SkipUnchangedFiles="true" Condition="Exists('$(TelemetryCredentialsSourcePath)')" />
   </Target>
-  <Target Name="StageInstallerLayout" BeforeTargets="BeforeBuild">
+  <Target Name="StageInstallerLayout" BeforeTargets="CoreCompile">
     <RemoveDir Directories="$(InstallerLayoutRoot)" Condition="Exists('$(InstallerLayoutRoot)')" />
     <MakeDir Directories="$(InstallerBinLayoutDir);$(InstallerDocLayoutDir);$(InstallerLicenseLayoutDir);$(InstallerPluginLayoutDir)" />
     <ItemGroup>
