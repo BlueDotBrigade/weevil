@@ -1,0 +1,6 @@
+3050-09-30 11:26:00.00000	1977	2	Info	Alpha: the first record
+3050-09-30 11:26:01.00000	1977	2	Info	Bravo
+3050-09-30 11:26:02.00000	1977	2	Info	Alpha: 2 seconds after the previous Alpha
+3050-09-30 11:26:09.00000	1977	2	Info	Bravo: 7 seconds after the previous record
+3050-09-30 11:26:10.00000	1977	2	Info	Alpha: 8 seconds after the previous Alpha
+3050-09-30 11:26:11.00000	1977	2	Info	Alpha: 1 second after the previous Alpha

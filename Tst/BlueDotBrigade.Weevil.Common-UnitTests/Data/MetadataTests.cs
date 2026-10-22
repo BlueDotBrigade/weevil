@@ -87,5 +87,43 @@ namespace BlueDotBrigade.Weevil.Data
 
 			view.Annotations.IsPinned(7).Should().BeFalse();
 		}
+
+		[TestMethod]
+		public void GivenAttachedRecord_WhenTheViewCalculatesElapsedTimes_ThenTheRecordReadsThem()
+		{
+			var start = new System.DateTime(2026, 10, 22, 10, 0, 0);
+			System.Collections.Immutable.ImmutableArray<IRecord> records = R.Create()
+				.WithCreatedAt(6, start)
+				.WithCreatedAt(7, start.AddSeconds(2))
+				.GetRecords();
+			var view = new ViewAnnotations();
+			records[1].Metadata.Attach(view, lineNumber: 7);
+
+			view.ElapsedTimes = ElapsedTimes.Calculate(records);
+
+			records[1].Metadata.ElapsedTime.Should().Be(System.TimeSpan.FromSeconds(2));
+			records[1].Metadata.HasElapsedTime.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenRecordNotAttachedToAView_WhenRead_ThenItHasNoElapsedTime()
+		{
+			var metadata = new Metadata();
+
+			metadata.ElapsedTime.Should().Be(Metadata.ElapsedTimeUnknown);
+			metadata.HasElapsedTime.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenRecord_WhenTheViewReportsANewElapsedTime_ThenTheChangeIsRaised()
+		{
+			var metadata = new Metadata();
+			var changes = new List<string>();
+			metadata.PropertyChanged += (sender, e) => changes.Add(e.PropertyName);
+
+			metadata.RaiseElapsedTimeChanged();
+
+			changes.Should().Equal(nameof(Metadata.ElapsedTime));
+		}
 	}
 }

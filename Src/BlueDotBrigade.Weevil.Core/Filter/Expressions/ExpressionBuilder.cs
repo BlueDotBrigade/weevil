@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 
 	internal class ExpressionBuilder
@@ -29,11 +30,11 @@
 			return SurrogateExpression.IsReal(result);
 		}
 
-		public static ExpressionBuilder Create(ICoreExtension coreExtension, ContextDictionary context, FilterType filterType, IFilterCriteria criteria, IRegionManager regionManager, IBookmarkManager bookmarkManager)
+		public static ExpressionBuilder Create(ICoreExtension coreExtension, ContextDictionary context, FilterType filterType, IFilterCriteria criteria, IRegionManager regionManager, IBookmarkManager bookmarkManager, ElapsedTimes previousElapsedTimes)
 		{
 			var factories = new List<IExpressionFactory>();
 
-			var builtInMonikers = new Monikers.ExpressionFactory(regionManager, bookmarkManager);
+			var builtInMonikers = new Monikers.ExpressionFactory(regionManager, bookmarkManager, previousElapsedTimes);
 
 			factories.Add(builtInMonikers);
 

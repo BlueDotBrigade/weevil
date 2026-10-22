@@ -50,6 +50,7 @@
 	</ItemGroup>
 	<ItemGroup>
           <None Include=".Daten\.Global\Droid.log" />
+          <None Include=".Daten\.Global\ElapsedTime.log" />
           <None Include=".Daten\.Global\Empty.log" />
           <None Include=".Daten\.Global\StableValueAnalyzer.log" />
           <None Include=".Daten\OpeningFileShould\EmptyFile.txt" />
