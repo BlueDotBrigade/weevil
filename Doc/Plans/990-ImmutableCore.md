@@ -49,7 +49,9 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - The store loads every sidecar entry, including lines not in memory (an open from a start line, or a cleared line), so the sidecar can be saved from the store without losing them.
    - The store and the flags carry across Clear and Reload, as bookmarks and regions do today.
    - Unpin All, Remove All Flags and Remove Comments touch only records in memory today. The sub-issue decides whether they include cleared lines.
-4. **Proof of concept: WPF virtual list (#1014).** On Windows, outside the product: a `ListView` bound to a virtual list of row view-models with 100 M rows, using the real row template, whose row heights vary.
+4. **Proof of concept: WPF virtual list (#1014). Done 2026-10-22: row view-models only for the rows WPF asks for, and the selection as ranges.**
+   - At 100 M rows it met 21 of its 23 targets, and missed the other two by less than 10 ms: Ctrl+A took 21 ms with no extra memory, and keeping a selection across a filter at most 281 ms. WPF's own selection, as Weevil 2.12 uses it, does not scale: selecting rows again after a filter, one `Add` each, takes time that grows with the square of the count. See the [results](../Research/Weevil3/VirtualListPoC/README.md#results).
+   - The proof of concept, as planned: on Windows, outside the product: a `ListView` bound to a virtual list of row view-models with 100 M rows, using the real row template, whose row heights vary.
    - Check scrolling, Shift and Ctrl selection (keeping the #806 behaviour), Ctrl+A, Shift+End, filtering with a large selection, comment editing, and the cost of `IndexOf`.
    - The list implements the non-generic `IList`, or WPF copies every item. Rows are equal by line number, because WPF finds items with `IndexOf`.
    - This decides the row design for step 5 and for #988. Record the result in `Research/Weevil3/`.
@@ -58,7 +60,10 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - A row ignores its own writes, so the comment box (two-way, with a 250 ms delay) does not overwrite text still being typed.
    - Larger than it looks: the row style binds `Severity`, four converters expect an `IRecord`, and code-behind casts items to `IRecord`.
    - Core's `SelectionManager` stores ranges instead of one record per selected row (decision 5).
-   - Keeping the selection after a filter uses `IndexOf`, instead of comparing every result with every selected record.
+   - Keeping the selection after a filter uses binary searches, or a merge of the old and new results where the old ones had gaps, as in the proof of concept, instead of comparing every result with every selected record.
+   - WPF never selects a row: the grid handles clicks and the selection keys itself, as the proof of concept does for click, Shift, Ctrl, the arrow keys, Page Up, Page Down, Home, End and Ctrl+A. It also needs what the proof of concept left out: selecting by dragging the mouse, a right-click that selects its row before the context menu opens, keeping the anchor across a filter, and reporting the selection to UI Automation.
+   - Decide whether a selected record that a filter hides is still selected when a later filter shows it again. The proof of concept drops it.
+   - GUI feature tests cover the selection journeys, because the Core tests cannot see focus or key handling.
    - Copy stops at 100,000 records (decision 5).
 6. **Elapsed time comes from the view (#1016).**
    - After each filter, the view calculates elapsed times for all its results (decision 1).

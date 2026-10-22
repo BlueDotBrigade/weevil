@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 752 322" width="752" height="322" role="img" aria-labelledby="newTitle">
+  <style>
+    text { font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif; fill: #1A1A1A; }
+    .label { font: 600 10px Consolas, "IBM Plex Mono", monospace; letter-spacing: 0.06em; fill: #525252; }
+    .note { font-size: 12px; fill: #525252; }
+    .boxtitle { font: 600 15px "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif; fill: #1A1A1A; }
+    .action { font-size: 13px; font-weight: 600; fill: #1A1A1A; }
+    .mono { font: 12px Consolas, "IBM Plex Mono", monospace; fill: #1A1A1A; }
+    .strong { font-weight: 600; fill: #900A22; }
+    .box { fill: #FFFFFF; stroke: #C0C0C0; stroke-width: 1; }
+    .accentbox { stroke: #900A22; stroke-width: 2; }
+    .bar { fill: #C0C0C0; }
+    .row { fill: #EEEEEE; }
+    .rowsel { fill: #949494; }
+    .obj { fill: #525252; opacity: 0.55; }
+    .objsel { fill: #949494; }
+    .cell { fill: #FFFFFF; stroke: #C0C0C0; }
+    .cellsel { fill: #949494; stroke: #949494; }
+    .celltext { font: 10px Consolas, "IBM Plex Mono", monospace; fill: #525252; }
+    .celltextsel { font: 600 10px Consolas, "IBM Plex Mono", monospace; fill: #000000; }
+    .link { stroke: #525252; stroke-width: 1.5; fill: none; }
+    .dashed { stroke-dasharray: 4 4; }
+    .arrowhead { fill: #525252; }
+  </style>
+  <rect x="-16" y="-16" width="752" height="322" fill="#FFFFFF"/>
+  <title id="newTitle">The new design: the row list makes a row only for the rows WPF draws, and the selection is a list of ranges</title>
+    <defs><marker id="arrowNew" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+    <rect class="box" x="10" y="30" width="150" height="96" rx="6"/>
+    <text class="boxtitle" x="22" y="54">Record data</text>
+    <text class="note" x="22" y="76">compact, shared by</text>
+    <text class="note" x="22" y="93">the whole log</text>
+    <line class="link" x1="164" y1="78" x2="186" y2="78" marker-end="url(#arrowNew)"/>
+    <rect class="box" x="190" y="30" width="150" height="96" rx="6"/>
+    <text class="boxtitle" x="202" y="54">Filter results</text>
+    <text class="note" x="202" y="76">record numbers,</text>
+    <text class="note" x="202" y="93">4 bytes each</text>
+    <line class="link" x1="344" y1="78" x2="366" y2="78" marker-end="url(#arrowNew)"/>
+    <rect class="box accentbox" x="370" y="30" width="150" height="96" rx="6"/>
+    <text class="boxtitle" x="382" y="54">Row list</text>
+    <text class="note" x="382" y="76">makes a row only</text>
+    <text class="note" x="382" y="93">when WPF asks</text>
+    <line class="link" x1="524" y1="78" x2="546" y2="78" marker-end="url(#arrowNew)"/>
+    <rect class="box" x="550" y="30" width="160" height="96" rx="6"/>
+    <rect class="bar" x="550" y="30" width="160" height="14" rx="6"/>
+    <rect class="bar" x="550" y="38" width="160" height="6"/>
+    <rect class="row" x="560" y="52" width="140" height="11" rx="2"/>
+    <rect class="row" x="560" y="68" width="140" height="11" rx="2"/>
+    <rect class="rowsel" x="560" y="84" width="140" height="11" rx="2"/>
+    <rect class="rowsel" x="560" y="100" width="140" height="11" rx="2"/>
+    <rect class="row" x="560" y="116" width="140" height="11" rx="2"/>
+    <rect class="row" x="560" y="132" width="140" height="11" rx="2"/>
+    <text class="note" x="630" y="146" text-anchor="middle">about 30 rows on screen</text>
+    <rect class="box" x="150" y="190" width="250" height="90" rx="6"/>
+    <text class="boxtitle" x="162" y="214">Selection</text>
+    <text class="mono" x="162" y="236">[0 – 99,999,999]</text>
+    <text class="note" x="162" y="253">one range after Ctrl+A</text>
+    <rect class="box" x="430" y="190" width="280" height="90" rx="6"/>
+    <text class="boxtitle" x="442" y="214">Comments and pins</text>
+    <text class="note" x="442" y="236">kept by line number;</text>
+    <text class="note" x="442" y="253">a row reads and writes them</text>
+    <line class="link dashed" x1="410" y1="126" x2="330" y2="190"/>
+    <text class="note" x="378" y="164">is this row selected?</text>
+    <line class="link dashed" x1="600" y1="190" x2="630" y2="160"/>
+</svg>
