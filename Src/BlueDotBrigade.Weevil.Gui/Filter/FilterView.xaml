@@ -239,19 +239,17 @@
                 </Button.CommandParameter>
             </Button>
         </Grid>
-        <ListView x:Name="ListView"
+        <guiControls:RecordListView x:Name="ListView"
                 Grid.Row="1"
                 FontSize="{DynamicResource ApplicationFontSize}"
                 VirtualizingStackPanel.IsVirtualizing="True"
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
                 ScrollViewer.CanContentScroll="True"
                 ItemsSource="{Binding Rows}"
-                             local:FilterListViewBehavior.ActiveRecordIndex="{Binding ActiveRecordIndex, Mode=OneWay}"
                              AlternationCount="2"
-                             IsSynchronizedWithCurrentItem="True"
-                             SelectionChanged="ListView_OnSelectionChanged"
-                             SelectionMode="Extended" 
-                             controls:ListViewBehavior.AutoScrollToCurrentItem="True">
+                             RowPressed="OnListViewRowPressed"
+                             PreviewKeyDown="OnListViewPreviewKeyDown"
+                             IsVisibleChanged="OnListViewIsVisibleChanged">
             <ListView.Resources>
                 <Thickness x:Key="ColumnHeaderPadding" Left="4" Top="4" Right="4" Bottom="4" />
             </ListView.Resources>
@@ -304,10 +302,11 @@
                             <Setter Property="Background" Value="{Binding Severity, Converter={StaticResource SeverityBackgroundConverter}, FallbackValue={StaticResource AlternatingRowBackgroundBrush}, Mode=OneWay}"/>
                         </Trigger>
 
-                        <Trigger Property="IsSelected" Value="True">
+                        <!-- The row's selection comes from Core: WPF never selects a row (#1064). -->
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
                             <Setter Property="Foreground" Value="Black"/>
                             <Setter Property="Background" Value="{StaticResource RowHighlightedBrush}"/>
-                        </Trigger>
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </ListView.ItemContainerStyle>
@@ -461,7 +460,7 @@
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
-        </ListView>
+        </guiControls:RecordListView>
         <StackPanel Grid.Row="1"
                   Visibility="{Binding IsProcessingLongOperation, Converter={StaticResource BooleanToVisibilityConverter}}"
                   VerticalAlignment="Center" HorizontalAlignment="Center" 

@@ -116,8 +116,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			return xaml
 				.Descendants()
 				.First(element =>
-					element.Name.LocalName == "Trigger"
-					&& string.Equals((string?)element.Attribute("Property"), triggerProperty, StringComparison.Ordinal)
+					// The row's selection is a DataTrigger on the row view-model since #1064.
+					((element.Name.LocalName == "Trigger" && string.Equals((string?)element.Attribute("Property"), triggerProperty, StringComparison.Ordinal))
+						|| (element.Name.LocalName == "DataTrigger" && string.Equals((string?)element.Attribute("Binding"), $"{{Binding {triggerProperty}}}", StringComparison.Ordinal)))
 					&& string.Equals((string?)element.Attribute("Value"), triggerValue, StringComparison.Ordinal))
 				.Elements()
 				.First(element =>

@@ -18,6 +18,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		// The comment the grid last read or wrote, so a change to the pin alone leaves the comment box alone.
 		private string _shownComment = string.Empty;
+		private bool _isSelected;
 
 		public RowViewModel(IRecord record, IAnnotations annotations)
 		{
@@ -37,6 +38,22 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// The view calculates elapsed times after each filter, and each filter creates new rows.
 		/// </remarks>
 		public TimeSpan ElapsedTime => this.Record.Metadata?.ElapsedTime ?? Metadata.ElapsedTimeUnknown;
+
+		/// <summary>
+		/// The row is selected in Core. WPF never selects a row (#1064).
+		/// </summary>
+		public bool IsSelected
+		{
+			get => _isSelected;
+			set
+			{
+				if (_isSelected != value)
+				{
+					_isSelected = value;
+					RaisePropertyChanged(nameof(this.IsSelected));
+				}
+			}
+		}
 
 		public bool IsPinned
 		{
