@@ -1,7 +1,14 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Collections.Immutable;
+	using System.Diagnostics;
+	using System.Linq;
+	using System.Text;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Navigation;
+	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
 	public class SelectionManagerTest
@@ -60,6 +67,43 @@
 
 			act.Should().Throw<RecordNotFoundException>();
 			engine.Selector.Selected.Count.Should().Be(0);
+		}
+
+		[TestMethod]
+		public void GivenEveryOtherRecordSelected_WhenTheOthersAreSelectedToo_ThenItTakesLessThanFiveSeconds()
+		{
+			// Regression: the #1055 review. Changing one record at a time took about 30 seconds here.
+			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 300_000);
+			SelectionManager selector = CreateSelector(records);
+			selector.Select(records.Where(r => r.LineNumber % 2 == 1).ToList());
+			List<IRecord> others = records.Where(r => r.LineNumber % 2 == 0).ToList();
+
+			var stopwatch = Stopwatch.StartNew();
+			selector.Select(others);
+
+			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(5));
+			selector.Selected.Count.Should().Be(records.Length);
+		}
+
+		[TestMethod]
+		public void GivenEveryOtherRecordSelected_WhenTheyAreUnselected_ThenItTakesLessThanFiveSeconds()
+		{
+			// Regression: the #1055 review. Changing one record at a time took about 30 seconds here.
+			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 300_000);
+			SelectionManager selector = CreateSelector(records);
+			List<IRecord> scattered = records.Where(r => r.LineNumber % 2 == 1).ToList();
+			selector.Select(scattered);
+
+			var stopwatch = Stopwatch.StartNew();
+			selector.Unselect(scattered);
+
+			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(5));
+			selector.Selected.Count.Should().Be(0);
+		}
+
+		private static SelectionManager CreateSelector(ImmutableArray<IRecord> records)
+		{
+			return new SelectionManager(records, records, new NavigationManager(null, null, records, null), Encoding.UTF8, () => { });
 		}
 	}
 }
