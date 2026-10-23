@@ -249,7 +249,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				viewModel.IsProcessingLongOperation.Should().BeTrue("the busy overlay is shown while Clear runs");
+				viewModel.IsProcessingLongOperation.Should().BeTrue("the progress bar a filter shows is shown while Clear runs");
 				clear.IsCompleted.Should().BeFalse("Clear needs the UI thread only to show its results");
 			}
 			finally

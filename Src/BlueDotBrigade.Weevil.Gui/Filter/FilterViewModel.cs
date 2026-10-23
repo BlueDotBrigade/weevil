@@ -1144,7 +1144,7 @@
 
 		/// <remarks>
 		/// Clear saves the sidecar and rebuilds the engine, which takes seconds on a large log, so it runs in the background,
-		/// as Reload does (#1071).
+		/// as Reload does, with the progress bar a filter shows (#1071).
 		/// </remarks>
 		public Task ClearRecords(ClearOperation operation)
 		{
