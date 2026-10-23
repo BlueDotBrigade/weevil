@@ -72,7 +72,7 @@
 		[TestMethod]
 		public void GivenEveryOtherRecordSelected_WhenTheOthersAreSelectedToo_ThenItTakesLessThanFiveSeconds()
 		{
-			// Regression: the #1055 review. Changing one record at a time took about 30 seconds here.
+			// Changing one record at a time took about 30 seconds here.
 			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 300_000);
 			SelectionManager selector = CreateSelector(records);
 			selector.Select(records.Where(r => r.LineNumber % 2 == 1).ToList());
@@ -88,7 +88,7 @@
 		[TestMethod]
 		public void GivenEveryOtherRecordSelected_WhenTheyAreUnselected_ThenItTakesLessThanFiveSeconds()
 		{
-			// Regression: the #1055 review. Changing one record at a time took about 30 seconds here.
+			// Changing one record at a time took about 30 seconds here.
 			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 300_000);
 			SelectionManager selector = CreateSelector(records);
 			List<IRecord> scattered = records.Where(r => r.LineNumber % 2 == 1).ToList();
