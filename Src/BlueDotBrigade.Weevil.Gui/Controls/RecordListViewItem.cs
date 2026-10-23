@@ -30,9 +30,10 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 			{
 				// Handled, so WPF neither selects the row nor captures the mouse.
 				e.Handled = true;
-				Focus();
 
+				// Reported before the row takes focus, which moves the caret: Shift+click extends from the previous caret.
 				(ItemsControl.ItemsControlFromItemContainer(this) as RecordListView)?.OnRowPressed(this, button);
+				Focus();
 			}
 		}
 	}

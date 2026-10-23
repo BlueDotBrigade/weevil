@@ -205,6 +205,48 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenASelection_WhenAltSpaceOrAltDownIsPressed_ThenTheKeyIsLeftAlone()
+		{
+			// Regression: the #1064 review. Alt+Space opens the window menu, as it did in Weevil 2.12.
+			Click(lineNumber: 2);
+			Click(lineNumber: 6, ModifierKeys.Shift);
+
+			_selection.TryPressKey(_rows, Key.Space, ModifierKeys.Alt, 10, isOnRow: true, out _).Should().BeFalse();
+			_selection.TryPressKey(_rows, Key.Down, ModifierKeys.Alt, 10, isOnRow: true, out _).Should().BeFalse();
+
+			SelectedLines().Should().Equal(2, 3, 4, 5, 6);
+		}
+
+		[TestMethod]
+		public void GivenACaretAndNoAnchor_WhenShiftClicked_ThenTheRowsFromTheCaretAreSelected()
+		{
+			// Regression: the #1064 review. The filter hides the anchor, then shows the caret's record again.
+			Click(lineNumber: 3);
+			Click(lineNumber: 5, ModifierKeys.Control);
+			_engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Record 1"));
+			_engine.Filter.Apply(FilterType.PlainText, FilterCriteria.None);
+			_rows = new RowList(_engine.Filter.Results, _engine.Annotations, _engine.Selector, new UiDispatcherFake());
+			_engine.Selector.AnchorLineNumber.Should().Be(-1);
+
+			Click(lineNumber: 8, ModifierKeys.Shift);
+
+			SelectedLines().Should().Equal(5, 6, 7, 8);
+		}
+
+		[TestMethod]
+		public void GivenAPinBoxThatTookFocus_WhenDownIsPressed_ThenTheRowBelowItIsSelected()
+		{
+			// Regression: the #1064 review. The caret follows keyboard focus into a row, without selecting it.
+			Click(lineNumber: 10);
+
+			_selection.MoveCaretTo(_rows, _rows.IndexOfLineNumber(50));
+			SelectedLines().Should().Equal(10);
+
+			PressKey(Key.Up);
+			SelectedLines().Should().Equal(49);
+		}
+
+		[TestMethod]
 		public void GivenAFoundRecord_WhenNavigatedTo_ThenOnlyItIsSelectedAndBecomesTheCaret()
 		{
 			Click(lineNumber: 2);

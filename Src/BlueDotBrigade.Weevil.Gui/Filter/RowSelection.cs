@@ -76,6 +76,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		/// <summary>
+		/// Moves only the caret, for example to the row whose pin box was clicked. The selection does not change.
+		/// </summary>
+		public void MoveCaretTo(RowList rows, int position)
+		{
+			this.CaretLineNumber = rows.LineNumberAt(position);
+		}
+
+		/// <summary>
 		/// Selects only the row a navigation command found, such as Find Next or Go To.
 		/// </summary>
 		public void SelectOnly(RowList rows, int position)
@@ -97,7 +105,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			scrollToPosition = -1;
 
-			if (rows.Count == 0)
+			// Alt+Space opens the window menu, and Alt+arrow belongs to others, as in WPF's own list.
+			if (rows.Count == 0 || (modifiers & (ModifierKeys.Alt | ModifierKeys.Control)) == ModifierKeys.Alt)
 			{
 				return false;
 			}
@@ -145,8 +154,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			if (modifiers.HasFlag(ModifierKeys.Shift))
 			{
-				var caretLineNumber = this.CaretLineNumber == NoLineNumber ? lineNumber : this.CaretLineNumber;
-				ExtendTo(lineNumber, modifiers.HasFlag(ModifierKeys.Control), caretLineNumber);
+				ExtendTo(lineNumber, modifiers.HasFlag(ModifierKeys.Control), lineNumber);
 			}
 			else if (!modifiers.HasFlag(ModifierKeys.Control))
 			{
@@ -176,12 +184,15 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			this.CaretLineNumber = lineNumber;
 		}
 
-		/// <param name="anchorWhenNone">The anchor to use when Core has none, for example after a filter hid it.</param>
+		/// <param name="anchorWhenNone">The anchor to use when Core has none, for example after a filter hid it, and there is no caret either.</param>
+		/// <remarks>
+		/// Called before the caret moves, so a missing anchor falls back to where the caret was.
+		/// </remarks>
 		private void ExtendTo(int lineNumber, bool addsToSelection, int anchorWhenNone)
 		{
-			var anchorLineNumber = this.Selector.AnchorLineNumber == NoLineNumber
-				? anchorWhenNone
-				: this.Selector.AnchorLineNumber;
+			var anchorLineNumber = this.Selector.AnchorLineNumber != NoLineNumber
+				? this.Selector.AnchorLineNumber
+				: this.CaretLineNumber != NoLineNumber ? this.CaretLineNumber : anchorWhenNone;
 
 			if (addsToSelection)
 			{

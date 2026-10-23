@@ -249,6 +249,7 @@
                              AlternationCount="2"
                              RowPressed="OnListViewRowPressed"
                              PreviewKeyDown="OnListViewPreviewKeyDown"
+                             GotKeyboardFocus="OnListViewGotKeyboardFocus"
                              IsVisibleChanged="OnListViewIsVisibleChanged">
             <ListView.Resources>
                 <Thickness x:Key="ColumnHeaderPadding" Left="4" Top="4" Right="4" Bottom="4" />

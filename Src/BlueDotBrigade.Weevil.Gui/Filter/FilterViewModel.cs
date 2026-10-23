@@ -946,6 +946,19 @@
 		}
 
 		/// <summary>
+		/// Keyboard focus moved into a row: the caret moves there, and the selection does not change.
+		/// </summary>
+		public void MoveCaretTo(RowViewModel row)
+		{
+			var position = this.Rows?.IndexOf(row) ?? -1;
+
+			if (position >= 0)
+			{
+				_rowSelection.MoveCaretTo(this.Rows, position);
+			}
+		}
+
+		/// <summary>
 		/// A key was pressed in the grid.
 		/// </summary>
 		/// <returns><see langword="true"/> when it was a selection key.</returns>

@@ -138,6 +138,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		private void OnResultsChanged(object sender, EventArgs e)
 		{
+			// Keep the caret's row in view, as Weevil 2.12 did, even when the filter started from the filter box.
+			ScrollToRow(this.ViewModel?.CaretPosition ?? -1);
+
 			// Recalculate column widths after filter results change.
 			// Note: BeginInvoke at Background priority ensures that this runs after
 			// any pending progress bar hide and rendering operations are complete.
@@ -160,11 +163,20 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				return;
 			}
 
-			Key key = e.Key == Key.System ? e.SystemKey : e.Key;
-
-			if (this.ViewModel.PressKey(key, Keyboard.Modifiers, GetPageSize(), isOnRow: e.OriginalSource is ListViewItem))
+			if (this.ViewModel.PressKey(e.Key, Keyboard.Modifiers, GetPageSize(), isOnRow: e.OriginalSource is ListViewItem))
 			{
 				e.Handled = true;
+			}
+		}
+
+		/// <remarks>
+		/// The caret follows keyboard focus into a row, for example when its pin box is clicked, so the keys move from there.
+		/// </remarks>
+		private void OnListViewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		{
+			if (ItemsControl.ContainerFromElement(this.ListView, e.NewFocus as DependencyObject) is ListViewItem { DataContext: RowViewModel row })
+			{
+				this.ViewModel?.MoveCaretTo(row);
 			}
 		}
 
@@ -180,7 +192,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			else if (_hadFocusWhenHidden && this.ViewModel != null)
 			{
 				_hadFocusWhenHidden = false;
-				FocusRow(this.ViewModel.CaretPosition);
+
+				// Hiding the grid moved focus to an ancestor. Give it back only if the user has not moved it elsewhere meanwhile.
+				if (Keyboard.FocusedElement is not Visual focused || focused.IsAncestorOf(this.ListView) || this.ListView.IsAncestorOf(focused))
+				{
+					FocusRow(this.ViewModel.CaretPosition);
+				}
 			}
 		}
 
@@ -194,15 +211,26 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		private void FocusRow(int position)
 		{
-			RowList rows = this.ViewModel?.Rows;
-
-			if (rows != null && position >= 0 && position < rows.Count)
+			if (ScrollToRow(position))
 			{
-				this.ListView.ScrollIntoView(rows.GetRow(position));
 				this.Dispatcher.BeginInvoke(
 					DispatcherPriority.Loaded,
 					new Action(() => this.ListView.ContainerFromPosition(position)?.Focus()));
 			}
+		}
+
+		/// <returns><see langword="false"/> when there is no row at <paramref name="position"/>.</returns>
+		private bool ScrollToRow(int position)
+		{
+			RowList rows = this.ViewModel?.Rows;
+
+			if (rows == null || position < 0 || position >= rows.Count)
+			{
+				return false;
+			}
+
+			this.ListView.ScrollIntoView(rows.GetRow(position));
+			return true;
 		}
 
 		/// <summary>
