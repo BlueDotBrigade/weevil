@@ -98,6 +98,19 @@ namespace BlueDotBrigade.Weevil
 			annotations.IsPinned(engine.Records[0].LineNumber).Should().BeTrue();
 		}
 
+		[TestMethod]
+		public void GivenUnselectedRecordsWereCleared_WhenReloaded_ThenTheRestoredRecordsAreNotSelected()
+		{
+			IEngine engine = OpenCopy();
+			engine.Selector.SelectOnly(1, 3).SelectRange(7, 9);
+			engine.Clear(ClearOperation.Unselected);
+			engine.Selector.SelectAll();
+
+			engine.Reload();
+
+			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 7, 8, 9);
+		}
+
 		private IEngine OpenCopy()
 		{
 			var logPath = Path.Combine(_folder, "SampleData.log");

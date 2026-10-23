@@ -54,6 +54,20 @@ namespace BlueDotBrigade.Weevil.Collections
 		}
 
 		/// <summary>
+		/// Returns every position from <paramref name="first"/> to <paramref name="last"/>, or none when <paramref name="last"/> is before <paramref name="first"/>.
+		/// </summary>
+		public static PositionRanges FromRange(int first, int last)
+		{
+			var ranges = new PositionRanges();
+			if (first <= last)
+			{
+				ranges.Append(first, last);
+			}
+
+			return ranges;
+		}
+
+		/// <summary>
 		/// Returns the given positions as ranges. They may come in any order, and more than once.
 		/// </summary>
 		/// <remarks>
