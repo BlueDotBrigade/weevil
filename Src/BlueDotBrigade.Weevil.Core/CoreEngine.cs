@@ -299,6 +299,8 @@
 
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)
 		{
+			// Before anyone else hears of the new results, so they read the selection that matches them (#1015).
+			_selectionManager.KeepRecordsShownBy(e.Records);
 			_navigationManager.UpdateDataSource(e.Records);
 		}
 		#endregion

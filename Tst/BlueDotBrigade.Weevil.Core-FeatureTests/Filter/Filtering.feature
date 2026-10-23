@@ -256,3 +256,26 @@ Scenario: Include and Exclude with Show Bookmarks on means bookmarked records al
 	Then there will be 32 matching records
 		 And line number 3 will be visible
 		 And line number 7 will be visible
+
+# A selected record that a filter hides is no longer selected (#1015).
+Scenario: A filter keeps only the selected records that it shows
+	Given that the "ElapsedTime.log" log file name is open
+	When selecting the records on lines 1 to 4
+	And applying the include filter: Alpha
+	Then 2 records will be selected
+	And line number 1 will be selected
+	And line number 3 will be selected
+
+Scenario: A selected record hidden by a filter stays unselected when a later filter shows it
+	Given that the "ElapsedTime.log" log file name is open
+	When selecting the records on lines 1 to 4
+	And applying the include filter: Alpha
+	And applying the include filter: Alpha||Bravo
+	Then 2 records will be selected
+	And line number 2 will not be selected
+
+Scenario: The selection period spans only the selected records that the filter shows
+	Given that the "ElapsedTime.log" log file name is open
+	When selecting the records on lines 1 to 6
+	And applying the include filter: Bravo
+	Then the selection period will be 8 seconds
