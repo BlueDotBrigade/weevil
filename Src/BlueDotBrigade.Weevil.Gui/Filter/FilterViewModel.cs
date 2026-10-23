@@ -54,6 +54,9 @@
 		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/dRrRat/1");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
+		// More would freeze the window while the clipboard fills, and Export saves any number of records to a file.
+		private const int CopyLimit = 100_000;
+
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
 		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\License.md");
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\ThirdPartyNoticesAndInformation.txt");
@@ -889,26 +892,58 @@
 
 		public void ClipboardCopyRaw(bool readableCallstack)
 		{
-			IRecordFormatter formatter = readableCallstack
-				? new SimpleCallStackFormatter() as IRecordFormatter
-				: new RawRecordFormatter() as IRecordFormatter;
+			if (CanCopySelected())
+			{
+				IRecordFormatter formatter = readableCallstack
+					? new SimpleCallStackFormatter() as IRecordFormatter
+					: new RawRecordFormatter() as IRecordFormatter;
 
-			ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
+				ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
+			}
 		}
 
 		public void ClipboardCopyLineNumbers()
 		{
-			ClipboardHelper.CopySelectedLineNumbers(_engine);
+			if (CanCopySelected())
+			{
+				ClipboardHelper.CopySelectedLineNumbers(_engine);
+			}
 		}
 
 		public void ClipboardCopyTimestamps()
 		{
-			ClipboardHelper.CopySelectedTimestamps(_engine);
+			if (CanCopySelected())
+			{
+				ClipboardHelper.CopySelectedTimestamps(_engine);
+			}
 		}
 
+		/// <remarks>
+		/// Not limited: it copies only the records with a comment, so selecting every record still copies a few lines.
+		/// </remarks>
 		public void ClipboardCopyComment()
 		{
 			ClipboardHelper.CopySelectedComments(_engine);
+		}
+
+		/// <summary>
+		/// Copy refuses more than <see cref="CopyLimit"/> records, and says how to save them instead (decision 5).
+		/// </summary>
+		private bool CanCopySelected()
+		{
+			var count = _engine.Selector.Selected.Count;
+
+			if (count > CopyLimit)
+			{
+				_dialogBox.ShowMessage(
+					$"Copy is limited to {CopyLimit:N0} records, and {count:N0} are selected.\n\n" +
+					"Use Export > Original Records (Ctrl+Shift+S) to save them to a file.",
+					"Copy");
+
+				return false;
+			}
+
+			return true;
 		}
 
 		public void ClipboardPaste(bool allowOverwrite)

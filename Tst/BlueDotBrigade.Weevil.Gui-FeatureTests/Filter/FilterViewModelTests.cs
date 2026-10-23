@@ -262,6 +262,22 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.VisibleItems.Count.Should().Be(recordCount - 10);
 		}
 
+		[TestMethod]
+		public async Task GivenMoreRecordsSelectedThanCopyAllows_WhenCopied_ThenAMessagePointsToExport()
+		{
+			var logPath = Path.Combine(_folder, "Large.log");
+			System.IO.File.WriteAllLines(logPath, Enumerable.Range(1, 100_001).Select(n => $"Record {n}"));
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+			await viewModel.OpenAsync(logPath);
+			WaitUntil(() => viewModel.IsMenuEnabled);
+			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
+
+			viewModel.ClipboardCopyRaw(readableCallstack: false);
+
+			dialogBox.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Export")), "Copy");
+		}
+
 		/// <summary>
 		/// Creates a dialog that answers the Detect Data prompt, after running <paramref name="prompt"/>.
 		/// </summary>

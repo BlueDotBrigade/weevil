@@ -149,9 +149,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		private void OnListViewRowPressed(object sender, RowPressedEventArgs e)
 		{
-			if (e.Row.DataContext is RowViewModel row)
+			if (e.Item is RowViewModel row)
 			{
-				this.ViewModel?.PressRow(row, e.Button == MouseButton.Right, Keyboard.Modifiers);
+				this.ViewModel?.PressRow(row, e.Button == MouseButton.Right, e.Modifiers);
 			}
 		}
 

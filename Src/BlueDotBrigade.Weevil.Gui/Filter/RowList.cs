@@ -44,7 +44,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			_uiDispatcher = uiDispatcher ?? throw new ArgumentNullException(nameof(uiDispatcher));
 		}
 
+		/// <summary>
+		/// Raised by <see cref="RefreshSelection"/> with the rows still held whose selection changed.
+		/// </summary>
+		public event EventHandler<IReadOnlyList<RowViewModel>> SelectionRefreshed;
+
 		public int Count => _results.Length;
+
+		/// <summary>
+		/// The number of selected records.
+		/// </summary>
+		public int SelectedCount => _selector.Selected.Count;
 
 		public bool IsReadOnly => true;
 
@@ -148,9 +158,44 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				}
 			}
 
+			var changedRows = new List<RowViewModel>();
+
 			foreach (RowViewModel row in liveRows)
 			{
-				row.IsSelected = selected.ContainsKey(row.LineNumber);
+				var isSelected = selected.ContainsKey(row.LineNumber);
+
+				if (row.IsSelected != isSelected)
+				{
+					row.IsSelected = isSelected;
+					changedRows.Add(row);
+				}
+			}
+
+			if (changedRows.Count > 0)
+			{
+				this.SelectionRefreshed?.Invoke(this, changedRows);
+			}
+		}
+
+		/// <summary>
+		/// Returns the positions of the selected rows after <paramref name="afterPosition"/>, in order, without creating a row for each.
+		/// </summary>
+		/// <param name="afterPosition">The position to start after, or -1 to start at the first row.</param>
+		public IEnumerable<int> GetSelectedPositions(int afterPosition)
+		{
+			var afterLineNumber = afterPosition >= 0 ? _results[afterPosition].LineNumber : int.MinValue;
+
+			foreach (var lineNumber in _selector.Selected.Keys)
+			{
+				if (lineNumber > afterLineNumber)
+				{
+					var position = IndexOfLineNumber(lineNumber);
+
+					if (position >= 0)
+					{
+						yield return position;
+					}
+				}
 			}
 		}
 
