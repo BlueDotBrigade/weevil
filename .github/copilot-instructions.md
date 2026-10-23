@@ -65,7 +65,7 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 
 ## Testing Expectations
 
-- Bug fixes must include regression tests.
+- A fix for a filed bug must include a regression test that names the bug; see `.github/instructions/tests.instructions.md`.
 - Prefer behavior-oriented tests over implementation-specific assertions.
 - Scenario-based tests use the Reqnroll framework (BDD style).
 - Unit tests use the MSTest framework.
