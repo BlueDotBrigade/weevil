@@ -1142,19 +1142,56 @@
 
 		#region Commands: Filtering
 
-		public void ClearRecords(ClearOperation operation)
+		/// <remarks>
+		/// Clear saves the sidecar and rebuilds the engine, which takes seconds on a large log, so it runs in the background,
+		/// as Reload does, with the progress bar a filter shows (#1071).
+		/// </remarks>
+		public Task ClearRecords(ClearOperation operation)
 		{
-			_engine.Clear(operation);
+			this.CanOpenLogFile = false;
+			this.IsProcessingLongOperation = true;
+			this.IsFilterToolboxEnabled = false;
 
-			_bulletinMediator.Post(new ClearRecordsBulletin
+			return Task.Run(() =>
 			{
-				TotalRecordCount = _engine.Count
+				var wasCleared = false;
+
+				try
+				{
+					_engine.Clear(operation);
+					wasCleared = true;
+
+					_bulletinMediator.Post(new ClearRecordsBulletin
+					{
+						TotalRecordCount = _engine.Count
+					});
+
+					RefreshFilterResults();
+					RaiseResultsChanged();
+				}
+				catch (Exception exception)
+				{
+					var message = "Unable to clear the records.";
+
+					Log.Default.Write(LogSeverityType.Error, exception, message);
+					_uiDispatcher.Invoke(() => MessageBox.Show(message, "Clear Failed", MessageBoxButton.OK, MessageBoxImage.Error));
+				}
+				finally
+				{
+					_uiDispatcher.Invoke(() =>
+					{
+						this.CanOpenLogFile = true;
+						this.IsProcessingLongOperation = false;
+						this.IsFilterToolboxEnabled = true;
+
+						// Clear resets the engine's filter, so the filter shown is applied again.
+						if (wasCleared)
+						{
+							FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
+						}
+					});
+				}
 			});
-
-			FilterAsynchronously(_currentfilterType, _currentfilterCriteria);
-
-			RefreshFilterResults();
-			RaiseResultsChanged();
 		}
 
 		public void Filter()

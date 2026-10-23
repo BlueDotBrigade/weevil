@@ -6,6 +6,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using System.Windows.Input;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
@@ -229,6 +230,36 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			bulletinMediator.Received(2).Post(Arg.Any<SourceFileOpenedBulletin>());
 
 			viewModel.InclusiveFilterHistory.Should().Equal(IncludeFilter);
+		}
+
+		[TestMethod]
+		[WorkItem(1071)]
+		public async Task GivenABusyUiThread_WhenRecordsAreCleared_ThenClearRunsInTheBackground()
+		{
+			// Clear rebuilt the engine on the UI thread, which froze the window for seconds on a large log.
+			using var uiDispatcher = new PausableUiDispatcher();
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+			await viewModel.OpenAsync(CopyLog("ClearRecords.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+			var recordCount = viewModel.VisibleItems.Count;
+			viewModel.PressRow(viewModel.Rows.GetRow(10), isRightButton: false, ModifierKeys.None);
+
+			uiDispatcher.Pause();
+			Task clear = viewModel.ClearRecords(ClearOperation.BeforeSelected);
+
+			try
+			{
+				viewModel.IsProcessingLongOperation.Should().BeTrue("the progress bar a filter shows is shown while Clear runs");
+				clear.IsCompleted.Should().BeFalse("Clear needs the UI thread only to show its results");
+			}
+			finally
+			{
+				uiDispatcher.Resume();
+				await clear;
+			}
+
+			WaitUntil(() => viewModel.CanOpenLogFile && !viewModel.IsFilterInProgress);
+			viewModel.VisibleItems.Count.Should().Be(recordCount - 10);
 		}
 
 		/// <summary>
