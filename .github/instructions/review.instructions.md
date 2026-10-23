@@ -25,8 +25,9 @@ These instructions guide Copilot during pull request reviews. Every review shoul
 
 ## Regression Tests
 
-- Flag any bug fix that does not include a regression test.
-- Confirm that the regression test would have caught the original defect.
+- Flag a fix for a filed bug that does not include a regression test.
+- Confirm that the regression test would have caught the original defect, and that it names the bug: `[WorkItem(N)]` or `@Bug:N`.
+- Flag tests that repeat a behaviour already tested at another level, or that test implementation details.
 - Flag feature additions that have no accompanying tests.
 - Confirm that test method names follow the `GivenCondition_WhenAction_ThenExpectedResult` pattern.
 

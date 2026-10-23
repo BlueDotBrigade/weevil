@@ -21,6 +21,44 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1066)]
+		public void GivenTextSentWhileTyping_WhenCtrlPIsPressedBeforeTheRest_ThenTheRecordStaysPinned()
+		{
+			// Ctrl+P toggled off the pin that the first words had set, and the rest of the text left it off.
+			var annotations = new AnnotationStore();
+			var row = new RowViewModel(R.WithLineNumber(5), annotations);
+
+			row.Comment = "Retry";
+			annotations.SetPinned(5, false);
+			row.Comment = "Retry starts here";
+
+			annotations.IsPinned(5).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenACommentedRecord_WhenTheCommentIsErased_ThenTheRecordIsUnpinned()
+		{
+			var annotations = new AnnotationStore();
+			var row = new RowViewModel(R.WithLineNumber(5), annotations);
+			row.Comment = "Retry starts here";
+
+			row.Comment = string.Empty;
+
+			annotations.IsPinned(5).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenARow_WhenOnlySpacesAreTyped_ThenTheRecordIsNotPinned()
+		{
+			var annotations = new AnnotationStore();
+			var row = new RowViewModel(R.WithLineNumber(5), annotations);
+
+			row.Comment = "   ";
+
+			annotations.IsPinned(5).Should().BeFalse();
+		}
+
+		[TestMethod]
 		public void GivenARow_WhenCommented_ThenTheRecordIsPinnedAndTheRowSaysSo()
 		{
 			var annotations = new AnnotationStore();

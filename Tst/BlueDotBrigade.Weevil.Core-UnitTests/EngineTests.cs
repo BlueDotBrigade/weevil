@@ -115,7 +115,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenAClearedRecordAndALogThatShrank_WhenReloaded_ThenTheRestoredRecordIsNotSelected()
 		{
-			// Regression: the #1062 review. One line fewer at the end made the remap count line 5 as selected.
+			// One line fewer at the end made the remap count line 5 as selected.
 			var logPath = Path.Combine(_folder, "SampleData.log");
 			var lines = File.ReadAllLines(new Daten().AsFilePath("SampleData.log"));
 			File.WriteAllLines(logPath, lines.Take(10));
