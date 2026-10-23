@@ -49,10 +49,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			get => _shownComment = _annotations.GetComment(this.LineNumber);
 			set
 			{
+				// Adding a comment pins the record, and removing it unpins the record.
 				_annotations.SetComment(this.LineNumber, value, this);
 				_shownComment = _annotations.GetComment(this.LineNumber);
 
-				// Adding a comment pins the record, and removing it unpins the record.
+				// The box sends its text after a pause, so the pin follows what it holds, not just whether it held text before:
+				// a Ctrl+P pressed while typing could otherwise toggle off a pin that the first words had set (#1066).
+				if (!string.IsNullOrWhiteSpace(_shownComment))
+				{
+					_annotations.SetPinned(this.LineNumber, true, this);
+				}
+
 				RaisePropertyChanged(nameof(this.IsPinned));
 			}
 		}
