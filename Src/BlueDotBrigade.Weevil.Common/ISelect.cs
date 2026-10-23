@@ -30,6 +30,7 @@
 		/// </summary>
 		/// <remarks>
 		/// <paramref name="anchorLineNumber"/> becomes the <see cref="AnchorLineNumber"/>, and <paramref name="lineNumber"/> the active record.
+		/// When <paramref name="anchorLineNumber"/> is -1 (no anchor), <paramref name="lineNumber"/> is used instead.
 		/// The cost does not depend on the number of records.
 		/// </remarks>
 		ISelect SelectOnly(int anchorLineNumber, int lineNumber);
@@ -39,6 +40,7 @@
 		/// </summary>
 		/// <remarks>
 		/// <paramref name="anchorLineNumber"/> becomes the <see cref="AnchorLineNumber"/>, and <paramref name="lineNumber"/> the active record.
+		/// When <paramref name="anchorLineNumber"/> is -1 (no anchor), <paramref name="lineNumber"/> is used instead.
 		/// The cost does not depend on the number of records.
 		/// </remarks>
 		ISelect SelectRange(int anchorLineNumber, int lineNumber);

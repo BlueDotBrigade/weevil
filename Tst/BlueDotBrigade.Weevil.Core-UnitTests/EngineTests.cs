@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 
@@ -109,6 +110,24 @@ namespace BlueDotBrigade.Weevil
 			engine.Reload();
 
 			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 7, 8, 9);
+		}
+
+		[TestMethod]
+		public void GivenAClearedRecordAndALogThatShrank_WhenReloaded_ThenTheRestoredRecordIsNotSelected()
+		{
+			// Regression: the #1062 review. One line fewer at the end made the remap count line 5 as selected.
+			var logPath = Path.Combine(_folder, "SampleData.log");
+			var lines = File.ReadAllLines(new Daten().AsFilePath("SampleData.log"));
+			File.WriteAllLines(logPath, lines.Take(10));
+			IEngine engine = Engine.UsingPath(logPath).Open();
+			engine.Selector.SelectOnly(5, 5);
+			engine.Clear(ClearOperation.Selected);
+			engine.Selector.SelectAll();
+			File.WriteAllLines(logPath, lines.Take(8));
+
+			engine.Reload();
+
+			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 4, 6, 7, 8);
 		}
 
 		private IEngine OpenCopy()

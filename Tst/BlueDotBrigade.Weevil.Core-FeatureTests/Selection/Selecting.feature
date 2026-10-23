@@ -43,6 +43,25 @@ Scenario: Toggling a selected record unselects it and makes it the anchor
 	And the anchor will be line 2
 
 @Requirement:1062
+Scenario: Toggling an unselected record adds it to the selection and makes it the anchor
+	Given that the "ElapsedTime.log" log file name is open
+	When selecting only lines 1 to 1
+	And toggling the selection of line 3
+	Then 2 records will be selected
+	And line number 3 will be selected
+	And the anchor will be line 3
+
+@Requirement:1062
+Scenario: Without an anchor, a range starts from the line selected
+	Given that the "ElapsedTime.log" log file name is open
+	When selecting only lines 2 to 3
+	And applying the include filter: Alpha
+	And selecting only from the anchor to line 5
+	Then 1 records will be selected
+	And line number 5 will be selected
+	And the anchor will be line 5
+
+@Requirement:1062
 Scenario: Selecting every record keeps the anchor
 	Given that the "ElapsedTime.log" log file name is open
 	When selecting only lines 2 to 3
@@ -81,9 +100,9 @@ Scenario: Navigation continues from the line a range was extended to, not from i
 	Given that the default log file is open
 	When pinning the record on line 10
 	And pinning the record on line 20
-	And selecting only lines 15 to 5
+	And selecting only lines 25 to 15
 	And navigating to the next pinned record
-	Then the selected record line number will be 10
+	Then the selected record line number will be 20
 
 @Requirement:1062
 Scenario: Reloading the log keeps the line navigation continues from

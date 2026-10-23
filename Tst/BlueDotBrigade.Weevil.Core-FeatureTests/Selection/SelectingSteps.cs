@@ -16,6 +16,12 @@ namespace BlueDotBrigade.Weevil.Selection
 			this.Context.Engine.Selector.SelectOnly(anchorLineNumber, lineNumber);
 		}
 
+		[When($"selecting only from the anchor to line {X.WholeNumber}")]
+		public void WhenSelectingOnlyFromTheAnchorToLine(int lineNumber)
+		{
+			this.Context.Engine.Selector.SelectOnly(this.Context.Engine.Selector.AnchorLineNumber, lineNumber);
+		}
+
 		[When($"adding lines {X.WholeNumber} to {X.WholeNumber} to the selection")]
 		public void WhenAddingLinesToTheSelection(int anchorLineNumber, int lineNumber)
 		{

@@ -198,8 +198,11 @@ namespace BlueDotBrigade.Weevil.Collections
 
 				searchFrom = high + 1;
 
-				var spanInLog = LowerBound(allRecords, lastLine, 0) - LowerBound(allRecords, firstLine, 0) + 1;
-				if (spanInLog == range.Count)
+				// The log must still hold both ends: after Reload, a log that shrank no longer holds every old result (#1062).
+				var firstInLog = LowerBound(allRecords, firstLine, 0);
+				var lastInLog = LowerBound(allRecords, lastLine, firstInLog);
+				var spanInLog = lastInLog - firstInLog + 1;
+				if (spanInLog == range.Count && lastInLog < allRecords.Length && allRecords[lastInLog].LineNumber == lastLine)
 				{
 					remapped.Append(low, high);
 					continue;

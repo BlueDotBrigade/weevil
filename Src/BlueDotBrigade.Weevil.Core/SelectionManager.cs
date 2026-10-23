@@ -445,6 +445,11 @@
 		{
 			int count;
 
+			if (anchorLineNumber == NoLineNumber)
+			{
+				anchorLineNumber = lineNumber;
+			}
+
 			lock (_selectionPadlock)
 			{
 				var first = PositionRanges.LowerBound(_visibleRecords, System.Math.Min(anchorLineNumber, lineNumber), 0);
