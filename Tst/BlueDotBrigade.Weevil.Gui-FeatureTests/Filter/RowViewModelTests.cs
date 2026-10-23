@@ -131,6 +131,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenAMultiLineRecord_WhenAScreenReaderNamesItsRow_ThenItHearsTheLineNumberAndFirstLine()
+		{
+			var row = new RowViewModel(R.WithContent(5, "Retry failed\r\n   at Connect()"), new AnnotationStore());
+
+			row.ToString().Should().Be("Line 5: Retry failed");
+		}
+
+		[TestMethod]
 		public void GivenARow_WhenReadByTheGrid_ThenItShowsItsRecord()
 		{
 			IRecord record = R.WithLineNumber(5);

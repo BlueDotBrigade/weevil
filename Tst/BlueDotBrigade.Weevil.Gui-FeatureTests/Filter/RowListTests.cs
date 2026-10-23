@@ -125,6 +125,37 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenRowsOnScreen_WhenTheSelectionChanges_ThenOnlyTheRowsThatChangedAreReported()
+		{
+			// The grid tells screen readers about these rows.
+			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
+			var selector = Substitute.For<ISelect>();
+			selector.Selected.Returns(Selected(results, 2, 5));
+			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
+			var heldRows = new[] { rows.GetRow(1), rows.GetRow(2), rows.GetRow(4) };
+			IReadOnlyList<RowViewModel> reportedRows = null;
+			rows.SelectionRefreshed += (_, changedRows) => reportedRows = changedRows;
+
+			selector.Selected.Returns(Selected(results, 3, 5));
+			rows.RefreshSelection();
+
+			reportedRows.Select(row => row.LineNumber).Should().BeEquivalentTo(new[] { 2, 3 });
+			GC.KeepAlive(heldRows);
+		}
+
+		[TestMethod]
+		public void GivenSelectedRecords_WhenTheSelectedRowsAfterARowAreAskedFor_ThenTheyAreFoundInOrder()
+		{
+			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
+			var selector = Substitute.For<ISelect>();
+			selector.Selected.Returns(Selected(results, 3, 7, 9));
+			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
+
+			rows.GetSelectedPositions(afterPosition: -1).Should().Equal(2, 6, 8);
+			rows.GetSelectedPositions(afterPosition: 2).Should().Equal(6, 8);
+		}
+
+		[TestMethod]
 		public void GivenTheRows_WhenChangedDirectly_ThenTheChangeIsRefused()
 		{
 			var rows = new RowList(R.WithLineNumbers(1, 3), new AnnotationStore(), Substitute.For<ISelect>(), new UiDispatcherFake());

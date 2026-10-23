@@ -14,6 +14,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	/// </remarks>
 	internal sealed class RowViewModel : INotifyPropertyChanged, IEquatable<RowViewModel>
 	{
+		private static readonly char[] LineBreaks = { '\r', '\n' };
+
 		private readonly IAnnotations _annotations;
 
 		// The comment the grid last read or wrote, so a change to the pin alone leaves the comment box alone.
@@ -108,6 +110,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					RaisePropertyChanged(nameof(this.Comment));
 				}
 			}
+		}
+
+		/// <summary>
+		/// The row's name for UI Automation clients, such as screen readers: its line number and the first line of its record.
+		/// </summary>
+		public override string ToString()
+		{
+			var content = this.Record.Content ?? string.Empty;
+			var endOfLine = content.IndexOfAny(LineBreaks);
+
+			return $"Line {this.LineNumber}: {(endOfLine < 0 ? content : content[..endOfLine])}";
 		}
 
 		public bool Equals(RowViewModel other)

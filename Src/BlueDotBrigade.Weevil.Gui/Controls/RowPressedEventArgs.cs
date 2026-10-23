@@ -1,19 +1,24 @@
 namespace BlueDotBrigade.Weevil.Gui.Controls
 {
 	using System;
-	using System.Windows.Controls;
 	using System.Windows.Input;
 
 	internal sealed class RowPressedEventArgs : EventArgs
 	{
-		public RowPressedEventArgs(ListViewItem row, MouseButton button)
+		public RowPressedEventArgs(object item, MouseButton button, ModifierKeys modifiers)
 		{
-			this.Row = row;
+			this.Item = item;
 			this.Button = button;
+			this.Modifiers = modifiers;
 		}
 
-		public ListViewItem Row { get; }
+		/// <summary>
+		/// The item the row shows.
+		/// </summary>
+		public object Item { get; }
 
 		public MouseButton Button { get; }
+
+		public ModifierKeys Modifiers { get; }
 	}
 }
