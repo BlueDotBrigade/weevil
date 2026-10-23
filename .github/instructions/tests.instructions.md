@@ -4,6 +4,14 @@ applyTo: "Tst/**"
 
 # Test Instructions
 
+## Rules
+
+- **A test written for a filed bug names it:** `[WorkItem(N)]` on an MSTest method, or `@Bug:N` on a Gherkin scenario, where `N` is the bug's GitHub issue number. Add a one-line comment saying what broke.
+- **A defect found and fixed before it was filed gets no bug tag.** Add a test for it only if it protects behaviour worth keeping; it is then an ordinary behaviour test.
+- **Prefer a few meaningful tests at the right level.** Do not test implementation details, and do not test the same behaviour at two levels.
+
+[Why: a test must earn its keep](#why-a-test-must-earn-its-keep) explains how to decide.
+
 ## Purpose
 
 These instructions apply to all test projects under `Tst/`. Tests must clearly express intent, remain resilient to refactoring, and validate behavior rather than implementation details.
@@ -56,14 +64,35 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Prefer behavior-oriented assertions over implementation-specific checks.
 - Avoid asserting on internal state (private fields, internal methods). Test through public APIs.
 - Do not write tests that rely on execution order; each test must be independent.
+- Assert on elapsed time only when a slow algorithm is the risk, and with a generous bound, so the test does not fail on a slow build machine.
 - Use `Record.Dummy` as the null object when a test requires an absent record reference.
 - When testing filters, construct `FilterCriteria` directly using `new FilterCriteria(expression)` or `FilterCriteria.None`. Load the engine via the `Engine.UsingPath(...)` builder style.
 
 ## Regression Tests
 
-- Every bug fix must be accompanied by a regression test that reproduces the original failure.
+A regression test guards a filed bug: a GitHub issue of type Bug.
+
+- Every fix for a filed bug comes with a regression test that reproduces the original failure.
 - The regression test must fail before the fix is applied and pass after.
-- Reference the issue number in a comment near the test (e.g., `// Regression: Issue #123`).
+- Name the bug in an attribute or tag, so a reader knows why the test exists, and say what broke in one line:
+
+  ```csharp
+  [TestMethod]
+  [WorkItem(1066)]
+  public void GivenTextSentWhileTyping_WhenCtrlPIsPressedBeforeTheRest_ThenTheRecordStaysPinned()
+  {
+      // Ctrl+P toggled off the pin that the first words of the comment had set.
+  ```
+
+  ```gherkin
+  @Bug:1066
+  Scenario: Pressing Ctrl+P while typing a comment keeps the record pinned
+  ```
+
+- `@Requirement:N` names the user story or requirement a scenario specifies; `@Bug:N` names the bug it guards.
+- Keep the test name about behaviour: the bug number goes in the attribute or tag, not in the name.
+- Older tests mark their bug with a `// Regression: Issue #N` comment. Switch a test to the attribute or tag when you change it.
+- A defect found during development, for example in a review of an unmerged pull request, is not a filed bug, so its tests get no tag.
 
 ## Reqnroll / BDD Conventions
 
@@ -83,3 +112,19 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Tests run using: `dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build`
 - The `InternalsVisibleTo` attribute is only active in `Debug` configuration; always use `Debug` when running tests.
 - Do not introduce test-only public APIs or loosen access modifiers solely for test purposes.
+
+## Why: a test must earn its keep
+
+The cost of a test is not writing it: it is every future change that has to keep it passing. A good suite earns its keep in two ways: it catches real regressions, and when it fails, people believe it. Noise works against both. Brittle tests break on harmless refactors, duplicate tests fail in groups, and tests of implementation details lock in the design. After a while, people stop trusting a failed build.
+
+Before adding a test, ask:
+
+1. **Does it protect a behaviour someone relies on?** A user or a caller relies on it, not just the way the code works today.
+2. **Could a future change plausibly break it?** Code that is obvious and unlikely to change does not need a test.
+3. **Is it at the cheapest level that can see the behaviour?**
+   - Gherkin feature tests in `BlueDotBrigade.Weevil.Core-FeatureTests` for what users experience. Most tests belong here (see [Test Placement](#test-placement)).
+   - Unit tests for logic with sharp edges, such as the selection's position ranges or keeping the selection across a filter.
+   - GUI tests only for what only the GUI can show.
+4. **Would its failure tell a developer something useful?** If not, it is noise.
+
+A filed bug passes these questions by definition: it escaped, which shows a gap in the tests. That is why it always gets a regression test, and why that test names it. A defect caught during development passes them only when the behaviour is worth protecting on its own.
