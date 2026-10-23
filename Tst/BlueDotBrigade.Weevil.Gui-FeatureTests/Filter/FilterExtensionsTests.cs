@@ -29,7 +29,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenSelectedRecords_WhenTheFilterExpressionIsInvalid_ThenTheSelectionIsKept()
 		{
-			// Regression: #1064. The filter cleared the selection first, and only an aborted filter restored it.
+			// The filter used to clear the selection first, and only an aborted filter restored it.
 			IEngine engine = Engine.UsingPath(_logPath).Open();
 			engine.Selector.SelectOnly(2, 4);
 

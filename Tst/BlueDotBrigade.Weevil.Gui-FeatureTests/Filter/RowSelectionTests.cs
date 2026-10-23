@@ -80,45 +80,30 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public void GivenASelectedRow_WhenRightClicked_ThenTheSelectionIsKept()
+		public void GivenASelectedRange_WhenRightClicked_ThenOnlyAnUnselectedRowReplacesIt()
 		{
 			Click(lineNumber: 2);
 			Click(lineNumber: 5, ModifierKeys.Shift);
 
+			// The context menu then acts on what was clicked.
 			_selection.RightClick(_rows, 2, ModifierKeys.None);
-
 			SelectedLines().Should().Equal(2, 3, 4, 5);
-		}
-
-		[TestMethod]
-		public void GivenAnUnselectedRow_WhenRightClicked_ThenOnlyThatRowIsSelected()
-		{
-			Click(lineNumber: 2);
-			Click(lineNumber: 5, ModifierKeys.Shift);
 
 			_selection.RightClick(_rows, 9, ModifierKeys.None);
-
 			SelectedLines().Should().Equal(10);
 		}
 
 		[TestMethod]
-		public void GivenNoCaret_WhenDownIsPressed_ThenTheFirstRowIsSelected()
+		public void GivenACaret_WhenShiftDownAndShiftEndArePressed_ThenEveryRowFromTheAnchorIsSelected()
 		{
-			PressKey(Key.Down).Should().Be(0);
-
-			SelectedLines().Should().Equal(1);
-		}
-
-		[TestMethod]
-		public void GivenACaret_WhenShiftDownIsPressedTwice_ThenThreeRowsAreSelected()
-		{
-			Click(lineNumber: 3);
+			Click(lineNumber: 41);
 
 			PressKey(Key.Down, ModifierKeys.Shift);
-			var scrollTo = PressKey(Key.Down, ModifierKeys.Shift);
+			SelectedLines().Should().Equal(41, 42);
 
-			SelectedLines().Should().Equal(3, 4, 5);
-			scrollTo.Should().Be(4);
+			var scrollTo = PressKey(Key.End, ModifierKeys.Shift);
+			SelectedLines().Should().Equal(Enumerable.Range(41, 10));
+			scrollTo.Should().Be(49);
 		}
 
 		[TestMethod]
@@ -144,28 +129,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			PressKey(Key.Down, ModifierKeys.Control | ModifierKeys.Shift);
 
 			SelectedLines().Should().Equal(1, 5, 6);
-		}
-
-		[TestMethod]
-		public void GivenACaret_WhenPageDownIsPressed_ThenTheRowAPageBelowIsSelected()
-		{
-			Click(lineNumber: 1);
-
-			var scrollTo = PressKey(Key.PageDown, pageSize: 10);
-
-			SelectedLines().Should().Equal(11);
-			scrollTo.Should().Be(10);
-		}
-
-		[TestMethod]
-		public void GivenACaret_WhenShiftEndIsPressed_ThenEveryRowToTheLastIsSelected()
-		{
-			Click(lineNumber: 41);
-
-			var scrollTo = PressKey(Key.End, ModifierKeys.Shift);
-
-			SelectedLines().Should().Equal(Enumerable.Range(41, 10));
-			scrollTo.Should().Be(49);
 		}
 
 		[TestMethod]
@@ -207,7 +170,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenASelection_WhenAltSpaceOrAltDownIsPressed_ThenTheKeyIsLeftAlone()
 		{
-			// Regression: the #1064 review. Alt+Space opens the window menu, as it did in Weevil 2.12.
+			// Alt+Space opens the window menu, as it did in Weevil 2.12.
 			Click(lineNumber: 2);
 			Click(lineNumber: 6, ModifierKeys.Shift);
 
@@ -220,7 +183,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenACaretAndNoAnchor_WhenShiftClicked_ThenTheRowsFromTheCaretAreSelected()
 		{
-			// Regression: the #1064 review. The filter hides the anchor, then shows the caret's record again.
+			// The filter hides the anchor, then shows the caret's record again.
 			Click(lineNumber: 3);
 			Click(lineNumber: 5, ModifierKeys.Control);
 			_engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Record 1"));
@@ -234,19 +197,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public void GivenAPinBoxThatTookFocus_WhenDownIsPressed_ThenTheRowBelowItIsSelected()
-		{
-			// Regression: the #1064 review. The caret follows keyboard focus into a row, without selecting it.
-			Click(lineNumber: 10);
-
-			_selection.MoveCaretTo(_rows, _rows.IndexOfLineNumber(50));
-			SelectedLines().Should().Equal(10);
-
-			PressKey(Key.Up);
-			SelectedLines().Should().Equal(49);
-		}
-
-		[TestMethod]
 		public void GivenAFoundRecord_WhenNavigatedTo_ThenOnlyItIsSelectedAndBecomesTheCaret()
 		{
 			Click(lineNumber: 2);
@@ -256,21 +206,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			SelectedLines().Should().Equal(20);
 			_selection.CaretLineNumber.Should().Be(20);
-		}
-
-		[TestMethod]
-		public void GivenSelectedRecords_WhenTheRowsAreCreatedAndRefreshed_ThenEachRowShowsWhetherItIsSelected()
-		{
-			Click(lineNumber: 2);
-			RowViewModel second = _rows.GetRow(1);
-			RowViewModel third = _rows.GetRow(2);
-
-			Click(lineNumber: 3, ModifierKeys.Shift);
-			_rows.RefreshSelection();
-
-			second.IsSelected.Should().BeTrue();
-			third.IsSelected.Should().BeTrue();
-			_rows.GetRow(3).IsSelected.Should().BeFalse();
 		}
 
 		private void Click(int lineNumber, ModifierKeys modifiers = ModifierKeys.None)

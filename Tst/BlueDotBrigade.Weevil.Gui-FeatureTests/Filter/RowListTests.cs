@@ -107,6 +107,24 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenSelectedRecords_WhenTheSelectionChanges_ThenTheRowsStillHeldShowIt()
+		{
+			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
+			var selector = Substitute.For<ISelect>();
+			selector.Selected.Returns(Selected(results, 2));
+			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
+			RowViewModel second = rows.GetRow(1);
+			RowViewModel third = rows.GetRow(2);
+			second.IsSelected.Should().BeTrue();
+
+			selector.Selected.Returns(Selected(results, 3));
+			rows.RefreshSelection();
+
+			second.IsSelected.Should().BeFalse();
+			third.IsSelected.Should().BeTrue();
+		}
+
+		[TestMethod]
 		public void GivenTheRows_WhenChangedDirectly_ThenTheChangeIsRefused()
 		{
 			var rows = new RowList(R.WithLineNumbers(1, 3), new AnnotationStore(), Substitute.For<ISelect>(), new UiDispatcherFake());
@@ -115,6 +133,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			rows.IsReadOnly.Should().BeTrue();
 			add.Should().Throw<NotSupportedException>();
+		}
+
+		private static IDictionary<int, IRecord> Selected(ImmutableArray<IRecord> results, params int[] lineNumbers)
+		{
+			return lineNumbers.ToDictionary(lineNumber => lineNumber, lineNumber => results[lineNumber - 1]);
 		}
 	}
 }
