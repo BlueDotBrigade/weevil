@@ -21,9 +21,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1066)]
 		public void GivenTextSentWhileTyping_WhenCtrlPIsPressedBeforeTheRest_ThenTheRecordStaysPinned()
 		{
-			// Regression: #1066. Ctrl+P toggled off the pin that the first words had set, and the rest of the text left it off.
+			// Ctrl+P toggled off the pin that the first words had set, and the rest of the text left it off.
 			var annotations = new AnnotationStore();
 			var row = new RowViewModel(R.WithLineNumber(5), annotations);
 
