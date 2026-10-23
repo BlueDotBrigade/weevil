@@ -6,9 +6,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Controls;
+	using System.Windows.Controls.Primitives;
+	using System.Windows.Input;
+	using System.Windows.Media;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Controls;
 	using BlueDotBrigade.Weevil.Gui.Properties;
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.Navigation;
@@ -20,6 +24,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	{
 		private bool _isLogFileOpening;
 		private bool _isCloseDeferred;
+		private bool _hadFocusWhenHidden;
+		private ScrollViewer _scrollViewer;
 
 		public FilterView()
 		{
@@ -33,6 +39,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					viewModel.ResultsChanged -= OnResultsChanged;
 					viewModel.RegionsChanged -= OnRegionsChanged;
 					viewModel.BookmarksChanged -= OnBookmarksChanged;
+					viewModel.ScrollRequested -= OnScrollRequested;
 				}
 				if (args.NewValue != null)
 				{
@@ -42,6 +49,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					viewModel.ResultsChanged += OnResultsChanged;
 					viewModel.RegionsChanged += OnRegionsChanged;
 					viewModel.BookmarksChanged += OnBookmarksChanged;
+					viewModel.ScrollRequested += OnScrollRequested;
 				}
 			};
 
@@ -102,90 +110,155 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		private void OnRegionsChanged(object sender, EventArgs e)
 		{
-			// Force bindings (and converters) for only the visible items to be refreshed.
-			this.ListView.Items.Refresh();
+			RefreshRows();
 		}
 
 		private void OnBookmarksChanged(object sender, EventArgs e)
 		{
-			// Force bindings (and converters) for only the visible items to be refreshed.
+			RefreshRows();
+		}
+
+		/// <summary>
+		/// Refreshes the bindings and converters of the rows on screen.
+		/// </summary>
+		/// <remarks>
+		/// Refreshing replaces the rows' containers, so the focused row loses focus: it is given back.
+		/// </remarks>
+		private void RefreshRows()
+		{
+			var hadFocus = this.ListView.IsKeyboardFocusWithin;
+
 			this.ListView.Items.Refresh();
+
+			if (hadFocus)
+			{
+				FocusRow(this.ViewModel.CaretPosition);
+			}
 		}
 
 		private void OnResultsChanged(object sender, EventArgs e)
 		{
-			try
+			// Keep the caret's row in view, as Weevil 2.12 did, even when the filter started from the filter box.
+			ScrollToRow(this.ViewModel?.CaretPosition ?? -1);
+
+			// Recalculate column widths after filter results change.
+			// Note: BeginInvoke at Background priority ensures that this runs after
+			// any pending progress bar hide and rendering operations are complete.
+			this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(UpdateLayout));
+		}
+
+		private void OnListViewRowPressed(object sender, RowPressedEventArgs e)
+		{
+			if (e.Row.DataContext is RowViewModel row)
 			{
-				this.ListView.SelectedItems.Clear();
-
-				RowList rows = this.ViewModel.Rows;
-
-				foreach (IRecord record in this.ViewModel.SelectedItems)
-				{
-					var position = rows.IndexOfLineNumber(record.LineNumber);
-
-					if (position >= 0)
-					{
-						this.ListView.SelectedItems.Add(rows.GetRow(position));
-					}
-				}
-
-				// Recalculate column widths after filter results change.
-				// Note: BeginInvoke at Background priority ensures that this runs after
-				// any pending progress bar hide and rendering operations are complete.
-				this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(UpdateLayout));
-			}
-			catch (Exception exception)
-			{
-				var message =
-					"An unexpected error occurred while updating the selected items after the filter changed.";
-
-				Log.Default.Write(
-					LogSeverityType.Error,
-					exception,
-					message);
-				MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				this.ViewModel?.PressRow(row, e.Button == MouseButton.Right, Keyboard.Modifiers);
 			}
 		}
 
-		private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void OnListViewPreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			var added = e.AddedItems.Cast<RowViewModel>().Select(row => row.Record).ToList();
-			if (added.Count > 0)
+			// Keys typed in the comment box belong to it.
+			if (this.ViewModel == null || e.OriginalSource is TextBoxBase)
 			{
-				try
-				{
-					this.ViewModel.Select(added);
-				}
-				catch (RecordNotFoundException recordException)
-				{
-					var message = "Attempting to select a record that is no longer visible.";
+				return;
+			}
 
-					Log.Default.Write(
-						LogSeverityType.Error,
-						recordException,
-						message);
+			if (this.ViewModel.PressKey(e.Key, Keyboard.Modifiers, GetPageSize(), isOnRow: e.OriginalSource is ListViewItem))
+			{
+				e.Handled = true;
+			}
+		}
+
+		/// <remarks>
+		/// The caret follows keyboard focus into a row, for example when its pin box is clicked, so the keys move from there.
+		/// </remarks>
+		private void OnListViewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		{
+			if (ItemsControl.ContainerFromElement(this.ListView, e.NewFocus as DependencyObject) is ListViewItem { DataContext: RowViewModel row })
+			{
+				this.ViewModel?.MoveCaretTo(row);
+			}
+		}
+
+		/// <remarks>
+		/// The grid is hidden while a filter runs, which takes keyboard focus away: it is given back to the caret's row.
+		/// </remarks>
+		private void OnListViewIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if (!(bool)e.NewValue)
+			{
+				_hadFocusWhenHidden = this.ListView.IsKeyboardFocusWithin;
+			}
+			else if (_hadFocusWhenHidden && this.ViewModel != null)
+			{
+				_hadFocusWhenHidden = false;
+
+				// Hiding the grid moved focus to an ancestor. Give it back only if the user has not moved it elsewhere meanwhile.
+				if (Keyboard.FocusedElement is not Visual focused || focused.IsAncestorOf(this.ListView) || this.ListView.IsAncestorOf(focused))
+				{
+					FocusRow(this.ViewModel.CaretPosition);
+				}
+			}
+		}
+
+		private void OnScrollRequested(object sender, int position)
+		{
+			FocusRow(position);
+		}
+
+		/// <summary>
+		/// Scrolls the row at <paramref name="position"/> into view, then gives it keyboard focus (#699).
+		/// </summary>
+		private void FocusRow(int position)
+		{
+			if (ScrollToRow(position))
+			{
+				this.Dispatcher.BeginInvoke(
+					DispatcherPriority.Loaded,
+					new Action(() => this.ListView.ContainerFromPosition(position)?.Focus()));
+			}
+		}
+
+		/// <returns><see langword="false"/> when there is no row at <paramref name="position"/>.</returns>
+		private bool ScrollToRow(int position)
+		{
+			RowList rows = this.ViewModel?.Rows;
+
+			if (rows == null || position < 0 || position >= rows.Count)
+			{
+				return false;
+			}
+
+			this.ListView.ScrollIntoView(rows.GetRow(position));
+			return true;
+		}
+
+		/// <summary>
+		/// Returns the number of rows Page Up and Page Down move: one less than the rows shown.
+		/// </summary>
+		private int GetPageSize()
+		{
+			_scrollViewer ??= FindDescendant<ScrollViewer>(this.ListView);
+
+			// The grid scrolls by row, so the viewport's height is a number of rows.
+			return System.Math.Max(1, (int)(_scrollViewer?.ViewportHeight ?? 20) - 1);
+		}
+
+		private static T FindDescendant<T>(DependencyObject parent)
+			where T : DependencyObject
+		{
+			for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+			{
+				DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+				T found = child as T ?? FindDescendant<T>(child);
+
+				if (found != null)
+				{
+					return found;
 				}
 			}
 
-			var removed = e.RemovedItems.Cast<RowViewModel>().Select(row => row.Record).ToList();
-			if (removed.Count > 0)
-			{
-				try
-				{
-					this.ViewModel.UnSelect(removed);
-				}
-				catch (RecordNotFoundException recordException)
-				{
-					var message = "Attempting to de-select a record that is no longer visible.";
-
-					Log.Default.Write(
-						LogSeverityType.Error,
-						recordException,
-						message);
-					throw;
-				}
-			}
+			return null;
 		}
 
 		private void OnWindowLayoutDragOver(object sender, DragEventArgs e)

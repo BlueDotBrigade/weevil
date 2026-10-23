@@ -83,6 +83,7 @@
 		private readonly IDialogBoxService _dialogBox;
 
 		private IEngine _engine;
+		private RowSelection _rowSelection;
 
 		private readonly DragAndDropViewModel _dragAndDrop;
 
@@ -126,6 +127,7 @@
 			_bulletinMediator = bulletinMediator;
 
 			_engine = Engine.Surrogate;
+			_rowSelection = new RowSelection(_engine);
 
 			this.IsLogFileOpen = false;
 			this.CanOpenLogFile = true;
@@ -359,6 +361,9 @@
 			}
 		}
 
+		/// <summary>
+		/// The position the last navigation command went to.
+		/// </summary>
 		public int ActiveRecordIndex { get; set; }
 
 		public bool IncludeDebugRecords
@@ -437,6 +442,11 @@
 		public event EventHandler BookmarksChanged;
 
 		public event EventHandler FileOpened;
+
+		/// <summary>
+		/// Asks the view to scroll to the row at the given position and give it keyboard focus.
+		/// </summary>
+		public event EventHandler<int> ScrollRequested;
 		#endregion
 
 		#region Event Handlers
@@ -622,6 +632,7 @@
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						_engine = openedEngine;
 						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
+						_rowSelection = new RowSelection(_engine);
 						_engine.Annotations.Changed += OnAnnotationsChanged;
 
 						this.FileOpened?.Invoke(this, EventArgs.Empty);
@@ -844,8 +855,7 @@
 			{
 				try
 				{
-					ImmutableArray<IRecord> oldRecordSelection = _engine.Selector.ClearAll();
-
+					// Reload keeps the selection in Core (#1062).
 					_engine.Save();
 					_engine.Reload();
 
@@ -860,10 +870,6 @@
 						Context = _engine.Context,
 						TotalRecordCount = _engine.Count
 					});
-
-					var newRecordSelection = _engine.Filter.Results
-						.Where(a => oldRecordSelection.Any(b => b.LineNumber == a.LineNumber)).ToList();
-					_engine.Selector.Select(newRecordSelection);
 
 					RefreshFilterResults();
 
@@ -911,24 +917,77 @@
 			RefreshFilterResults();
 		}
 
-		public void Select(IList<IRecord> records)
-		{
-			if (this.CanOpenLogFile)
-			{
-				_engine.Selector.Select(records);
+		/// <summary>
+		/// The row with keyboard focus, or -1 when there is none.
+		/// </summary>
+		[NotObservable]
+		public int CaretPosition => this.Rows is null ? -1 : _rowSelection.GetCaretPosition(this.Rows);
 
-				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+		/// <summary>
+		/// A row was clicked. WPF never selects a row: the click changes Core's selection (#1064).
+		/// </summary>
+		public void PressRow(RowViewModel row, bool isRightButton, ModifierKeys modifiers)
+		{
+			var position = this.Rows?.IndexOf(row) ?? -1;
+
+			if (this.CanOpenLogFile && position >= 0)
+			{
+				if (isRightButton)
+				{
+					_rowSelection.RightClick(this.Rows, position, modifiers);
+				}
+				else
+				{
+					_rowSelection.Click(this.Rows, position, modifiers);
+				}
+
+				OnSelectionChanged();
 			}
 		}
 
-		public void UnSelect(IList<IRecord> records)
+		/// <summary>
+		/// Keyboard focus moved into a row: the caret moves there, and the selection does not change.
+		/// </summary>
+		public void MoveCaretTo(RowViewModel row)
 		{
-			if (this.CanOpenLogFile)
-			{
-				_engine.Selector.Unselect(records);
+			var position = this.Rows?.IndexOf(row) ?? -1;
 
-				_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+			if (position >= 0)
+			{
+				_rowSelection.MoveCaretTo(this.Rows, position);
 			}
+		}
+
+		/// <summary>
+		/// A key was pressed in the grid.
+		/// </summary>
+		/// <returns><see langword="true"/> when it was a selection key.</returns>
+		public bool PressKey(Key key, ModifierKeys modifiers, int pageSize, bool isOnRow)
+		{
+			if (!this.CanOpenLogFile || this.Rows is null)
+			{
+				return false;
+			}
+
+			var isHandled = _rowSelection.TryPressKey(this.Rows, key, modifiers, pageSize, isOnRow, out var scrollToPosition);
+
+			if (isHandled)
+			{
+				OnSelectionChanged();
+
+				if (scrollToPosition >= 0)
+				{
+					this.ScrollRequested?.Invoke(this, scrollToPosition);
+				}
+			}
+
+			return isHandled;
+		}
+
+		private void OnSelectionChanged()
+		{
+			this.Rows.RefreshSelection();
+			_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 		}
 
 		public void DragOver(DragEventArgs e)
@@ -1986,11 +2045,24 @@
 			});
 		}
 
+		/// <remarks>
+		/// Selects only the record found, and scrolls to it and focuses it, whatever keys are held (#699, #768, #806).
+		/// </remarks>
 		private void SearchFilterResults(string userMessage, Func<int> search)
 		{
 			try
 			{
-				this.ActiveRecordIndex = search.Invoke();
+				var position = search.Invoke();
+
+				if (this.Rows != null && position >= 0 && position < this.Rows.Count)
+				{
+					_rowSelection.SelectOnly(this.Rows, position);
+					OnSelectionChanged();
+				}
+
+				// An event, not a property: Metalama would ignore going to the same row again (#806).
+				this.ActiveRecordIndex = position;
+				this.ScrollRequested?.Invoke(this, position);
 			}
 			catch (RecordNotFoundException e)
 			{
@@ -2011,7 +2083,7 @@
 				OnPropertyChanged(nameof(this.ExclusiveFilter));
 
 				this.VisibleItems = _engine.Filter.Results;
-				this.Rows = new RowList(_engine.Filter.Results, _engine.Annotations, _uiDispatcher);
+				this.Rows = new RowList(_engine.Filter.Results, _engine.Annotations, _engine.Selector, _uiDispatcher);
 
 				OnPropertyChanged(nameof(this.VisibleItems));
 			});

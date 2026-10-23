@@ -24,6 +24,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		private readonly ImmutableArray<IRecord> _results;
 		private readonly IAnnotations _annotations;
+		private readonly ISelect _selector;
 		private readonly IUiDispatcher _uiDispatcher;
 
 		// Guards the cache and the queued changes. Rows are read on the UI thread, but changes arrive on any thread.
@@ -35,10 +36,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private bool _isRefreshQueued;
 		private bool _refreshesEveryRow;
 
-		public RowList(ImmutableArray<IRecord> results, IAnnotations annotations, IUiDispatcher uiDispatcher)
+		public RowList(ImmutableArray<IRecord> results, IAnnotations annotations, ISelect selector, IUiDispatcher uiDispatcher)
 		{
 			_results = results.IsDefault ? ImmutableArray<IRecord>.Empty : results;
 			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+			_selector = selector ?? throw new ArgumentNullException(nameof(selector));
 			_uiDispatcher = uiDispatcher ?? throw new ArgumentNullException(nameof(uiDispatcher));
 		}
 
@@ -72,7 +74,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					return row;
 				}
 
-				row = new RowViewModel(_results[position], _annotations);
+				row = new RowViewModel(_results[position], _annotations)
+				{
+					IsSelected = _selector.Selected.ContainsKey(_results[position].LineNumber),
+				};
 				_rows[position] = new WeakReference<RowViewModel>(row);
 
 				if (_rows.Count >= _purgeCount)
@@ -84,35 +89,69 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 		}
 
+		public int LineNumberAt(int position)
+		{
+			return _results[position].LineNumber;
+		}
+
 		/// <summary>
 		/// Returns the position of the record with the given line number, or -1 when the filter hides it.
 		/// </summary>
 		public int IndexOfLineNumber(int lineNumber)
 		{
-			var low = 0;
-			var high = _results.Length - 1;
+			var position = IndexOfLineNumberOrNext(lineNumber);
 
-			while (low <= high)
+			return position < _results.Length && _results[position].LineNumber == lineNumber ? position : -1;
+		}
+
+		/// <summary>
+		/// Returns the position of the first record at or after the given line number, or <see cref="Count"/> when there is none.
+		/// </summary>
+		public int IndexOfLineNumberOrNext(int lineNumber)
+		{
+			var low = 0;
+			var high = _results.Length;
+
+			while (low < high)
 			{
 				var middle = low + ((high - low) / 2);
-				var current = _results[middle].LineNumber;
 
-				if (current == lineNumber)
-				{
-					return middle;
-				}
-
-				if (current < lineNumber)
+				if (_results[middle].LineNumber < lineNumber)
 				{
 					low = middle + 1;
 				}
 				else
 				{
-					high = middle - 1;
+					high = middle;
 				}
 			}
 
-			return -1;
+			return low;
+		}
+
+		/// <summary>
+		/// Shows the current selection on the rows still held. Call it on the UI thread after the selection changes.
+		/// </summary>
+		public void RefreshSelection()
+		{
+			IDictionary<int, IRecord> selected = _selector.Selected;
+			var liveRows = new List<RowViewModel>();
+
+			lock (_padlock)
+			{
+				foreach (WeakReference<RowViewModel> reference in _rows.Values)
+				{
+					if (reference.TryGetTarget(out RowViewModel row))
+					{
+						liveRows.Add(row);
+					}
+				}
+			}
+
+			foreach (RowViewModel row in liveRows)
+			{
+				row.IsSelected = selected.ContainsKey(row.LineNumber);
+			}
 		}
 
 		public int IndexOf(object value)
