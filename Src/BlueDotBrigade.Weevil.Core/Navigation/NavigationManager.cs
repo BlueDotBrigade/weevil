@@ -57,6 +57,20 @@
 			_activeRecord.SetActiveIndex(index);
 		}
 
+		/// <summary>
+		/// The line number of the active record, or -1 when there is none.
+		/// </summary>
+		internal int ActiveLineNumber
+		{
+			get
+			{
+				ImmutableArray<IRecord> dataSource = _activeRecord.DataSource;
+				var index = _activeRecord.Index;
+
+				return index >= 0 && index < dataSource.Length ? dataSource[index].LineNumber : -1;
+			}
+		}
+
 		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
 			_activeRecord.UpdateDataSource(filterResults);

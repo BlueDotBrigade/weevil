@@ -101,9 +101,51 @@
 			selector.Selected.Count.Should().Be(0);
 		}
 
+		[TestMethod]
+		public void GivenLinesTheFilterHides_WhenSelectedOnly_ThenOnlyTheRecordsShownBetweenThemAreSelected()
+		{
+			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 10);
+			ImmutableArray<IRecord> odd = records.Where(r => r.LineNumber % 2 == 1).ToImmutableArray();
+			SelectionManager selector = CreateSelector(records, odd);
+
+			selector.SelectOnly(2, 6);
+
+			selector.Selected.Keys.Should().Equal(3, 5);
+		}
+
+		[TestMethod]
+		public void GivenLinesBeyondTheRecords_WhenSelectedOnly_ThenNothingIsSelected()
+		{
+			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 10);
+			SelectionManager selector = CreateSelector(records);
+			selector.SelectOnly(1, 3);
+
+			selector.SelectOnly(100, 200);
+
+			selector.Selected.Count.Should().Be(0);
+		}
+
+		[TestMethod]
+		public void GivenALineTheFilterHides_WhenToggled_ThenRecordNotFoundIsThrown()
+		{
+			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 10);
+			ImmutableArray<IRecord> odd = records.Where(r => r.LineNumber % 2 == 1).ToImmutableArray();
+			SelectionManager selector = CreateSelector(records, odd);
+
+			Action toggle = () => selector.Toggle(2);
+
+			toggle.Should().Throw<RecordNotFoundException>();
+			selector.Selected.Count.Should().Be(0);
+		}
+
 		private static SelectionManager CreateSelector(ImmutableArray<IRecord> records)
 		{
-			return new SelectionManager(records, records, new NavigationManager(null, null, records, null), Encoding.UTF8, () => { });
+			return CreateSelector(records, records);
+		}
+
+		private static SelectionManager CreateSelector(ImmutableArray<IRecord> records, ImmutableArray<IRecord> visibleRecords)
+		{
+			return new SelectionManager(records, visibleRecords, new NavigationManager(null, null, visibleRecords, null), Encoding.UTF8, () => { });
 		}
 	}
 }

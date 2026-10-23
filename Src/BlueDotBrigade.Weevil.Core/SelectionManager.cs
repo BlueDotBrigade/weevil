@@ -23,6 +23,8 @@
 	[DebuggerDisplay("Selected={_selection.Count}")]
 	internal class SelectionManager : ISelect
 	{
+		private const int NoLineNumber = -1;
+
 		#region Fields
 		private readonly object _selectionPadlock;
 
@@ -36,6 +38,7 @@
 		private PositionRanges _selection;
 		private ImmutableArray<IRecord> _visibleRecords;
 		private TimeSpan _selectionPeriod;
+		private int _anchorLineNumber;
 		#endregion
 
 		#region Object Lifetime
@@ -58,6 +61,7 @@
 			_navigationManager = navigationManager;
 
 			_selectionPeriod = Metadata.ElapsedTimeUnknown;
+			_anchorLineNumber = NoLineNumber;
 		}
 		#endregion
 
@@ -76,6 +80,8 @@
 		public bool HasSelectionPeriod => _selection.Count >= 2;
 
 		public TimeSpan SelectionPeriod => _selectionPeriod;
+
+		public int AnchorLineNumber => _anchorLineNumber;
 		#endregion
 
 		#region Static Members
@@ -109,9 +115,14 @@
 		/// </summary>
 		private static int FindPosition(ImmutableArray<IRecord> visibleRecords, IRecord record)
 		{
-			var position = PositionRanges.LowerBound(visibleRecords, record.LineNumber, 0);
+			return FindPosition(visibleRecords, record.LineNumber);
+		}
 
-			return position < visibleRecords.Length && visibleRecords[position].LineNumber == record.LineNumber
+		private static int FindPosition(ImmutableArray<IRecord> visibleRecords, int lineNumber)
+		{
+			var position = PositionRanges.LowerBound(visibleRecords, lineNumber, 0);
+
+			return position < visibleRecords.Length && visibleRecords[position].LineNumber == lineNumber
 				? position
 				: -1;
 		}
@@ -189,6 +200,11 @@
 					: PositionRanges.Remap(_selection, _visibleRecords, visibleRecords, _allRecords);
 				_visibleRecords = visibleRecords;
 				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
+
+				if (FindPosition(_visibleRecords, _anchorLineNumber) < 0)
+				{
+					_anchorLineNumber = NoLineNumber;
+				}
 
 				after = _selection.Count;
 			}
@@ -331,6 +347,136 @@
 			}
 
 			return this;
+		}
+
+		/// <summary>
+		/// Keeps the selection, the anchor and the active record of an engine this one replaces, for the records this one shows.
+		/// </summary>
+		/// <remarks>
+		/// Called by Reload before it applies the filter, which then narrows the selection as usual. Records are matched by line number.
+		/// </remarks>
+		internal void KeepSelectionOf(SelectionManager previous)
+		{
+			PositionRanges selection;
+			ImmutableArray<IRecord> results;
+			int anchorLineNumber;
+
+			lock (previous._selectionPadlock)
+			{
+				selection = previous._selection;
+				results = previous._visibleRecords;
+				anchorLineNumber = previous._anchorLineNumber;
+			}
+
+			var activeLineNumber = previous._navigationManager.ActiveLineNumber;
+
+			lock (_selectionPadlock)
+			{
+				// Compared with this engine's records, so records a Clear removed and Reload restored are not selected.
+				_selection = selection.Count == 0
+					? new PositionRanges()
+					: PositionRanges.Remap(selection, results, _visibleRecords, _allRecords);
+				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
+				_anchorLineNumber = FindPosition(_visibleRecords, anchorLineNumber) < 0 ? NoLineNumber : anchorLineNumber;
+			}
+
+			SetActiveLineIfShown(activeLineNumber);
+		}
+
+		public ISelect SelectOnly(int anchorLineNumber, int lineNumber)
+		{
+			return ChangeRange(anchorLineNumber, lineNumber, replacesSelection: true);
+		}
+
+		public ISelect SelectRange(int anchorLineNumber, int lineNumber)
+		{
+			return ChangeRange(anchorLineNumber, lineNumber, replacesSelection: false);
+		}
+
+		public ISelect Toggle(int lineNumber)
+		{
+			int count;
+
+			lock (_selectionPadlock)
+			{
+				var position = FindPosition(_visibleRecords, lineNumber);
+				if (position < 0)
+				{
+					throw new RecordNotFoundException($"Unable to find record. LineNumber={lineNumber}");
+				}
+
+				var record = PositionRanges.FromRange(position, position);
+				_selection = _selection.Contains(position)
+					? PositionRanges.Except(_selection, record)
+					: PositionRanges.Union(_selection, record);
+				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
+				_anchorLineNumber = lineNumber;
+				count = _selection.Count;
+			}
+
+			Log.Default.Write(
+				LogSeverityType.Trace,
+				$"The number of selected records has changed. Toggled={lineNumber}, Current={count}");
+
+			_navigationManager.SetActiveLineNumber(lineNumber);
+
+			return this;
+		}
+
+		public ISelect SelectAll()
+		{
+			int count;
+
+			lock (_selectionPadlock)
+			{
+				_selection = PositionRanges.FromRange(0, _visibleRecords.Length - 1);
+				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
+				count = _selection.Count;
+			}
+
+			Log.Default.Write(
+				LogSeverityType.Trace,
+				$"Every record the filter shows has been selected. Current={count}");
+
+			return this;
+		}
+
+		private ISelect ChangeRange(int anchorLineNumber, int lineNumber, bool replacesSelection)
+		{
+			int count;
+
+			if (anchorLineNumber == NoLineNumber)
+			{
+				anchorLineNumber = lineNumber;
+			}
+
+			lock (_selectionPadlock)
+			{
+				var first = PositionRanges.LowerBound(_visibleRecords, System.Math.Min(anchorLineNumber, lineNumber), 0);
+				var last = PositionRanges.LowerBound(_visibleRecords, System.Math.Max(anchorLineNumber, lineNumber) + 1, first) - 1;
+				var range = PositionRanges.FromRange(first, last);
+
+				_selection = replacesSelection ? range : PositionRanges.Union(_selection, range);
+				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
+				_anchorLineNumber = anchorLineNumber;
+				count = _selection.Count;
+			}
+
+			Log.Default.Write(
+				LogSeverityType.Trace,
+				$"The number of selected records has changed. AnchorLineNumber={anchorLineNumber}, LineNumber={lineNumber}, Current={count}");
+
+			SetActiveLineIfShown(lineNumber);
+
+			return this;
+		}
+
+		private void SetActiveLineIfShown(int lineNumber)
+		{
+			if (FindPosition(_visibleRecords, lineNumber) >= 0)
+			{
+				_navigationManager.SetActiveLineNumber(lineNumber);
+			}
 		}
 
 		public ImmutableArray<IRecord> ClearAll()

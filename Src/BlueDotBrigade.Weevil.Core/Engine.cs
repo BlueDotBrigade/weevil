@@ -165,11 +165,16 @@
 			FilterType filterType = _coreEngine.Filter.FilterType;
 			IFilterCriteria filterCriteria = _coreEngine.Filter.Criteria;
 
+			CoreEngine previous = _coreEngine;
+
 			// The comments, pins and flags carry across Reload, as they do across Clear (#1013).
 			Replace(CoreEngine
 				.FromPath(sourcePath)
 				.UsingAnnotations(_coreEngine.Annotations)
 				.Build());
+
+			// Before the filter, which then narrows the selection as any filter does (#1062).
+			_coreEngine.Selector.KeepSelectionOf(previous.Selector);
 			_coreEngine.Filter.Apply(filterType, filterCriteria);
 		}
 

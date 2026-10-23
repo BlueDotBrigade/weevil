@@ -16,6 +16,46 @@
 		/// Represents the amount of time between the first and last selected records.
 		/// </summary>
 		TimeSpan SelectionPeriod { get; }
+
+		/// <summary>
+		/// The line a range of lines is selected from, for example by Shift+click, or -1 when there is none.
+		/// </summary>
+		/// <remarks>
+		/// A filter that hides the anchor's record drops the anchor, as it drops the selected records it hides.
+		/// </remarks>
+		int AnchorLineNumber { get; }
+
+		/// <summary>
+		/// Replaces the selection with every record the filter shows from <paramref name="anchorLineNumber"/> to <paramref name="lineNumber"/>, in either order.
+		/// </summary>
+		/// <remarks>
+		/// <paramref name="anchorLineNumber"/> becomes the <see cref="AnchorLineNumber"/>, and <paramref name="lineNumber"/> the active record.
+		/// When <paramref name="anchorLineNumber"/> is -1 (no anchor), <paramref name="lineNumber"/> is used instead.
+		/// The cost does not depend on the number of records.
+		/// </remarks>
+		ISelect SelectOnly(int anchorLineNumber, int lineNumber);
+
+		/// <summary>
+		/// Adds every record the filter shows from <paramref name="anchorLineNumber"/> to <paramref name="lineNumber"/>, in either order, to the selection.
+		/// </summary>
+		/// <remarks>
+		/// <paramref name="anchorLineNumber"/> becomes the <see cref="AnchorLineNumber"/>, and <paramref name="lineNumber"/> the active record.
+		/// When <paramref name="anchorLineNumber"/> is -1 (no anchor), <paramref name="lineNumber"/> is used instead.
+		/// The cost does not depend on the number of records.
+		/// </remarks>
+		ISelect SelectRange(int anchorLineNumber, int lineNumber);
+
+		/// <summary>
+		/// Selects the record if it is not selected, and unselects it otherwise. The record becomes the anchor and the active record.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException">The filter hides the record.</exception>
+		ISelect Toggle(int lineNumber);
+
+		/// <summary>
+		/// Selects every record the filter shows. The anchor and the active record do not change.
+		/// </summary>
+		ISelect SelectAll();
+
 		/// <summary>
 		/// The given <paramref name="lineNumber"/> is added to the "items of interest" list.
 		/// </summary>
