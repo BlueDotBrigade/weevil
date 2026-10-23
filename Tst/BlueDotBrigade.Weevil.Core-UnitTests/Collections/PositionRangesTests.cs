@@ -10,29 +10,35 @@ namespace BlueDotBrigade.Weevil.Collections
 	public class PositionRangesTests
 	{
 		[TestMethod]
-		public void GivenTwoSeparateRanges_WhenARangeTouchesBoth_ThenTheyMergeIntoOne()
+		public void GivenTwoSeparateRanges_WhenARangeTouchingBothIsAdded_ThenTheyMergeIntoOne()
 		{
-			var ranges = new PositionRanges();
-			ranges.Add(10, 20);
-			ranges.Add(30, 40);
+			PositionRanges ranges = PositionRanges.Union(Positions(10, 20), Positions(30, 40));
 
-			ranges.Add(21, 29);
+			PositionRanges merged = PositionRanges.Union(ranges, Positions(21, 29));
 
-			ranges.RangeCount.Should().Be(1);
-			ranges.Count.Should().Be(31);
+			merged.Ranges.Should().Equal(new PositionRange(10, 40));
+			merged.Count.Should().Be(31);
 		}
 
 		[TestMethod]
 		public void GivenOneRange_WhenAPositionInsideIsRemoved_ThenTheRangeSplitsInTwo()
 		{
-			var ranges = new PositionRanges();
-			ranges.Add(10, 40);
+			PositionRanges ranges = Positions(10, 40);
 
-			ranges.Remove(25, 25);
+			PositionRanges split = PositionRanges.Except(ranges, Positions(25, 25));
 
-			ranges.Ranges.Should().Equal(new PositionRange(10, 24), new PositionRange(26, 40));
-			ranges.Count.Should().Be(30);
-			ranges.Contains(25).Should().BeFalse();
+			split.Ranges.Should().Equal(new PositionRange(10, 24), new PositionRange(26, 40));
+			split.Count.Should().Be(30);
+			split.Contains(25).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenPositionsInAnyOrder_WhenBuilt_ThenDuplicatesAreIgnoredAndNeighboursMerge()
+		{
+			PositionRanges ranges = PositionRanges.FromPositions(new List<int> { 7, 3, 4, 3, 9, 8 });
+
+			ranges.Ranges.Should().Equal(new PositionRange(3, 4), new PositionRange(7, 9));
+			ranges.Count.Should().Be(5);
 		}
 
 		[TestMethod]
@@ -42,19 +48,26 @@ namespace BlueDotBrigade.Weevil.Collections
 			var ranges = new PositionRanges();
 			var expected = new SortedSet<int>();
 
-			for (var i = 0; i < 5_000; i++)
+			for (var i = 0; i < 2_000; i++)
 			{
-				var first = random.Next(0, 2_000);
-				var last = first + random.Next(0, 20);
+				// Several scattered ranges per change, some of them overlapping.
+				var positions = new List<int>();
+				for (var r = random.Next(1, 6); r > 0; r--)
+				{
+					var first = random.Next(0, 2_000);
+					positions.AddRange(Enumerable.Range(first, random.Next(1, 30)));
+				}
+
+				PositionRanges changes = PositionRanges.FromPositions(positions);
 				if (random.Next(2) == 0)
 				{
-					ranges.Add(last, first);
-					expected.UnionWith(Enumerable.Range(first, last - first + 1));
+					ranges = PositionRanges.Union(ranges, changes);
+					expected.UnionWith(positions);
 				}
 				else
 				{
-					ranges.Remove(first, last);
-					expected.ExceptWith(Enumerable.Range(first, last - first + 1));
+					ranges = PositionRanges.Except(ranges, changes);
+					expected.ExceptWith(positions);
 				}
 			}
 
@@ -68,8 +81,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		{
 			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 100);
 			ImmutableArray<IRecord> even = Keep(all, r => r.LineNumber % 2 == 0);
-			var selection = new PositionRanges();
-			selection.Add(0, all.Length - 1);
+			PositionRanges selection = Positions(0, all.Length - 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, all, even, all);
 
@@ -82,8 +94,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 100);
 			ImmutableArray<IRecord> even = Keep(all, r => r.LineNumber % 2 == 0);
 			ImmutableArray<IRecord> tenth = Keep(all, r => r.LineNumber % 10 == 0);
-			var selection = new PositionRanges();
-			selection.Add(0, even.Length - 1);
+			PositionRanges selection = Positions(0, even.Length - 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, even, tenth, all);
 
@@ -95,8 +106,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		{
 			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 10);
 			ImmutableArray<IRecord> even = Keep(all, r => r.LineNumber % 2 == 0);
-			var selection = new PositionRanges();
-			selection.Add(0, even.Length - 1);
+			PositionRanges selection = Positions(0, even.Length - 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, even, all, all);
 
@@ -109,8 +119,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		{
 			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 10);
 			ImmutableArray<IRecord> odd = Keep(all, r => r.LineNumber % 2 == 1);
-			var selection = new PositionRanges();
-			selection.Add(1, 1);
+			PositionRanges selection = Positions(1, 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, all, odd, all);
 
@@ -125,12 +134,16 @@ namespace BlueDotBrigade.Weevil.Collections
 				R.WithLineNumber(1), R.WithLineNumber(2), R.WithLineNumber(3),
 				R.WithLineNumber(10), R.WithLineNumber(11), R.WithLineNumber(12));
 			ImmutableArray<IRecord> filtered = Keep(all, r => r.LineNumber != 2);
-			var selection = new PositionRanges();
-			selection.Add(0, all.Length - 1);
+			PositionRanges selection = Positions(0, all.Length - 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, all, filtered, all);
 
 			remapped.Ranges.Should().Equal(new PositionRange(0, filtered.Length - 1));
+		}
+
+		private static PositionRanges Positions(int first, int last)
+		{
+			return PositionRanges.FromPositions(Enumerable.Range(first, last - first + 1).ToList());
 		}
 
 		private static ImmutableArray<IRecord> Keep(ImmutableArray<IRecord> records, Func<IRecord, bool> filter)

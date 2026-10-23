@@ -19,6 +19,8 @@ namespace BlueDotBrigade.Weevil.Collections
 	/// <remarks>
 	/// Ranges never overlap or touch: adjacent ranges are merged. The proof of concept in
 	/// <c>Doc/Research/Weevil3/VirtualListPoC</c> measured this design at 100 million rows (#1014).
+	/// A set never changes once it is built. A change builds a new set in one pass, so changing many positions costs
+	/// no more than reading both sets.
 	/// </remarks>
 	internal sealed class PositionRanges
 	{
@@ -27,12 +29,6 @@ namespace BlueDotBrigade.Weevil.Collections
 		public PositionRanges()
 		{
 			_ranges = new List<PositionRange>();
-		}
-
-		private PositionRanges(List<PositionRange> ranges, int count)
-		{
-			_ranges = ranges;
-			this.Count = count;
 		}
 
 		public int Count { get; private set; }
@@ -51,11 +47,6 @@ namespace BlueDotBrigade.Weevil.Collections
 		/// </summary>
 		public int Last => _ranges.Count == 0 ? -1 : _ranges[^1].Last;
 
-		public PositionRanges Clone()
-		{
-			return new PositionRanges(new List<PositionRange>(_ranges), this.Count);
-		}
-
 		public bool Contains(int position)
 		{
 			var index = FindRangeAtOrAfter(position);
@@ -63,73 +54,87 @@ namespace BlueDotBrigade.Weevil.Collections
 		}
 
 		/// <summary>
-		/// Adds every position from <paramref name="first"/> to <paramref name="last"/>, in either order.
+		/// Returns the given positions as ranges. They may come in any order, and more than once.
 		/// </summary>
-		public void Add(int first, int last)
+		/// <remarks>
+		/// Sorts <paramref name="positions"/> in place.
+		/// </remarks>
+		public static PositionRanges FromPositions(List<int> positions)
 		{
-			if (first > last)
+			positions.Sort();
+
+			var ranges = new PositionRanges();
+			foreach (var position in positions)
 			{
-				(first, last) = (last, first);
+				ranges.Append(position, position);
 			}
 
-			// Every range that overlaps or touches the new one is merged into it.
-			var start = FindRangeAtOrAfter(first - 1);
-			var end = start;
-			while (end < _ranges.Count && _ranges[end].First <= last + 1)
-			{
-				first = System.Math.Min(first, _ranges[end].First);
-				last = System.Math.Max(last, _ranges[end].Last);
-				this.Count -= _ranges[end].Count;
-				end++;
-			}
-
-			_ranges.RemoveRange(start, end - start);
-			_ranges.Insert(start, new PositionRange(first, last));
-			this.Count += last - first + 1;
+			return ranges;
 		}
 
 		/// <summary>
-		/// Removes every position from <paramref name="first"/> to <paramref name="last"/>, in either order.
+		/// Returns the positions that are in either set, in one pass over both.
 		/// </summary>
-		public void Remove(int first, int last)
+		public static PositionRanges Union(PositionRanges a, PositionRanges b)
 		{
-			if (first > last)
+			var union = new PositionRanges();
+			var i = 0;
+			var j = 0;
+
+			while (i < a._ranges.Count || j < b._ranges.Count)
 			{
-				(first, last) = (last, first);
+				PositionRange next = j == b._ranges.Count || (i < a._ranges.Count && a._ranges[i].First <= b._ranges[j].First)
+					? a._ranges[i++]
+					: b._ranges[j++];
+
+				union.Append(next.First, next.Last);
 			}
 
-			var start = FindRangeAtOrAfter(first);
-			var end = start;
-			var kept = new List<PositionRange>(2);
-			while (end < _ranges.Count && _ranges[end].First <= last)
-			{
-				PositionRange range = _ranges[end];
-				this.Count -= range.Count;
-				if (range.First < first)
-				{
-					kept.Add(new PositionRange(range.First, first - 1));
-				}
-
-				if (range.Last > last)
-				{
-					kept.Add(new PositionRange(last + 1, range.Last));
-				}
-
-				end++;
-			}
-
-			_ranges.RemoveRange(start, end - start);
-			_ranges.InsertRange(start, kept);
-			foreach (PositionRange range in kept)
-			{
-				this.Count += range.Count;
-			}
+			return union;
 		}
 
-		public void Clear()
+		/// <summary>
+		/// Returns the positions of <paramref name="a"/> that are not in <paramref name="b"/>, in one pass over both.
+		/// </summary>
+		public static PositionRanges Except(PositionRanges a, PositionRanges b)
 		{
-			_ranges.Clear();
-			this.Count = 0;
+			var difference = new PositionRanges();
+			var j = 0;
+
+			foreach (PositionRange range in a._ranges)
+			{
+				var first = range.First;
+
+				while (j < b._ranges.Count && b._ranges[j].Last < first)
+				{
+					j++;
+				}
+
+				// A removed range may also cover the next range, so it is only passed once it ends before this one does.
+				while (j < b._ranges.Count && b._ranges[j].First <= range.Last)
+				{
+					PositionRange removed = b._ranges[j];
+					if (removed.First > first)
+					{
+						difference.Append(first, removed.First - 1);
+					}
+
+					first = removed.Last + 1;
+					if (removed.Last > range.Last)
+					{
+						break;
+					}
+
+					j++;
+				}
+
+				if (first <= range.Last)
+				{
+					difference.Append(first, range.Last);
+				}
+			}
+
+			return difference;
 		}
 
 		public IEnumerable<int> EnumeratePositions()
@@ -237,20 +242,24 @@ namespace BlueDotBrigade.Weevil.Collections
 		}
 
 		/// <summary>
-		/// Adds positions after every existing range, merging with the last range when they touch.
+		/// Adds positions that start at or after the first position of the last range, merging with it when they overlap or touch.
 		/// </summary>
 		private void Append(int first, int last)
 		{
-			if (_ranges.Count > 0 && _ranges[^1].Last == first - 1)
+			if (_ranges.Count > 0 && _ranges[^1].Last >= first - 1)
 			{
-				_ranges[^1] = new PositionRange(_ranges[^1].First, last);
+				PositionRange previous = _ranges[^1];
+				if (last > previous.Last)
+				{
+					_ranges[^1] = new PositionRange(previous.First, last);
+					this.Count += last - previous.Last;
+				}
 			}
 			else
 			{
 				_ranges.Add(new PositionRange(first, last));
+				this.Count += last - first + 1;
 			}
-
-			this.Count += last - first + 1;
 		}
 
 		/// <summary>
