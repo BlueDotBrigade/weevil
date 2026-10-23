@@ -55,6 +55,26 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenAPinMadeElsewhere_WhenTheUiThreadRunsTheRefresh_ThenTheCommentIsNotReadBack()
+		{
+			// Regression: the #1057 review. Ctrl+P within 250 ms of typing erased the text the box had not sent yet.
+			var annotations = new AnnotationStore();
+			var dispatcher = new DeferredUiDispatcherFake();
+			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, dispatcher);
+			annotations.Changed += (_, e) => rows.QueueRefresh(e);
+			RowViewModel row = rows.GetRow(4);
+			_ = row.Comment;
+			var changedProperties = new List<string>();
+			row.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
+
+			annotations.SetPinned(row.LineNumber, true);
+			dispatcher.RunQueued();
+
+			changedProperties.Should().Contain(nameof(RowViewModel.IsPinned));
+			changedProperties.Should().NotContain(nameof(RowViewModel.Comment));
+		}
+
+		[TestMethod]
 		public void GivenACommentMadeElsewhere_WhenTheUiThreadRunsTheRefresh_ThenTheRowReadsItBack()
 		{
 			var annotations = new AnnotationStore();

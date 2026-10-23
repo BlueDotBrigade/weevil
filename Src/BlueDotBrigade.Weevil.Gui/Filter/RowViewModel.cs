@@ -16,6 +16,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	{
 		private readonly IAnnotations _annotations;
 
+		// The comment the grid last read or wrote, so a change to the pin alone leaves the comment box alone.
+		private string _shownComment = string.Empty;
+
 		public RowViewModel(IRecord record, IAnnotations annotations)
 		{
 			this.Record = record ?? throw new ArgumentNullException(nameof(record));
@@ -43,10 +46,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		public string Comment
 		{
-			get => _annotations.GetComment(this.LineNumber);
+			get => _shownComment = _annotations.GetComment(this.LineNumber);
 			set
 			{
 				_annotations.SetComment(this.LineNumber, value, this);
+				_shownComment = _annotations.GetComment(this.LineNumber);
 
 				// Adding a comment pins the record, and removing it unpins the record.
 				RaisePropertyChanged(nameof(this.IsPinned));
@@ -66,15 +70,19 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		/// <param name="source">The object that made the change.</param>
 		/// <remarks>
-		/// A row ignores its own writes. The comment box sends its text 250 ms after the last key, so reading the comment
-		/// back after the row's own write could overwrite text that is still being typed.
+		/// The comment box sends its text 250 ms after the last key, so reading the comment back could overwrite text
+		/// that is still being typed. A row therefore ignores its own writes, and reads the comment back only when it changed.
 		/// </remarks>
 		public void Refresh(object source)
 		{
 			if (!ReferenceEquals(source, this))
 			{
 				RaisePropertyChanged(nameof(this.IsPinned));
-				RaisePropertyChanged(nameof(this.Comment));
+
+				if (_annotations.GetComment(this.LineNumber) != _shownComment)
+				{
+					RaisePropertyChanged(nameof(this.Comment));
+				}
 			}
 		}
 
