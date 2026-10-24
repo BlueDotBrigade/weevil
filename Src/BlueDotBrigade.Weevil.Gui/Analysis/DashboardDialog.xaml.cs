@@ -119,7 +119,8 @@
 				this.Insights.ToImmutableArray(),
 				this.From,
 				this.To);
-			Clipboard.SetData(DataFormats.UnicodeText, report);
+			var markdown = new MarkdownInsightReportRenderer().Render(report);
+			Clipboard.SetData(DataFormats.UnicodeText, markdown);
 		}
 
 		private void OnNavigateToRecord(object sender, RoutedEventArgs e)
