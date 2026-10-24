@@ -178,13 +178,19 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		/// <summary>
-		/// Returns the positions of the selected rows after <paramref name="afterPosition"/>, in order, without creating a row for each.
+		/// Returns <see langword="true"/> when the record on <paramref name="lineNumber"/> is selected.
 		/// </summary>
-		/// <param name="afterPosition">The position to start after, or -1 to start at the first row.</param>
-		public IEnumerable<int> GetSelectedPositions(int afterPosition)
+		public bool IsSelected(int lineNumber)
 		{
-			var afterLineNumber = afterPosition >= 0 ? _results[afterPosition].LineNumber : int.MinValue;
+			return _selector.Selected.ContainsKey(lineNumber);
+		}
 
+		/// <summary>
+		/// Returns the positions of the selected rows after <paramref name="afterLineNumber"/>, in order, without creating a row for each.
+		/// </summary>
+		/// <param name="afterLineNumber">The line to start after, or -1 to start at the first row.</param>
+		public IEnumerable<int> GetSelectedPositions(int afterLineNumber)
+		{
 			foreach (var lineNumber in _selector.Selected.Keys)
 			{
 				if (lineNumber > afterLineNumber)

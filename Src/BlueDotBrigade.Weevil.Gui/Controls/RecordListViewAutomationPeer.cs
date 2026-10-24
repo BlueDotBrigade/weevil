@@ -1,6 +1,5 @@
 namespace BlueDotBrigade.Weevil.Gui.Controls
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Windows;
@@ -36,23 +35,18 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 
 		bool ISelectionProvider.IsSelectionRequired => false;
 
-		private RecordListView Grid => (RecordListView)this.Owner;
+		/// <summary>
+		/// The grid's rows, or <see langword="null"/> before a log is open.
+		/// </summary>
+		internal RowList Rows => this.Grid.ItemsSource as RowList;
 
-		private RowList Rows => this.Grid.ItemsSource as RowList;
+		private RecordListView Grid => (RecordListView)this.Owner;
 
 		IRawElementProviderSimple[] ISelectionProvider.GetSelection()
 		{
-			RowList rows = this.Rows;
-
-			if (rows == null)
-			{
-				return Array.Empty<IRawElementProviderSimple>();
-			}
-
-			return rows
-				.GetSelectedPositions(afterPosition: -1)
-				.Take(MaximumSelectionReported)
-				.Select(position => ProviderFor(rows.GetRow(position)))
+			// WPF wraps a peer only for a grid in a window, so tests check GetSelectedRowPeers instead (#1077).
+			return GetSelectedRowPeers()
+				.Select(ProviderFromPeer)
 				.Where(provider => provider != null)
 				.ToArray();
 		}
@@ -100,16 +94,43 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 			}
 		}
 
-		protected override ItemAutomationPeer CreateItemAutomationPeer(object item)
+		/// <summary>
+		/// Returns the peers of the first selected rows, as <see cref="ISelectionProvider.GetSelection"/> reports them.
+		/// </summary>
+		internal IEnumerable<RecordItemAutomationPeer> GetSelectedRowPeers()
 		{
-			return new RecordItemAutomationPeer(item, this);
+			RowList rows = this.Rows;
+
+			return rows == null
+				? Enumerable.Empty<RecordItemAutomationPeer>()
+				: rows
+					.GetSelectedPositions(afterLineNumber: -1)
+					.Take(MaximumSelectionReported)
+					.Select(position => (RecordItemAutomationPeer)FindOrCreateItemAutomationPeer(rows.GetRow(position)));
 		}
 
-		private IRawElementProviderSimple ProviderFor(RowViewModel row)
+		/// <summary>
+		/// Returns the peer of the first selected row after <paramref name="startAfter"/>, or <see langword="null"/> when there is none.
+		/// </summary>
+		/// <param name="startAfter">The row to start after, or <see langword="null"/> to start at the first row.</param>
+		internal RecordItemAutomationPeer FindNextSelectedRowPeer(RecordItemAutomationPeer startAfter)
 		{
-			ItemAutomationPeer peer = FindOrCreateItemAutomationPeer(row);
+			RowList rows = this.Rows;
 
-			return peer == null ? null : ProviderFromPeer(peer);
+			if (rows != null)
+			{
+				foreach (var position in rows.GetSelectedPositions(startAfter?.LineNumber ?? -1))
+				{
+					return (RecordItemAutomationPeer)FindOrCreateItemAutomationPeer(rows.GetRow(position));
+				}
+			}
+
+			return null;
+		}
+
+		protected override ItemAutomationPeer CreateItemAutomationPeer(object item)
+		{
+			return new RecordItemAutomationPeer((RowViewModel)item, this);
 		}
 
 		/// <summary>
@@ -131,31 +152,26 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 
 			public IRawElementProviderSimple FindItemByProperty(IRawElementProviderSimple startAfter, int propertyId, object value)
 			{
-				RowList rows = _listPeer.Rows;
-
-				if (propertyId != SelectionItemPatternIdentifiers.IsSelectedProperty.Id || value is not true || rows == null)
+				if (propertyId != SelectionItemPatternIdentifiers.IsSelectedProperty.Id || value is not true)
 				{
 					return _wpfFinder.FindItemByProperty(startAfter, propertyId, value);
 				}
 
-				var afterPosition = -1;
+				RecordItemAutomationPeer startAfterRow = null;
 
 				if (startAfter != null)
 				{
-					afterPosition = rows.IndexOf((_listPeer.PeerFromProvider(startAfter) as ItemAutomationPeer)?.Item);
+					startAfterRow = _listPeer.PeerFromProvider(startAfter) as RecordItemAutomationPeer;
 
-					if (afterPosition < 0)
+					if (startAfterRow == null)
 					{
 						return null;
 					}
 				}
 
-				foreach (var position in rows.GetSelectedPositions(afterPosition))
-				{
-					return _listPeer.ProviderFor(rows.GetRow(position));
-				}
+				RecordItemAutomationPeer next = _listPeer.FindNextSelectedRowPeer(startAfterRow);
 
-				return null;
+				return next == null ? null : _listPeer.ProviderFromPeer(next);
 			}
 		}
 	}

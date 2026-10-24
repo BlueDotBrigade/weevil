@@ -1,8 +1,9 @@
 namespace BlueDotBrigade.Weevil.Gui.Controls
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using System.Windows.Automation;
+	using System.Linq;
 	using System.Windows.Automation.Peers;
 	using System.Windows.Automation.Provider;
 	using System.Windows.Input;
@@ -11,51 +12,69 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
+	/// <remarks>
+	/// WPF gives a UI Automation client nothing for a grid outside a window, so these tests call the peers directly.
+	/// </remarks>
 	[TestClass]
 	public class RecordListViewAutomationPeerTests
 	{
 		[STATestMethod]
 		public void GivenASelectedRecord_WhenAScreenReaderAsksForTheSelection_ThenItGetsThatRow()
 		{
-			AutomationPeer grid = UIElementAutomationPeer.CreatePeerForElement(CreateGrid(selectedLineNumber: 2));
-			var selection = (ISelectionProvider)grid.GetPattern(PatternInterface.Selection);
-			var rows = (IItemContainerProvider)grid.GetPattern(PatternInterface.ItemContainer);
+			RecordListViewAutomationPeer grid = CreateGridPeer(selectedLineNumber: 2);
 
-			IRawElementProviderSimple[] selectedRows = selection.GetSelection();
-			IRawElementProviderSimple firstSelectedRow = rows.FindItemByProperty(null, SelectionItemPatternIdentifiers.IsSelectedProperty.Id, true);
+			List<RecordItemAutomationPeer> selectedRows = grid.GetSelectedRowPeers().ToList();
+			RecordItemAutomationPeer firstSelectedRow = grid.FindNextSelectedRowPeer(startAfter: null);
 
-			selection.CanSelectMultiple.Should().BeTrue();
-			selectedRows.Should().ContainSingle();
+			((ISelectionProvider)grid.GetPattern(PatternInterface.Selection)).CanSelectMultiple.Should().BeTrue();
+			selectedRows.Select(row => row.LineNumber).Should().Equal(2);
 			SelectionItem(selectedRows[0]).IsSelected.Should().BeTrue();
-			SelectionItem(firstSelectedRow).IsSelected.Should().BeTrue();
+			firstSelectedRow.LineNumber.Should().Be(2);
+			grid.FindNextSelectedRowPeer(firstSelectedRow).Should().BeNull();
 		}
 
 		[STATestMethod]
 		public void GivenAnUnselectedRow_WhenAScreenReaderAddsItToTheSelection_ThenTheGridReportsACtrlClick()
 		{
-			RecordListView grid = CreateGrid(selectedLineNumber: 2);
-			var rows = (IItemContainerProvider)UIElementAutomationPeer.CreatePeerForElement(grid).GetPattern(PatternInterface.ItemContainer);
+			RecordListViewAutomationPeer grid = CreateGridPeer(selectedLineNumber: 2);
+			var firstRow = new RecordItemAutomationPeer(grid.Rows.GetRow(0), grid);
 			RowPressedEventArgs pressed = null;
-			grid.RowPressed += (_, e) => pressed = e;
+			((RecordListView)grid.Owner).RowPressed += (_, e) => pressed = e;
 
-			SelectionItem(rows.FindItemByProperty(null, 0, null)).AddToSelection();
+			SelectionItem(firstRow).AddToSelection();
 
 			((RowViewModel)pressed.Item).LineNumber.Should().Be(1);
 			pressed.Modifiers.Should().Be(ModifierKeys.Control);
 		}
 
-		private static RecordListView CreateGrid(int selectedLineNumber)
+		[STATestMethod]
+		[WorkItem(1077)]
+		public void GivenASelectedRowOffScreen_WhenItsRowIsCollected_ThenAScreenReaderStillSeesItSelected()
+		{
+			// WPF holds a peer's row weakly, so the peer reported "not selected" once the garbage collector had run.
+			RecordListViewAutomationPeer grid = CreateGridPeer(selectedLineNumber: 2);
+			RecordItemAutomationPeer selectedRow = grid.GetSelectedRowPeers().Single();
+
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
+
+			SelectionItem(selectedRow).IsSelected.Should().BeTrue();
+		}
+
+		private static RecordListViewAutomationPeer CreateGridPeer(int selectedLineNumber)
 		{
 			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 3);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(new Dictionary<int, IRecord> { [selectedLineNumber] = results[selectedLineNumber - 1] });
+			var grid = new RecordListView { ItemsSource = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake()) };
 
-			return new RecordListView { ItemsSource = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake()) };
+			return (RecordListViewAutomationPeer)UIElementAutomationPeer.CreatePeerForElement(grid);
 		}
 
-		private static ISelectionItemProvider SelectionItem(IRawElementProviderSimple row)
+		private static ISelectionItemProvider SelectionItem(AutomationPeer row)
 		{
-			return (ISelectionItemProvider)row.GetPatternProvider(SelectionItemPatternIdentifiers.Pattern.Id);
+			return (ISelectionItemProvider)row.GetPattern(PatternInterface.SelectionItem);
 		}
 	}
 }

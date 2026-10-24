@@ -151,8 +151,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			selector.Selected.Returns(Selected(results, 3, 7, 9));
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
 
-			rows.GetSelectedPositions(afterPosition: -1).Should().Equal(2, 6, 8);
-			rows.GetSelectedPositions(afterPosition: 2).Should().Equal(6, 8);
+			rows.GetSelectedPositions(afterLineNumber: -1).Should().Equal(2, 6, 8);
+			rows.GetSelectedPositions(afterLineNumber: 3).Should().Equal(6, 8);
 		}
 
 		[TestMethod]
