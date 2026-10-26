@@ -55,6 +55,8 @@
 			/// </summary>
 			private Range _range = Range.All;
 
+			private Session _session;
+
 			private ViewAnnotations _annotations;
 
 			/// <summary>
@@ -138,12 +140,18 @@
 			}
 
 			/// <summary>
-			/// Keeps the comments, pins and flags of an engine this one replaces, as Reload does (#1013).
+			/// Keeps the session and the flags of an engine this one replaces, as Reload does (#1013).
 			/// The sidecar's comments and pins are then not loaded again.
 			/// </summary>
-			public CoreEngineBuilder UsingAnnotations(ViewAnnotations annotations)
+			public CoreEngineBuilder UsingStateOf(CoreEngine previous)
 			{
-				_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+				if (previous == null)
+				{
+					throw new ArgumentNullException(nameof(previous));
+				}
+
+				_session = previous.Session;
+				_annotations = previous.Annotations;
 
 				return this;
 			}
@@ -191,6 +199,7 @@
 
 				var knownContext = new ContextDictionary();
 
+				Session session;
 				ViewAnnotations annotations;
 
 				var inclusiveFilterHistory = new List<string>();
@@ -220,6 +229,7 @@
 					lineIndex = _sourceInstance._lineIndex;
 
 					// The records are the source's, already attached to these stores.
+					session = _sourceInstance._session;
 					annotations = _sourceInstance._annotations;
 
 					selectedRecords = _sourceInstance._selectionManager.GetSelected();
@@ -255,8 +265,9 @@
 
 						// Created before parsing, so they age with the records: attaching then stores no young reference
 						// in every record, which would slow the next garbage collections (#1013).
-						var isKeepingAnnotations = _annotations != null;
-						annotations = _annotations ?? new ViewAnnotations(new AnnotationStore(lineIndex.LineCount), new FlagSet(lineIndex.LineCount));
+						var isKeepingAnnotations = _session != null;
+						session = _session ?? new Session(new AnnotationStore(lineIndex.LineCount));
+						annotations = _annotations ?? new ViewAnnotations(session.Annotations, new FlagSet(lineIndex.LineCount));
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 						Range lineNumberRange = GetLineNumberRange();
@@ -283,7 +294,7 @@
 
 						sidecarManager.Load(
 							records,
-							isKeepingAnnotations ? null : annotations.Annotations,
+							isKeepingAnnotations ? null : session.Annotations,
 							out knownContext,
 							out sourceFileRemarks,
 							out inclusiveFilterHistory,
@@ -317,6 +328,7 @@
 					sidecarManager,
 					lineIndex,
 					records,
+					session,
 					annotations,
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),

@@ -229,7 +229,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			{
 				if (!_refreshesEveryRow)
 				{
-					if (_queuedChanges.Count < MaximumQueuedChanges)
+					// A change to many lines at once, such as Unpin All, refreshes every row.
+					if (_queuedChanges.Count < MaximumQueuedChanges && change.LineNumber != AnnotationChangedEventArgs.ManyLines)
 					{
 						_queuedChanges.Add(change);
 					}

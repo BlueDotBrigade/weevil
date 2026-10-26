@@ -19,7 +19,7 @@ Phase 2 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 ## Engine API
 
-Callers open and use an engine without ever seeing its state. `LogSession` holds the log, annotations, bookmarks, regions and the sidecar, and is internal to Core. An `IEngine` is one view of it, with its own record scope, filter and selection, so no operation takes a token. This phase has one view per log; #991 adds `CreateView()`. See [EngineApi.md](../Research/Weevil3/EngineApi.md).
+Callers open and use an engine without ever seeing its state. `Session` holds the log, annotations, bookmarks, regions and the sidecar, and is internal to Core. [EngineApi.md](../Research/Weevil3/EngineApi.md) calls it `LogSession`; it was renamed on 2026-10-26. An `IEngine` is one view of it, with its own record scope, filter and selection, so no operation takes a token. This phase has one view per log; #991 adds `CreateView()`. See [EngineApi.md](../Research/Weevil3/EngineApi.md).
 
 ## Decisions
 
@@ -28,6 +28,7 @@ Callers open and use an engine without ever seeing its state. `LogSession` holds
 3. **Annotations and flags are kept by line number** (decided 2026-10-20). Clear changes record positions but never line numbers.
 4. **Grid updates never block** (decided 2026-10-20). A row learns of a change asynchronously, never through a synchronous `Invoke`. A bulk operation (Unpin All, Remove Comments, an analyzer) raises one event, and the grid then refreshes the rows on screen.
 5. **Selection is stored as ranges, and Copy is limited to 100,000 records** (decided 2026-10-20). Selecting every record still works, so Clear Selected, Export and analyzers on a selection are unaffected. Copying more shows a message that points to Export.
+6. **A `Session` holds the log's mutable state in child stores** (decided 2026-10-26). Records hold none, so the state that changes stays together and fewer threads write to it. `Session` is internal to Core; each store is a child class, such as the comment and pin store. Flags and elapsed times stay with the view (decisions 1 and 2).
 
 ## Steps
 
@@ -55,7 +56,7 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - Check scrolling, Shift and Ctrl selection (keeping the #806 behaviour), Ctrl+A, Shift+End, filtering with a large selection, comment editing, and the cost of `IndexOf`.
    - The list implements the non-generic `IList`, or WPF copies every item. Rows are equal by line number, because WPF finds items with `IndexOf`.
    - This decides the row design for step 5 and for #988. Record the result in `Research/Weevil3/`.
-5. **Row view-models and selection (#1015).** Split into four pull requests: Core keeps the selection as ranges (#1055, done 2026-10-22), GUI row view-models (#1057, done 2026-10-23), GUI selection input, GUI feature tests (#1080). Selection input is itself three pull requests: Core selects ranges of lines and keeps the anchor (#1062, done 2026-10-23), the grid handles clicks and keys (#1064, done 2026-10-23), then UI Automation and the Copy limit (#1075, done 2026-10-23; its tests fixed by #1077, done 2026-10-24).
+5. **Row view-models and selection (#1015). Done 2026-10-26.** Split into four pull requests: Core keeps the selection as ranges (#1055, done 2026-10-22), GUI row view-models (#1057, done 2026-10-23), GUI selection input, GUI feature tests (#1080, done 2026-10-26). Selection input is itself three pull requests: Core selects ranges of lines and keeps the anchor (#1062, done 2026-10-23), the grid handles clicks and keys (#1064, done 2026-10-23), then UI Automation and the Copy limit (#1075, done 2026-10-23; its tests fixed by #1077, done 2026-10-24).
    - The grid binds to one view-model per realized row: pin check box, comment box and elapsed-time column. A row writes to the session, and refreshes when the session reports a change to its line (decision 4).
    - A row ignores its own writes, so the comment box (two-way, with a 250 ms delay) does not overwrite text still being typed.
    - Larger than it looks: the row style binds `Severity`, four converters expect an `IRecord`, and code-behind casts items to `IRecord`.
@@ -70,10 +71,13 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - An `@Elapsed` filter reads the elapsed times of the previous results, which the view passes in. Iterating by elapsed time reads the current ones.
    - This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
    - Add a test for `@Elapsed` applied after another filter, which nothing covers today.
-7. **`Metadata` removed from `IRecord` (#1017).**
-   - Filters, analyzers, navigators and reports use the session's annotation API, which is injected the way bookmarks already are. Records are now immutable.
-   - This also changes `IRecordAnalyzer.Analyze`, `ICoreExtension.GetAnalyzers`, and readers such as `DiskWriter` and `ClipboardHelper`.
-   - Tests use `.Metadata.` 173 times in 35 files.
+7. **`Metadata` removed from `IRecord` (#1017).** Split into four pull requests (decided 2026-10-26). Until the last one, `Metadata` forwards to the stores, so callers not yet moved keep working.
+   - **Core reads the session (#1082).** `Session` holds the comment and pin store (decision 6); the view keeps its flags and elapsed times. Filters, monikers, navigators, reports, export, the sidecar and the selection read and write the stores, which are passed in the way bookmarks already are. Unpin All, Remove Comments and Toggle Pin each become one operation on the comment and pin store: one lock and one change event (decision 4), covering the same lines as today; the lines to change are found in parallel first. Remove All Flags clears the view's flags, which raise no events.
+   - **Analyzers.** `IRecordAnalyzer.Analyze` receives `IAnnotations` and `IFlags`, so an analyzer can comment, pin and flag, but reach nothing else. The built-in analyzers and the TSV and default plugins move with it.
+   - **GUI.** Copy, Paste, the rows' elapsed times and Go to Record read the stores.
+   - **`Metadata` removed.** `IRecord`, `Record`, `Metadata` and `ViewAnnotations` go. Tests move to the stores (156 uses of `.Metadata.` in 28 files after #1082). Memory is measured against the goal.
+   - External plugins built for 2.x already fail to load in 3.0; they are fixed later (see Compatibility).
+   - Later, in a step of its own: bookmarks, regions, remarks, the table of contents and the filter history move into `Session`, under the same lock.
 8. **Clear without rebuilding (#1018).**
    - Clear narrows the engine's record scope, using today's rules for each clear operation. The engine, its events and the annotations stay.
    - Clear keeps doing what it does today: it resets the filter (the GUI re-applies its own), drops cleared records from the selection, recounts the metrics and sets `HasBeenCleared`.
@@ -91,5 +95,5 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
 ## Risks
 
 - Steps 3 and 7 touch every analyzer (13 set flags or comments) and the filter monikers. Keep each change mechanical.
-- Session events fire on worker threads: from the parallel loops in `AnalysisManager` (Unpin All, Remove Comments), the filter and parsing. Analyzers themselves run on the UI thread today (#996). A synchronous `Invoke` from those threads can freeze the GUI; decision 4 avoids it.
+- Session events fire on worker threads: from the filter and parsing. Unpin All, Remove Comments and Toggle Pin raise one event each, on the thread that runs them (#1082). Analyzers themselves run on the UI thread today (#996). A synchronous `Invoke` from those threads can freeze the GUI; decision 4 avoids it.
 - If the proof of concept shows WPF cannot handle the row design at 100 M rows, step 5 needs another approach before #988 can create records on demand.

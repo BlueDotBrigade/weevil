@@ -91,7 +91,8 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 			var sidecarFilePath = $"{logFilePath}.xml";
 
 			IRecord record = R.WithContent(5, "Record with a comment");
-			record.Metadata.Comment = "A comment";
+			var annotations = new AnnotationStore();
+			annotations.SetComment(record.LineNumber, "A comment");
 
 			try
 			{
@@ -99,6 +100,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 					new SidecarData
 					{
 						Records = ImmutableArray.Create(record),
+						Annotations = annotations,
 						Context = new ContextDictionary(),
 						SourceFileRemarks = string.Empty,
 						TableOfContents = new TableOfContents(new List<Section> { new Section("Section", 1, byteOffset: 999, lineNumber: 7) }),

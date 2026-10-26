@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// <remarks>
 	/// Writes are serialized by one lock. Reads never wait, so filters can read from many threads.
 	/// </remarks>
-	public sealed class FlagSet
+	public sealed class FlagSet : IFlags
 	{
 		private const int BitsPerWord = 64;
 

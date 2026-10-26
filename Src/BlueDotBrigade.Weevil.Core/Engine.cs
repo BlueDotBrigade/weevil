@@ -100,7 +100,7 @@
 
 		public IBookmarkManager Bookmarks => _coreEngine.Bookmarks;
 
-		public IAnnotations Annotations => _coreEngine.Annotations.Annotations;
+		public IAnnotations Annotations => _coreEngine.Session.Annotations;
 
 		public int Count => _coreEngine.Count;
 
@@ -167,10 +167,10 @@
 
 			CoreEngine previous = _coreEngine;
 
-			// The comments, pins and flags carry across Reload, as they do across Clear (#1013).
+			// The session and the flags carry across Reload, as they do across Clear (#1013).
 			Replace(CoreEngine
 				.FromPath(sourcePath)
-				.UsingAnnotations(_coreEngine.Annotations)
+				.UsingStateOf(_coreEngine)
 				.Build());
 
 			// Before the filter, which then narrows the selection as any filter does (#1062).

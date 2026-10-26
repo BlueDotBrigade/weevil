@@ -80,7 +80,7 @@
 						{
 							if (annotations != null)
 							{
-								x.Apply(allRecords);
+								x.Apply(allRecords, annotations);
 							}
 						}),
 				};

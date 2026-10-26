@@ -34,6 +34,8 @@
 		private readonly Action _reapplyCurrentFilter;
 
 		private readonly NavigationManager _navigationManager;
+		private readonly IAnnotations _annotations;
+		private readonly IFlags _flags;
 
 		private PositionRanges _selection;
 		private ImmutableArray<IRecord> _visibleRecords;
@@ -47,8 +49,13 @@
 			ImmutableArray<IRecord> visibleRecords,
 			NavigationManager navigationManager,
 			Encoding sourceFileEncoding,
+			IAnnotations annotations,
+			IFlags flags,
 			Action reapplyCurrentFilter)
 		{
+			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+			_flags = flags ?? throw new ArgumentNullException(nameof(flags));
+
 			_selection = new PositionRanges();
 			_selectionPadlock = new object();
 
@@ -339,7 +346,7 @@
 
 			if (sortedRecords != null)
 			{
-				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType).Write(sortedRecords);
+				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType, _annotations, _flags).Write(sortedRecords);
 
 				Log.Default.Write(
 					LogSeverityType.Trace,
@@ -519,12 +526,16 @@
 
 			if (selectedRecords.Length > 0)
 			{
-				var isPinned = !selectedRecords[0].Metadata.IsPinned;
+				var isPinned = !_annotations.IsPinned(selectedRecords[0].LineNumber);
 
-				foreach (IRecord record in selectedRecords)
-				{
-					record.Metadata.IsPinned = isPinned;
-				}
+				// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
+				int[] lineNumbers = selectedRecords
+					.AsParallel()
+					.Where(record => _annotations.IsPinned(record.LineNumber) != isPinned)
+					.Select(record => record.LineNumber)
+					.ToArray();
+
+				_annotations.SetPinned(lineNumbers, isPinned);
 
 				Log.Default.Write(
 					LogSeverityType.Information,

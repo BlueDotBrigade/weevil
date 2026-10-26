@@ -9,15 +9,17 @@
 	internal class CommentNavigator : ICommentNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
+		private readonly IAnnotations _annotations;
 
-		public CommentNavigator(ActiveRecord activeRecord)
+		public CommentNavigator(ActiveRecord activeRecord, IAnnotations annotations)
 		{
 			_activeRecord = activeRecord;
+			_annotations = annotations;
 		}
 
 		private bool CheckHasComment(IRecord record)
 		{
-			return record.Metadata.HasComment;
+			return _annotations.HasComment(record.LineNumber);
 		}
 
 		public IRecord FindPrevious()
@@ -53,7 +55,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToPrevious(_activeRecord.Index, record => 
-						record.Metadata.HasComment && regex.IsMatch(record.Metadata.Comment));
+						_annotations.HasComment(record.LineNumber) && regex.IsMatch(_annotations.GetComment(record.LineNumber)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -66,7 +68,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToPrevious(_activeRecord.Index, record => 
-						record.Metadata.HasComment && record.Metadata.Comment.Contains(value, comparison));
+						_annotations.HasComment(record.LineNumber) && _annotations.GetComment(record.LineNumber).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -89,7 +91,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToNext(_activeRecord.Index, record => 
-						record.Metadata.HasComment && regex.IsMatch(record.Metadata.Comment));
+						_annotations.HasComment(record.LineNumber) && regex.IsMatch(_annotations.GetComment(record.LineNumber)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -102,7 +104,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToNext(_activeRecord.Index, record => 
-						record.Metadata.HasComment && record.Metadata.Comment.Contains(value, comparison));
+						_annotations.HasComment(record.LineNumber) && _annotations.GetComment(record.LineNumber).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}

@@ -7,15 +7,17 @@
 	internal class PinNavigator : IPinNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
+		private readonly IAnnotations _annotations;
 
-		public PinNavigator(ActiveRecord activeRecord)
+		public PinNavigator(ActiveRecord activeRecord, IAnnotations annotations)
 		{
 			_activeRecord = activeRecord;
+			_annotations = annotations;
 		}
 
 		private bool CheckIsPinned(IRecord record)
 		{
-			return record.Metadata.IsPinned;
+			return _annotations.IsPinned(record.LineNumber);
 		}
 
 		public IRecord FindPrevious()

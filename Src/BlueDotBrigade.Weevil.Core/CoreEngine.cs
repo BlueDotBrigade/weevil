@@ -34,7 +34,8 @@
 
 		private readonly ImmutableArray<IRecord> _allRecords;
 
-		// Comments and pins are shared by every view of the log; flags belong to the view (#1013).
+		// Comments and pins are shared by every view of the log; flags and elapsed times belong to the view (#1013).
+		private readonly Session _session;
 		private readonly ViewAnnotations _annotations;
 
 		private readonly FilterManager _filterManager;
@@ -88,6 +89,7 @@
 			SidecarManager sidecarManager,
 			LineIndex lineIndex,
 			ImmutableArray<IRecord> records,
+			Session session,
 			ViewAnnotations annotations,
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
@@ -114,6 +116,7 @@
 			_sourceFileEncoding = sourceFileEncoding;
 
 			_allRecords = records;
+			_session = session;
 			_annotations = annotations;
 			_hasBeenCleared = hasBeenCleared;
 
@@ -167,13 +170,23 @@
 			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None);
 			_filterManager.ResultsChanged += OnResultsChanged;
 
-			_navigationManager = new NavigationManager(_sourceFilePath, _coreExtension, _allRecords, tableOfContents, _telemetryRecorder);
+			_navigationManager = new NavigationManager(
+				_sourceFilePath,
+				_coreExtension,
+				_allRecords,
+				tableOfContents,
+				_session.Annotations,
+				_annotations.Flags,
+				() => _annotations.ElapsedTimes,
+				_telemetryRecorder);
 
 			_selectionManager = new SelectionManager(
 				_allRecords,
 				_filterManager.Results,
 				_navigationManager, // TODO: adding navigation manager is a code smell
 				_sourceFileEncoding,
+				_session.Annotations,
+				_annotations.Flags,
 				new Action(() => { _filterManager.ReApply(); }));
 
 			recordAndMetadataLoadingStopwatch.Stop();
@@ -237,7 +250,14 @@
 
 		public FilterManager Filter => _filterManager;
 
+		internal Session Session => _session;
+
+		/// <summary>
+		/// The view's flags and elapsed times, with the session's comments and pins, which records' <see cref="Metadata"/> reads until #1017 removes it.
+		/// </summary>
 		internal ViewAnnotations Annotations => _annotations;
+
+		internal FlagSet Flags => _annotations.Flags;
 
 		public NavigationManager Navigate => _navigationManager;
 
@@ -320,6 +340,7 @@
 			var sidecarData = new SidecarData
 			{
 				Records = _allRecords,
+				Annotations = _session.Annotations,
 				Context = _context,
 				FilterTraits = _filterManager,
 				SourceFileRemarks = _sourceFileRemarks,
@@ -360,7 +381,7 @@
 			if (report == ReportType.CommentSummary)
 			{
 				ImmutableArray<IRecord> filterResults = _filterManager.Results;
-				new CommentSummaryReport(filterResults).Generate(destinationFolder);
+				new CommentSummaryReport(filterResults, _session.Annotations).Generate(destinationFolder);
 			}
 		}
 	}

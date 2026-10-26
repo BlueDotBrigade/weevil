@@ -4,6 +4,11 @@ namespace BlueDotBrigade.Weevil.Data
 
 	public sealed class AnnotationChangedEventArgs : EventArgs
 	{
+		/// <summary>
+		/// The <see cref="LineNumber"/> of one change to many lines, such as Unpin All.
+		/// </summary>
+		public const int ManyLines = -1;
+
 		public AnnotationChangedEventArgs(int lineNumber, object source)
 		{
 			this.LineNumber = lineNumber;

@@ -1,10 +1,10 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.Linq;
-	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -26,43 +26,32 @@
 			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 		}
 
+		/// <remarks>
+		/// One change to the session, as Remove Comments is, so the grid refreshes once (decision 4 of the #990 plan).
+		/// The pinned lines are found in parallel, outside the store's lock. Only the records in memory are unpinned, as before.
+		/// </remarks>
 		public void UnpinAll()
 		{
-			Parallel.For(0, _coreEngine.Records.Length, i =>
-			{
-				_coreEngine.Records[i].Metadata.IsPinned = false;
-			});
+			AnnotationStore annotations = _coreEngine.Session.Annotations;
+
+			annotations.SetPinned(FindLines(_coreEngine.Records, lineNumber => annotations.IsPinned(lineNumber)), false);
 		}
 
+		/// <remarks>
+		/// Every line, including cleared ones, or their flags would come back on Reload (#1013).
+		/// </remarks>
 		public void RemoveAllFlags()
 		{
-			// The records in memory first, so they raise PropertyChanged.
-			Parallel.For(0, _coreEngine.Records.Length, i =>
-			{
-				_coreEngine.Records[i].Metadata.IsFlagged = false;
-			});
-
-			// Then the cleared lines, or their flags would come back on Reload (#1013).
-			_coreEngine.Annotations.Flags.Clear();
+			_coreEngine.Flags.Clear();
 		}
 
 		public void RemoveComments(bool clearAll)
 		{
-			if (clearAll)
-			{
-				Parallel.For(0, _coreEngine.Records.Length, i =>
-				{
-					_coreEngine.Records[i].Metadata.Comment = string.Empty;
-				});
-			}
-			else
-			{
-				ImmutableArray<Data.IRecord> selectedRecords = _coreEngine.Selector.GetSelected();
-				Parallel.For(0, selectedRecords.Length, i =>
-				{
-					selectedRecords[i].Metadata.Comment = string.Empty;
-				});
-			}
+			ImmutableArray<Data.IRecord> records = clearAll ? _coreEngine.Records : _coreEngine.Selector.GetSelected();
+			AnnotationStore annotations = _coreEngine.Session.Annotations;
+
+			// Any text, so a comment of white space alone is removed too.
+			annotations.RemoveComments(FindLines(records, lineNumber => annotations.GetComment(lineNumber).Length > 0));
 		}
 
 		public IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType)
@@ -180,6 +169,18 @@
 		{
 			var key = $"{TelemetryMetrics.AnalysisRun}.{analyzerKey}";
 			return key.Length <= MetricKeyMaxLength ? key : key.Substring(0, MetricKeyMaxLength);
+		}
+
+		/// <summary>
+		/// Returns the line numbers of the records that match, searched in parallel.
+		/// </summary>
+		private static int[] FindLines(ImmutableArray<Data.IRecord> records, Func<int, bool> isMatch)
+		{
+			return records
+				.AsParallel()
+				.Where(record => isMatch(record.LineNumber))
+				.Select(record => record.LineNumber)
+				.ToArray();
 		}
 	}
 }

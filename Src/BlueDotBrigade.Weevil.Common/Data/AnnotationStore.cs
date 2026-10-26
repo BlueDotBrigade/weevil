@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
 	using System.Collections.Concurrent;
+	using System.Collections.Generic;
 	using System.Threading;
 
 	/// <summary>
@@ -41,9 +42,7 @@ namespace BlueDotBrigade.Weevil.Data
 			return _comments.TryGetValue(lineNumber, out var comment) ? comment : string.Empty;
 		}
 
-		/// <summary>
-		/// The line has a comment that is not only white space.
-		/// </summary>
+		/// <inheritdoc />
 		public bool HasComment(int lineNumber)
 		{
 			return (GetBits(lineNumber) & CommentBit) != 0;
@@ -105,6 +104,80 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 
 			this.Changed?.Invoke(this, new AnnotationChangedEventArgs(lineNumber, source));
+		}
+
+		/// <inheritdoc />
+		public void SetPinned(IEnumerable<int> lineNumbers, bool isPinned, object source = null)
+		{
+			var hasChanged = false;
+
+			try
+			{
+				lock (_padlock)
+				{
+					foreach (var lineNumber in lineNumbers)
+					{
+						ThrowIfNegative(lineNumber);
+
+						var bits = GetBits(lineNumber);
+						var changed = isPinned ? (byte)(bits | PinnedBit) : (byte)(bits & ~PinnedBit);
+
+						if (changed != bits)
+						{
+							SetBits(lineNumber, changed);
+							hasChanged = true;
+						}
+					}
+				}
+			}
+			finally
+			{
+				// Also when a line is rejected, so the lines already changed are reported.
+				RaiseChangedForManyLines(hasChanged, source);
+			}
+		}
+
+		/// <inheritdoc />
+		public void RemoveComments(IEnumerable<int> lineNumbers, object source = null)
+		{
+			var hasChanged = false;
+
+			try
+			{
+				lock (_padlock)
+				{
+					foreach (var lineNumber in lineNumbers)
+					{
+						var previous = GetComment(lineNumber);
+
+						if (previous.Length > 0)
+						{
+							var bits = GetBits(lineNumber);
+
+							if (!string.IsNullOrWhiteSpace(previous))
+							{
+								bits &= unchecked((byte)~PinnedBit);
+							}
+
+							SetCommentText(lineNumber, string.Empty, ref bits);
+							SetBits(lineNumber, bits);
+							hasChanged = true;
+						}
+					}
+				}
+			}
+			finally
+			{
+				RaiseChangedForManyLines(hasChanged, source);
+			}
+		}
+
+		private void RaiseChangedForManyLines(bool hasChanged, object source)
+		{
+			if (hasChanged)
+			{
+				this.Changed?.Invoke(this, new AnnotationChangedEventArgs(AnnotationChangedEventArgs.ManyLines, source));
+			}
 		}
 
 		/// <summary>

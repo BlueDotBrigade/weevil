@@ -53,7 +53,7 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. T
 ## Performance
 
 - Log files can contain hundreds of thousands of records. Avoid LINQ operations that enumerate all records multiple times per filter application.
-- Use `Parallel.For` or `Parallel.ForEach` for bulk metadata updates.
+- A bulk change to comments, pins or flags, such as Unpin All, is one call on its store: one lock and one change event (decision 4 of the #990 plan). Find the lines to change in parallel, before the call.
 - Avoid allocating per-record objects in the hot path of filtering or parsing.
 
 ## Persistence

@@ -107,6 +107,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenAChangeToManyLines_WhenTheUiThreadRunsTheRefresh_ThenEveryRowStillHeldRefreshes()
+		{
+			// Unpin All reports one change for many lines, not one per line.
+			var annotations = new AnnotationStore();
+			var dispatcher = new DeferredUiDispatcherFake();
+			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, Substitute.For<ISelect>(), dispatcher);
+			annotations.Changed += (_, e) => rows.QueueRefresh(e);
+			annotations.SetPinned(5, true);
+			dispatcher.RunQueued();
+			RowViewModel row = rows.GetRow(4);
+			var changedProperties = new List<string>();
+			row.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
+
+			annotations.SetPinned(new[] { 5, 6 }, false);
+			dispatcher.RunQueued();
+
+			changedProperties.Should().Contain(nameof(RowViewModel.IsPinned));
+			row.IsPinned.Should().BeFalse();
+		}
+
+		[TestMethod]
 		public void GivenSelectedRecords_WhenTheSelectionChanges_ThenTheRowsStillHeldShowIt()
 		{
 			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);

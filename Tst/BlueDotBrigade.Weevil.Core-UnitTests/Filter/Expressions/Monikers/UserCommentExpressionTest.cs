@@ -7,48 +7,47 @@
 	[TestClass]
 	public class UserCommentExpressionTest
 	{
+		private const int LineNumber = 5;
+
+		private readonly AnnotationStore _annotations = new AnnotationStore();
+		private readonly IRecord _record = R.WithLineNumber(LineNumber);
+
 		[TestMethod]
 		public void IsMatch_LookingForAnyComment_ReturnsTrue()
 		{
-			var record = Substitute.For<IRecord>();
-			record.Metadata.Returns(new Metadata { Comment = "The lazy brown dog jumped over the fence" });
+			_annotations.SetComment(LineNumber, "The lazy brown dog jumped over the fence");
 
-			var filter = new UserCommentExpression("@Comment");
+			var filter = new UserCommentExpression("@Comment", _annotations);
 
-			(filter.IsMatch(record)).Should().BeTrue();
+			(filter.IsMatch(_record)).Should().BeTrue();
 		}
 
 		[TestMethod]
 		public void IsMatch_LookingForAnyComment_ReturnsFalse()
 		{
-			var record = Substitute.For<IRecord>();
-			record.Metadata.Returns(new Metadata());
+			var filter = new UserCommentExpression("@Comment", _annotations);
 
-			var filter = new UserCommentExpression("@Comment");
-
-			(filter.IsMatch(record)).Should().BeFalse();
+			(filter.IsMatch(_record)).Should().BeFalse();
 		}
 
 		[TestMethod]
 		public void IsMatch_LookingForSpecificComment_ReturnsTrue()
 		{
-			var record = Substitute.For<IRecord>();
-			record.Metadata.Returns(new Metadata { Comment = "The lazy brown dog jumped over the fence" });
+			_annotations.SetComment(LineNumber, "The lazy brown dog jumped over the fence");
 
-			var filter = new UserCommentExpression("@Comment=dog");
+			var filter = new UserCommentExpression("@Comment=dog", _annotations);
 
-			(filter.IsMatch(record)).Should().BeTrue();
+			(filter.IsMatch(_record)).Should().BeTrue();
 		}
 
 		[TestMethod]
 		public void IsMatch_LookingForSpecificComment_ReturnsFalse()
 		{
-			var record = Substitute.For<IRecord>();
-			record.Metadata.Returns(new Metadata { Comment = "The lazy brown dog jumped over the fence" });
+			_annotations.SetComment(LineNumber, "The lazy brown dog jumped over the fence");
 
-			var filter = new UserCommentExpression("@Comment=cat");
+			var filter = new UserCommentExpression("@Comment=cat", _annotations);
 
-			(filter.IsMatch(record)).Should().BeFalse();
+			(filter.IsMatch(_record)).Should().BeFalse();
 		}
 	}
 }

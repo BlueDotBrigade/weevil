@@ -161,15 +161,20 @@
 			}
 		}
 
-		private static RecordInfo ToRecordInfo(IRecord record, Func<int, long> byteOffsetOfLine)
+		private static RecordInfo ToRecordInfo(int lineNumber, SidecarData newData)
 		{
 			return new RecordInfo()
 			{
-				Id = record.LineNumber,
-				RelatesTo = Locate(new RelatesTo { LineNumber = record.LineNumber }, byteOffsetOfLine),
-				Comment = record.Metadata.Comment,
-				IsPinned = record.Metadata.IsPinned,
+				Id = lineNumber,
+				RelatesTo = Locate(new RelatesTo { LineNumber = lineNumber }, newData.ByteOffsetOfLine),
+				Comment = newData.Annotations.GetComment(lineNumber),
+				IsPinned = newData.Annotations.IsPinned(lineNumber),
 			};
+		}
+
+		private static bool IsAnnotated(int lineNumber, IAnnotations annotations)
+		{
+			return !string.IsNullOrWhiteSpace(annotations.GetComment(lineNumber)) || annotations.IsPinned(lineNumber);
 		}
 
 		/// <summary>
@@ -212,10 +217,9 @@
 					{
 						if (newData.Records.TryRecordOfLineNumber(oldRecord.RelatesTo.LineNumber, out IRecord newRecord))
 						{
-							if (!string.IsNullOrWhiteSpace(newRecord.Metadata.Comment) ||
-								newRecord.Metadata.IsPinned)
+							if (IsAnnotated(newRecord.LineNumber, newData.Annotations))
 							{
-								masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord, newData.ByteOffsetOfLine));
+								masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord.LineNumber, newData));
 							}
 						}
 						else
@@ -232,12 +236,11 @@
 			{
 				foreach (IRecord newRecord in newData.Records)
 				{
-					if (!string.IsNullOrWhiteSpace(newRecord.Metadata.Comment) ||
-						newRecord.Metadata.IsPinned)
+					if (IsAnnotated(newRecord.LineNumber, newData.Annotations))
 					{
 						if (!masterRecords.ContainsKey(newRecord.LineNumber))
 						{
-							masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord, newData.ByteOffsetOfLine));
+							masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord.LineNumber, newData));
 						}
 					}
 				}
