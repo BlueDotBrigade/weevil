@@ -32,7 +32,7 @@ The API, Clear and memory design is in [EngineApi.md](../Research/Weevil3/Engine
 One sub-issue and one pull request per step, in order.
 
 1. **Views in Core.**
-   - `IEngine.CreateView()` returns another engine that shares the internal `LogSession`. Callers never see the session.
+   - `IEngine.CreateView()` returns another engine that shares the internal `Session`. Callers never see the session.
    - Each engine owns its record scope, filter, results, flags, selection, active record and metric counts. Flags already live in the engine (#990 step 3).
    - Filter history stays in the session, because the sidecar saves it per log.
    - A new view starts with the whole log and no filter; the caller can apply a filter. The GUI may choose otherwise in the next milestone.

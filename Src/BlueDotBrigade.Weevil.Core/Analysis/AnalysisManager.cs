@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
@@ -27,11 +28,13 @@
 
 		/// <remarks>
 		/// One change to the session, as Remove Comments is, so the grid refreshes once (decision 4 of the #990 plan).
-		/// Only the records in memory are unpinned, as before.
+		/// The pinned lines are found in parallel, outside the store's lock. Only the records in memory are unpinned, as before.
 		/// </remarks>
 		public void UnpinAll()
 		{
-			_coreEngine.Session.Annotations.SetPinned(LineNumbersOf(_coreEngine.Records), false);
+			AnnotationStore annotations = _coreEngine.Session.Annotations;
+
+			annotations.SetPinned(FindLines(_coreEngine.Records, lineNumber => annotations.IsPinned(lineNumber)), false);
 		}
 
 		/// <remarks>
@@ -45,8 +48,10 @@
 		public void RemoveComments(bool clearAll)
 		{
 			ImmutableArray<Data.IRecord> records = clearAll ? _coreEngine.Records : _coreEngine.Selector.GetSelected();
+			AnnotationStore annotations = _coreEngine.Session.Annotations;
 
-			_coreEngine.Session.Annotations.RemoveComments(LineNumbersOf(records));
+			// Any text, so a comment of white space alone is removed too.
+			annotations.RemoveComments(FindLines(records, lineNumber => annotations.GetComment(lineNumber).Length > 0));
 		}
 
 		public IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType)
@@ -166,9 +171,16 @@
 			return key.Length <= MetricKeyMaxLength ? key : key.Substring(0, MetricKeyMaxLength);
 		}
 
-		private static IEnumerable<int> LineNumbersOf(ImmutableArray<Data.IRecord> records)
+		/// <summary>
+		/// Returns the line numbers of the records that match, searched in parallel.
+		/// </summary>
+		private static int[] FindLines(ImmutableArray<Data.IRecord> records, Func<int, bool> isMatch)
 		{
-			return records.Select(record => record.LineNumber);
+			return records
+				.AsParallel()
+				.Where(record => isMatch(record.LineNumber))
+				.Select(record => record.LineNumber)
+				.ToArray();
 		}
 	}
 }

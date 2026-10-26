@@ -42,9 +42,7 @@ namespace BlueDotBrigade.Weevil.Data
 			return _comments.TryGetValue(lineNumber, out var comment) ? comment : string.Empty;
 		}
 
-		/// <summary>
-		/// The line has a comment that is not only white space.
-		/// </summary>
+		/// <inheritdoc />
 		public bool HasComment(int lineNumber)
 		{
 			return (GetBits(lineNumber) & CommentBit) != 0;
@@ -113,24 +111,29 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			var hasChanged = false;
 
-			lock (_padlock)
+			try
 			{
-				foreach (var lineNumber in lineNumbers)
+				lock (_padlock)
 				{
-					var bits = GetBits(lineNumber);
-					var changed = isPinned ? (byte)(bits | PinnedBit) : (byte)(bits & ~PinnedBit);
-
-					if (changed != bits)
+					foreach (var lineNumber in lineNumbers)
 					{
-						SetBits(lineNumber, changed);
-						hasChanged = true;
+						ThrowIfNegative(lineNumber);
+
+						var bits = GetBits(lineNumber);
+						var changed = isPinned ? (byte)(bits | PinnedBit) : (byte)(bits & ~PinnedBit);
+
+						if (changed != bits)
+						{
+							SetBits(lineNumber, changed);
+							hasChanged = true;
+						}
 					}
 				}
 			}
-
-			if (hasChanged)
+			finally
 			{
-				this.Changed?.Invoke(this, new AnnotationChangedEventArgs(AnnotationChangedEventArgs.ManyLines, source));
+				// Also when a line is rejected, so the lines already changed are reported.
+				RaiseChangedForManyLines(hasChanged, source);
 			}
 		}
 
@@ -139,28 +142,38 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			var hasChanged = false;
 
-			lock (_padlock)
+			try
 			{
-				foreach (var lineNumber in lineNumbers)
+				lock (_padlock)
 				{
-					var previous = GetComment(lineNumber);
-
-					if (previous.Length > 0)
+					foreach (var lineNumber in lineNumbers)
 					{
-						var bits = GetBits(lineNumber);
+						var previous = GetComment(lineNumber);
 
-						if (!string.IsNullOrWhiteSpace(previous))
+						if (previous.Length > 0)
 						{
-							bits &= unchecked((byte)~PinnedBit);
-						}
+							var bits = GetBits(lineNumber);
 
-						SetCommentText(lineNumber, string.Empty, ref bits);
-						SetBits(lineNumber, bits);
-						hasChanged = true;
+							if (!string.IsNullOrWhiteSpace(previous))
+							{
+								bits &= unchecked((byte)~PinnedBit);
+							}
+
+							SetCommentText(lineNumber, string.Empty, ref bits);
+							SetBits(lineNumber, bits);
+							hasChanged = true;
+						}
 					}
 				}
 			}
+			finally
+			{
+				RaiseChangedForManyLines(hasChanged, source);
+			}
+		}
 
+		private void RaiseChangedForManyLines(bool hasChanged, object source)
+		{
 			if (hasChanged)
 			{
 				this.Changed?.Invoke(this, new AnnotationChangedEventArgs(AnnotationChangedEventArgs.ManyLines, source));

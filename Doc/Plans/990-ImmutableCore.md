@@ -72,10 +72,10 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
    - Add a test for `@Elapsed` applied after another filter, which nothing covers today.
 7. **`Metadata` removed from `IRecord` (#1017).** Split into four pull requests (decided 2026-10-26). Until the last one, `Metadata` forwards to the stores, so callers not yet moved keep working.
-   - **Core reads the session (#1082).** `Session` holds the comment and pin store (decision 6); the view keeps its flags and elapsed times. Filters, monikers, navigators, reports, export, the sidecar and the selection read and write the stores, which are passed in the way bookmarks already are. Unpin All, Remove Comments and Remove All Flags each become one operation on a store: one lock and one change event (decision 4), covering the same lines as today.
+   - **Core reads the session (#1082).** `Session` holds the comment and pin store (decision 6); the view keeps its flags and elapsed times. Filters, monikers, navigators, reports, export, the sidecar and the selection read and write the stores, which are passed in the way bookmarks already are. Unpin All, Remove Comments and Toggle Pin each become one operation on the comment and pin store: one lock and one change event (decision 4), covering the same lines as today; the lines to change are found in parallel first. Remove All Flags clears the view's flags, which raise no events.
    - **Analyzers.** `IRecordAnalyzer.Analyze` receives `IAnnotations` and `IFlags`, so an analyzer can comment, pin and flag, but reach nothing else. The built-in analyzers and the TSV and default plugins move with it.
    - **GUI.** Copy, Paste, the rows' elapsed times and Go to Record read the stores.
-   - **`Metadata` removed.** `IRecord`, `Record`, `Metadata` and `ViewAnnotations` go. Tests move to the stores (169 uses of `.Metadata.` in 35 files). Memory is measured against the goal.
+   - **`Metadata` removed.** `IRecord`, `Record`, `Metadata` and `ViewAnnotations` go. Tests move to the stores (156 uses of `.Metadata.` in 28 files after #1082). Memory is measured against the goal.
    - External plugins built for 2.x already fail to load in 3.0; they are fixed later (see Compatibility).
    - Later, in a step of its own: bookmarks, regions, remarks, the table of contents and the filter history move into `Session`, under the same lock.
 8. **Clear without rebuilding (#1018).**
@@ -95,5 +95,5 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
 ## Risks
 
 - Steps 3 and 7 touch every analyzer (13 set flags or comments) and the filter monikers. Keep each change mechanical.
-- Session events fire on worker threads: from the parallel loops in `AnalysisManager` (Unpin All, Remove Comments), the filter and parsing. Analyzers themselves run on the UI thread today (#996). A synchronous `Invoke` from those threads can freeze the GUI; decision 4 avoids it.
+- Session events fire on worker threads: from the filter and parsing. Unpin All, Remove Comments and Toggle Pin raise one event each, on the thread that runs them (#1082). Analyzers themselves run on the UI thread today (#996). A synchronous `Invoke` from those threads can freeze the GUI; decision 4 avoids it.
 - If the proof of concept shows WPF cannot handle the row design at 100 M rows, step 5 needs another approach before #988 can create records on demand.

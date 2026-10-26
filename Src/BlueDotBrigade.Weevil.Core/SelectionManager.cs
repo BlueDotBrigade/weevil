@@ -528,7 +528,14 @@
 			{
 				var isPinned = !_annotations.IsPinned(selectedRecords[0].LineNumber);
 
-				_annotations.SetPinned(selectedRecords.Select(record => record.LineNumber), isPinned);
+				// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
+				int[] lineNumbers = selectedRecords
+					.AsParallel()
+					.Where(record => _annotations.IsPinned(record.LineNumber) != isPinned)
+					.Select(record => record.LineNumber)
+					.ToArray();
+
+				_annotations.SetPinned(lineNumbers, isPinned);
 
 				Log.Default.Write(
 					LogSeverityType.Information,
