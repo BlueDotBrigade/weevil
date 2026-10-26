@@ -41,10 +41,22 @@
 				uiDispatcher,
 				bulletinMediator);
 
+			// The grid shows and focuses the row the view-model asks for.
+			_mainViewModel.FilterViewModel.ScrollRequested += (_, position) => this.FocusRequestedPosition = position;
+
 			await _mainViewModel.FilterViewModel.OpenAsync(logFilePath);
 		}
 
 		#region Input Values
+		#endregion
+
+		#region Output Values
+
+		/// <summary>
+		/// The position of the row that the filter's view-model last asked the grid to show and focus, or -1 when there is none.
+		/// </summary>
+		public int FocusRequestedPosition { get; private set; } = -1;
+
 		#endregion
 
 		#region View Models

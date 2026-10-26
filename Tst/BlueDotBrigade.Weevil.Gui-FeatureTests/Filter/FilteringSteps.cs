@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	[Binding]
 	internal sealed class FilteringSteps : ReqnrollSteps
 	{
+		private static readonly TimeSpan FilterTimeout = TimeSpan.FromSeconds(10);
+
 		public FilteringSteps(Token token) : base(token)
 		{
 			// nothing to do
@@ -24,7 +27,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void WhenApplyingTheIncludeFilter(string include)
 		{
 			this.Context.Filter.InclusiveFilter = include;
-			this.Context.Filter.Filter();
+			FilterAndWait();
 		}
 
 		[When($"entering the exclude filter: {X.AnyText}")]
@@ -37,7 +40,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void WhenApplyingTheExcludeFilter(string exclude)
 		{
 			this.Context.Filter.ExclusiveFilter = exclude;
-			this.Context.Filter.Filter();
+			FilterAndWait();
 		}
 
 		[Then($@"there will be {X.WholeNumber} matching records")]
@@ -46,6 +49,24 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			this.Context.StatusBar.FilterDetails.VisibleRecordCount
 				.Should()
 				.Be(recordCount);
+		}
+
+		/// <summary>
+		/// Filters, then waits until the results are shown: the filter runs in the background.
+		/// </summary>
+		private void FilterAndWait()
+		{
+			RowList rowsBefore = this.Context.Filter.Rows;
+
+			this.Context.Filter.Filter();
+
+			var stopwatch = Stopwatch.StartNew();
+
+			while ((ReferenceEquals(this.Context.Filter.Rows, rowsBefore) || !this.Context.Filter.CanOpenLogFile) &&
+				stopwatch.Elapsed < FilterTimeout)
+			{
+				Thread.Sleep(TimeSpan.FromMilliseconds(50));
+			}
 		}
 	}
 }
