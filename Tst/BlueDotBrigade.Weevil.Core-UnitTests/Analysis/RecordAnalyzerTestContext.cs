@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Concurrent;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
 	using NSubstitute;
@@ -25,7 +26,9 @@ namespace BlueDotBrigade.Weevil.Analysis
 				filterType,
 				filterCriteria,
 				regionManager,
-				bookmarkManager);
+				bookmarkManager,
+				new AnnotationStore(),
+				new FlagSet());
 		}
 
 		public static IUserDialog CreateDialog(string regex, string analysisOrder = "Ascending")

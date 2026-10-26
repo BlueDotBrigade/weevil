@@ -13,17 +13,17 @@
 			_creators = monikerActivators;
 		}
 
-		public ExpressionFactory(IRegionManager regionManager, IBookmarkManager bookmarkManager, ElapsedTimes previousElapsedTimes)
+		public ExpressionFactory(IRegionManager regionManager, IBookmarkManager bookmarkManager, IAnnotations annotations, IFlags flags, ElapsedTimes previousElapsedTimes)
 		{
 			_creators = new List<MonikerActivator>
 			{
-				new MonikerActivator(FlagExpression.Moniker, (e) => new FlagExpression(e)),
-				new MonikerActivator(PinnedExpression.Moniker, (e) => new PinnedExpression(e)),
+				new MonikerActivator(FlagExpression.Moniker, (e) => new FlagExpression(e, flags)),
+				new MonikerActivator(PinnedExpression.Moniker, (e) => new PinnedExpression(e, annotations)),
 				new MonikerActivator(IsMultiLineExpression.Moniker, (e) => new IsMultiLineExpression(e)),
 				new MonikerActivator(SeverityTypeExpression.Moniker, (e) => new SeverityTypeExpression(e)),
 				new MonikerActivator(LineNumberExpression.Moniker, (e) => new LineNumberExpression(e)),
 				new MonikerActivator(UiThreadExpression.Moniker, (e) => new UiThreadExpression(e)),
-				new MonikerActivator(UserCommentExpression.Moniker, (e) => new UserCommentExpression(e)),
+				new MonikerActivator(UserCommentExpression.Moniker, (e) => new UserCommentExpression(e, annotations)),
 				new MonikerActivator(ContentLengthExpression.Moniker, (e) => new ContentLengthExpression(e)),
 				new MonikerActivator(ElapsedGreaterThanExpression.Moniker, (e) => new ElapsedGreaterThanExpression(e, previousElapsedTimes)),
 				new MonikerActivator(RegionExpression.Moniker, (e) => new RegionExpression(e, regionManager)),

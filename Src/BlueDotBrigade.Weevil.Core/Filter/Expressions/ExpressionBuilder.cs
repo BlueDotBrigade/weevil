@@ -30,11 +30,11 @@
 			return SurrogateExpression.IsReal(result);
 		}
 
-		public static ExpressionBuilder Create(ICoreExtension coreExtension, ContextDictionary context, FilterType filterType, IFilterCriteria criteria, IRegionManager regionManager, IBookmarkManager bookmarkManager, ElapsedTimes previousElapsedTimes)
+		public static ExpressionBuilder Create(ICoreExtension coreExtension, ContextDictionary context, FilterType filterType, IFilterCriteria criteria, IRegionManager regionManager, IBookmarkManager bookmarkManager, IAnnotations annotations, IFlags flags, ElapsedTimes previousElapsedTimes)
 		{
 			var factories = new List<IExpressionFactory>();
 
-			var builtInMonikers = new Monikers.ExpressionFactory(regionManager, bookmarkManager, previousElapsedTimes);
+			var builtInMonikers = new Monikers.ExpressionFactory(regionManager, bookmarkManager, annotations, flags, previousElapsedTimes);
 
 			factories.Add(builtInMonikers);
 

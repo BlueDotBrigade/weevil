@@ -10,6 +10,11 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 	public class SidecarData
 	{
 		public ImmutableArray<IRecord> Records { get; set; }
+
+		/// <summary>
+		/// The comments and pins, by line number.
+		/// </summary>
+		public IAnnotations Annotations { get; set; }
 		public ContextDictionary Context { get; set; }
 		public IFilterTraits FilterTraits { get; set; }
 		public TableOfContents TableOfContents { get; set; }

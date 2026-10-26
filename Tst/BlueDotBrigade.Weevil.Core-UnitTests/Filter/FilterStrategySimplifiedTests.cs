@@ -20,19 +20,16 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 
 		#region Test Infrastructure
 
-		private static IRecord CreateRecord(string content, int lineNumber, bool isPinned)
+		// The records' pins, kept by line number as the session keeps them.
+		private readonly AnnotationStore _annotations = new AnnotationStore();
+
+		private IRecord CreateRecord(string content, int lineNumber, bool isPinned)
 		{
 			var record = Substitute.For<IRecord>();
 			record.Content.Returns(content);
 			record.LineNumber.Returns(lineNumber);
-			
-			var metadata = new Metadata();
-			if (isPinned)
-			{
-				metadata.IsPinned = true;
-			}
-			record.Metadata.Returns(metadata);
-			
+			_annotations.SetPinned(lineNumber, isPinned);
+
 			return record;
 		}
 
@@ -54,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			return bookmarkManager;
 		}
 
-		private static FilterStrategy CreateFilterStrategy(
+		private FilterStrategy CreateFilterStrategy(
 			string includeFilter,
 			string excludeFilter,
 			bool showPinned,
@@ -80,7 +77,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				FilterType.PlainText,
 				filterCriteria,
 				regionManager,
-				bookmarkManager);
+				bookmarkManager,
+				_annotations,
+				new FlagSet());
 		}
 
 		#endregion

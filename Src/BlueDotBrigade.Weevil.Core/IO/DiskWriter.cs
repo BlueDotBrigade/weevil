@@ -20,9 +20,14 @@
 		private readonly string _destinationFilePath;
 		private readonly Encoding _destinationFileEncoding;
 		private readonly FileFormatType _fileFormatType;
+		private readonly IAnnotations _annotations;
+		private readonly IFlags _flags;
 
-		public DiskWriter(string destinationFilePath, Encoding destinationFileEncoding, FileFormatType fileFormatType)
+		public DiskWriter(string destinationFilePath, Encoding destinationFileEncoding, FileFormatType fileFormatType, IAnnotations annotations, IFlags flags)
 		{
+			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+			_flags = flags ?? throw new ArgumentNullException(nameof(flags));
+
 			if (string.IsNullOrWhiteSpace(destinationFilePath))
 			{
 				throw new ArgumentNullException(nameof(destinationFilePath), "Expected a directory path where the data will be saved.");
@@ -116,9 +121,9 @@
 
 					var serializedData = string.Format(CultureInfo.InvariantCulture, "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
 						record.LineNumber,
-						record.Metadata.IsFlagged,
-						record.Metadata.IsPinned,
-						record.Metadata.HasComment ? record.Metadata.Comment : ValueNotSpecified,
+						_flags.IsFlagged(record.LineNumber),
+						_annotations.IsPinned(record.LineNumber),
+						_annotations.HasComment(record.LineNumber) ? _annotations.GetComment(record.LineNumber) : ValueNotSpecified,
 						elapsedTime.TotalSeconds.ToString("0.000"),
 						record.HasCreationTime ? record.CreatedAt.ToString() : ValueNotSpecified,
 						record.Content);

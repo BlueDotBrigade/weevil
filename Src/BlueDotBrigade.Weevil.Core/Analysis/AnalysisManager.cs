@@ -4,7 +4,6 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.Linq;
-	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -26,43 +25,28 @@
 			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 		}
 
+		/// <remarks>
+		/// One change to the session, as Remove Comments is, so the grid refreshes once (decision 4 of the #990 plan).
+		/// Only the records in memory are unpinned, as before.
+		/// </remarks>
 		public void UnpinAll()
 		{
-			Parallel.For(0, _coreEngine.Records.Length, i =>
-			{
-				_coreEngine.Records[i].Metadata.IsPinned = false;
-			});
+			_coreEngine.Session.Annotations.SetPinned(LineNumbersOf(_coreEngine.Records), false);
 		}
 
+		/// <remarks>
+		/// Every line, including cleared ones, or their flags would come back on Reload (#1013).
+		/// </remarks>
 		public void RemoveAllFlags()
 		{
-			// The records in memory first, so they raise PropertyChanged.
-			Parallel.For(0, _coreEngine.Records.Length, i =>
-			{
-				_coreEngine.Records[i].Metadata.IsFlagged = false;
-			});
-
-			// Then the cleared lines, or their flags would come back on Reload (#1013).
-			_coreEngine.Annotations.Flags.Clear();
+			_coreEngine.Flags.Clear();
 		}
 
 		public void RemoveComments(bool clearAll)
 		{
-			if (clearAll)
-			{
-				Parallel.For(0, _coreEngine.Records.Length, i =>
-				{
-					_coreEngine.Records[i].Metadata.Comment = string.Empty;
-				});
-			}
-			else
-			{
-				ImmutableArray<Data.IRecord> selectedRecords = _coreEngine.Selector.GetSelected();
-				Parallel.For(0, selectedRecords.Length, i =>
-				{
-					selectedRecords[i].Metadata.Comment = string.Empty;
-				});
-			}
+			ImmutableArray<Data.IRecord> records = clearAll ? _coreEngine.Records : _coreEngine.Selector.GetSelected();
+
+			_coreEngine.Session.Annotations.RemoveComments(LineNumbersOf(records));
 		}
 
 		public IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType)
@@ -180,6 +164,11 @@
 		{
 			var key = $"{TelemetryMetrics.AnalysisRun}.{analyzerKey}";
 			return key.Length <= MetricKeyMaxLength ? key : key.Substring(0, MetricKeyMaxLength);
+		}
+
+		private static IEnumerable<int> LineNumbersOf(ImmutableArray<Data.IRecord> records)
+		{
+			return records.Select(record => record.LineNumber);
 		}
 	}
 }

@@ -45,19 +45,19 @@
 			return canLoad;
 		}
 
-		public void Apply(ImmutableArray<IRecord> allRecords)
+		public void Apply(ImmutableArray<IRecord> allRecords, IAnnotations annotations)
 		{
 			foreach (Label label in _metadata.Labels)
 			{
 				if (allRecords.TryRecordOfLineNumber(label.LineNumber, out IRecord record))
 				{
-					if (!string.IsNullOrWhiteSpace(record.Metadata.Comment))
+					if (!string.IsNullOrWhiteSpace(annotations.GetComment(record.LineNumber)))
 					{
 						Log.Default.Write(
 							LogSeverityType.Warning,
 							$"Overwriting current user comment with the value found in the sidecar. LineNumber={label.LineNumber}");
 					}
-					record.Metadata.Comment = label.Name;
+					annotations.SetComment(record.LineNumber, label.Name);
 				}
 				else
 				{

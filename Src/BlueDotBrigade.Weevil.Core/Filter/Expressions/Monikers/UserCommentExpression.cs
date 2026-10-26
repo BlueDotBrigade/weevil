@@ -10,15 +10,11 @@
 
 		private readonly bool _searchForSpecificText;
 		private readonly string _searchValue;
+		private readonly IAnnotations _annotations;
 
-		public UserCommentExpression()
+		public UserCommentExpression(string serializedExpression, IAnnotations annotations)
 		{
-			_searchForSpecificText = false;
-			_searchValue = string.Empty;
-		}
-
-		public UserCommentExpression(string serializedExpression)
-		{
+			_annotations = annotations;
 			_searchForSpecificText = true;
 			_searchValue = string.Empty;
 
@@ -35,12 +31,13 @@
 		public bool IsMatch(IRecord record)
 		{
 			var isMatch = false;
+			var comment = _annotations.GetComment(record.LineNumber);
 
-			if (record.Metadata.Comment.Length > 0)
+			if (comment.Length > 0)
 			{
 				if (_searchForSpecificText)
 				{
-					var index = record.Metadata.Comment.IndexOf(_searchValue, StringComparison.InvariantCultureIgnoreCase);
+					var index = comment.IndexOf(_searchValue, StringComparison.InvariantCultureIgnoreCase);
 					isMatch = index >= 0;
 				}
 				else

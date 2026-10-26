@@ -22,7 +22,15 @@
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
-		public NavigationManager(string sourceFilePath, ICoreExtension coreExtension, ImmutableArray<IRecord> allRecords, TableOfContents tableOfContents, ITelemetryMetricRecorder telemetryRecorder = null)
+		public NavigationManager(
+			string sourceFilePath,
+			ICoreExtension coreExtension,
+			ImmutableArray<IRecord> allRecords,
+			TableOfContents tableOfContents,
+			IAnnotations annotations,
+			IFlags flags,
+			Func<ElapsedTimes> getElapsedTimes,
+			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_sourceFilePath = sourceFilePath;
 			_coreCoreExtension = coreExtension;
@@ -36,10 +44,10 @@
 				new LineNumberNavigator(_activeRecord),
 				new TimestampNavigator(_activeRecord),
 				new ContentNavigator(_activeRecord),
-				new PinNavigator(_activeRecord),
-				new CommentNavigator(_activeRecord),
-				new FlagNavigator(_activeRecord),
-				new ElapsedTimeNavigator(_activeRecord),
+				new PinNavigator(_activeRecord, annotations),
+				new CommentNavigator(_activeRecord, annotations),
+				new FlagNavigator(_activeRecord, flags),
+				new ElapsedTimeNavigator(_activeRecord, getElapsedTimes),
 			}.ToImmutableArray();
 		}
 

@@ -148,6 +148,43 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenPinnedAndCommentedLines_WhenUnpinnedTogether_ThenChangedIsRaisedOnceAndTheCommentsStay()
+		{
+			// Unpin All: the grid refreshes once instead of once per line (decision 4 of the #990 plan).
+			var store = new AnnotationStore(10);
+			store.SetPinned(3, true);
+			store.SetComment(5, "Retry starts here");
+			var changes = new List<AnnotationChangedEventArgs>();
+			store.Changed += (_, e) => changes.Add(e);
+
+			store.SetPinned(new[] { 3, 4, 5 }, false);
+
+			changes.Should().ContainSingle().Which.LineNumber.Should().Be(AnnotationChangedEventArgs.ManyLines);
+			store.IsPinned(3).Should().BeFalse();
+			store.IsPinned(5).Should().BeFalse();
+			store.GetComment(5).Should().Be("Retry starts here");
+		}
+
+		[TestMethod]
+		public void GivenCommentedLines_WhenTheirCommentsAreRemovedTogether_ThenTheyAreUnpinnedAndChangedIsRaisedOnce()
+		{
+			var store = new AnnotationStore(10);
+			store.SetComment(3, "Connected");
+			store.SetComment(5, "Retry starts here");
+			store.SetComment(7, "Not removed");
+			var changes = new List<AnnotationChangedEventArgs>();
+			store.Changed += (_, e) => changes.Add(e);
+
+			store.RemoveComments(new[] { 3, 4, 5 });
+
+			changes.Should().ContainSingle().Which.LineNumber.Should().Be(AnnotationChangedEventArgs.ManyLines);
+			store.GetComment(3).Should().BeEmpty();
+			store.IsPinned(3).Should().BeFalse();
+			store.GetComment(5).Should().BeEmpty();
+			store.IsPinned(7).Should().BeTrue();
+		}
+
+		[TestMethod]
 		public void GivenNegativeLine_WhenUnpinned_ThenItIsRejected()
 		{
 			var store = new AnnotationStore(10);

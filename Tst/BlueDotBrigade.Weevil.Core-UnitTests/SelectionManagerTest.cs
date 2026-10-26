@@ -145,7 +145,11 @@
 
 		private static SelectionManager CreateSelector(ImmutableArray<IRecord> records, ImmutableArray<IRecord> visibleRecords)
 		{
-			return new SelectionManager(records, visibleRecords, new NavigationManager(null, null, visibleRecords, null), Encoding.UTF8, () => { });
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+			var navigationManager = new NavigationManager(null, null, visibleRecords, null, annotations, flags, () => ElapsedTimes.None);
+
+			return new SelectionManager(records, visibleRecords, navigationManager, Encoding.UTF8, annotations, flags, () => { });
 		}
 	}
 }
