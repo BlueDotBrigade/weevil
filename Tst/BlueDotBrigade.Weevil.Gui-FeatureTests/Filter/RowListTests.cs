@@ -14,7 +14,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenARowThatIsStillHeld_WhenAskedForAgain_ThenTheSameRowIsReturned()
 		{
-			var rows = new RowList(R.WithLineNumbers(1, 10), new AnnotationStore(), Substitute.For<ISelect>(), new UiDispatcherFake());
+			var rows = new RowList(R.WithLineNumbers(1, 10), ElapsedTimes.None, new AnnotationStore(), Substitute.For<ISelect>(), new UiDispatcherFake());
 
 			var row = rows[3];
 
@@ -23,11 +23,24 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenTheElapsedTimesOfTheResults_WhenARowIsCreated_ThenItShowsTheElapsedTimeOfItsRecord()
+		{
+			ImmutableArray<IRecord> results = R.Create()
+				.WithCreatedAt("2026-10-26 10:00:00")
+				.WithCreatedAt("2026-10-26 10:00:03")
+				.GetRecords();
+			var rows = new RowList(results, ElapsedTimes.Calculate(results), new AnnotationStore(), Substitute.For<ISelect>(), new UiDispatcherFake());
+
+			rows.GetRow(0).ElapsedTime.Should().Be(ElapsedTimes.Unknown);
+			rows.GetRow(1).ElapsedTime.Should().Be(TimeSpan.FromSeconds(3));
+		}
+
+		[TestMethod]
 		public void GivenRecordsWithGapsInTheirLineNumbers_WhenARowIsLookedUp_ThenItsPositionIsFound()
 		{
 			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 20).Where(r => r.LineNumber % 2 == 0).ToImmutableArray();
 			var annotations = new AnnotationStore();
-			var rows = new RowList(results, annotations, Substitute.For<ISelect>(), new UiDispatcherFake());
+			var rows = new RowList(results, ElapsedTimes.None, annotations, Substitute.For<ISelect>(), new UiDispatcherFake());
 
 			rows.IndexOf(new RowViewModel(R.WithLineNumber(6), annotations)).Should().Be(2);
 			rows.IndexOf(new RowViewModel(R.WithLineNumber(7), annotations)).Should().Be(-1);
@@ -53,7 +66,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var annotations = new AnnotationStore();
 			var dispatcher = new DeferredUiDispatcherFake();
-			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, Substitute.For<ISelect>(), dispatcher);
+			var rows = new RowList(R.WithLineNumbers(1, 10), ElapsedTimes.None, annotations, Substitute.For<ISelect>(), dispatcher);
 			annotations.Changed += (_, e) => rows.QueueRefresh(e);
 			RowViewModel row = rows.GetRow(4);
 			var changedProperties = new List<string>();
@@ -72,7 +85,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var annotations = new AnnotationStore();
 			var dispatcher = new DeferredUiDispatcherFake();
-			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, Substitute.For<ISelect>(), dispatcher);
+			var rows = new RowList(R.WithLineNumbers(1, 10), ElapsedTimes.None, annotations, Substitute.For<ISelect>(), dispatcher);
 			annotations.Changed += (_, e) => rows.QueueRefresh(e);
 
 			for (var lineNumber = 1; lineNumber <= 10; lineNumber++)
@@ -88,7 +101,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var annotations = new AnnotationStore();
 			var dispatcher = new DeferredUiDispatcherFake();
-			var rows = new RowList(R.WithLineNumbers(1, 5_000), annotations, Substitute.For<ISelect>(), dispatcher);
+			var rows = new RowList(R.WithLineNumbers(1, 5_000), ElapsedTimes.None, annotations, Substitute.For<ISelect>(), dispatcher);
 			annotations.Changed += (_, e) => rows.QueueRefresh(e);
 			RowViewModel row = rows.GetRow(0);
 			var changedProperties = new List<string>();
@@ -112,7 +125,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			// Unpin All reports one change for many lines, not one per line.
 			var annotations = new AnnotationStore();
 			var dispatcher = new DeferredUiDispatcherFake();
-			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, Substitute.For<ISelect>(), dispatcher);
+			var rows = new RowList(R.WithLineNumbers(1, 10), ElapsedTimes.None, annotations, Substitute.For<ISelect>(), dispatcher);
 			annotations.Changed += (_, e) => rows.QueueRefresh(e);
 			annotations.SetPinned(5, true);
 			dispatcher.RunQueued();
@@ -133,7 +146,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(Selected(results, 2));
-			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
+			var rows = new RowList(results, ElapsedTimes.None, new AnnotationStore(), selector, new UiDispatcherFake());
 			RowViewModel second = rows.GetRow(1);
 			RowViewModel third = rows.GetRow(2);
 			second.IsSelected.Should().BeTrue();
@@ -152,7 +165,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(Selected(results, 2, 5));
-			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
+			var rows = new RowList(results, ElapsedTimes.None, new AnnotationStore(), selector, new UiDispatcherFake());
 			var heldRows = new[] { rows.GetRow(1), rows.GetRow(2), rows.GetRow(4) };
 			IReadOnlyList<RowViewModel> reportedRows = null;
 			rows.SelectionRefreshed += (_, changedRows) => reportedRows = changedRows;
@@ -170,7 +183,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(Selected(results, 3, 7, 9));
-			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
+			var rows = new RowList(results, ElapsedTimes.None, new AnnotationStore(), selector, new UiDispatcherFake());
 
 			rows.GetSelectedPositions(afterLineNumber: -1).Should().Equal(2, 6, 8);
 			rows.GetSelectedPositions(afterLineNumber: 3).Should().Equal(6, 8);
@@ -179,7 +192,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenTheRows_WhenChangedDirectly_ThenTheChangeIsRefused()
 		{
-			var rows = new RowList(R.WithLineNumbers(1, 3), new AnnotationStore(), Substitute.For<ISelect>(), new UiDispatcherFake());
+			var rows = new RowList(R.WithLineNumbers(1, 3), ElapsedTimes.None, new AnnotationStore(), Substitute.For<ISelect>(), new UiDispatcherFake());
 
 			Action add = () => rows.Add(new RowViewModel(R.WithLineNumber(4), new AnnotationStore()));
 

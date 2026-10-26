@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Threading;
 
 	/// <summary>
@@ -38,30 +39,28 @@ namespace BlueDotBrigade.Weevil.Data
 
 		public void SetFlagged(int lineNumber, bool isFlagged)
 		{
-			if (lineNumber < 0)
-			{
-				throw new ArgumentOutOfRangeException(nameof(lineNumber), lineNumber, "A line number cannot be negative.");
-			}
-
-			var word = lineNumber / BitsPerWord;
+			ThrowIfNegative(lineNumber);
 
 			lock (_padlock)
 			{
-				if (word >= _words.Length)
+				SetBit(lineNumber, isFlagged);
+			}
+		}
+
+		/// <summary>
+		/// Unflags every line, then flags <paramref name="lineNumbers"/>, in one step.
+		/// </summary>
+		public void FlagOnly(IEnumerable<int> lineNumbers)
+		{
+			lock (_padlock)
+			{
+				Array.Clear(_words, 0, _words.Length);
+
+				foreach (var lineNumber in lineNumbers)
 				{
-					if (!isFlagged)
-					{
-						return;
-					}
-
-					var grown = new long[System.Math.Max(word + 1, _words.Length * 2)];
-					Array.Copy(_words, grown, _words.Length);
-					Volatile.Write(ref _words, grown);
+					ThrowIfNegative(lineNumber);
+					SetBit(lineNumber, true);
 				}
-
-				_words[word] = isFlagged
-					? _words[word] | Mask(lineNumber)
-					: _words[word] & ~Mask(lineNumber);
 			}
 		}
 
@@ -73,6 +72,36 @@ namespace BlueDotBrigade.Weevil.Data
 			lock (_padlock)
 			{
 				Array.Clear(_words, 0, _words.Length);
+			}
+		}
+
+		// Called while holding the lock.
+		private void SetBit(int lineNumber, bool isFlagged)
+		{
+			var word = lineNumber / BitsPerWord;
+
+			if (word >= _words.Length)
+			{
+				if (!isFlagged)
+				{
+					return;
+				}
+
+				var grown = new long[System.Math.Max(word + 1, _words.Length * 2)];
+				Array.Copy(_words, grown, _words.Length);
+				Volatile.Write(ref _words, grown);
+			}
+
+			_words[word] = isFlagged
+				? _words[word] | Mask(lineNumber)
+				: _words[word] & ~Mask(lineNumber);
+		}
+
+		private static void ThrowIfNegative(int lineNumber)
+		{
+			if (lineNumber < 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(lineNumber), lineNumber, "A line number cannot be negative.");
 			}
 		}
 

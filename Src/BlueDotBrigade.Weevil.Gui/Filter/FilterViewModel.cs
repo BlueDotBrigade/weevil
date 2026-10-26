@@ -54,8 +54,10 @@
 		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/dRrRat/1");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
-		// More would freeze the window while the clipboard fills, and Export saves any number of records to a file.
-		private const int CopyLimit = 100_000;
+		// Copying more would freeze the window while the clipboard fills, and Export saves any number of records to a file.
+		// Pasting one comment onto more is a mistake, and each commented record costs memory.
+		private const int ClipboardLimit = 100_000;
+		private const string CopyAdvice = "Use Export > Original Records (Ctrl+Shift+S) to save them to a file.";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
 		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\License.md");
@@ -892,7 +894,7 @@
 
 		public void ClipboardCopyRaw(bool readableCallstack)
 		{
-			if (CanCopySelected())
+			if (IsWithinClipboardLimit("Copy", CopyAdvice))
 			{
 				IRecordFormatter formatter = readableCallstack
 					? new SimpleCallStackFormatter() as IRecordFormatter
@@ -904,7 +906,7 @@
 
 		public void ClipboardCopyLineNumbers()
 		{
-			if (CanCopySelected())
+			if (IsWithinClipboardLimit("Copy", CopyAdvice))
 			{
 				ClipboardHelper.CopySelectedLineNumbers(_engine);
 			}
@@ -912,7 +914,7 @@
 
 		public void ClipboardCopyTimestamps()
 		{
-			if (CanCopySelected())
+			if (IsWithinClipboardLimit("Copy", CopyAdvice))
 			{
 				ClipboardHelper.CopySelectedTimestamps(_engine);
 			}
@@ -927,18 +929,19 @@
 		}
 
 		/// <summary>
-		/// Copy refuses more than <see cref="CopyLimit"/> records, and says how to save them instead (decision 5).
+		/// Copy and Paste refuse more than <see cref="ClipboardLimit"/> selected records, and say what to do instead (decision 5).
 		/// </summary>
-		private bool CanCopySelected()
+		/// <param name="action">The command's name, which is also the message's title.</param>
+		/// <param name="advice">What to do instead.</param>
+		private bool IsWithinClipboardLimit(string action, string advice)
 		{
 			var count = _engine.Selector.Selected.Count;
 
-			if (count > CopyLimit)
+			if (count > ClipboardLimit)
 			{
 				_dialogBox.ShowMessage(
-					$"Copy is limited to {CopyLimit:N0} records, and {count:N0} are selected.\n\n" +
-					"Use Export > Original Records (Ctrl+Shift+S) to save them to a file.",
-					"Copy");
+					$"{action} is limited to {ClipboardLimit:N0} records, and {count:N0} are selected.\n\n{advice}",
+					action);
 
 				return false;
 			}
@@ -948,8 +951,11 @@
 
 		public void ClipboardPaste(bool allowOverwrite)
 		{
-			ClipboardHelper.PasteToSelected(_engine, allowOverwrite);
-			RefreshFilterResults();
+			if (IsWithinClipboardLimit("Paste", "Select fewer records, then paste again."))
+			{
+				ClipboardHelper.PasteToSelected(_engine, allowOverwrite);
+				RefreshFilterResults();
+			}
 		}
 
 		/// <summary>
@@ -1637,29 +1643,10 @@
 			{
 				// Option 6: Flag insight records and add @Flagged to filter
 				
-				// Step 1: Clear all existing flags, including those on cleared lines (#1013)
-				_engine.Analyzer.RemoveAllFlags();
-
-				// Step 2: Flag all insight-related records and count successfully flagged
-				var insightRecordCount = bulletin.RelatedRecords.Length;
-				var successfullyFlaggedCount = 0;
-
-				// Create a set of line numbers from the insight for efficient lookup
-				var insightLineNumbers = new HashSet<int>();
-				foreach (var record in bulletin.RelatedRecords)
-				{
-					insightLineNumbers.Add(record.LineNumber);
-				}
-
-				// Flag records that are still available in memory
-				foreach (var record in _engine.Records)
-				{
-					if (insightLineNumbers.Contains(record.LineNumber))
-					{
-						record.Metadata.IsFlagged = true;
-						successfullyFlaggedCount++;
-					}
-				}
+				// Steps 1 and 2: Core replaces the flags with those of the insight records still in memory (#1013)
+				var insightLineNumbers = new HashSet<int>(bulletin.RelatedRecords.Select(record => record.LineNumber));
+				var insightRecordCount = insightLineNumbers.Count;
+				var successfullyFlaggedCount = _engine.Analyzer.FlagOnly(insightLineNumbers);
 
 				// Check if any records were missing and notify user
 				if (successfullyFlaggedCount < insightRecordCount)
@@ -2154,8 +2141,11 @@
 				OnPropertyChanged(nameof(this.InclusiveFilter));
 				OnPropertyChanged(nameof(this.ExclusiveFilter));
 
-				this.VisibleItems = _engine.Filter.Results;
-				this.Rows = new RowList(_engine.Filter.Results, _engine.Annotations, _engine.Selector, _uiDispatcher);
+				// Read once, so the results and their elapsed times come from the same filter.
+				IFilter filter = _engine.Filter;
+
+				this.VisibleItems = filter.Results;
+				this.Rows = new RowList(filter.Results, filter.ElapsedTimes, _engine.Annotations, _engine.Selector, _uiDispatcher);
 
 				OnPropertyChanged(nameof(this.VisibleItems));
 			});

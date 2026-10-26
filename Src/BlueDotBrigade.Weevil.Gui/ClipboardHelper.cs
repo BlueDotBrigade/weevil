@@ -53,13 +53,17 @@
 		{
 			CopyFromSelected(engine, (record) =>
 			{
+				// Checked first, so a record without a comment costs no string.
+				if (!engine.Annotations.HasComment(record.LineNumber))
+				{
+					return string.Empty;
+				}
+
 				var timestamp = record.HasCreationTime
 					? record.CreatedAt.ToString(ShortTimestampFormat, CultureInfo.InvariantCulture)
 					: ShortMissingTimestamp;
 
-				return record.Metadata.HasComment
-					? timestamp + "\t" + record.Metadata.Comment
-					: string.Empty;
+				return timestamp + "\t" + engine.Annotations.GetComment(record.LineNumber);
 			});
 		}
 		public static void CopySelectedLineNumbers(IEngine engine)
@@ -105,33 +109,9 @@
 
 		internal static void PasteToSelected(IEngine engine, bool allowOverwrite = false)
 		{
-			IEngine coreEngine = engine;
-
-			if (coreEngine != null)
+			if (engine != null && engine.Selector.Selected.Count > 0 && Clipboard.ContainsText())
 			{
-				System.Collections.Generic.ICollection<IRecord> selectedValues = coreEngine.Selector.Selected.Values;
-
-				if (Clipboard.ContainsText())
-				{
-					if (selectedValues.Count > 0)
-					{
-						var newComment = Clipboard.GetText();
-						foreach (IRecord record in selectedValues)
-						{
-							if (allowOverwrite)
-							{
-								record.Metadata.Comment = newComment;
-							}
-							else
-							{
-								if (string.IsNullOrWhiteSpace(record.Metadata.Comment))
-								{
-									record.Metadata.Comment = newComment;
-								}
-							}
-						}
-					}
-				}
+				engine.Selector.SetComment(Clipboard.GetText(), allowOverwrite);
 			}
 		}
 	}

@@ -40,6 +40,36 @@ namespace BlueDotBrigade.Weevil.Selection
 			this.Context.Engine.Selector.SelectAll();
 		}
 
+		[Given($"line {X.WholeNumber} has the comment: {X.AnyText}")]
+		public void GivenLineHasTheComment(int lineNumber, string comment)
+		{
+			this.Context.Engine.Annotations.SetComment(lineNumber, comment);
+		}
+
+		[When($"commenting the selected records: {X.AnyText}")]
+		public void WhenCommentingTheSelectedRecords(string comment)
+		{
+			this.Context.Engine.Selector.SetComment(comment, allowOverwrite: false);
+		}
+
+		[When($"commenting the selected records, replacing their comments: {X.AnyText}")]
+		public void WhenCommentingTheSelectedRecordsReplacingTheirComments(string comment)
+		{
+			this.Context.Engine.Selector.SetComment(comment, allowOverwrite: true);
+		}
+
+		[When("commenting the selected records with only white space")]
+		public void WhenCommentingTheSelectedRecordsWithOnlyWhiteSpace()
+		{
+			this.Context.Engine.Selector.SetComment("   ", allowOverwrite: false);
+		}
+
+		[Then($"the record on line {X.WholeNumber} will have no comment")]
+		public void ThenTheRecordOnLineWillHaveNoComment(int lineNumber)
+		{
+			this.Context.Engine.Annotations.GetComment(lineNumber).Should().BeEmpty();
+		}
+
 		[When("reloading the log")]
 		public void WhenReloadingTheLog()
 		{

@@ -67,7 +67,7 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 3);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(new Dictionary<int, IRecord> { [selectedLineNumber] = results[selectedLineNumber - 1] });
-			var grid = new RecordListView { ItemsSource = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake()) };
+			var grid = new RecordListView { ItemsSource = new RowList(results, ElapsedTimes.None, new AnnotationStore(), selector, new UiDispatcherFake()) };
 
 			return (RecordListViewAutomationPeer)UIElementAutomationPeer.CreatePeerForElement(grid);
 		}

@@ -21,8 +21,9 @@ Scenario: Insight with no problems has no related records
 		And the critical errors insight is refreshed
 	Then the insight should not have related records
 
-Scenario: Related records are flagged for navigation
+Scenario: Going to an insight's records flags only those records
 	Given that the default log file is open
 	When the critical errors insight is refreshed
-	Then the insight should have related records
-		And all related records should be flaggable
+		And flagging only the insight's records
+		And applying the include filter: @Flagged
+	Then the results will be the insight's records

@@ -9,10 +9,15 @@ namespace BlueDotBrigade.Weevil.Data
 	/// <remarks>
 	/// The view calculates them after each filter, for all its results, then replaces the previous ones.
 	/// They never change once calculated, so they can be read from many threads.
-	/// A record the view does not show, or one without a timestamp, has none: <see cref="Metadata.ElapsedTimeUnknown"/>.
+	/// A record the view does not show, or one without a timestamp, has none: <see cref="Unknown"/>.
 	/// </remarks>
 	public sealed class ElapsedTimes
 	{
+		/// <summary>
+		/// The elapsed time of a record that has none.
+		/// </summary>
+		public static readonly TimeSpan Unknown = TimeSpan.MinValue;
+
 		/// <summary>
 		/// No elapsed times: what a view has before its first filter.
 		/// </summary>
@@ -46,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 
 			var byLineNumber = new TimeSpan[lastLineNumber + 1];
-			Array.Fill(byLineNumber, Metadata.ElapsedTimeUnknown);
+			Array.Fill(byLineNumber, Unknown);
 
 			IRecord previous = Record.Dummy;
 			foreach (IRecord current in records)
@@ -66,13 +71,13 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		/// <summary>
-		/// Returns the elapsed time of the record on a line, or <see cref="Metadata.ElapsedTimeUnknown"/> if it has none.
+		/// Returns the elapsed time of the record on a line, or <see cref="Unknown"/> if it has none.
 		/// </summary>
 		public TimeSpan Get(int lineNumber)
 		{
 			return lineNumber >= 0 && lineNumber < _byLineNumber.Length
 				? _byLineNumber[lineNumber]
-				: Metadata.ElapsedTimeUnknown;
+				: Unknown;
 		}
 	}
 }

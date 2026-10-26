@@ -207,6 +207,38 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenBlankAndCommentedLines_WhenOneCommentIsSetOnThemTogether_ThenEachHasItAndChangedIsRaisedOnce()
+		{
+			// Paste: the grid refreshes once instead of once per line (decision 4 of the #990 plan).
+			var store = new AnnotationStore(10);
+			store.SetComment(5, "Retry starts here");
+			store.SetPinned(5, false);
+			var changes = new List<AnnotationChangedEventArgs>();
+			store.Changed += (_, e) => changes.Add(e);
+
+			store.SetComment(new[] { 3, 5 }, "Checked");
+
+			changes.Should().ContainSingle().Which.LineNumber.Should().Be(AnnotationChangedEventArgs.ManyLines);
+			store.GetComment(3).Should().Be("Checked");
+			store.IsPinned(3).Should().BeTrue();
+			store.GetComment(5).Should().Be("Checked");
+			store.IsPinned(5).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenLinesThatAlreadyHaveTheComment_WhenItIsSetOnThemTogether_ThenChangedIsNotRaised()
+		{
+			var store = new AnnotationStore(10);
+			store.SetComment(3, "Checked");
+			var changes = new List<AnnotationChangedEventArgs>();
+			store.Changed += (_, e) => changes.Add(e);
+
+			store.SetComment(new[] { 3 }, "Checked");
+
+			changes.Should().BeEmpty();
+		}
+
+		[TestMethod]
 		public void GivenNegativeLine_WhenUnpinned_ThenItIsRejected()
 		{
 			var store = new AnnotationStore(10);

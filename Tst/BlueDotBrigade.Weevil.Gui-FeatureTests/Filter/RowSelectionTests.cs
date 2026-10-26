@@ -23,7 +23,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			File.WriteAllLines(_logPath, Enumerable.Range(1, 50).Select(n => $"Record {n}"));
 
 			_engine = Engine.UsingPath(_logPath).Open();
-			_rows = new RowList(_engine.Filter.Results, _engine.Annotations, _engine.Selector, new UiDispatcherFake());
+			_rows = new RowList(_engine.Filter.Results, _engine.Filter.ElapsedTimes, _engine.Annotations, _engine.Selector, new UiDispatcherFake());
 			_selection = new RowSelection(_engine);
 		}
 
@@ -159,7 +159,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			Click(lineNumber: 3);
 			_engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(@"Record \d*[05]$"));
-			_rows = new RowList(_engine.Filter.Results, _engine.Annotations, _engine.Selector, new UiDispatcherFake());
+			_rows = new RowList(_engine.Filter.Results, _engine.Filter.ElapsedTimes, _engine.Annotations, _engine.Selector, new UiDispatcherFake());
 
 			// The caret takes the place of line 5, the next one shown, so Down goes to line 10.
 			PressKey(Key.Down);
@@ -188,7 +188,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			Click(lineNumber: 5, ModifierKeys.Control);
 			_engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Record 1"));
 			_engine.Filter.Apply(FilterType.PlainText, FilterCriteria.None);
-			_rows = new RowList(_engine.Filter.Results, _engine.Annotations, _engine.Selector, new UiDispatcherFake());
+			_rows = new RowList(_engine.Filter.Results, _engine.Filter.ElapsedTimes, _engine.Annotations, _engine.Selector, new UiDispatcherFake());
 			_engine.Selector.AnchorLineNumber.Should().Be(-1);
 
 			Click(lineNumber: 8, ModifierKeys.Shift);

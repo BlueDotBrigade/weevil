@@ -87,6 +87,29 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 		}
 
+		/// <inheritdoc />
+		public void SetComment(IEnumerable<int> lineNumbers, string comment, object source = null)
+		{
+			comment ??= string.Empty;
+			var hasChanged = false;
+
+			try
+			{
+				lock (_padlock)
+				{
+					foreach (var lineNumber in lineNumbers)
+					{
+						hasChanged |= ReplaceComment(lineNumber, comment);
+					}
+				}
+			}
+			finally
+			{
+				// Also when a line is rejected, so the lines already changed are reported.
+				RaiseChangedForManyLines(hasChanged, source);
+			}
+		}
+
 		// Called while holding the lock. Adding a comment pins the record, and removing it unpins the record.
 		private bool ReplaceComment(int lineNumber, string comment)
 		{
