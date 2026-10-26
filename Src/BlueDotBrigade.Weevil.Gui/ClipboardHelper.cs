@@ -53,13 +53,17 @@
 		{
 			CopyFromSelected(engine, (record) =>
 			{
+				// Checked first, so a record without a comment costs no string.
+				if (!engine.Annotations.HasComment(record.LineNumber))
+				{
+					return string.Empty;
+				}
+
 				var timestamp = record.HasCreationTime
 					? record.CreatedAt.ToString(ShortTimestampFormat, CultureInfo.InvariantCulture)
 					: ShortMissingTimestamp;
 
-				return engine.Annotations.HasComment(record.LineNumber)
-					? timestamp + "\t" + engine.Annotations.GetComment(record.LineNumber)
-					: string.Empty;
+				return timestamp + "\t" + engine.Annotations.GetComment(record.LineNumber);
 			});
 		}
 		public static void CopySelectedLineNumbers(IEngine engine)
