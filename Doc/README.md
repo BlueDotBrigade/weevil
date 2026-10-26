@@ -4,7 +4,7 @@ Supporting documentation for developers. Pick the folder by the question you are
 
 | Folder | Answers | Contents | Kept up to date? |
 |---|---|---|---|
-| [Design](Design/) | How does Weevil work today? | Architecture, component notes, requirements | Yes: update it in the same pull request as the code |
+| [Design](Design/) | How does Weevil work today? | Architecture and component notes | Yes: update it in the same pull request as the code |
 | [Guides](Guides/) | How should I do X? | Naming, UI style guide, WPF, testing, requirements syntax | Yes, when the practice changes |
 | [Research](Research/) | Why was it built this way? | Concepts, benchmarks and prototypes behind a decision | No: a dated record of what was known then |
 | [Plans](Plans/) | What is the plan for issue #N? | Implementation plans written by people and AI agents | Only the status note |
@@ -12,6 +12,8 @@ Supporting documentation for developers. Pick the folder by the question you are
 | [Notes/Release](Notes/Release/) | What ships with Weevil? | Help, release notes, licences | Every release |
 
 `Notes/Release` must not move: the installer and the in-app release notification depend on its paths.
+
+Requirements are not documents: each is a GitHub issue labelled `requirement`, and a "Requirements: vX" issue lists the ones a release supports, for example #1093.
 
 ## One Source of Truth
 
