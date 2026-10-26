@@ -18,3 +18,11 @@ Scenario: Commenting the selected records can replace the comments they already 
 	When selecting only lines 1 to 3
 		And commenting the selected records, replacing their comments: Checked
 	Then the record on line 2 will have the comment: Checked
+
+Scenario: Commenting the selected records with only white space stores nothing
+	Given that the "ElapsedTime.log" log file name is open
+		And line 2 has the comment: Retry
+	When selecting only lines 1 to 3
+		And commenting the selected records with only white space
+	Then the record on line 1 will have no comment
+		And the record on line 2 will have the comment: Retry

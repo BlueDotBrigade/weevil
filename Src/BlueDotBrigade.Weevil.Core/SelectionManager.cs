@@ -545,12 +545,16 @@
 
 		public void SetComment(string comment, bool allowOverwrite)
 		{
+			// White space alone is no comment, so it is not stored: pasted onto every record, it would keep an entry for each line.
+			comment = string.IsNullOrWhiteSpace(comment) ? string.Empty : comment;
+
 			ImmutableArray<IRecord> selectedRecords = GetSelected();
 
 			// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
 			int[] lineNumbers = selectedRecords
 				.AsParallel()
 				.Where(record => allowOverwrite || !_annotations.HasComment(record.LineNumber))
+				.Where(record => _annotations.GetComment(record.LineNumber) != comment)
 				.Select(record => record.LineNumber)
 				.ToArray();
 
