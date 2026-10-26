@@ -13,11 +13,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// These tests cover the View Model layer only. Issue #806 is a View-layer bug —
-	/// the WPF range-extend behavior under <c>Ctrl+Shift+Plus</c> can only be reproduced
-	/// against a live <see cref="System.Windows.Controls.ListView"/>. The matching manual
-	/// regression test is documented in
-	/// <see href="https://github.com/BlueDotBrigade/weevil/issues/806">issue #806</see>.
+	/// These tests cover the View Model layer only. Issue #806 was a View-layer bug:
+	/// WPF extended the selection when <c>Ctrl+Shift+Plus</c> was pressed quickly.
+	/// Since #1064 the grid never selects a row itself, so <c>SelectingRecords.feature</c>
+	/// now covers the #806 journey without a live <see cref="System.Windows.Controls.ListView"/>.
 	/// </para>
 	/// <para>
 	/// The wrap-around assertion below pins down the engine-side contract that the View
