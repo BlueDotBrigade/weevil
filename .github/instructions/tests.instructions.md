@@ -7,6 +7,7 @@ applyTo: "Tst/**"
 ## Rules
 
 - **A test written for a filed bug names it:** `[WorkItem(N)]` on an MSTest method, or `@Bug:N` on a Gherkin scenario, where `N` is the bug's GitHub issue number. Add a one-line comment saying what broke.
+- **A test that checks a requirement names it the same way:** `[WorkItem(N)]` on an MSTest method, or `@Requirement:N` on a Gherkin scenario, where `N` is the requirement's GitHub issue number.
 - **A defect found and fixed before it was filed gets no bug tag.** Add a test for it only if it protects behaviour worth keeping; it is then an ordinary behaviour test.
 - **Prefer a few meaningful tests at the right level.** Do not test implementation details, and do not test the same behaviour at two levels.
 - **Add a test only when** it protects a behaviour a user or caller relies on, a future change could plausibly break it, it sits at the cheapest level that can see the behaviour, and its failure would tell a developer something useful.
@@ -35,6 +36,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 | `BlueDotBrigade.Weevil.Gui-FeatureTests` | Feature tests for genuine GUI-specific user journeys |
 | `BlueDotBrigade.Weevil.Cli-FunctionalTests` | Functional tests for the command-line interface's commands, with real I/O |
 | `BlueDotBrigade.Weevil.PowerShell-FunctionalTests` | Functional tests for the PowerShell cmdlets, with real I/O |
+| `BlueDotBrigade.Weevil.Core-PerformanceTests` | CPU, RAM and I/O checks of the performance requirements, on logs small enough for CI |
 
 ## Test Placement
 
@@ -42,6 +44,8 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Add GUI feature tests only for behaviors that cannot be validated through the core library's public API.
 - Use core feature tests for: filtering logic, analysis results, navigation, data transformations, persistence.
 - Use GUI feature tests for: workflow sequencing requiring UI state, visual concerns, end-user journeys spanning multiple ViewModels.
+- A test that needs Windows, for example to exercise WPF, in a project that otherwise runs on any system, carries `[OSCondition(OperatingSystems.Windows)]`, so other systems skip it. `BlueDotBrigade.Weevil.Gui-FeatureTests` builds only on Windows, so its tests need not.
+- Put performance tests in `BlueDotBrigade.Weevil.Core-PerformanceTests`, so they need no category to be found.
 
 ## Naming Convention
 
