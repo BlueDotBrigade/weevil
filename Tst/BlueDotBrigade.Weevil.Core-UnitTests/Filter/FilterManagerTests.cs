@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Filter
 
 			apply.Should().Throw<FilterAbortedException>();
 			filter.Results.Should().HaveCount(100);
-			records.Skip(1).Should().OnlyContain(r => r.Metadata.ElapsedTime == TimeSpan.FromSeconds(1));
+			records.Skip(1).Should().OnlyContain(r => filter.ElapsedTimes.Get(r.LineNumber) == TimeSpan.FromSeconds(1));
 		}
 
 		[TestMethod]
@@ -49,14 +49,14 @@ namespace BlueDotBrigade.Weevil.Filter
 
 			filter.Apply(FilterType.PlainText, new FilterCriteria("line number: 2||line number: 4||line number: 6"));
 
-			ElapsedTimesByLine(records).Should().Equal(
+			ElapsedTimesByLine(filter, records).Should().Equal(
 				new Dictionary<int, TimeSpan>
 				{
-					{ 1, Metadata.ElapsedTimeUnknown },
-					{ 2, Metadata.ElapsedTimeUnknown },
-					{ 3, Metadata.ElapsedTimeUnknown },
+					{ 1, ElapsedTimes.Unknown },
+					{ 2, ElapsedTimes.Unknown },
+					{ 3, ElapsedTimes.Unknown },
 					{ 4, TimeSpan.FromSeconds(2) },
-					{ 5, Metadata.ElapsedTimeUnknown },
+					{ 5, ElapsedTimes.Unknown },
 					{ 6, TimeSpan.FromSeconds(2) },
 				});
 		}
@@ -121,9 +121,9 @@ namespace BlueDotBrigade.Weevil.Filter
 				view);
 		}
 
-		private static Dictionary<int, TimeSpan> ElapsedTimesByLine(ImmutableArray<IRecord> records)
+		private static Dictionary<int, TimeSpan> ElapsedTimesByLine(IFilter filter, ImmutableArray<IRecord> records)
 		{
-			return records.ToDictionary(r => r.LineNumber, r => r.Metadata.ElapsedTime);
+			return records.ToDictionary(r => r.LineNumber, r => filter.ElapsedTimes.Get(r.LineNumber));
 		}
 	}
 }

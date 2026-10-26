@@ -9,6 +9,13 @@
 		void UnpinAll();
 
 		void RemoveAllFlags();
+
+		/// <summary>
+		/// Unflags every line, then flags the given lines whose records are in memory.
+		/// </summary>
+		/// <returns>The number of lines flagged, each counted once.</returns>
+		int FlagOnly(IEnumerable<int> lineNumbers);
+
 		void RemoveComments(bool clearAll);
 
 		IList<IRecordAnalyzer> GetAnalyzers(ComponentType componentType);

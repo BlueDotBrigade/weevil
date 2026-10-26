@@ -78,5 +78,13 @@
 		ImmutableArray<IRecord> ClearAll();
 		ImmutableArray<IRecord> GetSelected();
 		void ToggleIsPinned();
+
+		/// <summary>
+		/// Puts <paramref name="comment"/> on the selected records that have none, or on every selected record when <paramref name="allowOverwrite"/> is <see langword="true"/>.
+		/// </summary>
+		/// <remarks>
+		/// A record whose comment is only white space has none. Adding a comment pins the record.
+		/// </remarks>
+		void SetComment(string comment, bool allowOverwrite);
 	}
 }

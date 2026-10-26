@@ -85,7 +85,7 @@
                                 .Results
                                 .First(r => r.LineNumber == lineNumber);
 
-                        record.Metadata.Comment.Should().Be(expectedComment);
+                        this.Context.Engine.Annotations.GetComment(record.LineNumber).Should().Be(expectedComment);
                 }
 
                 [When("the critical errors insight is refreshed")]
@@ -129,23 +129,19 @@
                         insight.RelatedRecords[0].LineNumber.Should().BeGreaterThan(0);
                 }
 
-                [Then("all related records should be flaggable")]
-                public void ThenAllRelatedRecordsShouldBeFlaggable()
+                [When("flagging only the insight's records")]
+                public void WhenFlaggingOnlyTheInsightsRecords()
                 {
-                        var insight = this.Context.LastInsight;
-                        insight.Should().NotBeNull();
-                        insight.RelatedRecords.Should().NotBeEmpty();
-                        
-                        // Verify we can flag these records (they have Metadata that supports IsFlagged)
-                        foreach (var record in insight.RelatedRecords)
-                        {
-                                record.Metadata.Should().NotBeNull();
-                                // Flag and unflag to verify it works
-                                record.Metadata.IsFlagged = true;
-                                record.Metadata.IsFlagged.Should().BeTrue();
-                                record.Metadata.IsFlagged = false;
-                                record.Metadata.IsFlagged.Should().BeFalse();
-                        }
+                        this.Context.Engine.Analyzer.FlagOnly(this.Context.LastInsight.RelatedRecords.Select(record => record.LineNumber));
+                }
+
+                [Then("the results will be the insight's records")]
+                public void ThenTheResultsWillBeTheInsightsRecords()
+                {
+                        this.Context.Engine.Filter.Results
+                                .Select(record => record.LineNumber)
+                                .Should()
+                                .Equal(this.Context.LastInsight.RelatedRecords.Select(record => record.LineNumber));
                 }
 
         }

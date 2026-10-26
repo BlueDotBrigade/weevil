@@ -1637,29 +1637,10 @@
 			{
 				// Option 6: Flag insight records and add @Flagged to filter
 				
-				// Step 1: Clear all existing flags, including those on cleared lines (#1013)
-				_engine.Analyzer.RemoveAllFlags();
-
-				// Step 2: Flag all insight-related records and count successfully flagged
-				var insightRecordCount = bulletin.RelatedRecords.Length;
-				var successfullyFlaggedCount = 0;
-
-				// Create a set of line numbers from the insight for efficient lookup
-				var insightLineNumbers = new HashSet<int>();
-				foreach (var record in bulletin.RelatedRecords)
-				{
-					insightLineNumbers.Add(record.LineNumber);
-				}
-
-				// Flag records that are still available in memory
-				foreach (var record in _engine.Records)
-				{
-					if (insightLineNumbers.Contains(record.LineNumber))
-					{
-						record.Metadata.IsFlagged = true;
-						successfullyFlaggedCount++;
-					}
-				}
+				// Steps 1 and 2: Core replaces the flags with those of the insight records still in memory (#1013)
+				var insightLineNumbers = new HashSet<int>(bulletin.RelatedRecords.Select(record => record.LineNumber));
+				var insightRecordCount = insightLineNumbers.Count;
+				var successfullyFlaggedCount = _engine.Analyzer.FlagOnly(insightLineNumbers);
 
 				// Check if any records were missing and notify user
 				if (successfullyFlaggedCount < insightRecordCount)
@@ -2154,8 +2135,11 @@
 				OnPropertyChanged(nameof(this.InclusiveFilter));
 				OnPropertyChanged(nameof(this.ExclusiveFilter));
 
-				this.VisibleItems = _engine.Filter.Results;
-				this.Rows = new RowList(_engine.Filter.Results, _engine.Annotations, _engine.Selector, _uiDispatcher);
+				// Read once, so the results and their elapsed times come from the same filter.
+				IFilter filter = _engine.Filter;
+
+				this.VisibleItems = filter.Results;
+				this.Rows = new RowList(filter.Results, filter.ElapsedTimes, _engine.Annotations, _engine.Selector, _uiDispatcher);
 
 				OnPropertyChanged(nameof(this.VisibleItems));
 			});

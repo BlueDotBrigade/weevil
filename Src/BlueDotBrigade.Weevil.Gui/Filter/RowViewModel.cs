@@ -37,9 +37,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public SeverityType Severity => this.Record.Severity;
 
 		/// <remarks>
-		/// The view calculates elapsed times after each filter, and each filter creates new rows.
+		/// The view calculates elapsed times after each filter, and each filter creates new rows, so the value never changes.
 		/// </remarks>
-		public TimeSpan ElapsedTime => this.Record.Metadata?.ElapsedTime ?? Metadata.ElapsedTimeUnknown;
+		public TimeSpan ElapsedTime { get; init; } = ElapsedTimes.Unknown;
 
 		/// <summary>
 		/// The row is selected in Core. WPF never selects a row (#1064).

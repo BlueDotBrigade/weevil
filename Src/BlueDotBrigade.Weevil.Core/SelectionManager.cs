@@ -67,7 +67,7 @@
 
 			_navigationManager = navigationManager;
 
-			_selectionPeriod = Metadata.ElapsedTimeUnknown;
+			_selectionPeriod = ElapsedTimes.Unknown;
 			_anchorLineNumber = NoLineNumber;
 		}
 		#endregion
@@ -98,7 +98,7 @@
 
 		private static TimeSpan CalculateTimePeriod(PositionRanges selection, ImmutableArray<IRecord> visibleRecords)
 		{
-			TimeSpan timePeriod = Metadata.ElapsedTimeUnknown;
+			TimeSpan timePeriod = ElapsedTimes.Unknown;
 
 			if (selection.Count > 0)
 			{
@@ -494,7 +494,7 @@
 			{
 				clearedRecords = GetRecords(_selection, _visibleRecords);
 				_selection = new PositionRanges();
-				_selectionPeriod = Metadata.ElapsedTimeUnknown;
+				_selectionPeriod = ElapsedTimes.Unknown;
 			}
 
 			Log.Default.Write(
@@ -541,6 +541,24 @@
 					LogSeverityType.Information,
 					$"Changing record state. IsPinned={isPinned}, RecordsAffected={selectedRecords.Length}");
 			}
+		}
+
+		public void SetComment(string comment, bool allowOverwrite)
+		{
+			ImmutableArray<IRecord> selectedRecords = GetSelected();
+
+			// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
+			int[] lineNumbers = selectedRecords
+				.AsParallel()
+				.Where(record => allowOverwrite || !_annotations.HasComment(record.LineNumber))
+				.Select(record => record.LineNumber)
+				.ToArray();
+
+			_annotations.SetComment(lineNumbers, comment);
+
+			Log.Default.Write(
+				LogSeverityType.Information,
+				$"Commenting the selected records. AllowOverwrite={allowOverwrite}, RecordsAffected={lineNumbers.Length}");
 		}
 	}
 }

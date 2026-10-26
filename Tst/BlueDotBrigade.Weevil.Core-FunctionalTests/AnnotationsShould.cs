@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Filter;
 
 	/// <summary>
 	/// Comments and pins are kept for the log, and flags for the view, so they carry across Clear and Reload (#1013).
@@ -90,6 +91,22 @@ namespace BlueDotBrigade.Weevil
 			engine.Reload();
 
 			Line(engine, 5).Metadata.IsFlagged.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenAClearedLine_WhenOnlyItAndALineInMemoryAreFlagged_ThenOnlyTheLineInMemoryIsFlaggedAndCounted()
+		{
+			// Going to an insight's records: the GUI reports the records that could not be flagged.
+			IEngine engine = Open();
+			engine.Selector.Select(13);
+			engine.Clear(ClearOperation.BeforeSelected);
+
+			var flaggedCount = engine.Analyzer.FlagOnly(new[] { 5, 20 });
+			engine.Reload();
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("@Flagged"));
+
+			flaggedCount.Should().Be(1);
+			engine.Filter.Results.Select(record => record.LineNumber).Should().Equal(20);
 		}
 
 		private IEngine Open()

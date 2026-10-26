@@ -8,7 +8,7 @@
 		public SelectionChangedBulletin()
 		{
 			this.LineNumber = 0;
-			this.SelectionPeriod = Metadata.ElapsedTimeUnknown;
+			this.SelectionPeriod = ElapsedTimes.Unknown;
 			this.SelectedRecordCount = 0;
 			this.RegionName = string.Empty;
 			this.SectionName = string.Empty;

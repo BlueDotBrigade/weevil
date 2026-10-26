@@ -9,7 +9,7 @@
 		/// <summary>
 		/// Indicates the system was unable to determine the amount of time between records.
 		/// </summary>
-		public static readonly TimeSpan ElapsedTimeUnknown = TimeSpan.MinValue;
+		public static readonly TimeSpan ElapsedTimeUnknown = ElapsedTimes.Unknown;
 
 		// The comment, pin and flag live in stores kept by line number (#1013), and the elapsed time in the view (#1016).
 		// Until Core attaches this record to a view of its log, they are kept in stores of its own.

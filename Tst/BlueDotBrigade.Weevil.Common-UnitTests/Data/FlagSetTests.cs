@@ -32,6 +32,19 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenFlaggedLines_WhenOnlyOtherLinesAreFlagged_ThenJustThoseLinesAreFlagged()
+		{
+			var flags = new FlagSet(10);
+			flags.SetFlagged(5, true);
+
+			flags.FlagOnly(new[] { 7, 1_000 });
+
+			flags.IsFlagged(5).Should().BeFalse();
+			flags.IsFlagged(7).Should().BeTrue();
+			flags.IsFlagged(1_000).Should().BeTrue();
+		}
+
+		[TestMethod]
 		public void GivenFlaggedLines_WhenCleared_ThenNoLineIsFlagged()
 		{
 			var flags = new FlagSet(10);

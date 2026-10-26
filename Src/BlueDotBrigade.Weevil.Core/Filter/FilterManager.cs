@@ -85,6 +85,8 @@
 
 		public ImmutableArray<IRecord> Results => _latestFilterResults;
 
+		public ElapsedTimes ElapsedTimes => _viewAnnotations.ElapsedTimes;
+
 		public IList<string> IncludeHistory => _includeHistory;
 
 		public IList<string> ExcludeHistory => _excludeHistory;

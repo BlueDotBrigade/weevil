@@ -45,6 +45,25 @@
 			_coreEngine.Flags.Clear();
 		}
 
+		/// <remarks>
+		/// Every line is unflagged, including cleared ones, as <see cref="RemoveAllFlags"/> does. A cleared line is not flagged,
+		/// or its flag would come back on Reload (#1013). One change to the flags, which raise no events.
+		/// </remarks>
+		public int FlagOnly(IEnumerable<int> lineNumbers)
+		{
+			ImmutableArray<Data.IRecord> records = _coreEngine.Records;
+
+			// A binary search for each line: there are few, and the records are in line order.
+			int[] inMemory = lineNumbers
+				.Distinct()
+				.Where(lineNumber => records.TryIndexOfLineNumber(lineNumber, out _))
+				.ToArray();
+
+			_coreEngine.Flags.FlagOnly(inMemory);
+
+			return inMemory.Length;
+		}
+
 		public void RemoveComments(bool clearAll)
 		{
 			ImmutableArray<Data.IRecord> records = clearAll ? _coreEngine.Records : _coreEngine.Selector.GetSelected();

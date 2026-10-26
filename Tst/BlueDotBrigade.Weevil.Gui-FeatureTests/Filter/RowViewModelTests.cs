@@ -78,7 +78,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var annotations = new AnnotationStore();
 			var dispatcher = new DeferredUiDispatcherFake();
-			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, Substitute.For<ISelect>(), dispatcher);
+			var rows = new RowList(R.WithLineNumbers(1, 10), ElapsedTimes.None, annotations, Substitute.For<ISelect>(), dispatcher);
 			annotations.Changed += (_, e) => rows.QueueRefresh(e);
 			RowViewModel row = rows.GetRow(4);
 			row.Comment = "Ret";
@@ -98,7 +98,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			// Ctrl+P within 250 ms of typing could erase text the box had not sent yet.
 			var annotations = new AnnotationStore();
 			var dispatcher = new DeferredUiDispatcherFake();
-			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, Substitute.For<ISelect>(), dispatcher);
+			var rows = new RowList(R.WithLineNumbers(1, 10), ElapsedTimes.None, annotations, Substitute.For<ISelect>(), dispatcher);
 			annotations.Changed += (_, e) => rows.QueueRefresh(e);
 			RowViewModel row = rows.GetRow(4);
 			_ = row.Comment;
@@ -117,7 +117,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var annotations = new AnnotationStore();
 			var dispatcher = new DeferredUiDispatcherFake();
-			var rows = new RowList(R.WithLineNumbers(1, 10), annotations, Substitute.For<ISelect>(), dispatcher);
+			var rows = new RowList(R.WithLineNumbers(1, 10), ElapsedTimes.None, annotations, Substitute.For<ISelect>(), dispatcher);
 			annotations.Changed += (_, e) => rows.QueueRefresh(e);
 			RowViewModel row = rows.GetRow(4);
 			var changedProperties = new List<string>();
