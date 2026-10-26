@@ -147,14 +147,14 @@ internal sealed class FilteringSteps : ReqnrollSteps
 	public void WhenPinningTheRecordOnLine(int lineNumber)
 	{
 		var index = this.Context.Engine.Records.IndexOfLineNumber(lineNumber);
-		this.Context.Engine.Records[index].Metadata.IsPinned = true;
+		this.Context.Engine.RecordState.SetPinned(this.Context.Engine.Records[index], true);
 	}
 
 	[When($"unpinning the record on line {X.WholeNumber}")]
 	public void WhenUnpinningTheRecordOnLine(int lineNumber)
 	{
 		var index = this.Context.Engine.Records.IndexOfLineNumber(lineNumber);
-		this.Context.Engine.Records[index].Metadata.IsPinned = false;
+		this.Context.Engine.RecordState.SetPinned(this.Context.Engine.Records[index], false);
 	}
 
 	[When($"bookmarking the record on line {X.WholeNumber}")]

@@ -188,7 +188,6 @@
 					 _currentRecord.CreatedAt,
 					 _currentRecord.Severity,
 					 multilineContent?.ToString() ?? _currentRecord.Content,
-					 _currentRecord.Metadata,
 					 isMultiLine: multilineContent != null,
 					 _currentRecord.WasGeneratedByUi);
 			}

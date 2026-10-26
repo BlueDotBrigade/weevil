@@ -71,7 +71,7 @@
                         var flaggedRecords = this.Context
                                 .Engine
 				.Filter
-				.Results.Count(x => x.Metadata.IsFlagged);
+				.Results.Count(x => this.Context.Engine.RecordState.IsFlagged(x));
 
                         flaggedRecords.Should().Be(expectedCount);
                 }

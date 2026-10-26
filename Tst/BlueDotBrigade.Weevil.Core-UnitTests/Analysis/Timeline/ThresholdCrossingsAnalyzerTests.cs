@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	{
 		#region Setup helpers
 
-		private static Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string regex, string threshold, string comparison)
+		private static Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string regex, string threshold, string comparison)
 		{
 			var analyzer = new ThresholdCrossingsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = Substitute.For<IUserDialog>();
@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 					return true;
 				});
 
-			return analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+			return analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 		}
 
 		#endregion
@@ -42,29 +42,26 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private static void AssertIntegerScenario(string pattern, string threshold, string comparison, string expected)
 		{
 			var records = AnalysisHelper.BuildIntegerRecords(pattern);
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
-			var results = Analyze(records, annotations, flags, AnalysisHelper.IntegerRegex, threshold, comparison);
+			var state = new RecordState();
+			var results = Analyze(records, state, AnalysisHelper.IntegerRegex, threshold, comparison);
 
-			AssertFlagsMatchExpected(pattern, expected, records, annotations, flags, results, $"integer scenario ({comparison} {threshold})");
+			AssertFlagsMatchExpected(pattern, expected, records, state, results, $"integer scenario ({comparison} {threshold})");
 		}
 
 		private static void AssertDecimalScenario(string pattern, string threshold, string comparison, string expected)
 		{
 			var records = AnalysisHelper.BuildDecimalRecords(pattern);
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
-			var results = Analyze(records, annotations, flags, AnalysisHelper.DecimalRegex, threshold, comparison);
+			var state = new RecordState();
+			var results = Analyze(records, state, AnalysisHelper.DecimalRegex, threshold, comparison);
 
-			AssertFlagsMatchExpected(pattern, expected, records, annotations, flags, results, $"decimal scenario ({comparison} {threshold})");
+			AssertFlagsMatchExpected(pattern, expected, records, state, results, $"decimal scenario ({comparison} {threshold})");
 		}
 
 		private static void AssertFlagsMatchExpected(
 			string pattern,
 			string expected,
 			ImmutableArray<IRecord> records,
-			IAnnotations annotations,
-			IFlags flags,
+			IRecordState state,
 			Results results,
 			string label)
 		{
@@ -72,8 +69,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				pattern,
 				expected,
 				records,
-				annotations,
-				flags,
+				state,
 				label,
 				"threshold-crossing flag mismatch");
 
@@ -89,12 +85,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		public void GivenDialogReturnsBlankThresholdAndComparison_WhenAnalyze_ThenDefaultsAreApplied()
 		{
 			var records = AnalysisHelper.BuildIntegerRecords("1");
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
-			var results = Analyze(records, annotations, flags, AnalysisHelper.IntegerRegex, string.Empty, string.Empty);
+			var state = new RecordState();
+			var results = Analyze(records, state, AnalysisHelper.IntegerRegex, string.Empty, string.Empty);
 
 			results.FlaggedRecords.Should().Be(1);
-			flags.IsFlagged(records[0].LineNumber).Should().BeTrue();
+			state.IsFlagged(records[0]).Should().BeTrue();
 		}
 
 		[TestMethod]

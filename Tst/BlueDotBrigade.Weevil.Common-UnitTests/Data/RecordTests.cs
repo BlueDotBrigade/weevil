@@ -14,7 +14,7 @@ namespace BlueDotBrigade.Weevil.Data
 				{
 					foreach (var wasGeneratedByUi in new[] { false, true })
 					{
-						var record = new Record(1, DateTime.Now, severity, "content", new Metadata(), isMultiLine, wasGeneratedByUi);
+						var record = new Record(1, DateTime.Now, severity, "content", isMultiLine, wasGeneratedByUi);
 
 						record.Severity.Should().Be(severity);
 						record.IsMultiLine.Should().Be(isMultiLine);

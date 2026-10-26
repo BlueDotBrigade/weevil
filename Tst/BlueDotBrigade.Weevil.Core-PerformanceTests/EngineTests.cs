@@ -12,9 +12,9 @@
 	{
 		private const int RecordCount = 200_000;
 
-		// Measured on 2026-10-26: 397 bytes per record, before #988. #1086 needs about 157 (1.2 GB per GB of log),
-		// which #988 delivers: lower the budget as its steps land.
-		private const int MaximumBytesPerRecord = 480;
+		// Measured on 2026-10-26: 348 bytes per record once records lost their Metadata (#1100), down from 397.
+		// #1086 needs about 157 (1.2 GB per GB of log), which #988 delivers: lower the budget as its steps land.
+		private const int MaximumBytesPerRecord = 420;
 
 		private string _folder = string.Empty;
 

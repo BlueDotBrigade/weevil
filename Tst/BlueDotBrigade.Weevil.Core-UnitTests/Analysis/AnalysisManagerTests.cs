@@ -14,13 +14,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			foreach (var record in engine.Records)
 			{
-				record.Metadata.IsFlagged = true;
+				engine.RecordState.SetFlagged(record, true);
 			}
 
 			engine.Analyzer.RemoveAllFlags();
 
 			engine.Records.Should().HaveCount(expectedCount);
-			engine.Records.Should().NotContain(record => record.Metadata.IsFlagged);
+			engine.Records.Should().NotContain(record => engine.RecordState.IsFlagged(record));
 		}
 
 		[TestMethod]
@@ -34,13 +34,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			foreach (var record in engine.Records)
 			{
-				record.Metadata.IsPinned = true;
+				engine.RecordState.SetPinned(record, true);
 			}
 
 			engine.Analyzer.UnpinAll();
 
 			engine.Records.Should().HaveCount(expectedCount);
-			engine.Records.Should().NotContain(record => record.Metadata.IsPinned);
+			engine.Records.Should().NotContain(record => engine.RecordState.IsPinned(record));
 		}
 
 		private static IEngine OpenEngine(string fileName)

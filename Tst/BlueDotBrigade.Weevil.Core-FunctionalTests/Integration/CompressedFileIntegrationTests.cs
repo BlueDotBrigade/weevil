@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.Integration
 					.Open();
 
 				// Add a comment to the first record
-				engine.Records[0].Metadata.Comment = "Test comment added";
+				engine.RecordState.SetComment(engine.Records[0], "Test comment added");
 
 				// Try to save - this should NOT throw an exception
 				// and should skip the save since it's in a temp directory
@@ -104,7 +104,7 @@ namespace BlueDotBrigade.Weevil.Integration
 					.Open();
 
 				// Add a comment to the first record
-				engine.Records[0].Metadata.Comment = "Test comment";
+				engine.RecordState.SetComment(engine.Records[0], "Test comment");
 
 				// Save - this should succeed since it's not in temp directory
 				engine.Save();
@@ -118,7 +118,7 @@ namespace BlueDotBrigade.Weevil.Integration
 					.UsingPath(logFilePath)
 					.Open();
 				
-				engine2.Records[0].Metadata.Comment.Should().Be("Test comment", "Comment should be loaded from sidecar");
+				engine2.RecordState.GetComment(engine2.Records[0]).Should().Be("Test comment", "Comment should be loaded from sidecar");
 			}
 			finally
 			{

@@ -22,16 +22,15 @@
 			var analyzer = new MatchingRecordRunsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?:2|2\.5)");
 
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
+			var state = new RecordState();
 
-			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[4].LineNumber).Should().BeTrue();
-			annotations.GetComment(records[1].LineNumber).Should().Contain("01-Begins");
-			annotations.GetComment(records[4].LineNumber).Should().Contain("01-Ends");
+			state.IsFlagged(records[1]).Should().BeTrue();
+			state.IsFlagged(records[4]).Should().BeTrue();
+			state.GetComment(records[1]).Should().Contain("01-Begins");
+			state.GetComment(records[4]).Should().Contain("01-Ends");
 		}
 
 		[TestMethod]
@@ -50,14 +49,13 @@
 			var analyzer = new MatchingRecordRunsAnalyzer(FilterStrategy.KeepAllRecords);
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?:2|2\.5)");
 
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
+			var state = new RecordState();
 
-			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[4].LineNumber).Should().BeTrue();
+			state.IsFlagged(records[1]).Should().BeTrue();
+			state.IsFlagged(records[4]).Should().BeTrue();
 		}
 	}
 }

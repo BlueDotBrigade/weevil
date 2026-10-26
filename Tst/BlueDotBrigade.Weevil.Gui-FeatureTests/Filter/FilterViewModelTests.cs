@@ -186,7 +186,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			{
 				bulletinMediator.Post(new NavigateToInsightRecordBulletin(ImmutableArray.Create(insightRecord)));
 
-				viewModel.VisibleItems.Should().NotContain(record => record.Metadata.IsFlagged, "only the analyzer sets flags while it runs");
+				viewModel.InclusiveFilter.Should().NotContain("@Flagged", "insight navigation, which flags records and shows them, waits for the analysis");
 			}
 			finally
 			{

@@ -29,8 +29,6 @@
 		/// </remarks>
 		int LineNumber { get; }
 
-		Metadata Metadata { get; }
-
 		SeverityType Severity { get; }
 
 		/// <summary>

@@ -43,7 +43,7 @@
 		/// 2. an appropriate comment is added to the record
 		/// </remarks>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var flaggedLineNumbers = new HashSet<int>();
 
@@ -85,7 +85,7 @@
 
 			foreach (IRecord record in records)
 			{
-				AnalysisHelper.ClearRecordFlag(record, flags, canUpdateMetadata);
+				AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 			}
 
 			ImmutableArray<IRecord> sortedRecords = AnalysisHelper.OrderRecordsForAnalysis(records, analysisOrder);
@@ -114,8 +114,7 @@
 
 							AnalysisHelper.UpdateRecordMetadata(
 								priorRecord,
-								annotations,
-								flags,
+								state,
 								true,
 								$"{parameterName}: {previousRaw} => {current.Value}",
 								canUpdateMetadata);

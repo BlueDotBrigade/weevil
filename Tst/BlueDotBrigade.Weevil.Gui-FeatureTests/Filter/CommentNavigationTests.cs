@@ -53,8 +53,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.IsLogFileOpen.Should().BeTrue("the log file should be open before the test continues");
 
 			// GlobalDefault.log is 1-indexed and sequential, so line N is at 0-based index N-1.
-			viewModel.VisibleItems[LineNumberA - 1].Metadata.Comment = CommentA;
-			viewModel.VisibleItems[LineNumberB - 1].Metadata.Comment = CommentB;
+			viewModel.Rows.GetRow(LineNumberA - 1).Comment = CommentA;
+			viewModel.Rows.GetRow(LineNumberB - 1).Comment = CommentB;
 
 			// Act & Assert — first "Next Comment" should land on line 10 (index 9).
 			viewModel.GoToNextComment();

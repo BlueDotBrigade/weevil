@@ -12,7 +12,7 @@ Phase 2 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 - One lock guards every write to the session.
 - The GUI subscribes to events once per open log, not again after each Clear or Reload.
 - Behaviour is unchanged, apart from the decisions below. The sidecar format does not change.
-- No `Metadata` object per record: about 12% less memory.
+- No `Metadata` object per record: about 12% less memory. Measured 12% on 2026-10-26 (#1100): 396 to 348 bytes per record.
 - Filtering is no slower.
 
 [MutableStateInCore.md](../Research/Weevil3/MutableStateInCore.md) lists every value that moves, and what writes it today.
@@ -29,6 +29,11 @@ Callers open and use an engine without ever seeing its state. `Session` holds th
 4. **Grid updates never block** (decided 2026-10-20). A row learns of a change asynchronously, never through a synchronous `Invoke`. A bulk operation (Unpin All, Remove Comments, an analyzer) raises one event, and the grid then refreshes the rows on screen.
 5. **Selection is stored as ranges, and Copy is limited to 100,000 records** (decided 2026-10-20). Selecting every record still works, so Clear Selected, Export and analyzers on a selection are unaffected. Copying more shows a message that points to Export. Paste has the same limit (added 2026-10-26, #1097): one comment on more records is a mistake, and each commented record costs memory.
 6. **A `Session` holds the log's mutable state in child stores** (decided 2026-10-26). Records hold none, so the state that changes stays together and fewer threads write to it. `Session` is internal to Core; each store is a child class, such as the comment and pin store. Flags and elapsed times stay with the view (decisions 1 and 2).
+7. **Callers reach a record's state through a `RecordState` facade** (decided 2026-10-26, #1100). `IRecordState` (public, in Common) gets and sets a record's comment, pin and flag, and gets its elapsed time; each method takes an `IRecord`. The caller does not know which store, session or view, holds a value. `RecordState` implements it over the session's comment and pin store and the view's flags and elapsed times, and adds no state, locks or memory of its own.
+   - Used one record at a time, by analyzers (`IRecordAnalyzer.Analyze` receives it), filters, navigators, export and reports, and by headless callers through `IEngine.RecordState`.
+   - Bulk operations (Unpin All, Remove Comments, Paste, `FlagOnly`, Toggle Pin) and the sidecar keep calling the stores, so many lines change under one lock with one event. The GUI keeps `IEngine.Annotations` for its change events.
+   - Not added: global or static access, extension methods on `IRecord`, per-record objects, or a snapshot of all of a record's values. Selection, results and bookmarks stay out of it.
+   - Why: plugins see one contract that survives changes to the stores, components take one parameter instead of two or three, and each view of a log (#991) has its own `RecordState`.
 
 ## Steps
 
@@ -71,12 +76,12 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - An `@Elapsed` filter reads the elapsed times of the previous results, which the view passes in. Iterating by elapsed time reads the current ones.
    - This also fixes an aborted filter erasing elapsed times that are still shown. That fix needs its regression test.
    - Add a test for `@Elapsed` applied after another filter, which nothing covers today.
-7. **`Metadata` removed from `IRecord` (#1017).** Split into four pull requests (decided 2026-10-26). Until the last one, `Metadata` forwards to the stores, so callers not yet moved keep working.
+7. **`Metadata` removed from `IRecord` (#1017). Done 2026-10-26.** Split into four pull requests (decided 2026-10-26). Until the last one, `Metadata` forwards to the stores, so callers not yet moved keep working.
    - **Core reads the session (#1082). Done 2026-10-26.** `Session` holds the comment and pin store (decision 6); the view keeps its flags and elapsed times. Filters, monikers, navigators, reports, export, the sidecar and the selection read and write the stores, which are passed in the way bookmarks already are. Unpin All, Remove Comments and Toggle Pin each become one operation on the comment and pin store: one lock and one change event (decision 4), covering the same lines as today; the lines to change are found in parallel first. Remove All Flags clears the view's flags, which raise no events.
    - **Analyzers (#1095). Done 2026-10-26.** `IRecordAnalyzer.Analyze` receives `IAnnotations` and `IFlags`, so an analyzer can comment, pin and flag, but reach nothing else. The built-in analyzers move with it; the TSV and default plugins only list them. `IAnnotations.AppendComment` adds to a comment in one locked step, where `Metadata` read and then wrote it.
    - **GUI (#1097). Done 2026-10-26.** The GUI no longer reads `Metadata`. Copy reads `IEngine.Annotations`. Paste calls `ISelect.SetComment`, which keeps the "only records without a comment" rule in Core and makes one store call. Rows take their elapsed times from the new `IFilter.ElapsedTimes`, read with the results they belong to. Going to an insight's records calls `IAnalyze.FlagOnly`, which replaces the flags in one step and returns how many lines it flagged; the ViewModel shows the message and edits the filter. `ElapsedTimes.Unknown` replaces `Metadata.ElapsedTimeUnknown`, which forwards to it until piece 4.
    - Left for piece 4: `FilterManager.PublishElapsedTimes` still makes a pass over every record after each filter only to notify `Metadata`, which nothing in the GUI listens to any more.
-   - **`Metadata` removed.** `IRecord`, `Record`, `Metadata` and `ViewAnnotations` go. Tests move to the stores (156 uses of `.Metadata.` in 28 files after #1082). Memory is measured against the goal.
+   - **`Metadata` removed (#1100). Done 2026-10-26.** `IRecord.Metadata` and `Metadata` go; `ViewAnnotations` becomes `RecordState` (decision 7), and `IFlags` goes, because callers use `IRecordState`. Opening a log no longer attaches each record, and a filter no longer makes a pass over every record to notify `Metadata`. Tests move to `RecordState` or the stores. Memory kept per record fell from 396 to 348 bytes (12%), and the working set from 3.13 to 2.77 GB per GB of log (300 MB log, Linux); the memory-budget test (#1086) is lowered from 480 to 420 bytes.
    - External plugins built for 2.x already fail to load in 3.0; they are fixed later (see Compatibility).
    - Later, in a step of its own: bookmarks, regions, remarks, the table of contents and the filter history move into `Session`, under the same lock.
 8. **Clear without rebuilding (#1018).**

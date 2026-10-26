@@ -48,7 +48,7 @@
 					{
 						SeverityTypeHelpers.TryParse(text[fields[3]], out SeverityType severityType);
 
-						record = new Record(line, createdAt, severityType, content, new Metadata(), isMultiLine: false, wasGeneratedByUi: threadId == 1);
+						record = new Record(line, createdAt, severityType, content, isMultiLine: false, wasGeneratedByUi: threadId == 1);
 					}
 					else
 					{

@@ -27,8 +27,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				filterCriteria,
 				regionManager,
 				bookmarkManager,
-				new AnnotationStore(),
-				new FlagSet());
+				new RecordState());
 		}
 
 		public static IUserDialog CreateDialog(string regex, string analysisOrder = "Ascending")

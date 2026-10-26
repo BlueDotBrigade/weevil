@@ -7,17 +7,17 @@
 	internal class FlagNavigator : IFlagNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
-		private readonly IFlags _flags;
+		private readonly IRecordState _state;
 
-		public FlagNavigator(ActiveRecord activeRecord, IFlags flags)
+		public FlagNavigator(ActiveRecord activeRecord, IRecordState state)
 		{
 			_activeRecord = activeRecord;
-			_flags = flags;
+			_state = state;
 		}
 
 		private bool CheckIsFlagged(IRecord record)
 		{
-			return _flags.IsFlagged(record.LineNumber);
+			return _state.IsFlagged(record);
 		}
 
 		public IRecord FindPrevious()

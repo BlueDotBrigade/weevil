@@ -14,9 +14,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         internal const string DecimalRegex = @"(?<Value>\d+\.\d+)$";
         internal const char FlagMarker = '^';
 
-        internal static int[] GetFlaggedIndices(ImmutableArray<IRecord> records, IFlags flags) =>
+        internal static int[] GetFlaggedIndices(ImmutableArray<IRecord> records, IRecordState state) =>
             Enumerable.Range(0, records.Length)
-                .Where(i => flags.IsFlagged(records[i].LineNumber))
+                .Where(i => state.IsFlagged(records[i]))
                 .ToArray();
 
         internal static int CountExpectedFlags(string expected) =>
@@ -53,8 +53,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                         ? Record.CreationTimeUnknown
                         : DateTime.Parse(record.Timestamp, CultureInfo.InvariantCulture),
                     SeverityType.Information,
-                    record.Content,
-                    new Metadata()))
+                    record.Content))
                 .ToImmutableArray();
         }
 
@@ -62,8 +61,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             string pattern,
             string expected,
             ImmutableArray<IRecord> records,
-            IAnnotations annotations,
-            IFlags flags,
+            IRecordState state,
             string label,
             string mismatchLabel)
         {
@@ -71,11 +69,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 because: $"[{label}] pattern '{pattern}' and expected '{expected}' must be the same length");
 
             var expectedIndices = ParseFlaggedIndices(expected);
-            var actualIndices = GetFlaggedIndices(records, flags);
+            var actualIndices = GetFlaggedIndices(records, state);
             var actualRendered = RenderFlags(pattern, actualIndices);
 
             actualRendered.Should().Be(expected,
-                because: BuildDiagnostic(mismatchLabel, label, pattern, expected, actualRendered, records, annotations, expectedIndices, actualIndices));
+                because: BuildDiagnostic(mismatchLabel, label, pattern, expected, actualRendered, records, state, expectedIndices, actualIndices));
         }
 
         private static int[] ParseFlaggedIndices(string expected) =>
@@ -104,7 +102,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             string expected,
             string actualRendered,
             ImmutableArray<IRecord> records,
-            IAnnotations annotations,
+            IRecordState state,
             int[] expectedIndices,
             int[] actualIndices)
         {
@@ -130,7 +128,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 details.Add("  Disagreements:");
                 foreach (var i in disagreements)
                 {
-                    var comment = annotations.GetComment(records[i].LineNumber);
+                    var comment = state.GetComment(records[i]);
                     details.Add($"    index {i} (value '{pattern[i]}'): comment=\"{comment}\"");
                 }
             }

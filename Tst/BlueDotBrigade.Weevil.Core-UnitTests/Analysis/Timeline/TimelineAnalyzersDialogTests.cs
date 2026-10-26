@@ -84,7 +84,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -99,7 +99,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -114,7 +114,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -133,7 +133,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -148,7 +148,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -167,7 +167,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -182,7 +182,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -201,7 +201,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -216,7 +216,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -235,7 +235,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -250,7 +250,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -269,7 +269,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -284,7 +284,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -299,7 +299,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -318,7 +318,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -333,7 +333,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -348,7 +348,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -367,7 +367,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -382,7 +382,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -397,7 +397,7 @@
 			var records = ImmutableArray<IRecord>.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: true);
+			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);

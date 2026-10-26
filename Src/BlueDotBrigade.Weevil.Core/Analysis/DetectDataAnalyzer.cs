@@ -35,7 +35,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		/// Extracts key/value pairs defined by regular expression "groups", and then adds them to the records' comments.
 		/// </summary>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var flaggedLineNumbers = new HashSet<int>();
 
@@ -73,7 +73,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			{
 				if (canUpdateMetadata)
 				{
-					flags.SetFlagged(record.LineNumber, false);
+					state.SetFlagged(record, false);
 				}
 
 				// Track unique key/value pairs per record to avoid duplicates using tuple-based key
@@ -103,8 +103,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 								if (canUpdateMetadata)
 								{
-									flags.SetFlagged(record.LineNumber, true);
-									annotations.AppendComment(record.LineNumber, $"{parameterName}: {keyValuePair.Value}");
+									state.SetFlagged(record, true);
+									state.AppendComment(record, $"{parameterName}: {keyValuePair.Value}");
 								}
 
 								flaggedLineNumbers.Add(record.LineNumber);

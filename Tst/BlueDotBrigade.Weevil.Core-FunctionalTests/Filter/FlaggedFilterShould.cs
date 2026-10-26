@@ -28,7 +28,7 @@
 			// Verify only flagged records are shown
 			foreach (IRecord record in engine.Filter.Results)
 			{
-				record.Metadata.IsFlagged.Should().BeTrue($"Record {record.LineNumber} should be flagged");
+				engine.RecordState.IsFlagged(record).Should().BeTrue($"Record {record.LineNumber} should be flagged");
 			}
 
 			// Verify we have the expected flagged records
@@ -56,7 +56,7 @@
 			// Should still show flagged records (case-insensitive)
 			foreach (IRecord record in engine.Filter.Results)
 			{
-				record.Metadata.IsFlagged.Should().BeTrue($"Record {record.LineNumber} should be flagged");
+				engine.RecordState.IsFlagged(record).Should().BeTrue($"Record {record.LineNumber} should be flagged");
 			}
 
 			(engine.Filter.Results.Length > 0).Should().BeTrue("Should find flagged records with lowercase moniker");
@@ -81,7 +81,7 @@
 
 			// Verify results contain both Error records and flagged records
 			var hasErrorRecord = engine.Filter.Results.Any(r => r.Content.Contains("Error"));
-			var hasFlaggedRecord = engine.Filter.Results.Any(r => r.Metadata.IsFlagged);
+			var hasFlaggedRecord = engine.Filter.Results.Any(r => engine.RecordState.IsFlagged(r));
 
 			(hasErrorRecord || hasFlaggedRecord).Should().BeTrue("Should have either Error records or flagged records");
 		}

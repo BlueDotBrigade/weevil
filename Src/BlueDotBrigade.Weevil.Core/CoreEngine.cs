@@ -36,7 +36,7 @@
 
 		// Comments and pins are shared by every view of the log; flags and elapsed times belong to the view (#1013).
 		private readonly Session _session;
-		private readonly ViewAnnotations _annotations;
+		private readonly RecordState _recordState;
 
 		private readonly FilterManager _filterManager;
 		private readonly SidecarManager _sidecarManager;
@@ -90,7 +90,7 @@
 			LineIndex lineIndex,
 			ImmutableArray<IRecord> records,
 			Session session,
-			ViewAnnotations annotations,
+			RecordState recordState,
 			bool hasBeenCleared,
 			TableOfContents tableOfContents,
 			ImmutableArray<Region> regions,
@@ -117,7 +117,7 @@
 
 			_allRecords = records;
 			_session = session;
-			_annotations = annotations;
+			_recordState = recordState;
 			_hasBeenCleared = hasBeenCleared;
 
 			Log.Default.Write(
@@ -163,7 +163,7 @@
 				GetRecordCounters(),
 				_regionManager,
 				_bookmarkManager,
-				_annotations,
+				_recordState,
 				_telemetryRecorder);
 
 			// Construction-time default filter: applied without recording telemetry (not a user action).
@@ -175,9 +175,7 @@
 				_coreExtension,
 				_allRecords,
 				tableOfContents,
-				_session.Annotations,
-				_annotations.Flags,
-				() => _annotations.ElapsedTimes,
+				_recordState,
 				_telemetryRecorder);
 
 			_selectionManager = new SelectionManager(
@@ -185,8 +183,7 @@
 				_filterManager.Results,
 				_navigationManager, // TODO: adding navigation manager is a code smell
 				_sourceFileEncoding,
-				_session.Annotations,
-				_annotations.Flags,
+				_recordState,
 				new Action(() => { _filterManager.ReApply(); }));
 
 			recordAndMetadataLoadingStopwatch.Stop();
@@ -253,11 +250,9 @@
 		internal Session Session => _session;
 
 		/// <summary>
-		/// The view's flags and elapsed times, with the session's comments and pins, which records' <see cref="Metadata"/> reads until #1017 removes it.
+		/// The state of the records this view shows: the session's comments and pins, and the view's flags and elapsed times (decision 7 of the #990 plan).
 		/// </summary>
-		internal ViewAnnotations Annotations => _annotations;
-
-		internal FlagSet Flags => _annotations.Flags;
+		internal RecordState RecordState => _recordState;
 
 		public NavigationManager Navigate => _navigationManager;
 
@@ -381,7 +376,7 @@
 			if (report == ReportType.CommentSummary)
 			{
 				ImmutableArray<IRecord> filterResults = _filterManager.Results;
-				new CommentSummaryReport(filterResults, _session.Annotations).Generate(destinationFolder);
+				new CommentSummaryReport(filterResults, _recordState).Generate(destinationFolder);
 			}
 		}
 	}

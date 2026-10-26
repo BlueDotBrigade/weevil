@@ -32,7 +32,7 @@
 		private readonly bool _includePinned;
 		private readonly bool _includeBookmarks;
 		private readonly IBookmarkManager _bookmarkManager;
-		private readonly IAnnotations _annotations;
+		private readonly IRecordState _state;
 
 		static FilterStrategy()
 		{
@@ -55,16 +55,15 @@
 			IFilterCriteria filterCriteria,
 			IRegionManager regionManager,
 			IBookmarkManager bookmarkManager,
-			IAnnotations annotations,
-			IFlags flags,
+			IRecordState state,
 			ElapsedTimes previousElapsedTimes = null)
 		{
 			_filterType = filterType;
 			_filterCriteria = filterCriteria;
 			_bookmarkManager = bookmarkManager;
-			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+			_state = state ?? throw new ArgumentNullException(nameof(state));
 
-            _expressionBuilder = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager, bookmarkManager, annotations, flags ?? throw new ArgumentNullException(nameof(flags)), previousElapsedTimes ?? ElapsedTimes.None);
+            _expressionBuilder = ExpressionBuilder.Create(coreExtension, context, filterType, filterCriteria, regionManager, bookmarkManager, _state, previousElapsedTimes ?? ElapsedTimes.None);
 
 			List<IExpression> inclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, true);
 			List<IExpression> exclusiveExpressions = ConvertCriteriaIntoExpressions(filterAliasExpander, _expressionBuilder, filterCriteria, false);
@@ -139,7 +138,7 @@
 			else
 			{
 				// Check if record should be kept due to pinned or bookmarked status first
-				var isPinned = _includePinned && _annotations.IsPinned(record.LineNumber);
+				var isPinned = _includePinned && _state.IsPinned(record);
 				var isBookmarked = _includeBookmarks && _bookmarkManager != null && _bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);
 
 				if (isPinned || isBookmarked)

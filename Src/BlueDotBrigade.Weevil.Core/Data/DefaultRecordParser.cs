@@ -6,7 +6,7 @@
 	{
 		public bool TryParse(int line, string content, out IRecord record)
 		{
-			record = new Record(line, DateTime.MaxValue, SeverityType.Information, content, new Metadata());
+			record = new Record(line, DateTime.MaxValue, SeverityType.Information, content);
 
 			return Record.IsGenuine(record);
 		}

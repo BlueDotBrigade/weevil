@@ -29,7 +29,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		public string DisplayName => "Threshold Crossings";
 
-		public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var count = 0;
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
@@ -85,7 +85,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 			foreach (IRecord record in records)
 			{
-				AnalysisHelper.ClearRecordFlag(record, flags, canUpdateMetadata);
+				AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 				var wasFlagged = false;
 
 				foreach (RegularExpression expression in expressions)
@@ -114,8 +114,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 						var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
 						AnalysisHelper.UpdateRecordMetadata(
 							record,
-							annotations,
-							flags,
+							state,
 							true,
 							$"{parameterName}: {current.Value} {GetComparisonSymbol(comparison)} {threshold.ToString(CultureInfo.InvariantCulture)}",
 							canUpdateMetadata);

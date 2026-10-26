@@ -36,11 +36,11 @@
 					case 300:
 					case 400:
 					case 500:
-						record.Metadata.IsFlagged.Should().BeTrue();
+						engine.RecordState.IsFlagged(record).Should().BeTrue();
 						break;
 
 					default:
-						record.Metadata.IsFlagged.Should().BeFalse();
+						engine.RecordState.IsFlagged(record).Should().BeFalse();
 						break;
 				}
 			}
@@ -70,7 +70,7 @@
                                         case 300:
                                         case 400:
                                         case 500:
-                                                record.Metadata.HasComment.Should().BeTrue();
+                                                engine.RecordState.HasComment(record).Should().BeTrue();
                                                 break;
                                 }
                         }
@@ -96,7 +96,7 @@
                                 int[] flaggedLines = engine
                                         .Filter
                                         .Results
-                                        .Where(record => record.Metadata.IsFlagged)
+                                        .Where(record => engine.RecordState.IsFlagged(record))
                                         .Select(record => record.LineNumber)
                                         .ToArray();
 
@@ -104,7 +104,7 @@
                                         new[] { 1, 3, 4, 5, 6 },
                                         flaggedLines);
 
-                                (engine.Filter.Results.Count(r => r.Metadata.IsFlagged)).Should().Be(5);
+                                (engine.Filter.Results.Count(r => engine.RecordState.IsFlagged(r))).Should().Be(5);
                         }
                         finally
                         {
@@ -136,11 +136,11 @@
                                         .Results
                                         .ToDictionary(record => record.LineNumber);
 
-                                recordsByLineNumber[1].Metadata.Comment.Should().Be("Start State: Cold");
-                                recordsByLineNumber[3].Metadata.Comment.Should().Be("Stop State: Cold");
-                                recordsByLineNumber[4].Metadata.Comment.Should().Be("Start State: Warm");
-                                recordsByLineNumber[5].Metadata.Comment.Should().Be("Stop State: Warm");
-                                recordsByLineNumber[6].Metadata.Comment.Should().Be("Start State: Hot, Stop State: Hot");
+                                engine.RecordState.GetComment(recordsByLineNumber[1]).Should().Be("Start State: Cold");
+                                engine.RecordState.GetComment(recordsByLineNumber[3]).Should().Be("Stop State: Cold");
+                                engine.RecordState.GetComment(recordsByLineNumber[4]).Should().Be("Start State: Warm");
+                                engine.RecordState.GetComment(recordsByLineNumber[5]).Should().Be("Stop State: Warm");
+                                engine.RecordState.GetComment(recordsByLineNumber[6]).Should().Be("Start State: Hot, Stop State: Hot");
                         }
                         finally
                         {
@@ -167,7 +167,7 @@
 
 				var flaggedRecords = engine
 					.Filter.Results
-					.Count(x => x.Metadata.IsFlagged);
+					.Count(x => engine.RecordState.IsFlagged(x));
 
 				flaggedRecords.Should().Be(1);
 			}
@@ -195,7 +195,7 @@
 
 				var flaggedRecords = engine
 					.Filter.Results
-					.Count(x => x.Metadata.IsFlagged);
+					.Count(x => engine.RecordState.IsFlagged(x));
 
 				flaggedRecords.Should().Be(1);
 			}
@@ -223,7 +223,7 @@
 
 				engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
-				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+				engine.Filter.Results.Count(record => engine.RecordState.IsFlagged(record)).Should().Be(0);
 			}
 			finally
 			{
@@ -249,7 +249,7 @@
 
 				engine.Analyzer.Analyze(AnalysisType.StableValueRuns);
 
-				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+				engine.Filter.Results.Count(record => engine.RecordState.IsFlagged(record)).Should().Be(0);
 			}
 			finally
 			{
@@ -275,7 +275,7 @@
 
 				engine.Analyzer.Analyze(AnalysisType.DetectRisingEdges, CreateAscendingAnalysisDialog(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
 
-				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+				engine.Filter.Results.Count(record => engine.RecordState.IsFlagged(record)).Should().Be(0);
 			}
 			finally
 			{
@@ -301,7 +301,7 @@
 
 				engine.Analyzer.Analyze(AnalysisType.DetectFallingEdges, CreateAscendingAnalysisDialog(@"A=(?<Value>\d+)||B=(?<Value>\d+)"));
 
-				engine.Filter.Results.Count(record => record.Metadata.IsFlagged).Should().Be(0);
+				engine.Filter.Results.Count(record => engine.RecordState.IsFlagged(record)).Should().Be(0);
 			}
 			finally
 			{

@@ -31,51 +31,51 @@ namespace BlueDotBrigade.Weevil
 		public void GivenUnsavedComment_WhenReloaded_ThenTheCommentIsKept()
 		{
 			IEngine engine = Open();
-			Line(engine, 20).Metadata.Comment = "Retry starts here";
+			engine.RecordState.SetComment(Line(engine, 20), "Retry starts here");
 
 			engine.Reload();
 
-			Line(engine, 20).Metadata.Comment.Should().Be("Retry starts here");
-			Line(engine, 20).Metadata.IsPinned.Should().BeTrue();
+			engine.RecordState.GetComment(Line(engine, 20)).Should().Be("Retry starts here");
+			engine.RecordState.IsPinned(Line(engine, 20)).Should().BeTrue();
 		}
 
 		[TestMethod]
 		public void GivenFlaggedRecord_WhenReloaded_ThenItIsStillFlagged()
 		{
 			IEngine engine = Open();
-			Line(engine, 20).Metadata.IsFlagged = true;
+			engine.RecordState.SetFlagged(Line(engine, 20), true);
 
 			engine.Reload();
 
-			Line(engine, 20).Metadata.IsFlagged.Should().BeTrue();
-			Line(engine, 21).Metadata.IsFlagged.Should().BeFalse();
+			engine.RecordState.IsFlagged(Line(engine, 20)).Should().BeTrue();
+			engine.RecordState.IsFlagged(Line(engine, 21)).Should().BeFalse();
 		}
 
 		[TestMethod]
 		public void GivenFlaggedAndCommentedRecords_WhenCleared_ThenTheRecordsLeftKeepThem()
 		{
 			IEngine engine = Open();
-			Line(engine, 20).Metadata.IsFlagged = true;
-			Line(engine, 21).Metadata.Comment = "Retry starts here";
+			engine.RecordState.SetFlagged(Line(engine, 20), true);
+			engine.RecordState.SetComment(Line(engine, 21), "Retry starts here");
 
 			engine.Selector.Select(13);
 			engine.Clear(ClearOperation.BeforeSelected);
 
-			Line(engine, 20).Metadata.IsFlagged.Should().BeTrue();
-			Line(engine, 21).Metadata.Comment.Should().Be("Retry starts here");
+			engine.RecordState.IsFlagged(Line(engine, 20)).Should().BeTrue();
+			engine.RecordState.GetComment(Line(engine, 21)).Should().Be("Retry starts here");
 		}
 
 		[TestMethod]
 		public void GivenRecordClearedThenReloaded_WhenItReturns_ThenItKeepsItsComment()
 		{
 			IEngine engine = Open();
-			Line(engine, 5).Metadata.Comment = "Before the retry";
+			engine.RecordState.SetComment(Line(engine, 5), "Before the retry");
 			engine.Selector.Select(13);
 			engine.Clear(ClearOperation.BeforeSelected);
 
 			engine.Reload();
 
-			Line(engine, 5).Metadata.Comment.Should().Be("Before the retry");
+			engine.RecordState.GetComment(Line(engine, 5)).Should().Be("Before the retry");
 		}
 
 		[TestMethod]
@@ -83,14 +83,14 @@ namespace BlueDotBrigade.Weevil
 		{
 			// Regression: Issue #1013. Remove All Flags must also reach lines no longer in memory.
 			IEngine engine = Open();
-			Line(engine, 5).Metadata.IsFlagged = true;
+			engine.RecordState.SetFlagged(Line(engine, 5), true);
 			engine.Selector.Select(13);
 			engine.Clear(ClearOperation.BeforeSelected);
 
 			engine.Analyzer.RemoveAllFlags();
 			engine.Reload();
 
-			Line(engine, 5).Metadata.IsFlagged.Should().BeFalse();
+			engine.RecordState.IsFlagged(Line(engine, 5)).Should().BeFalse();
 		}
 
 		[TestMethod]

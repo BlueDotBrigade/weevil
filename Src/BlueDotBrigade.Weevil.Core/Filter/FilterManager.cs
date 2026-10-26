@@ -23,7 +23,7 @@
 		private readonly IFilterAliasExpander _filterAliasExpander;
 		private readonly ImmutableArray<IRecord> _allRecords;
 		private readonly ImmutableArray<IMetricCollector> _metricCollectors;
-		private readonly ViewAnnotations _viewAnnotations;
+		private readonly RecordState _recordState;
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
@@ -53,7 +53,7 @@
 			ImmutableArray<IMetricCollector> metricCollectors,
 			IRegionManager regionManager,
 			IBookmarkManager bookmarkManager,
-			ViewAnnotations viewAnnotations,
+			RecordState recordState,
 			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_coreExtension = coreExtension;
@@ -66,7 +66,7 @@
 			_bookmarkManager = bookmarkManager;
 
 			_metricCollectors = metricCollectors;
-			_viewAnnotations = viewAnnotations ?? throw new ArgumentNullException(nameof(viewAnnotations));
+			_recordState = recordState ?? throw new ArgumentNullException(nameof(recordState));
 
 			_latestFilterStrategy = FilterStrategy.KeepAllRecords;
 			_latestFilterResults = allRecords;
@@ -85,7 +85,7 @@
 
 		public ImmutableArray<IRecord> Results => _latestFilterResults;
 
-		public ElapsedTimes ElapsedTimes => _viewAnnotations.ElapsedTimes;
+		public ElapsedTimes ElapsedTimes => _recordState.ElapsedTimes;
 
 		public IList<string> IncludeHistory => _includeHistory;
 
@@ -191,27 +191,6 @@
 				$"Filter results have been compressed. Before={resultsCache.Length}, After={compressedResults.Length}");
 
 			return compressedResults;
-		}
-
-		/// <summary>
-		/// Replaces the view's elapsed times with those of the new results, then tells each record whose elapsed time
-		/// changed, so the grid shows the new value (#1016).
-		/// </summary>
-		/// <remarks>
-		/// An aborted filter never gets here, so the results still shown keep their elapsed times.
-		/// </remarks>
-		private void PublishElapsedTimes(ElapsedTimes elapsedTimes)
-		{
-			ElapsedTimes previous = _viewAnnotations.ElapsedTimes;
-			_viewAnnotations.ElapsedTimes = elapsedTimes;
-
-			Parallel.ForEach(_allRecords, record =>
-			{
-				if (previous.Get(record.LineNumber) != elapsedTimes.Get(record.LineNumber))
-				{
-					record.Metadata?.RaiseElapsedTimeChanged();
-				}
-			});
 		}
 
 		private void UpdateFilterHistory(IList<string> history, string newValue)
@@ -332,7 +311,7 @@
 					});
 
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _viewAnnotations.Annotations, _viewAnnotations.Flags, _viewAnnotations.ElapsedTimes);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _recordState, _recordState.ElapsedTimes);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();
@@ -344,7 +323,8 @@
 				UpdateFilterHistory(_includeHistory, criteria.Include);
 				UpdateFilterHistory(_excludeHistory, criteria.Exclude);
 
-				PublishElapsedTimes(ElapsedTimes.Calculate(_latestFilterResults));
+				// An aborted filter never gets here, so the results still shown keep their elapsed times (#1016).
+				_recordState.ElapsedTimes = ElapsedTimes.Calculate(_latestFilterResults);
 
 				exectionTimeStopwatch.Stop();
 				_filterExecutionTime = exectionTimeStopwatch.Elapsed;

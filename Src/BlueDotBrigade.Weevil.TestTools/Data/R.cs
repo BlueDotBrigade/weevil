@@ -56,8 +56,7 @@
 				lineNumber,
 				timestamp,
 				SeverityType.Information,
-				$"Fake record used for testing. Has line number: {_lineNumber}",
-				new Metadata());
+				$"Fake record used for testing. Has line number: {_lineNumber}");
 
 			_records.Add(record);
 
@@ -82,8 +81,7 @@
 				lineNumber,
 				DateTime.Now.AddSeconds(lineNumber),
 				SeverityType.Information,
-				$"Fake record used for testing. Has line number: {lineNumber}",
-				new Metadata());
+				$"Fake record used for testing. Has line number: {lineNumber}");
 		}
 
 		public static ImmutableArray<IRecord> WithLineNumbers(int minLineNumber, int maxLineNumber)
@@ -107,8 +105,7 @@
 				lineNumber,
 				DateTime.Now.AddSeconds(lineNumber),
 				SeverityType.Information,
-				content,
-				new Metadata());
+				content);
 		}
 	}
 }
