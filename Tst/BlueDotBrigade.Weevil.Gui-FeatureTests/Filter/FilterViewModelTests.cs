@@ -265,17 +265,36 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenMoreRecordsSelectedThanCopyAllows_WhenCopied_ThenAMessagePointsToExport()
 		{
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = await OpenWithMoreRecordsSelectedThanTheClipboardAllows(dialogBox);
+
+			viewModel.ClipboardCopyRaw(readableCallstack: false);
+
+			dialogBox.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Export")), "Copy");
+		}
+
+		[TestMethod]
+		public async Task GivenMoreRecordsSelectedThanPasteAllows_WhenPasted_ThenAMessageSaysSo()
+		{
+			// One comment on that many records is a mistake, and each commented record costs memory.
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = await OpenWithMoreRecordsSelectedThanTheClipboardAllows(dialogBox);
+
+			viewModel.ClipboardPaste(allowOverwrite: true);
+
+			dialogBox.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("100,000")), "Paste");
+		}
+
+		private async Task<FilterViewModel> OpenWithMoreRecordsSelectedThanTheClipboardAllows(IDialogBoxService dialogBox)
+		{
 			var logPath = Path.Combine(_folder, "Large.log");
 			System.IO.File.WriteAllLines(logPath, Enumerable.Range(1, 100_001).Select(n => $"Record {n}"));
-			var dialogBox = Substitute.For<IDialogBoxService>();
 			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
 			await viewModel.OpenAsync(logPath);
 			WaitUntil(() => viewModel.IsMenuEnabled);
 			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
 
-			viewModel.ClipboardCopyRaw(readableCallstack: false);
-
-			dialogBox.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Export")), "Copy");
+			return viewModel;
 		}
 
 		/// <summary>

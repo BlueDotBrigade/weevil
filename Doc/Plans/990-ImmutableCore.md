@@ -27,7 +27,7 @@ Callers open and use an engine without ever seeing its state. `Session` holds th
 2. **Flags belong to the view** (decided 2026-10-19 for #991), so different analyzers can run in different views. With one view in this phase, nothing changes for the user.
 3. **Annotations and flags are kept by line number** (decided 2026-10-20). Clear changes record positions but never line numbers.
 4. **Grid updates never block** (decided 2026-10-20). A row learns of a change asynchronously, never through a synchronous `Invoke`. A bulk operation (Unpin All, Remove Comments, an analyzer) raises one event, and the grid then refreshes the rows on screen.
-5. **Selection is stored as ranges, and Copy is limited to 100,000 records** (decided 2026-10-20). Selecting every record still works, so Clear Selected, Export and analyzers on a selection are unaffected. Copying more shows a message that points to Export.
+5. **Selection is stored as ranges, and Copy is limited to 100,000 records** (decided 2026-10-20). Selecting every record still works, so Clear Selected, Export and analyzers on a selection are unaffected. Copying more shows a message that points to Export. Paste has the same limit (added 2026-10-26, #1097): one comment on more records is a mistake, and each commented record costs memory.
 6. **A `Session` holds the log's mutable state in child stores** (decided 2026-10-26). Records hold none, so the state that changes stays together and fewer threads write to it. `Session` is internal to Core; each store is a child class, such as the comment and pin store. Flags and elapsed times stay with the view (decisions 1 and 2).
 
 ## Steps

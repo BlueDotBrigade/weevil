@@ -54,8 +54,10 @@
 		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/dRrRat/1");
 		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
 
-		// More would freeze the window while the clipboard fills, and Export saves any number of records to a file.
-		private const int CopyLimit = 100_000;
+		// Copying more would freeze the window while the clipboard fills, and Export saves any number of records to a file.
+		// Pasting one comment onto more is a mistake, and each commented record costs memory.
+		private const int ClipboardLimit = 100_000;
+		private const string CopyAdvice = "Use Export > Original Records (Ctrl+Shift+S) to save them to a file.";
 
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
 		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\License.md");
@@ -892,7 +894,7 @@
 
 		public void ClipboardCopyRaw(bool readableCallstack)
 		{
-			if (CanCopySelected())
+			if (IsWithinClipboardLimit("Copy", CopyAdvice))
 			{
 				IRecordFormatter formatter = readableCallstack
 					? new SimpleCallStackFormatter() as IRecordFormatter
@@ -904,7 +906,7 @@
 
 		public void ClipboardCopyLineNumbers()
 		{
-			if (CanCopySelected())
+			if (IsWithinClipboardLimit("Copy", CopyAdvice))
 			{
 				ClipboardHelper.CopySelectedLineNumbers(_engine);
 			}
@@ -912,7 +914,7 @@
 
 		public void ClipboardCopyTimestamps()
 		{
-			if (CanCopySelected())
+			if (IsWithinClipboardLimit("Copy", CopyAdvice))
 			{
 				ClipboardHelper.CopySelectedTimestamps(_engine);
 			}
@@ -927,18 +929,19 @@
 		}
 
 		/// <summary>
-		/// Copy refuses more than <see cref="CopyLimit"/> records, and says how to save them instead (decision 5).
+		/// Copy and Paste refuse more than <see cref="ClipboardLimit"/> selected records, and say what to do instead (decision 5).
 		/// </summary>
-		private bool CanCopySelected()
+		/// <param name="action">The command's name, which is also the message's title.</param>
+		/// <param name="advice">What to do instead.</param>
+		private bool IsWithinClipboardLimit(string action, string advice)
 		{
 			var count = _engine.Selector.Selected.Count;
 
-			if (count > CopyLimit)
+			if (count > ClipboardLimit)
 			{
 				_dialogBox.ShowMessage(
-					$"Copy is limited to {CopyLimit:N0} records, and {count:N0} are selected.\n\n" +
-					"Use Export > Original Records (Ctrl+Shift+S) to save them to a file.",
-					"Copy");
+					$"{action} is limited to {ClipboardLimit:N0} records, and {count:N0} are selected.\n\n{advice}",
+					action);
 
 				return false;
 			}
@@ -948,8 +951,11 @@
 
 		public void ClipboardPaste(bool allowOverwrite)
 		{
-			ClipboardHelper.PasteToSelected(_engine, allowOverwrite);
-			RefreshFilterResults();
+			if (IsWithinClipboardLimit("Paste", "Select fewer records, then paste again."))
+			{
+				ClipboardHelper.PasteToSelected(_engine, allowOverwrite);
+				RefreshFilterResults();
+			}
 		}
 
 		/// <summary>
