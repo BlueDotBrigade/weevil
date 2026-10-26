@@ -55,6 +55,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Power
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-FunctionalTests", "Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\BlueDotBrigade.Weevil.Core-FunctionalTests.csproj", "{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Core-PerformanceTests", "Tst\BlueDotBrigade.Weevil.Core-PerformanceTests\BlueDotBrigade.Weevil.Core-PerformanceTests.csproj", "{1535EE97-FB09-4269-BCFC-7E3801A0DB46}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Telemetry", "Src\BlueDotBrigade.Weevil.Telemetry\BlueDotBrigade.Weevil.Telemetry.csproj", "{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueDotBrigade.Weevil.Telemetry-UnitTests", "Tst\BlueDotBrigade.Weevil.Telemetry-UnitTests\BlueDotBrigade.Weevil.Telemetry-UnitTests.csproj", "{83ACCB7E-8C2C-4798-A576-1E492572FD36}"
@@ -123,6 +125,9 @@ Global
 		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Debug|x64.ActiveCfg = Debug|x64
 		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Debug|x64.Build.0 = Debug|x64
 		{D8390C5D-F2CA-4A89-98FF-839DBD17C65B}.Release|x64.ActiveCfg = Release|x64
+		{1535EE97-FB09-4269-BCFC-7E3801A0DB46}.Debug|x64.ActiveCfg = Debug|x64
+		{1535EE97-FB09-4269-BCFC-7E3801A0DB46}.Debug|x64.Build.0 = Debug|x64
+		{1535EE97-FB09-4269-BCFC-7E3801A0DB46}.Release|x64.ActiveCfg = Release|x64
 		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}.Debug|x64.ActiveCfg = Debug|x64
 		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}.Debug|x64.Build.0 = Debug|x64
 		{9E48516F-BB11-429B-90DC-C1CE18A8A3C2}.Release|x64.ActiveCfg = Release|x64
