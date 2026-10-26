@@ -168,9 +168,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
+		[WorkItem(927)]
 		public void GivenOutOfOrderTimestampsAndUnknownTimestamp_WhenAnalyzeAscending_ThenUsesChronologicalOrder()
 		{
-			// Regression: Issue #927
+			// Rising and falling edges followed the file's order instead of the timestamps' order.
 			var records = AnalysisHelper.BuildRecords(
 				(1, "2024-01-01 00:00:02", "Value=1"),
 				(2, null, "Value=0"),
@@ -185,9 +186,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
+		[WorkItem(927)]
 		public void GivenOutOfOrderTimestamps_WhenAnalyzeDescending_ThenUsesReverseChronologicalOrder()
 		{
-			// Regression: Issue #927
+			// Rising and falling edges followed the file's order instead of the timestamps' order.
 			var records = AnalysisHelper.BuildRecords(
 				(1, "2024-01-01 00:00:02", "Value=1"),
 				(2, "2024-01-01 00:00:03", "Value=2"),
@@ -201,9 +203,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		}
 
 		[TestMethod]
+		[WorkItem(927)]
 		public void GivenMatchingTimestamps_WhenAnalyzeDescending_ThenUsesLineNumberAsStableTieBreaker()
 		{
-			// Regression: Issue #927
+			// Rising and falling edges followed the file's order instead of the timestamps' order.
 			var records = AnalysisHelper.BuildRecords(
 				(1, "2024-01-01 00:00:03", "Value=2"),
 				(2, "2024-01-01 00:00:03", "Value=1"),

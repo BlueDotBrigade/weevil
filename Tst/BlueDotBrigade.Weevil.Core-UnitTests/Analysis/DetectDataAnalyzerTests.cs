@@ -32,9 +32,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[TestMethod]
+		[WorkItem(923)]
 		public void GivenKeepAllRecords_WhenAnalyzeRunsWithNamedGroupRegex_ThenMatchingRecordsAreFlagged()
 		{
-			// Regression: Issue #923
+			// An analyzer ignored its regular expression unless the active filter was a regular expression.
 			var records = R.Create()
 				.WithContent("Value=2")
 				.WithContent("Value=2.5")
@@ -55,9 +56,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[TestMethod]
+		[WorkItem(923)]
 		public void GivenPlainTextFilter_WhenAnalyzeRunsWithNamedGroupRegex_ThenMatchingRecordsAreFlagged()
 		{
-			// Regression: Issue #923
+			// An analyzer ignored its regular expression unless the active filter was a regular expression.
 			var records = R.Create()
 				.WithContent("Value=2")
 				.WithContent("Value=2.5")

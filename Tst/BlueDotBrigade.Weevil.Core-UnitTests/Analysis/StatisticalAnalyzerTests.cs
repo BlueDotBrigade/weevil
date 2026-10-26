@@ -11,9 +11,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 	public class StatisticalAnalyzerTests
 	{
 		[TestMethod]
+		[WorkItem(931)]
 		public void GivenRecordsWithNoNumericMatches_WhenAnalyzeRuns_ThenResultContainsNullableMetrics()
 		{
-			// Regression: Issue #931
+			// Statistics with no numeric matches threw instead of reporting empty metrics.
 			var records = R.Create()
 				.WithContent("NoNumbers")
 				.WithContent("AlsoNoNumbers")
@@ -57,9 +58,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[DataTestMethod]
 		[DataRow("de-DE")]
 		[DataRow("fr-FR")]
+		[WorkItem(928)]
 		public void GivenInvariantDecimalValueAndNonEnglishCulture_WhenAnalyzeRuns_ThenStatisticsAreCalculated(string cultureName)
 		{
-			// Regression: Issue #928
+			// Statistics parsed numbers with the workstation's culture, so 2.5 failed where the decimal separator is a comma.
 			var originalCulture = CultureInfo.CurrentCulture;
 			var originalUiCulture = CultureInfo.CurrentUICulture;
 
@@ -93,9 +95,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[TestMethod]
+		[WorkItem(929)]
 		public void GivenRecordsWithoutCreationTime_WhenAnalyzeRuns_ThenRangeHasNoTimestamps()
 		{
-			// Regression: Issue #929
+			// Statistics counted unknown timestamps, so the time range it reported was huge.
 			var records = ImmutableArray.Create<IRecord>(
 				new Record(1, Record.CreationTimeUnknown, SeverityType.Information, "Value=10"),
 				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=20"));
@@ -113,9 +116,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[TestMethod]
+		[WorkItem(929)]
 		public void GivenMixedTimestampedAndUntimestampedRecords_WhenAnalyzeRuns_ThenRangeOnlyIncludesValidTimestamps()
 		{
-			// Regression: Issue #929
+			// Statistics counted unknown timestamps, so the time range it reported was huge.
 			var knownTime1 = new DateTime(2024, 1, 1, 10, 0, 0);
 			var knownTime2 = new DateTime(2024, 1, 1, 10, 0, 5);
 

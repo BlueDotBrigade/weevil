@@ -206,9 +206,10 @@
                 }
 
 		[TestMethod]
+		[WorkItem(926)]
 		public void GivenOverlappingOrExpressions_WhenDetectingStateTransitions_ThenDoesNotCreateTransitionsWithinOneRecord()
 		{
-			// Regression: Issue #926
+			// Overlapping || expressions changed the analyzer's state twice within one record.
 			var filePath = CreateOverlappingOrLog();
 
 			try
@@ -232,9 +233,10 @@
 		}
 
 		[TestMethod]
+		[WorkItem(926)]
 		public void GivenOverlappingOrExpressions_WhenDetectingStableValueRuns_ThenDoesNotStartOrStopRunsWithinOneRecord()
 		{
-			// Regression: Issue #926
+			// Overlapping || expressions changed the analyzer's state twice within one record.
 			var filePath = CreateOverlappingOrLog();
 
 			try
@@ -258,9 +260,10 @@
 		}
 
 		[TestMethod]
+		[WorkItem(926)]
 		public void GivenOverlappingOrExpressions_WhenDetectingRisingEdges_ThenDoesNotCreateEdgesWithinOneRecord()
 		{
-			// Regression: Issue #926
+			// Overlapping || expressions changed the analyzer's state twice within one record.
 			var filePath = CreateOverlappingOrLog();
 
 			try
@@ -284,9 +287,10 @@
 		}
 
 		[TestMethod]
+		[WorkItem(926)]
 		public void GivenOverlappingOrExpressions_WhenDetectingFallingEdges_ThenDoesNotCreateEdgesWithinOneRecord()
 		{
-			// Regression: Issue #926
+			// Overlapping || expressions changed the analyzer's state twice within one record.
 			var filePath = CreateOverlappingOrLog();
 
 			try

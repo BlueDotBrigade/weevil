@@ -77,10 +77,11 @@
 			}
 		}
 
-		// Regression: Issue #1004
 		[TestMethod]
+		[WorkItem(1004)]
 		public void GivenUnsavedComment_WhenItsRecordIsClearedAndSaved_ThenSidecarKeepsTheComment()
 		{
+			// Comments and pins on cleared records were lost when the sidecar was saved.
 			var logFilePath = CreateLogFile(out var directory);
 
 			try
@@ -99,10 +100,11 @@
 			}
 		}
 
-		// Regression: Issue #1004
 		[TestMethod]
+		[WorkItem(1004)]
 		public void GivenSavedComment_WhenEditedThenClearedAndSaved_ThenSidecarHasTheEdit()
 		{
+			// Comments and pins on cleared records were lost when the sidecar was saved.
 			var logFilePath = CreateLogFile(out var directory);
 
 			try
@@ -124,10 +126,11 @@
 			}
 		}
 
-		// Regression: Issue #1004
 		[TestMethod]
+		[WorkItem(1004)]
 		public void GivenSavedPin_WhenUnpinnedThenClearedAndSaved_ThenSidecarHasNoPin()
 		{
+			// Comments and pins on cleared records were lost when the sidecar was saved.
 			var logFilePath = CreateLogFile(out var directory);
 
 			try

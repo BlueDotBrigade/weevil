@@ -79,9 +79,10 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1013)]
 		public void GivenFlagOnClearedLine_WhenAllFlagsRemovedAndReloaded_ThenTheLineIsNotFlagged()
 		{
-			// Regression: Issue #1013. Remove All Flags must also reach lines no longer in memory.
+			// Remove All Flags did not reach lines no longer in memory, so their flags came back on Reload.
 			IEngine engine = Open();
 			engine.RecordState.SetFlagged(Line(engine, 5), true);
 			engine.Selector.Select(13);

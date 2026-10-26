@@ -34,9 +34,10 @@
 		}
 
 		[TestMethod]
+		[WorkItem(923)]
 		public void GivenKeepAllRecords_WhenAnalyzeRunsWithRegex_ThenBlockEdgesAreFlagged()
 		{
-			// Regression: Issue #923
+			// An analyzer ignored its regular expression unless the active filter was a regular expression.
 			var records = R.Create()
 				.WithContent("Value=0")
 				.WithContent("Value=2")

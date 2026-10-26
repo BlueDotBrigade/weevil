@@ -7,9 +7,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[DataRow("NoRecords.log", 0)]
 		[DataRow("CompleteRecord.log", 1)]
 		[DataRow("ThreeRecords.log", 3)]
+		[WorkItem(932)]
 		public void GivenRecordCollection_WhenRemoveAllFlagsCalled_ThenEveryRecordIsUnflagged(string fileName, int expectedCount)
 		{
-			// Regression: Issue #932
+			// Remove All Flags and Unpin All skipped the last record.
 			IEngine engine = OpenEngine(fileName);
 
 			foreach (var record in engine.Records)
@@ -27,9 +28,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[DataRow("NoRecords.log", 0)]
 		[DataRow("CompleteRecord.log", 1)]
 		[DataRow("ThreeRecords.log", 3)]
+		[WorkItem(932)]
 		public void GivenRecordCollection_WhenUnpinAllCalled_ThenEveryRecordIsUnpinned(string fileName, int expectedCount)
 		{
-			// Regression: Issue #932
+			// Remove All Flags and Unpin All skipped the last record.
 			IEngine engine = OpenEngine(fileName);
 
 			foreach (var record in engine.Records)

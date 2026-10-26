@@ -61,9 +61,10 @@
 		}
 
 		[TestMethod]
+		[WorkItem(925)]
 		public void GivenUiRecordsWithUnknownTimestamps_WhenAnalyzeCalled_ThenUnknownTimestampsAreIgnoredForGapDetection()
 		{
-			// Regression: Issue #925
+			// The UI time-gap analysis took an unknown timestamp for a real one, and flagged a false gap.
 			var analyzer = new TimeGapUiAnalyzer();
 			IRecord firstUntimestampedUiRecord = _records[1];
 			IRecord firstTimestampedUiRecordAfterUnknownTime = _records[2];

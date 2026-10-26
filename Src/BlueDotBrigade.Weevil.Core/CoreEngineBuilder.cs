@@ -263,8 +263,7 @@
 
 						lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
 
-						// Created before parsing, so they age with the records: attaching then stores no young reference
-						// in every record, which would slow the next garbage collections (#1013).
+						// Sized from the line index, before the records are parsed.
 						var isKeepingAnnotations = _session != null;
 						session = _session ?? new Session(new AnnotationStore(lineIndex.LineCount));
 						recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
