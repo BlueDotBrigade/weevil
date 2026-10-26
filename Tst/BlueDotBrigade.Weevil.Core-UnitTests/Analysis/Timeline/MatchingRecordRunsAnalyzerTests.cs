@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
@@ -21,13 +22,16 @@
 			var analyzer = new MatchingRecordRunsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?:2|2\.5)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
+			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			records[1].Metadata.IsFlagged.Should().BeTrue();
-			records[4].Metadata.IsFlagged.Should().BeTrue();
-			records[1].Metadata.Comment.Should().Contain("01-Begins");
-			records[4].Metadata.Comment.Should().Contain("01-Ends");
+			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[4].LineNumber).Should().BeTrue();
+			annotations.GetComment(records[1].LineNumber).Should().Contain("01-Begins");
+			annotations.GetComment(records[4].LineNumber).Should().Contain("01-Ends");
 		}
 
 		[TestMethod]
@@ -46,11 +50,14 @@
 			var analyzer = new MatchingRecordRunsAnalyzer(FilterStrategy.KeepAllRecords);
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?:2|2\.5)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
+			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			records[1].Metadata.IsFlagged.Should().BeTrue();
-			records[4].Metadata.IsFlagged.Should().BeTrue();
+			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[4].LineNumber).Should().BeTrue();
 		}
 	}
 }

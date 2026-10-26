@@ -71,17 +71,22 @@
 			IRecord secondUntimestampedUiRecord = _records[7];
 			IRecord finalTimestampedUiRecordAfterUnknownTime = _records[8];
 
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
 			analyzer.Analyze(
 				_records,
+				annotations,
+				flags,
 				EnvironmentHelper.GetExecutableDirectory(),
 				GetUserDialog(90000),
 				canUpdateMetadata: true);
 
-			firstUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
-			firstTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
-			laterTimestampedUiRecordWithGap.Metadata.IsFlagged.Should().BeTrue();
-			secondUntimestampedUiRecord.Metadata.IsFlagged.Should().BeFalse();
-			finalTimestampedUiRecordAfterUnknownTime.Metadata.IsFlagged.Should().BeTrue();
+			flags.IsFlagged(firstUntimestampedUiRecord.LineNumber).Should().BeFalse();
+			flags.IsFlagged(firstTimestampedUiRecordAfterUnknownTime.LineNumber).Should().BeTrue();
+			flags.IsFlagged(laterTimestampedUiRecordWithGap.LineNumber).Should().BeTrue();
+			flags.IsFlagged(secondUntimestampedUiRecord.LineNumber).Should().BeFalse();
+			flags.IsFlagged(finalTimestampedUiRecordAfterUnknownTime.LineNumber).Should().BeTrue();
 			analyzer.Count.Should().Be(3);
 			analyzer.FirstOccurrenceAt.Should().Be(firstTimestampedUiRecordAfterUnknownTime.CreatedAt);
 		}
@@ -92,15 +97,18 @@
 			DateTime now = DateTime.Now;
 			var records = new List<IRecord>
 			{
-				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", new Metadata { IsFlagged = true }, isMultiLine: false, wasGeneratedByUi: true),
+				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 				new Record(20, now, SeverityType.Debug, "first", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 				new Record(30, now.AddSeconds(1), SeverityType.Debug, "second", new Metadata(), isMultiLine: false, wasGeneratedByUi: true),
 			};
 
 			var analyzer = new TimeGapUiAnalyzer();
-			analyzer.Analyze(records.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+			var flags = new FlagSet();
+			flags.SetFlagged(records[0].LineNumber, true);
 
-			records[0].Metadata.IsFlagged.Should().BeFalse();
+			analyzer.Analyze(records.ToImmutableArray(), new AnnotationStore(), flags, TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+
+			flags.IsFlagged(records[0].LineNumber).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -125,8 +133,8 @@
 
 			var analyzer = new TimeGapUiAnalyzer();
 
-			analyzer.Analyze(recordsWithGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
-			analyzer.Analyze(recordsWithNoGap.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithGap.ToImmutableArray(), new AnnotationStore(), new FlagSet(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithNoGap.ToImmutableArray(), new AnnotationStore(), new FlagSet(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
 
 			analyzer.Count.Should().Be(0);
 			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
@@ -143,11 +151,13 @@
 				.Returns("not-a-number");
 
 			var analyzer = new TimeGapUiAnalyzer();
-			analyzer.Analyze(_records, TimeSpan.FromMilliseconds(1), canUpdateMetadata: false);
+			analyzer.Analyze(_records, new AnnotationStore(), new FlagSet(), TimeSpan.FromMilliseconds(1), canUpdateMetadata: false);
 			analyzer.Count.Should().BeGreaterThan(0);
 
 			var results = analyzer.Analyze(
 				_records,
+				new AnnotationStore(),
+				new FlagSet(),
 				string.Empty,
 				userDialog,
 				canUpdateMetadata: false);

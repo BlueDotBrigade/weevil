@@ -19,7 +19,7 @@
 
 		public string DisplayName => "Out-of-Order Timestamps";
 
-		private Results Analyze(ImmutableArray<IRecord> records, TimeSpan tolerance, bool canUpdateMetadata)
+		private Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, TimeSpan tolerance, bool canUpdateMetadata)
 		{
 			var metric = new TemporalAnomalyMetrics(tolerance);
 
@@ -33,14 +33,14 @@
 				{
 					if (metric.Counter == counter)
 					{
-						record.Metadata.IsFlagged = false;
+						flags.SetFlagged(record.LineNumber, false);
 					}
 					else
 					{
 						counter++;
 
-						record.Metadata.IsFlagged = true;
-						record.Metadata.UpdateUserComment($"{CommentLabel}: {metric.CurrentAnomaly.ToHumanReadable()}");
+						flags.SetFlagged(record.LineNumber, true);
+						annotations.AppendComment(record.LineNumber, $"{CommentLabel}: {metric.CurrentAnomaly.ToHumanReadable()}");
 					}
 				}
 			}
@@ -48,13 +48,13 @@
 			return new Results(metric.Counter);
 		}
 
-		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			Results results = Results.None;
 
 			if (TryGetTolerance(userDialog, out TimeSpan tolerance))
 			{
-				results = Analyze(records, tolerance, canUpdateMetadata);
+				results = Analyze(records, annotations, flags, tolerance, canUpdateMetadata);
 			}
 
 			return results;

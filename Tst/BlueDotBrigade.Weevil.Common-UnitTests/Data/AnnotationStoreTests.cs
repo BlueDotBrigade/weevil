@@ -44,6 +44,28 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenLineWithoutComment_WhenCommentAppended_ThenItBecomesTheCommentAndTheLineIsPinned()
+		{
+			var store = new AnnotationStore(10);
+
+			store.AppendComment(5, "Value: 2");
+
+			store.GetComment(5).Should().Be("Value: 2");
+			store.IsPinned(5).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenCommentedLine_WhenCommentAppended_ThenBothAreKeptAfterAComma()
+		{
+			var store = new AnnotationStore(10);
+			store.SetComment(5, "Retry starts here");
+
+			store.AppendComment(5, "Value: 2");
+
+			store.GetComment(5).Should().Be("Retry starts here, Value: 2");
+		}
+
+		[TestMethod]
 		public void GivenWhiteSpaceComment_WhenSet_ThenItIsKeptButIsNotAComment()
 		{
 			var store = new AnnotationStore(10);

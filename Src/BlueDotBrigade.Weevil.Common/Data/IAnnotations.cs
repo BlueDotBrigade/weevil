@@ -31,6 +31,15 @@ namespace BlueDotBrigade.Weevil.Data
 		/// <param name="source">The object making the change, passed on to <see cref="Changed"/> so it can ignore its own writes.</param>
 		void SetComment(int lineNumber, string comment, object source = null);
 
+		/// <summary>
+		/// Adds <paramref name="comment"/> to the end of the line's comment, after a comma, or sets it when the line has none.
+		/// </summary>
+		/// <remarks>
+		/// One step, so a comment written at the same time is not lost. As <see cref="SetComment"/> does, adding a comment pins the record.
+		/// </remarks>
+		/// <param name="source">The object making the change, passed on to <see cref="Changed"/> so it can ignore its own writes.</param>
+		void AppendComment(int lineNumber, string comment, object source = null);
+
 		/// <param name="source">The object making the change, passed on to <see cref="Changed"/> so it can ignore its own writes.</param>
 		void SetPinned(int lineNumber, bool isPinned, object source = null);
 

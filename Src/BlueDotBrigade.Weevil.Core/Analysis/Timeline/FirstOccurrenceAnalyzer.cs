@@ -31,7 +31,7 @@
 
 		public string DisplayName => "First Occurrence";
 
-		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var flaggedLineNumbers = new HashSet<int>();
 
@@ -71,7 +71,7 @@
 			{
 				if (canUpdateMetadata)
 				{
-					record.Metadata.IsFlagged = false;
+					flags.SetFlagged(record.LineNumber, false);
 				}
 
 				foreach (RegularExpression expression in expressions)
@@ -91,8 +91,8 @@
 
 									if (canUpdateMetadata)
 									{
-										record.Metadata.IsFlagged = true;
-										record.Metadata.UpdateUserComment($"{parameterName}: {pair.Value}");
+										flags.SetFlagged(record.LineNumber, true);
+										annotations.AppendComment(record.LineNumber, $"{parameterName}: {pair.Value}");
 									}
 
 									foundValues.Add(uniqueKey);

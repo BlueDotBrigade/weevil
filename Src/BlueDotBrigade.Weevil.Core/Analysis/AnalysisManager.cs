@@ -150,6 +150,8 @@
 
 			Results results = analyzer.Analyze(
 				records,
+				_coreEngine.Session.Annotations,
+				_coreEngine.Flags,
 				_coreEngine.SourceDirectory,
 				userDialog,
 				true);

@@ -21,9 +21,12 @@
 		/// <summary>
 		/// Looks for trends within the provided <see cref="IRecord"/> collection.
 		/// </summary>
-		/// <param name="userDialog">Enables the analyzer to prompt the user for additional context.</param>
-		/// <param name="outputDirectory">Path to where analysis results can be saved.</param>
 		/// <param name="records">List of records to be analyzed.</param>
-		Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata);
+		/// <param name="annotations">The log's comments and pins, which the analyzer may add to.</param>
+		/// <param name="flags">The view's flags, which the analyzer sets on the records it finds.</param>
+		/// <param name="outputDirectory">Path to where analysis results can be saved.</param>
+		/// <param name="userDialog">Enables the analyzer to prompt the user for additional context.</param>
+		/// <param name="canUpdateMetadata">When <see langword="false"/>, the analyzer changes neither <paramref name="annotations"/> nor <paramref name="flags"/>.</param>
+		Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata);
 	}
 }

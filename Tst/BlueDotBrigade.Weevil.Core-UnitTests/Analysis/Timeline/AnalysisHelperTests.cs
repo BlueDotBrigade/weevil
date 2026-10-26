@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
     using System;
     using System.Collections.Immutable;
+    using BlueDotBrigade.Weevil.Data;
 
     [TestClass]
     public class AnalysisHelperTests
@@ -10,10 +11,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         public void GivenRecordsWithFlags_WhenGetFlaggedIndices_ThenReturnsFlaggedIndexes()
         {
             var records = AnalysisHelper.BuildIntegerRecords("12345");
-            records[1].Metadata.IsFlagged = true;
-            records[3].Metadata.IsFlagged = true;
+            var flags = new FlagSet();
+            flags.SetFlagged(records[1].LineNumber, true);
+            flags.SetFlagged(records[3].LineNumber, true);
 
-            var result = AnalysisHelper.GetFlaggedIndices(records);
+            var result = AnalysisHelper.GetFlaggedIndices(records, flags);
 
             result.Should().Equal(1, 3);
         }
@@ -56,13 +58,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             var pattern = "12345";
             var expected = "1^3^5";
             var records = AnalysisHelper.BuildIntegerRecords(pattern);
-            records[1].Metadata.IsFlagged = true;
-            records[3].Metadata.IsFlagged = true;
+            var annotations = new AnnotationStore();
+            var flags = new FlagSet();
+            flags.SetFlagged(records[1].LineNumber, true);
+            flags.SetFlagged(records[3].LineNumber, true);
 
             Action act = () => AnalysisHelper.AssertFlagsMatchExpected(
                 pattern,
                 expected,
                 records,
+                annotations,
+                flags,
                 "unit test",
                 "custom mismatch");
 
@@ -75,13 +81,17 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             var pattern = "12345";
             var expected = "1^345";
             var records = AnalysisHelper.BuildIntegerRecords(pattern);
-            records[3].Metadata.IsFlagged = true;
-            records[3].Metadata.Comment = "unexpected flag";
+            var annotations = new AnnotationStore();
+            var flags = new FlagSet();
+            flags.SetFlagged(records[3].LineNumber, true);
+            annotations.SetComment(records[3].LineNumber, "unexpected flag");
 
             Action act = () => AnalysisHelper.AssertFlagsMatchExpected(
                 pattern,
                 expected,
                 records,
+                annotations,
+                flags,
                 "unit test",
                 "custom mismatch");
 
@@ -98,11 +108,15 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             var pattern = "12345";
             var expected = "1^34";
             var records = AnalysisHelper.BuildIntegerRecords(pattern);
+            var annotations = new AnnotationStore();
+            var flags = new FlagSet();
 
             Action act = () => AnalysisHelper.AssertFlagsMatchExpected(
                 pattern,
                 expected,
                 records,
+                annotations,
+                flags,
                 "unit test",
                 "custom mismatch");
 
