@@ -31,7 +31,7 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. B
 
 - `IRecord` is the immutable public contract for a log record. Do not modify `IRecord` without a compatibility review.
 - `Record` is the sealed, thread-safe implementation. Records must never be mutated after creation.
-- Mutable per-record state (comments, pinned status, flags) belongs in `Metadata`, which supports `INotifyPropertyChanged`.
+- Mutable per-record state belongs in stores kept by line number, not in the record: comments and pins in `IAnnotations`, flags in `IFlags`. `Metadata` forwards to them until #1017 removes it.
 - Use `ImmutableArray<IRecord>` for record collections passed across boundaries.
 - Use `Record.Dummy` as the null object when a genuine record is absent.
 - Use `Record.IsGenuine(record)` or `Record.IsDummyOrNull(record)` to validate record references.

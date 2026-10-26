@@ -1,5 +1,6 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
@@ -18,14 +19,17 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new DetectDataAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
+			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			records[0].Metadata.IsFlagged.Should().BeTrue();
-			records[1].Metadata.IsFlagged.Should().BeTrue();
-			records[2].Metadata.IsFlagged.Should().BeFalse();
-			records[0].Metadata.Comment.Should().Contain("Value: 2");
-			records[1].Metadata.Comment.Should().Contain("Value: 2.5");
+			flags.IsFlagged(records[0].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
+			annotations.GetComment(records[0].LineNumber).Should().Contain("Value: 2");
+			annotations.GetComment(records[1].LineNumber).Should().Contain("Value: 2.5");
 		}
 
 		[TestMethod]
@@ -41,12 +45,15 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new DetectDataAnalyzer(FilterStrategy.KeepAllRecords);
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
+			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			records[0].Metadata.IsFlagged.Should().BeTrue();
-			records[1].Metadata.IsFlagged.Should().BeTrue();
-			records[2].Metadata.IsFlagged.Should().BeFalse();
+			flags.IsFlagged(records[0].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -62,12 +69,15 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new DetectDataAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy(FilterType.PlainText));
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
+			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			records[0].Metadata.IsFlagged.Should().BeTrue();
-			records[1].Metadata.IsFlagged.Should().BeTrue();
-			records[2].Metadata.IsFlagged.Should().BeFalse();
+			flags.IsFlagged(records[0].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
 		}
 	}
 }

@@ -33,7 +33,7 @@
 
 		public string DisplayName => "Matching Record Runs";
 
-		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
         {
             var flaggedRecords = 0;
 			var blockCount = 0;
@@ -74,7 +74,7 @@
                 {
 					if (canUpdateMetadata)
 					{
-						record.Metadata.IsFlagged = false;
+						flags.SetFlagged(record.LineNumber, false);
 					}
 
 					// Check if any expression matches
@@ -116,11 +116,11 @@
 
 								if (canUpdateMetadata)
 								{
-									firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
-									firstMatch.Metadata.IsFlagged = true;
+									annotations.AppendComment(firstMatch.LineNumber, $"{blockCount:00}-Begins");
+									flags.SetFlagged(firstMatch.LineNumber, true);
 
-									lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
-									lastMatch.Metadata.IsFlagged = true;
+									annotations.AppendComment(lastMatch.LineNumber, $"{blockCount:00}-Ends");
+									flags.SetFlagged(lastMatch.LineNumber, true);
 								}
 
 								flaggedRecords += 2;
@@ -140,11 +140,11 @@
 
 					if (canUpdateMetadata)
 					{
-						firstMatch.Metadata.UpdateUserComment($"{blockCount:00}-Begins");
-						firstMatch.Metadata.IsFlagged = true;
+						annotations.AppendComment(firstMatch.LineNumber, $"{blockCount:00}-Begins");
+						flags.SetFlagged(firstMatch.LineNumber, true);
 
-						lastMatch.Metadata.UpdateUserComment($"{blockCount:00}-Ends");
-						lastMatch.Metadata.IsFlagged = true;
+						annotations.AppendComment(lastMatch.LineNumber, $"{blockCount:00}-Ends");
+						flags.SetFlagged(lastMatch.LineNumber, true);
 					}
 
 					flaggedRecords += 2;

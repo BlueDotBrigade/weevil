@@ -56,33 +56,62 @@ namespace BlueDotBrigade.Weevil.Data
 		/// <inheritdoc />
 		public void SetComment(int lineNumber, string comment, object source = null)
 		{
-			comment ??= string.Empty;
+			bool hasChanged;
 
 			lock (_padlock)
 			{
-				var previous = GetComment(lineNumber);
-
-				if (previous == comment)
-				{
-					return;
-				}
-
-				var bits = GetBits(lineNumber);
-
-				if (string.IsNullOrWhiteSpace(comment) && !string.IsNullOrWhiteSpace(previous))
-				{
-					bits &= unchecked((byte)~PinnedBit);
-				}
-				else if (!string.IsNullOrWhiteSpace(comment) && string.IsNullOrWhiteSpace(previous))
-				{
-					bits |= PinnedBit;
-				}
-
-				SetCommentText(lineNumber, comment, ref bits);
-				SetBits(lineNumber, bits);
+				hasChanged = ReplaceComment(lineNumber, comment ?? string.Empty);
 			}
 
-			this.Changed?.Invoke(this, new AnnotationChangedEventArgs(lineNumber, source));
+			if (hasChanged)
+			{
+				this.Changed?.Invoke(this, new AnnotationChangedEventArgs(lineNumber, source));
+			}
+		}
+
+		/// <inheritdoc />
+		public void AppendComment(int lineNumber, string comment, object source = null)
+		{
+			comment ??= string.Empty;
+			bool hasChanged;
+
+			lock (_padlock)
+			{
+				var combined = HasComment(lineNumber) ? $"{GetComment(lineNumber)}, {comment}" : comment;
+				hasChanged = ReplaceComment(lineNumber, combined);
+			}
+
+			if (hasChanged)
+			{
+				this.Changed?.Invoke(this, new AnnotationChangedEventArgs(lineNumber, source));
+			}
+		}
+
+		// Called while holding the lock. Adding a comment pins the record, and removing it unpins the record.
+		private bool ReplaceComment(int lineNumber, string comment)
+		{
+			var previous = GetComment(lineNumber);
+
+			if (previous == comment)
+			{
+				return false;
+			}
+
+			var bits = GetBits(lineNumber);
+
+			if (string.IsNullOrWhiteSpace(comment) && !string.IsNullOrWhiteSpace(previous))
+			{
+				bits &= unchecked((byte)~PinnedBit);
+			}
+			else if (!string.IsNullOrWhiteSpace(comment) && string.IsNullOrWhiteSpace(previous))
+			{
+				bits |= PinnedBit;
+			}
+
+			SetCommentText(lineNumber, comment, ref bits);
+			SetBits(lineNumber, bits);
+
+			return true;
 		}
 
 		/// <inheritdoc />

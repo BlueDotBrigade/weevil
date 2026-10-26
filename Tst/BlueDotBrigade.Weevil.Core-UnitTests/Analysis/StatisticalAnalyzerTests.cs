@@ -22,7 +22,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+			Results results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: false);
 
 			results.FlaggedRecords.Should().Be(0);
 			results.Data.Should().ContainKey("Min");
@@ -43,10 +43,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
+			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(0);
-			records.Should().NotContain(record => record.Metadata.IsFlagged);
+			records.Should().NotContain(record => flags.IsFlagged(record.LineNumber));
 			results.Data.Should().ContainKey("Mean");
 			results.Data["Mean"].Should().Be(2.167d);
 			results.Data["Count"].Should().Be(3d);
@@ -74,10 +77,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 				var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 				var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-				Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: true);
+				var annotations = new AnnotationStore();
+				var flags = new FlagSet();
+
+				Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
 
 				results.FlaggedRecords.Should().Be(0);
-				records.Should().NotContain(record => record.Metadata.IsFlagged);
+				records.Should().NotContain(record => flags.IsFlagged(record.LineNumber));
 				results.Data["Count"].Should().Be(1d);
 				results.Data["Mean"].Should().Be(2.5d);
 			}
@@ -99,7 +105,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+			Results results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: false);
 
 			results.Data["Count"].Should().Be(2d);
 			results.Data["Mean"].Should().Be(15d);
@@ -123,7 +129,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+			Results results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: false);
 
 			results.Data["Count"].Should().Be(3d);
 			results.Data["Mean"].Should().Be(2d);

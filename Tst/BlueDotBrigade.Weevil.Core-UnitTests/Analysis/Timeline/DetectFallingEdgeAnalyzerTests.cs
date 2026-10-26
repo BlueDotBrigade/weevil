@@ -9,13 +9,15 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	{
 		#region Setup helpers
 
-		private static Results Analyze(ImmutableArray<IRecord> records, string regex, string analysisOrder = "Ascending")
+		private static Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string regex, string analysisOrder = "Ascending")
 		{
 			var analyzer = new DetectFallingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex, analysisOrder);
 
 			return analyzer.Analyze(
 				records,
+				annotations,
+				flags,
 				string.Empty,
 				userDialog,
 				canUpdateMetadata: true);
@@ -40,23 +42,29 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private static void AssertIntegerScenario(string pattern, string expected)
 		{
          var records = AnalysisHelper.BuildIntegerRecords(pattern);
-			var results = Analyze(records, AnalysisHelper.IntegerRegex);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+			var results = Analyze(records, annotations, flags, AnalysisHelper.IntegerRegex);
 
-			AssertFlagsMatchExpected(pattern, expected, records, results, label: "integer scenario");
+			AssertFlagsMatchExpected(pattern, expected, records, annotations, flags, results, label: "integer scenario");
 		}
 
 		private static void AssertDecimalScenario(string pattern, string expected)
 		{
          var records = AnalysisHelper.BuildDecimalRecords(pattern);
-			var results = Analyze(records, AnalysisHelper.DecimalRegex);
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+			var results = Analyze(records, annotations, flags, AnalysisHelper.DecimalRegex);
 
-			AssertFlagsMatchExpected(pattern, expected, records, results, label: "decimal scenario");
+			AssertFlagsMatchExpected(pattern, expected, records, annotations, flags, results, label: "decimal scenario");
 		}
 
 		private static void AssertFlagsMatchExpected(
 			string pattern,
 			string expected,
 			ImmutableArray<IRecord> records,
+			IAnnotations annotations,
+			IFlags flags,
 			Results results,
 			string label)
 		{
@@ -64,6 +72,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				pattern,
 				expected,
 				records,
+				annotations,
+				flags,
 				label,
 				"falling-edge flag mismatch");
 
@@ -155,9 +165,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.WithContent("15:02:08.000 32.997")
 				.GetRecords();
 
-           var results = Analyze(records, AnalysisHelper.DecimalRegex);
+           var annotations = new AnnotationStore();
+           var flags = new FlagSet();
+           var results = Analyze(records, annotations, flags, AnalysisHelper.DecimalRegex);
 
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(1, 3, 6);
+			AnalysisHelper.GetFlaggedIndices(records, flags).Should().Equal(1, 3, 6);
 			results.FlaggedRecords.Should().Be(3);
 		}
 
@@ -171,9 +183,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				(3, "2024-01-01 00:00:01", "Value=2"),
 				(4, "2024-01-01 00:00:03", "Value=3"));
 
-			var results = Analyze(records, @"(?<Value>\d+)$");
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+			var results = Analyze(records, annotations, flags, @"(?<Value>\d+)$");
 
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(2);
+			AnalysisHelper.GetFlaggedIndices(records, flags).Should().Equal(2);
 			results.FlaggedRecords.Should().Be(1);
 		}
 
@@ -186,9 +200,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				(2, "2024-01-01 00:00:03", "Value=2"),
 				(3, "2024-01-01 00:00:01", "Value=3"));
 
-			var results = Analyze(records, @"(?<Value>\d+)$", "Descending");
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+			var results = Analyze(records, annotations, flags, @"(?<Value>\d+)$", "Descending");
 
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(1);
+			AnalysisHelper.GetFlaggedIndices(records, flags).Should().Equal(1);
 			results.FlaggedRecords.Should().Be(1);
 		}
 
@@ -201,9 +217,11 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				(2, "2024-01-01 00:00:03", "Value=1"),
 				(3, "2024-01-01 00:00:01", "Value=3"));
 
-			var results = Analyze(records, @"(?<Value>\d+)$", "Descending");
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+			var results = Analyze(records, annotations, flags, @"(?<Value>\d+)$", "Descending");
 
-			AnalysisHelper.GetFlaggedIndices(records).Should().Equal(0);
+			AnalysisHelper.GetFlaggedIndices(records, flags).Should().Equal(0);
 			results.FlaggedRecords.Should().Be(1);
 		}
 

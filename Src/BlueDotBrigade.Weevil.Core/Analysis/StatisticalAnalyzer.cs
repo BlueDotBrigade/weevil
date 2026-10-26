@@ -61,7 +61,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		public string DisplayName => "Statistics";
 
-		public Results Analyze(ImmutableArray<IRecord> records, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var timestamps = new List<DateTime>();
 			var values = new List<double>();
@@ -100,7 +100,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			{
 				if (canUpdateMetadata)
 				{
-					record.Metadata.IsFlagged = false;
+					flags.SetFlagged(record.LineNumber, false);
 				}
 
 				// Collect all key-value pairs from all expressions for this record

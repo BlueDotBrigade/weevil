@@ -75,15 +75,20 @@
 
 			var analyzer = new TimeGapAnalyzer();
 
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
 			analyzer.Analyze(
 				records.ToImmutableArray(),
+				annotations,
+				flags,
 				EnvironmentHelper.GetExecutableDirectory(),
 				GetUserDialog(3000),
 				canUpdateMetadata: true);
 
-			records[0].Metadata.IsFlagged.Should().BeFalse();
-			records[1].Metadata.IsFlagged.Should().BeTrue();
-			records[2].Metadata.IsFlagged.Should().BeFalse();
+			flags.IsFlagged(records[0].LineNumber).Should().BeFalse();
+			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -104,15 +109,20 @@
 
 			var analyzer = new TimeGapAnalyzer();
 
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
 			analyzer.Analyze(
 				records.ToImmutableArray(),
+				annotations,
+				flags,
 				EnvironmentHelper.GetExecutableDirectory(),
 				GetUserDialog(500),
 				canUpdateMetadata: true);
 
-			records[2].Metadata.IsFlagged.Should().BeFalse();
-			records[3].Metadata.IsFlagged.Should().BeTrue();
-			records[4].Metadata.IsFlagged.Should().BeTrue();
+			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
+			flags.IsFlagged(records[3].LineNumber).Should().BeTrue();
+			flags.IsFlagged(records[4].LineNumber).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -130,8 +140,13 @@
 
 			var analyzer = new TimeGapAnalyzer();
 
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
 			var results = analyzer.Analyze(
 				records.ToImmutableArray(),
+				annotations,
+				flags,
 				EnvironmentHelper.GetExecutableDirectory(),
 				GetUserDialog(3000),
 				canUpdateMetadata: true);
@@ -155,15 +170,20 @@
 
 			var analyzer = new TimeGapAnalyzer();
 
+			var annotations = new AnnotationStore();
+			var flags = new FlagSet();
+
 			analyzer.Analyze(
 				records.ToImmutableArray(),
+				annotations,
+				flags,
 				EnvironmentHelper.GetExecutableDirectory(),
 				GetUserDialog(2000),
 				canUpdateMetadata: true);
 
-			records[0].Metadata.IsFlagged.Should().BeFalse();
-			records[1].Metadata.IsFlagged.Should().BeFalse();
-			records[2].Metadata.IsFlagged.Should().BeTrue();
+			flags.IsFlagged(records[0].LineNumber).Should().BeFalse();
+			flags.IsFlagged(records[1].LineNumber).Should().BeFalse();
+			flags.IsFlagged(records[2].LineNumber).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -172,15 +192,18 @@
 			DateTime now = DateTime.Now;
 			var records = new List<IRecord>
 			{
-				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", new Metadata { IsFlagged = true }),
+				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header"),
 				new Record(20, now, SeverityType.Debug, "first"),
 				new Record(30, now.AddSeconds(1), SeverityType.Debug, "second"),
 			};
 
 			var analyzer = new TimeGapAnalyzer();
-			analyzer.Analyze(records.ToImmutableArray(), TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+			var flags = new FlagSet();
+			flags.SetFlagged(records[0].LineNumber, true);
 
-			records[0].Metadata.IsFlagged.Should().BeFalse();
+			analyzer.Analyze(records.ToImmutableArray(), new AnnotationStore(), flags, TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+
+			flags.IsFlagged(records[0].LineNumber).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -197,9 +220,9 @@
 				.Returns("not-a-number");
 			var analyzer = new TimeGapAnalyzer();
 
-			analyzer.Analyze(records, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
 			analyzer.Count.Should().Be(1);
-			Results results = analyzer.Analyze(records, string.Empty, userDialog, canUpdateMetadata: false);
+			Results results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: false);
 
 			results.Should().BeSameAs(Results.None);
 			analyzer.Count.Should().Be(0);
@@ -226,8 +249,8 @@
 
 			var analyzer = new TimeGapAnalyzer();
 
-			analyzer.Analyze(recordsWithGap, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
-			analyzer.Analyze(recordsWithNoGap, TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithGap, new AnnotationStore(), new FlagSet(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
+			analyzer.Analyze(recordsWithNoGap, new AnnotationStore(), new FlagSet(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
 
 			analyzer.Count.Should().Be(0);
 			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);

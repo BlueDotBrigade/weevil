@@ -31,7 +31,7 @@
 		protected override void OnRefresh(ImmutableArray<IRecord> records)
 		{
 			var analyzer = new TimeGapUiAnalyzer();
-			analyzer.Analyze(records, _threshold, false);
+			analyzer.Analyze(records, annotations: null, flags: null, _threshold, canUpdateMetadata: false);
 
 			if (analyzer.Count > 0)
 			{
