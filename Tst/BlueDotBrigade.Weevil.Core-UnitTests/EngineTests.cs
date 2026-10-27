@@ -1,10 +1,14 @@
 namespace BlueDotBrigade.Weevil
 {
+	using System;
+	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
+	using BlueDotBrigade.Weevil.Navigation;
 
 	[TestClass]
 	public class EngineTests
@@ -192,12 +196,108 @@ namespace BlueDotBrigade.Weevil
 			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 4, 6, 7, 8);
 		}
 
+		[TestMethod]
+		[WorkItem(1105)]
+		[DoNotParallelize]
+		public void GivenALog_WhenOpened_ThenTheApplicationLogRecordsHowLongItTookAndTheMemoryUsed()
+		{
+			using var log = CapturingLogWriter.Register();
+
+			IEngine engine = OpenCopy();
+
+			IDictionary<string, object> entry = log.Last("File loading complete.");
+			entry["RecordCount"].Should().Be(engine.Count);
+			((double)entry["OpeningDuration"]).Should().BePositive();
+			((long)entry["WorkingSet"]).Should().BePositive();
+			((long)entry["ManagedMemory"]).Should().BePositive();
+		}
+
+		[TestMethod]
+		[WorkItem(1105)]
+		[DoNotParallelize]
+		public void GivenFilteredResults_WhenASearchFindsARecord_ThenTheApplicationLogRecordsHowManyResultsItSearched()
+		{
+			IEngine engine = OpenCopy();
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			using var log = CapturingLogWriter.Register();
+
+			engine.Navigate.PreviousContent("Id=150", isCaseSensitive: true);
+
+			IDictionary<string, object> entry = log.Last("Search complete.");
+			entry["Search"].Should().Be(nameof(INavigate.PreviousContent));
+			entry["WasFound"].Should().Be(true);
+			entry["Records"].Should().Be(engine.Filter.Results.Length).And.NotBe(engine.Count);
+		}
+
+		[TestMethod]
+		[WorkItem(1105)]
+		[DoNotParallelize]
+		public void GivenASearchThatFindsNothing_WhenItFinishes_ThenTheApplicationLogRecordsHowLongItTookWithoutTheText()
+		{
+			const string text = "Text that no record holds";
+			IEngine engine = OpenCopy();
+			using var log = CapturingLogWriter.Register();
+
+			Action search = () => engine.Navigate.NextContent(text, isCaseSensitive: true);
+
+			search.Should().Throw<RecordNotFoundException>();
+			IDictionary<string, object> entry = log.Last("Search complete.");
+			entry["Search"].Should().Be(nameof(INavigate.NextContent));
+			entry["WasFound"].Should().Be(false);
+			((double)entry["Duration"]).Should().BeGreaterThanOrEqualTo(0);
+			entry.Values.Should().NotContain(text);
+		}
+
 		private IEngine OpenCopy()
 		{
 			var logPath = Path.Combine(_folder, "SampleData.log");
 			File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
 
 			return Engine.UsingPath(logPath).Open();
+		}
+
+		/// <summary>
+		/// Captures what is written to the application's log, until disposed.
+		/// </summary>
+		private sealed class CapturingLogWriter : ILogWriter, IDisposable
+		{
+			private readonly ILogWriter _original = Log.Default;
+			private readonly ConcurrentQueue<(string Message, IDictionary<string, object> Metadata)> _entries = new();
+
+			public static CapturingLogWriter Register()
+			{
+				var writer = new CapturingLogWriter();
+				Log.Register(writer);
+
+				return writer;
+			}
+
+			/// <summary>
+			/// Returns the metadata of the last entry with the given message.
+			/// </summary>
+			public IDictionary<string, object> Last(string message)
+			{
+				return _entries.Last(entry => entry.Message == message).Metadata;
+			}
+
+			public void Dispose() => Log.Register(_original);
+
+			public void Write(string message) => Write(LogSeverityType.Debug, message, null);
+
+			public void Write(string message, IEnumerable<KeyValuePair<string, object>> metadata) => Write(LogSeverityType.Debug, message, metadata);
+
+			public void Write(LogSeverityType severity, string message) => Write(severity, message, null);
+
+			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
+			{
+				_entries.Enqueue((message, (metadata ?? []).ToDictionary(pair => pair.Key, pair => pair.Value)));
+			}
+
+			public void Write(LogSeverityType severity, Exception exception) => Write(severity, exception.Message, null);
+
+			public void Write(LogSeverityType severity, Exception exception, string message) => Write(severity, message, null);
+
+			public void Write(LogSeverityType severity, Exception exception, string message, IEnumerable<KeyValuePair<string, object>> metadata) => Write(severity, message, metadata);
 		}
 	}
 }

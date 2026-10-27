@@ -180,23 +180,6 @@
 				sourceFileLoadingPeriod,
 				recordAndMetadataLoadingStopwatch.Elapsed);
 
-			var filterDuration =
-				_logFileMetrics.RecordAndMetadataLoadDuration.TotalSeconds -
-				_logFileMetrics.SourceFileLoadingPeriod.TotalSeconds;
-
-			Log.Default.Write(
-				LogSeverityType.Information,
-				"File loading complete.",
-				new Dictionary<string, object>
-				{
-					{ "RecordAndMetadataLoadDuration", _logFileMetrics.RecordAndMetadataLoadDuration.TotalSeconds },
-					{ "SourceFileLoadingPeriod", _logFileMetrics.SourceFileLoadingPeriod.TotalSeconds },
-					{ "FilterDuration", filterDuration },
-					{ "RecordCount", _logFileMetrics.RecordCount },
-					{ "FileSize", _logFileMetrics.FileSize },
-					{ "SourceFilePath", _sourceFilePath},
-				});
-
 			Debug.WriteLine($"{nameof(CoreEngine)} resources have been allocated.");
 		}
 

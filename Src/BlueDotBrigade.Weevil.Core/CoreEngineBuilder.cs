@@ -157,6 +157,7 @@
 					LogSeverityType.Debug,
 					"Core engine is being constructed.");
 
+				var openingStopwatch = Stopwatch.StartNew();
 				var sourceFileRemarks = string.Empty;
 
 				string sourceFilePath;
@@ -278,7 +279,38 @@
 					coreEngine.Filter.ExcludeHistory.AddRange(exclusiveFilterHistory);
 				}
 
+				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);
+
 				return coreEngine;
+			}
+
+			/// <summary>
+			/// Records what the performance requirements measure once a log has opened (#1084, #1086),
+			/// so a shared application log is enough to compare them (#1105).
+			/// </summary>
+			/// <remarks>
+			/// The engine has already collected the memory used while parsing. The memory is the whole process's:
+			/// it includes the application, and any engine the caller still holds, such as the one a Reload or a second open replaces.
+			/// So only the first open in a process measures one log on its own.
+			/// </remarks>
+			private static void LogFileLoaded(CoreEngine coreEngine, TimeSpan openingDuration)
+			{
+				LogFileMetrics metrics = coreEngine.Metrics;
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					"File loading complete.",
+					new Dictionary<string, object>
+					{
+						{ "OpeningDuration", openingDuration.TotalSeconds },
+						{ "SourceFileLoadingPeriod", metrics.SourceFileLoadingPeriod.TotalSeconds },
+						{ "RecordAndMetadataLoadDuration", metrics.RecordAndMetadataLoadDuration.TotalSeconds },
+						{ "RecordCount", metrics.RecordCount },
+						{ "FileSize", metrics.FileSize },
+						{ "WorkingSet", Environment.WorkingSet },
+						{ "ManagedMemory", GC.GetTotalMemory(forceFullCollection: false) },
+						{ "SourceFilePath", coreEngine.SourceFilePath },
+					});
 			}
 
 			/// <summary>
