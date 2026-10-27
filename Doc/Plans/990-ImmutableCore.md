@@ -37,7 +37,7 @@ Callers open and use an engine without ever seeing its state. `Session` holds th
 8. **One lock guards every write to the session, and reads never wait** (decided 2026-10-27, #1107).
    - `Session` owns the lock. The comment and pin store, bookmarks, regions, remarks, the table of contents and the filter history all write under it.
    - Each store publishes values that do not change, so filters read without locking. Bookmarks and regions publish a new array on each write; remarks, the table of contents and the filter history are replaced whole.
-   - Reload carries the session over, so unsaved bookmarks, regions, remarks and filter history are kept, as comments and pins are. The GUI saves before it reloads, so it sees no difference.
+   - Reload carries the session over, so unsaved bookmarks, regions, remarks and filter history are kept, as comments and pins are. The GUI saves before it reloads, so it sees no difference, except for a log it cannot save, such as one opened from an archive.
    - Callers read the filter history but cannot change it; only the filter adds to it.
 
 ## Steps

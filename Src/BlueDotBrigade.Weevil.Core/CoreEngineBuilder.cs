@@ -117,8 +117,8 @@
 			}
 
 			/// <summary>
-			/// Keeps the session and the flags of an engine this one replaces, as Reload does (#1013).
-			/// The sidecar's comments and pins are then not loaded again.
+			/// Keeps the session and the flags of an engine this one replaces, as Reload does (#1013, #1107).
+			/// The session's state, such as comments, pins, bookmarks, regions and remarks, is then not loaded from the sidecar again.
 			/// </summary>
 			public CoreEngineBuilder UsingStateOf(CoreEngine previous)
 			{
