@@ -105,6 +105,17 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 3. Implement one user story at a time: create its GitHub issue first, then implement it. Commits reference the issue (see below).
 4. Write formal requirements once an epic is complete: every user story is implemented, the user and you are satisfied with the result, and all automated tests pass. Write each requirement in EARS syntax as a GitHub issue that references the user stories it formalizes.
 
+## Reviewing Changes
+
+GitHub Copilot, Codex and Claude Code all follow this rule.
+
+- Before a non-trivial change is ready for review, at least two agents review it:
+  - a **reviewer** looks for defects, broken rules and missing tests;
+  - a **sceptic** tries to disprove each finding. When the reviewer finds nothing, the sceptic tries to show what it missed.
+- Each starts with a fresh context, so neither inherits the author's reasoning. An agent that cannot start other agents runs the two roles as separate passes.
+- Fix what survives the sceptic, and say in the pull request what the review found.
+- A trivial change, such as a typo, a comment or a formatting fix, needs no review agents.
+
 ## GitHub Issues and Pull Requests
 
 - An epic (label `epic`) groups related work. User stories, tasks and bugs are its sub-issues. A user story may also stand alone, without an epic.
@@ -125,5 +136,5 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 
 ## About These Instructions
 
-- GitHub Copilot and Claude Code share these instructions. Edit this file and the files in `.github/instructions/`; never put instructions in a `CLAUDE.md` file, which only imports them.
+- GitHub Copilot, Codex and Claude Code share these instructions. Edit this file and the files in `.github/instructions/`; never put instructions in a `CLAUDE.md` or `AGENTS.md` file, which only point to them.
 - Each file in `.github/instructions/` needs a `CLAUDE.md` that imports it, in the folder its `applyTo` covers, so Claude Code reads it too. See `Doc/LessonsLearned/AiAgentInstructionFiles.md`.
