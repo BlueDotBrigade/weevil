@@ -107,12 +107,12 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 
 ## Reviewing Changes
 
-GitHub Copilot, Codex and Claude Code all follow this rule.
+This rule is for the agent that makes a change, whether GitHub Copilot, Codex or Claude Code. An agent asked to review a pull request is its reviewer, and the rest of this rule does not apply to it.
 
-- Before a non-trivial change is ready for review, at least two agents review it:
+- When you make a non-trivial change, have at least two agents review it before you open its pull request:
   - a **reviewer** looks for defects, broken rules and missing tests;
   - a **sceptic** tries to disprove each finding. When the reviewer finds nothing, the sceptic tries to show what it missed.
-- Each starts with a fresh context, so neither inherits the author's reasoning. An agent that cannot start other agents runs the two roles as separate passes.
+- Each starts with a fresh context, so neither inherits your reasoning. If you cannot start other agents, run each role as a separate pass that judges only the diff, not your earlier reasoning.
 - Fix what survives the sceptic, and say in the pull request what the review found.
 - A trivial change, such as a typo, a comment or a formatting fix, needs no review agents.
 

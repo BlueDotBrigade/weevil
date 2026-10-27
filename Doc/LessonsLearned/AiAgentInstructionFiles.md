@@ -4,20 +4,20 @@ No single instruction file is read by Claude Code, Codex and every GitHub Copilo
 
 - `.github/copilot-instructions.md` is the only file every Copilot feature reads. `AGENTS.md` looks like the shared standard, but Copilot Chat on github.com, Copilot in Visual Studio, and Copilot code review in VS Code and Visual Studio ignore it.
 - Claude Code reads `CLAUDE.md`. It reads `AGENTS.md` only when there is no `CLAUDE.md`, and it never reads `.github/copilot-instructions.md` or `.github/instructions/` on its own.
-- Codex reads `AGENTS.md`, the one nearest each file it works on. Its code review on GitHub follows the `## Review guidelines` section there. It reads none of the other files on its own.
+- Codex reads `AGENTS.md` and none of the other files on its own. The Codex agent joins every `AGENTS.md` from the repository root down to its working folder. Its code review on GitHub uses the one nearest each changed file, and follows that file's `## Review guidelines` section.
 
 > Notes from #983, 2026-10-18. Codex added from #1111, 2026-10-27.
 
 ## How Weevil Keeps One Source
 
-The instructions live in Copilot's files, and Claude Code imports them with `@path` lines:
+The instructions live in Copilot's files. Claude Code imports them with `@path` lines, and `AGENTS.md` names them for Codex:
 
 | File | Read by | Contains |
 |---|---|---|
 | `.github/copilot-instructions.md` | Every Copilot feature; Claude Code through `CLAUDE.md` | The rules for the whole repository |
 | `.github/instructions/*.instructions.md` | Copilot, for files matching `applyTo`; Claude Code through the `CLAUDE.md` in that folder | The rules for one folder |
 | `CLAUDE.md` | Claude Code | Only imports: the repository rules and the review rules |
-| `AGENTS.md` | Codex; also Copilot's cloud agent, its code review on github.com and Chat in VS Code | Only directions: read the repository rules and the matching folder rules, and follow the review rules when reviewing |
+| `AGENTS.md` | Codex; also Copilot's cloud agent, its code review on github.com and Chat in VS Code | Only references: the repository rules, the folder rules and, under `## Review guidelines`, the review rules |
 | `Src/BlueDotBrigade.Weevil.Common/CLAUDE.md`, `Src/BlueDotBrigade.Weevil.Core/CLAUDE.md`, `Src/BlueDotBrigade.Weevil.Gui/CLAUDE.md`, `Tst/CLAUDE.md` | Claude Code, once it reads or edits a file in that folder | Only an import of that folder's instructions file |
 
 To add rules for another folder, create `.github/instructions/<name>.instructions.md` with an `applyTo` pattern, and a `CLAUDE.md` in that folder containing `@<relative path>/.github/instructions/<name>.instructions.md`.
@@ -42,7 +42,7 @@ From [Support for different types of custom instructions][CopilotSupport]:
 
 Claude Code: [How Claude remembers your project][ClaudeMemory] (`CLAUDE.md`, `@path` imports, `AGENTS.md`) and [`plansDirectory`][ClaudePlans].
 
-Codex: [Codex code review in GitHub][CodexReview] (`AGENTS.md` and its review guidelines). Codex has no `@path` imports, so `AGENTS.md` tells it which files to read.
+Codex: [Codex code review in GitHub][CodexReview] (`AGENTS.md` and its review guidelines). Codex has no `@path` imports, so `AGENTS.md` names the files to read in plain sentences.
 
 [CopilotSupport]: https://docs.github.com/en/copilot/reference/custom-instructions-support
 [ClaudeMemory]: https://code.claude.com/docs/en/memory
