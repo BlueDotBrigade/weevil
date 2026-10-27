@@ -174,5 +174,6 @@
 			engine.Clear(ClearOperation.AfterSelected);
 			engine.HasBeenCleared.Should().BeTrue();
 		}
+
 	}
 }

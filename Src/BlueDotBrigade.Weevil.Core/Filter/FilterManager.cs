@@ -21,7 +21,7 @@
 
 		private readonly ContextDictionary _context;
 		private readonly IFilterAliasExpander _filterAliasExpander;
-		private readonly ImmutableArray<IRecord> _allRecords;
+		private readonly RecordScope _scope;
 		private readonly ImmutableArray<IMetricCollector> _metricCollectors;
 		private readonly RecordState _recordState;
 
@@ -49,7 +49,7 @@
 			ICoreExtension coreExtension,
 			ContextDictionary context,
 			IFilterAliasExpander filterAliasExpander,
-			ImmutableArray<IRecord> allRecords,
+			RecordScope scope,
 			ImmutableArray<IMetricCollector> metricCollectors,
 			IRegionManager regionManager,
 			IBookmarkManager bookmarkManager,
@@ -60,7 +60,7 @@
 			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 			_context = context;
 			_filterAliasExpander = filterAliasExpander;
-			_allRecords = allRecords;
+			_scope = scope;
 
 			_regionManager = regionManager;
 			_bookmarkManager = bookmarkManager;
@@ -69,7 +69,7 @@
 			_recordState = recordState ?? throw new ArgumentNullException(nameof(recordState));
 
 			_latestFilterStrategy = FilterStrategy.KeepAllRecords;
-			_latestFilterResults = allRecords;
+			_latestFilterResults = scope.Records;
 
 			_currentFilter = new Filter(FilterType.PlainText, FilterCriteria.None);
 
@@ -118,7 +118,8 @@
 				collector.Reset();
 			}
 
-			var resultsCache = new IRecord[_allRecords.Length];
+			ImmutableArray<IRecord> records = _scope.Records;
+			var resultsCache = new IRecord[records.Length];
 			var resultsCount = 0;
 
 			// Set `MaxDegreeOfParallelism=1` to force the loop to be executed by only one thread.
@@ -126,7 +127,7 @@
 			var parallelOptions = new ParallelOptions();
 
 			Parallel.ForEach(
-							 _allRecords,
+							 records,
 							 parallelOptions,
 					  // FMR Part1: initialize thread local storage
 					  () => { return new FilterMapReduceState(); },
@@ -337,7 +338,7 @@
 						{"FilterType", filterType},
 						{"FilterCriteria", criteria},
 						{"TimeElapsed", _filterExecutionTime},
-						{"TotalRecords", _allRecords.Length},
+						{"TotalRecords", _scope.Records.Length},
 						{"VisibleRecords", _latestFilterResults.Length},
 					});
 			}

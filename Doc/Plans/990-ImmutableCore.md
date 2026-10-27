@@ -84,11 +84,13 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - **`Metadata` removed (#1100). Done 2026-10-26.** `IRecord.Metadata` and `Metadata` go; `ViewAnnotations` becomes `RecordState` (decision 7), and `IFlags` goes, because callers use `IRecordState`. Opening a log no longer attaches each record, and a filter no longer makes a pass over every record to notify `Metadata`. Tests move to `RecordState` or the stores. Memory kept per record fell from 396 to 348 bytes (12%), and the working set from 3.13 to 2.77 GB per GB of log (300 MB log, Linux); the memory-budget test (#1086) is lowered from 480 to 420 bytes.
    - External plugins built for 2.x already fail to load in 3.0; they are fixed later (see Compatibility).
    - Later, in a step of its own: bookmarks, regions, remarks, the table of contents and the filter history move into `Session`, under the same lock.
-8. **Clear without rebuilding (#1018).**
+8. **Clear without rebuilding (#1018). Done 2026-10-27.**
    - Clear narrows the engine's record scope, using today's rules for each clear operation. The engine, its events and the annotations stay.
    - Clear keeps doing what it does today: it resets the filter (the GUI re-applies its own), drops cleared records from the selection, recounts the metrics and sets `HasBeenCleared`.
    - Every manager holds the record array, set in its constructor, so each reads the scope instead.
-   - Clear Selected and Clear Unselected make one range per selected record, so the scope must handle millions of ranges, for example as a bitmap.
+   - Changed on 2026-10-27: the scope is the array of records kept (`RecordScope`), because records outside it are dropped anyway. A bitmap or ranges belong to #988, when records are no longer all in memory.
+   - The engine's filter and its history lists stay, so a subscription to the filter itself now survives Clear. `IEngine.FilterResultsChanged` is still not raised by Clear.
+   - The selection is carried over as the selected records that are kept, as the rebuilt engine did. Remapping its positions would be wrong: the remap assumes the records it compares with include the old results, and Clear removes some of them.
    - Memory: as today, records outside the scope are dropped. This is safe because records are immutable and annotations live in the session. #988 replaces it with releasing content chunks.
    - Bug #1004 (unsaved comments and pins on cleared records are lost on save) is fixed before this phase. Its tests must keep passing.
 

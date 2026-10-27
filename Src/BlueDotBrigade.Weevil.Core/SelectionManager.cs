@@ -30,7 +30,7 @@
 
 		private readonly Encoding _sourceFileEncoding;
 
-		private readonly ImmutableArray<IRecord> _allRecords;
+		private readonly RecordScope _scope;
 		private readonly Action _reapplyCurrentFilter;
 
 		private readonly NavigationManager _navigationManager;
@@ -44,7 +44,7 @@
 
 		#region Object Lifetime
 		public SelectionManager(
-			ImmutableArray<IRecord> allRecords,
+			RecordScope scope,
 			ImmutableArray<IRecord> visibleRecords,
 			NavigationManager navigationManager,
 			Encoding sourceFileEncoding,
@@ -58,7 +58,7 @@
 
 			_sourceFileEncoding = sourceFileEncoding;
 
-			_allRecords = allRecords;
+			_scope = scope;
 			_visibleRecords = visibleRecords;
 			_reapplyCurrentFilter = reapplyCurrentFilter;
 
@@ -201,7 +201,7 @@
 
 				_selection = before == 0
 					? new PositionRanges()
-					: PositionRanges.Remap(_selection, _visibleRecords, visibleRecords, _allRecords);
+					: PositionRanges.Remap(_selection, _visibleRecords, visibleRecords, _scope.Records);
 				_visibleRecords = visibleRecords;
 				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
 
@@ -335,7 +335,7 @@
 		{
 			ImmutableArray<IRecord> sortedRecords = _selection.Count > 1
 				? GetSelected()
-				: _allRecords.OrderBy(x => x.LineNumber).ToImmutableArray();
+				: _scope.Records.OrderBy(x => x.LineNumber).ToImmutableArray();
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
@@ -379,7 +379,7 @@
 				// Compared with this engine's records, so records a Clear removed and Reload restored are not selected.
 				_selection = selection.Count == 0
 					? new PositionRanges()
-					: PositionRanges.Remap(selection, results, _visibleRecords, _allRecords);
+					: PositionRanges.Remap(selection, results, _visibleRecords, _scope.Records);
 				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
 				_anchorLineNumber = FindPosition(_visibleRecords, anchorLineNumber) < 0 ? NoLineNumber : anchorLineNumber;
 			}
@@ -481,6 +481,44 @@
 			{
 				_navigationManager.SetActiveLineNumber(lineNumber);
 			}
+		}
+
+		/// <summary>
+		/// Keeps the selected records that <paramref name="kept"/> holds, at their positions in it, and forgets the anchor,
+		/// as a new engine starts (#1018).
+		/// </summary>
+		/// <remarks>
+		/// Clear calls it before its filter shows the kept records, so listeners read a selection that matches those results (#1015).
+		/// The positions are found by line number: remapping them would assume the records still include the old results, which Clear removes.
+		/// </remarks>
+		/// <param name="selected">The records selected before the Clear.</param>
+		/// <param name="kept">The records the Clear keeps, which its filter then shows.</param>
+		/// <returns>The last selected record kept, or <see cref="Record.Dummy"/> when none is.</returns>
+		internal IRecord Narrow(ImmutableArray<IRecord> selected, ImmutableArray<IRecord> kept)
+		{
+			IRecord lastKept = Record.Dummy;
+			var positions = new List<int>();
+
+			foreach (IRecord record in selected)
+			{
+				var position = FindPosition(kept, record.LineNumber);
+
+				if (position >= 0)
+				{
+					positions.Add(position);
+					lastKept = record;
+				}
+			}
+
+			lock (_selectionPadlock)
+			{
+				_visibleRecords = kept;
+				_selection = PositionRanges.FromPositions(positions);
+				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
+				_anchorLineNumber = NoLineNumber;
+			}
+
+			return lastKept;
 		}
 
 		public ImmutableArray<IRecord> ClearAll()

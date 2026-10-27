@@ -77,6 +77,14 @@
 			}
 		}
 
+		/// <summary>
+		/// Forgets the active record, as a new engine starts. Clear calls it before it narrows the records (#1018).
+		/// </summary>
+		internal void Reset()
+		{
+			_activeRecord.SetActiveIndex(ActiveRecord.UnknownIndex);
+		}
+
 		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
 		{
 			_activeRecord.UpdateDataSource(filterResults);

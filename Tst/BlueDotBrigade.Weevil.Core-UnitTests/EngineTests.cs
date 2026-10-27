@@ -40,6 +40,68 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenSubscribedToTheFiltersOwnEvent_WhenFilteringAfterClear_ThenTheFilterStillRaisesIt()
+		{
+			// Clear keeps the engine's filter (#1018), so a subscription to the filter itself survives.
+			IEngine engine = OpenCopy();
+			IFilter filter = engine.Filter;
+			var results = new List<int>();
+			filter.ResultsChanged += (sender, e) => results.Add(e.Records.Length);
+
+			engine.Selector.Select(lineNumber: 101);
+			engine.Clear(ClearOperation.BeforeSelected);
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+
+			engine.Filter.Should().BeSameAs(filter);
+			results.Should().EndWith(engine.Filter.Results.Length);
+		}
+
+		[TestMethod]
+		public void GivenSubscribedToTheFiltersOwnEvent_WhenClearKeepsASelectedRecord_ThenTheSelectionAlreadyMatchesTheResults()
+		{
+			// Listeners read the selection that matches the new results (#1015), when Clear resets the filter too.
+			IEngine engine = OpenCopy();
+			engine.Selector.Select(lineNumber: 101);
+			var selectedWhenNotified = new List<int>();
+			engine.Filter.ResultsChanged += (sender, e) =>
+				selectedWhenNotified.AddRange(engine.Selector.GetSelected().Select(record => record.LineNumber));
+
+			engine.Clear(ClearOperation.BeforeSelected);
+
+			selectedWhenNotified.Should().Equal(101);
+		}
+
+		[TestMethod]
+		public void GivenAFilteredSelectionAcrossAGapBetweenRegions_WhenClearedBeyondRegions_ThenOnlyTheSelectedRecordsKeptStaySelected()
+		{
+			// Lines 7 and 9 are cleared, and lines 4 and 6, which the filter hid, were never selected.
+			IEngine engine = OpenCopy();
+			engine.Regions.CreateFromSelection("First", new[] { 3, 6 });
+			engine.Regions.CreateFromSelection("Second", new[] { 11, 12 });
+			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(@"Id=0(03|05|07|09|11)$"));
+			engine.Selector.SelectAll();
+
+			engine.Clear(ClearOperation.BeyondRegions);
+
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(3, 5, 11);
+		}
+
+		[TestMethod]
+		public void GivenAnActiveRecordButNoSelectedRecord_WhenCleared_ThenNavigationStartsFromTheTop()
+		{
+			// A cleared engine starts as a new one did, with no active record.
+			IEngine engine = OpenCopy();
+			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 2), true);
+			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 20), true);
+			engine.Selector.Select(lineNumber: 10);
+			engine.Selector.Unselect(lineNumber: 10);
+
+			engine.Clear(ClearOperation.Selected);
+
+			engine.Navigate.NextPin().LineNumber.Should().Be(2);
+		}
+
+		[TestMethod]
 		public void GivenSubscribedToFilterResults_WhenReloading_ThenEngineRaisesTheEventForTheReappliedFilter()
 		{
 			IEngine engine = OpenCopy();

@@ -8,7 +8,7 @@
 	{
 		/// <summary>
 		/// Raised when the filter's results change. Subscribe once per open log: unlike <see cref="ICoreEngine.Filter"/>'s own event,
-		/// it keeps working after <see cref="Clear"/> and <see cref="Reload"/> replace the filter.
+		/// it keeps working after <see cref="Reload"/> replaces the filter. <see cref="Clear"/> keeps the filter.
 		/// </summary>
 		/// <remarks>
 		/// The sender is the filter.
@@ -19,11 +19,11 @@
 
 		/// <summary>
 		/// Raised when the filter's include or exclude history changes. Subscribe once per open log: unlike <see cref="ICoreEngine.Filter"/>'s own event,
-		/// it keeps working after <see cref="Clear"/> and <see cref="Reload"/> replace the filter.
+		/// it keeps working after <see cref="Reload"/> replaces the filter. <see cref="Clear"/> keeps the filter.
 		/// </summary>
 		/// <remarks>
 		/// The sender is the history list that changed: <see cref="IFilterTraits.IncludeHistory"/> or <see cref="IFilterTraits.ExcludeHistory"/>.
-		/// <see cref="Clear"/> does not raise it. <see cref="Clear"/> and <see cref="Reload"/> replace both lists, so read them again after calling either method.
+		/// <see cref="Clear"/> does not raise it, and keeps both lists. <see cref="Reload"/> replaces both lists, so read them again after calling it.
 		/// </remarks>
 		event EventHandler<HistoryChangedEventArgs> FilterHistoryChanged;
 
@@ -40,6 +40,13 @@
 		/// </remarks>
 		IRecordState RecordState { get; }
 
+		/// <summary>
+		/// Narrows the records kept in memory, using the rules of <paramref name="clearOperation"/>. The log file does not change.
+		/// </summary>
+		/// <remarks>
+		/// The engine, its filter, selector and events, and the comments, pins and flags stay (#1018).
+		/// The filter is reset to show every record kept, and the selected records that are kept stay selected.
+		/// </remarks>
 		void Clear(ClearOperation clearOperation);
 
 		void Reload();

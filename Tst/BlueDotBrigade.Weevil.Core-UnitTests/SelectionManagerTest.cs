@@ -148,7 +148,7 @@
 			var state = new RecordState();
 			var navigationManager = new NavigationManager(null, null, visibleRecords, null, state);
 
-			return new SelectionManager(records, visibleRecords, navigationManager, Encoding.UTF8, state, () => { });
+			return new SelectionManager(new RecordScope(records), visibleRecords, navigationManager, Encoding.UTF8, state, () => { });
 		}
 	}
 }

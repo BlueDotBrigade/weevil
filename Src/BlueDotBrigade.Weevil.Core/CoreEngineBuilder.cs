@@ -30,17 +30,11 @@
 		/// <seealso href="https://stackoverflow.com/questions/38480410/builder-pattern-with-nested-objects">StackOverflow: Builder pattern with nested objects</seealso>
 		internal class CoreEngineBuilder
 		{
-			private const int NotSet = -1;
-
 			private static readonly Version LatestVersion = new Version(512, 512, 512, 512);
 			public const int FirstRecordLineNumber = 1;
 
 			private readonly string _sourceFilePath;
-			private readonly CoreEngine _sourceInstance;
 			private readonly int _startAtLineNumber;
-
-			private readonly ClearOperation _clearOperation;
-			private readonly bool _hasBeenCleared;
 
 			private bool _isUsingUserDefinedContext;
 			private ContextDictionary _userDefinedContext;
@@ -74,7 +68,6 @@
 				_sourceFilePath = sourceFilePath;
 
 				_startAtLineNumber = startAtLineNumber;
-				_hasBeenCleared = false;
 
 				_userDefinedContext = new ContextDictionary();
 
@@ -84,22 +77,6 @@
 					startAtLineNumber);
 
 				Log.Default.Write(LogSeverityType.Debug, message);
-			}
-
-			internal CoreEngineBuilder(CoreEngine source, ClearOperation clearOperation)
-			{
-				_sourceInstance = source;
-				_clearOperation = clearOperation;
-				_hasBeenCleared = true;
-
-				// A cleared/derived engine keeps recording to the same telemetry session as its source.
-				_telemetryRecorder = source._telemetryRecorder;
-
-				_startAtLineNumber = NotSet;
-
-				Log.Default.Write(
-					LogSeverityType.Debug,
-					$"Core engine construction will read records from an existing instance. OriginalFilename={Path.GetFileName(source.SourceFilePath)}, Operation={clearOperation}");
 			}
 
 			public CoreEngineBuilder UsingTelemetry(ITelemetryMetricRecorder recorder)
@@ -171,8 +148,6 @@
 				return this;
 			}
 
-			private bool UseExistingInstance => _sourceInstance != null;
-
 			/// <summary>
 			/// Creates an instance of <see cref="CoreEngine"/> based on the provided parameters.
 			/// </summary>
@@ -195,7 +170,6 @@
 
 				var maxRecords = _maxRecords;
 				ImmutableArray<IRecord> records;
-				ImmutableArray<IRecord> selectedRecords = ImmutableArray<IRecord>.Empty;
 
 				var knownContext = new ContextDictionary();
 
@@ -208,107 +182,67 @@
 				var regions = new List<Region>();
 				var bookmarks = new List<Bookmark>();
 
-				if (this.UseExistingInstance)
+				sourceFileEncoding = EncodingHelper.GetEncoding(FileHelper.Open(_sourceFilePath));
+
+				using (FileStream dataSource = FileHelper.Open(_sourceFilePath))
 				{
-					sourceFilePath = _sourceInstance.SourceFilePath;
-					sourceFileLength = _sourceInstance._logFileMetrics.FileSize;
-					sourceFileEncoding = _sourceInstance._sourceFileEncoding;
+					sourceFilePath = _sourceFilePath;
+					sourceFileLength = dataSource.Length;
 
-					knownContext = _sourceInstance._context;
-					sourceFileRemarks = _sourceInstance._sourceFileRemarks;
+					IPlugin plugin = new PluginFactory().Create(sourceFilePath);
+					coreExtension = plugin.GetExtension(sourceFilePath);
 
-					tableOfContents = _sourceInstance.Navigate.TableOfContents.Sections.ToList();
-					regions.AddRange(_sourceInstance._regionManager.Regions);
-					bookmarks.AddRange(_sourceInstance._bookmarkManager.Bookmarks);
+					sidecarManager = new SidecarManager(_sourceFilePath);
 
-					inclusiveFilterHistory.AddRange(_sourceInstance.Filter.IncludeHistory);
-					exclusiveFilterHistory.AddRange(_sourceInstance.Filter.ExcludeHistory);
+					loadingStopwatch.Restart();
 
-					coreExtension = _sourceInstance._coreExtension;
-					sidecarManager = _sourceInstance._sidecarManager;
-					lineIndex = _sourceInstance._lineIndex;
+					lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
 
-					// The source's session and view state carry over, with its records.
-					session = _sourceInstance._session;
-					recordState = _sourceInstance._recordState;
+					// Sized from the line index, before the records are parsed.
+					var isKeepingAnnotations = _session != null;
+					session = _session ?? new Session(new AnnotationStore(lineIndex.LineCount));
+					recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
 
-					selectedRecords = _sourceInstance._selectionManager.GetSelected();
+					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
+					Range lineNumberRange = GetLineNumberRange();
 
-					var repository = new InMemoryRecordRepository(
-						_sourceInstance._allRecords,
-						_sourceInstance._filterManager.Results,
-						selectedRecords,
-						_clearOperation,
-						regions.ToImmutableArray());
+					// Reading starts at the start line's byte offset, taken from the line index (#977).
+					// A start line beyond the end of the log reads from the top, which finds no records to keep.
+					var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
+						? new SerializedRecordRepository(
+							 dataSource,
+							 coreExtension.GetRecordParser(),
+							 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
+							 startAtLineNumber,
+							 true)
+						: new SerializedRecordRepository(
+							 dataSource,
+							 coreExtension.GetRecordParser(),
+							 GetMaximumLinesToSearch(lineNumberRange));
 
-					records = repository.Get(maxRecords);
+					records = repository.Get(lineNumberRange, maxRecords);
 
-					selectedRecords = GetVisibleRecordSelection(records, selectedRecords);
-				}
-				else
-				{
-					sourceFileEncoding = EncodingHelper.GetEncoding(FileHelper.Open(_sourceFilePath));
+					loadingStopwatch.Stop();
 
-					using (FileStream dataSource = FileHelper.Open(_sourceFilePath))
+					sidecarManager.Load(
+						records,
+						isKeepingAnnotations ? null : session.Annotations,
+						out knownContext,
+						out sourceFileRemarks,
+						out inclusiveFilterHistory,
+						out exclusiveFilterHistory,
+						out tableOfContents,
+						out regions,
+						out bookmarks);
+
+					if (inclusiveFilterHistory.Count == 0)
 					{
-						sourceFilePath = _sourceFilePath;
-						sourceFileLength = dataSource.Length;
+						inclusiveFilterHistory.AddRange(plugin.GetDefaultInclusiveHistory());
+					}
 
-						IPlugin plugin = new PluginFactory().Create(sourceFilePath);
-						coreExtension = plugin.GetExtension(sourceFilePath);
-
-						sidecarManager = new SidecarManager(_sourceFilePath);
-
-						loadingStopwatch.Restart();
-
-						lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
-
-						// Sized from the line index, before the records are parsed.
-						var isKeepingAnnotations = _session != null;
-						session = _session ?? new Session(new AnnotationStore(lineIndex.LineCount));
-						recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
-
-						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
-						Range lineNumberRange = GetLineNumberRange();
-
-						// Reading starts at the start line's byte offset, taken from the line index (#977).
-						// A start line beyond the end of the log reads from the top, which finds no records to keep.
-						var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
-							? new SerializedRecordRepository(
-								 dataSource,
-								 coreExtension.GetRecordParser(),
-								 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
-								 startAtLineNumber,
-								 true)
-							: new SerializedRecordRepository(
-								 dataSource,
-								 coreExtension.GetRecordParser(),
-								 GetMaximumLinesToSearch(lineNumberRange));
-
-						records = repository.Get(lineNumberRange, maxRecords);
-
-						loadingStopwatch.Stop();
-
-						sidecarManager.Load(
-							records,
-							isKeepingAnnotations ? null : session.Annotations,
-							out knownContext,
-							out sourceFileRemarks,
-							out inclusiveFilterHistory,
-							out exclusiveFilterHistory,
-							out tableOfContents,
-							out regions,
-							out bookmarks);
-
-						if (inclusiveFilterHistory.Count == 0)
-						{
-							inclusiveFilterHistory.AddRange(plugin.GetDefaultInclusiveHistory());
-						}
-
-						if (exclusiveFilterHistory.Count == 0)
-						{
-							exclusiveFilterHistory.AddRange(plugin.GetDefaultExclusiveHistory());
-						}
+					if (exclusiveFilterHistory.Count == 0)
+					{
+						exclusiveFilterHistory.AddRange(plugin.GetDefaultExclusiveHistory());
 					}
 				}
 
@@ -327,7 +261,6 @@
 					records,
 					session,
 					recordState,
-					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
 					regions.ToImmutableArray(),
 					bookmarks.ToImmutableArray(),
@@ -344,8 +277,6 @@
 					coreEngine.Filter.ExcludeHistory.Clear();
 					coreEngine.Filter.ExcludeHistory.AddRange(exclusiveFilterHistory);
 				}
-
-				coreEngine.Selector.Select(selectedRecords);
 
 				return coreEngine;
 			}
@@ -380,21 +311,6 @@
 				long linesBeforeStart = System.Math.Max(lineNumberRange.Start.Value, FirstRecordLineNumber) - 1;
 
 				return (int)System.Math.Min(linesBeforeStart + MultilineRecordParser.MaximumLinesToSearch, int.MaxValue);
-			}
-
-			private ImmutableArray<IRecord> GetVisibleRecordSelection(ImmutableArray<IRecord> visibleRecords, ImmutableArray<IRecord>  selectedRecords)
-			{
-				var result = new List<IRecord>();
-
-				foreach (IRecord record in selectedRecords)
-				{
-					if (visibleRecords.TryRecordOfLineNumber(record.LineNumber, out _ ))
-					{
-						result.Add(record);
-					}
-				}
-
-				return result.ToImmutableArray();
 			}
 
 			private ContextDictionary GetContext(ICoreExtension extension, ContextDictionary knownContext, ImmutableArray<IRecord> records)
