@@ -105,6 +105,17 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 3. Implement one user story at a time: create its GitHub issue first, then implement it. Commits reference the issue (see below).
 4. Write formal requirements once an epic is complete: every user story is implemented, the user and you are satisfied with the result, and all automated tests pass. Write each requirement in EARS syntax as a GitHub issue that references the user stories it formalizes.
 
+## Reviewing Changes
+
+This rule is for the agent that makes a change, whether GitHub Copilot, Codex or Claude Code. An agent asked to review a pull request is its reviewer, and the rest of this rule does not apply to it.
+
+- When you make a non-trivial change, have at least two agents review it before you open its pull request:
+  - a **reviewer** looks for defects, broken rules and missing tests;
+  - a **sceptic** tries to disprove each finding. When the reviewer finds nothing, the sceptic tries to show what it missed.
+- Each starts with a fresh context, so neither inherits your reasoning. If you cannot start other agents, run each role as a separate pass that judges only the diff, not your earlier reasoning.
+- Fix what survives the sceptic, and say in the pull request what the review found.
+- A trivial change, such as a typo, a comment or a formatting fix, needs no review agents.
+
 ## GitHub Issues and Pull Requests
 
 - An epic (label `epic`) groups related work. User stories, tasks and bugs are its sub-issues. A user story may also stand alone, without an epic.
@@ -125,5 +136,5 @@ dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
 
 ## About These Instructions
 
-- GitHub Copilot and Claude Code share these instructions. Edit this file and the files in `.github/instructions/`; never put instructions in a `CLAUDE.md` file, which only imports them.
+- GitHub Copilot, Codex and Claude Code share these instructions. Edit this file and the files in `.github/instructions/`; never put instructions in a `CLAUDE.md` or `AGENTS.md` file, which only point to them.
 - Each file in `.github/instructions/` needs a `CLAUDE.md` that imports it, in the folder its `applyTo` covers, so Claude Code reads it too. See `Doc/LessonsLearned/AiAgentInstructionFiles.md`.

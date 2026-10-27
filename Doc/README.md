@@ -19,7 +19,7 @@ Requirements are not documents: each is a GitHub issue labelled `requirement`, a
 
 When a tool can check a rule, the tool's configuration is the source of truth, and documents only explain why. For example, code style lives in [`.editorconfig`](../.editorconfig), not in a guide.
 
-AI agent instructions live in [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) and [`.github/instructions/`](../.github/instructions/), shared by GitHub Copilot and Claude Code. See [AiAgentInstructionFiles.md](LessonsLearned/AiAgentInstructionFiles.md).
+AI agent instructions live in [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) and [`.github/instructions/`](../.github/instructions/), shared by GitHub Copilot, Codex and Claude Code. See [AiAgentInstructionFiles.md](LessonsLearned/AiAgentInstructionFiles.md).
 
 ## Research
 
