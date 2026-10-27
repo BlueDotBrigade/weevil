@@ -1184,7 +1184,7 @@
 		#region Commands: Filtering
 
 		/// <remarks>
-		/// Clear saves the sidecar and rebuilds the engine, which takes seconds on a large log, so it runs in the background,
+		/// Clear saves the sidecar, then narrows the engine's records and filters them again, which takes seconds on a large log, so it runs in the background,
 		/// as Reload does, with the progress bar a filter shows (#1071).
 		/// </remarks>
 		public Task ClearRecords(ClearOperation operation)

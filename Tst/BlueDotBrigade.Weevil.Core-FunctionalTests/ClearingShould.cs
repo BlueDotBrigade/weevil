@@ -1,9 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
-	using System.Linq;
 	using Data;
-	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -177,21 +175,5 @@
 			engine.HasBeenCleared.Should().BeTrue();
 		}
 
-		[TestMethod]
-		public void GivenAFilteredSelectionAcrossAGapBetweenRegions_WhenClearedBeyondRegions_ThenOnlyTheSelectedRecordsKeptStaySelected()
-		{
-			// Lines 7 and 9 are cleared, and lines 4 and 6, which the filter hid, were never selected.
-			IEngine engine = Engine
-				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
-				.Open();
-			engine.Regions.CreateFromSelection("First", new[] { 3, 6 });
-			engine.Regions.CreateFromSelection("Second", new[] { 11, 12 });
-			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(@"Id=0(03|05|07|09|11)$"));
-			engine.Selector.SelectAll();
-
-			engine.Clear(ClearOperation.BeyondRegions);
-
-			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(3, 5, 11);
-		}
 	}
 }

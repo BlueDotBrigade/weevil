@@ -319,7 +319,9 @@
 					_regionManager.Regions.ToImmutableArray())
 				.Get(int.MaxValue);
 
+			// As a new engine starts: selecting the kept records below sets the active record again.
 			_selectionManager.Reset();
+			_navigationManager.Reset();
 			_scope.Narrow(kept);
 			_hasBeenCleared = true;
 			_logFileMetrics = new LogFileMetrics(

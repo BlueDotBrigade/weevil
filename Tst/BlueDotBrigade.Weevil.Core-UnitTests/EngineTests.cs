@@ -57,6 +57,36 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenAFilteredSelectionAcrossAGapBetweenRegions_WhenClearedBeyondRegions_ThenOnlyTheSelectedRecordsKeptStaySelected()
+		{
+			// Lines 7 and 9 are cleared, and lines 4 and 6, which the filter hid, were never selected.
+			IEngine engine = OpenCopy();
+			engine.Regions.CreateFromSelection("First", new[] { 3, 6 });
+			engine.Regions.CreateFromSelection("Second", new[] { 11, 12 });
+			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(@"Id=0(03|05|07|09|11)$"));
+			engine.Selector.SelectAll();
+
+			engine.Clear(ClearOperation.BeyondRegions);
+
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(3, 5, 11);
+		}
+
+		[TestMethod]
+		public void GivenAnActiveRecordButNoSelectedRecord_WhenCleared_ThenNavigationStartsFromTheTop()
+		{
+			// A cleared engine starts as a new one did, with no active record.
+			IEngine engine = OpenCopy();
+			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 2), true);
+			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 20), true);
+			engine.Selector.Select(lineNumber: 10);
+			engine.Selector.Unselect(lineNumber: 10);
+
+			engine.Clear(ClearOperation.Selected);
+
+			engine.Navigate.NextPin().LineNumber.Should().Be(2);
+		}
+
+		[TestMethod]
 		public void GivenSubscribedToFilterResults_WhenReloading_ThenEngineRaisesTheEventForTheReappliedFilter()
 		{
 			IEngine engine = OpenCopy();
