@@ -19,7 +19,8 @@
 		private readonly ActiveRecord _activeRecord;
 		private ImmutableArray<INavigator> _navigators;
 
-		private TableOfContents _tableOfContents;
+		// The table of contents belongs to the log, so it lives in the session (#1107).
+		private readonly Session _session;
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
@@ -27,13 +28,13 @@
 			string sourceFilePath,
 			ICoreExtension coreExtension,
 			ImmutableArray<IRecord> allRecords,
-			TableOfContents tableOfContents,
+			Session session,
 			IRecordState state,
 			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_sourceFilePath = sourceFilePath;
 			_coreCoreExtension = coreExtension;
-			_tableOfContents = tableOfContents;
+			_session = session;
 			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
 
 			_activeRecord = new ActiveRecord(allRecords);
@@ -50,9 +51,9 @@
 			}.ToImmutableArray();
 		}
 
-		public TableOfContents TableOfContents => _tableOfContents;
+		public TableOfContents TableOfContents => _session.TableOfContents;
 
-		ITableOfContents INavigate.TableOfContents => _tableOfContents;
+		ITableOfContents INavigate.TableOfContents => _session.TableOfContents;
 
 		/// <summary>
 		/// Sets the focus of the navigation manager to the specified <paramref name="lineNumber"/>.
@@ -99,7 +100,7 @@
 				{
 					using (var sourceReader = new StreamReader(sourceFileStream))
 					{
-						_tableOfContents = _coreCoreExtension.BuildTableOfContents(sourceReader);
+						_session.TableOfContents = _coreCoreExtension.BuildTableOfContents(sourceReader);
 					}
 				}
 			}

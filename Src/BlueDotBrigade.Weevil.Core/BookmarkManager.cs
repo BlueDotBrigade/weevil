@@ -2,49 +2,55 @@ namespace BlueDotBrigade.Weevil
 {
 	using System;
 	using System.Linq;
-	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 
-	[DebuggerDisplay("Count={_bookmarks.Count}")]
+	/// <remarks>
+	/// Writes are serialized by the session's lock (#1107). Each write publishes a new array, so reads never wait.
+	/// </remarks>
+	[DebuggerDisplay("Count={_bookmarks.Length}")]
 	internal class BookmarkManager : IBookmarkManager
 	{
-		private readonly List<Bookmark> _bookmarks;
-		private readonly object _gate;
+		private readonly object _writeLock;
+		private ImmutableArray<Bookmark> _bookmarks = ImmutableArray<Bookmark>.Empty;
 
-		internal BookmarkManager() : this(ImmutableArray<Bookmark>.Empty)
+		internal BookmarkManager() : this(new object())
 		{
 			// nothing to do
 		}
 
-		internal BookmarkManager(ImmutableArray<Bookmark> bookmarks)
+		/// <param name="writeLock">The lock that serializes writes, shared by every store of the session.</param>
+		internal BookmarkManager(object writeLock)
 		{
-			_bookmarks = new List<Bookmark>(bookmarks);
-			_gate = new object();
+			_writeLock = writeLock ?? throw new ArgumentNullException(nameof(writeLock));
 		}
 
-		public ImmutableArray<Bookmark> Bookmarks
+		public ImmutableArray<Bookmark> Bookmarks => _bookmarks;
+
+		/// <summary>
+		/// Replaces every bookmark, such as with those read from the sidecar.
+		/// </summary>
+		internal void Load(ImmutableArray<Bookmark> bookmarks)
 		{
-			get
+			lock (_writeLock)
 			{
-				lock (_gate)
-				{
-					return _bookmarks.ToImmutableArray();
-				}
+				Publish(bookmarks.IsDefault ? ImmutableArray<Bookmark>.Empty : bookmarks);
 			}
 		}
 
 		public void Create(int id, string bookmarkName, int lineNumber)
 		{
-			lock (_gate)
+			lock (_writeLock)
 			{
+				ImmutableArray<Bookmark> bookmarks = _bookmarks;
+
 				var effectiveName = string.IsNullOrEmpty(bookmarkName)
 					? "Bookmark"
 					: bookmarkName;
 
 				var bookmark = new Bookmark(id, effectiveName, lineNumber);
 
-				if (_bookmarks.Any(r => r.Record.LineNumber == bookmark.Record.LineNumber))
+				if (bookmarks.Any(r => r.Record.LineNumber == bookmark.Record.LineNumber))
 				{
 					throw new InvalidOperationException("Unable to create bookmark because this bookmark has already been defined.");
 				}
@@ -53,22 +59,23 @@ namespace BlueDotBrigade.Weevil
 				// remove any existing bookmark with that same ID first
 				if (id > 0)
 				{
-					var existingBookmarkWithSameId = _bookmarks.FirstOrDefault(r => r.Id == id);
+					Bookmark existingBookmarkWithSameId = bookmarks.FirstOrDefault(r => r.Id == id);
 					if (existingBookmarkWithSameId != null)
 					{
-						_bookmarks.Remove(existingBookmarkWithSameId);
+						bookmarks = bookmarks.Remove(existingBookmarkWithSameId);
 					}
 				}
 
-				_bookmarks.Add(bookmark);
+				Publish(bookmarks.Add(bookmark));
 			}
 		}
 
 		public bool Rename(int lineNumber, string newName)
 		{
-			lock (_gate)
+			lock (_writeLock)
 			{
-				var existing = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
+				ImmutableArray<Bookmark> bookmarks = _bookmarks;
+				Bookmark existing = bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 
 				if (existing == null)
 				{
@@ -80,78 +87,72 @@ namespace BlueDotBrigade.Weevil
 					: newName;
 
 				var renamed = new Bookmark(existing.Id, effectiveName, existing.Record);
-				_bookmarks.Remove(existing);
-				_bookmarks.Add(renamed);
+				Publish(bookmarks.Remove(existing).Add(renamed));
 				return true;
 			}
 		}
 
 		public bool TryGetBookmarkName(int lineNumber, out string bookmarkName)
-		{			
-			lock (_gate)
+		{
+			// A loop rather than LINQ: filtering calls this for every record, and a lambda would allocate each time.
+			foreach (Bookmark bookmark in _bookmarks)
 			{
-				// A loop rather than LINQ: filtering calls this for every record, and a lambda would allocate each time.
-				foreach (Bookmark bookmark in _bookmarks)
+				if (bookmark.Record.LineNumber == lineNumber)
 				{
-					if (bookmark.Record.LineNumber == lineNumber)
-					{
-						bookmarkName = bookmark.Name;
-						return true;
-					}
+					bookmarkName = bookmark.Name;
+					return true;
 				}
-
-				bookmarkName = string.Empty;
-				return false;
 			}
+
+			bookmarkName = string.Empty;
+			return false;
 		}
 
 		public bool TryGetBookmarkById(int id, out Bookmark bookmark)
 		{
-			lock (_gate)
-			{
-				bookmark = _bookmarks.FirstOrDefault(r => r.Id == id);
-				return bookmark != null;
-			}
+			bookmark = _bookmarks.FirstOrDefault(r => r.Id == id);
+			return bookmark != null;
 		}
 
 		public bool TryGetBookmark(int lineNumber, out Bookmark bookmark)
 		{
-			lock (_gate)
-			{
-				bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
-				return bookmark != null;
-			}
+			bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
+			return bookmark != null;
 		}
 
 		public bool Contains(int lineNumber)
 		{
-			lock (_gate)
-			{
-				return _bookmarks.Any(r => r.Record.LineNumber == lineNumber);
-			}
+			return _bookmarks.Any(r => r.Record.LineNumber == lineNumber);
 		}
 
 		public void Clear()
 		{
-			lock (_gate)
+			lock (_writeLock)
 			{
-				_bookmarks.Clear();
+				Publish(ImmutableArray<Bookmark>.Empty);
 			}
 		}
 
 		public bool Clear(int lineNumber)
 		{
-			lock (_gate)
+			lock (_writeLock)
 			{
-				Bookmark bookmark = _bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
+				ImmutableArray<Bookmark> bookmarks = _bookmarks;
+				Bookmark bookmark = bookmarks.FirstOrDefault(r => r.Record.LineNumber == lineNumber);
 
 				if (bookmark != null)
 				{
-					_bookmarks.Remove(bookmark);
+					Publish(bookmarks.Remove(bookmark));
 					return true;
 				}
 				return false;
 			}
+		}
+
+		// Called while holding the lock.
+		private void Publish(ImmutableArray<Bookmark> bookmarks)
+		{
+			ImmutableInterlocked.InterlockedExchange(ref _bookmarks, bookmarks);
 		}
 	}
 }

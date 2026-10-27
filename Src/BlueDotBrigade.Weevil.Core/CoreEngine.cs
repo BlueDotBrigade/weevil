@@ -28,14 +28,13 @@
 		private readonly string _sourceFilePath;
 		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
-		private string _sourceFileRemarks;
 
 		private LogFileMetrics _logFileMetrics;
 
 		// The records this view keeps: Clear narrows them (#1018).
 		private readonly RecordScope _scope;
 
-		// Comments and pins are shared by every view of the log; flags and elapsed times belong to the view (#1013).
+		// The session's state is shared by every view of the log; flags and elapsed times belong to the view (#1013, #1107).
 		private readonly Session _session;
 		private readonly RecordState _recordState;
 
@@ -44,8 +43,6 @@
 		private readonly LineIndex _lineIndex;
 		private readonly SelectionManager _selectionManager;
 		private readonly NavigationManager _navigationManager;
-		private readonly IRegionManager _regionManager;
-		private readonly IBookmarkManager _bookmarkManager;
 		private readonly IAnalyze _analysisManager;
 
 		private volatile bool _hasBeenCleared;
@@ -75,15 +72,11 @@
 			TimeSpan sourceFileLoadingPeriod,
 			ICoreExtension coreExtension,
 			ContextDictionary context,
-			string sourceFileRemarks,
 			SidecarManager sidecarManager,
 			LineIndex lineIndex,
 			ImmutableArray<IRecord> records,
 			Session session,
 			RecordState recordState,
-			TableOfContents tableOfContents,
-			ImmutableArray<Region> regions,
-			ImmutableArray<Bookmark> bookmarks,
 			ITelemetryMetricRecorder telemetryRecorder)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -99,7 +92,6 @@
 
 			_coreExtension = coreExtension;
 			_context = context;
-			_sourceFileRemarks = sourceFileRemarks;
 
 			_sourceFilePath = sourceFilePath;
 			_sourceFileEncoding = sourceFileEncoding;
@@ -137,18 +129,14 @@
 			var filterAliases = _coreExtension.GetFilterAliases(_context);
 			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
-			_regionManager = new RegionManager(regions);
-
-			_bookmarkManager = new BookmarkManager(bookmarks);
-
 			_filterManager = new FilterManager(
 				_coreExtension,
 				_context,
 				filterAliasExpander,
 				_scope,
 				GetRecordCounters(),
-				_regionManager,
-				_bookmarkManager,
+				_session.Regions,
+				_session.Bookmarks,
 				_recordState,
 				_telemetryRecorder);
 
@@ -160,7 +148,7 @@
 				_sourceFilePath,
 				_coreExtension,
 				records,
-				tableOfContents,
+				_session,
 				_recordState,
 				_telemetryRecorder);
 
@@ -229,9 +217,9 @@
 
 		public IAnalyze Analyzer => _analysisManager;
 
-		public IRegionManager Regions => _regionManager;
+		public IRegionManager Regions => _session.Regions;
 
-		public IBookmarkManager Bookmarks => _bookmarkManager;
+		public IBookmarkManager Bookmarks => _session.Bookmarks;
 
 		public ImmutableArray<IRecord> Records => _scope.Records;
 
@@ -243,8 +231,8 @@
 
 		public string SourceFileRemarks
 		{
-			get { return _sourceFileRemarks ?? String.Empty; }
-			set { _sourceFileRemarks = value ?? String.Empty; }
+			get { return _session.Remarks; }
+			set { _session.Remarks = value; }
 		}
 
 		public string SourceFilePath => _sourceFilePath;
@@ -298,7 +286,7 @@
 					_filterManager.Results,
 					selected,
 					clearOperation,
-					_regionManager.Regions)
+					_session.Regions.Regions)
 				.Get(int.MaxValue);
 
 			// The selection and the active record are set for the kept records before the filter shows them,
@@ -360,10 +348,10 @@
 				Annotations = _session.Annotations,
 				Context = _context,
 				FilterTraits = _filterManager,
-				SourceFileRemarks = _sourceFileRemarks,
-				TableOfContents = _navigationManager.TableOfContents,
-				Regions = _regionManager.Regions,
-				Bookmarks = _bookmarkManager.Bookmarks,
+				SourceFileRemarks = _session.Remarks,
+				TableOfContents = _session.TableOfContents,
+				Regions = _session.Regions.Regions,
+				Bookmarks = _session.Bookmarks.Bookmarks,
 				ByteOffsetOfLine = lineNumber => GetByteOffset(logSource, lineNumber),
 			};
 
