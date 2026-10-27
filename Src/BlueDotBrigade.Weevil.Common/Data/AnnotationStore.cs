@@ -18,7 +18,7 @@ namespace BlueDotBrigade.Weevil.Data
 		private const byte PinnedBit = 0b01;
 		private const byte CommentBit = 0b10;
 
-		private readonly object _padlock = new object();
+		private readonly object _padlock;
 		// One lock and no capacity up front: writes are already serialized by _padlock, and most lines have no comment.
 		private readonly ConcurrentDictionary<int, string> _comments = new ConcurrentDictionary<int, string>(concurrencyLevel: 1, capacity: 0);
 		private byte[] _lines;
@@ -31,7 +31,16 @@ namespace BlueDotBrigade.Weevil.Data
 
 		/// <param name="lineCount">The number of lines expected. The store grows when a later line is annotated.</param>
 		public AnnotationStore(int lineCount)
+			: this(lineCount, new object())
 		{
+			// nothing to do
+		}
+
+		/// <param name="lineCount">The number of lines expected. The store grows when a later line is annotated.</param>
+		/// <param name="writeLock">The lock that serializes writes. A session shares one lock among all its stores (#1107).</param>
+		public AnnotationStore(int lineCount, object writeLock)
+		{
+			_padlock = writeLock ?? throw new ArgumentNullException(nameof(writeLock));
 			_lines = new byte[System.Math.Max(lineCount, 0) + 1];
 		}
 

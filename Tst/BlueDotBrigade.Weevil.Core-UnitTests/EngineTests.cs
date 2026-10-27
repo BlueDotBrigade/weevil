@@ -166,6 +166,25 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1108)]
+		public void GivenUnsavedBookmarksRegionsAndRemarks_WhenReloaded_ThenTheyAreKept()
+		{
+			// Reload keeps the session's state in memory, as it keeps comments and pins, instead of reading it back from the sidecar.
+			IEngine engine = OpenCopy();
+			engine.Bookmarks.Create(1, "Start", 10);
+			engine.Regions.CreateFromSelection("Startup", new[] { 20, 30 });
+			engine.SourceFileRemarks = "Reviewed";
+
+			engine.Reload();
+
+			engine.Bookmarks.TryGetBookmarkName(10, out var bookmarkName).Should().BeTrue();
+			bookmarkName.Should().Be("Start");
+			engine.Regions.TryGetRegionName(25, out var regionName).Should().BeTrue();
+			regionName.Should().Be("Startup");
+			engine.SourceFileRemarks.Should().Be("Reviewed");
+		}
+
+		[TestMethod]
 		public void GivenUnselectedRecordsWereCleared_WhenReloaded_ThenTheRestoredRecordsAreNotSelected()
 		{
 			IEngine engine = OpenCopy();

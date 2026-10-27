@@ -34,6 +34,11 @@ Callers open and use an engine without ever seeing its state. `Session` holds th
    - Bulk operations (Unpin All, Remove Comments, Paste, `FlagOnly`, Toggle Pin) and the sidecar keep calling the stores, so many lines change under one lock with one event. The GUI keeps `IEngine.Annotations` for its change events.
    - Not added: global or static access, extension methods on `IRecord`, per-record objects, or a snapshot of all of a record's values. Selection, results and bookmarks stay out of it.
    - Why: plugins see one contract that survives changes to the stores, components take one parameter instead of two or three, and each view of a log (#991) has its own `RecordState`.
+8. **One lock guards every write to the session, and reads never wait** (decided 2026-10-27, #1107).
+   - `Session` owns the lock. The comment and pin store, bookmarks, regions, remarks, the table of contents and the filter history all write under it.
+   - Each store publishes values that do not change, so filters read without locking. Bookmarks and regions publish a new array on each write; remarks, the table of contents and the filter history are replaced whole.
+   - Reload carries the session over, so unsaved bookmarks, regions, remarks and filter history are kept, as comments and pins are. The GUI saves before it reloads, so it sees no difference.
+   - Callers read the filter history but cannot change it; only the filter adds to it.
 
 ## Steps
 
@@ -83,7 +88,7 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - Left for piece 4: `FilterManager.PublishElapsedTimes` still makes a pass over every record after each filter only to notify `Metadata`, which nothing in the GUI listens to any more.
    - **`Metadata` removed (#1100). Done 2026-10-26.** `IRecord.Metadata` and `Metadata` go; `ViewAnnotations` becomes `RecordState` (decision 7), and `IFlags` goes, because callers use `IRecordState`. Opening a log no longer attaches each record, and a filter no longer makes a pass over every record to notify `Metadata`. Tests move to `RecordState` or the stores. Memory kept per record fell from 396 to 348 bytes (12%), and the working set from 3.13 to 2.77 GB per GB of log (300 MB log, Linux); the memory-budget test (#1086) is lowered from 480 to 420 bytes.
    - External plugins built for 2.x already fail to load in 3.0; they are fixed later (see Compatibility).
-   - Later, in a step of its own: bookmarks, regions, remarks, the table of contents and the filter history move into `Session`, under the same lock.
+   - Later, in step 9: bookmarks, regions, remarks, the table of contents and the filter history move into `Session`, under the same lock.
 8. **Clear without rebuilding (#1018). Done 2026-10-27.**
    - Clear narrows the engine's record scope, using today's rules for each clear operation. The engine, its events and the annotations stay.
    - Clear keeps doing what it does today: it resets the filter (the GUI re-applies its own), drops cleared records from the selection, recounts the metrics and sets `HasBeenCleared`.
@@ -93,6 +98,11 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - The selection is carried over as the selected records that are kept, as the rebuilt engine did. Remapping its positions would be wrong: the remap assumes the records it compares with include the old results, and Clear removes some of them.
    - Memory: as today, records outside the scope are dropped. This is safe because records are immutable and annotations live in the session. #988 replaces it with releasing content chunks.
    - Bug #1004 (unsaved comments and pins on cleared records are lost on save) is fixed before this phase. Its tests must keep passing.
+9. **Session state (#1107).** Split into two pull requests (decided 2026-10-27): bookmarks, regions, remarks and the table of contents (#1108), then the filter history (#1109).
+   - `Session` holds them beside the comment and pin store, under its one write lock (decision 8). The engine, its filter and its navigation read them from the session.
+   - A filter that includes bookmarks or regions no longer takes a lock for every record.
+   - Reload keeps them in memory instead of reading them back from the sidecar.
+   - The filter history becomes `IReadOnlyList<string>` for callers. Today it is a writable list that the filter's background thread changes without a lock, while the GUI and the sidecar save read it.
 
 ## Compatibility
 
