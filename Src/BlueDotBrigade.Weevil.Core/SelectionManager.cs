@@ -484,17 +484,41 @@
 		}
 
 		/// <summary>
-		/// Forgets the selection and the anchor, as a new engine starts. Clear calls it before it narrows the records (#1018),
-		/// because the selection's positions refer to results the engine no longer holds.
+		/// Keeps the selected records that <paramref name="kept"/> holds, at their positions in it, and forgets the anchor,
+		/// as a new engine starts (#1018).
 		/// </summary>
-		internal void Reset()
+		/// <remarks>
+		/// Clear calls it before its filter shows the kept records, so listeners read a selection that matches those results (#1015).
+		/// The positions are found by line number: remapping them would assume the records still include the old results, which Clear removes.
+		/// </remarks>
+		/// <param name="selected">The records selected before the Clear.</param>
+		/// <param name="kept">The records the Clear keeps, which its filter then shows.</param>
+		/// <returns>The last selected record kept, or <see cref="Record.Dummy"/> when none is.</returns>
+		internal IRecord Narrow(ImmutableArray<IRecord> selected, ImmutableArray<IRecord> kept)
 		{
+			IRecord lastKept = Record.Dummy;
+			var positions = new List<int>();
+
+			foreach (IRecord record in selected)
+			{
+				var position = FindPosition(kept, record.LineNumber);
+
+				if (position >= 0)
+				{
+					positions.Add(position);
+					lastKept = record;
+				}
+			}
+
 			lock (_selectionPadlock)
 			{
-				_selection = new PositionRanges();
-				_selectionPeriod = ElapsedTimes.Unknown;
+				_visibleRecords = kept;
+				_selection = PositionRanges.FromPositions(positions);
+				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
 				_anchorLineNumber = NoLineNumber;
 			}
+
+			return lastKept;
 		}
 
 		public ImmutableArray<IRecord> ClearAll()

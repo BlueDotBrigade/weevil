@@ -5,7 +5,6 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
-	using System.Linq;
 	using System.Reflection;
 	using System.Text;
 	using System.Threading;
@@ -316,12 +315,20 @@
 					_filterManager.Results,
 					selected,
 					clearOperation,
-					_regionManager.Regions.ToImmutableArray())
+					_regionManager.Regions)
 				.Get(int.MaxValue);
 
-			// As a new engine starts: selecting the kept records below sets the active record again.
-			_selectionManager.Reset();
+			// The selection and the active record are set for the kept records before the filter shows them,
+			// so listeners read the state that matches the new results (#1015). As with a new engine, the active record
+			// is the last selected record kept, or none.
+			IRecord lastSelectedKept = _selectionManager.Narrow(selected, kept);
 			_navigationManager.Reset();
+			_navigationManager.UpdateDataSource(kept);
+			if (Record.IsGenuine(lastSelectedKept))
+			{
+				_navigationManager.SetActiveLineNumber(lastSelectedKept.LineNumber);
+			}
+
 			_scope.Narrow(kept);
 			_hasBeenCleared = true;
 			_logFileMetrics = new LogFileMetrics(
@@ -332,10 +339,6 @@
 
 			// Not a user action, so no telemetry, as when the engine was created.
 			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None);
-
-			_selectionManager.Select(selected
-				.Where(record => kept.TryRecordOfLineNumber(record.LineNumber, out _))
-				.ToList());
 
 			Log.Default.Write(
 				LogSeverityType.Information,

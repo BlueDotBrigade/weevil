@@ -57,6 +57,21 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenSubscribedToTheFiltersOwnEvent_WhenClearKeepsASelectedRecord_ThenTheSelectionAlreadyMatchesTheResults()
+		{
+			// Listeners read the selection that matches the new results (#1015), when Clear resets the filter too.
+			IEngine engine = OpenCopy();
+			engine.Selector.Select(lineNumber: 101);
+			var selectedWhenNotified = new List<int>();
+			engine.Filter.ResultsChanged += (sender, e) =>
+				selectedWhenNotified.AddRange(engine.Selector.GetSelected().Select(record => record.LineNumber));
+
+			engine.Clear(ClearOperation.BeforeSelected);
+
+			selectedWhenNotified.Should().Equal(101);
+		}
+
+		[TestMethod]
 		public void GivenAFilteredSelectionAcrossAGapBetweenRegions_WhenClearedBeyondRegions_ThenOnlyTheSelectedRecordsKeptStaySelected()
 		{
 			// Lines 7 and 9 are cleared, and lines 4 and 6, which the filter hid, were never selected.
