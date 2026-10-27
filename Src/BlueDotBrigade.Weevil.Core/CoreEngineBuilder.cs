@@ -117,8 +117,8 @@
 			}
 
 			/// <summary>
-			/// Keeps the session and the flags of an engine this one replaces, as Reload does (#1013).
-			/// The sidecar's comments and pins are then not loaded again.
+			/// Keeps the session and the flags of an engine this one replaces, as Reload does (#1013, #1107).
+			/// The session's state, such as comments, pins, bookmarks, regions and remarks, is then not loaded from the sidecar again.
 			/// </summary>
 			public CoreEngineBuilder UsingStateOf(CoreEngine previous)
 			{
@@ -200,8 +200,8 @@
 					lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
 
 					// Sized from the line index, before the records are parsed.
-					var isKeepingAnnotations = _session != null;
-					session = _session ?? new Session(new AnnotationStore(lineIndex.LineCount));
+					var isKeepingSession = _session != null;
+					session = _session ?? new Session(lineIndex.LineCount);
 					recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
 
 					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
@@ -227,7 +227,7 @@
 
 					sidecarManager.Load(
 						records,
-						isKeepingAnnotations ? null : session.Annotations,
+						isKeepingSession ? null : session.Annotations,
 						out knownContext,
 						out sourceFileRemarks,
 						out inclusiveFilterHistory,
@@ -235,6 +235,12 @@
 						out tableOfContents,
 						out regions,
 						out bookmarks);
+
+					// Reload keeps the session's state in memory instead of reading it back from the sidecar (#1107).
+					if (!isKeepingSession)
+					{
+						session.Load(sourceFileRemarks, new TableOfContents(tableOfContents), regions.ToImmutableArray(), bookmarks.ToImmutableArray());
+					}
 
 					if (inclusiveFilterHistory.Count == 0)
 					{
@@ -256,15 +262,11 @@
 					loadingStopwatch.Elapsed,
 					coreExtension,
 					context,
-					sourceFileRemarks,
 					sidecarManager,
 					lineIndex,
 					records,
 					session,
 					recordState,
-					new TableOfContents(tableOfContents),
-					regions.ToImmutableArray(),
-					bookmarks.ToImmutableArray(),
 					_telemetryRecorder);
 
 				if (inclusiveFilterHistory.Count > 0)

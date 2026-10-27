@@ -166,6 +166,55 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1108)]
+		public void GivenUnsavedBookmarksRegionsAndRemarks_WhenReloaded_ThenTheyAreKept()
+		{
+			// Reload keeps the session's state in memory, as it keeps comments and pins, instead of reading it back from the sidecar.
+			IEngine engine = OpenCopy();
+			engine.Bookmarks.Create(1, "Start", 10);
+			engine.Regions.CreateFromSelection("Startup", new[] { 20, 30 });
+			engine.SourceFileRemarks = "Reviewed";
+
+			engine.Reload();
+
+			engine.Bookmarks.TryGetBookmarkName(10, out var bookmarkName).Should().BeTrue();
+			bookmarkName.Should().Be("Start");
+			engine.Regions.TryGetRegionName(25, out var regionName).Should().BeTrue();
+			regionName.Should().Be("Startup");
+			engine.SourceFileRemarks.Should().Be("Reviewed");
+		}
+
+		[TestMethod]
+		[WorkItem(1108)]
+		public void GivenSavedBookmarksRegionsAndRemarks_WhenTheLogIsOpenedAgain_ThenTheyAreReadFromTheSidecar()
+		{
+			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+				IEngine engine = Engine.UsingPath(logPath).Open();
+				engine.Bookmarks.Create(1, "Start", 10);
+				engine.Regions.CreateFromSelection("Startup", new[] { 20, 30 });
+				engine.SourceFileRemarks = "Reviewed";
+				engine.Save();
+
+				IEngine reopened = Engine.UsingPath(logPath).Open();
+
+				reopened.Bookmarks.TryGetBookmarkName(10, out var bookmarkName).Should().BeTrue();
+				bookmarkName.Should().Be("Start");
+				reopened.Regions.TryGetRegionName(25, out var regionName).Should().BeTrue();
+				regionName.Should().Be("Startup");
+				reopened.SourceFileRemarks.Should().Be("Reviewed");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		public void GivenUnselectedRecordsWereCleared_WhenReloaded_ThenTheRestoredRecordsAreNotSelected()
 		{
 			IEngine engine = OpenCopy();
