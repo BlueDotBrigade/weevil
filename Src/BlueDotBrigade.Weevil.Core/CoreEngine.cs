@@ -138,6 +138,8 @@
 				_session.Regions,
 				_session.Bookmarks,
 				_recordState,
+				_session.IncludeHistory,
+				_session.ExcludeHistory,
 				_telemetryRecorder);
 
 			// Construction-time default filter: applied without recording telemetry (not a user action).

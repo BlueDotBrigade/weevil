@@ -236,12 +236,6 @@
 						out regions,
 						out bookmarks);
 
-					// Reload keeps the session's state in memory instead of reading it back from the sidecar (#1107).
-					if (!isKeepingSession)
-					{
-						session.Load(sourceFileRemarks, new TableOfContents(tableOfContents), regions.ToImmutableArray(), bookmarks.ToImmutableArray());
-					}
-
 					if (inclusiveFilterHistory.Count == 0)
 					{
 						inclusiveFilterHistory.AddRange(plugin.GetDefaultInclusiveHistory());
@@ -250,6 +244,18 @@
 					if (exclusiveFilterHistory.Count == 0)
 					{
 						exclusiveFilterHistory.AddRange(plugin.GetDefaultExclusiveHistory());
+					}
+
+					// Reload keeps the session's state in memory instead of reading it back from the sidecar (#1107).
+					if (!isKeepingSession)
+					{
+						session.Load(
+							sourceFileRemarks,
+							new TableOfContents(tableOfContents),
+							regions.ToImmutableArray(),
+							bookmarks.ToImmutableArray(),
+							inclusiveFilterHistory,
+							exclusiveFilterHistory);
 					}
 				}
 
@@ -268,18 +274,6 @@
 					session,
 					recordState,
 					_telemetryRecorder);
-
-				if (inclusiveFilterHistory.Count > 0)
-				{
-					coreEngine.Filter.IncludeHistory.Clear();
-					coreEngine.Filter.IncludeHistory.AddRange(inclusiveFilterHistory);
-				}
-
-				if (exclusiveFilterHistory.Count > 0)
-				{
-					coreEngine.Filter.ExcludeHistory.Clear();
-					coreEngine.Filter.ExcludeHistory.AddRange(exclusiveFilterHistory);
-				}
 
 				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);
 

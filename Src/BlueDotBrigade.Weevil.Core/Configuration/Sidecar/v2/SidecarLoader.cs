@@ -318,7 +318,7 @@
 			return snapshot;
 		}
 
-		private static List<Filter> GetFilterHistorySnapshot(IList<string> filterHistory)
+		private static List<Filter> GetFilterHistorySnapshot(IEnumerable<string> filterHistory)
 		{
 			var snapshot = new List<Filter>();
 

@@ -98,11 +98,11 @@ Step 6 comes before step 5 (decided 2026-10-22): it needs nothing from the row d
    - The selection is carried over as the selected records that are kept, as the rebuilt engine did. Remapping its positions would be wrong: the remap assumes the records it compares with include the old results, and Clear removes some of them.
    - Memory: as today, records outside the scope are dropped. This is safe because records are immutable and annotations live in the session. #988 replaces it with releasing content chunks.
    - Bug #1004 (unsaved comments and pins on cleared records are lost on save) is fixed before this phase. Its tests must keep passing.
-9. **Session state (#1107).** Split into two pull requests (decided 2026-10-27): bookmarks, regions, remarks and the table of contents (#1108), then the filter history (#1109).
+9. **Session state (#1107). Done 2026-10-27.** Split into two pull requests (decided 2026-10-27): bookmarks, regions, remarks and the table of contents (#1108, done 2026-10-27), then the filter history (#1109, done 2026-10-27).
    - `Session` holds them beside the comment and pin store, under its one write lock (decision 8). The engine, its filter and its navigation read them from the session.
    - A filter that includes bookmarks or regions no longer takes a lock for every record.
    - Reload keeps them in memory instead of reading them back from the sidecar.
-   - The filter history becomes `IReadOnlyList<string>` for callers. Today it is a writable list that the filter's background thread changes without a lock, while the GUI and the sidecar save read it.
+   - The filter history becomes `IReadOnlyList<string>` for callers. It was a writable list that the filter's background thread changed without a lock, while the GUI and the sidecar save read it. Each history stays the same object while its values change, because the GUI recognizes the history that changed by the event's sender.
 
 ## Compatibility
 

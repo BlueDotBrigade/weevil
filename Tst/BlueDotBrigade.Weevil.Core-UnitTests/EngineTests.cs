@@ -185,6 +185,22 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1109)]
+		public void GivenFiltersApplied_WhenReloaded_ThenTheHistoryIsKeptWithoutSaving()
+		{
+			// Reload keeps the history in memory, as it keeps the rest of the session, instead of reading it back from the sidecar.
+			IEngine engine = OpenCopy();
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2"));
+			IReadOnlyList<string> history = engine.Filter.IncludeHistory;
+
+			engine.Reload();
+
+			engine.Filter.IncludeHistory.Should().BeSameAs(history);
+			history.Take(2).Should().Equal("Id=2", "Id=1");
+		}
+
+		[TestMethod]
 		[WorkItem(1108)]
 		public void GivenSavedBookmarksRegionsAndRemarks_WhenTheLogIsOpenedAgain_ThenTheyAreReadFromTheSidecar()
 		{
