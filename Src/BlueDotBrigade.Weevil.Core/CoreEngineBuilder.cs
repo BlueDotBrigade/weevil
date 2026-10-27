@@ -289,8 +289,9 @@
 			/// so a shared application log is enough to compare them (#1105).
 			/// </summary>
 			/// <remarks>
-			/// The memory is the whole process's, so it includes the application and any log still open.
-			/// The engine has already collected the memory used while parsing.
+			/// The engine has already collected the memory used while parsing. The memory is the whole process's:
+			/// it includes the application, and any engine the caller still holds, such as the one a Reload or a second open replaces.
+			/// So only the first open in a process measures one log on its own.
 			/// </remarks>
 			private static void LogFileLoaded(CoreEngine coreEngine, TimeSpan openingDuration)
 			{
