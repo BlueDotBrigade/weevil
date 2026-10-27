@@ -28,30 +28,30 @@ Claude Code also saves the plans it writes in plan mode to `Doc/Plans/`, set by 
 
 ## One Source, Not One File
 
-No file is read by all three agents on their own, but the rules can still live in one place, as long as the other files only point to it:
+One source is possible: the rules live once in Copilot's files, and the other files only point to them.
 
-- **Copilot's file holds the rules.** Some Copilot features read only `.github/copilot-instructions.md` and cannot follow a reference: Chat on github.com, and code review in VS Code and Visual Studio. Every other agent can reach that file.
-- **Claude Code always loads them.** An `@path` import becomes part of `CLAUDE.md`.
-- **Codex is the weak spot.** `AGENTS.md` asks it to read the rules, and it nearly always does, but it is following an instruction, not loading a file.
+- **Copilot's files hold the rules.** Some Copilot features read only `.github/copilot-instructions.md` and cannot follow a reference: Chat on github.com, and code review in VS Code and Visual Studio. Every other agent can reach Copilot's files.
+- **Claude Code loads them without being asked.** An `@path` import becomes part of the `CLAUDE.md` that holds it: the root file at launch, and a folder's file when Claude works in that folder.
+- **Codex is the weak spot.** `AGENTS.md` asks it to read the rules, but it is following an instruction, not loading a file.
 
 Do not copy the rules into more files by hand. Copies drift, and Copilot's cloud agent and its code review on github.com read several of these files, so they would load the rules more than once. If Codex is found to skip the rules:
 
 | Option | Gain | Cost |
 |---|---|---|
 | Generate `AGENTS.md` from the shared files, and have CI fail when it is out of date | Codex reads the rules in its own file | A build step. Copilot features that read both files load the rules twice. |
-| Make `AGENTS.md` a symbolic link to `.github/copilot-instructions.md` | One physical file | On Windows, Git needs Developer Mode and `core.symlinks`. Without them, the checkout holds a text file containing the path. |
+| Make `AGENTS.md` a symbolic link to `.github/copilot-instructions.md` | One physical file | Codex review loses the `## Review guidelines` section and the folder rules. Copilot features that read both files load the rules twice. On Windows, Git needs `core.symlinks` and Developer Mode or administrator rights; without them, the checkout holds a text file containing the path. |
 
 ## Checking That an Agent Read the Rules
 
-Ask each agent a question that only the rules answer, such as how to name a branch for a bug fix (`BugFix/<IssueNumber>-<ShortName>`):
+Ask each agent a question that only the rules answer, such as how to name a branch for a bug fix, then compare its answer with `.github/copilot-instructions.md`:
 
-- **Claude Code:** `/memory` lists the files it loaded.
+- **Claude Code:** `/context` lists the `CLAUDE.md` files loaded at launch. A folder's `CLAUDE.md` loads when Claude works in that folder, and Claude Code then shows a `Loaded` line with its path.
 - **Copilot Chat:** a response that used the rules lists `.github/copilot-instructions.md` under its references.
 - **Codex:** check its answer, and whether its pull request reviews cite the repository's rules.
 
 ## Instructions Ask, CI Enforces
 
-An instruction file asks an agent to do something, but nothing makes the agent comply. A rule that must hold, such as a review by a reviewer and a sceptic, needs a check that fails, in CI or in branch protection.
+An instruction file asks an agent to do something, but nothing makes the agent comply. A rule that must hold, such as a required pull request review, needs a check that fails, in CI or in branch protection. A rule no check can see, such as running a reviewer and a sceptic before opening a pull request, stays a request.
 
 ## Which Copilot Feature Reads What
 
