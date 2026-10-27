@@ -1,3 +1,5 @@
 ﻿global using FluentAssertions;
 
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+global using BlueDotBrigade.DatenLokator.TestTools;
