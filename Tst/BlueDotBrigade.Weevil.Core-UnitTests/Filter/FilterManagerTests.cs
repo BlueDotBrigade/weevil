@@ -82,7 +82,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				Substitute.For<ICoreExtension>(),
 				new ContextDictionary(),
 				aliasExpander,
-				records,
+				new RecordScope(records),
 				ImmutableArray.Create(collector),
 				Substitute.For<IRegionManager>(),
 				Substitute.For<IBookmarkManager>(),

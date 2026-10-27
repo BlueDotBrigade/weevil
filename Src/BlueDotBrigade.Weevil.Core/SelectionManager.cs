@@ -30,7 +30,7 @@
 
 		private readonly Encoding _sourceFileEncoding;
 
-		private readonly ImmutableArray<IRecord> _allRecords;
+		private readonly RecordScope _scope;
 		private readonly Action _reapplyCurrentFilter;
 
 		private readonly NavigationManager _navigationManager;
@@ -44,7 +44,7 @@
 
 		#region Object Lifetime
 		public SelectionManager(
-			ImmutableArray<IRecord> allRecords,
+			RecordScope scope,
 			ImmutableArray<IRecord> visibleRecords,
 			NavigationManager navigationManager,
 			Encoding sourceFileEncoding,
@@ -58,7 +58,7 @@
 
 			_sourceFileEncoding = sourceFileEncoding;
 
-			_allRecords = allRecords;
+			_scope = scope;
 			_visibleRecords = visibleRecords;
 			_reapplyCurrentFilter = reapplyCurrentFilter;
 
@@ -201,7 +201,7 @@
 
 				_selection = before == 0
 					? new PositionRanges()
-					: PositionRanges.Remap(_selection, _visibleRecords, visibleRecords, _allRecords);
+					: PositionRanges.Remap(_selection, _visibleRecords, visibleRecords, _scope.Records);
 				_visibleRecords = visibleRecords;
 				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
 
@@ -335,7 +335,7 @@
 		{
 			ImmutableArray<IRecord> sortedRecords = _selection.Count > 1
 				? GetSelected()
-				: _allRecords.OrderBy(x => x.LineNumber).ToImmutableArray();
+				: _scope.Records.OrderBy(x => x.LineNumber).ToImmutableArray();
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
@@ -379,7 +379,7 @@
 				// Compared with this engine's records, so records a Clear removed and Reload restored are not selected.
 				_selection = selection.Count == 0
 					? new PositionRanges()
-					: PositionRanges.Remap(selection, results, _visibleRecords, _allRecords);
+					: PositionRanges.Remap(selection, results, _visibleRecords, _scope.Records);
 				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
 				_anchorLineNumber = FindPosition(_visibleRecords, anchorLineNumber) < 0 ? NoLineNumber : anchorLineNumber;
 			}
@@ -480,6 +480,20 @@
 			if (FindPosition(_visibleRecords, lineNumber) >= 0)
 			{
 				_navigationManager.SetActiveLineNumber(lineNumber);
+			}
+		}
+
+		/// <summary>
+		/// Forgets the selection and the anchor, as a new engine starts. Clear calls it before it narrows the records (#1018),
+		/// because the selection's positions refer to results the engine no longer holds.
+		/// </summary>
+		internal void Reset()
+		{
+			lock (_selectionPadlock)
+			{
+				_selection = new PositionRanges();
+				_selectionPeriod = ElapsedTimes.Unknown;
+				_anchorLineNumber = NoLineNumber;
 			}
 		}
 

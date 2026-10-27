@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
+	using System.Linq;
 	using System.Reflection;
 	using System.Text;
 	using System.Threading;
@@ -30,9 +31,10 @@
 		private readonly ContextDictionary _context;
 		private string _sourceFileRemarks;
 
-		private readonly LogFileMetrics _logFileMetrics;
+		private LogFileMetrics _logFileMetrics;
 
-		private readonly ImmutableArray<IRecord> _allRecords;
+		// The records this view keeps: Clear narrows them (#1018).
+		private readonly RecordScope _scope;
 
 		// Comments and pins are shared by every view of the log; flags and elapsed times belong to the view (#1013).
 		private readonly Session _session;
@@ -47,9 +49,7 @@
 		private readonly IBookmarkManager _bookmarkManager;
 		private readonly IAnalyze _analysisManager;
 
-		private readonly int _originalRecordCount;
-
-		private readonly bool _hasBeenCleared;
+		private volatile bool _hasBeenCleared;
 
 		private static int _instancesCreated;
 		private readonly int _instanceId;
@@ -64,15 +64,6 @@
 		internal static CoreEngineBuilder FromPath(string path)
 		{
 			return new CoreEngineBuilder(path);
-		}
-
-		/// <summary>
-		/// Facilitates the creation of a new <see cref="CoreEngine"/> object using a Fluent API and the current instance.
-		/// </summary>
-		/// <param name="clearOperation">Indicates what records will be omitted from the current object, when a new instance is created..</param>
-		internal CoreEngineBuilder FromInstance(ClearOperation clearOperation)
-		{
-			return new CoreEngineBuilder(this, clearOperation);
 		}
 
 		/// <summary>
@@ -91,7 +82,6 @@
 			ImmutableArray<IRecord> records,
 			Session session,
 			RecordState recordState,
-			bool hasBeenCleared,
 			TableOfContents tableOfContents,
 			ImmutableArray<Region> regions,
 			ImmutableArray<Bookmark> bookmarks,
@@ -115,10 +105,9 @@
 			_sourceFilePath = sourceFilePath;
 			_sourceFileEncoding = sourceFileEncoding;
 
-			_allRecords = records;
+			_scope = new RecordScope(records);
 			_session = session;
 			_recordState = recordState;
-			_hasBeenCleared = hasBeenCleared;
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
@@ -136,15 +125,13 @@
 				new Dictionary<string, object>
 				{
 					{ "SourceFileLoadingPeriod", sourceFileLoadingPeriod.TotalSeconds},
-					{ "RecordCount", _allRecords.Length},
+					{ "RecordCount", records.Length},
 					{ "FileSize", sourceFileLength},
 					{ "SourceFilePath", _sourceFilePath},
 				});
 
 			_sidecarManager = sidecarManager;
 			_lineIndex = lineIndex;
-
-			_originalRecordCount = _allRecords.Length;
 
 			_analysisManager = new AnalysisManager(this, _coreExtension, _telemetryRecorder);
 
@@ -159,7 +146,7 @@
 				_coreExtension,
 				_context,
 				filterAliasExpander,
-				_allRecords,
+				_scope,
 				GetRecordCounters(),
 				_regionManager,
 				_bookmarkManager,
@@ -173,13 +160,13 @@
 			_navigationManager = new NavigationManager(
 				_sourceFilePath,
 				_coreExtension,
-				_allRecords,
+				records,
 				tableOfContents,
 				_recordState,
 				_telemetryRecorder);
 
 			_selectionManager = new SelectionManager(
-				_allRecords,
+				_scope,
 				_filterManager.Results,
 				_navigationManager, // TODO: adding navigation manager is a code smell
 				_sourceFileEncoding,
@@ -190,7 +177,7 @@
 
 			_logFileMetrics = new LogFileMetrics(
 				sourceFileLength,
-				_allRecords.Length,
+				records.Length,
 				sourceFileLoadingPeriod,
 				recordAndMetadataLoadingStopwatch.Elapsed);
 
@@ -241,7 +228,7 @@
 		#endregion
 
 		#region Properties
-		public IRecord this[int index] => _allRecords[index];
+		public IRecord this[int index] => _scope.Records[index];
 
 		public LogFileMetrics Metrics => _logFileMetrics;
 
@@ -264,9 +251,9 @@
 
 		public IBookmarkManager Bookmarks => _bookmarkManager;
 
-		public ImmutableArray<IRecord> Records => _allRecords;
+		public ImmutableArray<IRecord> Records => _scope.Records;
 
-		public int Count => _allRecords.Length;
+		public int Count => _scope.Records.Length;
 
 		public bool HasBeenCleared => _hasBeenCleared;
 
@@ -312,6 +299,53 @@
 				.ToImmutableArray();
 		}
 
+		/// <summary>
+		/// Narrows the records this view keeps, using the rules of <paramref name="clearOperation"/> (#1018).
+		/// The engine, its filter, its events and the session stay.
+		/// </summary>
+		/// <remarks>
+		/// As when Clear built a new engine: the filter is reset, the selected records that are kept stay selected,
+		/// and the record count and the filter's metrics are recounted. The caller saves the sidecar first (#1004).
+		/// </remarks>
+		internal void Clear(ClearOperation clearOperation)
+		{
+			ImmutableArray<IRecord> selected = _selectionManager.GetSelected();
+
+			ImmutableArray<IRecord> kept = new InMemoryRecordRepository(
+					_scope.Records,
+					_filterManager.Results,
+					selected,
+					clearOperation,
+					_regionManager.Regions.ToImmutableArray())
+				.Get(int.MaxValue);
+
+			_selectionManager.Reset();
+			_scope.Narrow(kept);
+			_hasBeenCleared = true;
+			_logFileMetrics = new LogFileMetrics(
+				_logFileMetrics.FileSize,
+				kept.Length,
+				_logFileMetrics.SourceFileLoadingPeriod,
+				_logFileMetrics.RecordAndMetadataLoadDuration);
+
+			// Not a user action, so no telemetry, as when the engine was created.
+			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None);
+
+			_selectionManager.Select(selected
+				.Where(record => kept.TryRecordOfLineNumber(record.LineNumber, out _))
+				.ToList());
+
+			Log.Default.Write(
+				LogSeverityType.Information,
+				"Records have been cleared.",
+				new Dictionary<string, object>
+				{
+					{ "ClearOperation", clearOperation },
+					{ "RecordsKept", kept.Length },
+					{ "SelectedRecordsKept", _selectionManager.Selected.Count },
+				});
+		}
+
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)
 		{
 			// Before anyone else hears of the new results, so they read the selection that matches them (#1015).
@@ -334,7 +368,7 @@
 
 			var sidecarData = new SidecarData
 			{
-				Records = _allRecords,
+				Records = _scope.Records,
 				Annotations = _session.Annotations,
 				Context = _context,
 				FilterTraits = _filterManager,

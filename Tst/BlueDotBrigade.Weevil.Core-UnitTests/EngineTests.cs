@@ -40,6 +40,23 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenSubscribedToTheFiltersOwnEvent_WhenFilteringAfterClear_ThenTheFilterStillRaisesIt()
+		{
+			// Clear keeps the engine's filter (#1018), so a subscription to the filter itself survives.
+			IEngine engine = OpenCopy();
+			IFilter filter = engine.Filter;
+			var results = new List<int>();
+			filter.ResultsChanged += (sender, e) => results.Add(e.Records.Length);
+
+			engine.Selector.Select(lineNumber: 101);
+			engine.Clear(ClearOperation.BeforeSelected);
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+
+			engine.Filter.Should().BeSameAs(filter);
+			results.Should().EndWith(engine.Filter.Results.Length);
+		}
+
+		[TestMethod]
 		public void GivenSubscribedToFilterResults_WhenReloading_ThenEngineRaisesTheEventForTheReappliedFilter()
 		{
 			IEngine engine = OpenCopy();

@@ -158,7 +158,17 @@
 				_coreEngine.Save();
 			}
 
-			Replace(_coreEngine.FromInstance(clearOperation).Build());
+			// Clear resets the filter without telling subscribers, as IEngine documents; the engine itself still hears of it.
+			UnsubscribeFrom(_coreEngine);
+
+			try
+			{
+				_coreEngine.Clear(clearOperation);
+			}
+			finally
+			{
+				SubscribeTo(_coreEngine);
+			}
 		}
 
 		public void Reload()
@@ -169,7 +179,7 @@
 
 			CoreEngine previous = _coreEngine;
 
-			// The session and the flags carry across Reload, as they do across Clear (#1013).
+			// The session and the flags carry across Reload (#1013).
 			Replace(CoreEngine
 				.FromPath(sourcePath)
 				.UsingStateOf(_coreEngine)
