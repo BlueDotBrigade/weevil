@@ -34,7 +34,7 @@
 
                 public string DisplayName => "Stable Value Runs";
 
-                public Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+                public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
                 {
                         var flaggedLineNumbers = new HashSet<int>();
 
@@ -69,7 +69,7 @@
 
                                         foreach (IRecord record in records)
                                         {
-                                                AnalysisHelper.ClearRecordFlag(record, flags, canUpdateMetadata);
+                                                AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 
                                                 var matchedKeys = new HashSet<string>();
                                                 IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
@@ -126,8 +126,7 @@
                                                         flaggedLineNumbers.Add(record.LineNumber);
                                                         AnalysisHelper.UpdateRecordMetadata(
                                                                 record,
-                                                                annotations,
-                                                                flags,
+                                                                state,
                                                                 true,
                                                                 $"Start {friendlyName}: {value}",
                                                                 canUpdateMetadata);
@@ -138,8 +137,7 @@
                                                         flaggedLineNumbers.Add(run.LastRecord.LineNumber);
                                                         AnalysisHelper.UpdateRecordMetadata(
                                                                 run.LastRecord,
-                                                                annotations,
-                                                                flags,
+                                                                state,
                                                                 true,
                                                                 $"Stop {run.FriendlyName}: {run.Value}",
                                                                 canUpdateMetadata);

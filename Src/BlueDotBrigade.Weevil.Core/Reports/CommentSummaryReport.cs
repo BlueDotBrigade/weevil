@@ -12,12 +12,12 @@
 		private const string DefaultFileName = @"CommentSummary.tsv";
 
 		private readonly ImmutableArray<IRecord> _records;
-		private readonly IAnnotations _annotations;
+		private readonly IRecordState _state;
 
-		public CommentSummaryReport(ImmutableArray<IRecord> records, IAnnotations annotations)
+		public CommentSummaryReport(ImmutableArray<IRecord> records, IRecordState state)
 		{
 			_records = records;
-			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+			_state = state ?? throw new ArgumentNullException(nameof(state));
 		}
 
 		public void Generate(params object[] userParameters)
@@ -36,7 +36,7 @@
 				{
 					IRecord currentRecord = _records[i];
 
-					if (_annotations.HasComment(currentRecord.LineNumber))
+					if (_state.HasComment(currentRecord))
 					{
 						DateTime timestamp = DateTime.MaxValue;
 
@@ -59,7 +59,7 @@
 						if (!timestamp.Equals(DateTime.MaxValue))
 						{
 							var recordedAt = timestamp.ToString("HH:mm:ss.ffff", CultureInfo.InvariantCulture);
-							streamWriter.WriteLine($"{recordedAt}\t{_annotations.GetComment(currentRecord.LineNumber)}");
+							streamWriter.WriteLine($"{recordedAt}\t{_state.GetComment(currentRecord)}");
 						}
 					}
 				}

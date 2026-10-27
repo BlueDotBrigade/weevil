@@ -63,7 +63,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			engine.Filter.Results[9].Metadata.IsPinned = true;
+			engine.RecordState.SetPinned(engine.Filter.Results[9], true);
 
 			engine.Selector.Select(1);
 			IRecord pinnedRecord = engine.Navigate.NextPin();
@@ -81,16 +81,16 @@
 
 			engine.Analyzer.RemoveComments(true);
 
-			engine.Records[12].Metadata.Comment = "First";
-			engine.Records[24].Metadata.Comment = "Second";
+			engine.RecordState.SetComment(engine.Records[12], "First");
+			engine.RecordState.SetComment(engine.Records[24], "Second");
 
 			engine.Selector.Select(1);
 
 			IRecord record = engine.Navigate.NextComment();
-			record.Metadata.Comment.Should().Be("First");
+			engine.RecordState.GetComment(record).Should().Be("First");
 
 			record = engine.Navigate.NextComment();
-			record.Metadata.Comment.Should().Be("Second");
+			engine.RecordState.GetComment(record).Should().Be("Second");
 		}
 
 		[TestMethod]
@@ -102,18 +102,18 @@
 
 			engine.Analyzer.RemoveComments(true);
 
-			engine.Records[12].Metadata.Comment = "First note";
-			engine.Records[24].Metadata.Comment = "Second item";
-			engine.Records[36].Metadata.Comment = "Third note";
+			engine.RecordState.SetComment(engine.Records[12], "First note");
+			engine.RecordState.SetComment(engine.Records[24], "Second item");
+			engine.RecordState.SetComment(engine.Records[36], "Third note");
 
 			engine.Selector.Select(1);
 
 			// Search for "note" - should find records 12 and 36
 			IRecord record = engine.Navigate.NextCommentWithText("note", false);
-			record.Metadata.Comment.Should().Be("First note");
+			engine.RecordState.GetComment(record).Should().Be("First note");
 
 			record = engine.Navigate.NextCommentWithText("note", false);
-			record.Metadata.Comment.Should().Be("Third note");
+			engine.RecordState.GetComment(record).Should().Be("Third note");
 		}
 
 		[TestMethod]
@@ -125,18 +125,18 @@
 
 			engine.Analyzer.RemoveComments(true);
 
-			engine.Records[12].Metadata.Comment = "First note";
-			engine.Records[24].Metadata.Comment = "Second item";
-			engine.Records[36].Metadata.Comment = "Third note";
+			engine.RecordState.SetComment(engine.Records[12], "First note");
+			engine.RecordState.SetComment(engine.Records[24], "Second item");
+			engine.RecordState.SetComment(engine.Records[36], "Third note");
 
 			engine.Selector.Select(50);
 
 			// Search backwards for "note" - should find records 36 and 12
 			IRecord record = engine.Navigate.PreviousCommentWithText("note", false);
-			record.Metadata.Comment.Should().Be("Third note");
+			engine.RecordState.GetComment(record).Should().Be("Third note");
 
 			record = engine.Navigate.PreviousCommentWithText("note", false);
-			record.Metadata.Comment.Should().Be("First note");
+			engine.RecordState.GetComment(record).Should().Be("First note");
 		}
 
 		[TestMethod]
@@ -148,14 +148,14 @@
 
 			engine.Analyzer.RemoveComments(true);
 
-			engine.Records[12].Metadata.Comment = "First NOTE";
-			engine.Records[24].Metadata.Comment = "Second note";
+			engine.RecordState.SetComment(engine.Records[12], "First NOTE");
+			engine.RecordState.SetComment(engine.Records[24], "Second note");
 
 			engine.Selector.Select(1);
 
 			// Case-sensitive search for "note" (lowercase) should only find record 24
 			IRecord record = engine.Navigate.NextCommentWithText("note", true);
-			record.Metadata.Comment.Should().Be("Second note");
+			engine.RecordState.GetComment(record).Should().Be("Second note");
 		}
 
 		[TestMethod]
@@ -167,18 +167,18 @@
 
 			engine.Analyzer.RemoveComments(true);
 
-			engine.Records[12].Metadata.Comment = "Bug #123";
-			engine.Records[24].Metadata.Comment = "Feature request";
-			engine.Records[36].Metadata.Comment = "Bug #456";
+			engine.RecordState.SetComment(engine.Records[12], "Bug #123");
+			engine.RecordState.SetComment(engine.Records[24], "Feature request");
+			engine.RecordState.SetComment(engine.Records[36], "Bug #456");
 
 			engine.Selector.Select(1);
 
 			// Regex search for bug numbers
 			IRecord record = engine.Navigate.NextCommentWithText(@"Bug #\d+", false, true);
-			record.Metadata.Comment.Should().Be("Bug #123");
+			engine.RecordState.GetComment(record).Should().Be("Bug #123");
 
 			record = engine.Navigate.NextCommentWithText(@"Bug #\d+", false, true);
-			record.Metadata.Comment.Should().Be("Bug #456");
+			engine.RecordState.GetComment(record).Should().Be("Bug #456");
 		}
 
 		[TestMethod]

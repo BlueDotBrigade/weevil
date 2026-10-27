@@ -49,8 +49,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.IsLogFileOpen.Should().BeTrue("Log file should be open before the test continues.");
 
 			// GlobalDefault.log is 1-indexed and sequential, so line N is at 0-based index N-1.
-			viewModel.VisibleItems[LineNumberA - 1].Metadata.IsPinned = true;
-			viewModel.VisibleItems[LineNumberB - 1].Metadata.IsPinned = true;
+			viewModel.Rows.GetRow(LineNumberA - 1).IsPinned = true;
+			viewModel.Rows.GetRow(LineNumberB - 1).IsPinned = true;
 
 			// Act & Assert — first "Next Pinned" should land on line 10 (index 9)
 			viewModel.GoToNextPin();

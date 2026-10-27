@@ -9,18 +9,18 @@ namespace BlueDotBrigade.Weevil.Navigation
 	{
 		private readonly ActiveRecord _activeRecord;
 
-		// The view replaces its elapsed times after each filter.
-		private readonly Func<ElapsedTimes> _getElapsedTimes;
+		// The view replaces its elapsed times after each filter, so they are read each time.
+		private readonly IRecordState _state;
 
-		public ElapsedTimeNavigator(ActiveRecord activeRecord, Func<ElapsedTimes> getElapsedTimes)
+		public ElapsedTimeNavigator(ActiveRecord activeRecord, IRecordState state)
 		{
 			_activeRecord = activeRecord;
-			_getElapsedTimes = getElapsedTimes;
+			_state = state;
 		}
 
 		private bool CheckElapsedTime(IRecord record, int? minMilliseconds, int? maxMilliseconds)
 		{
-			TimeSpan elapsedTime = _getElapsedTimes().Get(record.LineNumber);
+			TimeSpan elapsedTime = _state.GetElapsedTime(record);
 
 			if (elapsedTime < TimeSpan.Zero)
 			{

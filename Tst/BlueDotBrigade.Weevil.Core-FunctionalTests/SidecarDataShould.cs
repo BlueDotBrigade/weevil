@@ -21,7 +21,7 @@
 			engine.Clear(ClearOperation.BeforeSelected);
 
 			engine.Filter.Results[1].LineNumber.Should().Be(32);
-			engine.Filter.Results[1].Metadata.Comment.Should().Be("Index31");
+			engine.RecordState.GetComment(engine.Filter.Results[1]).Should().Be("Index31");
 		}
 
 		[TestMethod]
@@ -31,7 +31,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			firstEngine[0].Metadata.Comment.Should().Be("First");
+			firstEngine.RecordState.GetComment(firstEngine[0]).Should().Be("First");
 
 			firstEngine.Selector.Select(5);
 			firstEngine.Clear(ClearOperation.BeforeSelected);
@@ -42,7 +42,7 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			secondEngine[0].Metadata.Comment.Should().Be("First");
+			secondEngine.RecordState.GetComment(secondEngine[0]).Should().Be("First");
 		}
 
 		// Issue #977: saving the sidecar writes byte offsets taken from the line index.
@@ -60,7 +60,7 @@
 				File.WriteAllText(logFilePath, string.Concat(Enumerable.Range(1, 300).Select(lineNumber => $"Line {lineNumber:000}\n")));
 
 				IEngine engine = Engine.UsingPath(logFilePath).Open();
-				engine[149].Metadata.Comment = "A comment on line 150";
+				engine.RecordState.SetComment(engine[149], "A comment on line 150");
 				engine.Bookmarks.Create(1, "A bookmark on line 180", 180);
 				engine.Save(true);
 
@@ -77,20 +77,22 @@
 			}
 		}
 
-		// Regression: Issue #1004
 		[TestMethod]
+		[WorkItem(1004)]
 		public void GivenUnsavedComment_WhenItsRecordIsClearedAndSaved_ThenSidecarKeepsTheComment()
 		{
+			// Comments and pins on cleared records were lost when the sidecar was saved.
 			var logFilePath = CreateLogFile(out var directory);
 
 			try
 			{
 				IEngine engine = Engine.UsingPath(logFilePath).Open();
-				engine[11].Metadata.Comment = "hello world";
+				engine.RecordState.SetComment(engine[11], "hello world");
 				ClearLinesOneToTwelve(engine);
 				engine.Save(true);
 
-				Engine.UsingPath(logFilePath).Open()[11].Metadata.Comment.Should().Be("hello world");
+				IEngine reopened = Engine.UsingPath(logFilePath).Open();
+				reopened.RecordState.GetComment(reopened[11]).Should().Be("hello world");
 			}
 			finally
 			{
@@ -98,23 +100,25 @@
 			}
 		}
 
-		// Regression: Issue #1004
 		[TestMethod]
+		[WorkItem(1004)]
 		public void GivenSavedComment_WhenEditedThenClearedAndSaved_ThenSidecarHasTheEdit()
 		{
+			// Comments and pins on cleared records were lost when the sidecar was saved.
 			var logFilePath = CreateLogFile(out var directory);
 
 			try
 			{
 				IEngine engine = Engine.UsingPath(logFilePath).Open();
-				engine[11].Metadata.Comment = "before";
+				engine.RecordState.SetComment(engine[11], "before");
 				engine.Save(true);
 
-				engine[11].Metadata.Comment = "after";
+				engine.RecordState.SetComment(engine[11], "after");
 				ClearLinesOneToTwelve(engine);
 				engine.Save(true);
 
-				Engine.UsingPath(logFilePath).Open()[11].Metadata.Comment.Should().Be("after");
+				IEngine reopened = Engine.UsingPath(logFilePath).Open();
+				reopened.RecordState.GetComment(reopened[11]).Should().Be("after");
 			}
 			finally
 			{
@@ -122,23 +126,25 @@
 			}
 		}
 
-		// Regression: Issue #1004
 		[TestMethod]
+		[WorkItem(1004)]
 		public void GivenSavedPin_WhenUnpinnedThenClearedAndSaved_ThenSidecarHasNoPin()
 		{
+			// Comments and pins on cleared records were lost when the sidecar was saved.
 			var logFilePath = CreateLogFile(out var directory);
 
 			try
 			{
 				IEngine engine = Engine.UsingPath(logFilePath).Open();
-				engine[11].Metadata.IsPinned = true;
+				engine.RecordState.SetPinned(engine[11], true);
 				engine.Save(true);
 
-				engine[11].Metadata.IsPinned = false;
+				engine.RecordState.SetPinned(engine[11], false);
 				ClearLinesOneToTwelve(engine);
 				engine.Save(true);
 
-				Engine.UsingPath(logFilePath).Open()[11].Metadata.IsPinned.Should().BeFalse();
+				IEngine reopened = Engine.UsingPath(logFilePath).Open();
+				reopened.RecordState.IsPinned(reopened[11]).Should().BeFalse();
 			}
 			finally
 			{

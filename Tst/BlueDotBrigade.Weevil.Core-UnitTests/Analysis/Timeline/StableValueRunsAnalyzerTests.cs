@@ -9,15 +9,14 @@
 	{
 		#region Setup helpers
 
-		private static Results Analyze(ImmutableArray<IRecord> records, IAnnotations annotations, IFlags flags, string regex)
+		private static Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string regex)
 		{
 			var analyzer = new StableValueRunsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
 
 			return analyzer.Analyze(
 				records,
-				annotations,
-				flags,
+				state,
 				string.Empty,
 				userDialog,
 				canUpdateMetadata: true);
@@ -39,29 +38,26 @@
 		private static void AssertIntegerScenario(string pattern, string expected)
 		{
          var records = AnalysisHelper.BuildIntegerRecords(pattern);
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
-			var results = Analyze(records, annotations, flags, AnalysisHelper.IntegerRegex);
+			var state = new RecordState();
+			var results = Analyze(records, state, AnalysisHelper.IntegerRegex);
 
-			AssertFlagsMatchExpected(pattern, expected, records, annotations, flags, results, label: "integer scenario");
+			AssertFlagsMatchExpected(pattern, expected, records, state, results, label: "integer scenario");
 		}
 
 		private static void AssertDecimalScenario(string pattern, string expected)
 		{
          var records = AnalysisHelper.BuildDecimalRecords(pattern);
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
-			var results = Analyze(records, annotations, flags, AnalysisHelper.DecimalRegex);
+			var state = new RecordState();
+			var results = Analyze(records, state, AnalysisHelper.DecimalRegex);
 
-			AssertFlagsMatchExpected(pattern, expected, records, annotations, flags, results, label: "decimal scenario");
+			AssertFlagsMatchExpected(pattern, expected, records, state, results, label: "decimal scenario");
 		}
 
 		private static void AssertFlagsMatchExpected(
 			string pattern,
 			string expected,
 			ImmutableArray<IRecord> records,
-			IAnnotations annotations,
-			IFlags flags,
+			IRecordState state,
 			Results results,
 			string label)
 		{
@@ -69,8 +65,7 @@
 				pattern,
 				expected,
 				records,
-				annotations,
-				flags,
+				state,
 				label,
 				"stable-value flag mismatch");
 
@@ -155,11 +150,10 @@
 				.WithContent("15:02:08.000 32.997")
 				.GetRecords();
 
-         var annotations = new AnnotationStore();
-         var flags = new FlagSet();
-         Analyze(records, annotations, flags, AnalysisHelper.DecimalRegex);
+         var state = new RecordState();
+         Analyze(records, state, AnalysisHelper.DecimalRegex);
 
-           AnalysisHelper.GetFlaggedIndices(records, flags).Should().Equal(0, 1, 2, 3, 4, 5, 6, 7, 8);
+           AnalysisHelper.GetFlaggedIndices(records, state).Should().Equal(0, 1, 2, 3, 4, 5, 6, 7, 8);
 		}
 
 		#endregion

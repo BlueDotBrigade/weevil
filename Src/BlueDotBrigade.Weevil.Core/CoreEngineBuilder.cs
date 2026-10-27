@@ -57,7 +57,7 @@
 
 			private Session _session;
 
-			private ViewAnnotations _annotations;
+			private RecordState _recordState;
 
 			/// <summary>
 			/// Records semantic usage metrics. Defaults to a no-op recorder when the host does not supply one.
@@ -151,7 +151,7 @@
 				}
 
 				_session = previous.Session;
-				_annotations = previous.Annotations;
+				_recordState = previous.RecordState;
 
 				return this;
 			}
@@ -200,7 +200,7 @@
 				var knownContext = new ContextDictionary();
 
 				Session session;
-				ViewAnnotations annotations;
+				RecordState recordState;
 
 				var inclusiveFilterHistory = new List<string>();
 				var exclusiveFilterHistory = new List<string>();
@@ -228,9 +228,9 @@
 					sidecarManager = _sourceInstance._sidecarManager;
 					lineIndex = _sourceInstance._lineIndex;
 
-					// The records are the source's, already attached to these stores.
+					// The source's session and view state carry over, with its records.
 					session = _sourceInstance._session;
-					annotations = _sourceInstance._annotations;
+					recordState = _sourceInstance._recordState;
 
 					selectedRecords = _sourceInstance._selectionManager.GetSelected();
 
@@ -263,11 +263,10 @@
 
 						lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
 
-						// Created before parsing, so they age with the records: attaching then stores no young reference
-						// in every record, which would slow the next garbage collections (#1013).
+						// Sized from the line index, before the records are parsed.
 						var isKeepingAnnotations = _session != null;
 						session = _session ?? new Session(new AnnotationStore(lineIndex.LineCount));
-						annotations = _annotations ?? new ViewAnnotations(session.Annotations, new FlagSet(lineIndex.LineCount));
+						recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
 
 						var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 						Range lineNumberRange = GetLineNumberRange();
@@ -289,8 +288,6 @@
 						records = repository.Get(lineNumberRange, maxRecords);
 
 						loadingStopwatch.Stop();
-
-						Attach(records, annotations);
 
 						sidecarManager.Load(
 							records,
@@ -329,7 +326,7 @@
 					lineIndex,
 					records,
 					session,
-					annotations,
+					recordState,
 					_hasBeenCleared,
 					new TableOfContents(tableOfContents),
 					regions.ToImmutableArray(),
@@ -351,17 +348,6 @@
 				coreEngine.Selector.Select(selectedRecords);
 
 				return coreEngine;
-			}
-
-			/// <summary>
-			/// Attaches each record's metadata to the view's annotations, by line number.
-			/// </summary>
-			private static void Attach(ImmutableArray<IRecord> records, ViewAnnotations annotations)
-			{
-				foreach (IRecord record in records)
-				{
-					record.Metadata?.Attach(annotations, record.LineNumber);
-				}
 			}
 
 			/// <summary>

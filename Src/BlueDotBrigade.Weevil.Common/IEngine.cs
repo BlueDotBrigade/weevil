@@ -32,6 +32,14 @@
 		/// </summary>
 		IAnnotations Annotations { get; }
 
+		/// <summary>
+		/// Gets and sets a record's comment, pin and flag, and gets its elapsed time. The same object for the log's lifetime.
+		/// </summary>
+		/// <remarks>
+		/// Records hold no state of their own (decision 7 of the #990 plan). Use <see cref="Annotations"/> to be told when comments and pins change.
+		/// </remarks>
+		IRecordState RecordState { get; }
+
 		void Clear(ClearOperation clearOperation);
 
 		void Reload();

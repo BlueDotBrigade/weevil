@@ -1,7 +1,6 @@
 namespace BlueDotBrigade.Weevil.Filter
 {
 	using System;
-	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
@@ -61,31 +60,6 @@ namespace BlueDotBrigade.Weevil.Filter
 				});
 		}
 
-		[TestMethod]
-		public void GivenShownRecords_WhenAFilterChangesTheirElapsedTimes_ThenOnlyThoseRecordsRaiseTheChange()
-		{
-			ImmutableArray<IRecord> records = CreateRecordsOneSecondApart(6);
-			FilterManager filter = CreateFilterManager(records, Substitute.For<IMetricCollector>());
-			filter.Apply(FilterType.PlainText, FilterCriteria.None);
-
-			var changedLines = new ConcurrentBag<int>();
-			foreach (IRecord record in records)
-			{
-				record.Metadata.PropertyChanged += (sender, e) =>
-				{
-					if (e.PropertyName == nameof(Metadata.ElapsedTime))
-					{
-						changedLines.Add(record.LineNumber);
-					}
-				};
-			}
-
-			filter.Apply(FilterType.PlainText, new FilterCriteria("line number: 2||line number: 4||line number: 6"));
-
-			// Line 1 had no elapsed time before, and has none after.
-			changedLines.Should().BeEquivalentTo(new[] { 2, 3, 4, 5, 6 });
-		}
-
 		private static ImmutableArray<IRecord> CreateRecordsOneSecondApart(int count)
 		{
 			// Each record's content ends with its line number, for example "Has line number: 7".
@@ -101,12 +75,6 @@ namespace BlueDotBrigade.Weevil.Filter
 
 		private static FilterManager CreateFilterManager(ImmutableArray<IRecord> records, IMetricCollector collector)
 		{
-			var view = new ViewAnnotations();
-			foreach (IRecord record in records)
-			{
-				record.Metadata.Attach(view, record.LineNumber);
-			}
-
 			IFilterAliasExpander aliasExpander = Substitute.For<IFilterAliasExpander>();
 			aliasExpander.Expand(Arg.Any<string>()).Returns(x => x.Arg<string>());
 
@@ -118,7 +86,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				ImmutableArray.Create(collector),
 				Substitute.For<IRegionManager>(),
 				Substitute.For<IBookmarkManager>(),
-				view);
+				new RecordState());
 		}
 
 		private static Dictionary<int, TimeSpan> ElapsedTimesByLine(IFilter filter, ImmutableArray<IRecord> records)

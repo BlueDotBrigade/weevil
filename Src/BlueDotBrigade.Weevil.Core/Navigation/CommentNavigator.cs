@@ -9,17 +9,17 @@
 	internal class CommentNavigator : ICommentNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
-		private readonly IAnnotations _annotations;
+		private readonly IRecordState _state;
 
-		public CommentNavigator(ActiveRecord activeRecord, IAnnotations annotations)
+		public CommentNavigator(ActiveRecord activeRecord, IRecordState state)
 		{
 			_activeRecord = activeRecord;
-			_annotations = annotations;
+			_state = state;
 		}
 
 		private bool CheckHasComment(IRecord record)
 		{
-			return _annotations.HasComment(record.LineNumber);
+			return _state.HasComment(record);
 		}
 
 		public IRecord FindPrevious()
@@ -55,7 +55,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToPrevious(_activeRecord.Index, record => 
-						_annotations.HasComment(record.LineNumber) && regex.IsMatch(_annotations.GetComment(record.LineNumber)));
+						_state.HasComment(record) && regex.IsMatch(_state.GetComment(record)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -68,7 +68,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToPrevious(_activeRecord.Index, record => 
-						_annotations.HasComment(record.LineNumber) && _annotations.GetComment(record.LineNumber).Contains(value, comparison));
+						_state.HasComment(record) && _state.GetComment(record).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -91,7 +91,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToNext(_activeRecord.Index, record => 
-						_annotations.HasComment(record.LineNumber) && regex.IsMatch(_annotations.GetComment(record.LineNumber)));
+						_state.HasComment(record) && regex.IsMatch(_state.GetComment(record)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -104,7 +104,7 @@
 				var resultAt = _activeRecord
 					.DataSource
 					.GoToNext(_activeRecord.Index, record => 
-						_annotations.HasComment(record.LineNumber) && _annotations.GetComment(record.LineNumber).Contains(value, comparison));
+						_state.HasComment(record) && _state.GetComment(record).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}

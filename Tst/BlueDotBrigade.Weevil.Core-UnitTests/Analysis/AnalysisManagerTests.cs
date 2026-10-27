@@ -7,40 +7,42 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[DataRow("NoRecords.log", 0)]
 		[DataRow("CompleteRecord.log", 1)]
 		[DataRow("ThreeRecords.log", 3)]
+		[WorkItem(932)]
 		public void GivenRecordCollection_WhenRemoveAllFlagsCalled_ThenEveryRecordIsUnflagged(string fileName, int expectedCount)
 		{
-			// Regression: Issue #932
+			// Remove All Flags and Unpin All skipped the last record.
 			IEngine engine = OpenEngine(fileName);
 
 			foreach (var record in engine.Records)
 			{
-				record.Metadata.IsFlagged = true;
+				engine.RecordState.SetFlagged(record, true);
 			}
 
 			engine.Analyzer.RemoveAllFlags();
 
 			engine.Records.Should().HaveCount(expectedCount);
-			engine.Records.Should().NotContain(record => record.Metadata.IsFlagged);
+			engine.Records.Should().NotContain(record => engine.RecordState.IsFlagged(record));
 		}
 
 		[TestMethod]
 		[DataRow("NoRecords.log", 0)]
 		[DataRow("CompleteRecord.log", 1)]
 		[DataRow("ThreeRecords.log", 3)]
+		[WorkItem(932)]
 		public void GivenRecordCollection_WhenUnpinAllCalled_ThenEveryRecordIsUnpinned(string fileName, int expectedCount)
 		{
-			// Regression: Issue #932
+			// Remove All Flags and Unpin All skipped the last record.
 			IEngine engine = OpenEngine(fileName);
 
 			foreach (var record in engine.Records)
 			{
-				record.Metadata.IsPinned = true;
+				engine.RecordState.SetPinned(record, true);
 			}
 
 			engine.Analyzer.UnpinAll();
 
 			engine.Records.Should().HaveCount(expectedCount);
-			engine.Records.Should().NotContain(record => record.Metadata.IsPinned);
+			engine.Records.Should().NotContain(record => engine.RecordState.IsPinned(record));
 		}
 
 		private static IEngine OpenEngine(string fileName)

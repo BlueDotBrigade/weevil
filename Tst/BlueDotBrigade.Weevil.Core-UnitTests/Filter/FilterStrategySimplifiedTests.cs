@@ -78,8 +78,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				filterCriteria,
 				regionManager,
 				bookmarkManager,
-				_annotations,
-				new FlagSet());
+				new RecordState(_annotations, new FlagSet()));
 		}
 
 		#endregion

@@ -34,8 +34,7 @@
 		private readonly Action _reapplyCurrentFilter;
 
 		private readonly NavigationManager _navigationManager;
-		private readonly IAnnotations _annotations;
-		private readonly IFlags _flags;
+		private readonly RecordState _state;
 
 		private PositionRanges _selection;
 		private ImmutableArray<IRecord> _visibleRecords;
@@ -49,12 +48,10 @@
 			ImmutableArray<IRecord> visibleRecords,
 			NavigationManager navigationManager,
 			Encoding sourceFileEncoding,
-			IAnnotations annotations,
-			IFlags flags,
+			RecordState state,
 			Action reapplyCurrentFilter)
 		{
-			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
-			_flags = flags ?? throw new ArgumentNullException(nameof(flags));
+			_state = state ?? throw new ArgumentNullException(nameof(state));
 
 			_selection = new PositionRanges();
 			_selectionPadlock = new object();
@@ -346,7 +343,7 @@
 
 			if (sortedRecords != null)
 			{
-				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType, _annotations, _flags).Write(sortedRecords);
+				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType, _state).Write(sortedRecords);
 
 				Log.Default.Write(
 					LogSeverityType.Trace,
@@ -526,16 +523,16 @@
 
 			if (selectedRecords.Length > 0)
 			{
-				var isPinned = !_annotations.IsPinned(selectedRecords[0].LineNumber);
+				var isPinned = !_state.IsPinned(selectedRecords[0]);
 
 				// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
 				int[] lineNumbers = selectedRecords
 					.AsParallel()
-					.Where(record => _annotations.IsPinned(record.LineNumber) != isPinned)
+					.Where(record => _state.IsPinned(record) != isPinned)
 					.Select(record => record.LineNumber)
 					.ToArray();
 
-				_annotations.SetPinned(lineNumbers, isPinned);
+				_state.Annotations.SetPinned(lineNumbers, isPinned);
 
 				Log.Default.Write(
 					LogSeverityType.Information,
@@ -553,12 +550,12 @@
 			// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
 			int[] lineNumbers = selectedRecords
 				.AsParallel()
-				.Where(record => allowOverwrite || !_annotations.HasComment(record.LineNumber))
-				.Where(record => _annotations.GetComment(record.LineNumber) != comment)
+				.Where(record => allowOverwrite || !_state.HasComment(record))
+				.Where(record => _state.GetComment(record) != comment)
 				.Select(record => record.LineNumber)
 				.ToArray();
 
-			_annotations.SetComment(lineNumbers, comment);
+			_state.Annotations.SetComment(lineNumbers, comment);
 
 			Log.Default.Write(
 				LogSeverityType.Information,

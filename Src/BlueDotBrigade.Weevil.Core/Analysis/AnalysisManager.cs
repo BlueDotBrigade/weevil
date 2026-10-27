@@ -42,7 +42,7 @@
 		/// </remarks>
 		public void RemoveAllFlags()
 		{
-			_coreEngine.Flags.Clear();
+			_coreEngine.RecordState.Flags.Clear();
 		}
 
 		/// <remarks>
@@ -59,7 +59,7 @@
 				.Where(lineNumber => records.TryIndexOfLineNumber(lineNumber, out _))
 				.ToArray();
 
-			_coreEngine.Flags.FlagOnly(inMemory);
+			_coreEngine.RecordState.Flags.FlagOnly(inMemory);
 
 			return inMemory.Length;
 		}
@@ -169,8 +169,7 @@
 
 			Results results = analyzer.Analyze(
 				records,
-				_coreEngine.Session.Annotations,
-				_coreEngine.Flags,
+				_coreEngine.RecordState,
 				_coreEngine.SourceDirectory,
 				userDialog,
 				true);

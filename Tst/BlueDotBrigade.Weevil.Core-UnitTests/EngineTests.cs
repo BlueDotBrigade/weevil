@@ -92,7 +92,7 @@ namespace BlueDotBrigade.Weevil
 			engine.Selector.Select(lineNumber: 101);
 			engine.Clear(ClearOperation.BeforeSelected);
 			engine.Reload();
-			engine.Records[0].Metadata.IsPinned = true;
+			engine.RecordState.SetPinned(engine.Records[0], true);
 
 			engine.Annotations.Should().BeSameAs(annotations);
 			lines.Should().Equal(engine.Records[0].LineNumber);

@@ -268,7 +268,6 @@
 			var customRecord = Substitute.For<IRecord>();
 			customRecord.LineNumber.Returns(1);
 			customRecord.Content.Returns("Custom record");
-			customRecord.Metadata.Returns(new Metadata());
 
 			var recordParser = Substitute.For<IRecordParser>();
 			recordParser

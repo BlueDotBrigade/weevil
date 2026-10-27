@@ -8,11 +8,11 @@
 		public static readonly Moniker Moniker = new Moniker("@Pinned");
 
 		private readonly bool _isPinned;
-		private readonly IAnnotations _annotations;
+		private readonly IRecordState _state;
 
-		public PinnedExpression(string serializedExpression, IAnnotations annotations)
+		public PinnedExpression(string serializedExpression, IRecordState state)
 		{
-			_annotations = annotations;
+			_state = state;
 			_isPinned = true;
 
 			if (Moniker.IsReferencedBy(serializedExpression))
@@ -27,7 +27,7 @@
 
 		public bool IsMatch(IRecord record)
 		{
-			var isMatch = _annotations.IsPinned(record.LineNumber) == _isPinned;
+			var isMatch = _state.IsPinned(record) == _isPinned;
 			return isMatch;
 		}
 	}

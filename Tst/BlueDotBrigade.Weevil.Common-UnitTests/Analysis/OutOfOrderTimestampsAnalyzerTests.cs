@@ -29,12 +29,11 @@
 					.Returns("0");
 
 				var analyzer = new OutOfOrderTimestampsAnalyzer();
-				var annotations = new AnnotationStore();
-				var flags = new FlagSet();
+				var state = new RecordState();
 
-				analyzer.Analyze(records, annotations, flags, string.Empty, dialog, canUpdateMetadata: true);
+				analyzer.Analyze(records, state, string.Empty, dialog, canUpdateMetadata: true);
 
-				annotations.GetComment(records[3].LineNumber).Should().Be("OutOfOrderTimestamps: -00:15:00");
+				state.GetComment(records[3]).Should().Be("OutOfOrderTimestamps: -00:15:00");
 			}
 		}
 	}

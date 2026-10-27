@@ -155,10 +155,11 @@ engine.Filter.Apply(
 // and flags the record when a value changes.
 engine.Analyzer.Analyze(AnalysisType.StateTransitions);
 
-foreach (var record in engine.Filter.Results.Where(r => r.Metadata.IsFlagged == true))
+// Records hold no state of their own: ask the engine for each record's flag and comment.
+foreach (var record in engine.Filter.Results.Where(r => engine.RecordState.IsFlagged(r)))
 {
    Console.WriteLine(
-   $"{record.CreatedAt} {record.Metadata.Comment}");
+   $"{record.CreatedAt} {engine.RecordState.GetComment(record)}");
 }
 ```
 

@@ -8,7 +8,7 @@
 	[TestClass]
 	public class PinNavigatorTest
 	{
-		private readonly AnnotationStore _annotations = new AnnotationStore();
+		private readonly RecordState _state = new RecordState();
 
 		[TestMethod]
 		public void GoToNext_NoPinnedRecords_Throws()
@@ -24,7 +24,7 @@
 						"Sample log entry."));
 			}
 
-			Action act = () => new PinNavigator(new ActiveRecord(records), _annotations).FindNext();
+			Action act = () => new PinNavigator(new ActiveRecord(records), _state).FindNext();
 			act.Should().Throw<RecordNotFoundException>();
 		}
 
@@ -43,10 +43,10 @@
 			}
 
 			// Note: the order of pinning should be irrelevant
-			_annotations.SetPinned(records[8].LineNumber, true); // Line: 58 is pinned
-			_annotations.SetPinned(records[2].LineNumber, true); // Line: 52 is pinned
+			_state.SetPinned(records[8], true); // Line: 58 is pinned
+			_state.SetPinned(records[2], true); // Line: 52 is pinned
 
-			(new PinNavigator(new ActiveRecord(records), _annotations).FindNext().LineNumber).Should().Be(52);
+			(new PinNavigator(new ActiveRecord(records), _state).FindNext().LineNumber).Should().Be(52);
 		}
 
 		[TestMethod]
@@ -63,10 +63,10 @@
 						"Sample log entry."));
 			}
 
-			_annotations.SetPinned(records[2].LineNumber, true);
-			_annotations.SetPinned(records[8].LineNumber, true);
+			_state.SetPinned(records[2], true);
+			_state.SetPinned(records[8], true);
 
-			var navigator = new PinNavigator(new ActiveRecord(records), _annotations);
+			var navigator = new PinNavigator(new ActiveRecord(records), _state);
 
 			(navigator.FindNext().LineNumber).Should().Be(52);
 			(navigator.FindNext().LineNumber).Should().Be(58);

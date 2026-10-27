@@ -10,11 +10,11 @@
 
 		private readonly bool _searchForSpecificText;
 		private readonly string _searchValue;
-		private readonly IAnnotations _annotations;
+		private readonly IRecordState _state;
 
-		public UserCommentExpression(string serializedExpression, IAnnotations annotations)
+		public UserCommentExpression(string serializedExpression, IRecordState state)
 		{
-			_annotations = annotations;
+			_state = state;
 			_searchForSpecificText = true;
 			_searchValue = string.Empty;
 
@@ -31,7 +31,7 @@
 		public bool IsMatch(IRecord record)
 		{
 			var isMatch = false;
-			var comment = _annotations.GetComment(record.LineNumber);
+			var comment = _state.GetComment(record);
 
 			if (comment.Length > 0)
 			{

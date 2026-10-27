@@ -84,19 +84,18 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		/// Flags a record and adds to its comment, if updates are allowed.
 		/// </summary>
 		/// <param name="record">The record to update.</param>
-		/// <param name="annotations">The comments the comment is added to.</param>
-		/// <param name="flags">The flags the record's flag is set in.</param>
+		/// <param name="state">The records' comments and flags.</param>
 		/// <param name="isFlagged">Whether the record should be flagged.</param>
 		/// <param name="comment">The comment to add to the record.</param>
 		/// <param name="canUpdateMetadata">Whether updates are allowed.</param>
-		public static void UpdateRecordMetadata(IRecord record, IAnnotations annotations, IFlags flags, bool isFlagged, string comment, bool canUpdateMetadata)
+		public static void UpdateRecordMetadata(IRecord record, IRecordState state, bool isFlagged, string comment, bool canUpdateMetadata)
 		{
 			if (canUpdateMetadata)
 			{
-				flags.SetFlagged(record.LineNumber, isFlagged);
+				state.SetFlagged(record, isFlagged);
 				if (!string.IsNullOrEmpty(comment))
 				{
-					annotations.AppendComment(record.LineNumber, comment);
+					state.AppendComment(record, comment);
 				}
 			}
 		}
@@ -105,13 +104,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		/// Clears the flagged status of a record if updates are allowed.
 		/// </summary>
 		/// <param name="record">The record to update.</param>
-		/// <param name="flags">The flags the record's flag is cleared in.</param>
+		/// <param name="state">The records' flags.</param>
 		/// <param name="canUpdateMetadata">Whether updates are allowed.</param>
-		public static void ClearRecordFlag(IRecord record, IFlags flags, bool canUpdateMetadata)
+		public static void ClearRecordFlag(IRecord record, IRecordState state, bool canUpdateMetadata)
 		{
 			if (canUpdateMetadata)
 			{
-				flags.SetFlagged(record.LineNumber, false);
+				state.SetFlagged(record, false);
 			}
 		}
 

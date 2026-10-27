@@ -19,23 +19,23 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new DetectDataAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
+			var state = new RecordState();
 
-			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			flags.IsFlagged(records[0].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
-			annotations.GetComment(records[0].LineNumber).Should().Contain("Value: 2");
-			annotations.GetComment(records[1].LineNumber).Should().Contain("Value: 2.5");
+			state.IsFlagged(records[0]).Should().BeTrue();
+			state.IsFlagged(records[1]).Should().BeTrue();
+			state.IsFlagged(records[2]).Should().BeFalse();
+			state.GetComment(records[0]).Should().Contain("Value: 2");
+			state.GetComment(records[1]).Should().Contain("Value: 2.5");
 		}
 
 		[TestMethod]
+		[WorkItem(923)]
 		public void GivenKeepAllRecords_WhenAnalyzeRunsWithNamedGroupRegex_ThenMatchingRecordsAreFlagged()
 		{
-			// Regression: Issue #923
+			// An analyzer ignored its regular expression unless the active filter was a regular expression.
 			var records = R.Create()
 				.WithContent("Value=2")
 				.WithContent("Value=2.5")
@@ -45,21 +45,21 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new DetectDataAnalyzer(FilterStrategy.KeepAllRecords);
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
+			var state = new RecordState();
 
-			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			flags.IsFlagged(records[0].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
+			state.IsFlagged(records[0]).Should().BeTrue();
+			state.IsFlagged(records[1]).Should().BeTrue();
+			state.IsFlagged(records[2]).Should().BeFalse();
 		}
 
 		[TestMethod]
+		[WorkItem(923)]
 		public void GivenPlainTextFilter_WhenAnalyzeRunsWithNamedGroupRegex_ThenMatchingRecordsAreFlagged()
 		{
-			// Regression: Issue #923
+			// An analyzer ignored its regular expression unless the active filter was a regular expression.
 			var records = R.Create()
 				.WithContent("Value=2")
 				.WithContent("Value=2.5")
@@ -69,15 +69,14 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new DetectDataAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy(FilterType.PlainText));
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
+			var state = new RecordState();
 
-			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(2);
-			flags.IsFlagged(records[0].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[1].LineNumber).Should().BeTrue();
-			flags.IsFlagged(records[2].LineNumber).Should().BeFalse();
+			state.IsFlagged(records[0]).Should().BeTrue();
+			state.IsFlagged(records[1]).Should().BeTrue();
+			state.IsFlagged(records[2]).Should().BeFalse();
 		}
 	}
 }

@@ -27,9 +27,7 @@
 			ICoreExtension coreExtension,
 			ImmutableArray<IRecord> allRecords,
 			TableOfContents tableOfContents,
-			IAnnotations annotations,
-			IFlags flags,
-			Func<ElapsedTimes> getElapsedTimes,
+			IRecordState state,
 			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_sourceFilePath = sourceFilePath;
@@ -44,10 +42,10 @@
 				new LineNumberNavigator(_activeRecord),
 				new TimestampNavigator(_activeRecord),
 				new ContentNavigator(_activeRecord),
-				new PinNavigator(_activeRecord, annotations),
-				new CommentNavigator(_activeRecord, annotations),
-				new FlagNavigator(_activeRecord, flags),
-				new ElapsedTimeNavigator(_activeRecord, getElapsedTimes),
+				new PinNavigator(_activeRecord, state),
+				new CommentNavigator(_activeRecord, state),
+				new FlagNavigator(_activeRecord, state),
+				new ElapsedTimeNavigator(_activeRecord, state),
 			}.ToImmutableArray();
 		}
 

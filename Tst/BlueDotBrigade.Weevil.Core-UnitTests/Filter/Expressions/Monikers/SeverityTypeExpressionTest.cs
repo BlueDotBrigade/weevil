@@ -8,11 +8,9 @@
 	public class SeverityTypeExpressionTest
 	{
 		[TestMethod]
-		public void IsMatch_NoMetadata_ReturnsFalse()
+		public void IsMatch_RecordHasDefaultSeverity_ReturnsFalse()
 		{
 			var record = Substitute.For<IRecord>();
-
-			record.Metadata.Returns(new Metadata());
 
 			var expression = new SeverityTypeExpression(SeverityType.Error);
 

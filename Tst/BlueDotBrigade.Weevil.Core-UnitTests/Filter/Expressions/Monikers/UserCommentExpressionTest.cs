@@ -9,15 +9,15 @@
 	{
 		private const int LineNumber = 5;
 
-		private readonly AnnotationStore _annotations = new AnnotationStore();
+		private readonly RecordState _state = new RecordState();
 		private readonly IRecord _record = R.WithLineNumber(LineNumber);
 
 		[TestMethod]
 		public void IsMatch_LookingForAnyComment_ReturnsTrue()
 		{
-			_annotations.SetComment(LineNumber, "The lazy brown dog jumped over the fence");
+			_state.SetComment(_record, "The lazy brown dog jumped over the fence");
 
-			var filter = new UserCommentExpression("@Comment", _annotations);
+			var filter = new UserCommentExpression("@Comment", _state);
 
 			(filter.IsMatch(_record)).Should().BeTrue();
 		}
@@ -25,7 +25,7 @@
 		[TestMethod]
 		public void IsMatch_LookingForAnyComment_ReturnsFalse()
 		{
-			var filter = new UserCommentExpression("@Comment", _annotations);
+			var filter = new UserCommentExpression("@Comment", _state);
 
 			(filter.IsMatch(_record)).Should().BeFalse();
 		}
@@ -33,9 +33,9 @@
 		[TestMethod]
 		public void IsMatch_LookingForSpecificComment_ReturnsTrue()
 		{
-			_annotations.SetComment(LineNumber, "The lazy brown dog jumped over the fence");
+			_state.SetComment(_record, "The lazy brown dog jumped over the fence");
 
-			var filter = new UserCommentExpression("@Comment=dog", _annotations);
+			var filter = new UserCommentExpression("@Comment=dog", _state);
 
 			(filter.IsMatch(_record)).Should().BeTrue();
 		}
@@ -43,9 +43,9 @@
 		[TestMethod]
 		public void IsMatch_LookingForSpecificComment_ReturnsFalse()
 		{
-			_annotations.SetComment(LineNumber, "The lazy brown dog jumped over the fence");
+			_state.SetComment(_record, "The lazy brown dog jumped over the fence");
 
-			var filter = new UserCommentExpression("@Comment=cat", _annotations);
+			var filter = new UserCommentExpression("@Comment=cat", _state);
 
 			(filter.IsMatch(_record)).Should().BeFalse();
 		}

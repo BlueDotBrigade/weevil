@@ -16,8 +16,7 @@
 			-1,
 			CreationTimeUnknown,
 			SeverityType.Verbose,
-			string.Empty,
-			new Metadata());
+			string.Empty);
 
 		/// <summary>
 		/// Indicates the system was unable to determine when the record was generated.
@@ -32,14 +31,7 @@
 		private readonly byte _facts;
 
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content)
-		: this(lineNumber, createdAt, severity, content, new Metadata())
-		{
-			// nothing to do
-		}
-
-		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content,
-			 Metadata metadata)
-		: this(lineNumber, createdAt, severity, content, metadata, isMultiLine: false, wasGeneratedByUi: false)
+		: this(lineNumber, createdAt, severity, content, isMultiLine: false, wasGeneratedByUi: false)
 		{
 			// nothing to do
 		}
@@ -47,7 +39,7 @@
 		/// <param name="isMultiLine">The record spans several lines of the log.</param>
 		/// <param name="wasGeneratedByUi">The record was written by the application's user interface thread.</param>
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content,
-			 Metadata metadata, bool isMultiLine, bool wasGeneratedByUi)
+			 bool isMultiLine, bool wasGeneratedByUi)
 		{
 			if ((uint)severity > SeverityMask)
 			{
@@ -57,7 +49,6 @@
 			this.LineNumber = lineNumber;
 			this.CreatedAt = createdAt;
 			this.Content = content ?? string.Empty;
-			this.Metadata = metadata;
 
 			_facts = (byte)((byte)severity
 				| (isMultiLine ? MultiLineFlag : 0)
@@ -77,8 +68,6 @@
 		public string Content { get; }
 
 		public bool HasContent => !string.IsNullOrWhiteSpace(this.Content);
-
-		public Metadata Metadata { get; }
 
 		/// <summary>
 		/// Returns <see langword="true"/> if it is known when the record was created.
@@ -131,7 +120,7 @@
 
 		public override string ToString()
 		{
-			return $@"LineNumber={this.LineNumber}, Severity={this.Severity}, HasContent={this.HasContent}, CreatedAt={this.CreatedAt}, IsMultiLine={this.IsMultiLine}, WasGeneratedByUi={this.WasGeneratedByUi}, Metadata={{{this.Metadata.ToString()}}}";
+			return $@"LineNumber={this.LineNumber}, Severity={this.Severity}, HasContent={this.HasContent}, CreatedAt={this.CreatedAt}, IsMultiLine={this.IsMultiLine}, WasGeneratedByUi={this.WasGeneratedByUi}";
 		}
 	}
 }

@@ -12,7 +12,7 @@
 		[WorkItem(200)]
 		public void Convert_LongMultiLineRecord_ReturnsTruncatedString()
 		{
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString(), new Metadata(), isMultiLine: true, wasGeneratedByUi: false);
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, new Daten().AsString(), isMultiLine: true, wasGeneratedByUi: false);
 
 			record.Content.Length.Should().Be(2379476);
 
@@ -26,7 +26,7 @@
 		[TestMethod]
 		public void GivenAGridRow_WhenConverted_ThenTheResultIsTheSameAsForItsRecord()
 		{
-			var record = new Record(1, DateTime.Now, SeverityType.Debug, new string('x', 1_000), new Metadata());
+			var record = new Record(1, DateTime.Now, SeverityType.Debug, new string('x', 1_000));
 			var row = new RowViewModel(record, new AnnotationStore());
 			var converter = new ContentConverter();
 

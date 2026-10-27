@@ -13,7 +13,7 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(ImmutableArray<IRecord>.Empty);
 
-			elapsedTimes.Get(1).Should().Be(Metadata.ElapsedTimeUnknown);
+			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 		}
 
 		[TestMethod]
@@ -23,7 +23,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
 
-			elapsedTimes.Get(1).Should().Be(Metadata.ElapsedTimeUnknown);
+			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 		}
 
 		[TestMethod]
@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
 
-			elapsedTimes.Get(1).Should().Be(Metadata.ElapsedTimeUnknown);
+			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 			elapsedTimes.Get(2).Should().Be(TimeSpan.FromMilliseconds(200));
 		}
 
@@ -50,8 +50,8 @@ namespace BlueDotBrigade.Weevil.Data
 
 			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
 
-			elapsedTimes.Get(1).Should().Be(Metadata.ElapsedTimeUnknown);
-			elapsedTimes.Get(2).Should().Be(Metadata.ElapsedTimeUnknown);
+			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
+			elapsedTimes.Get(2).Should().Be(ElapsedTimes.Unknown);
 			elapsedTimes.Get(3).Should().Be(TimeSpan.FromMilliseconds(500));
 		}
 
@@ -64,8 +64,8 @@ namespace BlueDotBrigade.Weevil.Data
 
 			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
 
-			elapsedTimes.Get(1).Should().Be(Metadata.ElapsedTimeUnknown);
-			elapsedTimes.Get(2).Should().Be(Metadata.ElapsedTimeUnknown);
+			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
+			elapsedTimes.Get(2).Should().Be(ElapsedTimes.Unknown);
 		}
 
 		[TestMethod]
@@ -82,9 +82,9 @@ namespace BlueDotBrigade.Weevil.Data
 
 			elapsedTimes.Get(10).Should().Be(TimeSpan.FromSeconds(8));
 			elapsedTimes.Get(11).Should().Be(TimeSpan.FromSeconds(1));
-			elapsedTimes.Get(5).Should().Be(Metadata.ElapsedTimeUnknown);
-			elapsedTimes.Get(12).Should().Be(Metadata.ElapsedTimeUnknown);
-			elapsedTimes.Get(-1).Should().Be(Metadata.ElapsedTimeUnknown);
+			elapsedTimes.Get(5).Should().Be(ElapsedTimes.Unknown);
+			elapsedTimes.Get(12).Should().Be(ElapsedTimes.Unknown);
+			elapsedTimes.Get(-1).Should().Be(ElapsedTimes.Unknown);
 		}
 	}
 }

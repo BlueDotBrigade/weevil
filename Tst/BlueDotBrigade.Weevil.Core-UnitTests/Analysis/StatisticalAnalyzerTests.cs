@@ -11,9 +11,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 	public class StatisticalAnalyzerTests
 	{
 		[TestMethod]
+		[WorkItem(931)]
 		public void GivenRecordsWithNoNumericMatches_WhenAnalyzeRuns_ThenResultContainsNullableMetrics()
 		{
-			// Regression: Issue #931
+			// Statistics with no numeric matches threw instead of reporting empty metrics.
 			var records = R.Create()
 				.WithContent("NoNumbers")
 				.WithContent("AlsoNoNumbers")
@@ -22,7 +23,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
-			Results results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: false);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: false);
 
 			results.FlaggedRecords.Should().Be(0);
 			results.Data.Should().ContainKey("Min");
@@ -43,13 +44,12 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-			var annotations = new AnnotationStore();
-			var flags = new FlagSet();
+			var state = new RecordState();
 
-			Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 
 			results.FlaggedRecords.Should().Be(0);
-			records.Should().NotContain(record => flags.IsFlagged(record.LineNumber));
+			records.Should().NotContain(record => state.IsFlagged(record));
 			results.Data.Should().ContainKey("Mean");
 			results.Data["Mean"].Should().Be(2.167d);
 			results.Data["Count"].Should().Be(3d);
@@ -58,9 +58,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[DataTestMethod]
 		[DataRow("de-DE")]
 		[DataRow("fr-FR")]
+		[WorkItem(928)]
 		public void GivenInvariantDecimalValueAndNonEnglishCulture_WhenAnalyzeRuns_ThenStatisticsAreCalculated(string cultureName)
 		{
-			// Regression: Issue #928
+			// Statistics parsed numbers with the workstation's culture, so 2.5 failed where the decimal separator is a comma.
 			var originalCulture = CultureInfo.CurrentCulture;
 			var originalUiCulture = CultureInfo.CurrentUICulture;
 
@@ -77,13 +78,12 @@ namespace BlueDotBrigade.Weevil.Analysis
 				var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 				var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
-				var annotations = new AnnotationStore();
-				var flags = new FlagSet();
+				var state = new RecordState();
 
-				Results results = analyzer.Analyze(records, annotations, flags, string.Empty, userDialog, canUpdateMetadata: true);
+				Results results = analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true);
 
 				results.FlaggedRecords.Should().Be(0);
-				records.Should().NotContain(record => flags.IsFlagged(record.LineNumber));
+				records.Should().NotContain(record => state.IsFlagged(record));
 				results.Data["Count"].Should().Be(1d);
 				results.Data["Mean"].Should().Be(2.5d);
 			}
@@ -95,17 +95,18 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[TestMethod]
+		[WorkItem(929)]
 		public void GivenRecordsWithoutCreationTime_WhenAnalyzeRuns_ThenRangeHasNoTimestamps()
 		{
-			// Regression: Issue #929
+			// Statistics counted unknown timestamps, so the time range it reported was huge.
 			var records = ImmutableArray.Create<IRecord>(
-				new Record(1, Record.CreationTimeUnknown, SeverityType.Information, "Value=10", new Metadata()),
-				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=20", new Metadata()));
+				new Record(1, Record.CreationTimeUnknown, SeverityType.Information, "Value=10"),
+				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=20"));
 
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
-			Results results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: false);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: false);
 
 			results.Data["Count"].Should().Be(2d);
 			results.Data["Mean"].Should().Be(15d);
@@ -115,21 +116,22 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[TestMethod]
+		[WorkItem(929)]
 		public void GivenMixedTimestampedAndUntimestampedRecords_WhenAnalyzeRuns_ThenRangeOnlyIncludesValidTimestamps()
 		{
-			// Regression: Issue #929
+			// Statistics counted unknown timestamps, so the time range it reported was huge.
 			var knownTime1 = new DateTime(2024, 1, 1, 10, 0, 0);
 			var knownTime2 = new DateTime(2024, 1, 1, 10, 0, 5);
 
 			var records = ImmutableArray.Create<IRecord>(
-				new Record(1, knownTime1, SeverityType.Information, "Value=1", new Metadata()),
-				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=2", new Metadata()),
-				new Record(3, knownTime2, SeverityType.Information, "Value=3", new Metadata()));
+				new Record(1, knownTime1, SeverityType.Information, "Value=1"),
+				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=2"),
+				new Record(3, knownTime2, SeverityType.Information, "Value=3"));
 
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
-			Results results = analyzer.Analyze(records, new AnnotationStore(), new FlagSet(), string.Empty, userDialog, canUpdateMetadata: false);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: false);
 
 			results.Data["Count"].Should().Be(3d);
 			results.Data["Mean"].Should().Be(2d);

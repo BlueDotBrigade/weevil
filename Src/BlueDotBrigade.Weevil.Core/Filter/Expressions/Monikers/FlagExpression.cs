@@ -7,11 +7,11 @@
 	{
 		public static readonly Moniker Moniker = new Moniker("@Flagged");
 		private readonly bool _isFlagged;
-		private readonly IFlags _flags;
+		private readonly IRecordState _state;
 
-		public FlagExpression(string serializedExpression, IFlags flags)
+		public FlagExpression(string serializedExpression, IRecordState state)
 		{
-			_flags = flags;
+			_state = state;
 
 			if (Moniker.IsReferencedBy(serializedExpression))
 			{
@@ -27,7 +27,7 @@
 
 		public bool IsMatch(IRecord record)
 		{
-			return _flags.IsFlagged(record.LineNumber) == _isFlagged;
+			return _state.IsFlagged(record) == _isFlagged;
 		}
 	}
 }

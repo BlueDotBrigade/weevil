@@ -102,6 +102,8 @@
 
 		public IAnnotations Annotations => _coreEngine.Session.Annotations;
 
+		public IRecordState RecordState => _coreEngine.RecordState;
+
 		public int Count => _coreEngine.Count;
 
 		public ContextDictionary Context => _coreEngine.Context;

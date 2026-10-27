@@ -20,13 +20,11 @@
 		private readonly string _destinationFilePath;
 		private readonly Encoding _destinationFileEncoding;
 		private readonly FileFormatType _fileFormatType;
-		private readonly IAnnotations _annotations;
-		private readonly IFlags _flags;
+		private readonly IRecordState _state;
 
-		public DiskWriter(string destinationFilePath, Encoding destinationFileEncoding, FileFormatType fileFormatType, IAnnotations annotations, IFlags flags)
+		public DiskWriter(string destinationFilePath, Encoding destinationFileEncoding, FileFormatType fileFormatType, IRecordState state)
 		{
-			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
-			_flags = flags ?? throw new ArgumentNullException(nameof(flags));
+			_state = state ?? throw new ArgumentNullException(nameof(state));
 
 			if (string.IsNullOrWhiteSpace(destinationFilePath))
 			{
@@ -121,9 +119,9 @@
 
 					var serializedData = string.Format(CultureInfo.InvariantCulture, "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
 						record.LineNumber,
-						_flags.IsFlagged(record.LineNumber),
-						_annotations.IsPinned(record.LineNumber),
-						_annotations.HasComment(record.LineNumber) ? _annotations.GetComment(record.LineNumber) : ValueNotSpecified,
+						_state.IsFlagged(record),
+						_state.IsPinned(record),
+						_state.HasComment(record) ? _state.GetComment(record) : ValueNotSpecified,
 						elapsedTime.TotalSeconds.ToString("0.000"),
 						record.HasCreationTime ? record.CreatedAt.ToString() : ValueNotSpecified,
 						record.Content);
