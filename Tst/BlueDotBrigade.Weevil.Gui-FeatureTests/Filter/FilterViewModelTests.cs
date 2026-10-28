@@ -60,13 +60,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Opening a log never told the Remarks box to refresh, so it stayed empty although the sidecar held remarks.
 			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>());
-			var changedProperties = new List<string>();
-			((INotifyPropertyChanged)viewModel).PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
+			List<string> remarksSentToBox = RecordRemarksSentToBox(viewModel);
 
 			await OpenAsync(viewModel, CopyLogWithSidecar("A.log"));
 
-			changedProperties.Should().Contain(nameof(FilterViewModel.SourceFileRemarks));
-			viewModel.SourceFileRemarks.Should().Be("Why did the droid reboot?");
+			remarksSentToBox.Should().EndWith("Why did the droid reboot?");
 		}
 
 		[TestMethod]
@@ -77,13 +75,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>());
 			await OpenAsync(viewModel, CopyLog("A.log"));
 			viewModel.SourceFileRemarks = "Remarks about A";
-			var changedProperties = new List<string>();
-			((INotifyPropertyChanged)viewModel).PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
+			List<string> remarksSentToBox = RecordRemarksSentToBox(viewModel);
 
 			await OpenAsync(viewModel, CopyLog("B.log"));
 
-			changedProperties.Should().Contain(nameof(FilterViewModel.SourceFileRemarks));
-			viewModel.SourceFileRemarks.Should().BeEmpty();
+			remarksSentToBox.Should().EndWith(string.Empty);
 		}
 
 		private static async Task OpenAsync(FilterViewModel viewModel, string logPath)
@@ -97,6 +93,23 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 
 			viewModel.IsLogFileOpen.Should().BeTrue("the log should be open before the test continues");
+		}
+
+		/// <summary>
+		/// Records the remarks the Remarks box would read each time it is told they changed.
+		/// </summary>
+		private static List<string> RecordRemarksSentToBox(FilterViewModel viewModel)
+		{
+			var remarksSentToBox = new List<string>();
+			((INotifyPropertyChanged)viewModel).PropertyChanged += (_, e) =>
+			{
+				if (e.PropertyName == nameof(FilterViewModel.SourceFileRemarks))
+				{
+					remarksSentToBox.Add(viewModel.SourceFileRemarks);
+				}
+			};
+
+			return remarksSentToBox;
 		}
 
 		private string CopyLog(string fileName)
