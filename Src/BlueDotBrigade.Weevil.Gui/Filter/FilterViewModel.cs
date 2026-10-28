@@ -1915,8 +1915,8 @@
 			{
 				var index = search.Invoke();
 
-				// The list scrolls only when the index changes, so going to the last row again first moves it away (#1123).
-				// The list ignores -1. Callers run on the UI thread, so the list sees both values.
+				// The list scrolls only when the index changes. To go again to the row the last navigation went to, set -1 first, which the list ignores (#1123).
+				// Callers run on the UI thread, so the list sees both values.
 				if (index == this.ActiveRecordIndex)
 				{
 					this.ActiveRecordIndex = -1;
