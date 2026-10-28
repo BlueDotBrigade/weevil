@@ -3,6 +3,7 @@
 	using System;
 	using System.Diagnostics;
 	using System.Runtime.ExceptionServices;
+	using System.Runtime.InteropServices;
 	using System.Security;
 	using System.Threading.Tasks;
 	using System.Windows;
@@ -110,7 +111,6 @@
 
 				Log.Default.Write(LogSeverityType.Information, "Weevil application is initializing logging...");
 				Log.Register(new NLogWriter());
-				Log.Default.Write(LogSeverityType.Information, $"Build configuration={BuildConfiguration}");
 				Log.Default.Write($"Weevil command line parameters. Arguments={Environment.GetCommandLineArgs().Length}");
 
 				Log.Default.Write(
@@ -136,10 +136,18 @@
 
 				var computerSnapshot = ComputerSnapshot.Create();
 
-				var computerDetails =  
+				// What a performance measurement depends on, so a shared application log is enough to compare one (#1105).
+				var computerDetails =
+					"Weevil is running on this computer. " +
+					$"WeevilVersion={typeof(App).Assembly.GetName().Version}, " +
+					$"BuildConfiguration={BuildConfiguration}, " +
+					$"Runtime=`{RuntimeInformation.FrameworkDescription}`, " +
 					$"OsName=`{computerSnapshot.OsName}`, " +
+					$"OsVersion={computerSnapshot.OsVersion}, " +
 					$"OsIs64Bit={computerSnapshot.OsIs64Bit}, " +
 					$"CpuName=`{computerSnapshot.CpuName}`, " +
+					$"CpuCores={computerSnapshot.CpuCores}, " +
+					$"CpuProcessors={computerSnapshot.CpuProcessors}, " +
 					$"RamTotalInstalled={computerSnapshot.RamTotalInstalled.GigaBytes:0.00}GB, " +
 					$"RamTotalFree={computerSnapshot.RamTotalFree.GigaBytes:0.00}GB";
 
