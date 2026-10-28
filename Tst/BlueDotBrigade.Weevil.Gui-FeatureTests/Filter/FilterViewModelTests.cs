@@ -29,6 +29,32 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1123)]
+		public async Task GivenTheLastNavigationWentToBookmark1_WhenGoingToBookmark1Again_ThenTheListIsToldToShowItAgain()
+		{
+			// Ctrl+1 did nothing when the last navigation had gone to the same row, because the index the list scrolls to did not change.
+			const int lineNumber = 10;
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>());
+			await OpenAsync(viewModel, CopyLogWithBookmark1(lineNumber));
+			viewModel.GoToBookmark1Command.Execute(null);
+			viewModel.ActiveRecordIndex.Should().Be(lineNumber - 1);
+			var indexesSentToList = new List<int>();
+			((INotifyPropertyChanged)viewModel).PropertyChanged += (_, e) =>
+			{
+				if (e.PropertyName == nameof(FilterViewModel.ActiveRecordIndex))
+				{
+					indexesSentToList.Add(viewModel.ActiveRecordIndex);
+				}
+			};
+
+			viewModel.GoToBookmark1Command.Execute(null);
+
+			// The list scrolls only when the index changes, so it must change before it returns to the same row.
+			indexesSentToList.Should().Contain(index => index != lineNumber - 1);
+			indexesSentToList.Should().EndWith(lineNumber - 1);
+		}
+
+		[TestMethod]
 		[WorkItem(1124)]
 		public async Task GivenWeevilHasJustStarted_WhenALogWithRemarksIsOpened_ThenTheRemarksShownAreRefreshed()
 		{
@@ -85,6 +111,20 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var logPath = CopyLog(fileName);
 			File.Copy($"{new Daten().AsFilePath(From.GlobalDefault)}.xml", $"{logPath}.xml");
+
+			return logPath;
+		}
+
+		/// <summary>
+		/// Copies the log and saves a sidecar that holds bookmark 1, as a previous session would.
+		/// </summary>
+		private string CopyLogWithBookmark1(int lineNumber)
+		{
+			var logPath = CopyLog("Bookmarked.log");
+
+			IEngine engine = Engine.UsingPath(logPath).Open();
+			engine.Bookmarks.Create(1, "Bookmark 1", lineNumber);
+			engine.Save();
 
 			return logPath;
 		}
