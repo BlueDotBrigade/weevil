@@ -185,8 +185,25 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1109)]
+		public void GivenFiltersApplied_WhenReloaded_ThenTheHistoryIsKeptWithoutSaving()
+		{
+			// Reload keeps the history in memory, as it keeps the rest of the session, instead of reading it back from the sidecar.
+			IEngine engine = OpenCopy();
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2"));
+			IReadOnlyList<string> history = engine.Filter.IncludeHistory;
+
+			engine.Reload();
+
+			engine.Filter.IncludeHistory.Should().BeSameAs(history);
+			history.Take(2).Should().Equal("Id=2", "Id=1");
+		}
+
+		[TestMethod]
 		[WorkItem(1108)]
-		public void GivenSavedBookmarksRegionsAndRemarks_WhenTheLogIsOpenedAgain_ThenTheyAreReadFromTheSidecar()
+		[WorkItem(1109)]
+		public void GivenSavedSessionState_WhenTheLogIsOpenedAgain_ThenItIsReadFromTheSidecar()
 		{
 			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
 			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
@@ -198,6 +215,8 @@ namespace BlueDotBrigade.Weevil
 				engine.Bookmarks.Create(1, "Start", 10);
 				engine.Regions.CreateFromSelection("Startup", new[] { 20, 30 });
 				engine.SourceFileRemarks = "Reviewed";
+				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1", "Id=99"));
+				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2", "Id=98"));
 				engine.Save();
 
 				IEngine reopened = Engine.UsingPath(logPath).Open();
@@ -207,6 +226,8 @@ namespace BlueDotBrigade.Weevil
 				reopened.Regions.TryGetRegionName(25, out var regionName).Should().BeTrue();
 				regionName.Should().Be("Startup");
 				reopened.SourceFileRemarks.Should().Be("Reviewed");
+				reopened.Filter.IncludeHistory.Take(2).Should().Equal("Id=2", "Id=1");
+				reopened.Filter.ExcludeHistory.Take(2).Should().Equal("Id=98", "Id=99");
 			}
 			finally
 			{

@@ -559,7 +559,7 @@
 			return Task.FromResult(result);
 		}
 
-		private void RefreshHistory(ObservableCollection<string> history, IList<string> newValues)
+		private void RefreshHistory(ObservableCollection<string> history, IEnumerable<string> newValues)
 		{
 			_uiDispatcher.Invoke(() =>
 			{
@@ -864,7 +864,7 @@
 					_engine.Save();
 					_engine.Reload();
 
-					// Reload replaces the engine's history, which can differ from the one shown (#1011).
+					// Reload keeps the engine's history (#1109); this keeps the lists shown in step with it.
 					RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
 					RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
 

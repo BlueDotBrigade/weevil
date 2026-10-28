@@ -86,7 +86,9 @@ namespace BlueDotBrigade.Weevil.Filter
 				ImmutableArray.Create(collector),
 				Substitute.For<IRegionManager>(),
 				Substitute.For<IBookmarkManager>(),
-				new RecordState());
+				new RecordState(),
+				new FilterHistory(),
+				new FilterHistory());
 		}
 
 		private static Dictionary<int, TimeSpan> ElapsedTimesByLine(IFilter filter, ImmutableArray<IRecord> records)

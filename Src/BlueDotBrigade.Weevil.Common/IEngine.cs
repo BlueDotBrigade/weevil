@@ -23,7 +23,7 @@
 		/// </summary>
 		/// <remarks>
 		/// The sender is the history list that changed: <see cref="IFilterTraits.IncludeHistory"/> or <see cref="IFilterTraits.ExcludeHistory"/>.
-		/// <see cref="Clear"/> does not raise it, and keeps both lists. <see cref="Reload"/> replaces both lists, so read them again after calling it.
+		/// <see cref="Clear"/> does not raise it. <see cref="Clear"/> and <see cref="Reload"/> keep both lists, because they belong to the log (#1109).
 		/// </remarks>
 		event EventHandler<HistoryChangedEventArgs> FilterHistoryChanged;
 

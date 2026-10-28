@@ -36,8 +36,9 @@
 
 		private Filter _currentFilter;
 
-		private readonly IList<string> _includeHistory;
-		private readonly IList<string> _excludeHistory;
+		// The histories belong to the log, so they live in the session (#1109).
+		private readonly FilterHistory _includeHistory;
+		private readonly FilterHistory _excludeHistory;
 
 		private bool _abortFilterOperation;
 
@@ -54,6 +55,8 @@
 			IRegionManager regionManager,
 			IBookmarkManager bookmarkManager,
 			RecordState recordState,
+			FilterHistory includeHistory,
+			FilterHistory excludeHistory,
 			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_coreExtension = coreExtension;
@@ -73,8 +76,8 @@
 
 			_currentFilter = new Filter(FilterType.PlainText, FilterCriteria.None);
 
-			_includeHistory = new List<string>();
-			_excludeHistory = new List<string>();
+			_includeHistory = includeHistory ?? throw new ArgumentNullException(nameof(includeHistory));
+			_excludeHistory = excludeHistory ?? throw new ArgumentNullException(nameof(excludeHistory));
 
 			_filterExecutionTime = TimeSpan.Zero;
 		}
@@ -87,9 +90,9 @@
 
 		public ElapsedTimes ElapsedTimes => _recordState.ElapsedTimes;
 
-		public IList<string> IncludeHistory => _includeHistory;
+		public IReadOnlyList<string> IncludeHistory => _includeHistory;
 
-		public IList<string> ExcludeHistory => _excludeHistory;
+		public IReadOnlyList<string> ExcludeHistory => _excludeHistory;
 
 		public FilterType FilterType => _currentFilter.Type;
 
@@ -194,42 +197,14 @@
 			return compressedResults;
 		}
 
-		private void UpdateFilterHistory(IList<string> history, string newValue)
+		private void UpdateFilterHistory(FilterHistory history, string newValue)
 		{
 			if (!string.IsNullOrWhiteSpace(newValue))
 			{
-				if (history.Contains(newValue))
+				// Raised after the session's lock is released, as the comment and pin store raises its own events.
+				foreach (HistoryChangedEventArgs change in history.Add(newValue))
 				{
-					var insertAt = 0;
-					var removeAt = history.IndexOf(newValue);
-					var oldValue = history[removeAt];
-
-					// Move item
-					history.RemoveAt(removeAt);
-					history.Insert(insertAt, newValue);
-
-					HistoryChanged?.Invoke(
-						history,
-						new HistoryChangedEventArgs(HistoryChangeType.Moved, removeAt, oldValue));
-				}
-				else
-				{
-					if (history.Count >= MaxFilterHistory)
-					{
-						var removeAt = history.Count - 1;
-						var oldValue = history[removeAt];
-						history.RemoveAt(removeAt);
-
-						HistoryChanged?.Invoke(
-						history,
-						new HistoryChangedEventArgs(HistoryChangeType.Removed, removeAt, oldValue));
-					}
-
-					var insertAt = 0;
-					history.Insert(insertAt, newValue);
-					HistoryChanged?.Invoke(
-						history,
-						new HistoryChangedEventArgs(HistoryChangeType.Added, insertAt, newValue));
+					HistoryChanged?.Invoke(history, change);
 				}
 			}
 		}
