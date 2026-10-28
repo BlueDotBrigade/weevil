@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
@@ -230,6 +231,23 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			bulletinMediator.Received(2).Post(Arg.Any<SourceFileOpenedBulletin>());
 
 			viewModel.InclusiveFilterHistory.Should().Equal(IncludeFilter);
+		}
+
+		[TestMethod]
+		[WorkItem(1116)]
+		public async Task GivenALogWithRemarks_WhenAnotherLogIsOpened_ThenTheRemarksShownAreRefreshed()
+		{
+			// Opening a log never told the Remarks box to refresh, so it kept showing the previous log's remarks.
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+			await viewModel.OpenAsync(CopyLog("A.log"));
+			viewModel.SourceFileRemarks = "Remarks about A";
+			var changedProperties = new List<string>();
+			viewModel.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
+
+			await viewModel.OpenAsync(CopyLog("B.log"));
+
+			changedProperties.Should().Contain(nameof(FilterViewModel.SourceFileRemarks));
+			viewModel.SourceFileRemarks.Should().BeEmpty();
 		}
 
 		[TestMethod]
