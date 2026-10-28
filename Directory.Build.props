@@ -4,7 +4,7 @@
     <WeevilTargetFramework>net10.0</WeevilTargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' != '.wixproj'">
-    <WeevilReleaseVersion>2.12.1</WeevilReleaseVersion>
+    <WeevilReleaseVersion>3.0.0</WeevilReleaseVersion>
     <VersionPrefix>$(WeevilReleaseVersion)</VersionPrefix>
     <BuildRevisionRaw Condition="'$(BuildRevisionRaw)' == '' and '$(BUILD_BUILDID)' != ''">$(BUILD_BUILDID)</BuildRevisionRaw>
     <BuildRevisionRaw Condition="'$(BuildRevisionRaw)' == '' and '$(GITHUB_RUN_NUMBER)' != ''">$(GITHUB_RUN_NUMBER)</BuildRevisionRaw>
