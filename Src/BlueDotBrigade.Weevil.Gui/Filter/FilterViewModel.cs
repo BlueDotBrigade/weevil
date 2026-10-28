@@ -613,10 +613,8 @@
 							TotalRecordCount = _engine.Count
 						});
 
-						_uiDispatcher.Invoke(() =>
-						{
-							this.SourceFileRemarks = _engine.SourceFileRemarks;
-						});
+						// The Remarks box reads the engine, which is now the opened log's. Assigning the remarks to themselves would raise nothing (#1124).
+						_uiDispatcher.Invoke(() => OnPropertyChanged(nameof(this.SourceFileRemarks)));
 
 						_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
 						{
@@ -1915,7 +1913,16 @@
 		{
 			try
 			{
-				this.ActiveRecordIndex = search.Invoke();
+				var index = search.Invoke();
+
+				// The list scrolls only when the index changes. To go again to the row the last navigation went to, set -1 first, which the list ignores (#1123).
+				// Callers run on the UI thread, so the list sees both values.
+				if (index == this.ActiveRecordIndex)
+				{
+					this.ActiveRecordIndex = -1;
+				}
+
+				this.ActiveRecordIndex = index;
 			}
 			catch (RecordNotFoundException e)
 			{
