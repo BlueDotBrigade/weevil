@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <AcceptEula>wix7</AcceptEula>
-    <ProductVersion>2.12.1</ProductVersion>
+    <ProductVersion>3.0.0</ProductVersion>
     <OutputName>Weevil-$(ProductVersion)</OutputName>
     <Name>BlueDotBrigade.Weevil.Installer</Name>
     <RepoRootDir Condition=" '$(SolutionDir)' != '' ">$(SolutionDir)</RepoRootDir>

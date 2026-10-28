@@ -4,9 +4,22 @@
 
 The following summarizes the changes that have been made to Weevil's core engine.  This change log does not include plugin specific features & bug fixes.
 
+
+### Version 3.0.0
+
+Released on MMM DD, YYYY.
+
+#### What's New?
+
+- TBD
+
+#### Bug Fixes
+
+- TDB
+
 ### Version 2.12.1
 
-Released for June 27th, 2026.
+Released on June 27th, 2026.
 
 #### What's New?
 
@@ -30,7 +43,7 @@ Released for June 27th, 2026.
 
 ### Version 2.12.0
 
-Released for June 27th, 2026.
+Released on June 27th, 2026.
 
 #### What's New?
 
