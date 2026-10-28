@@ -51,7 +51,8 @@ namespace BlueDotBrigade.Weevil
 
 			engine.Navigate.PreviousContent("Id=150", isCaseSensitive: true);
 
-			IDictionary<string, object> entry = _log.Entries.Last(e => e.Message == "Search complete.").Metadata;
+			var (severity, _, entry) = _log.Entries.Last(e => e.Message == "Search complete.");
+			severity.Should().Be(LogSeverityType.Information);
 			entry["Search"].Should().Be(nameof(INavigate.PreviousContent));
 			entry["WasFound"].Should().Be(true);
 			entry["Records"].Should().Be(engine.Filter.Results.Length).And.NotBe(engine.Count);
@@ -77,9 +78,9 @@ namespace BlueDotBrigade.Weevil
 
 		private sealed class CapturingLogWriter : ILogWriter
 		{
-			private readonly ConcurrentQueue<(string Message, IDictionary<string, object> Metadata)> _entries = new();
+			private readonly ConcurrentQueue<(LogSeverityType Severity, string Message, IDictionary<string, object> Metadata)> _entries = new();
 
-			public IEnumerable<(string Message, IDictionary<string, object> Metadata)> Entries => _entries;
+			public IEnumerable<(LogSeverityType Severity, string Message, IDictionary<string, object> Metadata)> Entries => _entries;
 
 			public void Write(string message) => Write(LogSeverityType.Debug, message, null);
 
@@ -89,7 +90,7 @@ namespace BlueDotBrigade.Weevil
 
 			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 			{
-				_entries.Enqueue((message, (metadata ?? []).ToDictionary(pair => pair.Key, pair => pair.Value)));
+				_entries.Enqueue((severity, message, (metadata ?? []).ToDictionary(pair => pair.Key, pair => pair.Value)));
 			}
 
 			public void Write(LogSeverityType severity, Exception exception) => Write(severity, exception.Message, null);
