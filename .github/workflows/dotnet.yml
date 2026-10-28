@@ -21,6 +21,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Test data such as 10MillionRecords.zip is stored in Git LFS, and DatenLokator unzips it when the tests start (#1127).
+      # The cache downloads each LFS file once, not on every build, because downloads count against the LFS bandwidth.
+      - name: List Git LFS files
+        shell: bash
+        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore Git LFS files
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ runner.os }}-${{ hashFiles('.lfs-assets-id') }}
+
+      - name: Fetch Git LFS files
+        run: git lfs pull
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
@@ -46,6 +61,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # Test data such as 10MillionRecords.zip is stored in Git LFS, and DatenLokator unzips it when the tests start (#1127).
+      # The cache downloads each LFS file once, not on every build, because downloads count against the LFS bandwidth.
+      - name: List Git LFS files
+        shell: bash
+        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore Git LFS files
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ runner.os }}-${{ hashFiles('.lfs-assets-id') }}
+
+      - name: Fetch Git LFS files
+        run: git lfs pull
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
