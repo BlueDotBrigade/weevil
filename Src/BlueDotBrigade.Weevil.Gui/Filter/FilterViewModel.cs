@@ -660,10 +660,8 @@
 							TotalRecordCount = _engine.Count
 						});
 
-						_uiDispatcher.Invoke(() =>
-						{
-							this.SourceFileRemarks = _engine.SourceFileRemarks;
-						});
+						// The Remarks box reads the engine, which is now the opened log's. Assigning the remarks to themselves would raise nothing (#1116).
+						_uiDispatcher.Invoke(() => OnPropertyChanged(nameof(this.SourceFileRemarks)));
 
 						_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
 						{
