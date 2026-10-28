@@ -284,6 +284,7 @@ namespace BlueDotBrigade.Weevil
 
 		[TestMethod]
 		[WorkItem(1105)]
+		[WorkItem(1120)]
 		[DoNotParallelize]
 		public void GivenFilteredResults_WhenASearchFindsARecord_ThenTheApplicationLogRecordsHowManyResultsItSearched()
 		{
@@ -294,6 +295,7 @@ namespace BlueDotBrigade.Weevil
 			engine.Navigate.PreviousContent("Id=150", isCaseSensitive: true);
 
 			IDictionary<string, object> entry = log.Last("Search complete.");
+			log.SeverityOfLast("Search complete.").Should().Be(LogSeverityType.Information);
 			entry["Search"].Should().Be(nameof(INavigate.PreviousContent));
 			entry["WasFound"].Should().Be(true);
 			entry["Records"].Should().Be(engine.Filter.Results.Length).And.NotBe(engine.Count);
@@ -332,7 +334,7 @@ namespace BlueDotBrigade.Weevil
 		private sealed class CapturingLogWriter : ILogWriter, IDisposable
 		{
 			private readonly ILogWriter _original = Log.Default;
-			private readonly ConcurrentQueue<(string Message, IDictionary<string, object> Metadata)> _entries = new();
+			private readonly ConcurrentQueue<(LogSeverityType Severity, string Message, IDictionary<string, object> Metadata)> _entries = new();
 
 			public static CapturingLogWriter Register()
 			{
@@ -350,6 +352,14 @@ namespace BlueDotBrigade.Weevil
 				return _entries.Last(entry => entry.Message == message).Metadata;
 			}
 
+			/// <summary>
+			/// Returns the severity of the last entry with the given message.
+			/// </summary>
+			public LogSeverityType SeverityOfLast(string message)
+			{
+				return _entries.Last(entry => entry.Message == message).Severity;
+			}
+
 			public void Dispose() => Log.Register(_original);
 
 			public void Write(string message) => Write(LogSeverityType.Debug, message, null);
@@ -360,7 +370,7 @@ namespace BlueDotBrigade.Weevil
 
 			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 			{
-				_entries.Enqueue((message, (metadata ?? []).ToDictionary(pair => pair.Key, pair => pair.Value)));
+				_entries.Enqueue((severity, message, (metadata ?? []).ToDictionary(pair => pair.Key, pair => pair.Value)));
 			}
 
 			public void Write(LogSeverityType severity, Exception exception) => Write(severity, exception.Message, null);

@@ -133,7 +133,7 @@
 			finally
 			{
 				Log.Default.Write(
-					LogSeverityType.Debug,
+					LogSeverityType.Information,
 					"Search complete.",
 					new Dictionary<string, object>
 					{
