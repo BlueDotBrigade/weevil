@@ -354,13 +354,7 @@
 		}
 
 		/// <summary>
-		/// Keeps the selection, the anchor and the active record of an engine this one replaces, for the records this one shows.
-		/// </summary>
-		/// <remarks>
-		/// Called by Reload before it applies the filter, which then narrows the selection as usual. Records are matched by line number.
-		/// </remarks>
-		/// <summary>
-		/// Returns the selection by line number, so it can outlive this view's records (#1126).
+		/// Returns the selection, the anchor and the active record by line number, so they can outlive this view's records (#1126).
 		/// </summary>
 		internal Snapshot TakeSnapshot()
 		{
@@ -389,8 +383,11 @@
 		}
 
 		/// <summary>
-		/// Selects again the records of <paramref name="snapshot"/> that this view shows.
+		/// Selects again the records of <paramref name="snapshot"/> that this view shows, and keeps its anchor and active record if shown.
 		/// </summary>
+		/// <remarks>
+		/// Called by Reload before it applies the filter, which then narrows the selection as usual. Records are matched by line number.
+		/// </remarks>
 		internal void Restore(Snapshot snapshot)
 		{
 			ImmutableArray<int> lineNumbers = snapshot.SelectedLineNumbers;

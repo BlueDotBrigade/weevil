@@ -181,7 +181,7 @@
 
 		/// <summary>
 		/// Returns an engine for the same log, with the same session, flags and filter, that holds none of the records.
-		/// Reload uses it while it reads the log again, so memory never holds two copies of the log (#1126).
+		/// Reload uses it while it reads the log again, so the engine holds none of the previous records meanwhile (#1126).
 		/// </summary>
 		/// <remarks>
 		/// If reading fails, the engine stays, so it still saves this log's sidecar, and a retry reloads this log.

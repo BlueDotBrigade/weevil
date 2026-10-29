@@ -363,6 +363,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		/// <summary>
 		/// Watches the first record shown without keeping it alive: a Debug build keeps a test method's locals until it ends.
+		/// It tracks resurrection, so a record that a finalizer still holds counts as alive.
 		/// </summary>
 		/// <remarks>
 		/// No insight refers to the first record of the test log.
@@ -370,7 +371,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static WeakReference TrackFirstRecord(FilterViewModel viewModel)
 		{
-			return new WeakReference(viewModel.VisibleItems[0]);
+			return new WeakReference(viewModel.VisibleItems[0], trackResurrection: true);
 		}
 
 		private string CopyLog(string fileName)

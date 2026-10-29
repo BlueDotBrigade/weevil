@@ -220,6 +220,34 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenASavedComment_WhenSavedAgainAfterAReloadThatCouldNotReadTheLog_ThenTheCommentIsKept()
+		{
+			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+				IEngine engine = Engine.UsingPath(logPath).Open();
+				engine.RecordState.SetComment(engine.Records[0], "Checked");
+				engine.Save();
+
+				File.Move(logPath, $"{logPath}~");
+				FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
+				File.Move($"{logPath}~", logPath);
+				engine.Save();
+
+				IEngine reopened = Engine.UsingPath(logPath).Open();
+
+				reopened.RecordState.GetComment(reopened.Records[0]).Should().Be("Checked");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		[WorkItem(1109)]
 		public void GivenFiltersApplied_WhenReloaded_ThenTheHistoryIsKeptWithoutSaving()
 		{
@@ -357,11 +385,12 @@ namespace BlueDotBrigade.Weevil
 
 		/// <summary>
 		/// Watches the first record without keeping it alive: a Debug build keeps a test method's locals until it ends.
+		/// It tracks resurrection, so a record that a finalizer still holds counts as alive.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static WeakReference TrackFirstRecord(IEngine engine)
 		{
-			return new WeakReference(engine.Filter.Results[0]);
+			return new WeakReference(engine.Filter.Results[0], trackResurrection: true);
 		}
 
 		private IEngine OpenCopy()

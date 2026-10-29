@@ -54,8 +54,9 @@
 		/// </summary>
 		/// <remarks>
 		/// The comments, pins, bookmarks, regions, remarks and filter history stay, and so do the filter and the selected records the log still holds.
-		/// The previous records are released before the log is read, so memory never holds two copies (#1126).
-		/// While it reads, and if reading fails, the engine shows the same log without records, with the same filter.
+		/// The engine lets go of the previous records before it reads the log (#1126). While it reads, and if reading fails, it shows the same log without records, with the same filter.
+		/// So save first: after a failed read, saving keeps only the comments and pins already saved.
+		/// A failed read does not raise <see cref="FilterResultsChanged"/>, so read <see cref="IFilter.Results"/> afterwards.
 		/// </remarks>
 		void Reload();
 	}

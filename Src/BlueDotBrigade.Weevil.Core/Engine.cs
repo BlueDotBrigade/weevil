@@ -184,7 +184,7 @@
 		}
 
 		/// <summary>
-		/// Keeps what Reload carries over, then lets go of the records, so Reload never holds two copies of the log (#1126).
+		/// Keeps what Reload carries over, then lets go of the records, so the engine holds none of them while it reads the log again (#1126).
 		/// Meanwhile, and if reading the log fails, this engine shows the same log without records.
 		/// </summary>
 		/// <remarks>
