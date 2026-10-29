@@ -14,7 +14,7 @@
 		internal int Count { get; set; }
 
 		/// <summary>
-		/// Holds the content of the record this thread is filtering, so it is read once for every expression (#1131).
+		/// Holds the content of the record being filtered, so it is read once, however many expressions test it (#1131).
 		/// </summary>
 		internal ContentBuffer Content { get; } = new ContentBuffer();
 	}
