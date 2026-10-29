@@ -161,9 +161,9 @@ namespace BlueDotBrigade.Weevil.IO
 		public ContentChunk TakeChunk(long endOffset)
 		{
 			var start = (int)(_chunkStart - _bufferOffset);
-			var bytes = _buffer.AsSpan(start, (int)(endOffset - _chunkStart)).ToArray();
 
-			var chunk = new ContentChunk(_chunkStart, bytes, this.Encoding);
+			// The chunk copies the bytes, so the buffer can be reused.
+			var chunk = new ContentChunk(_chunkStart, _buffer.AsSpan(start, (int)(endOffset - _chunkStart)), this.Encoding);
 			_chunkStart = endOffset;
 
 			return chunk;

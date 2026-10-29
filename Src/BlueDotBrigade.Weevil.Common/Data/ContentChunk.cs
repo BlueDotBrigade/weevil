@@ -16,13 +16,15 @@ namespace BlueDotBrigade.Weevil.Data
 		private readonly Encoding _encoding;
 
 		/// <param name="fileOffset">Where the bytes start in the log file.</param>
-		/// <param name="bytes">The bytes, which the chunk then owns: do not change them afterwards.</param>
-		/// <param name="encoding">The log's encoding, without a byte order mark, which turns invalid bytes into U+FFFD.</param>
-		public ContentChunk(long fileOffset, byte[] bytes, Encoding encoding)
+		/// <param name="bytes">The bytes, which are copied, so the records' content cannot change afterwards.</param>
+		/// <param name="encoding">The log's encoding, without a byte order mark, which turns invalid bytes into U+FFFD. It is copied too.</param>
+		public ContentChunk(long fileOffset, ReadOnlySpan<byte> bytes, Encoding encoding)
 		{
+			ArgumentNullException.ThrowIfNull(encoding);
+
 			this.FileOffset = fileOffset;
-			_bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
-			_encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
+			_bytes = bytes.ToArray();
+			_encoding = (Encoding)encoding.Clone();
 		}
 
 		public long FileOffset { get; }

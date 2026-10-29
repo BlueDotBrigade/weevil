@@ -71,6 +71,17 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 		}
 
+		[TestMethod]
+		public void GivenTheBytesAChunkWasMadeFrom_WhenChangedAfterwards_ThenTheRecordsContentDoesNotChange()
+		{
+			var bytes = Encoding.UTF8.GetBytes("Original");
+			var record = new Record(1, DateTime.Now, SeverityType.Information, new ContentChunk(0, bytes, Encoding.UTF8), 0, bytes.Length, isMultiLine: false, wasGeneratedByUi: false);
+
+			bytes[0] = (byte)'X';
+
+			record.Content.Should().Be("Original");
+		}
+
 		private static IRecord HeldAsBytes(Encoding encoding, string text, bool isMultiLine)
 		{
 			// Bytes before the content, as in a chunk shared with other records.
