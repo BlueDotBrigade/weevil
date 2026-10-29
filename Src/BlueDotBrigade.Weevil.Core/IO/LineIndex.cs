@@ -337,7 +337,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Detects the encoding from a byte order mark, with the same checks, in the same order, as <see cref="StreamReader"/>.
 		/// </summary>
 		/// <returns>The size of each character's code unit in bytes, its byte order, and the length of the byte order mark.</returns>
-		private static (int UnitSize, bool IsBigEndian, int PreambleLength) DetectEncoding(Stream source)
+		internal static (int UnitSize, bool IsBigEndian, int PreambleLength) DetectEncoding(Stream source)
 		{
 			Span<byte> b = stackalloc byte[4];
 
