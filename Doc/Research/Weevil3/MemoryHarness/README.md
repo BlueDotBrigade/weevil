@@ -84,15 +84,15 @@ Measured on a 4-vCPU Linux container with 14.2 GB of RAM available to .NET, all 
 
 ### After step 1 of #988: content held as the log's bytes (2026-10-29)
 
-Weevil now needs about **1.75 GB of RAM per GB of log** at the peak while opening, and 1.62 GB once the log is open. That is 46% less than 2.12.1 after opening, and 40% less than `main` before #1133, which was measured the same day on the same machine. The full reports are in [Results-2026-10-29-RawContent.md](Results-2026-10-29-RawContent.md) and, for `main`, [Results-2026-10-29-MainBeforeRawContent.md](Results-2026-10-29-MainBeforeRawContent.md).
+Weevil now needs about **1.62 GB of RAM per GB of log**, both at the peak while opening and once the log is open. That is 46% less than 2.12.1 after opening, and 40% less than `main` before #1133, which was measured the same day on the same machine. The full reports are in [Results-2026-10-29-RawContent.md](Results-2026-10-29-RawContent.md) and, for `main`, [Results-2026-10-29-MainBeforeRawContent.md](Results-2026-10-29-MainBeforeRawContent.md).
 
 | Log | 2.12.1 | `main` before #1133 | After #1133 | Source |
 |---|---|---|---|---|
-| 1 GB | 3.3 GB | 2.8 GB | 1.7 GB, peak 1.9 GB | Measured: opened in 22 s, against 29 s for `main` |
-| 4 GB | 12.2 GB, peak 13.0 GB | 10.9 GB, peak 10.9 GB | 6.5 GB, peak 7.0 GB | Measured: opened in 94 s, against 114 s for `main` |
-| 8 GB | 24.3 GB, peak 26.0 GB | | 13.0 GB, peak 14.0 GB | **Estimate** |
-| 16 GB | 48.5 GB, peak 52.0 GB | | 25.9 GB, peak 28.1 GB | **Estimate** |
-| 24 GB | 72.8 GB, peak 77.9 GB | | 38.9 GB, peak 42.1 GB | **Estimate** |
+| 1 GB | 3.3 GB | 2.8 GB | 1.7 GB, peak 1.7 GB | Measured: opened in 20 s, against 29 s for `main` |
+| 4 GB | 12.2 GB, peak 13.0 GB | 10.9 GB, peak 10.9 GB | 6.5 GB, peak 6.5 GB | Measured: opened in 75 s, against 114 s for `main` |
+| 8 GB | 24.3 GB, peak 26.0 GB | | 13.0 GB, peak 13.0 GB | **Estimate** |
+| 16 GB | 48.5 GB, peak 52.0 GB | | 25.9 GB, peak 25.9 GB | **Estimate** |
+| 24 GB | 72.8 GB, peak 77.9 GB | | 38.9 GB, peak 38.9 GB | **Estimate** |
 
 - **On a PC:** with 32 GB of RAM, the largest log that fits is now about 16 GB, instead of about 8 GB.
-- **The peak:** unlike `main`, the peak while opening is above the memory once the log is open, by 0.5 GB for the 4 GB log. The cause has not been investigated.
+- **The peak:** a first measurement put the peak 0.5 GB above the memory after opening. The parser kept every record it had read, with its line's text, until the chunk holding them was complete. Keeping only what the parser found (#1134 review) removed it, and opening the 4 GB log fell from 94 s to 75 s.
