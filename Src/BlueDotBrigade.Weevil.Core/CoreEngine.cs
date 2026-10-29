@@ -192,11 +192,6 @@
 			}
 		}
 
-		~CoreEngine()
-		{
-			Log.Default.Write($"The core engine has been removed from memory.");
-		}
-
 		#endregion
 
 		#region Properties

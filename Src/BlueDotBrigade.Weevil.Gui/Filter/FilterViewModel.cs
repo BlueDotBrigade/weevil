@@ -858,6 +858,15 @@
 			{
 				try
 				{
+					// The rows hold the old records, so drop them first: Reload frees them before it reads the log again (#1126).
+					// The grid is hidden meanwhile.
+					_uiDispatcher.Invoke(() =>
+					{
+						this.VisibleItems = null;
+						this.Rows = null;
+						OnPropertyChanged(nameof(this.VisibleItems));
+					});
+
 					// Reload keeps the selection in Core (#1062).
 					_engine.Save();
 					_engine.Reload();

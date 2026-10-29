@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
+	using System.Runtime.CompilerServices;
 	using Analysis;
 	using Data;
 	using Filter;
@@ -173,21 +174,36 @@
 
 		public void Reload()
 		{
-			var sourcePath = _coreEngine.SourceFilePath;
-			FilterType filterType = _coreEngine.Filter.FilterType;
-			IFilterCriteria filterCriteria = _coreEngine.Filter.Criteria;
+			(CoreEngine.CoreEngineBuilder builder, SelectionManager.Snapshot selection, FilterType filterType, IFilterCriteria filterCriteria) = Release();
 
-			CoreEngine previous = _coreEngine;
-
-			// The session and the flags carry across Reload (#1013).
-			Replace(CoreEngine
-				.FromPath(sourcePath)
-				.UsingStateOf(_coreEngine)
-				.Build());
+			Replace(builder.Build());
 
 			// Before the filter, which then narrows the selection as any filter does (#1062).
-			_coreEngine.Selector.KeepSelectionOf(previous.Selector);
+			_coreEngine.Selector.Restore(selection);
 			_coreEngine.Filter.Apply(filterType, filterCriteria);
+		}
+
+		/// <summary>
+		/// Keeps what Reload carries over, then lets go of the records, so Reload never holds two copies of the log (#1126).
+		/// Meanwhile, and if reading the log fails, this engine shows an empty log.
+		/// </summary>
+		/// <remarks>
+		/// A method of its own, because a Debug build keeps a method's temporaries, such as the old filter, until it returns.
+		/// </remarks>
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private (CoreEngine.CoreEngineBuilder Builder, SelectionManager.Snapshot Selection, FilterType FilterType, IFilterCriteria FilterCriteria) Release()
+		{
+			// The session and the flags carry across Reload (#1013).
+			CoreEngine.CoreEngineBuilder builder = CoreEngine
+				.FromPath(_coreEngine.SourceFilePath)
+				.UsingStateOf(_coreEngine);
+
+			var kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
+
+			UnsubscribeFrom(_coreEngine);
+			_coreEngine = ((Engine)Surrogate)._coreEngine;
+
+			return kept;
 		}
 
 		/// <summary>

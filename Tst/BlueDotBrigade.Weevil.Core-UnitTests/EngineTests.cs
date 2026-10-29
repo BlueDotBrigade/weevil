@@ -5,6 +5,7 @@ namespace BlueDotBrigade.Weevil
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -185,6 +186,19 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1126)]
+		public void GivenAnOpenLog_WhenReloaded_ThenItsPreviousRecordsHaveBeenFreed()
+		{
+			// Reload kept the previous records while it read the log again, so memory held two copies of the log.
+			IEngine engine = OpenCopy();
+			WeakReference previousRecord = TrackFirstRecord(engine);
+
+			engine.Reload();
+
+			previousRecord.IsAlive.Should().BeFalse("Reload releases the previous records before it reads the log, and opening collects them");
+		}
+
+		[TestMethod]
 		[WorkItem(1109)]
 		public void GivenFiltersApplied_WhenReloaded_ThenTheHistoryIsKeptWithoutSaving()
 		{
@@ -318,6 +332,15 @@ namespace BlueDotBrigade.Weevil
 			entry["WasFound"].Should().Be(false);
 			((double)entry["Duration"]).Should().BeGreaterThanOrEqualTo(0);
 			entry.Values.Should().NotContain(text);
+		}
+
+		/// <summary>
+		/// Watches the first record without keeping it alive: a Debug build keeps a test method's locals until it ends.
+		/// </summary>
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static WeakReference TrackFirstRecord(IEngine engine)
+		{
+			return new WeakReference(engine.Filter.Results[0]);
 		}
 
 		private IEngine OpenCopy()

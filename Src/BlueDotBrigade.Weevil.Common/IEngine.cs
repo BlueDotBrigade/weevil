@@ -49,6 +49,14 @@
 		/// </remarks>
 		void Clear(ClearOperation clearOperation);
 
+		/// <summary>
+		/// Reads the log file again, including any records a Clear removed.
+		/// </summary>
+		/// <remarks>
+		/// The comments, pins, bookmarks, regions, remarks and filter history stay, and so do the filter and the selected records the log still holds.
+		/// The previous records are released before the log is read, so memory never holds two copies (#1126).
+		/// While it reads, and if reading fails, the engine shows an empty log.
+		/// </remarks>
 		void Reload();
 	}
 }

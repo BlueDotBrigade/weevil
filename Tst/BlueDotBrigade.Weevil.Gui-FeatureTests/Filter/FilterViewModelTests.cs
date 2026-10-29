@@ -5,6 +5,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
+	using System.Runtime.CompilerServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows.Input;
@@ -234,6 +235,22 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1126)]
+		public async Task GivenAnOpenLog_WhenReloaded_ThenThePreviousRecordsHaveBeenFreed()
+		{
+			// The grid's rows kept the previous records while Reload read the log again, so memory held two copies of the log.
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+			await viewModel.OpenAsync(CopyLog("A.log"));
+			WaitUntil(() => viewModel.CanOpenLogFile);
+			WeakReference previousRecord = TrackFirstRecord(viewModel);
+
+			viewModel.Reload();
+			WaitUntil(() => viewModel.IsFilterToolboxEnabled);
+
+			previousRecord.IsAlive.Should().BeFalse("Reload drops the rows and the engine's records before it reads the log, and opening collects them");
+		}
+
+		[TestMethod]
 		[WorkItem(1116)]
 		public async Task GivenALogWithRemarks_WhenAnotherLogIsOpened_ThenTheRemarksShownAreRefreshed()
 		{
@@ -342,6 +359,18 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 
 			viewModel.IsMenuEnabled.Should().BeTrue("the log file should be open before the test continues");
+		}
+
+		/// <summary>
+		/// Watches the first record shown without keeping it alive: a Debug build keeps a test method's locals until it ends.
+		/// </summary>
+		/// <remarks>
+		/// No insight refers to the first record of the test log.
+		/// </remarks>
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static WeakReference TrackFirstRecord(FilterViewModel viewModel)
+		{
+			return new WeakReference(viewModel.VisibleItems[0]);
 		}
 
 		private string CopyLog(string fileName)
