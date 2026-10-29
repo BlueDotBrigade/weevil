@@ -225,16 +225,15 @@
 				{
 					chunk ??= _dataSource.TakeChunk(endOffset);
 
-					IRecord parsed = read.Record;
 					_ready.Enqueue(new Record(
-						parsed.LineNumber,
-						parsed.CreatedAt,
-						parsed.Severity,
+						read.LineNumber,
+						read.CreatedAt,
+						read.Severity,
 						chunk,
 						(int)(read.Offset - chunk.FileOffset),
 						read.Length,
 						read.IsMultiLine,
-						parsed.WasGeneratedByUi));
+						read.WasGeneratedByUi));
 				}
 				else
 				{
@@ -281,7 +280,11 @@
 		{
 			public ReadRecord(IRecord parsed, long offset, int length, bool isMultiLine)
 			{
-				this.Record = parsed;
+				this.Record = null;
+				this.LineNumber = parsed.LineNumber;
+				this.CreatedAt = parsed.CreatedAt;
+				this.Severity = parsed.Severity;
+				this.WasGeneratedByUi = parsed.WasGeneratedByUi;
 				this.Offset = offset;
 				this.Length = length;
 				this.IsMultiLine = isMultiLine;
@@ -295,7 +298,16 @@
 				this.IsMultiLine = record.IsMultiLine;
 			}
 
+			// Only for a record that keeps its string; for the others, only what the parser found is kept, so its line's text can be collected (#1133).
 			public IRecord Record { get; }
+
+			public int LineNumber { get; }
+
+			public DateTime CreatedAt { get; }
+
+			public SeverityType Severity { get; }
+
+			public bool WasGeneratedByUi { get; }
 
 			// -1 when the record keeps its string.
 			public long Offset { get; }
