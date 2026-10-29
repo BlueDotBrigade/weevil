@@ -93,27 +93,25 @@ namespace BlueDotBrigade.Weevil.Data
 		private static int CountLoneLineBreaks(ReadOnlySpan<char> text)
 		{
 			var count = 0;
-
-			for (var i = 0; i < text.Length; i++)
+			var i = 0;
+			while (true)
 			{
-				if (text[i] == '\r')
+				var found = text.Slice(i).IndexOfAny('\r', '\n');
+				if (found < 0)
 				{
-					if (i + 1 < text.Length && text[i + 1] == '\n')
-					{
-						i++;
-					}
-					else
-					{
-						count++;
-					}
+					return count;
 				}
-				else if (text[i] == '\n')
+				i += found;
+				if (text[i] == '\r' && i + 1 < text.Length && text[i + 1] == '\n')
+				{
+					i += 2;
+				}
+				else
 				{
 					count++;
+					i++;
 				}
 			}
-
-			return count;
 		}
 
 		/// <summary>
@@ -122,26 +120,25 @@ namespace BlueDotBrigade.Weevil.Data
 		/// </summary>
 		private static void WidenLoneLineBreaks(char[] text, int count, int lineBreaksToWiden)
 		{
-			var j = count + lineBreaksToWiden - 1;
-
-			for (var i = count - 1; i >= 0; i--)
+			var end = count;
+			var j = count + lineBreaksToWiden;
+			while (lineBreaksToWiden > 0)
 			{
-				var c = text[i];
-
-				if (c == '\r' || c == '\n')
+				var k = text.AsSpan(0, end).LastIndexOfAny('\r', '\n');
+				var tail = end - (k + 1);
+				text.AsSpan(k + 1, tail).CopyTo(text.AsSpan(j - tail));
+				j -= tail;
+				if (text[k] == '\n' && k > 0 && text[k - 1] == '\r')
 				{
-					text[j--] = '\n';
-					text[j--] = '\r';
-
-					if (c == '\n' && i > 0 && text[i - 1] == '\r')
-					{
-						i--;
-					}
+					end = k - 1;
 				}
 				else
 				{
-					text[j--] = c;
+					end = k;
+					lineBreaksToWiden--;
 				}
+				text[--j] = '\n';
+				text[--j] = '\r';
 			}
 		}
 	}

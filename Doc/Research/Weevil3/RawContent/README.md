@@ -42,6 +42,8 @@ The logs were the 10-million-record log from `Tst/BlueDotBrigade.Weevil.Core-Per
 
 The timings vary by up to ±30% between runs on the 4-vCPU container used: compare runs made one after another.
 
+**A log with many multi-line records and non-ASCII text:** `big_mixed_utf8.log` from `GenerateLogs.py` has 600,000 records. About a third are multi-line, with mixed line breaks, and every record has non-ASCII text. Each build ran twice, with line breaks widened by vectorized searches (#1134 review); the raw figures are in [Results-2026-10-29-MultiLine.tsv](Timing/Results-2026-10-29-MultiLine.tsv). Every filter kept the same records. Regular expressions took 0.03–0.10 s instead of 0.03–0.04 s, case-insensitive plain text took 0.79 s instead of 0.55 s, and a Find took about 0.03 s longer. Decoding text that is not ASCII is slower than decoding ASCII, and records with many lines are rejoined with `\r\n` when read.
+
 ## Reviewer Checks
 
 [ReviewerChecks](ReviewerChecks/) holds the throwaway checks the #1134 review used. Run them again after fixing its findings.
