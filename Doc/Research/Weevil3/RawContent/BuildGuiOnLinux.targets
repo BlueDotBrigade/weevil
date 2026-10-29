@@ -1,0 +1,5 @@
+<Project>
+	<!-- Replaces the GUI's Windows-only build events, so its code can be compiled on Linux. -->
+	<Target Name="PreBuild" />
+	<Target Name="PostBuild" />
+</Project>

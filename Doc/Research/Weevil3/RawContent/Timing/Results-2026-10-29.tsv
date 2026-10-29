@@ -1,0 +1,96 @@
+main	droid-utf8.log	Open	37.30	10000000
+main	droid-utf8.log	PlainText NoSuchText	0.448	0
+main	droid-utf8.log	PlainText Gyroscope	1.761	3666732
+main	droid-utf8.log	PlainText gyroscope (ignore case)	2.290	3666732
+main	droid-utf8.log	Regex Gyroscope	1.802	3666732
+main	droid-utf8.log	Regex Security	0.970	76
+main	droid-utf8.log	Regex NoSuchText\d+	0.552	0
+main	droid-utf8.log	Regex Pitch=\d+\.\d	1.433	1355171
+main	droid-utf8.log	Moniker @Severity=Error	0.330	16
+main	droid-utf8.log	No filter	1.284	10000000
+main	droid-utf8.log	Find NoSuchText	0.515	
+main	droid-utf8.log	Find NoSuchText\d+ (regex)	0.618	
+new	droid-utf8.log	Open	19.58	10000000
+new	droid-utf8.log	PlainText NoSuchText	0.320	0
+new	droid-utf8.log	PlainText Gyroscope	1.233	3666732
+new	droid-utf8.log	PlainText gyroscope (ignore case)	1.789	3666732
+new	droid-utf8.log	Regex Gyroscope	1.359	3666732
+new	droid-utf8.log	Regex Security	0.391	76
+new	droid-utf8.log	Regex NoSuchText\d+	0.273	0
+new	droid-utf8.log	Regex Pitch=\d+\.\d	0.444	1355171
+new	droid-utf8.log	Moniker @Severity=Error	0.179	16
+new	droid-utf8.log	No filter	1.383	10000000
+new	droid-utf8.log	Find NoSuchText	0.456	
+new	droid-utf8.log	Find NoSuchText\d+ (regex)	0.685	
+new	droid-utf16.log	Open	24.82	10000000
+new	droid-utf16.log	PlainText NoSuchText	0.405	0
+new	droid-utf16.log	PlainText Gyroscope	1.362	3666732
+new	droid-utf16.log	PlainText gyroscope (ignore case)	1.882	3666732
+new	droid-utf16.log	Regex Gyroscope	1.505	3666732
+new	droid-utf16.log	Regex Security	0.963	76
+new	droid-utf16.log	Regex NoSuchText\d+	0.565	0
+new	droid-utf16.log	Regex Pitch=\d+\.\d	1.096	1355171
+new	droid-utf16.log	Moniker @Severity=Error	0.321	16
+new	droid-utf16.log	No filter	0.373	10000000
+new	droid-utf16.log	Find NoSuchText	0.596	
+new	droid-utf16.log	Find NoSuchText\d+ (regex)	0.842	
+main	droid-utf16.log	Open	19.94	10000000
+main	droid-utf16.log	PlainText NoSuchText	0.364	0
+main	droid-utf16.log	PlainText Gyroscope	1.734	3666732
+main	droid-utf16.log	PlainText gyroscope (ignore case)	2.221	3666732
+main	droid-utf16.log	Regex Gyroscope	1.765	3666732
+main	droid-utf16.log	Regex Security	0.952	76
+main	droid-utf16.log	Regex NoSuchText\d+	0.521	0
+main	droid-utf16.log	Regex Pitch=\d+\.\d	1.252	1355171
+main	droid-utf16.log	Moniker @Severity=Error	0.267	16
+main	droid-utf16.log	No filter	0.909	10000000
+main	droid-utf16.log	Find NoSuchText	0.388	
+main	droid-utf16.log	Find NoSuchText\d+ (regex)	0.611	
+new	droid-utf16.log	Open	26.32	10000000
+new	droid-utf16.log	PlainText NoSuchText	0.368	0
+new	droid-utf16.log	PlainText Gyroscope	1.236	3666732
+new	droid-utf16.log	PlainText gyroscope (ignore case)	1.871	3666732
+new	droid-utf16.log	Regex Gyroscope	1.493	3666732
+new	droid-utf16.log	Regex Security	0.945	76
+new	droid-utf16.log	Regex NoSuchText\d+	0.458	0
+new	droid-utf16.log	Regex Pitch=\d+\.\d	1.195	1355171
+new	droid-utf16.log	Moniker @Severity=Error	0.684	16
+new	droid-utf16.log	No filter	0.427	10000000
+new	droid-utf16.log	Find NoSuchText	0.724	
+new	droid-utf16.log	Find NoSuchText\d+ (regex)	0.950	
+main	droid-utf16.log	Open	23.62	10000000
+main	droid-utf16.log	PlainText NoSuchText	0.301	0
+main	droid-utf16.log	PlainText Gyroscope	1.539	3666732
+main	droid-utf16.log	PlainText gyroscope (ignore case)	2.059	3666732
+main	droid-utf16.log	Regex Gyroscope	1.827	3666732
+main	droid-utf16.log	Regex Security	0.956	76
+main	droid-utf16.log	Regex NoSuchText\d+	0.548	0
+main	droid-utf16.log	Regex Pitch=\d+\.\d	1.290	1355171
+main	droid-utf16.log	Moniker @Severity=Error	0.257	16
+main	droid-utf16.log	No filter	1.082	10000000
+main	droid-utf16.log	Find NoSuchText	0.428	
+main	droid-utf16.log	Find NoSuchText\d+ (regex)	0.632	
+new	droid-utf16.log	Open	19.23	10000000
+new	droid-utf16.log	PlainText NoSuchText	0.394	0
+new	droid-utf16.log	PlainText Gyroscope	1.446	3666732
+new	droid-utf16.log	PlainText gyroscope (ignore case)	1.756	3666732
+new	droid-utf16.log	Regex Gyroscope	1.443	3666732
+new	droid-utf16.log	Regex Security	0.967	76
+new	droid-utf16.log	Regex NoSuchText\d+	0.462	0
+new	droid-utf16.log	Regex Pitch=\d+\.\d	1.058	1355171
+new	droid-utf16.log	Moniker @Severity=Error	0.658	16
+new	droid-utf16.log	No filter	0.375	10000000
+new	droid-utf16.log	Find NoSuchText	0.680	
+new	droid-utf16.log	Find NoSuchText\d+ (regex)	0.944	
+main	droid-utf16.log	Open	21.48	10000000
+main	droid-utf16.log	PlainText NoSuchText	0.398	0
+main	droid-utf16.log	PlainText Gyroscope	1.676	3666732
+main	droid-utf16.log	PlainText gyroscope (ignore case)	2.028	3666732
+main	droid-utf16.log	Regex Gyroscope	1.753	3666732
+main	droid-utf16.log	Regex Security	0.990	76
+main	droid-utf16.log	Regex NoSuchText\d+	0.421	0
+main	droid-utf16.log	Regex Pitch=\d+\.\d	0.739	1355171
+main	droid-utf16.log	Moniker @Severity=Error	0.800	16
+main	droid-utf16.log	No filter	2.276	10000000
+main	droid-utf16.log	Find NoSuchText	0.554	
+main	droid-utf16.log	Find NoSuchText\d+ (regex)	0.762	

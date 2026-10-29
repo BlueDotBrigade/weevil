@@ -84,7 +84,7 @@ Measured on a 4-vCPU Linux container with 14.2 GB of RAM available to .NET, all 
 
 ### After step 1 of #988: content held as the log's bytes (2026-10-29)
 
-Weevil now needs about **1.75 GB of RAM per GB of log** at the peak while opening, and 1.62 GB once the log is open. That is 46% less than 2.12.1 after opening, and 40% less than `main` before #1133, which was measured the same day on the same machine. The full report is in [Results-2026-10-29-RawContent.md](Results-2026-10-29-RawContent.md).
+Weevil now needs about **1.75 GB of RAM per GB of log** at the peak while opening, and 1.62 GB once the log is open. That is 46% less than 2.12.1 after opening, and 40% less than `main` before #1133, which was measured the same day on the same machine. The full reports are in [Results-2026-10-29-RawContent.md](Results-2026-10-29-RawContent.md) and, for `main`, [Results-2026-10-29-MainBeforeRawContent.md](Results-2026-10-29-MainBeforeRawContent.md).
 
 | Log | 2.12.1 | `main` before #1133 | After #1133 | Source |
 |---|---|---|---|---|
