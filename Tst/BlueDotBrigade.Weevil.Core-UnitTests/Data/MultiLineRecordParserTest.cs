@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
 	using BlueDotBrigade.Weevil.IO;
@@ -288,6 +289,52 @@
 
 			record.Should().BeOfType<Record>();
 			record.Content.Should().Be("Custom record");
+		}
+
+		[TestMethod]
+		public void GivenRecordsSpanningSeveralChunks_WhenReading_ThenEachRecordKeepsItsContent()
+		{
+			// A chunk of 100 bytes holds about one record, so records are read across several chunks.
+			string[] lines = [FirstLine, ContinuationLine1, SecondLine, FirstLine, ContinuationLine1, ContinuationLine2, SecondLine];
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes(string.Join("\n", lines)));
+			var parser = new MultilineRecordParser(
+				new LogLineReader(dataSource, startOffset: 0, chunkSize: 100),
+				new TsvRecordParser(),
+				MultilineRecordParser.MaximumLinesToSearch,
+				MultilineRecordParser.FirstRecordLineNumber,
+				isLoggingEnabled: false);
+
+			var contents = new List<string>();
+			for (IRecord record = parser.GetNext(); Record.IsGenuine(record); record = parser.GetNext())
+			{
+				contents.Add(record.Content);
+			}
+
+			contents.Should().Equal(
+				$"{FirstLine}\r\n{ContinuationLine1}",
+				SecondLine,
+				$"{FirstLine}\r\n{ContinuationLine1}\r\n{ContinuationLine2}",
+				SecondLine);
+		}
+
+		[TestMethod]
+		public void GivenAParserThatChangesTheText_WhenReading_ThenTheRecordKeepsTheParsersText()
+		{
+			var recordParser = Substitute.For<IRecordParser>();
+			recordParser
+				.TryParse(Arg.Any<int>(), Arg.Is<string>(line => line.StartsWith("Record")), out Arg.Any<IRecord>())
+				.Returns(call =>
+				{
+					call[2] = new Record((int)call[0], DateTime.MaxValue, SeverityType.Information, "Changed " + (string)call[1]);
+					return true;
+				});
+
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes("Record 1\ncontinued\nRecord 2"));
+
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
+
+			record.Content.Should().Be("Changed Record 1\r\ncontinued");
+			record.IsMultiLine.Should().BeTrue();
 		}
 	}
 }

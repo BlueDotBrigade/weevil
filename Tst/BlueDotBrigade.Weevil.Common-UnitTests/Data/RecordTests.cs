@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Text;
 
 	[TestClass]
 	public class RecordTests
@@ -40,6 +41,44 @@ namespace BlueDotBrigade.Weevil.Data
 			Action create = () => new Record(1, DateTime.Now, (SeverityType)8, "content");
 
 			create.Should().Throw<ArgumentOutOfRangeException>();
+		}
+
+		[TestMethod]
+		public void GivenAMultiLineRecordHeldAsBytes_WhenItsContentIsRead_ThenItsLinesAreJoinedWithCrLf()
+		{
+			// The file's own line breaks: \n, \r and \r\n.
+			IRecord record = HeldAsBytes(Encoding.UTF8, "First\nSecond\rThird\r\nFourth", isMultiLine: true);
+
+			record.Content.Should().Be("First\r\nSecond\r\nThird\r\nFourth");
+		}
+
+		[TestMethod]
+		public void GivenRecordsHeldAsBytes_WhenReadThroughOneBuffer_ThenEachIsItsContent()
+		{
+			// UTF-16, and a longer record after a shorter one, so the buffer grows.
+			var encoding = new UnicodeEncoding(bigEndian: false, byteOrderMark: false);
+			IRecord[] records =
+			[
+				HeldAsBytes(encoding, "Short", isMultiLine: false),
+				HeldAsBytes(encoding, "A longer record\nwith a second line, and \u00e9", isMultiLine: true),
+				HeldAsBytes(encoding, "Short again", isMultiLine: false),
+			];
+			var buffer = new ContentBuffer();
+
+			foreach (IRecord record in records)
+			{
+				buffer.Read(record).ToString().Should().Be(record.Content);
+			}
+		}
+
+		private static IRecord HeldAsBytes(Encoding encoding, string text, bool isMultiLine)
+		{
+			// Bytes before the content, as in a chunk shared with other records.
+			var bytes = encoding.GetBytes("Earlier\n" + text);
+			var offset = encoding.GetByteCount("Earlier\n");
+			var chunk = new ContentChunk(0, bytes, encoding);
+
+			return new Record(1, DateTime.Now, SeverityType.Information, chunk, offset, bytes.Length - offset, isMultiLine, wasGeneratedByUi: false);
 		}
 	}
 }

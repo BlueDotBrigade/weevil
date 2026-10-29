@@ -81,7 +81,16 @@
 
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record)
 		{
-			var results = GetKeyValuePairs(record.Content);
+			return GetKeyValuePairs(record, record.Content);
+		}
+
+		/// <summary>
+		/// As <see cref="GetKeyValuePairs(IRecord)"/>, for a record whose content has already been read,
+		/// so a record that several expressions test is decoded once (#1133).
+		/// </summary>
+		public IDictionary<string, string> GetKeyValuePairs(IRecord record, string content)
+		{
+			var results = GetKeyValuePairs(content);
 
 			if (results.Count > 0)
 			{
