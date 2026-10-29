@@ -73,6 +73,15 @@ namespace BlueDotBrigade.Weevil.IO
 		public Encoding Encoding { get; }
 
 		/// <summary>
+		/// The log is UTF-8, or UTF-16 in this computer's byte order, which .NET decodes many characters at a time.
+		/// </summary>
+		/// <remarks>
+		/// UTF-16 in the other byte order and UTF-32 are decoded one character at a time, 10 to 50 times more slowly,
+		/// so their records keep a string, which also uses less memory than UTF-32's bytes (#1134 review).
+		/// </remarks>
+		public bool IsQuickToDecode => _unitSize == 1 || (_unitSize == 2 && _isBigEndian != BitConverter.IsLittleEndian);
+
+		/// <summary>
 		/// Where the next line starts in the file.
 		/// </summary>
 		public long Position => _bufferOffset + _lineStart;
