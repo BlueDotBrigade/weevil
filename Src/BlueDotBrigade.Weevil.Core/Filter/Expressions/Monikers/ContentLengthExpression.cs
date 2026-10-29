@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 {
+	using System;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
 
@@ -23,18 +24,12 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
-			var isMatch = false;
-			if (record.HasContent)
-			{
-				if (record.Content.Length >= _contentLength)
-				{
-					isMatch = true;
-				}
-			}
+			// The only built-in moniker that reads the content.
+			ReadOnlySpan<char> text = content.Read(record);
 
-			return isMatch;
+			return !text.IsWhiteSpace() && text.Length >= _contentLength;
 		}
 	}
 }

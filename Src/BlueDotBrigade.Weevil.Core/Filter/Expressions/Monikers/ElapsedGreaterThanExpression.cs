@@ -36,7 +36,7 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return _previousElapsedTimes.Get(record.LineNumber) > _userSpecifiedValue;
 		}

@@ -19,7 +19,7 @@
 
 			var filter = new UserCommentExpression("@Comment", _state);
 
-			(filter.IsMatch(_record)).Should().BeTrue();
+			(filter.IsMatch(_record, new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -27,7 +27,7 @@
 		{
 			var filter = new UserCommentExpression("@Comment", _state);
 
-			(filter.IsMatch(_record)).Should().BeFalse();
+			(filter.IsMatch(_record, new ContentBuffer())).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -37,7 +37,7 @@
 
 			var filter = new UserCommentExpression("@Comment=dog", _state);
 
-			(filter.IsMatch(_record)).Should().BeTrue();
+			(filter.IsMatch(_record, new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -47,7 +47,7 @@
 
 			var filter = new UserCommentExpression("@Comment=cat", _state);
 
-			(filter.IsMatch(_record)).Should().BeFalse();
+			(filter.IsMatch(_record, new ContentBuffer())).Should().BeFalse();
 		}
 	}
 }

@@ -37,7 +37,7 @@
 			return !IsSurrogateOrNull(expression);
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return false;
 		}

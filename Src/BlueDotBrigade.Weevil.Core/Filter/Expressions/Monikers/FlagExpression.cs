@@ -25,7 +25,7 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return _state.IsFlagged(record) == _isFlagged;
 		}

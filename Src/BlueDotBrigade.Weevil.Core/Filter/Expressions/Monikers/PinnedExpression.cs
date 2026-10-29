@@ -25,7 +25,7 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			var isMatch = _state.IsPinned(record) == _isPinned;
 			return isMatch;

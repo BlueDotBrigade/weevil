@@ -31,7 +31,7 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return _isMatchDelegate(record.Severity);
 		}

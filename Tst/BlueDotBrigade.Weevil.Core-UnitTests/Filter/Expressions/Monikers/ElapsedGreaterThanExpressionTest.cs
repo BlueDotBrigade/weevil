@@ -14,7 +14,7 @@
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(records));
 
-			(expression.IsMatch(records[1])).Should().BeFalse();
+			(expression.IsMatch(records[1], new ContentBuffer())).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -24,7 +24,7 @@
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(records));
 
-			(expression.IsMatch(records[1])).Should().BeFalse();
+			(expression.IsMatch(records[1], new ContentBuffer())).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -34,7 +34,7 @@
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(records));
 
-			(expression.IsMatch(records[1])).Should().BeTrue();
+			(expression.IsMatch(records[1], new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -45,7 +45,7 @@
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(previousResults));
 
-			(expression.IsMatch(records[1])).Should().BeFalse();
+			(expression.IsMatch(records[1], new ContentBuffer())).Should().BeFalse();
 		}
 
 		private static ImmutableArray<IRecord> CreateRecordsMillisecondsApart(int milliseconds)

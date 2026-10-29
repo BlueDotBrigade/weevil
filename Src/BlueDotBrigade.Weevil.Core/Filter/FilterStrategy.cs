@@ -126,7 +126,7 @@
 		/// - If "show pinned" is enabled: pinned records are ALWAYS visible (even if they match exclude filter)
 		/// - If "show bookmarks" is enabled: bookmarked records are ALWAYS visible (even if they match exclude filter)
 		/// </summary>
-		public bool CanKeep(IRecord record)
+		public bool CanKeep(IRecord record, ContentBuffer content)
 		{
 			var canKeepRecord = false;
 
@@ -152,17 +152,17 @@
 					// Apply normal filtering logic
 					if (_inclusiveFilter.Count > 0 && _exclusiveFilter.Count == 0)
 					{
-						canKeepRecord = _inclusiveFilter.IsMatch(record);
+						canKeepRecord = _inclusiveFilter.IsMatch(record, content);
 					}
 					else if (_inclusiveFilter.Count == 0 && _exclusiveFilter.Count > 0)
 					{
-						canKeepRecord = !_exclusiveFilter.IsMatch(record);
+						canKeepRecord = !_exclusiveFilter.IsMatch(record, content);
 					}
 					else
 					{
-						if (_inclusiveFilter.IsMatch(record))
+						if (_inclusiveFilter.IsMatch(record, content))
 						{
-							var isRecordIgnored = _exclusiveFilter.IsMatch(record);
+							var isRecordIgnored = _exclusiveFilter.IsMatch(record, content);
 							canKeepRecord = !isRecordIgnored;
 						}
 					}

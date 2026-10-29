@@ -74,9 +74,9 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
-			return _threadExpression.Value.IsMatch(record.Content);
+			return _threadExpression.Value.IsMatch(content.Read(record));
 		}
 
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record)

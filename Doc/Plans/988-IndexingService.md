@@ -26,14 +26,14 @@ One sub-issue of #978 and one pull request per step, in order. The step issues w
 
 Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8 GB logs measured, noting any too big for the RAM, and 12, 16, 20 and 24 GB estimated. Its harness measures memory again after each step. **Done 2026-10-20:** 2.12.1 needs about 3.25 GB of RAM per GB of log at the peak while opening: 13.0 GB for the 4 GB log, and about 65 GB for a 20 GB log. The 8 GB log is too big for the 14.2 GB test machine, so it is estimated with the larger sizes. See the [results](../Research/Weevil3/MemoryHarness/README.md#results).
 
-1. **Compact content (#1020).**
+1. **Compact content (#1020).** Split into two pull requests (2026-10-29): filters and Find read each record's content once, through a buffer they reuse (#1131), then content is held as raw bytes and the buffer decodes them.
    - Content is held as the file's raw bytes, as the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md) and [LargeLogFileStrategy.md](../Research/LargeLogFiles/LargeLogFileStrategy.md) recommend. It is kept in shared, read-only 16 MB chunks split at record boundaries, so no array reaches .NET's 2 GB limit. A record larger than a chunk gets a chunk of its own.
    - A record keeps an offset and a length instead of a string.
    - `Content` decodes on each access with the log's encoding, rejoining multi-line records with `\r\n`, so it returns exactly what it returns today. Invalid bytes become U+FFFD, as today. Reading a released chunk back (#986) is then a plain file read.
-   - A filter decodes each record once, into a buffer reused per thread, and passes that text to every expression; `IExpression.IsMatch` takes the text (decided 2026-10-20). The rules for each filter type stay as they are:
+   - A filter decodes each record once, into a buffer reused per thread, and passes that text to every expression; `IExpression.IsMatch` takes the text (decided 2026-10-20). Changed on 2026-10-29 (#1131): `IsMatch` takes the record and a `ContentBuffer`, which decodes the record's content the first time an expression reads it, so a filter of only monikers decodes nothing. The rules for each filter type stay as they are:
      - Regular expressions and plain text keep today's culture and case rules exactly.
      - Aliases (`#`) expand to text or regular expressions first.
-     - Monikers (`@`) read the facts byte, annotations, flags or elapsed times, and never decode content.
+     - Monikers (`@`) read the facts byte, annotations, flags or elapsed times, and never decode content. The exception is `@ContentLength`, which reads the content's length.
    - Check that every filter type keeps exactly the same records. The storage benchmark measured regular expressions on UTF-8 only, so also time plain text and a UTF-16 log.
    - Estimate: −38% memory on the test log.
 2. **Proof of concept: timestamps (#1008). Done 2026-10-20: keep an 8-byte timestamp column.**

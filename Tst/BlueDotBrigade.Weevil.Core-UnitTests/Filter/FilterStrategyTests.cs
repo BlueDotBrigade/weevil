@@ -100,7 +100,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("no filters means all records should be visible");
@@ -123,7 +123,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("no filters means all records should be visible");
@@ -143,7 +143,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("pinned record should be visible when ShowPinned is ON");
@@ -166,7 +166,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("no filters means all records should be visible");
@@ -186,7 +186,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON");
@@ -206,7 +206,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON");
@@ -226,7 +226,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("pinned record should be visible when ShowPinned is ON");
@@ -246,7 +246,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON");
@@ -266,7 +266,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record with both special statuses should be visible when either option is ON");
@@ -290,7 +290,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record matches include filter");
@@ -310,7 +310,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record matches include filter, regardless of ShowPinned setting");
@@ -334,7 +334,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record does not match include filter");
@@ -354,7 +354,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record does not match include filter and is not pinned");
@@ -378,7 +378,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record does not match include filter and ShowPinned is OFF");
@@ -398,7 +398,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("pinned record should be visible when ShowPinned is ON, even if it doesn't match include filter");
@@ -422,7 +422,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("bookmarked record should be visible when ShowBookmarks is ON, even if it doesn't match include filter");
@@ -446,7 +446,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record matches exclude filter and should be hidden");
@@ -466,7 +466,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record matches exclude filter, not pinned, and should be hidden");
@@ -486,7 +486,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record matches exclude filter, not bookmarked, and should be hidden");
@@ -506,7 +506,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record matches exclude filter, has no special status, and should be hidden");
@@ -530,7 +530,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record matches exclude filter and ShowPinned is OFF, so it should be hidden");
@@ -550,7 +550,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("pinned record with ShowPinned ON should be visible, even if it matches exclude filter");
@@ -574,7 +574,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record matches exclude filter and ShowBookmarks is OFF, so it should be hidden");
@@ -594,7 +594,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("bookmarked record with ShowBookmarks ON should be visible, even if it matches exclude filter");
@@ -618,7 +618,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record does not match exclude filter, so it should be visible");
@@ -638,7 +638,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record does not match exclude filter, so it should be visible even with ShowPinned ON");
@@ -658,7 +658,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record does not match exclude filter, so it should be visible even with ShowBookmarks ON");
@@ -681,7 +681,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("exclude filter takes priority over include filter");
@@ -701,7 +701,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("pinned record with ShowPinned ON should override both filters");
@@ -721,7 +721,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("bookmarked record with ShowBookmarks ON should override both filters");
@@ -745,7 +745,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record matches include filter and does not match exclude filter");
@@ -769,10 +769,46 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeFalse("record does not match include filter");
+		}
+
+		#endregion
+
+		#region Reading Content
+
+		[TestMethod]
+		public void GivenAFilterOfOnlyMonikers_WhenARecordIsChecked_ThenItsContentIsNotRead()
+		{
+			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			FilterStrategy strategy = CreateFilterStrategy(
+				includeFilter: "@Pinned",
+				excludeFilter: "@Flagged",
+				showPinned: false,
+				showBookmarks: false,
+				CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER));
+
+			strategy.CanKeep(record, new ContentBuffer()).Should().BeTrue();
+
+			_ = record.DidNotReceive().Content;
+		}
+
+		[TestMethod]
+		public void GivenSeveralTextExpressions_WhenARecordIsChecked_ThenItsContentIsReadOnce()
+		{
+			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			FilterStrategy strategy = CreateFilterStrategy(
+				includeFilter: "WARN||FATAL||ERROR",
+				excludeFilter: "DEBUG||TRACE",
+				showPinned: false,
+				showBookmarks: false,
+				CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER));
+
+			strategy.CanKeep(record, new ContentBuffer()).Should().BeTrue();
+
+			_ = record.Received(1).Content;
 		}
 
 		#endregion

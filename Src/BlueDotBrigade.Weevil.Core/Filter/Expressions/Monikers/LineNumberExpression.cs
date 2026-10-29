@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Filter.Expressions.Monikers
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return _isValid && record.LineNumber == _lineNumber;
 		}

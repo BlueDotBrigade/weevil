@@ -20,7 +20,7 @@
 
 			var expression = new RegularExpression("fox", Microsoft.RegexOptions.None); // default: case sensitive
 
-			(expression.IsMatch(record)).Should().BeTrue();
+			(expression.IsMatch(record, new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -31,7 +31,7 @@
 
 			var expression = new RegularExpression("FOX", Microsoft.RegexOptions.None); // default: case sensitive
 
-			(expression.IsMatch(record)).Should().BeFalse();
+			(expression.IsMatch(record, new ContentBuffer())).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -42,7 +42,7 @@
 
 			var expression = new RegularExpression("FoX", Microsoft.RegexOptions.IgnoreCase);
 
-			(expression.IsMatch(record)).Should().BeTrue();
+			(expression.IsMatch(record, new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -53,7 +53,7 @@
 
 			var expression = new RegularExpression("dinosaur");
 
-			(expression.IsMatch(record)).Should().BeFalse();
+			(expression.IsMatch(record, new ContentBuffer())).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -64,7 +64,7 @@
 
 			var v = new RegularExpression("^The");
 
-			(v.IsMatch(record)).Should().BeTrue();
+			(v.IsMatch(record, new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -75,7 +75,7 @@
 
 			var expression = new RegularExpression("dog$");
 
-			(expression.IsMatch(record)).Should().BeTrue();
+			(expression.IsMatch(record, new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -86,7 +86,7 @@
 
 			var expression = new RegularExpression("fox");
 
-			(expression.IsMatch(record)).Should().BeTrue();
+			(expression.IsMatch(record, new ContentBuffer())).Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -98,7 +98,7 @@
 				.ToArray();
 			var results = new bool[records.Length];
 
-			Parallel.For(0, records.Length, i => results[i] = expression.IsMatch(records[i]));
+			Parallel.For(0, records.Length, i => results[i] = expression.IsMatch(records[i], new ContentBuffer()));
 
 			results.Should().Equal(records.Select(r => r.Content.Contains("fox")));
 		}
@@ -123,7 +123,7 @@
 			var thread = new Thread(() =>
 			{
 				CultureInfo.CurrentCulture = new CultureInfo("en-US");
-				isMatch = expression.IsMatch(R.WithContent(1, "I"));
+				isMatch = expression.IsMatch(R.WithContent(1, "I"), new ContentBuffer());
 			});
 			thread.Start();
 			thread.Join();

@@ -14,7 +14,7 @@
 			_regionManager = regionManager;
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return 
 				_regionManager.TryStartsWith(record.LineNumber, out var region) ||

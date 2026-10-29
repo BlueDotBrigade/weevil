@@ -28,7 +28,7 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			var isMatch = false;
 			var comment = _state.GetComment(record);

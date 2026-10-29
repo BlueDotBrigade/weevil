@@ -143,7 +143,7 @@
 							  parallelLoopState.Break();
 						  }
 
-						  if (strategy.CanKeep(record))
+						  if (strategy.CanKeep(record, results.Content))
 						  {
 							  resultsCache[index] = record;
 							  results.Count++;

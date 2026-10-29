@@ -128,7 +128,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().Be(expectedResult);
@@ -177,7 +177,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().Be(expectedResult);
@@ -208,7 +208,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("with no filters and both options off, all records should be visible");
@@ -236,7 +236,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("special record and corresponding option is on");
@@ -266,7 +266,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().Be(expectedResult, "exclude takes priority unless special record overrides");
