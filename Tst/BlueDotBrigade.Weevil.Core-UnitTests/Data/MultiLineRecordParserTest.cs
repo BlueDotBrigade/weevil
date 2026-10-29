@@ -292,6 +292,35 @@
 		}
 
 		[TestMethod]
+		public void GivenAParserThatReturnsTrueWithoutAGenuineRecord_WhenReading_ThenThatLineStartsNoRecord()
+		{
+			// "skip" returns Record.Dummy and "nothing" returns null: neither starts a record, and "nothing" still ends the one before it.
+			var recordParser = Substitute.For<IRecordParser>();
+			recordParser
+				.TryParse(Arg.Any<int>(), Arg.Any<string>(), out Arg.Any<IRecord>())
+				.Returns(call =>
+				{
+					var line = (string)call[1];
+					call[2] = line.StartsWith("Record")
+						? new Record((int)call[0], DateTime.MaxValue, SeverityType.Information, line)
+						: line == "skip" ? Record.Dummy : null;
+					return line != "continued";
+				});
+
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes("skip\nRecord A\ncontinued\nnothing\nRecord B"));
+			var parser = new MultilineRecordParser(new LogLineReader(dataSource), recordParser);
+
+			IRecord first = parser.GetNext();
+			IRecord second = parser.GetNext();
+
+			first.LineNumber.Should().Be(2);
+			first.Content.Should().Be("Record A\r\ncontinued");
+			second.LineNumber.Should().Be(5);
+			second.Content.Should().Be("Record B");
+			parser.GetNext().Should().Be(Record.Dummy);
+		}
+
+		[TestMethod]
 		public void GivenRecordsSpanningSeveralChunks_WhenReading_ThenEachRecordKeepsItsContent()
 		{
 			// A chunk of 100 bytes holds about one record, so records are read across several chunks.

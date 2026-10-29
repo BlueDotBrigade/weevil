@@ -118,8 +118,14 @@
 				// Get beginning of current record
 				if (_recordParser.TryParse(_lineNumber, line, out IRecord record))
 				{
-					current = new RecordStart(record, line, offset, length);
-					return true;
+					// A parser that returns no genuine record has not found one: the search goes on, as it always has.
+					if (Record.IsGenuine(record))
+					{
+						current = new RecordStart(record, line, offset, length);
+						return true;
+					}
+
+					continue;
 				}
 
 				if (_isLoggingEnabled)
@@ -149,7 +155,12 @@
 				// Have we found the next record?
 				if (_recordParser.TryParse(_lineNumber, line, out IRecord record))
 				{
-					_nextRecord = new RecordStart(record, line, offset, length);
+					// Without a genuine record, the line still ends this record, but starts none, as it always has.
+					if (Record.IsGenuine(record))
+					{
+						_nextRecord = new RecordStart(record, line, offset, length);
+					}
+
 					break;
 				}
 
