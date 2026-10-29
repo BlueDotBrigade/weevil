@@ -354,37 +354,55 @@
 		}
 
 		/// <summary>
-		/// Keeps the selection, the anchor and the active record of an engine this one replaces, for the records this one shows.
+		/// Returns the selection, the anchor and the active record by line number, so they can outlive this view's records (#1126).
 		/// </summary>
-		/// <remarks>
-		/// Called by Reload before it applies the filter, which then narrows the selection as usual. Records are matched by line number.
-		/// </remarks>
-		internal void KeepSelectionOf(SelectionManager previous)
+		internal Snapshot TakeSnapshot()
 		{
 			PositionRanges selection;
 			ImmutableArray<IRecord> results;
 			int anchorLineNumber;
 
-			lock (previous._selectionPadlock)
+			lock (_selectionPadlock)
 			{
-				selection = previous._selection;
-				results = previous._visibleRecords;
-				anchorLineNumber = previous._anchorLineNumber;
+				selection = _selection;
+				results = _visibleRecords;
+				anchorLineNumber = _anchorLineNumber;
 			}
 
-			var activeLineNumber = previous._navigationManager.ActiveLineNumber;
+			ImmutableArray<int>.Builder lineNumbers = ImmutableArray.CreateBuilder<int>(selection.Count);
+
+			foreach (PositionRange range in selection.Ranges)
+			{
+				for (var position = range.First; position <= range.Last; position++)
+				{
+					lineNumbers.Add(results[position].LineNumber);
+				}
+			}
+
+			return new Snapshot(lineNumbers.MoveToImmutable(), anchorLineNumber, _navigationManager.ActiveLineNumber);
+		}
+
+		/// <summary>
+		/// Selects again the records of <paramref name="snapshot"/> that this view shows, and keeps its anchor and active record if shown.
+		/// </summary>
+		/// <remarks>
+		/// Called by Reload before it applies the filter, which then narrows the selection as usual. Records are matched by line number.
+		/// </remarks>
+		internal void Restore(Snapshot snapshot)
+		{
+			ImmutableArray<int> lineNumbers = snapshot.SelectedLineNumbers;
 
 			lock (_selectionPadlock)
 			{
 				// Compared with this engine's records, so records a Clear removed and Reload restored are not selected.
-				_selection = selection.Count == 0
+				_selection = lineNumbers.Length == 0
 					? new PositionRanges()
-					: PositionRanges.Remap(selection, results, _visibleRecords, _scope.Records);
+					: PositionRanges.Remap(PositionRanges.FromRange(0, lineNumbers.Length - 1), lineNumbers, _visibleRecords, _scope.Records);
 				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
-				_anchorLineNumber = FindPosition(_visibleRecords, anchorLineNumber) < 0 ? NoLineNumber : anchorLineNumber;
+				_anchorLineNumber = FindPosition(_visibleRecords, snapshot.AnchorLineNumber) < 0 ? NoLineNumber : snapshot.AnchorLineNumber;
 			}
 
-			SetActiveLineIfShown(activeLineNumber);
+			SetActiveLineIfShown(snapshot.ActiveLineNumber);
 		}
 
 		public ISelect SelectOnly(int anchorLineNumber, int lineNumber)
@@ -599,5 +617,10 @@
 				LogSeverityType.Information,
 				$"Commenting the selected records. AllowOverwrite={allowOverwrite}, RecordsAffected={lineNumbers.Length}");
 		}
+
+		/// <summary>
+		/// A view's selection by line number, which holds none of its records (#1126).
+		/// </summary>
+		internal sealed record Snapshot(ImmutableArray<int> SelectedLineNumbers, int AnchorLineNumber, int ActiveLineNumber);
 	}
 }

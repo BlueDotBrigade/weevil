@@ -858,9 +858,29 @@
 			{
 				try
 				{
-					// Reload keeps the selection in Core (#1062).
-					_engine.Save();
-					_engine.Reload();
+					try
+					{
+						// Saved first: after a failed read, saving keeps only the comments and pins already saved (#1126).
+						_engine.Save();
+
+						// The rows hold the old records, so drop them: Reload frees the records before it reads the log again (#1126).
+						// The grid is hidden meanwhile.
+						_uiDispatcher.Invoke(() =>
+						{
+							this.VisibleItems = null;
+							this.Rows = null;
+						});
+
+						// Reload keeps the selection in Core (#1062).
+						_engine.Reload();
+					}
+					catch (Exception e)
+					{
+						// What follows then shows what the engine holds: the log as it was if saving failed, or none of its records if reading failed.
+						var message = "Unable to reload the log file.";
+						Log.Default.Write(LogSeverityType.Error, e, message);
+						_dialogBox.ShowMessage(e.Message, message);
+					}
 
 					// Reload keeps the engine's history (#1109); this keeps the lists shown in step with it.
 					RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);

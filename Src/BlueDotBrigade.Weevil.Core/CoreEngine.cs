@@ -65,6 +65,7 @@
 		/// <summary>
 		/// Creates an instance of <see cref="CoreEngine"/> which can only be instantiated through a Fluent API managed by <see cref="CoreEngineBuilder"/>.
 		/// </summary>
+		/// <param name="hasReadLog"><see langword="false"/> for the engine without records that Reload uses while it reads the log again (#1126).</param>
 		private CoreEngine(
 			string sourceFilePath,
 			long sourceFileLength,
@@ -77,7 +78,8 @@
 			ImmutableArray<IRecord> records,
 			Session session,
 			RecordState recordState,
-			ITelemetryMetricRecorder telemetryRecorder)
+			ITelemetryMetricRecorder telemetryRecorder,
+			bool hasReadLog)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
 
@@ -100,26 +102,30 @@
 			_session = session;
 			_recordState = recordState;
 
-			Log.Default.Write(
-				LogSeverityType.Debug,
-				"File loading...");
-
 			var recordAndMetadataLoadingStopwatch = Stopwatch.StartNew();
 
-			// The only forced collection while opening a file: it frees the memory used while parsing,
-			// and Aggressive mode returns that memory to the operating system, so memory right after opening stays low (#969).
-			GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+			// An engine without records has read nothing, so it has no parsing memory to collect (#1126).
+			if (hasReadLog)
+			{
+				Log.Default.Write(
+					LogSeverityType.Debug,
+					"File loading...");
 
-			Log.Default.Write(
-				LogSeverityType.Information,
-				"File loading has retrieved records from disk.",
-				new Dictionary<string, object>
-				{
-					{ "SourceFileLoadingPeriod", sourceFileLoadingPeriod.TotalSeconds},
-					{ "RecordCount", records.Length},
-					{ "FileSize", sourceFileLength},
-					{ "SourceFilePath", _sourceFilePath},
-				});
+				// The only forced collection while opening a file: it frees the memory used while parsing,
+				// and Aggressive mode returns that memory to the operating system, so memory right after opening stays low (#969).
+				GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+
+				Log.Default.Write(
+					LogSeverityType.Information,
+					"File loading has retrieved records from disk.",
+					new Dictionary<string, object>
+					{
+						{ "SourceFileLoadingPeriod", sourceFileLoadingPeriod.TotalSeconds},
+						{ "RecordCount", records.Length},
+						{ "FileSize", sourceFileLength},
+						{ "SourceFilePath", _sourceFilePath},
+					});
+			}
 
 			_sidecarManager = sidecarManager;
 			_lineIndex = lineIndex;
@@ -174,6 +180,36 @@
 		}
 
 		/// <summary>
+		/// Returns an engine for the same log, with the same session, flags and filter, that holds none of the records.
+		/// Reload uses it while it reads the log again, so the engine holds none of the previous records meanwhile (#1126).
+		/// </summary>
+		/// <remarks>
+		/// If reading fails, the engine stays, so it still saves this log's sidecar, and a retry reloads this log.
+		/// </remarks>
+		internal CoreEngine WithoutRecords()
+		{
+			var empty = new CoreEngine(
+				_sourceFilePath,
+				_logFileMetrics.FileSize,
+				_sourceFileEncoding,
+				TimeSpan.Zero,
+				_coreExtension,
+				_context,
+				_sidecarManager,
+				_lineIndex,
+				ImmutableArray<IRecord>.Empty,
+				_session,
+				_recordState,
+				_telemetryRecorder,
+				hasReadLog: false);
+
+			// Not a user action, so no telemetry, as when the engine was created.
+			empty._filterManager.ApplyInternal(_filterManager.FilterType, _filterManager.Criteria);
+
+			return empty;
+		}
+
+		/// <summary>
 		/// Determines the current version of the core engine, and records the value in the application's log file.
 		/// </summary>
 		/// <seealso href="https://developercommunity.visualstudio.com/content/problem/315285/assemblygetentryassembly-returns-null-in-unit-test.html">MSDN: Assembly.GetEntryAssembly() returns null in unit test projects</seealso>
@@ -190,11 +226,6 @@
 				Version version = Assembly.GetEntryAssembly().GetName().Version;
 				Log.Default.Write($"The core engine has been created. Version={version}");
 			}
-		}
-
-		~CoreEngine()
-		{
-			Log.Default.Write($"The core engine has been removed from memory.");
 		}
 
 		#endregion

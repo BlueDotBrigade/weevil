@@ -1,5 +1,6 @@
 namespace BlueDotBrigade.Weevil.Collections
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
@@ -181,13 +182,39 @@ namespace BlueDotBrigade.Weevil.Collections
 			ImmutableArray<IRecord> newResults,
 			ImmutableArray<IRecord> allRecords)
 		{
+			return Remap(selection, position => oldResults[position].LineNumber, newResults, allRecords);
+		}
+
+		/// <summary>
+		/// Keeps the positions of the records that the new results still show, given only the line numbers of the old ones,
+		/// so the old records need not be kept (#1126).
+		/// </summary>
+		/// <param name="selection">Positions in <paramref name="oldLineNumbers"/>.</param>
+		/// <param name="oldLineNumbers">The line numbers the positions refer to, in order.</param>
+		/// <param name="newResults">The results to map the positions to, in line number order.</param>
+		/// <param name="allRecords">Every record the view holds, in line number order.</param>
+		public static PositionRanges Remap(
+			PositionRanges selection,
+			ImmutableArray<int> oldLineNumbers,
+			ImmutableArray<IRecord> newResults,
+			ImmutableArray<IRecord> allRecords)
+		{
+			return Remap(selection, position => oldLineNumbers[position], newResults, allRecords);
+		}
+
+		private static PositionRanges Remap(
+			PositionRanges selection,
+			Func<int, int> oldLineNumberAt,
+			ImmutableArray<IRecord> newResults,
+			ImmutableArray<IRecord> allRecords)
+		{
 			var remapped = new PositionRanges();
 			var searchFrom = 0;
 
 			foreach (PositionRange range in selection._ranges)
 			{
-				var firstLine = oldResults[range.First].LineNumber;
-				var lastLine = oldResults[range.Last].LineNumber;
+				var firstLine = oldLineNumberAt(range.First);
+				var lastLine = oldLineNumberAt(range.Last);
 
 				var low = LowerBound(newResults, firstLine, searchFrom);
 				var high = LowerBound(newResults, lastLine + 1, low) - 1;
@@ -213,7 +240,7 @@ namespace BlueDotBrigade.Weevil.Collections
 				while (newPosition <= high && oldPosition <= range.Last)
 				{
 					var newLine = newResults[newPosition].LineNumber;
-					var oldLine = oldResults[oldPosition].LineNumber;
+					var oldLine = oldLineNumberAt(oldPosition);
 					if (newLine == oldLine)
 					{
 						remapped.Append(newPosition, newPosition);

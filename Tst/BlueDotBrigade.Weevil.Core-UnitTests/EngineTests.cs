@@ -5,6 +5,7 @@ namespace BlueDotBrigade.Weevil
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -185,6 +186,68 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1126)]
+		public void GivenAnOpenLog_WhenReloaded_ThenItsPreviousRecordsHaveBeenFreed()
+		{
+			// Reload kept the previous records while it read the log again, so memory held two copies of the log.
+			IEngine engine = OpenCopy();
+			WeakReference previousRecord = TrackFirstRecord(engine);
+
+			engine.Reload();
+
+			previousRecord.IsAlive.Should().BeFalse("Reload releases the previous records before it reads the log, and opening collects them");
+		}
+
+		[TestMethod]
+		public void GivenAReloadThatCouldNotReadTheLog_WhenReloadedAgain_ThenTheLogIsBackWithItsCommentsAndFilter()
+		{
+			IEngine engine = OpenCopy();
+			var logPath = engine.SourceFilePath;
+			var recordCount = engine.Count;
+			engine.RecordState.SetComment(engine.Records[0], "Checked");
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			var resultCount = engine.Filter.Results.Length;
+
+			File.Move(logPath, $"{logPath}~");
+			FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
+			File.Move($"{logPath}~", logPath);
+
+			engine.Reload();
+
+			engine.Count.Should().Be(recordCount);
+			engine.Filter.Results.Length.Should().Be(resultCount);
+			engine.RecordState.GetComment(engine.Records[0]).Should().Be("Checked");
+		}
+
+		[TestMethod]
+		public void GivenASavedComment_WhenSavedAgainAfterAReloadThatCouldNotReadTheLog_ThenTheCommentIsKept()
+		{
+			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+				IEngine engine = Engine.UsingPath(logPath).Open();
+				engine.RecordState.SetComment(engine.Records[0], "Checked");
+				engine.Save();
+
+				File.Move(logPath, $"{logPath}~");
+				FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
+				File.Move($"{logPath}~", logPath);
+				engine.Save();
+
+				IEngine reopened = Engine.UsingPath(logPath).Open();
+
+				reopened.RecordState.GetComment(reopened.Records[0]).Should().Be("Checked");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		[WorkItem(1109)]
 		public void GivenFiltersApplied_WhenReloaded_ThenTheHistoryIsKeptWithoutSaving()
 		{
@@ -318,6 +381,16 @@ namespace BlueDotBrigade.Weevil
 			entry["WasFound"].Should().Be(false);
 			((double)entry["Duration"]).Should().BeGreaterThanOrEqualTo(0);
 			entry.Values.Should().NotContain(text);
+		}
+
+		/// <summary>
+		/// Watches the first record without keeping it alive: a Debug build keeps a test method's locals until it ends.
+		/// It tracks resurrection, so a record that a finalizer still holds counts as alive.
+		/// </summary>
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static WeakReference TrackFirstRecord(IEngine engine)
+		{
+			return new WeakReference(engine.Filter.Results[0], trackResurrection: true);
 		}
 
 		private IEngine OpenCopy()

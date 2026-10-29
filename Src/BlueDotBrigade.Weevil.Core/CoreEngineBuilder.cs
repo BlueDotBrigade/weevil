@@ -273,7 +273,8 @@
 					records,
 					session,
 					recordState,
-					_telemetryRecorder);
+					_telemetryRecorder,
+					hasReadLog: true);
 
 				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);
 
@@ -286,8 +287,8 @@
 			/// </summary>
 			/// <remarks>
 			/// The engine has already collected the memory used while parsing. The memory is the whole process's:
-			/// it includes the application, and any engine the caller still holds, such as the one a Reload or a second open replaces.
-			/// So only the first open in a process measures one log on its own.
+			/// it includes the application, and any engine the caller still holds, such as the one a second open replaces.
+			/// Reload lets go of the engine it replaces before parsing (#1126).
 			/// </remarks>
 			private static void LogFileLoaded(CoreEngine coreEngine, TimeSpan openingDuration)
 			{
