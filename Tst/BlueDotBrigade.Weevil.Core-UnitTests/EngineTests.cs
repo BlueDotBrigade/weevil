@@ -199,6 +199,27 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenAReloadThatCouldNotReadTheLog_WhenReloadedAgain_ThenTheLogIsBackWithItsCommentsAndFilter()
+		{
+			IEngine engine = OpenCopy();
+			var logPath = engine.SourceFilePath;
+			var recordCount = engine.Count;
+			engine.RecordState.SetComment(engine.Records[0], "Checked");
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			var resultCount = engine.Filter.Results.Length;
+
+			File.Move(logPath, $"{logPath}~");
+			FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
+			File.Move($"{logPath}~", logPath);
+
+			engine.Reload();
+
+			engine.Count.Should().Be(recordCount);
+			engine.Filter.Results.Length.Should().Be(resultCount);
+			engine.RecordState.GetComment(engine.Records[0]).Should().Be("Checked");
+		}
+
+		[TestMethod]
 		[WorkItem(1109)]
 		public void GivenFiltersApplied_WhenReloaded_ThenTheHistoryIsKeptWithoutSaving()
 		{

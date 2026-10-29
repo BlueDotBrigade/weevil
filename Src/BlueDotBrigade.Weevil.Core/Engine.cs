@@ -185,7 +185,7 @@
 
 		/// <summary>
 		/// Keeps what Reload carries over, then lets go of the records, so Reload never holds two copies of the log (#1126).
-		/// Meanwhile, and if reading the log fails, this engine shows an empty log.
+		/// Meanwhile, and if reading the log fails, this engine shows the same log without records.
 		/// </summary>
 		/// <remarks>
 		/// A method of its own, because a Debug build keeps a method's temporaries, such as the old filter, until it returns.
@@ -200,8 +200,8 @@
 
 			var kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
 
-			UnsubscribeFrom(_coreEngine);
-			_coreEngine = ((Engine)Surrogate)._coreEngine;
+			// Not the Surrogate's engine, which every engine shares: after a failed read, this engine still saves to and reloads its own log.
+			Replace(_coreEngine.WithoutRecords());
 
 			return kept;
 		}

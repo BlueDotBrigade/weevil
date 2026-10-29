@@ -858,8 +858,10 @@
 			{
 				try
 				{
-					// The rows hold the old records, so drop them first: Reload frees them before it reads the log again (#1126).
-					// The grid is hidden meanwhile.
+					_engine.Save();
+
+					// The rows hold the old records, so drop them before Reload, which frees the records before it reads the log again (#1126).
+					// After saving, so a failed save leaves them shown. The grid is hidden meanwhile.
 					_uiDispatcher.Invoke(() =>
 					{
 						this.VisibleItems = null;
@@ -868,7 +870,6 @@
 					});
 
 					// Reload keeps the selection in Core (#1062).
-					_engine.Save();
 					_engine.Reload();
 
 					// Reload keeps the engine's history (#1109); this keeps the lists shown in step with it.

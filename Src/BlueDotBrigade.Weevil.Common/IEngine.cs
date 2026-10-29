@@ -55,7 +55,7 @@
 		/// <remarks>
 		/// The comments, pins, bookmarks, regions, remarks and filter history stay, and so do the filter and the selected records the log still holds.
 		/// The previous records are released before the log is read, so memory never holds two copies (#1126).
-		/// While it reads, and if reading fails, the engine shows an empty log.
+		/// While it reads, and if reading fails, the engine shows the same log without records, with the same filter.
 		/// </remarks>
 		void Reload();
 	}

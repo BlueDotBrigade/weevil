@@ -273,7 +273,8 @@
 					records,
 					session,
 					recordState,
-					_telemetryRecorder);
+					_telemetryRecorder,
+					hasReadLog: true);
 
 				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);
 
