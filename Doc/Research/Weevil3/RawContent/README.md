@@ -53,7 +53,7 @@ The timings vary by up to ±30% between runs on the 4-vCPU container used: compa
   - `ZzContractTests`, `ZzNullTests` and `ZzLimitTests`: reproduce the review's findings. A parser that returns `true` with `Record.Dummy` or `null`, and `UsingLimit`.
 - **[Benchmarks](ReviewerChecks/Benchmarks/):**
   - `micro` times decoding one record in each encoding: UTF-16 big-endian and UTF-32 were 10–50 times slower than UTF-8.
-  - `src` measures opening, filtering and Clear. `Bench.csproj` references `../../wt-main`; point it at the Core to measure, and define `BRANCH` for the branch.
+  - `src` measures opening, filtering and Clear. Build it with `-p:WeevilRoot=<repository or worktree>`, plus `-p:Branch=true` for a Core that holds content as bytes.
 
 ## Compiling the GUI on Linux
 
