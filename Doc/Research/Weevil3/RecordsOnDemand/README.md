@@ -2,7 +2,18 @@
 
 **Question:** how to deliver step 3 of the [#988 plan](../../../Plans/988-IndexingService.md), records created on demand from a record table, as a series of pull requests.
 
-**Status (2026-10-30):** proposal, not yet decided. An architect agent wrote the design below from four maps of the code (Core internals, public contracts and callers, GUI, research constraints), and a sceptic agent challenged it. The user decides the open questions before any sub-issue is filed.
+**Status (2026-10-30):** decided. An architect agent wrote the design below from four maps of the code (Core internals, public contracts and callers, GUI, research constraints), and a sceptic agent challenged it. The split follows the challenge: seven pull requests, #1135, #1136, #1137, #1138, #1139, #1140 and #1141, listed in step 3 of the [#988 plan](../../../Plans/988-IndexingService.md).
+
+The user's decisions on the open questions:
+1. **Memory:** accept about 161 bytes per record for now, and revisit the last 4 bytes with #1023.
+2. **Graph:** at most 100,000 selected records, like Copy and Paste, kept as its own copy.
+3. **Insights:** `IInsight.RelatedRecords` becomes line numbers.
+4. **Equality:** records are equal when their line numbers are equal, even across logs.
+
+The defaults taken:
+- The Clear set stays a list of record numbers; #1022 may change it to ranges.
+- Monikers that read the table directly are a later story.
+- The first-Fatal ordering is filed as #1142.
 
 ## Proposal
 
