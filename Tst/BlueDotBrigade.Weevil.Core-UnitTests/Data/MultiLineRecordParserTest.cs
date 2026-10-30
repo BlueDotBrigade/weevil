@@ -347,6 +347,41 @@
 		}
 
 		[TestMethod]
+		public void GivenALogLargerThanTheReadersBuffer_WhenReadInSmallChunks_ThenEveryRecordKeepsItsContent()
+		{
+			// About 200 KB read in chunks of about 1,000 bytes, so the reader moves the chunk's bytes to the start of its 64 KB buffer many times.
+			var lines = new List<string>();
+			var expected = new List<string>();
+			for (var i = 0; i < 2_000; i++)
+			{
+				var record = new List<string> { $"2026-10-16 10:00:00.00000\t123\t2\tInformation\tRecord {i}" };
+				for (var j = 0; j < i % 3; j++)
+				{
+					record.Add($"   at Weevil.Component.Method{j}() for record {i}");
+				}
+
+				lines.AddRange(record);
+				expected.Add(string.Join("\r\n", record));
+			}
+
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes(string.Join("\n", lines)));
+			var parser = new MultilineRecordParser(
+				new LogLineReader(dataSource, startOffset: 0, chunkSize: 1_000),
+				new TsvRecordParser(),
+				MultilineRecordParser.MaximumLinesToSearch,
+				MultilineRecordParser.FirstRecordLineNumber,
+				isLoggingEnabled: false);
+
+			var contents = new List<string>();
+			for (IRecord record = parser.GetNext(); Record.IsGenuine(record); record = parser.GetNext())
+			{
+				contents.Add(record.Content);
+			}
+
+			contents.Should().Equal(expected);
+		}
+
+		[TestMethod]
 		public void GivenAParserThatChangesTheText_WhenReading_ThenTheRecordKeepsTheParsersText()
 		{
 			var recordParser = Substitute.For<IRecordParser>();
