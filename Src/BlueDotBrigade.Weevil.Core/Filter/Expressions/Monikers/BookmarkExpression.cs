@@ -14,7 +14,7 @@
 			_bookmarkManager = bookmarkManager;
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return
 				_bookmarkManager.TryGetBookmarkName(record.LineNumber, out _);

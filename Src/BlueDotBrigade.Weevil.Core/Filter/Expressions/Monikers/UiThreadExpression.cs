@@ -23,7 +23,7 @@
 			}
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			return record.WasGeneratedByUi == _isUiRecord;
 		}

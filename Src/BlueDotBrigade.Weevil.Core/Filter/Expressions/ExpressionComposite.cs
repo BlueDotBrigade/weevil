@@ -14,13 +14,13 @@
 
 		public int Count => _expressions.Length;
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			bool isMatch = false;
 
 			foreach (var expression in _expressions)
 			{
-				if (expression.IsMatch(record))
+				if (expression.IsMatch(record, content))
 				{
 					isMatch = true;
 					break;

@@ -17,6 +17,9 @@
 
 		public IRecord FindPrevious(string value, bool isCaseSensitive, bool useRegex = false)
 		{
+			// Each record's content is read once, into a buffer the search reuses (#1131).
+			var content = new ContentBuffer();
+
 			if (useRegex)
 			{
 				var regexOptions = isCaseSensitive
@@ -26,7 +29,7 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToPrevious(_activeRecord.Index, record => regex.IsMatch(record.Content));
+					.GoToPrevious(_activeRecord.Index, record => regex.IsMatch(content.Read(record)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -38,7 +41,7 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToPrevious(_activeRecord.Index, record => record.Content.Contains(value, comparison));
+					.GoToPrevious(_activeRecord.Index, record => content.Read(record).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -46,6 +49,9 @@
 
 		public IRecord FindNext(string value, bool isCaseSensitive, bool useRegex = false)
 		{
+			// Each record's content is read once, into a buffer the search reuses (#1131).
+			var content = new ContentBuffer();
+
 			if (useRegex)
 			{
 				var regexOptions = isCaseSensitive
@@ -55,7 +61,7 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToNext(_activeRecord.Index, record => regex.IsMatch(record.Content));
+					.GoToNext(_activeRecord.Index, record => regex.IsMatch(content.Read(record)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -67,7 +73,7 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToNext(_activeRecord.Index, record => record.Content.Contains(value, comparison));
+					.GoToNext(_activeRecord.Index, record => content.Read(record).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}

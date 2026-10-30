@@ -19,13 +19,13 @@
 		/// <summary>
 		/// This operator returns <see langword="True"/> if any of the <see cref="IExpression"/> values match the given <see cref="IRecord"/>.
 		/// </summary>
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
 			var isMatch = false;
 
 			foreach (IExpression expression in _expressions)
 			{
-				if (expression.IsMatch(record))
+				if (expression.IsMatch(record, content))
 				{
 					isMatch = true;
 					break;

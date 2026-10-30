@@ -69,6 +69,7 @@
 
                 IRecord firstMatch = null;
                 IRecord lastMatch = null;
+                var content = new ContentBuffer();
 
 				foreach (IRecord record in sortedRecords)
                 {
@@ -81,7 +82,7 @@
 					var isMatch = false;
 					foreach (IExpression expression in expressions)
 					{
-						if (expression.IsMatch(record))
+						if (expression.IsMatch(record, content))
 						{
 							isMatch = true;
 							break;

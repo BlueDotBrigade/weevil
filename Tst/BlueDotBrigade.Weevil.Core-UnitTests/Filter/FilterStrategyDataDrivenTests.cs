@@ -111,7 +111,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("with no filters and both options off, all records should be visible");
@@ -136,7 +136,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record is pinned or bookmarked and the corresponding option is on");
@@ -171,7 +171,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record matches include filter");
@@ -202,7 +202,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().Be(expectedResult, 
@@ -239,7 +239,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().Be(expectedResult, 
@@ -270,7 +270,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().Be(expectedResult,
@@ -302,7 +302,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().Be(expectedResult,
@@ -328,7 +328,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 				bookmarkManager);
 
 			// Act
-			var result = strategy.CanKeep(record);
+			var result = strategy.CanKeep(record, new ContentBuffer());
 
 			// Assert
 			result.Should().BeTrue("record matches include and does not match exclude");

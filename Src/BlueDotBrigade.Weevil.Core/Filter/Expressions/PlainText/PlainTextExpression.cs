@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter.Expressions.PlainText
 {
+	using System;
 	using System.Globalization;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using Data;
@@ -17,15 +18,17 @@
 			_isCaseSensitive = isCaseSensitive;
 		}
 
-		public bool IsMatch(IRecord record)
+		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
+			ReadOnlySpan<char> text = content.Read(record);
+
 			if (_isCaseSensitive)
 			{
-				return record.Content.Contains(_expression);
+				return text.Contains(_expression, StringComparison.Ordinal);
 			}
 			else
 			{
-				return CultureInfo.InvariantCulture.CompareInfo.IndexOf(record.Content, _expression, CompareOptions.IgnoreCase) >= 0;
+				return CultureInfo.InvariantCulture.CompareInfo.IndexOf(text, _expression, CompareOptions.IgnoreCase) >= 0;
 			}
 		}
 	}

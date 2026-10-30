@@ -38,7 +38,8 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. B
 
 ## Filter Contracts
 
-- `IFilterStrategy` defines the filtering contract: `FilterType`, `FilterCriteria`, and `CanKeep(IRecord)`.
+- `IFilterStrategy` defines the filtering contract: `FilterType`, `FilterCriteria`, and `CanKeep(IRecord, ContentBuffer)`.
+- An expression that tests a record's text reads it with `content.Read(record)`, not `record.Content`, so a filter reads each record's content once (#1131).
 - `FilterCriteria` is constructed directly: `new FilterCriteria(includeExpression)` or use `FilterCriteria.None` when no filter should be applied.
 - `FilterType` specifies how the expression is interpreted (e.g., `PlainText`, `RegularExpression`, `Temporal`).
 - Do not change `IFilterCriteria` or `FilterCriteria` in ways that break existing serialized filter history.

@@ -31,7 +31,8 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. T
 
 ## Filter Architecture
 
-- `IFilterStrategy` defines the filtering contract: `FilterType`, `FilterCriteria`, and `CanKeep(IRecord)`.
+- `IFilterStrategy` defines the filtering contract: `FilterType`, `FilterCriteria`, and `CanKeep(IRecord, ContentBuffer)`.
+- An expression that tests a record's text reads it with `content.Read(record)`, not `record.Content`, so a filter reads each record's content once (#1131).
 - `FilterStrategy.KeepAllRecords` is the singleton that passes all records when no filter is active.
 - Inclusive and exclusive filter expressions are composed using `LogicalOrOperation`.
 - Pinned and bookmarked records override both include and exclude filters when their respective options are enabled.
