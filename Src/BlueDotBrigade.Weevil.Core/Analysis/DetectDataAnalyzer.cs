@@ -79,9 +79,12 @@ namespace BlueDotBrigade.Weevil.Analysis
 				// Track unique key/value pairs per record to avoid duplicates using tuple-based key
 				var seenKeyValues = new HashSet<(string Key, string Value)>();
 
+				// Read once, however many expressions test the record (#1133).
+				var content = record.Content;
+
 				foreach (RegularExpression regexExpression in expressions)
 				{
-					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record, content);
 
 					if (keyValuePairs.Count > 0)
 					{

@@ -1,0 +1,48 @@
+main	big_mixed_utf8.log	Open	1.63	600000
+main	big_mixed_utf8.log	PlainText NoSuchText	0.073	0
+main	big_mixed_utf8.log	PlainText Gyroscope	0.072	0
+main	big_mixed_utf8.log	PlainText gyroscope (ignore case)	0.540	0
+main	big_mixed_utf8.log	Regex Gyroscope	0.031	0
+main	big_mixed_utf8.log	Regex Security	0.032	0
+main	big_mixed_utf8.log	Regex NoSuchText\d+	0.032	0
+main	big_mixed_utf8.log	Regex Pitch=\d+\.\d	0.040	0
+main	big_mixed_utf8.log	Moniker @Severity=Error	0.044	100000
+main	big_mixed_utf8.log	No filter	0.084	600000
+main	big_mixed_utf8.log	Find NoSuchText	0.048	
+main	big_mixed_utf8.log	Find NoSuchText\d+ (regex)	0.058	
+new	big_mixed_utf8.log	Open	1.56	600000
+new	big_mixed_utf8.log	PlainText NoSuchText	0.073	0
+new	big_mixed_utf8.log	PlainText Gyroscope	0.086	0
+new	big_mixed_utf8.log	PlainText gyroscope (ignore case)	0.849	0
+new	big_mixed_utf8.log	Regex Gyroscope	0.042	0
+new	big_mixed_utf8.log	Regex Security	0.057	0
+new	big_mixed_utf8.log	Regex NoSuchText\d+	0.049	0
+new	big_mixed_utf8.log	Regex Pitch=\d+\.\d	0.052	0
+new	big_mixed_utf8.log	Moniker @Severity=Error	0.026	100000
+new	big_mixed_utf8.log	No filter	0.060	600000
+new	big_mixed_utf8.log	Find NoSuchText	0.065	
+new	big_mixed_utf8.log	Find NoSuchText\d+ (regex)	0.126	
+main	big_mixed_utf8.log	Open	1.78	600000
+main	big_mixed_utf8.log	PlainText NoSuchText	0.072	0
+main	big_mixed_utf8.log	PlainText Gyroscope	0.071	0
+main	big_mixed_utf8.log	PlainText gyroscope (ignore case)	0.559	0
+main	big_mixed_utf8.log	Regex Gyroscope	0.027	0
+main	big_mixed_utf8.log	Regex Security	0.029	0
+main	big_mixed_utf8.log	Regex NoSuchText\d+	0.032	0
+main	big_mixed_utf8.log	Regex Pitch=\d+\.\d	0.032	0
+main	big_mixed_utf8.log	Moniker @Severity=Error	0.047	100000
+main	big_mixed_utf8.log	No filter	0.085	600000
+main	big_mixed_utf8.log	Find NoSuchText	0.044	
+main	big_mixed_utf8.log	Find NoSuchText\d+ (regex)	0.061	
+new	big_mixed_utf8.log	Open	1.67	600000
+new	big_mixed_utf8.log	PlainText NoSuchText	0.090	0
+new	big_mixed_utf8.log	PlainText Gyroscope	0.058	0
+new	big_mixed_utf8.log	PlainText gyroscope (ignore case)	0.730	0
+new	big_mixed_utf8.log	Regex Gyroscope	0.100	0
+new	big_mixed_utf8.log	Regex Security	0.061	0
+new	big_mixed_utf8.log	Regex NoSuchText\d+	0.059	0
+new	big_mixed_utf8.log	Regex Pitch=\d+\.\d	0.060	0
+new	big_mixed_utf8.log	Moniker @Severity=Error	0.024	100000
+new	big_mixed_utf8.log	No filter	0.049	600000
+new	big_mixed_utf8.log	Find NoSuchText	0.073	
+new	big_mixed_utf8.log	Find NoSuchText\d+ (regex)	0.095	

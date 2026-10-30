@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.IO;
-	using System.Text;
+	using BlueDotBrigade.Weevil.IO;
 	using Diagnostics;
 
 	internal class SerializedRecordRepository : IRecordRepository
@@ -43,53 +43,11 @@
 				$"Preparing to read records from disk. {nameof(firstRecordByteOffset)}={firstRecordByteOffset}, {nameof(firstRecordLineNumber)}={firstRecordLineNumber}");
 
 			_recordParser = new MultilineRecordParser(
-				CreateReader(_source, _firstRecordByteOffset),
+				new LogLineReader(_source, _firstRecordByteOffset),
 				recordParser,
 				maximumLinesToSearch,
 				firstRecordLineNumber,
 				loggingEnabled);
-		}
-
-		/// <summary>
-		/// Creates a reader positioned at the first record.
-		/// </summary>
-		/// <remarks>
-		/// The encoding is detected from a byte order mark, which is only at the top of the file.
-		/// So when reading starts further in, the encoding is detected at the top first.
-		/// </remarks>
-		private static StreamReader CreateReader(Stream source, long firstRecordByteOffset)
-		{
-			source.Position = 0;
-
-			if (firstRecordByteOffset == FirstRecordByteOffset)
-			{
-				return new StreamReader(source);
-			}
-
-			Encoding encoding;
-
-			using (var detector = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 4, leaveOpen: true))
-			{
-				detector.Peek();
-				encoding = detector.CurrentEncoding;
-			}
-
-			source.Position = firstRecordByteOffset;
-
-			return new StreamReader(source, WithoutPreamble(encoding), detectEncodingFromByteOrderMarks: false);
-		}
-
-		/// <summary>
-		/// Returns the same encoding without a byte order mark, so that the reader does not skip one at the first record.
-		/// </summary>
-		private static Encoding WithoutPreamble(Encoding encoding)
-		{
-			return encoding switch
-			{
-				UnicodeEncoding => new UnicodeEncoding(bigEndian: encoding.CodePage == Encoding.BigEndianUnicode.CodePage, byteOrderMark: false),
-				UTF32Encoding => new UTF32Encoding(bigEndian: encoding.CodePage != Encoding.UTF32.CodePage, byteOrderMark: false),
-				_ => new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
-			};
 		}
 
 		public IRecord GetNext()
@@ -110,8 +68,6 @@
 		public ImmutableArray<IRecord> Get(Range range, int maximumCount)
 		{
 			var results = new List<IRecord>();
-
-			_source.Position = _firstRecordByteOffset;
 
 			IRecord record = Record.Dummy;
 

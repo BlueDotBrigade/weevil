@@ -123,9 +123,12 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var resolvedValues = new Dictionary<string, string>();
 			var ambiguousKeys = new HashSet<string>();
 
+			// Read once, however many expressions test the record (#1133).
+			var content = record.Content;
+
 			foreach (RegularExpression expression in expressions)
 			{
-				IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
+				IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record, content);
 
 				if (keyValuePairs.Count == 0)
 				{

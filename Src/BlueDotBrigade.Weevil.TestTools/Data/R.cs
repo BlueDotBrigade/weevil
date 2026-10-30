@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Text;
 	using BlueDotBrigade.Weevil.Data;
 
 	/// <summary>
@@ -106,6 +107,30 @@
 				DateTime.Now.AddSeconds(lineNumber),
 				SeverityType.Information,
 				content);
+		}
+
+		/// <summary>
+		/// Creates a fake record that holds <paramref name="content"/> as bytes in <paramref name="encoding"/>, as an opened log's records do (#1133).
+		/// </summary>
+		/// <remarks>
+		/// Other bytes come before the content in its chunk, as in a chunk that several records share.
+		/// </remarks>
+		public static IRecord WithContentAsBytes(int lineNumber, string content, Encoding encoding, bool isMultiLine)
+		{
+			const string Earlier = "Earlier\n";
+
+			var bytes = encoding.GetBytes(Earlier + content);
+			var offset = encoding.GetByteCount(Earlier);
+
+			return new Record(
+				lineNumber,
+				DateTime.Now.AddSeconds(lineNumber),
+				SeverityType.Information,
+				new ContentChunk(0, bytes, encoding),
+				offset,
+				bytes.Length - offset,
+				isMultiLine,
+				wasGeneratedByUi: false);
 		}
 	}
 }

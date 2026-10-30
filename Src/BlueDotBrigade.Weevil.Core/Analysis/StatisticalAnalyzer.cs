@@ -107,9 +107,12 @@ namespace BlueDotBrigade.Weevil.Analysis
 				// For statistical analysis, we take the first numeric value found
 				double? foundValue = null;
 
+				// Read once, however many expressions test the record (#1133).
+				var content = record.Content;
+
 				foreach (RegularExpression regexExpression in expressions)
 				{
-					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record);
+					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record, content);
 
 					if (keyValuePairs.Count == 1)
 					{

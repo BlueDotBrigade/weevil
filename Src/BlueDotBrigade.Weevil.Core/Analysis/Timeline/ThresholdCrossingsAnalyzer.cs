@@ -88,9 +88,12 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 				var wasFlagged = false;
 
+				// Read once, however many expressions test the record (#1133).
+				var content = record.Content;
+
 				foreach (RegularExpression expression in expressions)
 				{
-					IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record);
+					IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record, content);
 
 					foreach (KeyValuePair<string, string> current in keyValuePairs)
 					{

@@ -30,6 +30,11 @@
 
 		private readonly byte _facts;
 
+		// The content: a string, or the chunk of the log's bytes that holds it (#1133).
+		private readonly object _content;
+		private readonly int _contentOffset;
+		private readonly int _contentLength;
+
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content)
 		: this(lineNumber, createdAt, severity, content, isMultiLine: false, wasGeneratedByUi: false)
 		{
@@ -41,16 +46,43 @@
 		public Record(int lineNumber, DateTime createdAt, SeverityType severity, string content,
 			 bool isMultiLine, bool wasGeneratedByUi)
 		{
+			this.LineNumber = lineNumber;
+			this.CreatedAt = createdAt;
+			_content = content ?? string.Empty;
+			_facts = GetFacts(severity, isMultiLine, wasGeneratedByUi);
+		}
+
+		/// <summary>
+		/// Creates a record whose content is the bytes at <paramref name="contentOffset"/> in <paramref name="chunk"/>, decoded when it is read (#1133).
+		/// </summary>
+		/// <param name="isMultiLine">The record spans several lines of the log, which <see cref="Content"/> joins with <c>\r\n</c>.</param>
+		/// <param name="wasGeneratedByUi">The record was written by the application's user interface thread.</param>
+		public Record(int lineNumber, DateTime createdAt, SeverityType severity, ContentChunk chunk, int contentOffset, int contentLength,
+			 bool isMultiLine, bool wasGeneratedByUi)
+		{
+			ArgumentNullException.ThrowIfNull(chunk);
+
+			if (contentOffset < 0 || contentLength < 0 || contentOffset > chunk.Length - contentLength)
+			{
+				throw new ArgumentOutOfRangeException(nameof(contentOffset), contentOffset, "The content is expected to be within the chunk.");
+			}
+
+			this.LineNumber = lineNumber;
+			this.CreatedAt = createdAt;
+			_content = chunk;
+			_contentOffset = contentOffset;
+			_contentLength = contentLength;
+			_facts = GetFacts(severity, isMultiLine, wasGeneratedByUi);
+		}
+
+		private static byte GetFacts(SeverityType severity, bool isMultiLine, bool wasGeneratedByUi)
+		{
 			if ((uint)severity > SeverityMask)
 			{
 				throw new ArgumentOutOfRangeException(nameof(severity), severity, "The severity is not a known value.");
 			}
 
-			this.LineNumber = lineNumber;
-			this.CreatedAt = createdAt;
-			this.Content = content ?? string.Empty;
-
-			_facts = (byte)((byte)severity
+			return (byte)((byte)severity
 				| (isMultiLine ? MultiLineFlag : 0)
 				| (wasGeneratedByUi ? UserInterfaceThreadFlag : 0));
 		}
@@ -65,9 +97,28 @@
 
 		public bool WasGeneratedByUi => (_facts & UserInterfaceThreadFlag) != 0;
 
-		public string Content { get; }
+		/// <remarks>
+		/// When the record holds the log's bytes, each read decodes them into a new string. To read many records, use a <see cref="ContentBuffer"/>.
+		/// </remarks>
+		public string Content => _content as string ?? ((ContentChunk)_content).GetString(_contentOffset, _contentLength, this.IsMultiLine);
 
 		public bool HasContent => !string.IsNullOrWhiteSpace(this.Content);
+
+		/// <summary>
+		/// Decodes the content into <paramref name="buffer"/>, which grows when needed, if the record holds the log's bytes.
+		/// </summary>
+		/// <returns><see langword="false"/> when the record holds a string, which <see cref="Content"/> returns as it is.</returns>
+		internal bool TryDecodeContent(ref char[] buffer, out int length)
+		{
+			if (_content is ContentChunk chunk)
+			{
+				length = chunk.Decode(_contentOffset, _contentLength, this.IsMultiLine, ref buffer);
+				return true;
+			}
+
+			length = 0;
+			return false;
+		}
 
 		/// <summary>
 		/// Returns <see langword="true"/> if it is known when the record was created.

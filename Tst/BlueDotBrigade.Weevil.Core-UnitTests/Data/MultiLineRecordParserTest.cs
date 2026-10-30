@@ -1,8 +1,10 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
+	using BlueDotBrigade.Weevil.IO;
 	using NSubstitute;
 
 	[TestClass]
@@ -13,20 +15,23 @@
 		/// </summary>
 		private const int LineOne = 1;
 
-		private int CountNumberOfNewLines(StreamReader reader)
+		private int CountNumberOfNewLines(Stream source)
 		{
-			var startPosition = reader.BaseStream.Position;
+			var startPosition = source.Position;
 			var count = 0;
 
-			reader.BaseStream.Seek(0, SeekOrigin.Begin);
+			source.Seek(0, SeekOrigin.Begin);
 
-			while (!reader.EndOfStream)
+			using (var reader = new StreamReader(source, leaveOpen: true))
 			{
-				reader.ReadLine();
-				count++;
+				while (!reader.EndOfStream)
+				{
+					reader.ReadLine();
+					count++;
+				}
 			}
 
-			reader.BaseStream.Seek(startPosition, SeekOrigin.Begin);
+			source.Seek(startPosition, SeekOrigin.Begin);
 
 			return count;
 		}
@@ -34,10 +39,10 @@
 		[TestMethod]
 		public void GetNext_ReadUntilNextRecord_ReturnsRecord()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
 			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
@@ -47,8 +52,8 @@
 		[TestMethod]
 		public void GetNext_ReadingMultilineRecords_ReturnsLineNumberForStartOfEachRecord()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader("ReadUntilNextRecord.log");
-			var multilineParser = new MultilineRecordParser(dataSource, new TsvRecordParser());
+			Stream dataSource = new Daten().AsStream("ReadUntilNextRecord.log");
+			var multilineParser = new MultilineRecordParser(new LogLineReader(dataSource), new TsvRecordParser());
 
 			IRecord multilineRecord = multilineParser.GetNext();
 			IRecord singleLineRecord = multilineParser.GetNext();
@@ -60,10 +65,10 @@
 		[TestMethod]
 		public void GetNext_ReadUntilEof_ReturnsRecord()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
 			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
@@ -73,10 +78,10 @@
 		[TestMethod]
 		public void GetNext_FileStartsWithPartialRecord_ReturnsRecord()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			(record.Content.StartsWith("2019-12-31 23:59:58")).Should().BeTrue();
 			(record.Content.EndsWith("sapiente alienos esse arbitrantur.")).Should().BeTrue();
@@ -86,10 +91,10 @@
 		[TestMethod]
 		public void GetNext_ThreeOneLineRecords_ReturnsThreeRecords()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			var multilineParser = new MultilineRecordParser(dataSource, recordParser);
+			var multilineParser = new MultilineRecordParser(new LogLineReader(dataSource), recordParser);
 
 			(multilineParser.GetNext().Content.EndsWith("First Record")).Should().BeTrue();
 			(multilineParser.GetNext().Content.EndsWith("Second Record")).Should().BeTrue();
@@ -99,10 +104,10 @@
 		[TestMethod]
 		public void GetNext_NoRecords_ReturnsEmptyRecord()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			record.Should().Be(Record.Dummy);
 		}
@@ -110,13 +115,13 @@
 		[TestMethod]
 		public void GetNext_RecordStartsAfterMaxLineCount_EmptyRecordReturned()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
 			// Won't be able to find anything
 			// ... because the parser will give up before the first complete record is found
 			IRecord record = new MultilineRecordParser(
-				dataSource,
+				new LogLineReader(dataSource),
 				recordParser,
 				maximumLinesToSearch: 32,
 				firstRecordLineNumber: 1,
@@ -129,13 +134,13 @@
 		[TestMethod]
 		public void GetNext_RecordStartsBeforeMaxLineCount_RecordReturned()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
 			// Record is returned
 			// ... because the parser will find it before it reaches the search limit
 			IRecord record = new MultilineRecordParser(
-				dataSource,
+				new LogLineReader(dataSource),
 				recordParser,
 				maximumLinesToSearch: 32,
 				firstRecordLineNumber: 1,
@@ -148,10 +153,10 @@
 		[TestMethod]
 		public void GetNext_RecordStartsDefaultMaxLinesWhileSearching_RecordReturned()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			MultilineRecordParser.MaximumLinesToSearch.Should().Be(256);
 			record.LineNumber.Should().Be(MultilineRecordParser.MaximumLinesToSearch);
@@ -162,10 +167,10 @@
 		{
 			// We are intentionally reading in an image file
 			// ... that cannot be interpreted as a log file
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			record.Should().Be(Record.Dummy);
 		}
@@ -173,10 +178,10 @@
 		[TestMethod]
 		public void Metadata_IsMultilineRecord_HasMultilineAttribute()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			record.IsMultiLine.Should().BeTrue();
 		}
@@ -184,10 +189,10 @@
 		[TestMethod]
 		public void Metadata_IsSingleLineRecord_DoesNotHaveMultilineAttribute()
 		{
-			StreamReader dataSource = new Daten().AsStreamReader();
+			Stream dataSource = new Daten().AsStream();
 			var recordParser = new TsvRecordParser();
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			record.IsMultiLine.Should().BeFalse();
 		}
@@ -200,9 +205,9 @@
 		private static MultilineRecordParser CreateParser(params string[] lines)
 		{
 			var content = string.Join("\n", lines);
-			var dataSource = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(content)));
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes(content));
 
-			return new MultilineRecordParser(dataSource, new TsvRecordParser());
+			return new MultilineRecordParser(new LogLineReader(dataSource), new TsvRecordParser());
 		}
 
 		[TestMethod]
@@ -278,12 +283,122 @@
 					return true;
 				});
 
-			var dataSource = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes("line 1\nline 2")));
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes("line 1\nline 2"));
 
-			IRecord record = new MultilineRecordParser(dataSource, recordParser).GetNext();
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
 
 			record.Should().BeOfType<Record>();
 			record.Content.Should().Be("Custom record");
+		}
+
+		[TestMethod]
+		public void GivenAParserThatReturnsTrueWithoutAGenuineRecord_WhenReading_ThenThatLineStartsNoRecord()
+		{
+			// "skip" returns Record.Dummy and "nothing" returns null: neither starts a record, and "nothing" still ends the one before it.
+			var recordParser = Substitute.For<IRecordParser>();
+			recordParser
+				.TryParse(Arg.Any<int>(), Arg.Any<string>(), out Arg.Any<IRecord>())
+				.Returns(call =>
+				{
+					var line = (string)call[1];
+					call[2] = line.StartsWith("Record")
+						? new Record((int)call[0], DateTime.MaxValue, SeverityType.Information, line)
+						: line == "skip" ? Record.Dummy : null;
+					return line != "continued";
+				});
+
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes("skip\nRecord A\ncontinued\nnothing\nRecord B"));
+			var parser = new MultilineRecordParser(new LogLineReader(dataSource), recordParser);
+
+			IRecord first = parser.GetNext();
+			IRecord second = parser.GetNext();
+
+			first.LineNumber.Should().Be(2);
+			first.Content.Should().Be("Record A\r\ncontinued");
+			second.LineNumber.Should().Be(5);
+			second.Content.Should().Be("Record B");
+			parser.GetNext().Should().Be(Record.Dummy);
+		}
+
+		[TestMethod]
+		public void GivenRecordsSpanningSeveralChunks_WhenReading_ThenEachRecordKeepsItsContent()
+		{
+			// A chunk of 100 bytes holds about one record, so records are read across several chunks.
+			string[] lines = [FirstLine, ContinuationLine1, SecondLine, FirstLine, ContinuationLine1, ContinuationLine2, SecondLine];
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes(string.Join("\n", lines)));
+			var parser = new MultilineRecordParser(
+				new LogLineReader(dataSource, startOffset: 0, chunkSize: 100),
+				new TsvRecordParser(),
+				MultilineRecordParser.MaximumLinesToSearch,
+				MultilineRecordParser.FirstRecordLineNumber,
+				isLoggingEnabled: false);
+
+			var contents = new List<string>();
+			for (IRecord record = parser.GetNext(); Record.IsGenuine(record); record = parser.GetNext())
+			{
+				contents.Add(record.Content);
+			}
+
+			contents.Should().Equal(
+				$"{FirstLine}\r\n{ContinuationLine1}",
+				SecondLine,
+				$"{FirstLine}\r\n{ContinuationLine1}\r\n{ContinuationLine2}",
+				SecondLine);
+		}
+
+		[TestMethod]
+		public void GivenALogLargerThanTheReadersBuffer_WhenReadInSmallChunks_ThenEveryRecordKeepsItsContent()
+		{
+			// About 200 KB read in chunks of about 1,000 bytes, so the reader moves the chunk's bytes to the start of its 64 KB buffer many times.
+			var lines = new List<string>();
+			var expected = new List<string>();
+			for (var i = 0; i < 2_000; i++)
+			{
+				var record = new List<string> { $"2026-10-16 10:00:00.00000\t123\t2\tInformation\tRecord {i}" };
+				for (var j = 0; j < i % 3; j++)
+				{
+					record.Add($"   at Weevil.Component.Method{j}() for record {i}");
+				}
+
+				lines.AddRange(record);
+				expected.Add(string.Join("\r\n", record));
+			}
+
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes(string.Join("\n", lines)));
+			var parser = new MultilineRecordParser(
+				new LogLineReader(dataSource, startOffset: 0, chunkSize: 1_000),
+				new TsvRecordParser(),
+				MultilineRecordParser.MaximumLinesToSearch,
+				MultilineRecordParser.FirstRecordLineNumber,
+				isLoggingEnabled: false);
+
+			var contents = new List<string>();
+			for (IRecord record = parser.GetNext(); Record.IsGenuine(record); record = parser.GetNext())
+			{
+				contents.Add(record.Content);
+			}
+
+			contents.Should().Equal(expected);
+		}
+
+		[TestMethod]
+		public void GivenAParserThatChangesTheText_WhenReading_ThenTheRecordKeepsTheParsersText()
+		{
+			var recordParser = Substitute.For<IRecordParser>();
+			recordParser
+				.TryParse(Arg.Any<int>(), Arg.Is<string>(line => line.StartsWith("Record")), out Arg.Any<IRecord>())
+				.Returns(call =>
+				{
+					call[2] = new Record((int)call[0], DateTime.MaxValue, SeverityType.Information, "Changed " + (string)call[1]);
+					return true;
+				});
+
+			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes("Record 1\ncontinued\nRecord 2"));
+
+			IRecord record = new MultilineRecordParser(new LogLineReader(dataSource), recordParser).GetNext();
+
+			record.Content.Should().Be("Changed Record 1\r\ncontinued");
+			record.IsMultiLine.Should().BeTrue();
 		}
 	}
 }
