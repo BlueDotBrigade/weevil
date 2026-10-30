@@ -37,6 +37,17 @@ namespace BlueDotBrigade.Weevil.Collections
 		}
 
 		[TestMethod]
+		public void GivenARecordForAnUnselectedLine_WhenLookedFor_ThenItIsNotFound()
+		{
+			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			var selected = new SelectedRecords(PositionRanges.FromPositions(new List<int> { 1, 2, 5 }), results);
+
+			selected.Values.Contains(R.WithLineNumber(14)).Should().BeFalse();
+			selected.Contains(new KeyValuePair<int, IRecord>(12, R.WithLineNumber(13))).Should().BeFalse();
+			selected.Contains(new KeyValuePair<int, IRecord>(12, null)).Should().BeFalse();
+		}
+
+		[TestMethod]
 		public void GivenALineThatIsNotSelected_WhenLookedUp_ThenItIsNotFound()
 		{
 			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);

@@ -67,7 +67,14 @@ namespace BlueDotBrigade.Weevil.Data
 		public void GivenRecordsForDifferentLines_WhenCompared_ThenTheyAreNotEqual()
 		{
 			R.WithContent(7, "Same").Should().NotBe(R.WithContent(8, "Same"));
-			Record.IsGenuine(R.WithContent(7, "Same")).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenARecordOnLineMinusOne_WhenCheckedForTheDummy_ThenItIsTheDummy()
+		{
+			// Line -1 is the dummy's, and a log's line numbers start at 1 (#1135).
+			Record.IsDummyOrNull(R.WithContent(-1, "Any")).Should().BeTrue();
+			Record.IsGenuine(R.WithContent(1, "Any")).Should().BeTrue();
 		}
 
 		[TestMethod]
