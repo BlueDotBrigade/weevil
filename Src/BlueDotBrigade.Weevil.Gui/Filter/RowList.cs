@@ -3,7 +3,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Threading;

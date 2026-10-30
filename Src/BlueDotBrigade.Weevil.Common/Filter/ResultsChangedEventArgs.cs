@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter
 {
 	using System;
-	using System.Collections.Immutable;
 	using Data;
 
 	public class ResultsChangedEventArgs : EventArgs

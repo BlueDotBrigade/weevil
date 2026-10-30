@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
-	using System.Collections.Immutable;
 
 	public interface IRecordRepository
 	{

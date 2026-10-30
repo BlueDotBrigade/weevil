@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
-	using System.Collections.Immutable;
 
 	public static class RecordExtensions
 	{

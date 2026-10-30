@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 {
-	using System.Collections.Immutable;
 	using Data;
 
 	internal interface ISidecarLoader

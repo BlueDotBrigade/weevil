@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Utilities
 {
-	using System.Collections.Immutable;
 	using System.IO;
 	using System.Text;
 	using Data;

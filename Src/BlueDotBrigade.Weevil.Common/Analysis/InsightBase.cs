@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	public abstract class InsightBase : IInsight

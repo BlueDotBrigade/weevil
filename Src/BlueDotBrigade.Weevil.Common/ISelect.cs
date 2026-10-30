@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.Data;

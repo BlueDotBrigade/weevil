@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Configuration.Sidecar.v1
 {
 	using System;
-	using System.Collections.Immutable;
 	using System.Runtime.Serialization;
 	using Data;
 	using Diagnostics;

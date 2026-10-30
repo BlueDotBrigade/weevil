@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 

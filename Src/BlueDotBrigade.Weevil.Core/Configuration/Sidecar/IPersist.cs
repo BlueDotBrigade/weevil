@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 {
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using Data;
 	using Navigation;
 

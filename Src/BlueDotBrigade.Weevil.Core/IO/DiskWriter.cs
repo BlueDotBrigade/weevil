@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
-	using System.Collections.Immutable;
 	using System.Globalization;
 	using System.IO;
 	using System.Text;

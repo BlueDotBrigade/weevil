@@ -1,7 +1,6 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
-	using System.Collections.Immutable;
 
 	/// <summary>
 	/// For each record a view shows, the time since the previous record it shows that has a timestamp, kept by line number (#1016).
