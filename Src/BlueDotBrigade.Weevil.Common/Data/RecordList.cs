@@ -188,6 +188,7 @@ namespace BlueDotBrigade.Weevil.Data
 #if DEBUG
 			// Set WEEVIL_TEST_RECORD_COPIES=1 to return a new copy of a record on every read, as a list over a record table will (#1021),
 			// so a test run shows which code still relies on reading the same record object twice (#1136).
+			// The memory budget tests (#1086) can fail in this mode, because filter results then hold copies.
 			private static readonly bool IsCopyingOnRead = Environment.GetEnvironmentVariable("WEEVIL_TEST_RECORD_COPIES") == "1";
 #endif
 
