@@ -139,8 +139,8 @@
 		/// Indicates whether the provided value refers to a dummy record, or a null value.
 		/// </summary>
 		/// <returns>
-		///     Returns <see langword="true" /> when the parameter refers to <see langword="null" /> or <see cref="Record.Dummy" />
-		///     .
+		///     Returns <see langword="true" /> when the parameter refers to <see langword="null" /> or <see cref="Record.Dummy" />.
+		///     Records are equal by line number, so any <see cref="Record" /> on line −1, the dummy's line, is the dummy; a log's line numbers start at 1 (#1135).
 		/// </returns>
 		public static bool IsDummyOrNull(IRecord record)
 		{
