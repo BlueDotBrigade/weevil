@@ -46,10 +46,10 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
    - The question was whether to keep each record's timestamp in a column, as today, or parse it from the content each time it is needed.
    - Even the fastest re-read added 5.2 s to opening a 20 GB log and up to 3.8 s to each filter. The column costs 60 MB per GB of log. See the [results](../Research/Weevil3/TimestampPoC/README.md#results).
 3. **Records on demand (#1021).**
-   - Records live in a record table: line number, content offset, the facts byte and the timestamp.
+   - Records live in a record table, in columns: the line number, the content's offset in its chunk and its length, the facts byte and the timestamp, 21 bytes per record. Storing the length, rather than deriving it from the next record, avoids a table of exceptions.
    - `IRecord` objects are created for shown rows, a selection or an export, and compare equal by line number.
    - A read-only record list replaces `ImmutableArray<IRecord>`, with `IndexOf` by line number. Filter results and the Clear record set become lists of record numbers.
-   - This is the largest step. In October 2026 there were 156 references in 60 source files and 81 in 20 test files, and `ISelect` also exposes records as a dictionary and a list. When writing its sub-issue, split it: for example Core behind an adapter first, then the GUI, then the tests.
+   - This is the largest step. On 2026-10-30 there were 169 references to `ImmutableArray<IRecord>` in 61 source files and 128 in 28 test files, and `ISelect` also exposes records as a dictionary and a list.
    - **Split into seven pull requests (decided 2026-10-30)**, in this order. The design and the challenge it survived are in [RecordsOnDemand](../Research/Weevil3/RecordsOnDemand/README.md).
      1. Records are equal when their line numbers are equal (#1135).
      2. Callers read records from a read-only record list, an `IList<IRecord>` (#1136).
@@ -58,7 +58,6 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
      5. Insights and the graph stop keeping records of a log that is no longer open (#1139).
      6. Filter results, the selection and Clear hold record numbers, and records are created only when read (#1140).
      7. Tests use record lists, the temporary forwarders go, and records on demand are measured (#1141).
-   - The record table's columns are the line number, the content's offset in its chunk and its length, the facts byte and the timestamp: 21 bytes per record. Storing the length, rather than deriving it from the next record, avoids a table of exceptions.
    - **Decisions (2026-10-30):**
      - About 161 bytes per record is accepted for now. The last 4 bytes to reach #1086's 157 are revisited with #1023.
      - The graph graphs at most 100,000 selected records, like Copy and Paste.
