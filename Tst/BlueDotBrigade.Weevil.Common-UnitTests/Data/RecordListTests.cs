@@ -22,6 +22,20 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenARecordList_WhenEnumerated_ThenItReadsEveryRecordInOrder()
+		{
+			RecordList list = R.WithLineNumbers(11, 13);
+
+			var lineNumbers = new List<int>();
+			foreach (IRecord record in list)
+			{
+				lineNumbers.Add(record.LineNumber);
+			}
+
+			lineNumbers.Should().Equal(11, 12, 13);
+		}
+
+		[TestMethod]
 		public void GivenADefaultArray_WhenConverted_ThenTheListIsEmpty()
 		{
 			RecordList list = default(ImmutableArray<IRecord>);

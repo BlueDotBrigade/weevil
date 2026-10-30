@@ -98,12 +98,17 @@ namespace BlueDotBrigade.Weevil.Data
 			return records.MoveToImmutable();
 		}
 
-		public virtual IEnumerator<IRecord> GetEnumerator()
+		/// <summary>
+		/// Returns an enumerator that reads each record once, in order.
+		/// </summary>
+		public Enumerator GetEnumerator()
 		{
-			for (var position = 0; position < this.Count; position++)
-			{
-				yield return this[position];
-			}
+			return new Enumerator(this);
+		}
+
+		IEnumerator<IRecord> IEnumerable<IRecord>.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -120,6 +125,53 @@ namespace BlueDotBrigade.Weevil.Data
 		void IList<IRecord>.Insert(int index, IRecord item) => throw new NotSupportedException("A record list cannot be changed.");
 
 		void IList<IRecord>.RemoveAt(int index) => throw new NotSupportedException("A record list cannot be changed.");
+
+		/// <summary>
+		/// Reads each record once, in order, as <see cref="List{T}.Enumerator"/> does, so a <c>foreach</c> over a list allocates nothing (#1136 review).
+		/// </summary>
+		public struct Enumerator : IEnumerator<IRecord>
+		{
+			private readonly RecordList _records;
+			private readonly int _count;
+			private int _position;
+
+			internal Enumerator(RecordList records)
+			{
+				_records = records;
+				_count = records.Count;
+				_position = -1;
+				this.Current = null;
+			}
+
+			public IRecord Current { get; private set; }
+
+			object IEnumerator.Current => this.Current;
+
+			public bool MoveNext()
+			{
+				if (_position + 1 < _count)
+				{
+					_position++;
+					this.Current = _records[_position];
+					return true;
+				}
+
+				_position = _count;
+				this.Current = null;
+				return false;
+			}
+
+			public void Reset()
+			{
+				_position = -1;
+				this.Current = null;
+			}
+
+			public void Dispose()
+			{
+				// nothing to release
+			}
+		}
 
 		/// <summary>
 		/// A record list over an array of records that already exist.

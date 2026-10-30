@@ -44,18 +44,23 @@ namespace BlueDotBrigade.Weevil.Data
 				return None;
 			}
 
+			// Index loops, which are faster than foreach over a RecordList: this runs after every filter (#1136 review).
+			var count = records.Count;
+
 			var lastLineNumber = 0;
-			foreach (IRecord record in records)
+			for (var position = 0; position < count; position++)
 			{
-				lastLineNumber = System.Math.Max(lastLineNumber, record.LineNumber);
+				lastLineNumber = System.Math.Max(lastLineNumber, records[position].LineNumber);
 			}
 
 			var byLineNumber = new TimeSpan[lastLineNumber + 1];
 			Array.Fill(byLineNumber, Unknown);
 
 			IRecord previous = Record.Dummy;
-			foreach (IRecord current in records)
+			for (var position = 0; position < count; position++)
 			{
+				IRecord current = records[position];
+
 				if (current.HasCreationTime)
 				{
 					if (!Record.IsDummyOrNull(previous) && current.LineNumber >= 0)
