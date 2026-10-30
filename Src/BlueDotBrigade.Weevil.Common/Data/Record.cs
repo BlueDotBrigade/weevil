@@ -104,6 +104,18 @@
 
 		public bool HasContent => !string.IsNullOrWhiteSpace(this.Content);
 
+#if DEBUG
+		/// <summary>
+		/// Returns a new record with the same line, facts and content, as a record list over a record table will (#1136).
+		/// </summary>
+		internal Record Copy()
+		{
+			return _content is ContentChunk chunk
+				? new Record(this.LineNumber, this.CreatedAt, this.Severity, chunk, _contentOffset, _contentLength, this.IsMultiLine, this.WasGeneratedByUi)
+				: new Record(this.LineNumber, this.CreatedAt, this.Severity, (string)_content, this.IsMultiLine, this.WasGeneratedByUi);
+		}
+#endif
+
 		/// <summary>
 		/// Decodes the content into <paramref name="buffer"/>, which grows when needed, if the record holds the log's bytes.
 		/// </summary>
