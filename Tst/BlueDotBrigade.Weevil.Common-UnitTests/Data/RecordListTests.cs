@@ -56,6 +56,16 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenAnArrayTooSmall_WhenRecordsAreCopiedToIt_ThenNothingIsWritten()
+		{
+			RecordList list = R.WithLineNumbers(11, 13);
+			var array = new IRecord[2];
+
+			FluentActions.Invoking(() => list.CopyTo(array, 0)).Should().Throw<ArgumentException>();
+			array.Should().OnlyContain(record => record == null);
+		}
+
+		[TestMethod]
 		public void GivenARecordList_WhenChanged_ThenTheChangeIsRefused()
 		{
 			IList<IRecord> list = (RecordList)R.WithLineNumbers(11, 13);

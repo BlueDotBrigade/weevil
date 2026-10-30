@@ -76,6 +76,12 @@ namespace BlueDotBrigade.Weevil.Data
 		public void CopyTo(IRecord[] array, int arrayIndex)
 		{
 			ArgumentNullException.ThrowIfNull(array);
+			ArgumentOutOfRangeException.ThrowIfNegative(arrayIndex);
+
+			if (array.Length - arrayIndex < this.Count)
+			{
+				throw new ArgumentException("The array is too small to hold every record.", nameof(array));
+			}
 
 			for (var position = 0; position < this.Count; position++)
 			{
