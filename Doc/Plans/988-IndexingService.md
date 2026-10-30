@@ -50,6 +50,20 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
    - `IRecord` objects are created for shown rows, a selection or an export, and compare equal by line number.
    - A read-only record list replaces `ImmutableArray<IRecord>`, with `IndexOf` by line number. Filter results and the Clear record set become lists of record numbers.
    - This is the largest step. In October 2026 there were 156 references in 60 source files and 81 in 20 test files, and `ISelect` also exposes records as a dictionary and a list. When writing its sub-issue, split it: for example Core behind an adapter first, then the GUI, then the tests.
+   - **Split into seven pull requests (decided 2026-10-30)**, in this order. The design and the challenge it survived are in [RecordsOnDemand](../Research/Weevil3/RecordsOnDemand/README.md).
+     1. Records are equal when their line numbers are equal (#1135).
+     2. Callers read records from a read-only record list, an `IList<IRecord>` (#1136).
+     3. Code that needs only line numbers or timestamps stops creating records (#1137).
+     4. The parser fills a record table, and Core builds its records from it (#1138).
+     5. Insights and the graph stop keeping records of a log that is no longer open (#1139).
+     6. Filter results, the selection and Clear hold record numbers, and records are created only when read (#1140).
+     7. Tests use record lists, the temporary forwarders go, and records on demand are measured (#1141).
+   - The record table's columns are the line number, the content's offset in its chunk and its length, the facts byte and the timestamp: 21 bytes per record. Storing the length, rather than deriving it from the next record, avoids a table of exceptions.
+   - **Decisions (2026-10-30):**
+     - About 161 bytes per record is accepted for now. The last 4 bytes to reach #1086's 157 are revisited with #1023.
+     - The graph graphs at most 100,000 selected records, like Copy and Paste.
+     - `IInsight.RelatedRecords` becomes line numbers.
+     - Records are equal when their line numbers are equal, even across logs.
 4. **Clear frees memory (#1022).**
    - Clear narrows the view's record scope (#990 step 8). Content chunks that the scope no longer includes are released, followed by one compacting garbage collection, as Clear does today. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
    - Only whole chunks are released: up to about 16 MB stays at each edge of a kept range, and `Clear Selected` frees nothing.
