@@ -9,8 +9,9 @@ namespace BlueDotBrigade.Weevil.Data
 	/// A read-only list of records, in the order they were given, which callers read instead of an <see cref="ImmutableArray{T}"/> (#1136).
 	/// </summary>
 	/// <remarks>
-	/// Once records are created when they are read (#1021), a list may create each record it returns, so read a record once and keep it,
-	/// rather than reading the same position many times. A list never changes: filters and Clear publish new lists.
+	/// Once records are created when they are read (#1021), a list may create each record it returns, so two reads of a position may return
+	/// different objects: read a record once rather than reading the same position many times, and compare records by line number, never by reference.
+	/// A list never changes: filters and Clear publish new lists.
 	/// <see cref="IndexOf"/> and <see cref="Contains"/> find a record by its line number, as records are equal by line number (#1135).
 	/// </remarks>
 	public abstract class RecordList : IList<IRecord>, IReadOnlyList<IRecord>
