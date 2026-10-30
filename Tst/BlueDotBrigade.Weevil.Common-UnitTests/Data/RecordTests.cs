@@ -53,6 +53,24 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenTwoRecordsForTheSameLine_WhenCompared_ThenTheyAreEqual()
+		{
+			// One holds a string and the other the log's bytes: only the line number counts (#1135).
+			IRecord first = R.WithContent(7, "First");
+			IRecord second = R.WithContentAsBytes(7, "Second", Encoding.UTF8, isMultiLine: false);
+
+			first.Should().Be(second);
+			first.GetHashCode().Should().Be(second.GetHashCode());
+		}
+
+		[TestMethod]
+		public void GivenRecordsForDifferentLines_WhenCompared_ThenTheyAreNotEqual()
+		{
+			R.WithContent(7, "Same").Should().NotBe(R.WithContent(8, "Same"));
+			Record.IsGenuine(R.WithContent(7, "Same")).Should().BeTrue();
+		}
+
+		[TestMethod]
 		public void GivenTheBytesAChunkWasMadeFrom_WhenChangedAfterwards_ThenTheRecordsContentDoesNotChange()
 		{
 			var bytes = Encoding.UTF8.GetBytes("Original");

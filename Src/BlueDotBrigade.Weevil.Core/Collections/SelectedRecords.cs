@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Collections
 
 		public ICollection<int> Keys => new ReadOnlyView<int>(this.Select(pair => pair.Key), this.Count, lineNumber => ContainsKey(lineNumber));
 
-		public ICollection<IRecord> Values => new ReadOnlyView<IRecord>(this.Select(pair => pair.Value), this.Count, record => record != null && TryGetValue(record.LineNumber, out IRecord found) && ReferenceEquals(found, record));
+		public ICollection<IRecord> Values => new ReadOnlyView<IRecord>(this.Select(pair => pair.Value), this.Count, record => record != null && ContainsKey(record.LineNumber));
 
 		public IRecord this[int lineNumber]
 		{
@@ -60,7 +60,8 @@ namespace BlueDotBrigade.Weevil.Collections
 
 		public bool Contains(KeyValuePair<int, IRecord> item)
 		{
-			return TryGetValue(item.Key, out IRecord record) && ReferenceEquals(record, item.Value);
+			// Records are equal by line number (#1135).
+			return TryGetValue(item.Key, out IRecord record) && record.Equals(item.Value);
 		}
 
 		public IEnumerator<KeyValuePair<int, IRecord>> GetEnumerator()

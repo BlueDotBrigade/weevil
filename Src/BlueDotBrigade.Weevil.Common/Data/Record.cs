@@ -6,7 +6,7 @@
 
 	/// <threadsafety static="true" instance="true" />
 	[DebuggerDisplay("Line {" + nameof(LineNumber) + "}: {this.DebuggerString()}")]
-	public sealed class Record : IRecord
+	public sealed class Record : IRecord, IEquatable<IRecord>
 	{
 		/// <summary>
 		/// Represents a surrogate that is used when a genuine record is not available.
@@ -162,6 +162,28 @@
 		public static bool IsGenuine(IRecord record)
 		{
 			return !IsDummyOrNull(record);
+		}
+
+		/// <summary>
+		/// A record is equal to any record with the same line number, which identifies a record within its log (#1135).
+		/// </summary>
+		/// <remarks>
+		/// Records will be created when they are read (#1021), so one line can give several record objects.
+		/// Records of different logs with the same line number are equal too: Weevil compares records only within one log.
+		/// </remarks>
+		public bool Equals(IRecord other)
+		{
+			return other is not null && other.LineNumber == this.LineNumber;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is IRecord other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			return this.LineNumber;
 		}
 
 		private string DebuggerString()
