@@ -28,7 +28,7 @@
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
 		private FilterStrategy _latestFilterStrategy;
-		private ImmutableArray<IRecord> _latestFilterResults;
+		private RecordList _latestFilterResults;
 
 		private IRegionManager _regionManager;
 
@@ -86,7 +86,7 @@
 		#region Properties
 		public FilterStrategy FilterStrategy => _latestFilterStrategy;
 
-		public ImmutableArray<IRecord> Results => _latestFilterResults;
+		public RecordList Results => _latestFilterResults;
 
 		public ElapsedTimes ElapsedTimes => _recordState.ElapsedTimes;
 
@@ -112,7 +112,7 @@
 			throw new NotImplementedException();
 		}
 
-		private ImmutableArray<IRecord> FilterAndCalculateMetrics(IFilterStrategy strategy)
+		private RecordList FilterAndCalculateMetrics(IFilterStrategy strategy)
 		{
 			_abortFilterOperation = false;
 
@@ -121,7 +121,7 @@
 				collector.Reset();
 			}
 
-			ImmutableArray<IRecord> records = _scope.Records;
+			RecordList records = _scope.Records;
 			var resultsCache = new IRecord[records.Length];
 			var resultsCount = 0;
 
@@ -188,7 +188,7 @@
 				$"Filter results are being compressed... Before={resultsCache.Length}");
 
 			// `resultsCache` does not change after this point, so it is wrapped rather than copied.
-			ImmutableArray<IRecord> compressedResults = ImmutableCollectionsMarshal.AsImmutableArray(resultsCache).Compact(resultsCount);
+			RecordList compressedResults = ImmutableCollectionsMarshal.AsImmutableArray(resultsCache).Compact(resultsCount);
 
 			Log.Default.Write(
 				LogSeverityType.Debug,

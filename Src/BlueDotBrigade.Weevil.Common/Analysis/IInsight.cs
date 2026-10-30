@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	public interface IInsight
@@ -22,8 +21,8 @@
 		 /// When the insight has detected a problem, this collection contains the records
 		 /// that require user attention, with the first record being the primary record of interest.
 		 /// </remarks>
-		 ImmutableArray<IRecord> RelatedRecords { get; }
+		 RecordList RelatedRecords { get; }
 
-		 void Refresh(ImmutableArray<IRecord> records);
+		 void Refresh(RecordList records);
 	}
 }

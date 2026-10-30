@@ -1,7 +1,6 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
-	using System.Collections.Immutable;
 
 	/// <summary>
 	/// For each record a view shows, the time since the previous record it shows that has a timestamp, kept by line number (#1016).
@@ -37,25 +36,30 @@ namespace BlueDotBrigade.Weevil.Data
 		/// Records without a timestamp are skipped: the next record with one is measured from the last record that had one.
 		/// The first record with a timestamp has no elapsed time.
 		/// </remarks>
-		public static ElapsedTimes Calculate(ImmutableArray<IRecord> records)
+		public static ElapsedTimes Calculate(RecordList records)
 		{
-			if (records.IsDefaultOrEmpty)
+			if (records is null || records.IsEmpty)
 			{
 				return None;
 			}
 
+			// Index loops, which are faster than foreach over a RecordList: this runs after every filter (#1136 review).
+			var count = records.Count;
+
 			var lastLineNumber = 0;
-			foreach (IRecord record in records)
+			for (var position = 0; position < count; position++)
 			{
-				lastLineNumber = System.Math.Max(lastLineNumber, record.LineNumber);
+				lastLineNumber = System.Math.Max(lastLineNumber, records[position].LineNumber);
 			}
 
 			var byLineNumber = new TimeSpan[lastLineNumber + 1];
 			Array.Fill(byLineNumber, Unknown);
 
 			IRecord previous = Record.Dummy;
-			foreach (IRecord current in records)
+			for (var position = 0; position < count; position++)
 			{
+				IRecord current = records[position];
+
 				if (current.HasCreationTime)
 				{
 					if (!Record.IsDummyOrNull(previous) && current.LineNumber >= 0)

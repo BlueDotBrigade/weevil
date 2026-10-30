@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Configuration.Sidecar.v1
 {
 	using System;
-	using System.Collections.Immutable;
 	using System.Runtime.Serialization;
 	using Data;
 	using Diagnostics;
@@ -45,7 +44,7 @@
 			return canLoad;
 		}
 
-		public void Apply(ImmutableArray<IRecord> allRecords, IAnnotations annotations)
+		public void Apply(RecordList allRecords, IAnnotations annotations)
 		{
 			foreach (Label label in _metadata.Labels)
 			{
@@ -68,7 +67,7 @@
 			}
 		}
 
-		public void Save(bool deleteBackup, ImmutableArray<IRecord> allRecords)
+		public void Save(bool deleteBackup, RecordList allRecords)
 		{
 			throw new NotSupportedException("A deprecated schema cannot be used to save sidecar data.");
 		}

@@ -62,7 +62,7 @@
 			NumberStyles.AllowExponent |
 			NumberStyles.AllowDecimalPoint;
 
-		private readonly ImmutableArray<IRecord> _records;
+		private readonly RecordList _records;
 		private readonly string _xAxisTimeFormat;
 
 		private IEnumerable<ISeries> _series;
@@ -89,7 +89,7 @@
 		private string _series3Axis = YAxisLeft;
 		private string _series4Axis = YAxisLeft;
 
-		public GraphViewModel(ImmutableArray<IRecord> records, string regularExpression, string windowTitle, string sourceFilePath)
+		public GraphViewModel(RecordList records, string regularExpression, string windowTitle, string sourceFilePath)
 		{
 			_records = records;
 			_xAxisTimeFormat = GetXAxisTimeFormat(records);
@@ -536,9 +536,9 @@
 			};
 		}
 
-		private static string GetXAxisTimeFormat(ImmutableArray<IRecord> records)
+		private static string GetXAxisTimeFormat(RecordList records)
 		{
-			if (records.IsDefaultOrEmpty)
+			if (records is null || records.IsEmpty)
 			{
 				return TwentyFourHourTimeFormat;
 			}
@@ -828,14 +828,14 @@
 				}
 			}
 			// NOTE: GetGroupNameOrDefault should only be called after all records are processed
-			// in the calling method GetSeriesNames(ImmutableArray<IRecord>, string), not here.
+			// in the calling method GetSeriesNames(RecordList, string), not here.
 			// Calling it here fills in default names prematurely, preventing actual group names
 			// from being extracted from subsequent records.
 			// GetGroupNameOrDefault(seriesNames);
 			return seriesNames;
 		}
 
-		private static List<string> GetSeriesNames(ImmutableArray<IRecord> records, string regularExpression)
+		private static List<string> GetSeriesNames(RecordList records, string regularExpression)
 		{
 			var expressions = ParseRegularExpressions(regularExpression);
 
@@ -881,7 +881,7 @@
 			return seriesNames;
 		}
 
-		private static IEnumerable<ISeries> GetSeries(ImmutableArray<IRecord> records, string regularExpression, string[] seriesNames, string[] seriesAxes)
+		private static IEnumerable<ISeries> GetSeries(RecordList records, string regularExpression, string[] seriesNames, string[] seriesAxes)
 		{
 			var seriesValues = new ObservableCollection<DateTimePoint>[MaxSeriesCount];
 			var hasSeriesData = new bool[MaxSeriesCount];

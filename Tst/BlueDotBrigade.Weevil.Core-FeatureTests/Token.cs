@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
-	using System.Collections.Immutable;
 	using System.Security;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
@@ -44,6 +43,6 @@
 			this.ExcludeFilter, 
 			this.Configuration);
 
-		public ImmutableArray<IRecord> Results => Engine.Filter.Results;
+		public RecordList Results => Engine.Filter.Results;
 	}
 }

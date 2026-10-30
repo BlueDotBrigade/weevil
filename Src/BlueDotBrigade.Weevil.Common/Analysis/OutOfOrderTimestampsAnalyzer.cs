@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
@@ -19,7 +18,7 @@
 
 		public string DisplayName => "Out-of-Order Timestamps";
 
-		private Results Analyze(ImmutableArray<IRecord> records, IRecordState state, TimeSpan tolerance, bool canUpdateMetadata)
+		private Results Analyze(RecordList records, IRecordState state, TimeSpan tolerance, bool canUpdateMetadata)
 		{
 			var metric = new TemporalAnomalyMetrics(tolerance);
 
@@ -48,7 +47,7 @@
 			return new Results(metric.Counter);
 		}
 
-		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			Results results = Results.None;
 

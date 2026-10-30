@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 
@@ -26,6 +25,6 @@
 		/// <param name="outputDirectory">Path to where analysis results can be saved.</param>
 		/// <param name="userDialog">Enables the analyzer to prompt the user for additional context.</param>
 		/// <param name="canUpdateMetadata">When <see langword="false"/>, the analyzer does not change <paramref name="state"/>.</param>
-		Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata);
+		Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata);
 	}
 }

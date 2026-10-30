@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
-	using System.Collections.Immutable;
 	using Analysis;
 	using Data;
 	using Filter;
@@ -18,7 +17,7 @@
 		///
 		/// Coupling business logic to the <see cref="Records"/> property is strongly discouraged.
 		/// </remarks>
-		ImmutableArray<IRecord> Records { get; }
+		RecordList Records { get; }
 
 		LogFileMetrics Metrics { get; }
 

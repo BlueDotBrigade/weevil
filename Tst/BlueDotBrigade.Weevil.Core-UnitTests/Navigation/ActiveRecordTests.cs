@@ -10,18 +10,19 @@
 	public class ActiveRecordTests
 	{
 		[TestMethod]
-		public void Constructor_UninitializedArray_ThrowsArgumentException()
+		public void GivenNoRecordList_WhenCreated_ThenItThrows()
 		{
-			Action act = () => _ = new ActiveRecord(new ImmutableArray<IRecord>());
-			act.Should().Throw<ArgumentException>();
+			// An uninitialized array now becomes an empty record list (#1136), so only a missing list is refused.
+			Action act = () => _ = new ActiveRecord(null);
+			act.Should().Throw<ArgumentNullException>();
 		}
 
 		[TestMethod]
-		public void UpdateDataSource_UninitializedArray_ThrowsArgumentException()
+		public void GivenNoRecordList_WhenTheDataSourceIsUpdated_ThenItThrows()
 		{
 			var activeRecord = new ActiveRecord(ImmutableArray.Create<IRecord>());
-			Action act = () => activeRecord.UpdateDataSource(new ImmutableArray<IRecord>());
-			act.Should().Throw<ArgumentException>();
+			Action act = () => activeRecord.UpdateDataSource(null);
+			act.Should().Throw<ArgumentNullException>();
 		}
 
 		[TestMethod]

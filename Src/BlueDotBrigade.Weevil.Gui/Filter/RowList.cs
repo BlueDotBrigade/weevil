@@ -3,7 +3,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using System.Windows.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Gui.Threading;
@@ -22,7 +21,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private const int MaximumQueuedChanges = 1_000;
 		private const int MinimumPurgeCount = 4_096;
 
-		private readonly ImmutableArray<IRecord> _results;
+		private readonly RecordList _results;
 		private readonly ElapsedTimes _elapsedTimes;
 		private readonly IAnnotations _annotations;
 		private readonly ISelect _selector;
@@ -38,9 +37,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private bool _refreshesEveryRow;
 
 		/// <param name="elapsedTimes">The elapsed times of <paramref name="results"/>, from the same filter.</param>
-		public RowList(ImmutableArray<IRecord> results, ElapsedTimes elapsedTimes, IAnnotations annotations, ISelect selector, IUiDispatcher uiDispatcher)
+		public RowList(RecordList results, ElapsedTimes elapsedTimes, IAnnotations annotations, ISelect selector, IUiDispatcher uiDispatcher)
 		{
-			_results = results.IsDefault ? ImmutableArray<IRecord>.Empty : results;
+			_results = results ?? RecordList.Empty;
 			_elapsedTimes = elapsedTimes ?? throw new ArgumentNullException(nameof(elapsedTimes));
 			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
 			_selector = selector ?? throw new ArgumentNullException(nameof(selector));

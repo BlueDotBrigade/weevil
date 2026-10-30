@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
@@ -40,7 +39,7 @@
 
 		public DateTime FirstOccurrenceAt => _firstOccurrenceAt;
 
-		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = 0;
@@ -56,7 +55,7 @@
 			return results;
 		}
 
-		private static int IndexOfFirstTimestamp(ImmutableArray<IRecord> records)
+		private static int IndexOfFirstTimestamp(RecordList records)
 		{
 			var result = UnknownIndex;
 
@@ -80,7 +79,7 @@
 		/// and not the elapsed times of the current view (<see cref="IRecordState.GetElapsedTime"/>).
 		/// </remarks>
 		/// <param name="state">Not used when <paramref name="canUpdateMetadata"/> is <see langword="false"/>.</param>
-		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, TimeSpan maximumAllowedPeriod, bool canUpdateMetadata)
+		public Results Analyze(RecordList records, IRecordState state, TimeSpan maximumAllowedPeriod, bool canUpdateMetadata)
 		{
 			Log.Default.Write(LogSeverityType.Debug, "Time gap analysis for records logged by the UI thread is starting...");
 

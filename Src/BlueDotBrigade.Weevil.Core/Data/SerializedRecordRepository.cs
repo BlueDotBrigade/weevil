@@ -55,17 +55,17 @@
 			return _recordParser.GetNext();
 		}
 
-		public ImmutableArray<IRecord> GetAll()
+		public RecordList GetAll()
 		{
 			return Get(int.MaxValue);
 		}
 
-		public ImmutableArray<IRecord> Get(int maximumCount)
+		public RecordList Get(int maximumCount)
 		{
 			return Get(Range.All, maximumCount);
 		}
 
-		public ImmutableArray<IRecord> Get(Range range, int maximumCount)
+		public RecordList Get(Range range, int maximumCount)
 		{
 			var results = new List<IRecord>();
 

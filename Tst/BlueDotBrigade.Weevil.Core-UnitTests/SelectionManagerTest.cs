@@ -22,7 +22,7 @@
 
 			engine.Selector.Select(lineNumber: 1);
 
-			System.Collections.Immutable.ImmutableArray<Data.IRecord> selectedRecords = engine.Selector.GetSelected();
+			RecordList selectedRecords = engine.Selector.GetSelected();
 
 			selectedRecords.Length.Should().Be(1);
 			selectedRecords[0].LineNumber.Should().Be(1);
@@ -36,7 +36,7 @@
 
 			engine.Selector.Select(lineNumber: 32);
 
-			System.Collections.Immutable.ImmutableArray<Data.IRecord> selectedRecords = engine.Selector.GetSelected();
+			RecordList selectedRecords = engine.Selector.GetSelected();
 
 			selectedRecords.Length.Should().Be(1);
 			selectedRecords[0].LineNumber.Should().Be(32);
@@ -73,7 +73,7 @@
 		public void GivenEveryOtherRecordSelected_WhenTheOthersAreSelectedToo_ThenItTakesLessThanFiveSeconds()
 		{
 			// Changing one record at a time took about 30 seconds here.
-			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 300_000);
+			RecordList records = R.WithLineNumbers(1, 300_000);
 			SelectionManager selector = CreateSelector(records);
 			selector.Select(records.Where(r => r.LineNumber % 2 == 1).ToList());
 			List<IRecord> others = records.Where(r => r.LineNumber % 2 == 0).ToList();
@@ -89,7 +89,7 @@
 		public void GivenEveryOtherRecordSelected_WhenTheyAreUnselected_ThenItTakesLessThanFiveSeconds()
 		{
 			// Changing one record at a time took about 30 seconds here.
-			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 300_000);
+			RecordList records = R.WithLineNumbers(1, 300_000);
 			SelectionManager selector = CreateSelector(records);
 			List<IRecord> scattered = records.Where(r => r.LineNumber % 2 == 1).ToList();
 			selector.Select(scattered);
@@ -104,8 +104,8 @@
 		[TestMethod]
 		public void GivenLinesTheFilterHides_WhenSelectedOnly_ThenOnlyTheRecordsShownBetweenThemAreSelected()
 		{
-			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 10);
-			ImmutableArray<IRecord> odd = records.Where(r => r.LineNumber % 2 == 1).ToImmutableArray();
+			RecordList records = R.WithLineNumbers(1, 10);
+			RecordList odd = records.Where(r => r.LineNumber % 2 == 1).ToImmutableArray();
 			SelectionManager selector = CreateSelector(records, odd);
 
 			selector.SelectOnly(2, 6);
@@ -116,7 +116,7 @@
 		[TestMethod]
 		public void GivenLinesBeyondTheRecords_WhenSelectedOnly_ThenNothingIsSelected()
 		{
-			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 10);
+			RecordList records = R.WithLineNumbers(1, 10);
 			SelectionManager selector = CreateSelector(records);
 			selector.SelectOnly(1, 3);
 
@@ -128,8 +128,8 @@
 		[TestMethod]
 		public void GivenALineTheFilterHides_WhenToggled_ThenRecordNotFoundIsThrown()
 		{
-			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 10);
-			ImmutableArray<IRecord> odd = records.Where(r => r.LineNumber % 2 == 1).ToImmutableArray();
+			RecordList records = R.WithLineNumbers(1, 10);
+			RecordList odd = records.Where(r => r.LineNumber % 2 == 1).ToImmutableArray();
 			SelectionManager selector = CreateSelector(records, odd);
 
 			Action toggle = () => selector.Toggle(2);
@@ -138,12 +138,12 @@
 			selector.Selected.Count.Should().Be(0);
 		}
 
-		private static SelectionManager CreateSelector(ImmutableArray<IRecord> records)
+		private static SelectionManager CreateSelector(RecordList records)
 		{
 			return CreateSelector(records, records);
 		}
 
-		private static SelectionManager CreateSelector(ImmutableArray<IRecord> records, ImmutableArray<IRecord> visibleRecords)
+		private static SelectionManager CreateSelector(RecordList records, RecordList visibleRecords)
 		{
 			var state = new RecordState();
 			var navigationManager = new NavigationManager(null, null, visibleRecords, null, state);

@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.Data;
@@ -75,8 +74,8 @@
 		ISelect Unselect(IRecord record);
 		ISelect Unselect(IList<IRecord> records);
 		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType);
-		ImmutableArray<IRecord> ClearAll();
-		ImmutableArray<IRecord> GetSelected();
+		RecordList ClearAll();
+		RecordList GetSelected();
 		void ToggleIsPinned();
 
 		/// <summary>

@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
-	using System.Collections.Immutable;
 	using System.Globalization;
 	using System.IO;
 	using System.Text;
@@ -42,7 +41,7 @@
 			_destinationFilePath = destinationFilePath;
 		}
 
-		public void Write(ImmutableArray<IRecord> records)
+		public void Write(RecordList records)
 		{
 			if (string.IsNullOrWhiteSpace(_destinationFilePath))
 			{
@@ -86,7 +85,7 @@
 			}
 		}
 
-		private void SaveAsRaw(ImmutableArray<IRecord> records)
+		private void SaveAsRaw(RecordList records)
 		{
 			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))
 			{
@@ -97,7 +96,7 @@
 			}
 		}
 
-		private void SaveAsTsv(ImmutableArray<IRecord> records)
+		private void SaveAsTsv(RecordList records)
 		{
 			DateTime? previouslyCreatedAt = null;
 			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))

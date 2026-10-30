@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 
 	public class SidecarData
 	{
-		public ImmutableArray<IRecord> Records { get; set; }
+		public RecordList Records { get; set; }
 
 		/// <summary>
 		/// The comments and pins, by line number.

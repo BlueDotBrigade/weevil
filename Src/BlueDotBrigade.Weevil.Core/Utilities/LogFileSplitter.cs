@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Utilities
 {
-	using System.Collections.Immutable;
 	using System.IO;
 	using System.Text;
 	using Data;
@@ -20,7 +19,7 @@
 			_outputFileFormat = Path.GetFileNameWithoutExtension(sourceFilePath) + "-{0:00}.log";
 		}
 
-		public void Run(ImmutableArray<IRecord> records)
+		public void Run(RecordList records)
 		{
 			if (string.IsNullOrWhiteSpace(_sourceFilePath))
 			{

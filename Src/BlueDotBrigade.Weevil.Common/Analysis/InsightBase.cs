@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	public abstract class InsightBase : IInsight
@@ -19,7 +18,7 @@
 			this.MetricUnit = metricUnit ?? throw new ArgumentNullException(nameof(metricUnit));
 			this.MetricValue = _defaultMetricValue;
 			this.Details = _defaultDetails;
-			this.RelatedRecords = ImmutableArray<IRecord>.Empty;
+			this.RelatedRecords = RecordList.Empty;
 		}
 
 		public string Title { get; }
@@ -27,18 +26,18 @@
 		public string MetricUnit { get; }
 		public string Details { get; protected set; }
 		public bool IsAttentionRequired { get; protected set; }
-		public ImmutableArray<IRecord> RelatedRecords { get; protected set; }
+		public RecordList RelatedRecords { get; protected set; }
 
-		public void Refresh(ImmutableArray<IRecord> records)
+		public void Refresh(RecordList records)
 		{
 			this.IsAttentionRequired = false;
 			this.MetricValue = _defaultMetricValue;
 			this.Details = _defaultDetails;
-			this.RelatedRecords = ImmutableArray<IRecord>.Empty;
+			this.RelatedRecords = RecordList.Empty;
 
 			OnRefresh(records);
 		}
 
-		protected abstract void OnRefresh(ImmutableArray<IRecord> records);
+		protected abstract void OnRefresh(RecordList records);
 	}
 }

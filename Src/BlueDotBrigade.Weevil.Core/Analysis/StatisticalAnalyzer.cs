@@ -61,7 +61,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		public string DisplayName => "Statistics";
 
-		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var timestamps = new List<DateTime>();
 			var values = new List<double>();

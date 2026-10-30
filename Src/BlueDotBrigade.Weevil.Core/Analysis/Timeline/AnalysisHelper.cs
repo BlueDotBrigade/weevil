@@ -65,7 +65,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		/// Records without timestamps are ignored because they cannot be placed in a deterministic chronological order.
 		/// Records sharing the same timestamp are ordered by <see cref="IRecord.LineNumber"/> to preserve file order.
 		/// </remarks>
-		public static ImmutableArray<IRecord> OrderRecordsForAnalysis(ImmutableArray<IRecord> records, AnalysisOrder analysisOrder)
+		public static RecordList OrderRecordsForAnalysis(RecordList records, AnalysisOrder analysisOrder)
 		{
 			IOrderedEnumerable<IRecord> orderedRecords = analysisOrder == AnalysisOrder.Ascending
 				? records

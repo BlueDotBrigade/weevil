@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Reports
 {
 	using System;
-	using System.Collections.Immutable;
 	using System.Globalization;
 	using System.IO;
 	using System.Text;
@@ -11,10 +10,10 @@
 	{
 		private const string DefaultFileName = @"CommentSummary.tsv";
 
-		private readonly ImmutableArray<IRecord> _records;
+		private readonly RecordList _records;
 		private readonly IRecordState _state;
 
-		public CommentSummaryReport(ImmutableArray<IRecord> records, IRecordState state)
+		public CommentSummaryReport(RecordList records, IRecordState state)
 		{
 			_records = records;
 			_state = state ?? throw new ArgumentNullException(nameof(state));

@@ -50,7 +50,7 @@
 			return _recordParser;
 		}
 
-		public ContextDictionary DetermineContext(ImmutableArray<IRecord> allRecords)
+		public ContextDictionary DetermineContext(RecordList allRecords)
 		{
 			return _context;
 		}
