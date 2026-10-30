@@ -1,4 +1,5 @@
-// Writes 10MillionRecords.zip, the log the performance tests open (#1103). From this folder: dotnet run DroidLogGenerator.cs
+// Writes the log the performance tests open (#1103), once in each encoding they read: 10MillionRecords_UTF8.zip,
+// without a byte order mark, and 10MillionRecords_UTF16LE.zip, with one. From this folder: dotnet run DroidLogGenerator.cs
 //
 // The log tells the story behind Core-FeatureTests' Droid.log at full length. An astromech droid is given an objective,
 // detects threats, is hit by blasters and reboots, while its subsystems report telemetry.
@@ -14,21 +15,30 @@ const int RecordCount = 10_000_000;
 
 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-var zipPath = Path.GetFullPath(Path.Combine(args.Length > 0 ? args[0] : ".", LogName + ".zip"));
-File.Delete(zipPath);
+var folder = args.Length > 0 ? args[0] : ".";
 
-using (ZipArchive zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+Write("UTF8", new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+Write("UTF16LE", new UnicodeEncoding(bigEndian: false, byteOrderMark: true));
+
+void Write(string encodingName, Encoding encoding)
 {
-	ZipArchiveEntry entry = zip.CreateEntry(LogName + ".log", CompressionLevel.SmallestSize);
-	entry.LastWriteTime = new DateTimeOffset(2026, 10, 27, 0, 0, 0, TimeSpan.Zero);
+	var name = $"{LogName}_{encodingName}";
+	var zipPath = Path.GetFullPath(Path.Combine(folder, name + ".zip"));
+	File.Delete(zipPath);
 
-	using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), bufferSize: 1 << 20) { NewLine = "\r\n" };
-	var droid = new Droid(writer);
-	Story.Tell(droid, RecordCount);
-	Console.WriteLine($"Wrote {droid.RecordCount:N0} records, ending {droid.Now:yyyy-MM-dd HH:mm}.");
+	using (ZipArchive zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+	{
+		ZipArchiveEntry entry = zip.CreateEntry(name + ".log", CompressionLevel.SmallestSize);
+		entry.LastWriteTime = new DateTimeOffset(2026, 10, 27, 0, 0, 0, TimeSpan.Zero);
+
+		using var writer = new StreamWriter(entry.Open(), encoding, bufferSize: 1 << 20) { NewLine = "\r\n" };
+		var droid = new Droid(writer);
+		Story.Tell(droid, RecordCount);
+		Console.WriteLine($"Wrote {droid.RecordCount:N0} records, ending {droid.Now:yyyy-MM-dd HH:mm}.");
+	}
+
+	Console.WriteLine($"Saved {zipPath} ({new FileInfo(zipPath).Length / 1_000_000.0:N1} MB).");
 }
-
-Console.WriteLine($"Saved {zipPath} ({new FileInfo(zipPath).Length / 1_000_000.0:N1} MB).");
 
 static class Severity
 {

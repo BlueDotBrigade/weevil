@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Test data such as 10MillionRecords.zip is stored in Git LFS, and DatenLokator unzips it when the tests start (#1127).
+      # Test data such as 10MillionRecords_UTF8.zip is stored in Git LFS, and DatenLokator unzips it when the tests start (#1127).
       # The cache downloads each LFS file once, not on every build, because downloads count against the LFS bandwidth.
       - name: List Git LFS files
         shell: bash
@@ -62,7 +62,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Test data such as 10MillionRecords.zip is stored in Git LFS, and DatenLokator unzips it when the tests start (#1127).
+      # Test data such as 10MillionRecords_UTF8.zip is stored in Git LFS, and DatenLokator unzips it when the tests start (#1127).
       # The cache downloads each LFS file once, not on every build, because downloads count against the LFS bandwidth.
       - name: List Git LFS files
         shell: bash
