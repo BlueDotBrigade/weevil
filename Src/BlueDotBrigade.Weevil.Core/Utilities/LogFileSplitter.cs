@@ -20,7 +20,7 @@
 			_outputFileFormat = Path.GetFileNameWithoutExtension(sourceFilePath) + "-{0:00}.log";
 		}
 
-		public void Run(ImmutableArray<IRecord> records)
+		public void Run(RecordList records)
 		{
 			if (string.IsNullOrWhiteSpace(_sourceFilePath))
 			{

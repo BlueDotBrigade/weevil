@@ -35,7 +35,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		/// Extracts key/value pairs defined by regular expression "groups", and then adds them to the records' comments.
 		/// </summary>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var flaggedLineNumbers = new HashSet<int>();
 

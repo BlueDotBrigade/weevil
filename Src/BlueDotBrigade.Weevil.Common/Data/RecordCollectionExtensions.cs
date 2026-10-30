@@ -11,7 +11,7 @@
 	{
 		private const int AttemptCount = 16;
 
-		private static DateTime EstimateFirstTimestamp(ImmutableArray<IRecord> sourceRecords)
+		private static DateTime EstimateFirstTimestamp(RecordList sourceRecords)
 		{
 			var result = Record.CreationTimeUnknown;
 
@@ -31,7 +31,7 @@
 			return result;
 		}
 
-		private static DateTime EstimateLastTimestamp(ImmutableArray<IRecord> sourceRecords)
+		private static DateTime EstimateLastTimestamp(RecordList sourceRecords)
 		{
 			var result = Record.CreationTimeUnknown;
 
@@ -104,7 +104,7 @@
 		/// <remarks>
 		/// This method is faster than a sequential search.
 		/// </remarks>
-		public static int IndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
+		public static int IndexOfLineNumber(this RecordList sourceRecords, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			return RecordSearch.IndexOfLineNumber(sourceRecords, lineNumber, searchType);
 		}
@@ -119,7 +119,7 @@
 		/// <remarks>
 		/// This method is faster than a sequential search.
 		/// </remarks>
-		public static bool TryIndexOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
+		public static bool TryIndexOfLineNumber(this RecordList sourceRecords, int lineNumber, out int index)
 		{
 			return RecordSearch.TryIndexOfLineNumber(sourceRecords, lineNumber, out index);
 		}
@@ -135,7 +135,7 @@
 		/// This method is faster than a sequential search.
 		/// </remarks>
 		/// <exception cref="RecordNotFoundException"/>
-		public static IRecord RecordAtLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber)
+		public static IRecord RecordAtLineNumber(this RecordList sourceRecords, int lineNumber)
 		{
 			IRecord result = Record.Dummy;
 
@@ -161,7 +161,7 @@
 		/// <remarks>
 		/// This method is faster than a sequential search.
 		/// </remarks>
-		public static bool TryRecordOfLineNumber(this ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
+		public static bool TryRecordOfLineNumber(this RecordList sourceRecords, int lineNumber, out IRecord result)
 		{
 			return RecordSearch.TryRecordOfLineNumber(sourceRecords, lineNumber, out result);
 		}
@@ -189,12 +189,12 @@
 		/// <remarks>
 		/// This method is faster than a sequential search.
 		/// </remarks>
-		public static int IndexOfCreatedAt(this ImmutableArray<IRecord> sourceRecords, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
+		public static int IndexOfCreatedAt(this RecordList sourceRecords, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			return RecordSearch.IndexOfCreatedAt(sourceRecords, createdAt, searchType);
 		}
 
-		public static IRecord GetFirstCreatedAt(this ImmutableArray<IRecord> sourceRecords)
+		public static IRecord GetFirstCreatedAt(this RecordList sourceRecords)
 		{
 			IRecord result = Record.Dummy;
 
@@ -213,7 +213,7 @@
 		/// <summary>
 		/// Returns a reference to the first result.
 		/// </summary>
-		public static IRecord First(this ImmutableArray<IRecord> sourceRecords)
+		public static IRecord First(this RecordList sourceRecords)
 		{
 			return sourceRecords[0];
 		}
@@ -221,12 +221,12 @@
 		/// <summary>
 		/// Returns a reference to the last result.
 		/// </summary>
-		public static IRecord Last(this ImmutableArray<IRecord> sourceRecords)
+		public static IRecord Last(this RecordList sourceRecords)
 		{
 			return sourceRecords[sourceRecords.Length - 1];
 		}
 
-		public static (DateTime From, DateTime To) GetRange(this ImmutableArray<IRecord> sourceRecords)
+		public static (DateTime From, DateTime To) GetRange(this RecordList sourceRecords)
 		{
 			var from = Record.CreationTimeUnknown;
 			var to = Record.CreationTimeUnknown;
@@ -248,7 +248,7 @@
 			return (from, to);
 		}
 
-		public static (DateTime From, DateTime To) GetEstimatedRange(this ImmutableArray<IRecord> sourceRecords)
+		public static (DateTime From, DateTime To) GetEstimatedRange(this RecordList sourceRecords)
 		{
 			var from = Record.CreationTimeUnknown;
 			var to = Record.CreationTimeUnknown;
@@ -280,7 +280,7 @@
 		/// Returns the <see cref="Data.Record"/> that matches the search criteria.
 		/// </returns>
 		/// <exception cref="RecordNotFoundException"/>
-		public static int GoToPrevious(this ImmutableArray<IRecord> sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
+		public static int GoToPrevious(this RecordList sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
 		{
 			const int UnknownActiveRecord = -1;
 
@@ -323,7 +323,7 @@
 		/// Returns the <see cref="Data.Record"/> that matches the search criteria.
 		/// </returns>
 		/// <exception cref="RecordNotFoundException"/>
-		public static int GoToNext(this ImmutableArray<IRecord> sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
+		public static int GoToNext(this RecordList sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
 		{
 			const int UnknownActiveRecord = -1;
 
@@ -356,7 +356,7 @@
 			}
 		}
 
-		public static IEnumerable<IRecord> GetSectionRecords(this ImmutableArray<IRecord> records, ISection section, ITableOfContents tableOfContent)
+		public static IEnumerable<IRecord> GetSectionRecords(this RecordList records, ISection section, ITableOfContents tableOfContent)
 		{
 			var firstLineNumber = section.LineNumber;
 

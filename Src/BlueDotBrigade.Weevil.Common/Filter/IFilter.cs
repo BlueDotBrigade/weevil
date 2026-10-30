@@ -6,7 +6,7 @@
 
 	public interface IFilter : IFilterTraits, IFilterBehaviors
 	{
-		ImmutableArray<IRecord> Results { get; }
+		RecordList Results { get; }
 
 		/// <summary>
 		/// The elapsed times of <see cref="Results"/>, which each filter replaces (#1016). An aborted filter keeps the previous ones.

@@ -7,6 +7,6 @@
 	{
 		bool Load();
 
-		void Save(bool deleteBackup, ImmutableArray<IRecord> allRecords);
+		void Save(bool deleteBackup, RecordList allRecords);
 	}
 }

@@ -18,9 +18,9 @@ namespace BlueDotBrigade.Weevil.Collections
 	internal sealed class SelectedRecords : IDictionary<int, IRecord>
 	{
 		private readonly PositionRanges _selection;
-		private readonly ImmutableArray<IRecord> _results;
+		private readonly RecordList _results;
 
-		public SelectedRecords(PositionRanges selection, ImmutableArray<IRecord> results)
+		public SelectedRecords(PositionRanges selection, RecordList results)
 		{
 			_selection = selection;
 			_results = results;

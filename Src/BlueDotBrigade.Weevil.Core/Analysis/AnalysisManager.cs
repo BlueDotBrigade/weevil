@@ -51,7 +51,7 @@
 		/// </remarks>
 		public int FlagOnly(IEnumerable<int> lineNumbers)
 		{
-			ImmutableArray<Data.IRecord> records = _coreEngine.Records;
+			RecordList records = _coreEngine.Records;
 
 			// A binary search for each line: there are few, and the records are in line order.
 			int[] inMemory = lineNumbers
@@ -66,7 +66,7 @@
 
 		public void RemoveComments(bool clearAll)
 		{
-			ImmutableArray<Data.IRecord> records = clearAll ? _coreEngine.Records : _coreEngine.Selector.GetSelected();
+			RecordList records = clearAll ? _coreEngine.Records : _coreEngine.Selector.GetSelected();
 			AnnotationStore annotations = _coreEngine.Session.Annotations;
 
 			// Any text, so a comment of white space alone is removed too.
@@ -161,7 +161,7 @@
 
 		public Results Analyze(string analyzerKey, IUserDialog userDialog)
 		{
-			ImmutableArray<IRecord> records = _coreEngine.Selector.HasSelectionPeriod
+			RecordList records = _coreEngine.Selector.HasSelectionPeriod
 				? _coreEngine.Selector.GetSelected()
 				: _coreEngine.Filter.Results;
 
@@ -194,7 +194,7 @@
 		/// <summary>
 		/// Returns the line numbers of the records that match, searched in parallel.
 		/// </summary>
-		private static int[] FindLines(ImmutableArray<Data.IRecord> records, Func<int, bool> isMatch)
+		private static int[] FindLines(RecordList records, Func<int, bool> isMatch)
 		{
 			return records
 				.AsParallel()

@@ -37,7 +37,7 @@
 		private readonly RecordState _state;
 
 		private PositionRanges _selection;
-		private ImmutableArray<IRecord> _visibleRecords;
+		private RecordList _visibleRecords;
 		private TimeSpan _selectionPeriod;
 		private int _anchorLineNumber;
 		#endregion
@@ -45,7 +45,7 @@
 		#region Object Lifetime
 		public SelectionManager(
 			RecordScope scope,
-			ImmutableArray<IRecord> visibleRecords,
+			RecordList visibleRecords,
 			NavigationManager navigationManager,
 			Encoding sourceFileEncoding,
 			RecordState state,
@@ -93,7 +93,7 @@
 
 		#region Private Methods
 
-		private static TimeSpan CalculateTimePeriod(PositionRanges selection, ImmutableArray<IRecord> visibleRecords)
+		private static TimeSpan CalculateTimePeriod(PositionRanges selection, RecordList visibleRecords)
 		{
 			TimeSpan timePeriod = ElapsedTimes.Unknown;
 
@@ -117,12 +117,12 @@
 		/// <summary>
 		/// Returns the record's position in the filter results, or -1 when the filter hides it.
 		/// </summary>
-		private static int FindPosition(ImmutableArray<IRecord> visibleRecords, IRecord record)
+		private static int FindPosition(RecordList visibleRecords, IRecord record)
 		{
 			return FindPosition(visibleRecords, record.LineNumber);
 		}
 
-		private static int FindPosition(ImmutableArray<IRecord> visibleRecords, int lineNumber)
+		private static int FindPosition(RecordList visibleRecords, int lineNumber)
 		{
 			var position = PositionRanges.LowerBound(visibleRecords, lineNumber, 0);
 
@@ -167,7 +167,7 @@
 			}
 		}
 
-		private static ImmutableArray<IRecord> GetRecords(PositionRanges selection, ImmutableArray<IRecord> visibleRecords)
+		private static RecordList GetRecords(PositionRanges selection, RecordList visibleRecords)
 		{
 			var records = new IRecord[selection.Count];
 			var index = 0;
@@ -190,7 +190,7 @@
 		/// <remarks>
 		/// Called after each filter, on the filter's thread. An aborted filter never gets here, so it keeps the selection.
 		/// </remarks>
-		internal void KeepRecordsShownBy(ImmutableArray<IRecord> visibleRecords)
+		internal void KeepRecordsShownBy(RecordList visibleRecords)
 		{
 			int before;
 			int after;
@@ -224,7 +224,7 @@
 		public ISelect Select(int lineNumber)
 		{
 			// One read: a filter may replace the results meanwhile.
-			ImmutableArray<IRecord> visibleRecords = _visibleRecords;
+			RecordList visibleRecords = _visibleRecords;
 			var index = visibleRecords.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
@@ -288,7 +288,7 @@
 		public ISelect Unselect(int lineNumber)
 		{
 			// One read: a filter may replace the results meanwhile.
-			ImmutableArray<IRecord> visibleRecords = _visibleRecords;
+			RecordList visibleRecords = _visibleRecords;
 			var index = visibleRecords.IndexOfLineNumber(lineNumber);
 
 			if (index >= 0)
@@ -333,7 +333,7 @@
 
 		public ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType)
 		{
-			ImmutableArray<IRecord> sortedRecords = _selection.Count > 1
+			RecordList sortedRecords = _selection.Count > 1
 				? GetSelected()
 				: _scope.Records.OrderBy(x => x.LineNumber).ToImmutableArray();
 
@@ -359,7 +359,7 @@
 		internal Snapshot TakeSnapshot()
 		{
 			PositionRanges selection;
-			ImmutableArray<IRecord> results;
+			RecordList results;
 			int anchorLineNumber;
 
 			lock (_selectionPadlock)
@@ -512,7 +512,7 @@
 		/// <param name="selected">The records selected before the Clear.</param>
 		/// <param name="kept">The records the Clear keeps, which its filter then shows.</param>
 		/// <returns>The last selected record kept, or <see cref="Record.Dummy"/> when none is.</returns>
-		internal IRecord Narrow(ImmutableArray<IRecord> selected, ImmutableArray<IRecord> kept)
+		internal IRecord Narrow(RecordList selected, RecordList kept)
 		{
 			IRecord lastKept = Record.Dummy;
 			var positions = new List<int>();
@@ -539,9 +539,9 @@
 			return lastKept;
 		}
 
-		public ImmutableArray<IRecord> ClearAll()
+		public RecordList ClearAll()
 		{
-			ImmutableArray<IRecord> clearedRecords;
+			RecordList clearedRecords;
 
 			lock (_selectionPadlock)
 			{
@@ -557,9 +557,9 @@
 			return clearedRecords;
 		}
 
-		public ImmutableArray<IRecord> GetSelected()
+		public RecordList GetSelected()
 		{
-			ImmutableArray<IRecord> selectedRecords;
+			RecordList selectedRecords;
 
 			lock (_selectionPadlock)
 			{
@@ -575,7 +575,7 @@
 
 		public void ToggleIsPinned()
 		{
-			ImmutableArray<IRecord> selectedRecords = GetSelected();
+			RecordList selectedRecords = GetSelected();
 
 			if (selectedRecords.Length > 0)
 			{
@@ -601,7 +601,7 @@
 			// White space alone is no comment, so it is not stored: pasted onto every record, it would keep an entry for each line.
 			comment = string.IsNullOrWhiteSpace(comment) ? string.Empty : comment;
 
-			ImmutableArray<IRecord> selectedRecords = GetSelected();
+			RecordList selectedRecords = GetSelected();
 
 			// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
 			int[] lineNumbers = selectedRecords

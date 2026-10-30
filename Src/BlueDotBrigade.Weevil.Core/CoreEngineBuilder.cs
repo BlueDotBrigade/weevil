@@ -170,7 +170,7 @@
 				LineIndex lineIndex;
 
 				var maxRecords = _maxRecords;
-				ImmutableArray<IRecord> records;
+				RecordList records;
 
 				var knownContext = new ContextDictionary();
 
@@ -342,7 +342,7 @@
 				return (int)System.Math.Min(linesBeforeStart + MultilineRecordParser.MaximumLinesToSearch, int.MaxValue);
 			}
 
-			private ContextDictionary GetContext(ICoreExtension extension, ContextDictionary knownContext, ImmutableArray<IRecord> records)
+			private ContextDictionary GetContext(ICoreExtension extension, ContextDictionary knownContext, RecordList records)
 			{
 				ContextDictionary result = ContextDictionary.Empty;
 

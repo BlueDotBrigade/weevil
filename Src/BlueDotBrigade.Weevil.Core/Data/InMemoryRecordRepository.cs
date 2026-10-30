@@ -12,9 +12,9 @@
 		private const int OperationRunning = 1;
 
 		#region Fields
-		private readonly ImmutableArray<IRecord> _allRecords;
-		private readonly ImmutableArray<IRecord> _visibleRecords;
-		private readonly ImmutableArray<IRecord> _selectedRecords;
+		private readonly RecordList _allRecords;
+		private readonly RecordList _visibleRecords;
+		private readonly RecordList _selectedRecords;
 
 		private readonly ImmutableArray<Region> _regions;
 
@@ -33,9 +33,9 @@
 		/// This operation will not impact records that have already been persisted to disk.
 		/// </remarks>
 		public InMemoryRecordRepository(
-			ImmutableArray<IRecord> allRecords,
-			ImmutableArray<IRecord> visibleRecords,
-			ImmutableArray<IRecord> selectedRecords,
+			RecordList allRecords,
+			RecordList visibleRecords,
+			RecordList selectedRecords,
 			ClearOperation clearOperation,
 			ImmutableArray<Region> regions)
 		{
@@ -64,7 +64,7 @@
 		///
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearBeforeSelected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
+		private static IList<IRecord> ClearBeforeSelected(RecordList records, RecordList selectedRecords)
 		{
 			var results = new List<IRecord>();
 
@@ -98,7 +98,7 @@
 		///
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearAfterSelected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
+		private static IList<IRecord> ClearAfterSelected(RecordList records, RecordList selectedRecords)
 		{
 			var results = new List<IRecord>();
 
@@ -122,7 +122,7 @@
 			return results;
 		}
 
-		private static IList<IRecord> ClearBeforeAndAfterSelected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
+		private static IList<IRecord> ClearBeforeAndAfterSelected(RecordList records, RecordList selectedRecords)
 		{
 			IList<IRecord> headlessResults = ClearBeforeSelected(records, selectedRecords);
 
@@ -131,7 +131,7 @@
 			return ClearAfterSelected(immutableHeadlessResults, selectedRecords);
 		}
 
-		private static IList<IRecord> ClearBetweenSelected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
+		private static IList<IRecord> ClearBetweenSelected(RecordList records, RecordList selectedRecords)
 		{
 			var results = new List<IRecord>();
 
@@ -160,7 +160,7 @@
 		/// <remarks>
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearSelected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
+		private static IList<IRecord> ClearSelected(RecordList records, RecordList selectedRecords)
 		{
 			var results = new IRecord[records.Length - selectedRecords.Length];
 
@@ -192,12 +192,12 @@
 		/// 
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearUnselected(ImmutableArray<IRecord> records, ImmutableArray<IRecord> selectedRecords)
+		private static IList<IRecord> ClearUnselected(RecordList records, RecordList selectedRecords)
 		{
 			return selectedRecords;
 		}
 
-		private static IList<IRecord> ClearBeyondRegions(ImmutableArray<IRecord> allRecords, ImmutableArray<Region> regions)
+		private static IList<IRecord> ClearBeyondRegions(RecordList allRecords, ImmutableArray<Region> regions)
 		{
 			// Have any regions of interest been defined?
 			// ... If not, then return everything.
@@ -231,14 +231,14 @@
 			throw new NotImplementedException();
 		}
 
-		public ImmutableArray<IRecord> Get(int maxRecords)
+		public RecordList Get(int maxRecords)
 		{
 			if (System.Threading.Interlocked.Exchange(ref _operationState, OperationRunning) == OperationRunning)
 			{
 				throw new InvalidOperationException("An operation is already in progress.");
 			}
 
-			IList<IRecord> visibleRecords = ImmutableArray<IRecord>.Empty;
+			IList<IRecord> visibleRecords = RecordList.Empty;
 
 			try
 			{
@@ -317,12 +317,12 @@
 			return visibleRecords.ToImmutableArray();
 		}
 
-		public ImmutableArray<IRecord> Get(Range range, int maximumCount)
+		public RecordList Get(Range range, int maximumCount)
 		{
 			throw new NotImplementedException();
 		}
 
-		public ImmutableArray<IRecord> GetAll()
+		public RecordList GetAll()
 		{
 			return Get(_allRecords.Length);
 		}

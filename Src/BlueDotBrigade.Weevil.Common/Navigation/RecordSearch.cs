@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Navigation.Comparers;
@@ -27,7 +28,7 @@
 		/// than any of the elements in array, a negative number which is the bitwise
 		/// complement of (the index of the last element plus 1).</para>
 		/// </returns>
-		public static int IndexOfLineNumber(ImmutableArray<IRecord> records, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
+		public static int IndexOfLineNumber(RecordList records, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			var desiredRecord = new Record(
 				lineNumber,
@@ -38,7 +39,7 @@
 			return IndexOf(records, desiredRecord, new LineNumberComparer(), searchType);
 		}
 
-		public static int IndexOfCreatedAt(ImmutableArray<IRecord> records, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
+		public static int IndexOfCreatedAt(RecordList records, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			var desiredRecord = new Record(
 				0,
@@ -57,7 +58,7 @@
 		/// <param name="comparer">A comparer that returns the difference between the <paramref name="desiredRecord"/>, and any given <paramref name="records"/> instance.</param>
 		/// <param name="searchType">Indicates what is considered an acceptable result.</param>
 		/// <exception cref="RecordNotFoundException"/>
-		private static int IndexOf(ImmutableArray<IRecord> records, IRecord desiredRecord, MagnitudeComparer comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
+		private static int IndexOf(RecordList records, IRecord desiredRecord, MagnitudeComparer comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
 			if (desiredRecord == null)
 			{
@@ -74,7 +75,7 @@
 				throw new RecordNotFoundException($"Unable to find record. LineNumber={desiredRecord.LineNumber}");
 			}
 
-			var index = records.BinarySearch(desiredRecord, comparer);
+			var index = BinarySearch(records, desiredRecord, comparer);
 
 			if (searchType == RecordSearchType.ExactOrPrevious)
 			{
@@ -149,7 +150,7 @@
 		/// <param name="lineNumber">The value to search for.</param>
 		/// <param name="index">The position of the record in the <paramref name="sourceRecords"/> with the corresponding <paramref name="lineNumber"/>.</param>
 		/// <returns>True is returned if the collection has a matching line number.</returns>
-		public static bool TryIndexOfLineNumber(ImmutableArray<IRecord> sourceRecords, int lineNumber, out int index)
+		public static bool TryIndexOfLineNumber(RecordList sourceRecords, int lineNumber, out int index)
 		{
 			var desiredRecord = new Record(
 				lineNumber,
@@ -157,7 +158,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for line number: {lineNumber}");
 
-			index = sourceRecords.BinarySearch(desiredRecord, new LineNumberComparer());
+			index = BinarySearch(sourceRecords, desiredRecord, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			return wasFound;
@@ -170,7 +171,7 @@
 		/// <param name="lineNumber">The line number to search for.</param>
 		/// <param name="result">Returns the matching result, or <see cref="Record.Dummy"/></param>
 		/// <returns>Returns <see lang="True"/> if a record with a matching line number is found.</returns>
-		public static bool TryRecordOfLineNumber(ImmutableArray<IRecord> sourceRecords, int lineNumber, out IRecord result)
+		public static bool TryRecordOfLineNumber(RecordList sourceRecords, int lineNumber, out IRecord result)
 		{
 			result = Record.Dummy;
 
@@ -180,7 +181,7 @@
 				SeverityType.Debug,
 				$"This record is used to facilitate binary searching for line number: {lineNumber}");
 
-			var index = sourceRecords.BinarySearch(desiredRecord, new LineNumberComparer());
+			var index = BinarySearch(sourceRecords, desiredRecord, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			if (wasFound)
@@ -189,6 +190,38 @@
 			}
 
 			return wasFound;
+		}
+
+		/// <summary>
+		/// Searches records ordered by <paramref name="comparer"/>, as <see cref="ImmutableArray{T}.BinarySearch(T, IComparer{T})"/> does:
+		/// returns the position of a match, or the bitwise complement of where <paramref name="value"/> would go (#1136).
+		/// </summary>
+		private static int BinarySearch(RecordList records, IRecord value, IComparer<IRecord> comparer)
+		{
+			var low = 0;
+			var high = records.Count - 1;
+
+			while (low <= high)
+			{
+				var middle = low + ((high - low) >> 1);
+				var comparison = comparer.Compare(records[middle], value);
+
+				if (comparison == 0)
+				{
+					return middle;
+				}
+
+				if (comparison < 0)
+				{
+					low = middle + 1;
+				}
+				else
+				{
+					high = middle - 1;
+				}
+			}
+
+			return ~low;
 		}
 	}
 }

@@ -27,7 +27,7 @@
 		public NavigationManager(
 			string sourceFilePath,
 			ICoreExtension coreExtension,
-			ImmutableArray<IRecord> allRecords,
+			RecordList allRecords,
 			Session session,
 			IRecordState state,
 			ITelemetryMetricRecorder telemetryRecorder = null)
@@ -72,7 +72,7 @@
 		{
 			get
 			{
-				ImmutableArray<IRecord> dataSource = _activeRecord.DataSource;
+				RecordList dataSource = _activeRecord.DataSource;
 				var index = _activeRecord.Index;
 
 				return index >= 0 && index < dataSource.Length ? dataSource[index].LineNumber : -1;
@@ -87,7 +87,7 @@
 			_activeRecord.SetActiveIndex(ActiveRecord.UnknownIndex);
 		}
 
-		internal void UpdateDataSource(ImmutableArray<IRecord> filterResults)
+		internal void UpdateDataSource(RecordList filterResults)
 		{
 			_activeRecord.UpdateDataSource(filterResults);
 		}

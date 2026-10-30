@@ -15,7 +15,7 @@
 			// nothing to do
 		}
 
-		protected override void OnRefresh(ImmutableArray<IRecord> records)
+		protected override void OnRefresh(RecordList records)
 		{
 			var metrics = new TemporalAnomalyMetrics(TimeSpan.Zero);
 

@@ -9,7 +9,7 @@
 	{
 		public const int UnknownIndex = -1;
 
-		private ImmutableArray<IRecord> _dataSource;
+		private RecordList _dataSource;
 
 		private int _activeIndex;
 		private IRecord _activeRecord;
@@ -19,12 +19,11 @@
 			// nothing to do
 		}
 
-		public ActiveRecord(ImmutableArray<IRecord> dataSource)
+		public ActiveRecord(RecordList dataSource)
 		{
-			if (dataSource.IsDefault)
+			if (dataSource is null)
 			{
-				throw new ArgumentException(
-					"Immutable array should be initialized - consider calling Create() method.", nameof(dataSource));
+				throw new ArgumentNullException(nameof(dataSource));
 			}
 
 			_dataSource = dataSource;
@@ -35,7 +34,7 @@
 		public int Index => _activeIndex;
 		public IRecord Record => _activeRecord;
 
-		public ImmutableArray<IRecord> DataSource => _dataSource;
+		public RecordList DataSource => _dataSource;
 
 		/// <summary>
 		/// Saves the <paramref name="index"/> of the record that is currently active.
@@ -72,16 +71,15 @@
 			return _activeRecord;
 		}
 
-		public void UpdateDataSource(ImmutableArray<IRecord> newRecordCollection)
+		public void UpdateDataSource(RecordList newRecordCollection)
 		{
-			if (newRecordCollection.IsDefault)
+			if (newRecordCollection is null)
 			{
 				_activeIndex = UnknownIndex;
 				_activeRecord = Data.Record.Dummy;
-				_dataSource = ImmutableArray<IRecord>.Empty;
+				_dataSource = RecordList.Empty;
 
-				throw new ArgumentException(
-					"Immutable array should be initialized - consider calling Create() method.", nameof(newRecordCollection));
+				throw new ArgumentNullException(nameof(newRecordCollection));
 			}
 
 			// Is collection empty?

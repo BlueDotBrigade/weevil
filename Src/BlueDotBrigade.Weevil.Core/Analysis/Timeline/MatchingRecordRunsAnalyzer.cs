@@ -33,7 +33,7 @@
 
 		public string DisplayName => "Matching Record Runs";
 
-		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
         {
             var flaggedRecords = 0;
 			var blockCount = 0;

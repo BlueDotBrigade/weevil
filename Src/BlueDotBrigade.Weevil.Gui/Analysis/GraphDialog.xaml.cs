@@ -14,7 +14,7 @@
 	{
 		private readonly GraphViewModel _viewModel;
 
-		public GraphDialog(ImmutableArray<IRecord> records, string regExPattern, string windowTitle, string sourceFilePath)
+		public GraphDialog(RecordList records, string regExPattern, string windowTitle, string sourceFilePath)
 		{
 			LiveCharts.Configure(
 				settings => settings

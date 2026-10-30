@@ -28,7 +28,7 @@
 		/// Determines if the sidecar file path is in a temporary directory.
 		/// </summary>
 		public void Load(
-			ImmutableArray<IRecord> allRecords,
+			RecordList allRecords,
 			AnnotationStore annotations,
 			out ContextDictionary context,
 			out string sourceFileRemarks,

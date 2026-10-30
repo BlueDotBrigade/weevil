@@ -6,11 +6,11 @@
 
 	public class ResultsChangedEventArgs : EventArgs
 	{
-		public ResultsChangedEventArgs(ImmutableArray<IRecord> records)
+		public ResultsChangedEventArgs(RecordList records)
 		{
 			this.Records = records;
 		}
 
-		public ImmutableArray<IRecord> Records { get; }
+		public RecordList Records { get; }
 	}
 }

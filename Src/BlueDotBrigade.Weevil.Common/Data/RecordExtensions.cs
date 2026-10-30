@@ -10,7 +10,7 @@
 		/// <param name="record"></param>
 		/// <param name="records"></param>
 		/// <returns></returns>
-		public static int ToIndexUsing(this IRecord record, ImmutableArray<IRecord> records)
+		public static int ToIndexUsing(this IRecord record, RecordList records)
 		{
 			var index = records.IndexOfLineNumber(record.LineNumber);
 			return index;

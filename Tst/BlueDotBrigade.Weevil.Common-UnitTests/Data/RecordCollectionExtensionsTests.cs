@@ -14,7 +14,7 @@
 		const int DefaultLevel = 1;
 		const int DefaultOffset = 0;
 
-		private ImmutableArray<IRecord> GetRecords(IList<DateTime> timestamps)
+		private RecordList GetRecords(IList<DateTime> timestamps)
 		{
 			var records = new List<IRecord>();
 
@@ -35,7 +35,7 @@
 		[TestMethod]
 		public void GetEstimatedRange_NoRecords_ReturnsUnknownCreationTime()
 		{
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			var range = records.GetEstimatedRange();
 
@@ -98,8 +98,7 @@
 
 			const int UnknownStartingPosition = -1;
 
-			var indexOfResult = records
-				.ToImmutableArray()
+			var indexOfResult = ((RecordList)records.ToImmutableArray())
 				.GoToNext(UnknownStartingPosition, record => record.LineNumber > 0);
 
 			records[indexOfResult].LineNumber.Should().Be(10);
@@ -117,8 +116,7 @@
 
 			const int IndexOfFirstRecord = 0;
 
-			var indexOfResult = records
-				.ToImmutableArray()
+			var indexOfResult = ((RecordList)records.ToImmutableArray())
 				.GoToNext(IndexOfFirstRecord, record => record.LineNumber > 0);
 
 			records[indexOfResult].LineNumber.Should().Be(20);
@@ -136,8 +134,7 @@
 
 			const int UnknownStartingPosition = -1;
 
-			var indexOfResult = records
-				.ToImmutableArray()
+			var indexOfResult = ((RecordList)records.ToImmutableArray())
 				.GoToPrevious(UnknownStartingPosition, record => record.LineNumber > 0);
 
 			records[indexOfResult].LineNumber.Should().Be(30);
@@ -155,14 +152,13 @@
 
 			const int IndexOfLastRecord = 2;
 
-			var indexOfResult = records
-				.ToImmutableArray()
+			var indexOfResult = ((RecordList)records.ToImmutableArray())
 				.GoToPrevious(IndexOfLastRecord, record => record.LineNumber > 0);
 
 			records[indexOfResult].LineNumber.Should().Be(20);
 		}
 
-		private ImmutableArray<IRecord> GetRecords(int startAt, int count)
+		private RecordList GetRecords(int startAt, int count)
 		{
 			var now = new DateTime(2000, 12, 30);
 
@@ -219,7 +215,7 @@
 			var toc = new TableOfContents(sections);
 
 			var records = GetRecords(100, 50);
-			var oddRecords = records.Where((record, index) => index % 2 == 1).ToImmutableArray();
+			RecordList oddRecords = records.Where((record, index) => index % 2 == 1).ToImmutableArray();
 
 			var recordsInSection = oddRecords
 				.GetSectionRecords(sections.First(x => x.Name.Equals("Part2")), toc)
@@ -245,7 +241,7 @@
 				R.WithLineNumber(5),
 				null);
 
-			ImmutableArray<IRecord> results = records.Compact(3);
+			RecordList results = records.Compact(3);
 
 			results.Select(r => r.LineNumber).Should().Equal(2, 4, 5);
 		}

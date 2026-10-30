@@ -37,9 +37,9 @@ namespace BlueDotBrigade.Weevil.Data
 		/// Records without a timestamp are skipped: the next record with one is measured from the last record that had one.
 		/// The first record with a timestamp has no elapsed time.
 		/// </remarks>
-		public static ElapsedTimes Calculate(ImmutableArray<IRecord> records)
+		public static ElapsedTimes Calculate(RecordList records)
 		{
-			if (records.IsDefaultOrEmpty)
+			if (records is null || records.IsEmpty)
 			{
 				return None;
 			}

@@ -17,7 +17,7 @@
 
 		IRecordParser GetRecordParser();
 
-		ContextDictionary DetermineContext(ImmutableArray<IRecord> allRecords);
+		ContextDictionary DetermineContext(RecordList allRecords);
 
 		IList<IRecordAnalyzer> GetAnalyzers(ContextDictionary context, ITableOfContents tableOfContents);
 

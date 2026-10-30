@@ -178,9 +178,9 @@ namespace BlueDotBrigade.Weevil.Collections
 		/// </remarks>
 		public static PositionRanges Remap(
 			PositionRanges selection,
-			ImmutableArray<IRecord> oldResults,
-			ImmutableArray<IRecord> newResults,
-			ImmutableArray<IRecord> allRecords)
+			RecordList oldResults,
+			RecordList newResults,
+			RecordList allRecords)
 		{
 			return Remap(selection, position => oldResults[position].LineNumber, newResults, allRecords);
 		}
@@ -196,8 +196,8 @@ namespace BlueDotBrigade.Weevil.Collections
 		public static PositionRanges Remap(
 			PositionRanges selection,
 			ImmutableArray<int> oldLineNumbers,
-			ImmutableArray<IRecord> newResults,
-			ImmutableArray<IRecord> allRecords)
+			RecordList newResults,
+			RecordList allRecords)
 		{
 			return Remap(selection, position => oldLineNumbers[position], newResults, allRecords);
 		}
@@ -205,8 +205,8 @@ namespace BlueDotBrigade.Weevil.Collections
 		private static PositionRanges Remap(
 			PositionRanges selection,
 			Func<int, int> oldLineNumberAt,
-			ImmutableArray<IRecord> newResults,
-			ImmutableArray<IRecord> allRecords)
+			RecordList newResults,
+			RecordList allRecords)
 		{
 			var remapped = new PositionRanges();
 			var searchFrom = 0;
@@ -265,7 +265,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		/// Returns the position of the first record whose line number is at least <paramref name="lineNumber"/>,
 		/// or the length if there is none.
 		/// </summary>
-		internal static int LowerBound(ImmutableArray<IRecord> records, int lineNumber, int from)
+		internal static int LowerBound(RecordList records, int lineNumber, int from)
 		{
 			var low = from;
 			var high = records.Length;

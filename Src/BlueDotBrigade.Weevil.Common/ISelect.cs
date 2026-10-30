@@ -75,8 +75,8 @@
 		ISelect Unselect(IRecord record);
 		ISelect Unselect(IList<IRecord> records);
 		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType);
-		ImmutableArray<IRecord> ClearAll();
-		ImmutableArray<IRecord> GetSelected();
+		RecordList ClearAll();
+		RecordList GetSelected();
 		void ToggleIsPinned();
 
 		/// <summary>

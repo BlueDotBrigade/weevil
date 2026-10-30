@@ -5,6 +5,6 @@
 
 	public interface IWrite
 	{
-		void Write(ImmutableArray<IRecord> records);
+		void Write(RecordList records);
 	}
 }

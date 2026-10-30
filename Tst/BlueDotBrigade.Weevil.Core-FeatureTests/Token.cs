@@ -44,6 +44,6 @@
 			this.ExcludeFilter, 
 			this.Configuration);
 
-		public ImmutableArray<IRecord> Results => Engine.Filter.Results;
+		public RecordList Results => Engine.Filter.Results;
 	}
 }

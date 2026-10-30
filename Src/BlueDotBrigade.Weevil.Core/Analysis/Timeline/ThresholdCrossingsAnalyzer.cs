@@ -29,7 +29,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		public string DisplayName => "Threshold Crossings";
 
-		public Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			var count = 0;
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);

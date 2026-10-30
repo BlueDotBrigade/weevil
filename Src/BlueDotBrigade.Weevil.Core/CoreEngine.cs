@@ -75,7 +75,7 @@
 			ContextDictionary context,
 			SidecarManager sidecarManager,
 			LineIndex lineIndex,
-			ImmutableArray<IRecord> records,
+			RecordList records,
 			Session session,
 			RecordState recordState,
 			ITelemetryMetricRecorder telemetryRecorder,
@@ -197,7 +197,7 @@
 				_context,
 				_sidecarManager,
 				_lineIndex,
-				ImmutableArray<IRecord>.Empty,
+				RecordList.Empty,
 				_session,
 				_recordState,
 				_telemetryRecorder,
@@ -254,7 +254,7 @@
 
 		public IBookmarkManager Bookmarks => _session.Bookmarks;
 
-		public ImmutableArray<IRecord> Records => _scope.Records;
+		public RecordList Records => _scope.Records;
 
 		public int Count => _scope.Records.Length;
 
@@ -312,9 +312,9 @@
 		/// </remarks>
 		internal void Clear(ClearOperation clearOperation)
 		{
-			ImmutableArray<IRecord> selected = _selectionManager.GetSelected();
+			RecordList selected = _selectionManager.GetSelected();
 
-			ImmutableArray<IRecord> kept = new InMemoryRecordRepository(
+			RecordList kept = new InMemoryRecordRepository(
 					_scope.Records,
 					_filterManager.Results,
 					selected,
@@ -418,7 +418,7 @@
 		{
 			if (report == ReportType.CommentSummary)
 			{
-				ImmutableArray<IRecord> filterResults = _filterManager.Results;
+				RecordList filterResults = _filterManager.Results;
 				new CommentSummaryReport(filterResults, _recordState).Generate(destinationFolder);
 			}
 		}

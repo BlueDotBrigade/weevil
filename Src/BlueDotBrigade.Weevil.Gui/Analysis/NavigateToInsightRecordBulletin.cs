@@ -8,7 +8,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 	/// </summary>
 	internal class NavigateToInsightRecordBulletin
 	{
-		public NavigateToInsightRecordBulletin(ImmutableArray<IRecord> relatedRecords)
+		public NavigateToInsightRecordBulletin(RecordList relatedRecords)
 		{
 			this.RelatedRecords = relatedRecords;
 		}
@@ -16,6 +16,6 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		/// <summary>
 		/// All records related to the insight that require user attention.
 		/// </summary>
-		public ImmutableArray<IRecord> RelatedRecords { get; }
+		public RecordList RelatedRecords { get; }
 	}
 }
