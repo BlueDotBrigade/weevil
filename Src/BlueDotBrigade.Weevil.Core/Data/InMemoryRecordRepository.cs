@@ -314,7 +314,8 @@
 				_operationState = OperationInactive;
 			}
 
-			return visibleRecords.ToImmutableArray();
+			// A list kept whole is returned as it is, not copied.
+			return visibleRecords as RecordList ?? visibleRecords.ToImmutableArray();
 		}
 
 		public RecordList Get(Range range, int maximumCount)
