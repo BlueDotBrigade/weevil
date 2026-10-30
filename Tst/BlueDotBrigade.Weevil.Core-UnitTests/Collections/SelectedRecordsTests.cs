@@ -20,8 +20,20 @@ namespace BlueDotBrigade.Weevil.Collections
 			selected.Count.Should().Be(3);
 			selected.Keys.ToArray().Should().Equal(12, 13, 16);
 			selected.Values.Select(r => r.LineNumber).Should().Equal(12, 13, 16);
-			selected.First().Value.Should().BeSameAs(results[1]);
-			selected[16].Should().BeSameAs(results[5]);
+			selected.First().Value.Should().Be(results[1]);
+			selected[16].Should().Be(results[5]);
+		}
+
+		[TestMethod]
+		public void GivenAnotherRecordForASelectedLine_WhenLookedFor_ThenItIsFound()
+		{
+			// Records are equal by line number, so a record created again for a selected line is still selected (#1135).
+			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			var selected = new SelectedRecords(PositionRanges.FromPositions(new List<int> { 1, 2, 5 }), results);
+			IRecord again = R.WithLineNumber(12);
+
+			selected.Values.Contains(again).Should().BeTrue();
+			selected.Contains(new KeyValuePair<int, IRecord>(12, again)).Should().BeTrue();
 		}
 
 		[TestMethod]
