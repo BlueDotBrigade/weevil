@@ -32,7 +32,7 @@ cmp dump-main.txt dump-new.txt
 
 [Timing](Timing/) opens a log, then times nine filters and two Finds. Each figure is the median of three runs after a warm-up run. Build it against each Core as above, without `NEWBUILD`, in Release.
 
-The logs were the 10-million-record log from `Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/.Daten/.Global/10MillionRecords.zip`, and a UTF-16 copy made with `iconv -f UTF-8 -t UTF-16LE` behind a `FF FE` byte order mark. The raw figures are in [Results-2026-10-29.tsv](Timing/Results-2026-10-29.tsv): the first block is one run of each build on each log, and the rest are two more runs on the UTF-16 log in alternating order.
+The logs were the 10-million-record logs in `Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/.Daten/.Global/`: `10MillionRecords_UTF8.zip`, and `10MillionRecords_UTF16LE.zip`, the same text behind a `FF FE` byte order mark. At the time, the UTF-16 copy was made with `iconv -f UTF-8 -t UTF-16LE`, which writes the same bytes. The raw figures are in [Results-2026-10-29.tsv](Timing/Results-2026-10-29.tsv): the first block is one run of each build on each log, and the rest are two more runs on the UTF-16 log in alternating order.
 
 | | UTF-8 log | UTF-16 log (2 GB) |
 |---|---|---|
