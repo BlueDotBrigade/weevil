@@ -70,6 +70,30 @@ namespace BlueDotBrigade.Weevil.Selection
 			this.Context.Engine.Annotations.GetComment(lineNumber).Should().BeEmpty();
 		}
 
+		[Given($"line {X.WholeNumber} is pinned")]
+		public void GivenLineIsPinned(int lineNumber)
+		{
+			this.Context.Engine.Annotations.SetPinned(lineNumber, true);
+		}
+
+		[When("toggling the pins of the selected records")]
+		public void WhenTogglingThePinsOfTheSelectedRecords()
+		{
+			this.Context.Engine.Selector.ToggleIsPinned();
+		}
+
+		[Then($"the record on line {X.WholeNumber} will be pinned")]
+		public void ThenTheRecordOnLineWillBePinned(int lineNumber)
+		{
+			this.Context.Engine.Annotations.IsPinned(lineNumber).Should().BeTrue();
+		}
+
+		[Then($"the record on line {X.WholeNumber} will not be pinned")]
+		public void ThenTheRecordOnLineWillNotBePinned(int lineNumber)
+		{
+			this.Context.Engine.Annotations.IsPinned(lineNumber).Should().BeFalse();
+		}
+
 		[When("reloading the log")]
 		public void WhenReloadingTheLog()
 		{
