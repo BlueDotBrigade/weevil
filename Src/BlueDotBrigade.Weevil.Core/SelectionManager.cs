@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.InteropServices;
 	using System.Text;
 	using Analysis;
 	using BlueDotBrigade.Weevil.Collections;
@@ -178,8 +179,21 @@
 		}
 
 		/// <summary>
-		/// Returns the selected line numbers, read without creating records (#1137).
+		/// Returns the line numbers of the selected positions, read without creating records (#1137).
 		/// </summary>
+		private static int[] GetLineNumbers(PositionRanges selection, RecordList visibleRecords)
+		{
+			var lineNumbers = new int[selection.Count];
+			var index = 0;
+
+			foreach (var position in selection.EnumeratePositions())
+			{
+				lineNumbers[index++] = visibleRecords.GetLineNumber(position);
+			}
+
+			return lineNumbers;
+		}
+
 		private int[] GetSelectedLineNumbers()
 		{
 			PositionRanges selection;
@@ -191,15 +205,7 @@
 				visibleRecords = _visibleRecords;
 			}
 
-			var lineNumbers = new int[selection.Count];
-			var index = 0;
-
-			foreach (var position in selection.EnumeratePositions())
-			{
-				lineNumbers[index++] = visibleRecords.GetLineNumber(position);
-			}
-
-			return lineNumbers;
+			return GetLineNumbers(selection, visibleRecords);
 		}
 		#endregion
 
@@ -392,17 +398,10 @@
 				anchorLineNumber = _anchorLineNumber;
 			}
 
-			ImmutableArray<int>.Builder lineNumbers = ImmutableArray.CreateBuilder<int>(selection.Count);
+			// Wrapped without a copy: nothing else holds the array.
+			ImmutableArray<int> lineNumbers = ImmutableCollectionsMarshal.AsImmutableArray(GetLineNumbers(selection, results));
 
-			foreach (PositionRange range in selection.Ranges)
-			{
-				for (var position = range.First; position <= range.Last; position++)
-				{
-					lineNumbers.Add(results.GetLineNumber(position));
-				}
-			}
-
-			return new Snapshot(lineNumbers.MoveToImmutable(), anchorLineNumber, _navigationManager.ActiveLineNumber);
+			return new Snapshot(lineNumbers, anchorLineNumber, _navigationManager.ActiveLineNumber);
 		}
 
 		/// <summary>
