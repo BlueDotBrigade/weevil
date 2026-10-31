@@ -1,26 +1,32 @@
 ﻿namespace BlueDotBrigade.Weevil.Navigation.Comparers
 {
+	using System;
 	using BlueDotBrigade.Weevil.Data;
 
-	internal sealed class CreatedAtComparer : MagnitudeComparer
+	internal sealed class CreatedAtComparer : MagnitudeComparer<DateTime>
 	{
 		private const int GreaterX = 1;
 		private const int EqualTimestamps = 0;
 		private const int GreaterY = -1;
 
-		public override int Compare(IRecord x, IRecord y)
+		public override DateTime Read(RecordList records, int position)
 		{
-			if (x.HasCreationTime && y.HasCreationTime)
+			return records.GetCreatedAt(position);
+		}
+
+		public override int Compare(DateTime x, DateTime y)
+		{
+			if (HasCreationTime(x) && HasCreationTime(y))
 			{
-				return x.CreatedAt.CompareTo(y.CreatedAt);
+				return x.CompareTo(y);
 			}
 			else
 			{
-				if (!x.HasCreationTime && !y.HasCreationTime)
+				if (!HasCreationTime(x) && !HasCreationTime(y))
 				{
 					return EqualTimestamps;
 				}
-				else if (x.HasCreationTime)
+				else if (HasCreationTime(x))
 				{
 					return GreaterX;
 				}
@@ -32,20 +38,20 @@
 			}
 		}
 
-		public override double CompareMagnitude(IRecord x, IRecord y)
+		public override double CompareMagnitude(DateTime x, DateTime y)
 		{
-			if (x.HasCreationTime && y.HasCreationTime)
+			if (HasCreationTime(x) && HasCreationTime(y))
 			{
-				var delta = x.CreatedAt - y.CreatedAt;
+				var delta = x - y;
 				return delta.TotalMilliseconds;
 			}
 			else
 			{
-				if (!x.HasCreationTime && !y.HasCreationTime)
+				if (!HasCreationTime(x) && !HasCreationTime(y))
 				{
 					return EqualTimestamps;
 				}
-				else if (x.HasCreationTime)
+				else if (HasCreationTime(x))
 				{
 					return GreaterX;
 				}
@@ -55,6 +61,11 @@
 					return GreaterY;
 				}
 			}
+		}
+
+		private static bool HasCreationTime(DateTime value)
+		{
+			return value != Record.CreationTimeUnknown;
 		}
 	}
 }

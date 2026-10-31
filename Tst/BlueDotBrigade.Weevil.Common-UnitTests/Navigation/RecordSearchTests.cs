@@ -74,8 +74,9 @@
 				R.WithLineNumber(30),
 			};
 
+			// A list that cannot create records shows that the search creates none (#1137).
 			var index = RecordSearch.IndexOfLineNumber(
-				records.ToImmutableArray(), 
+				new ColumnsOnlyRecordList(records.ToImmutableArray()), 
 				requestedLine, 
 				RecordSearchType.NearestNeighbor);
 
@@ -103,7 +104,8 @@
 
 			var createdAtTimestamp = DateTime.Parse(createdAt);
 
-			var actualIndex = RecordSearch.IndexOfCreatedAt(records, createdAtTimestamp, RecordSearchType.NearestNeighbor);
+			// A list that cannot create records shows that the search creates none (#1137).
+			var actualIndex = RecordSearch.IndexOfCreatedAt(new ColumnsOnlyRecordList(records), createdAtTimestamp, RecordSearchType.NearestNeighbor);
 
 			actualIndex.Should().Be(expectedIndex);
 		}

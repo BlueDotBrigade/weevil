@@ -2,16 +2,21 @@
 {
 	using BlueDotBrigade.Weevil.Data;
 
-	internal sealed class LineNumberComparer : MagnitudeComparer
+	internal sealed class LineNumberComparer : MagnitudeComparer<int>
 	{
-		public override int Compare(IRecord x, IRecord y)
+		public override int Read(RecordList records, int position)
 		{
-			return x.LineNumber.CompareTo(y.LineNumber);
+			return records.GetLineNumber(position);
 		}
 
-		public override double CompareMagnitude(IRecord x, IRecord y)
+		public override int Compare(int x, int y)
 		{
-			return x.LineNumber - y.LineNumber;
+			return x.CompareTo(y);
+		}
+
+		public override double CompareMagnitude(int x, int y)
+		{
+			return x - y;
 		}
 	}
 }

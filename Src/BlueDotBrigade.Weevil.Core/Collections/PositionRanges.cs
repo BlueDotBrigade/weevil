@@ -182,7 +182,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			RecordList newResults,
 			RecordList allRecords)
 		{
-			return Remap(selection, position => oldResults[position].LineNumber, newResults, allRecords);
+			return Remap(selection, oldResults.GetLineNumber, newResults, allRecords);
 		}
 
 		/// <summary>
@@ -229,7 +229,7 @@ namespace BlueDotBrigade.Weevil.Collections
 				var firstInLog = LowerBound(allRecords, firstLine, 0);
 				var lastInLog = LowerBound(allRecords, lastLine, firstInLog);
 				var spanInLog = lastInLog - firstInLog + 1;
-				if (spanInLog == range.Count && lastInLog < allRecords.Length && allRecords[lastInLog].LineNumber == lastLine)
+				if (spanInLog == range.Count && lastInLog < allRecords.Length && allRecords.GetLineNumber(lastInLog) == lastLine)
 				{
 					remapped.Append(low, high);
 					continue;
@@ -239,7 +239,7 @@ namespace BlueDotBrigade.Weevil.Collections
 				var newPosition = low;
 				while (newPosition <= high && oldPosition <= range.Last)
 				{
-					var newLine = newResults[newPosition].LineNumber;
+					var newLine = newResults.GetLineNumber(newPosition);
 					var oldLine = oldLineNumberAt(oldPosition);
 					if (newLine == oldLine)
 					{
@@ -272,7 +272,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			while (low < high)
 			{
 				var middle = low + ((high - low) / 2);
-				if (records[middle].LineNumber < lineNumber)
+				if (records.GetLineNumber(middle) < lineNumber)
 				{
 					low = middle + 1;
 				}

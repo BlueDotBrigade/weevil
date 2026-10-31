@@ -34,6 +34,17 @@ namespace BlueDotBrigade.Weevil.Data
 
 		public abstract IRecord this[int position] { get; }
 
+		/// <summary>
+		/// Returns the line number of the record at <paramref name="position"/>, without creating the record (#1137).
+		/// </summary>
+		public abstract int GetLineNumber(int position);
+
+		/// <summary>
+		/// Returns when the record at <paramref name="position"/> was created, or <see cref="Record.CreationTimeUnknown"/>,
+		/// without creating the record (#1137).
+		/// </summary>
+		public abstract DateTime GetCreatedAt(int position);
+
 		IRecord IList<IRecord>.this[int index]
 		{
 			get => this[index];
@@ -214,6 +225,10 @@ namespace BlueDotBrigade.Weevil.Data
 					return _records[position];
 				}
 			}
+
+			public override int GetLineNumber(int position) => _records[position].LineNumber;
+
+			public override DateTime GetCreatedAt(int position) => _records[position].CreatedAt;
 
 			public override ImmutableArray<IRecord> ToImmutableArray()
 			{
