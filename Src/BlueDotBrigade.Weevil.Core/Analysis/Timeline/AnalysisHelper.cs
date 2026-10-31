@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
@@ -64,20 +65,19 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		/// <remarks>
 		/// Records without timestamps are ignored because they cannot be placed in a deterministic chronological order.
 		/// Records sharing the same timestamp are ordered by <see cref="IRecord.LineNumber"/> to preserve file order.
+		/// The positions are sorted, not the records, so no record is created or copied (#1137).
 		/// </remarks>
 		public static RecordList OrderRecordsForAnalysis(RecordList records, AnalysisOrder analysisOrder)
 		{
-			IOrderedEnumerable<IRecord> orderedRecords = analysisOrder == AnalysisOrder.Ascending
-				? records
-					.Where(record => record.HasCreationTime)
-					.OrderBy(record => record.CreatedAt)
-				: records
-					.Where(record => record.HasCreationTime)
-					.OrderByDescending(record => record.CreatedAt);
+			IEnumerable<int> timestamped = Enumerable
+				.Range(0, records.Count)
+				.Where(position => records.GetCreatedAt(position) != Record.CreationTimeUnknown);
 
-			return orderedRecords
-				.ThenBy(record => record.LineNumber)
-				.ToImmutableArray();
+			IOrderedEnumerable<int> orderedPositions = analysisOrder == AnalysisOrder.Ascending
+				? timestamped.OrderBy(records.GetCreatedAt)
+				: timestamped.OrderByDescending(records.GetCreatedAt);
+
+			return new PositionRecordList(records, orderedPositions.ThenBy(records.GetLineNumber).ToArray());
 		}
 
 		/// <summary>

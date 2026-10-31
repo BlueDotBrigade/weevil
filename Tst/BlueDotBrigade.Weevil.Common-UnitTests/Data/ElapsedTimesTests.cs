@@ -78,7 +78,8 @@ namespace BlueDotBrigade.Weevil.Data
 				.WithCreatedAt(11, Start.AddSeconds(9))
 				.GetRecords();
 
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
+			// A list that cannot create records shows that the calculation creates none (#1137).
+			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(new ColumnsOnlyRecordList(results));
 
 			elapsedTimes.Get(10).Should().Be(TimeSpan.FromSeconds(8));
 			elapsedTimes.Get(11).Should().Be(TimeSpan.FromSeconds(1));

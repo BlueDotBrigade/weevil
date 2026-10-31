@@ -108,7 +108,8 @@ namespace BlueDotBrigade.Weevil.Collections
 			ImmutableArray<IRecord> even = Keep(all, r => r.LineNumber % 2 == 0);
 			PositionRanges selection = Positions(0, even.Length - 1);
 
-			PositionRanges remapped = PositionRanges.Remap(selection, even, all, all);
+			// Lists that cannot create records show that remapping, which runs after every filter, creates none (#1137).
+			PositionRanges remapped = PositionRanges.Remap(selection, new ColumnsOnlyRecordList(even), new ColumnsOnlyRecordList(all), new ColumnsOnlyRecordList(all));
 
 			remapped.EnumeratePositions().Select(p => all[p].LineNumber).Should().Equal(2, 4, 6, 8, 10);
 			remapped.RangeCount.Should().Be(5);

@@ -215,11 +215,13 @@
 				{
 					foreach (RecordInfo oldRecord in oldData.CommonData.Records)
 					{
-						if (newData.Records.TryRecordOfLineNumber(oldRecord.RelatesTo.LineNumber, out IRecord newRecord))
+						var lineNumber = oldRecord.RelatesTo.LineNumber;
+
+						if (newData.Records.TryIndexOfLineNumber(lineNumber, out _))
 						{
-							if (IsAnnotated(newRecord.LineNumber, newData.Annotations))
+							if (IsAnnotated(lineNumber, newData.Annotations))
 							{
-								masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord.LineNumber, newData));
+								masterRecords.Add(lineNumber, ToRecordInfo(lineNumber, newData));
 							}
 						}
 						else
@@ -231,18 +233,15 @@
 				}
 			}
 
-			// Find new data that needs to be saved.
-			if (newData.Records.Length > 0)
+			// Find new data that needs to be saved. The pass walks the scope, so annotations on cleared lines are not saved,
+			// and reads only line numbers, so it creates no record (#1137).
+			for (var position = 0; position < newData.Records.Count; position++)
 			{
-				foreach (IRecord newRecord in newData.Records)
+				var lineNumber = newData.Records.GetLineNumber(position);
+
+				if (IsAnnotated(lineNumber, newData.Annotations) && !masterRecords.ContainsKey(lineNumber))
 				{
-					if (IsAnnotated(newRecord.LineNumber, newData.Annotations))
-					{
-						if (!masterRecords.ContainsKey(newRecord.LineNumber))
-						{
-							masterRecords.Add(newRecord.LineNumber, ToRecordInfo(newRecord.LineNumber, newData));
-						}
-					}
+					masterRecords.Add(lineNumber, ToRecordInfo(lineNumber, newData));
 				}
 			}
 

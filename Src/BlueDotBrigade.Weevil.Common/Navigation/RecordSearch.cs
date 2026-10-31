@@ -30,52 +30,33 @@
 		/// </returns>
 		public static int IndexOfLineNumber(RecordList records, int lineNumber, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
-			var desiredRecord = new Record(
-				lineNumber,
-				Record.CreationTimeUnknown,
-				SeverityType.Debug,
-				$"This record is used to facilitate binary searching of line number: {lineNumber}");
-
-			return IndexOf(records, desiredRecord, new LineNumberComparer(), searchType);
+			return IndexOf(records, lineNumber, new LineNumberComparer(), searchType);
 		}
 
 		public static int IndexOfCreatedAt(RecordList records, DateTime createdAt, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
-			var desiredRecord = new Record(
-				0,
-				createdAt,
-				SeverityType.Debug,
-				$"This record is used to facilitate binary searching for a record created at: {createdAt}");
-
-			return IndexOf(records, desiredRecord, new CreatedAtComparer(), searchType);
+			return IndexOf(records, createdAt, new CreatedAtComparer(), searchType);
 		}
 
 		/// <summary>
 		/// Returns a zero-based index value of the first <see cref="Record"/> that matches the <paramref name="comparer"/>.
 		/// </summary>
 		/// <param name="records">The sorted <see cref="Record"/> collection to search.</param>
-		/// <param name="desiredRecord"></param>
-		/// <param name="comparer">A comparer that returns the difference between the <paramref name="desiredRecord"/>, and any given <paramref name="records"/> instance.</param>
+		/// <param name="desiredValue">The line number or timestamp to search for.</param>
+		/// <param name="comparer">A comparer that returns the difference between the <paramref name="desiredValue"/>, and the value it reads from any given position of <paramref name="records"/>.</param>
 		/// <param name="searchType">Indicates what is considered an acceptable result.</param>
+		/// <remarks>
+		/// The comparer reads values by position, so the search creates no record (#1137).
+		/// </remarks>
 		/// <exception cref="RecordNotFoundException"/>
-		private static int IndexOf(RecordList records, IRecord desiredRecord, MagnitudeComparer comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
+		private static int IndexOf<T>(RecordList records, T desiredValue, MagnitudeComparer<T> comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
-			if (desiredRecord == null)
-			{
-				throw new ArgumentNullException(nameof(desiredRecord));
-			}
-
-			if (comparer == null)
-			{
-				throw new ArgumentNullException(nameof(comparer));
-			}
-
 			if (records.Length == 0)
 			{
-				throw new RecordNotFoundException($"Unable to find record. LineNumber={desiredRecord.LineNumber}");
+				throw new RecordNotFoundException($"Unable to find record. Value={desiredValue}");
 			}
 
-			var index = BinarySearch(records, desiredRecord, comparer);
+			var index = BinarySearch(records, desiredValue, comparer);
 
 			if (searchType == RecordSearchType.ExactOrPrevious)
 			{
@@ -125,8 +106,8 @@
 						var precedingIndex = Math.Abs(index) - 1 + ZeroOffsetAdjustment;
 						var currentIndex = Math.Abs(index) - 0 + ZeroOffsetAdjustment;
 
-						var precedingDelta = Math.Abs(comparer.CompareMagnitude(desiredRecord, records[precedingIndex]));
-						var currentDelta = Math.Abs(comparer.CompareMagnitude(records[currentIndex], desiredRecord));
+						var precedingDelta = Math.Abs(comparer.CompareMagnitude(desiredValue, comparer.Read(records, precedingIndex)));
+						var currentDelta = Math.Abs(comparer.CompareMagnitude(comparer.Read(records, currentIndex), desiredValue));
 
 						// Is the desired value (e.g. 10:31) closer to the current record,
 						// ... or the one that preceded it (e.g. Record#8)?
@@ -137,7 +118,7 @@
 
 			if (index < 0 || index > records.Length - 1)
 			{
-				throw new RecordNotFoundException($"Unable to find record. LineNumber={desiredRecord.LineNumber}");
+				throw new RecordNotFoundException($"Unable to find record. Value={desiredValue}");
 			}
 
 			return index;
@@ -152,13 +133,7 @@
 		/// <returns>True is returned if the collection has a matching line number.</returns>
 		public static bool TryIndexOfLineNumber(RecordList sourceRecords, int lineNumber, out int index)
 		{
-			var desiredRecord = new Record(
-				lineNumber,
-				Record.CreationTimeUnknown,
-				SeverityType.Debug,
-				$"This record is used to facilitate binary searching for line number: {lineNumber}");
-
-			index = BinarySearch(sourceRecords, desiredRecord, new LineNumberComparer());
+			index = BinarySearch(sourceRecords, lineNumber, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			return wasFound;
@@ -175,13 +150,7 @@
 		{
 			result = Record.Dummy;
 
-			var desiredRecord = new Record(
-				lineNumber,
-				Record.CreationTimeUnknown,
-				SeverityType.Debug,
-				$"This record is used to facilitate binary searching for line number: {lineNumber}");
-
-			var index = BinarySearch(sourceRecords, desiredRecord, new LineNumberComparer());
+			var index = BinarySearch(sourceRecords, lineNumber, new LineNumberComparer());
 			var wasFound = index >= 0;
 
 			if (wasFound)
@@ -195,8 +164,9 @@
 		/// <summary>
 		/// Searches records ordered by <paramref name="comparer"/>, as <see cref="ImmutableArray{T}.BinarySearch(T, IComparer{T})"/> does:
 		/// returns the position of a match, or the bitwise complement of where <paramref name="value"/> would go (#1136).
+		/// It reads only the compared values, so it creates no record (#1137).
 		/// </summary>
-		private static int BinarySearch(RecordList records, IRecord value, IComparer<IRecord> comparer)
+		private static int BinarySearch<T>(RecordList records, T value, MagnitudeComparer<T> comparer)
 		{
 			var low = 0;
 			var high = records.Count - 1;
@@ -204,7 +174,7 @@
 			while (low <= high)
 			{
 				var middle = low + ((high - low) >> 1);
-				var comparison = comparer.Compare(records[middle], value);
+				var comparison = comparer.Compare(comparer.Read(records, middle), value);
 
 				if (comparison == 0)
 				{

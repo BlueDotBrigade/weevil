@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Collections
 	/// </summary>
 	/// <remarks>
 	/// It reads one moment of the selection: later changes create a new <see cref="PositionRanges"/>, never change this one.
-	/// <see cref="Count"/> is immediate, a lookup by line number is a binary search, and enumerating creates nothing per record.
+	/// <see cref="Count"/> is immediate, a lookup by line number is a binary search, and neither a lookup nor <see cref="Keys"/> creates a record.
 	/// </remarks>
 	internal sealed class SelectedRecords : IDictionary<int, IRecord>
 	{
@@ -29,7 +29,7 @@ namespace BlueDotBrigade.Weevil.Collections
 
 		public bool IsReadOnly => true;
 
-		public ICollection<int> Keys => new ReadOnlyView<int>(this.Select(pair => pair.Key), this.Count, lineNumber => ContainsKey(lineNumber));
+		public ICollection<int> Keys => new ReadOnlyView<int>(_selection.EnumeratePositions().Select(_results.GetLineNumber), this.Count, ContainsKey);
 
 		public ICollection<IRecord> Values => new ReadOnlyView<IRecord>(this.Select(pair => pair.Value), this.Count, record => record != null && ContainsKey(record.LineNumber));
 
@@ -41,20 +41,13 @@ namespace BlueDotBrigade.Weevil.Collections
 
 		public bool ContainsKey(int lineNumber)
 		{
-			return TryGetValue(lineNumber, out _);
+			return TryGetPosition(lineNumber, out _);
 		}
 
 		public bool TryGetValue(int lineNumber, out IRecord record)
 		{
-			var position = PositionRanges.LowerBound(_results, lineNumber, 0);
-			if (position < _results.Length && _results[position].LineNumber == lineNumber && _selection.Contains(position))
-			{
-				record = _results[position];
-				return true;
-			}
-
-			record = null;
-			return false;
+			record = TryGetPosition(lineNumber, out var position) ? _results[position] : null;
+			return record != null;
 		}
 
 		public bool Contains(KeyValuePair<int, IRecord> item)
@@ -94,6 +87,15 @@ namespace BlueDotBrigade.Weevil.Collections
 		public bool Remove(KeyValuePair<int, IRecord> item) => throw new NotSupportedException();
 
 		public void Clear() => throw new NotSupportedException();
+
+		/// <summary>
+		/// Finds a selected line from the results' line numbers, so a lookup creates no record (#1137).
+		/// </summary>
+		private bool TryGetPosition(int lineNumber, out int position)
+		{
+			position = PositionRanges.LowerBound(_results, lineNumber, 0);
+			return position < _results.Count && _results.GetLineNumber(position) == lineNumber && _selection.Contains(position);
+		}
 
 		/// <summary>
 		/// The keys or values, read as they are enumerated.

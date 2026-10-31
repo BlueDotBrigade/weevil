@@ -21,9 +21,11 @@
 
 			for (var i = 0; i < maxIndex; i++)
 			{
-				if (sourceRecords[i].HasCreationTime)
+				var createdAt = sourceRecords.GetCreatedAt(i);
+
+				if (createdAt != Record.CreationTimeUnknown)
 				{
-					result = sourceRecords[i].CreatedAt;
+					result = createdAt;
 					break;
 				}
 			}
@@ -41,9 +43,11 @@
 
 			for (var i = sourceRecords.Length-1; minIndex <= i; i--)
 			{
-				if (sourceRecords[i].HasCreationTime)
+				var createdAt = sourceRecords.GetCreatedAt(i);
+
+				if (createdAt != Record.CreationTimeUnknown)
 				{
-					result = sourceRecords[i].CreatedAt;
+					result = createdAt;
 					break;
 				}
 			}
@@ -200,7 +204,7 @@
 
 			for (int i = 0; i < sourceRecords.Length; i++)
 			{
-				if (sourceRecords[i].HasCreationTime)
+				if (sourceRecords.GetCreatedAt(i) != Record.CreationTimeUnknown)
 				{
 					result = sourceRecords[i];
 					break;
@@ -235,13 +239,13 @@
 			{
 				if (sourceRecords.Length == 1)
 				{
-					from = sourceRecords[0].CreatedAt;
-					to = sourceRecords[0].CreatedAt;
+					from = sourceRecords.GetCreatedAt(0);
+					to = sourceRecords.GetCreatedAt(0);
 				}
 				else
 				{
-					from = sourceRecords[0].CreatedAt;
-					to = sourceRecords[sourceRecords.Length - 1].CreatedAt;
+					from = sourceRecords.GetCreatedAt(0);
+					to = sourceRecords.GetCreatedAt(sourceRecords.Length - 1);
 				}
 			}
 
@@ -372,7 +376,7 @@
 
 			var lastLineNumber = (nextSection != null)
 				? nextSection.LineNumber
-				: records[records.Length - 1].LineNumber;
+				: records.GetLineNumber(records.Length - 1);
 
 			var lastIndex = records.IndexOfLineNumber(
 				lastLineNumber, 
@@ -380,8 +384,8 @@
 
 			for (var i = firstIndex; i <= lastIndex; i++)
 			{
-				if (records[i].LineNumber >= section.LineNumber && 
-					records[i].LineNumber < nextSection.LineNumber)
+				if (records.GetLineNumber(i) >= section.LineNumber && 
+					records.GetLineNumber(i) < nextSection.LineNumber)
 				{
 					yield return records[i];
 				}

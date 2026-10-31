@@ -25,6 +25,20 @@ namespace BlueDotBrigade.Weevil.Collections
 		}
 
 		[TestMethod]
+		public void GivenSelectedPositions_WhenTheirLinesAreLookedUp_ThenNoRecordIsCreated()
+		{
+			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 1, 2, 5 });
+
+			var selected = new SelectedRecords(selection, new ColumnsOnlyRecordList(results));
+
+			selected.Keys.ToArray().Should().Equal(12, 13, 16);
+			selected.Keys.Contains(16).Should().BeTrue();
+			selected.ContainsKey(13).Should().BeTrue();
+			selected.ContainsKey(14).Should().BeFalse();
+		}
+
+		[TestMethod]
 		public void GivenAnotherRecordForASelectedLine_WhenLookedFor_ThenItIsFound()
 		{
 			// Records are equal by line number, so a record created again for a selected line is still selected (#1135).

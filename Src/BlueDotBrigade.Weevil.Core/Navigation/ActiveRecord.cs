@@ -99,7 +99,7 @@
 			}
 			else
 			{
-				var previousLineNumber = _dataSource[_activeIndex].LineNumber;
+				var previousLineNumber = _dataSource.GetLineNumber(_activeIndex);
 
 				// Try to find the "record of interest" in the new collection
 				if (newRecordCollection.TryIndexOfLineNumber(previousLineNumber, out var newIndex))

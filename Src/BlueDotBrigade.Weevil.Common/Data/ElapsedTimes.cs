@@ -43,31 +43,35 @@ namespace BlueDotBrigade.Weevil.Data
 				return None;
 			}
 
-			// Index loops, which are faster than foreach over a RecordList: this runs after every filter (#1136 review).
+			// Reads only line numbers and timestamps, so it creates no record (#1137). It runs after every filter.
 			var count = records.Count;
 
 			var lastLineNumber = 0;
 			for (var position = 0; position < count; position++)
 			{
-				lastLineNumber = System.Math.Max(lastLineNumber, records[position].LineNumber);
+				lastLineNumber = System.Math.Max(lastLineNumber, records.GetLineNumber(position));
 			}
 
 			var byLineNumber = new TimeSpan[lastLineNumber + 1];
 			Array.Fill(byLineNumber, Unknown);
 
-			IRecord previous = Record.Dummy;
+			var previousLineNumber = Record.Dummy.LineNumber;
+			var previousCreatedAt = Record.CreationTimeUnknown;
 			for (var position = 0; position < count; position++)
 			{
-				IRecord current = records[position];
+				var createdAt = records.GetCreatedAt(position);
 
-				if (current.HasCreationTime)
+				if (createdAt != Record.CreationTimeUnknown)
 				{
-					if (!Record.IsDummyOrNull(previous) && current.LineNumber >= 0)
+					var lineNumber = records.GetLineNumber(position);
+
+					if (previousLineNumber != Record.Dummy.LineNumber && lineNumber >= 0)
 					{
-						byLineNumber[current.LineNumber] = current.CreatedAt - previous.CreatedAt;
+						byLineNumber[lineNumber] = createdAt - previousCreatedAt;
 					}
 
-					previous = current;
+					previousLineNumber = lineNumber;
+					previousCreatedAt = createdAt;
 				}
 			}
 

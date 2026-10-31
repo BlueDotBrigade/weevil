@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.InteropServices;
 	using System.Text;
 	using Analysis;
 	using BlueDotBrigade.Weevil.Collections;
@@ -99,15 +100,12 @@
 
 			if (selection.Count > 0)
 			{
-				IRecord firstRecord = visibleRecords[selection.First];
-				IRecord lastRecord = visibleRecords[selection.Last];
+				DateTime firstCreatedAt = visibleRecords.GetCreatedAt(selection.First);
+				DateTime lastCreatedAt = visibleRecords.GetCreatedAt(selection.Last);
 
-				if (firstRecord.HasCreationTime)
+				if (firstCreatedAt != Record.CreationTimeUnknown && lastCreatedAt != Record.CreationTimeUnknown)
 				{
-					if (lastRecord.HasCreationTime)
-					{
-						timePeriod = lastRecord.CreatedAt - firstRecord.CreatedAt;
-					}
+					timePeriod = lastCreatedAt - firstCreatedAt;
 				}
 			}
 
@@ -126,7 +124,7 @@
 		{
 			var position = PositionRanges.LowerBound(visibleRecords, lineNumber, 0);
 
-			return position < visibleRecords.Length && visibleRecords[position].LineNumber == lineNumber
+			return position < visibleRecords.Length && visibleRecords.GetLineNumber(position) == lineNumber
 				? position
 				: -1;
 		}
@@ -178,6 +176,36 @@
 			}
 
 			return ImmutableArray.Create(records);
+		}
+
+		/// <summary>
+		/// Returns the line numbers of the selected positions, read without creating records (#1137).
+		/// </summary>
+		private static int[] GetLineNumbers(PositionRanges selection, RecordList visibleRecords)
+		{
+			var lineNumbers = new int[selection.Count];
+			var index = 0;
+
+			foreach (var position in selection.EnumeratePositions())
+			{
+				lineNumbers[index++] = visibleRecords.GetLineNumber(position);
+			}
+
+			return lineNumbers;
+		}
+
+		private int[] GetSelectedLineNumbers()
+		{
+			PositionRanges selection;
+			RecordList visibleRecords;
+
+			lock (_selectionPadlock)
+			{
+				selection = _selection;
+				visibleRecords = _visibleRecords;
+			}
+
+			return GetLineNumbers(selection, visibleRecords);
 		}
 		#endregion
 
@@ -333,9 +361,10 @@
 
 		public ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType)
 		{
+			// The scope is already in line number order, so it is saved as it is, not sorted into a copy of every record (#1137).
 			RecordList sortedRecords = _selection.Count > 1
 				? GetSelected()
-				: _scope.Records.OrderBy(x => x.LineNumber).ToImmutableArray();
+				: _scope.Records;
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
@@ -369,17 +398,10 @@
 				anchorLineNumber = _anchorLineNumber;
 			}
 
-			ImmutableArray<int>.Builder lineNumbers = ImmutableArray.CreateBuilder<int>(selection.Count);
+			// Wrapped without a copy: nothing else holds the array.
+			ImmutableArray<int> lineNumbers = ImmutableCollectionsMarshal.AsImmutableArray(GetLineNumbers(selection, results));
 
-			foreach (PositionRange range in selection.Ranges)
-			{
-				for (var position = range.First; position <= range.Last; position++)
-				{
-					lineNumbers.Add(results[position].LineNumber);
-				}
-			}
-
-			return new Snapshot(lineNumbers.MoveToImmutable(), anchorLineNumber, _navigationManager.ActiveLineNumber);
+			return new Snapshot(lineNumbers, anchorLineNumber, _navigationManager.ActiveLineNumber);
 		}
 
 		/// <summary>
@@ -514,17 +536,18 @@
 		/// <returns>The last selected record kept, or <see cref="Record.Dummy"/> when none is.</returns>
 		internal IRecord Narrow(RecordList selected, RecordList kept)
 		{
-			IRecord lastKept = Record.Dummy;
+			var lastKept = -1;
 			var positions = new List<int>();
 
-			foreach (IRecord record in selected)
+			// Found by line number, so only the last selected record kept is created (#1137).
+			for (var index = 0; index < selected.Count; index++)
 			{
-				var position = FindPosition(kept, record.LineNumber);
+				var position = FindPosition(kept, selected.GetLineNumber(index));
 
 				if (position >= 0)
 				{
 					positions.Add(position);
-					lastKept = record;
+					lastKept = index;
 				}
 			}
 
@@ -536,7 +559,7 @@
 				_anchorLineNumber = NoLineNumber;
 			}
 
-			return lastKept;
+			return lastKept >= 0 ? selected[lastKept] : Record.Dummy;
 		}
 
 		public RecordList ClearAll()
@@ -575,24 +598,25 @@
 
 		public void ToggleIsPinned()
 		{
-			RecordList selectedRecords = GetSelected();
+			// Pins are kept by line number, so no record is created (#1137).
+			var selectedLineNumbers = GetSelectedLineNumbers();
 
-			if (selectedRecords.Length > 0)
+			if (selectedLineNumbers.Length > 0)
 			{
-				var isPinned = !_state.IsPinned(selectedRecords[0]);
+				IAnnotations annotations = _state.Annotations;
+				var isPinned = !annotations.IsPinned(selectedLineNumbers[0]);
 
 				// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
-				int[] lineNumbers = selectedRecords
+				var lineNumbers = selectedLineNumbers
 					.AsParallel()
-					.Where(record => _state.IsPinned(record) != isPinned)
-					.Select(record => record.LineNumber)
+					.Where(lineNumber => annotations.IsPinned(lineNumber) != isPinned)
 					.ToArray();
 
-				_state.Annotations.SetPinned(lineNumbers, isPinned);
+				annotations.SetPinned(lineNumbers, isPinned);
 
 				Log.Default.Write(
 					LogSeverityType.Information,
-					$"Changing record state. IsPinned={isPinned}, RecordsAffected={selectedRecords.Length}");
+					$"Changing record state. IsPinned={isPinned}, RecordsAffected={selectedLineNumbers.Length}");
 			}
 		}
 
@@ -601,17 +625,17 @@
 			// White space alone is no comment, so it is not stored: pasted onto every record, it would keep an entry for each line.
 			comment = string.IsNullOrWhiteSpace(comment) ? string.Empty : comment;
 
-			RecordList selectedRecords = GetSelected();
+			// Comments are kept by line number, so no record is created (#1137).
+			IAnnotations annotations = _state.Annotations;
 
 			// One change to the session, so the grid refreshes once. The lines to change are found in parallel, outside the store's lock.
-			int[] lineNumbers = selectedRecords
+			var lineNumbers = GetSelectedLineNumbers()
 				.AsParallel()
-				.Where(record => allowOverwrite || !_state.HasComment(record))
-				.Where(record => _state.GetComment(record) != comment)
-				.Select(record => record.LineNumber)
+				.Where(lineNumber => allowOverwrite || !annotations.HasComment(lineNumber))
+				.Where(lineNumber => annotations.GetComment(lineNumber) != comment)
 				.ToArray();
 
-			_state.Annotations.SetComment(lineNumbers, comment);
+			annotations.SetComment(lineNumbers, comment);
 
 			Log.Default.Write(
 				LogSeverityType.Information,

@@ -192,14 +192,14 @@
 		}
 
 		/// <summary>
-		/// Returns the line numbers of the records that match, searched in parallel.
+		/// Returns the line numbers of the records that match, searched in parallel without creating records (#1137).
 		/// </summary>
 		private static int[] FindLines(RecordList records, Func<int, bool> isMatch)
 		{
-			return records
-				.AsParallel()
-				.Where(record => isMatch(record.LineNumber))
-				.Select(record => record.LineNumber)
+			return ParallelEnumerable
+				.Range(0, records.Count)
+				.Select(records.GetLineNumber)
+				.Where(isMatch)
 				.ToArray();
 		}
 	}

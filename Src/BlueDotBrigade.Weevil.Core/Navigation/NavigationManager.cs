@@ -75,7 +75,7 @@
 				RecordList dataSource = _activeRecord.DataSource;
 				var index = _activeRecord.Index;
 
-				return index >= 0 && index < dataSource.Length ? dataSource[index].LineNumber : -1;
+				return index >= 0 && index < dataSource.Length ? dataSource.GetLineNumber(index) : -1;
 			}
 		}
 
