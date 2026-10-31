@@ -23,12 +23,7 @@
 		/// </summary>
 		public static readonly DateTime CreationTimeUnknown = DateTime.MaxValue;
 
-		// The facts the parser found, in one byte: the severity in the low bits, then one bit per flag.
-		private const byte SeverityMask = 0b0000_0111;
-		private const byte MultiLineFlag = 0b0000_1000;
-		private const byte UserInterfaceThreadFlag = 0b0001_0000;
-
-		private readonly byte _facts;
+		private readonly RecordFacts _facts;
 
 		// The content: a string, or the chunk of the log's bytes that holds it (#1133).
 		private readonly object _content;
@@ -49,7 +44,7 @@
 			this.LineNumber = lineNumber;
 			this.CreatedAt = createdAt;
 			_content = content ?? string.Empty;
-			_facts = GetFacts(severity, isMultiLine, wasGeneratedByUi);
+			_facts = new RecordFacts(severity, isMultiLine, wasGeneratedByUi);
 		}
 
 		/// <summary>
@@ -72,30 +67,18 @@
 			_content = chunk;
 			_contentOffset = contentOffset;
 			_contentLength = contentLength;
-			_facts = GetFacts(severity, isMultiLine, wasGeneratedByUi);
-		}
-
-		private static byte GetFacts(SeverityType severity, bool isMultiLine, bool wasGeneratedByUi)
-		{
-			if ((uint)severity > SeverityMask)
-			{
-				throw new ArgumentOutOfRangeException(nameof(severity), severity, "The severity is not a known value.");
-			}
-
-			return (byte)((byte)severity
-				| (isMultiLine ? MultiLineFlag : 0)
-				| (wasGeneratedByUi ? UserInterfaceThreadFlag : 0));
+			_facts = new RecordFacts(severity, isMultiLine, wasGeneratedByUi);
 		}
 
 		public int LineNumber { get; }
 
 		public DateTime CreatedAt { get; }
 
-		public SeverityType Severity => (SeverityType)(_facts & SeverityMask);
+		public SeverityType Severity => _facts.Severity;
 
-		public bool IsMultiLine => (_facts & MultiLineFlag) != 0;
+		public bool IsMultiLine => _facts.IsMultiLine;
 
-		public bool WasGeneratedByUi => (_facts & UserInterfaceThreadFlag) != 0;
+		public bool WasGeneratedByUi => _facts.WasGeneratedByUi;
 
 		/// <remarks>
 		/// When the record holds the log's bytes, each read decodes them into a new string. To read many records, use a <see cref="ContentBuffer"/>.

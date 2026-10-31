@@ -1,8 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using System.IO;
 	using BlueDotBrigade.Weevil.IO;
 	using Diagnostics;
@@ -65,32 +63,34 @@
 			return Get(Range.All, maximumCount);
 		}
 
+		/// <remarks>
+		/// The records go into a record table, 21 bytes each, instead of a growing list of records (#1138).
+		/// Core still holds an array of records, created from the table, until records are created when they are read (#1140).
+		/// </remarks>
 		public RecordList Get(Range range, int maximumCount)
 		{
-			var results = new List<IRecord>();
-
-			IRecord record = Record.Dummy;
+			var table = new RecordTable.Builder();
 
 			if (range.Equals(Range.All))
 			{
 				range = new Range(1, int.MaxValue);
 			}
 
+			bool hasRecord;
+
 			do
 			{
-				record = _recordParser.GetNext();
+				hasRecord = _recordParser.TryReadNext(out MultilineRecordParser.ParsedRecord record);
 
-				if (Record.IsGenuine(record))
+				if (hasRecord &&
+				    range.Start.Value <= record.LineNumber &&
+				    record.LineNumber <= range.End.Value)
 				{
-					if (range.Start.Value <= record.LineNumber &&
-					    record.LineNumber <= range.End.Value)
-					{
-						results.Add(record);
-					}
+					record.AddTo(table);
 				}
-			} while (Record.IsGenuine(record) && results.Count < maximumCount);
+			} while (hasRecord && table.Count < maximumCount);
 
-			return results.ToImmutableArray();
+			return table.Build().CreateRecords();
 		}
 	}
 }
