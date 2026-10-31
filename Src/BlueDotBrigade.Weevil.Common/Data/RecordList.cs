@@ -71,7 +71,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 			for (var position = 0; position < this.Count; position++)
 			{
-				if (this[position].LineNumber == record.LineNumber)
+				if (GetLineNumber(position) == record.LineNumber)
 				{
 					return position;
 				}
