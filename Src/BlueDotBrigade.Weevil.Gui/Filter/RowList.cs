@@ -86,10 +86,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					return row;
 				}
 
-				row = new RowViewModel(_results[position], _annotations)
+				// Read once: a list may create the record on each read (#1137).
+				IRecord record = _results[position];
+				row = new RowViewModel(record, _annotations)
 				{
-					IsSelected = _selector.Selected.ContainsKey(_results[position].LineNumber),
-					ElapsedTime = _elapsedTimes.Get(_results[position].LineNumber),
+					IsSelected = _selector.Selected.ContainsKey(record.LineNumber),
+					ElapsedTime = _elapsedTimes.Get(record.LineNumber),
 				};
 				_rows[position] = new WeakReference<RowViewModel>(row);
 
@@ -104,7 +106,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		public int LineNumberAt(int position)
 		{
-			return _results[position].LineNumber;
+			return _results.GetLineNumber(position);
 		}
 
 		/// <summary>
@@ -114,7 +116,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var position = IndexOfLineNumberOrNext(lineNumber);
 
-			return position < _results.Length && _results[position].LineNumber == lineNumber ? position : -1;
+			return position < _results.Length && _results.GetLineNumber(position) == lineNumber ? position : -1;
 		}
 
 		/// <summary>
@@ -129,7 +131,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			{
 				var middle = low + ((high - low) / 2);
 
-				if (_results[middle].LineNumber < lineNumber)
+				if (_results.GetLineNumber(middle) < lineNumber)
 				{
 					low = middle + 1;
 				}

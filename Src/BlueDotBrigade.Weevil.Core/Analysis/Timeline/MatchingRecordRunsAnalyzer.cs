@@ -65,13 +65,12 @@
 
             if (!expressions.IsDefaultOrEmpty)
             {
-                var sortedRecords = records.OrderBy((x => x.LineNumber)).ToImmutableArray();
-
                 IRecord firstMatch = null;
                 IRecord lastMatch = null;
                 var content = new ContentBuffer();
 
-				foreach (IRecord record in sortedRecords)
+				// The filter results and the selection are already in line number order, so they are not sorted into a copy (#1137).
+				foreach (IRecord record in records)
                 {
 					if (canUpdateMetadata)
 					{
