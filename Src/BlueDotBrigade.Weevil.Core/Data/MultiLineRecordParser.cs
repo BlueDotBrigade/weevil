@@ -28,9 +28,9 @@
 		// The first line of the next record, found while reading the continuation lines of the one before it.
 		private RecordStart _nextRecord;
 
-		// The records read since the current chunk started, which are created once the chunk is complete (#1133).
+		// The records read since the current chunk started, which are ready once the chunk is complete (#1133).
 		private readonly List<ReadRecord> _unchunked = new List<ReadRecord>();
-		private readonly Queue<IRecord> _ready = new Queue<IRecord>();
+		private readonly Queue<ParsedRecord> _ready = new Queue<ParsedRecord>();
 		private bool _isFinished;
 
 		public MultilineRecordParser(LogLineReader dataSource, IRecordParser recordParser)
@@ -60,12 +60,21 @@
 		/// </remarks>
 		public IRecord GetNext()
 		{
+			return TryReadNext(out ParsedRecord record) ? record.CreateRecord() : Record.Dummy;
+		}
+
+		/// <summary>
+		/// Reads the next record without creating it, so it can be added to a record table (#1138).
+		/// </summary>
+		/// <returns><see langword="false"/> when there are no more records.</returns>
+		public bool TryReadNext(out ParsedRecord record)
+		{
 			while (_ready.Count == 0 && !_isFinished)
 			{
 				ReadNextRecord();
 			}
 
-			return _ready.Count > 0 ? _ready.Dequeue() : Record.Dummy;
+			return _ready.TryDequeue(out record);
 		}
 
 		private void ReadNextRecord()
@@ -213,7 +222,7 @@
 		}
 
 		/// <summary>
-		/// Ends the current chunk at <paramref name="endOffset"/>, and creates the records read since it started, in order.
+		/// Ends the current chunk at <paramref name="endOffset"/>, and makes the records read since it started ready, in order.
 		/// </summary>
 		private void CompleteChunk(long endOffset)
 		{
@@ -224,20 +233,11 @@
 				if (read.Offset >= 0)
 				{
 					chunk ??= _dataSource.TakeChunk(endOffset);
-
-					_ready.Enqueue(new Record(
-						read.LineNumber,
-						read.CreatedAt,
-						read.Severity,
-						chunk,
-						(int)(read.Offset - chunk.FileOffset),
-						read.Length,
-						read.IsMultiLine,
-						read.WasGeneratedByUi));
+					_ready.Enqueue(new ParsedRecord(read, chunk));
 				}
 				else
 				{
-					_ready.Enqueue(read.Record);
+					_ready.Enqueue(new ParsedRecord(read, null));
 				}
 			}
 
@@ -247,6 +247,53 @@
 			}
 
 			_unchunked.Clear();
+		}
+
+		/// <summary>
+		/// A record that has been read, and the chunk that holds its content, or <see langword="null"/> when it keeps its string.
+		/// </summary>
+		internal readonly struct ParsedRecord
+		{
+			private readonly ReadRecord _read;
+			private readonly ContentChunk _chunk;
+
+			public ParsedRecord(ReadRecord read, ContentChunk chunk)
+			{
+				_read = read;
+				_chunk = chunk;
+			}
+
+			public int LineNumber => _chunk == null ? _read.Record.LineNumber : _read.LineNumber;
+
+			public IRecord CreateRecord()
+			{
+				return _chunk == null
+					? _read.Record
+					: new Record(
+						_read.LineNumber,
+						_read.CreatedAt,
+						_read.Severity,
+						_chunk,
+						this.ContentOffset,
+						_read.Length,
+						_read.IsMultiLine,
+						_read.WasGeneratedByUi);
+			}
+
+			public void AddTo(RecordTable.Builder table)
+			{
+				if (_chunk == null)
+				{
+					IRecord record = _read.Record;
+					table.Add(record.LineNumber, record.CreatedAt, new RecordFacts(record.Severity, record.IsMultiLine, record.WasGeneratedByUi), record.Content);
+				}
+				else
+				{
+					table.Add(_read.LineNumber, _read.CreatedAt, new RecordFacts(_read.Severity, _read.IsMultiLine, _read.WasGeneratedByUi), _chunk, this.ContentOffset, _read.Length);
+				}
+			}
+
+			private int ContentOffset => (int)(_read.Offset - _chunk.FileOffset);
 		}
 
 		/// <summary>
@@ -276,7 +323,7 @@
 		/// <summary>
 		/// A record that has been read: either where its bytes are, with what the parser found, or a record that keeps its string.
 		/// </summary>
-		private readonly struct ReadRecord
+		internal readonly struct ReadRecord
 		{
 			public ReadRecord(IRecord parsed, long offset, int length, bool isMultiLine)
 			{

@@ -53,7 +53,7 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
    - **Split into seven pull requests (decided 2026-10-30)**, in this order. The design and the challenge it survived are in [RecordsOnDemand](../Research/Weevil3/RecordsOnDemand/README.md).
      1. Records are equal when their line numbers are equal (#1135). **Done 2026-10-30.**
      2. Callers read records from a read-only record list, an `IList<IRecord>` (#1136). **Done 2026-10-30.**
-     3. Code that needs only line numbers or timestamps stops creating records (#1137).
+     3. Code that needs only line numbers or timestamps stops creating records (#1137). **Done 2026-10-31.**
      4. The parser fills a record table, and Core builds its records from it (#1138).
      5. Insights and the graph stop keeping records of a log that is no longer open (#1139).
      6. Filter results, the selection and Clear hold record numbers, and records are created only when read (#1140).
