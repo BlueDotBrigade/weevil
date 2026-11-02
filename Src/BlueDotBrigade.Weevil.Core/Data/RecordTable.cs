@@ -2,7 +2,6 @@ namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 
 	/// <summary>
 	/// A log's records in columns, 21 bytes per record, from which records are created when they are needed (#1021, #1138).
@@ -65,21 +64,6 @@ namespace BlueDotBrigade.Weevil.Data
 					block.Lengths[row],
 					facts.IsMultiLine,
 					facts.WasGeneratedByUi);
-		}
-
-		/// <summary>
-		/// Creates every record, in order, as the array Core holds until records are created when they are read (#1140).
-		/// </summary>
-		public ImmutableArray<IRecord> CreateRecords()
-		{
-			ImmutableArray<IRecord>.Builder records = ImmutableArray.CreateBuilder<IRecord>(this.Count);
-
-			for (var recordNumber = 0; recordNumber < this.Count; recordNumber++)
-			{
-				records.Add(CreateRecord(recordNumber));
-			}
-
-			return records.MoveToImmutable();
 		}
 
 		private Block GetBlock(int recordNumber)

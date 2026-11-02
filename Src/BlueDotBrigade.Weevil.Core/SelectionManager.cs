@@ -165,17 +165,14 @@
 			}
 		}
 
+		/// <summary>
+		/// Returns the selected records as a list over the results and the selected ranges, which copies neither (#1140).
+		/// </summary>
 		private static RecordList GetRecords(PositionRanges selection, RecordList visibleRecords)
 		{
-			var records = new IRecord[selection.Count];
-			var index = 0;
-
-			foreach (var position in selection.EnumeratePositions())
-			{
-				records[index++] = visibleRecords[position];
-			}
-
-			return ImmutableArray.Create(records);
+			return selection.Count == 0
+				? RecordList.Empty
+				: new SelectedRecordList(selection, visibleRecords);
 		}
 
 		/// <summary>

@@ -65,7 +65,7 @@
 
 		/// <remarks>
 		/// The records go into a record table, 21 bytes each, instead of a growing list of records (#1138).
-		/// Core still holds an array of records, created from the table, until records are created when they are read (#1140).
+		/// The list returned creates each record when it is read (#1140).
 		/// </remarks>
 		public RecordList Get(Range range, int maximumCount)
 		{
@@ -92,7 +92,7 @@
 				}
 			} while (hasRecord && table.Count < maximumCount);
 
-			return table.Build().CreateRecords();
+			return new TableRecordList(table.Build());
 		}
 	}
 }
