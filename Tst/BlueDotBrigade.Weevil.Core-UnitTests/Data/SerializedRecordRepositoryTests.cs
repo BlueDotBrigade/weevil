@@ -72,5 +72,38 @@ namespace BlueDotBrigade.Weevil.Data
 			records[0].LineNumber.Should().Be(2);
 			records[0].Content.Should().Be(secondLine.TrimEnd('\n'));
 		}
+
+		[TestMethod]
+		public void GivenAParserThatChangesTheTextOfSomeLines_WhenRecordsAreRead_ThenRecordsThatKeepStringsAndBytesAreBothRight()
+		{
+			// Changed lines keep a string, and the others keep the log's bytes, so both go through the record table together (#1138).
+			var log = new MemoryStream(Encoding.UTF8.GetBytes("keep 1\nchange 2\n  more\nkeep 4\n  more\nchange 6\nkeep 7"));
+			var repository = new SerializedRecordRepository(log, new ChangingParser());
+
+			var records = repository.Get(Range.All, int.MaxValue);
+
+			records.Select(r => r.LineNumber).Should().Equal(1, 2, 4, 6, 7);
+			records.Select(r => r.Content).Should().Equal("keep 1", "CHANGE 2\r\n  more", "keep 4\r\n  more", "CHANGE 6", "keep 7");
+			records.Select(r => r.IsMultiLine).Should().Equal(false, true, true, false, false);
+			records.Select(r => r.WasGeneratedByUi).Should().Equal(false, true, false, true, false);
+		}
+
+		/// <summary>
+		/// Upper-cases the lines that start with "change", and marks them as written by the user interface thread.
+		/// Lines that start with a space continue the record before them.
+		/// </summary>
+		private sealed class ChangingParser : IRecordParser
+		{
+			public bool TryParse(int line, string content, out IRecord record)
+			{
+				var isChanged = content.StartsWith("change", StringComparison.Ordinal);
+
+				record = content.StartsWith(' ')
+					? null
+					: new Record(line, Record.CreationTimeUnknown, SeverityType.Information, isChanged ? content.ToUpperInvariant() : content, isMultiLine: false, wasGeneratedByUi: isChanged);
+
+				return record != null;
+			}
+		}
 	}
 }
