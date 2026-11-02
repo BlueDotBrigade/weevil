@@ -83,7 +83,7 @@ namespace BlueDotBrigade.Weevil.Data
 		/// Only the chunks the record's block can use are searched: from its first chunk to the next block's.
 		/// A chunk holds many records, so that is usually one or two.
 		/// </remarks>
-		private ContentChunk GetChunk(int recordNumber)
+		internal ContentChunk GetChunk(int recordNumber)
 		{
 			var blockIndex = recordNumber / BlockSize;
 			var low = _blocks[blockIndex].FirstChunk;

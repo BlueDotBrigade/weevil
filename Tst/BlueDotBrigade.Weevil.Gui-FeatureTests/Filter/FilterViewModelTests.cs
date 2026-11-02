@@ -238,15 +238,16 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenAnOpenLog_WhenReloaded_ThenThePreviousRecordsHaveBeenFreed()
 		{
 			// The grid's rows kept the previous records while Reload read the log again, so memory held two copies of the log.
+			// Records are created when they are read (#1140), so the test watches the list of records shown, which holds the log's records.
 			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
 			await viewModel.OpenAsync(CopyLog("A.log"));
 			WaitUntil(() => viewModel.CanOpenLogFile);
-			WeakReference previousRecord = TrackFirstRecord(viewModel);
+			WeakReference previousRecords = TrackRecordsShown(viewModel);
 
 			viewModel.Reload();
 			WaitUntil(() => viewModel.IsFilterToolboxEnabled);
 
-			previousRecord.IsAlive.Should().BeFalse("Reload drops the rows and the engine's records before it reads the log, and opening collects them");
+			previousRecords.IsAlive.Should().BeFalse("Reload drops the rows and the engine's records before it reads the log, and opening collects them");
 		}
 
 		[TestMethod]
@@ -388,13 +389,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		/// <summary>
-		/// Watches the first record shown without keeping it alive: a Debug build keeps a test method's locals until it ends.
-		/// It tracks resurrection, so a record that a finalizer still holds counts as alive.
+		/// Watches the list of records shown without keeping it alive: a Debug build keeps a test method's locals until it ends.
+		/// It tracks resurrection, so a list that a finalizer still holds counts as alive.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static WeakReference TrackFirstRecord(FilterViewModel viewModel)
+		private static WeakReference TrackRecordsShown(FilterViewModel viewModel)
 		{
-			return new WeakReference(viewModel.VisibleItems[0], trackResurrection: true);
+			return new WeakReference(viewModel.VisibleItems, trackResurrection: true);
 		}
 
 		private string CopyLog(string fileName)
