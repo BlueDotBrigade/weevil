@@ -947,7 +947,8 @@
 		}
 
 		/// <summary>
-		/// Copy, Paste and Graph refuse more than <see cref="ClipboardLimit"/> selected records, and say what to do instead (decision 5).
+		/// Copy and Paste (decision 5 of the #990 plan), and Graph (decided 2026-10-30), refuse more than <see cref="ClipboardLimit"/> selected records,
+		/// and say what to do instead.
 		/// </summary>
 		/// <param name="action">The command's name, which is also the message's title.</param>
 		/// <param name="advice">What to do instead.</param>
@@ -1226,8 +1227,8 @@
 
 				try
 				{
-					// The rows hold records that the Clear may remove, so drop them first, as Reload does (#1139).
-					// The grid is hidden meanwhile.
+					// The rows hold records that the Clear may remove, so they are dropped first, as Reload does (#1139):
+					// once Clear frees the memory of cleared records (#1022, #1140), the grid must not keep them. The grid is hidden meanwhile.
 					_uiDispatcher.Invoke(() =>
 					{
 						this.VisibleItems = null;

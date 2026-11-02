@@ -204,6 +204,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			// The GUI keeps its insights across Reload; an insight that kept a record would keep the previous log's content (#1139).
 			// The log's third timestamp is earlier than its second, so the temporal anomaly insight refers to line 2.
+			// Once records are created on demand (#1140), a record object proves nothing: watch the record's chunk instead.
 			IEngine engine = OpenCopy("OutOfOrderTimestamps.log");
 			(IInsight[] insights, WeakReference referredRecord) = GetInsightsAndTrackTheirRecord(engine);
 
@@ -409,7 +410,7 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		/// <summary>
-		/// Gets the insights, and watches the record that the first insight to refer to one refers to, the same way.
+		/// Gets the insights, and watches the record on the first line that an insight refers to, without keeping that record alive.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static (IInsight[] Insights, WeakReference Record) GetInsightsAndTrackTheirRecord(IEngine engine)

@@ -104,7 +104,7 @@
 
 				if (string.IsNullOrEmpty(textToAppend))
 				{
-					// Ignore empty data. (e.g. record might not have a comment)
+					// Ignore empty data.
 				}
 				else
 				{

@@ -30,7 +30,7 @@
 		}
 
 		[TestMethod]
-		public void FirstOccurredAt_InChronologicalOrder_ReturnsDummyRecord()
+		public void FirstOccurredOnLine_InChronologicalOrder_ReturnsDummyLine()
 		{
 			ImmutableArray<IRecord> records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
@@ -102,7 +102,7 @@
 		}
 
 		[TestMethod]
-		public void FirstOccurredAt_NotInChronologicalOrder_Returns3()
+		public void FirstOccurredOnLine_NotInChronologicalOrder_Returns3()
 		{
 			ImmutableArray<IRecord> records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
@@ -139,7 +139,7 @@
 		}
 
 		[TestMethod]
-		public void BiggestAnomalyAt_NotInChronologicalOrder_Returns1()
+		public void BiggestAnomalyOnLine_NotInChronologicalOrder_Returns1()
 		{
 			ImmutableArray<IRecord> records = R.Create()
 				.WithCreatedAt(0, "10:00:00")

@@ -31,12 +31,12 @@
 		public int Fatals => _fatal;
 
 		/// <summary>
-		/// When the first fatal record counted was created, or <see cref="Record.CreationTimeUnknown"/>.
+		/// When the first fatal record counted was created. Read it only when <see cref="Fatals"/> is greater than zero.
 		/// </summary>
 		public DateTime FatalFirstOccurredAt => _fatalFirstOccurredAt;
 
 		/// <summary>
-		/// The line number of the first fatal record counted, or the line number of <see cref="Record.Dummy"/>.
+		/// The line number of the first fatal record counted. Read it only when <see cref="Fatals"/> is greater than zero.
 		/// </summary>
 		public int FatalFirstOccurredOnLine => _fatalFirstOccurredOnLine;
 		#endregion

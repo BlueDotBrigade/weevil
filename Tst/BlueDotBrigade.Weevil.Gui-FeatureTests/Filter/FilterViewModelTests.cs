@@ -298,7 +298,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			try
 			{
 				viewModel.IsProcessingLongOperation.Should().BeTrue("the progress bar a filter shows is shown while Clear runs");
-				clear.IsCompleted.Should().BeFalse("Clear needs the UI thread only to show its results");
+				clear.IsCompleted.Should().BeFalse("Clear needs the UI thread only briefly, to drop the rows and then show its results");
 			}
 			finally
 			{
