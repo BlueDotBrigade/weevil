@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
 	using System.Text;
@@ -51,20 +52,27 @@
 
 		public static void CopySelectedComments(IEngine engine)
 		{
-			CopyFromSelected(engine, (record) =>
+			if (engine == null) throw new ArgumentNullException(nameof(engine));
+
+			IDictionary<int, IRecord> selected = engine.Selector.Selected;
+			var output = new StringBuilder();
+
+			// Walks the selected line numbers, so only a record with a comment is created (#1139).
+			foreach (var lineNumber in selected.Keys)
 			{
-				// Checked first, so a record without a comment costs no string.
-				if (!engine.Annotations.HasComment(record.LineNumber))
+				if (engine.Annotations.HasComment(lineNumber))
 				{
-					return string.Empty;
+					IRecord record = selected[lineNumber];
+
+					var timestamp = record.HasCreationTime
+						? record.CreatedAt.ToString(ShortTimestampFormat, CultureInfo.InvariantCulture)
+						: ShortMissingTimestamp;
+
+					output.AppendLine(timestamp + "\t" + engine.Annotations.GetComment(lineNumber));
 				}
+			}
 
-				var timestamp = record.HasCreationTime
-					? record.CreatedAt.ToString(ShortTimestampFormat, CultureInfo.InvariantCulture)
-					: ShortMissingTimestamp;
-
-				return timestamp + "\t" + engine.Annotations.GetComment(record.LineNumber);
-			});
+			Clipboard.SetData(DataFormats.Text, output.ToString().TrimEnd());
 		}
 		public static void CopySelectedLineNumbers(IEngine engine)
 		{

@@ -668,8 +668,6 @@
 							HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
 						});
 
-						var selectedItem = _engine.Selector.Selected.FirstOrDefault().Value;
-
 						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
 
 						_bulletinMediator.Post(new AnalysisCompleteBulletin(0));
@@ -1572,7 +1570,8 @@
 		{
 			try
 			{
-				var selectedRecord = this.SelectedItems?.Count == 1 ? this.SelectedItems[0] : null;
+				// The count first, so a large selection creates no records (#1139).
+				IRecord selectedRecord = _engine.Selector.Selected.Count == 1 ? _engine.Selector.GetSelected()[0] : null;
 				if (selectedRecord == null)
 				{
 					MessageBox.Show("A single record must be selected.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -2191,9 +2190,7 @@
 
 			if (coreEngine.Selector.Selected.Count > 0)
 			{
-				var selectedItem = coreEngine.Selector.Selected.First().Value;
-
-				lineNumber = selectedItem.LineNumber;
+				lineNumber = coreEngine.Selector.Selected.Keys.First();
 
 				coreEngine.Navigate.TableOfContents.TryGetSectionName(lineNumber, out sectionName);
 				coreEngine.Regions.TryGetRegionName(lineNumber, out regionName);
