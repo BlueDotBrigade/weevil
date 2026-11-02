@@ -60,7 +60,7 @@ namespace BlueDotBrigade.Weevil.Data
 					block.LineNumbers[row],
 					block.CreatedAt[row],
 					facts.Severity,
-					GetChunk(block, recordNumber),
+					GetChunk(recordNumber),
 					block.Offsets[row],
 					block.Lengths[row],
 					facts.IsMultiLine,
@@ -93,12 +93,19 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		/// <summary>
-		/// Returns the last chunk that starts at or before <paramref name="recordNumber"/>, searching from the block's first chunk.
+		/// Returns the last chunk that starts at or before <paramref name="recordNumber"/>.
 		/// </summary>
-		private ContentChunk GetChunk(Block block, int recordNumber)
+		/// <remarks>
+		/// Only the chunks the record's block can use are searched: from its first chunk to the next block's.
+		/// A chunk holds many records, so that is usually one or two.
+		/// </remarks>
+		private ContentChunk GetChunk(int recordNumber)
 		{
-			var low = block.FirstChunk;
-			var high = _chunkStarts.Length - 1;
+			var blockIndex = recordNumber / BlockSize;
+			var low = _blocks[blockIndex].FirstChunk;
+			var high = blockIndex + 1 < _blocks.Length
+				? _blocks[blockIndex + 1].FirstChunk
+				: _chunkStarts.Length - 1;
 
 			while (low < high)
 			{
