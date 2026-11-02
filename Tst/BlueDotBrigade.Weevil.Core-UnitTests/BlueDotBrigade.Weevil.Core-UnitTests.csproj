@@ -78,6 +78,7 @@
 		<None Include=".Daten\Data\TsvRecordParserTest\PartialRecordMissingTime.log" />
 		<None Include=".Daten\.Global\Default.log" />
 		<None Include=".Daten\.Global\Default.log.xml" />
+		<None Include=".Daten\.Global\OutOfOrderTimestamps.log" />
 		<None Include=".Daten\.Global\SampleData.log" />
 	</ItemGroup>
 	<PropertyGroup>
