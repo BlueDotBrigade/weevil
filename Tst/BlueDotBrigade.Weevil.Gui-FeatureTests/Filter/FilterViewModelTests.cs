@@ -333,6 +333,19 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			dialogBox.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("100,000")), "Paste");
 		}
 
+		[TestMethod]
+		public async Task GivenMoreRecordsSelectedThanGraphAllows_WhenGraphed_ThenAMessageSaysSoAndNoGraphIsShown()
+		{
+			// A graph keeps its records for as long as its window is open (decided 2026-10-30).
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = await OpenWithMoreRecordsSelectedThanTheClipboardAllows(dialogBox);
+
+			viewModel.GraphDataCommand.Execute(null);
+
+			dialogBox.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("100,000")), "Graph");
+			dialogBox.DidNotReceiveWithAnyArgs().ShowGraph(default, default, default);
+		}
+
 		private async Task<FilterViewModel> OpenWithMoreRecordsSelectedThanTheClipboardAllows(IDialogBoxService dialogBox)
 		{
 			var logPath = Path.Combine(_folder, "Large.log");
