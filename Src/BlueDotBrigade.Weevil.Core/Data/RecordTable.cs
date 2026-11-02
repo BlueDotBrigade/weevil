@@ -8,7 +8,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// A log's records in columns, 21 bytes per record, from which records are created when they are needed (#1021, #1138).
 	/// </summary>
 	/// <remarks>
-	/// - Each column is an array, kept in blocks of <see cref="BlockSize"/> rows, so no array grows large and building the table never copies one.
+	/// - Each column is an array, kept in blocks of <see cref="BlockSize"/> rows, so no array grows large, and building the table copies only the last block, to trim it.
 	/// - A record that holds the log's bytes keeps its content's offset and length in its chunk. The chunk directory says where each chunk's
 	///   records start, and each block knows the chunk its first record is in, so finding a record's chunk is a short search.
 	/// - A record that keeps its content as a string (UTF-16 in the other byte order, UTF-32, or text a plugin changed) has
@@ -132,7 +132,7 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 
 			/// <summary>
-			/// The chunk in the directory that the block's first record is in, or 0 when no chunk has started yet.
+			/// The last chunk in the directory when the block's first record was added, or 0 when no chunk had started yet.
 			/// </summary>
 			public int FirstChunk { get; }
 
