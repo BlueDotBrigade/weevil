@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// - A record that holds the log's bytes keeps its content's offset and length in its chunk. The chunk directory says where each chunk's
 	///   records start, and each block knows the chunk its first record is in, so finding a record's chunk is a short search.
 	/// - A record that keeps its content as a string (UTF-16 in the other byte order, UTF-32, or text a plugin changed) has
-	///   <see cref="RecordFacts.KeepsString"/>, and its block keeps the string. A block allocates strings only if it holds such a record.
+	///   <see cref="RecordFacts.KeepsString"/>, and its block keeps the string: by row when most of its rows keep one, otherwise in a short list.
 	/// - The table never changes once built.
 	/// </remarks>
 	internal sealed class RecordTable
@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil.Data
 					block.LineNumbers[row],
 					block.CreatedAt[row],
 					facts.Severity,
-					block.Strings[row],
+					block.GetString(row),
 					facts.IsMultiLine,
 					facts.WasGeneratedByUi)
 				: new Record(
@@ -146,21 +146,65 @@ namespace BlueDotBrigade.Weevil.Data
 
 			public DateTime[] CreatedAt = new DateTime[BlockSize];
 
-			// Allocated only when the block holds a record that keeps a string.
-			public string[] Strings;
+			// The strings of the rows that keep one: listed while the block is built, then kept by row when most rows keep one,
+			// otherwise as the rows, in order, and their strings, so a few such rows cost little.
+			private List<(int Row, string Content)> _pendingStrings;
+			private string[] _stringsByRow;
+			private int[] _stringRows;
+			private string[] _strings;
 
-			public void Trim(int rowCount)
+			public void AddString(int row, string content)
 			{
-				Array.Resize(ref this.LineNumbers, rowCount);
-				Array.Resize(ref this.Offsets, rowCount);
-				Array.Resize(ref this.Lengths, rowCount);
-				Array.Resize(ref this.Facts, rowCount);
-				Array.Resize(ref this.CreatedAt, rowCount);
+				(_pendingStrings ??= new List<(int Row, string Content)>()).Add((row, content));
+			}
 
-				if (this.Strings != null)
+			public string GetString(int row)
+			{
+				return _stringsByRow != null
+					? _stringsByRow[row]
+					: _strings[Array.BinarySearch(_stringRows, row)];
+			}
+
+			/// <summary>
+			/// Ends the block at <paramref name="rowCount"/> rows: trims its columns, and stores its strings.
+			/// </summary>
+			public void Complete(int rowCount)
+			{
+				if (rowCount < this.LineNumbers.Length)
 				{
-					Array.Resize(ref this.Strings, rowCount);
+					Array.Resize(ref this.LineNumbers, rowCount);
+					Array.Resize(ref this.Offsets, rowCount);
+					Array.Resize(ref this.Lengths, rowCount);
+					Array.Resize(ref this.Facts, rowCount);
+					Array.Resize(ref this.CreatedAt, rowCount);
 				}
+
+				if (_pendingStrings == null)
+				{
+					return;
+				}
+
+				if (_pendingStrings.Count * 2 > rowCount)
+				{
+					_stringsByRow = new string[rowCount];
+
+					foreach ((var row, var content) in _pendingStrings)
+					{
+						_stringsByRow[row] = content;
+					}
+				}
+				else
+				{
+					_stringRows = new int[_pendingStrings.Count];
+					_strings = new string[_pendingStrings.Count];
+
+					for (var index = 0; index < _pendingStrings.Count; index++)
+					{
+						(_stringRows[index], _strings[index]) = _pendingStrings[index];
+					}
+				}
+
+				_pendingStrings = null;
 			}
 		}
 
@@ -202,18 +246,13 @@ namespace BlueDotBrigade.Weevil.Data
 				var keepsString = new RecordFacts(facts.Severity, facts.IsMultiLine, facts.WasGeneratedByUi, keepsString: true);
 
 				var row = NextRow(lineNumber, createdAt, keepsString);
-				_current.Strings ??= new string[BlockSize];
-				_current.Strings[row] = content ?? string.Empty;
+				_current.AddString(row, content ?? string.Empty);
 			}
 
 			public RecordTable Build()
 			{
 				var rowsInLastBlock = this.Count % BlockSize;
-
-				if (_current != null && rowsInLastBlock > 0)
-				{
-					_current.Trim(rowsInLastBlock);
-				}
+				_current?.Complete(rowsInLastBlock > 0 ? rowsInLastBlock : BlockSize);
 
 				return new RecordTable(_blocks.ToArray(), _chunkStarts.ToArray(), _chunks.ToArray(), this.Count);
 			}
@@ -224,6 +263,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 				if (row == 0)
 				{
+					_current?.Complete(BlockSize);
 					_current = new Block(System.Math.Max(_chunks.Count - 1, 0));
 					_blocks.Add(_current);
 				}
