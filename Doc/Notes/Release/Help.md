@@ -482,6 +482,7 @@ Steps:
    - Example: `HandleCount=(?<Handles>\d+)`
 2. Select the records you want to plot.
    - To select all visible records, press `Ctrl+A`.
+   - A graph takes at most 100,000 records. If more are selected, filter the log further first.
 3. Select `Graph Data`, or press `Ctrl+Shift+G`.
 
 Good candidates for graphing include:
