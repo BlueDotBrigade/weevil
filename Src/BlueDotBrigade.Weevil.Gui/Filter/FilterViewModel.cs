@@ -56,6 +56,7 @@
 
 		// Copying more would freeze the window while the clipboard fills, and Export saves any number of records to a file.
 		// Pasting one comment onto more is a mistake, and each commented record costs memory.
+		// A graph keeps its records for as long as its window is open.
 		private const int ClipboardLimit = 100_000;
 		private const string CopyAdvice = "Use Export > Original Records (Ctrl+Shift+S) to save them to a file.";
 
@@ -945,7 +946,7 @@
 		}
 
 		/// <summary>
-		/// Copy and Paste refuse more than <see cref="ClipboardLimit"/> selected records, and say what to do instead (decision 5).
+		/// Copy, Paste and Graph refuse more than <see cref="ClipboardLimit"/> selected records, and say what to do instead (decision 5).
 		/// </summary>
 		/// <param name="action">The command's name, which is also the message's title.</param>
 		/// <param name="advice">What to do instead.</param>
@@ -1175,9 +1176,18 @@
 			}
 		}
 
+		/// <remarks>
+		/// Like Copy and Paste, the graph takes at most <see cref="ClipboardLimit"/> selected records (decided 2026-10-30).
+		/// Its window can outlive the log, so it keeps its own array of them, not the log's list of records (#1139).
+		/// </remarks>
 		private void GraphData()
 		{
-			var records = _engine.Selector.GetSelected();
+			if (!IsWithinClipboardLimit("Graph", "Select fewer records, then graph again."))
+			{
+				return;
+			}
+
+			RecordList records = _engine.Selector.GetSelected().ToImmutableArray();
 			var recordsDescription = records.Length.ToString("N0");
 
 			if (_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
