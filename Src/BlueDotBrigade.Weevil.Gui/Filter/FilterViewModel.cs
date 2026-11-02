@@ -1215,6 +1215,14 @@
 
 				try
 				{
+					// The rows hold records that the Clear may remove, so drop them first, as Reload does (#1139).
+					// The grid is hidden meanwhile.
+					_uiDispatcher.Invoke(() =>
+					{
+						this.VisibleItems = null;
+						this.Rows = null;
+					});
+
 					_engine.Clear(operation);
 					wasCleared = true;
 
@@ -1232,6 +1240,9 @@
 
 					Log.Default.Write(LogSeverityType.Error, exception, message);
 					_uiDispatcher.Invoke(() => MessageBox.Show(message, "Clear Failed", MessageBoxButton.OK, MessageBoxImage.Error));
+
+					// The grid shows the records the engine still holds.
+					RefreshFilterResults();
 				}
 				finally
 				{
