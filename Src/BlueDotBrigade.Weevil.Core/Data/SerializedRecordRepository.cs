@@ -80,7 +80,9 @@
 
 			do
 			{
-				hasRecord = _recordParser.TryReadNext(out MultilineRecordParser.ParsedRecord record);
+				// A record on the dummy's line ends the read, as it always has: a plugin's own record type can be on line -1.
+				hasRecord = _recordParser.TryReadNext(out MultilineRecordParser.ParsedRecord record) &&
+				            record.LineNumber != Record.Dummy.LineNumber;
 
 				if (hasRecord &&
 				    range.Start.Value <= record.LineNumber &&
