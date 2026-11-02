@@ -641,6 +641,10 @@
 						_rowSelection = new RowSelection(_engine);
 						_engine.Annotations.Changed += OnAnnotationsChanged;
 
+						// The dashboard reads the engine it was shown with, so it would keep the previous log in memory,
+						// and its insights would point at lines of that log (#1139).
+						_uiDispatcher.Invoke(() => _dialogBox.CloseDashboard());
+
 						this.FileOpened?.Invoke(this, EventArgs.Empty);
 
 						_bulletinMediator.Post(new BookmarksChangedBulletin

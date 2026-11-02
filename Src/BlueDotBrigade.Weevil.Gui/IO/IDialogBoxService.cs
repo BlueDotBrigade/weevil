@@ -20,6 +20,11 @@
 
 		void ShowDashboard(Version weevilVersion, IEngine engine, ImmutableArray<IInsight> insights, IBulletinMediator bulletinMediator);
 
+		/// <summary>
+		/// Closes the dashboard, if one is open.
+		/// </summary>
+		void CloseDashboard();
+
 		void ShowGraph(RecordList records, string selectedPattern, string sourceFilePath);
 		
 		bool TryShowGoTo(string defaultValue, out string userValue);
