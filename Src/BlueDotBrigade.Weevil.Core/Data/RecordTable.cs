@@ -233,7 +233,10 @@ namespace BlueDotBrigade.Weevil.Data
 					_chunks.Add(chunk);
 				}
 
-				var row = NextRow(lineNumber, createdAt, facts);
+				// The content is the chunk's bytes, whatever the caller's facts say.
+				var holdsBytes = new RecordFacts(facts.Severity, facts.IsMultiLine, facts.WasGeneratedByUi, keepsString: false);
+
+				var row = NextRow(lineNumber, createdAt, holdsBytes);
 				_current.Offsets[row] = offset;
 				_current.Lengths[row] = length;
 			}
