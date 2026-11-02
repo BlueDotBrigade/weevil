@@ -1657,12 +1657,12 @@
 				return;
 			}
 
-			if (bulletin?.RelatedRecords != null && bulletin.RelatedRecords.Length > 0)
+			if (bulletin?.RelatedLineNumbers != null && bulletin.RelatedLineNumbers.Count > 0)
 			{
 				// Option 6: Flag insight records and add @Flagged to filter
 				
 				// Steps 1 and 2: Core replaces the flags with those of the insight records still in memory (#1013)
-				var insightLineNumbers = new HashSet<int>(bulletin.RelatedRecords.Select(record => record.LineNumber));
+				var insightLineNumbers = new HashSet<int>(bulletin.RelatedLineNumbers);
 				var insightRecordCount = insightLineNumbers.Count;
 				var successfullyFlaggedCount = _engine.Analyzer.FlagOnly(insightLineNumbers);
 
@@ -1718,12 +1718,12 @@
 				{
 					_uiDispatcher.Invoke(() =>
 					{
-						var firstRecord = bulletin.RelatedRecords[0];
+						var firstLineNumber = bulletin.RelatedLineNumbers[0];
 						SearchFilterResults(
-							$"Unable to find the insight's related record in the search results. Line={firstRecord.LineNumber}",
+							$"Unable to find the insight's related record in the search results. Line={firstLineNumber}",
 							() => _engine
 								.Navigate
-								.GoTo(firstRecord.LineNumber, RecordSearchType.NearestNeighbor)
+								.GoTo(firstLineNumber, RecordSearchType.NearestNeighbor)
 								.ToIndexUsing(_engine.Filter.Results));
 					});
 				});

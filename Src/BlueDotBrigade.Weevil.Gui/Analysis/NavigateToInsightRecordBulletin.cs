@@ -1,20 +1,20 @@
 namespace BlueDotBrigade.Weevil.Gui.Analysis
 {
-	using BlueDotBrigade.Weevil.Data;
+	using System.Collections.Generic;
 
 	/// <summary>
 	/// Bulletin requesting navigation to records related to an insight.
 	/// </summary>
 	internal class NavigateToInsightRecordBulletin
 	{
-		public NavigateToInsightRecordBulletin(RecordList relatedRecords)
+		public NavigateToInsightRecordBulletin(IReadOnlyList<int> relatedLineNumbers)
 		{
-			this.RelatedRecords = relatedRecords;
+			this.RelatedLineNumbers = relatedLineNumbers;
 		}
 
 		/// <summary>
-		/// All records related to the insight that require user attention.
+		/// The line numbers of all records related to the insight that require user attention.
 		/// </summary>
-		public RecordList RelatedRecords { get; }
+		public IReadOnlyList<int> RelatedLineNumbers { get; }
 	}
 }

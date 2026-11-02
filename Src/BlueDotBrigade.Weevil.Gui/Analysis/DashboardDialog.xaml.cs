@@ -126,9 +126,9 @@
 		{
 			if (sender is FrameworkElement element && element.DataContext is IInsight insight)
 			{
-				if (insight.RelatedRecords.Length > 0)
+				if (insight.RelatedLineNumbers.Count > 0)
 				{
-					_bulletinMediator.Post(new NavigateToInsightRecordBulletin(insight.RelatedRecords));
+					_bulletinMediator.Post(new NavigateToInsightRecordBulletin(insight.RelatedLineNumbers));
 					
 					// Bring the main window to the front
 					if (this.Owner != null)

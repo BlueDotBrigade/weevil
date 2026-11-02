@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
+	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
 
 	public abstract class InsightBase : IInsight
@@ -18,7 +19,7 @@
 			this.MetricUnit = metricUnit ?? throw new ArgumentNullException(nameof(metricUnit));
 			this.MetricValue = _defaultMetricValue;
 			this.Details = _defaultDetails;
-			this.RelatedRecords = RecordList.Empty;
+			this.RelatedLineNumbers = Array.Empty<int>();
 		}
 
 		public string Title { get; }
@@ -26,14 +27,14 @@
 		public string MetricUnit { get; }
 		public string Details { get; protected set; }
 		public bool IsAttentionRequired { get; protected set; }
-		public RecordList RelatedRecords { get; protected set; }
+		public IReadOnlyList<int> RelatedLineNumbers { get; protected set; }
 
 		public void Refresh(RecordList records)
 		{
 			this.IsAttentionRequired = false;
 			this.MetricValue = _defaultMetricValue;
 			this.Details = _defaultDetails;
-			this.RelatedRecords = RecordList.Empty;
+			this.RelatedLineNumbers = Array.Empty<int>();
 
 			OnRefresh(records);
 		}
