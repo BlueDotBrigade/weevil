@@ -56,7 +56,7 @@
 		/// Returns the next record, or <see cref="Record.Dummy"/> when there are no more.
 		/// </summary>
 		/// <remarks>
-		/// Records are created a chunk at a time, so the log is read up to a chunk ahead of the record returned.
+		/// Records are made ready a chunk at a time, so the log is read up to a chunk ahead of the record returned.
 		/// </remarks>
 		public IRecord GetNext()
 		{
