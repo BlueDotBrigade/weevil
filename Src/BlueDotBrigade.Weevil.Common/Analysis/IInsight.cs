@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
 
 	public interface IInsight
@@ -15,13 +16,14 @@
 		 bool IsAttentionRequired { get; }
 
 		 /// <summary>
-		 /// Gets the collection of records that are related to this insight.
+		 /// Gets the line numbers of the records that are related to this insight.
 		 /// </summary>
 		 /// <remarks>
-		 /// When the insight has detected a problem, this collection contains the records
-		 /// that require user attention, with the first record being the primary record of interest.
+		 /// When the insight has detected a problem, these are the records that require user attention,
+		 /// with the first being the primary record of interest.
+		 /// They are line numbers, not records, so an insight keeps none of a log's content in memory (#1139).
 		 /// </remarks>
-		 RecordList RelatedRecords { get; }
+		 IReadOnlyList<int> RelatedLineNumbers { get; }
 
 		 void Refresh(RecordList records);
 	}

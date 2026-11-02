@@ -1,7 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	public class TemporalAnomalyInsight : InsightBase
@@ -33,13 +32,13 @@
 				this.MetricValue = metrics.Counter.ToString("#,##0");
 				this.IsAttentionRequired = false; // When using NLog, log entries are often out of order.
 				this.Details = $"The log file timestamps were not in chronological order {metrics.Counter} time(s). " +
-				               $"The biggest anomaly occurred at {metrics.BiggestAnomalyAt.CreatedAt.ToString("HH:mm:ss")}, " +
+				               $"The biggest anomaly occurred at {metrics.BiggestAnomalyAt.ToString("HH:mm:ss")}, " +
 				               $"and was {metrics.BiggestAnomaly.ToHumanReadable()}. Using threshold: {threshold}";
 
-				// Store the record where the biggest anomaly occurred
-				if (metrics.BiggestAnomalyAt != null && !Record.IsDummyOrNull(metrics.BiggestAnomalyAt))
+				// Store the line where the biggest anomaly occurred
+				if (metrics.BiggestAnomalyOnLine != Record.Dummy.LineNumber)
 				{
-					this.RelatedRecords = ImmutableArray.Create(metrics.BiggestAnomalyAt);
+					this.RelatedLineNumbers = new[] { metrics.BiggestAnomalyOnLine };
 				}
 			}
 		}

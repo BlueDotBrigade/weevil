@@ -1,8 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
-	using System.Collections.Immutable;
-	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 
 	public class TimeGapInsight : InsightBase
@@ -40,13 +38,16 @@
 				this.Details = $"A threshold of {_threshold.ToHumanReadable()}, resulted in {analyzer.Count} unexpected gaps in time. " +
 				               $"The longest gap occurred at {analyzer.FirstOccurrenceAt.ToString("HH:mm:ss")}.";
 
-				// Find the first record that matches the first occurrence timestamp
-				var firstOccurrenceRecord = records
-					.FirstOrDefault(r => r.HasCreationTime && r.CreatedAt == analyzer.FirstOccurrenceAt);
-
-				if (firstOccurrenceRecord != null)
+				// Find the first record that matches the first occurrence timestamp, by its timestamp alone
+				for (var position = 0; position < records.Count; position++)
 				{
-					this.RelatedRecords = ImmutableArray.Create(firstOccurrenceRecord);
+					var createdAt = records.GetCreatedAt(position);
+
+					if (createdAt != Record.CreationTimeUnknown && createdAt == analyzer.FirstOccurrenceAt)
+					{
+						this.RelatedLineNumbers = new[] { records.GetLineNumber(position) };
+						break;
+					}
 				}
 			}
 		}

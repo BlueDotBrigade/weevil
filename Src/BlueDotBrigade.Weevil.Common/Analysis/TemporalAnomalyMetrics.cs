@@ -8,12 +8,16 @@
 
 	internal class TemporalAnomalyMetrics : IMetricCollector
 	{
-		private IRecord _previousRecord;
-		private IRecord _firstOccurredAt;
+		// Where records were counted, not the records, so the metrics keep none of a log's content (#1139).
+		private int _previousLineNumber;
+		private DateTime _previousCreatedAt;
+		private int _firstOccurredOnLine;
+		private DateTime _firstOccurredAt;
 
 		private int _counter;
 
-		private IRecord _biggestAnomalyAt;
+		private int _biggestAnomalyOnLine;
+		private DateTime _biggestAnomalyAt;
 		private TimeSpan _biggestAnomaly;
 
 		private readonly TimeSpan _threshold;
@@ -33,11 +37,27 @@
 			Reset();
 		}
 
-		public IRecord FirstOccurredAt => _firstOccurredAt;
+		/// <summary>
+		/// When the first anomaly's record was created, or <see cref="Record.CreationTimeUnknown"/>.
+		/// </summary>
+		public DateTime FirstOccurredAt => _firstOccurredAt;
+
+		/// <summary>
+		/// The line number of the first anomaly's record, or the line number of <see cref="Record.Dummy"/>.
+		/// </summary>
+		public int FirstOccurredOnLine => _firstOccurredOnLine;
 
 		public int Counter => _counter;
 
-		public IRecord BiggestAnomalyAt => _biggestAnomalyAt;
+		/// <summary>
+		/// When the record before the biggest anomaly was created, or <see cref="Record.CreationTimeUnknown"/>.
+		/// </summary>
+		public DateTime BiggestAnomalyAt => _biggestAnomalyAt;
+
+		/// <summary>
+		/// The line number of the record before the biggest anomaly, or the line number of <see cref="Record.Dummy"/>.
+		/// </summary>
+		public int BiggestAnomalyOnLine => _biggestAnomalyOnLine;
 
 		public TimeSpan BiggestAnomaly => _biggestAnomaly;
 
@@ -57,32 +77,34 @@
 
 			if (record.HasCreationTime)
 			{
-				if (Record.IsDummyOrNull(_previousRecord))
+				if (_previousLineNumber == Record.Dummy.LineNumber)
 				{
-					_previousRecord = record;
+					// The first record with a timestamp: nothing to compare it with yet.
 				}
 				else
 				{
-					if (_previousRecord.CreatedAt <= record.CreatedAt)
+					if (_previousCreatedAt <= record.CreatedAt)
 					{
 						// everything appears to be in order
 					}
 					else
 					{
-						_currentAnomaly = record.CreatedAt - _previousRecord.CreatedAt;
+						_currentAnomaly = record.CreatedAt - _previousCreatedAt;
 						
 						if (_currentAnomaly < _threshold)
 						{
-							if (Record.IsDummyOrNull(_firstOccurredAt))
+							if (_firstOccurredOnLine == Record.Dummy.LineNumber)
 							{
-								_firstOccurredAt = record;
+								_firstOccurredOnLine = record.LineNumber;
+								_firstOccurredAt = record.CreatedAt;
 							}
 							Interlocked.Increment(ref _counter);
 
 							if (_currentAnomaly < _biggestAnomaly)
 							{
 								_biggestAnomaly = _currentAnomaly;
-								_biggestAnomalyAt = _previousRecord;
+								_biggestAnomalyOnLine = _previousLineNumber;
+								_biggestAnomalyAt = _previousCreatedAt;
 							}
 						}
 						else
@@ -96,7 +118,8 @@
 						}
 					}
 				}
-				_previousRecord = record;
+				_previousLineNumber = record.LineNumber;
+				_previousCreatedAt = record.CreatedAt;
 			}
 		}
 
@@ -104,9 +127,12 @@
 		{
 			_counter = 0;
 
-			_previousRecord = Record.Dummy;
-			_firstOccurredAt = Record.Dummy;
-			_biggestAnomalyAt = Record.Dummy;
+			_previousLineNumber = Record.Dummy.LineNumber;
+			_previousCreatedAt = Record.CreationTimeUnknown;
+			_firstOccurredOnLine = Record.Dummy.LineNumber;
+			_firstOccurredAt = Record.CreationTimeUnknown;
+			_biggestAnomalyOnLine = Record.Dummy.LineNumber;
+			_biggestAnomalyAt = Record.CreationTimeUnknown;
 
 			_biggestAnomaly = TimeSpan.Zero;
 
@@ -119,8 +145,8 @@
 			{
 				{ nameof(this.Threshold), this.Threshold },
 				{ nameof(this.Counter), this.Counter },
-				{ nameof(this.FirstOccurredAt), this.FirstOccurredAt.CreatedAt },
-				{ nameof(this.BiggestAnomalyAt), this.BiggestAnomalyAt.CreatedAt },
+				{ nameof(this.FirstOccurredAt), this.FirstOccurredAt },
+				{ nameof(this.BiggestAnomalyAt), this.BiggestAnomalyAt },
 				{ nameof(this.BiggestAnomaly), this.BiggestAnomaly },
 			};
 		}

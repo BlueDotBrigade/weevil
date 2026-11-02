@@ -1,6 +1,5 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
-	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
 
 	public class CriticalErrorsInsight : InsightBase
@@ -27,13 +26,13 @@
 			{
 				this.MetricValue = analyzer.Fatals.ToString("#,##0");
 				this.Details =
-					$"Fatal and/or critical errors have been detected, with the first occurrence at: {analyzer.FatalFirstOccurredAt.CreatedAt:HH:mm:ss}.";
+					$"Fatal and/or critical errors have been detected, with the first occurrence at: {analyzer.FatalFirstOccurredAt:HH:mm:ss}.";
 				this.IsAttentionRequired = true;
 
-				// Store the first fatal record so users can navigate to it
-				if (analyzer.FatalFirstOccurredAt != null)
+				// Store the first fatal record's line so users can navigate to it
+				if (analyzer.FatalFirstOccurredOnLine != Record.Dummy.LineNumber)
 				{
-					this.RelatedRecords = ImmutableArray.Create(analyzer.FatalFirstOccurredAt);
+					this.RelatedLineNumbers = new[] { analyzer.FatalFirstOccurredOnLine };
 				}
 			}
 		}

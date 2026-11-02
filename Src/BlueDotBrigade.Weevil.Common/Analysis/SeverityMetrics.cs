@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
@@ -12,7 +13,9 @@
 		private int _error;
 		private int _fatal;
 
-		private IRecord _fatalFirstOccurredAt;
+		// Where the first fatal record was counted, not the record, so the metrics keep none of a log's content (#1139).
+		private DateTime _fatalFirstOccurredAt = Record.CreationTimeUnknown;
+		private int _fatalFirstOccurredOnLine = Record.Dummy.LineNumber;
 		#endregion
 
 		#region Object Lifetime
@@ -27,7 +30,15 @@
 
 		public int Fatals => _fatal;
 
-		public IRecord FatalFirstOccurredAt => _fatalFirstOccurredAt;
+		/// <summary>
+		/// When the first fatal record counted was created, or <see cref="Record.CreationTimeUnknown"/>.
+		/// </summary>
+		public DateTime FatalFirstOccurredAt => _fatalFirstOccurredAt;
+
+		/// <summary>
+		/// The line number of the first fatal record counted, or the line number of <see cref="Record.Dummy"/>.
+		/// </summary>
+		public int FatalFirstOccurredOnLine => _fatalFirstOccurredOnLine;
 		#endregion
 
 		#region Private Methods
@@ -56,7 +67,8 @@
 					var count = Interlocked.Increment(ref _fatal);
 					if (count == 1)
 					{
-						_fatalFirstOccurredAt = record;
+						_fatalFirstOccurredAt = record.CreatedAt;
+						_fatalFirstOccurredOnLine = record.LineNumber;
 					}
 					break;
 			}

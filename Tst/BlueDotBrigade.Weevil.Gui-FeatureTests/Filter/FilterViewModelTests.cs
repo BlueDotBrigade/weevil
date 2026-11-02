@@ -2,7 +2,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Runtime.CompilerServices;
@@ -186,7 +185,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				bulletinMediator.Post(new NavigateToInsightRecordBulletin(ImmutableArray.Create(insightRecord)));
+				bulletinMediator.Post(new NavigateToInsightRecordBulletin(new[] { insightRecord.LineNumber }));
 
 				viewModel.InclusiveFilter.Should().NotContain("@Flagged", "insight navigation, which flags records and shows them, waits for the analysis");
 			}

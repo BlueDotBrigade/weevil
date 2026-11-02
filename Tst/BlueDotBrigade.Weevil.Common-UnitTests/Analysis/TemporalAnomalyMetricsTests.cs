@@ -44,7 +44,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			metrics.FirstOccurredAt.Should().BeSameAs(Record.Dummy);
+			metrics.FirstOccurredOnLine.Should().Be(Record.Dummy.LineNumber);
 		}
 
 		[TestMethod]
@@ -116,7 +116,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			metrics.FirstOccurredAt.LineNumber.Should().Be(3);
+			metrics.FirstOccurredOnLine.Should().Be(3);
 		}
 
 
@@ -153,7 +153,7 @@
 
 			records.ForEach(r => metrics.Count(r));
 
-			metrics.BiggestAnomalyAt.LineNumber.Should().Be(1);
+			metrics.BiggestAnomalyOnLine.Should().Be(1);
 		}
 	}
 }

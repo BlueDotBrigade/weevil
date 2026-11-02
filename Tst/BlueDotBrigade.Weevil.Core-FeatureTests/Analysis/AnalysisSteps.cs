@@ -109,7 +109,7 @@
                 {
                         var insight = this.Context.LastInsight;
                         insight.Should().NotBeNull();
-                        insight.RelatedRecords.Should().NotBeEmpty();
+                        insight.RelatedLineNumbers.Should().NotBeEmpty();
                 }
 
                 [Then("the insight should not have related records")]
@@ -117,7 +117,7 @@
                 {
                         var insight = this.Context.LastInsight;
                         insight.Should().NotBeNull();
-                        insight.RelatedRecords.Should().BeEmpty();
+                        insight.RelatedLineNumbers.Should().BeEmpty();
                 }
 
                 [Then("the first related record line number should be greater than 0")]
@@ -125,14 +125,14 @@
                 {
                         var insight = this.Context.LastInsight;
                         insight.Should().NotBeNull();
-                        insight.RelatedRecords.Should().NotBeEmpty();
-                        insight.RelatedRecords[0].LineNumber.Should().BeGreaterThan(0);
+                        insight.RelatedLineNumbers.Should().NotBeEmpty();
+                        insight.RelatedLineNumbers[0].Should().BeGreaterThan(0);
                 }
 
                 [When("flagging only the insight's records")]
                 public void WhenFlaggingOnlyTheInsightsRecords()
                 {
-                        this.Context.Engine.Analyzer.FlagOnly(this.Context.LastInsight.RelatedRecords.Select(record => record.LineNumber));
+                        this.Context.Engine.Analyzer.FlagOnly(this.Context.LastInsight.RelatedLineNumbers);
                 }
 
                 [Then("the results will be the insight's records")]
@@ -141,7 +141,7 @@
                         this.Context.Engine.Filter.Results
                                 .Select(record => record.LineNumber)
                                 .Should()
-                                .Equal(this.Context.LastInsight.RelatedRecords.Select(record => record.LineNumber));
+                                .Equal(this.Context.LastInsight.RelatedLineNumbers);
                 }
 
         }
