@@ -250,6 +250,20 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public async Task GivenAnOpenLog_WhenAnotherLogIsOpened_ThenTheDashboardIsClosed()
+		{
+			// The dashboard reads the engine it was shown with, so it would keep the previous log in memory (#1139).
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+			await viewModel.OpenAsync(CopyLog("A.log"));
+			dialogBox.ClearReceivedCalls();
+
+			await viewModel.OpenAsync(CopyLog("B.log"));
+
+			dialogBox.Received(1).CloseDashboard();
+		}
+
+		[TestMethod]
 		[WorkItem(1116)]
 		public async Task GivenALogWithRemarks_WhenAnotherLogIsOpened_ThenTheRemarksShownAreRefreshed()
 		{

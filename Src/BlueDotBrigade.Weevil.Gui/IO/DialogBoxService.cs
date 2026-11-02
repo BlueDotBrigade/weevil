@@ -111,6 +111,11 @@ internal class DialogBoxService : IDialogBoxService
 		dialog.Show();
 	}
 
+	public void CloseDashboard()
+	{
+		_activeDashboard?.Close();
+	}
+
 	public void ShowMessage(string message, string caption)
 	{
 		MessageBox.Show(message, caption);
