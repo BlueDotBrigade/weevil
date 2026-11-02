@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Linq;
 	using System.Text;
 
 	[TestClass]
@@ -51,6 +52,77 @@ namespace BlueDotBrigade.Weevil.Data
 			table.CreateRecord(RecordTable.BlockSize + 1).Content.Should().Be("d");
 			table.CreateRecord(RecordTable.BlockSize + 2).Content.Should().Be("Kept as a string");
 			table.GetLineNumber(RecordTable.BlockSize + 2).Should().Be(RecordTable.BlockSize + 3);
+		}
+
+		[TestMethod]
+		public void GivenChunksAndStringRowsAcrossBlocks_WhenCreatedFromTheTable_ThenEachRecordReadsItsOwnContent()
+		{
+			ContentChunk[] chunks = Enumerable.Range(0, 5)
+				.Select(index => new ContentChunk(index, Encoding.UTF8.GetBytes(((char)('A' + index)).ToString()), Encoding.UTF8))
+				.ToArray();
+			var facts = new RecordFacts(SeverityType.Information, isMultiLine: false, wasGeneratedByUi: false);
+			var flagged = new RecordFacts(SeverityType.Error, isMultiLine: true, wasGeneratedByUi: true);
+			var builder = new RecordTable.Builder();
+			var recordNumber = 0;
+
+			void AddBytes(int count, ContentChunk chunk)
+			{
+				for (var added = 0; added < count; added++, recordNumber++)
+				{
+					builder.Add(recordNumber + 1, Start, facts, chunk, 0, 1);
+				}
+			}
+
+			void AddString(RecordFacts stringFacts)
+			{
+				builder.Add(recordNumber + 1, Start, stringFacts, $"String {recordNumber}");
+				recordNumber++;
+			}
+
+			// The first block holds three chunks. The second block starts in the middle of the third chunk, holds a string row
+			// between two rows of the fourth, and ends exactly with the block. The third block starts with a string row.
+			AddBytes(10, chunks[0]);
+			AddBytes(10, chunks[1]);
+			AddBytes(RecordTable.BlockSize - 20 + 4, chunks[2]);
+			AddBytes(1, chunks[3]);
+			AddString(flagged);
+			AddBytes(RecordTable.BlockSize - 6, chunks[3]);
+			AddString(facts);
+			AddBytes(1, chunks[4]);
+			RecordTable table = builder.Build();
+
+			const int SecondBlock = RecordTable.BlockSize;
+			const int ThirdBlock = 2 * RecordTable.BlockSize;
+			table.Count.Should().Be(ThirdBlock + 2);
+			table.CreateRecord(9).Content.Should().Be("A");
+			table.CreateRecord(10).Content.Should().Be("B");
+			table.CreateRecord(20).Content.Should().Be("C");
+			table.CreateRecord(SecondBlock - 1).Content.Should().Be("C");
+			table.CreateRecord(SecondBlock + 3).Content.Should().Be("C");
+			table.CreateRecord(SecondBlock + 4).Content.Should().Be("D");
+			ShouldBe(table.CreateRecord(SecondBlock + 5), SecondBlock + 6, Start, SeverityType.Error, isMultiLine: true, wasGeneratedByUi: true, $"String {SecondBlock + 5}");
+			table.CreateRecord(SecondBlock + 6).Content.Should().Be("D");
+			table.CreateRecord(ThirdBlock - 1).Content.Should().Be("D");
+			table.CreateRecord(ThirdBlock).Content.Should().Be($"String {ThirdBlock}");
+			table.CreateRecord(ThirdBlock + 1).Content.Should().Be("E");
+		}
+
+		[TestMethod]
+		public void GivenExactlyAFullBlock_WhenTheTableIsBuilt_ThenItsLastRecordIsKept()
+		{
+			var chunk = new ContentChunk(0, Encoding.UTF8.GetBytes("a"), Encoding.UTF8);
+			var facts = new RecordFacts(SeverityType.Information, isMultiLine: false, wasGeneratedByUi: false);
+			var builder = new RecordTable.Builder();
+
+			for (var recordNumber = 0; recordNumber < RecordTable.BlockSize; recordNumber++)
+			{
+				builder.Add(recordNumber + 1, Start, facts, chunk, 0, 1);
+			}
+
+			RecordTable table = builder.Build();
+
+			table.Count.Should().Be(RecordTable.BlockSize);
+			table.CreateRecord(RecordTable.BlockSize - 1).LineNumber.Should().Be(RecordTable.BlockSize);
 		}
 
 		[TestMethod]
