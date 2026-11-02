@@ -6,6 +6,7 @@ namespace BlueDotBrigade.Weevil
 	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -196,6 +197,20 @@ namespace BlueDotBrigade.Weevil
 			engine.Reload();
 
 			previousRecord.IsAlive.Should().BeFalse("Reload releases the previous records before it reads the log, and opening collects them");
+		}
+
+		[TestMethod]
+		public void GivenInsightsThatAreKept_WhenTheLogIsReloaded_ThenTheRecordTheyReferToHasBeenFreed()
+		{
+			// The GUI keeps its insights across Reload; an insight that kept a record would keep the previous log's content (#1139).
+			// The log's third timestamp is earlier than its second, so the temporal anomaly insight refers to line 2.
+			IEngine engine = OpenCopy("OutOfOrderTimestamps.log");
+			(IInsight[] insights, WeakReference referredRecord) = GetInsightsAndTrackTheirRecord(engine);
+
+			engine.Reload();
+
+			referredRecord.IsAlive.Should().BeFalse("insights keep line numbers, not records");
+			GC.KeepAlive(insights);
 		}
 
 		[TestMethod]
@@ -393,10 +408,31 @@ namespace BlueDotBrigade.Weevil
 			return new WeakReference(engine.Filter.Results[0], trackResurrection: true);
 		}
 
-		private IEngine OpenCopy()
+		/// <summary>
+		/// Gets the insights, and watches the record that the first insight to refer to one refers to, the same way.
+		/// </summary>
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static (IInsight[] Insights, WeakReference Record) GetInsightsAndTrackTheirRecord(IEngine engine)
 		{
-			var logPath = Path.Combine(_folder, "SampleData.log");
-			File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+			IInsight[] insights = engine.Analyzer.GetInsights().ToArray();
+			var lineNumber = insights.First(insight => insight.RelatedLineNumbers.Count > 0).RelatedLineNumbers[0];
+
+			return (insights, TrackRecordOn(engine, lineNumber));
+		}
+
+		/// <summary>
+		/// Watches the record on <paramref name="lineNumber"/> the same way.
+		/// </summary>
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static WeakReference TrackRecordOn(IEngine engine, int lineNumber)
+		{
+			return new WeakReference(engine.Records[engine.Records.IndexOfLineNumber(lineNumber)], trackResurrection: true);
+		}
+
+		private IEngine OpenCopy(string fileName = "SampleData.log")
+		{
+			var logPath = Path.Combine(_folder, fileName);
+			File.Copy(new Daten().AsFilePath(fileName), logPath);
 
 			return Engine.UsingPath(logPath).Open();
 		}
