@@ -55,7 +55,7 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. T
 
 - Log files can contain hundreds of thousands of records. Avoid LINQ operations that enumerate all records multiple times per filter application.
 - A bulk change to comments, pins or flags, such as Unpin All, is one call on its store: one lock and one change event (decision 4 of the #990 plan). Find the lines to change in parallel, before the call.
-- Avoid allocating per-record objects in the hot path of filtering or parsing.
+- Records are created when they are read (#1140), so a filter or a Find creates one record per row it reads. On 10 million records in Release, filters that read text were as fast or faster than with an array of records, while filters that never read text, and a Find through every record, took about 0.4 s longer (#1150). Avoid any other per-record allocation in the hot path of filtering or parsing.
 
 ## Persistence
 

@@ -63,6 +63,7 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
      - The graph graphs at most 100,000 selected records, like Copy and Paste.
      - `IInsight.RelatedRecords` becomes line numbers.
      - Records are equal when their line numbers are equal, even across logs.
+   - **Decision (2026-11-02):** records created when they are read (#1140) make filters that never read text, and a Find through every record, about 0.4 s slower on 10 million records. Opening takes about half the time and filters that read text are as fast or faster. The user accepted this; #1150 follows up.
 4. **Clear frees memory (#1022).**
    - Clear narrows the view's record scope (#990 step 8). Content chunks that the scope no longer includes are released, followed by one compacting garbage collection, as Clear does today. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
    - Only whole chunks are released: up to about 16 MB stays at each edge of a kept range, and `Clear Selected` frees nothing.
