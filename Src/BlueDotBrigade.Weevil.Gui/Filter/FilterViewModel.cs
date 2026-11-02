@@ -423,9 +423,6 @@
 
 		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
-		[NotObservable]
-		public IList<IRecord> SelectedItems => _engine.Selector.GetSelected();
-
 		public ObservableCollection<MenuItemViewModel> CustomAnalyzerCommands { get; }
 
 		/// <summary>
