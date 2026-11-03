@@ -1,19 +1,11 @@
 namespace BlueDotBrigade.Weevil.Cli.Analysis
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Immutable;
-
-	using System.IO;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Analysis;
-
-	using BlueDotBrigade.Weevil.Cli.IO;
 	using BlueDotBrigade.Weevil.Diagnostics;
-
-	using BlueDotBrigade.Weevil.Filter;
+	using BlueDotBrigade.Weevil.Linq;
 	using BlueDotBrigade.Weevil.IO;
 	using Cocona;
 	using Cocona.Help;
@@ -39,39 +31,26 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 						.UsingTelemetry(telemetry)
 						.Open();
 
-				var severityMetrics =  engine.Filter.GetMetrics();
-
 				var insights = engine.Analyzer.GetInsights();
 
-				if (verbose)
+				if (!verbose)
 				{
-					Write.Heading("Metrics");
-
-					Write.Text($"Total Records\t{engine.Metrics.RecordCount}");
-					Write.Text($"File Size\t{engine.Metrics.FileSize}");
-
-					foreach (var item in severityMetrics)
-					{
-						Write.Text($"{item.Key}\t{item.Value}");
-					}
-				}else{
-				
-					insights = insights.Where(x => x.IsAttentionRequired == true).ToImmutableArray();
+					insights = insights.Where(x => x.IsAttentionRequired).ToImmutableArray();
 				}
 
-				Write.Heading("Insights");
+				var range = engine.Filter.Results.GetEstimatedRange();
+				var report = new InsightReportGenerator().Generate(
+					Program.ApplicationVersion,
+					engine,
+					insights,
+					range.From,
+					range.To);
+				var formatter = OutputAs.ResolveFormatter(
+					Environment.GetCommandLineArgs().Skip(1).ToArray(),
+					new MarkdownFormatter());
+				var renderer = InsightReportRendererFactory.Create(formatter);
 
-				if (insights.Length == 0)
-				{
-					Write.Text("No noteworthy insight was found.");
-				}
-				else
-				{
-					foreach(var insight in insights)
-					{
-						Write.Text($"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}");
-					}
-				}
+				Console.Out.WriteLine(renderer.Render(report));
 			}
 			finally
 			{
