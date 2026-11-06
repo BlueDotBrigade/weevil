@@ -242,6 +242,27 @@
 			return results;
 		}
 
+		/// <summary>
+		/// Returns <see langword="true"/> when <paramref name="positions"/> are 0, 1, 2 and so on, up to <paramref name="count"/>: every record, in order.
+		/// </summary>
+		private static bool IsEveryPosition(List<int> positions, int count)
+		{
+			if (positions.Count != count)
+			{
+				return false;
+			}
+
+			for (var index = 0; index < count; index++)
+			{
+				if (positions[index] != index)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		/// <returns>The positions of the records kept, or <see langword="null"/> to keep every record.</returns>
 		private static List<int> ClearBeyondRegions(RecordList allRecords, ImmutableArray<Region> regions)
 		{
@@ -334,6 +355,12 @@
 
 						default:
 							throw new ArgumentOutOfRangeException(nameof(_clearOperation), _clearOperation, "Clear operation is not supported.");
+					}
+
+					// A Clear that keeps every record, as after Select All, keeps the list rather than copying its table.
+					if (keptPositions != null && IsEveryPosition(keptPositions, _allRecords.Length))
+					{
+						keptPositions = null;
 					}
 
 					var recordsCleared = _allRecords.Length - (keptPositions?.Count ?? _allRecords.Length);
