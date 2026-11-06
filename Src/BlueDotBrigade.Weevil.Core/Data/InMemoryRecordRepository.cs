@@ -223,16 +223,19 @@
 			var results = new List<int>(selectedRecords.Count);
 			var searchFrom = 0;
 
-			// The selected records are in line number order, as the records are, so each search starts where the last one ended.
+			// The selected records are in line number order, as the records are, so each search starts after the last record found.
+			// Selected records are often next to each other, as after Select All, so the next record is tried before a search.
 			for (var index = 0; index < selectedRecords.Count; index++)
 			{
 				var lineNumber = selectedRecords.GetLineNumber(index);
-				var position = Collections.PositionRanges.LowerBound(records, lineNumber, searchFrom);
+				var position = searchFrom < records.Count && records.GetLineNumber(searchFrom) == lineNumber
+					? searchFrom
+					: Collections.PositionRanges.LowerBound(records, lineNumber, searchFrom);
 
 				if (position < records.Count && records.GetLineNumber(position) == lineNumber)
 				{
 					results.Add(position);
-					searchFrom = position;
+					searchFrom = position + 1;
 				}
 			}
 
