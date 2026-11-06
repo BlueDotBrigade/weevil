@@ -395,6 +395,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static WeakReference TrackRecordsShown(FilterViewModel viewModel)
 		{
+			// A list that was never shown would look freed.
+			viewModel.VisibleItems.Should().NotBeNullOrEmpty("the open log's records are shown");
+
 			return new WeakReference(viewModel.VisibleItems, trackResurrection: true);
 		}
 

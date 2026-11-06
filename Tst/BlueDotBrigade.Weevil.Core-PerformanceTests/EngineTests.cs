@@ -55,7 +55,7 @@
 		[WorkItem(1086)]
 		[DoNotParallelize]
 		[DataRow(DroidLog.Utf8, 1.6)]
-		[DataRow(DroidLog.Utf16LittleEndian, 1.4)]
+		[DataRow(DroidLog.Utf16LittleEndian, 1.3)]
 		public void GivenADroidLog_WhenOpened_ThenEveryRecordIsKeptWithinTheMemoryBudget(string logName, double maximumMemoryPerByteOfLog)
 		{
 			var logPath = DroidLog.GetPath(logName);
