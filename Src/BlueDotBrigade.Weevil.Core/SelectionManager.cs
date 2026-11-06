@@ -535,16 +535,19 @@
 		{
 			var lastKept = -1;
 			var positions = new List<int>();
+			var searchFrom = 0;
 
 			// Found by line number, so only the last selected record kept is created (#1137).
+			// Both lists are in line number order, so each search starts after the last record found (#1140).
 			for (var index = 0; index < selected.Count; index++)
 			{
-				var position = FindPosition(kept, selected.GetLineNumber(index));
+				var position = PositionRanges.IndexOfLineNumber(kept, selected.GetLineNumber(index), searchFrom);
 
 				if (position >= 0)
 				{
 					positions.Add(position);
 					lastKept = index;
+					searchFrom = position + 1;
 				}
 			}
 

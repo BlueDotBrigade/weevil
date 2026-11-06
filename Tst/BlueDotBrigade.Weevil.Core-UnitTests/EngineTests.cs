@@ -93,6 +93,17 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenRecordsSelectedTogetherAndApart_WhenTheRecordsBeforeThemAreCleared_ThenTheyStaySelected()
+		{
+			IEngine engine = OpenCopy();
+			engine.Selector.SelectOnly(5, 6).Select(lineNumber: 8);
+
+			engine.Clear(ClearOperation.BeforeSelected);
+
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(5, 6, 8);
+		}
+
+		[TestMethod]
 		public void GivenAnActiveRecordButNoSelectedRecord_WhenCleared_ThenNavigationStartsFromTheTop()
 		{
 			// A cleared engine starts as a new one did, with no active record.

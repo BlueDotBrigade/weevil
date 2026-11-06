@@ -262,6 +262,24 @@ namespace BlueDotBrigade.Weevil.Collections
 		}
 
 		/// <summary>
+		/// Returns the position of the record on <paramref name="lineNumber"/>, at or after <paramref name="from"/>, or -1 if there is none.
+		/// </summary>
+		/// <remarks>
+		/// For line numbers looked up in ascending order, each from just after the last one found: the record at <paramref name="from"/>
+		/// is tried before a search, because the next line looked up is often the next record, as after Select All (#1140).
+		/// </remarks>
+		internal static int IndexOfLineNumber(RecordList records, int lineNumber, int from)
+		{
+			var position = from < records.Length && records.GetLineNumber(from) == lineNumber
+				? from
+				: LowerBound(records, lineNumber, from);
+
+			return position < records.Length && records.GetLineNumber(position) == lineNumber
+				? position
+				: -1;
+		}
+
+		/// <summary>
 		/// Returns the position of the first record whose line number is at least <paramref name="lineNumber"/>,
 		/// or the length if there is none.
 		/// </summary>
