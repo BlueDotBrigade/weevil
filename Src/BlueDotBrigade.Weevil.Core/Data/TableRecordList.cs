@@ -53,19 +53,51 @@ namespace BlueDotBrigade.Weevil.Data
 				return RecordList.Empty;
 			}
 
-			if (records is TableRecordList list)
-			{
-				if (list._recordNumbers != null)
-				{
-					for (var index = 0; index < positions.Length; index++)
-					{
-						positions[index] = list._recordNumbers[positions[index]];
-					}
-				}
+			return records is TableRecordList list
+				? new TableRecordList(list._table, list.ToRecordNumbers(positions))
+				: CopyRecords(records, positions);
+		}
 
-				return new TableRecordList(list._table, positions);
+		/// <summary>
+		/// Returns the records at <paramref name="positions"/> of <paramref name="records"/>, in that order, over a new table of only those records.
+		/// </summary>
+		/// <param name="positions">Positions in <paramref name="records"/>, which the method may change.</param>
+		/// <remarks>
+		/// Clear keeps one, so the records it clears, and the chunks that no kept record is read from, can be freed.
+		/// </remarks>
+		public static RecordList Keep(RecordList records, int[] positions)
+		{
+			if (positions.Length == 0)
+			{
+				return RecordList.Empty;
 			}
 
+			return records is TableRecordList list
+				? new TableRecordList(list._table.Keep(list.ToRecordNumbers(positions)))
+				: CopyRecords(records, positions);
+		}
+
+		/// <summary>
+		/// Turns positions in this list into the record numbers they refer to, in the same array.
+		/// </summary>
+		private int[] ToRecordNumbers(int[] positions)
+		{
+			if (_recordNumbers != null)
+			{
+				for (var index = 0; index < positions.Length; index++)
+				{
+					positions[index] = _recordNumbers[positions[index]];
+				}
+			}
+
+			return positions;
+		}
+
+		/// <summary>
+		/// A list that is not over a table, as tests build, keeps the records themselves.
+		/// </summary>
+		private static RecordList CopyRecords(RecordList records, int[] positions)
+		{
 			ImmutableArray<IRecord>.Builder selected = ImmutableArray.CreateBuilder<IRecord>(positions.Length);
 
 			foreach (var position in positions)

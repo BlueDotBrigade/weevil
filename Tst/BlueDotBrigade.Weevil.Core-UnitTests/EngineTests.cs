@@ -201,6 +201,23 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenAnOpenLog_WhenRecordsAreCleared_ThenTheRecordTableTheyWereReadFromHasBeenFreed()
+		{
+			// Clear keeps a record table of only the records it keeps, so the records it clears can be freed (#1140).
+			IEngine engine = OpenCopy();
+			WeakReference previousTable = TrackRecordTable(engine);
+			engine.Selector.SelectOnly(10, 20);
+
+			engine.Clear(ClearOperation.BeforeSelected);
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
+
+			previousTable.IsAlive.Should().BeFalse("Clear keeps a record table of only the records it keeps");
+			engine.Records.GetLineNumber(0).Should().Be(10);
+		}
+
+		[TestMethod]
 		public void GivenInsightsThatAreKept_WhenTheLogIsReloaded_ThenTheRecordTheyReferToHasBeenFreed()
 		{
 			// The GUI keeps its insights across Reload; an insight that kept a record would keep the previous log's content (#1139).

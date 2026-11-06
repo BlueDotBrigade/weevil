@@ -66,6 +66,35 @@ namespace BlueDotBrigade.Weevil.Data
 					facts.WasGeneratedByUi);
 		}
 
+		/// <summary>
+		/// Returns a new table of only the records at <paramref name="recordNumbers"/>, in that order (#1140).
+		/// </summary>
+		/// <remarks>
+		/// Clear keeps one, so this table and the chunks that no kept record is read from can be freed, as Clear always freed the records it cleared.
+		/// </remarks>
+		public RecordTable Keep(IReadOnlyList<int> recordNumbers)
+		{
+			var kept = new Builder();
+
+			foreach (var recordNumber in recordNumbers)
+			{
+				Block block = GetBlock(recordNumber);
+				var row = recordNumber % BlockSize;
+				RecordFacts facts = block.Facts[row];
+
+				if (facts.KeepsString)
+				{
+					kept.Add(block.LineNumbers[row], block.CreatedAt[row], facts, block.GetString(row));
+				}
+				else
+				{
+					kept.Add(block.LineNumbers[row], block.CreatedAt[row], facts, GetChunk(recordNumber), block.Offsets[row], block.Lengths[row]);
+				}
+			}
+
+			return kept.Build();
+		}
+
 		private Block GetBlock(int recordNumber)
 		{
 			if ((uint)recordNumber >= (uint)this.Count)

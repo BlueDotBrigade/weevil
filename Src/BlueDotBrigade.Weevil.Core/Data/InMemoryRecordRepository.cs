@@ -367,10 +367,11 @@
 				_operationState = OperationInactive;
 			}
 
-			// A list kept whole is returned as it is, not copied.
+			// A list kept whole is returned as it is, not copied. Otherwise the records kept get a table of their own,
+			// so the records cleared, and the chunks only they were read from, are freed (#1140).
 			return keptPositions == null
 				? _allRecords
-				: TableRecordList.Select(_allRecords, keptPositions.ToArray());
+				: TableRecordList.Keep(_allRecords, keptPositions.ToArray());
 		}
 
 		public RecordList Get(Range range, int maximumCount)
