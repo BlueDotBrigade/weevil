@@ -9,24 +9,25 @@
 	internal class CommentNavigator : ICommentNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
-		private readonly IRecordState _state;
+		private readonly RecordState _state;
 
-		public CommentNavigator(ActiveRecord activeRecord, IRecordState state)
+		public CommentNavigator(ActiveRecord activeRecord, RecordState state)
 		{
 			_activeRecord = activeRecord;
 			_state = state;
 		}
 
-		private bool CheckHasComment(IRecord record)
+		// By line number, so a search creates no record (#1140).
+		private bool CheckHasComment(int lineNumber)
 		{
-			return _state.HasComment(record);
+			return _state.Annotations.HasComment(lineNumber);
 		}
 
 		public IRecord FindPrevious()
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToPrevious(_activeRecord.Index, CheckHasComment);
+				.GoToPreviousLineNumber(_activeRecord.Index, CheckHasComment);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
@@ -34,7 +35,7 @@
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToNext(_activeRecord.Index, CheckHasComment);
+				.GoToNextLineNumber(_activeRecord.Index, CheckHasComment);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
@@ -54,8 +55,8 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToPrevious(_activeRecord.Index, record => 
-						_state.HasComment(record) && regex.IsMatch(_state.GetComment(record)));
+					.GoToPreviousLineNumber(_activeRecord.Index, lineNumber => 
+						_state.Annotations.HasComment(lineNumber) && regex.IsMatch(_state.Annotations.GetComment(lineNumber)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -67,8 +68,8 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToPrevious(_activeRecord.Index, record => 
-						_state.HasComment(record) && _state.GetComment(record).Contains(value, comparison));
+					.GoToPreviousLineNumber(_activeRecord.Index, lineNumber => 
+						_state.Annotations.HasComment(lineNumber) && _state.Annotations.GetComment(lineNumber).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -90,8 +91,8 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToNext(_activeRecord.Index, record => 
-						_state.HasComment(record) && regex.IsMatch(_state.GetComment(record)));
+					.GoToNextLineNumber(_activeRecord.Index, lineNumber => 
+						_state.Annotations.HasComment(lineNumber) && regex.IsMatch(_state.Annotations.GetComment(lineNumber)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -103,8 +104,8 @@
 
 				var resultAt = _activeRecord
 					.DataSource
-					.GoToNext(_activeRecord.Index, record => 
-						_state.HasComment(record) && _state.GetComment(record).Contains(value, comparison));
+					.GoToNextLineNumber(_activeRecord.Index, lineNumber => 
+						_state.Annotations.HasComment(lineNumber) && _state.Annotations.GetComment(lineNumber).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}

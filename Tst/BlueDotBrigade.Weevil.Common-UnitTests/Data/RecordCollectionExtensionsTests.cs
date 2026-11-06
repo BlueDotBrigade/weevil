@@ -266,5 +266,16 @@
 			results.IsDefault.Should().BeFalse();
 			results.Should().BeEmpty();
 		}
+
+		[TestMethod]
+		public void GivenAListThatCannotCreateRecords_WhenSearchedByLineNumber_ThenItFindsThePositionsAroundTheStart()
+		{
+			// Navigation tests only line numbers, so it creates no record (#1140).
+			var records = new ColumnsOnlyRecordList(R.WithLineNumbers(11, 15));
+
+			records.GoToNextLineNumber(1, lineNumber => lineNumber % 2 == 1).Should().Be(2);
+			records.GoToPreviousLineNumber(1, lineNumber => lineNumber % 2 == 1).Should().Be(0);
+			records.GoToNextLineNumber(4, lineNumber => lineNumber == 12).Should().Be(1);
+		}
 	}
 }

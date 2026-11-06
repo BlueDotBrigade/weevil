@@ -286,35 +286,16 @@
 		/// <exception cref="RecordNotFoundException"/>
 		public static int GoToPrevious(this RecordList sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
 		{
-			const int UnknownActiveRecord = -1;
+			return FindPrevious(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords[position]));
+		}
 
-			if (sourceRecords.Length == 0)
-			{
-				return UnknownActiveRecord;
-			}
-			else
-			{
-				var wasFound = false;
-				var index = startAt >= 0 ? startAt : UnknownActiveRecord;
-
-				var indexOfResult = UnknownActiveRecord;
-
-				for (var i = 0; i < sourceRecords.Length; i++)
-				{
-					index = index - 1 < 0 ? sourceRecords.Length - 1 : index - 1;
-
-					if (checkIfMatches(sourceRecords[index]))
-					{
-						indexOfResult = index;
-						wasFound = true;
-						break;
-					}
-				}
-
-				return wasFound
-					? indexOfResult
-					: throw new RecordNotFoundException();
-			}
+		/// <summary>
+		/// Navigates through records in descending order, testing only their line numbers, so it creates no record (#1140).
+		/// </summary>
+		/// <inheritdoc cref="GoToPrevious(RecordList, int, Func{IRecord, bool})"/>
+		public static int GoToPreviousLineNumber(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
+		{
+			return FindPrevious(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords.GetLineNumber(position)));
 		}
 
 		/// <summary>
@@ -329,9 +310,62 @@
 		/// <exception cref="RecordNotFoundException"/>
 		public static int GoToNext(this RecordList sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
 		{
+			return FindNext(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords[position]));
+		}
+
+		/// <summary>
+		/// Navigates through records in ascending order, testing only their line numbers, so it creates no record (#1140).
+		/// </summary>
+		/// <inheritdoc cref="GoToNext(RecordList, int, Func{IRecord, bool})"/>
+		public static int GoToNextLineNumber(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
+		{
+			return FindNext(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords.GetLineNumber(position)));
+		}
+
+		/// <summary>
+		/// Returns the first position before <paramref name="startAt"/>, wrapping around, at which <paramref name="isMatchAt"/> is true.
+		/// </summary>
+		private static int FindPrevious(int count, int startAt, Func<int, bool> isMatchAt)
+		{
 			const int UnknownActiveRecord = -1;
 
-			if (sourceRecords.Length == 0)
+			if (count == 0)
+			{
+				return UnknownActiveRecord;
+			}
+			else
+			{
+				var wasFound = false;
+				var index = startAt >= 0 ? startAt : UnknownActiveRecord;
+
+				var indexOfResult = UnknownActiveRecord;
+
+				for (var i = 0; i < count; i++)
+				{
+					index = index - 1 < 0 ? count - 1 : index - 1;
+
+					if (isMatchAt(index))
+					{
+						indexOfResult = index;
+						wasFound = true;
+						break;
+					}
+				}
+
+				return wasFound
+					? indexOfResult
+					: throw new RecordNotFoundException();
+			}
+		}
+
+		/// <summary>
+		/// Returns the first position after <paramref name="startAt"/>, wrapping around, at which <paramref name="isMatchAt"/> is true.
+		/// </summary>
+		private static int FindNext(int count, int startAt, Func<int, bool> isMatchAt)
+		{
+			const int UnknownActiveRecord = -1;
+
+			if (count == 0)
 			{
 				return UnknownActiveRecord;
 			}
@@ -342,11 +376,11 @@
 
 				var indexOfResult = UnknownActiveRecord;
 
-				for (var i = 0; i < sourceRecords.Length; i++)
+				for (var i = 0; i < count; i++)
 				{
-					index = (index + 1) % sourceRecords.Length;
+					index = (index + 1) % count;
 
-					if (checkIfMatches(sourceRecords[index]))
+					if (isMatchAt(index))
 					{
 						indexOfResult = index;
 						wasFound = true;

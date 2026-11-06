@@ -7,24 +7,25 @@
 	internal class PinNavigator : IPinNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
-		private readonly IRecordState _state;
+		private readonly RecordState _state;
 
-		public PinNavigator(ActiveRecord activeRecord, IRecordState state)
+		public PinNavigator(ActiveRecord activeRecord, RecordState state)
 		{
 			_activeRecord = activeRecord;
 			_state = state;
 		}
 
-		private bool CheckIsPinned(IRecord record)
+		// By line number, so a search creates no record (#1140).
+		private bool CheckIsPinned(int lineNumber)
 		{
-			return _state.IsPinned(record);
+			return _state.Annotations.IsPinned(lineNumber);
 		}
 
 		public IRecord FindPrevious()
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToPrevious(_activeRecord.Index, CheckIsPinned);
+				.GoToPreviousLineNumber(_activeRecord.Index, CheckIsPinned);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
@@ -32,7 +33,7 @@
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToNext(_activeRecord.Index, CheckIsPinned);
+				.GoToNextLineNumber(_activeRecord.Index, CheckIsPinned);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 	}

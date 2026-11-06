@@ -7,24 +7,25 @@
 	internal class FlagNavigator : IFlagNavigator
 	{
 		private readonly ActiveRecord _activeRecord;
-		private readonly IRecordState _state;
+		private readonly RecordState _state;
 
-		public FlagNavigator(ActiveRecord activeRecord, IRecordState state)
+		public FlagNavigator(ActiveRecord activeRecord, RecordState state)
 		{
 			_activeRecord = activeRecord;
 			_state = state;
 		}
 
-		private bool CheckIsFlagged(IRecord record)
+		// By line number, so a search creates no record (#1140).
+		private bool CheckIsFlagged(int lineNumber)
 		{
-			return _state.IsFlagged(record);
+			return _state.Flags.IsFlagged(lineNumber);
 		}
 
 		public IRecord FindPrevious()
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToPrevious(_activeRecord.Index, CheckIsFlagged);
+				.GoToPreviousLineNumber(_activeRecord.Index, CheckIsFlagged);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
@@ -32,7 +33,7 @@
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToNext(_activeRecord.Index, CheckIsFlagged);
+				.GoToNextLineNumber(_activeRecord.Index, CheckIsFlagged);
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 	}
