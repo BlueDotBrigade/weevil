@@ -45,6 +45,20 @@ namespace BlueDotBrigade.Weevil.Data
 		/// </summary>
 		public abstract DateTime GetCreatedAt(int position);
 
+		/// <summary>
+		/// Returns the content of the record at <paramref name="position"/>, read with <paramref name="content"/>,
+		/// without creating the record when the list does not hold it (#1150).
+		/// </summary>
+		/// <remarks>
+		/// The same text as <see cref="ContentBuffer.Read(IRecord)"/> returns for the record, valid until <paramref name="content"/> reads another.
+		/// </remarks>
+		public virtual ReadOnlySpan<char> ReadContent(int position, ContentBuffer content)
+		{
+			ArgumentNullException.ThrowIfNull(content);
+
+			return content.Read(this[position]);
+		}
+
 		IRecord IList<IRecord>.this[int index]
 		{
 			get => this[index];

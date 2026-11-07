@@ -39,6 +39,13 @@ namespace BlueDotBrigade.Weevil.Data
 
 		public override DateTime GetCreatedAt(int position) => _table.GetCreatedAt(GetRecordNumber(position));
 
+		public override ReadOnlySpan<char> ReadContent(int position, ContentBuffer content)
+		{
+			ArgumentNullException.ThrowIfNull(content);
+
+			return _table.ReadContent(GetRecordNumber(position), content);
+		}
+
 		/// <summary>
 		/// Returns the records at <paramref name="positions"/> of <paramref name="records"/>, in that order.
 		/// </summary>

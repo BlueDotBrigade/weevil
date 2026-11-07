@@ -35,5 +35,27 @@ namespace BlueDotBrigade.Weevil.Data
 
 			return _content is null ? _chars.AsSpan(0, _length) : _content;
 		}
+
+		/// <summary>
+		/// Returns the text of the <paramref name="length"/> bytes at <paramref name="offset"/> in <paramref name="chunk"/>,
+		/// as <see cref="Read(IRecord)"/> returns it for a record that holds them, so a list over a record table can read content without creating records (#1150).
+		/// </summary>
+		/// <param name="isMultiLine">The bytes span several lines, which are joined with <c>\r\n</c> whatever the file's own line breaks.</param>
+		public ReadOnlySpan<char> Read(ContentChunk chunk, int offset, int length, bool isMultiLine)
+		{
+			ArgumentNullException.ThrowIfNull(chunk);
+
+			if (offset < 0 || length < 0 || offset > chunk.Length - length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(offset), offset, "The content is expected to be within the chunk.");
+			}
+
+			// The buffer no longer holds a record's content, so the next Read(IRecord) reads its record again.
+			_record = null;
+			_content = null;
+			_length = chunk.Decode(offset, length, isMultiLine, ref _chars);
+
+			return _chars.AsSpan(0, _length);
+		}
 	}
 }

@@ -67,6 +67,21 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		/// <summary>
+		/// Returns the content of the record at <paramref name="recordNumber"/>, the same text its record's content would be, without creating the record (#1150).
+		/// </summary>
+		/// <param name="content">Decodes a row that holds the log's bytes. A row that keeps a string returns the string as it is.</param>
+		public ReadOnlySpan<char> ReadContent(int recordNumber, ContentBuffer content)
+		{
+			Block block = GetBlock(recordNumber);
+			var row = recordNumber % BlockSize;
+			RecordFacts facts = block.Facts[row];
+
+			return facts.KeepsString
+				? block.GetString(row)
+				: content.Read(GetChunk(recordNumber), block.Offsets[row], block.Lengths[row], facts.IsMultiLine);
+		}
+
+		/// <summary>
 		/// Returns a new table of only the records at <paramref name="recordNumbers"/>, in that order (#1140).
 		/// </summary>
 		/// <remarks>
