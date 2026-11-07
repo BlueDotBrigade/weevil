@@ -299,6 +299,15 @@
 		}
 
 		/// <summary>
+		/// Navigates through records in descending order, testing their positions, so the test reads only what it needs and creates no record (#1150).
+		/// </summary>
+		/// <inheritdoc cref="GoToPrevious(RecordList, int, Func{IRecord, bool})"/>
+		public static int GoToPreviousPosition(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
+		{
+			return FindPrevious(sourceRecords.Length, startAt, checkIfMatches);
+		}
+
+		/// <summary>
 		/// Navigates through records in ascending order (e.g. lines: 2, 4, 8, 16).
 		/// </summary>
 		/// <param name="sourceRecords">Collection to search.</param>
@@ -320,6 +329,15 @@
 		public static int GoToNextLineNumber(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
 		{
 			return FindNext(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords.GetLineNumber(position)));
+		}
+
+		/// <summary>
+		/// Navigates through records in ascending order, testing their positions, so the test reads only what it needs and creates no record (#1150).
+		/// </summary>
+		/// <inheritdoc cref="GoToNext(RecordList, int, Func{IRecord, bool})"/>
+		public static int GoToNextPosition(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
+		{
+			return FindNext(sourceRecords.Length, startAt, checkIfMatches);
 		}
 
 		/// <summary>

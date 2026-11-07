@@ -17,7 +17,9 @@
 
 		public IRecord FindPrevious(string value, bool isCaseSensitive, bool useRegex = false)
 		{
-			// Each record's content is read once, into a buffer the search reuses (#1131).
+			// Each row's content is read once, by position, into a buffer the search reuses (#1131),
+			// so only the record found is created (#1150).
+			RecordList records = _activeRecord.DataSource;
 			var content = new ContentBuffer();
 
 			if (useRegex)
@@ -27,9 +29,7 @@
 					: RegexOptions.IgnoreCase;
 				var regex = new Regex(value, regexOptions);
 
-				var resultAt = _activeRecord
-					.DataSource
-					.GoToPrevious(_activeRecord.Index, record => regex.IsMatch(content.Read(record)));
+				var resultAt = records.GoToPreviousPosition(_activeRecord.Index, position => regex.IsMatch(records.ReadContent(position, content)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -39,9 +39,7 @@
 					? StringComparison.Ordinal
 					: StringComparison.OrdinalIgnoreCase;
 
-				var resultAt = _activeRecord
-					.DataSource
-					.GoToPrevious(_activeRecord.Index, record => content.Read(record).Contains(value, comparison));
+				var resultAt = records.GoToPreviousPosition(_activeRecord.Index, position => records.ReadContent(position, content).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -49,7 +47,9 @@
 
 		public IRecord FindNext(string value, bool isCaseSensitive, bool useRegex = false)
 		{
-			// Each record's content is read once, into a buffer the search reuses (#1131).
+			// Each row's content is read once, by position, into a buffer the search reuses (#1131),
+			// so only the record found is created (#1150).
+			RecordList records = _activeRecord.DataSource;
 			var content = new ContentBuffer();
 
 			if (useRegex)
@@ -59,9 +59,7 @@
 					: RegexOptions.IgnoreCase;
 				var regex = new Regex(value, regexOptions);
 
-				var resultAt = _activeRecord
-					.DataSource
-					.GoToNext(_activeRecord.Index, record => regex.IsMatch(content.Read(record)));
+				var resultAt = records.GoToNextPosition(_activeRecord.Index, position => regex.IsMatch(records.ReadContent(position, content)));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}
@@ -71,9 +69,7 @@
 					? StringComparison.Ordinal
 					: StringComparison.OrdinalIgnoreCase;
 
-				var resultAt = _activeRecord
-					.DataSource
-					.GoToNext(_activeRecord.Index, record => content.Read(record).Contains(value, comparison));
+				var resultAt = records.GoToNextPosition(_activeRecord.Index, position => records.ReadContent(position, content).Contains(value, comparison));
 
 				return _activeRecord.SetActiveIndex(resultAt);
 			}

@@ -63,5 +63,7 @@ namespace BlueDotBrigade.Weevil.Data
 		public void SetPinned(IRecord record, bool isPinned) => this.Annotations.SetPinned(record.LineNumber, isPinned);
 
 		public void SetFlagged(IRecord record, bool isFlagged) => this.Flags.SetFlagged(record.LineNumber, isFlagged);
+
+		public void SetFlagged(RecordList records, bool isFlagged) => this.Flags.SetFlagged(records, isFlagged);
 	}
 }

@@ -55,7 +55,7 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. T
 
 - Log files can contain hundreds of thousands of records. Avoid LINQ operations that enumerate all records multiple times per filter application.
 - A bulk change to comments, pins or flags, such as Unpin All, is one call on its store: one lock and one change event (decision 4 of the #990 plan). Find the lines to change in parallel, before the call.
-- Records are created when they are read (#1140), so a filter, a Find or an analyzer creates one record for each row it reads. On one thread, that costs about 14 ns more per record than reading a record held in an array: about 0.15 – 0.2 s more for a Find through 10 million records. Code that needs only a line number or a timestamp reads `GetLineNumber` or `GetCreatedAt`; #1150 adds other ways to read the table without creating a record. Avoid any other per-record allocation in the hot path of filtering or parsing.
+- Records are created when they are read (#1140). On one thread, creating one costs about 14 ns more than reading a record held in an array: about 0.15 – 0.2 s for a pass over 10 million records. Code that needs only a row's line number, timestamp, facts or text reads `GetLineNumber`, `GetCreatedAt`, `GetFacts` or `ReadContent`, which create no record (#1137, #1150), as Find, the time-gap analyzers and the insights do. A filter still creates one record per row, because `IFilterStrategy.CanKeep` takes a record. Avoid any other per-record allocation in the hot path of filtering or parsing.
 
 ## Persistence
 

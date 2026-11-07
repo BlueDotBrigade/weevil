@@ -39,6 +39,21 @@ namespace BlueDotBrigade.Weevil.Data
 		public DateTime GetCreatedAt(int recordNumber) => GetBlock(recordNumber).CreatedAt[recordNumber % BlockSize];
 
 		/// <summary>
+		/// Returns what the parser found about the record at <paramref name="recordNumber"/>, without creating it (#1150).
+		/// </summary>
+		/// <remarks>
+		/// Whether the table keeps the content as a string is left out, as a record leaves it out.
+		/// </remarks>
+		public RecordFacts GetFacts(int recordNumber)
+		{
+			RecordFacts facts = GetBlock(recordNumber).Facts[recordNumber % BlockSize];
+
+			return facts.KeepsString
+				? new RecordFacts(facts.Severity, facts.IsMultiLine, facts.WasGeneratedByUi)
+				: facts;
+		}
+
+		/// <summary>
 		/// Creates the record at <paramref name="recordNumber"/>: a new object on each call.
 		/// </summary>
 		public IRecord CreateRecord(int recordNumber)
@@ -64,6 +79,21 @@ namespace BlueDotBrigade.Weevil.Data
 					block.Lengths[row],
 					facts.IsMultiLine,
 					facts.WasGeneratedByUi);
+		}
+
+		/// <summary>
+		/// Returns the content of the record at <paramref name="recordNumber"/>, the same text its record's content would be, without creating the record (#1150).
+		/// </summary>
+		/// <param name="content">Decodes a row that holds the log's bytes. A row that keeps a string returns the string as it is.</param>
+		public ReadOnlySpan<char> ReadContent(int recordNumber, ContentBuffer content)
+		{
+			Block block = GetBlock(recordNumber);
+			var row = recordNumber % BlockSize;
+			RecordFacts facts = block.Facts[row];
+
+			return facts.KeepsString
+				? block.GetString(row)
+				: content.Read(GetChunk(recordNumber), block.Offsets[row], block.Lengths[row], facts.IsMultiLine);
 		}
 
 		/// <summary>

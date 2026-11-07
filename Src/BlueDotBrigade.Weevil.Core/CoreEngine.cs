@@ -342,7 +342,9 @@
 				_logFileMetrics.RecordAndMetadataLoadDuration);
 
 			// Not a user action, so no telemetry, as when the engine was created.
-			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None);
+			// The filter has no criteria, so @Elapsed reads nothing. It is given no elapsed times: those of the results shown
+			// before the Clear hold those results, and so the record table the Clear frees, until the next filter (#1150).
+			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None, ElapsedTimes.None);
 
 			Log.Default.Write(
 				LogSeverityType.Information,

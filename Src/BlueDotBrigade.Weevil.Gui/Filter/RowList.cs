@@ -22,7 +22,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private const int MinimumPurgeCount = 4_096;
 
 		private readonly RecordList _results;
-		private readonly ElapsedTimes _elapsedTimes;
 		private readonly IAnnotations _annotations;
 		private readonly ISelect _selector;
 		private readonly IUiDispatcher _uiDispatcher;
@@ -36,11 +35,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private bool _isRefreshQueued;
 		private bool _refreshesEveryRow;
 
-		/// <param name="elapsedTimes">The elapsed times of <paramref name="results"/>, from the same filter.</param>
-		public RowList(RecordList results, ElapsedTimes elapsedTimes, IAnnotations annotations, ISelect selector, IUiDispatcher uiDispatcher)
+		public RowList(RecordList results, IAnnotations annotations, ISelect selector, IUiDispatcher uiDispatcher)
 		{
 			_results = results ?? RecordList.Empty;
-			_elapsedTimes = elapsedTimes ?? throw new ArgumentNullException(nameof(elapsedTimes));
 			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
 			_selector = selector ?? throw new ArgumentNullException(nameof(selector));
 			_uiDispatcher = uiDispatcher ?? throw new ArgumentNullException(nameof(uiDispatcher));
@@ -91,7 +88,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				row = new RowViewModel(record, _annotations)
 				{
 					IsSelected = _selector.Selected.ContainsKey(record.LineNumber),
-					ElapsedTime = _elapsedTimes.Get(record.LineNumber),
+					// From the results the row is shown in, by position, so displaying rows calculates no elapsed time for every line (#1150).
+					// Known limitation: after a long run of rows without a timestamp, this walks back over the run on the UI thread, about 20 ms for 10 million rows (#1150).
+					ElapsedTime = ElapsedTimes.Measure(_results, position),
 				};
 				_rows[position] = new WeakReference<RowViewModel>(row);
 

@@ -45,6 +45,22 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenFlaggedLinesInAndOutOfAList_WhenTheListIsUnflagged_ThenOnlyItsLinesAreUnflagged()
+		{
+			var flags = new FlagSet(100);
+			flags.SetFlagged(12, true);
+			flags.SetFlagged(14, true);
+			flags.SetFlagged(20, true);
+
+			// The list reads only line numbers; it throws if a record is created.
+			flags.SetFlagged(new ColumnsOnlyRecordList(R.WithLineNumbers(11, 15)), false);
+
+			flags.IsFlagged(12).Should().BeFalse();
+			flags.IsFlagged(14).Should().BeFalse();
+			flags.IsFlagged(20).Should().BeTrue();
+		}
+
+		[TestMethod]
 		public void GivenFlaggedLines_WhenCleared_ThenNoLineIsFlagged()
 		{
 			var flags = new FlagSet(10);
