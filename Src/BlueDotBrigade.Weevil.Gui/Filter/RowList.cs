@@ -89,6 +89,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				{
 					IsSelected = _selector.Selected.ContainsKey(record.LineNumber),
 					// From the results the row is shown in, by position, so displaying rows calculates no elapsed time for every line (#1150).
+					// Known limitation: after a long run of rows without a timestamp, this walks back over the run on the UI thread, about 20 ms for 10 million rows (#1150).
 					ElapsedTime = ElapsedTimes.Measure(_results, position),
 				};
 				_rows[position] = new WeakReference<RowViewModel>(row);
