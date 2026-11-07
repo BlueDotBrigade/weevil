@@ -45,3 +45,4 @@ On the 10-million-record UTF-8 droid log (`Tst/BlueDotBrigade.Weevil.Core-Perfor
 ## Resume Here
 
 - **2026-11-07:** steps 1 – 7 are pushed to #1152. A reviewer and a sceptic reviewed the whole diff: no should-fix defect, six nits, four fixed (9bc6871e, 5bf1ae7a), two kept with reasons in #1152. Nothing is left but the user's merge, and CI on Windows for the GUI tests.
+- **2026-11-07, token check before stopping:** the session had used 611,714 of its 1,000,000 context tokens (61%), and its 5-hour usage limit reported a warning. All work was committed and pushed to #1152 before stopping. To resume: check CI on #1152 (the GUI feature tests run only on Windows), then wait for the user's merge.
