@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,19 +12,16 @@ namespace BlueDotBrigade.Weevil.Navigation
 		[TestMethod]
 		public void FindNext_NoMatchingRecords_Throws()
 		{
+			// Every record has the same timestamp, so none is 100 ms after the one before. The search measures each row by position,
+			// so it creates no record while it searches (#1150).
+			var createdAt = new DateTime(2025, 1, 1, 10, 0, 0);
 			var records = new List<IRecord>();
 			for (var lineNumber = 50; lineNumber < 60; lineNumber++)
 			{
-				records.Add(
-					new Record(
-						lineNumber,
-						DateTime.Now,
-						SeverityType.Debug,
-						"Sample log entry."));
+				records.Add(new Record(lineNumber, createdAt, SeverityType.Debug, "Sample log entry."));
 			}
 
-			// The records are created microseconds apart, so none is 100 ms or more after the one before.
-			Action act = () => new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(100, 200);
+			Action act = () => new ElapsedTimeNavigator(new ActiveRecord(new ColumnsOnlyRecordList(records.ToImmutableArray()))).FindNext(100, 200);
 			act.Should().Throw<RecordNotFoundException>();
 		}
 

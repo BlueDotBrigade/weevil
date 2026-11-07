@@ -199,5 +199,24 @@
 			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.Zero);
 			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
 		}
+
+		[TestMethod]
+		public void GivenAThresholdBelowZero_WhenAnalyzeRuns_ThenTheFirstTimestampedUiRecordIsComparedWithItself()
+		{
+			// The first timestamped UI record has none before it, so its elapsed time is zero, as in TimeGapAnalyzer (#1150).
+			var start = new DateTime(2026, 11, 7, 9, 0, 0);
+			ImmutableArray<IRecord> records = ImmutableArray.Create<IRecord>(
+				new Record(10, Record.CreationTimeUnknown, SeverityType.Information, "Starting", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(20, start, SeverityType.Information, "Shown", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(30, start.AddSeconds(1), SeverityType.Information, "Clicked", isMultiLine: false, wasGeneratedByUi: true));
+			var state = new RecordState();
+			var analyzer = new TimeGapUiAnalyzer();
+
+			analyzer.Analyze(records, state, TimeSpan.FromMilliseconds(-1), canUpdateMetadata: true);
+
+			state.IsFlagged(records[0]).Should().BeFalse();
+			state.GetComment(records[1]).Should().Be("ElapsedTimeUi: 00.000s");
+			state.GetComment(records[2]).Should().Be("ElapsedTimeUi: 01.000s");
+		}
 	}
 }

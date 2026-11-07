@@ -118,6 +118,20 @@
 			}
 		}
 
+		[TestMethod]
+		[DataRow(false)]
+		[DataRow(true)]
+		public void GivenAListThatCannotCreateRecords_WhenTextIsNotFound_ThenEveryRowWasSearchedWithoutCreatingOne(bool useRegex)
+		{
+			// Find reads each row's content by position, so it creates no record while it searches (#1150).
+			RecordList records = new ColumnsOnlyRecordList(R.WithLineNumbers(1, 10));
+
+			FluentActions.Invoking(() => new ContentNavigator(new ActiveRecord(records)).FindNext("NoSuchText", true, useRegex))
+				.Should().Throw<RecordNotFoundException>();
+			FluentActions.Invoking(() => new ContentNavigator(new ActiveRecord(records)).FindPrevious("NoSuchText", true, useRegex))
+				.Should().Throw<RecordNotFoundException>();
+		}
+
 		/// <summary>
 		/// Lines 1 to 5: bytes, multi-line bytes with a lone line feed, a string, and bytes with an invalid byte.
 		/// </summary>
