@@ -1,6 +1,6 @@
 # 990: Immutable Core
 
-> **Status:** In progress
+> **Status:** Done. Every step merged by 2026-10-27 (steps 1 – 3 in #1050); epic #990 closed on 2026-11-07.
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
