@@ -17,9 +17,10 @@
 		{
 			var analyzer = new SeverityMetrics();
 
-			foreach (var record in records)
+			// From the columns, so refreshing the insight after each open creates no record (#1150).
+			for (var position = 0; position < records.Count; position++)
 			{
-				analyzer.Count(record);
+				analyzer.Count(records.GetFacts(position).Severity, records.GetLineNumber(position), records.GetCreatedAt(position));
 			}
 
 			if (analyzer.Fatals > 0)

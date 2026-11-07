@@ -18,9 +18,10 @@
 		{
 			var metrics = new TemporalAnomalyMetrics(TimeSpan.Zero);
 
-			foreach (IRecord record in records)
+			// From the columns, so refreshing the insight after each open creates no record (#1150).
+			for (var position = 0; position < records.Count; position++)
 			{
-				metrics.Count(record);
+				metrics.Count(records.GetLineNumber(position), records.GetCreatedAt(position));
 			}
 
 			if (metrics.Counter > 0)

@@ -49,7 +49,15 @@
 
 		public void Count(IRecord record)
 		{
-			switch (record.Severity)
+			Count(record.Severity, record.LineNumber, record.CreatedAt);
+		}
+
+		/// <summary>
+		/// Counts a record from its columns, so a caller that reads a record table creates no record (#1150).
+		/// </summary>
+		internal void Count(SeverityType severity, int lineNumber, DateTime createdAt)
+		{
+			switch (severity)
 			{
 				case SeverityType.Information:
 					Interlocked.Increment(ref _information);
@@ -67,8 +75,8 @@
 					var count = Interlocked.Increment(ref _fatal);
 					if (count == 1)
 					{
-						_fatalFirstOccurredAt = record.CreatedAt;
-						_fatalFirstOccurredOnLine = record.LineNumber;
+						_fatalFirstOccurredAt = createdAt;
+						_fatalFirstOccurredOnLine = lineNumber;
 					}
 					break;
 			}

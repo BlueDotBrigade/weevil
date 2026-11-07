@@ -16,11 +16,11 @@ Follow-up to #1140 (step 3.6 of [plan 988](988-IndexingService.md)). Since #1140
 2. **The elapsed-time search measures by position.** Done (08880e67).
 3. **Find reads content by position.** Done (7858658b). `RecordList.ReadContent`, `ContentBuffer.Read(chunk, ...)`.
 4. **The memory budgets fall.** Done (e6bd2b14). 160 bytes per record; 1.35 and 1.25 GB per GB of the droid logs.
-5. **The time-gap and out-of-order analyzers create records only for the rows they flag.**
+5. **The time-gap and out-of-order analyzers create records only for the rows they flag.** Done (9e6a54cd).
    - Clear the analyzed rows' flags with one bulk call by line number, not `FlagSet.FlagOnly`, which would clear hidden lines too.
    - Read timestamps with `GetCreatedAt` and the UI-thread fact with a new `RecordList.GetFacts(position)`.
    - The prototype measured the elapsed-time analyzer at 0.07 s on 10 million records (0.57 s before, `main` 0.25 – 0.30 s, 2.12.1 0.41 s).
-6. **The insights read columns.** `CriticalErrorsInsight` (severity), `TemporalAnomalyInsight` (timestamps) and `TimeGapInsight` (through `TimeGapUiAnalyzer`) run after every open and read every record. Time `GetInsights` before and after.
+6. **The insights read columns.** Done in the commit after 9e6a54cd: `SeverityMetrics.Count(severity, line, createdAt)`; `TimeGapInsight` needed nothing more. `CriticalErrorsInsight` (severity), `TemporalAnomalyInsight` (timestamps) and `TimeGapInsight` (through `TimeGapUiAnalyzer`) run after every open and read every record. Time `GetInsights` before and after.
 7. **Documentation and the pull request.** The Core and Common rules, plan 988 and the description of #1152.
 
 ## How to Measure
