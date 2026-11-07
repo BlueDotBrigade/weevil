@@ -44,4 +44,4 @@ On the 10-million-record UTF-8 droid log (`Tst/BlueDotBrigade.Weevil.Core-Perfor
 
 ## Resume Here
 
-- **2026-11-07:** steps 1 – 7 are pushed to #1152. Next: a reviewer and a sceptic, each starting fresh, review the whole diff (`git diff origin/main...Feature/1150-RecordFreeReads`). Fix what survives the sceptic, one commit at a time, push, and add the outcome to the description of #1152.
+- **2026-11-07:** steps 1 – 7 are pushed to #1152. A reviewer and a sceptic reviewed the whole diff: no should-fix defect, six nits, four fixed (9bc6871e, 5bf1ae7a), two kept with reasons in #1152. Nothing is left but the user's merge, and CI on Windows for the GUI tests.
