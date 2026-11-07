@@ -24,6 +24,10 @@
 			_userSpecifiedValue = DefaultElapsedTime;
 			_previousElapsedTimes = previousElapsedTimes ?? throw new ArgumentNullException(nameof(previousElapsedTimes));
 
+			// Elapsed times are calculated by line number on their first lookup (#1150). The filter builds this expression before
+			// its loop, so it is done once here rather than on one of the loop's threads while the others wait.
+			_ = _previousElapsedTimes.Get(0);
+
 			if (Moniker.IsReferencedBy(serializedExpression))
 			{
 				if (Moniker.HasParameter(serializedExpression))

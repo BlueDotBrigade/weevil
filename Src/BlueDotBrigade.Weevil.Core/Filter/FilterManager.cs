@@ -272,7 +272,11 @@
 			return ApplyInternal(filterType, criteria);
 		}
 
-		internal IFilter ApplyInternal(FilterType filterType, IFilterCriteria criteria)
+		/// <param name="previousElapsedTimes">
+		/// The elapsed times that @Elapsed compares: by default, those of the results shown before this filter (#1016).
+		/// The filter keeps them until the next one, and they keep those results.
+		/// </param>
+		internal IFilter ApplyInternal(FilterType filterType, IFilterCriteria criteria, ElapsedTimes previousElapsedTimes = null)
 		{
 			if (criteria is null)
 			{
@@ -291,7 +295,7 @@
 					});
 
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _recordState, _recordState.ElapsedTimes);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _recordState, previousElapsedTimes ?? _recordState.ElapsedTimes);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();

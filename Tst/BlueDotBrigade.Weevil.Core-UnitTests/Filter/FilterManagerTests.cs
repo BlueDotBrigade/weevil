@@ -60,6 +60,68 @@ namespace BlueDotBrigade.Weevil.Filter
 				});
 		}
 
+		[TestMethod]
+		public void GivenTheResultsOfAFilterOverARecordTable_WhenTheirElapsedTimesAreRead_ThenOnlyTheFirstLookupByLineNumberCalculatesThoseOfEveryLine()
+		{
+			// The filter allocated 8 bytes for every line up to its last result, for elapsed times that are mostly only displayed (#1150).
+			const int LineCount = 5_000;
+			const long BytesForEveryLine = LineCount * 8L;
+			FilterManager filter = CreateFilterManager(new TableRecordList(CreateTableOneSecondApart(LineCount)), Substitute.For<IMetricCollector>());
+
+			filter.Apply(FilterType.PlainText, FilterCriteria.None);
+
+			RecordList results = filter.Results;
+			ElapsedTimes elapsedTimes = filter.ElapsedTimes;
+			var byPosition = new TimeSpan[results.Count];
+			var byLineNumber = new TimeSpan[results.Count];
+
+			var readingByPosition = CountBytesAllocated(() =>
+			{
+				for (var position = 0; position < results.Count; position++)
+				{
+					byPosition[position] = ElapsedTimes.Measure(results, position);
+				}
+			});
+			var firstReadingByLineNumber = CountBytesAllocated(() => elapsedTimes.Get(1));
+			var readingByLineNumber = CountBytesAllocated(() =>
+			{
+				for (var position = 0; position < results.Count; position++)
+				{
+					byLineNumber[position] = elapsedTimes.Get(results.GetLineNumber(position));
+				}
+			});
+
+			readingByPosition.Should().BeLessThan(BytesForEveryLine, "the grid measures elapsed times by position, one at a time");
+			firstReadingByLineNumber.Should().BeGreaterThanOrEqualTo(BytesForEveryLine, "the filter did not calculate the elapsed times of every line");
+			readingByLineNumber.Should().BeLessThan(BytesForEveryLine, "the first read by line number keeps them");
+			byLineNumber.Should().Equal(byPosition);
+			byPosition.Skip(1).Should().OnlyContain(elapsedTime => elapsedTime == TimeSpan.FromSeconds(1));
+		}
+
+		private static long CountBytesAllocated(Action read)
+		{
+			var before = GC.GetAllocatedBytesForCurrentThread();
+			read();
+			return GC.GetAllocatedBytesForCurrentThread() - before;
+		}
+
+		/// <summary>
+		/// Lines 1 to <paramref name="count"/>, one second apart, in a record table, as an opened log's records are (#1140).
+		/// </summary>
+		private static RecordTable CreateTableOneSecondApart(int count)
+		{
+			var facts = new RecordFacts(SeverityType.Information, isMultiLine: false, wasGeneratedByUi: false);
+			var start = new DateTime(2026, 11, 7, 9, 0, 0);
+			var builder = new RecordTable.Builder();
+
+			for (var lineNumber = 1; lineNumber <= count; lineNumber++)
+			{
+				builder.Add(lineNumber, start.AddSeconds(lineNumber), facts, $"Line {lineNumber}");
+			}
+
+			return builder.Build();
+		}
+
 		private static ImmutableArray<IRecord> CreateRecordsOneSecondApart(int count)
 		{
 			// Each record's content ends with its line number, for example "Has line number: 7".
@@ -73,7 +135,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			return records.GetRecords();
 		}
 
-		private static FilterManager CreateFilterManager(ImmutableArray<IRecord> records, IMetricCollector collector)
+		private static FilterManager CreateFilterManager(RecordList records, IMetricCollector collector)
 		{
 			IFilterAliasExpander aliasExpander = Substitute.For<IFilterAliasExpander>();
 			aliasExpander.Expand(Arg.Any<string>()).Returns(x => x.Arg<string>());

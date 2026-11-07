@@ -2181,11 +2181,11 @@
 				OnPropertyChanged(nameof(this.InclusiveFilter));
 				OnPropertyChanged(nameof(this.ExclusiveFilter));
 
-				// Read once, so the results and their elapsed times come from the same filter.
-				IFilter filter = _engine.Filter;
+				// Read once, so the items and the rows show the same results. Each row measures its elapsed time in them (#1150).
+				RecordList results = _engine.Filter.Results;
 
-				this.VisibleItems = filter.Results;
-				this.Rows = new RowList(filter.Results, filter.ElapsedTimes, _engine.Annotations, _engine.Selector, _uiDispatcher);
+				this.VisibleItems = results;
+				this.Rows = new RowList(results, _engine.Annotations, _engine.Selector, _uiDispatcher);
 
 				OnPropertyChanged(nameof(this.VisibleItems));
 			});
