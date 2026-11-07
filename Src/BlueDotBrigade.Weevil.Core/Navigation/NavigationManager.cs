@@ -47,7 +47,7 @@
 				new PinNavigator(_activeRecord, state),
 				new CommentNavigator(_activeRecord, state),
 				new FlagNavigator(_activeRecord, state),
-				new ElapsedTimeNavigator(_activeRecord, state),
+				new ElapsedTimeNavigator(_activeRecord),
 			}.ToImmutableArray();
 		}
 
