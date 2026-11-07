@@ -516,8 +516,9 @@
 				return;
 			}
 
-			// Weevil opens a copy extracted to a folder of its own, and deletes only that folder, never the zip (#1156).
+			// Weevil opens a copy extracted to a folder of its own, and deletes only what it extracted, never the zip (#1156).
 			var extractedFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+			var openedFilePath = string.Empty;
 
 			try
 			{
@@ -538,27 +539,40 @@
 
 				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName))
 				{
-					await OpenAsync(Path.Combine(extractedFolder, selectedFileName));
+					openedFilePath = Path.Combine(extractedFolder, selectedFileName);
+					await OpenAsync(openedFilePath);
 				}
 			}
 			finally
 			{
-				DeleteExtractedFolder(extractedFolder);
+				DeleteExtracted(extractedFolder, openedFilePath);
 			}
 		}
 
-		private static void DeleteExtractedFolder(string extractedFolder)
+		/// <summary>
+		/// Deletes the folder a zip was extracted to, or only the file opened from it:
+		/// exports, reports and splits are saved beside the open log, so its folder stays.
+		/// </summary>
+		private static void DeleteExtracted(string extractedFolder, string openedFilePath)
 		{
 			try
 			{
-				if (Directory.Exists(extractedFolder))
+				if (!string.IsNullOrEmpty(openedFilePath))
+				{
+					// Never anything outside the folder Weevil extracted to (#1156).
+					if (Path.GetFullPath(openedFilePath).StartsWith(Path.GetFullPath(extractedFolder) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+					{
+						File.Delete(openedFilePath);
+					}
+				}
+				else if (Directory.Exists(extractedFolder))
 				{
 					Directory.Delete(extractedFolder, recursive: true);
 				}
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				// A leftover temporary folder does no harm, so it must not stop Weevil.
+				// A leftover temporary file or folder does no harm, so it must not stop Weevil.
 				Log.Default.Write(LogSeverityType.Warning, e, $"Unable to delete the files extracted from a zip. Path={extractedFolder}");
 			}
 		}

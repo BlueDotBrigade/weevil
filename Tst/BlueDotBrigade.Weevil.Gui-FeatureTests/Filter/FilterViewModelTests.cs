@@ -290,7 +290,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var dialogBox = Substitute.For<IDialogBoxService>();
 			dialogBox.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>()).Returns(false);
 			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
-			var zipPath = CreateZip("Logs.zip", CopyLog("A.log"));
+			var zipPath = CreateZip("Logs.zip", "A.log");
 
 			await viewModel.OpenCompressedAsync(zipPath);
 
@@ -300,26 +300,35 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		[TestMethod]
 		[WorkItem(1156)]
-		public async Task GivenAZipWithNoFiles_WhenOpened_ThenNothingOpensAndTheZipIsKept()
+		public async Task GivenAZipHoldingOnlyFolders_WhenOpened_ThenAMessageSaysSoAndTheZipIsKept()
 		{
 			// With no file to list, Weevil opened the zip itself as a log, then deleted the zip.
 			var dialogBox = Substitute.For<IDialogBoxService>();
 			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
-			var zipPath = Path.Combine(_folder, "Folders.zip");
-			using (ZipArchive archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
-			{
-				archive.CreateEntry("Logs/");
-			}
+			var zipPath = CreateZip("Folders.zip", "Logs/");
 
 			await viewModel.OpenCompressedAsync(zipPath);
 
 			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
 			viewModel.IsLogFileOpen.Should().BeFalse("the zip holds no file to open");
-			dialogBox.Received(1).ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+			dialogBox.Received(1).ShowMessage(Arg.Any<string>(), "Nothing to Open");
 		}
 
 		[TestMethod]
-		public async Task GivenAZip_WhenAFileInItIsChosen_ThenThatFileOpensAndTheZipIsKept()
+		public async Task GivenAnEmptyZip_WhenOpened_ThenAMessageSaysSo()
+		{
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+			var zipPath = CreateZip("Empty.zip");
+
+			await viewModel.OpenCompressedAsync(zipPath);
+
+			viewModel.IsLogFileOpen.Should().BeFalse("the zip holds no file to open");
+			dialogBox.Received(1).ShowMessage(Arg.Any<string>(), "Nothing to Open");
+		}
+
+		[TestMethod]
+		public async Task GivenAZip_WhenAFileInItIsChosen_ThenItsExtractedCopyOpensAndTheZipIsKept()
 		{
 			var dialogBox = Substitute.For<IDialogBoxService>();
 			dialogBox
@@ -329,13 +338,30 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					callInfo[1] = "A.log";
 					return true;
 				});
-			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
-			var zipPath = CreateZip("Logs.zip", CopyLog("A.log"));
+			var openedPath = string.Empty;
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPath = bulletin.SourceFilePath));
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox);
+			var zipPath = CreateZip("Logs.zip", "A.log");
 
-			await viewModel.OpenCompressedAsync(zipPath);
+			try
+			{
+				await viewModel.OpenCompressedAsync(zipPath);
 
-			viewModel.IsLogFileOpen.Should().BeTrue("the chosen file is opened");
-			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
+				viewModel.IsLogFileOpen.Should().BeTrue("the chosen file is opened");
+				Path.GetDirectoryName(openedPath).Should().NotBe(_folder, "Weevil opens an extracted copy, never a file beside the zip");
+				System.IO.Directory.Exists(Path.GetDirectoryName(openedPath)).Should().BeTrue("exports, reports and splits are saved beside the open log");
+				System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
+			}
+			finally
+			{
+				// Weevil leaves the folder it extracted the zip to in the temporary folder.
+				var extractedFolder = Path.GetDirectoryName(openedPath);
+				if (!string.IsNullOrEmpty(extractedFolder) && extractedFolder != _folder && System.IO.Directory.Exists(extractedFolder))
+				{
+					System.IO.Directory.Delete(extractedFolder, recursive: true);
+				}
+			}
 		}
 
 		[TestMethod]
@@ -466,15 +492,26 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			return logPath;
 		}
 
-		private string CreateZip(string zipName, params string[] filePaths)
+		/// <summary>
+		/// Creates a zip whose entries are copies of the test log, or folders when a name ends with a slash.
+		/// No file is left beside the zip.
+		/// </summary>
+		private string CreateZip(string zipName, params string[] entryNames)
 		{
 			var zipPath = Path.Combine(_folder, zipName);
 
 			using (ZipArchive archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
 			{
-				foreach (var filePath in filePaths)
+				foreach (var entryName in entryNames)
 				{
-					archive.CreateEntryFromFile(filePath, Path.GetFileName(filePath));
+					if (entryName.EndsWith('/'))
+					{
+						archive.CreateEntry(entryName);
+					}
+					else
+					{
+						archive.CreateEntryFromFile(new Daten().AsFilePath(From.GlobalDefault), entryName);
+					}
 				}
 			}
 
