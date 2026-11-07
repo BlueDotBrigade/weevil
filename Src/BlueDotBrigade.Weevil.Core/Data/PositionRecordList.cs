@@ -28,5 +28,7 @@ namespace BlueDotBrigade.Weevil.Data
 		public override DateTime GetCreatedAt(int position) => _records.GetCreatedAt(_positions[position]);
 
 		public override RecordFacts GetFacts(int position) => _records.GetFacts(_positions[position]);
+
+		public override ReadOnlySpan<char> ReadContent(int position, ContentBuffer content) => _records.ReadContent(_positions[position], content);
 	}
 }

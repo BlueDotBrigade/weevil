@@ -42,6 +42,8 @@ namespace BlueDotBrigade.Weevil.Collections
 
 		public override RecordFacts GetFacts(int position) => _results.GetFacts(ToResultsPosition(position));
 
+		public override ReadOnlySpan<char> ReadContent(int position, ContentBuffer content) => _results.ReadContent(ToResultsPosition(position), content);
+
 		private int ToResultsPosition(int position)
 		{
 			if ((uint)position >= (uint)this.Count)
