@@ -40,7 +40,6 @@
 	using Metalama.Patterns.Observability;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
-	using SelectFileView = BlueDotBrigade.Weevil.Gui.IO.SelectFileView;
 
 	[Observable]
 	internal partial class FilterViewModel
@@ -525,7 +524,7 @@
 				if (files.Length > 0)
 				{
 					var relativeNames = files.Select(f => Path.GetRelativePath(tempFolder, f)).ToArray();
-					temporarySourceFileName = await ShowListOfCompressedFiles(relativeNames);
+					_dialogBox.TrySelectCompressedFile(relativeNames, out temporarySourceFileName);
 				}
 				if (!string.IsNullOrEmpty(temporarySourceFileName))
 				{
@@ -544,17 +543,6 @@
 					File.Delete(sourceFilePath);
 				}
 			}
-		}
-
-		private Task<string> ShowListOfCompressedFiles(string[] files)
-		{
-			var selectFileViewModel = new SelectFileViewModel(files);
-			var selectFileView = new SelectFileView(selectFileViewModel);
-			var result = string.Empty;
-			selectFileView.ShowDialog();
-			result = selectFileViewModel.SelectedFilename;
-
-			return Task.FromResult(result);
 		}
 
 		private void RefreshHistory(ObservableCollection<string> history, IEnumerable<string> newValues)

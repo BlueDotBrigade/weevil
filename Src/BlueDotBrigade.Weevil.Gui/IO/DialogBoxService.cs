@@ -171,6 +171,15 @@ internal class DialogBoxService : IDialogBoxService
 	}
 
 
+	public bool TrySelectCompressedFile(string[] fileNames, out string selectedFileName)
+	{
+		var viewModel = new SelectFileViewModel(fileNames);
+		new SelectFileView(viewModel).ShowDialog();
+
+		selectedFileName = viewModel.SelectedFilename;
+		return !string.IsNullOrEmpty(selectedFileName);
+	}
+
 	public bool TryShowGoTo(string defaultValue, out string userValue)
 	{
 		userValue = string.Empty;
