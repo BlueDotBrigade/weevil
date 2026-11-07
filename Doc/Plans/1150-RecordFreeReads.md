@@ -41,3 +41,7 @@ Memory: 153 bytes per record, and 1.22 GB of working set per GB of the 4 GB harn
 ## How to Measure
 
 On the 10-million-record UTF-8 droid log (`Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/.Daten/.Global/10MillionRecords_UTF8~ZIP`), in Release, alternating this branch and `main` in one session: each operation after 28 filters, median of 5 runs after a warm-up. The machine's speed varies widely between sessions, so compare only numbers from the same session.
+
+## Resume Here
+
+- **2026-11-07:** steps 1 – 7 are pushed to #1152. Next: a reviewer and a sceptic, each starting fresh, review the whole diff (`git diff origin/main...Feature/1150-RecordFreeReads`). Fix what survives the sceptic, one commit at a time, push, and add the outcome to the description of #1152.
