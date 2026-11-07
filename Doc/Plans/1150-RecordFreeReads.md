@@ -20,8 +20,23 @@ Follow-up to #1140 (step 3.6 of [plan 988](988-IndexingService.md)). Since #1140
    - Clear the analyzed rows' flags with one bulk call by line number, not `FlagSet.FlagOnly`, which would clear hidden lines too.
    - Read timestamps with `GetCreatedAt` and the UI-thread fact with a new `RecordList.GetFacts(position)`.
    - The prototype measured the elapsed-time analyzer at 0.07 s on 10 million records (0.57 s before, `main` 0.25 – 0.30 s, 2.12.1 0.41 s).
-6. **The insights read columns.** Done in the commit after 9e6a54cd: `SeverityMetrics.Count(severity, line, createdAt)`; `TimeGapInsight` needed nothing more. `CriticalErrorsInsight` (severity), `TemporalAnomalyInsight` (timestamps) and `TimeGapInsight` (through `TimeGapUiAnalyzer`) run after every open and read every record. Time `GetInsights` before and after.
-7. **Documentation and the pull request.** The Core and Common rules, plan 988 and the description of #1152.
+6. **The insights read columns.** Done (9ab51552). `CriticalErrorsInsight` and `TemporalAnomalyInsight` read columns, through `SeverityMetrics.Count(severity, lineNumber, createdAt)`; `TimeGapInsight` runs `TimeGapUiAnalyzer`, which already did.
+7. **Documentation and the pull request.** Done: the Core and Common rules, plan 988 and the description of #1152.
+
+## Results
+
+Measured on 2026-11-07, 10 million records, Release, against `main` before #1140, #1140 as merged, and this branch (seconds):
+
+| | Before #1140 | #1140 | This branch |
+|---|---|---|---|
+| Moniker filter, after 28 filters | 0.12 | 0.16 | 0.11 – 0.12 |
+| No filter, after 28 filters | 0.32 – 0.33 | 0.24 – 0.25 | 0.12 |
+| Find, no match | 0.36 – 0.39 | 0.45 – 0.54 | 0.35 – 0.36 |
+| Analyzer: elapsed time | 0.26 – 0.30 | 0.54 – 0.56 | 0.07 |
+| Analyzer: out-of-order timestamps | 0.23 – 0.24 | 0.36 – 0.37 | 0.09 |
+| Insights after an open | 0.20 – 0.21 | 0.60 – 0.61 | 0.18 |
+
+Memory: 153 bytes per record, and 1.22 GB of working set per GB of the 4 GB harness log.
 
 ## How to Measure
 
