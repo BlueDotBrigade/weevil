@@ -14,9 +14,9 @@
 	{
 		private const int RecordCount = 200_000;
 
-		// Measured on 2026-11-02: 161 bytes per record once records were created when read (#1140), down from 205 (#1133), 348 (#1100) and 397.
-		// #1086 needs about 157 (1.2 GB per GB of log); the last 4 bytes are revisited with #1023 (decided 2026-10-30).
-		private const int MaximumBytesPerRecord = 175;
+		// Measured on 2026-11-07: 153 bytes per record once elapsed times were calculated when read (#1150), down from 161 (#1140),
+		// 205 (#1133), 348 (#1100) and 397. #1086 needs about 157 (1.2 GB per GB of log). Keeping elapsed times per line again would be 161.
+		private const int MaximumBytesPerRecord = 160;
 
 		private string _folder = string.Empty;
 
@@ -49,13 +49,13 @@
 			bytesPerRecord.Should().BeLessThanOrEqualTo(MaximumBytesPerRecord, "opening a log should not keep noticeably more memory per record than it did");
 		}
 
-		// Measured on 2026-11-02, once records were created when read (#1140): 1.30 GB per GB of the UTF-8 log (131 bytes per record),
-		// and 1.15 per GB of the UTF-16 log (232), whose records hold twice the bytes. Before: 1.73 and 1.36. #1086 needs 1.2.
+		// Measured on 2026-11-07, once elapsed times were calculated when read (#1150): 1.22 GB per GB of the UTF-8 log (123 bytes per record),
+		// and 1.11 per GB of the UTF-16 log (224), whose records hold twice the bytes. Before #1140: 1.73 and 1.36. #1086 needs 1.2.
 		[TestMethod]
 		[WorkItem(1086)]
 		[DoNotParallelize]
-		[DataRow(DroidLog.Utf8, 1.6)]
-		[DataRow(DroidLog.Utf16LittleEndian, 1.3)]
+		[DataRow(DroidLog.Utf8, 1.35)]
+		[DataRow(DroidLog.Utf16LittleEndian, 1.25)]
 		public void GivenADroidLog_WhenOpened_ThenEveryRecordIsKeptWithinTheMemoryBudget(string logName, double maximumMemoryPerByteOfLog)
 		{
 			var logPath = DroidLog.GetPath(logName);
