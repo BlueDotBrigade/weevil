@@ -510,38 +510,56 @@
 
 		public async Task OpenCompressedAsync(string sourceFilePath)
 		{
-			var fileInfo = new FileInfo(sourceFilePath);
-			var isSourceFileCompressed = fileInfo.Extension.ToUpperInvariant() == ".ZIP";
-
-			var temporarySourceFileName = string.Empty;
-
-			if (isSourceFileCompressed)
+			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
 			{
-				var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-				ZipFile.ExtractToDirectory(sourceFilePath, tempFolder);
-				var files = Directory.GetFiles(tempFolder, "*", SearchOption.AllDirectories);
-
-				if (files.Length > 0)
-				{
-					var relativeNames = files.Select(f => Path.GetRelativePath(tempFolder, f)).ToArray();
-					_dialogBox.TrySelectCompressedFile(relativeNames, out temporarySourceFileName);
-				}
-				if (!string.IsNullOrEmpty(temporarySourceFileName))
-				{
-					sourceFilePath = Path.Combine(tempFolder, temporarySourceFileName);
-				}
+				await OpenAsync(sourceFilePath);
+				return;
 			}
+
+			// Weevil opens a copy extracted to a folder of its own, and deletes only that folder, never the zip (#1156).
+			var extractedFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
 			try
 			{
-				await OpenAsync(sourceFilePath);
+				ZipFile.ExtractToDirectory(sourceFilePath, extractedFolder);
+
+				// A zip with no entries creates no folder.
+				var files = Directory.Exists(extractedFolder)
+					? Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)
+					: Array.Empty<string>();
+
+				if (files.Length == 0)
+				{
+					_dialogBox.ShowMessage($"{Path.GetFileName(sourceFilePath)} holds no file to open.", "Nothing to Open");
+					return;
+				}
+
+				var relativeNames = files.Select(f => Path.GetRelativePath(extractedFolder, f)).ToArray();
+
+				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName))
+				{
+					await OpenAsync(Path.Combine(extractedFolder, selectedFileName));
+				}
 			}
 			finally
 			{
-				if (isSourceFileCompressed && File.Exists(sourceFilePath))
+				DeleteExtractedFolder(extractedFolder);
+			}
+		}
+
+		private static void DeleteExtractedFolder(string extractedFolder)
+		{
+			try
+			{
+				if (Directory.Exists(extractedFolder))
 				{
-					File.Delete(sourceFilePath);
+					Directory.Delete(extractedFolder, recursive: true);
 				}
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// A leftover temporary folder does no harm, so it must not stop Weevil.
+				Log.Default.Write(LogSeverityType.Warning, e, $"Unable to delete the files extracted from a zip. Path={extractedFolder}");
 			}
 		}
 
