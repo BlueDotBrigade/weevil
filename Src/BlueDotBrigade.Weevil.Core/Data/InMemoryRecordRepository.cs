@@ -55,6 +55,24 @@
 
 		#region Private Methods
 		/// <summary>
+		/// Returns the lowest and highest line numbers of <paramref name="records"/>, read without creating records.
+		/// </summary>
+		private static (int Lowest, int Highest) GetLineNumberRange(RecordList records)
+		{
+			var lowest = int.MaxValue;
+			var highest = int.MinValue;
+
+			for (var position = 0; position < records.Count; position++)
+			{
+				var lineNumber = records.GetLineNumber(position);
+				lowest = System.Math.Min(lowest, lineNumber);
+				highest = System.Math.Max(highest, lineNumber);
+			}
+
+			return (lowest, highest);
+		}
+
+		/// <summary>
 		/// Clears all records from memory leading up to, but not including, the first selected item.
 		/// </summary>
 		/// <remarks>
@@ -64,23 +82,19 @@
 		///
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearBeforeSelected(RecordList records, RecordList selectedRecords)
+		private static List<int> ClearBeforeSelected(RecordList records, RecordList selectedRecords)
 		{
-			var results = new List<IRecord>();
+			var results = new List<int>();
 
 			if (records.Length > 0 && selectedRecords.Length > 0)
 			{
-				var lowestSelectedLine = selectedRecords.OrderBy(x => x.LineNumber).First().LineNumber;
+				var lowestSelectedLine = GetLineNumberRange(selectedRecords).Lowest;
 
-				foreach (IRecord record in records)
+				for (var position = 0; position < records.Count; position++)
 				{
-					if (record.LineNumber < lowestSelectedLine)
+					if (records.GetLineNumber(position) >= lowestSelectedLine)
 					{
-						// record will no longer be kept in memory
-					}
-					else
-					{
-						results.Add(record);
+						results.Add(position);
 					}
 				}
 			}
@@ -98,19 +112,19 @@
 		///
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearAfterSelected(RecordList records, RecordList selectedRecords)
+		private static List<int> ClearAfterSelected(RecordList records, RecordList selectedRecords)
 		{
-			var results = new List<IRecord>();
+			var results = new List<int>();
 
 			if (records.Length > 0 && selectedRecords.Length > 0)
 			{
-				var highestSelectedLine = selectedRecords.OrderBy(x => x.LineNumber).Last().LineNumber;
+				var highestSelectedLine = GetLineNumberRange(selectedRecords).Highest;
 
-				foreach (IRecord record in records)
+				for (var position = 0; position < records.Count; position++)
 				{
-					if (record.LineNumber <= highestSelectedLine)
+					if (records.GetLineNumber(position) <= highestSelectedLine)
 					{
-						results.Add(record);
+						results.Add(position);
 					}
 					else
 					{
@@ -122,31 +136,50 @@
 			return results;
 		}
 
-		private static IList<IRecord> ClearBeforeAndAfterSelected(RecordList records, RecordList selectedRecords)
+		private static List<int> ClearBeforeAndAfterSelected(RecordList records, RecordList selectedRecords)
 		{
-			IList<IRecord> headlessResults = ClearBeforeSelected(records, selectedRecords);
+			var results = new List<int>();
 
-			var immutableHeadlessResults = headlessResults.ToImmutableArray();
+			if (records.Length > 0 && selectedRecords.Length > 0)
+			{
+				(var lowestSelectedLine, var highestSelectedLine) = GetLineNumberRange(selectedRecords);
 
-			return ClearAfterSelected(immutableHeadlessResults, selectedRecords);
+				for (var position = 0; position < records.Count; position++)
+				{
+					var lineNumber = records.GetLineNumber(position);
+
+					if (lineNumber < lowestSelectedLine)
+					{
+						continue;
+					}
+
+					if (lineNumber > highestSelectedLine)
+					{
+						break;
+					}
+
+					results.Add(position);
+				}
+			}
+
+			return results;
 		}
 
-		private static IList<IRecord> ClearBetweenSelected(RecordList records, RecordList selectedRecords)
+		private static List<int> ClearBetweenSelected(RecordList records, RecordList selectedRecords)
 		{
-			var results = new List<IRecord>();
+			var results = new List<int>();
 
 			if (records.Length >= 2 && selectedRecords.Length >= 2)
 			{
-				var sortedRecords = selectedRecords.OrderBy(x => x.LineNumber);
+				(var lowestSelectedLine, var highestSelectedLine) = GetLineNumberRange(selectedRecords);
 
-				var lowestSelectedLine = sortedRecords.First().LineNumber;
-				var highestSelectedLine = sortedRecords.Last().LineNumber;
-
-				foreach (IRecord record in records)
+				for (var position = 0; position < records.Count; position++)
 				{
-					if (record.LineNumber <= lowestSelectedLine || record.LineNumber >= highestSelectedLine)
+					var lineNumber = records.GetLineNumber(position);
+
+					if (lineNumber <= lowestSelectedLine || lineNumber >= highestSelectedLine)
 					{
-						results.Add(record);
+						results.Add(position);
 					}
 				}
 			}
@@ -160,24 +193,17 @@
 		/// <remarks>
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearSelected(RecordList records, RecordList selectedRecords)
+		private static List<int> ClearSelected(RecordList records, RecordList selectedRecords)
 		{
-			var results = new IRecord[records.Length - selectedRecords.Length];
+			var results = new List<int>(records.Length - selectedRecords.Length);
 
 			var blacklist = Enumerable.Range(0, selectedRecords.Count).Select(selectedRecords.GetLineNumber).ToImmutableHashSet();
 
-			var insertAt = 0;
-
-            for (var i = 0; i < records.Length; i++)
-            {
-				if (blacklist.Contains(records.GetLineNumber(i)))
+			for (var position = 0; position < records.Count; position++)
+			{
+				if (!blacklist.Contains(records.GetLineNumber(position)))
 				{
-					// consider the record cleared
-				}
-				else
-				{
-					results[insertAt] = records[i];
-					insertAt++;
+					results.Add(position);
 				}
 			}
 
@@ -192,33 +218,73 @@
 		/// 
 		/// When complete, the original log file will remain unchanged.
 		/// </remarks>
-		private static IList<IRecord> ClearUnselected(RecordList records, RecordList selectedRecords)
+		private static List<int> ClearUnselected(RecordList records, RecordList selectedRecords)
 		{
-			return selectedRecords;
+			var results = new List<int>(selectedRecords.Count);
+			var searchFrom = 0;
+
+			// The selected records are in line number order, as the records are, so each search starts after the last record found.
+			for (var index = 0; index < selectedRecords.Count; index++)
+			{
+				var position = Collections.PositionRanges.IndexOfLineNumber(records, selectedRecords.GetLineNumber(index), searchFrom);
+
+				if (position >= 0)
+				{
+					results.Add(position);
+					searchFrom = position + 1;
+				}
+			}
+
+			return results;
 		}
 
-		private static IList<IRecord> ClearBeyondRegions(RecordList allRecords, ImmutableArray<Region> regions)
+		/// <summary>
+		/// Returns <see langword="true"/> when <paramref name="positions"/> are 0, 1, 2 and so on, up to <paramref name="count"/>: every record, in order.
+		/// </summary>
+		private static bool IsEveryPosition(List<int> positions, int count)
+		{
+			if (positions.Count != count)
+			{
+				return false;
+			}
+
+			for (var index = 0; index < count; index++)
+			{
+				if (positions[index] != index)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		/// <returns>The positions of the records kept, or <see langword="null"/> to keep every record.</returns>
+		private static List<int> ClearBeyondRegions(RecordList allRecords, ImmutableArray<Region> regions)
 		{
 			// Have any regions of interest been defined?
 			// ... If not, then return everything.
 			if (regions.Length == 0)
 			{
-				return allRecords;
+				return null;
 			}
 			else
 			{
-				var filteredRecords = new List<IRecord>();
+				var results = new List<int>();
 
 				// Sort regions by line number to maintain sequential order (Bug #647)
-			foreach (Region region in regions.OrderBy(r => r.Minimum.LineNumber))
+				foreach (Region region in regions.OrderBy(r => r.Minimum.LineNumber))
 				{
 					// Add all records that fall within the current region of interest
-					filteredRecords.AddRange(allRecords.Where(record =>
-						record.LineNumber >= region.Minimum.LineNumber &&
-						record.LineNumber <= region.Maximum.LineNumber));
+					var position = Collections.PositionRanges.LowerBound(allRecords, region.Minimum.LineNumber, 0);
+
+					for (; position < allRecords.Count && allRecords.GetLineNumber(position) <= region.Maximum.LineNumber; position++)
+					{
+						results.Add(position);
+					}
 				}
 
-				return filteredRecords;
+				return results;
 			}
 		}
 		#endregion
@@ -231,6 +297,9 @@
 			throw new NotImplementedException();
 		}
 
+		/// <remarks>
+		/// The records kept are found by line number, and kept as positions in the records, so no record is created (#1140).
+		/// </remarks>
 		public RecordList Get(int maxRecords)
 		{
 			if (System.Threading.Interlocked.Exchange(ref _operationState, OperationRunning) == OperationRunning)
@@ -238,52 +307,59 @@
 				throw new InvalidOperationException("An operation is already in progress.");
 			}
 
-			IList<IRecord> visibleRecords = RecordList.Empty;
+			// Null keeps every record.
+			List<int> keptPositions = null;
 
 			try
 			{
 				// Early exit?
 				if (_selectedRecords.Length == 0 && _clearOperation != ClearOperation.BeyondRegions)
 				{
-					visibleRecords = _allRecords;
+					keptPositions = null;
 				}
 				else
 				{
 					switch (_clearOperation)
 					{
 						case ClearOperation.BeforeSelected:
-							visibleRecords = ClearBeforeSelected(_allRecords, _selectedRecords);
+							keptPositions = ClearBeforeSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.BeforeAndAfterSelected:
-							visibleRecords = ClearBeforeAndAfterSelected(_allRecords, _selectedRecords);
+							keptPositions = ClearBeforeAndAfterSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.BetweenSelected:
-							visibleRecords = ClearBetweenSelected(_allRecords, _selectedRecords);
+							keptPositions = ClearBetweenSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.AfterSelected:
-							visibleRecords = ClearAfterSelected(_allRecords, _selectedRecords);
+							keptPositions = ClearAfterSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.Selected:
-							visibleRecords = ClearSelected(_allRecords, _selectedRecords);
+							keptPositions = ClearSelected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.Unselected:
-							visibleRecords = ClearUnselected(_allRecords, _selectedRecords);
+							keptPositions = ClearUnselected(_allRecords, _selectedRecords);
 							break;
 
 						case ClearOperation.BeyondRegions:
-							visibleRecords = ClearBeyondRegions(_allRecords, _regions);
+							keptPositions = ClearBeyondRegions(_allRecords, _regions);
 							break;
 
 						default:
 							throw new ArgumentOutOfRangeException(nameof(_clearOperation), _clearOperation, "Clear operation is not supported.");
 					}
 
-					var recordsCleared = _allRecords.Length - visibleRecords.Count;
+					// A Clear that keeps every record, as after Select All, keeps the list rather than copying its table.
+					if (keptPositions != null && IsEveryPosition(keptPositions, _allRecords.Length))
+					{
+						keptPositions = null;
+					}
+
+					var recordsCleared = _allRecords.Length - (keptPositions?.Count ?? _allRecords.Length);
 
 					if (recordsCleared > 0)
 					{
@@ -300,9 +376,12 @@
 				if (maxRecords != int.MinValue &&
 					maxRecords != int.MaxValue)
 				{
-					visibleRecords = visibleRecords.Count < maxRecords
-						? visibleRecords
-						: visibleRecords.Take(maxRecords).ToList();
+					var keptCount = keptPositions?.Count ?? _allRecords.Length;
+
+					if (keptCount >= maxRecords)
+					{
+						keptPositions = keptPositions?.Take(maxRecords).ToList() ?? Enumerable.Range(0, maxRecords).ToList();
+					}
 
 					Log.Default.Write(LogSeverityType.Information,
 						$"Record results have been limited to... Maximum={maxRecords}");
@@ -314,8 +393,11 @@
 				_operationState = OperationInactive;
 			}
 
-			// A list kept whole is returned as it is, not copied.
-			return visibleRecords as RecordList ?? visibleRecords.ToImmutableArray();
+			// A list kept whole is returned as it is, not copied. Otherwise the records kept get a table of their own,
+			// so the records cleared, and the chunks only they were read from, are freed (#1140).
+			return keptPositions == null
+				? _allRecords
+				: TableRecordList.Keep(_allRecords, keptPositions.ToArray());
 		}
 
 		public RecordList Get(Range range, int maximumCount)

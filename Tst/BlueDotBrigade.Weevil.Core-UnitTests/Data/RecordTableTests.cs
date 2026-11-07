@@ -131,7 +131,6 @@ namespace BlueDotBrigade.Weevil.Data
 			RecordTable table = new RecordTable.Builder().Build();
 
 			table.Count.Should().Be(0);
-			table.CreateRecords().Should().BeEmpty();
 			FluentActions.Invoking(() => table.CreateRecord(0)).Should().Throw<ArgumentOutOfRangeException>();
 		}
 

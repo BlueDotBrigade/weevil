@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
-	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Analysis;
@@ -121,8 +120,9 @@
 				collector.Reset();
 			}
 
+			// Records are created as they are read, so the filter marks the positions it keeps rather than keeping records (#1140).
 			RecordList records = _scope.Records;
-			var resultsCache = new IRecord[records.Length];
+			var isKept = new bool[records.Count];
 			var resultsCount = 0;
 
 			// Set `MaxDegreeOfParallelism=1` to force the loop to be executed by only one thread.
@@ -145,19 +145,13 @@
 
 						  if (strategy.CanKeep(record, results.Content))
 						  {
-							  resultsCache[index] = record;
+							  isKept[index] = true;
 							  results.Count++;
 
 							  foreach (IMetricCollector collector in _metricCollectors)
 							  {
 								  collector.Count(record);
 							  }
-						  }
-						  else
-						  {
-							  // this record does not meet the search criteria
-							  // ... it will not be included in the results
-							  resultsCache[index] = null;
 						  }
 
 						  return results;
@@ -183,18 +177,28 @@
 				throw new FilterAbortedException();
 			}
 
+			// A filter that keeps every record keeps the records' list itself, so it keeps no array (#1140).
+			if (resultsCount == records.Count)
+			{
+				return records;
+			}
+
+			var positions = new int[resultsCount];
+			var kept = 0;
+
+			for (var position = 0; position < isKept.Length; position++)
+			{
+				if (isKept[position])
+				{
+					positions[kept++] = position;
+				}
+			}
+
 			Log.Default.Write(
 				LogSeverityType.Debug,
-				$"Filter results are being compressed... Before={resultsCache.Length}");
+				$"Filter results have been kept. Records={records.Count}, Results={resultsCount}");
 
-			// `resultsCache` does not change after this point, so it is wrapped rather than copied.
-			RecordList compressedResults = ImmutableCollectionsMarshal.AsImmutableArray(resultsCache).Compact(resultsCount);
-
-			Log.Default.Write(
-				LogSeverityType.Debug,
-				$"Filter results have been compressed. Before={resultsCache.Length}, After={compressedResults.Length}");
-
-			return compressedResults;
+			return TableRecordList.Select(records, positions);
 		}
 
 		private void UpdateFilterHistory(FilterHistory history, string newValue)

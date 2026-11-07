@@ -165,17 +165,14 @@
 			}
 		}
 
+		/// <summary>
+		/// Returns the selected records as a list over the results and the selected ranges, which copies neither (#1140).
+		/// </summary>
 		private static RecordList GetRecords(PositionRanges selection, RecordList visibleRecords)
 		{
-			var records = new IRecord[selection.Count];
-			var index = 0;
-
-			foreach (var position in selection.EnumeratePositions())
-			{
-				records[index++] = visibleRecords[position];
-			}
-
-			return ImmutableArray.Create(records);
+			return selection.Count == 0
+				? RecordList.Empty
+				: new SelectedRecordList(selection, visibleRecords);
 		}
 
 		/// <summary>
@@ -538,16 +535,19 @@
 		{
 			var lastKept = -1;
 			var positions = new List<int>();
+			var searchFrom = 0;
 
 			// Found by line number, so only the last selected record kept is created (#1137).
+			// Both lists are in line number order, so each search starts after the last record found (#1140).
 			for (var index = 0; index < selected.Count; index++)
 			{
-				var position = FindPosition(kept, selected.GetLineNumber(index));
+				var position = PositionRanges.IndexOfLineNumber(kept, selected.GetLineNumber(index), searchFrom);
 
 				if (position >= 0)
 				{
 					positions.Add(position);
 					lastKept = index;
+					searchFrom = position + 1;
 				}
 			}
 

@@ -16,8 +16,6 @@
 		private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(60);
 		private const string CommentLabel = "ElapsedTimeUi";
 
-		private const int UnknownIndex = -1;
-
 		private TimeSpan _maximumPeriodDetected;
 		private int _count;
 		private DateTime _firstOccurrenceAt;
@@ -55,22 +53,6 @@
 			return results;
 		}
 
-		private static int IndexOfFirstTimestamp(RecordList records)
-		{
-			var result = UnknownIndex;
-
-			for (var i = 0; i < records.Length; i++)
-			{
-				if (records[i].HasCreationTime && records[i].WasGeneratedByUi)
-				{
-					result = i;
-					break;
-				}
-			}
-
-			return result;
-		}
-
 		/// <summary>
 		/// Analyzes the <paramref name="records"/> looking for time periods where logging appears to have stopped.
 		/// </summary>
@@ -95,19 +77,20 @@
 				}
 			}
 
-			var previous = IndexOfFirstTimestamp(records);
+			// Each timestamped record is created once, and each UI record is compared with the UI record before it; the first is compared with itself (#1140).
+			IRecord previousRecord = null;
 
-			if (previous != UnknownIndex)
+			for (var position = 0; position < records.Length; position++)
 			{
-				for (var current = previous; current < records.Length; current++)
+				if (records.GetCreatedAt(position) != Record.CreationTimeUnknown)
 				{
-					IRecord currentRecord = records[current];
+					IRecord currentRecord = records[position];
 
-					if (currentRecord.HasCreationTime && currentRecord.WasGeneratedByUi)
+					if (currentRecord.WasGeneratedByUi)
 					{
-						CheckForTimeGap(currentRecord, records[previous], state, maximumAllowedPeriod, canUpdateMetadata);
+						CheckForTimeGap(currentRecord, previousRecord ?? currentRecord, state, maximumAllowedPeriod, canUpdateMetadata);
 
-						previous = current;
+						previousRecord = currentRecord;
 					}
 				}
 			}

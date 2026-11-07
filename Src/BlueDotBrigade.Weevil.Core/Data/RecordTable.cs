@@ -2,7 +2,6 @@ namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 
 	/// <summary>
 	/// A log's records in columns, 21 bytes per record, from which records are created when they are needed (#1021, #1138).
@@ -68,18 +67,32 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		/// <summary>
-		/// Creates every record, in order, as the array Core holds until records are created when they are read (#1140).
+		/// Returns a new table of only the records at <paramref name="recordNumbers"/>, in that order (#1140).
 		/// </summary>
-		public ImmutableArray<IRecord> CreateRecords()
+		/// <remarks>
+		/// Clear keeps one, so this table and the chunks that no kept record is read from can be freed, as Clear always freed the records it cleared.
+		/// </remarks>
+		public RecordTable Keep(IReadOnlyList<int> recordNumbers)
 		{
-			ImmutableArray<IRecord>.Builder records = ImmutableArray.CreateBuilder<IRecord>(this.Count);
+			var kept = new Builder();
 
-			for (var recordNumber = 0; recordNumber < this.Count; recordNumber++)
+			foreach (var recordNumber in recordNumbers)
 			{
-				records.Add(CreateRecord(recordNumber));
+				Block block = GetBlock(recordNumber);
+				var row = recordNumber % BlockSize;
+				RecordFacts facts = block.Facts[row];
+
+				if (facts.KeepsString)
+				{
+					kept.Add(block.LineNumbers[row], block.CreatedAt[row], facts, block.GetString(row));
+				}
+				else
+				{
+					kept.Add(block.LineNumbers[row], block.CreatedAt[row], facts, GetChunk(recordNumber), block.Offsets[row], block.Lengths[row]);
+				}
 			}
 
-			return records.MoveToImmutable();
+			return kept.Build();
 		}
 
 		private Block GetBlock(int recordNumber)
@@ -99,7 +112,7 @@ namespace BlueDotBrigade.Weevil.Data
 		/// Only the chunks the record's block can use are searched: from its first chunk to the next block's.
 		/// A chunk holds many records, so that is usually one or two.
 		/// </remarks>
-		private ContentChunk GetChunk(int recordNumber)
+		internal ContentChunk GetChunk(int recordNumber)
 		{
 			var blockIndex = recordNumber / BlockSize;
 			var low = _blocks[blockIndex].FirstChunk;

@@ -55,7 +55,7 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
      2. Callers read records from a read-only record list, an `IList<IRecord>` (#1136). **Done 2026-10-30.**
      3. Code that needs only line numbers or timestamps stops creating records (#1137). **Done 2026-10-31.**
      4. The parser fills a record table, and Core builds its records from it (#1138). **Done 2026-11-02.**
-     5. Insights and the graph stop keeping records of a log that is no longer open (#1139).
+     5. Insights and the graph stop keeping records of a log that is no longer open (#1139). **Done 2026-11-02.**
      6. Filter results, the selection and Clear hold record numbers, and records are created only when read (#1140).
      7. Tests use record lists, the temporary forwarders go, and records on demand are measured (#1141).
    - **Decisions (2026-10-30):**
@@ -63,6 +63,13 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
      - The graph graphs at most 100,000 selected records, like Copy and Paste.
      - `IInsight.RelatedRecords` becomes line numbers.
      - Records are equal when their line numbers are equal, even across logs.
+   - **Decision (2026-11-02):** records created when they are read (#1140) make filters that never read text, and a Find through every record, about 0.4 s slower on 10 million records. Opening takes about half the time and filters that read text are as fast or faster. The user accepted this; #1150 follows up.
+   - **Correction (2026-11-06):** most of that 0.4 s was not the cost of creating records.
+     - Creating a record costs about 14 ns more than reading one held in an array, on one thread: a Find through 10 million records takes 0.15 – 0.2 s longer, and the elapsed-time analyzer, which created two records per row, about 0.25 s longer. On four threads, the filter loop takes 0.06 – 0.08 s longer.
+     - The rest came from `ElapsedTimes.Calculate`. After every filter it allocates an array as long as the highest line number, about 65 MB even for 16 results. The young collections that creating records triggers left that array on fresh memory each time, and on the 4-vCPU test VM its 15,800 page faults took 0.27 – 0.30 s. `main` reused the memory, in 0.015 s.
+     - The design's benchmark (80 ms against 106 ms) compared two ways of storing results, not the cost of a record. Its own figures showed creating a record nearly doubled the loop. It never timed single-thread scans, the real path through the table, or a session after many filters.
+     - Prototypes that read the table by position, creating no record per row, measured: Find 0.35 – 0.39 s (this branch 0.53 – 0.55, `main` 0.36 – 0.40, 2.12.1 0.44 – 0.46), and the elapsed-time analyzer 0.07 – 0.08 s (this branch 0.59 – 0.64, `main` 0.30 – 0.32, 2.12.1 0.41). #1150 follows up with those and with `ElapsedTimes`.
+   - **Decision (2026-11-06):** Clear keeps a new record table of only the records it keeps (#1140), rather than numbers of records in the log's table, as the [design](../Research/Weevil3/RecordsOnDemand/README.md) planned. Otherwise the kept list would hold the whole table, and Clear would no longer free the memory of the records it clears, as it always has. So record numbers do not survive Clear: #991, whose views would share one table, starts from this. The chunks that only cleared records were read from are already freed, so #1022 starts by checking what is left to do.
 4. **Clear frees memory (#1022).**
    - Clear narrows the view's record scope (#990 step 8). Content chunks that the scope no longer includes are released, followed by one compacting garbage collection, as Clear does today. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
    - Only whole chunks are released: up to about 16 MB stays at each edge of a kept range, and `Clear Selected` frees nothing.

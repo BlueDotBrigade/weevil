@@ -10,17 +10,18 @@ namespace BlueDotBrigade.Weevil.Navigation
 		private readonly ActiveRecord _activeRecord;
 
 		// The view replaces its elapsed times after each filter, so they are read each time.
-		private readonly IRecordState _state;
+		private readonly RecordState _state;
 
-		public ElapsedTimeNavigator(ActiveRecord activeRecord, IRecordState state)
+		public ElapsedTimeNavigator(ActiveRecord activeRecord, RecordState state)
 		{
 			_activeRecord = activeRecord;
 			_state = state;
 		}
 
-		private bool CheckElapsedTime(IRecord record, int? minMilliseconds, int? maxMilliseconds)
+		// By line number, so a search creates no record (#1140).
+		private bool CheckElapsedTime(int lineNumber, int? minMilliseconds, int? maxMilliseconds)
 		{
-			TimeSpan elapsedTime = _state.GetElapsedTime(record);
+			TimeSpan elapsedTime = _state.ElapsedTimes.Get(lineNumber);
 
 			if (elapsedTime < TimeSpan.Zero)
 			{
@@ -46,7 +47,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToPrevious(_activeRecord.Index, record => CheckElapsedTime(record, minMilliseconds, maxMilliseconds));
+				.GoToPreviousLineNumber(_activeRecord.Index, lineNumber => CheckElapsedTime(lineNumber, minMilliseconds, maxMilliseconds));
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 
@@ -54,7 +55,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 		{
 			var resultAt = _activeRecord
 				.DataSource
-				.GoToNext(_activeRecord.Index, record => CheckElapsedTime(record, minMilliseconds, maxMilliseconds));
+				.GoToNextLineNumber(_activeRecord.Index, lineNumber => CheckElapsedTime(lineNumber, minMilliseconds, maxMilliseconds));
 			return _activeRecord.SetActiveIndex(resultAt);
 		}
 	}

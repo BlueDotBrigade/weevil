@@ -93,6 +93,17 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenRecordsSelectedTogetherAndApart_WhenTheRecordsBeforeThemAreCleared_ThenTheyStaySelected()
+		{
+			IEngine engine = OpenCopy();
+			engine.Selector.SelectOnly(5, 6).Select(lineNumber: 8);
+
+			engine.Clear(ClearOperation.BeforeSelected);
+
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(5, 6, 8);
+		}
+
+		[TestMethod]
 		public void GivenAnActiveRecordButNoSelectedRecord_WhenCleared_ThenNavigationStartsFromTheTop()
 		{
 			// A cleared engine starts as a new one did, with no active record.
@@ -191,12 +202,30 @@ namespace BlueDotBrigade.Weevil
 		public void GivenAnOpenLog_WhenReloaded_ThenItsPreviousRecordsHaveBeenFreed()
 		{
 			// Reload kept the previous records while it read the log again, so memory held two copies of the log.
+			// Records are created when they are read (#1140), so the test watches the record table they are created from.
 			IEngine engine = OpenCopy();
-			WeakReference previousRecord = TrackFirstRecord(engine);
+			WeakReference previousTable = TrackRecordTable(engine);
 
 			engine.Reload();
 
-			previousRecord.IsAlive.Should().BeFalse("Reload releases the previous records before it reads the log, and opening collects them");
+			previousTable.IsAlive.Should().BeFalse("Reload releases the previous records before it reads the log, and opening collects them");
+		}
+
+		[TestMethod]
+		public void GivenAnOpenLog_WhenRecordsAreCleared_ThenTheRecordTableTheyWereReadFromHasBeenFreed()
+		{
+			// Clear keeps a record table of only the records it keeps, so the records it clears can be freed (#1140).
+			IEngine engine = OpenCopy();
+			WeakReference previousTable = TrackRecordTable(engine);
+			engine.Selector.SelectOnly(10, 20);
+
+			engine.Clear(ClearOperation.BeforeSelected);
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
+
+			previousTable.IsAlive.Should().BeFalse("Clear keeps a record table of only the records it keeps");
+			engine.Records.GetLineNumber(0).Should().Be(10);
 		}
 
 		[TestMethod]
@@ -204,13 +233,13 @@ namespace BlueDotBrigade.Weevil
 		{
 			// The GUI keeps its insights across Reload; an insight that kept a record would keep the previous log's content (#1139).
 			// The log's third timestamp is earlier than its second, so the temporal anomaly insight refers to line 2.
-			// Once records are created on demand (#1140), a record object proves nothing: watch the record's chunk instead.
+			// A kept record keeps the chunk of the log's content it is read from, so the test watches that chunk (#1140).
 			IEngine engine = OpenCopy("OutOfOrderTimestamps.log");
-			(IInsight[] insights, WeakReference referredRecord) = GetInsightsAndTrackTheirRecord(engine);
+			(IInsight[] insights, WeakReference referredChunk) = GetInsightsAndTrackTheirChunk(engine);
 
 			engine.Reload();
 
-			referredRecord.IsAlive.Should().BeFalse("insights keep line numbers, not records");
+			referredChunk.IsAlive.Should().BeFalse("insights keep line numbers, not records");
 			GC.KeepAlive(insights);
 		}
 
@@ -400,34 +429,29 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		/// <summary>
-		/// Watches the first record without keeping it alive: a Debug build keeps a test method's locals until it ends.
-		/// It tracks resurrection, so a record that a finalizer still holds counts as alive.
+		/// Watches the engine's record table without keeping it alive: a Debug build keeps a test method's locals until it ends.
+		/// It tracks resurrection, so a table that a finalizer still holds counts as alive.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static WeakReference TrackFirstRecord(IEngine engine)
+		private static WeakReference TrackRecordTable(IEngine engine)
 		{
-			return new WeakReference(engine.Filter.Results[0], trackResurrection: true);
+			return new WeakReference(((TableRecordList)engine.Records).Table, trackResurrection: true);
 		}
 
 		/// <summary>
-		/// Gets the insights, and watches the record on the first line that an insight refers to, without keeping that record alive.
+		/// Gets the insights, and watches the chunk that holds the content of the first line an insight refers to, the same way.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static (IInsight[] Insights, WeakReference Record) GetInsightsAndTrackTheirRecord(IEngine engine)
+		private static (IInsight[] Insights, WeakReference Chunk) GetInsightsAndTrackTheirChunk(IEngine engine)
 		{
 			IInsight[] insights = engine.Analyzer.GetInsights().ToArray();
 			var lineNumber = insights.First(insight => insight.RelatedLineNumbers.Count > 0).RelatedLineNumbers[0];
 
-			return (insights, TrackRecordOn(engine, lineNumber));
-		}
+			// Nothing has been cleared, so a record's position in the engine's records is its number in the table.
+			var records = (TableRecordList)engine.Records;
+			ContentChunk chunk = records.Table.GetChunk(records.IndexOfLineNumber(lineNumber));
 
-		/// <summary>
-		/// Watches the record on <paramref name="lineNumber"/> the same way.
-		/// </summary>
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static WeakReference TrackRecordOn(IEngine engine, int lineNumber)
-		{
-			return new WeakReference(engine.Records[engine.Records.IndexOfLineNumber(lineNumber)], trackResurrection: true);
+			return (insights, new WeakReference(chunk, trackResurrection: true));
 		}
 
 		private IEngine OpenCopy(string fileName = "SampleData.log")

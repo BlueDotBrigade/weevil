@@ -29,7 +29,7 @@
 			ICoreExtension coreExtension,
 			RecordList allRecords,
 			Session session,
-			IRecordState state,
+			RecordState state,
 			ITelemetryMetricRecorder telemetryRecorder = null)
 		{
 			_sourceFilePath = sourceFilePath;

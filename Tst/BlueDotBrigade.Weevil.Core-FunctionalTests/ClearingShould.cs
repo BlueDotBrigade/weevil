@@ -1,7 +1,9 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
+	using System.Linq;
 	using Data;
+	using Filter;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
@@ -157,6 +159,30 @@
 			engine.Count.Should().Be(9);
 			(engine.Filter.Results.First().LineNumber).Should().Be(1);
 			(engine.Filter.Results.Last().LineNumber).Should().Be(9);
+		}
+
+		[TestMethod]
+		public void GivenRecordsSelectedTogetherAndApart_WhenTheOthersAreClearedAndTheRestFiltered_ThenTheFilterReadsTheRecordsKept()
+		{
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
+				.Open();
+
+			foreach (var lineNumber in new[] { 2, 3, 4, 9, 200, 500 })
+			{
+				engine.Selector.Select(lineNumber);
+			}
+
+			engine.Clear(ClearOperation.Unselected);
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Changing state"));
+
+			engine.Filter.Results.Select(record => record.LineNumber).Should().Equal(200, 500);
+			engine.Filter.Results[1].Content.Should().Contain("new state Section500.");
+
+			engine.Filter.Apply(FilterType.PlainText, FilterCriteria.None);
+
+			engine.Filter.Results.Select(record => record.LineNumber).Should().Equal(2, 3, 4, 9, 200, 500);
+			engine.Filter.Results[0].Content.Should().Contain("Id=002");
 		}
 
 		[TestMethod]
