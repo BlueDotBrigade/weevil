@@ -29,6 +29,21 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenRecordsThatHoldBytesOrStrings_WhenTheirFactsAreRead_ThenEachHasTheFactsOfTheRecordThatWasAdded()
+		{
+			var chunk = new ContentChunk(0, Encoding.UTF8.GetBytes("Alpha"), Encoding.UTF8);
+			var builder = new RecordTable.Builder();
+
+			builder.Add(1, Start, new RecordFacts(SeverityType.Information, isMultiLine: false, wasGeneratedByUi: true), chunk, 0, 5);
+			builder.Add(2, Start, new RecordFacts(SeverityType.Error, isMultiLine: true, wasGeneratedByUi: false), "Kept as a string");
+			RecordTable table = builder.Build();
+
+			// How the table keeps the content is not a fact about the record (#1150).
+			table.GetFacts(0).Should().BeEquivalentTo(new { Severity = SeverityType.Information, IsMultiLine = false, WasGeneratedByUi = true, KeepsString = false });
+			table.GetFacts(1).Should().BeEquivalentTo(new { Severity = SeverityType.Error, IsMultiLine = true, WasGeneratedByUi = false, KeepsString = false });
+		}
+
+		[TestMethod]
 		public void GivenMoreRecordsThanABlockHolds_WhenCreatedFromTheTable_ThenRecordsAroundTheBlockAndChunkEdgesAreCorrect()
 		{
 			var first = new ContentChunk(0, Encoding.UTF8.GetBytes("ab"), Encoding.UTF8);

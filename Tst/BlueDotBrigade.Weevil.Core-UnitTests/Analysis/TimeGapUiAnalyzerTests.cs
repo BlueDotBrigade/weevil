@@ -111,6 +111,39 @@
 		}
 
 		[TestMethod]
+		public void GivenAGapOnlyBetweenRecordsNotFromTheUi_WhenAnalyzeRuns_ThenNoRecordIsCreated()
+		{
+			// Whether the UI thread wrote a row is read from its facts, so only a row the analyzer flags is created (#1150).
+			var start = new DateTime(2026, 11, 6, 9, 0, 0);
+			var records = ImmutableArray.Create<IRecord>(
+				new Record(10, start, SeverityType.Debug, "worker", isMultiLine: false, wasGeneratedByUi: false),
+				new Record(20, start.AddSeconds(60), SeverityType.Debug, "ui", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(30, start.AddSeconds(61), SeverityType.Debug, "ui", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(40, start.AddSeconds(120), SeverityType.Debug, "worker", isMultiLine: false, wasGeneratedByUi: false));
+			var state = new RecordState();
+			state.Flags.SetFlagged(30, true);
+			var analyzer = new TimeGapUiAnalyzer();
+
+			Results results = analyzer.Analyze(new ColumnsOnlyRecordList(records), state, TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+
+			results.FlaggedRecords.Should().Be(0);
+			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.FromSeconds(1));
+			state.Flags.IsFlagged(30).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenGapsAndNoMetadataToUpdate_WhenAnalyzeRuns_ThenGapsAreCountedWithoutCreatingARecord()
+		{
+			// The time gap insight runs the analyzer this way over every record of the log (#1150).
+			var analyzer = new TimeGapUiAnalyzer();
+
+			Results results = analyzer.Analyze(new ColumnsOnlyRecordList(_records), state: null, TimeSpan.FromSeconds(90), canUpdateMetadata: false);
+
+			results.FlaggedRecords.Should().Be(3);
+			analyzer.FirstOccurrenceAt.Should().Be(_records[2].CreatedAt);
+		}
+
+		[TestMethod]
 		[WorkItem(935)]
 		public void GivenFirstRunHasGaps_WhenSecondRunHasNoGaps_ThenFirstOccurrenceAtIsReset()
 		{

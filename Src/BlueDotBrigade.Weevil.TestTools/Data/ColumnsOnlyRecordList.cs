@@ -4,8 +4,8 @@ namespace BlueDotBrigade.Weevil.TestTools.Data
 	using BlueDotBrigade.Weevil.Data;
 
 	/// <summary>
-	/// A record list that reads line numbers and timestamps from another list, but throws when a record is read,
-	/// so a test shows that code which needs only those creates no record (#1137).
+	/// A record list that reads line numbers, timestamps and facts from another list, but throws when a record is read,
+	/// so a test shows that code which needs only those creates no record (#1137, #1150).
 	/// </summary>
 	public sealed class ColumnsOnlyRecordList : RecordList
 	{
@@ -23,5 +23,7 @@ namespace BlueDotBrigade.Weevil.TestTools.Data
 		public override int GetLineNumber(int position) => _records.GetLineNumber(position);
 
 		public override DateTime GetCreatedAt(int position) => _records.GetCreatedAt(position);
+
+		public override RecordFacts GetFacts(int position) => _records.GetFacts(position);
 	}
 }

@@ -79,22 +79,23 @@
 
 			if (canUpdateMetadata)
 			{
-				foreach (IRecord record in records)
-				{
-					state.SetFlagged(record, false);
-				}
+				// One step, by line number, so clearing a flag creates no record (#1150).
+				state.SetFlagged(records, false);
 			}
 
-			// Each timestamped record is created once, and compared with the one before it; the first is compared with itself (#1140).
-			IRecord previousRecord = null;
+			// Each timestamped row is compared with the one before it, and the first with itself, by timestamp alone (#1140, #1150).
+			DateTime previousCreatedAt = Record.CreationTimeUnknown;
+			var count = records.Count;
 
-			for (var position = 0; position < records.Length; position++)
+			for (var position = 0; position < count; position++)
 			{
-				if (records.GetCreatedAt(position) != Record.CreationTimeUnknown)
+				DateTime createdAt = records.GetCreatedAt(position);
+
+				if (createdAt != Record.CreationTimeUnknown)
 				{
-					IRecord currentRecord = records[position];
-					CheckForTimeGap(currentRecord, previousRecord ?? currentRecord, state, maximumAllowedPeriod, canUpdateMetadata);
-					previousRecord = currentRecord;
+					DateTime comparedWith = previousCreatedAt != Record.CreationTimeUnknown ? previousCreatedAt : createdAt;
+					CheckForTimeGap(records, position, createdAt, comparedWith, state, maximumAllowedPeriod, canUpdateMetadata);
+					previousCreatedAt = createdAt;
 				}
 			}
 
@@ -104,10 +105,14 @@
 			return new Results(_count);
 		}
 
-		protected virtual void CheckForTimeGap(IRecord currentRecord, IRecord previousRecord, IRecordState state, TimeSpan maximumAllowedPeriod,
-			bool canUpdateMetadata)
+		/// <param name="records">The records being analyzed.</param>
+		/// <param name="position">The row of <paramref name="records"/> to check. Its record is created only if it is flagged (#1150).</param>
+		/// <param name="createdAt">When the row's record was created.</param>
+		/// <param name="previousCreatedAt">When the timestamped row before it was created, or <paramref name="createdAt"/> for the first one.</param>
+		protected virtual void CheckForTimeGap(RecordList records, int position, DateTime createdAt, DateTime previousCreatedAt, IRecordState state,
+			TimeSpan maximumAllowedPeriod, bool canUpdateMetadata)
 		{
-			TimeSpan elapsedTime = currentRecord.CreatedAt - previousRecord.CreatedAt;
+			TimeSpan elapsedTime = createdAt - previousCreatedAt;
 
 			_maximumPeriodDetected = elapsedTime > _maximumPeriodDetected
 				? elapsedTime
@@ -119,11 +124,13 @@
 
 				if (_count == 1)
 				{
-					_firstOccurrenceAt = currentRecord.CreatedAt;
+					_firstOccurrenceAt = createdAt;
 				}
 
 				if (canUpdateMetadata)
 				{
+					IRecord currentRecord = records[position];
+
 					state.SetFlagged(currentRecord, true);
 
 					state.AppendComment(						currentRecord,

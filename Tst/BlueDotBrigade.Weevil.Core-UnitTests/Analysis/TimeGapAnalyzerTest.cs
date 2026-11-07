@@ -199,6 +199,68 @@
 		}
 
 		[TestMethod]
+		public void GivenALineOutsideTheAnalyzedRecordsIsFlagged_WhenAnalyzeRuns_ThenThatLineKeepsItsFlag()
+		{
+			// An analyzer reads the selection or the filter results, so a line it does not read keeps its flag (#1150).
+			var start = new DateTime(2026, 11, 6, 9, 0, 0);
+			ImmutableArray<IRecord> analyzed = R.Create()
+				.WithCreatedAt(10, start)
+				.WithCreatedAt(20, start.AddSeconds(1))
+				.GetRecords();
+			var state = new RecordState();
+			state.Flags.SetFlagged(15, true);
+			state.Flags.SetFlagged(20, true);
+
+			new TimeGapAnalyzer().Analyze(analyzed, state, TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+
+			state.Flags.IsFlagged(15).Should().BeTrue();
+			state.Flags.IsFlagged(20).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenRowsWithoutAGap_WhenAnalyzeRuns_ThenNoRecordIsCreated()
+		{
+			// Only a row the analyzer flags is created as a record (#1150); the list throws if any other is read.
+			var start = new DateTime(2026, 11, 6, 9, 0, 0);
+			ImmutableArray<IRecord> records = R.Create()
+				.WithCreatedAt(10, start)
+				.WithCreatedAt(20, Record.CreationTimeUnknown)
+				.WithCreatedAt(30, start.AddSeconds(2))
+				.GetRecords();
+			var state = new RecordState();
+			state.Flags.SetFlagged(30, true);
+			var analyzer = new TimeGapAnalyzer();
+
+			Results results = analyzer.Analyze(new ColumnsOnlyRecordList(records), state, TimeSpan.FromSeconds(5), canUpdateMetadata: true);
+
+			results.FlaggedRecords.Should().Be(0);
+			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.FromSeconds(2));
+			state.Flags.IsFlagged(30).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenAThresholdBelowZero_WhenAnalyzeRuns_ThenTheFirstTimestampedRecordIsComparedWithItself()
+		{
+			// The first timestamped record has none before it, so its elapsed time is zero (#1140).
+			var start = new DateTime(2026, 11, 6, 9, 0, 0);
+			ImmutableArray<IRecord> records = R.Create()
+				.WithCreatedAt(10, Record.CreationTimeUnknown)
+				.WithCreatedAt(20, start)
+				.WithCreatedAt(30, start.AddSeconds(1))
+				.GetRecords();
+			var state = new RecordState();
+			var analyzer = new TimeGapAnalyzer();
+
+			Results results = analyzer.Analyze(records, state, TimeSpan.FromMilliseconds(-1), canUpdateMetadata: true);
+
+			results.FlaggedRecords.Should().Be(2);
+			analyzer.FirstOccurrenceAt.Should().Be(start);
+			state.IsFlagged(records[0]).Should().BeFalse();
+			state.GetComment(records[1]).Should().Be("ElapsedTime: 00.000s");
+			state.GetComment(records[2]).Should().Be("ElapsedTime: 01.000s");
+		}
+
+		[TestMethod]
 		public void GivenPreviousRunHasGapsAndInvalidThreshold_WhenAnalyzeCalled_ThenPublicStateIsReset()
 		{
 			DateTime now = DateTime.Now;

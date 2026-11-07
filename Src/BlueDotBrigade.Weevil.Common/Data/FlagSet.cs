@@ -48,6 +48,29 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		/// <summary>
+		/// Flags or unflags the line of each record in <paramref name="records"/>, in one step. Other lines keep their flags.
+		/// </summary>
+		/// <remarks>
+		/// Reads only line numbers, so no record is created (#1150).
+		/// </remarks>
+		public void SetFlagged(RecordList records, bool isFlagged)
+		{
+			ArgumentNullException.ThrowIfNull(records);
+
+			var count = records.Count;
+
+			lock (_padlock)
+			{
+				for (var position = 0; position < count; position++)
+				{
+					var lineNumber = records.GetLineNumber(position);
+					ThrowIfNegative(lineNumber);
+					SetBit(lineNumber, isFlagged);
+				}
+			}
+		}
+
+		/// <summary>
 		/// Unflags every line, then flags <paramref name="lineNumbers"/>, in one step.
 		/// </summary>
 		public void FlagOnly(IEnumerable<int> lineNumbers)

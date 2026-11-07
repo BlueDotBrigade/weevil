@@ -73,9 +73,17 @@
 
 		public void Count(IRecord record)
 		{
+			Count(record.LineNumber, record.CreatedAt);
+		}
+
+		/// <summary>
+		/// Counts the record on <paramref name="lineNumber"/>, created at <paramref name="createdAt"/>, without the record itself (#1150).
+		/// </summary>
+		public void Count(int lineNumber, DateTime createdAt)
+		{
 			_currentAnomaly = TimeSpan.Zero;
 
-			if (record.HasCreationTime)
+			if (createdAt != Record.CreationTimeUnknown)
 			{
 				if (_previousLineNumber == Record.Dummy.LineNumber)
 				{
@@ -83,20 +91,20 @@
 				}
 				else
 				{
-					if (_previousCreatedAt <= record.CreatedAt)
+					if (_previousCreatedAt <= createdAt)
 					{
 						// everything appears to be in order
 					}
 					else
 					{
-						_currentAnomaly = record.CreatedAt - _previousCreatedAt;
+						_currentAnomaly = createdAt - _previousCreatedAt;
 						
 						if (_currentAnomaly < _threshold)
 						{
 							if (_firstOccurredOnLine == Record.Dummy.LineNumber)
 							{
-								_firstOccurredOnLine = record.LineNumber;
-								_firstOccurredAt = record.CreatedAt;
+								_firstOccurredOnLine = lineNumber;
+								_firstOccurredAt = createdAt;
 							}
 							Interlocked.Increment(ref _counter);
 
@@ -118,8 +126,8 @@
 						}
 					}
 				}
-				_previousLineNumber = record.LineNumber;
-				_previousCreatedAt = record.CreatedAt;
+				_previousLineNumber = lineNumber;
+				_previousCreatedAt = createdAt;
 			}
 		}
 

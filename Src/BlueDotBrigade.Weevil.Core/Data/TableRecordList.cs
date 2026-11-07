@@ -46,6 +46,8 @@ namespace BlueDotBrigade.Weevil.Data
 			return _table.ReadContent(GetRecordNumber(position), content);
 		}
 
+		public override RecordFacts GetFacts(int position) => _table.GetFacts(GetRecordNumber(position));
+
 		/// <summary>
 		/// Returns the records at <paramref name="positions"/> of <paramref name="records"/>, in that order.
 		/// </summary>

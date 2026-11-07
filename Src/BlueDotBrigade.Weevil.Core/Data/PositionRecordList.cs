@@ -26,5 +26,7 @@ namespace BlueDotBrigade.Weevil.Data
 		public override int GetLineNumber(int position) => _records.GetLineNumber(_positions[position]);
 
 		public override DateTime GetCreatedAt(int position) => _records.GetCreatedAt(_positions[position]);
+
+		public override RecordFacts GetFacts(int position) => _records.GetFacts(_positions[position]);
 	}
 }

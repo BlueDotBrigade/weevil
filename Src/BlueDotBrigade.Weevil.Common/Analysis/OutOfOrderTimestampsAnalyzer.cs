@@ -24,23 +24,26 @@
 
 			var counter = 0;
 
-			foreach (IRecord record in records)
+			if (canUpdateMetadata)
 			{
-				metric.Count(record);
+				// One step, by line number, so clearing a flag creates no record (#1150).
+				state.SetFlagged(records, false);
+			}
 
-				if (canUpdateMetadata)
+			var count = records.Count;
+
+			for (var position = 0; position < count; position++)
+			{
+				// By line number and timestamp alone, so only a row that is flagged is created as a record (#1150).
+				metric.Count(records.GetLineNumber(position), records.GetCreatedAt(position));
+
+				if (canUpdateMetadata && metric.Counter != counter)
 				{
-					if (metric.Counter == counter)
-					{
-						state.SetFlagged(record, false);
-					}
-					else
-					{
-						counter++;
+					counter++;
 
-						state.SetFlagged(record, true);
-						state.AppendComment(record, $"{CommentLabel}: {metric.CurrentAnomaly.ToHumanReadable()}");
-					}
+					IRecord record = records[position];
+					state.SetFlagged(record, true);
+					state.AppendComment(record, $"{CommentLabel}: {metric.CurrentAnomaly.ToHumanReadable()}");
 				}
 			}
 

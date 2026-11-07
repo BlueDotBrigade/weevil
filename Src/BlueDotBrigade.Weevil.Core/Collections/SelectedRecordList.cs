@@ -40,6 +40,8 @@ namespace BlueDotBrigade.Weevil.Collections
 
 		public override DateTime GetCreatedAt(int position) => _results.GetCreatedAt(ToResultsPosition(position));
 
+		public override RecordFacts GetFacts(int position) => _results.GetFacts(ToResultsPosition(position));
+
 		private int ToResultsPosition(int position)
 		{
 			if ((uint)position >= (uint)this.Count)

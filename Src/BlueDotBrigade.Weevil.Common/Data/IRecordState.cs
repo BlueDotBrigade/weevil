@@ -40,5 +40,11 @@ namespace BlueDotBrigade.Weevil.Data
 		void SetPinned(IRecord record, bool isPinned);
 
 		void SetFlagged(IRecord record, bool isFlagged);
+
+		/// <summary>
+		/// Flags or unflags every record of <paramref name="records"/> in one step, without creating them (#1150).
+		/// Records that are not in the list keep their flags.
+		/// </summary>
+		void SetFlagged(RecordList records, bool isFlagged);
 	}
 }

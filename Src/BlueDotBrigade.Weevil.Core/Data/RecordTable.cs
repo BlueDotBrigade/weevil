@@ -39,6 +39,21 @@ namespace BlueDotBrigade.Weevil.Data
 		public DateTime GetCreatedAt(int recordNumber) => GetBlock(recordNumber).CreatedAt[recordNumber % BlockSize];
 
 		/// <summary>
+		/// Returns what the parser found about the record at <paramref name="recordNumber"/>, without creating it (#1150).
+		/// </summary>
+		/// <remarks>
+		/// Whether the table keeps the content as a string is left out, as a record leaves it out.
+		/// </remarks>
+		public RecordFacts GetFacts(int recordNumber)
+		{
+			RecordFacts facts = GetBlock(recordNumber).Facts[recordNumber % BlockSize];
+
+			return facts.KeepsString
+				? new RecordFacts(facts.Severity, facts.IsMultiLine, facts.WasGeneratedByUi)
+				: facts;
+		}
+
+		/// <summary>
 		/// Creates the record at <paramref name="recordNumber"/>: a new object on each call.
 		/// </summary>
 		public IRecord CreateRecord(int recordNumber)
