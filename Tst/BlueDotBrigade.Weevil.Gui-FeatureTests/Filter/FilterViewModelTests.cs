@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
+	using System.IO.Compression;
 	using System.Runtime.CompilerServices;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -282,6 +283,62 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1156)]
+		public async Task GivenAZip_WhenNoFileInItIsChosen_ThenNothingOpensAndTheZipIsKept()
+		{
+			// Cancelling the list of the zip's files opened the zip itself as a log, then deleted the zip.
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			dialogBox.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>()).Returns(false);
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+			var zipPath = CreateZip("Logs.zip", CopyLog("A.log"));
+
+			await viewModel.OpenCompressedAsync(zipPath);
+
+			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
+			viewModel.IsLogFileOpen.Should().BeFalse("no file was chosen");
+		}
+
+		[TestMethod]
+		[WorkItem(1156)]
+		public async Task GivenAZipWithNoFiles_WhenOpened_ThenNothingOpensAndTheZipIsKept()
+		{
+			// With no file to list, Weevil opened the zip itself as a log, then deleted the zip.
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+			var zipPath = Path.Combine(_folder, "Folders.zip");
+			using (ZipArchive archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+			{
+				archive.CreateEntry("Logs/");
+			}
+
+			await viewModel.OpenCompressedAsync(zipPath);
+
+			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
+			viewModel.IsLogFileOpen.Should().BeFalse("the zip holds no file to open");
+			dialogBox.Received(1).ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+		}
+
+		[TestMethod]
+		public async Task GivenAZip_WhenAFileInItIsChosen_ThenThatFileOpensAndTheZipIsKept()
+		{
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			dialogBox
+				.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>())
+				.Returns(callInfo =>
+				{
+					callInfo[1] = "A.log";
+					return true;
+				});
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+			var zipPath = CreateZip("Logs.zip", CopyLog("A.log"));
+
+			await viewModel.OpenCompressedAsync(zipPath);
+
+			viewModel.IsLogFileOpen.Should().BeTrue("the chosen file is opened");
+			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
+		}
+
+		[TestMethod]
 		[WorkItem(1071)]
 		public async Task GivenABusyUiThread_WhenRecordsAreCleared_ThenClearRunsInTheBackground()
 		{
@@ -407,6 +464,21 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), logPath);
 
 			return logPath;
+		}
+
+		private string CreateZip(string zipName, params string[] filePaths)
+		{
+			var zipPath = Path.Combine(_folder, zipName);
+
+			using (ZipArchive archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+			{
+				foreach (var filePath in filePaths)
+				{
+					archive.CreateEntryFromFile(filePath, Path.GetFileName(filePath));
+				}
+			}
+
+			return zipPath;
 		}
 
 		private string CopyLogWithIncompatibleSidecar(string fileName)

@@ -10,6 +10,12 @@
 	{
 		string ShowOpenFile(string compatibleFileExtensions);
 
+		/// <summary>
+		/// Lets the user choose one of the files extracted from a zip.
+		/// </summary>
+		/// <returns><see langword="false"/> when the user chose no file.</returns>
+		bool TrySelectCompressedFile(string[] fileNames, out string selectedFileName);
+
 		string ShowSaveFile(string targetDirectory, string targetFileName);
 
 		void ShowMessage(string message, string caption);
