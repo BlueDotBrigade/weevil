@@ -1,6 +1,6 @@
 # 1150: Read the Record Table Without Creating Records
 
-> **Status:** In progress
+> **Status:** Done. Merged in #1152 on 2026-11-07.
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
