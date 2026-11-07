@@ -56,7 +56,7 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
      3. Code that needs only line numbers or timestamps stops creating records (#1137). **Done 2026-10-31.**
      4. The parser fills a record table, and Core builds its records from it (#1138). **Done 2026-11-02.**
      5. Insights and the graph stop keeping records of a log that is no longer open (#1139). **Done 2026-11-02.**
-     6. Filter results, the selection and Clear hold record numbers, and records are created only when read (#1140).
+     6. Filter results, the selection and Clear hold record numbers, and records are created only when read (#1140). **Done 2026-11-07.**
      7. Tests use record lists, the temporary forwarders go, and records on demand are measured (#1141).
    - **Decisions (2026-10-30):**
      - About 161 bytes per record is accepted for now. The last 4 bytes to reach #1086's 157 are revisited with #1023.
