@@ -19,7 +19,7 @@ Drafted on 2026-11-08 from two independent designs and a judge's synthesis.
 
 - **`StorageMode { Ram, Disk }`**: a public enum in Common, `BlueDotBrigade.Weevil.IO`. Until #1028, only internal builders take it.
 - **`LogFileSource`**: one per opened log, in Common. It holds the path, the length that was parsed, and a checksum of every 64 KB block of the log.
-  - Opening computes the checksums as the bytes go past: a fast 64-bit hash (XxHash3, from Microsoft's `System.IO.Hashing` package), about 8 bytes per 64 KB, or 2.4 MB for a 20 GB log. Its cost, estimated at about a second of CPU per 20 GB, is measured in step 2.
+  - Opening computes the checksums as the bytes go past: a fast 64-bit hash (XxHash3, from Microsoft's `System.IO.Hashing` package), about 8 bytes per 64 KB, or 2.4 MB for a 20 GB log. Its cost, estimated at about a second of CPU per 20 GB, is measured in step 2. #1023 can save the checksums in the `.idx` with the record table.
   - Each read opens its own handle, sharing reading, writing and deletion, reads whole 64 KB blocks around what it needs, checks their checksums, and closes the handle. It never memory-maps the log, never retries, and keeps no cache.
 - **A changed log** (decided 2026-11-08):
   - **Grown:** the log is longer than when it was opened, and the blocks read still match. This is normal: Weevil logs a warning once and shows nothing.
@@ -53,7 +53,7 @@ Decided by the owner on 2026-11-08:
 6. **Disk mode reads every encoding from the drive** (changed 2026-11-08, after the owner's question). Only text a plugin changed stays in memory, because it is not in the file.
 7. **The zip copy:** deleted as described in the design. Extracting only the chosen file, and removing leftovers at startup, are later issues.
 8. **Sharing deletion everywhere:** `FileHelper.Open` shares deletion for every open of the log, in its own pull request.
-9. **#1087:** its 137 MB per GB becomes the measured disk-mode figure, about 22 bytes per record plus content being read. Dropping table columns would change the `.idx` format, which this phase excludes.
+9. **#1087:** its 137 MB per GB becomes the measured disk-mode figure, about 22 bytes per record plus content being read. The `.idx` format is new in Weevil 3.0, so a later step may still move table columns out of memory if that figure must fall.
 10. **Several pull requests for one step**, as #988 did.
 11. **CI** runs the Core tests a second time in disk mode, through a Debug-only `WEEVIL_TEST_STORAGE=Disk`.
 12. **Order:** #1025 does not need #1022 or #1023. #1022 has one concrete fix left (Clear's forced garbage collection runs before the kept table is built) and stays under #988.
