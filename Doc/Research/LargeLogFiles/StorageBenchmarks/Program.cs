@@ -22,7 +22,8 @@ public enum StorageKind
 {
     Text,
     Bytes,
-    Weevil
+    Weevil,
+    Disk
 }
 
 internal static class Program
@@ -41,7 +42,7 @@ internal static class Program
             }
 
             string path = options.FilePath ?? Path.Combine(
-                Path.GetTempPath(), $"weevil-storage-benchmark-{options.SizeMb}mb.tsv");
+                options.LogFolder ?? Path.GetTempPath(), $"weevil-storage-benchmark-{options.SizeMb}mb.tsv");
 
             if (options.FilePath is null)
             {
@@ -72,8 +73,15 @@ internal static class Program
             if (options.Case.Equals("all", StringComparison.OrdinalIgnoreCase))
                 return ProfileInIsolatedProcesses(args);
 
-            return Profile.Run(path, options.Pattern,
-                Enum.Parse<StorageKind>(options.Case, ignoreCase: true), options.Filters);
+            StorageKind kind = Enum.Parse<StorageKind>(options.Case, ignoreCase: true);
+            if (kind == StorageKind.Disk)
+            {
+                return DiskStorage.Run(path, options.Pattern, options.Filters, new DiskOptions(
+                    options.Threads, options.ChunkKb, options.Cache == "cold", options.Text,
+                    options.Screens, options.ScreenRows));
+            }
+
+            return Profile.Run(path, options.Pattern, kind, options.Filters);
         }
         catch (Exception ex)
         {
@@ -130,7 +138,7 @@ internal static class Program
             expectedRecords = records;
             expectedMatches = matches;
         }
-        Console.WriteLine("\nPASS: All three cases returned equal record and match counts.");
+        Console.WriteLine("\nPASS: All cases returned equal record and match counts.");
         return 0;
     }
 
@@ -141,32 +149,47 @@ internal static class Program
 
             --mode profile|bdn     profile (default) measures retained memory, CPU time,
                                    elapsed time and allocations; bdn uses BenchmarkDotNet
-            --case all|Text|Bytes|Weevil
+            --case all|Text|Bytes|Weevil|Disk
                                    profile cases; all (default) runs isolated processes
             --bench load|filter|both
                                    BDN benchmark groups (default both)
             --file PATH           use existing UTF-8 Weevil TSV log file
             --size-mb N           synthetic file size in decimal MB (default 1000)
+            --log-folder PATH     folder for the synthetic file, e.g. on another drive
+                                   (default: the temporary folder)
             --regex PATTERN       regex applied to each complete record
                                    (default ERROR_CODE_42)
             --filters N           number of consecutive filtering passes (default 5)
             --help                show this message
 
+            Disk case only (see README.md, "Disk case"):
+            --threads N[,N...]    thread counts to measure (default: logical processors)
+            --chunk-kb N          size of the chunks a filter reads (default 16384)
+            --cache cold|warm     cold empties the file cache before each pass; on
+                                   Windows it needs an elevated prompt (default warm)
+            --text TEXT           plain-text filter instead of --regex
+            --screens N           screens of rows read through the line index (default 200)
+            --screen-rows N       rows per screen (default 50)
+
             Example smoke test: dotnet run -c Release -- --size-mb 10
             Example 1 GB run: dotnet run -c Release -- --mode profile --size-mb 1000
             Example BDN: dotnet run -c Release -- --mode bdn --bench filter --size-mb 1000
+            Example disk run: dotnet run -c Release -- --case Disk --size-mb 20000 --threads 1,2,4,8,16 --cache cold --filters 3
             """);
     }
 
     private sealed record Arguments(
         string Mode, string Case, string Benchmark, string? FilePath,
-        int SizeMb, string Pattern, int Filters, bool Help)
+        int SizeMb, string Pattern, int Filters, bool Help,
+        string? LogFolder, int[] Threads, int ChunkKb, string Cache, string? Text,
+        int Screens, int ScreenRows)
     {
         public static Arguments Parse(string[] args)
         {
-            string mode = "profile", @case = "all", benchmark = "both";
-            string? file = null;
-            int sizeMb = 1000, filters = 5;
+            string mode = "profile", @case = "all", benchmark = "both", cache = "warm";
+            string? file = null, logFolder = null, text = null;
+            int sizeMb = 1000, filters = 5, chunkKb = 16 * 1024, screens = 200, screenRows = 50;
+            int[] threads = [Environment.ProcessorCount];
             string pattern = DefaultPattern;
             bool help = false;
 
@@ -185,6 +208,13 @@ internal static class Program
                     case "--size-mb": sizeMb = int.Parse(value, CultureInfo.InvariantCulture); break;
                     case "--regex": pattern = value; break;
                     case "--filters": filters = int.Parse(value, CultureInfo.InvariantCulture); break;
+                    case "--log-folder": logFolder = value; break;
+                    case "--threads": threads = Array.ConvertAll(value.Split(','), x => int.Parse(x, CultureInfo.InvariantCulture)); break;
+                    case "--chunk-kb": chunkKb = int.Parse(value, CultureInfo.InvariantCulture); break;
+                    case "--cache": cache = value.ToLowerInvariant(); break;
+                    case "--text": text = value; break;
+                    case "--screens": screens = int.Parse(value, CultureInfo.InvariantCulture); break;
+                    case "--screen-rows": screenRows = int.Parse(value, CultureInfo.InvariantCulture); break;
                     default: throw new ArgumentException($"Unknown option {key}.");
                 }
             }
@@ -193,9 +223,23 @@ internal static class Program
             if (benchmark is not ("load" or "filter" or "both")) throw new ArgumentException("--bench must be load, filter or both.");
             if (!@case.Equals("all", StringComparison.OrdinalIgnoreCase) &&
                 !Enum.TryParse<StorageKind>(@case, true, out _))
-                throw new ArgumentException("--case must be all, Text, Bytes or Weevil.");
+                throw new ArgumentException("--case must be all, Text, Bytes, Weevil or Disk.");
             if (sizeMb < 1 || filters < 1) throw new ArgumentException("--size-mb and --filters must be positive.");
-            return new(mode, @case, benchmark, file, sizeMb, pattern, filters, help);
+            if (cache is not ("cold" or "warm"))
+            {
+                throw new ArgumentException("--cache must be cold or warm.");
+            }
+            if (Array.Exists(threads, x => x < 1) || chunkKb < 1 || screens < 0 || screenRows < 1)
+            {
+                throw new ArgumentException("--threads, --chunk-kb and --screen-rows must be positive, and --screens zero or more.");
+            }
+            // Only the disk case has a plain-text filter, so its matches would not equal the other cases'.
+            if (text is not null && !@case.Equals(nameof(StorageKind.Disk), StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException("--text needs --case Disk.");
+            }
+            return new(mode, @case, benchmark, file, sizeMb, pattern, filters, help,
+                logFolder, threads, chunkKb, cache, text, screens, screenRows);
         }
     }
 }
@@ -400,7 +444,7 @@ internal static class TextStorage
         return end + 1;
     }
 
-    private static bool IsTsvStart(ReadOnlySpan<byte> line)
+    internal static bool IsTsvStart(ReadOnlySpan<byte> line)
     {
         // Decode ONLY the TSV header, not the record body, while indexing bytes.
         int headerEnd = 0;
@@ -479,6 +523,8 @@ internal static class SyntheticLog
             total += line.Length;
             lineIndex = (lineIndex + 1) % lines.Length;
         }
+        // Written to the drive, not just to the cache, so the disk case's cold passes can empty the cache of it.
+        file.Flush(flushToDisk: true);
         Console.WriteLine($"Created {total:N0} bytes.");
     }
 }
