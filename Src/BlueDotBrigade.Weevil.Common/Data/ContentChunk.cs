@@ -1,18 +1,24 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Buffers;
 	using System.Text;
+	using BlueDotBrigade.Weevil.IO;
 
 	/// <summary>
 	/// A range of a log file's bytes, exactly as they are in the file, shared by the records whose content it holds (#1133).
 	/// </summary>
 	/// <remarks>
 	/// Holding the bytes instead of one string per record uses about half the memory for a UTF-8 log.
+	/// A chunk on file holds no bytes: its records' content is read back from the log when it is read (#1025).
 	/// A chunk never changes, so records on any thread can decode it.
 	/// </remarks>
 	public sealed class ContentChunk
 	{
+		// The bytes, or null for a chunk on file, which reads them from `_source`.
 		private readonly byte[] _bytes;
+		private readonly LogFileSource _source;
+		private readonly int _length;
 		private readonly Encoding _encoding;
 
 		/// <param name="fileOffset">Where the bytes start in the log file.</param>
@@ -24,12 +30,51 @@ namespace BlueDotBrigade.Weevil.Data
 
 			this.FileOffset = fileOffset;
 			_bytes = bytes.ToArray();
+			_length = _bytes.Length;
+			_encoding = (Encoding)encoding.Clone();
+		}
+
+		/// <summary>
+		/// Creates a chunk on file, which holds no bytes and reads them from <paramref name="source"/> when its records' content is read (#1025).
+		/// </summary>
+		/// <param name="source">The log, which checks that the bytes read are the bytes parsed.</param>
+		/// <param name="fileOffset">Where the bytes start in the log file.</param>
+		/// <param name="length">How many bytes the chunk spans.</param>
+		/// <param name="encoding">The log's encoding, without a byte order mark, which turns invalid bytes into U+FFFD. It is copied.</param>
+		public ContentChunk(LogFileSource source, long fileOffset, int length, Encoding encoding)
+		{
+			ArgumentNullException.ThrowIfNull(source);
+			ArgumentNullException.ThrowIfNull(encoding);
+			ArgumentOutOfRangeException.ThrowIfNegative(length);
+
+			if (fileOffset < source.StartOffset || fileOffset > source.EndOffset - length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(fileOffset), fileOffset, "The chunk is expected to be within the range of the log that was parsed.");
+			}
+
+			this.FileOffset = fileOffset;
+			_source = source;
+			_length = length;
 			_encoding = (Encoding)encoding.Clone();
 		}
 
 		public long FileOffset { get; }
 
-		public int Length => _bytes.Length;
+		public int Length => _length;
+
+		/// <summary>
+		/// The chunk holds no bytes, and reads them back from the log.
+		/// </summary>
+		internal bool IsOnFile => _source != null;
+
+		/// <summary>
+		/// Reads the whole chunk from the log into <paramref name="destination"/>, which is <see cref="Length"/> bytes long.
+		/// </summary>
+		/// <exception cref="LogFileChangedException">The log was truncated, replaced or corrupted since it was parsed.</exception>
+		internal void ReadFromFile(Span<byte> destination)
+		{
+			_source.Read(this.FileOffset, destination);
+		}
 
 		/// <summary>
 		/// Returns the text of the bytes at <paramref name="offset"/>, as <see cref="IRecord.Content"/> returns it.
@@ -37,7 +82,7 @@ namespace BlueDotBrigade.Weevil.Data
 		/// <param name="isMultiLine">The bytes span several lines, which are joined with <c>\r\n</c> whatever the file's own line breaks.</param>
 		internal string GetString(int offset, int length, bool isMultiLine)
 		{
-			if (!isMultiLine)
+			if (!isMultiLine && !this.IsOnFile)
 			{
 				return _encoding.GetString(_bytes, offset, length);
 			}
@@ -53,17 +98,42 @@ namespace BlueDotBrigade.Weevil.Data
 		/// </summary>
 		/// <remarks>
 		/// The same text as <see cref="GetString"/>, without allocating a string.
+		/// A chunk on file reads only the blocks of the log that hold the bytes.
 		/// </remarks>
 		internal int Decode(int offset, int length, bool isMultiLine, ref char[] buffer)
 		{
-			var maximum = _encoding.GetMaxCharCount(length);
+			if (!this.IsOnFile)
+			{
+				return Decode(_bytes.AsSpan(offset, length), isMultiLine, ref buffer);
+			}
+
+			var bytes = ArrayPool<byte>.Shared.Rent(length);
+
+			try
+			{
+				_source.Read(this.FileOffset + offset, bytes.AsSpan(0, length));
+
+				return Decode(bytes.AsSpan(0, length), isMultiLine, ref buffer);
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(bytes);
+			}
+		}
+
+		/// <summary>
+		/// Decodes <paramref name="bytes"/>, some of this chunk's, into <paramref name="buffer"/>, as <see cref="Decode(int, int, bool, ref char[])"/> does.
+		/// </summary>
+		internal int Decode(ReadOnlySpan<byte> bytes, bool isMultiLine, ref char[] buffer)
+		{
+			var maximum = _encoding.GetMaxCharCount(bytes.Length);
 
 			if (buffer.Length < maximum)
 			{
 				buffer = new char[maximum];
 			}
 
-			var count = _encoding.GetChars(_bytes, offset, length, buffer, 0);
+			var count = _encoding.GetChars(bytes, buffer);
 
 			if (isMultiLine)
 			{
