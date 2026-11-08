@@ -74,6 +74,7 @@ Outside this plan: Clear's garbage collection fix (#1022), and `FileHelper.Open`
 - **RAM mode regresses:** steps 2 and 3 leave its path untouched; the existing Clear, Reload and memory-budget tests guard it.
 - **File reads on the UI thread:** nobody can choose disk mode until #1028; #1027 moves scans off the UI thread; step 4 covers screen rows.
 - **The log changes or disappears:** a changed log is reloaded rather than shown with other text. A log that disappears cannot be reloaded, so Reload's existing message says so.
+- **A previous log is read after its zip's copy is deleted:** a zipped log's copy is deleted once another log opens (#1162). In RAM mode, an engine something still holds, such as a plugin dashboard's (#1139), reads memory; in disk mode it would read a deleted file. Step 3 checks that nothing reads the previous log's engine once another log is open.
 - **A new package:** `System.IO.Hashing`, from Microsoft, for the checksums.
 - **UTF-16 in the other byte order and UTF-32 decode slowly in disk mode:** filtering such a log is slower than a UTF-8 one, but it fits in memory.
 - **A handle per read is slow** on network drives or with antivirus: measured before step 4 is decided.
