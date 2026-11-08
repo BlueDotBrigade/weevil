@@ -1,6 +1,6 @@
 # 1025: Read Content Back from the File
 
-> **Status:** Draft
+> **Status:** Approved
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -43,7 +43,7 @@ Drafted on 2026-11-08 from two independent designs and a judge's synthesis.
 
 ## Decisions
 
-Proposed on 2026-11-08, to confirm:
+Decided by the owner on 2026-11-08:
 
 1. **No handle is held between reads.** Each read opens its own. "Disk mode keeps the file open" in plan 986 changes to match, and `IEngine` stays non-disposable, as #1030 decided.
 2. **Disk caching:** one chunk per reader, and single-record reads are not cached. A cache for screen rows comes only if a measurement shows it is needed (step 4).
