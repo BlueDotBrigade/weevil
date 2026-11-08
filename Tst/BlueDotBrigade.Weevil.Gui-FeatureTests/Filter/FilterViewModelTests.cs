@@ -355,12 +355,103 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 			finally
 			{
-				// Weevil leaves the folder it extracted the zip to in the temporary folder.
+				// Weevil keeps the folder it extracted the zip to while the log is open.
 				var extractedFolder = Path.GetDirectoryName(openedPath);
 				if (!string.IsNullOrEmpty(extractedFolder) && extractedFolder != _folder && System.IO.Directory.Exists(extractedFolder))
 				{
 					System.IO.Directory.Delete(extractedFolder, recursive: true);
 				}
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1005)]
+		public async Task GivenALogOpenedFromAZip_WhenReloaded_ThenItsRecordsAreBack()
+		{
+			// Weevil deleted the extracted copy right after opening it, so Reload had nothing to read.
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+
+				zipped.ViewModel.Reload();
+				WaitUntil(() => zipped.ViewModel.IsFilterToolboxEnabled);
+
+				zipped.DialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+				zipped.ViewModel.VisibleItems.Should().NotBeNullOrEmpty("Reload reads the log again from its extracted copy");
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedFromAZip_WhenAnotherLogOpens_ThenItsExtractedCopyIsDeleted()
+		{
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+			var extractedCopy = zipped.OpenedPaths[0];
+
+			await zipped.ViewModel.OpenCompressedAsync(CopyLog("B.log"));
+
+			System.IO.File.Exists(extractedCopy).Should().BeFalse("nothing reads the previous log's copy any more");
+			System.IO.Directory.Exists(Path.GetDirectoryName(extractedCopy)).Should().BeFalse("the folder Weevil extracted to is left empty");
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedFromAZip_WhenAnotherLogFailsToOpen_ThenItsExtractedCopyIsKept()
+		{
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				var extractedCopy = zipped.OpenedPaths[0];
+
+				await zipped.ViewModel.OpenCompressedAsync(CopyLogWithIncompatibleSidecar("B.log"));
+
+				System.IO.File.Exists(extractedCopy).Should().BeTrue("the zipped log is still the open one");
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedFromAZip_WhenWeevilExits_ThenItsExtractedCopyIsDeleted()
+		{
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+			var extractedCopy = zipped.OpenedPaths[0];
+
+			zipped.ViewModel.Exit();
+
+			System.IO.File.Exists(extractedCopy).Should().BeFalse("Weevil deletes what it extracted when it exits");
+		}
+
+		[TestMethod]
+		public async Task GivenAnExportBesideAZippedLog_WhenAnotherLogOpens_ThenTheExportIsKept()
+		{
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+			var extractedCopy = zipped.OpenedPaths[0];
+			var export = Path.Combine(Path.GetDirectoryName(extractedCopy), "SelectedRecords.log");
+			System.IO.File.WriteAllText(export, "Records the analyst saved beside the open log");
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(CopyLog("B.log"));
+
+				System.IO.File.Exists(export).Should().BeTrue("only what Weevil extracted is deleted");
+				System.IO.File.Exists(extractedCopy).Should().BeFalse("nothing reads the previous log's copy any more");
+			}
+			finally
+			{
+				System.IO.Directory.Delete(Path.GetDirectoryName(extractedCopy), recursive: true);
 			}
 		}
 
@@ -496,6 +587,26 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// Creates a zip whose entries are copies of the test log, or folders when a name ends with a slash.
 		/// No file is left beside the zip.
 		/// </summary>
+		/// <summary>
+		/// Creates a view model that opens <c>A.log</c> whenever a zip's file list is shown, and collects the path of each log it opens.
+		/// </summary>
+		private ZippedLogViewModel CreateViewModelForZip()
+		{
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			dialogBox
+				.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>())
+				.Returns(callInfo =>
+				{
+					callInfo[1] = "A.log";
+					return true;
+				});
+			var openedPaths = new List<string>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
+
+			return new ZippedLogViewModel(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox), dialogBox, openedPaths);
+		}
+
 		private string CreateZip(string zipName, params string[] entryNames)
 		{
 			var zipPath = Path.Combine(_folder, zipName);
@@ -540,6 +651,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				Thread.Sleep(TimeSpan.FromMilliseconds(50));
 			}
 		}
+
+		private sealed record ZippedLogViewModel(FilterViewModel ViewModel, IDialogBoxService DialogBox, List<string> OpenedPaths);
 
 		/// <summary>
 		/// Mimics a UI thread that runs callbacks at once, except while it is paused.
