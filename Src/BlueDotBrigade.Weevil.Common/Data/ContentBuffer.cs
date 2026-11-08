@@ -9,8 +9,8 @@ namespace BlueDotBrigade.Weevil.Data
 	/// Not thread-safe: use one per thread. What <see cref="Read(IRecord)"/> returns is valid until it is called for another record.
 	/// A record that holds the log's bytes is decoded into memory the buffer reuses, so reading it allocates no string (#1133).
 	/// The buffer also holds the bytes of one chunk on file at a time: it reads the whole chunk from the log when a record in it is first read,
-	/// so a scan reads each chunk once (#1025). Reading such a chunk throws <see cref="IO.LogFileChangedException"/> when the log was truncated, replaced or corrupted,
-	/// and another <see cref="System.IO.IOException"/> when it cannot be read.
+	/// so a scan reads each chunk once (#1025). Reading such a chunk throws what <see cref="IO.LogFileSource.Read"/> throws,
+	/// for example <see cref="IO.LogFileChangedException"/> when the log was truncated, replaced or corrupted.
 	/// </remarks>
 	public sealed class ContentBuffer
 	{

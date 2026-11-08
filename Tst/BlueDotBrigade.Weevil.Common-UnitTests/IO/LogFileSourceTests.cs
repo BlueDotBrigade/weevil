@@ -5,6 +5,7 @@ namespace BlueDotBrigade.Weevil.IO
 	using System.IO;
 	using System.Linq;
 	using System.Text;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using NSubstitute;
 
@@ -37,15 +38,16 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		[DataRow(StartOffset, StartOffset, 10, DisplayName = "The first bytes parsed")]
-		[DataRow(StartOffset, 1000, 500, DisplayName = "Within a block")]
-		[DataRow(StartOffset, LogFileSource.BlockSize - 100, 200, DisplayName = "Across a block boundary")]
-		[DataRow(StartOffset, 100, (2 * LogFileSource.BlockSize) + 50, DisplayName = "Across several blocks")]
-		[DataRow(StartOffset, LogLength - 300, 300, DisplayName = "The last bytes parsed")]
-		[DataRow((2 * LogFileSource.BlockSize) + 100, (2 * LogFileSource.BlockSize) + 150, LogFileSource.BlockSize, DisplayName = "Parsed from past the first blocks")]
-		public void GivenALogParsed_WhenBytesAreReadBack_ThenTheyAreTheBytesParsed(int startOffset, int fileOffset, int length)
+		[DataRow(StartOffset, LogLength, StartOffset, 10, DisplayName = "The first bytes parsed")]
+		[DataRow(StartOffset, LogLength, 1000, 500, DisplayName = "Within a block")]
+		[DataRow(StartOffset, LogLength, LogFileSource.BlockSize - 100, 200, DisplayName = "Across a block boundary")]
+		[DataRow(StartOffset, LogLength, 100, (2 * LogFileSource.BlockSize) + 50, DisplayName = "Across several blocks")]
+		[DataRow(StartOffset, LogLength, LogLength - 300, 300, DisplayName = "The last bytes parsed")]
+		[DataRow(StartOffset, 2 * LogFileSource.BlockSize, (2 * LogFileSource.BlockSize) - 100, 100, DisplayName = "The last bytes parsed, ending on a block boundary")]
+		[DataRow((2 * LogFileSource.BlockSize) + 100, LogLength, (2 * LogFileSource.BlockSize) + 150, LogFileSource.BlockSize, DisplayName = "Parsed from past the first blocks")]
+		public void GivenALogParsed_WhenBytesAreReadBack_ThenTheyAreTheBytesParsed(int startOffset, int endOffset, int fileOffset, int length)
 		{
-			LogFileSource source = Parse(startOffset, LogLength);
+			LogFileSource source = Parse(startOffset, endOffset);
 			var destination = new byte[length];
 
 			source.Read(fileOffset, destination);
@@ -63,6 +65,20 @@ namespace BlueDotBrigade.Weevil.IO
 			Action read = () => builder.Source.Read(0, new byte[10]);
 
 			read.Should().Throw<InvalidOperationException>("the last block's checksum is not known yet");
+		}
+
+		[TestMethod]
+		public void GivenAChunkMadeWhileTheLogIsParsed_WhenReadOnceTheSourceIsBuilt_ThenItHoldsTheBytesParsed()
+		{
+			// The parser makes each chunk on file as soon as its bytes have been read, before the rest of the log.
+			var builder = new LogFileSourceBuilder(_logPath, 0, LogLength);
+			builder.Append(_bytes.AsSpan(0, 1000));
+			var chunk = new ContentChunk(builder.Source, 100, 900, Encoding.UTF8);
+			builder.Append(_bytes.AsSpan(1000));
+			builder.Build();
+
+			new ContentBuffer().Read(chunk, 0, 900, isMultiLine: false).ToString()
+				.Should().Be(Encoding.UTF8.GetString(_bytes, 100, 900));
 		}
 
 		[TestMethod]
