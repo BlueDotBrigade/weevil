@@ -77,38 +77,44 @@ Step 1 of the [#986 plan](../../../Plans/986-DiskMode.md#steps). **Question:** c
 
 - **Opening** reads the log once and keeps only where each record starts: 8 bytes per record, about 1.2 GB for a 20 GB log. This is not part of any filter time.
 - **Each filtering pass** reads the whole log from the drive, as disk mode will:
-  - in chunks of about 16 MB (`--chunk-kb`) that end at a record start, like Weevil's content chunks, handed to the threads as they become free;
-  - with ordinary reads (`RandomAccess.Read`), sharing the log for reading, writing and deletion, and never memory-mapped;
-  - decoding each record and matching it with the thread's own compiled `Regex`, or with Weevil's case-sensitive plain-text rule (`--text`).
-- **`--threads`** lists the thread counts to measure, for example `1,2,4,8,16`. Each pass prints its seconds, MB/s and CPU seconds; every pass must find the same matches.
-- **`--cache cold`** empties the operating system's file cache before each pass, so every pass reads from the drive:
-  - on Windows, by emptying the standby list, which needs an elevated prompt. Without one the run stops and says so;
-  - on Linux, with `posix_fadvise`.
-- **A screen of rows:** after the passes, `--screens` reads of `--screen-rows` rows (default 200 of 50) at random lines, through a copy of Weevil's line index, which keeps the offset of every 64th line. It prints the median, 95th percentile and maximum, cold when `--cache cold`.
+  - in chunks of about 16 MB (`--chunk-kb`) that end at a record start, like Weevil's content chunks;
+  - with one reader per thread, each on a thread of its own, reading a contiguous range of chunks through **its own handle**. On Windows, the reads of a handle opened for synchronous I/O are serialized, and read-ahead is kept per handle, so readers sharing one handle would read one at a time;
+  - with ordinary reads (`RandomAccess.Read`, `FileOptions.SequentialScan`), sharing the log for reading, writing and deletion, and never memory-mapped;
+  - decoding each record and matching it with the reader's own compiled `Regex`, or with Weevil's case-sensitive plain-text rule (`--text`).
+- **`--threads`** lists the thread counts to measure, for example `1,2,4,8,16`. Each pass prints its seconds, MB/s and CPU seconds, and each thread count a `SUMMARY` line with the median, minimum and maximum of its passes. Every pass must find the same matches.
+- **`--cache cold`** empties the operating system's file cache of the log before each pass, so every pass reads from the drive:
+  - on Windows, it opens the log unbuffered for a moment, which makes the file system purge the log's cached pages, then trims the system cache and empties the standby list. This needs an elevated prompt; without one, the run stops before it reads the log;
+  - on Linux, it calls `posix_fadvise`.
+- **`--cache evict`** only empties the cache of the log, and exits, so you can check that emptying works.
+- **A screen of rows:** after the passes, `--screens` reads of `--screen-rows` rows (default 200 of 50) at random lines, through a copy of Weevil's line index, which keeps the offset of every 64th line. It prints the median, 95th percentile and maximum, cold when `--cache cold`. Building the index reads the whole log once more; `--screens 0` skips it.
 - **Not measured:** creating one record per row, which Weevil's filter does (about 14 ns each on one thread), metrics and the GUI. The engine adds those to the times measured here.
 
 ### Decision rule, set before measuring
 
-Proposed on 2026-11-08, to confirm with the owner:
+Proposed on 2026-11-08, to confirm with the owner. All times are cold, on the 20 GB synthetic log:
 
-- **10 s is feasible** if a cold filter of the 20 GB log on NVMe takes **8 s or less** at the best thread count. The other 2 s leave room for creating records, which costs about 2 s of CPU for 150 million records on one thread, and less across several.
-- **Reader threads:** the smallest count within 10% of the fastest.
-- **SATA:** no target; the measured time decides the wording of the warning in step 5 of the plan.
-- **A screen of rows** should take well under 50 ms cold, so that scrolling stays smooth.
+- **10 s is feasible on NVMe** if the median of 3 regex passes is **8 s or less** at the best thread count. The other 2 s leave room for creating records, which costs about 2 s of CPU for 150 million records on one thread, and less across several.
+- **Reader threads:** the smallest count whose median is within 10% of the fastest median.
+- **SATA:** no target; the median decides the wording of the warning in step 5 of the plan.
+- **A screen of 50 rows:** its 95th percentile is 50 ms or less, on both drives.
 
 ### Run it on Windows
 
-From an **elevated** prompt, in this folder. Each 20 GB log takes several minutes to generate, and is reused afterwards.
+From an **elevated** prompt, in this folder. Each 20 GB log takes several minutes to generate, is reused afterwards, and should be deleted when you are done.
 
 ```powershell
-# NVMe: the log is generated in the temporary folder, usually on C:
-dotnet run -c Release -- --case Disk --size-mb 20000 --threads 1,2,4,8,16 --cache cold --filters 3
-dotnet run -c Release -- --case Disk --size-mb 20000 --threads 8 --cache cold --filters 3 --text ERROR_CODE_42 --screens 0
-# SATA: generate the log on that drive instead
+# NVMe: generate the log on the NVMe drive
+dotnet run -c Release -- --case Disk --size-mb 20000 --log-folder C:\WeevilBenchmark --cache evict
+dotnet run -c Release -- --case Disk --size-mb 20000 --log-folder C:\WeevilBenchmark --threads 1,2,4,8,16 --cache cold --filters 3
+# Plain text, at the thread count the first run chose (8 here)
+dotnet run -c Release -- --case Disk --size-mb 20000 --log-folder C:\WeevilBenchmark --threads 8 --cache cold --filters 3 --text ERROR_CODE_42 --screens 0
+# SATA: the same, with the log on that drive
 dotnet run -c Release -- --case Disk --size-mb 20000 --log-folder D:\WeevilBenchmark --threads 1,2,4,8,16 --cache cold --filters 3
 ```
 
-The first time, check with Sysinternals RAMMap (File Summary) that the log's standby pages are gone after a pass, so that "cold" really is cold. Record the drive models, the free space, and whether antivirus scans the folder.
+- **Check once that "cold" is cold:** after the `--cache evict` run, Sysinternals RAMMap's File Summary should show almost no Active, Standby or Modified pages for the log.
+- **Keep the drive the only limit:** exclude the log folders from Defender's real-time scanning, and use the High performance power plan.
+- **Record:** the drive models, the free space on each, and whether BitLocker encrypts them.
 
 ### Results: 2026-11-08, Linux check of the method
 
@@ -116,9 +122,11 @@ On the 4-vCPU Linux VM, .NET 10. **These are not drive speeds:** the VM's disk i
 
 - **Same results:** with `--case all`, all four cases found the same records and matches on a 10 MB synthetic log (76,372 and 4,774) and on the 1 GB droid log with multi-line records (10,000,000 and 546,510).
 - **Beyond 4 GB:** on an 8 GB synthetic log, 61,097,852 records, both thread counts found 3,818,616 matches, one record in 16 as generated.
-- **Cold is colder:** on the 1 GB synthetic log, 4 threads took 0.21 s cold and 0.11 s warm; 1 thread 0.43 s and 0.41 s.
+- **Cold is colder:** on the 1 GB synthetic log, medians of 3 passes, 4 threads took 0.23 s cold and 0.13 s warm; 1 thread 0.50 s and 0.41 s.
 - **A screen of 50 rows:** 0.10 ms median cold, 0.02 ms warm.
-- **Memory:** 1.6 GB peak working set for the 8 GB log, mostly the record starts and the list that collected them.
+- **Memory:** 1.7 GB peak working set for the 8 GB log, mostly the record starts and the list that collected them.
+
+**Decision:** open, waiting for the NVMe and SATA runs on the owner's PC.
 
 ## Results: 2026-10-16
 
