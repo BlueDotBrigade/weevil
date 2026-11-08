@@ -1,6 +1,6 @@
 # 986: Open a Log in RAM or on Disk
 
-> **Status:** Draft
+> **Status:** In progress
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -40,6 +40,7 @@ Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the 
 1. **Proof of concept: disk filtering (#1024).** This adds the disk case to the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md), as [LargeLogFileStrategy.md](../Research/LargeLogFiles/LargeLogFileStrategy.md) planned.
    - Measure a parallel streaming filter over a 20 GB log on NVMe and on SATA, and the time to read a screen of rows through the line index.
    - This decides the number of reader threads and confirms the 10 s target. Record the result in `Research/LargeLogFiles/`.
+   - 2026-11-08: the disk case is in the storage benchmark, checked on Linux. The measurements on NVMe and SATA, on the owner's PC, are still to do; its README says how to run them and sets the decision rule.
 2. **Content from the file (#1025).** One content store with two caching rules: RAM mode keeps every chunk the view's scope includes, and disk mode keeps only the chunks being read. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
    - A chunk that is not in memory, released by Clear (#988) or never loaded in disk mode, is read back from the file when needed.
    - File reads are ordinary reads, shared for reading, writing and deletion, so the writing application is never blocked. Today Weevil shares the log for reading and writing only (`FileHelper.cs`), which is harmless while it reads the file once; disk mode keeps the file open, so add deletion.
