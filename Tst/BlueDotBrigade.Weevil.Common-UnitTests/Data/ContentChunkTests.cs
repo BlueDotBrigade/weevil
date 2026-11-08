@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 			var logPath = Path.Combine(_folder, "Log.txt");
 			File.WriteAllBytes(logPath, log.ToArray());
-			var builder = new LogFileSourceBuilder(logPath, 0);
+			var builder = new LogFileSourceBuilder(logPath, 0, log.ToArray().Length);
 			builder.Append(log.ToArray());
 			LogFileSource source = builder.Build();
 

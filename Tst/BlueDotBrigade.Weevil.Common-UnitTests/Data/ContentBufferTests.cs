@@ -82,7 +82,7 @@ namespace BlueDotBrigade.Weevil.Data
 			var bytes = Encoding.UTF8.GetBytes(text);
 			File.WriteAllBytes(logPath, bytes);
 
-			var builder = new LogFileSourceBuilder(logPath, 0);
+			var builder = new LogFileSourceBuilder(logPath, 0, bytes.Length);
 			builder.Append(bytes);
 
 			return (builder.Build(), logPath);

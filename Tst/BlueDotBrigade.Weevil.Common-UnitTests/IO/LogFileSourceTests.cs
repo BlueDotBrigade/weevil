@@ -5,6 +5,8 @@ namespace BlueDotBrigade.Weevil.IO
 	using System.IO;
 	using System.Linq;
 	using System.Text;
+	using BlueDotBrigade.Weevil.Diagnostics;
+	using NSubstitute;
 
 	[TestClass]
 	public class LogFileSourceTests
@@ -35,14 +37,15 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		[DataRow(StartOffset, 10, DisplayName = "The first bytes parsed")]
-		[DataRow(1000, 500, DisplayName = "Within a block")]
-		[DataRow(LogFileSource.BlockSize - 100, 200, DisplayName = "Across a block boundary")]
-		[DataRow(100, (2 * LogFileSource.BlockSize) + 50, DisplayName = "Across several blocks")]
-		[DataRow(LogLength - 300, 300, DisplayName = "The last bytes parsed")]
-		public void GivenALogParsed_WhenBytesAreReadBack_ThenTheyAreTheBytesParsed(int fileOffset, int length)
+		[DataRow(StartOffset, StartOffset, 10, DisplayName = "The first bytes parsed")]
+		[DataRow(StartOffset, 1000, 500, DisplayName = "Within a block")]
+		[DataRow(StartOffset, LogFileSource.BlockSize - 100, 200, DisplayName = "Across a block boundary")]
+		[DataRow(StartOffset, 100, (2 * LogFileSource.BlockSize) + 50, DisplayName = "Across several blocks")]
+		[DataRow(StartOffset, LogLength - 300, 300, DisplayName = "The last bytes parsed")]
+		[DataRow((2 * LogFileSource.BlockSize) + 100, (2 * LogFileSource.BlockSize) + 150, LogFileSource.BlockSize, DisplayName = "Parsed from past the first blocks")]
+		public void GivenALogParsed_WhenBytesAreReadBack_ThenTheyAreTheBytesParsed(int startOffset, int fileOffset, int length)
 		{
-			LogFileSource source = Parse();
+			LogFileSource source = Parse(startOffset, LogLength);
 			var destination = new byte[length];
 
 			source.Read(fileOffset, destination);
@@ -52,9 +55,20 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
+		public void GivenALogStillBeingParsed_WhenRead_ThenTheReadIsRefused()
+		{
+			var builder = new LogFileSourceBuilder(_logPath, 0, LogLength);
+			builder.Append(_bytes.AsSpan(0, 100));
+
+			Action read = () => builder.Source.Read(0, new byte[10]);
+
+			read.Should().Throw<InvalidOperationException>("the last block's checksum is not known yet");
+		}
+
+		[TestMethod]
 		public void GivenATruncatedLog_WhenRead_ThenItIsReportedAsChangedWithBothLengths()
 		{
-			LogFileSource source = Parse();
+			LogFileSource source = Parse(StartOffset, LogLength);
 			System.IO.File.WriteAllBytes(_logPath, _bytes.AsSpan(0, LogLength - 10).ToArray());
 
 			Action read = () => source.Read(StartOffset, new byte[10]);
@@ -65,20 +79,23 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenALogReplacedByOneOfTheSameLength_WhenRead_ThenItIsReportedAsChanged()
+		[DataRow(LogLength, DisplayName = "Of the same length")]
+		[DataRow(LogLength + 1000, DisplayName = "Longer")]
+		public void GivenALogReplacedByAnother_WhenRead_ThenItIsReportedAsChangedAndNotAsGrown(int replacementLength)
 		{
-			LogFileSource source = Parse();
-			System.IO.File.WriteAllBytes(_logPath, Enumerable.Repeat((byte)'x', LogLength).ToArray());
+			LogFileSource source = Parse(StartOffset, LogLength);
+			System.IO.File.WriteAllBytes(_logPath, Enumerable.Repeat((byte)'x', replacementLength).ToArray());
 
 			Action read = () => source.Read(StartOffset, new byte[10]);
 
 			read.Should().Throw<LogFileChangedException>().Which.ChangedOffset.Should().Be(StartOffset);
+			source.HasGrown.Should().BeFalse();
 		}
 
 		[TestMethod]
 		public void GivenOneByteChangedInTheMiddleOfTheLog_WhenItsBlockIsRead_ThenTheBlockIsReportedAsChanged()
 		{
-			LogFileSource source = Parse();
+			LogFileSource source = Parse(StartOffset, LogLength);
 			const int ChangedByte = (2 * LogFileSource.BlockSize) + 777;
 			using (FileStream log = System.IO.File.OpenWrite(_logPath))
 			{
@@ -93,22 +110,45 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenALogThatGrew_WhenRead_ThenTheBytesParsedAreReadAndTheLogIsReportedAsGrown()
+		public void GivenALogThatGrew_WhenReadTwice_ThenTheBytesParsedAreReadAndAWarningIsLoggedOnce()
 		{
-			LogFileSource source = Parse();
+			LogFileSource source = Parse(StartOffset, LogLength);
 			System.IO.File.AppendAllText(_logPath, "A line written after the log was opened\r\n");
 			var destination = new byte[300];
+			ILogWriter original = Log.Default;
+			ILogWriter writer = Substitute.For<ILogWriter>();
+			Log.Register(writer);
 
-			source.Read(LogLength - 300, destination);
+			try
+			{
+				source.Read(LogLength - 300, destination);
+				source.Read(StartOffset, new byte[10]);
+			}
+			finally
+			{
+				Log.Register(original);
+			}
 
 			destination.Should().Equal(_bytes.AsSpan(LogLength - 300).ToArray());
 			source.HasGrown.Should().BeTrue();
+			writer.Received(1).Write(LogSeverityType.Warning, Arg.Is<string>(message => message.Contains("has grown")));
+		}
+
+		[TestMethod]
+		public void GivenALogParsedOnlyInPart_WhenRead_ThenItIsNotReportedAsGrown()
+		{
+			// As when a log is opened with a limit on its records: the rest of the log was there when it was opened.
+			LogFileSource source = Parse(StartOffset, LogLength - 1000);
+
+			source.Read(StartOffset, new byte[10]);
+
+			source.HasGrown.Should().BeFalse();
 		}
 
 		[TestMethod]
 		public void GivenAnApplicationWritingTheLog_WhenRead_ThenNeitherBlocksTheOther()
 		{
-			LogFileSource source = Parse();
+			LogFileSource source = Parse(StartOffset, LogLength);
 
 			// A logger that lets others read, but not write.
 			using (var writer = new FileStream(_logPath, FileMode.Append, FileAccess.Write, FileShare.Read))
@@ -127,7 +167,7 @@ namespace BlueDotBrigade.Weevil.IO
 		[TestMethod]
 		public void GivenALogThatIsGone_WhenRead_ThenTheReadFailsAtOnce()
 		{
-			LogFileSource source = Parse();
+			LogFileSource source = Parse(StartOffset, LogLength);
 			System.IO.File.Delete(_logPath);
 			var stopwatch = Stopwatch.StartNew();
 
@@ -138,15 +178,17 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// Appends the log's bytes from the start offset, in pieces that do not line up with the blocks, as a parser reads them.
+		/// Appends the log's bytes from <paramref name="startOffset"/> to <paramref name="endOffset"/>,
+		/// in pieces that do not line up with the blocks, as a parser reads them.
 		/// </summary>
-		private LogFileSource Parse()
+		private LogFileSource Parse(int startOffset, int endOffset)
 		{
-			var builder = new LogFileSourceBuilder(_logPath, StartOffset);
+			const int PieceSize = 7919;
+			var builder = new LogFileSourceBuilder(_logPath, startOffset, LogLength);
 
-			for (var offset = StartOffset; offset < LogLength; offset += 7919)
+			for (var offset = startOffset; offset < endOffset; offset += PieceSize)
 			{
-				builder.Append(_bytes.AsSpan(offset, System.Math.Min(7919, LogLength - offset)));
+				builder.Append(_bytes.AsSpan(offset, System.Math.Min(PieceSize, endOffset - offset)));
 			}
 
 			return builder.Build();
