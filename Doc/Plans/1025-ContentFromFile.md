@@ -1,6 +1,6 @@
 # 1025: Read Content Back from the File
 
-> **Status:** Approved
+> **Status:** In progress
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -19,7 +19,7 @@ Drafted on 2026-11-08 from two independent designs and a judge's synthesis.
 
 - **`StorageMode { Ram, Disk }`**: a public enum in Common, `BlueDotBrigade.Weevil.IO`. Until #1028, only internal builders take it.
 - **`LogFileSource`**: one per opened log, in Common. It holds the path, the length that was parsed, and a checksum of every 64 KB block of the log.
-  - Opening computes the checksums as the bytes go past: a fast 64-bit hash (XxHash3, from Microsoft's `System.IO.Hashing` package), about 8 bytes per 64 KB, or 2.4 MB for a 20 GB log. Its cost, estimated at about a second of CPU per 20 GB, is measured in step 2. #1023 can save the checksums in the `.idx` with the record table.
+  - Opening computes the checksums as the bytes go past: a fast 64-bit hash (XxHash3, from Microsoft's `System.IO.Hashing` package), about 8 bytes per 64 KB, or 2.4 MB for a 20 GB log. Measured in step 2: 0.14 s per GB, or about 3 s for a 20 GB log, where opening the 1 GB droid log takes about 15 s in CI. #1023 can save the checksums in the `.idx` with the record table.
   - Each read opens its own handle, sharing reading, writing and deletion, reads whole 64 KB blocks around what it needs, checks their checksums, and closes the handle. It never memory-maps the log, never retries, and keeps no cache.
 - **A changed log** (decided 2026-11-08):
   - **Grown:** the log is longer than when it was opened, and the blocks read still match. This is normal: Weevil logs a warning once and shows nothing.
@@ -62,8 +62,8 @@ Decided by the owner on 2026-11-08:
 
 One pull request each, in order:
 
-1. **Keep a zipped log's copy while it is open (GUI).** Tests: Reload of a zipped log brings its records back (`[WorkItem(1005)]`); the copy is deleted when another log opens and when Weevil exits; it is kept when another log fails to open; an export saved beside it is kept.
-2. **The read path in Common, with no caller yet:** `LogFileSource`, chunks on file, `ContentBuffer` and an internal `Record` accessor. Tests: a chunk on file decodes the same text as the same chunk in memory, for single and multi-line records, lone `\r`, invalid bytes, UTF-8, both UTF-16 byte orders and UTF-32; a buffer that moves to another chunk; a truncated, replaced or corrupted log, including one byte changed in the middle, is reported as changed; a log that only grew is reported as grown, not changed; a writer is never blocked; a missing log fails at once; the time the checksums add to opening a large log.
+1. **Keep a zipped log's copy while it is open (GUI),** #1162: done. Tests: Reload of a zipped log brings its records back (`[WorkItem(1005)]`); the copy is deleted when another log opens and when Weevil exits; it is kept when another log fails to open; an export saved beside it is kept.
+2. **The read path in Common, with no caller yet,** #1164: `LogFileSource`, chunks on file, `ContentBuffer` and an internal `Record` accessor. Tests: a chunk on file decodes the same text as the same chunk in memory, for single and multi-line records, lone `\r`, invalid bytes, UTF-8, both UTF-16 byte orders and UTF-32; a buffer that moves to another chunk; a truncated, replaced or corrupted log, including one byte changed in the middle, is reported as changed; a log that only grew is reported as grown, not changed; a writer is never blocked; a missing log fails at once; the time the checksums add to opening a large log.
 3. **Disk mode in Core, headless.** Tests: a Reqnroll feature, "A log opened on disk shows the same records and filter results as in RAM", over several encodings and line endings; a log that changed is reloaded after a warning; a log that grew only logs a warning; Reload, a failed Reload and Clear keep disk mode; a builder with no mode opens in RAM; a memory budget for disk mode. CI gains the disk-mode run.
 4. **Only if needed: a cache for screen rows.** A grid row reads its content up to five times through the converters, and each read opens the log. Measure it with a screen case that opens a handle per read, in the #1024 harness, before deciding.
 

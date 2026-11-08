@@ -100,19 +100,16 @@
 #endif
 
 		/// <summary>
-		/// Decodes the content into <paramref name="buffer"/>, which grows when needed, if the record holds the log's bytes.
+		/// Returns where the content's bytes are, if the record holds the log's bytes rather than a string (#1025).
 		/// </summary>
 		/// <returns><see langword="false"/> when the record holds a string, which <see cref="Content"/> returns as it is.</returns>
-		internal bool TryDecodeContent(ref char[] buffer, out int length)
+		internal bool TryGetContentBytes(out ContentChunk chunk, out int offset, out int length)
 		{
-			if (_content is ContentChunk chunk)
-			{
-				length = chunk.Decode(_contentOffset, _contentLength, this.IsMultiLine, ref buffer);
-				return true;
-			}
+			chunk = _content as ContentChunk;
+			offset = _contentOffset;
+			length = _contentLength;
 
-			length = 0;
-			return false;
+			return chunk != null;
 		}
 
 		/// <summary>
