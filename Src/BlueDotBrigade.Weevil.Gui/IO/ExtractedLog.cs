@@ -89,7 +89,9 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		private static (long Length, DateTime LastWriteUtc) GetStamp(string file)
 		{
 			var info = new FileInfo(file);
-			return (info.Length, info.LastWriteTimeUtc);
+
+			// A file gone since extraction, for example one antivirus removed, matches no file that appears later.
+			return info.Exists ? (info.Length, info.LastWriteTimeUtc) : (-1, DateTime.MinValue);
 		}
 
 		/// <summary>
