@@ -20,9 +20,14 @@ using BlueDotBrigade.Weevil.IO;
 using Microsoft.Win32.SafeHandles;
 
 /// <summary>
-/// Options of the disk case. <see cref="Text"/>, when set, replaces the regular expression with a plain-text filter.
+/// Options of the disk case. <see cref="Cache"/> is cold, warm or evict; <see cref="Text"/>, when set, replaces the regular expression with a plain-text filter.
 /// </summary>
-internal sealed record DiskOptions(int[] Threads, int ChunkKb, bool Cold, string? Text, int Screens, int ScreenRows);
+internal sealed record DiskOptions(int[] Threads, int ChunkKb, string Cache, string? Text, int Screens, int ScreenRows)
+{
+	public bool IsCold => this.Cache == "cold";
+
+	public bool IsEvictOnly => this.Cache == "evict";
+}
 
 /// <summary>
 /// Decides whether one record's text matches the filter.
@@ -35,6 +40,19 @@ internal static class DiskStorage
 
 	public static int Run(string path, string pattern, int filters, DiskOptions options)
 	{
+		if (options.IsEvictOnly)
+		{
+			// Lets the owner check, for example with RAMMap's File Summary, that emptying the cache works.
+			Console.WriteLine($"Cache: {Evict(path)}. Nothing else was measured.");
+			return 0;
+		}
+
+		if (options.IsCold)
+		{
+			// Fails now, rather than after reading the whole log, when emptying the cache is not allowed.
+			Evict(path);
+		}
+
 		var clock = Stopwatch.StartNew();
 		var log = DiskLog.Open(path, checked(options.ChunkKb * 1024));
 		clock.Stop();
@@ -43,16 +61,18 @@ internal static class DiskStorage
 		Console.WriteLine($"Open: {clock.Elapsed.TotalSeconds:N1} s to find where records start (not part of any filter time); {log.RecordCount * 8L / 1_000_000.0:N1} MB to keep them");
 		Console.WriteLine($"Chunks: {log.ChunkCount:N0} of about {options.ChunkKb:N0} KB; largest chunk {log.MaxChunkBytes:N0} bytes; largest record {log.MaxRecordBytes:N0} bytes");
 		Console.WriteLine(options.Text is null ? $"Filter: regular expression {pattern}" : $"Filter: plain text {options.Text}");
-		Console.WriteLine($"Cache: {(options.Cold ? "cold, emptied before each pass" : "warm")}; logical processors: {Environment.ProcessorCount}");
+		Console.WriteLine($"Cache: {(options.IsCold ? "cold, emptied before each pass" : "warm")}; logical processors: {Environment.ProcessorCount}");
 
 		long? expectedMatches = null;
 		using var process = Process.GetCurrentProcess();
 
 		foreach (var threads in options.Threads)
 		{
+			var passSeconds = new double[filters];
+
 			for (var pass = 1; pass <= filters; pass++)
 			{
-				var cache = options.Cold ? Evict(path) : "warm";
+				var cache = options.IsCold ? Evict(path) : "warm";
 
 				process.Refresh();
 				TimeSpan cpuBefore = process.TotalProcessorTime;
@@ -68,9 +88,13 @@ internal static class DiskStorage
 
 				expectedMatches = matches;
 				var seconds = clock.Elapsed.TotalSeconds;
+				passSeconds[pass - 1] = seconds;
 				var cpu = (process.TotalProcessorTime - cpuBefore).TotalSeconds;
 				Console.WriteLine($"DISK threads={threads,2} pass={pass} seconds={seconds,8:N3} MB/s={log.Length / seconds / 1_000_000.0,7:N0} cpu={cpu,8:N3} matches={matches:N0} cache={cache}");
 			}
+
+			Array.Sort(passSeconds);
+			Console.WriteLine($"SUMMARY threads={threads,2} median={passSeconds[passSeconds.Length / 2],8:N3} s min={passSeconds[0]:N3} s max={passSeconds[^1]:N3} s");
 		}
 
 		MeasureScreens(path, options);
@@ -88,8 +112,11 @@ internal static class DiskStorage
 	{
 		if (OperatingSystem.IsWindows())
 		{
+			// Opening the log unbuffered, while no other handle has it open, makes the file system purge its cached pages,
+			// including pages still mapped in the system cache. This needs no administrator rights.
+			File.OpenHandle(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, NoBuffering).Dispose();
 			StandbyList.Purge();
-			return "standby list emptied";
+			return "file cache emptied";
 		}
 
 		if (OperatingSystem.IsLinux())
@@ -105,7 +132,7 @@ internal static class DiskStorage
 			return "posix_fadvise";
 		}
 
-		throw new PlatformNotSupportedException("--cache cold works on Windows and Linux only.");
+		throw new PlatformNotSupportedException("--cache cold and evict work on Windows and Linux only.");
 	}
 
 	private static Func<Matcher> CreateMatcher(string pattern, string? text)
@@ -116,7 +143,7 @@ internal static class DiskStorage
 			return () => line => line.Contains(text, StringComparison.Ordinal);
 		}
 
-		// One Regex per worker, as Weevil's RegularExpression keeps one per thread:
+		// One Regex per reader and pass, as Weevil's RegularExpression keeps one per thread for each filter:
 		// a shared Regex caches one runner, so the other threads allocate one on every call.
 		return () =>
 		{
@@ -145,7 +172,7 @@ internal static class DiskStorage
 
 		Console.WriteLine($"Line index: {index.LineCount:N0} lines, built in {clock.Elapsed.TotalSeconds:N1} s");
 
-		var cache = options.Cold ? Evict(path) : "warm";
+		var cache = options.IsCold ? Evict(path) : "warm";
 		var random = new Random(RandomSeed);
 		var milliseconds = new double[options.Screens];
 		var buffer = new byte[64 * 1024];
@@ -191,7 +218,7 @@ internal static class DiskStorage
 				var lineBreak = buffer.AsSpan(used, read - used).IndexOf((byte)'\n');
 				var end = lineBreak < 0 ? read : used + lineBreak;
 
-				// A row's start may be decoded twice when it crosses a read: a negligible cost.
+				// A row that crosses a read is decoded in two parts. Rows end at \n, as in the synthetic logs.
 				Encoding.UTF8.GetChars(buffer.AsSpan(used, end - used), chars);
 
 				if (lineBreak < 0)
@@ -206,6 +233,9 @@ internal static class DiskStorage
 	}
 
 	private const int PosixFadviseDontNeed = 4;
+
+	// FILE_FLAG_NO_BUFFERING, which .NET passes on to CreateFile on Windows.
+	private const FileOptions NoBuffering = (FileOptions)0x20000000;
 
 	[DllImport("libc", EntryPoint = "posix_fadvise")]
 	private static extern int PosixFadvise(int fileDescriptor, long offset, long length, int advice);
@@ -320,29 +350,32 @@ internal sealed class DiskLog
 	}
 
 	/// <summary>
-	/// Reads every chunk once, on the given number of threads, and returns how many records match.
+	/// Reads every chunk once and returns how many records match.
+	/// Each of the given number of readers runs on a thread of its own and reads a contiguous range of chunks.
 	/// </summary>
 	public long Filter(int threads, Func<Matcher> createMatcher)
 	{
-		// Opened as disk mode will open it: it never blocks the writer, and the log can still be deleted.
-		using SafeFileHandle handle = File.OpenHandle(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+		var readers = Math.Max(1, Math.Min(threads, this.ChunkCount));
+		var tasks = new Task<long>[readers];
+
+		for (var reader = 0; reader < readers; reader++)
+		{
+			var firstChunk = (int)((long)this.ChunkCount * reader / readers);
+			var lastChunk = (int)((long)this.ChunkCount * (reader + 1) / readers);
+			tasks[reader] = Task.Factory.StartNew(
+				() => FilterRange(firstChunk, lastChunk, createMatcher()),
+				CancellationToken.None,
+				TaskCreationOptions.LongRunning,
+				TaskScheduler.Default);
+		}
+
+		Task.WaitAll(tasks);
 		long matches = 0;
 
-		Parallel.For(
-			0,
-			this.ChunkCount,
-			new ParallelOptions { MaxDegreeOfParallelism = threads },
-			() => new Worker(this.MaxChunkBytes, this.MaxRecordBytes, createMatcher()),
-			(chunk, _, worker) =>
-			{
-				FilterChunk(handle, chunk, worker);
-				return worker;
-			},
-			worker =>
-			{
-				Interlocked.Add(ref matches, worker.Matches);
-				worker.Dispose();
-			});
+		foreach (Task<long> task in tasks)
+		{
+			matches += task.Result;
+		}
 
 		return matches;
 	}
@@ -377,6 +410,22 @@ internal sealed class DiskLog
 		}
 
 		return new DiskLog(path, starts, chunks.ToArray(), length, checked((int)maxChunkBytes), checked((int)maxRecordBytes));
+	}
+
+	private long FilterRange(int firstChunk, int lastChunk, Matcher matcher)
+	{
+		// Each reader opens the log itself. On Windows, the reads of a handle opened for synchronous I/O are serialized,
+		// and read-ahead is kept per handle, so readers sharing one handle would read one at a time.
+		// Opened as disk mode will open it: the writer is never blocked, and the log can still be deleted.
+		using SafeFileHandle handle = File.OpenHandle(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, FileOptions.SequentialScan);
+		using var worker = new Worker(this.MaxChunkBytes, this.MaxRecordBytes, matcher);
+
+		for (var chunk = firstChunk; chunk < lastChunk; chunk++)
+		{
+			FilterChunk(handle, chunk, worker);
+		}
+
+		return worker.Matches;
 	}
 
 	private void FilterChunk(SafeFileHandle handle, int chunk, Worker worker)
@@ -468,7 +517,7 @@ internal sealed class DiskLog
 }
 
 /// <summary>
-/// Empties Windows' standby list, so files read earlier are no longer cached. Needs an elevated process.
+/// Empties Windows' file cache, so files read earlier are no longer cached. Needs an elevated process.
 /// </summary>
 [SupportedOSPlatform("windows")]
 internal static class StandbyList
@@ -483,9 +532,17 @@ internal static class StandbyList
 
 	public static void Purge()
 	{
+		EnablePrivilege("SeIncreaseQuotaPrivilege");
 		EnablePrivilege("SeProfileSingleProcessPrivilege");
 
-		// Writes pending changes first, so recently written pages join the standby list and are purged too.
+		// Trims the system cache's working set, so its pages join the standby and modified lists.
+		// Unlike emptying every working set, this leaves the benchmark's own memory alone.
+		if (!SetSystemFileCacheSize(UIntPtr.MaxValue, UIntPtr.MaxValue, 0))
+		{
+			throw new Win32Exception(Marshal.GetLastWin32Error());
+		}
+
+		// Writes pending changes, so recently written pages join the standby list, then empties it.
 		SetMemoryList(MemoryFlushModifiedList);
 		SetMemoryList(MemoryPurgeStandbyList);
 	}
@@ -511,8 +568,7 @@ internal static class StandbyList
 			if (!isAdjusted || error == ErrorNotAllAssigned)
 			{
 				throw new InvalidOperationException(
-					"--cache cold empties the file cache, which needs administrator rights. " +
-					"Run the benchmark from an elevated prompt, or use --cache warm and empty the standby list with RAMMap before each run.");
+					"--cache cold and evict empty the file cache, which needs administrator rights: run the benchmark from an elevated prompt.");
 			}
 		}
 		finally
@@ -560,6 +616,9 @@ internal static class StandbyList
 
 	[DllImport("kernel32.dll", SetLastError = true)]
 	private static extern bool CloseHandle(IntPtr handle);
+
+	[DllImport("kernel32.dll", SetLastError = true)]
+	private static extern bool SetSystemFileCacheSize(UIntPtr minimumFileCacheSize, UIntPtr maximumFileCacheSize, int flags);
 
 	[DllImport("ntdll.dll")]
 	private static extern int NtSetSystemInformation(int systemInformationClass, ref int systemInformation, int systemInformationLength);

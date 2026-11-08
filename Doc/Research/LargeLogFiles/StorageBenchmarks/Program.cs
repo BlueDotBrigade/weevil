@@ -77,7 +77,7 @@ internal static class Program
             if (kind == StorageKind.Disk)
             {
                 return DiskStorage.Run(path, options.Pattern, options.Filters, new DiskOptions(
-                    options.Threads, options.ChunkKb, options.Cache == "cold", options.Text,
+                    options.Threads, options.ChunkKb, options.Cache, options.Text,
                     options.Screens, options.ScreenRows));
             }
 
@@ -165,8 +165,10 @@ internal static class Program
             Disk case only (see README.md, "Disk case"):
             --threads N[,N...]    thread counts to measure (default: logical processors)
             --chunk-kb N          size of the chunks a filter reads (default 16384)
-            --cache cold|warm     cold empties the file cache before each pass; on
-                                   Windows it needs an elevated prompt (default warm)
+            --cache cold|warm|evict
+                                   cold empties the file cache before each pass; evict
+                                   only empties it and exits; on Windows both need an
+                                   elevated prompt (default warm)
             --text TEXT           plain-text filter instead of --regex
             --screens N           screens of rows read through the line index (default 200)
             --screen-rows N       rows per screen (default 50)
@@ -225,9 +227,9 @@ internal static class Program
                 !Enum.TryParse<StorageKind>(@case, true, out _))
                 throw new ArgumentException("--case must be all, Text, Bytes, Weevil or Disk.");
             if (sizeMb < 1 || filters < 1) throw new ArgumentException("--size-mb and --filters must be positive.");
-            if (cache is not ("cold" or "warm"))
+            if (cache is not ("cold" or "warm" or "evict"))
             {
-                throw new ArgumentException("--cache must be cold or warm.");
+                throw new ArgumentException("--cache must be cold, warm or evict.");
             }
             if (Array.Exists(threads, x => x < 1) || chunkKb < 1 || screens < 0 || screenRows < 1)
             {
