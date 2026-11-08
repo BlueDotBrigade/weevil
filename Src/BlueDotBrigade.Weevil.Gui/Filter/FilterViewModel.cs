@@ -88,6 +88,11 @@
 		private readonly IDialogBoxService _dialogBox;
 
 		private IEngine _engine;
+
+		/// <summary>
+		/// The copy the open log was extracted to, when it came from a zip.
+		/// </summary>
+		private ExtractedLog _openExtractedLog;
 		private RowSelection _rowSelection;
 
 		private readonly DragAndDropViewModel _dragAndDrop;
@@ -513,12 +518,19 @@
 			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
 			{
 				await OpenAsync(sourceFilePath);
+
+				if (IsOpen(sourceFilePath))
+				{
+					KeepExtractedLog(null);
+				}
+
 				return;
 			}
 
 			// Weevil opens a copy extracted to a folder of its own, and deletes only what it extracted, never the zip (#1156).
 			var extractedFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-			var openedFilePath = string.Empty;
+			var extracted = new ExtractedLog(extractedFolder, Array.Empty<string>());
+			var isOpen = false;
 
 			try
 			{
@@ -528,6 +540,8 @@
 				var files = Directory.Exists(extractedFolder)
 					? Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)
 					: Array.Empty<string>();
+
+				extracted = new ExtractedLog(extractedFolder, files);
 
 				if (files.Length == 0)
 				{
@@ -539,40 +553,53 @@
 
 				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName))
 				{
-					openedFilePath = Path.Combine(extractedFolder, selectedFileName);
+					var openedFilePath = Path.Combine(extractedFolder, selectedFileName);
 					await OpenAsync(openedFilePath);
+					isOpen = IsOpen(openedFilePath);
 				}
 			}
 			finally
 			{
-				DeleteExtracted(extractedFolder, openedFilePath);
+				if (isOpen)
+				{
+					// Reload and disk mode read the log again, so its copy stays while it is open (#1162).
+					KeepExtractedLog(extracted);
+				}
+				else
+				{
+					// Nothing was opened from this copy, so nothing was saved beside it either.
+					DeleteFolder(extractedFolder);
+				}
 			}
 		}
 
+		private bool IsOpen(string sourceFilePath)
+		{
+			return Engine.IsRealInstance(_engine) && string.Equals(_engine.SourceFilePath, sourceFilePath, StringComparison.OrdinalIgnoreCase);
+		}
+
 		/// <summary>
-		/// Deletes the folder a zip was extracted to, or only the file opened from it:
-		/// exports, reports and splits are saved beside the open log, so its folder stays.
+		/// Keeps the copy the open log was extracted to, if any, and deletes the previous log's copy, which nothing reads any more.
 		/// </summary>
-		private static void DeleteExtracted(string extractedFolder, string openedFilePath)
+		private void KeepExtractedLog(ExtractedLog extracted)
+		{
+			ExtractedLog previous = _openExtractedLog;
+			_openExtractedLog = extracted;
+			previous?.Delete();
+		}
+
+		private static void DeleteFolder(string extractedFolder)
 		{
 			try
 			{
-				if (!string.IsNullOrEmpty(openedFilePath))
-				{
-					// Never anything outside the folder Weevil extracted to (#1156).
-					if (Path.GetFullPath(openedFilePath).StartsWith(Path.GetFullPath(extractedFolder) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-					{
-						File.Delete(openedFilePath);
-					}
-				}
-				else if (Directory.Exists(extractedFolder))
+				if (Directory.Exists(extractedFolder))
 				{
 					Directory.Delete(extractedFolder, recursive: true);
 				}
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				// A leftover temporary file or folder does no harm, so it must not stop Weevil.
+				// A leftover temporary folder does no harm, so it must not stop Weevil.
 				Log.Default.Write(LogSeverityType.Warning, e, $"Unable to delete the files extracted from a zip. Path={extractedFolder}");
 			}
 		}
@@ -1092,6 +1119,8 @@
 			{
 				_engine.Save(true);
 			}
+
+			KeepExtractedLog(null);
 		}
 
 		private void SaveSelected(FileFormatType fileFormatType)
