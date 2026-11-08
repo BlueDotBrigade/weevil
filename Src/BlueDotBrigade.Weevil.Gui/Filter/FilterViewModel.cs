@@ -93,6 +93,11 @@
 		/// The copy the open log was extracted to, when it came from a zip.
 		/// </summary>
 		private ExtractedLog _openExtractedLog;
+
+		/// <summary>
+		/// The copy a log is being opened from, until the open has finished.
+		/// </summary>
+		private ExtractedLog _extractedLogBeingOpened;
 		private RowSelection _rowSelection;
 
 		private readonly DragAndDropViewModel _dragAndDrop;
@@ -519,9 +524,10 @@
 			{
 				await OpenAsync(sourceFilePath);
 
-				if (IsOpen(sourceFilePath))
+				// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
+				if (IsOpen(sourceFilePath) && _openExtractedLog?.Contains(sourceFilePath) != true)
 				{
-					KeepExtractedLog(null);
+					ReplaceExtractedLog(null);
 				}
 
 				return;
@@ -529,8 +535,8 @@
 
 			// Weevil opens a copy extracted to a folder of its own, and deletes only what it extracted, never the zip (#1156).
 			var extractedFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-			var extracted = new ExtractedLog(extractedFolder, Array.Empty<string>());
-			var isOpen = false;
+			ExtractedLog extracted = null;
+			string openedFilePath = null;
 
 			try
 			{
@@ -540,8 +546,6 @@
 				var files = Directory.Exists(extractedFolder)
 					? Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)
 					: Array.Empty<string>();
-
-				extracted = new ExtractedLog(extractedFolder, files);
 
 				if (files.Length == 0)
 				{
@@ -553,22 +557,32 @@
 
 				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName))
 				{
-					var openedFilePath = Path.Combine(extractedFolder, selectedFileName);
+					extracted = new ExtractedLog(extractedFolder, files);
+					openedFilePath = Path.Combine(extractedFolder, selectedFileName);
+
+					// Weevil may close before the open finishes.
+					_extractedLogBeingOpened = extracted;
 					await OpenAsync(openedFilePath);
-					isOpen = IsOpen(openedFilePath);
 				}
 			}
 			finally
 			{
-				if (isOpen)
-				{
-					// Reload and disk mode read the log again, so its copy stays while it is open (#1162).
-					KeepExtractedLog(extracted);
-				}
-				else
+				_extractedLogBeingOpened = null;
+
+				if (openedFilePath == null)
 				{
 					// Nothing was opened from this copy, so nothing was saved beside it either.
 					DeleteFolder(extractedFolder);
+				}
+				else if (IsOpen(openedFilePath))
+				{
+					// Reload and disk mode read the log again, so its copy stays while it is open (#1162).
+					ReplaceExtractedLog(extracted);
+				}
+				else
+				{
+					// An open that failed may still have saved something beside the log, which stays.
+					extracted.Delete();
 				}
 			}
 		}
@@ -581,11 +595,23 @@
 		/// <summary>
 		/// Keeps the copy the open log was extracted to, if any, and deletes the previous log's copy, which nothing reads any more.
 		/// </summary>
-		private void KeepExtractedLog(ExtractedLog extracted)
+		private void ReplaceExtractedLog(ExtractedLog extracted)
 		{
 			ExtractedLog previous = _openExtractedLog;
 			_openExtractedLog = extracted;
 			previous?.Delete();
+		}
+
+		/// <summary>
+		/// Deletes the copies Weevil extracted from zips, when Weevil closes (#1162).
+		/// </summary>
+		/// <remarks>
+		/// Exit calls it, and so does closing Weevil while Exit cannot run, for example while a filter, Reload or an open is running.
+		/// </remarks>
+		public void DeleteExtractedLogs()
+		{
+			_extractedLogBeingOpened?.Delete();
+			ReplaceExtractedLog(null);
 		}
 
 		private static void DeleteFolder(string extractedFolder)
@@ -1120,7 +1146,7 @@
 				_engine.Save(true);
 			}
 
-			KeepExtractedLog(null);
+			DeleteExtractedLogs();
 		}
 
 		private void SaveSelected(FileFormatType fileFormatType)
