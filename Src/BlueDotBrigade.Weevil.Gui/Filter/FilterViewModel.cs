@@ -527,7 +527,7 @@
 				// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
 				if (!IsOpenFrom(_openExtractedLog))
 				{
-					ReplaceExtractedLog(null);
+					await ReplaceExtractedLogAsync(null);
 				}
 
 				return;
@@ -557,7 +557,7 @@
 
 				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName))
 				{
-					extracted = new ExtractedLog(extractedFolder, files);
+					extracted = await Task.Run(() => new ExtractedLog(extractedFolder, files));
 					openedFilePath = Path.Combine(extractedFolder, selectedFileName);
 
 					// Weevil may close before the open finishes.
@@ -573,21 +573,22 @@
 					_extractedLogBeingOpened = null;
 				}
 
+				// A zip can hold thousands of files, so they are deleted off the UI thread.
 				if (openedFilePath == null)
 				{
 					// Nothing was opened from this copy, so nothing was saved beside it either.
-					DeleteFolder(extractedFolder);
+					await Task.Run(() => DeleteFolder(extractedFolder));
 				}
 				else if (IsOpenFrom(extracted))
 				{
 					// Reload and disk mode read the log again, so its copy stays while it is open (#1162).
 					// The open log may be a sibling that another open chose from this copy meanwhile.
-					ReplaceExtractedLog(extracted);
+					await ReplaceExtractedLogAsync(extracted);
 				}
 				else
 				{
 					// An open that failed may still have saved something beside the log, which stays.
-					extracted.Delete();
+					await Task.Run(extracted.Delete);
 				}
 			}
 		}
@@ -603,11 +604,15 @@
 		/// <summary>
 		/// Keeps the copy the open log was extracted to, if any, and deletes the previous log's copy, which nothing reads any more.
 		/// </summary>
-		private void ReplaceExtractedLog(ExtractedLog extracted)
+		/// <remarks>
+		/// The copy is replaced at once, on the UI thread; only the deletion runs in the background.
+		/// </remarks>
+		private Task ReplaceExtractedLogAsync(ExtractedLog extracted)
 		{
 			ExtractedLog previous = _openExtractedLog;
 			_openExtractedLog = extracted;
-			previous?.Delete();
+
+			return previous == null ? Task.CompletedTask : Task.Run(previous.Delete);
 		}
 
 		/// <summary>
@@ -619,7 +624,8 @@
 		public void DeleteExtractedLogs()
 		{
 			_extractedLogBeingOpened?.Delete();
-			ReplaceExtractedLog(null);
+			_openExtractedLog?.Delete();
+			_openExtractedLog = null;
 		}
 
 		private static void DeleteFolder(string extractedFolder)
