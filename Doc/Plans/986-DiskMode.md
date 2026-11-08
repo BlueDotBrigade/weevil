@@ -10,7 +10,7 @@ Phase 4 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 - An analyst chooses RAM or Disk when opening a log (#421). The default is the mode that fits: RAM for the largest log the computer's memory can hold, Disk above that.
 - A 64 GB log opens on a machine with 32 GB of RAM.
-- On an NVMe drive, a 20 GB log filters in under 10 s. A first open may take about 2 minutes, as today (accepted 2026-10-20); reopening uses the saved index (#988).
+- On an NVMe drive, a 20 GB log filters in under 10 s. A first open may take about 2 minutes, as today (accepted 2026-10-20); opening it again later uses the saved index (#988).
 - Every feature works in disk mode, including Clear, which narrows the view's record scope.
 - Reload (Ctrl+F5) brings cleared records back, in both modes, as today: released content is read back from the file.
 - Weevil never blocks the application that writes the log, and never modifies or deletes the log, or the zip it came from (#1156).
@@ -63,7 +63,7 @@ Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the 
 
 ## Compatibility
 
-- The sidecar and `.idx` formats do not change in this phase.
+- The sidecar format does not change. The `.idx` format, the record table and the checksums are new in Weevil 3.0, so they can change without keeping compatibility (decided 2026-11-08).
 - RAM mode behaves exactly as after #988.
 - Recommended 2026-11-07, not yet confirmed: the MaterialDesign upgrade (#428) is not a prerequisite, because neither Open As nor #1157 needs MaterialDesign 5 (#1157).
 
