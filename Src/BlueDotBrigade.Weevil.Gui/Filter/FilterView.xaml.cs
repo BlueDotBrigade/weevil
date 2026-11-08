@@ -100,6 +100,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				{
 					this.ViewModel.ExitCommand.Execute(null);
 				}
+				else
+				{
+					// Exit cannot run while a filter, Reload or an open is running, but the copies extracted from zips still go (#1162).
+					this.ViewModel.DeleteExtractedLogs();
+				}
 			}
 		}
 
