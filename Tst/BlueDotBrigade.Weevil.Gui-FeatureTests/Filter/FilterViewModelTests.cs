@@ -330,33 +330,22 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenAZip_WhenAFileInItIsChosen_ThenItsExtractedCopyOpensAndTheZipIsKept()
 		{
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			dialogBox
-				.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>())
-				.Returns(callInfo =>
-				{
-					callInfo[1] = "A.log";
-					return true;
-				});
-			var openedPath = string.Empty;
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPath = bulletin.SourceFilePath));
-			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox);
+			ZippedLogViewModel zipped = CreateViewModelForZip();
 			var zipPath = CreateZip("Logs.zip", "A.log");
 
 			try
 			{
-				await viewModel.OpenCompressedAsync(zipPath);
+				await zipped.ViewModel.OpenCompressedAsync(zipPath);
 
-				viewModel.IsLogFileOpen.Should().BeTrue("the chosen file is opened");
+				zipped.ViewModel.IsLogFileOpen.Should().BeTrue("the chosen file is opened");
+				var openedPath = zipped.OpenedPaths.Should().ContainSingle().Subject;
 				Path.GetDirectoryName(openedPath).Should().NotBe(_folder, "Weevil opens an extracted copy, never a file beside the zip");
 				System.IO.Directory.Exists(Path.GetDirectoryName(openedPath)).Should().BeTrue("exports, reports and splits are saved beside the open log");
 				System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
 			}
 			finally
 			{
-				// Weevil keeps the folder it extracted the zip to while the log is open.
-				DeleteExtractedFolder(openedPath);
+				zipped.ViewModel.Exit();
 			}
 		}
 
@@ -451,7 +440,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public async Task GivenALogOpenedFromAZip_WhenAnotherLogFailsToOpen_ThenItsExtractedCopyIsKept()
+		[DataRow(false)]
+		[DataRow(true)]
+		public async Task GivenALogOpenedFromAZip_WhenAnotherLogFailsToOpen_ThenItsExtractedCopyIsKept(bool isOtherLogZipped)
 		{
 			ZippedLogViewModel zipped = CreateViewModelForZip();
 
@@ -460,8 +451,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
 				var extractedCopy = zipped.OpenedPaths[0];
 
-				await zipped.ViewModel.OpenCompressedAsync(CopyLogWithIncompatibleSidecar("B.log"));
+				await zipped.ViewModel.OpenCompressedAsync(isOtherLogZipped
+					? CreateZipWithIncompatibleSidecar("Others.zip", "A.log")
+					: CopyLogWithIncompatibleSidecar("B.log"));
 
+				zipped.OpenedPaths.Should().ContainSingle("the other log fails to open");
 				System.IO.File.Exists(extractedCopy).Should().BeTrue("the zipped log is still the open one");
 			}
 			finally
@@ -495,7 +489,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenAnExportBesideAZippedLog_WhenAnotherLogOpens_ThenTheExportIsKept()
 		{
 			ZippedLogViewModel zipped = CreateViewModelForZip();
-			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+
+			// The zip already holds a file by the export's name, as when a folder holding an earlier export was zipped.
+			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log", "SelectedRecords.log"));
 			var extractedCopy = zipped.OpenedPaths[0];
 			var export = Path.Combine(Path.GetDirectoryName(extractedCopy), "SelectedRecords.log");
 			System.IO.File.WriteAllText(export, "Records the analyst saved beside the open log");
@@ -682,6 +678,23 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 						archive.CreateEntryFromFile(new Daten().AsFilePath(From.GlobalDefault), entryName);
 					}
 				}
+			}
+
+			return zipPath;
+		}
+
+		/// <summary>
+		/// Creates a zip holding a copy of the test log and a sidecar from a newer version of Weevil, which stops the log opening.
+		/// </summary>
+		private string CreateZipWithIncompatibleSidecar(string zipName, string logName)
+		{
+			var logPath = CopyLogWithIncompatibleSidecar(logName);
+			var zipPath = Path.Combine(_folder, zipName);
+
+			using (ZipArchive archive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+			{
+				archive.CreateEntryFromFile(logPath, logName);
+				archive.CreateEntryFromFile($"{logPath}.xml", $"{logName}.xml");
 			}
 
 			return zipPath;

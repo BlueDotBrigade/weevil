@@ -525,7 +525,7 @@
 				await OpenAsync(sourceFilePath);
 
 				// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
-				if (IsOpen(sourceFilePath) && _openExtractedLog?.Contains(sourceFilePath) != true)
+				if (!IsOpenFrom(_openExtractedLog))
 				{
 					ReplaceExtractedLog(null);
 				}
@@ -567,16 +567,21 @@
 			}
 			finally
 			{
-				_extractedLogBeingOpened = null;
+				// Another open may have started while this one finished its insights.
+				if (_extractedLogBeingOpened == extracted)
+				{
+					_extractedLogBeingOpened = null;
+				}
 
 				if (openedFilePath == null)
 				{
 					// Nothing was opened from this copy, so nothing was saved beside it either.
 					DeleteFolder(extractedFolder);
 				}
-				else if (IsOpen(openedFilePath))
+				else if (IsOpenFrom(extracted))
 				{
 					// Reload and disk mode read the log again, so its copy stays while it is open (#1162).
+					// The open log may be a sibling that another open chose from this copy meanwhile.
 					ReplaceExtractedLog(extracted);
 				}
 				else
@@ -587,9 +592,12 @@
 			}
 		}
 
-		private bool IsOpen(string sourceFilePath)
+		/// <summary>
+		/// Returns <see langword="true"/> when the open log is one of the files in <paramref name="extracted"/>.
+		/// </summary>
+		private bool IsOpenFrom(ExtractedLog extracted)
 		{
-			return Engine.IsRealInstance(_engine) && string.Equals(_engine.SourceFilePath, sourceFilePath, StringComparison.OrdinalIgnoreCase);
+			return extracted != null && Engine.IsRealInstance(_engine) && extracted.Contains(_engine.SourceFilePath);
 		}
 
 		/// <summary>
