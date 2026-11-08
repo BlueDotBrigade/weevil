@@ -12,32 +12,39 @@ namespace BlueDotBrigade.Weevil.IO
 	/// </remarks>
 	public sealed class LogFileSourceBuilder
 	{
-		private readonly string _path;
-		private readonly long _startOffset;
 		private readonly List<ulong> _checksums = new List<ulong>();
 		private readonly XxHash3 _hash = new XxHash3();
 
 		// Where the next byte appended is in the file, and whether the block it falls in has bytes already.
 		private long _position;
 		private bool _isBlockStarted;
+		private bool _isBuilt;
 
 		/// <param name="path">The log.</param>
 		/// <param name="startOffset">Where the first byte appended is in the file.</param>
-		public LogFileSourceBuilder(string path, long startOffset)
+		/// <param name="logLength">The log's length when it was opened, so a log parsed only in part is not taken for one that grew.</param>
+		public LogFileSourceBuilder(string path, long startOffset, long logLength)
 		{
 			ArgumentException.ThrowIfNullOrEmpty(path);
 			ArgumentOutOfRangeException.ThrowIfNegative(startOffset);
+			ArgumentOutOfRangeException.ThrowIfNegative(logLength);
 
-			_path = path;
-			_startOffset = startOffset;
 			_position = startOffset;
+			this.Source = new LogFileSource(path, startOffset, logLength);
 		}
+
+		/// <summary>
+		/// The source being built: chunks on file can refer to it while the log is parsed, and read through it once <see cref="Build"/> has completed it.
+		/// </summary>
+		public LogFileSource Source { get; }
 
 		/// <summary>
 		/// Adds the next bytes of the log.
 		/// </summary>
 		public void Append(ReadOnlySpan<byte> bytes)
 		{
+			ThrowIfBuilt();
+
 			while (!bytes.IsEmpty)
 			{
 				var blockEnd = ((_position / LogFileSource.BlockSize) + 1) * LogFileSource.BlockSize;
@@ -53,20 +60,27 @@ namespace BlueDotBrigade.Weevil.IO
 					AddChecksum();
 				}
 			}
+
+			this.Source.Extend(_position);
 		}
 
 		/// <summary>
-		/// Returns a source that reads back the bytes appended.
+		/// Completes the source, so it reads back the bytes appended, and returns it.
 		/// </summary>
 		public LogFileSource Build()
 		{
+			ThrowIfBuilt();
+
 			if (_isBlockStarted)
 			{
 				// The last block, which the range parsed ends within.
 				AddChecksum();
 			}
 
-			return new LogFileSource(_path, _startOffset, _position, _checksums.ToArray());
+			_isBuilt = true;
+			this.Source.Complete(_checksums.ToArray());
+
+			return this.Source;
 		}
 
 		private void AddChecksum()
@@ -74,6 +88,14 @@ namespace BlueDotBrigade.Weevil.IO
 			_checksums.Add(_hash.GetCurrentHashAsUInt64());
 			_hash.Reset();
 			_isBlockStarted = false;
+		}
+
+		private void ThrowIfBuilt()
+		{
+			if (_isBuilt)
+			{
+				throw new InvalidOperationException("The source has already been built.");
+			}
 		}
 	}
 }
