@@ -17,6 +17,8 @@ namespace BlueDotBrigade.Weevil.IO
 	/// - <c>\n</c>, <c>\r</c> and <c>\r\n</c> end a line, and a line break at the end of the file is not followed by an empty line.
 	/// - Invalid bytes become U+FFFD.
 	/// The reader keeps every byte from the start of the current chunk, so <see cref="TakeChunk"/> can hand them over without reading the file again.
+	/// In disk mode, a chunk copies no bytes: it reads them back from the log through a <see cref="LogFileSource"/>, whose checksums the reader computes
+	/// from every byte it reads (#1025).
 	/// </remarks>
 	internal sealed class LogLineReader
 	{
@@ -44,10 +46,14 @@ namespace BlueDotBrigade.Weevil.IO
 		private long _chunkStart;
 		private bool _isEndOfFile;
 
-		/// <param name="source">The log, which must be able to seek.</param>
+		// Disk mode only: computes the checksums of every byte read, for the chunks on file to read back through.
+		private readonly LogFileSourceBuilder _sourceBuilder;
+
+		/// <param name="source">The log, which must be able to seek. In disk mode, a <see cref="FileStream"/>.</param>
 		/// <param name="startOffset">Where to start reading: the start of a line, or 0 for the top of the file.</param>
 		/// <param name="chunkSize">About how many bytes each chunk holds.</param>
-		public LogLineReader(Stream source, long startOffset = 0, int chunkSize = DefaultChunkSize)
+		/// <param name="storageMode">Whether chunks hold their bytes, or read them back from the log.</param>
+		public LogLineReader(Stream source, long startOffset = 0, int chunkSize = DefaultChunkSize, StorageMode storageMode = StorageMode.Ram)
 		{
 			_source = source ?? throw new ArgumentNullException(nameof(source));
 			_chunkSize = chunkSize > 0 ? chunkSize : throw new ArgumentOutOfRangeException(nameof(chunkSize), chunkSize, "Value is expected to be greater than zero.");
@@ -65,6 +71,14 @@ namespace BlueDotBrigade.Weevil.IO
 			_bufferOffset = Math.Max(startOffset, preambleLength);
 			_chunkStart = _bufferOffset;
 			_source.Position = _bufferOffset;
+
+			if (storageMode == StorageMode.Disk)
+			{
+				var file = source as FileStream ?? throw new ArgumentException("Disk mode reads the log back from its file, so the source must be a file.", nameof(source));
+
+				// The full path, so reads still find the log if the working directory changes. The checksums start after the byte order mark.
+				_sourceBuilder = new LogFileSourceBuilder(file.Name, _bufferOffset, file.Length);
+			}
 		}
 
 		/// <summary>
@@ -77,9 +91,16 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		/// <remarks>
 		/// UTF-16 in the other byte order and UTF-32 are decoded one character at a time, 10 to 50 times more slowly,
-		/// so their records keep a string, which also uses less memory than UTF-32's bytes (#1134 review).
+		/// so in RAM mode their records keep a string, which also uses less memory than UTF-32's bytes (#1134 review).
+		/// In disk mode they are read back from the log like any other: they only decode more slowly (#1025, decision 6).
 		/// </remarks>
 		public bool IsQuickToDecode => _unitSize == 1 || (_unitSize == 2 && _isBigEndian != BitConverter.IsLittleEndian);
+
+		/// <summary>
+		/// Records can keep the log's bytes instead of a string: always in disk mode, where every record is read back from the log,
+		/// otherwise only when the log decodes quickly.
+		/// </summary>
+		public bool CanKeepBytes => _sourceBuilder != null || this.IsQuickToDecode;
 
 		/// <summary>
 		/// Where the next line starts in the file.
@@ -169,13 +190,33 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public ContentChunk TakeChunk(long endOffset)
 		{
-			var start = (int)(_chunkStart - _bufferOffset);
+			ContentChunk chunk;
 
-			// The chunk copies the bytes, so the buffer can be reused.
-			var chunk = new ContentChunk(_chunkStart, _buffer.AsSpan(start, (int)(endOffset - _chunkStart)), this.Encoding);
+			if (_sourceBuilder != null)
+			{
+				// Its bytes have been appended to the source already, when they were read.
+				chunk = new ContentChunk(_sourceBuilder.Source, _chunkStart, (int)(endOffset - _chunkStart), this.Encoding);
+			}
+			else
+			{
+				var start = (int)(_chunkStart - _bufferOffset);
+
+				// The chunk copies the bytes, so the buffer can be reused.
+				chunk = new ContentChunk(_chunkStart, _buffer.AsSpan(start, (int)(endOffset - _chunkStart)), this.Encoding);
+			}
+
 			_chunkStart = endOffset;
 
 			return chunk;
+		}
+
+		/// <summary>
+		/// In disk mode, completes the source the chunks on file read back through, once the reading is done: nothing can be read through it before.
+		/// </summary>
+		/// <returns>The source, or <see langword="null"/> in RAM mode.</returns>
+		public LogFileSource BuildSource()
+		{
+			return _sourceBuilder?.Build();
 		}
 
 		/// <summary>
@@ -217,6 +258,8 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 			else
 			{
+				// Every byte, in file order, before any chunk that holds it is taken.
+				_sourceBuilder?.Append(_buffer.AsSpan(_filled, read));
 				_filled += read;
 			}
 		}

@@ -28,6 +28,7 @@
 		private readonly string _sourceFilePath;
 		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
+		private readonly StorageMode _storageMode;
 
 		private LogFileMetrics _logFileMetrics;
 
@@ -63,8 +64,14 @@
 		}
 
 		/// <summary>
+		/// Whether the records keep their content, or read it back from the log. Clear and Reload keep it (#1025).
+		/// </summary>
+		internal StorageMode StorageMode => _storageMode;
+
+		/// <summary>
 		/// Creates an instance of <see cref="CoreEngine"/> which can only be instantiated through a Fluent API managed by <see cref="CoreEngineBuilder"/>.
 		/// </summary>
+		/// <param name="storageMode">Whether the records keep their content, or read it back from the log (#1025).</param>
 		/// <param name="hasReadLog"><see langword="false"/> for the engine without records that Reload uses while it reads the log again (#1126).</param>
 		private CoreEngine(
 			string sourceFilePath,
@@ -79,6 +86,7 @@
 			Session session,
 			RecordState recordState,
 			ITelemetryMetricRecorder telemetryRecorder,
+			StorageMode storageMode,
 			bool hasReadLog)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -94,6 +102,7 @@
 
 			_coreExtension = coreExtension;
 			_context = context;
+			_storageMode = storageMode;
 
 			_sourceFilePath = sourceFilePath;
 			_sourceFileEncoding = sourceFileEncoding;
@@ -201,6 +210,7 @@
 				_session,
 				_recordState,
 				_telemetryRecorder,
+				_storageMode,
 				hasReadLog: false);
 
 			// Not a user action, so no telemetry, as when the engine was created.

@@ -41,3 +41,7 @@ For this reason, it is best to perform the majority of testing at the `BlueDotBr
 This project uses two approaches to functional testing:
 1. Gherkin scenarios
 2. Integration tests (i.e. non-Gherkin)
+
+### Disk Mode
+
+CI runs the Core unit, feature and functional tests a second time with every log opened on disk (#1025). To do the same locally, give `dotnet test` the settings file `Tst/Disk.runsettings`, or select it in Visual Studio's Test Explorer. See [DiskMode.md](../../Design/DiskMode.md).

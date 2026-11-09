@@ -2,6 +2,7 @@
 {
 	using System;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.IO;
 
 	public class EngineBuilder : IEngineBuilder
 	{
@@ -38,6 +39,15 @@
 		public IEngineBuilder UsingRange(Range range)
 		{
 			_coreEngineBuilder.UsingRange(range);
+			return this;
+		}
+
+		/// <summary>
+		/// Opens the log in RAM or on disk (#1025). Internal until the Open As window lets the user choose (#1028).
+		/// </summary>
+		internal IEngineBuilder UsingStorage(StorageMode storageMode)
+		{
+			_coreEngineBuilder.UsingStorage(storageMode);
 			return this;
 		}
 

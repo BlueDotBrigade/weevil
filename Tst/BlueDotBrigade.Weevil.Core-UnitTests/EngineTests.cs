@@ -11,6 +11,7 @@ namespace BlueDotBrigade.Weevil
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Navigation;
+	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
 	public class EngineTests
@@ -265,6 +266,45 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenALogOpenOnDisk_WhenAReloadThatCouldNotReadTheLogIsRetried_ThenItStillReadsItsRecordsFromTheLog()
+		{
+			// Reload carries the mode, and so does the engine without records that a failed Reload leaves for the retry (#1025).
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			var logPath = engine.SourceFilePath;
+
+			File.Move(logPath, $"{logPath}~");
+			FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
+			File.Move($"{logPath}~", logPath);
+			engine.Reload();
+
+			ReadsContentFromTheLog(engine).Should().BeTrue("Reload keeps disk mode");
+		}
+
+		[TestMethod]
+		public void GivenALogOpenOnDisk_WhenRecordsAreCleared_ThenTheRecordsKeptStillReadTheLog()
+		{
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			engine.Selector.Select(lineNumber: 101);
+
+			engine.Clear(ClearOperation.BeforeSelected);
+
+			ReadsContentFromTheLog(engine).Should().BeTrue("Clear keeps disk mode");
+		}
+
+		[TestMethod]
+		public void GivenNoStorageMode_WhenALogIsOpened_ThenItsContentIsKeptInMemory()
+		{
+			if (CoreEngine.CoreEngineBuilder.DefaultStorageMode != StorageMode.Ram)
+			{
+				Assert.Inconclusive("WEEVIL_TEST_STORAGE opens every log given no mode on disk (Tst/Disk.runsettings).");
+			}
+
+			IEngine engine = OpenCopy();
+
+			ReadsContentFromTheLog(engine).Should().BeFalse("a log given no storage mode opens in RAM");
+		}
+
+		[TestMethod]
 		public void GivenASavedComment_WhenSavedAgainAfterAReloadThatCouldNotReadTheLog_ThenTheCommentIsKept()
 		{
 			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
@@ -454,12 +494,41 @@ namespace BlueDotBrigade.Weevil
 			return (insights, new WeakReference(chunk, trackResurrection: true));
 		}
 
-		private IEngine OpenCopy(string fileName = "SampleData.log")
+		/// <param name="storageMode">The storage mode, or <see langword="null"/> to give the builder none.</param>
+		private IEngine OpenCopy(string fileName = "SampleData.log", StorageMode? storageMode = null)
 		{
 			var logPath = Path.Combine(_folder, fileName);
 			File.Copy(new Daten().AsFilePath(fileName), logPath);
 
-			return Engine.UsingPath(logPath).Open();
+			return storageMode is { } mode
+				? new EngineBuilder(logPath).UsingStorage(mode).Open()
+				: Engine.UsingPath(logPath).Open();
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> when the engine reads its records' content back from the log, as disk mode does: RAM mode keeps it in memory.
+		/// </summary>
+		/// <remarks>
+		/// Moves the log away while it reads a record, then puts it back: no handle is kept between reads, even on Windows.
+		/// </remarks>
+		private static bool ReadsContentFromTheLog(IEngine engine)
+		{
+			var logPath = engine.SourceFilePath;
+			File.Move(logPath, $"{logPath}~");
+
+			try
+			{
+				_ = engine.Records[0].Content;
+				return false;
+			}
+			catch (IOException)
+			{
+				return true;
+			}
+			finally
+			{
+				File.Move($"{logPath}~", logPath);
+			}
 		}
 
 		/// <summary>
