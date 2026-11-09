@@ -147,7 +147,34 @@ namespace BlueDotBrigade.Weevil.IO
 
 			destination.Should().Equal(_bytes.AsSpan(LogLength - 300).ToArray());
 			source.HasGrown.Should().BeTrue();
+			source.HasChanged.Should().BeFalse("a log that grew has not changed");
 			writer.Received(1).Write(LogSeverityType.Warning, Arg.Is<string>(message => message.Contains("has grown")));
+		}
+
+		[TestMethod]
+		public void GivenATruncatedLog_WhenReadTwice_ThenEachReadReportsTheChangeAndAWarningIsLoggedOnce()
+		{
+			// A filter's parallel workers, and each screen row, find the same change: it is logged once, and the log must be reloaded (#1025).
+			LogFileSource source = Parse(StartOffset, LogLength);
+			System.IO.File.WriteAllBytes(_logPath, _bytes.AsSpan(0, LogLength - 10).ToArray());
+			ILogWriter original = Log.Default;
+			ILogWriter writer = Substitute.For<ILogWriter>();
+			Log.Register(writer);
+
+			try
+			{
+				Action read = () => source.Read(StartOffset, new byte[10]);
+
+				read.Should().Throw<LogFileChangedException>();
+				read.Should().Throw<LogFileChangedException>();
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			source.HasChanged.Should().BeTrue();
+			writer.Received(1).Write(LogSeverityType.Warning, Arg.Is<string>(message => message.Contains("has changed")));
 		}
 
 		[TestMethod]

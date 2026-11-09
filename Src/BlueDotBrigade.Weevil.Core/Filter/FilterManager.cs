@@ -4,6 +4,9 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
+	using System.IO;
+	using System.Linq;
+	using System.Runtime.ExceptionServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Analysis;
@@ -129,39 +132,47 @@
 			// ... This can simplify the debugging process.
 			var parallelOptions = new ParallelOptions();
 
-			Parallel.ForEach(
-							 records,
-							 parallelOptions,
-					  // FMR Part1: initialize thread local storage
-					  () => { return new FilterMapReduceState(); },
+			try
+			{
+				Parallel.ForEach(
+								 records,
+								 parallelOptions,
+						  // FMR Part1: initialize thread local storage
+						  () => { return new FilterMapReduceState(); },
 
-					  // FMR Part2: define task to perform
-					  (record, parallelLoopState, index, results) =>
-					  {
-						  if (_abortFilterOperation)
+						  // FMR Part2: define task to perform
+						  (record, parallelLoopState, index, results) =>
 						  {
-							  parallelLoopState.Break();
-						  }
-
-						  if (strategy.CanKeep(record, results.Content))
-						  {
-							  isKept[index] = true;
-							  results.Count++;
-
-							  foreach (IMetricCollector collector in _metricCollectors)
+							  if (_abortFilterOperation)
 							  {
-								  collector.Count(record);
+								  parallelLoopState.Break();
 							  }
-						  }
 
-						  return results;
-					  },
-					  // FMR Part3: merge the results
-					  (results) =>
-					  {
-						  Interlocked.Add(ref resultsCount, results.Count);
-					  }
-			);
+							  if (strategy.CanKeep(record, results.Content))
+							  {
+								  isKept[index] = true;
+								  results.Count++;
+
+								  foreach (IMetricCollector collector in _metricCollectors)
+								  {
+									  collector.Count(record);
+								  }
+							  }
+
+							  return results;
+						  },
+						  // FMR Part3: merge the results
+						  (results) =>
+						  {
+							  Interlocked.Add(ref resultsCount, results.Count);
+						  }
+				);
+			}
+			catch (AggregateException exception) when (exception.Flatten().InnerExceptions.OfType<IOException>().FirstOrDefault() is { } readError)
+			{
+				// A read of the log failed, in disk mode: throw what the read threw, as every other reader does (#1025).
+				ExceptionDispatchInfo.Throw(readError);
+			}
 
 			if (_abortFilterOperation)
 			{
@@ -325,8 +336,9 @@
 						{"VisibleRecords", _latestFilterResults.Length},
 					});
 			}
-			catch (Exception exception)
+			catch (Exception exception) when (exception is not IO.LogFileChangedException)
 			{
+				// A log that changed is expected in disk mode, and its source has already logged a warning (#1025).
 				Log.Default.Write(
 					LogSeverityType.Error,
 					exception,

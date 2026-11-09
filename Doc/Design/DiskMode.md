@@ -18,7 +18,20 @@ Until the Open As window lets the user choose (#1028), only Core's internal `Eng
 3. Before the repository returns any record, it completes the `LogFileSource`. Nothing can be read through it before then.
 4. Afterwards, a record's content is read through its chunk and the source: each read opens its own handle, reads the blocks that hold the bytes, checks their checksums and closes the handle. A `ContentBuffer` reads a whole chunk at a time, so each reader reads a chunk once when it reaches it: a filter's parallel workers may each read the chunk where their ranges meet.
 
-A read that finds the log shorter, or a block changed, throws `LogFileChangedException`. A log that has only grown logs a warning once, and reads go on.
+## A Log That Changed
+
+A log that has only grown is normal: the first read that finds it longer logs a warning, and reads go on with the bytes parsed.
+
+A log that was truncated, replaced or corrupted must be reloaded (#1168):
+
+1. The read that finds it shorter, or a block changed, throws `LogFileChangedException`, with the length expected and found, or the offset of the changed block. Every later read checks again, and throws again.
+2. The first such read logs one warning and sets `LogFileSource.HasChanged`.
+3. A filter throws the same exception, not an `AggregateException` from its parallel workers, and does not log it as an unexpected error.
+4. The caller shows the warning and calls `Engine.Reload()`. Core never reloads by itself: a reader such as a filter worker cannot swap the engine it is reading.
+5. Reload deletes the saved line index first, because it checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
+6. If the log changes again before Reload applies the filter, Reload ends like one that could not read the log: the engine shows the log without records, and keeps the filter for the next Reload.
+
+The GUI, CLI and PowerShell do steps 4 and 6 in #1028.
 
 ## Testing in Disk Mode
 

@@ -11,6 +11,7 @@ namespace BlueDotBrigade.Weevil
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Navigation;
+	using LogFileChangedException = BlueDotBrigade.Weevil.IO.LogFileChangedException;
 	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
@@ -283,6 +284,101 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[DataRow(false, DisplayName = "Truncated")]
+		[DataRow(true, DisplayName = "One byte changed in the middle")]
+		public void GivenALogOpenOnDiskThatChanged_WhenFiltered_ThenTheFilterThrowsThatTheLogChanged(bool isChangedInTheMiddle)
+		{
+			// The filter's parallel workers each find the change, but the caller gets the read's exception, not an AggregateException (#1025).
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			ChangeLog(engine.SourceFilePath, isChangedInTheMiddle);
+
+			Exception thrown = null;
+			try
+			{
+				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			}
+			catch (Exception exception)
+			{
+				thrown = exception;
+			}
+
+			// FluentAssertions' Throw<T> also matches an exception inside an AggregateException, so the type is checked as it is.
+			thrown.Should().BeOfType<LogFileChangedException>();
+		}
+
+		[TestMethod]
+		public void GivenALogThatChangedWhileOpenOnDisk_WhenReloaded_ThenItKeepsItsCommentsPinsBookmarksFilterAndDiskMode()
+		{
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			var logPath = engine.SourceFilePath;
+			engine.RecordState.SetComment(engine.Records[0], "Checked");
+			engine.RecordState.SetPinned(engine.Records[1], true);
+			engine.Bookmarks.Create(1, "Start", 10);
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+
+			// Rewritten with its first 150 lines, as a logger that starts over does.
+			var lines = File.ReadAllLines(logPath).Take(150).ToArray();
+			File.WriteAllLines(logPath, lines);
+			FluentActions.Invoking(() => engine.Filter.ReApply()).Should().Throw<LogFileChangedException>();
+
+			engine.Reload();
+
+			engine.Count.Should().Be(150);
+			engine.RecordState.GetComment(engine.Records[0]).Should().Be("Checked");
+			engine.Annotations.IsPinned(engine.Records[1].LineNumber).Should().BeTrue();
+			engine.Bookmarks.TryGetBookmarkName(10, out var bookmarkName).Should().BeTrue();
+			bookmarkName.Should().Be("Start");
+			engine.Filter.Criteria.Include.Should().Be("Id=1");
+			ReadsContentFromTheLog(engine).Should().BeTrue("Reload keeps disk mode");
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public void GivenALogThatChangesWhileItIsReloadedOnDisk_WhenReloadedAgain_ThenTheFilterIsKept()
+		{
+			// The log changes after Reload reads it, before the filter is applied again: Reload ends like one that could not read the log,
+			// and keeps the filter for the next one (#1025).
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			var logPath = engine.SourceFilePath;
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			var lines = File.ReadAllLines(logPath).Take(150).ToArray();
+
+			using (CapturingLogWriter.Register(message =>
+			{
+				if (message == "File loading complete.")
+				{
+					File.WriteAllLines(logPath, lines);
+				}
+			}))
+			{
+				FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
+			}
+
+			engine.Count.Should().Be(0, "a Reload that could not read the log shows it without records");
+			engine.Filter.Criteria.Include.Should().Be("Id=1");
+
+			engine.Reload();
+
+			engine.Count.Should().Be(150);
+			engine.Filter.Criteria.Include.Should().Be("Id=1");
+			engine.Filter.Results.Should().NotBeEmpty();
+		}
+
+		[TestMethod]
+		public void GivenALogOpenOnDiskThatGrew_WhenFilteredAgain_ThenTheResultsAreUnchanged()
+		{
+			// A log that grows is normal: it is read as it was until it is reloaded (#1025).
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
+			var results = engine.Filter.Results.Select(record => record.LineNumber).ToArray();
+
+			File.AppendAllText(engine.SourceFilePath, "Info 1900-01-01 13:00:00.0000 248 Written after the log was opened. Id=1000\n");
+			engine.Filter.ReApply();
+
+			engine.Filter.Results.Select(record => record.LineNumber).Should().Equal(results);
+		}
+
+		[TestMethod]
 		public void GivenALogOpenOnDisk_WhenRecordsAreCleared_ThenTheRecordsKeptStillReadTheLog()
 		{
 			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
@@ -506,6 +602,30 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		/// <summary>
+		/// Truncates the log to half its length, or changes one letter in its middle, which keeps its length and its lines.
+		/// </summary>
+		private static void ChangeLog(string logPath, bool isChangedInTheMiddle)
+		{
+			var bytes = File.ReadAllBytes(logPath);
+
+			if (isChangedInTheMiddle)
+			{
+				var middle = bytes.Length / 2;
+				while (!char.IsAsciiLetter((char)bytes[middle]))
+				{
+					middle++;
+				}
+
+				bytes[middle] = bytes[middle] == (byte)'X' ? (byte)'Y' : (byte)'X';
+				File.WriteAllBytes(logPath, bytes);
+			}
+			else
+			{
+				File.WriteAllBytes(logPath, bytes.AsSpan(0, bytes.Length / 2).ToArray());
+			}
+		}
+
+		/// <summary>
 		/// Returns <see langword="true"/> when the engine reads its records' content back from the log, as disk mode does: RAM mode keeps it in memory.
 		/// </summary>
 		/// <remarks>
@@ -538,10 +658,12 @@ namespace BlueDotBrigade.Weevil
 		{
 			private readonly ILogWriter _original = Log.Default;
 			private readonly ConcurrentQueue<(LogSeverityType Severity, string Message, IDictionary<string, object> Metadata)> _entries = new();
+			private Action<string> _onWrite;
 
-			public static CapturingLogWriter Register()
+			/// <param name="onWrite">Runs as each message is written, so a test can act at a point the application logs.</param>
+			public static CapturingLogWriter Register(Action<string> onWrite = null)
 			{
-				var writer = new CapturingLogWriter();
+				var writer = new CapturingLogWriter { _onWrite = onWrite };
 				Log.Register(writer);
 
 				return writer;
@@ -574,6 +696,7 @@ namespace BlueDotBrigade.Weevil
 			public void Write(LogSeverityType severity, string message, IEnumerable<KeyValuePair<string, object>> metadata)
 			{
 				_entries.Enqueue((severity, message, (metadata ?? []).ToDictionary(pair => pair.Key, pair => pair.Value)));
+				_onWrite?.Invoke(message);
 			}
 
 			public void Write(LogSeverityType severity, Exception exception) => Write(severity, exception.Message, null);

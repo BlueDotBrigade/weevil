@@ -2,7 +2,11 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using System.IO;
+	using System.Linq;
+	using System.Text;
 	using BlueDotBrigade.Weevil.Filter;
+	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
 	public class OpeningFileShould
@@ -38,6 +42,41 @@ namespace BlueDotBrigade.Weevil
 			engine.Count.Should().Be(2);
 			engine[0].Content.Should().EndWith("Process ID is too large");
 			engine[1].LineNumber.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void GivenALogChangedInTheMiddleWhileOpenOnDisk_WhenReloaded_ThenOpeningItAtALaterLineShowsThatLine()
+		{
+			// The saved line index checks only the first and last 4 KB of the log, so it still matches a log changed in the middle,
+			// and opening at a later line would show another line: Reload after a change rebuilds it (#1025).
+			// A log in the temporary folder gets no saved index, so this one is kept beside the tests.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(OpeningFileShould), Guid.NewGuid().ToString("N"))).FullName;
+
+			try
+			{
+				// 300 lines of 54 bytes: line 100 is past the first 4 KB, and before the last 4 KB.
+				var logPath = Path.Combine(folder, "Log.txt");
+				var lines = Enumerable.Range(1, 300).Select(lineNumber => $"Info 1900-01-01 12:00:00.0000 248 Line {lineNumber:D3} of the log").ToArray();
+				File.WriteAllText(logPath, string.Join("\n", lines) + "\n");
+				IEngine engine = new EngineBuilder(logPath).UsingStorage(StorageMode.Disk).Open();
+
+				// A space on line 100 becomes a line break: the log keeps its length, and every later line moves down one.
+				var bytes = File.ReadAllBytes(logPath);
+				var space = Array.IndexOf(bytes, (byte)' ', Encoding.UTF8.GetByteCount(string.Join("\n", lines.Take(99)) + "\n"));
+				bytes[space] = (byte)'\n';
+				File.WriteAllBytes(logPath, bytes);
+				FluentActions.Invoking(() => engine.Records[99].Content).Should().Throw<IO.LogFileChangedException>();
+
+				engine.Reload();
+
+				IEngine reopened = Engine.UsingPath(logPath, startAtLineNumber: 200).Open();
+				reopened[0].LineNumber.Should().Be(200);
+				reopened[0].Content.Should().Be(lines[198], "the changed log's line 200 was its line 199");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
 		}
 
 		[TestMethod]
