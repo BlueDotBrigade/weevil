@@ -5,6 +5,10 @@
 	using BlueDotBrigade.Weevil.IO;
 	using Diagnostics;
 
+	/// <remarks>
+	/// In disk mode, the records' content is read back from the log, so a repository reads once: <see cref="Get(Range, int)"/> completes
+	/// the source the records read through before it returns them (#1025).
+	/// </remarks>
 	internal class SerializedRecordRepository : IRecordRepository
 	{
 		public const bool LoggingEnabled = true;
@@ -15,6 +19,7 @@
 		private readonly Stream _source;
 		private readonly long _firstRecordByteOffset;
 		private readonly int _firstRecordLineNumber;
+		private readonly LogLineReader _reader;
 		private readonly MultilineRecordParser _recordParser;
 
 		public SerializedRecordRepository(Stream source, IRecordParser recordParser)
@@ -24,13 +29,15 @@
 		}
 
 		/// <param name="maximumLinesToSearch">Represents the number of lines that will be read while searching for the first record.</param>
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser, int maximumLinesToSearch)
-			: this(source, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled, maximumLinesToSearch)
+		/// <param name="storageMode">Whether the records keep their content, or read it back from the log, which must then be a file.</param>
+		public SerializedRecordRepository(Stream source, IRecordParser recordParser, int maximumLinesToSearch, StorageMode storageMode = StorageMode.Ram)
+			: this(source, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled, maximumLinesToSearch, storageMode)
 		{
 			// nothing to do
 		}
 
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch)
+		/// <param name="storageMode">Whether the records keep their content, or read it back from the log, which must then be a file.</param>
+		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram)
 		{
 			_source = source;
 			_firstRecordByteOffset = firstRecordByteOffset;
@@ -40,8 +47,9 @@
 				LogSeverityType.Debug,
 				$"Preparing to read records from disk. {nameof(firstRecordByteOffset)}={firstRecordByteOffset}, {nameof(firstRecordLineNumber)}={firstRecordLineNumber}");
 
+			_reader = new LogLineReader(_source, _firstRecordByteOffset, storageMode: storageMode);
 			_recordParser = new MultilineRecordParser(
-				new LogLineReader(_source, _firstRecordByteOffset),
+				_reader,
 				recordParser,
 				maximumLinesToSearch,
 				firstRecordLineNumber,
@@ -91,6 +99,9 @@
 					record.AddTo(table);
 				}
 			} while (hasRecord && table.Count < maximumCount);
+
+			// In disk mode, the records read their content back through the source, which can be read only once complete.
+			_reader.BuildSource();
 
 			return new TableRecordList(table.Build());
 		}

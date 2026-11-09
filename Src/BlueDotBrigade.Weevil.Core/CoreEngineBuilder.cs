@@ -33,6 +33,21 @@
 			private static readonly Version LatestVersion = new Version(512, 512, 512, 512);
 			public const int FirstRecordLineNumber = 1;
 
+#if DEBUG
+			/// <summary>
+			/// The storage mode of a builder given none: RAM, or disk when the environment variable <c>WEEVIL_TEST_STORAGE</c> is <c>Disk</c>,
+			/// so CI runs the Core tests on disk too, through <c>Tst/Disk.runsettings</c> (#1025). A mode given to the builder, or carried by Reload, wins.
+			/// </summary>
+			/// <remarks>
+			/// A Debug build of the GUI, CLI or PowerShell module started with the variable set opens on disk too.
+			/// </remarks>
+			internal static readonly StorageMode DefaultStorageMode = string.Equals(Environment.GetEnvironmentVariable("WEEVIL_TEST_STORAGE"), nameof(StorageMode.Disk), StringComparison.OrdinalIgnoreCase)
+				? StorageMode.Disk
+				: StorageMode.Ram;
+#else
+			internal static readonly StorageMode DefaultStorageMode = StorageMode.Ram;
+#endif
+
 			private readonly string _sourceFilePath;
 			private readonly int _startAtLineNumber;
 
@@ -58,6 +73,8 @@
 			/// </summary>
 			private ITelemetryMetricRecorder _telemetryRecorder = NullTelemetryMetricRecorder.Instance;
 
+			private StorageMode _storageMode = DefaultStorageMode;
+
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
 				// nothing to do
@@ -82,6 +99,22 @@
 			public CoreEngineBuilder UsingTelemetry(ITelemetryMetricRecorder recorder)
 			{
 				_telemetryRecorder = recorder ?? NullTelemetryMetricRecorder.Instance;
+				return this;
+			}
+
+			/// <summary>
+			/// Keeps each record's content in memory, or reads it back from the log whenever it is needed (#1025).
+			/// </summary>
+			public CoreEngineBuilder UsingStorage(StorageMode storageMode)
+			{
+				_storageMode = Enum.IsDefined(storageMode)
+					? storageMode
+					: throw new ArgumentOutOfRangeException(nameof(storageMode), storageMode, "Value is expected to be a storage mode.");
+
+				Log.Default.Write(
+					LogSeverityType.Debug,
+					$"Core engine construction has been given a storage mode. Value={storageMode}");
+
 				return this;
 			}
 
@@ -209,17 +242,20 @@
 
 					// Reading starts at the start line's byte offset, taken from the line index (#977).
 					// A start line beyond the end of the log reads from the top, which finds no records to keep.
+					// In disk mode, the records read their content back from the log, through a source complete before Get returns (#1025).
 					var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
 						? new SerializedRecordRepository(
 							 dataSource,
 							 coreExtension.GetRecordParser(),
 							 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
 							 startAtLineNumber,
-							 true)
+							 true,
+							 storageMode: _storageMode)
 						: new SerializedRecordRepository(
 							 dataSource,
 							 coreExtension.GetRecordParser(),
-							 GetMaximumLinesToSearch(lineNumberRange));
+							 GetMaximumLinesToSearch(lineNumberRange),
+							 _storageMode);
 
 					records = repository.Get(lineNumberRange, maxRecords);
 
@@ -274,6 +310,7 @@
 					session,
 					recordState,
 					_telemetryRecorder,
+					_storageMode,
 					hasReadLog: true);
 
 				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);
@@ -307,6 +344,7 @@
 						{ "WorkingSet", Environment.WorkingSet },
 						{ "ManagedMemory", GC.GetTotalMemory(forceFullCollection: false) },
 						{ "SourceFilePath", coreEngine.SourceFilePath },
+						{ "StorageMode", coreEngine.StorageMode },
 					});
 			}
 

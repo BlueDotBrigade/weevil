@@ -192,10 +192,11 @@
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private (CoreEngine.CoreEngineBuilder Builder, SelectionManager.Snapshot Selection, FilterType FilterType, IFilterCriteria FilterCriteria) Release()
 		{
-			// The session and the flags carry across Reload (#1013).
+			// The session, the flags and the storage mode carry across Reload (#1013, #1025).
 			CoreEngine.CoreEngineBuilder builder = CoreEngine
 				.FromPath(_coreEngine.SourceFilePath)
-				.UsingStateOf(_coreEngine);
+				.UsingStateOf(_coreEngine)
+				.UsingStorage(_coreEngine.StorageMode);
 
 			var kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
 

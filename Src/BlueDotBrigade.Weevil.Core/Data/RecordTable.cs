@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// - Each column is an array, kept in blocks of <see cref="BlockSize"/> rows, so no array grows large, and building the table copies only the last block, to trim it.
 	/// - A record that holds the log's bytes keeps its content's offset and length in its chunk. The chunk directory says where each chunk's
 	///   records start, and each block knows the chunk its first record is in, so finding a record's chunk is a short search.
-	/// - A record that keeps its content as a string (UTF-16 in the other byte order, UTF-32, or text a plugin changed) has
+	/// - A record that keeps its content as a string (UTF-16 in the other byte order and UTF-32 in RAM mode, or text a plugin changed) has
 	///   <see cref="RecordFacts.KeepsString"/>, and its block keeps the string: by row when most of its rows keep one, otherwise in a short list.
 	/// - The table never changes once built.
 	/// </remarks>

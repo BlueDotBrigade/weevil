@@ -130,7 +130,7 @@
 					// A parser that returns no genuine record has not found one: the search goes on, as it always has.
 					if (Record.IsGenuine(record))
 					{
-						current = new RecordStart(record, line, offset, length, _dataSource.IsQuickToDecode);
+						current = new RecordStart(record, line, offset, length, _dataSource.CanKeepBytes);
 						return true;
 					}
 
@@ -167,7 +167,7 @@
 					// Without a genuine record, the line still ends this record, but starts none, as it always has.
 					if (Record.IsGenuine(record))
 					{
-						_nextRecord = new RecordStart(record, line, offset, length, _dataSource.IsQuickToDecode);
+						_nextRecord = new RecordStart(record, line, offset, length, _dataSource.CanKeepBytes);
 					}
 
 					break;
@@ -301,14 +301,14 @@
 		/// </summary>
 		private readonly struct RecordStart
 		{
-			public RecordStart(IRecord record, string line, long offset, int length, bool isQuickToDecode)
+			public RecordStart(IRecord record, string line, long offset, int length, bool canKeepBytes)
 			{
 				this.Record = record;
 				this.Offset = offset;
 				this.Length = length;
 
-				// The bytes can stand in for the text only when the parser kept the line as it is, and the log decodes quickly.
-				this.CanKeepBytes = isQuickToDecode && record is Record && string.Equals(record.Content, line, StringComparison.Ordinal);
+				// The bytes can stand in for the text only when the parser kept the line as it is, and this log's records may keep bytes.
+				this.CanKeepBytes = canKeepBytes && record is Record && string.Equals(record.Content, line, StringComparison.Ordinal);
 			}
 
 			public IRecord Record { get; }

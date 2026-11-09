@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Data
 	using System.IO;
 	using System.Linq;
 	using System.Text;
+	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
 	public class SerializedRecordRepositoryTests
@@ -86,6 +87,41 @@ namespace BlueDotBrigade.Weevil.Data
 			records.Select(r => r.Content).Should().Equal("keep 1", "CHANGE 2\r\n  more", "keep 4\r\n  more", "CHANGE 6", "keep 7");
 			records.Select(r => r.IsMultiLine).Should().Equal(false, true, true, false, false);
 			records.Select(r => r.WasGeneratedByUi).Should().Equal(false, true, false, true, false);
+		}
+
+		[TestMethod]
+		[DataRow("UTF-16BE")]
+		[DataRow("UTF-32LE")]
+		public void GivenALogOnDiskAndAParserThatChangesSomeLines_WhenRecordsAreRead_ThenOnlyTheChangedTextIsKeptInMemory(string encodingName)
+		{
+			// In RAM mode these encodings keep a string per record, because they decode slowly. On disk, every record whose text
+			// is the log's own is read back from the log, and only text the parser changed, which is not in the log, stays in memory (#1025, decision 6).
+			Encoding encoding = encodingName == "UTF-16BE"
+				? new UnicodeEncoding(bigEndian: true, byteOrderMark: true)
+				: new UTF32Encoding(bigEndian: false, byteOrderMark: true);
+			var folder = Directory.CreateTempSubdirectory("Weevil.SerializedRecordRepositoryTests.").FullName;
+
+			try
+			{
+				var logPath = Path.Combine(folder, "Log.txt");
+				File.WriteAllBytes(logPath, encoding.GetPreamble().Concat(encoding.GetBytes("keep 1\nchange 2\nkeep 3")).ToArray());
+
+				RecordList records;
+				using (var log = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					records = new SerializedRecordRepository(log, new ChangingParser(), MultilineRecordParser.MaximumLinesToSearch, StorageMode.Disk)
+						.Get(Range.All, int.MaxValue);
+				}
+
+				File.Move(logPath, $"{logPath}~");
+
+				records[1].Content.Should().Be("CHANGE 2", "text the parser changed is not in the log, so it stays in memory");
+				FluentActions.Invoking(() => records[0].Content).Should().Throw<IOException>("the log's own text is read back from the log");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
 		}
 
 		/// <summary>

@@ -53,6 +53,15 @@ jobs:
       - name: Test (Debug, x64)
         run: dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal
 
+      # Runs the Core tests again with every log opened on disk, unless a test chooses a mode (#1025).
+      # Only these projects: a Debug GUI follows the same setting, and the performance tests measure RAM mode.
+      - name: Test on disk (Debug, x64)
+        shell: bash
+        run: |
+          for project in Core-UnitTests Core-FeatureTests Core-FunctionalTests; do
+            dotnet test "Tst/BlueDotBrigade.Weevil.$project/BlueDotBrigade.Weevil.$project.csproj" --configuration Debug -p:Platform=x64 --no-build --settings Tst/Disk.runsettings --verbosity normal
+          done
+
   # Everything except the WPF GUI and its tests must also build and pass on Linux (#973).
   test-linux:
     runs-on: ubuntu-latest
@@ -87,4 +96,13 @@ jobs:
           for project in Tst/*/*.csproj; do
             if [[ "$project" == *Gui* ]]; then continue; fi
             dotnet test "$project" --configuration Debug -p:Platform=x64 --verbosity normal
+          done
+
+      # Runs the Core tests again with every log opened on disk, unless a test chooses a mode (#1025).
+      # Only these projects: a Debug GUI follows the same setting, and the performance tests measure RAM mode.
+      - name: Test on disk (Debug, x64)
+        shell: bash
+        run: |
+          for project in Core-UnitTests Core-FeatureTests Core-FunctionalTests; do
+            dotnet test "Tst/BlueDotBrigade.Weevil.$project/BlueDotBrigade.Weevil.$project.csproj" --configuration Debug -p:Platform=x64 --no-build --settings Tst/Disk.runsettings --verbosity normal
           done
