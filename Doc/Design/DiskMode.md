@@ -16,7 +16,7 @@ Until the Open As window lets the user choose (#1028), only Core's internal `Eng
 1. The engine builder opens the log, and `SerializedRecordRepository` reads it through `LogLineReader`.
 2. In disk mode, the reader gives every byte it reads, in file order, to a `LogFileSourceBuilder`, which computes a checksum of each 64 KB block. Its chunks are chunks on file: they hold their range of the log, but no bytes.
 3. Before the repository returns any record, it completes the `LogFileSource`. Nothing can be read through it before then.
-4. Afterwards, a record's content is read through its chunk and the source: each read opens its own handle, reads the blocks that hold the bytes, checks their checksums and closes the handle. A `ContentBuffer` reads a whole chunk at a time, so a scan such as a filter reads each chunk once.
+4. Afterwards, a record's content is read through its chunk and the source: each read opens its own handle, reads the blocks that hold the bytes, checks their checksums and closes the handle. A `ContentBuffer` reads a whole chunk at a time, so each reader reads a chunk once when it reaches it: a filter's parallel workers may each read the chunk where their ranges meet.
 
 A read that finds the log shorter, or a block changed, throws `LogFileChangedException`. A log that has only grown logs a warning once, and reads go on.
 
@@ -24,4 +24,4 @@ A read that finds the log shorter, or a block changed, throws `LogFileChangedExc
 
 In a Debug build, the environment variable `WEEVIL_TEST_STORAGE=Disk` makes disk mode the default for a builder given no mode. A mode given to the builder, or carried by Reload, wins.
 
-[`Tst/Disk.runsettings`](../../Tst/Disk.runsettings) sets it, and CI runs the Core unit, feature and functional tests a second time with it. Use it for those projects only: a Debug GUI started with the variable set opens logs on disk too.
+[`Tst/Disk.runsettings`](../../Tst/Disk.runsettings) sets it, and marks the run so a test can check that logs really open on disk. CI runs the Core unit, feature and functional tests a second time with it. Use it for those projects only: a Debug GUI started with the variable set opens logs on disk too.

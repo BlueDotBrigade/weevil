@@ -18,6 +18,8 @@ namespace BlueDotBrigade.Weevil
 	{
 		private string _folder = string.Empty;
 
+		public TestContext TestContext { get; set; } = null!;
+
 		[TestInitialize]
 		public void Setup()
 		{
@@ -292,16 +294,14 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
-		public void GivenNoStorageMode_WhenALogIsOpened_ThenItsContentIsKeptInMemory()
+		public void GivenNoStorageMode_WhenALogIsOpened_ThenItOpensInRamUnlessTheTestsRunOnDisk()
 		{
-			if (CoreEngine.CoreEngineBuilder.DefaultStorageMode != StorageMode.Ram)
-			{
-				Assert.Inconclusive("WEEVIL_TEST_STORAGE opens every log given no mode on disk (Tst/Disk.runsettings).");
-			}
+			// Tst/Disk.runsettings marks the disk run, so this also fails if that run silently opens its logs in RAM (#1025).
+			var isDiskRun = TestContext.Properties.TryGetValue("StorageMode", out var runMode) && string.Equals(runMode as string, nameof(StorageMode.Disk), StringComparison.Ordinal);
 
 			IEngine engine = OpenCopy();
 
-			ReadsContentFromTheLog(engine).Should().BeFalse("a log given no storage mode opens in RAM");
+			ReadsContentFromTheLog(engine).Should().Be(isDiskRun, "a log given no storage mode opens in RAM, except in the disk run");
 		}
 
 		[TestMethod]

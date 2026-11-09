@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Linq;
 	using System.Text;
 	using BlueDotBrigade.Weevil.IO;
 	using NSubstitute;
@@ -347,9 +348,12 @@
 		}
 
 		[TestMethod]
-		public void GivenALogLargerThanTheReadersBuffer_WhenReadInSmallChunks_ThenEveryRecordKeepsItsContent()
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenALogLargerThanTheReadersBuffer_WhenReadInSmallChunks_ThenEveryRecordKeepsItsContent(StorageMode storageMode)
 		{
-			// About 200 KB read in chunks of about 1,000 bytes, so the reader moves the chunk's bytes to the start of its 64 KB buffer many times.
+			// About 200 KB read in chunks of about 1,000 bytes, so the reader moves the chunk's bytes to the start of its 64 KB buffer many times,
+			// and a log on disk is read back from about 200 chunks on file (#1025).
 			var lines = new List<string>();
 			var expected = new List<string>();
 			for (var i = 0; i < 2_000; i++)
@@ -364,21 +368,40 @@
 				expected.Add(string.Join("\r\n", record));
 			}
 
-			var dataSource = new MemoryStream(Encoding.UTF8.GetBytes(string.Join("\n", lines)));
-			var parser = new MultilineRecordParser(
-				new LogLineReader(dataSource, startOffset: 0, chunkSize: 1_000),
-				new TsvRecordParser(),
-				MultilineRecordParser.MaximumLinesToSearch,
-				MultilineRecordParser.FirstRecordLineNumber,
-				isLoggingEnabled: false);
+			var folder = System.IO.Directory.CreateTempSubdirectory("Weevil.MultiLineRecordParserTest.").FullName;
 
-			var contents = new List<string>();
-			for (IRecord record = parser.GetNext(); Record.IsGenuine(record); record = parser.GetNext())
+			try
 			{
-				contents.Add(record.Content);
-			}
+				var logPath = Path.Combine(folder, "Log.txt");
+				System.IO.File.WriteAllBytes(logPath, Encoding.UTF8.GetBytes(string.Join("\n", lines)));
+				var records = new List<IRecord>();
+				LogLineReader reader;
 
-			contents.Should().Equal(expected);
+				using (var dataSource = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					reader = new LogLineReader(dataSource, startOffset: 0, chunkSize: 1_000, storageMode);
+					var parser = new MultilineRecordParser(
+						reader,
+						new TsvRecordParser(),
+						MultilineRecordParser.MaximumLinesToSearch,
+						MultilineRecordParser.FirstRecordLineNumber,
+						isLoggingEnabled: false);
+
+					for (IRecord record = parser.GetNext(); Record.IsGenuine(record); record = parser.GetNext())
+					{
+						records.Add(record);
+					}
+				}
+
+				// On disk, the records read their content back once the source is complete.
+				reader.BuildSource();
+
+				records.Select(record => record.Content).Should().Equal(expected);
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
 		}
 
 		[TestMethod]

@@ -2,8 +2,8 @@
 <!--
 	Runs the Core tests with every log opened on disk, unless a test chooses a mode (#1025).
 	Debug builds only: the Core engine builder reads WEEVIL_TEST_STORAGE once, as its default storage mode.
-	For the Core test projects only. A Debug GUI started with the variable set would open on disk too.
-	Give this file to dotnet test with its settings option, or select it in Visual Studio's Test Explorer.
+	For the Core unit, feature and functional test projects only: give this file to dotnet test with its settings option, for each of them.
+	Selected in Visual Studio's Test Explorer, it applies to every test project, including the GUI and performance tests, until it is cleared.
 -->
 <RunSettings>
 	<RunConfiguration>
@@ -11,4 +11,8 @@
 			<WEEVIL_TEST_STORAGE>Disk</WEEVIL_TEST_STORAGE>
 		</EnvironmentVariables>
 	</RunConfiguration>
+	<!-- Tells the tests this is the disk run, so a test can check that logs given no mode really open on disk. -->
+	<TestRunParameters>
+		<Parameter name="StorageMode" value="Disk" />
+	</TestRunParameters>
 </RunSettings>
