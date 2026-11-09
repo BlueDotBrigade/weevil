@@ -31,7 +31,7 @@ A log that was truncated, replaced or corrupted must be reloaded (#1168):
 5. Reload deletes the saved line index first, because the index checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
 6. If the log changes again before Reload applies the filter, Reload deletes the line index it has just saved, and ends like one that could not read the log: the engine shows the log without records, keeps the filter for the next Reload, and Reload throws what the read threw.
 
-The GUI, CLI and PowerShell do step 4, and handle what Reload throws in step 6, in #1028. A read that fails because the log can no longer be opened, with an `IOException` or `UnauthorizedAccessException`, is handled as in steps 3 and 6.
+The GUI, CLI and PowerShell do step 4, and handle what Reload throws in step 6, in #1028. A read that fails because the log can no longer be opened, with another `IOException` or an `UnauthorizedAccessException`, is thrown as it is by a filter, as in step 3, and ends a Reload as in step 6. Unlike a change, the filter logs it as an error, because nothing has logged it before.
 
 ## Testing in Disk Mode
 
