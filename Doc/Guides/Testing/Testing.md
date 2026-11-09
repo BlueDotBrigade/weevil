@@ -44,4 +44,4 @@ This project uses two approaches to functional testing:
 
 ### Disk Mode
 
-CI runs the Core unit, feature and functional tests a second time with every log opened on disk (#1025). To do the same locally, give `dotnet test` the settings file `Tst/Disk.runsettings`, or select it in Visual Studio's Test Explorer. See [DiskMode.md](../../Design/DiskMode.md).
+CI runs the Core unit, feature and functional tests a second time with every log opened on disk (#1025). To do the same locally, run each of those three projects with `dotnet test --settings Tst/Disk.runsettings`. Do not select the file in Visual Studio's Test Explorer: it would apply to every test project until cleared. See [DiskMode.md](../../Design/DiskMode.md).
