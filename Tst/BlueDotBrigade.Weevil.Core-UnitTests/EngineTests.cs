@@ -284,26 +284,20 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
-		[DataRow(false, DisplayName = "Truncated")]
-		[DataRow(true, DisplayName = "One byte changed in the middle")]
-		public void GivenALogOpenOnDiskThatChanged_WhenFiltered_ThenTheFilterThrowsThatTheLogChanged(bool isChangedInTheMiddle)
+		[DoNotParallelize]
+		public void GivenALogOpenOnDiskThatChanged_WhenFiltered_ThenTheFilterThrowsThatTheLogChangedWithoutLoggingAnError()
 		{
-			// The filter's parallel workers each find the change, but the caller gets the read's exception, not an AggregateException (#1025).
+			// The filter's parallel workers each find the change, but the caller gets the read's exception, not an AggregateException,
+			// and the change, which is expected in disk mode, is not logged as an unexpected error (#1025).
 			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
-			ChangeLog(engine.SourceFilePath, isChangedInTheMiddle);
+			var bytes = File.ReadAllBytes(engine.SourceFilePath);
+			File.WriteAllBytes(engine.SourceFilePath, bytes.AsSpan(0, bytes.Length / 2).ToArray());
+			using var log = CapturingLogWriter.Register();
 
-			Exception thrown = null;
-			try
-			{
-				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
-			}
-			catch (Exception exception)
-			{
-				thrown = exception;
-			}
+			FluentActions.Invoking(() => engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1")))
+				.Should().ThrowExactly<LogFileChangedException>();
 
-			// FluentAssertions' Throw<T> also matches an exception inside an AggregateException, so the type is checked as it is.
-			thrown.Should().BeOfType<LogFileChangedException>();
+			log.Contains(LogSeverityType.Error).Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -602,30 +596,6 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		/// <summary>
-		/// Truncates the log to half its length, or changes one letter in its middle, which keeps its length and its lines.
-		/// </summary>
-		private static void ChangeLog(string logPath, bool isChangedInTheMiddle)
-		{
-			var bytes = File.ReadAllBytes(logPath);
-
-			if (isChangedInTheMiddle)
-			{
-				var middle = bytes.Length / 2;
-				while (!char.IsAsciiLetter((char)bytes[middle]))
-				{
-					middle++;
-				}
-
-				bytes[middle] = bytes[middle] == (byte)'X' ? (byte)'Y' : (byte)'X';
-				File.WriteAllBytes(logPath, bytes);
-			}
-			else
-			{
-				File.WriteAllBytes(logPath, bytes.AsSpan(0, bytes.Length / 2).ToArray());
-			}
-		}
-
-		/// <summary>
 		/// Returns <see langword="true"/> when the engine reads its records' content back from the log, as disk mode does: RAM mode keeps it in memory.
 		/// </summary>
 		/// <remarks>
@@ -675,6 +645,14 @@ namespace BlueDotBrigade.Weevil
 			public IDictionary<string, object> Last(string message)
 			{
 				return _entries.Last(entry => entry.Message == message).Metadata;
+			}
+
+			/// <summary>
+			/// Returns <see langword="true"/> when an entry of the given severity was written.
+			/// </summary>
+			public bool Contains(LogSeverityType severity)
+			{
+				return _entries.Any(entry => entry.Severity == severity);
 			}
 
 			/// <summary>

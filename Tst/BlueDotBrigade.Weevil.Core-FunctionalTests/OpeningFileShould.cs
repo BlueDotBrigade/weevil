@@ -2,10 +2,13 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
+	using NSubstitute;
 	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
@@ -44,29 +47,21 @@ namespace BlueDotBrigade.Weevil
 			engine[1].LineNumber.Should().Be(3);
 		}
 
+		// The saved line index checks only the first and last 4 KB of the log, so it still matches a log changed in the middle.
+		// It keeps the offset of every 64th line, so opening at line 200, after a change on line 100, would show another line.
 		[TestMethod]
 		public void GivenALogChangedInTheMiddleWhileOpenOnDisk_WhenReloaded_ThenOpeningItAtALaterLineShowsThatLine()
 		{
-			// The saved line index checks only the first and last 4 KB of the log, so it still matches a log changed in the middle,
-			// and opening at a later line would show another line: Reload after a change rebuilds it (#1025).
-			// A log in the temporary folder gets no saved index, so this one is kept beside the tests.
-			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(OpeningFileShould), Guid.NewGuid().ToString("N"))).FullName;
+			// Reload after a change rebuilds the saved line index (#1025).
+			(var folder, var logPath, var lines) = CreateLogBesideTheTests();
 
 			try
 			{
-				// 300 lines of 54 bytes: line 100 is past the first 4 KB, and before the last 4 KB.
-				var logPath = Path.Combine(folder, "Log.txt");
-				var lines = Enumerable.Range(1, 300).Select(lineNumber => $"Info 1900-01-01 12:00:00.0000 248 Line {lineNumber:D3} of the log").ToArray();
-				File.WriteAllText(logPath, string.Join("\n", lines) + "\n");
 				IEngine engine = new EngineBuilder(logPath).UsingStorage(StorageMode.Disk).Open();
+				File.Exists($"{logPath}.idx").Should().BeTrue("the log has a saved line index");
 
-				// A space on line 100 becomes a line break: the log keeps its length, and every later line moves down one.
-				var bytes = File.ReadAllBytes(logPath);
-				var space = Array.IndexOf(bytes, (byte)' ', Encoding.UTF8.GetByteCount(string.Join("\n", lines.Take(99)) + "\n"));
-				bytes[space] = (byte)'\n';
-				File.WriteAllBytes(logPath, bytes);
+				BreakLine(logPath, lines, lineNumber: 100);
 				FluentActions.Invoking(() => engine.Records[99].Content).Should().Throw<IO.LogFileChangedException>();
-
 				engine.Reload();
 
 				IEngine reopened = Engine.UsingPath(logPath, startAtLineNumber: 200).Open();
@@ -77,6 +72,68 @@ namespace BlueDotBrigade.Weevil
 			{
 				Directory.Delete(folder, recursive: true);
 			}
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public void GivenALogChangedInTheMiddleWhileItIsReloadedOnDisk_WhenReloadedAgain_ThenOpeningItAtALaterLineShowsThatLine()
+		{
+			// The log changes after Reload has read it and saved its line index, before the filter is applied: that index is not kept (#1025).
+			(var folder, var logPath, var lines) = CreateLogBesideTheTests();
+			ILogWriter original = Log.Default;
+
+			try
+			{
+				IEngine engine = new EngineBuilder(logPath).UsingStorage(StorageMode.Disk).Open();
+				File.Exists($"{logPath}.idx").Should().BeTrue("the log has a saved line index");
+				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Line"));
+
+				ILogWriter writer = Substitute.For<ILogWriter>();
+				writer
+					.When(w => w.Write(Arg.Any<LogSeverityType>(), "File loading complete.", Arg.Any<IEnumerable<KeyValuePair<string, object>>>()))
+					.Do(_ => BreakLine(logPath, lines, lineNumber: 100));
+				Log.Register(writer);
+				FluentActions.Invoking(engine.Reload).Should().Throw<IO.LogFileChangedException>();
+				Log.Register(original);
+
+				engine.Reload();
+
+				IEngine reopened = Engine.UsingPath(logPath, startAtLineNumber: 200).Open();
+				reopened[0].LineNumber.Should().Be(200);
+				reopened[0].Content.Should().Be(lines[198], "the changed log's line 200 was its line 199");
+			}
+			finally
+			{
+				Log.Register(original);
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		/// <summary>
+		/// Writes a log of 300 lines of 54 bytes, so line 100 is past the first 4 KB and before the last 4 KB.
+		/// </summary>
+		/// <remarks>
+		/// A log in the temporary folder gets no saved line index, so this one is kept beside the tests.
+		/// </remarks>
+		private static (string Folder, string LogPath, string[] Lines) CreateLogBesideTheTests()
+		{
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(OpeningFileShould), Guid.NewGuid().ToString("N"))).FullName;
+			var logPath = Path.Combine(folder, "Log.txt");
+			var lines = Enumerable.Range(1, 300).Select(lineNumber => $"Info 1900-01-01 12:00:00.0000 248 Line {lineNumber:D3} of the log").ToArray();
+			File.WriteAllText(logPath, string.Join("\n", lines) + "\n");
+
+			return (folder, logPath, lines);
+		}
+
+		/// <summary>
+		/// Turns the first space on a line into a line break: the log keeps its length, and every later line moves down one.
+		/// </summary>
+		private static void BreakLine(string logPath, string[] lines, int lineNumber)
+		{
+			var bytes = File.ReadAllBytes(logPath);
+			var lineStart = Encoding.UTF8.GetByteCount(string.Join("\n", lines.Take(lineNumber - 1)) + "\n");
+			bytes[Array.IndexOf(bytes, (byte)' ', lineStart)] = (byte)'\n';
+			File.WriteAllBytes(logPath, bytes);
 		}
 
 		[TestMethod]

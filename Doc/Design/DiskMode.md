@@ -28,10 +28,10 @@ A log that was truncated, replaced or corrupted must be reloaded (#1168):
 2. The first such read logs one warning and sets `LogFileSource.HasChanged`.
 3. A filter throws the same exception, not an `AggregateException` from its parallel workers, and does not log it as an unexpected error.
 4. The caller shows the warning and calls `Engine.Reload()`. Core never reloads by itself: a reader such as a filter worker cannot swap the engine it is reading.
-5. Reload deletes the saved line index first, because it checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
-6. If the log changes again before Reload applies the filter, Reload ends like one that could not read the log: the engine shows the log without records, and keeps the filter for the next Reload.
+5. Reload deletes the saved line index first, because the index checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
+6. If the log changes again before Reload applies the filter, Reload deletes the line index it has just saved, and ends like one that could not read the log: the engine shows the log without records, keeps the filter for the next Reload, and Reload throws what the read threw.
 
-The GUI, CLI and PowerShell do steps 4 and 6 in #1028.
+The GUI, CLI and PowerShell do step 4, and handle what Reload throws in step 6, in #1028. A read that fails because the log can no longer be opened, with an `IOException` or `UnauthorizedAccessException`, is handled as in steps 3 and 6.
 
 ## Testing in Disk Mode
 

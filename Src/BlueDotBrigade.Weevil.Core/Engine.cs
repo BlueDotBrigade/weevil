@@ -184,11 +184,26 @@
 			{
 				_coreEngine.Filter.Apply(filterType, filterCriteria);
 			}
-			catch (IOException)
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
 			{
 				// The log changed or went away again once read: end like a Reload that could not read it, keeping the filter for the next one (#1025).
+				DeleteLineIndexIfChanged();
 				Replace(_coreEngine.WithoutRecords(filterType, filterCriteria));
 				throw;
+			}
+		}
+
+		/// <summary>
+		/// Deletes the saved line index when a read found the log changed since this engine read it, so the next Reload or open rebuilds it (#1025).
+		/// </summary>
+		/// <remarks>
+		/// The index checks only the start and end of the log, so it can still match a log changed in the middle.
+		/// </remarks>
+		private void DeleteLineIndexIfChanged()
+		{
+			if (_coreEngine.Source?.HasChanged == true)
+			{
+				IO.LineIndexFile.Delete(_coreEngine.SourceFilePath);
 			}
 		}
 
@@ -202,11 +217,7 @@
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private (CoreEngine.CoreEngineBuilder Builder, SelectionManager.Snapshot Selection, FilterType FilterType, IFilterCriteria FilterCriteria) Release()
 		{
-			// The saved line index checks only the start and end of the log, so it can still match a log changed in the middle: it is rebuilt (#1025).
-			if (_coreEngine.Source?.HasChanged == true)
-			{
-				IO.LineIndexFile.Delete(_coreEngine.SourceFilePath);
-			}
+			DeleteLineIndexIfChanged();
 
 			// The session, the flags and the storage mode carry across Reload (#1013, #1025).
 			CoreEngine.CoreEngineBuilder builder = CoreEngine

@@ -168,7 +168,7 @@
 						  }
 				);
 			}
-			catch (AggregateException exception) when (exception.Flatten().InnerExceptions.OfType<IOException>().FirstOrDefault() is { } readError)
+			catch (AggregateException exception) when (exception.Flatten().InnerExceptions.FirstOrDefault(inner => inner is IOException or UnauthorizedAccessException) is { } readError)
 			{
 				// A read of the log failed, in disk mode: throw what the read threw, as every other reader does (#1025).
 				ExceptionDispatchInfo.Throw(readError);
