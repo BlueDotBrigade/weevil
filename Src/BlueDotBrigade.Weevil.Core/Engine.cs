@@ -179,7 +179,32 @@
 
 			// Before the filter, which then narrows the selection as any filter does (#1062).
 			_coreEngine.Selector.Restore(selection);
-			_coreEngine.Filter.Apply(filterType, filterCriteria);
+
+			try
+			{
+				_coreEngine.Filter.Apply(filterType, filterCriteria);
+			}
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			{
+				// The log changed or went away again once read: end like a Reload that could not read it, keeping the filter for the next one (#1025).
+				DeleteLineIndexIfChanged();
+				Replace(_coreEngine.WithoutRecords(filterType, filterCriteria));
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Deletes the saved line index when a read found the log changed since this engine read it, so the next Reload or open rebuilds it (#1025).
+		/// </summary>
+		/// <remarks>
+		/// The index checks only the start and end of the log, so it can still match a log changed in the middle.
+		/// </remarks>
+		private void DeleteLineIndexIfChanged()
+		{
+			if (_coreEngine.Source?.HasChanged == true)
+			{
+				IO.LineIndexFile.Delete(_coreEngine.SourceFilePath);
+			}
 		}
 
 		/// <summary>
@@ -192,6 +217,8 @@
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private (CoreEngine.CoreEngineBuilder Builder, SelectionManager.Snapshot Selection, FilterType FilterType, IFilterCriteria FilterCriteria) Release()
 		{
+			DeleteLineIndexIfChanged();
+
 			// The session, the flags and the storage mode carry across Reload (#1013, #1025).
 			CoreEngine.CoreEngineBuilder builder = CoreEngine
 				.FromPath(_coreEngine.SourceFilePath)

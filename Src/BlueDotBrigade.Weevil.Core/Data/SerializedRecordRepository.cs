@@ -56,6 +56,11 @@
 				loggingEnabled);
 		}
 
+		/// <summary>
+		/// In disk mode, the source the records read their content back through, once <see cref="Get(Range, int)"/> has read the log: otherwise <see langword="null"/>.
+		/// </summary>
+		internal LogFileSource Source { get; private set; }
+
 		public IRecord GetNext()
 		{
 			return _recordParser.GetNext();
@@ -101,7 +106,7 @@
 			} while (hasRecord && table.Count < maximumCount);
 
 			// In disk mode, the records read their content back through the source, which can be read only once complete.
-			_reader.BuildSource();
+			this.Source = _reader.BuildSource();
 
 			return new TableRecordList(table.Build());
 		}

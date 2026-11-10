@@ -29,6 +29,7 @@
 		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
 		private readonly StorageMode _storageMode;
+		private readonly LogFileSource _source;
 
 		private LogFileMetrics _logFileMetrics;
 
@@ -69,6 +70,12 @@
 		internal StorageMode StorageMode => _storageMode;
 
 		/// <summary>
+		/// In disk mode, the source the records read their content back through, which says whether the log changed since it was read (#1025).
+		/// <see langword="null"/> in RAM mode, and for the engine without records that Reload uses.
+		/// </summary>
+		internal LogFileSource Source => _source;
+
+		/// <summary>
 		/// Creates an instance of <see cref="CoreEngine"/> which can only be instantiated through a Fluent API managed by <see cref="CoreEngineBuilder"/>.
 		/// </summary>
 		/// <param name="storageMode">Whether the records keep their content, or read it back from the log (#1025).</param>
@@ -87,6 +94,7 @@
 			RecordState recordState,
 			ITelemetryMetricRecorder telemetryRecorder,
 			StorageMode storageMode,
+			LogFileSource source,
 			bool hasReadLog)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -103,6 +111,7 @@
 			_coreExtension = coreExtension;
 			_context = context;
 			_storageMode = storageMode;
+			_source = source;
 
 			_sourceFilePath = sourceFilePath;
 			_sourceFileEncoding = sourceFileEncoding;
@@ -197,6 +206,17 @@
 		/// </remarks>
 		internal CoreEngine WithoutRecords()
 		{
+			return WithoutRecords(_filterManager.FilterType, _filterManager.Criteria);
+		}
+
+		/// <summary>
+		/// Returns an engine for the same log, with the same session and flags, that holds none of the records and shows them with the given filter.
+		/// </summary>
+		/// <remarks>
+		/// Reload uses it when the filter it applies again cannot read the log, so a retry keeps that filter (#1025).
+		/// </remarks>
+		internal CoreEngine WithoutRecords(FilterType filterType, IFilterCriteria criteria)
+		{
 			var empty = new CoreEngine(
 				_sourceFilePath,
 				_logFileMetrics.FileSize,
@@ -211,10 +231,11 @@
 				_recordState,
 				_telemetryRecorder,
 				_storageMode,
+				source: null,
 				hasReadLog: false);
 
 			// Not a user action, so no telemetry, as when the engine was created.
-			empty._filterManager.ApplyInternal(_filterManager.FilterType, _filterManager.Criteria);
+			empty._filterManager.ApplyInternal(filterType, criteria);
 
 			return empty;
 		}

@@ -201,6 +201,7 @@
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
 				LineIndex lineIndex;
+				LogFileSource source;
 
 				var maxRecords = _maxRecords;
 				RecordList records;
@@ -258,6 +259,7 @@
 							 _storageMode);
 
 					records = repository.Get(lineNumberRange, maxRecords);
+					source = repository.Source;
 
 					loadingStopwatch.Stop();
 
@@ -311,6 +313,7 @@
 					recordState,
 					_telemetryRecorder,
 					_storageMode,
+					source,
 					hasReadLog: true);
 
 				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);

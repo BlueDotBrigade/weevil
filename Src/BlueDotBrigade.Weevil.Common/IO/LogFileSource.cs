@@ -19,6 +19,7 @@ namespace BlueDotBrigade.Weevil.IO
 	///
 	/// A checksum of each <see cref="BlockSize"/> block of the range parsed tells whether the log changed since:
 	/// - A log that is shorter, or whose block read has another checksum, was truncated, replaced or corrupted: the read throws <see cref="LogFileChangedException"/>.
+	///   The first such read logs a warning and sets <see cref="HasChanged"/>; the log must then be reloaded. Later reads still check, and throw.
 	/// - A log that is only longer than when it was opened has grown, which is normal: a warning is logged once, and reads go on.
 	/// </remarks>
 	public sealed class LogFileSource
@@ -36,6 +37,7 @@ namespace BlueDotBrigade.Weevil.IO
 		private ulong[] _checksums;
 
 		private int _hasGrown;
+		private int _hasChanged;
 
 		internal LogFileSource(string path, long startOffset, long lengthWhenOpened)
 		{
@@ -64,6 +66,11 @@ namespace BlueDotBrigade.Weevil.IO
 		/// A read found the log longer than when it was opened, and the blocks it read unchanged.
 		/// </summary>
 		public bool HasGrown => Volatile.Read(ref _hasGrown) == 1;
+
+		/// <summary>
+		/// A read found the log truncated, replaced or corrupted since it was parsed, so it must be reloaded.
+		/// </summary>
+		public bool HasChanged => Volatile.Read(ref _hasChanged) == 1;
 
 		/// <summary>
 		/// Reads the bytes at <paramref name="fileOffset"/> into <paramref name="destination"/>, after checking the blocks that hold them.
@@ -125,6 +132,18 @@ namespace BlueDotBrigade.Weevil.IO
 						bytes.Slice((int)(copyStart - blockStart), (int)(copyEnd - copyStart)).CopyTo(destination.Slice((int)(copyStart - fileOffset)));
 					}
 				}
+			}
+			catch (LogFileChangedException exception)
+			{
+				// Once per parse: a filter's parallel workers, and each screen row, find the same change (#1025).
+				if (Interlocked.Exchange(ref _hasChanged, 1) == 0)
+				{
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						$"The log has changed since it was opened, so it must be reloaded. Path={this.Path}, ExpectedLength={exception.ExpectedLength}, ActualLength={exception.ActualLength}, ChangedOffset={exception.ChangedOffset}");
+				}
+
+				throw;
 			}
 			finally
 			{

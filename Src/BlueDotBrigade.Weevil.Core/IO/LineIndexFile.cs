@@ -129,6 +129,15 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 		}
 
+		/// <summary>
+		/// Deletes the saved index, so the next open rebuilds it: it checks only the start and end of the log,
+		/// so it can still match a log changed in the middle (#1025).
+		/// </summary>
+		public static void Delete(string logFilePath)
+		{
+			TryDelete($"{logFilePath}.{FileExtension}");
+		}
+
 		private static void TryDelete(string filePath)
 		{
 			try
@@ -140,7 +149,7 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
 			{
-				Log.Default.Write(LogSeverityType.Warning, exception, $"A temporary file could not be deleted. FilePath={filePath}");
+				Log.Default.Write(LogSeverityType.Warning, exception, $"A file could not be deleted. FilePath={filePath}");
 			}
 		}
 	}
