@@ -49,7 +49,7 @@ Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the 
    - A log opened from a zip reads back from its extracted copy, so Weevil keeps that copy while the log is open: the plan's reading of "deleted later", to confirm. Today the copy is deleted right after opening, so Reload of a zipped log fails (#1005, #1156).
 3. **Reload brings cleared records back (#1026).** Reload resets the view's scope to the whole log, as Ctrl+F5 does today, and content released by Clear is read back from the file.
    - Done on 2026-11-10 with no new code: Reload parses the whole log again, in the mode it was opened in (#1126, #1166), so cleared records come back in RAM and on disk. A test now says so for both modes.
-4. **Streaming work (#1027).** In disk mode (decided 2026-10-20):
+4. **Streaming work (#1027).** In disk mode (decided 2026-10-20). Planned in the [#1027 plan](1027-StreamingReads.md), with measurements of where disk mode stands:
    - Filters read the log in parallel ranges split at record boundaries.
    - Analyzers, export, Find, the graph and the dashboard read it once, in order, because most analyzers carry state from one record to the next. An NVMe drive reads 20 GB in about 6 s.
    - Filters on monikers that never read content, such as `@Pinned` or `@Flagged`, do not read the file, so an expression must say whether it needs content.
