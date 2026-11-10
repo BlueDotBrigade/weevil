@@ -83,6 +83,31 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
+		public void GivenAChunkAlreadyReadWhole_WhenAPassComesBackToIt_ThenOnlyEachRecordsBlocksAreRead()
+		{
+			// Records sorted by time can go back and forth between chunks: each chunk is read whole once at most (#1027).
+			var lines = string.Concat(Enumerable.Range(1, 30_000).Select(i => $"Line {i:D5}\n"));
+			(LogFileSource source, var logPath) = CreateLog(lines);
+			const int SecondChunkStart = 15_000 * 11;
+			var first = new ContentChunk(source, 0, SecondChunkStart, Encoding.UTF8);
+			var second = new ContentChunk(source, SecondChunkStart, lines.Length - SecondChunkStart, Encoding.UTF8);
+			var buffer = new ContentBuffer();
+			buffer.Read(CreateRecord(1, first, 0, 10));
+			buffer.Read(CreateRecord(2, first, 11, 10));
+			buffer.Read(CreateRecord(15_001, second, 0, 10));
+			buffer.Read(CreateRecord(15_002, second, 11, 10));
+			using (FileStream log = File.OpenWrite(logPath))
+			{
+				// In the first chunk, past the 64 KB block that holds the records read again.
+				log.Position = SecondChunkStart - 1;
+				log.WriteByte((byte)'x');
+			}
+
+			buffer.Read(CreateRecord(1, first, 0, 10)).ToString().Should().Be("Line 00001");
+			buffer.Read(CreateRecord(2, first, 11, 10)).ToString().Should().Be("Line 00002", "the first chunk is not read whole again");
+		}
+
+		[TestMethod]
 		public void GivenALogThatChanged_WhenAChunkIsReadAfterAnotherFailedToBe_ThenTheChangeIsReportedRatherThanOtherText()
 		{
 			// The longer chunk that fails to be read replaces the buffer's array, which no longer holds the first chunk.

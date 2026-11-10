@@ -17,7 +17,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		[TestMethod]
 		[DoNotParallelize]
-		public void GivenADroidLogOpenedOnDisk_WhenDataIsDetectedInEveryRecord_ThenTheAnalysisEndsQuickly()
+		public void GivenADroidLogOpenedOnDisk_WhenEveryRecordIsSearchedForData_ThenTheAnalysisEndsQuickly()
 		{
 			IEngine engine = StorageModes.UsingPath(DroidLog.GetPath(DroidLog.Utf8), StorageMode.Disk).Open();
 			var dialog = new ExpressionDialog(@"\[Security\] (?<Threat>.*) detected");

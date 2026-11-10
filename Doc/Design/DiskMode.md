@@ -18,7 +18,9 @@ Until the Open As window lets the user choose (#1028), only Core's internal `Eng
 3. Before the repository returns any record, it completes the `LogFileSource`. Nothing can be read through it before then.
 4. Afterwards, a record's content is read through its chunk and the source: each read opens its own handle, reads the blocks that hold the bytes, checks their checksums and closes the handle. A `ContentBuffer` reads a whole chunk at a time, so each reader reads a chunk once when it reaches it: a filter's parallel workers may each read the chunk where their ranges meet.
 
-Code that reads many records reads them through one `ContentBuffer`, with `ContentBuffer.Read(record)` or `RecordList.ReadContent(position, buffer)`, as filters, Find, the analyzers, export, the CLI and the graph do (#1027). `record.Content` reads only the 64 KB blocks that hold one record, and keeps nothing: about 7 µs per record, against 0.2 µs through a buffer, or 72 s against 1.5 s for 10 million records.
+Code that reads many records reads them through one `ContentBuffer` per pass, with `ContentBuffer.Read(record)` or `RecordList.ReadContent(position, buffer)`, as filters, Find, the analyzers, export, the CLI and the graph do (#1027). `record.Content` reads the 64 KB blocks that hold one record, and keeps nothing: about 7 µs per record. Over 10 million records in a row, that is 72 s, against 1.5 s through a buffer.
+
+A buffer reads a whole chunk only when two records in a row come from it, so a sparse list, such as a few filter results spread over a large log, reads only each record's blocks. It reads a chunk whole once at most: a pass that comes back to a chunk, such as records sorted by time, reads only each record's blocks from it. A pass therefore never reads more than the log once, plus 64 KB per record.
 
 ## A Log That Changed
 
@@ -39,4 +41,4 @@ The GUI, CLI and PowerShell do step 4, and handle what Reload throws in step 6, 
 
 In a Debug build, the environment variable `WEEVIL_TEST_STORAGE=Disk` makes disk mode the default for a builder given no mode. A mode given to the builder, or carried by Reload, wins.
 
-[`Tst/Disk.runsettings`](../../Tst/Disk.runsettings) sets it, and marks the run so a test can check that logs really open on disk. CI runs the Core unit, feature and functional tests a second time with it. Use it for those projects only: a Debug GUI started with the variable set opens logs on disk too.
+[`Tst/Disk.runsettings`](../../Tst/Disk.runsettings) sets it, and marks the run so a test can check that logs really open on disk. CI runs the Core unit, feature and functional tests, and the CLI's functional tests, a second time with it. Use it for those projects only: a Debug GUI started with the variable set opens logs on disk too.

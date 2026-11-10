@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Collections.Generic;
 
 	/// <summary>
 	/// Holds the content of one record at a time, so code that reads many records, such as a filter, reads each record's content once (#1131).
@@ -8,9 +9,14 @@ namespace BlueDotBrigade.Weevil.Data
 	/// <remarks>
 	/// Not thread-safe: use one per thread. What <see cref="Read(IRecord)"/> returns is valid until it is called for another record.
 	/// A record that holds the log's bytes is decoded into memory the buffer reuses, so reading it allocates no string (#1133).
-	/// The buffer also holds the bytes of one chunk on file at a time, so a scan reads each chunk once (#1025): it reads the whole chunk from the log
-	/// when a second record in a row is read from it. The first reads only the blocks that hold it, so a sparse list, such as a few filter results
-	/// spread over a large log, does not read a whole chunk for each record (#1027). Reading from the log throws what <see cref="IO.LogFileSource.Read"/> throws,
+	/// The buffer also holds the bytes of one chunk on file at a time, so a scan reads each chunk once (#1025, #1027):
+	/// - The first record read from a chunk reads only the blocks that hold it, so a sparse list, such as a few filter results spread over a large log,
+	///   does not read a whole chunk for each record.
+	/// - A second record in a row from the same chunk reads the whole chunk.
+	/// - A buffer reads a chunk whole once at most. A pass that comes back to a chunk, such as records sorted by time, reads only each record's blocks from it,
+	///   so a pass never reads more than the log once, plus the blocks of each record.
+	///
+	/// Reading from the log throws what <see cref="IO.LogFileSource.Read"/> throws,
 	/// for example <see cref="IO.LogFileChangedException"/> when the log was truncated, replaced or corrupted.
 	/// </remarks>
 	public sealed class ContentBuffer
@@ -26,8 +32,12 @@ namespace BlueDotBrigade.Weevil.Data
 		private ContentChunk _fileChunk;
 		private byte[] _fileBytes = [];
 
-		// The chunk on file that the last read reached, of which it read only the record's blocks, or null.
+		// The chunk on file that the last read reached, and the offset of the record whose blocks it read, or null.
 		private ContentChunk _partlyReadChunk;
+		private int _partlyReadOffset;
+
+		// The chunks on file this buffer has read whole, or null before the first.
+		private HashSet<ContentChunk> _chunksReadWhole;
 
 		/// <summary>
 		/// Returns the content of <paramref name="record"/>, and reads it only if this buffer does not hold it already.
@@ -88,12 +98,16 @@ namespace BlueDotBrigade.Weevil.Data
 
 			if (!ReferenceEquals(chunk, _fileChunk))
 			{
-				if (!ReferenceEquals(chunk, _partlyReadChunk))
+				// The same record read again, as RecordList.ReadContent can, is not a second record.
+				var isSecondRecordInARow = ReferenceEquals(chunk, _partlyReadChunk) && offset != _partlyReadOffset;
+
+				if (!isSecondRecordInARow || _chunksReadWhole?.Contains(chunk) == true)
 				{
-					// The first record in a row from this chunk: only the blocks that hold it, as a single record is read.
+					// Only the blocks that hold the record, as a single record is read.
 					_partlyReadChunk = null;
 					var count = chunk.Decode(offset, length, isMultiLine, ref _chars);
 					_partlyReadChunk = chunk;
+					_partlyReadOffset = offset;
 
 					return count;
 				}
@@ -101,6 +115,7 @@ namespace BlueDotBrigade.Weevil.Data
 				// A second record in a row from the same chunk: a scan, so the whole chunk is read once.
 				_partlyReadChunk = null;
 				_fileChunk = null;
+				(_chunksReadWhole ??= new HashSet<ContentChunk>()).Add(chunk);
 
 				if (_fileBytes.Length < chunk.Length)
 				{
