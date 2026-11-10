@@ -1,6 +1,6 @@
 # 1027: Read the Log Once per Pass in Disk Mode
 
-> **Status:** Draft
+> **Status:** In progress
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -73,7 +73,8 @@ Today Abort stops only filters. Analyzers, export and Find run to the end. `IRec
 1. **Filters read each chunk once.** Chunk-aligned ranges, and the log of bytes read (decision 3).
    - Tests: the droid filter performance test also checks, in disk mode, that a filter reads the log's bytes once. A unit test checks that the ranges cover every position once, in order, at chunk boundaries. A feature test checks that a moniker filter on a log opened on disk finds its records after the log is deleted, so it read nothing.
 2. **Sequential readers read through a `ContentBuffer`.**
-   - Tests: a performance test exports the 1 GB droid log on disk, and runs one analyzer over it, each within a generous bound that reads through `record.Content` would miss by a wide margin. The existing analyzer, export and CLI tests run on disk in CI's disk run.
+   - Tests: a performance test exports the 1 GB droid log on disk, and runs one analyzer over it, each within a generous bound that reads through `record.Content` would miss by a wide margin. The existing analyzer, export and CLI tests run on disk in CI's disk run, which now includes the CLI's functional tests.
+   - A `ContentBuffer` reads a whole chunk only for a second record in a row from it, and each chunk whole once at most, so a sparse list reads only each record's blocks, and records sorted by time never make a pass read more than the log once (found in review).
    - Done first, since it needs no decision: on the 1 GB droid log on disk, export takes 3.0 s instead of 80 s, and the detect-data analyzer 4.4 s instead of 83 s (2026-11-10, with the log in the operating system's cache).
 3. **Abort** (if decision 4 picks A).
 
