@@ -6,6 +6,7 @@
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
@@ -46,9 +47,11 @@
 					destinationFile);
 
 				// Saved as the GUI saves records in raw format: one record per line, in the log's encoding (#1001).
+				// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+				var buffer = new ContentBuffer();
 				System.IO.File.WriteAllLines(
 					destinationFilePath,
-					engine.Filter.Results.Select(record => record.Content),
+					engine.Filter.Results.Select(record => buffer.Read(record).ToString()),
 					EncodingHelper.GetEncoding(FileHelper.Open(logPath)));
 			}
 			finally

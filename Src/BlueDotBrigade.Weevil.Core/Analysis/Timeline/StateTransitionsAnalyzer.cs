@@ -77,11 +77,14 @@
 
 			var previousState = new Dictionary<string, string>();
 
+			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+			var buffer = new ContentBuffer();
+
 			foreach (IRecord record in records)
 				{
 					AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 
-						IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+						IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, buffer);
 
 						foreach (KeyValuePair<string, string> currentState in keyValuePairs)
 						{

@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.TestTools.Data;
@@ -155,7 +156,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				new RegularExpression(@"B=(?<Value>\d+)"));
 			var record = R.Create().WithContent("A=1 B=1").GetRecords()[0];
 
-			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, new ContentBuffer());
 
 			result.Should().ContainSingle();
 			result["Value"].Should().Be("1");
@@ -170,7 +171,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				new RegularExpression(@"B=(?<Value>\d+)"));
 			var record = R.Create().WithContent("A=1 B=2").GetRecords()[0];
 
-			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, new ContentBuffer());
 
 			result.Should().NotContainKey("Value");
 		}

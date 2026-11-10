@@ -90,9 +90,12 @@
 
 			RecordList sortedRecords = AnalysisHelper.OrderRecordsForAnalysis(records, analysisOrder);
 
+			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+			var buffer = new ContentBuffer();
+
 			foreach (IRecord record in sortedRecords)
 			{
-				IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record);
+				IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, buffer);
 
 				foreach (KeyValuePair<string, string> current in keyValuePairs)
 				{

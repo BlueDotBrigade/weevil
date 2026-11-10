@@ -580,6 +580,38 @@ namespace BlueDotBrigade.Weevil
 			entry.Values.Should().NotContain(text);
 		}
 
+		[TestMethod]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenSelectedRecords_WhenSavedInRawFormat_ThenEachRecordIsALineOfTheFile(StorageMode storageMode)
+		{
+			IEngine engine = OpenCopy(storageMode: storageMode);
+			var destinationPath = Path.Combine(_folder, "Selected.log");
+			engine.Selector.SelectRange(2, 4);
+
+			engine.Selector.SaveSelection(destinationPath, FileFormatType.Raw);
+
+			File.ReadAllLines(destinationPath).Should().Equal(ReadLogLines(2, 4));
+		}
+
+		[TestMethod]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenSelectedRecords_WhenSavedInTsvFormat_ThenEachRecordIsARowEndingWithItsContent(StorageMode storageMode)
+		{
+			IEngine engine = OpenCopy(storageMode: storageMode);
+			var destinationPath = Path.Combine(_folder, "Selected.tsv");
+			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 3), true);
+			engine.Selector.SelectRange(2, 4);
+
+			engine.Selector.SaveSelection(destinationPath, FileFormatType.Tsv);
+
+			string[][] rows = File.ReadAllLines(destinationPath).Skip(1).Select(line => line.Split('\t', 7)).ToArray();
+			rows.Select(row => row[0]).Should().Equal("2", "3", "4");
+			rows.Select(row => row[2]).Should().Equal("False", "True", "False");
+			rows.Select(row => row[6]).Should().Equal(ReadLogLines(2, 4));
+		}
+
 		/// <summary>
 		/// Watches the engine's record table without keeping it alive: a Debug build keeps a test method's locals until it ends.
 		/// It tracks resurrection, so a table that a finalizer still holds counts as alive.
@@ -604,6 +636,14 @@ namespace BlueDotBrigade.Weevil
 			ContentChunk chunk = records.Table.GetChunk(records.IndexOfLineNumber(lineNumber));
 
 			return (insights, new WeakReference(chunk, trackResurrection: true));
+		}
+
+		/// <summary>
+		/// Returns lines <paramref name="first"/> to <paramref name="last"/> of the sample log, as the log holds them.
+		/// </summary>
+		private static string[] ReadLogLines(int first, int last)
+		{
+			return File.ReadAllLines(new Daten().AsFilePath("SampleData.log")).Skip(first - 1).Take(last - first + 1).ToArray();
 		}
 
 		/// <param name="storageMode">The storage mode, or <see langword="null"/> to give the builder none.</param>

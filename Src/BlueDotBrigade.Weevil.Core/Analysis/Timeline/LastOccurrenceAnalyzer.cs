@@ -67,6 +67,9 @@
 
 			var foundValues = new HashSet<string>();
 
+			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+			var buffer = new ContentBuffer();
+
 			for (var i = records.Length - 1; i >= 0; i--)
 			{
 				IRecord record = records[i];
@@ -77,7 +80,7 @@
 				}
 
 				// Read once, however many expressions test the record (#1133).
-				var content = record.Content;
+				var content = buffer.Read(record).ToString();
 
 				foreach (RegularExpression expression in expressions)
 				{

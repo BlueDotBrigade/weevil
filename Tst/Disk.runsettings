@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-	Runs the Core tests with every log opened on disk, unless a test chooses a mode (#1025).
+	Runs the Core and CLI tests with every log opened on disk, unless a test chooses a mode (#1025).
 	Debug builds only: the Core engine builder reads WEEVIL_TEST_STORAGE once, as its default storage mode.
-	For the Core unit, feature and functional test projects only: give this file to dotnet test with its settings option, for each of them.
+	For the Core unit, feature and functional test projects, and the CLI's functional tests, only: give this file to dotnet test with its settings option, for each of them.
 	Selected in Visual Studio's Test Explorer, it applies to every test project, including the GUI and performance tests, until it is cleared.
 -->
 <RunSettings>
