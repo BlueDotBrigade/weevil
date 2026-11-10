@@ -58,6 +58,9 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>BlueDotBrigade.Weevil.Core-FeatureTests</_Parameter1>
     </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>BlueDotBrigade.Weevil.Core-PerformanceTests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Warning Condition="'$(WEEVIL_PLUGINS_PATH)' == ''" Code="BDB" Text="`WEEVIL_PLUGINS_PATH` environment variable is missing." />

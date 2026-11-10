@@ -507,17 +507,19 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		[WorkItem(1105)]
 		[DoNotParallelize]
-		public void GivenALog_WhenOpened_ThenTheApplicationLogRecordsHowLongItTookAndTheMemoryUsed()
+		public void GivenALog_WhenOpened_ThenTheApplicationLogRecordsHowLongItTookTheMemoryUsedAndTheStorageMode()
 		{
 			using var log = CapturingLogWriter.Register();
 
-			IEngine engine = OpenCopy();
+			// On disk, which no run opens by default in RAM, so the mode recorded is this log's (#1025).
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 
 			IDictionary<string, object> entry = log.Last("File loading complete.");
 			entry["RecordCount"].Should().Be(engine.Count);
 			((double)entry["OpeningDuration"]).Should().BePositive();
 			((long)entry["WorkingSet"]).Should().BePositive();
 			((long)entry["ManagedMemory"]).Should().BePositive();
+			entry["StorageMode"].Should().Be(StorageMode.Disk);
 		}
 
 		[TestMethod]
