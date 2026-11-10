@@ -57,6 +57,19 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
+		public void GivenTwoReads_WhenTheyAreCounted_ThenTheBlocksEachReadAreCounted()
+		{
+			// A filter logs the bytes it read, to check that it reads the log once (#1027).
+			LogFileSource source = Parse(StartOffset, LogLength);
+
+			source.Read(StartOffset, new byte[10]);
+			source.Read(LogFileSource.BlockSize - 100, new byte[200]);
+
+			// The first block holds bytes from the start offset, and both reads read it. The second read also reads the next block.
+			source.BytesRead.Should().Be((2L * (LogFileSource.BlockSize - StartOffset)) + LogFileSource.BlockSize);
+		}
+
+		[TestMethod]
 		public void GivenALogStillBeingParsed_WhenRead_ThenTheReadIsRefused()
 		{
 			var builder = new LogFileSourceBuilder(_logPath, 0, LogLength);

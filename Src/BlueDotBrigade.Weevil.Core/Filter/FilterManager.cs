@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.Concurrent;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
@@ -28,6 +29,9 @@
 		private readonly RecordState _recordState;
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
+
+		// Reads a log opened on disk back, or null in RAM mode.
+		private readonly IO.LogFileSource _source;
 
 		private FilterStrategy _latestFilterStrategy;
 		private RecordList _latestFilterResults;
@@ -59,10 +63,12 @@
 			RecordState recordState,
 			FilterHistory includeHistory,
 			FilterHistory excludeHistory,
-			ITelemetryMetricRecorder telemetryRecorder = null)
+			ITelemetryMetricRecorder telemetryRecorder = null,
+			IO.LogFileSource source = null)
 		{
 			_coreExtension = coreExtension;
 			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
+			_source = source;
 			_context = context;
 			_filterAliasExpander = filterAliasExpander;
 			_scope = scope;
@@ -132,30 +138,39 @@
 			// ... This can simplify the debugging process.
 			var parallelOptions = new ParallelOptions();
 
+			// Each worker reads whole ranges of records that share a content chunk, so a log on disk is read once (#1027).
+			(int Start, int End)[] ranges = RecordRanges.Split(records);
+
 			try
 			{
 				Parallel.ForEach(
-								 records,
+								 Partitioner.Create(ranges, loadBalance: true),
 								 parallelOptions,
 						  // FMR Part1: initialize thread local storage
 						  () => { return new FilterMapReduceState(); },
 
 						  // FMR Part2: define task to perform
-						  (record, parallelLoopState, index, results) =>
+						  (range, parallelLoopState, results) =>
 						  {
-							  if (_abortFilterOperation)
+							  for (var position = range.Start; position < range.End; position++)
 							  {
-								  parallelLoopState.Break();
-							  }
-
-							  if (strategy.CanKeep(record, results.Content))
-							  {
-								  isKept[index] = true;
-								  results.Count++;
-
-								  foreach (IMetricCollector collector in _metricCollectors)
+								  if (_abortFilterOperation)
 								  {
-									  collector.Count(record);
+									  parallelLoopState.Stop();
+									  break;
+								  }
+
+								  IRecord record = records[position];
+
+								  if (strategy.CanKeep(record, results.Content))
+								  {
+									  isKept[position] = true;
+									  results.Count++;
+
+									  foreach (IMetricCollector collector in _metricCollectors)
+									  {
+										  collector.Count(record);
+									  }
 								  }
 							  }
 
@@ -310,6 +325,7 @@
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();
+				var bytesReadBefore = _source?.BytesRead ?? 0;
 
 				_latestFilterResults = FilterAndCalculateMetrics(_latestFilterStrategy);
 
@@ -324,17 +340,22 @@
 				exectionTimeStopwatch.Stop();
 				_filterExecutionTime = exectionTimeStopwatch.Elapsed;
 
-				Log.Default.Write(
-					LogSeverityType.Information,
-					$"Filtering complete.",
-					new Dictionary<string, object>
-					{
-						{"FilterType", filterType},
-						{"FilterCriteria", criteria},
-						{"TimeElapsed", _filterExecutionTime},
-						{"TotalRecords", _scope.Records.Length},
-						{"VisibleRecords", _latestFilterResults.Length},
-					});
+				var completed = new Dictionary<string, object>
+				{
+					{"FilterType", filterType},
+					{"FilterCriteria", criteria},
+					{"TimeElapsed", _filterExecutionTime},
+					{"TotalRecords", _scope.Records.Length},
+					{"VisibleRecords", _latestFilterResults.Length},
+				};
+
+				if (_source != null)
+				{
+					// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
+					completed.Add("BytesRead", _source.BytesRead - bytesReadBefore);
+				}
+
+				Log.Default.Write(LogSeverityType.Information, $"Filtering complete.", completed);
 			}
 			catch (Exception exception) when (exception is not IO.LogFileChangedException)
 			{
