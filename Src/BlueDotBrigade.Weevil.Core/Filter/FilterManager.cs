@@ -138,13 +138,15 @@
 			// ... This can simplify the debugging process.
 			var parallelOptions = new ParallelOptions();
 
-			// Each worker reads whole ranges of records that share a content chunk, so a log on disk is read once (#1027).
-			(int Start, int End)[] ranges = RecordRanges.Split(records);
+			// On disk, each worker reads whole ranges of records that share a content chunk, so the log is read once (#1027).
+			// In RAM, ranges of about the same size keep every core busy, however small the log.
+			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: Environment.ProcessorCount);
 
 			try
 			{
 				Parallel.ForEach(
-								 Partitioner.Create(ranges, loadBalance: true),
+								 // One range at a time, so no worker is left with several 16 MB chunks while the others wait.
+								 Partitioner.Create((IEnumerable<(int Start, int End)>)ranges, EnumerablePartitionerOptions.NoBuffering),
 								 parallelOptions,
 						  // FMR Part1: initialize thread local storage
 						  () => { return new FilterMapReduceState(); },

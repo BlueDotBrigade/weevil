@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenTwoReads_WhenTheyAreCounted_ThenTheBlocksEachReadAreCounted()
+		public void GivenTwoReadsOfOverlappingBlocks_WhenTheBytesReadAreCounted_ThenEachBlockReadIsCounted()
 		{
 			// A filter logs the bytes it read, to check that it reads the log once (#1027).
 			LogFileSource source = Parse(StartOffset, LogLength);
