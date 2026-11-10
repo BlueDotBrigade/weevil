@@ -54,6 +54,7 @@ Decided by the owner on 2026-11-08:
 7. **The zip copy:** deleted as described in the design. Extracting only the chosen file, and removing leftovers at startup, are later issues.
 8. **Sharing deletion everywhere:** `FileHelper.Open` shares deletion for every open of the log, in its own pull request.
 9. **#1087:** its 137 MB per GB becomes the measured disk-mode figure, about 22 bytes per record plus content being read. The `.idx` format is new in Weevil 3.0, so a later step may still move table columns out of memory if that figure must fall.
+   - Measured in step 3 (#1170), as managed memory once the log is open: 22 bytes per record, against 153 in RAM. That is 170 MB per GB of the reference log, whose records average 131 bytes, and 0.22 GB per GB of the UTF-8 droid log, against 1.22 in RAM.
 10. **Several pull requests for one step**, as #988 did.
 11. **CI** runs the Core tests a second time in disk mode, through a Debug-only `WEEVIL_TEST_STORAGE=Disk`.
 12. **Order:** #1025 does not need #1022 or #1023. #1022 has one concrete fix left (Clear's forced garbage collection runs before the kept table is built) and stays under #988.
@@ -64,7 +65,7 @@ One pull request each, in order:
 
 1. **Keep a zipped log's copy while it is open (GUI),** #1162: done. Tests: Reload of a zipped log brings its records back (`[WorkItem(1005)]`); the copy is deleted when another log opens and when Weevil exits; it is kept when another log fails to open; an export saved beside it is kept.
 2. **The read path in Common, with no caller yet,** #1164: `LogFileSource`, chunks on file, `ContentBuffer` and an internal `Record` accessor. Tests: a chunk on file decodes the same text as the same chunk in memory, for single and multi-line records, lone `\r`, invalid bytes, UTF-8, both UTF-16 byte orders and UTF-32; a buffer that moves to another chunk; a truncated, replaced or corrupted log, including one byte changed in the middle, is reported as changed; a log that only grew is reported as grown, not changed; a writer is never blocked; a missing log fails at once; the time the checksums add to opening a large log.
-3. **Disk mode in Core, headless,** in three pull requests: #1166 parses into chunks on file and keeps the mode (done), #1168 a changed log, then the disk-mode memory budget. Tests: a Reqnroll feature, "A log opened on disk shows the same records and filter results as in RAM", over several encodings and line endings; a log that changed is reloaded after a warning; a log that grew only logs a warning; Reload, a failed Reload and Clear keep disk mode; a builder with no mode opens in RAM; a memory budget for disk mode. CI gains the disk-mode run.
+3. **Disk mode in Core, headless,** in three pull requests: #1166 parses into chunks on file and keeps the mode (done), #1168 a changed log (done), and #1170 the disk-mode memory budget. Tests: a Reqnroll feature, "A log opened on disk shows the same records and filter results as in RAM", over several encodings and line endings; a log that changed is reloaded after a warning; a log that grew only logs a warning; Reload, a failed Reload and Clear keep disk mode; a builder with no mode opens in RAM; a memory budget for disk mode. CI gains the disk-mode run.
 4. **Only if needed: a cache for screen rows.** A grid row reads its content up to five times through the converters, and each read opens the log. Measure it with a screen case that opens a handle per read, in the #1024 harness, before deciding.
 
 Outside this plan: Clear's garbage collection fix (#1022), and `FileHelper.Open` sharing deletion (decision 8).
@@ -74,11 +75,36 @@ Outside this plan: Clear's garbage collection fix (#1022), and `FileHelper.Open`
 - **RAM mode regresses:** steps 2 and 3 leave its path untouched; the existing Clear, Reload and memory-budget tests guard it.
 - **File reads on the UI thread:** nobody can choose disk mode until #1028; #1027 moves scans off the UI thread; step 4 covers screen rows.
 - **The log changes or disappears:** a changed log is reloaded rather than shown with other text. A log that disappears cannot be reloaded, so Reload's existing message says so.
-- **A previous log is read after its zip's copy is deleted:** a zipped log's copy is deleted once another log opens (#1162). In RAM mode, an engine something still holds, such as a plugin dashboard's (#1139), reads memory; in disk mode it would read a deleted file. Step 3 checks that nothing reads the previous log's engine once another log is open.
+- **A previous log is read after its zip's copy is deleted:** a zipped log's copy is deleted once another log opens (#1162). In RAM mode, an engine something still holds, such as a plugin dashboard's (#1139), reads memory; in disk mode it would read a deleted file. Step 3 found that Core keeps nothing of a previous log, and that the GUI does: see [What Still Reads a Log](#what-still-reads-a-log).
 - **A new package:** `System.IO.Hashing`, from Microsoft, for the checksums.
 - **UTF-16 in the other byte order and UTF-32 decode slowly in disk mode:** filtering such a log is slower than a UTF-8 one, but it fits in memory.
 - **A handle per read is slow** on network drives or with antivirus: measured before step 4 is decided.
 - **Parallel filter workers may read the same chunk twice** where their ranges meet: correct but slower; #1027 replaces the split.
+
+## What Still Reads a Log
+
+Listed in step 3 (#1170) by reading the code, for #1028 to fix before disk mode can be chosen. In RAM mode these reads cannot fail. In disk mode each one reads the log, so it throws when the log changed, or is gone.
+
+**Core keeps nothing of a previous log.** Reload lets go of the engine it replaces, and insights keep line numbers, not records: `EngineTests` checks both with weak references, and now in disk mode too. A record that outlives its engine returns the bytes that were parsed, or throws: it never shows other text.
+
+**What can read a log after another one opens, or after Reload:**
+
+| Holder | What happens in disk mode | For #1028 |
+|---|---|---|
+| A graph window (`GraphViewModel`). It keeps its own array of the selected records, and its window can outlive the log (#1139). | Changing its expression reads the previous log, or the deleted copy of a zipped log (#1162). | The graph copies the text of its records when it opens. |
+| A plugin's dashboard (`IPlugin.ShowDashboard`). It is given the engine, and only Weevil's own dashboard is closed when another log opens. | It reads the previous log. | Say on `ShowDashboard` that reads can fail once its log is closed (#1139). |
+| Grid rows, between the engine being replaced and the rows being refreshed. | They read the previous log, which still exists at that moment. | Covered by the row converters below. |
+| A plugin's analyzer that keeps the engine it was given. | The same bytes, or an exception. | Nothing. |
+| Records a PowerShell cmdlet has written to the pipeline. | Each is read later, when the pipeline uses it. | Document it with the mode parameter. |
+
+**Reads of the open log whose exception nothing catches today:**
+
+- The grid's row converters (`ContentConverter`, `ContentToTruncationIconConverter`): WPF does not catch a converter's exception, and `App.OnDispatcherUnhandledException` does not mark it handled, so Weevil ends.
+- A filter started from the filter box (`FilterViewModel.FilterAsynchronously`): it catches only an invalid expression, so another exception leaves the progress bar running.
+- What runs after a log opens: the table of contents and the plugin's insights.
+- Find, the analyzers, export and split, the clipboard and the graph.
+
+For each, #1028 shows the warning and reloads when the log changed, at most once per change, and shows an error otherwise.
 
 ## Size
 
