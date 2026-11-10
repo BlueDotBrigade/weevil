@@ -25,6 +25,11 @@
 		/// <param name="outputDirectory">Path to where analysis results can be saved.</param>
 		/// <param name="userDialog">Enables the analyzer to prompt the user for additional context.</param>
 		/// <param name="canUpdateMetadata">When <see langword="false"/>, the analyzer does not change <paramref name="state"/>.</param>
+		/// <remarks>
+		/// Read each record's content through one <see cref="ContentBuffer"/> for the whole pass, with <see cref="ContentBuffer.Read(IRecord)"/>
+		/// or <see cref="RecordList.ReadContent(int, ContentBuffer)"/>. For a log opened on disk, <see cref="IRecord.Content"/> reads the file for every record,
+		/// while a buffer reads each part of the log once (#1027).
+		/// </remarks>
 		Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata);
 	}
 }

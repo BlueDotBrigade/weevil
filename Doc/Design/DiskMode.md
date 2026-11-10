@@ -18,6 +18,8 @@ Until the Open As window lets the user choose (#1028), only Core's internal `Eng
 3. Before the repository returns any record, it completes the `LogFileSource`. Nothing can be read through it before then.
 4. Afterwards, a record's content is read through its chunk and the source: each read opens its own handle, reads the blocks that hold the bytes, checks their checksums and closes the handle. A `ContentBuffer` reads a whole chunk at a time, so each reader reads a chunk once when it reaches it: a filter's parallel workers may each read the chunk where their ranges meet.
 
+Code that reads many records reads them through one `ContentBuffer`, with `ContentBuffer.Read(record)` or `RecordList.ReadContent(position, buffer)`, as filters, Find, the analyzers, export, the CLI and the graph do (#1027). `record.Content` reads only the 64 KB blocks that hold one record, and keeps nothing: about 7 µs per record, against 0.2 µs through a buffer, or 72 s against 1.5 s for 10 million records.
+
 ## A Log That Changed
 
 A log that has only grown is normal: the first read that finds it longer logs a warning, and reads go on with the bytes parsed.

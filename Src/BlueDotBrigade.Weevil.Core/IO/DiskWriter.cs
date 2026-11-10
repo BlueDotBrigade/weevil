@@ -89,9 +89,12 @@
 		{
 			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))
 			{
+				// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+				var buffer = new ContentBuffer();
+
 				foreach (IRecord record in records)
 				{
-					streamWriter.WriteLine(record.Content);
+					streamWriter.WriteLine(buffer.Read(record));
 				}
 			}
 		}
@@ -102,6 +105,9 @@
 			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))
 			{
 				streamWriter.WriteLine("Line Number\tFlagged\tPinned\tComment\tElapsedTime\tCreated At\tContent");
+
+				// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+				var buffer = new ContentBuffer();
 
 				foreach (IRecord record in records)
 				{
@@ -116,16 +122,16 @@
 						elapsedTime = (record.CreatedAt - previouslyCreatedAt.Value);
 					}
 
-					var serializedData = string.Format(CultureInfo.InvariantCulture, "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
+					var columns = string.Format(CultureInfo.InvariantCulture, "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t",
 						record.LineNumber,
 						_state.IsFlagged(record),
 						_state.IsPinned(record),
 						_state.HasComment(record) ? _state.GetComment(record) : ValueNotSpecified,
 						elapsedTime.TotalSeconds.ToString("0.000"),
-						record.HasCreationTime ? record.CreatedAt.ToString() : ValueNotSpecified,
-						record.Content);
+						record.HasCreationTime ? record.CreatedAt.ToString() : ValueNotSpecified);
 
-					streamWriter.WriteLine(serializedData);
+					streamWriter.Write(columns);
+					streamWriter.WriteLine(buffer.Read(record));
 
 					if (record.HasCreationTime)
 					{

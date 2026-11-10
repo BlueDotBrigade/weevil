@@ -92,7 +92,7 @@
 		private double MeasureBytesPerRecord(StorageMode storageMode)
 		{
 			// Opened once first, so the memory of loading Weevil itself is not counted.
-			_ = UsingPath(ReferenceLog.Create(_folder, 10), storageMode).Open();
+			_ = StorageModes.UsingPath(ReferenceLog.Create(_folder, 10), storageMode).Open();
 
 			(IEngine engine, var memoryKept, _) = OpenAndMeasure(ReferenceLog.Create(_folder, RecordCount), storageMode);
 
@@ -110,7 +110,7 @@
 			var logPath = DroidLog.GetPath(logName);
 
 			// Its first records are opened first, so the memory of loading Weevil itself is not counted.
-			_ = UsingPath(logPath, storageMode).UsingLimit(10).Open();
+			_ = StorageModes.UsingPath(logPath, storageMode).UsingLimit(10).Open();
 
 			(IEngine engine, var memoryKept, TimeSpan duration) = OpenAndMeasure(logPath, storageMode);
 
@@ -122,27 +122,6 @@
 		}
 
 		/// <summary>
-		/// Returns a builder that opens the log in the given storage mode.
-		/// </summary>
-		/// <remarks>
-		/// Until the storage mode is public (#1028), only a Debug build can choose it, through Core's internal builder.
-		/// A Release build, as on the reference machine, opens in RAM, and cannot run the tests on disk.
-		/// </remarks>
-		private static IEngineBuilder UsingPath(string logPath, StorageMode storageMode)
-		{
-#if DEBUG
-			return new EngineBuilder(logPath).UsingStorage(storageMode);
-#else
-			if (storageMode != StorageMode.Ram)
-			{
-				Assert.Inconclusive("Only a Debug build can open a log on disk, until the storage mode is public (#1028).");
-			}
-
-			return Engine.UsingPath(logPath);
-#endif
-		}
-
-		/// <summary>
 		/// Opens the log, and returns the managed memory the engine keeps and how long opening took.
 		/// </summary>
 		private static (IEngine Engine, long MemoryKept, TimeSpan Duration) OpenAndMeasure(string logPath, StorageMode storageMode)
@@ -150,7 +129,7 @@
 			var before = GC.GetTotalMemory(forceFullCollection: true);
 			var stopwatch = Stopwatch.StartNew();
 
-			IEngine engine = UsingPath(logPath, storageMode).Open();
+			IEngine engine = StorageModes.UsingPath(logPath, storageMode).Open();
 
 			stopwatch.Stop();
 			var memoryKept = GC.GetTotalMemory(forceFullCollection: true) - before;

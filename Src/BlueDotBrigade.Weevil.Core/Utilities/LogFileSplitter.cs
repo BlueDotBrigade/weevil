@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Utilities
 {
+	using System;
 	using System.IO;
 	using System.Text;
 	using Data;
@@ -42,9 +43,14 @@
 
 					var newLog = new StringBuilder();
 
+					// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+					var buffer = new ContentBuffer();
+
 					foreach (IRecord record in records)
 					{
-						if (record.Content.Contains(ApplicationStartMarker))
+						ReadOnlySpan<char> content = buffer.Read(record);
+
+						if (content.Contains(ApplicationStartMarker, StringComparison.Ordinal))
 						{
 							if (newLog.Length > 0)
 							{
@@ -60,7 +66,7 @@
 							outputPath = Path.Combine(Path.GetDirectoryName(_sourceFilePath), string.Format(_outputFileFormat, startCount));
 						}
 
-						newLog.AppendLine(record.Content);
+						newLog.Append(content).AppendLine();
 					}
 
 					if (newLog.Length > 0)
