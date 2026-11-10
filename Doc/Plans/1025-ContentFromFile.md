@@ -92,9 +92,9 @@ Listed in step 3 (#1170) by reading the code, for #1028 to fix before disk mode 
 | Holder | What happens in disk mode | For #1028 |
 |---|---|---|
 | A graph window (`GraphViewModel`). It keeps its own array of the selected records, and its window can outlive the log (#1139). | Changing its expression reads the previous log, or the deleted copy of a zipped log (#1162). | The graph copies the text of its records when it opens. |
-| A plugin's dashboard (`IPlugin.ShowDashboard`). It is given the engine, and only Weevil's own dashboard is closed when another log opens. | It reads the previous log. | Say on `ShowDashboard` that reads can fail once its log is closed (#1139). |
+| A plugin's dashboard (`IPlugin.ShowDashboard`). It is given the engine, and only Weevil's own dashboard is closed when another log opens. | It reads the previous log. | Done: `ShowDashboard`, `IEngine`, `IInsight.Refresh` and `ICoreExtension` say that reads can fail once their log is closed (#1139). |
 | Grid rows, between the engine being replaced and the rows being refreshed. | They read the previous log, which still exists at that moment. | Covered by the row converters below. |
-| A plugin's analyzer that keeps the engine it was given. | The same bytes, or an exception. | Nothing. |
+| A plugin's analyzer that keeps the engine it was given. | The same bytes, or an exception. | Nothing: `ICoreExtension.GetAnalyzers` says not to keep it. |
 | Records a PowerShell cmdlet has written to the pipeline. | Each is read later, when the pipeline uses it. | Document it with the mode parameter. |
 
 **Reads of the open log whose exception nothing catches today:**
@@ -103,6 +103,14 @@ Listed in step 3 (#1170) by reading the code, for #1028 to fix before disk mode 
 - A filter started from the filter box (`FilterViewModel.FilterAsynchronously`): it catches only an invalid expression, so another exception leaves the progress bar running.
 - What runs after a log opens: the table of contents and the plugin's insights.
 - Find, the analyzers, export and split, the clipboard and the graph.
+
+Found by an audit after step 3 was merged (2026-11-10), also for #1028:
+
+- Weevil's own dashboard: its Refresh button (`DashboardDialog.OnRefresh`) has no catch, so an insight from a plugin that reads content ends Weevil when the read fails.
+- What runs after a log opens reads `_engine` afresh on each statement, while Reload or Clear can already run: take the engine once. If it fails after opening a log that is not zipped, the previous zip's copy is not deleted (`ReplaceExtractedLogAsync(null)` is skipped).
+- Export (`FilterViewModel.SaveSelected`) shows its message, then rethrows, so a second, generic message follows.
+- UI Automation reads a row's text through `RowViewModel.ToString`, which has no catch.
+- The graph window has no owner, so it outlives the main window, and keeps Weevil running after the zip's copy it reads was deleted. Its axis buttons update the chart from a binding, which swallows a failed read: the chart goes stale without a message. Copying the text when the graph opens fixes the read; giving it an owner is a separate choice.
 
 For each, #1028 shows the warning and reloads when the log changed, at most once per change, and shows an error otherwise.
 

@@ -25,6 +25,10 @@
 		 /// </remarks>
 		 IReadOnlyList<int> RelatedLineNumbers { get; }
 
+		 /// <remarks>
+		 /// Keep line numbers, not records: <paramref name="records"/> is valid only during the call.
+		 /// In disk mode, reading a record's content reads the log, and can throw an <see cref="System.IO.IOException"/> (#1025).
+		 /// </remarks>
 		 void Refresh(RecordList records);
 	}
 }
