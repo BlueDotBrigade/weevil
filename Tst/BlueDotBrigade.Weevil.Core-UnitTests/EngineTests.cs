@@ -474,6 +474,26 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenClearedRecords_WhenReloaded_ThenTheyAreBackWithTheirContent(StorageMode storageMode)
+		{
+			// Reload reads the whole log again, so there is no separate command to restore cleared records (#1026).
+			IEngine engine = OpenCopy(storageMode: storageMode);
+			var recordCount = engine.Count;
+			var firstContent = engine.Records[0].Content;
+			engine.Selector.Select(lineNumber: 101);
+			engine.Clear(ClearOperation.BeforeSelected);
+			engine.Count.Should().BeLessThan(recordCount);
+
+			engine.Reload();
+
+			engine.Count.Should().Be(recordCount);
+			engine.Records[0].Content.Should().Be(firstContent);
+			ReadsContentFromTheLog(engine).Should().Be(storageMode == StorageMode.Disk, "Reload keeps the storage mode");
+		}
+
+		[TestMethod]
 		public void GivenUnselectedRecordsWereCleared_WhenReloaded_ThenTheRestoredRecordsAreNotSelected()
 		{
 			IEngine engine = OpenCopy();

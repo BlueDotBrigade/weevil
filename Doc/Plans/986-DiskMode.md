@@ -41,13 +41,14 @@ Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the 
    - Measure a parallel streaming filter over a 20 GB log on NVMe and on SATA, and the time to read a screen of rows through the line index.
    - This decides the number of reader threads and confirms the 10 s target. Record the result in `Research/LargeLogFiles/`.
    - 2026-11-08: the disk case is in the storage benchmark, checked on Linux. The measurements on NVMe and SATA, on the owner's PC, are still to do; its README says how to run them and proposes the decision rule.
-2. **Content from the file (#1025).** One content store with two caching rules: RAM mode keeps every chunk the view's scope includes, and disk mode keeps only the chunks being read. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
+2. **Content from the file (#1025).** Done on 2026-11-10, by the [#1025 plan](1025-ContentFromFile.md); [DiskMode.md](../Design/DiskMode.md) describes the result. Disk mode works headless, and keeps 22 bytes per record in memory. One content store with two caching rules: RAM mode keeps every chunk the view's scope includes, and disk mode keeps only the chunks being read. See [EngineApi.md](../Research/Weevil3/EngineApi.md#freeing-ram).
    - A chunk that is not in memory, released by Clear (#988) or never loaded in disk mode, is read back from the file when needed.
    - File reads are ordinary reads, shared for reading, writing and deletion, so the writing application is never blocked. Today Weevil shares the log for reading and writing only (`FileHelper.cs`), which is harmless while it reads the file once; disk mode keeps the file open, so add deletion.
    - Never memory-map the log. Weevil's own `.idx` may be mapped if the record table is too large to hold.
    - Each parallel reader opens its own handle (found in #1024). On Windows, the reads of a handle opened for synchronous I/O are serialized, and read-ahead is kept per handle, so readers sharing one handle read one at a time.
    - A log opened from a zip reads back from its extracted copy, so Weevil keeps that copy while the log is open: the plan's reading of "deleted later", to confirm. Today the copy is deleted right after opening, so Reload of a zipped log fails (#1005, #1156).
 3. **Reload brings cleared records back (#1026).** Reload resets the view's scope to the whole log, as Ctrl+F5 does today, and content released by Clear is read back from the file.
+   - Done on 2026-11-10 with no new code: Reload parses the whole log again, in the mode it was opened in (#1126, #1166), so cleared records come back in RAM and on disk. A test now says so for both modes.
 4. **Streaming work (#1027).** In disk mode (decided 2026-10-20):
    - Filters read the log in parallel ranges split at record boundaries.
    - Analyzers, export, Find, the graph and the dashboard read it once, in order, because most analyzers carry state from one record to the next. An NVMe drive reads 20 GB in about 6 s.
