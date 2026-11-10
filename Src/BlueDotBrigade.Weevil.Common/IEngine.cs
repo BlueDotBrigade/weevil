@@ -4,6 +4,11 @@
 	using Data;
 	using Filter;
 
+	/// <remarks>
+	/// <see cref="Reload"/> replaces the engine's filter, selector, navigation, analyzer and records: read them from the engine each time, rather than keeping them.
+	/// A record, or a <see cref="RecordList"/>, kept after another log opens or after Reload still reads its own log.
+	/// In disk mode that read can throw an <see cref="System.IO.IOException"/>, such as <see cref="IO.LogFileChangedException"/>, once the log changed or is gone (#1025).
+	/// </remarks>
 	public interface IEngine : ICoreEngine
 	{
 		/// <summary>

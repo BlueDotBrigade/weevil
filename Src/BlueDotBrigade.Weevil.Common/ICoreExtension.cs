@@ -17,10 +17,17 @@
 
 		IRecordParser GetRecordParser();
 
+		/// <remarks>
+		/// <paramref name="allRecords"/> is valid only during the call. In disk mode, reading a record's content reads the log, and can throw an <see cref="System.IO.IOException"/> (#1025).
+		/// </remarks>
 		ContextDictionary DetermineContext(RecordList allRecords);
 
 		IList<IRecordAnalyzer> GetAnalyzers(ContextDictionary context, ITableOfContents tableOfContents);
 
+		/// <remarks>
+		/// <paramref name="coreEngine"/> is valid only until the log is reloaded or another log opens: an analyzer should not keep it.
+		/// In disk mode, reading a record's content reads the log, and can throw an <see cref="System.IO.IOException"/> (#1025).
+		/// </remarks>
 		IList<IRecordAnalyzer> GetAnalyzers(ICoreEngine coreEngine, ContextDictionary context, ITableOfContents tableOfContents);
 
 		/// <summary>

@@ -17,6 +17,11 @@
 
 		bool CanShowDashboard { get; }
 
+		/// <remarks>
+		/// Weevil does not close a plugin's dashboard when another log opens, so <paramref name="engine"/> can outlive its log.
+		/// In disk mode, a read through it then throws an <see cref="System.IO.IOException"/>, such as <see cref="IO.LogFileChangedException"/>
+		/// when the log changed, or <see cref="System.IO.FileNotFoundException"/> when the copy of a zipped log was deleted (#1025, #1139).
+		/// </remarks>
 		void ShowDashboard(Version weevilVersion, IEngine engine, IInsight[] insights);
 
 		ICoreExtension GetExtension(string sourceFilePath);
