@@ -42,7 +42,7 @@ Measured on 2026-11-10, in a Debug build on Linux with 4 cores, on the 1 GB UTF-
 
 ### Sequential readers read through a `ContentBuffer`
 
-Each reads `records.ReadContent(position, buffer)` instead of `record.Content`, so it reads each chunk once:
+Each reads through one `ContentBuffer` for the whole pass, with `buffer.Read(record)`, instead of `record.Content`, so it reads each chunk once:
 
 - the analyzers: statistical, detect data, first and last occurrence, threshold crossings, and `AnalyzerExpressionHelper`;
 - export: `DiskWriter`, raw and TSV;
@@ -74,6 +74,7 @@ Today Abort stops only filters. Analyzers, export and Find run to the end. `IRec
    - Tests: the droid filter performance test also checks, in disk mode, that a filter reads the log's bytes once. A unit test checks that the ranges cover every position once, in order, at chunk boundaries. A feature test checks that a moniker filter on a log opened on disk finds its records after the log is deleted, so it read nothing.
 2. **Sequential readers read through a `ContentBuffer`.**
    - Tests: a performance test exports the 1 GB droid log on disk, and runs one analyzer over it, each within a generous bound that reads through `record.Content` would miss by a wide margin. The existing analyzer, export and CLI tests run on disk in CI's disk run.
+   - Done first, since it needs no decision: on the 1 GB droid log on disk, export takes 3.0 s instead of 80 s, and the detect-data analyzer 4.4 s instead of 83 s (2026-11-10, with the log in the operating system's cache).
 3. **Abort** (if decision 4 picks A).
 
 ## Not in This Plan
