@@ -96,6 +96,9 @@ namespace BlueDotBrigade.Weevil.Analysis
 				return new Results(0);
 			}
 
+			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+			var buffer = new ContentBuffer();
+
 			foreach (IRecord record in records)
 			{
 				if (canUpdateMetadata)
@@ -108,7 +111,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				double? foundValue = null;
 
 				// Read once, however many expressions test the record (#1133).
-				var content = record.Content;
+				var content = buffer.Read(record).ToString();
 
 				foreach (RegularExpression regexExpression in expressions)
 				{

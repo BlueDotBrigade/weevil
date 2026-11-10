@@ -115,16 +115,18 @@ namespace BlueDotBrigade.Weevil.Analysis
 		/// </summary>
 		/// <param name="expressions">The expressions to evaluate.</param>
 		/// <param name="record">The record being analyzed.</param>
+		/// <param name="buffer">Reads the record's content. An analyzer passes the same one for every record, so each chunk of a log on disk is read once (#1027).</param>
 		/// <returns>A dictionary containing at most one resolved value per key for the record.</returns>
 		public static Dictionary<string, string> GetResolvedKeyValuePairs(
 			ImmutableArray<RegularExpression> expressions,
-			IRecord record)
+			IRecord record,
+			ContentBuffer buffer)
 		{
 			var resolvedValues = new Dictionary<string, string>();
 			var ambiguousKeys = new HashSet<string>();
 
 			// Read once, however many expressions test the record (#1133).
-			var content = record.Content;
+			var content = buffer.Read(record).ToString();
 
 			foreach (RegularExpression expression in expressions)
 			{

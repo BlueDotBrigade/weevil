@@ -543,9 +543,13 @@
 				return TwentyFourHourTimeFormat;
 			}
 
+			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+			var buffer = new ContentBuffer();
 			bool usesMeridiem = records.Any(record =>
-				!string.IsNullOrWhiteSpace(record.Content) &&
-				MeridiemRegex.IsMatch(record.Content));
+			{
+				ReadOnlySpan<char> content = buffer.Read(record);
+				return !content.IsWhiteSpace() && MeridiemRegex.IsMatch(content);
+			});
 
 			DateTime? earliest = null;
 			DateTime? latest = null;
@@ -849,10 +853,13 @@
 			var seriesCount = (expressions.Length == 1) ? MaxSeriesCount : System.Math.Min(expressions.Length, MaxSeriesCount);
 			var seriesNames = Enumerable.Repeat(string.Empty, seriesCount).ToList();
 
+			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+			var buffer = new ContentBuffer();
+
 			// Find records that match each expression to extract series names
 			foreach (var record in records)
 			{
-				var recordSeriesNames = GetSeriesNames(record.Content, expressions);
+				var recordSeriesNames = GetSeriesNames(buffer.Read(record).ToString(), expressions);
 
 				for (var index = 0; index < seriesNames.Count && index < recordSeriesNames.Count; index++)
 				{
@@ -903,11 +910,14 @@
 					rawSeriesData[i] = new List<(DateTime, string)>();
 				}
 
+				// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+				var buffer = new ContentBuffer();
+
 				foreach (IRecord record in records)
 				{
 					try
 					{
-						if (TryGetRawMatchForRecord(expressions, record.Content, out var rawValues))
+						if (TryGetRawMatchForRecord(expressions, buffer.Read(record).ToString(), out var rawValues))
 						{
 							for (int i = 0; i < MaxSeriesCount; i++)
 							{
