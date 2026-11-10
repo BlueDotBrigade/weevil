@@ -8,8 +8,9 @@ namespace BlueDotBrigade.Weevil.Data
 	/// <remarks>
 	/// Not thread-safe: use one per thread. What <see cref="Read(IRecord)"/> returns is valid until it is called for another record.
 	/// A record that holds the log's bytes is decoded into memory the buffer reuses, so reading it allocates no string (#1133).
-	/// The buffer also holds the bytes of one chunk on file at a time: it reads the whole chunk from the log when a record in it is first read,
-	/// so a scan reads each chunk once (#1025). Reading such a chunk throws what <see cref="IO.LogFileSource.Read"/> throws,
+	/// The buffer also holds the bytes of one chunk on file at a time, so a scan reads each chunk once (#1025): it reads the whole chunk from the log
+	/// when a second record in a row is read from it. The first reads only the blocks that hold it, so a sparse list, such as a few filter results
+	/// spread over a large log, does not read a whole chunk for each record (#1027). Reading from the log throws what <see cref="IO.LogFileSource.Read"/> throws,
 	/// for example <see cref="IO.LogFileChangedException"/> when the log was truncated, replaced or corrupted.
 	/// </remarks>
 	public sealed class ContentBuffer
@@ -24,6 +25,9 @@ namespace BlueDotBrigade.Weevil.Data
 		// The chunk on file whose bytes are the first `_fileChunk.Length` of `_fileBytes`, or null.
 		private ContentChunk _fileChunk;
 		private byte[] _fileBytes = [];
+
+		// The chunk on file that the last read reached, of which it read only the record's blocks, or null.
+		private ContentChunk _partlyReadChunk;
 
 		/// <summary>
 		/// Returns the content of <paramref name="record"/>, and reads it only if this buffer does not hold it already.
@@ -84,6 +88,18 @@ namespace BlueDotBrigade.Weevil.Data
 
 			if (!ReferenceEquals(chunk, _fileChunk))
 			{
+				if (!ReferenceEquals(chunk, _partlyReadChunk))
+				{
+					// The first record in a row from this chunk: only the blocks that hold it, as a single record is read.
+					_partlyReadChunk = null;
+					var count = chunk.Decode(offset, length, isMultiLine, ref _chars);
+					_partlyReadChunk = chunk;
+
+					return count;
+				}
+
+				// A second record in a row from the same chunk: a scan, so the whole chunk is read once.
+				_partlyReadChunk = null;
 				_fileChunk = null;
 
 				if (_fileBytes.Length < chunk.Length)
