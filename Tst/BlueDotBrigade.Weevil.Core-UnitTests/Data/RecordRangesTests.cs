@@ -29,12 +29,21 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
-		public void GivenFewerChunksThanWorkersOnDisk_WhenSplit_ThenEachChunksRangeIsSplitSoEveryWorkerHasOne()
+		public void GivenAtMostHalfAsManyChunksAsWorkersOnDisk_WhenSplit_ThenEachChunksRangeIsSplitSoMoreWorkersAreBusy()
 		{
-			// A small log on disk still keeps every core busy: each worker reads its chunk once.
-			var ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 5);
+			// A small log on disk keeps more cores busy: each worker reads its chunk once. The table's 3 ranges each split in 2 for 6 workers.
+			var ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 6);
 
 			ranges.Should().Equal((0, 1), (1, 2), (2, 4), (4, 6), (6, 7), (7, 8));
+		}
+
+		[TestMethod]
+		public void GivenMoreThanHalfAsManyChunksAsWorkersOnDisk_WhenSplit_ThenEachRangeIsAWholeChunk()
+		{
+			// Splitting the table's 3 ranges in 2 for 5 workers would not finish sooner, and would read the log twice.
+			var ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 5);
+
+			ranges.Should().Equal((0, 2), (2, 6), (6, 8));
 		}
 
 		[TestMethod]
