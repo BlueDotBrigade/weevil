@@ -4,6 +4,9 @@ namespace BlueDotBrigade.Weevil
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
+	/// <summary>
+	/// Helpers for callers of <see cref="IEngine"/>.
+	/// </summary>
 	public static class EngineExtensions
 	{
 		/// <summary>

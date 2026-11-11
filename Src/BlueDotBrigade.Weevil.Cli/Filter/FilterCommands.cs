@@ -80,6 +80,7 @@
 		private static void SaveResults(IEngine engine, string destinationFilePath, Encoding encoding)
 		{
 			var temporaryFilePath = $"{destinationFilePath}.{Guid.NewGuid():N}.tmp";
+			var isSaved = false;
 
 			try
 			{
@@ -91,11 +92,29 @@
 					encoding);
 
 				System.IO.File.Move(temporaryFilePath, destinationFilePath, overwrite: true);
+				isSaved = true;
 			}
 			finally
 			{
-				// Gone once moved into place.
+				if (!isSaved)
+				{
+					DeleteTemporaryFile(temporaryFilePath);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deletes the records written before a save stopped, without hiding why it stopped: a change to the log must still reach the retry.
+		/// </summary>
+		private static void DeleteTemporaryFile(string temporaryFilePath)
+		{
+			try
+			{
 				System.IO.File.Delete(temporaryFilePath);
+			}
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			{
+				Log.Default.Write(LogSeverityType.Warning, $"A temporary file could not be deleted. Path={temporaryFilePath}, Reason=`{exception.Message}`");
 			}
 		}
 	}

@@ -42,6 +42,23 @@ namespace BlueDotBrigade.Weevil.PowerShell
 		}
 
 		[TestMethod]
+		public void GivenStorageDisk_WhenGettingRecords_ThenReturnsTheSameRecordsAsInRam()
+		{
+			var cmdlet = new GetRecordsCmdlet
+			{
+				FilePath = new Daten().AsFilePath("Application.log"),
+				Include = "database",
+				Exclude = "Unable",
+				Storage = StorageMode.Disk,
+			};
+
+			var output = cmdlet.Invoke().Cast<object>().ToList();
+
+			output.Should().AllBeAssignableTo<IRecord>();
+			output.Cast<IRecord>().Select(record => record.LineNumber).Should().Equal(2, 6);
+		}
+
+		[TestMethod]
 		[DataRow(StorageMode.Ram, false)]
 		[DataRow(StorageMode.Disk, true)]
 		public void GivenAStorageMode_WhenTheLogIsTruncatedAfterGettingRecords_ThenOnlyRecordsOnDiskFailToRead(StorageMode storage, bool readFails)

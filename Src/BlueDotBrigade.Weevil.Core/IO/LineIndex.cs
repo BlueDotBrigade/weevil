@@ -250,7 +250,8 @@ namespace BlueDotBrigade.Weevil.IO
 				return false;
 			}
 
-			return lineCount >= 0 && indexedLength >= 0;
+			// Each line but the last holds at least its line break, so a damaged header cannot claim more lines than bytes.
+			return lineCount >= 0 && indexedLength >= 0 && lineCount <= indexedLength + 1;
 		}
 
 		/// <summary>

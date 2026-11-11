@@ -4,16 +4,11 @@ namespace BlueDotBrigade.Weevil.IO
 	using System.IO;
 
 	/// <summary>
-	/// Estimates the memory a log needs when it is opened in RAM, so that Weevil can suggest RAM or Disk before opening it (#1028).
+	/// Estimates the memory a log needs when it is opened in RAM: see <see cref="Engine.EstimateMemory"/> (#1028).
 	/// </summary>
 	/// <remarks>
-	/// The estimate is the log's size plus <see cref="BytesPerRecord"/> for each record (the #986 plan).
-	/// The record count is the line count, which is never lower:
-	/// <list type="bullet">
-	///   <item>from the saved line index's header, scaled up when the log has grown past the length the index covers;</item>
-	///   <item>otherwise from the line breaks in the log's first <see cref="SampleLength"/> bytes, scaled to the log's size. That average can err either way.</item>
-	/// </list>
-	/// The estimate covers the log's content and records, not Weevil's window, nor the log that is open while another one opens.
+	/// The line count comes from the saved line index's header, scaled up when the log has grown past the length the index covers,
+	/// or else from the line breaks in the log's first <see cref="SampleLength"/> bytes, scaled to the log's size.
 	/// </remarks>
 	internal static class MemoryEstimator
 	{

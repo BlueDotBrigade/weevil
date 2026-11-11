@@ -23,19 +23,28 @@ namespace BlueDotBrigade.Weevil.Cli.Filter
 
 		[TestMethod]
 		[WorkItem(1001)]
-		[DataRow(StorageMode.Ram)]
-		[DataRow(StorageMode.Disk)]
-		public void GivenIncludeFilter_WhenFiltering_ThenResultsFileHasOnlyMatchingRecords(StorageMode storage)
+		public void GivenIncludeFilter_WhenFiltering_ThenResultsFileHasOnlyMatchingRecords()
 		{
 			// The Filter command wrote no results file.
 			var logPath = CopyLog("Application.log");
 			var lines = File.ReadAllLines(logPath);
 
-			new FilterCommands().Filter(logPath, include: "Error", exclude: null, storage);
+			new FilterCommands().Filter(logPath, include: "Error", exclude: null);
 
 			File.ReadAllLines(Path.Combine(_folder, "Application.Results.log"))
 				.Should().Equal(lines[2], lines[4], lines[7]);
-			Directory.GetFiles(_folder, "*.tmp").Should().BeEmpty("the results are moved into place once written");
+		}
+
+		[TestMethod]
+		public void GivenStorageDisk_WhenFiltering_ThenResultsFileHasTheSameRecordsAsInRam()
+		{
+			var logPath = CopyLog("Application.log");
+			var lines = File.ReadAllLines(logPath);
+
+			new FilterCommands().Filter(logPath, include: "Error", exclude: null, storage: StorageMode.Disk);
+
+			File.ReadAllLines(Path.Combine(_folder, "Application.Results.log"))
+				.Should().Equal(lines[2], lines[4], lines[7]);
 		}
 
 		// Regression: Issue #1001

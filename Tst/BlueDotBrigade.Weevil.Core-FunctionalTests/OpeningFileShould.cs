@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil
 
 			try
 			{
-				IEngine engine = new EngineBuilder(logPath).UsingStorage(StorageMode.Disk).Open();
+				IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 				File.Exists($"{logPath}.idx").Should().BeTrue("the log has a saved line index");
 
 				BreakLine(logPath, lines, lineNumber: 100);
@@ -84,7 +84,7 @@ namespace BlueDotBrigade.Weevil
 
 			try
 			{
-				IEngine engine = new EngineBuilder(logPath).UsingStorage(StorageMode.Disk).Open();
+				IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 				File.Exists($"{logPath}.idx").Should().BeTrue("the log has a saved line index");
 				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Line"));
 

@@ -10,6 +10,11 @@ namespace BlueDotBrigade.Weevil.IO
 	{
 		private const int BytesPerRecord = MemoryEstimator.BytesPerRecord;
 
+		/// <summary>
+		/// Where the index's header keeps the line count: after its signature, format version, checkpoint interval, unit size, byte order and preamble length.
+		/// </summary>
+		private const int LineCountOffset = 4 + 4 + 4 + 1 + 1 + 1;
+
 		private string _folder = string.Empty;
 
 		[TestInitialize]
@@ -73,6 +78,28 @@ namespace BlueDotBrigade.Weevil.IO
 			var logPath = WriteLog("a\nb\nc\nd\ne\nf\ng\nh\n");
 			SaveIndex(logPath);
 			System.IO.File.WriteAllText(logPath, "a\nb\n");
+
+			MemoryEstimator.Estimate(logPath).Bytes.Should().Be(4 + 2 * BytesPerRecord);
+		}
+
+		[TestMethod]
+		public void GivenALogWhoseLinesEndInCarriageReturnsOnly_WhenEstimated_ThenEachLineIsCounted()
+		{
+			var logPath = WriteLog("a\rbb\rccc\r");
+
+			MemoryEstimator.Estimate(logPath).Bytes.Should().Be(9 + 3 * BytesPerRecord);
+		}
+
+		[TestMethod]
+		public void GivenAnIndexWhoseHeaderIsDamaged_WhenEstimated_ThenTheLinesAreCountedFromTheLog()
+		{
+			// The header claims far more lines than the log has bytes, which no index can hold.
+			var logPath = WriteLog("a\nb\n");
+			SaveIndex(logPath);
+			var indexPath = $"{logPath}.{LineIndexFile.FileExtension}";
+			var index = System.IO.File.ReadAllBytes(indexPath);
+			BitConverter.GetBytes(int.MaxValue).CopyTo(index, LineCountOffset);
+			System.IO.File.WriteAllBytes(indexPath, index);
 
 			MemoryEstimator.Estimate(logPath).Bytes.Should().Be(4 + 2 * BytesPerRecord);
 		}

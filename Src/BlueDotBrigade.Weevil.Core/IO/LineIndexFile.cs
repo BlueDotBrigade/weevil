@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </remarks>
 		public static LineIndex Load(string logFilePath, Stream logSource)
 		{
-			var indexFilePath = $"{logFilePath}.{FileExtension}";
+			var indexFilePath = GetIndexFilePath(logFilePath);
 			var stopwatch = Stopwatch.StartNew();
 			var hasChanged = true;
 
@@ -74,7 +74,7 @@ namespace BlueDotBrigade.Weevil.IO
 			lineCount = 0;
 			indexedLength = 0;
 
-			var indexFilePath = $"{logFilePath}.{FileExtension}";
+			var indexFilePath = GetIndexFilePath(logFilePath);
 
 			if (!System.IO.File.Exists(indexFilePath))
 			{
@@ -165,7 +165,12 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public static void Delete(string logFilePath)
 		{
-			TryDelete($"{logFilePath}.{FileExtension}");
+			TryDelete(GetIndexFilePath(logFilePath));
+		}
+
+		private static string GetIndexFilePath(string logFilePath)
+		{
+			return $"{logFilePath}.{FileExtension}";
 		}
 
 		private static void TryDelete(string filePath)

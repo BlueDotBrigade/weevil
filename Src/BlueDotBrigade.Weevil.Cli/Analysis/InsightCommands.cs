@@ -44,10 +44,11 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 						.UsingStorage(storage)
 						.Open();
 
-				var severityMetrics =  engine.Filter.GetMetrics();
-
 				// On disk, a log that changed while it was read is reloaded, and read once more (#1028).
 				var insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
+
+				// After the insights, so that both describe the same log, if it was reloaded.
+				var severityMetrics =  engine.Filter.GetMetrics();
 
 				if (verbose)
 				{
