@@ -48,32 +48,49 @@ CI runs the Core unit, feature and functional tests, and the CLI's functional te
 
 ## Performance
 
-Everything about performance lives in `BlueDotBrigade.Weevil.Core-PerformanceTests`, in two kinds (#1177):
+Everything about performance lives in `BlueDotBrigade.Weevil.Core-PerformanceTests`, as MSTest tests of two kinds (#1177):
 
 | Kind | Where | Runs | Catches |
 |---|---|---|---|
-| **Test**: a budget that must hold | An MSTest `[TestClass]` | In CI, with `dotnet test` | Large regressions: memory kept per record in RAM and on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
-| **Benchmark**: a measurement to compare two versions | A BenchmarkDotNet class in `Benchmarks/` | On demand, with `dotnet run` | Smaller regressions in time and memory allocated: opening (without a saved line index), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
+| **Budget**: a limit that must hold | An MSTest `[TestClass]` | In CI, with `dotnet test` | Large regressions: memory kept per record in RAM and on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
+| **Benchmark**: a measurement to compare two versions | A BenchmarkDotNet class in `Benchmarks/`, run by a test in `BenchmarkTests`, in the `Benchmark` category | On demand, in Release: locally, or with the Benchmarks workflow | Smaller regressions in time and memory allocated: opening (without a saved line index), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
 
-Add a test when a limit must never be crossed, and a benchmark when you want to see how a change moves a number. A CI runner is too noisy to fail a build on a 10% slowdown, so that is a benchmark, not a test. CI never runs the benchmarks.
+Add a budget when a limit must never be crossed, and a benchmark when you want to see how a change moves a number. A CI runner is too noisy to fail a build on a 10% slowdown, so that is a benchmark, not a budget. To add a benchmark class, also add a test method for it to `BenchmarkTests`.
 
 ### Running the Benchmarks
 
 Run them in Release, on a quiet computer, from the repository's root folder:
 
 ```
-dotnet run -c Release -p:Platform=x64 --project Tst/BlueDotBrigade.Weevil.Core-PerformanceTests -- --filter "*"
+dotnet test Tst/BlueDotBrigade.Weevil.Core-PerformanceTests -c Release -p:Platform=x64 --filter TestCategory=Benchmark --logger "console;verbosity=detailed"
 ```
 
-- In Debug, the program only says to run it in Release.
-- `--filter "*FilterBenchmarks*"` runs one class's benchmarks; without `--filter`, BenchmarkDotNet asks which to run.
-- `--job short` takes a few minutes, for a quick look. The default job takes longer and measures more precisely.
+- `--filter "TestCategory=Benchmark&Name~FilterBenchmarks"` runs one class's benchmarks.
+- Set the environment variable `WEEVIL_BENCHMARK_JOB=Short` for a quick look: it takes a few minutes. Without it, the default job takes longer and measures more precisely.
+- In Debug, each benchmark test is inconclusive and measures nothing. CI's test runs leave the `Benchmark` category out.
 - The first run writes the reference logs to the temporary folder (`Weevil.Benchmarks`), and later runs reuse them. After a change to `ReferenceLog.cs`, delete that folder.
-- Results are written to `BenchmarkDotNet.Artifacts/results`, which Git ignores.
+- The Benchmarks workflow (`.github/workflows/benchmarks.yml`) runs them on demand on a GitHub runner, from the Actions tab. It shows the reports on the run's summary page and keeps them as the `benchmark-reports` artifact. A shared runner is noisy, so compare runs of the same workflow, not a runner with your computer.
+
+### Where the Results Go
+
+Each class's results are written to a Markdown file, beside the test assembly, in a folder Git ignores:
+
+```
+Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/bin/x64/Release/net10.0/BenchmarkDotNet.Artifacts/results/BlueDotBrigade.Weevil.<Class>-report-github.md
+```
+
+The test also attaches the file to its result, and writes the table to its output: Visual Studio's Test Explorer shows it, and so does `dotnet test` with the detailed console logger. A plain `dotnet test` shows only whether each test passed. BenchmarkDotNet's log of the whole run is in `BenchmarkDotNet.Artifacts`, one level up.
+
+### When the Output Stops
+
+- **No progress while a test runs.** The test runner shows a test's output only once the test ends, and one class can take many minutes, so a run can look stuck. To follow it, read BenchmarkDotNet's log in `BenchmarkDotNet.Artifacts`, which it writes as it goes.
+- **A timeout stops the run.** For example, the test runner's `--blame-hang-timeout`, or the Benchmarks workflow's limit of 180 minutes. The class being measured then writes no report. The classes already measured keep theirs, and the log shows how far the run got. Run fewer classes at a time, or the short job.
+- **A BenchmarkDotNet upgrade can stop the benchmarks running.** Its documentation supports console applications only, and running from a test runner works with 0.15.8 without being supported. After an upgrade, run one class, for example `FindBenchmarks` with the short job. If it no longer runs, start the benchmarks from a console application's `Main` with `BenchmarkSwitcher` instead.
+- **A Debug build measures nothing.** Each benchmark test is inconclusive: build in Release.
 
 ### Comparing Two Versions
 
-1. Run the benchmarks on `main`, and keep the Markdown results.
+1. Run the benchmarks on `main`, and keep the Markdown reports: the next run overwrites them.
 2. Run them on the branch, on the same computer, with the same job.
 3. Compare the `Mean` and `Allocated` columns. A change larger than the `Error` column, and larger than about 10%, is worth explaining in the pull request.
 

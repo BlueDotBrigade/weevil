@@ -1,14 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>$(WeevilTargetFramework)</TargetFramework>
-		<!--
-			Two entry points (#1177), described in Program.cs:
-			- `dotnet test` runs the MSTest tests. The test runner loads the assembly itself.
-			- `dotnet run -c Release` runs the BenchmarkDotNet benchmarks, through Program.Main.
-			An Exe, so `dotnet run` can start it. Microsoft.NET.Test.Sdk would generate an empty Main of its own, so it is told not to.
-		-->
-		<OutputType>Exe</OutputType>
-		<GenerateProgramFile>false</GenerateProgramFile>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>

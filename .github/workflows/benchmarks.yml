@@ -1,0 +1,83 @@
+name: Benchmarks
+description: Runs the BenchmarkDotNet benchmarks on demand, and keeps their Markdown reports (#1177).
+
+# Only on demand: the benchmarks take minutes, and a shared runner is too noisy to fail a build on their numbers.
+# To compare two versions, run this workflow on each branch and compare the reports: see Doc/Guides/Testing/Testing.md.
+on:
+  workflow_dispatch:
+    inputs:
+      benchmarks:
+        description: Which benchmark class to run
+        type: choice
+        options: [All, Open, Filter, Find, Export, Analyzer]
+        default: All
+      job:
+        description: BenchmarkDotNet's job. Short takes a few minutes, and measures less precisely.
+        type: choice
+        options: [Default, Short]
+        default: Default
+
+permissions:
+  contents: read
+
+jobs:
+  benchmarks:
+    runs-on: windows-latest
+    # A timeout stops the run: the class being measured then writes no report, and the classes already measured keep theirs.
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # DatenLokator unzips the test data, stored in Git LFS, when the test assembly starts (#1127), so the benchmarks need it too.
+      # The cache downloads each LFS file once, not on every run, because downloads count against the LFS bandwidth.
+      - name: List Git LFS files
+        shell: bash
+        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore Git LFS files
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ runner.os }}-${{ hashFiles('.lfs-assets-id') }}
+
+      - name: Fetch Git LFS files
+        run: git lfs pull
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      # Release, because BenchmarkDotNet's times mean nothing without the optimizer: in Debug each benchmark test is inconclusive.
+      # The detailed console logger shows each test's output, including its results table, once the test ends.
+      - name: Benchmark (Release, x64)
+        shell: bash
+        env:
+          BENCHMARKS: ${{ inputs.benchmarks }}
+          WEEVIL_BENCHMARK_JOB: ${{ inputs.job }}
+        run: |
+          filter="TestCategory=Benchmark"
+          if [[ "$BENCHMARKS" != "All" ]]; then filter="$filter&Name~${BENCHMARKS}Benchmarks"; fi
+          dotnet test Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/BlueDotBrigade.Weevil.Core-PerformanceTests.csproj --configuration Release -p:Platform=x64 --filter "$filter" --logger "console;verbosity=detailed"
+
+      # Even after a failure or a timeout, so the reports of the classes already measured, and the log of how far the run got, are kept.
+      - name: Show the reports
+        if: always()
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for report in Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/bin/x64/Release/*/BenchmarkDotNet.Artifacts/results/*.md; do
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+            echo >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Keep the reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-reports
+          path: |
+            Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/bin/x64/Release/*/BenchmarkDotNet.Artifacts/results/*.md
+            Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/bin/x64/Release/*/BenchmarkDotNet.Artifacts/*.log
+          if-no-files-found: warn
