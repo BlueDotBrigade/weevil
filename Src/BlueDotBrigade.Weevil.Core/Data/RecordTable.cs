@@ -34,6 +34,14 @@ namespace BlueDotBrigade.Weevil.Data
 
 		public int Count { get; }
 
+		/// <summary>
+		/// The record number each chunk's records start at, in order: the records between two of them read the same chunk (#1027).
+		/// </summary>
+		/// <remarks>
+		/// Records that keep their content as a string read no chunk, so a table of only those has none.
+		/// </remarks>
+		public IReadOnlyList<int> ChunkStarts => _chunkStarts;
+
 		public int GetLineNumber(int recordNumber) => GetBlock(recordNumber).LineNumbers[recordNumber % BlockSize];
 
 		public DateTime GetCreatedAt(int recordNumber) => GetBlock(recordNumber).CreatedAt[recordNumber % BlockSize];

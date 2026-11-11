@@ -164,7 +164,8 @@
 				_recordState,
 				_session.IncludeHistory,
 				_session.ExcludeHistory,
-				_telemetryRecorder);
+				_telemetryRecorder,
+				_source);
 
 			// Construction-time default filter: applied without recording telemetry (not a user action).
 			_filterManager.ApplyInternal(FilterType.PlainText, FilterCriteria.None);
