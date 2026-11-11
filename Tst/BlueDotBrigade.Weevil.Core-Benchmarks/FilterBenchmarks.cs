@@ -20,7 +20,7 @@ namespace BlueDotBrigade.Weevil
 		[GlobalSetup]
 		public void Setup()
 		{
-			_engine = Engine.UsingPath(BenchmarkLogs.GetPath(this.Records)).Open();
+			_engine = BenchmarkLogs.Open(this.Records);
 		}
 
 		[Benchmark]

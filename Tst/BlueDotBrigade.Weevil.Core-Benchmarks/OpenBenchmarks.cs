@@ -3,8 +3,11 @@ namespace BlueDotBrigade.Weevil
 	using BenchmarkDotNet.Attributes;
 
 	/// <summary>
-	/// Opening a log in RAM: parsing it into the record table (#1177).
+	/// Opening a log in RAM: parsing it into the record table, without a saved line index (#1177).
 	/// </summary>
+	/// <remarks>
+	/// Weevil saves no line index in the temporary folder, so every open parses the whole log, as a user's first open of a log does.
+	/// </remarks>
 	[MemoryDiagnoser]
 	public class OpenBenchmarks
 	{
@@ -17,6 +20,9 @@ namespace BlueDotBrigade.Weevil
 		public void Setup()
 		{
 			_logPath = BenchmarkLogs.GetPath(this.Records);
+
+			// Once, before measuring, so the log is known to hold every record.
+			_ = BenchmarkLogs.Open(this.Records);
 		}
 
 		[Benchmark]

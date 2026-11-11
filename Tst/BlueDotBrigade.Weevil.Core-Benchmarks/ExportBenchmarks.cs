@@ -18,9 +18,8 @@ namespace BlueDotBrigade.Weevil
 		[GlobalSetup]
 		public void Setup()
 		{
-			var logPath = BenchmarkLogs.GetPath(this.Records);
-			_engine = Engine.UsingPath(logPath).Open();
-			_destinationPath = Path.ChangeExtension(logPath, ".Saved.log");
+			_engine = BenchmarkLogs.Open(this.Records);
+			_destinationPath = BenchmarkLogs.GetOutputPath($"Saved.{this.Records}.log");
 		}
 
 		[GlobalCleanup]

@@ -52,8 +52,8 @@ Two projects watch performance, at different grains (#1177):
 
 | Project | Runs | Catches |
 |---|---|---|
-| `BlueDotBrigade.Weevil.Core-PerformanceTests` | In CI, as tests | Large regressions: memory kept per record, a filter on disk reading the log more than once, and filters, export and an analyzer far over a generous time limit |
-| `BlueDotBrigade.Weevil.Core-Benchmarks` | On demand, with BenchmarkDotNet | Smaller regressions in time and memory allocated: opening, filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
+| `BlueDotBrigade.Weevil.Core-PerformanceTests` | In CI, as tests | Large regressions: memory kept per record, an analyzer or export on disk reading the log far more than once, and filters, export and an analyzer far over a generous time limit |
+| `BlueDotBrigade.Weevil.Core-Benchmarks` | On demand, with BenchmarkDotNet | Smaller regressions in time and memory allocated: opening (without a saved line index), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
 
 A CI runner is too noisy to fail a build on a 10% slowdown, so the benchmarks are not a test. CI only builds them.
 
@@ -67,7 +67,7 @@ dotnet run -c Release -p:Platform=x64 --project Tst/BlueDotBrigade.Weevil.Core-B
 
 - `--filter "*Filter*"` runs one class's benchmarks; without `--filter`, BenchmarkDotNet asks which to run.
 - `--job short` takes a few minutes, for a quick look. The default job takes longer and measures more precisely.
-- The first run writes the reference logs to the temporary folder (`Weevil.Benchmarks`), and later runs reuse them.
+- The first run writes the reference logs to the temporary folder (`Weevil.Benchmarks`), and later runs reuse them. After a change to `ReferenceLog.cs`, delete that folder.
 - Results are written to `BenchmarkDotNet.Artifacts/results`, which Git ignores.
 
 ### Comparing Two Versions
