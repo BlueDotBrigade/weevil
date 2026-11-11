@@ -24,8 +24,9 @@ namespace BlueDotBrigade.Weevil
 	///     </description>
 	///   </item>
 	/// </list>
-	/// BenchmarkDotNet could also be started from a test method, but then <c>dotnet test</c>, and so CI, would run benchmarks that take minutes,
-	/// inside the test runner's process and time limits. Starting them from this method keeps them out of every test run.
+	/// BenchmarkDotNet's documentation says it works only with console applications ("How to run your benchmarks", benchmarkdotnet.org).
+	/// A test method can start it, but that is not a supported way to run it, and <c>dotnet test</c>, and so CI, would then run benchmarks that take minutes.
+	/// Starting them from this method follows the documentation, and keeps them out of every test run.
 	///
 	/// With its default settings, BenchmarkDotNet refuses to measure code that is not optimized, because the times would not mean anything.
 	/// So a Debug build only says how to run the benchmarks in Release.
