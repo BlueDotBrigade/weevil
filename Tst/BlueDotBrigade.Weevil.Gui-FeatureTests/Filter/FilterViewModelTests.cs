@@ -154,7 +154,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					x[1] = false; // case sensitive
 					x[2] = true; // find next
 					x[3] = false; // regular expression
-					x[4] = "Id=010";
+					x[4] = "Holonet"; // in one record of the log, on line 233
 					x[5] = false; // elapsed time
 					x[6] = null;
 					x[7] = null;
@@ -185,7 +185,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				await viewModel.BackgroundTask;
 			}
 
-			viewModel.ActiveRecordIndex.Should().Be(9, "line 10 holds Id=010");
+			viewModel.Rows.GetRow(viewModel.ActiveRecordIndex).LineNumber.Should().Be(233, "the only record that mentions the Holonet is on line 233");
+			dialog.DidNotReceiveWithAnyArgs().ShowMessage(default, default);
 			wereMenusEnabledWhenScrolling.Should().BeTrue("the view goes to the record found once the records and menus are back");
 			viewModel.IsMenuEnabled.Should().BeTrue("the menus are enabled again once the search finishes");
 		}

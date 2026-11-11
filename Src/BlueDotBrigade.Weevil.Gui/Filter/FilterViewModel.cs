@@ -1194,7 +1194,7 @@
 				catch (IOException e) when (e.HResult.Equals(-2147024864))
 				{
 					Log.Default.Write(LogSeverityType.Error, e, "Unable to save the selected records. The target file is being used by another process.");
-					_uiDispatcher.Invoke(() => MessageBox.Show("Unable to save the selected records\r\nThe target file is being used by another process."));
+					_uiDispatcher.Invoke(() => _dialogBox.ShowMessage("Unable to save the selected records\r\nThe target file is being used by another process.", "Error"));
 				}
 			},
 			progressDelay: QuickWorkProgressDelay);
@@ -1605,7 +1605,9 @@
 					catch (RecordNotFoundException e)
 					{
 						Log.Default.Write(LogSeverityType.Warning, e, userMessage);
-						_uiDispatcher.Invoke(() => MessageBox.Show(userMessage, "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning));
+
+						// Through the dialog service, so a test that finds nothing gets no message box, which would wait for a click forever.
+						_uiDispatcher.Invoke(() => _dialogBox.ShowMessage(userMessage, "Not Found"));
 					}
 				},
 				onSucceeded: () =>
@@ -2071,11 +2073,7 @@
 				catch (Exception e)
 				{
 					Log.Default.Write(LogSeverityType.Error, e, $"{operation} could not be completed.");
-					_uiDispatcher.Invoke(() => MessageBox.Show(
-						$"{operation} could not be completed.\r\n\r\n{e.Message}",
-						"Error",
-						MessageBoxButton.OK,
-						MessageBoxImage.Error));
+					_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"{operation} could not be completed.\r\n\r\n{e.Message}", "Error"));
 				}
 				finally
 				{

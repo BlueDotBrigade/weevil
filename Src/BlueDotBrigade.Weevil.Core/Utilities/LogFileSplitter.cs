@@ -69,6 +69,8 @@
 						{
 							if (newLog.Length > 0)
 							{
+								cancellationToken.ThrowIfCancellationRequested();
+
 								if (File.Exists(outputPath))
 								{
 									File.Delete(outputPath);
@@ -84,8 +86,11 @@
 						newLog.Append(content).AppendLine();
 					}
 
+					// Escape may be pressed while the last record is read: the last file is then not written either.
 					if (newLog.Length > 0)
 					{
+						cancellationToken.ThrowIfCancellationRequested();
+
 						if (File.Exists(outputPath))
 						{
 							File.Delete(outputPath);
