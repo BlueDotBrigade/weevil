@@ -45,3 +45,35 @@ This project uses two approaches to functional testing:
 ### Disk Mode
 
 CI runs the Core unit, feature and functional tests, and the CLI's functional tests, a second time with every log opened on disk (#1025, #1027). To do the same locally, run each of those four projects with `dotnet test --settings Tst/Disk.runsettings`. Do not select the file in Visual Studio's Test Explorer: it would apply to every test project until cleared. See [DiskMode.md](../../Design/DiskMode.md).
+
+## Performance
+
+Two projects watch performance, at different grains (#1177):
+
+| Project | Runs | Catches |
+|---|---|---|
+| `BlueDotBrigade.Weevil.Core-PerformanceTests` | In CI, as tests | Large regressions: memory kept per record, a filter on disk reading the log more than once, and filters, export and an analyzer far over a generous time limit |
+| `BlueDotBrigade.Weevil.Core-Benchmarks` | On demand, with BenchmarkDotNet | Smaller regressions in time and memory allocated: opening, filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
+
+A CI runner is too noisy to fail a build on a 10% slowdown, so the benchmarks are not a test. CI only builds them.
+
+### Running the Benchmarks
+
+Run them in Release, on a quiet computer, from the repository's root folder:
+
+```
+dotnet run -c Release -p:Platform=x64 --project Tst/BlueDotBrigade.Weevil.Core-Benchmarks -- --filter "*"
+```
+
+- `--filter "*Filter*"` runs one class's benchmarks; without `--filter`, BenchmarkDotNet asks which to run.
+- `--job short` takes a few minutes, for a quick look. The default job takes longer and measures more precisely.
+- The first run writes the reference logs to the temporary folder (`Weevil.Benchmarks`), and later runs reuse them.
+- Results are written to `BenchmarkDotNet.Artifacts/results`, which Git ignores.
+
+### Comparing Two Versions
+
+1. Run the benchmarks on `main`, and keep the Markdown results.
+2. Run them on the branch, on the same computer, with the same job.
+3. Compare the `Mean` and `Allocated` columns. A change larger than the `Error` column, and larger than about 10%, is worth explaining in the pull request.
+
+The benchmarks use only Weevil's public API, because `InternalsVisibleTo` is limited to Debug builds. They open logs in RAM: disk mode joins them when #1028 makes the storage mode public.

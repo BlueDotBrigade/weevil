@@ -37,6 +37,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 | `BlueDotBrigade.Weevil.Cli-FunctionalTests` | Functional tests for the command-line interface's commands, with real I/O |
 | `BlueDotBrigade.Weevil.PowerShell-FunctionalTests` | Functional tests for the PowerShell cmdlets, with real I/O |
 | `BlueDotBrigade.Weevil.Core-PerformanceTests` | CPU, RAM and I/O checks of the performance requirements, on logs small enough for CI |
+| `BlueDotBrigade.Weevil.Core-Benchmarks` | BenchmarkDotNet benchmarks, run on demand in Release, not by a test runner: see [Testing.md](../../Doc/Guides/Testing/Testing.md#performance) |
 
 ## Test Placement
 
