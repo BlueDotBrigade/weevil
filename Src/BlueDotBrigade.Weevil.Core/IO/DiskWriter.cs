@@ -4,6 +4,7 @@
 	using System.Globalization;
 	using System.IO;
 	using System.Text;
+	using System.Threading;
 	using Analysis;
 	using Data;
 	using Diagnostics;
@@ -43,6 +44,15 @@
 
 		public void Write(RecordList records)
 		{
+			Write(records, CancellationToken.None);
+		}
+
+		/// <remarks>
+		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and deletes the file saved so far (#1027).
+		/// </remarks>
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		public void Write(RecordList records, CancellationToken cancellationToken)
+		{
 			if (string.IsNullOrWhiteSpace(_destinationFilePath))
 			{
 				Log.Default.Write(LogSeverityType.Warning, "Records could not be saved - a destination has not been provided.");
@@ -66,10 +76,10 @@
 					switch (_fileFormatType)
 					{
 						case FileFormatType.Raw:
-							SaveAsRaw(records);
+							SaveAsRaw(records, cancellationToken);
 							break;
 						case FileFormatType.Tsv:
-							SaveAsTsv(records);
+							SaveAsTsv(records, cancellationToken);
 							break;
 						default:
 							throw new NotSupportedException($"The selected format type is not currently supported. Format={_fileFormatType}");
@@ -80,12 +90,19 @@
 					Log.Default.Write(LogSeverityType.Error, $"Records were not saved. Reason=`{e.Message}`");
 					throw;
 				}
+				catch (OperationCanceledException)
+				{
+					// The stream is closed by now, so the file saved so far can be deleted. It is the destination, never the log.
+					System.IO.File.Delete(_destinationFilePath);
+					Log.Default.Write(LogSeverityType.Information, $"Records were not saved - the user aborted. Format={_fileFormatType}");
+					throw;
+				}
 
 				Log.Default.Write($"Records have been saved. Format={_fileFormatType}, Count={records.Length}.");
 			}
 		}
 
-		private void SaveAsRaw(RecordList records)
+		private void SaveAsRaw(RecordList records, CancellationToken cancellationToken)
 		{
 			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))
 			{
@@ -94,12 +111,13 @@
 
 				foreach (IRecord record in records)
 				{
+					cancellationToken.ThrowIfCancellationRequested();
 					streamWriter.WriteLine(buffer.Read(record));
 				}
 			}
 		}
 
-		private void SaveAsTsv(RecordList records)
+		private void SaveAsTsv(RecordList records, CancellationToken cancellationToken)
 		{
 			DateTime? previouslyCreatedAt = null;
 			using (var streamWriter = new StreamWriter(_destinationFilePath, false, _destinationFileEncoding, 65536))
@@ -111,6 +129,8 @@
 
 				foreach (IRecord record in records)
 				{
+					cancellationToken.ThrowIfCancellationRequested();
+
 					TimeSpan elapsedTime = TimeSpan.Zero;
 
 					if (previouslyCreatedAt == null)

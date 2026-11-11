@@ -109,6 +109,9 @@
                 private FilterType _previousFilterType;
 
 		private string _findText;
+
+		// Cancels the analysis in progress when Abort (Escape) is pressed, or null when none runs (#1027). Read and written on the UI thread.
+		private CancellationTokenSource _analysisCancellation;
 		private bool _findIsCaseSensitive;
 		private bool _findUseRegex;
 		private bool _findSearchComments;
@@ -1444,9 +1447,13 @@
 			RaiseResultsChanged();
 		}
 
+		/// <summary>
+		/// Stops the filter or the analysis in progress (#1027).
+		/// </summary>
 		private void AbortFilter()
 		{
 			_engine.Filter.Abort();
+			_analysisCancellation?.Cancel();
 		}
 		#endregion
 
@@ -1912,12 +1919,12 @@
 
 		public Task Analyze(AnalysisType analysisType)
 		{
-			return AnalyzeInBackground(userDialog => _engine.Analyzer.Analyze(analysisType, userDialog));
+			return AnalyzeInBackground((userDialog, cancellationToken) => _engine.Analyzer.Analyze(analysisType, userDialog, cancellationToken));
 		}
 
 		public Task Analyze(string customAnalyzerKey)
 		{
-			return AnalyzeInBackground(userDialog => _engine.Analyzer.Analyze(customAnalyzerKey, userDialog));
+			return AnalyzeInBackground((userDialog, cancellationToken) => _engine.Analyzer.Analyze(customAnalyzerKey, userDialog, cancellationToken));
 		}
 
 		/// <summary>
@@ -1927,8 +1934,9 @@
 		/// Until the analyzer finishes, the menus and the filter are disabled and the progress bar replaces the records,
 		/// so the user cannot edit a comment or a pin that the analyzer may be writing to.
 		/// Its prompts are shown on the UI thread, with the records visible behind the modal prompt.
+		/// Abort (Escape) stops it: the comments, pins and flags it changed so far stay (#1027).
 		/// </remarks>
-		private Task AnalyzeInBackground(Func<IUserDialog, Results> analyze)
+		private Task AnalyzeInBackground(Func<IUserDialog, CancellationToken, Results> analyze)
 		{
 			// Another analysis, a filter or an open is in progress.
 			if (!this.IsMenuEnabled)
@@ -1942,6 +1950,9 @@
 			this.IsFilterToolboxEnabled = false;
 			this.IsProcessingLongOperation = true;
 
+			var cancellation = new CancellationTokenSource();
+			_analysisCancellation = cancellation;
+
 			var userDialog = new UiThreadUserDialog(
 				_dialogBox,
 				_uiDispatcher,
@@ -1952,11 +1963,15 @@
 			{
 				try
 				{
-					Results results = analyze(userDialog);
+					Results results = analyze(userDialog, cancellation.Token);
 
 					_bulletinMediator.Post(new AnalysisCompleteBulletin(
 						results.FlaggedRecords,
 						results.Data));
+				}
+				catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+				{
+					Log.Default.Write(LogSeverityType.Information, "The analysis was aborted by the user.");
 				}
 				catch (Exception e)
 				{
@@ -1967,6 +1982,8 @@
 				{
 					_uiDispatcher.Invoke(() =>
 					{
+						_analysisCancellation = null;
+						cancellation.Dispose();
 						this.IsProcessingLongOperation = false;
 						this.IsFilterToolboxEnabled = wasFilterToolboxEnabled;
 						this.CanOpenLogFile = true;

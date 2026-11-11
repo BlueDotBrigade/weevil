@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -155,11 +156,20 @@
 
 		public Results Analyze(AnalysisType analysisType, IUserDialog userDialog)
 		{
-			var analyzerKey = analysisType.ToString();
-			return Analyze(analyzerKey, userDialog);
+			return Analyze(analysisType.ToString(), userDialog, CancellationToken.None);
 		}
 
 		public Results Analyze(string analyzerKey, IUserDialog userDialog)
+		{
+			return Analyze(analyzerKey, userDialog, CancellationToken.None);
+		}
+
+		public Results Analyze(AnalysisType analysisType, IUserDialog userDialog, CancellationToken cancellationToken)
+		{
+			return Analyze(analysisType.ToString(), userDialog, cancellationToken);
+		}
+
+		public Results Analyze(string analyzerKey, IUserDialog userDialog, CancellationToken cancellationToken)
 		{
 			RecordList records = _coreEngine.Selector.HasSelectionPeriod
 				? _coreEngine.Selector.GetSelected()
@@ -172,7 +182,8 @@
 				_coreEngine.RecordState,
 				_coreEngine.SourceDirectory,
 				userDialog,
-				true);
+				true,
+				cancellationToken);
 
 			// Records which analyzer the user ran. Works for plugin analyzers too: their key flows
 			// through unchanged and becomes a new metric_key row (no schema/code change required).

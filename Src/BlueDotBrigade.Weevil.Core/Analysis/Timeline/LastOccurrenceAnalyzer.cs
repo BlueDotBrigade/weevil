@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -32,6 +33,14 @@
 		public string DisplayName => "Last Occurrence";
 
 		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		{
+			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
+		}
+
+		/// <remarks>
+		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
+		/// </remarks>
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
 		{
 			var flaggedLineNumbers = new HashSet<int>();
 
@@ -72,6 +81,8 @@
 
 			for (var i = records.Length - 1; i >= 0; i--)
 			{
+				cancellationToken.ThrowIfCancellationRequested();
+
 				IRecord record = records[i];
 
 				if (canUpdateMetadata)

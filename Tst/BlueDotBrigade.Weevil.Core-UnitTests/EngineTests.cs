@@ -6,11 +6,14 @@ namespace BlueDotBrigade.Weevil
 	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Navigation;
+	using NSubstitute;
+	using IUserDialog = BlueDotBrigade.Weevil.IO.IUserDialog;
 	using LogFileChangedException = BlueDotBrigade.Weevil.IO.LogFileChangedException;
 	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
@@ -578,6 +581,53 @@ namespace BlueDotBrigade.Weevil
 			entry["WasFound"].Should().Be(false);
 			((double)entry["Duration"]).Should().BeGreaterThanOrEqualTo(0);
 			entry.Values.Should().NotContain(text);
+		}
+
+		[TestMethod]
+		public void GivenSelectedRecords_WhenSavingThemIsAborted_ThenNoFileIsLeft()
+		{
+			// Abort cancels the save, which deletes the file saved so far (#1027).
+			IEngine engine = OpenCopy();
+			var destinationPath = Path.Combine(_folder, "Selected.log");
+			engine.Selector.SelectRange(2, 4);
+
+			Action save = () => engine.Selector.SaveSelection(destinationPath, FileFormatType.Raw, new CancellationToken(canceled: true));
+
+			save.Should().Throw<OperationCanceledException>();
+			File.Exists(destinationPath).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenTextThatALaterRecordHolds_WhenSearchingForItIsAborted_ThenTheSearchStopsWithoutFindingIt()
+		{
+			// A search that was aborted is not mistaken for one that found nothing (#1027).
+			IEngine engine = OpenCopy();
+			engine.Selector.Select(lineNumber: 1);
+
+			Action search = () => engine.Navigate.NextContent("Id=150", isCaseSensitive: true, useRegex: false, new CancellationToken(canceled: true));
+
+			search.Should().Throw<OperationCanceledException>();
+			engine.Navigate.NextContent("Id=150", isCaseSensitive: true).LineNumber.Should().Be(150, "the aborted search did not move the active record");
+		}
+
+		[TestMethod]
+		public void GivenAnAnalyzer_WhenItIsAborted_ThenItStops()
+		{
+			// The engine passes Abort's token to the analyzer (#1027).
+			IEngine engine = OpenCopy();
+			IUserDialog dialog = Substitute.For<IUserDialog>();
+			dialog
+				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
+				.Returns(callInfo =>
+				{
+					callInfo[2] = @"Id=(?<Id>\d+)";
+					return true;
+				});
+
+			Action analyze = () => engine.Analyzer.Analyze(AnalysisType.DetectData, dialog, new CancellationToken(canceled: true));
+
+			analyze.Should().Throw<OperationCanceledException>();
+			engine.Analyzer.Analyze(AnalysisType.DetectData, dialog).FlaggedRecords.Should().BePositive("the analyzer reads the same records when it is not aborted");
 		}
 
 		[TestMethod]

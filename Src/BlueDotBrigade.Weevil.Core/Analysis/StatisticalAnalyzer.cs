@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System.Collections.Immutable;
 	using System.Globalization;
 	using System.Linq;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Filter;
@@ -63,6 +64,14 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
+			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
+		}
+
+		/// <remarks>
+		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
+		/// </remarks>
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
+		{
 			var timestamps = new List<DateTime>();
 			var values = new List<double>();
 
@@ -101,6 +110,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			foreach (IRecord record in records)
 			{
+				cancellationToken.ThrowIfCancellationRequested();
+
 				if (canUpdateMetadata)
 				{
 					state.SetFlagged(record, false);

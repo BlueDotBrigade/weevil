@@ -6,6 +6,7 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
@@ -166,6 +167,11 @@
 
 		public IRecord PreviousContent(string text, bool isCaseSensitive, bool useRegex = false)
 		{
+			return PreviousContent(text, isCaseSensitive, useRegex, CancellationToken.None);
+		}
+
+		public IRecord PreviousContent(string text, bool isCaseSensitive, bool useRegex, CancellationToken cancellationToken)
+		{
 			if (text == null)
 			{
 				throw new ArgumentNullException(nameof(text));
@@ -175,10 +181,15 @@
 
 			return Search(nameof(PreviousContent), useRegex, () => this
 				.Using<IContentNavigator>()
-				.FindPrevious(text, isCaseSensitive, useRegex));
+				.FindPrevious(text, isCaseSensitive, useRegex, cancellationToken));
 		}
 
 		public IRecord NextContent(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			return NextContent(text, isCaseSensitive, useRegex, CancellationToken.None);
+		}
+
+		public IRecord NextContent(string text, bool isCaseSensitive, bool useRegex, CancellationToken cancellationToken)
 		{
 			if (text == null)
 			{
@@ -189,7 +200,7 @@
 
 			return Search(nameof(NextContent), useRegex, () => this
 				.Using<IContentNavigator>()
-				.FindNext(text, isCaseSensitive, useRegex));
+				.FindNext(text, isCaseSensitive, useRegex, cancellationToken));
 		}
 
 		public IRecord PreviousPin()
