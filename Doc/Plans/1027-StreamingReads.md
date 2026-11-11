@@ -1,6 +1,6 @@
 # 1027: Read the Log Once per Pass in Disk Mode
 
-> **Status:** In progress
+> **Status:** Done
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -11,7 +11,9 @@ Step 4 of the [#986 plan](986-DiskMode.md#steps): in disk mode, filters, analyze
 - A filter on a log opened on disk reads each byte of the log once, in parallel ranges split at record boundaries.
 - Analyzers, export, the graph and the CLI's output read the log once, in order.
 - Filters on monikers that never read content, such as `@Pinned` or `@Flagged`, do not read the file.
-- Abort stops them (see decision 4).
+- Abort stops them (decision 4).
+
+Done on 2026-11-11, in #1174, #1176 and #1178. [DiskMode.md](../Design/DiskMode.md) describes the result. In the GUI, Escape does not yet reach export or Find, because they run on the UI thread: #1028 moves them off it.
 - RAM mode finds the same records, at least as fast as today.
 
 ## Where Disk Mode Stands
@@ -56,16 +58,16 @@ A plugin that reads `record.Content` still works, at 7 µs per record on disk. [
 
 ### Abort
 
-Today Abort stops only filters. Analyzers, export and Find run to the end. `IRecordAnalyzer.Analyze` takes no cancellation, and it is a public plugin interface (decision 4).
+Before this plan, Abort stopped only filters. Analyzers, export and Find ran to the end, and `IRecordAnalyzer.Analyze`, a public plugin interface, took no cancellation (decision 4).
 
 ## Decisions for the Owner
 
-Decisions 1 to 3 were taken as recommended on 2026-11-10, when the owner merged this plan and asked to proceed. Decision 4 is still open.
+Decisions 1 to 3 were taken as recommended on 2026-11-10, when the owner merged this plan and asked to proceed. Decision 4 was taken as option A on 2026-11-11.
 
 1. **RAM mode uses the same filter ranges.** Recommended: one code path, kept only if the RAM filter times do not get slower. Otherwise disk mode alone uses them.
 2. **Reader threads:** one per core until the #1024 runs on NVMe and SATA decide the count, by the rule in the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md).
 3. **"Filtering complete." logs the bytes read from the log**, in disk mode. Recommended: the owner gets a figure from real use, and the performance test checks that a filter reads the log once.
-4. **Abort for analyzers, export and Find.** Options:
+4. **Abort for analyzers, export and Find.** Option A, chosen 2026-11-11. Options:
    - **A (recommended):** a second `IRecordAnalyzer.Analyze` overload taking a `CancellationToken`, as a default interface method that calls the current one, so existing plugins still build and run. The built-in analyzers, `DiskWriter.Write` and Find take the token, and the GUI's Abort button cancels them. A separate pull request, step 3.
    - **B:** a new user story after #1028, since Abort never stopped them in RAM mode either.
 5. **Pull requests:** one per step below, as #1025 did.
@@ -80,7 +82,10 @@ Decisions 1 to 3 were taken as recommended on 2026-11-10, when the owner merged 
    - Tests: a performance test exports the 1 GB droid log on disk, and runs one analyzer over it, each within a generous bound that reads through `record.Content` would miss by a wide margin. The existing analyzer, export and CLI tests run on disk in CI's disk run, which now includes the CLI's functional tests.
    - A `ContentBuffer` reads a whole chunk only for a second record in a row from it, and each chunk whole once at most, so a sparse list reads only each record's blocks, and records sorted by time never make a pass read more than the log once (found in review).
    - Done first, since it needs no decision: on the 1 GB droid log on disk, export takes 3.0 s instead of 80 s, and the detect-data analyzer 4.4 s instead of 83 s (2026-11-10, with the log in the operating system's cache).
-3. **Abort** (if decision 4 picks A).
+3. **Abort** (decision 4, option A).
+   - Tests: an analyzer, a save and a search aborted part-way stop at the next record; a plugin's analyzer without the new overload still runs, and doesn't once aborted; the engine passes the token on; Abort in the GUI posts no results.
+   - Done third (#1178, 2026-11-11). The built-in analyzers that read content check the token at every record; the three that read only timestamps keep the default overload. A save writes beside its destination and replaces it when done, so a cancelled or failed save keeps an earlier file. A cancelled search keeps the active record, and "Search complete." logs that it was cancelled.
+   - Escape cancels an analysis wherever the focus is. Export and Find still run on the UI thread, so Escape can't reach them: #1028 moves them off it.
 
 ## Not in This Plan
 
