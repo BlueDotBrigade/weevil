@@ -36,8 +36,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 | `BlueDotBrigade.Weevil.Gui-FeatureTests` | Feature tests for genuine GUI-specific user journeys |
 | `BlueDotBrigade.Weevil.Cli-FunctionalTests` | Functional tests for the command-line interface's commands, with real I/O |
 | `BlueDotBrigade.Weevil.PowerShell-FunctionalTests` | Functional tests for the PowerShell cmdlets, with real I/O |
-| `BlueDotBrigade.Weevil.Core-PerformanceTests` | CPU, RAM and I/O checks of the performance requirements, on logs small enough for CI |
-| `BlueDotBrigade.Weevil.Core-Benchmarks` | BenchmarkDotNet benchmarks, run on demand in Release, not by a test runner: see [Testing.md](../../Doc/Guides/Testing/Testing.md#performance) |
+| `BlueDotBrigade.Weevil.Core-PerformanceTests` | CPU, RAM and I/O checks of the performance requirements, on logs small enough for CI, and BenchmarkDotNet benchmarks run on demand |
 
 ## Test Placement
 
@@ -46,7 +45,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Use core feature tests for: filtering logic, analysis results, navigation, data transformations, persistence.
 - Use GUI feature tests for: workflow sequencing requiring UI state, visual concerns, end-user journeys spanning multiple ViewModels.
 - A test that needs Windows, for example to exercise WPF, in a project that otherwise runs on any system, carries `[OSCondition(OperatingSystems.Windows)]`, so other systems skip it. `BlueDotBrigade.Weevil.Gui-FeatureTests` builds only on Windows, so its tests need not.
-- Put performance tests in `BlueDotBrigade.Weevil.Core-PerformanceTests`, so they need no category to be found.
+- Put performance tests in `BlueDotBrigade.Weevil.Core-PerformanceTests`, so they need no category to be found. A budget that must hold is an MSTest test; a measurement to compare two versions is a BenchmarkDotNet class in its `Benchmarks/` folder. See [Testing.md](../../Doc/Guides/Testing/Testing.md#performance).
 
 ## Naming Convention
 

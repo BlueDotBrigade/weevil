@@ -48,24 +48,25 @@ CI runs the Core unit, feature and functional tests, and the CLI's functional te
 
 ## Performance
 
-Two projects watch performance, at different grains (#1177):
+Everything about performance lives in `BlueDotBrigade.Weevil.Core-PerformanceTests`, in two kinds (#1177):
 
-| Project | Runs | Catches |
-|---|---|---|
-| `BlueDotBrigade.Weevil.Core-PerformanceTests` | In CI, as tests | Large regressions: memory kept per record in RAM and on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
-| `BlueDotBrigade.Weevil.Core-Benchmarks` | On demand, with BenchmarkDotNet | Smaller regressions in time and memory allocated: opening (without a saved line index), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
+| Kind | Where | Runs | Catches |
+|---|---|---|---|
+| **Test**: a budget that must hold | An MSTest `[TestClass]` | In CI, with `dotnet test` | Large regressions: memory kept per record in RAM and on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
+| **Benchmark**: a measurement to compare two versions | A BenchmarkDotNet class in `Benchmarks/` | On demand, with `dotnet run` | Smaller regressions in time and memory allocated: opening (without a saved line index), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
 
-A CI runner is too noisy to fail a build on a 10% slowdown, so the benchmarks are not a test. The Windows CI job builds them in Debug, to check they compile; nothing runs them.
+Add a test when a limit must never be crossed, and a benchmark when you want to see how a change moves a number. A CI runner is too noisy to fail a build on a 10% slowdown, so that is a benchmark, not a test. CI never runs the benchmarks.
 
 ### Running the Benchmarks
 
 Run them in Release, on a quiet computer, from the repository's root folder:
 
 ```
-dotnet run -c Release -p:Platform=x64 --project Tst/BlueDotBrigade.Weevil.Core-Benchmarks -- --filter "*"
+dotnet run -c Release -p:Platform=x64 --project Tst/BlueDotBrigade.Weevil.Core-PerformanceTests -- --filter "*"
 ```
 
-- `--filter "*Filter*"` runs one class's benchmarks; without `--filter`, BenchmarkDotNet asks which to run.
+- In Debug, the program only says to run it in Release.
+- `--filter "*FilterBenchmarks*"` runs one class's benchmarks; without `--filter`, BenchmarkDotNet asks which to run.
 - `--job short` takes a few minutes, for a quick look. The default job takes longer and measures more precisely.
 - The first run writes the reference logs to the temporary folder (`Weevil.Benchmarks`), and later runs reuse them. After a change to `ReferenceLog.cs`, delete that folder.
 - Results are written to `BenchmarkDotNet.Artifacts/results`, which Git ignores.
