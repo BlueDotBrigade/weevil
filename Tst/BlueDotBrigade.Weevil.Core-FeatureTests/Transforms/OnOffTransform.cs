@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BlueDotBrigade.Weevil.Filter;
-using Microsoft.Diagnostics.Tracing.Parsers.Clr;
 
 namespace BlueDotBrigade.Weevil.Transforms
 {

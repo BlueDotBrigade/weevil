@@ -50,8 +50,9 @@ jobs:
       - name: Build (Debug, x64)
         run: dotnet build Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-restore
 
+      # The benchmarks take minutes and need a Release build, so CI leaves them out. The Benchmarks workflow runs them on demand (#1177).
       - name: Test (Debug, x64)
-        run: dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal
+        run: dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal --filter "TestCategory!=Benchmark"
 
       # Runs the Core and CLI tests again with every log opened on disk, unless a test chooses a mode (#1025, #1027).
       # Only these projects: a Debug GUI follows the same setting, and each performance test chooses its own mode.
@@ -93,11 +94,12 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      # The benchmarks take minutes and need a Release build, so CI leaves them out. The Benchmarks workflow runs them on demand (#1177).
       - name: Test (Debug, x64)
         run: |
           for project in Tst/*/*.csproj; do
             if [[ "$project" == *Gui* ]]; then continue; fi
-            dotnet test "$project" --configuration Debug -p:Platform=x64 --verbosity normal
+            dotnet test "$project" --configuration Debug -p:Platform=x64 --verbosity normal --filter "TestCategory!=Benchmark"
           done
 
       # Runs the Core and CLI tests again with every log opened on disk, unless a test chooses a mode (#1025, #1027).

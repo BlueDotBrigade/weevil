@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>$(WeevilTargetFramework)</TargetFramework>
-		<OutputType>Library</OutputType>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>BlueDotBrigade.Weevil</RootNamespace>
@@ -19,6 +18,7 @@
 		<CodeAnalysisRuleSet>..\..\Weevil.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
 		<PackageReference Include="BlueDotBrigade.DatenLokator" Version="2.4.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
 		<PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
