@@ -24,8 +24,9 @@
 		<PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
 	</ItemGroup>
 	<ItemGroup>
-		<!-- The same records as the performance tests' reference log. -->
+		<!-- The same records as the performance tests' reference log, and the same answer to an analyzer's prompt. -->
 		<Compile Include="..\BlueDotBrigade.Weevil.Core-PerformanceTests\ReferenceLog.cs" Link="ReferenceLog.cs" />
+		<Compile Include="..\BlueDotBrigade.Weevil.Core-PerformanceTests\Analysis\ExpressionDialog.cs" Link="ExpressionDialog.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />

@@ -52,10 +52,10 @@ Two projects watch performance, at different grains (#1177):
 
 | Project | Runs | Catches |
 |---|---|---|
-| `BlueDotBrigade.Weevil.Core-PerformanceTests` | In CI, as tests | Large regressions: memory kept per record, an analyzer or export on disk reading the log far more than once, and filters, export and an analyzer far over a generous time limit |
+| `BlueDotBrigade.Weevil.Core-PerformanceTests` | In CI, as tests | Large regressions: memory kept per record in RAM and on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
 | `BlueDotBrigade.Weevil.Core-Benchmarks` | On demand, with BenchmarkDotNet | Smaller regressions in time and memory allocated: opening (without a saved line index), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
 
-A CI runner is too noisy to fail a build on a 10% slowdown, so the benchmarks are not a test. CI only builds them.
+A CI runner is too noisy to fail a build on a 10% slowdown, so the benchmarks are not a test. The Windows CI job builds them in Debug, to check they compile; nothing runs them.
 
 ### Running the Benchmarks
 

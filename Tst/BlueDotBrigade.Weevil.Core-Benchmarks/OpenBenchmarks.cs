@@ -6,7 +6,7 @@ namespace BlueDotBrigade.Weevil
 	/// Opening a log in RAM: parsing it into the record table, without a saved line index (#1177).
 	/// </summary>
 	/// <remarks>
-	/// Weevil saves no line index in the temporary folder, so every open parses the whole log, as a user's first open of a log does.
+	/// Weevil saves no line index in the temporary folder, so every open parses the whole log, as a user's first open of a log does, without then saving the index.
 	/// </remarks>
 	[MemoryDiagnoser]
 	public class OpenBenchmarks
