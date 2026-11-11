@@ -60,6 +60,8 @@ Today Abort stops only filters. Analyzers, export and Find run to the end. `IRec
 
 ## Decisions for the Owner
 
+Decisions 1 to 3 were taken as recommended on 2026-11-10, when the owner merged this plan and asked to proceed. Decision 4 is still open.
+
 1. **RAM mode uses the same filter ranges.** Recommended: one code path, kept only if the RAM filter times do not get slower. Otherwise disk mode alone uses them.
 2. **Reader threads:** one per core until the #1024 runs on NVMe and SATA decide the count, by the rule in the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md).
 3. **"Filtering complete." logs the bytes read from the log**, in disk mode. Recommended: the owner gets a figure from real use, and the performance test checks that a filter reads the log once.
@@ -72,6 +74,8 @@ Today Abort stops only filters. Analyzers, export and Find run to the end. `IRec
 
 1. **Filters read each chunk once.** Chunk-aligned ranges, and the log of bytes read (decision 3).
    - Tests: the droid filter performance test also checks, in disk mode, that a filter reads the log's bytes once. A unit test checks that the ranges cover every position once, in order, at chunk boundaries. A feature test checks that a moniker filter on a log opened on disk finds its records after the log is deleted, so it read nothing.
+   - Done second (2026-11-10), with decisions 1 to 3 as recommended. On the droid logs on disk, a filter reads 1.008 times the log, against 1.3 to 2.1 before: each chunk's first record reads its own blocks first. On disk, the 1 GB log filtered in about 770 ms against 1,100 (medians of 7, with the log in the operating system's cache).
+   - Ranges follow chunks only on disk. In RAM, where a chunk costs nothing to read, one range per chunk left a log under 16 MB on one thread, about 3 times slower (found in review), so RAM splits into 4 ranges per core. A log on disk with at most half as many chunks as cores splits each chunk's range, so more cores are busy, and each part's worker reads its chunk once. RAM filter times then matched main's, within noise: 16 – 23 ms against 15 – 18 on a 13 MB log, and 600 – 700 ms against 620 – 655 on the 1 GB log.
 2. **Sequential readers read through a `ContentBuffer`.**
    - Tests: a performance test exports the 1 GB droid log on disk, and runs one analyzer over it, each within a generous bound that reads through `record.Content` would miss by a wide margin. The existing analyzer, export and CLI tests run on disk in CI's disk run, which now includes the CLI's functional tests.
    - A `ContentBuffer` reads a whole chunk only for a second record in a row from it, and each chunk whole once at most, so a sparse list reads only each record's blocks, and records sorted by time never make a pass read more than the log once (found in review).

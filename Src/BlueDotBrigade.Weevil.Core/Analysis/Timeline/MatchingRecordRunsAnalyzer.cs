@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Immutable;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
@@ -33,6 +34,14 @@
 		public string DisplayName => "Matching Record Runs";
 
 		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		{
+			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
+		}
+
+		/// <remarks>
+		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
+		/// </remarks>
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
         {
             var flaggedRecords = 0;
 			var blockCount = 0;
@@ -71,6 +80,8 @@
 				// The filter results and the selection are already in line number order, so they are not sorted into a copy (#1137).
 				foreach (IRecord record in records)
                 {
+					cancellationToken.ThrowIfCancellationRequested();
+
 					if (canUpdateMetadata)
 					{
 						state.SetFlagged(record, false);

@@ -6,6 +6,7 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
@@ -119,16 +120,23 @@
 		/// <remarks>
 		/// The text searched for is not recorded, because it may be sensitive.
 		/// A search that finds nothing, whether it throws <see cref="RecordNotFoundException"/> or returns <see cref="Record.Dummy"/>, is recorded as not found.
+		/// A search that was cancelled is recorded as cancelled, so it is not mistaken for a slow one that found nothing (#1027).
 		/// </remarks>
 		private IRecord Search(string search, bool useRegex, Func<IRecord> find)
 		{
 			var startedAt = Stopwatch.GetTimestamp();
 			IRecord record = Record.Dummy;
+			var wasCancelled = false;
 
 			try
 			{
 				record = find();
 				return record;
+			}
+			catch (OperationCanceledException)
+			{
+				wasCancelled = true;
+				throw;
 			}
 			finally
 			{
@@ -141,6 +149,7 @@
 						{ "UseRegex", useRegex },
 						{ "Duration", Stopwatch.GetElapsedTime(startedAt).TotalSeconds },
 						{ "WasFound", Record.IsGenuine(record) },
+						{ "WasCancelled", wasCancelled },
 						{ "Records", _activeRecord.DataSource.Length },
 					});
 			}
@@ -166,6 +175,11 @@
 
 		public IRecord PreviousContent(string text, bool isCaseSensitive, bool useRegex = false)
 		{
+			return PreviousContent(text, isCaseSensitive, useRegex, CancellationToken.None);
+		}
+
+		public IRecord PreviousContent(string text, bool isCaseSensitive, bool useRegex, CancellationToken cancellationToken)
+		{
 			if (text == null)
 			{
 				throw new ArgumentNullException(nameof(text));
@@ -175,10 +189,15 @@
 
 			return Search(nameof(PreviousContent), useRegex, () => this
 				.Using<IContentNavigator>()
-				.FindPrevious(text, isCaseSensitive, useRegex));
+				.FindPrevious(text, isCaseSensitive, useRegex, cancellationToken));
 		}
 
 		public IRecord NextContent(string text, bool isCaseSensitive, bool useRegex = false)
+		{
+			return NextContent(text, isCaseSensitive, useRegex, CancellationToken.None);
+		}
+
+		public IRecord NextContent(string text, bool isCaseSensitive, bool useRegex, CancellationToken cancellationToken)
 		{
 			if (text == null)
 			{
@@ -189,7 +208,7 @@
 
 			return Search(nameof(NextContent), useRegex, () => this
 				.Using<IContentNavigator>()
-				.FindNext(text, isCaseSensitive, useRegex));
+				.FindNext(text, isCaseSensitive, useRegex, cancellationToken));
 		}
 
 		public IRecord PreviousPin()

@@ -39,6 +39,8 @@ namespace BlueDotBrigade.Weevil.IO
 		private int _hasGrown;
 		private int _hasChanged;
 
+		private long _bytesRead;
+
 		internal LogFileSource(string path, long startOffset, long lengthWhenOpened)
 		{
 			this.Path = path;
@@ -71,6 +73,14 @@ namespace BlueDotBrigade.Weevil.IO
 		/// A read found the log truncated, replaced or corrupted since it was parsed, so it must be reloaded.
 		/// </summary>
 		public bool HasChanged => Volatile.Read(ref _hasChanged) == 1;
+
+		/// <summary>
+		/// How many bytes have been read back from the log so far: whole blocks, by every reader.
+		/// </summary>
+		/// <remarks>
+		/// A reader can count what it read by comparing the value before and after, though readers on other threads add to it too (#1027).
+		/// </remarks>
+		public long BytesRead => Interlocked.Read(ref _bytesRead);
 
 		/// <summary>
 		/// Reads the bytes at <paramref name="fileOffset"/> into <paramref name="destination"/>, after checking the blocks that hold them.
@@ -121,6 +131,7 @@ namespace BlueDotBrigade.Weevil.IO
 						Span<byte> bytes = buffer.AsSpan(0, (int)(blockEnd - blockStart));
 
 						ReadExactly(handle, bytes, blockStart);
+						Interlocked.Add(ref _bytesRead, bytes.Length);
 
 						if (XxHash3.HashToUInt64(bytes) != checksums[block - firstChecksum])
 						{

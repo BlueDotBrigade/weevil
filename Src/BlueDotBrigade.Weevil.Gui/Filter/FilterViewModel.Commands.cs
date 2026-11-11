@@ -176,7 +176,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand RefreshCommand => new UiBoundCommand(Refresh, () => this.IsMenuEnabled);
 
 		[NotObservable]
-		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress);
+		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress || _analysisCancellation != null);
 
 		[NotObservable]
 		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreFilterOptionsVisible = !this.AreFilterOptionsVisible, () => this.IsFilterToolboxEnabled);

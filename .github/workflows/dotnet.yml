@@ -55,7 +55,7 @@ jobs:
         run: dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal --filter "TestCategory!=Benchmark"
 
       # Runs the Core and CLI tests again with every log opened on disk, unless a test chooses a mode (#1025, #1027).
-      # Only these projects: a Debug GUI follows the same setting, and the performance tests measure RAM mode.
+      # Only these projects: a Debug GUI follows the same setting, and each performance test chooses its own mode.
       # The functional tests save sidecars beside their logs, so their test data is restored first, for both runs to use the same.
       - name: Test on disk (Debug, x64)
         shell: bash
@@ -103,7 +103,7 @@ jobs:
           done
 
       # Runs the Core and CLI tests again with every log opened on disk, unless a test chooses a mode (#1025, #1027).
-      # Only these projects: a Debug GUI follows the same setting, and the performance tests measure RAM mode.
+      # Only these projects: a Debug GUI follows the same setting, and each performance test chooses its own mode.
       # The functional tests save sidecars beside their logs, so their test data is restored first, for both runs to use the same.
       - name: Test on disk (Debug, x64)
         shell: bash
