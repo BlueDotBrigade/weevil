@@ -26,7 +26,7 @@ Phase 4 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
   - **The default comes from the log's size and the computer's memory**, no longer always RAM: it is RAM for the largest log that fits. Weevil assumes no other application runs apart from the operating system. A percentage of installed RAM does not work, because what matters is the memory the operating system leaves free. Memory is read through `ComputerSnapshot`, as Weevil reads its other facts about the computer.
   - **Zipped logs work in both modes**, from a copy extracted to a temporary folder and deleted later. The zip itself is never deleted (#1156).
   - **The CLI and PowerShell** open in RAM unless an optional parameter asks for Disk.
-- Proposed 2026-11-07, to confirm when step 5 starts: default to RAM when the log's estimated memory fits in the available memory, less a small fixed reserve.
+- Proposed 2026-11-07, confirmed 2026-11-11 in the [#1028 plan](1028-OpenAs.md#decisions-for-the-owner), which reads the available memory with `GlobalMemoryStatusEx`: default to RAM when the log's estimated memory fits in the available memory, less a small fixed reserve.
   - **Available:** Windows' available physical memory (free and standby pages) when the log is chosen. Applications already running count against it; no room is kept for applications started later. Check on Windows that `ComputerSnapshot.RamTotalFree`, WMI's `FreePhysicalMemory`, reports it; otherwise read it there with `GlobalMemoryStatusEx`.
   - **Estimate:** the log's size plus about 34 bytes per record: about 30 for the record table (1.22 GB of working set per GB of log, #1150) and 4 for a filter's temporary results. The record count comes from the saved index's line count, which is never lower, or from the average line length in the log's first megabyte.
   - **Reserve:** about 1 GB, for Weevil's window and headroom. Tune it once #1141 measures the peak while opening.
@@ -54,10 +54,10 @@ Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the 
    - Analyzers, export, Find, the graph and the dashboard read it once, in order, because most analyzers carry state from one record to the next. An NVMe drive reads 20 GB in about 6 s.
    - Filters on monikers that never read content, such as `@Pinned` or `@Flagged`, do not read the file, so an expression must say whether it needs content.
    - Abort stops them.
-5. **Open As dialog (#1028).** The simplest version (decided 2026-11-07): after the Windows file dialog, Weevil shows a small Open As window offering RAM or Disk, with the default already chosen.
+5. **Open As dialog (#1028).** Planned in the [#1028 plan](1028-OpenAs.md), approved 2026-11-11. The simplest version (decided 2026-11-07): after the Windows file dialog, Weevil shows a small Open As window offering RAM or Disk, with the default already chosen.
    - For a zip, Open As follows the Select File list, so the default uses the chosen log's size.
    - Warnings appear in that window, not in message boxes: RAM chosen for a log that may not fit, and a disk-mode log on a network drive (suggested 2026-11-07; the owner did not object).
-   - #1028 settles what drag-and-drop and opening from Explorer or the command line do, since they skip the Windows file dialog.
+   - Drag-and-drop and opening from Explorer or the command line show Open As too, although they skip the Windows file dialog (decided 2026-11-11).
    - Today only plugins can show an Open As dialog (`IPlugin.ShowOpenAs`), and the built-in plugins don't. A plugin's own window still follows Weevil's for now.
    - The CLI and PowerShell gain their optional mode parameter.
 6. **One Open dialog (#1157).** A generic file-browser user control in `BlueDotBrigade.Weevil.Windows`, which will later move to a library shared by Blue Dot Brigade WPF applications, replaces the Windows file dialog. Weevil's Open As window hosts it beside RAM and Disk. Its design is revisited when it starts (decided 2026-11-07). Details and open questions: #1157.

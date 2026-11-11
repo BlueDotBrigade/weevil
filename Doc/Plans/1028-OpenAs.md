@@ -1,6 +1,6 @@
 # 1028: Choose RAM or Disk When Opening a Log
 
-> **Status:** Draft
+> **Status:** Approved
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -61,7 +61,7 @@ Read from the code on 2026-11-11.
 
 ### Core: choosing the mode, and estimating memory
 
-Public additions, for the owner to approve (decision 1):
+Public additions (decision 1):
 
 - **`IEngineBuilder.UsingStorage(StorageMode)`**, the method that is internal today.
   - Only Core implements `IEngineBuilder`; plugins are only given one. So it is added as an ordinary member, and breaks no plugin.
@@ -78,7 +78,7 @@ Public additions, for the owner to approve (decision 1):
     - The log that is open now is still in memory when the free memory is read. Reopening a large log may therefore default to Disk. The [#986 plan](986-DiskMode.md#decisions) explains why Open keeps it.
 - **Reload after a change, for the CLI and PowerShell.** Both run one command and stop, so they recover the same way: catch `LogFileChangedException`, call `Reload()`, and try once more. If the second try fails, the error is reported as it is today.
   - The helper is written once, in Core, and used by both, so it is tested once.
-  - Its public shape is part of decision 1. Recommended: an extension method on `IEngine` that runs a function, and on a change reloads and runs it once more.
+  - Its shape (decision 1): an extension method on `IEngine` that runs a function, and on a change reloads and runs it once more.
 
 ### The Open As window
 
@@ -189,22 +189,24 @@ The search for text in RAM usually takes milliseconds. The progress bar appears 
 
 ## Decisions for the Owner
 
+All five were taken as recommended on 2026-11-11, when the owner approved this plan.
+
 1. **Public API.**
-   - Recommended: `IEngineBuilder.UsingStorage`, `IEngine.StorageMode`, `Engine.EstimateMemory` and the reload-and-retry helper, as described above.
+   - Chosen: `IEngineBuilder.UsingStorage`, `IEngine.StorageMode`, `Engine.EstimateMemory` and the reload-and-retry helper, as described above.
    - Alternative: leave out `IEngine.StorageMode`. The GUI then remembers the mode it asked for and passes it on, and a plugin's dashboard can't tell.
-2. **The default rule** (proposed in the #986 plan on 2026-11-07, to confirm now). Recommended:
+2. **The default rule** (proposed in the #986 plan on 2026-11-07). Chosen:
    - RAM when the log's size plus 34 bytes per record fits in the available physical memory, less 1 GB;
    - available memory read with `GlobalMemoryStatusEx`;
    - the reserve tuned once #1141 measures the peak while opening.
 3. **Drag-and-drop and opening from Explorer.**
-   - **A (recommended):** they show Open As, like every other open.
+   - **A (chosen):** they show Open As, like every other open.
    - **B:** they open with the default mode, without asking; the status bar shows which.
 4. **No `IEngine.SourceFileChanged` event** (the question left open in #1028).
-   - Recommended: none. The rows report to the GUI's handler through a callback.
+   - Chosen: none. The rows report to the GUI's handler through a callback.
    - A plugin that swallows the exception loses only its own read: the GUI's next read finds the change.
    - The event can be added later, if a plugin needs it.
 5. **The parameter's name.**
-   - Recommended: `--storage` in the CLI and `-Storage` in PowerShell, matching `StorageMode`.
+   - Chosen: `--storage` in the CLI and `-Storage` in PowerShell, matching `StorageMode`.
    - The alternative, `--mode`, is shorter but says less.
 
 ## Steps
@@ -260,4 +262,4 @@ One pull request per step, in order. The GUI builds only on Windows, so for step
 - Whether a plugin's own options join Weevil's window: moved to #1157.
 - Letting a plugin choose the mode: `OpenAsResult` carries no mode, and nothing asks for one.
 - The number of reader threads: #1024's measurements on NVMe and SATA.
-- A mode passed on Weevil's own command line, to skip Open As: only if decision 3 picks A and someone asks for it.
+- A mode passed on Weevil's own command line, to skip Open As: only if someone asks for it.
