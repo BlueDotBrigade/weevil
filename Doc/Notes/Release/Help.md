@@ -574,7 +574,7 @@ The following expressions are practical starting points for common tasks.
 ### Appendix P: Performance Tips
 
 - The larger the log file, the longer it will take to apply a new filter.
-- To stop a filter, an analyzer, a search for text (`Ctrl+F`, `F3`), a save of the selected records or a split that is still running, press **Esc**. A save that stops leaves any earlier file as it was.
+- To stop a filter, an analyzer, a search for text (`Ctrl+F`, `F3`, `Shift+F3`), a save of the selected records or a split that is still running, press **Esc**. A save that stops leaves any earlier file as it was.
 - The **Clear** commands can improve performance by removing unneeded records from memory.
   - **Clear Before** removes records before the highlighted row in Log Viewer.
   - **Clear After** removes records after the highlighted row in Log Viewer.

@@ -105,7 +105,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public async Task GivenOpenLog_WhenSavingTheSelectedRecords_ThenTheSaveRunsInBackgroundAndCanBeAborted()
+		public async Task GivenOpenLog_WhenSavingTheSelectedRecords_ThenTheSaveRunsInBackgroundWhereAbortIsAvailable()
 		{
 			// A save reads every record, from the log itself in disk mode, so it runs in the background, where Abort (Escape) can stop it (#1028).
 			using var uiDispatcher = new PausableUiDispatcher();
@@ -166,6 +166,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			await viewModel.OpenAsync(CopyLog("Find.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled);
 
+			// The record found takes the focus, so the next F3 reaches the view: the records and menus must be back by then.
+			var wereMenusEnabledWhenScrolling = false;
+			viewModel.ScrollRequested += (_, _) => wereMenusEnabledWhenScrolling = viewModel.IsMenuEnabled && !viewModel.IsProcessingLongOperation;
+
 			// The UI thread is busy, so the search cannot go to the record yet.
 			uiDispatcher.Pause();
 			viewModel.FindTextCommand.Execute(null);
@@ -182,6 +186,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 
 			viewModel.ActiveRecordIndex.Should().Be(9, "line 10 holds Id=010");
+			wereMenusEnabledWhenScrolling.Should().BeTrue("the view goes to the record found once the records and menus are back");
 			viewModel.IsMenuEnabled.Should().BeTrue("the menus are enabled again once the search finishes");
 		}
 
