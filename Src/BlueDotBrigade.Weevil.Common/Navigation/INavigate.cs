@@ -36,14 +36,14 @@
 		/// <summary>
 		/// As <see cref="PreviousContent(string, bool, bool)"/>, and stops when <paramref name="cancellationToken"/> is cancelled, as Abort does (#1027).
 		/// </summary>
-		/// <exception cref="RecordNotFoundException">No record before the active one holds the text.</exception>
+		/// <exception cref="RecordNotFoundException">No record holds the text.</exception>
 		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled. The active record does not change.</exception>
 		IRecord PreviousContent(string text, bool isCaseSensitive, bool useRegex, System.Threading.CancellationToken cancellationToken);
 
 		/// <summary>
 		/// As <see cref="NextContent(string, bool, bool)"/>, and stops when <paramref name="cancellationToken"/> is cancelled, as Abort does (#1027).
 		/// </summary>
-		/// <exception cref="RecordNotFoundException">No record after the active one holds the text.</exception>
+		/// <exception cref="RecordNotFoundException">No record holds the text.</exception>
 		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled. The active record does not change.</exception>
 		IRecord NextContent(string text, bool isCaseSensitive, bool useRegex, System.Threading.CancellationToken cancellationToken);
 

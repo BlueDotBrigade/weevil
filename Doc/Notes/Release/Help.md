@@ -285,7 +285,7 @@ Typical workflow:
 1. Filter using a regular expression with a named group.
    - Example: `Key=(?<Value>[a-zA-Z0-9]+)`
 2. Select an analyzer.
-   - To stop an analyzer that is still running, press **Esc**. The flags and comments it has already added stay.
+   - To stop an analyzer that is still running, press **Esc**. The records it has already reached keep their new flags and comments; the others may still show the previous analysis's flags. The time-gap and out-of-order timestamp analyzers, and a plugin's analyzers, cannot be stopped once they have started.
 3. Review the results using one of these filters:
    - `@Comment` to show all records with extracted comments
    - `@Flagged` to show records matched by the previous analysis

@@ -20,6 +20,9 @@
 		{
 			// Each row's content is read once, by position, into a buffer the search reuses (#1131),
 			// so only the record found is created (#1150).
+			// Also before the first record, so an empty list honours a search cancelled before it starts.
+			cancellationToken.ThrowIfCancellationRequested();
+
 			RecordList records = _activeRecord.DataSource;
 			var content = new ContentBuffer();
 			TextPredicate isMatch = CreatePredicate(value, isCaseSensitive, useRegex);
@@ -33,6 +36,9 @@
 		{
 			// Each row's content is read once, by position, into a buffer the search reuses (#1131),
 			// so only the record found is created (#1150).
+			// Also before the first record, so an empty list honours a search cancelled before it starts.
+			cancellationToken.ThrowIfCancellationRequested();
+
 			RecordList records = _activeRecord.DataSource;
 			var content = new ContentBuffer();
 			TextPredicate isMatch = CreatePredicate(value, isCaseSensitive, useRegex);

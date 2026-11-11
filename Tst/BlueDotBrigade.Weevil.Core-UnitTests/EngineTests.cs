@@ -598,16 +598,19 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
-		public void GivenTextThatALaterRecordHolds_WhenSearchingForItIsAborted_ThenTheSearchStopsWithoutFindingIt()
+		[DoNotParallelize]
+		public void GivenTextThatALaterRecordHolds_WhenSearchingForItIsAborted_ThenTheSearchStopsAndIsLoggedAsCancelled()
 		{
 			// A search that was aborted is not mistaken for one that found nothing (#1027).
 			IEngine engine = OpenCopy();
 			engine.Selector.Select(lineNumber: 1);
+			using var log = CapturingLogWriter.Register();
 
 			Action search = () => engine.Navigate.NextContent("Id=150", isCaseSensitive: true, useRegex: false, new CancellationToken(canceled: true));
 
 			search.Should().Throw<OperationCanceledException>();
-			engine.Navigate.NextContent("Id=150", isCaseSensitive: true).LineNumber.Should().Be(150, "the aborted search did not move the active record");
+			log.Last("Search complete.")["WasCancelled"].Should().Be(true);
+			engine.Navigate.NextContent("Id=00", isCaseSensitive: true).LineNumber.Should().Be(2, "the aborted search did not move the active record from line 1");
 		}
 
 		[TestMethod]

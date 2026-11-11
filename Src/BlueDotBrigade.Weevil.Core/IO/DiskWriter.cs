@@ -64,6 +64,9 @@
 					Log.Default.Write(LogSeverityType.Warning, $"Records could not be saved - no records have been provided. Count={records.Length}");
 				}
 
+				// Before an earlier file is replaced, so a save cancelled before it starts changes nothing.
+				cancellationToken.ThrowIfCancellationRequested();
+
 				if (System.IO.File.Exists(_destinationFilePath))
 				{
 					System.IO.File.Delete(_destinationFilePath);
@@ -92,9 +95,19 @@
 				}
 				catch (OperationCanceledException)
 				{
-					// The stream is closed by now, so the file saved so far can be deleted. It is the destination, never the log.
-					System.IO.File.Delete(_destinationFilePath);
-					Log.Default.Write(LogSeverityType.Information, $"Records were not saved - the user aborted. Format={_fileFormatType}");
+					Log.Default.Write(LogSeverityType.Information, $"Records were not saved - the save was cancelled. Format={_fileFormatType}");
+
+					try
+					{
+						// The stream is closed by now, so the file saved so far can be deleted. It is the destination, never the log.
+						System.IO.File.Delete(_destinationFilePath);
+					}
+					catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+					{
+						// The caller is told of the cancel, not of a file that another application holds.
+						Log.Default.Write(LogSeverityType.Warning, $"The records saved before the cancel could not be deleted. Reason=`{exception.Message}`");
+					}
+
 					throw;
 				}
 

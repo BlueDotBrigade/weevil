@@ -37,7 +37,7 @@
 
                 public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
                 {
-            			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
+                        return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
                 }
 
                 /// <remarks>

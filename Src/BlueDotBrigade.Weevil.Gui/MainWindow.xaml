@@ -17,6 +17,10 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
         d:DataContext="{d:DesignInstance local:MainWindowViewModel}">
+    <Window.InputBindings>
+        <!-- On the window, not the filter view: while an analysis runs, nothing in the filter view can hold the focus (#1027). -->
+        <KeyBinding Key="Escape" Command="{Binding FilterViewModel.AbortFilterCommand}" />
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
