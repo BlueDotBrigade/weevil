@@ -77,6 +77,33 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			bulletinMediator.Received(1).Post(Arg.Is<AnalysisCompleteBulletin>(bulletin => bulletin.FlaggedRecords > 0));
 		}
 
+		[TestMethod]
+		public async Task GivenAnalysisInProgress_WhenAborted_ThenItStopsWithoutResultsAndTheMenusAreEnabledAgain()
+		{
+			// Abort (Escape) cancels an analysis: it posts no results, shows no error, and gives the menus back (#1027).
+			var couldAbort = false;
+			FilterViewModel viewModel = null!;
+
+			// Pressed while the analyzer's prompt is open, so the analyzer stops at its first record.
+			IDialogBoxService dialog = CreateDialog(() =>
+			{
+				couldAbort = viewModel.AbortFilterCommand.CanExecute(null);
+				viewModel.AbortFilterCommand.Execute(null);
+			});
+
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+			await OpenAsync(viewModel);
+			bulletinMediator.ClearReceivedCalls();
+
+			await viewModel.Analyze(AnalysisType.DetectData);
+
+			couldAbort.Should().BeTrue("Abort is available while the analyzer runs");
+			bulletinMediator.DidNotReceive().Post(Arg.Any<AnalysisCompleteBulletin>());
+			viewModel.IsMenuEnabled.Should().BeTrue("the menus are enabled again once the analysis stops");
+			viewModel.AbortFilterCommand.CanExecute(null).Should().BeFalse("nothing is left to abort");
+		}
+
 		// Regression: Issue #996 - the busy overlay was shown only after a prompt closed.
 		[TestMethod]
 		public async Task GivenOpenLog_WhenAnalysisStarts_ThenBusyOverlayIsShownExceptDuringPrompts()

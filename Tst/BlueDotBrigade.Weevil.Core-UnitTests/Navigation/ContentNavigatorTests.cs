@@ -2,12 +2,35 @@
 {
 	using System;
 	using System.Text;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
 	public class ContentNavigatorTests
 	{
+		[TestMethod]
+		public void GivenASearchAbortedWhileItReadsRecords_WhenItGoesOn_ThenItStopsAtTheNextRecordAndKeepsTheActiveRecord()
+		{
+			// Abort cancels the search, which stops within one record rather than reading the rest of a log on disk (#1027).
+			RecordList records = R.Create()
+				.WithContent("First")
+				.WithContent("Second")
+				.WithContent("Third")
+				.WithContent("The text searched for")
+				.GetRecords();
+			using var abort = new CancellationTokenSource();
+			var list = new AbortingRecordList(records, abort, abortAtRead: 1);
+			var activeRecord = new ActiveRecord(list);
+			activeRecord.SetActiveIndex(0);
+
+			Action search = () => new ContentNavigator(activeRecord).FindNext("searched", isCaseSensitive: true, useRegex: false, abort.Token);
+
+			search.Should().Throw<OperationCanceledException>();
+			list.Reads.Should().Be(1, "the search stops at the record after the abort");
+			activeRecord.Index.Should().Be(0);
+		}
+
 		[TestMethod]
 		public void FindNext_CaseIgnored_RecordFound()
 		{
@@ -152,6 +175,47 @@
 			builder.Add(5, Record.CreationTimeUnknown, facts, chunk, single.Length + multiLine.Length, invalid.Length);
 
 			return builder.Build();
+		}
+
+		/// <summary>
+		/// Reads another list, and aborts a search when it reads the content of its Nth record.
+		/// </summary>
+		private sealed class AbortingRecordList : RecordList
+		{
+			private readonly RecordList _records;
+			private readonly CancellationTokenSource _abort;
+			private readonly int _abortAtRead;
+
+			public AbortingRecordList(RecordList records, CancellationTokenSource abort, int abortAtRead)
+			{
+				_records = records;
+				_abort = abort;
+				_abortAtRead = abortAtRead;
+			}
+
+			public int Reads { get; private set; }
+
+			public override int Count => _records.Count;
+
+			public override IRecord this[int position] => _records[position];
+
+			public override int GetLineNumber(int position) => _records.GetLineNumber(position);
+
+			public override DateTime GetCreatedAt(int position) => _records.GetCreatedAt(position);
+
+			public override RecordFacts GetFacts(int position) => _records.GetFacts(position);
+
+			public override ReadOnlySpan<char> ReadContent(int position, ContentBuffer content)
+			{
+				this.Reads++;
+
+				if (this.Reads == _abortAtRead)
+				{
+					_abort.Cancel();
+				}
+
+				return _records.ReadContent(position, content);
+			}
 		}
 	}
 }
