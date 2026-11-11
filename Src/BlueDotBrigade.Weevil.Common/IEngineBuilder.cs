@@ -2,6 +2,7 @@
 {
 	using System;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.IO;
 
 	public delegate IEngineBuilder CreateEngineBuilder(string source);
 
@@ -26,6 +27,17 @@
 		/// </summary>
 		/// <param name="range">Represents the line numbers that will be loaded.</param>
 		IEngineBuilder UsingRange(Range range);
+
+		/// <summary>
+		/// Keeps the log's content in RAM, the default, or reads it back from the log whenever it is needed (#421).
+		/// </summary>
+		/// <remarks>
+		/// <see cref="IEngine.Reload"/> and <see cref="IEngine.Clear"/> keep the mode.
+		/// On disk, a read of a record's content can throw an <see cref="System.IO.IOException"/>, such as <see cref="LogFileChangedException"/>, once the log changed or is gone.
+		/// </remarks>
+		/// <param name="storageMode">Where the log's content is kept.</param>
+		/// <exception cref="ArgumentOutOfRangeException"><paramref name="storageMode"/> is not a <see cref="StorageMode"/>.</exception>
+		IEngineBuilder UsingStorage(StorageMode storageMode);
 
 		IEngine Open();
 	}

@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 	using System.Collections.Generic;
 	using System.Management.Automation;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.IO;
 
 	/*
 	# Assuming you have already loaded the BlueDotBrigade.Weevil.PowerShell module
@@ -25,15 +26,23 @@ namespace BlueDotBrigade.Weevil.PowerShell
         [Parameter(Position = 0, Mandatory = true)]
         public string FilePath { get; set; }
 
+        /// <summary>
+        /// Ram, the default, keeps the log in memory. Disk reads it back from the log, for a log larger than memory (#1028).
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "Ram keeps the log in memory. Disk reads it back from the log, for a log larger than memory.")]
+        public StorageMode Storage { get; set; } = StorageMode.Ram;
+
         protected override void ProcessRecord()
         {
             try
             {
                 IEngine engine = Engine
                     .UsingPath(this.FilePath)
+                    .UsingStorage(this.Storage)
                     .Open();
 
-                IEnumerable<IInsight> insights = engine.Analyzer.GetInsights();
+                // On disk, a log that changed while it was read is reloaded, and read once more (#1028).
+                IEnumerable<IInsight> insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
 
                 foreach (var insight in insights)
                 {

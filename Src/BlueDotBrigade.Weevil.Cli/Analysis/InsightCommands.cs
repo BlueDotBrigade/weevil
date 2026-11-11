@@ -25,7 +25,11 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			name: "Insight",
 			Aliases = new[] { "i" },
 			Description = "Extracts key performance indicators (KPIs), and relevant metrics.")]
-		public void Insight(string logPath, bool verbose = false)
+		public void Insight(
+			string logPath,
+			bool verbose = false,
+			[Option(Description = "Ram keeps the log in memory. Disk reads it back from the log, for a log larger than memory.")]
+			StorageMode storage = StorageMode.Ram)
 		{
 			var telemetry = TelemetrySessionLifecycle.Shared;
 			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
@@ -37,11 +41,13 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 				IEngine engine = Engine
 						.UsingPath(logPath)
 						.UsingTelemetry(telemetry)
+						.UsingStorage(storage)
 						.Open();
 
 				var severityMetrics =  engine.Filter.GetMetrics();
 
-				var insights = engine.Analyzer.GetInsights();
+				// On disk, a log that changed while it was read is reloaded, and read once more (#1028).
+				var insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
 
 				if (verbose)
 				{

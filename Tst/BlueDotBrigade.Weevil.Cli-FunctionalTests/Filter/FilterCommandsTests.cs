@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Cli.Filter
 {
 	using System.IO;
+	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
 	public class FilterCommandsTests
@@ -20,17 +21,21 @@ namespace BlueDotBrigade.Weevil.Cli.Filter
 			Directory.Delete(_folder, recursive: true);
 		}
 
-		// Regression: Issue #1001
 		[TestMethod]
-		public void GivenIncludeFilter_WhenFiltering_ThenResultsFileHasOnlyMatchingRecords()
+		[WorkItem(1001)]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenIncludeFilter_WhenFiltering_ThenResultsFileHasOnlyMatchingRecords(StorageMode storage)
 		{
+			// The Filter command wrote no results file.
 			var logPath = CopyLog("Application.log");
 			var lines = File.ReadAllLines(logPath);
 
-			new FilterCommands().Filter(logPath, include: "Error", exclude: null);
+			new FilterCommands().Filter(logPath, include: "Error", exclude: null, storage);
 
 			File.ReadAllLines(Path.Combine(_folder, "Application.Results.log"))
 				.Should().Equal(lines[2], lines[4], lines[7]);
+			Directory.GetFiles(_folder, "*.tmp").Should().BeEmpty("the results are moved into place once written");
 		}
 
 		// Regression: Issue #1001
