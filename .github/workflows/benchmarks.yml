@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       benchmarks:
+        # A new benchmark class needs an entry here, as well as its test method in BenchmarkTests.
         description: Which benchmark class to run
         type: choice
         options: [All, Open, Filter, Find, Export, Analyzer]
@@ -61,7 +62,7 @@ jobs:
           if [[ "$BENCHMARKS" != "All" ]]; then filter="$filter&Name~${BENCHMARKS}Benchmarks"; fi
           dotnet test Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/BlueDotBrigade.Weevil.Core-PerformanceTests.csproj --configuration Release -p:Platform=x64 --filter "$filter" --logger "console;verbosity=detailed"
 
-      # Even after a failure or a timeout, so the reports of the classes already measured, and the log of how far the run got, are kept.
+      # Even after a failure or a timeout, so the reports of the classes already measured, and each class's log, are kept.
       - name: Show the reports
         if: always()
         shell: bash
@@ -72,6 +73,7 @@ jobs:
             echo >> "$GITHUB_STEP_SUMMARY"
           done
 
+      # A choice that matches no test runs nothing and passes, so no file at all fails the run.
       - name: Keep the reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,4 +82,4 @@ jobs:
           path: |
             Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/bin/x64/Release/*/BenchmarkDotNet.Artifacts/results/*.md
             Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/bin/x64/Release/*/BenchmarkDotNet.Artifacts/*.log
-          if-no-files-found: warn
+          if-no-files-found: error

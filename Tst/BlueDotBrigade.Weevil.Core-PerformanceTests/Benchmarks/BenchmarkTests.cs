@@ -15,12 +15,12 @@ namespace BlueDotBrigade.Weevil
 	/// <code>dotnet test Tst/BlueDotBrigade.Weevil.Core-PerformanceTests -c Release -p:Platform=x64 --filter TestCategory=Benchmark</code>
 	/// CI excludes the category, and the Benchmarks workflow runs it on demand. In a Debug build each test is inconclusive and measures nothing, because BenchmarkDotNet's times mean nothing without the optimizer.
 	///
-	/// The results stay in <see cref="ArtifactsPath"/>: a <c>*-report-github.md</c> file per class, under <c>results</c>, and a log of the whole run.
+	/// The results stay in <see cref="ArtifactsPath"/>: a <c>*-report-github.md</c> file per class, under <c>results</c>, and a log per class, named after the class and the time it started.
 	/// Each test also attaches its report to its result, and writes the table to its output.
 	///
 	/// The output can stop, or not appear, in these cases. Doc/Guides/Testing/Testing.md says what to do about each:
 	/// <list type="bullet">
-	///   <item>The test runner shows a test's output only once the test ends, so a run of several minutes shows no progress. BenchmarkDotNet's log, in <see cref="ArtifactsPath"/>, is written as it goes.</item>
+	///   <item>The test runner shows a test's output only once the test ends, so a run of several minutes shows no progress. BenchmarkDotNet writes the class's log, in <see cref="ArtifactsPath"/>, as it goes.</item>
 	///   <item>A timeout, from the test runner or from the workflow, stops the run. The class being measured then writes no report; the classes already measured keep theirs.</item>
 	///   <item>BenchmarkDotNet's documentation supports console applications only. It works from MSTest with BenchmarkDotNet 0.15.8, but a later version may stop working from a test runner.</item>
 	/// </list>
