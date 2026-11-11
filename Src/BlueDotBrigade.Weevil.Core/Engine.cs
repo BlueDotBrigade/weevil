@@ -104,6 +104,9 @@
 
 		public IRecordState RecordState => _coreEngine.RecordState;
 
+		/// <inheritdoc />
+		public IO.StorageMode StorageMode => _coreEngine.StorageMode;
+
 		public int Count => _coreEngine.Count;
 
 		public ContextDictionary Context => _coreEngine.Context;
@@ -148,6 +151,24 @@
 		public static IEngineBuilder UsingPath(string sourceFilePath, int startAtLineNumber)
 		{
 			return new EngineBuilder(sourceFilePath, startAtLineNumber);
+		}
+
+		/// <summary>
+		/// Estimates the memory the log needs when opened in <see cref="IO.StorageMode.Ram"/>, so a caller can suggest RAM or Disk before opening it (#1028).
+		/// </summary>
+		/// <remarks>
+		/// The log's size plus 34 bytes per record, counting lines, which are never fewer than records. The line count comes from the saved line index when there is one,
+		/// otherwise from the log's first megabyte, so the estimate can err either way.
+		/// It reads at most the index's header and 1 MB of the log, so call it off the UI thread: on a network drive that takes a noticeable moment.
+		/// It covers the log's content and records, not the application, nor a log that is already open.
+		/// </remarks>
+		/// <param name="sourceFilePath">The log to estimate.</param>
+		/// <exception cref="FileNotFoundException">The log does not exist.</exception>
+		/// <exception cref="IOException">The log cannot be read.</exception>
+		/// <exception cref="UnauthorizedAccessException">The log cannot be read.</exception>
+		public static IO.StorageUnit EstimateMemory(string sourceFilePath)
+		{
+			return IO.MemoryEstimator.Estimate(sourceFilePath);
 		}
 
 		public void Clear(ClearOperation clearOperation)

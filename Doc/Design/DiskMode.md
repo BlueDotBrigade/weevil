@@ -9,7 +9,9 @@ How Weevil keeps a log's content on disk instead of in memory (#421, #1025). The
 - **RAM**, the default: each record's content is kept in memory until Reload, as bytes in 16 MB chunks, or as a string for UTF-16 in the other byte order, UTF-32 and text a plugin changed.
 - **Disk**: only the record table stays in memory, about 22 bytes per record. Content is read back from the log whenever it is needed, whatever the encoding. Only text a plugin's parser changed, which is not in the log, stays in memory.
 
-Until the Open As window lets the user choose (#1028), only Core's internal `EngineBuilder.UsingStorage` takes the mode. The engine keeps it, and Clear, Reload and a retry after a failed Reload keep it.
+`IEngineBuilder.UsingStorage` takes the mode, and `IEngine.StorageMode` reports it (#1028). The engine keeps it, and Clear, Reload and a retry after a failed Reload keep it. The CLI's `--storage` and PowerShell's `-Storage` choose it; without them, a log opens in RAM. The GUI's Open As window comes with #1028.
+
+`Engine.EstimateMemory(path)` estimates the memory a log needs in RAM, so a caller can suggest a mode before opening it: the log's size plus 34 bytes per line, counted from the saved line index's header, or from the log's first megabyte.
 
 ## Reading a Log on Disk
 
@@ -35,7 +37,7 @@ A log that was truncated, replaced or corrupted must be reloaded (#1168):
 5. Reload deletes the saved line index first, because the index checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
 6. If the log changes again before Reload applies the filter, Reload deletes the line index it has just saved, and ends like one that could not read the log: the engine shows the log without records, keeps the filter for the next Reload, and Reload throws what the read threw.
 
-The GUI, CLI and PowerShell do step 4, and handle what Reload throws in step 6, in #1028. A read that fails because the log can no longer be opened, with another `IOException` or an `UnauthorizedAccessException`, is thrown as it is by a filter, as in step 3, and ends a Reload as in step 6. Unlike a change, the filter logs it as an error, because nothing has logged it before.
+The CLI and PowerShell do step 4 through the extension method `EngineExtensions.RunReloadingOnChange`: it runs their work, such as a filter, and on a change reloads once and runs it again. Opening the log is not part of that work: a log that changes while it opens is read as it was. A second change, or what Reload throws in step 6, reaches them as an error. The GUI does step 4 in #1028. A read that fails because the log can no longer be opened, with another `IOException` or an `UnauthorizedAccessException`, is thrown as it is by a filter, as in step 3, and ends a Reload as in step 6. Unlike a change, the filter logs it as an error, because nothing has logged it before.
 
 ## Testing in Disk Mode
 

@@ -35,7 +35,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenADroidLogOpenedOnDisk_WhenEveryRecordIsSaved_ThenTheRecordsAreSavedQuickly()
 		{
 			var logPath = DroidLog.GetPath(DroidLog.Utf8);
-			IEngine engine = StorageModes.UsingPath(logPath, StorageMode.Disk).Open();
+			IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 			var destinationPath = Path.Combine(_folder, "Saved.log");
 
 			var stopwatch = Stopwatch.StartNew();

@@ -218,6 +218,43 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
+		/// Reads the line count and the length of the log it covers from the header of an index saved by <see cref="Write"/>, without checking the rest of the index or the log.
+		/// </summary>
+		/// <remarks>
+		/// For an estimate only, such as the memory a log needs (#1028): the index may be damaged, or belong to a log that has changed since.
+		/// </remarks>
+		public static bool TryReadLineCount(Stream indexSource, out int lineCount, out long indexedLength)
+		{
+			lineCount = 0;
+			indexedLength = 0;
+
+			try
+			{
+				using var reader = new BinaryReader(indexSource, Encoding.UTF8, leaveOpen: true);
+
+				if (!reader.ReadBytes(Signature.Length).AsSpan().SequenceEqual(Signature) ||
+				    reader.ReadInt32() != FormatVersion)
+				{
+					return false;
+				}
+
+				reader.ReadInt32(); // checkpoint interval
+				reader.ReadByte(); // unit size
+				reader.ReadBoolean(); // big endian
+				reader.ReadByte(); // preamble length
+				lineCount = reader.ReadInt32();
+				indexedLength = reader.ReadInt64();
+			}
+			catch (EndOfStreamException)
+			{
+				return false;
+			}
+
+			// Each line but the last holds at least its line break, so a damaged header cannot claim more lines than bytes.
+			return lineCount >= 0 && indexedLength >= 0 && lineCount <= indexedLength + 1;
+		}
+
+		/// <summary>
 		/// Reads an index saved by <see cref="Write"/>, provided it is valid and the content it scanned is unchanged.
 		/// </summary>
 		/// <remarks>

@@ -50,7 +50,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				Assert.Inconclusive("With more cores than 16 MB chunks, each chunk is split between workers, and read by each of them.");
 			}
 
-			IEngine engine = StorageModes.UsingPath(logPath, StorageMode.Disk).Open();
+			IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 			var writer = new FilterCompletedWriter();
 			ILogWriter original = Log.Default;
 			Log.Register(writer);

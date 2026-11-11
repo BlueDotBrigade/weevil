@@ -3,6 +3,7 @@
 	using System;
 	using Data;
 	using Filter;
+	using IO;
 
 	/// <remarks>
 	/// <see cref="Reload"/> replaces the engine's filter, selector, navigation, analyzer and records: read them from the engine each time, rather than keeping them.
@@ -44,6 +45,11 @@
 		/// Records hold no state of their own (decision 7 of the #990 plan). Use <see cref="Annotations"/> to be told when comments and pins change.
 		/// </remarks>
 		IRecordState RecordState { get; }
+
+		/// <summary>
+		/// Whether the log's content is kept in RAM or read back from the log (#421). <see cref="Clear"/> and <see cref="Reload"/> keep it.
+		/// </summary>
+		StorageMode StorageMode { get; }
 
 		/// <summary>
 		/// Narrows the records kept in memory, using the rules of <paramref name="clearOperation"/>. The log file does not change.

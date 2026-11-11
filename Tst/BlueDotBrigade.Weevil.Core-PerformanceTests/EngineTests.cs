@@ -92,7 +92,7 @@
 		private double MeasureBytesPerRecord(StorageMode storageMode)
 		{
 			// Opened once first, so the memory of loading Weevil itself is not counted.
-			_ = StorageModes.UsingPath(ReferenceLog.Create(_folder, 10), storageMode).Open();
+			_ = Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(storageMode).Open();
 
 			(IEngine engine, var memoryKept, _) = OpenAndMeasure(ReferenceLog.Create(_folder, RecordCount), storageMode);
 
@@ -110,7 +110,7 @@
 			var logPath = DroidLog.GetPath(logName);
 
 			// Its first records are opened first, so the memory of loading Weevil itself is not counted.
-			_ = StorageModes.UsingPath(logPath, storageMode).UsingLimit(10).Open();
+			_ = Engine.UsingPath(logPath).UsingStorage(storageMode).UsingLimit(10).Open();
 
 			(IEngine engine, var memoryKept, TimeSpan duration) = OpenAndMeasure(logPath, storageMode);
 
@@ -129,7 +129,7 @@
 			var before = GC.GetTotalMemory(forceFullCollection: true);
 			var stopwatch = Stopwatch.StartNew();
 
-			IEngine engine = StorageModes.UsingPath(logPath, storageMode).Open();
+			IEngine engine = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
 
 			stopwatch.Stop();
 			var memoryKept = GC.GetTotalMemory(forceFullCollection: true) - before;

@@ -94,4 +94,4 @@ The test also attaches the file to its result, and writes the table to its outpu
 2. Run them on the branch, on the same computer, with the same job.
 3. Compare the `Mean` and `Allocated` columns. A change larger than the `Error` column, and larger than about 10%, is worth explaining in the pull request.
 
-The benchmarks use only Weevil's public API, because `InternalsVisibleTo` is limited to Debug builds. They open logs in RAM: disk mode joins them when #1028 makes the storage mode public.
+The benchmarks use only Weevil's public API, because `InternalsVisibleTo` is limited to Debug builds. They open logs in RAM. Since #1028 made the storage mode public, a benchmark can also open a log on disk, with `UsingStorage(StorageMode.Disk)`.

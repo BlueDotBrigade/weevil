@@ -497,6 +497,22 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenALogOpenedInAStorageMode_WhenClearedAndReloaded_ThenTheEngineStillReportsThatMode(StorageMode storageMode)
+		{
+			// The GUI's status bar shows the mode the engine reports (#1028).
+			IEngine engine = OpenCopy(storageMode: storageMode);
+			engine.StorageMode.Should().Be(storageMode);
+
+			engine.Selector.Select(lineNumber: 101);
+			engine.Clear(ClearOperation.BeforeSelected);
+			engine.Reload();
+
+			engine.StorageMode.Should().Be(storageMode);
+		}
+
+		[TestMethod]
 		public void GivenUnselectedRecordsWereCleared_WhenReloaded_ThenTheRestoredRecordsAreNotSelected()
 		{
 			IEngine engine = OpenCopy();
@@ -706,7 +722,7 @@ namespace BlueDotBrigade.Weevil
 			File.Copy(new Daten().AsFilePath(fileName), logPath);
 
 			return storageMode is { } mode
-				? new EngineBuilder(logPath).UsingStorage(mode).Open()
+				? Engine.UsingPath(logPath).UsingStorage(mode).Open()
 				: Engine.UsingPath(logPath).Open();
 		}
 

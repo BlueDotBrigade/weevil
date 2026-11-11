@@ -18,6 +18,9 @@
 					new HelpHeading("Filter Examples:"),
 					new HelpSection(
 						new HelpParagraph(@"WeevilCli.exe filter --log-path ""C:\Temp\Http.log"" --Include ""Error 404"""),
+						new HelpParagraph(""),
+						new HelpParagraph("A log larger than memory:"),
+						new HelpParagraph(@"WeevilCli.exe filter --log-path ""C:\Temp\Http.log"" --Include ""Error 404"" --storage Disk"),
 						new HelpParagraph("")
 					)
 				));

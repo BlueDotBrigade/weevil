@@ -42,10 +42,8 @@
 			return this;
 		}
 
-		/// <summary>
-		/// Opens the log in RAM or on disk (#1025). Internal until the Open As window lets the user choose (#1028).
-		/// </summary>
-		internal IEngineBuilder UsingStorage(StorageMode storageMode)
+		/// <inheritdoc />
+		public IEngineBuilder UsingStorage(StorageMode storageMode)
 		{
 			_coreEngineBuilder.UsingStorage(storageMode);
 			return this;

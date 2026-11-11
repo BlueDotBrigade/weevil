@@ -53,7 +53,7 @@ internal sealed class OpeningOnDiskSteps : ReqnrollSteps
 	[Given("that the saved log file is open on disk")]
 	public void GivenThatTheSavedLogFileIsOpenOnDisk()
 	{
-		this.Context.Engine = new EngineBuilder(_logPath)
+		this.Context.Engine = Engine.UsingPath(_logPath)
 			.UsingStorage(StorageMode.Disk)
 			.Open();
 	}
@@ -70,7 +70,7 @@ internal sealed class OpeningOnDiskSteps : ReqnrollSteps
 	[Then("the log on disk will show the same records and filter results as in RAM")]
 	public void ThenTheLogOnDiskWillShowTheSameRecordsAndFilterResultsAsInRam()
 	{
-		IEngine inRam = new EngineBuilder(_logPath)
+		IEngine inRam = Engine.UsingPath(_logPath)
 			.UsingStorage(StorageMode.Ram)
 			.Open();
 		inRam.Filter.Apply(this.Context.FilterType, this.Context.FilterCriteria);

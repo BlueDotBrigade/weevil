@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </remarks>
 		public static LineIndex Load(string logFilePath, Stream logSource)
 		{
-			var indexFilePath = $"{logFilePath}.{FileExtension}";
+			var indexFilePath = GetIndexFilePath(logFilePath);
 			var stopwatch = Stopwatch.StartNew();
 			var hasChanged = true;
 
@@ -61,6 +61,36 @@ namespace BlueDotBrigade.Weevil.IO
 				});
 
 			return index;
+		}
+
+		/// <summary>
+		/// Reads the line count, and the length of the log it covers, from the saved index's header, without checking that the index matches the log.
+		/// </summary>
+		/// <remarks>
+		/// For an estimate only (#1028). Returns <see langword="false"/> when there is no index, or it cannot be read.
+		/// </remarks>
+		public static bool TryReadLineCount(string logFilePath, out int lineCount, out long indexedLength)
+		{
+			lineCount = 0;
+			indexedLength = 0;
+
+			var indexFilePath = GetIndexFilePath(logFilePath);
+
+			if (!System.IO.File.Exists(indexFilePath))
+			{
+				return false;
+			}
+
+			try
+			{
+				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+
+				return LineIndex.TryReadLineCount(indexSource, out lineCount, out indexedLength);
+			}
+			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
+			{
+				return false;
+			}
 		}
 
 		private static bool TryRead(string indexFilePath, Stream logSource, out LineIndex index)
@@ -135,7 +165,12 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public static void Delete(string logFilePath)
 		{
-			TryDelete($"{logFilePath}.{FileExtension}");
+			TryDelete(GetIndexFilePath(logFilePath));
+		}
+
+		private static string GetIndexFilePath(string logFilePath)
+		{
+			return $"{logFilePath}.{FileExtension}";
 		}
 
 		private static void TryDelete(string filePath)
