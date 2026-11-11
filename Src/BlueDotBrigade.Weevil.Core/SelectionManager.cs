@@ -358,6 +358,11 @@
 
 		public ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType)
 		{
+			return SaveSelection(destinationFilePath, fileFormatType, System.Threading.CancellationToken.None);
+		}
+
+		public ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType, System.Threading.CancellationToken cancellationToken)
+		{
 			// The scope is already in line number order, so it is saved as it is, not sorted into a copy of every record (#1137).
 			RecordList sortedRecords = _selection.Count > 1
 				? GetSelected()
@@ -369,7 +374,7 @@
 
 			if (sortedRecords != null)
 			{
-				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType, _state).Write(sortedRecords);
+				new DiskWriter(destinationFilePath, _sourceFileEncoding, fileFormatType, _state).Write(sortedRecords, cancellationToken);
 
 				Log.Default.Write(
 					LogSeverityType.Trace,

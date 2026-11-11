@@ -8,12 +8,14 @@
 		/// Searches backwards through records looking for <see cref="Record.Content"/> with the provided text. Descending order: 4, 3, 2, 1.
 		/// </summary>
 		/// <exception cref="Record"/>
-		IRecord FindPrevious(string value, bool isCaseSensitive, bool useRegex = false);
+		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled, and the active record did not change (#1027).</exception>
+		IRecord FindPrevious(string value, bool isCaseSensitive, bool useRegex = false, System.Threading.CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Searches forward through records looking for <see cref="Record.Content"/> with the provided text. Ascending order: 1, 2, 3, 4.
 		/// </summary>
 		/// <exception cref="Record"/>
-		IRecord FindNext(string value, bool isCaseSensitive, bool useRegex = false);
+		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled, and the active record did not change (#1027).</exception>
+		IRecord FindNext(string value, bool isCaseSensitive, bool useRegex = false, System.Threading.CancellationToken cancellationToken = default);
 	}
 }

@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.IO;
 
 	public interface IAnalyze
@@ -27,5 +28,17 @@
 		Results Analyze(AnalysisType analysisType, IUserDialog userDialog);
 
 		Results Analyze(string analyzerKey, IUserDialog userDialog);
+
+		/// <summary>
+		/// Runs the analyzer, and stops it when <paramref name="cancellationToken"/> is cancelled, as Abort does (#1027).
+		/// </summary>
+		/// <remarks>
+		/// An analyzer that stops keeps the comments, pins and flags it changed so far.
+		/// </remarks>
+		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		Results Analyze(AnalysisType analysisType, IUserDialog userDialog, CancellationToken cancellationToken);
+
+		/// <inheritdoc cref="Analyze(AnalysisType, IUserDialog, CancellationToken)"/>
+		Results Analyze(string analyzerKey, IUserDialog userDialog, CancellationToken cancellationToken);
 	}
 }

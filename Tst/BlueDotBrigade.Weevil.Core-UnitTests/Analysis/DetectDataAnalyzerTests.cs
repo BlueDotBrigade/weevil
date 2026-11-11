@@ -1,12 +1,36 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.TestTools.Data;
+	using NSubstitute;
 
 	[TestClass]
 	public class DetectDataAnalyzerTests
 	{
+		[TestMethod]
+		public void GivenAnAnalysisAbortedWhenItFlagsARecord_WhenItGoesOn_ThenItStopsAtTheNextRecordAndKeepsTheFlag()
+		{
+			// Abort cancels the analysis, which stops within one record, and keeps what it changed so far (#1027).
+			var records = R.Create()
+				.WithContent("Value=1")
+				.WithContent("Value=2")
+				.WithContent("Value=3")
+				.GetRecords();
+			var analyzer = new DetectDataAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
+			using var abort = new CancellationTokenSource();
+			IRecordState state = Substitute.For<IRecordState>();
+			state.When(x => x.SetFlagged(Arg.Any<IRecord>(), true)).Do(_ => abort.Cancel());
+
+			Action analyze = () => analyzer.Analyze(records, state, string.Empty, userDialog, canUpdateMetadata: true, abort.Token);
+
+			analyze.Should().Throw<OperationCanceledException>();
+			state.Received(1).SetFlagged(Arg.Any<IRecord>(), true);
+		}
+
 		[TestMethod]
 		public void GivenIntegerAndDecimalMatches_WhenAnalyzeRuns_ThenMatchingRecordsAreFlagged()
 		{

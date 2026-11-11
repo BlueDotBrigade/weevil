@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Globalization;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -30,6 +31,14 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		public string DisplayName => "Threshold Crossings";
 
 		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		{
+			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
+		}
+
+		/// <remarks>
+		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
+		/// </remarks>
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
 		{
 			var count = 0;
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
@@ -88,6 +97,8 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 			foreach (IRecord record in records)
 			{
+				cancellationToken.ThrowIfCancellationRequested();
+
 				AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 				var wasFlagged = false;
 

@@ -1,5 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 
@@ -31,5 +33,21 @@
 		/// while a buffer reads each part of the log once (#1027).
 		/// </remarks>
 		Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata);
+
+		/// <summary>
+		/// Looks for trends within the provided <see cref="IRecord"/> collection, and stops when <paramref name="cancellationToken"/> is cancelled.
+		/// </summary>
+		/// <remarks>
+		/// Abort cancels the token (#1027). An analyzer that stops throws <see cref="OperationCanceledException"/>, and keeps the comments, pins and flags it changed so far.
+		/// This default checks the token only before it calls the overload without one, so an analyzer that reads many records, such as one of a log on disk,
+		/// implements it and checks the token at each record.
+		/// </remarks>
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata);
+		}
 	}
 }

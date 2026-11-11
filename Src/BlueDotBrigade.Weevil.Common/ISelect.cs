@@ -74,6 +74,15 @@
 		ISelect Unselect(IRecord record);
 		ISelect Unselect(IList<IRecord> records);
 		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType);
+
+		/// <summary>
+		/// As <see cref="SaveSelection(string, FileFormatType)"/>, and stops when <paramref name="cancellationToken"/> is cancelled, as Abort does (#1027).
+		/// </summary>
+		/// <remarks>
+		/// A save that is cancelled, or fails, leaves an earlier file at <paramref name="destinationFilePath"/> as it was, and no partial file.
+		/// </remarks>
+		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType, System.Threading.CancellationToken cancellationToken);
 		RecordList ClearAll();
 		RecordList GetSelected();
 		void ToggleIsPinned();

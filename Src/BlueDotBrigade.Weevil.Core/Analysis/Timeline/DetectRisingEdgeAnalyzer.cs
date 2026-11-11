@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
       using System.Globalization;
+	using System.Threading;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -45,6 +46,14 @@
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
 		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
+			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
+		}
+
+		/// <remarks>
+		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
+		/// </remarks>
+		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
+		{
 			var flaggedLineNumbers = new HashSet<int>();
 
 			// Get default regex from current inclusive filter
@@ -85,6 +94,8 @@
 
 			foreach (IRecord record in records)
 			{
+				cancellationToken.ThrowIfCancellationRequested();
+
 				AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 			}
 
@@ -95,6 +106,8 @@
 
 			foreach (IRecord record in sortedRecords)
 			{
+				cancellationToken.ThrowIfCancellationRequested();
+
 				IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, buffer);
 
 				foreach (KeyValuePair<string, string> current in keyValuePairs)
