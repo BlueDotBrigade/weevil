@@ -67,7 +67,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[NotObservable]
 		public ICommand ShowApplicationLogFileCommand => new UiBoundCommand(ShowApplicationLogFile);
 		[NotObservable]
-		public ICommand SplitCurrentLogCommand => new UiBoundCommand(SplitCurrentLog, () => this.IsMenuEnabled);
+		public ICommand SplitCurrentLogCommand => new UiBoundCommand(() => SplitCurrentLog(), () => this.IsMenuEnabled);
 
 		[NotObservable]
 		public ICommand ForceGarbageCollectionCommand => new UiBoundCommand(ForceGarbageCollection, () => this.IsMenuEnabled);
@@ -176,7 +176,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand RefreshCommand => new UiBoundCommand(Refresh, () => this.IsMenuEnabled);
 
 		[NotObservable]
-		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress || _analysisCancellation != null);
+		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress || _backgroundCancellation != null);
 
 		[NotObservable]
 		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreFilterOptionsVisible = !this.AreFilterOptionsVisible, () => this.IsFilterToolboxEnabled);

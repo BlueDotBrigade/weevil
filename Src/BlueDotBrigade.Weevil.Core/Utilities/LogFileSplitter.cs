@@ -3,6 +3,7 @@
 	using System;
 	using System.IO;
 	using System.Text;
+	using System.Threading;
 	using Data;
 	using Diagnostics;
 
@@ -21,6 +22,18 @@
 		}
 
 		public void Run(RecordList records)
+		{
+			Run(records, CancellationToken.None);
+		}
+
+		/// <summary>
+		/// As <see cref="Run(RecordList)"/>, and stops within one record when <paramref name="cancellationToken"/> is cancelled, as Abort does (#1028).
+		/// </summary>
+		/// <remarks>
+		/// The files already written stay. The file being collected when the split stops is not written.
+		/// </remarks>
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		public void Run(RecordList records, CancellationToken cancellationToken)
 		{
 			if (string.IsNullOrWhiteSpace(_sourceFilePath))
 			{
@@ -48,6 +61,8 @@
 
 					foreach (IRecord record in records)
 					{
+						cancellationToken.ThrowIfCancellationRequested();
+
 						ReadOnlySpan<char> content = buffer.Read(record);
 
 						if (content.Contains(ApplicationStartMarker, StringComparison.Ordinal))

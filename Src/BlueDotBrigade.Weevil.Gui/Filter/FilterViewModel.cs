@@ -110,8 +110,9 @@
 
 		private string _findText;
 
-		// Cancels the analysis in progress when Abort (Escape) is pressed, or null when none runs (#1027). Read and written on the UI thread.
-		private CancellationTokenSource _analysisCancellation;
+		// Cancels the background work in progress, such as an analysis or a save, when Abort (Escape) is pressed, or null when none runs (#1027, #1028).
+		// Read and written on the UI thread.
+		private CancellationTokenSource _backgroundCancellation;
 		private bool _findIsCaseSensitive;
 		private bool _findUseRegex;
 		private bool _findSearchComments;
@@ -428,10 +429,10 @@
 		public bool IsProcessingLongOperation { get; private set; }
 
 		/// <summary>
-		/// Completes when the latest analysis has finished.
+		/// Completes when the latest background work has finished: an analysis, a save, a split or a search for text (#996, #1028).
 		/// </summary>
 		[NotObservable]
-		public Task AnalysisTask { get; private set; } = Task.CompletedTask;
+		public Task BackgroundTask { get; private set; } = Task.CompletedTask;
 
 		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
@@ -1166,30 +1167,31 @@
 			DeleteExtractedLogs();
 		}
 
-		private void SaveSelected(FileFormatType fileFormatType)
+		/// <remarks>
+		/// Runs in the background, so a log on disk does not freeze the window while it is read, and Abort (Escape) stops it (#1028).
+		/// A save that stops keeps an earlier file (#1027).
+		/// </remarks>
+		private Task SaveSelected(FileFormatType fileFormatType)
 		{
-			try
-			{
-				var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
+			IEngine engine = _engine;
+			var destinationFolder = Path.GetDirectoryName(engine.SourceFilePath);
 
-				var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
-					Path.Combine(destinationFolder, TsvFileName) :
-					Path.Combine(destinationFolder, RawFileName);
+			var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
+				Path.Combine(destinationFolder, TsvFileName) :
+				Path.Combine(destinationFolder, RawFileName);
 
-				_engine.Selector.SaveSelection(destinationFilePath, fileFormatType);
-			}
-			catch (IOException e) when (e.HResult.Equals(-2147024864))
+			return RunInBackground("The save", cancellationToken =>
 			{
-				Log.Default.Write(LogSeverityType.Error, e, "Unable to save the selected records. The target file is being used by another process.");
-				MessageBox.Show("Unable to save the selected records\r\nThe target file is being used by another process.");
-			}
-			catch (Exception e)
-			{
-				var message = "An unexpected error occurred while the records were being saved.";
-				Log.Default.Write(LogSeverityType.Error, e, message);
-				MessageBox.Show(message);
-				throw;
-			}
+				try
+				{
+					engine.Selector.SaveSelection(destinationFilePath, fileFormatType, cancellationToken);
+				}
+				catch (IOException e) when (e.HResult.Equals(-2147024864))
+				{
+					Log.Default.Write(LogSeverityType.Error, e, "Unable to save the selected records. The target file is being used by another process.");
+					_uiDispatcher.Invoke(() => MessageBox.Show("Unable to save the selected records\r\nThe target file is being used by another process."));
+				}
+			});
 		}
 
 		public void ShowFileExplorer()
@@ -1249,9 +1251,15 @@
 			}
 		}
 
-		private void SplitCurrentLog()
+		/// <remarks>
+		/// Runs in the background, and Abort (Escape) stops it (#1028).
+		/// </remarks>
+		private Task SplitCurrentLog()
 		{
-			new LogFileSplitter(_engine.SourceFilePath).Run(_engine.Filter.Results);
+			var splitter = new LogFileSplitter(_engine.SourceFilePath);
+			RecordList records = _engine.Filter.Results;
+
+			return RunInBackground("The split", cancellationToken => splitter.Run(records, cancellationToken));
 		}
 
 		private void ShowDashboard()
@@ -1453,7 +1461,7 @@
 		private void AbortFilter()
 		{
 			_engine.Filter.Abort();
-			_analysisCancellation?.Cancel();
+			_backgroundCancellation?.Cancel();
 		}
 		#endregion
 
@@ -1539,12 +1547,7 @@
 			}
 			else if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				SearchFilterResults(
-					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
-					() => _engine
-						.Navigate
-						.NextContent(_findText, _findIsCaseSensitive, _findUseRegex)
-						.ToIndexUsing(_engine.Filter.Results));
+				FindContent(findNext: true);
 			}
 		}
 
@@ -1560,13 +1563,49 @@
 			}
 			else if (!string.IsNullOrWhiteSpace(_findText))
 			{
-				SearchFilterResults(
-					$"Unable to find the provided text in the search results.\r\n\r\nSearching for: {_findText}\r\nCase sensitive: {_findIsCaseSensitive}\r\nUse regex: {_findUseRegex}",
-					() => _engine
-						.Navigate
-						.PreviousContent(_findText, _findIsCaseSensitive, _findUseRegex)
-						.ToIndexUsing(_engine.Filter.Results));
+				FindContent(findNext: false);
 			}
+		}
+
+		/// <summary>
+		/// Searches the filter results for the text last entered in Find, on a background thread, because it reads each record's content:
+		/// from the log itself in disk mode. Abort (Escape) stops it, and leaves the active record where it was (#1027, #1028).
+		/// </summary>
+		/// <remarks>
+		/// The other searches, such as for a comment or an elapsed time, read no content, so they stay on the UI thread.
+		/// </remarks>
+		private Task FindContent(bool findNext)
+		{
+			IEngine engine = _engine;
+			var text = _findText;
+			var isCaseSensitive = _findIsCaseSensitive;
+			var useRegex = _findUseRegex;
+			var userMessage = $"Unable to find the provided text in the search results.\r\n\r\nSearching for: {text}\r\nCase sensitive: {isCaseSensitive}\r\nUse regex: {useRegex}";
+
+			return RunInBackground(
+				"The search",
+				cancellationToken =>
+				{
+					int position;
+
+					try
+					{
+						IRecord found = findNext
+							? engine.Navigate.NextContent(text, isCaseSensitive, useRegex, cancellationToken)
+							: engine.Navigate.PreviousContent(text, isCaseSensitive, useRegex, cancellationToken);
+
+						position = found.ToIndexUsing(engine.Filter.Results);
+					}
+					catch (RecordNotFoundException e)
+					{
+						Log.Default.Write(LogSeverityType.Warning, e, userMessage);
+						_uiDispatcher.Invoke(() => MessageBox.Show(userMessage, "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning));
+						return;
+					}
+
+					_uiDispatcher.Invoke(() => ShowFoundRecord(position));
+				},
+				progressDelay: TimeSpan.FromMilliseconds(250));
 		}
 
 		private void FindNextComment()
@@ -1931,58 +1970,96 @@
 		/// Runs an analyzer on a background thread, so the window stays responsive (#996).
 		/// </summary>
 		/// <remarks>
-		/// Until the analyzer finishes, the menus and the filter are disabled and the progress bar replaces the records,
-		/// so the user cannot edit a comment or a pin that the analyzer may be writing to.
 		/// Its prompts are shown on the UI thread, with the records visible behind the modal prompt.
 		/// Abort (Escape) stops it: the comments, pins and flags it changed so far stay (#1027).
 		/// </remarks>
 		private Task AnalyzeInBackground(Func<IUserDialog, CancellationToken, Results> analyze)
 		{
-			// Another analysis, a filter or an open is in progress.
-			if (!this.IsMenuEnabled)
-			{
-				return Task.CompletedTask;
-			}
-
-			var wasFilterToolboxEnabled = this.IsFilterToolboxEnabled;
-
-			this.CanOpenLogFile = false;
-			this.IsFilterToolboxEnabled = false;
-			this.IsProcessingLongOperation = true;
-
-			var cancellation = new CancellationTokenSource();
-			_analysisCancellation = cancellation;
-
 			var userDialog = new UiThreadUserDialog(
 				_dialogBox,
 				_uiDispatcher,
 				promptOpening: () => this.IsProcessingLongOperation = false,
 				promptClosed: () => this.IsProcessingLongOperation = true);
 
-			this.AnalysisTask = Task.Run(() =>
+			return RunInBackground("The analysis", cancellationToken =>
+			{
+				Results results = analyze(userDialog, cancellationToken);
+
+				_bulletinMediator.Post(new AnalysisCompleteBulletin(
+					results.FlaggedRecords,
+					results.Data));
+			});
+		}
+
+		/// <summary>
+		/// Runs work that reads the log, such as an analysis or a save, on a background thread, so the window stays responsive (#996, #1028).
+		/// </summary>
+		/// <remarks>
+		/// Until the work finishes, the menus and the filter are disabled and the progress bar replaces the records,
+		/// so the user cannot edit a comment or a pin that the work may be writing to, nor start other work.
+		/// Abort (Escape) cancels the token the work is given (#1027). An unexpected error is logged and shown.
+		/// </remarks>
+		/// <param name="operation">What the work does, for the log and the error message, such as "The analysis".</param>
+		/// <param name="work">Runs on a background thread. It marshals anything it shows to the UI thread.</param>
+		/// <param name="progressDelay">How long the work runs before the progress bar replaces the records, so that quick work does not flicker.</param>
+		private Task RunInBackground(string operation, Action<CancellationToken> work, TimeSpan progressDelay = default)
+		{
+			// Other background work, a filter or an open is in progress.
+			if (!this.IsMenuEnabled)
+			{
+				return Task.CompletedTask;
+			}
+
+			var wasFilterToolboxEnabled = this.IsFilterToolboxEnabled;
+			var isRunning = true;
+
+			this.CanOpenLogFile = false;
+			this.IsFilterToolboxEnabled = false;
+
+			if (progressDelay <= TimeSpan.Zero)
+			{
+				this.IsProcessingLongOperation = true;
+			}
+			else
+			{
+				// Read and written on the UI thread, as the finally block below is.
+				_ = Task.Delay(progressDelay).ContinueWith(_ => _uiDispatcher.Invoke(() =>
+				{
+					if (isRunning)
+					{
+						this.IsProcessingLongOperation = true;
+					}
+				}));
+			}
+
+			var cancellation = new CancellationTokenSource();
+			_backgroundCancellation = cancellation;
+
+			this.BackgroundTask = Task.Run(() =>
 			{
 				try
 				{
-					Results results = analyze(userDialog, cancellation.Token);
-
-					_bulletinMediator.Post(new AnalysisCompleteBulletin(
-						results.FlaggedRecords,
-						results.Data));
+					work(cancellation.Token);
 				}
 				catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
 				{
-					Log.Default.Write(LogSeverityType.Information, "The analysis was aborted by the user.");
+					Log.Default.Write(LogSeverityType.Information, $"{operation} was aborted by the user.");
 				}
 				catch (Exception e)
 				{
-					Log.Default.Write(LogSeverityType.Error, e, "Unable to complete the analysis.");
-					_uiDispatcher.Invoke(() => MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error));
+					Log.Default.Write(LogSeverityType.Error, e, $"{operation} could not be completed.");
+					_uiDispatcher.Invoke(() => MessageBox.Show(
+						$"{operation} could not be completed.\r\n\r\n{e.Message}",
+						"Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error));
 				}
 				finally
 				{
 					_uiDispatcher.Invoke(() =>
 					{
-						_analysisCancellation = null;
+						isRunning = false;
+						_backgroundCancellation = null;
 						cancellation.Dispose();
 						this.IsProcessingLongOperation = false;
 						this.IsFilterToolboxEnabled = wasFilterToolboxEnabled;
@@ -1993,7 +2070,7 @@
 				}
 			});
 
-			return this.AnalysisTask;
+			return this.BackgroundTask;
 		}
 
 		private void ToggleIsPinned()
@@ -2257,23 +2334,29 @@
 		{
 			try
 			{
-				var position = search.Invoke();
-
-				if (this.Rows != null && position >= 0 && position < this.Rows.Count)
-				{
-					_rowSelection.SelectOnly(this.Rows, position);
-					OnSelectionChanged();
-				}
-
-				// An event, not a property: Metalama would ignore going to the same row again (#806).
-				this.ActiveRecordIndex = position;
-				this.ScrollRequested?.Invoke(this, position);
+				ShowFoundRecord(search.Invoke());
 			}
 			catch (RecordNotFoundException e)
 			{
 				Log.Default.Write(LogSeverityType.Warning, e, userMessage);
 				MessageBox.Show(userMessage, "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
+		}
+
+		/// <summary>
+		/// Selects only the record found, and scrolls to it and focuses it (#699, #768, #806).
+		/// </summary>
+		private void ShowFoundRecord(int position)
+		{
+			if (this.Rows != null && position >= 0 && position < this.Rows.Count)
+			{
+				_rowSelection.SelectOnly(this.Rows, position);
+				OnSelectionChanged();
+			}
+
+			// An event, not a property: Metalama would ignore going to the same row again (#806).
+			this.ActiveRecordIndex = position;
+			this.ScrollRequested?.Invoke(this, position);
 		}
 
 		private void RefreshFilterResults()
