@@ -31,6 +31,11 @@ namespace BlueDotBrigade.Weevil.Data
 
 		internal RecordTable Table => _table;
 
+		/// <summary>
+		/// The list holds every record of its table, in order, so a position is a record number.
+		/// </summary>
+		internal bool ListsWholeTable => _recordNumbers == null;
+
 		public override int Count => _recordNumbers?.Length ?? _table.Count;
 
 		public override IRecord this[int position] => _table.CreateRecord(GetRecordNumber(position));

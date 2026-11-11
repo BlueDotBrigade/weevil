@@ -58,6 +58,15 @@ internal sealed class OpeningOnDiskSteps : ReqnrollSteps
 			.Open();
 	}
 
+	/// <remarks>
+	/// A log on disk is read whenever a record's content is needed, so a step that reads content would now fail.
+	/// </remarks>
+	[Given("that the saved log file has been deleted")]
+	public void GivenThatTheSavedLogFileHasBeenDeleted()
+	{
+		File.Delete(_logPath);
+	}
+
 	[Then("the log on disk will show the same records and filter results as in RAM")]
 	public void ThenTheLogOnDiskWillShowTheSameRecordsAndFilterResultsAsInRam()
 	{
