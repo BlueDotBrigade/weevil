@@ -165,6 +165,15 @@ Step 2 measures how long the grid takes to draw a screen of rows from a log on d
 - Otherwise, no cache, as the [#1025 plan](1025-ContentFromFile.md#decisions) chose.
 - A network drive is slower either way. The warning in Open As says so.
 
+**Measured on 2026-11-12: no cache.** `ScreenRowsBenchmarks` (Core-PerformanceTests) reads 50 rows of the 1 million-record reference log, 5 times each, through Weevil's own disk mode rather than the #1024 harness. Run with the short job, in Release on Linux, 4 cores, with the log in the operating system's cache:
+
+| Storage | A screen of rows |
+|---|---|
+| RAM | 0.018 ms |
+| Disk | 1.9 ms: about 7.6 µs per read |
+
+From a local SSD, each row adds the drive's latency for one 64 KB block, about 0.1 ms, since its other four reads find the block in the operating system's cache: about 5 ms a screen, a tenth of the 50 ms threshold. On a network drive, each of the 250 reads opens the log over the network, which is where a screen could pass 50 ms; the Open As warning covers it.
+
 ### Export, split and the search for text off the UI thread
 
 All three follow `AnalyzeInBackground`:
@@ -230,7 +239,7 @@ One pull request per step, in order. The GUI builds only on Windows, so for step
 2. **The GUI's reads are safe, and export, split and the search for text run off the UI thread.**
    - What it adds:
      - the failed-read handler, the rows' safe read, and the graph's copy of its text;
-     - the screen-row measurement, and the cache if it is needed;
+     - the screen-row measurement, and the cache if it is needed. Measured: no cache is needed (see Screen rows);
      - export, split and the search for text in the background, with Escape. Done first, in its own pull request: the found record is shown once the records and menus are back, and the progress bar waits 250 ms (found in review). Their messages go through `IDialogBoxService`, so a test never waits on a message box.
      - `OpenAsync` gains an internal mode parameter, so tests can open a log on disk before the window exists.
    - Tests in `Gui-FeatureTests`:
