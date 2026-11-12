@@ -1349,13 +1349,16 @@
 		/// <remarks>
 		/// One buffer for the whole pass, so each chunk of a log on disk is read once (#1027).
 		/// </remarks>
-		private static RecordList CopyWithText(RecordList records)
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		private static RecordList CopyWithText(RecordList records, CancellationToken cancellationToken)
 		{
 			var buffer = new ContentBuffer();
 			var copies = ImmutableArray.CreateBuilder<IRecord>(records.Length);
 
 			foreach (IRecord record in records)
 			{
+				cancellationToken.ThrowIfCancellationRequested();
+
 				copies.Add(new Record(
 					record.LineNumber,
 					record.CreatedAt,
@@ -1444,32 +1447,37 @@
 
 			var recordsDescription = _engine.Selector.Selected.Count.ToString("N0");
 
-			if (_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
+			if (!_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
 			{
-				RecordList records;
-
-				try
-				{
-					RecordList selected = _engine.Selector.GetSelected().ToImmutableArray();
-
-					// In RAM a record keeps its text, so only a log on disk needs the copy.
-					records = _engine.StorageMode == StorageMode.Disk
-						? CopyWithText(selected)
-						: selected;
-				}
-				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-				{
-					ReportFailedRead(e, Volatile.Read(ref _logGeneration));
-					return;
-				}
-
-				TelemetrySessionLifecycle.Shared.RecordGraphOpen();
-
-				_dialogBox.ShowGraph(
-					records,
-					confirmedFilter,
-					_engine.SourceFilePath);
+				return;
 			}
+
+			IEngine engine = _engine;
+			RecordList selected = engine.Selector.GetSelected().ToImmutableArray();
+			var sourceFilePath = engine.SourceFilePath;
+
+			// In RAM a record keeps its text, so only a log on disk needs the copy.
+			if (engine.StorageMode != StorageMode.Disk)
+			{
+				ShowGraph(selected, confirmedFilter, sourceFilePath);
+				return;
+			}
+
+			// The copy reads up to 100,000 records from the log, slowly on a network drive, so it runs in the background, where Escape stops it (#1028).
+			RecordList records = RecordList.Empty;
+
+			_ = RunInBackground(
+				"The graph",
+				cancellationToken => records = CopyWithText(selected, cancellationToken),
+				onSucceeded: () => ShowGraph(records, confirmedFilter, sourceFilePath),
+				progressDelay: QuickWorkProgressDelay);
+		}
+
+		private void ShowGraph(RecordList records, string confirmedFilter, string sourceFilePath)
+		{
+			TelemetrySessionLifecycle.Shared.RecordGraphOpen();
+
+			_dialogBox.ShowGraph(records, confirmedFilter, sourceFilePath);
 		}
 
 		private void ForceGarbageCollection()
