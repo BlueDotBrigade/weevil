@@ -74,12 +74,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			if (this.ViewModel != null)
 			{
-				Task analysis = this.ViewModel.AnalysisTask;
+				Task backgroundWork = this.ViewModel.BackgroundTask;
 
-				if (!analysis.IsCompleted)
+				if (!backgroundWork.IsCompleted)
 				{
-					// Closing now would skip saving the sidecar, so close once the analysis has finished (#996).
-					// Do not wait for it here: the analysis needs the UI thread for its prompts and to finish.
+					// Closing now would skip saving the sidecar, so close once the analysis, or the save, has finished (#996, #1028).
+					// Do not wait for it here: the work needs the UI thread for its prompts and to finish.
 					e.Cancel = true;
 
 					if (!_isCloseDeferred)
@@ -87,7 +87,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 						_isCloseDeferred = true;
 
 						var window = (Window)sender;
-						analysis.ContinueWith(
+						backgroundWork.ContinueWith(
 							_ =>
 							{
 								_isCloseDeferred = false;

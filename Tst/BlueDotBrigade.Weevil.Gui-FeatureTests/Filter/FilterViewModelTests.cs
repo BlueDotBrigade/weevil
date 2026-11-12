@@ -104,6 +104,93 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.AbortFilterCommand.CanExecute(null).Should().BeFalse("nothing is left to abort");
 		}
 
+		[TestMethod]
+		public async Task GivenOpenLog_WhenSavingTheSelectedRecords_ThenTheSaveRunsInBackgroundWhereAbortIsAvailable()
+		{
+			// A save reads every record, from the log itself in disk mode, so it runs in the background, where Abort (Escape) can stop it (#1028).
+			using var uiDispatcher = new PausableUiDispatcher();
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+			await viewModel.OpenAsync(CopyLog("Save.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+
+			// The UI thread is busy, so the save cannot finish yet.
+			uiDispatcher.Pause();
+			viewModel.SaveSelectedAsRawCommand.Execute(null);
+
+			try
+			{
+				viewModel.BackgroundTask.IsCompleted.Should().BeFalse("the command returns while the save runs in the background");
+				viewModel.IsMenuEnabled.Should().BeFalse("the menus are disabled while the save runs");
+				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("Abort is available while the save runs");
+			}
+			finally
+			{
+				uiDispatcher.Resume();
+				await viewModel.BackgroundTask;
+			}
+
+			System.IO.File.Exists(Path.Combine(_folder, "SelectedRecords.log")).Should().BeTrue("the save ran to the end");
+			viewModel.IsMenuEnabled.Should().BeTrue("the menus are enabled again once the save finishes");
+		}
+
+		[TestMethod]
+		public async Task GivenOpenLog_WhenFindingText_ThenTheSearchRunsInBackgroundAndGoesToTheRecordFound()
+		{
+			// A search for text reads each record, from the log itself in disk mode, so it runs in the background, where Abort (Escape) can stop it (#1028).
+			using var uiDispatcher = new PausableUiDispatcher();
+			var dialog = Substitute.For<IDialogBoxService>();
+			((IUserDialog)dialog).TryShowFind(
+					Arg.Any<string>(),
+					out Arg.Any<bool>(),
+					out Arg.Any<bool>(),
+					out Arg.Any<bool>(),
+					out Arg.Any<string>(),
+					out Arg.Any<bool>(),
+					out Arg.Any<int?>(),
+					out Arg.Any<int?>(),
+					out Arg.Any<bool>())
+				.Returns(x =>
+				{
+					x[1] = false; // case sensitive
+					x[2] = true; // find next
+					x[3] = false; // regular expression
+					x[4] = "Holonet"; // in one record of the log, on line 233
+					x[5] = false; // elapsed time
+					x[6] = null;
+					x[7] = null;
+					x[8] = false; // comments
+					return true;
+				});
+
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			await viewModel.OpenAsync(CopyLog("Find.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+
+			// The record found takes the focus, so the next F3 reaches the view: the records and menus must be back by then.
+			var wereMenusEnabledWhenScrolling = false;
+			viewModel.ScrollRequested += (_, _) => wereMenusEnabledWhenScrolling = viewModel.IsMenuEnabled && !viewModel.IsProcessingLongOperation;
+
+			// The UI thread is busy, so the search cannot go to the record yet.
+			uiDispatcher.Pause();
+			viewModel.FindTextCommand.Execute(null);
+
+			try
+			{
+				viewModel.BackgroundTask.IsCompleted.Should().BeFalse("the command returns while the search runs in the background");
+				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("Abort is available while the search runs");
+			}
+			finally
+			{
+				uiDispatcher.Resume();
+				await viewModel.BackgroundTask;
+			}
+
+			viewModel.Rows.GetRow(viewModel.ActiveRecordIndex).LineNumber.Should().Be(233, "the only record that mentions the Holonet is on line 233");
+			dialog.DidNotReceiveWithAnyArgs().ShowMessage(default, default);
+			wereMenusEnabledWhenScrolling.Should().BeTrue("the view goes to the record found once the records and menus are back");
+			viewModel.IsMenuEnabled.Should().BeTrue("the menus are enabled again once the search finishes");
+		}
+
 		// Regression: Issue #996 - the busy overlay was shown only after a prompt closed.
 		[TestMethod]
 		public async Task GivenOpenLog_WhenAnalysisStarts_ThenBusyOverlayIsShownExceptDuringPrompts()
@@ -135,10 +222,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.IsProcessingLongOperation.Should().BeFalse("the busy overlay is hidden once the analysis finishes");
 		}
 
-		// Regression: Issue #996 - FilterView defers closing the window until AnalysisTask completes, then Exit saves the sidecar.
+		// Regression: Issue #996 - FilterView defers closing the window until BackgroundTask completes, then Exit saves the sidecar.
 		// This covers the view-model side only; the deferral in FilterView.OnWindowClosing has no automated test.
 		[TestMethod]
-		public async Task GivenAnalysisInProgress_WhenAnalysisFinishes_ThenAnalysisTaskCompletesAndExitIsEnabled()
+		public async Task GivenAnalysisInProgress_WhenAnalysisFinishes_ThenBackgroundTaskCompletesAndExitIsEnabled()
 		{
 			using var releasePrompt = new ManualResetEventSlim();
 
@@ -151,18 +238,18 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				viewModel.AnalysisTask.IsCompleted.Should().BeFalse("AnalysisTask is incomplete while the analyzer runs");
+				viewModel.BackgroundTask.IsCompleted.Should().BeFalse("BackgroundTask is incomplete while the analyzer runs");
 				viewModel.ExitCommand.CanExecute(null).Should().BeFalse("Exit is disabled while the analyzer is writing to the records");
 			}
 			finally
 			{
 				releasePrompt.Set();
 
-				// FilterView continues on AnalysisTask, so Exit must be enabled by the time it completes.
-				await viewModel.AnalysisTask;
+				// FilterView continues on BackgroundTask, so Exit must be enabled by the time it completes.
+				await viewModel.BackgroundTask;
 			}
 
-			viewModel.AnalysisTask.IsCompleted.Should().BeTrue("AnalysisTask completes once the analysis has finished");
+			viewModel.BackgroundTask.IsCompleted.Should().BeTrue("BackgroundTask completes once the analysis has finished");
 			viewModel.ExitCommand.CanExecute(null).Should().BeTrue("Exit is enabled again once the analysis has finished");
 		}
 

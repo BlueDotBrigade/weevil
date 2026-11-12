@@ -1,6 +1,6 @@
 # 1028: Choose RAM or Disk When Opening a Log
 
-> **Status:** Approved
+> **Status:** In progress
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -226,11 +226,12 @@ One pull request per step, in order. The GUI builds only on Windows, so for step
      - Engine tests: `IEngine.StorageMode` reports the mode, and Reload keeps it.
      - CLI and PowerShell functional tests: `--storage Disk` and `-Storage Disk` open the log on disk and find the same records as RAM.
    - This step runs on Linux.
+   - Done on 2026-11-11 (#1183). A damaged `.idx` header that claims more lines than bytes is ignored, and the CLI's save deletes its temporary file without hiding why it stopped (found in review).
 2. **The GUI's reads are safe, and export, split and the search for text run off the UI thread.**
    - What it adds:
      - the failed-read handler, the rows' safe read, and the graph's copy of its text;
      - the screen-row measurement, and the cache if it is needed;
-     - export, split and the search for text in the background, with Escape.
+     - export, split and the search for text in the background, with Escape. Done first, in its own pull request: the found record is shown once the records and menus are back, and the progress bar waits 250 ms (found in review). Their messages go through `IDialogBoxService`, so a test never waits on a message box.
      - `OpenAsync` gains an internal mode parameter, so tests can open a log on disk before the window exists.
    - Tests in `Gui-FeatureTests`:
      - a row whose read fails shows its placeholder, and the handler acts once;
