@@ -251,8 +251,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			await OpenOnDiskAsync(viewModel, logPath);
 
 			System.IO.File.Delete(logPath);
+			dialog.ClearReceivedCalls();
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
-			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && dialog.ReceivedCalls().Any());
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && dialog.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IDialogBoxService.ShowMessage)));
 
 			viewModel.IsProcessingLongOperation.Should().BeFalse("the progress bar is hidden once the filter stops");
 			viewModel.IsMenuEnabled.Should().BeTrue("the menus come back once the filter stops");
@@ -264,7 +265,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// A graph window can outlive its log, so it copies the text of its records when it opens (#1028).
 			var dialog = Substitute.For<IDialogBoxService>();
-			((IUserDialog)dialog).TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>()).Returns(x =>
+
+			// The graph asks through the dialog service's own prompt, not the one analyzers use (IUserDialog).
+			dialog.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>()).Returns(x =>
 			{
 				x[2] = @"Cpu1=(?<Cpu1>\d+\.\d)%";
 				return true;
