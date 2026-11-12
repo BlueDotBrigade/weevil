@@ -203,7 +203,8 @@
 
 			try
 			{
-				_coreEngine.Filter.Apply(filterType, filterCriteria);
+				// Not a filter the user asked for, so not counted as one (#1185).
+				_coreEngine.Filter.ApplyInternal(filterType, filterCriteria);
 			}
 			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
 			{
