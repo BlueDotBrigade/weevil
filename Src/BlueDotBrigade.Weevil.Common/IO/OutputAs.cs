@@ -13,7 +13,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// The format that <c>--output-as</c> names, or the fallback when the option is missing.
 		/// </summary>
-		/// <exception cref="ArgumentException">The option names a format that Weevil does not write, such as <c>xml</c> (#837).</exception>
+		/// <exception cref="ArgumentException">The option has no value, or names a format that Weevil does not write, such as <c>xml</c> (#837).</exception>
 		public static OutputFormat ResolveFormat(IReadOnlyList<string> arguments, OutputFormat fallbackFormat)
 		{
 			if (arguments is null)
@@ -24,6 +24,11 @@ namespace BlueDotBrigade.Weevil.IO
 			if (!TryGetValue(arguments, out var value))
 			{
 				return fallbackFormat;
+			}
+
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				throw new ArgumentException($"--output-as needs a value. Use {SupportedValues}.");
 			}
 
 			return TryParseFormat(value, out var format)
@@ -78,43 +83,39 @@ namespace BlueDotBrigade.Weevil.IO
 			return sanitized.ToArray();
 		}
 
+		/// <summary>
+		/// Whether <c>--output-as</c> appears, and its last value, which is empty when the option has none.
+		/// </summary>
 		private static bool TryGetValue(IReadOnlyList<string> arguments, out string value)
 		{
+			var found = false;
 			value = string.Empty;
 
 			for (var index = 0; index < arguments.Count; index++)
 			{
-				var argument = arguments[index];
-
-				if (!TryGetOptionValue(argument, out var inlineValue, out var hasInlineValue))
+				if (!TryGetOptionValue(arguments[index], out var inlineValue, out var hasInlineValue))
 				{
 					continue;
 				}
+
+				found = true;
 
 				if (hasInlineValue)
 				{
-					if (IsValidValue(inlineValue))
-					{
-						value = inlineValue;
-					}
-
-					continue;
+					value = inlineValue;
 				}
-
-				if (index + 1 >= arguments.Count || LooksLikeOption(arguments[index + 1]))
+				else if (index + 1 < arguments.Count && !LooksLikeOption(arguments[index + 1]))
 				{
-					continue;
+					index++;
+					value = arguments[index];
 				}
-
-				index++;
-				var nextArgument = arguments[index];
-				if (IsValidValue(nextArgument))
+				else
 				{
-					value = nextArgument;
+					value = string.Empty;
 				}
 			}
 
-			return value.Length > 0;
+			return found;
 		}
 
 		private static bool TryParseFormat(string value, out OutputFormat format)
@@ -177,8 +178,6 @@ namespace BlueDotBrigade.Weevil.IO
 			return argument.StartsWith("-", StringComparison.Ordinal)
 			       || argument.StartsWith("/", StringComparison.Ordinal);
 		}
-
-		private static bool IsValidValue(string value) => !string.IsNullOrWhiteSpace(value);
 
 		private static string Normalize(string value)
 		{

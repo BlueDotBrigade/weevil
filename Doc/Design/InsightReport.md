@@ -22,7 +22,7 @@ A renderer then turns the model into text:
 
 The CLI chooses the output format once: `Program` resolves `--output-as` into an `OutputFormat`, and gives it to the commands as `OutputOptions`, through Cocona's services. A document a command renders itself, such as the JSON, is written with `Write.Document`, which the formatter does not wrap.
 
-`--output-as` accepts `markdown` (or `md`), the default, `plaintext` (or `plain`, `text`, `txt`) and `json`. Any other value, such as `xml` or `html`, is an error that names them, and the CLI exits with 1. Only `insight` writes JSON: `encrypt` refuses it, and `filter` writes its results to a file, whatever the format.
+`--output-as` accepts `markdown` (or `md`), the default, `plaintext` (or `plain`, `text`, `txt`) and `json`. Any other value, such as `xml` or `html`, or none, is an error that names them, and the CLI exits with 1. Only `insight` writes JSON: `encrypt` refuses it, and `filter` writes its results to a file, whatever the format.
 
 ## Scopes
 

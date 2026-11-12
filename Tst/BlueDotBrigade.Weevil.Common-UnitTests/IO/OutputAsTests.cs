@@ -10,8 +10,8 @@ namespace BlueDotBrigade.Weevil.IO
 		[TestMethod]
 		public void GivenOutputAsWithInlineValue_WhenResolveFormat_ThenReturnsTheFormat()
 		{
-			// Regression: Global OutputAs parameter should work for any CLI command.
-			OutputAs.ResolveFormat(["insight", "--output-as=json"], OutputFormat.Markdown).Should().Be(OutputFormat.Json);
+			// The option works for any CLI command, and ignores the value's case.
+			OutputAs.ResolveFormat(["insight", "--output-as=JSON"], OutputFormat.Markdown).Should().Be(OutputFormat.Json);
 		}
 
 		[TestMethod]
@@ -37,6 +37,19 @@ namespace BlueDotBrigade.Weevil.IO
 
 			resolve.Should().Throw<ArgumentException>()
 				.WithMessage($"--output-as {value} is not supported. Use markdown, plaintext or json.");
+		}
+
+		[TestMethod]
+		[DataRow("insight", "--output-as")]
+		[DataRow("insight", "--output-as=")]
+		[DataRow("insight", "--output-as", "--verbose")]
+		public void GivenOutputAsWithoutAValue_WhenResolveFormat_ThenTheErrorNamesTheSupportedFormats(params string[] arguments)
+		{
+			// A script whose variable is empty gets an error, not Markdown where it expected JSON (#837).
+			Action resolve = () => OutputAs.ResolveFormat(arguments, OutputFormat.Markdown);
+
+			resolve.Should().Throw<ArgumentException>()
+				.WithMessage("--output-as needs a value. Use markdown, plaintext or json.");
 		}
 
 		[TestMethod]
