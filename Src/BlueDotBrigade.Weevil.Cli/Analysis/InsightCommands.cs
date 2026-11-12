@@ -22,6 +22,13 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 	[TransformHelpFactory(typeof(InsightCommandHelp))]
 	internal class InsightCommands
 	{
+		private readonly OutputOptions _output;
+
+		public InsightCommands(OutputOptions output)
+		{
+			_output = output ?? throw new ArgumentNullException(nameof(output));
+		}
+
 		[Command(
 			name: "Insight",
 			Aliases = new[] { "i" },
@@ -53,6 +60,13 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 				var period = engine.Records.GetEstimatedRange();
 				InsightReport report = new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
 
+				if (_output.Format == OutputFormat.Json)
+				{
+					// The whole report, whatever --verbose says: a program filters the insights by their flag (#837).
+					Write.Document(new JsonInsightReportRenderer().Render(report));
+					return;
+				}
+
 				if (verbose)
 				{
 					Write.Heading("Metrics");
@@ -62,7 +76,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 
 					foreach (InsightReportMetric metric in report.Metrics)
 					{
-						Write.Text($"{metric.Name}\t{metric.Value}");
+						Write.Text($"{metric.Name}\t{metric.Value ?? "unknown"}");
 					}
 				}
 

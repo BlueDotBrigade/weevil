@@ -43,7 +43,9 @@ One pull request each, in order.
    - `MarkdownInsightReportRenderer` produces exactly what `Generate` produced; `Generate` calls it, and is marked `[Obsolete]`. The dashboard's Copy uses `Create` and the renderer.
    - The CLI's `Insight` command builds the model, and writes its usual output from it, the verbose metrics included.
    - Tests: the Markdown is unchanged (a golden test); the model splits insights by their flag, carries no record text, and keeps the metrics in order.
-2. **JSON.** `JsonInsightReportRenderer`, with the contract above; the CLI's `Insight` renders the model as Markdown or JSON; `Get-Insight` returns the model. Tests: a JSON contract test, and a CLI functional test of `insight --output-as json`.
+2. **JSON.** `JsonInsightReportRenderer`, with the contract above, described in [InsightReport.md](../Design/InsightReport.md); the CLI's `Insight` writes the whole report as JSON for `--output-as json`, and its usual lines otherwise; `Get-Insight` returns the model. Tests: a JSON contract test, and a CLI functional test of `insight --output-as json`.
+   - The format is resolved once, into an `OutputFormat` that `Program` gives the commands. Rejecting an unsupported value waits for step 3.
+   - A metric's time that is not known (`Record.CreationTimeUnknown`) is `null`. Weevil's own metrics have no times, but a plugin's may, such as `TemporalAnomalyMetrics`, whose first anomaly is not known in a log that has none. The CLI's `--verbose` shows it as "unknown", where it showed 12/31/9999 23:59:59.
 3. **Remove the formatter-based XML, HTML and JSON output.** `--output-as` accepts what the commands support, and rejects anything else with a message. This step changes behaviour, so it goes last.
 
 ## Not in This Plan

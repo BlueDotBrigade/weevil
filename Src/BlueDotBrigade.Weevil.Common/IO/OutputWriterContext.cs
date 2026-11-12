@@ -15,6 +15,15 @@ namespace BlueDotBrigade.Weevil.IO
 			_outputFormatter.ResetNumbering();
 		}
 
+		/// <summary>
+		/// Writes a document that is already in the chosen output format, such as JSON, as it is: the formatter does not wrap it (#837).
+		/// </summary>
+		public static void WriteDocument(string document)
+		{
+			_outputFormatter.ResetNumbering();
+			_outputWriter.WriteLine(document);
+		}
+
 		public static void WriteText(string message)
 		{
 			_outputFormatter.ResetNumbering();

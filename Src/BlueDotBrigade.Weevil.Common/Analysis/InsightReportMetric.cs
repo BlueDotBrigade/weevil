@@ -8,7 +8,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public required string Name { get; init; }
 
 		/// <summary>
-		/// The value, such as a count, a duration or a time.
+		/// The value, such as a count, a duration or a time. <see langword="null"/> for a time that is not known.
 		/// </summary>
 		public required object Value { get; init; }
 	}

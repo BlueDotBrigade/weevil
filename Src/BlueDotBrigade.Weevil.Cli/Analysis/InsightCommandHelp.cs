@@ -18,6 +18,9 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 					new HelpHeading("Insight Examples:"),
 					new HelpSection(
 						new HelpParagraph(@"WeevilCli.exe insight --log-path ""C:\Temp\Http.log"""),
+						new HelpParagraph(""),
+						new HelpParagraph("The whole report, every insight and metric, as JSON for a program:"),
+						new HelpParagraph(@"WeevilCli.exe insight --log-path ""C:\Temp\Http.log"" --output-as json"),
 						new HelpParagraph("")
 					)
 				));
