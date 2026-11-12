@@ -260,27 +260,6 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		}
 
 		[TestMethod]
-		public void SerializeMetrics_WithHtmlFormatter_ShouldGenerateHtmlTable()
-		{
-			// Arrange
-			var records = ImmutableArray.Create<IRecord>(
-				new Record(1, new DateTime(2024, 1, 1, 10, 0, 0), SeverityType.Information, "Value=5.0"));
-
-			var expression = "Value=(?<value>\\d+\\.?\\d*)";
-			var viewModel = new GraphViewModel(records, expression, "title", "source");
-			var formatter = new BlueDotBrigade.Weevil.IO.HtmlFormatter();
-
-			// Act
-			var serialized = viewModel.SerializeMetrics(formatter);
-
-			// Assert
-			serialized.Should().NotBeNullOrEmpty();
-			serialized.Should().Contain("<table>");
-			serialized.Should().Contain("<thead>");
-			serialized.Should().Contain("<tbody>");
-		}
-
-		[TestMethod]
 		public void SerializeMetrics_WithNullFormatter_ShouldThrowArgumentNullException()
 		{
 			// Arrange

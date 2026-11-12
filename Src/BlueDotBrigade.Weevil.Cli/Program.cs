@@ -35,7 +35,20 @@
 		public static void Main(string[] args)
 		{
 			// The format is chosen once; a command that renders a document itself, such as Insight's JSON, receives it (#837).
-			var outputFormat = OutputAs.ResolveFormat(args, OutputFormat.Markdown);
+			OutputFormat outputFormat;
+
+			try
+			{
+				outputFormat = OutputAs.ResolveFormat(args, OutputFormat.Markdown);
+			}
+			catch (ArgumentException exception)
+			{
+				// A format Weevil does not write is an error, rather than a different format (#837).
+				Console.Error.WriteLine(exception.Message);
+				Environment.ExitCode = 1;
+				return;
+			}
+
 			OutputWriterContext.Configure(OutputAs.CreateFormatter(outputFormat), new ConsoleWriter());
 
 			if (outputFormat == OutputFormat.Json)

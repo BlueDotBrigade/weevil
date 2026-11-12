@@ -5,26 +5,15 @@ namespace BlueDotBrigade.Weevil.IO
 
 	public static class OutputAs
 	{
-		public static IOutputFormatter ResolveFormatter(IReadOnlyList<string> arguments, IOutputFormatter fallbackFormatter)
-		{
-			if (arguments is null)
-			{
-				throw new ArgumentNullException(nameof(arguments));
-			}
-
-			if (fallbackFormatter is null)
-			{
-				throw new ArgumentNullException(nameof(fallbackFormatter));
-			}
-
-			return TryGetValue(arguments, out var value) && TryParseFormat(value, out var format)
-				? CreateFormatter(format)
-				: fallbackFormatter;
-		}
+		/// <summary>
+		/// The values that <c>--output-as</c> accepts, as an error message names them.
+		/// </summary>
+		private const string SupportedValues = "markdown, plaintext or json";
 
 		/// <summary>
-		/// The format that <c>--output-as</c> names, or the fallback when the option is missing or names no known format.
+		/// The format that <c>--output-as</c> names, or the fallback when the option is missing.
 		/// </summary>
+		/// <exception cref="ArgumentException">The option has no value, or names a format that Weevil does not write, such as <c>xml</c> (#837).</exception>
 		public static OutputFormat ResolveFormat(IReadOnlyList<string> arguments, OutputFormat fallbackFormat)
 		{
 			if (arguments is null)
@@ -32,20 +21,34 @@ namespace BlueDotBrigade.Weevil.IO
 				throw new ArgumentNullException(nameof(arguments));
 			}
 
-			return TryGetValue(arguments, out var value) && TryParseFormat(value, out var format)
+			if (!TryGetValue(arguments, out var value))
+			{
+				return fallbackFormat;
+			}
+
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				throw new ArgumentException($"--output-as needs a value. Use {SupportedValues}.");
+			}
+
+			return TryParseFormat(value, out var format)
 				? format
-				: fallbackFormat;
+				: throw new ArgumentException($"--output-as {value} is not supported. Use {SupportedValues}.");
 		}
 
+		/// <summary>
+		/// The formatter for the text a command writes in the format.
+		/// </summary>
+		/// <remarks>
+		/// A command that supports JSON renders it from its model, and writes it as a document that no formatter wraps; any other text is plain.
+		/// </remarks>
 		public static IOutputFormatter CreateFormatter(OutputFormat format)
 		{
 			return format switch
 			{
 				OutputFormat.Markdown => new MarkdownFormatter(),
 				OutputFormat.PlainText => new PlainTextFormatter(),
-				OutputFormat.Html => new HtmlFormatter(),
-				OutputFormat.Json => new JsonFormatter(),
-				OutputFormat.Xml => new XmlFormatter(),
+				OutputFormat.Json => new PlainTextFormatter(),
 				_ => throw new ArgumentOutOfRangeException(nameof(format), format, "The output format is not supported."),
 			};
 		}
@@ -80,43 +83,39 @@ namespace BlueDotBrigade.Weevil.IO
 			return sanitized.ToArray();
 		}
 
+		/// <summary>
+		/// Whether <c>--output-as</c> appears, and its last value, which is empty when the option has none.
+		/// </summary>
 		private static bool TryGetValue(IReadOnlyList<string> arguments, out string value)
 		{
+			var found = false;
 			value = string.Empty;
 
 			for (var index = 0; index < arguments.Count; index++)
 			{
-				var argument = arguments[index];
-
-				if (!TryGetOptionValue(argument, out var inlineValue, out var hasInlineValue))
+				if (!TryGetOptionValue(arguments[index], out var inlineValue, out var hasInlineValue))
 				{
 					continue;
 				}
+
+				found = true;
 
 				if (hasInlineValue)
 				{
-					if (IsValidValue(inlineValue))
-					{
-						value = inlineValue;
-					}
-
-					continue;
+					value = inlineValue;
 				}
-
-				if (index + 1 >= arguments.Count || LooksLikeOption(arguments[index + 1]))
+				else if (index + 1 < arguments.Count && !LooksLikeOption(arguments[index + 1]))
 				{
-					continue;
+					index++;
+					value = arguments[index];
 				}
-
-				index++;
-				var nextArgument = arguments[index];
-				if (IsValidValue(nextArgument))
+				else
 				{
-					value = nextArgument;
+					value = string.Empty;
 				}
 			}
 
-			return value.Length > 0;
+			return found;
 		}
 
 		private static bool TryParseFormat(string value, out OutputFormat format)
@@ -133,14 +132,8 @@ namespace BlueDotBrigade.Weevil.IO
 				case "txt":
 					format = OutputFormat.PlainText;
 					return true;
-				case "html":
-					format = OutputFormat.Html;
-					return true;
 				case "json":
 					format = OutputFormat.Json;
-					return true;
-				case "xml":
-					format = OutputFormat.Xml;
 					return true;
 				default:
 					format = default;
@@ -185,8 +178,6 @@ namespace BlueDotBrigade.Weevil.IO
 			return argument.StartsWith("-", StringComparison.Ordinal)
 			       || argument.StartsWith("/", StringComparison.Ordinal);
 		}
-
-		private static bool IsValidValue(string value) => !string.IsNullOrWhiteSpace(value);
 
 		private static string Normalize(string value)
 		{

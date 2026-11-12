@@ -14,13 +14,15 @@ A renderer then turns the model into text:
 | Caller | Output |
 |---|---|
 | Dashboard's Copy (GUI) | Markdown, for the insights shown |
-| `WeevilCli.exe insight` | Its own lines, through the formatter `--output-as` chose: the insights that need attention, or with `--verbose`, the log's metrics and every insight |
+| `WeevilCli.exe insight` | Its own lines, as Markdown or, with `--output-as plaintext`, plain text: the insights that need attention, or with `--verbose`, the log's metrics and every insight |
 | `WeevilCli.exe insight --output-as json` | The whole report as JSON, with or without `--verbose` |
 | `Get-Insight` (PowerShell) | The `InsightReport` object |
 
 `InsightReportGenerator.Generate` returns the Markdown directly, for plugins written before #837. It is marked `[Obsolete]`.
 
 The CLI chooses the output format once: `Program` resolves `--output-as` into an `OutputFormat`, and gives it to the commands as `OutputOptions`, through Cocona's services. A document a command renders itself, such as the JSON, is written with `Write.Document`, which the formatter does not wrap.
+
+`--output-as` accepts `markdown` (or `md`), the default, `plaintext` (or `plain`, `text`, `txt`) and `json`. Any other value, such as `xml` or `html`, or none, is an error that names them, and the CLI exits with 1. Only `insight` writes JSON: `encrypt` refuses it, and `filter` writes its results to a file, whatever the format.
 
 ## Scopes
 

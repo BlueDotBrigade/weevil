@@ -7,8 +7,10 @@ namespace BlueDotBrigade.Weevil.IO
 	{
 		Markdown,
 		PlainText,
-		Html,
+
+		/// <summary>
+		/// A document for programs, which a command renders from its model, such as the insight report.
+		/// </summary>
 		Json,
-		Xml,
 	}
 }
