@@ -124,13 +124,14 @@
 
 		private void OnCopy(object sender, RoutedEventArgs e)
 		{
-			var report = new InsightReportGenerator().Generate(
+			// Built as a model, then rendered as Markdown (#837).
+			InsightReport report = new InsightReportGenerator().Create(
 				this.WeevilVersion,
 				_engine,
 				this.Insights.ToImmutableArray(),
 				this.From,
 				this.To);
-			Clipboard.SetData(DataFormats.UnicodeText, report);
+			Clipboard.SetData(DataFormats.UnicodeText, new MarkdownInsightReportRenderer().Render(report));
 		}
 
 		private void OnNavigateToRecord(object sender, RoutedEventArgs e)
