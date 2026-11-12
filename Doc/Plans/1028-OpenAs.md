@@ -238,7 +238,7 @@ One pull request per step, in order. The GUI builds only on Windows, so for step
    - Done on 2026-11-11 (#1183). A damaged `.idx` header that claims more lines than bytes is ignored, and the CLI's save deletes its temporary file without hiding why it stopped (found in review).
 2. **The GUI's reads are safe, and export, split and the search for text run off the UI thread.**
    - What it adds:
-     - the failed-read handler, the rows' safe read, and the graph's copy of its text;
+     - the failed-read handler, the rows' safe read, and the graph's copy of its text. Done on 2026-11-12, in its own pull request. Background work reloads only for a log that changed: another `IOException`, such as a save to a locked file, is shown as that work's error;
      - the screen-row measurement, and the cache if it is needed. Measured: no cache is needed (see Screen rows);
      - export, split and the search for text in the background, with Escape. Done first, in its own pull request: the found record is shown once the records and menus are back, and the progress bar waits 250 ms (found in review). Their messages go through `IDialogBoxService`, so a test never waits on a message box.
      - `OpenAsync` gains an internal mode parameter, so tests can open a log on disk before the window exists.

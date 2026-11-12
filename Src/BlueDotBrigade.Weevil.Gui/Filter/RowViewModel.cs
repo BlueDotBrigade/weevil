@@ -16,16 +16,29 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	{
 		private static readonly char[] LineBreaks = { '\r', '\n' };
 
+		/// <summary>
+		/// Shown instead of a record's text when its log changed on disk since it was opened (#1028).
+		/// </summary>
+		internal const string ChangedLogPlaceholder = "\u26A0 Log changed: press Ctrl+F5";
+
+		/// <summary>
+		/// Shown instead of a record's text when its log on disk can no longer be read, for example because it was deleted (#1028).
+		/// </summary>
+		internal const string UnreadableLogPlaceholder = "\u26A0 Log can't be read";
+
 		private readonly IAnnotations _annotations;
+		private readonly Action<Exception> _reportFailedRead;
 
 		// The comment the grid last read or wrote, so a change to the pin alone leaves the comment box alone.
 		private string _shownComment = string.Empty;
 		private bool _isSelected;
 
-		public RowViewModel(IRecord record, IAnnotations annotations)
+		/// <param name="reportFailedRead">Told when the record's text cannot be read from its log on disk; it may be called on any thread.</param>
+		public RowViewModel(IRecord record, IAnnotations annotations, Action<Exception> reportFailedRead = null)
 		{
 			this.Record = record ?? throw new ArgumentNullException(nameof(record));
 			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
+			_reportFailedRead = reportFailedRead;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -84,6 +97,40 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		/// <summary>
+		/// Returns the record's text, or a placeholder when its log on disk changed or can no longer be read (#1028).
+		/// </summary>
+		/// <remarks>
+		/// The grid's converters read the text, and WPF does not catch a converter's exception, so Weevil would end.
+		/// The row reports the failure instead, and the view decides what to do about it, once per log.
+		/// In RAM mode the read cannot fail.
+		/// </remarks>
+		public string ReadContent()
+		{
+			try
+			{
+				return this.Record.Content;
+			}
+			catch (Exception exception) when (exception is System.IO.IOException or UnauthorizedAccessException)
+			{
+				_reportFailedRead?.Invoke(exception);
+
+				return exception is BlueDotBrigade.Weevil.IO.LogFileChangedException
+					? ChangedLogPlaceholder
+					: UnreadableLogPlaceholder;
+			}
+		}
+
+		/// <summary>
+		/// Returns the text of the item a grid binding passes to a converter: through <see cref="ReadContent()"/> for a row, or the record's own text.
+		/// </summary>
+		public static string ReadContent(object item)
+		{
+			return item is RowViewModel row
+				? row.ReadContent()
+				: (item as IRecord)?.Content;
+		}
+
+		/// <summary>
 		/// Returns the record that a grid binding passes to a converter: the row's record, or the record itself.
 		/// </summary>
 		public static IRecord ToRecord(object item)
@@ -117,7 +164,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		public override string ToString()
 		{
-			var content = this.Record.Content ?? string.Empty;
+			var content = ReadContent() ?? string.Empty;
 			var endOfLine = content.IndexOfAny(LineBreaks);
 
 			return $"Line {this.LineNumber}: {(endOfLine < 0 ? content : content[..endOfLine])}";

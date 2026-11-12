@@ -30,7 +30,8 @@
 
 			if (RowViewModel.ToRecord(record) is IRecord concreteRecord)
 			{
-				var content = CallStackFormatter.Format(concreteRecord);
+				// Through the row, which shows a placeholder when a log on disk can no longer be read, instead of ending Weevil (#1028).
+				var content = CallStackFormatter.Format(RowViewModel.ReadContent(record), concreteRecord.IsMultiLine);
 				result = ShortenedRecordFormatter.Format(content);
 			}
 

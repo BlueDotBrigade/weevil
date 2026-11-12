@@ -25,6 +25,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private readonly IAnnotations _annotations;
 		private readonly ISelect _selector;
 		private readonly IUiDispatcher _uiDispatcher;
+		private readonly Action<Exception> _reportFailedRead;
 
 		// Guards the cache and the queued changes. Rows are read on the UI thread, but changes arrive on any thread.
 		private readonly object _padlock = new object();
@@ -35,8 +36,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private bool _isRefreshQueued;
 		private bool _refreshesEveryRow;
 
-		public RowList(RecordList results, IAnnotations annotations, ISelect selector, IUiDispatcher uiDispatcher)
+		/// <param name="reportFailedRead">Given to each row: told when a row's text cannot be read from its log on disk (#1028).</param>
+		public RowList(RecordList results, IAnnotations annotations, ISelect selector, IUiDispatcher uiDispatcher, Action<Exception> reportFailedRead = null)
 		{
+			_reportFailedRead = reportFailedRead;
 			_results = results ?? RecordList.Empty;
 			_annotations = annotations ?? throw new ArgumentNullException(nameof(annotations));
 			_selector = selector ?? throw new ArgumentNullException(nameof(selector));
@@ -85,7 +88,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 				// Read once: a list may create the record on each read (#1137).
 				IRecord record = _results[position];
-				row = new RowViewModel(record, _annotations)
+				row = new RowViewModel(record, _annotations, _reportFailedRead)
 				{
 					IsSelected = _selector.Selected.ContainsKey(record.LineNumber),
 					// From the results the row is shown in, by position, so displaying rows calculates no elapsed time for every line (#1150).

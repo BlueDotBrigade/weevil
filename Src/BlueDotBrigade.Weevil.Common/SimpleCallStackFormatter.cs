@@ -38,9 +38,19 @@
 
 		public string Format(IRecord record)
 		{
-			var result = record.Content;
+			return Format(record.Content, record.IsMultiLine);
+		}
 
-			if (record.IsMultiLine)
+		/// <summary>
+		/// Shortens the call stacks in a record's text, already read, for example by a caller that catches a failed read of a log on disk (#1028).
+		/// </summary>
+		/// <param name="content">The record's text.</param>
+		/// <param name="isMultiLine">The record spans several lines: only then can it hold a call stack.</param>
+		public string Format(string content, bool isMultiLine)
+		{
+			var result = content;
+
+			if (isMultiLine)
 			{
 				foreach (var pattern in CallStackPatterns)
 				{
@@ -58,8 +68,6 @@
 					result = result.Replace(filePath, "on line");
 				}
 			}
-
-			var wasSucessful = result.Length < record.Content.Length;
 
 			return result;
 		}

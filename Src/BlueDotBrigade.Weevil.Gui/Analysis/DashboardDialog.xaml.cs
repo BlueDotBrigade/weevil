@@ -5,6 +5,7 @@
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	/// <summary>
 	/// Interaction logic for DashboardDialog.xaml
@@ -101,9 +102,19 @@
 
 		private void OnRefresh(object sender, RoutedEventArgs e)
 		{
-			foreach (IInsight insight in this.Insights)
+			try
 			{
-				insight.Refresh(_engine.Filter.Results);
+				foreach (IInsight insight in this.Insights)
+				{
+					insight.Refresh(_engine.Filter.Results);
+				}
+			}
+			catch (Exception exception) when (exception is System.IO.IOException or UnauthorizedAccessException)
+			{
+				// A plugin's insight that reads the text of a log on disk that changed, or is gone, would otherwise end Weevil (#1028).
+				Log.Default.Write(LogSeverityType.Warning, exception, "The dashboard could not refresh its insights.");
+				MessageBox.Show(this, $"The insights could not be refreshed.\r\n\r\n{exception.Message}", "Dashboard", MessageBoxButton.OK, MessageBoxImage.Warning);
+				return;
 			}
 
 			var range = _engine.Filter.Results.GetEstimatedRange();
