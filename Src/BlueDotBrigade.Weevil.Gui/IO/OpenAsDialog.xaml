@@ -33,12 +33,12 @@
         <TextBlock Text="{Binding FileDescription}" FontWeight="SemiBold" />
         <TextBlock Text="Where should Weevil keep the log's text while it is open?" />
 
-        <RadioButton x:Name="RamRadioButton" GroupName="StorageMode" Content="RAM"
+        <RadioButton x:Name="RamRadioButton" GroupName="StorageMode" Content="_RAM"
                      IsChecked="{Binding IsRamChosen, Mode=TwoWay}"
                      AutomationProperties.HelpText="{Binding RamDescription}" />
         <TextBlock Text="{Binding RamDescription}" Margin="30,0,5,5" />
 
-        <RadioButton x:Name="DiskRadioButton" GroupName="StorageMode" Content="Disk"
+        <RadioButton x:Name="DiskRadioButton" GroupName="StorageMode" Content="_Disk"
                      IsChecked="{Binding IsDiskChosen, Mode=TwoWay}"
                      AutomationProperties.HelpText="{Binding DiskDescription}" />
         <TextBlock Text="{Binding DiskDescription}" Margin="30,0,5,5" />
@@ -46,8 +46,7 @@
         <TextBlock x:Name="WarningTextBlock"
                    Text="{Binding Warning}"
                    FontWeight="SemiBold"
-                   Margin="5,10,5,5"
-                   AutomationProperties.LiveSetting="Assertive">
+                   Margin="5,10,5,5">
             <TextBlock.Style>
                 <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                     <Style.Triggers>

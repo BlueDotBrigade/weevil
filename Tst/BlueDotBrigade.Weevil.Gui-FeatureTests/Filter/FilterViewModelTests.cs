@@ -299,10 +299,28 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.CanOpenLogFile.Should().BeTrue("nothing else is running");
 
 			viewModel.OnFileDropped(this, new DroppedFileEventArgs(CopyLog("Dropped.log")));
-			WaitUntil(() => viewModel.IsMenuEnabled);
+
+			// Until the insights are ready, they still read the log on disk.
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 
 			dialog.Received(1).TryShowOpenAs(Arg.Is<OpenAsAdvice>(advice => advice.FileName == "Dropped.log"), out Arg.Any<StorageMode>());
 			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin => bulletin.StorageMode == StorageMode.Disk));
+		}
+
+		[TestMethod]
+		public void GivenTheOpenButton_WhenALogIsChosen_ThenOpenAsIsShownForIt()
+		{
+			// The Open button, Ctrl+O and the menu's Open… show the Windows file dialog, then Open As (#1028).
+			var dialog = Substitute.For<IDialogBoxService>();
+			dialog.ShowOpenFile(Arg.Any<string>()).Returns(CopyLog("Chosen.log"));
+			AcceptOpenAs(dialog, StorageMode.Ram);
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+
+			viewModel.OpenLogCommand.Execute(null);
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
+
+			dialog.Received(1).TryShowOpenAs(Arg.Is<OpenAsAdvice>(advice => advice.FileName == "Chosen.log"), out Arg.Any<StorageMode>());
+			viewModel.IsLogFileOpen.Should().BeTrue("the chosen log opens in the mode chosen");
 		}
 
 		[TestMethod]
@@ -328,12 +346,20 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Open As follows the zip's list of files, so its suggestion uses the size of the log chosen (#1028).
 			ZippedLogViewModel zipped = CreateViewModelForZip();
+			var logLength = (ulong)new FileInfo(new Daten().AsFilePath(From.GlobalDefault)).Length;
 
-			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
 
-			zipped.DialogBox.Received(1).TryShowOpenAs(
-				Arg.Is<OpenAsAdvice>(advice => advice.FileName == "A.log" && advice.FileSize.Bytes > 0),
-				out Arg.Any<StorageMode>());
+				zipped.DialogBox.Received(1).TryShowOpenAs(
+					Arg.Is<OpenAsAdvice>(advice => advice.FileName == "A.log" && advice.FileSize.Bytes == logLength),
+					out Arg.Any<StorageMode>());
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
 		}
 
 		[TestMethod]
@@ -345,7 +371,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
 			await viewModel.OpenCompressedAsync(CopyLog("Reloaded.log"));
-			WaitUntil(() => viewModel.IsMenuEnabled);
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 			bulletinMediator.ClearReceivedCalls();
 
 			viewModel.Reload();

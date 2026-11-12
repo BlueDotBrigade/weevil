@@ -8,9 +8,12 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		private static readonly StorageUnit OneGigabyte = new StorageUnit(StorageUnit.BytesPerGigabyte);
 
 		[TestMethod]
-		public void GivenALogThatFitsInTheFreeMemory_WhenAdvised_ThenRamIsSuggestedWithoutAWarning()
+		[DataRow(2, 8)]
+		[DataRow(7, 8)]
+		public void GivenALogThatFitsInTheFreeMemory_WhenAdvised_ThenRamIsSuggestedWithoutAWarning(double estimateGigabytes, double availableGigabytes)
 		{
-			var advice = Advise(estimateGigabytes: 2, availableGigabytes: 8);
+			// The second row fits exactly: the estimate and the 1 GB reserve take all the free memory.
+			var advice = Advise(estimateGigabytes, availableGigabytes);
 
 			advice.DefaultMode.Should().Be(StorageMode.Ram);
 			advice.GetWarning(StorageMode.Ram).Should().BeEmpty();
@@ -38,6 +41,14 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		}
 
 		[TestMethod]
+		public void GivenTheLogsMemoryCouldNotBeEstimated_WhenAdvised_ThenRamIsSuggested()
+		{
+			var advice = new OpenAsAdvice("Application.log", OneGigabyte, estimate: null, new StorageUnit(8 * StorageUnit.BytesPerGigabyte), isOnNetworkDrive: false);
+
+			advice.DefaultMode.Should().Be(StorageMode.Ram);
+		}
+
+		[TestMethod]
 		public void GivenALogOnANetworkDrive_WhenDiskIsChosen_ThenItWarnsThatFiltersAreSlower()
 		{
 			var advice = new OpenAsAdvice("Application.log", OneGigabyte, OneGigabyte, new StorageUnit(8 * StorageUnit.BytesPerGigabyte), isOnNetworkDrive: true);
@@ -47,9 +58,12 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		}
 
 		[TestMethod]
-		public void GivenAUncPath_WhenChecked_ThenItIsOnANetworkDrive()
+		[DataRow(@"\\Server\Logs\Application.log", true)]
+		[DataRow(@"\\?\UNC\Server\Logs\Application.log", true)]
+		[DataRow(@"\\?\C:\Logs\Application.log", false)]
+		public void GivenAPath_WhenChecked_ThenOnlyAShareIsOnANetworkDrive(string path, bool isOnNetworkDrive)
 		{
-			OpenAsAdvice.IsNetworkPath(@"\\Server\Logs\Application.log").Should().BeTrue();
+			OpenAsAdvice.IsNetworkPath(path).Should().Be(isOnNetworkDrive);
 		}
 
 		private static OpenAsAdvice Advise(double estimateGigabytes, double availableGigabytes)

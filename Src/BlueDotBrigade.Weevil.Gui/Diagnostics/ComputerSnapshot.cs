@@ -136,7 +136,7 @@
 
 			return snapshot;
 		}
-	
+
 		[StructLayout(LayoutKind.Sequential)]
 		private struct MemoryStatusEx
 		{

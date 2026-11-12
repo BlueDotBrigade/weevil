@@ -91,16 +91,27 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		{
 			try
 			{
-				if (path.StartsWith(@"\\", StringComparison.Ordinal))
+				// A relative path from the command line is relative to the working folder, which may be a share.
+				var fullPath = Path.GetFullPath(path);
+
+				// \\server\share, or the long form \\?\UNC\server\share. Not \\?\C:\ or \\.\, which are local.
+				if (fullPath.StartsWith(@"\\?\UNC\", StringComparison.OrdinalIgnoreCase))
 				{
 					return true;
 				}
 
-				var root = Path.GetPathRoot(path);
+				if (fullPath.StartsWith(@"\\", StringComparison.Ordinal) &&
+				    !fullPath.StartsWith(@"\\?\", StringComparison.Ordinal) &&
+				    !fullPath.StartsWith(@"\\.\", StringComparison.Ordinal))
+				{
+					return true;
+				}
+
+				var root = Path.GetPathRoot(fullPath);
 
 				return !string.IsNullOrEmpty(root) && new DriveInfo(root).DriveType == DriveType.Network;
 			}
-			catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException)
+			catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or NotSupportedException)
 			{
 				return false;
 			}
@@ -113,7 +124,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		{
 			return size.GigaBytes >= 1
 				? string.Format(CultureInfo.CurrentCulture, "{0:0.0} GB", size.GigaBytes)
-				: string.Format(CultureInfo.CurrentCulture, "{0:0} MB", Math.Max(1, Math.Ceiling(size.MegaBytes)));
+				: string.Format(CultureInfo.CurrentCulture, "{0:0} MB", System.Math.Ceiling(size.MegaBytes));
 		}
 	}
 }

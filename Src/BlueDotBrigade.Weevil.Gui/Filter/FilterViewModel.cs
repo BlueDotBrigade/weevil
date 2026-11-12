@@ -607,6 +607,9 @@
 				// A zip can hold thousands of files, so they are deleted off the UI thread.
 				if (openedFilePath == null)
 				{
+					// Open As may have taken the menus before the copy failed to open.
+					this.CanOpenLogFile = true;
+
 					// Nothing was opened from this copy, so nothing was saved beside it either.
 					await Task.Run(() => DeleteFolder(extractedFolder));
 				}
@@ -692,7 +695,30 @@
 		/// Shows Weevil's Open As window for the log about to open, with RAM or Disk already chosen from its size and the free memory (#1028).
 		/// </summary>
 		/// <returns>The mode chosen, or <see langword="null"/> when the user cancelled.</returns>
+		/// <remarks>
+		/// Nothing else opens a log or reloads while the estimate runs and the window is shown.
+		/// When a mode is chosen, the open that follows takes over the menus, and gives them back.
+		/// </remarks>
 		private async Task<StorageMode?> ChooseStorageAsync(string logPath)
+		{
+			this.CanOpenLogFile = false;
+			StorageMode? chosen = null;
+
+			try
+			{
+				chosen = await AskStorageAsync(logPath);
+				return chosen;
+			}
+			finally
+			{
+				if (chosen is null)
+				{
+					this.CanOpenLogFile = true;
+				}
+			}
+		}
+
+		private async Task<StorageMode?> AskStorageAsync(string logPath)
 		{
 			// Off the UI thread: the estimate reads up to 1 MB of the log, which takes a moment on a network drive.
 			(StorageUnit fileSize, StorageUnit? estimate, bool isOnNetworkDrive) = await Task.Run(() =>
