@@ -70,6 +70,23 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 			report.To.Should().BeNull();
 		}
 
+		[TestMethod]
+		public void GivenAMetricWhoseTimeIsNotKnown_WhenAReportIsCreated_ThenItsValueIsNull()
+		{
+			// A log with no time gap has no first gap; a program gets null rather than 9999-12-31T23:59:59 (#837).
+			IEngine engine = MarkdownInsightReportRendererTests.CreateEngine();
+			engine.Filter.GetMetrics().Returns(new Dictionary<string, object>
+			{
+				{ "Counter", 0 },
+				{ "FirstOccurredAt", Record.CreationTimeUnknown },
+			});
+
+			InsightReport report = new InsightReportGenerator().Create(new Version(3, 0, 1), engine, ImmutableArray<IInsight>.Empty, from: null, to: null);
+
+			report.Metrics.Select(metric => (metric.Name, metric.Value))
+				.Should().Equal(("Counter", 0), ("FirstOccurredAt", (object)null));
+		}
+
 		private static InsightReport Create(ImmutableArray<IInsight> insights)
 		{
 			return new InsightReportGenerator().Create(

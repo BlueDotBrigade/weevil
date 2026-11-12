@@ -6,6 +6,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Reflection;
+	using System.Text;
 	using System.Threading.Tasks;
 	using Analysis;
 	using Cocona;
@@ -14,6 +15,8 @@
 	using Security;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Cli.IO;
+	using Microsoft.Extensions.DependencyInjection;
 
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
@@ -31,8 +34,15 @@
 
 		public static void Main(string[] args)
 		{
-			var formatter = OutputAs.ResolveFormatter(args, new MarkdownFormatter());
-			OutputWriterContext.Configure(formatter, new ConsoleWriter());
+			// The format is chosen once; a command that renders a document itself, such as Insight's JSON, receives it (#837).
+			var outputFormat = OutputAs.ResolveFormat(args, OutputFormat.Markdown);
+			OutputWriterContext.Configure(OutputAs.CreateFormatter(outputFormat), new ConsoleWriter());
+
+			if (outputFormat == OutputFormat.Json)
+			{
+				// JSON is read as UTF-8, and keeps text such as "Σ" readable; on Windows, the console's code page would otherwise encode it, even when redirected to a file (#837).
+				Console.OutputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+			}
 
 			Log.Default.Write(LogSeverityType.Debug, "Weevil console application has started.");
 			Log.Register(new NLogWriter());
@@ -47,6 +57,7 @@
 
 			var argumentsWithoutOutputAs = OutputAs.RemoveFromArguments(args);
 			var builder = CoconaApp.CreateBuilder(argumentsWithoutOutputAs);
+			builder.Services.AddSingleton(new OutputOptions(outputFormat));
 
 			var application = builder.Build();
 

@@ -2,7 +2,6 @@ namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 
 	public static class OutputAs
 	{
@@ -18,12 +17,37 @@ namespace BlueDotBrigade.Weevil.IO
 				throw new ArgumentNullException(nameof(fallbackFormatter));
 			}
 
-			if (TryGetValue(arguments, out var format) && TryCreateFormatter(format, out var formatter))
+			return TryGetValue(arguments, out var value) && TryParseFormat(value, out var format)
+				? CreateFormatter(format)
+				: fallbackFormatter;
+		}
+
+		/// <summary>
+		/// The format that <c>--output-as</c> names, or the fallback when the option is missing or names no known format.
+		/// </summary>
+		public static OutputFormat ResolveFormat(IReadOnlyList<string> arguments, OutputFormat fallbackFormat)
+		{
+			if (arguments is null)
 			{
-				return formatter;
+				throw new ArgumentNullException(nameof(arguments));
 			}
 
-			return fallbackFormatter;
+			return TryGetValue(arguments, out var value) && TryParseFormat(value, out var format)
+				? format
+				: fallbackFormat;
+		}
+
+		public static IOutputFormatter CreateFormatter(OutputFormat format)
+		{
+			return format switch
+			{
+				OutputFormat.Markdown => new MarkdownFormatter(),
+				OutputFormat.PlainText => new PlainTextFormatter(),
+				OutputFormat.Html => new HtmlFormatter(),
+				OutputFormat.Json => new JsonFormatter(),
+				OutputFormat.Xml => new XmlFormatter(),
+				_ => throw new ArgumentOutOfRangeException(nameof(format), format, "The output format is not supported."),
+			};
 		}
 
 		public static string[] RemoveFromArguments(IReadOnlyList<string> arguments)
@@ -95,33 +119,31 @@ namespace BlueDotBrigade.Weevil.IO
 			return value.Length > 0;
 		}
 
-		private static bool TryCreateFormatter(string value, [NotNullWhen(true)] out IOutputFormatter? formatter)
+		private static bool TryParseFormat(string value, out OutputFormat format)
 		{
-			var normalized = Normalize(value);
-
-			switch (normalized)
+			switch (Normalize(value))
 			{
 				case "markdown":
 				case "md":
-					formatter = new MarkdownFormatter();
+					format = OutputFormat.Markdown;
 					return true;
 				case "plaintext":
 				case "plain":
 				case "text":
 				case "txt":
-					formatter = new PlainTextFormatter();
+					format = OutputFormat.PlainText;
 					return true;
 				case "html":
-					formatter = new HtmlFormatter();
+					format = OutputFormat.Html;
 					return true;
 				case "json":
-					formatter = new JsonFormatter();
+					format = OutputFormat.Json;
 					return true;
 				case "xml":
-					formatter = new XmlFormatter();
+					format = OutputFormat.Xml;
 					return true;
 				default:
-					formatter = null;
+					format = default;
 					return false;
 			}
 		}

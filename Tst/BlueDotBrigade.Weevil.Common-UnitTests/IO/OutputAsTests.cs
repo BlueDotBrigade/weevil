@@ -24,6 +24,19 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
+		public void GivenOutputAsJson_WhenResolveFormat_ThenTheFormatIsJson()
+		{
+			// The CLI chooses the format once; a command renders its own document in it (#837).
+			OutputAs.ResolveFormat(["insight", "--output-as", "JSON"], OutputFormat.Markdown).Should().Be(OutputFormat.Json);
+		}
+
+		[TestMethod]
+		public void GivenNoOutputAs_WhenResolveFormat_ThenTheFallbackIsUsed()
+		{
+			OutputAs.ResolveFormat(["insight", "--verbose"], OutputFormat.Markdown).Should().Be(OutputFormat.Markdown);
+		}
+
+		[TestMethod]
 		public void GivenUnknownOutputAsValue_WhenResolveFormatter_ThenReturnsFallbackFormatter()
 		{
 			var fallback = new MarkdownFormatter();

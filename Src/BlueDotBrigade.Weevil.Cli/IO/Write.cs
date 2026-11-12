@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Cli.IO
 
 	public static class Write
 	{
+		public static void Document(string document) => OutputWriterContext.WriteDocument(document);
 		public static void Text(string message) => OutputWriterContext.WriteText(message);
 		public static void Heading(string message) => OutputWriterContext.WriteHeading(message);
 		public static void SubHeading(string message) => OutputWriterContext.WriteSubHeading(message);

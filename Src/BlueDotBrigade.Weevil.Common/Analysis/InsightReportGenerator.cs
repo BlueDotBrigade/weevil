@@ -40,7 +40,7 @@
 				FileSize = engine.Metrics.FileSize,
 				Metrics = engine.Filter
 					.GetMetrics()
-					.Select(metric => new InsightReportMetric { Name = metric.Key, Value = metric.Value })
+					.Select(metric => new InsightReportMetric { Name = metric.Key, Value = KnownOrNull(metric.Value) })
 					.ToImmutableArray(),
 				Insights = insights
 					.Select(insight => new InsightReportItem
@@ -62,6 +62,14 @@
 		private static DateTime? KnownOrNull(DateTime? time)
 		{
 			return time == Record.CreationTimeUnknown ? null : time;
+		}
+
+		/// <summary>
+		/// The metric's value, or <see langword="null"/> for a time that is <see cref="Record.CreationTimeUnknown"/>, such as when the first gap occurred in a log that has none.
+		/// </summary>
+		private static object KnownOrNull(object value)
+		{
+			return value is DateTime time && time == Record.CreationTimeUnknown ? null : value;
 		}
 
 		/// <summary>

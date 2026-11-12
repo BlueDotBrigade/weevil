@@ -1,26 +1,28 @@
 namespace BlueDotBrigade.Weevil.PowerShell
 {
 	using System;
-	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using System.Management.Automation;
 	using BlueDotBrigade.Weevil.Analysis;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.IO;
 
 	/*
 	# Assuming you have already loaded the BlueDotBrigade.Weevil.PowerShell module
-	$logFilePath = "C:\Temp\Application.log"
+	$report = Get-Insight -FilePath "C:\Temp\Application.log"
 
-	$insights = Get-Insight -FilePath $logFilePath
+	$report.Metrics | Format-Table Name, Value
 
-	$insights | ForEach-Object {
-		Write-Host "Title: $_.Title"
-		Write-Host "Metric: $_.MetricValue $_.MetricUnit"
-		Write-Host "Details: $_.Details"
-		Write-Host "Attention Required: $_.IsAttentionRequired"
-		Write-Host "-------------------------------------"
+	$report.Insights | Where-Object IsAttentionRequired | ForEach-Object {
+		Write-Host "$($_.Title): $($_.MetricValue) $($_.MetricUnit)"
+		Write-Host $_.Details
 	}
 	*/
+	/// <summary>
+	/// Writes the log's <see cref="InsightReport"/>: the same data as the command line's <c>insight --output-as json</c>, as an object (#837).
+	/// </summary>
 	[Cmdlet(VerbsCommon.Get, "Insight")]
+	[OutputType(typeof(InsightReport))]
     public class GetInsightCmdlet : Cmdlet
     {
         [Parameter(Position = 0, Mandatory = true)]
@@ -42,12 +44,13 @@ namespace BlueDotBrigade.Weevil.PowerShell
                     .Open();
 
                 // On disk, a log that changed while it was read is reloaded, and read once more (#1028).
-                IEnumerable<IInsight> insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
+                ImmutableArray<IInsight> insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
 
-                foreach (var insight in insights)
-                {
-                    this.WriteObject(insight);
-                }
+                // After the insights, so that the report's metrics describe the same log, if it was reloaded.
+                var period = engine.Records.GetEstimatedRange();
+                var version = typeof(GetInsightCmdlet).Assembly.GetName().Version ?? new Version(0, 0);
+
+                this.WriteObject(new InsightReportGenerator().Create(version, engine, insights, period.From, period.To));
             }
             catch (Exception ex)
             {
