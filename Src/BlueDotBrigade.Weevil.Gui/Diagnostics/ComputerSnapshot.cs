@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Management;
+	using System.Runtime.InteropServices;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
@@ -23,6 +24,22 @@
 			
 			this.RamTotalInstalled = new StorageUnit();
 			this.RamTotalFree = new StorageUnit();
+		}
+
+		/// <summary>
+		/// Reads the available physical memory: free and standby pages, the figure Task Manager shows as Available (#1028).
+		/// </summary>
+		/// <remarks>
+		/// It answers in microseconds, unlike <see cref="Create"/>, whose WMI queries take a noticeable moment, so an open can read it.
+		/// </remarks>
+		/// <returns>The available memory, or <see langword="null"/> when Windows cannot say.</returns>
+		public static StorageUnit? ReadAvailableMemory()
+		{
+			var status = new MemoryStatusEx { Length = (uint)Marshal.SizeOf<MemoryStatusEx>() };
+
+			return GlobalMemoryStatusEx(ref status)
+				? new StorageUnit(status.AvailablePhysical)
+				: null;
 		}
 
 		public string CpuName { get; private set; }
@@ -119,5 +136,23 @@
 
 			return snapshot;
 		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		private struct MemoryStatusEx
+		{
+			public uint Length;
+			public uint MemoryLoad;
+			public ulong TotalPhysical;
+			public ulong AvailablePhysical;
+			public ulong TotalPageFile;
+			public ulong AvailablePageFile;
+			public ulong TotalVirtual;
+			public ulong AvailableVirtual;
+			public ulong AvailableExtendedVirtual;
+		}
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		private static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx buffer);
 	}
 }

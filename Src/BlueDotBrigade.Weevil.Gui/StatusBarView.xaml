@@ -279,6 +279,10 @@
             </StatusBarItem>
             <StatusBarItem Grid.Column="4" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
+                    <!-- RAM or Disk, as chosen in the Open As window (#1028). -->
+                    <TextBox Text="{Binding SourceFileDetails.StorageModeName, FallbackValue='', Mode=OneWay}"
+                             ToolTip="Where the log's text is kept: RAM, or Disk, where it is read back from the log when needed."
+                             Style="{StaticResource StatusBarTextBox}"/>
                 </StackPanel>
             </StatusBarItem>
             <Separator Grid.Column="5" />

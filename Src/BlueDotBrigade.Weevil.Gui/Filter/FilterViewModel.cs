@@ -545,7 +545,13 @@
 		{
 			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
 			{
-				await OpenAsync(sourceFilePath);
+				// Cancelled: nothing opens, and the open log stays (#1028).
+				if (await ChooseStorageAsync(sourceFilePath) is not { } storageMode)
+				{
+					return;
+				}
+
+				await OpenAsync(sourceFilePath, storageMode);
 
 				// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
 				if (!IsOpenFrom(_openExtractedLog))
@@ -578,14 +584,16 @@
 
 				var relativeNames = files.Select(f => Path.GetRelativePath(extractedFolder, f)).ToArray();
 
-				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName))
+				// Open As follows the list, so its suggestion uses the size of the log chosen (#1028).
+				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName) &&
+				    await ChooseStorageAsync(Path.Combine(extractedFolder, selectedFileName)) is { } storageMode)
 				{
 					extracted = await Task.Run(() => new ExtractedLog(extractedFolder, files));
 					openedFilePath = Path.Combine(extractedFolder, selectedFileName);
 
 					// Weevil may close before the open finishes.
 					_extractedLogBeingOpened = extracted;
-					await OpenAsync(openedFilePath);
+					await OpenAsync(openedFilePath, storageMode);
 				}
 			}
 			finally
@@ -599,6 +607,9 @@
 				// A zip can hold thousands of files, so they are deleted off the UI thread.
 				if (openedFilePath == null)
 				{
+					// Open As may have taken the menus before the copy failed to open.
+					this.CanOpenLogFile = true;
+
 					// Nothing was opened from this copy, so nothing was saved beside it either.
 					await Task.Run(() => DeleteFolder(extractedFolder));
 				}
@@ -680,6 +691,75 @@
 			});
 		}
 
+		/// <summary>
+		/// Shows Weevil's Open As window for the log about to open, with RAM or Disk already chosen from its size and the free memory (#1028).
+		/// </summary>
+		/// <returns>The mode chosen, or <see langword="null"/> when the user cancelled.</returns>
+		/// <remarks>
+		/// Nothing else opens a log or reloads while the estimate runs and the window is shown.
+		/// When a mode is chosen, the open that follows takes over the menus, and gives them back.
+		/// </remarks>
+		private async Task<StorageMode?> ChooseStorageAsync(string logPath)
+		{
+			this.CanOpenLogFile = false;
+			StorageMode? chosen = null;
+
+			try
+			{
+				chosen = await AskStorageAsync(logPath);
+				return chosen;
+			}
+			finally
+			{
+				if (chosen is null)
+				{
+					this.CanOpenLogFile = true;
+				}
+			}
+		}
+
+		private async Task<StorageMode?> AskStorageAsync(string logPath)
+		{
+			// Off the UI thread: the estimate reads up to 1 MB of the log, which takes a moment on a network drive.
+			(StorageUnit fileSize, StorageUnit? estimate, bool isOnNetworkDrive) = await Task.Run(() =>
+			{
+				try
+				{
+					return (new StorageUnit(new FileInfo(logPath).Length), (StorageUnit?)Engine.EstimateMemory(logPath), OpenAsAdvice.IsNetworkPath(logPath));
+				}
+				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+				{
+					// The open itself reports why the log cannot be read.
+					Log.Default.Write(LogSeverityType.Warning, e, "The memory the log needs could not be estimated.");
+					return (StorageUnit.Zero, (StorageUnit?)null, OpenAsAdvice.IsNetworkPath(logPath));
+				}
+			});
+
+			var advice = new OpenAsAdvice(
+				Path.GetFileName(logPath),
+				fileSize,
+				estimate,
+				BlueDotBrigade.Weevil.Gui.Diagnostics.ComputerSnapshot.ReadAvailableMemory(),
+				isOnNetworkDrive);
+			var isAccepted = _dialogBox.TryShowOpenAs(advice, out StorageMode storageMode);
+
+			// So the suggestion can be tuned from real use. Not in the engine's context, which the sidecar saves.
+			Log.Default.Write(
+				LogSeverityType.Information,
+				isAccepted ? "Open As: a storage mode was chosen." : "Open As was cancelled.",
+				new Dictionary<string, object>
+				{
+					{ "FileSize", advice.FileSize.Bytes },
+					{ "EstimatedMemory", advice.Estimate?.Bytes },
+					{ "AvailableMemory", advice.AvailableMemory?.Bytes },
+					{ "IsOnNetworkDrive", advice.IsOnNetworkDrive },
+					{ "SuggestedStorageMode", advice.DefaultMode },
+					{ "ChosenStorageMode", isAccepted ? (object)storageMode : null },
+				});
+
+			return isAccepted ? storageMode : null;
+		}
+
 		public Task OpenAsync(string sourceFilePath)
 		{
 			return OpenAsync(sourceFilePath, storageMode: null);
@@ -702,9 +782,10 @@
 
 				if (plugin.CanOpenAs)
 				{
+					// A plugin's builder opens in the mode chosen in Weevil's own Open As window (#1028).
 					(bool, OpenAsResult) result = plugin.ShowOpenAs(
 						LicensePath,
-						(path) => Engine.UsingPath(path),
+						(path) => storageMode is { } mode ? Engine.UsingPath(path).UsingStorage(mode) : Engine.UsingPath(path),
 						sourceFilePath);
 
 					wasOpenRequested = result.Item1;
@@ -786,7 +867,8 @@
 							SourceFilePath = _engine.SourceFilePath,
 							SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
 							Context = _engine.Context,
-							TotalRecordCount = _engine.Count
+							TotalRecordCount = _engine.Count,
+							StorageMode = _engine.StorageMode,
 						});
 
 						// The Remarks box reads the engine, which is now the opened log's. Assigning the remarks to themselves would raise nothing (#1116).
@@ -1038,7 +1120,8 @@
 						SourceFilePath = _engine.SourceFilePath,
 						SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
 						Context = _engine.Context,
-						TotalRecordCount = _engine.Count
+						TotalRecordCount = _engine.Count,
+						StorageMode = _engine.StorageMode,
 					});
 
 					RefreshFilterResults();

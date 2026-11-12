@@ -55,7 +55,7 @@ Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the 
    - Filters on monikers that never read content, such as `@Pinned` or `@Flagged`, do not read the file, so an expression must say whether it needs content.
    - Abort stops them.
    - Done on 2026-11-11 (#1174, #1176, #1178): a filter on disk reads the log 1.008 times, against 1.3 to 2.1 before, and export of the 1 GB log on disk takes 3 s instead of 80. Abort stops analyzers, export and Find in Core; in the GUI, Escape reaches export and Find once #1028 moves them off the UI thread.
-5. **Open As dialog (#1028).** Planned in the [#1028 plan](1028-OpenAs.md), approved 2026-11-11. The simplest version (decided 2026-11-07): after the Windows file dialog, Weevil shows a small Open As window offering RAM or Disk, with the default already chosen.
+5. **Open As dialog (#1028).** Planned in the [#1028 plan](1028-OpenAs.md), approved 2026-11-11, and done on 2026-11-12. The simplest version (decided 2026-11-07): after the Windows file dialog, Weevil shows a small Open As window offering RAM or Disk, with the default already chosen.
    - For a zip, Open As follows the Select File list, so the default uses the chosen log's size.
    - Warnings appear in that window, not in message boxes: RAM chosen for a log that may not fit, and a disk-mode log on a network drive (suggested 2026-11-07; the owner did not object).
    - Drag-and-drop and opening from Explorer or the command line show Open As too, although they skip the Windows file dialog (decided 2026-11-11).

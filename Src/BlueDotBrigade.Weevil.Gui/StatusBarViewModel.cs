@@ -118,7 +118,7 @@
 				// when a second log file is opened with insights requiring attention.
 				this.InsightDetails = new InsightChangedBulletin();
 
-				this.StatusMessage = $"Disk Loading Period: {bulletin.SourceFileLoadingPeriod.ToHumanReadable()}";
+				this.StatusMessage = $"Loading Period: {bulletin.SourceFileLoadingPeriod.ToHumanReadable()}";
 			});
 
 			_filterChangedStopwatch.Restart();
@@ -139,7 +139,7 @@
 			{
 				if (_wasFileJustOpened)
 				{
-					this.StatusMessage = $"Disk Loading Period: {this.SourceFileDetails.SourceFileLoadingPeriod.ToHumanReadable()}, ";
+					this.StatusMessage = $"Loading Period: {this.SourceFileDetails.SourceFileLoadingPeriod.ToHumanReadable()}, ";
 					this.StatusMessage += $"Filter duration: {bulletin.ExecutionTime.ToHumanReadable()}";
 				}
 				else

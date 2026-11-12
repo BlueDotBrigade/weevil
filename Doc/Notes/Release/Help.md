@@ -71,6 +71,17 @@ For a new user, a typical workflow looks like this:
 
 If the log file is large, start with a simple filter before running deeper analysis.
 
+### Opening a Log in RAM or on Disk
+
+Each time you open a log, Weevil asks where to keep its text while it is open:
+
+- **RAM** is faster. Weevil reads the log once, and keeps its text in memory.
+- **Disk** keeps only about 22 bytes per record in memory, and reads the log again whenever it needs a record's text. Use it for a log larger than your computer's free memory.
+
+Weevil chooses for you from the log's size and the memory that is free, so you can usually press **Enter**. It warns you when RAM may not fit, and when a log on a network drive would be slow on disk. The status bar shows which you chose. **Reload** (`Ctrl+F5`) keeps your choice.
+
+On disk, if another application truncates or replaces the log, Weevil says so once and reloads it. If the log is deleted, its rows show **Log can't be read**.
+
 ---
 
 ## Filtering Records
