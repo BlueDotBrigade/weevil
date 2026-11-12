@@ -6,7 +6,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 	using System.Text.Json;
 	using IOutputWriter = BlueDotBrigade.Weevil.IO.IOutputWriter;
 	using OutputWriterContext = BlueDotBrigade.Weevil.IO.OutputWriterContext;
-	using JsonFormatter = BlueDotBrigade.Weevil.IO.JsonFormatter;
+	using OutputAs = BlueDotBrigade.Weevil.IO.OutputAs;
 	using OutputFormat = BlueDotBrigade.Weevil.IO.OutputFormat;
 	using OutputOptions = BlueDotBrigade.Weevil.Cli.IO.OutputOptions;
 	using PlainTextFormatter = BlueDotBrigade.Weevil.IO.PlainTextFormatter;
@@ -69,7 +69,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			var logPath = Path.Combine(_folder, "Application.log");
 			File.Copy(new Daten().AsFilePath("Application.log"), logPath);
 			var insightCount = Engine.UsingPath(logPath).Open().Analyzer.GetInsights().Length;
-			OutputWriterContext.Configure(new JsonFormatter(), _output);
+			OutputWriterContext.Configure(OutputAs.CreateFormatter(OutputFormat.Json), _output);
 
 			new InsightCommands(new OutputOptions(OutputFormat.Json)).Insight(logPath);
 

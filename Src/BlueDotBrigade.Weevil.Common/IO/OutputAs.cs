@@ -5,26 +5,15 @@ namespace BlueDotBrigade.Weevil.IO
 
 	public static class OutputAs
 	{
-		public static IOutputFormatter ResolveFormatter(IReadOnlyList<string> arguments, IOutputFormatter fallbackFormatter)
-		{
-			if (arguments is null)
-			{
-				throw new ArgumentNullException(nameof(arguments));
-			}
-
-			if (fallbackFormatter is null)
-			{
-				throw new ArgumentNullException(nameof(fallbackFormatter));
-			}
-
-			return TryGetValue(arguments, out var value) && TryParseFormat(value, out var format)
-				? CreateFormatter(format)
-				: fallbackFormatter;
-		}
+		/// <summary>
+		/// The values that <c>--output-as</c> accepts, as an error message names them.
+		/// </summary>
+		private const string SupportedValues = "markdown, plaintext or json";
 
 		/// <summary>
-		/// The format that <c>--output-as</c> names, or the fallback when the option is missing or names no known format.
+		/// The format that <c>--output-as</c> names, or the fallback when the option is missing.
 		/// </summary>
+		/// <exception cref="ArgumentException">The option names a format that Weevil does not write, such as <c>xml</c> (#837).</exception>
 		public static OutputFormat ResolveFormat(IReadOnlyList<string> arguments, OutputFormat fallbackFormat)
 		{
 			if (arguments is null)
@@ -32,20 +21,29 @@ namespace BlueDotBrigade.Weevil.IO
 				throw new ArgumentNullException(nameof(arguments));
 			}
 
-			return TryGetValue(arguments, out var value) && TryParseFormat(value, out var format)
+			if (!TryGetValue(arguments, out var value))
+			{
+				return fallbackFormat;
+			}
+
+			return TryParseFormat(value, out var format)
 				? format
-				: fallbackFormat;
+				: throw new ArgumentException($"--output-as {value} is not supported. Use {SupportedValues}.");
 		}
 
+		/// <summary>
+		/// The formatter for the text a command writes in the format.
+		/// </summary>
+		/// <remarks>
+		/// A command that supports JSON renders it from its model, and writes it as a document that no formatter wraps; any other text is plain.
+		/// </remarks>
 		public static IOutputFormatter CreateFormatter(OutputFormat format)
 		{
 			return format switch
 			{
 				OutputFormat.Markdown => new MarkdownFormatter(),
 				OutputFormat.PlainText => new PlainTextFormatter(),
-				OutputFormat.Html => new HtmlFormatter(),
-				OutputFormat.Json => new JsonFormatter(),
-				OutputFormat.Xml => new XmlFormatter(),
+				OutputFormat.Json => new PlainTextFormatter(),
 				_ => throw new ArgumentOutOfRangeException(nameof(format), format, "The output format is not supported."),
 			};
 		}
@@ -133,14 +131,8 @@ namespace BlueDotBrigade.Weevil.IO
 				case "txt":
 					format = OutputFormat.PlainText;
 					return true;
-				case "html":
-					format = OutputFormat.Html;
-					return true;
 				case "json":
 					format = OutputFormat.Json;
-					return true;
-				case "xml":
-					format = OutputFormat.Xml;
 					return true;
 				default:
 					format = default;

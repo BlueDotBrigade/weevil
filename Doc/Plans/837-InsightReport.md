@@ -1,6 +1,6 @@
 # 837: Build the Insight Report as a Model, Then Render It
 
-> **Status:** In progress
+> **Status:** Done
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -49,6 +49,7 @@ One pull request each, in order.
    - The CLI writes JSON as UTF-8, so a program reads its text, such as "Σ", even on Windows.
 3. **Remove the formatter-based XML, HTML and JSON output.** `--output-as` accepts what the commands support, and rejects anything else with a message. This step changes behaviour, so it goes last.
    - `OutputAs.ResolveFormatter` has no caller after step 2: remove it, and move its tests of `--output-as=json` and `--OutputAs` to `ResolveFormat`.
+   - Done: `--output-as` accepts `markdown`, `plaintext` and `json`; any other value is an error naming them, with exit code 1. `encrypt` refuses `json`, since it writes text. `HtmlFormatter`, `XmlFormatter` and `JsonFormatter` are removed. [InsightReport.md](../Design/InsightReport.md) describes the result.
 
 ## Not in This Plan
 
