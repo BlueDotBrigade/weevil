@@ -205,6 +205,14 @@
 		/// <remarks>
 		/// If reading fails, the engine stays, so it still saves this log's sidecar, and a retry reloads this log.
 		/// </remarks>
+		/// <summary>
+		/// Applies a filter the user did not ask for, such as the one Reload carries over, so it records no telemetry (#1185).
+		/// </summary>
+		internal void ReApplyFilter(FilterType filterType, IFilterCriteria criteria)
+		{
+			_filterManager.ApplyInternal(filterType, criteria);
+		}
+
 		internal CoreEngine WithoutRecords()
 		{
 			return WithoutRecords(_filterManager.FilterType, _filterManager.Criteria);

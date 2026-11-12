@@ -150,7 +150,7 @@
 			}
 
 			/// <summary>
-			/// Keeps the session and the flags of an engine this one replaces, as Reload does (#1013, #1107).
+			/// Keeps the session, the flags and the telemetry recorder of an engine this one replaces, as Reload does (#1013, #1107, #1185).
 			/// The session's state, such as comments, pins, bookmarks, regions and remarks, is then not loaded from the sidecar again.
 			/// </summary>
 			public CoreEngineBuilder UsingStateOf(CoreEngine previous)
@@ -162,6 +162,7 @@
 
 				_session = previous.Session;
 				_recordState = previous.RecordState;
+				_telemetryRecorder = previous._telemetryRecorder;
 
 				return this;
 			}

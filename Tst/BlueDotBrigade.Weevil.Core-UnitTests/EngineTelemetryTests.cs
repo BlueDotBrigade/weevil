@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System.Collections.Generic;
+	using System.IO;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Filter;
@@ -66,6 +67,56 @@ namespace BlueDotBrigade.Weevil
 
 			recorder.Metrics.Should().ContainSingle()
 				.Which.Should().Be("Analysis.Run.StableValueRuns");
+		}
+
+		[TestMethod]
+		[WorkItem(1185)]
+		public void GivenEngineWithRecorder_WhenUserAppliesFilterAfterReload_ThenFilterAppliedRecordedOnce()
+		{
+			// After Reload, the engine recorded no telemetry at all.
+			var recorder = new FakeTelemetryMetricRecorder();
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
+				.UsingTelemetry(recorder)
+				.Open();
+
+			engine.Reload();
+			recorder.Metrics.Should().BeEmpty("Reload re-applies the user's filter, which is not a new filter");
+
+			engine.Filter.Apply(FilterType.PlainText, FilterCriteria.None);
+
+			recorder.Metrics.Should().ContainSingle()
+				.Which.Should().Be(TelemetryMetrics.FilterApplied);
+		}
+
+		[TestMethod]
+		[WorkItem(1185)]
+		public void GivenAReloadThatCouldNotReadTheLog_WhenReloadedAgainAndFiltered_ThenFilterAppliedRecordedOnce()
+		{
+			// The engine a failed Reload leaves kept the recorder, but the next Reload dropped it.
+			var folder = System.IO.Directory.CreateTempSubdirectory("WeevilTelemetry.").FullName;
+
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				System.IO.File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+				var recorder = new FakeTelemetryMetricRecorder();
+				IEngine engine = Engine.UsingPath(logPath).UsingTelemetry(recorder).Open();
+
+				System.IO.File.Move(logPath, $"{logPath}~");
+				FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
+				System.IO.File.Move($"{logPath}~", logPath);
+				engine.Reload();
+
+				engine.Filter.Apply(FilterType.PlainText, FilterCriteria.None);
+
+				recorder.Metrics.Should().ContainSingle()
+					.Which.Should().Be(TelemetryMetrics.FilterApplied);
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
 		}
 
 		[TestMethod]
