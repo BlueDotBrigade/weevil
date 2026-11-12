@@ -236,9 +236,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			lastRow.ReadContent();
 			uiDispatcher.RunQueued();
 
-			viewModel.Rows.Count.Should().BeLessThan(recordCount, "the log was reloaded, with half of its records");
+			viewModel.Rows.Count.Should().BeInRange(1, recordCount - 1, "the log was reloaded, with about half of its records");
 			dialog.Received(1).ShowMessage(Arg.Any<string>(), "Log Changed");
-			dialog.DidNotReceive().ShowMessage(Arg.Any<string>(), "Error");
+			dialog.ReceivedWithAnyArgs(1).ShowMessage(default, default);
+		}
+
+		[TestMethod]
+		public async Task GivenALogOnDiskThatWasDeleted_WhenFiltered_ThenTheProgressBarIsHiddenAndOneMessageIsShown()
+		{
+			// A filter from the filter box caught only an invalid expression, so a failed read left the progress bar running (#1028).
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			var logPath = CopyLog("Filtered.log");
+			await OpenOnDiskAsync(viewModel, logPath);
+
+			System.IO.File.Delete(logPath);
+			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && dialog.ReceivedCalls().Any());
+
+			viewModel.IsProcessingLongOperation.Should().BeFalse("the progress bar is hidden once the filter stops");
+			viewModel.IsMenuEnabled.Should().BeTrue("the menus come back once the filter stops");
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("can't read the log")), "Error");
 		}
 
 		[TestMethod]

@@ -152,7 +152,7 @@ Each reader listed in the [#1025 plan](1025-ContentFromFile.md#what-still-reads-
 
 **Readers that run a command** catch the exception, stop, and report the failure to the handler.
 
-- These are Find, the analyzers, export, split, the clipboard, a filter from the filter box, the dashboard's Refresh, and what runs after a log opens.
+- These are Find, the analyzers, export, split, the clipboard, a filter from the filter box, F5, and what runs after a log opens. The dashboard's Refresh shows its own message, since the dialog has no handler.
 - The progress bar and menus come back. Export shows one message, not two.
 - **What runs after a log opens** takes the engine once, rather than reading `_engine` on every statement. If it fails, the previous zip's copy is still released.
 - **The graph** copies the text of its records when it opens. It then never reads a log, so a graph left open after another log opens still works. Giving its window an owner stays a separate choice.

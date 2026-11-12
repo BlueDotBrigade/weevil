@@ -129,8 +129,9 @@
 		[NotObservable]
 		private int _logGeneration;
 
-		// The generation whose failed read was handled last. Read and written on the UI thread.
-		private int _failedReadGeneration = -1;
+		// The generations whose unreadable log, and whose changed log, were handled last. Read and written on the UI thread.
+		private int _unreadableLogGeneration = -1;
+		private int _changedLogGeneration = -1;
 		private bool _findIsCaseSensitive;
 		private bool _findUseRegex;
 		private bool _findSearchComments;
@@ -726,6 +727,9 @@
 
 			if (wasOpenRequested)
 			{
+				// The opened log's generation, for what runs after the open: a Reload may already have started another (#1028).
+				Action<Exception> openedLogReporter = _ => { };
+
 				await Task.Run(() =>
 				{
 					try
@@ -756,6 +760,7 @@
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						_engine = openedEngine;
 						Interlocked.Increment(ref _logGeneration);
+						openedLogReporter = CreateFailedReadReporter();
 						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
 						_rowSelection = new RowSelection(_engine);
 						_engine.Annotations.Changed += OnAnnotationsChanged;
@@ -858,7 +863,7 @@
 					{
 						// Taken once: Reload or Clear can already run, and replace what the engine holds (#1028).
 						IEngine engine = _engine;
-						Action<Exception> reportFailedRead = CreateFailedReadReporter();
+						Action<Exception> reportFailedRead = openedLogReporter;
 
 						try
 						{
@@ -1338,10 +1343,6 @@
 			}
 		}
 
-		/// <remarks>
-		/// Like Copy and Paste, the graph takes at most <see cref="ClipboardLimit"/> selected records (decided 2026-10-30).
-		/// Its window can outlive the log, so it keeps its own array of them, not the log's list of records (#1139).
-		/// </remarks>
 		/// <summary>
 		/// Copies the records with their text, so a graph never reads a log: it can outlive the log it was opened for (#1028).
 		/// </summary>
@@ -1393,12 +1394,16 @@
 		/// </summary>
 		/// <remarks>
 		/// Each open and each Reload starts a new generation, so a failure from an earlier one, such as a row still on screen from before Reload, is ignored.
-		/// Later failures of the same generation show nothing, so scrolling a log that is gone does not repeat the message.
+		/// Later failures of the same kind and generation show nothing, so scrolling a log that is gone does not repeat the message.
 		/// If Reload fails because the log changed again, Reload shows that message itself, and nothing reloads again by itself.
 		/// </remarks>
 		private void OnFailedRead(Exception exception, int generation)
 		{
-			if (generation != Volatile.Read(ref _logGeneration) || generation == _failedReadGeneration)
+			var isChange = exception is LogFileChangedException;
+
+			// A change is handled even after the log could not be read, for example while it was replaced, so it is still reloaded.
+			if (generation != Volatile.Read(ref _logGeneration) ||
+			    generation == (isChange ? _changedLogGeneration : _unreadableLogGeneration))
 			{
 				return;
 			}
@@ -1410,21 +1415,26 @@
 				return;
 			}
 
-			_failedReadGeneration = generation;
-
-			if (exception is LogFileChangedException)
+			if (isChange)
 			{
+				_changedLogGeneration = generation;
 				Log.Default.Write(LogSeverityType.Warning, exception, "The log changed on disk, so it is reloaded.");
 				_dialogBox.ShowMessage("The log changed on disk, so Weevil reloads it.", "Log Changed");
 				Reload();
 			}
 			else
 			{
+				_unreadableLogGeneration = generation;
 				Log.Default.Write(LogSeverityType.Error, exception, "The log can no longer be read.");
 				_dialogBox.ShowMessage($"Weevil can't read the log.\r\n\r\n{exception.Message}", "Error");
 			}
 		}
 
+		/// <remarks>
+		/// Like Copy and Paste, the graph takes at most <see cref="ClipboardLimit"/> selected records (decided 2026-10-30).
+		/// Its window can outlive the log, so it keeps its own array of them, not the log's list of records (#1139).
+		/// On disk it also copies their text, once the expressions are confirmed, so it never reads a log that is gone (#1028).
+		/// </remarks>
 		private void GraphData()
 		{
 			if (!IsWithinClipboardLimit("Graph", "Select fewer records, then graph again."))
@@ -1432,22 +1442,27 @@
 				return;
 			}
 
-			RecordList records;
-
-			try
-			{
-				records = CopyWithText(_engine.Selector.GetSelected());
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				ReportFailedRead(e, Volatile.Read(ref _logGeneration));
-				return;
-			}
-
-			var recordsDescription = records.Length.ToString("N0");
+			var recordsDescription = _engine.Selector.Selected.Count.ToString("N0");
 
 			if (_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
 			{
+				RecordList records;
+
+				try
+				{
+					RecordList selected = _engine.Selector.GetSelected().ToImmutableArray();
+
+					// In RAM a record keeps its text, so only a log on disk needs the copy.
+					records = _engine.StorageMode == StorageMode.Disk
+						? CopyWithText(selected)
+						: selected;
+				}
+				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+				{
+					ReportFailedRead(e, Volatile.Read(ref _logGeneration));
+					return;
+				}
+
 				TelemetrySessionLifecycle.Shared.RecordGraphOpen();
 
 				_dialogBox.ShowGraph(
@@ -1604,7 +1619,17 @@
 
 		private void Refresh()
 		{
-			_engine.Filter.ReApply();
+			try
+			{
+				_engine.Filter.ReApply();
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// A log on disk that changed, or is gone: handled once, as any other read (#1028).
+				ReportFailedRead(e, Volatile.Read(ref _logGeneration));
+				return;
+			}
+
 			RefreshFilterResults();
 			RaiseResultsChanged();
 		}
