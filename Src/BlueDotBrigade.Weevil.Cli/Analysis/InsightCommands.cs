@@ -11,6 +11,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 	using BlueDotBrigade.Weevil.Analysis;
 
 	using BlueDotBrigade.Weevil.Cli.IO;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 
 	using BlueDotBrigade.Weevil.Filter;
@@ -49,7 +50,8 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 
 				// After the insights, so that the report's metrics describe the same log, if it was reloaded.
 				// The report holds every insight and the metrics; the command shows what it always has (#837).
-				InsightReport report = new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, from: null, to: null);
+				var period = engine.Records.GetEstimatedRange();
+				InsightReport report = new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
 
 				if (verbose)
 				{

@@ -35,13 +35,9 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 			var from = new DateTime(2026, 5, 6, 10, 0, 0);
 			var to = new DateTime(2026, 5, 6, 11, 0, 0);
 
-			var generator = new InsightReportGenerator();
-			var markdown = new MarkdownInsightReportRenderer().Render(generator.Create(new Version(3, 0, 1), engine, CreateInsights(), from, to));
+			var markdown = new MarkdownInsightReportRenderer().Render(new InsightReportGenerator().Create(new Version(3, 0, 1), engine, CreateInsights(), from, to));
 
-			// The text the dashboard copied before #837, which plugins still get from Generate.
-#pragma warning disable CS0618 // Generate is kept for plugins.
-			markdown.Should().Be(generator.Generate(new Version(3, 0, 1), engine, CreateInsights(), from, to));
-#pragma warning restore CS0618
+			// The text the dashboard copied before #837, line for line.
 			markdown.Should().Be(string.Join(Environment.NewLine, new[]
 			{
 				"# Weevil Insight: Application.log",
@@ -75,6 +71,24 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 				"",
 				"",
 			}));
+		}
+
+		[TestMethod]
+		public void GivenALogWithContextAndNoTimestamps_WhenRenderedAsMarkdown_ThenItShowsTheContextAndAnUnknownPeriod()
+		{
+			// The context reads as it always has; an unknown period is "unknown", not 12/31/9999 23:59:59 (#837).
+			IEngine engine = CreateEngine();
+			engine.Context.Returns(new ContextDictionary { { "Application", "Droid" }, { "Version", "2.1" } });
+
+			var markdown = new MarkdownInsightReportRenderer().Render(new InsightReportGenerator().Create(
+				new Version(3, 0, 1),
+				engine,
+				CreateInsights(),
+				Record.CreationTimeUnknown,
+				Record.CreationTimeUnknown));
+
+			markdown.Should().Contain(" - Context: Application=Droid; Version=2.1;" + Environment.NewLine);
+			markdown.Should().Contain(" - Time period analyzed: unknown to unknown" + Environment.NewLine);
 		}
 
 		internal static IEngine CreateEngine()

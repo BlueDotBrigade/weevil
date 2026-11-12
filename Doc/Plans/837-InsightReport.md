@@ -4,7 +4,7 @@
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
-Issue #837, under #835 ("Review how output is generated"). It follows the research comment on #837, with the decisions the owner approved on 2026-11-13. It replaces draft pull request #843, which was six months behind `main` and built five renderers.
+Issue #837, under #835 ("Review how output is generated"). It follows the research comment on #837, with the decisions the owner approved on 2026-11-12. It replaces draft pull request #843, which was six months behind `main` and built five renderers.
 
 ## Goal
 
@@ -21,10 +21,10 @@ Issue #837, under #835 ("Review how output is generated"). It follows the resear
 
 ## Decisions
 
-Approved by the owner on 2026-11-13.
+Approved by the owner on 2026-11-12.
 
 1. **One model, which is the contract.** `InsightReport` holds what a program needs, not what the Markdown happens to show:
-   - about the report: the source file, the context, Weevil's version, when it was generated, the period analyzed (unknown when the log has no timestamps), and a schema version;
+   - about the report: the source file, the context as names and values, Weevil's version, when it was generated (with its offset), the period analyzed (`null` when it is not known), and a schema version. No display text, such as a title: renderers write their own;
    - the log's metrics: the record count, the file size, and the filter's metrics, such as the count per severity;
    - every insight, each with its attention flag. A program filters by the flag; the human output shows what it shows today.
 2. **An insight's related records are their line numbers, never their text.** `IInsight` already keeps only line numbers (#1139), so building a report never reads the log, and cannot fail in disk mode when the log changes. The output stays small, and record text stays out of a report that may be pasted or sent elsewhere. A timestamp would need the log's records, so it is left out.

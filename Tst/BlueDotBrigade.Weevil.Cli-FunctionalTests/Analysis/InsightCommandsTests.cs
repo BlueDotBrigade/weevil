@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 {
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Linq;
 	using IOutputWriter = BlueDotBrigade.Weevil.IO.IOutputWriter;
 	using OutputWriterContext = BlueDotBrigade.Weevil.IO.OutputWriterContext;
 	using PlainTextFormatter = BlueDotBrigade.Weevil.IO.PlainTextFormatter;
@@ -24,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 		[TestCleanup]
 		public void Cleanup()
 		{
-			// Later tests write nowhere, as before this test.
+			// Later tests write nowhere.
 			OutputWriterContext.Configure(new PlainTextFormatter(), new LinesWritten());
 			Directory.Delete(_folder, recursive: true);
 		}
@@ -41,6 +42,33 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			_output.Lines.Should().ContainInOrder("METRICS", "Total Records\t9", $"File Size\t{new FileInfo(logPath).Length}", "INSIGHTS");
 			_output.Lines.Should().Contain(line => line.StartsWith("Errors\t"), "the filter's metrics follow the log's");
 			_output.Lines.Should().NotContain("No noteworthy insight was found.", "verbose shows every insight");
+		}
+
+		[TestMethod]
+		public void GivenALog_WhenInsightIsRun_ThenItWritesOnlyTheInsightsThatNeedAttention()
+		{
+			// Without --verbose, the command shows no metrics, and filters the report's insights by their flag (#837).
+			var logPath = Path.Combine(_folder, "Application.log");
+			File.Copy(new Daten().AsFilePath("Application.log"), logPath);
+			var expected = ExpectedInsightLines(logPath);
+
+			new InsightCommands().Insight(logPath);
+
+			_output.Lines.Should().NotContain("METRICS");
+			_output.Lines.Should().Equal(new[] { "INSIGHTS" }.Concat(expected));
+		}
+
+		/// <summary>
+		/// The lines the command writes for the insights that need attention, worked out from the engine itself.
+		/// </summary>
+		private static string[] ExpectedInsightLines(string logPath)
+		{
+			var lines = Engine.UsingPath(logPath).Open().Analyzer.GetInsights()
+				.Where(insight => insight.IsAttentionRequired)
+				.Select(insight => $"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}")
+				.ToArray();
+
+			return lines.Length == 0 ? new[] { "No noteworthy insight was found." } : lines;
 		}
 
 		private sealed class LinesWritten : IOutputWriter

@@ -2,8 +2,11 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 {
 	using System;
 	using System.Collections.Immutable;
+	using System.Collections.Generic;
 	using System.Linq;
 	using global::BlueDotBrigade.Weevil.Analysis;
+	using global::BlueDotBrigade.Weevil.Data;
+	using NSubstitute;
 
 	[TestClass]
 	public class InsightReportGeneratorTests
@@ -38,8 +41,33 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 			report.RecordCount.Should().Be(13);
 			report.FileSize.Should().Be(2048);
 			report.Metrics.Select(metric => metric.Name).Should().Equal("Information", "Warnings", "Errors");
-			report.Context.Should().BeEmpty("the log has no context");
-			report.From.Should().BeNull("the period is not known");
+		}
+
+		[TestMethod]
+		public void GivenALogsContext_WhenAReportIsCreated_ThenItIsKeptAsNamesAndValues()
+		{
+			// A program reads the context's values, rather than parsing "Name=Value;" text (#837).
+			IEngine engine = MarkdownInsightReportRendererTests.CreateEngine();
+			engine.Context.Returns(new ContextDictionary { { "Application", "Droid" }, { "Version", "2.1" } });
+
+			InsightReport report = new InsightReportGenerator().Create(new Version(3, 0, 1), engine, ImmutableArray<IInsight>.Empty, from: null, to: null);
+
+			report.Context.Should().Equal(new Dictionary<string, string> { { "Application", "Droid" }, { "Version", "2.1" } });
+		}
+
+		[TestMethod]
+		public void GivenAPeriodThatIsNotKnown_WhenAReportIsCreated_ThenItsTimesAreNull()
+		{
+			// An estimated range returns CreationTimeUnknown for a log without timestamps; a program gets null instead (#837).
+			InsightReport report = new InsightReportGenerator().Create(
+				new Version(3, 0, 1),
+				MarkdownInsightReportRendererTests.CreateEngine(),
+				ImmutableArray<IInsight>.Empty,
+				Record.CreationTimeUnknown,
+				Record.CreationTimeUnknown);
+
+			report.From.Should().BeNull();
+			report.To.Should().BeNull();
 		}
 
 		private static InsightReport Create(ImmutableArray<IInsight> insights)

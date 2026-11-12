@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System;
+	using System.Linq;
 	using System.Text;
 
 	/// <summary>
@@ -13,9 +14,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 			ArgumentNullException.ThrowIfNull(report);
 
 			var output = new StringBuilder();
-			var context = string.IsNullOrEmpty(report.Context) ? "Not specified" : report.Context;
 
-			output.AppendLine($"# {report.Title}");
+			output.AppendLine($"# Weevil Insight: {report.SourceFileName}");
 			output.AppendLine();
 			output.AppendLine("- [General](#general)");
 			output.AppendLine("- [Insight](#insight)");
@@ -24,8 +24,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 			output.AppendLine();
 			output.AppendLine("## General");
 			output.AppendLine();
-			output.AppendLine($" - Context: {context}");
-			output.AppendLine($" - Time period analyzed: {report.From} to {report.To}");
+			output.AppendLine($" - Context: {FormatContext(report)}");
+			output.AppendLine($" - Time period analyzed: {FormatTime(report.From)} to {FormatTime(report.To)}");
 			output.AppendLine($" - Insight collected by: Weevil {report.WeevilVersion}");
 			output.AppendLine();
 			output.AppendLine("## Insight");
@@ -38,6 +38,21 @@ namespace BlueDotBrigade.Weevil.Analysis
 			AppendInsights(output, report, isAttentionRequired: false);
 
 			return output.ToString();
+		}
+
+		/// <summary>
+		/// "Name=Value; Name2=Value2;", as the context has always been shown, or "Not specified".
+		/// </summary>
+		private static string FormatContext(InsightReport report)
+		{
+			return report.Context.Count == 0
+				? "Not specified"
+				: string.Join(" ", report.Context.Select(property => $"{property.Key}={property.Value};"));
+		}
+
+		private static string FormatTime(DateTime? time)
+		{
+			return time?.ToString() ?? "unknown";
 		}
 
 		private static void AppendInsights(StringBuilder output, InsightReport report, bool isAttentionRequired)
