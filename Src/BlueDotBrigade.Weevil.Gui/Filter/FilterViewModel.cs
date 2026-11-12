@@ -52,6 +52,11 @@
 		/// </summary>
 		private static readonly TimeSpan QuickWorkProgressDelay = TimeSpan.FromMilliseconds(250);
 
+		/// <summary>
+		/// How long a failed read waits to be handled again, while a filter, an open or other work keeps the menus disabled (#1028).
+		/// </summary>
+		private static readonly TimeSpan FailedReadRetryDelay = TimeSpan.FromMilliseconds(500);
+
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 
@@ -118,6 +123,15 @@
 		// Cancels the background work in progress, such as an analysis or a save, when Abort (Escape) is pressed, or null when none runs (#1027, #1028).
 		// Read and written on the UI thread.
 		private CancellationTokenSource _backgroundCancellation;
+
+		// Each open and each Reload starts a new generation of the log, so a failed read is handled once per log, and a read of an older one is ignored (#1028).
+		// Not a property, so it can be passed to `Interlocked` and `Volatile`.
+		[NotObservable]
+		private int _logGeneration;
+
+		// The generations whose unreadable log, and whose changed log, were handled last. Read and written on the UI thread.
+		private int _unreadableLogGeneration = -1;
+		private int _changedLogGeneration = -1;
 		private bool _findIsCaseSensitive;
 		private bool _findUseRegex;
 		private bool _findSearchComments;
@@ -666,7 +680,13 @@
 			});
 		}
 
-		public async Task OpenAsync(string sourceFilePath)
+		public Task OpenAsync(string sourceFilePath)
+		{
+			return OpenAsync(sourceFilePath, storageMode: null);
+		}
+
+		/// <param name="storageMode">RAM or Disk, or <see langword="null"/> for the engine's default: RAM, unless a Debug build's <c>WEEVIL_TEST_STORAGE</c> says otherwise.</param>
+		internal async Task OpenAsync(string sourceFilePath, StorageMode? storageMode)
 		{
 			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
@@ -707,6 +727,9 @@
 
 			if (wasOpenRequested)
 			{
+				// The opened log's generation, for what runs after the open: a Reload may already have started another (#1028).
+				Action<Exception> openedLogReporter = _ => { };
+
 				await Task.Run(() =>
 				{
 					try
@@ -718,18 +741,26 @@
 
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
 
-						IEngine openedEngine = Engine
+						IEngineBuilder builder = Engine
 							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
 							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
-							.UsingRange(openAsResult.Range)
-							.Open();
+							.UsingRange(openAsResult.Range);
+
+						if (storageMode is { } mode)
+						{
+							builder = builder.UsingStorage(mode);
+						}
+
+						IEngine openedEngine = builder.Open();
 
 						// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
 						// Moved only once the open succeeds, so a failed open leaves the open log subscribed.
 						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						_engine = openedEngine;
+						Interlocked.Increment(ref _logGeneration);
+						openedLogReporter = CreateFailedReadReporter();
 						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
 						_rowSelection = new RowSelection(_engine);
 						_engine.Annotations.Changed += OnAnnotationsChanged;
@@ -830,28 +861,45 @@
 					}
 				}).ContinueWith((x) =>
 					{
-						// Continue computing insights asynchronously (UI is already enabled)
-						if (_engine.Navigate.TableOfContents.Sections.Count == 0)
+						// Taken once: Reload or Clear can already run, and replace what the engine holds (#1028).
+						IEngine engine = _engine;
+						Action<Exception> reportFailedRead = openedLogReporter;
+
+						try
 						{
-							_engine.Navigate.RebuildTableOfContents();
+							// Continue computing insights asynchronously (UI is already enabled)
+							if (engine.Navigate.TableOfContents.Sections.Count == 0)
+							{
+								engine.Navigate.RebuildTableOfContents();
+							}
+
+							_tableOfContents = engine.Navigate.TableOfContents;
+							_insights = engine.Analyzer.GetInsights();
+
+							_bulletinMediator.Post(new InsightChangedBulletin
+							{
+								HasInsight = _insights.Length > 0,
+								InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
+							});
+
+							// Set insights ready and requery commands after insights are ready
+							_uiDispatcher.Invoke(() =>
+							{
+								this.AreInsightsReady = true;
+								OnPropertyChanged(nameof(IsDashboardEnabled));
+								CommandManager.InvalidateRequerySuggested();
+							});
 						}
-
-						_tableOfContents = _engine.Navigate.TableOfContents;
-						_insights = _engine.Analyzer.GetInsights();
-
-						_bulletinMediator.Post(new InsightChangedBulletin
+						catch (Exception e)
 						{
-							HasInsight = _insights.Length > 0,
-							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
-						});
+							// Caught, so the open still finishes, and a zipped log's previous copy is still released (#1028).
+							Log.Default.Write(LogSeverityType.Error, e, "The table of contents and the insights could not be prepared.");
 
-						// Set insights ready and requery commands after insights are ready
-						_uiDispatcher.Invoke(() =>
-						{
-							this.AreInsightsReady = true;
-							OnPropertyChanged(nameof(IsDashboardEnabled));
-							CommandManager.InvalidateRequerySuggested();
-						});
+							if (e is IOException or UnauthorizedAccessException)
+							{
+								reportFailedRead(e);
+							}
+						}
 					}
 				);
 			}
@@ -943,6 +991,9 @@
 
 		public void Reload()
 		{
+			// A read of the log as it was before Reload is no longer handled (#1028).
+			Interlocked.Increment(ref _logGeneration);
+
 			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
 			this.IsFilterToolboxEnabled = false;
@@ -1014,7 +1065,15 @@
 					? new SimpleCallStackFormatter() as IRecordFormatter
 					: new RawRecordFormatter() as IRecordFormatter;
 
-				ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
+				try
+				{
+					ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
+				}
+				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+				{
+					// The text of a log on disk that changed, or is gone (#1028).
+					ReportFailedRead(e, Volatile.Read(ref _logGeneration));
+				}
 			}
 		}
 
@@ -1284,9 +1343,100 @@
 			}
 		}
 
+		/// <summary>
+		/// Copies the records with their text, so a graph never reads a log: it can outlive the log it was opened for (#1028).
+		/// </summary>
+		/// <remarks>
+		/// One buffer for the whole pass, so each chunk of a log on disk is read once (#1027).
+		/// </remarks>
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		private static RecordList CopyWithText(RecordList records, CancellationToken cancellationToken)
+		{
+			var buffer = new ContentBuffer();
+			var copies = ImmutableArray.CreateBuilder<IRecord>(records.Length);
+
+			foreach (IRecord record in records)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				copies.Add(new Record(
+					record.LineNumber,
+					record.CreatedAt,
+					record.Severity,
+					buffer.Read(record).ToString(),
+					record.IsMultiLine,
+					record.WasGeneratedByUi));
+			}
+
+			return copies.MoveToImmutable();
+		}
+
+		/// <summary>
+		/// Returns what a reader gives a failed read of the open log to: it carries the log's generation, so a failure from an earlier one is ignored (#1028).
+		/// </summary>
+		private Action<Exception> CreateFailedReadReporter()
+		{
+			var generation = Volatile.Read(ref _logGeneration);
+
+			return exception => ReportFailedRead(exception, generation);
+		}
+
+		/// <summary>
+		/// Handles a read of a log on disk that failed, from any thread (#1028).
+		/// </summary>
+		/// <remarks>
+		/// Always queued, so a read that fails while the grid draws its rows, or on a background thread, never shows a message or reloads from inside that read.
+		/// </remarks>
+		private void ReportFailedRead(Exception exception, int generation)
+		{
+			_uiDispatcher.BeginInvoke(() => OnFailedRead(exception, generation), DispatcherPriority.Background);
+		}
+
+		/// <summary>
+		/// Shows one warning and reloads a log that changed on disk, or shows one error for a log that can no longer be read, once per log (#1028).
+		/// </summary>
+		/// <remarks>
+		/// Each open and each Reload starts a new generation, so a failure from an earlier one, such as a row still on screen from before Reload, is ignored.
+		/// Later failures of the same kind and generation show nothing, so scrolling a log that is gone does not repeat the message.
+		/// If Reload fails because the log changed again, Reload shows that message itself, and nothing reloads again by itself.
+		/// </remarks>
+		private void OnFailedRead(Exception exception, int generation)
+		{
+			var isChange = exception is LogFileChangedException;
+
+			// A change is handled even after the log could not be read, for example while it was replaced, so it is still reloaded.
+			if (generation != Volatile.Read(ref _logGeneration) ||
+			    generation == (isChange ? _changedLogGeneration : _unreadableLogGeneration))
+			{
+				return;
+			}
+
+			// A filter, an open or other work is running: handle it once that is done, if the log is still the same.
+			if (!this.IsMenuEnabled)
+			{
+				_ = Task.Delay(FailedReadRetryDelay).ContinueWith(_ => ReportFailedRead(exception, generation));
+				return;
+			}
+
+			if (isChange)
+			{
+				_changedLogGeneration = generation;
+				Log.Default.Write(LogSeverityType.Warning, exception, "The log changed on disk, so it is reloaded.");
+				_dialogBox.ShowMessage("The log changed on disk, so Weevil reloads it.", "Log Changed");
+				Reload();
+			}
+			else
+			{
+				_unreadableLogGeneration = generation;
+				Log.Default.Write(LogSeverityType.Error, exception, "The log can no longer be read.");
+				_dialogBox.ShowMessage($"Weevil can't read the log.\r\n\r\n{exception.Message}", "Error");
+			}
+		}
+
 		/// <remarks>
 		/// Like Copy and Paste, the graph takes at most <see cref="ClipboardLimit"/> selected records (decided 2026-10-30).
 		/// Its window can outlive the log, so it keeps its own array of them, not the log's list of records (#1139).
+		/// On disk it also copies their text, once the expressions are confirmed, so it never reads a log that is gone (#1028).
 		/// </remarks>
 		private void GraphData()
 		{
@@ -1295,18 +1445,39 @@
 				return;
 			}
 
-			RecordList records = _engine.Selector.GetSelected().ToImmutableArray();
-			var recordsDescription = records.Length.ToString("N0");
+			var recordsDescription = _engine.Selector.Selected.Count.ToString("N0");
 
-			if (_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
+			if (!_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
 			{
-				TelemetrySessionLifecycle.Shared.RecordGraphOpen();
-
-				_dialogBox.ShowGraph(
-					records,
-					confirmedFilter,
-					_engine.SourceFilePath);
+				return;
 			}
+
+			IEngine engine = _engine;
+			RecordList selected = engine.Selector.GetSelected().ToImmutableArray();
+			var sourceFilePath = engine.SourceFilePath;
+
+			// In RAM a record keeps its text, so only a log on disk needs the copy.
+			if (engine.StorageMode != StorageMode.Disk)
+			{
+				ShowGraph(selected, confirmedFilter, sourceFilePath);
+				return;
+			}
+
+			// The copy reads up to 100,000 records from the log, slowly on a network drive, so it runs in the background, where Escape stops it (#1028).
+			RecordList records = RecordList.Empty;
+
+			_ = RunInBackground(
+				"The graph",
+				cancellationToken => records = CopyWithText(selected, cancellationToken),
+				onSucceeded: () => ShowGraph(records, confirmedFilter, sourceFilePath),
+				progressDelay: QuickWorkProgressDelay);
+		}
+
+		private void ShowGraph(RecordList records, string confirmedFilter, string sourceFilePath)
+		{
+			TelemetrySessionLifecycle.Shared.RecordGraphOpen();
+
+			_dialogBox.ShowGraph(records, confirmedFilter, sourceFilePath);
 		}
 
 		private void ForceGarbageCollection()
@@ -1456,7 +1627,17 @@
 
 		private void Refresh()
 		{
-			_engine.Filter.ReApply();
+			try
+			{
+				_engine.Filter.ReApply();
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// A log on disk that changed, or is gone: handled once, as any other read (#1028).
+				ReportFailedRead(e, Volatile.Read(ref _logGeneration));
+				return;
+			}
+
 			RefreshFilterResults();
 			RaiseResultsChanged();
 		}
@@ -2031,6 +2212,7 @@
 			var wasFilterToolboxEnabled = this.IsFilterToolboxEnabled;
 			var isRunning = true;
 			var hasFinished = false;
+			Action<Exception> reportFailedRead = CreateFailedReadReporter();
 
 			this.CanOpenLogFile = false;
 			this.IsFilterToolboxEnabled = false;
@@ -2069,6 +2251,12 @@
 				catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
 				{
 					Log.Default.Write(LogSeverityType.Information, $"{operation} was aborted by the user.");
+				}
+				catch (LogFileChangedException e)
+				{
+					// Shown once, and the log reloaded, as for any read of a log on disk that changed (#1028).
+					Log.Default.Write(LogSeverityType.Warning, e, $"{operation} stopped, because the log changed on disk.");
+					reportFailedRead(e);
 				}
 				catch (Exception e)
 				{
@@ -2242,6 +2430,8 @@
 			// Creating a background thread for processing.
 			// ... Risk: any events raised by the Weevil library will execute on a background thead,
 			// ... and not the UI thread which is required in order update/change the UI.
+			Action<Exception> reportFailedRead = CreateFailedReadReporter();
+
 			Task.Run(async () =>
 			{
 				// Is a filter operation in progress?
@@ -2298,6 +2488,18 @@
 					{
 						MessageBox.Show(message, "Invalid Expression", MessageBoxButton.OK, MessageBoxImage.Error);
 					});
+				}
+				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+				{
+					// A log on disk that changed, or is gone. The previous results stay, and the progress bar is hidden below (#1028).
+					Log.Default.Write(LogSeverityType.Warning, e, "The filter could not read the log.");
+					reportFailedRead(e);
+				}
+				catch (Exception e)
+				{
+					// Caught, so the progress bar is hidden below, rather than left running (#1028).
+					Log.Default.Write(LogSeverityType.Error, e, "The filter could not be completed.");
+					_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"The filter could not be completed.\r\n\r\n{e.Message}", "Error"));
 				}
 
 				// Last filter to execute?
@@ -2405,7 +2607,7 @@
 				RecordList results = _engine.Filter.Results;
 
 				this.VisibleItems = results;
-				this.Rows = new RowList(results, _engine.Annotations, _engine.Selector, _uiDispatcher);
+				this.Rows = new RowList(results, _engine.Annotations, _engine.Selector, _uiDispatcher, CreateFailedReadReporter());
 
 				OnPropertyChanged(nameof(this.VisibleItems));
 			});

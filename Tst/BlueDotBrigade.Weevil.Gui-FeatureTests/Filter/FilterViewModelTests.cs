@@ -191,6 +191,105 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.IsMenuEnabled.Should().BeTrue("the menus are enabled again once the search finishes");
 		}
 
+		[TestMethod]
+		public async Task GivenALogOnDiskThatWasDeleted_WhenItsRowsAreShown_ThenEachShowsAPlaceholderAndOneMessageIsShown()
+		{
+			// WPF does not catch a converter's exception, so a row that read a log on disk that was gone would end Weevil (#1028).
+			var uiDispatcher = new DeferredUiDispatcherFake();
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			var logPath = CopyLog("Deleted.log");
+			await OpenOnDiskAsync(viewModel, logPath);
+			uiDispatcher.RunQueued();
+
+			System.IO.File.Delete(logPath);
+
+			viewModel.Rows.GetRow(0).ReadContent().Should().Be(RowViewModel.UnreadableLogPlaceholder);
+			viewModel.Rows.GetRow(1).ReadContent().Should().Be(RowViewModel.UnreadableLogPlaceholder);
+			uiDispatcher.RunQueued();
+
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("can't read the log")), "Error");
+		}
+
+		[TestMethod]
+		public async Task GivenALogOnDiskThatWasTruncated_WhenARowIsShown_ThenTheLogIsReloadedOnce()
+		{
+			// A log that changes while it is open on disk shows one warning, and is reloaded as Ctrl+F5 does (#1028).
+			var uiDispatcher = new DeferredUiDispatcherFake();
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			var logPath = CopyLog("Truncated.log");
+			await OpenOnDiskAsync(viewModel, logPath);
+			uiDispatcher.RunQueued();
+			var recordCount = viewModel.Rows.Count;
+			RowViewModel lastRow = viewModel.Rows.GetRow(recordCount - 1);
+
+			var bytes = System.IO.File.ReadAllBytes(logPath);
+			System.IO.File.WriteAllBytes(logPath, bytes.AsSpan(0, bytes.Length / 2).ToArray());
+
+			lastRow.ReadContent().Should().Be(RowViewModel.ChangedLogPlaceholder);
+			lastRow.ReadContent();
+			uiDispatcher.RunQueued();
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.Rows?.Count < recordCount);
+
+			// A row of the log as it was before Reload is ignored.
+			lastRow.ReadContent();
+			uiDispatcher.RunQueued();
+
+			viewModel.Rows.Count.Should().BeInRange(1, recordCount - 1, "the log was reloaded, with about half of its records");
+			dialog.Received(1).ShowMessage(Arg.Any<string>(), "Log Changed");
+			dialog.ReceivedWithAnyArgs(1).ShowMessage(default, default);
+		}
+
+		[TestMethod]
+		public async Task GivenALogOnDiskThatWasDeleted_WhenFiltered_ThenTheProgressBarIsHiddenAndOneMessageIsShown()
+		{
+			// A filter from the filter box caught only an invalid expression, so a failed read left the progress bar running (#1028).
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			var logPath = CopyLog("Filtered.log");
+			await OpenOnDiskAsync(viewModel, logPath);
+
+			System.IO.File.Delete(logPath);
+			dialog.ClearReceivedCalls();
+			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && dialog.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IDialogBoxService.ShowMessage)));
+
+			viewModel.IsProcessingLongOperation.Should().BeFalse("the progress bar is hidden once the filter stops");
+			viewModel.IsMenuEnabled.Should().BeTrue("the menus come back once the filter stops");
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("can't read the log")), "Error");
+		}
+
+		[TestMethod]
+		public async Task GivenALogOnDisk_WhenItsRecordsAreGraphed_ThenTheGraphKeepsTheirTextAfterTheLogIsDeleted()
+		{
+			// A graph window can outlive its log, so it copies the text of its records when it opens (#1028).
+			var dialog = Substitute.For<IDialogBoxService>();
+
+			// The graph asks through the dialog service's own prompt, not the one analyzers use (IUserDialog).
+			dialog.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>()).Returns(x =>
+			{
+				x[2] = @"Cpu1=(?<Cpu1>\d+\.\d)%";
+				return true;
+			});
+			RecordList graphed = RecordList.Empty;
+			dialog.When(d => d.ShowGraph(Arg.Any<RecordList>(), Arg.Any<string>(), Arg.Any<string>()))
+				.Do(x => graphed = x.Arg<RecordList>());
+
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			var logPath = CopyLog("Graphed.log");
+			await OpenOnDiskAsync(viewModel, logPath);
+			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
+
+			// On disk the copy runs in the background.
+			viewModel.GraphDataCommand.Execute(null);
+			await viewModel.BackgroundTask;
+			System.IO.File.Delete(logPath);
+
+			graphed.Length.Should().Be(viewModel.Rows.Count, "every record was selected");
+			graphed[0].Content.Should().NotBeNullOrEmpty("the graph reads its own copy, not the log");
+		}
+
 		// Regression: Issue #996 - the busy overlay was shown only after a prompt closed.
 		[TestMethod]
 		public async Task GivenOpenLog_WhenAnalysisStarts_ThenBusyOverlayIsShownExceptDuringPrompts()
@@ -741,6 +840,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.VisibleItems.Should().NotBeNullOrEmpty("the open log's records are shown");
 
 			return new WeakReference(viewModel.VisibleItems, trackResurrection: true);
+		}
+
+		/// <summary>
+		/// Opens the log on disk, and waits until the table of contents and the insights have read it, so nothing else reads it afterwards.
+		/// </summary>
+		private static async Task OpenOnDiskAsync(FilterViewModel viewModel, string logPath)
+		{
+			await viewModel.OpenAsync(logPath, StorageMode.Disk);
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
+
+			viewModel.AreInsightsReady.Should().BeTrue("the log should be open before the test continues");
 		}
 
 		private string CopyLog(string fileName)

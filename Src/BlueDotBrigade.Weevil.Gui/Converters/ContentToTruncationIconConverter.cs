@@ -27,7 +27,7 @@
 				var convertedText = ContentConverter.Convert(record, targetType, parameter, culture);
 
 				// Compared by value: a record that holds the log's bytes returns a new string each time its content is read (#1133).
-				result = string.Equals(concreteRecord.Content, convertedText as string, StringComparison.Ordinal)
+				result = string.Equals(RowViewModel.ReadContent(record), convertedText as string, StringComparison.Ordinal)
 					? string.Empty
 					: " ... ";
 			}

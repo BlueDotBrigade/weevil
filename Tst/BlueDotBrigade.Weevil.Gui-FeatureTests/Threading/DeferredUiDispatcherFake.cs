@@ -1,15 +1,18 @@
 namespace BlueDotBrigade.Weevil.Gui.Threading
 {
 	using System;
-	using System.Collections.Generic;
+	using System.Collections.Concurrent;
 	using System.Windows.Threading;
 
 	/// <summary>
 	/// Mimics a UI thread that is busy: <see cref="BeginInvoke"/> queues its callback until <see cref="RunQueued"/> is called.
 	/// </summary>
+	/// <remarks>
+	/// Background threads may queue callbacks while the test runs them, as a Reload does.
+	/// </remarks>
 	internal class DeferredUiDispatcherFake : IUiDispatcher
 	{
-		private readonly Queue<Action> _queued = new Queue<Action>();
+		private readonly ConcurrentQueue<Action> _queued = new ConcurrentQueue<Action>();
 
 		public int QueuedCount => _queued.Count;
 
@@ -30,9 +33,9 @@ namespace BlueDotBrigade.Weevil.Gui.Threading
 
 		public void RunQueued()
 		{
-			while (_queued.Count > 0)
+			while (_queued.TryDequeue(out Action callback))
 			{
-				_queued.Dequeue().Invoke();
+				callback.Invoke();
 			}
 		}
 	}

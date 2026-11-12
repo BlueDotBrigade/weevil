@@ -152,7 +152,7 @@ Each reader listed in the [#1025 plan](1025-ContentFromFile.md#what-still-reads-
 
 **Readers that run a command** catch the exception, stop, and report the failure to the handler.
 
-- These are Find, the analyzers, export, split, the clipboard, a filter from the filter box, the dashboard's Refresh, and what runs after a log opens.
+- These are Find, the analyzers, export, split, the clipboard, a filter from the filter box, F5, and what runs after a log opens. The dashboard's Refresh shows its own message, since the dialog has no handler.
 - The progress bar and menus come back. Export shows one message, not two.
 - **What runs after a log opens** takes the engine once, rather than reading `_engine` on every statement. If it fails, the previous zip's copy is still released.
 - **The graph** copies the text of its records when it opens. It then never reads a log, so a graph left open after another log opens still works. Giving its window an owner stays a separate choice.
@@ -238,7 +238,7 @@ One pull request per step, in order. The GUI builds only on Windows, so for step
    - Done on 2026-11-11 (#1183). A damaged `.idx` header that claims more lines than bytes is ignored, and the CLI's save deletes its temporary file without hiding why it stopped (found in review).
 2. **The GUI's reads are safe, and export, split and the search for text run off the UI thread.**
    - What it adds:
-     - the failed-read handler, the rows' safe read, and the graph's copy of its text;
+     - the failed-read handler, the rows' safe read, and the graph's copy of its text. Done on 2026-11-12, in its own pull request. Background work reloads only for a log that changed: another `IOException`, such as a save to a locked file, is shown as that work's error;
      - the screen-row measurement, and the cache if it is needed. Measured: no cache is needed (see Screen rows);
      - export, split and the search for text in the background, with Escape. Done first, in its own pull request: the found record is shown once the records and menus are back, and the progress bar waits 250 ms (found in review). Their messages go through `IDialogBoxService`, so a test never waits on a message box.
      - `OpenAsync` gains an internal mode parameter, so tests can open a log on disk before the window exists.
