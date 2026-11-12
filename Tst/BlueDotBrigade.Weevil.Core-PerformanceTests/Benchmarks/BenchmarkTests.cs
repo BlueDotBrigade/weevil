@@ -52,6 +52,9 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenAnalyzerBenchmarks_WhenRun_ThenReportIsWritten() => Run<AnalyzerBenchmarks>();
 
+		[TestMethod]
+		public void GivenScreenRowsBenchmarks_WhenRun_ThenReportIsWritten() => Run<ScreenRowsBenchmarks>();
+
 		private void Run<TBenchmarks>()
 		{
 #if DEBUG

@@ -46,9 +46,10 @@ namespace BlueDotBrigade.Weevil
 		/// <summary>
 		/// Opens the reference log, and checks that it holds every record, so a benchmark never measures a smaller log than it says.
 		/// </summary>
-		public static IEngine Open(int recordCount)
+		/// <param name="storageMode">RAM, as the GUI opens a log today, or Disk (#1028).</param>
+		public static IEngine Open(int recordCount, IO.StorageMode storageMode = IO.StorageMode.Ram)
 		{
-			IEngine engine = Engine.UsingPath(GetPath(recordCount)).Open();
+			IEngine engine = Engine.UsingPath(GetPath(recordCount)).UsingStorage(storageMode).Open();
 
 			if (engine.Count != recordCount)
 			{

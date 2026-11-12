@@ -10,7 +10,7 @@ on:
         # A new benchmark class needs an entry here, as well as its test method in BenchmarkTests.
         description: Which benchmark class to run
         type: choice
-        options: [All, Open, Filter, Find, Export, Analyzer]
+        options: [All, Open, Filter, Find, Export, Analyzer, ScreenRows]
         default: All
       job:
         description: BenchmarkDotNet's job. Short takes a few minutes, and measures less precisely.
