@@ -1,0 +1,67 @@
+﻿<Window x:Class="BlueDotBrigade.Weevil.Gui.IO.OpenAsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Open As"
+        Width="600"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="{DynamicResource ApplicationFontSize}"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" Value="5,10,5,0" />
+            <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource  MaterialDesignRaisedButton}">
+            <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
+            <Setter Property="Width" Value="{StaticResource ButtonWidth}" />
+        </Style>
+    </Window.Resources>
+    <StackPanel Margin="10" FocusManager.FocusedElement="{Binding ElementName=OpenButton}">
+        <TextBlock Text="{Binding FileDescription}" FontWeight="SemiBold" />
+        <TextBlock Text="Where should Weevil keep the log's text while it is open?" />
+
+        <RadioButton x:Name="RamRadioButton" GroupName="StorageMode" Content="RAM"
+                     IsChecked="{Binding IsRamChosen, Mode=TwoWay}"
+                     AutomationProperties.HelpText="{Binding RamDescription}" />
+        <TextBlock Text="{Binding RamDescription}" Margin="30,0,5,5" />
+
+        <RadioButton x:Name="DiskRadioButton" GroupName="StorageMode" Content="Disk"
+                     IsChecked="{Binding IsDiskChosen, Mode=TwoWay}"
+                     AutomationProperties.HelpText="{Binding DiskDescription}" />
+        <TextBlock Text="{Binding DiskDescription}" Margin="30,0,5,5" />
+
+        <TextBlock x:Name="WarningTextBlock"
+                   Text="{Binding Warning}"
+                   FontWeight="SemiBold"
+                   Margin="5,10,5,5"
+                   AutomationProperties.LiveSetting="Assertive">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Warning}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="OpenButton" Content="Open" IsDefault="True" Click="OnOpenClicked" />
+            <Button Content="Cancel" IsCancel="True" />
+        </StackPanel>
+    </StackPanel>
+</Window>

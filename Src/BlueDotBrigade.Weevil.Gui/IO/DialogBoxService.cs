@@ -11,6 +11,7 @@ using BlueDotBrigade.Weevil.Gui.Analysis;
 using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
 using Microsoft.Win32;
+using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 /// <summary>
 /// Manages application-wide state for graph windows.
@@ -170,6 +171,16 @@ internal class DialogBoxService : IDialogBoxService
 		return wasSuccessful;
 	}
 
+
+	public bool TryShowOpenAs(OpenAsAdvice advice, out StorageMode storageMode)
+	{
+		var dialog = new OpenAsDialog(advice);
+		var isAccepted = dialog.ShowDialog() == true;
+
+		storageMode = dialog.StorageMode;
+
+		return isAccepted;
+	}
 
 	public bool TrySelectCompressedFile(string[] fileNames, out string selectedFileName)
 	{

@@ -11,6 +11,14 @@
 		string ShowOpenFile(string compatibleFileExtensions);
 
 		/// <summary>
+		/// Shows Weevil's Open As window, so the user chooses RAM or Disk for the log about to open (#1028).
+		/// </summary>
+		/// <param name="advice">The log, the mode suggested for it, and the warnings.</param>
+		/// <param name="storageMode">The mode chosen.</param>
+		/// <returns><see langword="false"/> when the user cancelled: nothing opens.</returns>
+		bool TryShowOpenAs(OpenAsAdvice advice, out StorageMode storageMode);
+
+		/// <summary>
 		/// Lets the user choose one of the files extracted from a zip.
 		/// </summary>
 		/// <returns><see langword="false"/> when the user chose no file.</returns>

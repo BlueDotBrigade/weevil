@@ -248,7 +248,7 @@ One pull request per step, in order. The GUI builds only on Windows, so for step
      - a log on disk that is truncated reloads once, and not again while Reload runs;
      - a log on disk that is deleted shows one message while its rows are scrolled;
      - export, split and the search for text run in the background, and Escape cancels them.
-3. **The Open As window.**
+3. **The Open As window.** Done on 2026-11-12, in its own pull request. Open As is asked in `OpenCompressedAsync`, where every open the user starts begins; the internal `OpenAsync` used by tests and plugins does not ask.
    - What it adds:
      - the window, the default, the warnings and the order on every open;
      - the delegate given to plugins;

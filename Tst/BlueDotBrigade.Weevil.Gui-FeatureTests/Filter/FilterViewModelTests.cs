@@ -288,6 +288,73 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			graphed[0].Content.Should().NotBeNullOrEmpty("the graph reads its own copy, not the log");
 		}
 
+		[TestMethod]
+		public void GivenALogDroppedOnTheWindow_WhenDiskIsChosenInOpenAs_ThenTheLogOpensOnDisk()
+		{
+			// Every open shows Open As, including a drop, which skips the Windows file dialog (decision 3 of the #1028 plan).
+			var dialog = Substitute.For<IDialogBoxService>();
+			AcceptOpenAs(dialog, StorageMode.Disk);
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+			viewModel.CanOpenLogFile.Should().BeTrue("nothing else is running");
+
+			viewModel.OnFileDropped(this, new DroppedFileEventArgs(CopyLog("Dropped.log")));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+
+			dialog.Received(1).TryShowOpenAs(Arg.Is<OpenAsAdvice>(advice => advice.FileName == "Dropped.log"), out Arg.Any<StorageMode>());
+			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin => bulletin.StorageMode == StorageMode.Disk));
+		}
+
+		[TestMethod]
+		public async Task GivenAnOpenLog_WhenOpenAsIsCancelledForAnother_ThenTheOpenLogStays()
+		{
+			var dialog = Substitute.For<IDialogBoxService>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+			await viewModel.OpenAsync(CopyLog("Open.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+			bulletinMediator.ClearReceivedCalls();
+
+			// The substitute answers false: the user cancelled.
+			await viewModel.OpenCompressedAsync(CopyLog("Other.log"));
+
+			dialog.Received(1).TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
+			bulletinMediator.DidNotReceive().Post(Arg.Any<SourceFileOpenedBulletin>());
+			viewModel.IsLogFileOpen.Should().BeTrue("the log that was open stays open");
+		}
+
+		[TestMethod]
+		public async Task GivenAZip_WhenAFileInItIsChosen_ThenOpenAsAdvisesOnThatFile()
+		{
+			// Open As follows the zip's list of files, so its suggestion uses the size of the log chosen (#1028).
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+
+			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+
+			zipped.DialogBox.Received(1).TryShowOpenAs(
+				Arg.Is<OpenAsAdvice>(advice => advice.FileName == "A.log" && advice.FileSize.Bytes > 0),
+				out Arg.Any<StorageMode>());
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedOnDisk_WhenReloaded_ThenOpenAsIsNotShownAgain()
+		{
+			// Reload keeps the mode, and never asks again (the #986 plan).
+			var dialog = Substitute.For<IDialogBoxService>();
+			AcceptOpenAs(dialog, StorageMode.Disk);
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+			await viewModel.OpenCompressedAsync(CopyLog("Reloaded.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+			bulletinMediator.ClearReceivedCalls();
+
+			viewModel.Reload();
+			WaitUntil(() => viewModel.IsMenuEnabled && bulletinMediator.ReceivedCalls().Any());
+
+			dialog.Received(1).TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
+			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin => bulletin.StorageMode == StorageMode.Disk));
+		}
+
 		// Regression: Issue #996 - the busy overlay was shown only after a prompt closed.
 		[TestMethod]
 		public async Task GivenOpenLog_WhenAnalysisStarts_ThenBusyOverlayIsShownExceptDuringPrompts()
@@ -841,6 +908,18 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		/// <summary>
+		/// Answers Weevil's Open As window with <paramref name="storageMode"/>.
+		/// </summary>
+		private static void AcceptOpenAs(IDialogBoxService dialogBox, StorageMode storageMode)
+		{
+			dialogBox.TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>()).Returns(x =>
+			{
+				x[1] = storageMode;
+				return true;
+			});
+		}
+
+		/// <summary>
 		/// Opens the log on disk, and waits until the table of contents and the insights have read it, so nothing else reads it afterwards.
 		/// </summary>
 		private static async Task OpenOnDiskAsync(FilterViewModel viewModel, string logPath)
@@ -872,6 +951,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					callInfo[1] = "A.log";
 					return true;
 				});
+			AcceptOpenAs(dialogBox, StorageMode.Ram);
 			var openedPaths = new List<string>();
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
