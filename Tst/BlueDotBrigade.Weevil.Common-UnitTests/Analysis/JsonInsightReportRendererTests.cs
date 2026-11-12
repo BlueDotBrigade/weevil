@@ -16,7 +16,7 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 			{
 				SourceFileName = "Application.log",
 				Context = new Dictionary<string, string> { { "Application", "Droid" } },
-				WeevilVersion = "3.0.1",
+				WeevilVersion = "3.0.1.0",
 				GeneratedAt = new DateTimeOffset(2026, 11, 12, 9, 30, 0, TimeSpan.FromHours(-5)),
 				From = new DateTime(2026, 5, 6, 10, 0, 0),
 				To = null,
@@ -48,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 				"  \"context\": {",
 				"    \"Application\": \"Droid\"",
 				"  },",
-				"  \"weevilVersion\": \"3.0.1\",",
+				"  \"weevilVersion\": \"3.0.1.0\",",
 				"  \"generatedAt\": \"2026-11-12T09:30:00-05:00\",",
 				"  \"from\": \"2026-05-06T10:00:00\",",
 				"  \"to\": null,",

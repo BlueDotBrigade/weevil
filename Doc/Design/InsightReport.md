@@ -33,10 +33,12 @@ The CLI chooses the output format once: `Program` resolves `--output-as` into an
 Programs rely on this shape. `JsonInsightReportRendererTests` checks it, property by property.
 
 - Names are camelCase. A context's names and a metric's name are kept as they are.
-- Times are ISO 8601. `generatedAt` has the offset of the machine that built the report; `from`, `to` and a metric's time are the log's own times, without an offset, since a log's timestamps carry none.
+- Times are ISO 8601. `generatedAt` has the offset of the machine that built the report; `from`, `to` and a metric's time are the log's own times, without an offset, since Weevil's parsers read none.
 - A time that is not known is `null`.
-- Text is written as it is, such as `Σ` and `'`, not escaped for a web page. Escape it before putting it in HTML.
+- Text is written as it is, such as `Σ` and `'`, not escaped for a web page. Escape it before putting it in HTML. The CLI writes the JSON as UTF-8, without a byte order mark.
 - `schemaVersion` changes when a property is removed, renamed or changes its meaning. Adding a property does not change it.
+
+In this example, `Threshold` and `FirstOccurredAt` stand for a plugin's metrics.
 
 ```json
 {
@@ -45,7 +47,7 @@ Programs rely on this shape. `JsonInsightReportRendererTests` checks it, propert
   "context": {
     "Application": "Droid"
   },
-  "weevilVersion": "3.0.1",
+  "weevilVersion": "3.0.1.0",
   "generatedAt": "2026-11-12T09:30:00-05:00",
   "from": "2026-05-06T10:00:00",
   "to": null,
@@ -74,13 +76,13 @@ Programs rely on this shape. `JsonInsightReportRendererTests` checks it, propert
 | `schemaVersion` | number | The version of this shape: 1 |
 | `sourceFileName` | string | The log's file name, without its folder |
 | `context` | object | The log's context, such as the version of the application that wrote it, as names and string values. `{}` when it has none |
-| `weevilVersion` | string | The version of Weevil that built the report |
+| `weevilVersion` | string | The version of Weevil that built the report: a .NET version in four parts |
 | `generatedAt` | string | When the report was built |
 | `from`, `to` | string or `null` | The period analyzed |
 | `recordCount` | number | The number of records in the log |
 | `fileSize` | number | The log's size, in bytes |
-| `metrics` | array | The filter's metrics, in the order the filter gives them. Which ones appear depends on the log's analyzers and plugins |
-| `metrics[].value` | number, string or `null` | A count; a duration, such as `"00:00:05"` or `"1.02:03:04.5000000"` (`[d.]hh:mm:ss[.fffffff]`); or a time |
+| `metrics` | array | The filter's metrics, in the order the filter gives them. Weevil's own are counts per severity: `Information`, `Warnings`, `Errors` and `Fatals`. A plugin can add others |
+| `metrics[].value` | number, string or `null` | Weevil's own metrics are numbers. A plugin's value is written as System.Text.Json writes its type: a duration as `[-][d.]hh:mm:ss[.fffffff]`, such as `"00:00:05"`, and a time as above, `null` when it is not known |
 | `insights` | array | Every insight, in the order Weevil shows them |
 | `insights[].metricValue` | string | The insight's key figure, as Weevil shows it |
 | `insights[].isAttentionRequired` | boolean | Whether the insight needs attention. Filter by it to get only the problems |

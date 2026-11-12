@@ -22,7 +22,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 	/// Writes the log's <see cref="InsightReport"/>: the same data as the command line's <c>insight --output-as json</c>, as an object (#837).
 	/// </summary>
 	[Cmdlet(VerbsCommon.Get, "Insight")]
-    [OutputType(typeof(InsightReport))]
+	[OutputType(typeof(InsightReport))]
     public class GetInsightCmdlet : Cmdlet
     {
         [Parameter(Position = 0, Mandatory = true)]
