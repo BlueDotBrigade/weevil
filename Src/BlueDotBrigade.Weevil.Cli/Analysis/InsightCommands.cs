@@ -11,6 +11,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 	using BlueDotBrigade.Weevil.Analysis;
 
 	using BlueDotBrigade.Weevil.Cli.IO;
+	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
 
 	using BlueDotBrigade.Weevil.Filter;
@@ -47,34 +48,37 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 				// On disk, a log that changed while it was read is reloaded, and read once more (#1028).
 				var insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
 
-				// After the insights, so that both describe the same log, if it was reloaded.
-				var severityMetrics =  engine.Filter.GetMetrics();
+				// After the insights, so that the report's metrics describe the same log, if it was reloaded.
+				// The report holds every insight and the metrics; the command shows what it always has (#837).
+				var period = engine.Records.GetEstimatedRange();
+				InsightReport report = new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
 
 				if (verbose)
 				{
 					Write.Heading("Metrics");
 
-					Write.Text($"Total Records\t{engine.Metrics.RecordCount}");
-					Write.Text($"File Size\t{engine.Metrics.FileSize}");
+					Write.Text($"Total Records\t{report.RecordCount}");
+					Write.Text($"File Size\t{report.FileSize}");
 
-					foreach (var item in severityMetrics)
+					foreach (InsightReportMetric metric in report.Metrics)
 					{
-						Write.Text($"{item.Key}\t{item.Value}");
+						Write.Text($"{metric.Name}\t{metric.Value}");
 					}
-				}else{
-				
-					insights = insights.Where(x => x.IsAttentionRequired == true).ToImmutableArray();
 				}
+
+				var shown = verbose
+					? report.Insights
+					: report.Insights.Where(insight => insight.IsAttentionRequired).ToImmutableArray();
 
 				Write.Heading("Insights");
 
-				if (insights.Length == 0)
+				if (shown.Length == 0)
 				{
 					Write.Text("No noteworthy insight was found.");
 				}
 				else
 				{
-					foreach(var insight in insights)
+					foreach (InsightReportItem insight in shown)
 					{
 						Write.Text($"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}");
 					}
