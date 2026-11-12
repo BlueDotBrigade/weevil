@@ -94,18 +94,18 @@ namespace BlueDotBrigade.Weevil
 		public void GivenAReloadThatCouldNotReadTheLog_WhenReloadedAgainAndFiltered_ThenFilterAppliedRecordedOnce()
 		{
 			// The engine a failed Reload leaves kept the recorder, but the next Reload dropped it.
-			var folder = System.IO.Directory.CreateTempSubdirectory("WeevilTelemetry.").FullName;
+			var folder = Directory.CreateTempSubdirectory("WeevilTelemetry.").FullName;
 
 			try
 			{
 				var logPath = Path.Combine(folder, "SampleData.log");
-				System.IO.File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
 				var recorder = new FakeTelemetryMetricRecorder();
 				IEngine engine = Engine.UsingPath(logPath).UsingTelemetry(recorder).Open();
 
-				System.IO.File.Move(logPath, $"{logPath}~");
+				File.Move(logPath, $"{logPath}~");
 				FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
-				System.IO.File.Move($"{logPath}~", logPath);
+				File.Move($"{logPath}~", logPath);
 				engine.Reload();
 
 				engine.Filter.Apply(FilterType.PlainText, FilterCriteria.None);
@@ -115,7 +115,7 @@ namespace BlueDotBrigade.Weevil
 			}
 			finally
 			{
-				System.IO.Directory.Delete(folder, recursive: true);
+				Directory.Delete(folder, recursive: true);
 			}
 		}
 
