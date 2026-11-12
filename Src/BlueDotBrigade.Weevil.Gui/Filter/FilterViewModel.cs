@@ -125,6 +125,8 @@
 		private CancellationTokenSource _backgroundCancellation;
 
 		// Each open and each Reload starts a new generation of the log, so a failed read is handled once per log, and a read of an older one is ignored (#1028).
+		// Not a property, so it can be passed to `Interlocked` and `Volatile`.
+		[NotObservable]
 		private int _logGeneration;
 
 		// The generation whose failed read was handled last. Read and written on the UI thread.
