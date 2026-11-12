@@ -281,7 +281,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			await OpenOnDiskAsync(viewModel, logPath);
 			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
 
+			// On disk the copy runs in the background.
 			viewModel.GraphDataCommand.Execute(null);
+			await viewModel.BackgroundTask;
 			System.IO.File.Delete(logPath);
 
 			graphed.Length.Should().Be(viewModel.Rows.Count, "every record was selected");
