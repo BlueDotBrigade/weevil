@@ -46,7 +46,10 @@ namespace BlueDotBrigade.Weevil.IO
 		private long _chunkStart;
 		private bool _isEndOfFile;
 
-		// Disk mode only: computes the checksums of every byte read, for the chunks on file to read back through.
+		private readonly StorageMode _storageMode;
+
+		// Computes the checksums of every byte read: for the chunks on file to read back through, and in both modes for the saved index (#1023).
+		// Null for a source that is not a file, which only RAM mode accepts.
 		private readonly LogFileSourceBuilder _sourceBuilder;
 
 		/// <param name="source">The log, which must be able to seek. In disk mode, a <see cref="FileStream"/>.</param>
@@ -72,10 +75,15 @@ namespace BlueDotBrigade.Weevil.IO
 			_chunkStart = _bufferOffset;
 			_source.Position = _bufferOffset;
 
-			if (storageMode == StorageMode.Disk)
-			{
-				var file = source as FileStream ?? throw new ArgumentException("Disk mode reads the log back from its file, so the source must be a file.", nameof(source));
+			_storageMode = storageMode;
 
+			if (storageMode == StorageMode.Disk && source is not FileStream)
+			{
+				throw new ArgumentException("Disk mode reads the log back from its file, so the source must be a file.", nameof(source));
+			}
+
+			if (source is FileStream file)
+			{
 				// The full path, so reads still find the log if the working directory changes. The checksums start after the byte order mark.
 				_sourceBuilder = new LogFileSourceBuilder(file.Name, _bufferOffset, file.Length);
 			}
@@ -100,7 +108,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Records can keep the log's bytes instead of a string: always in disk mode, where every record is read back from the log,
 		/// otherwise only when the log decodes quickly.
 		/// </summary>
-		public bool CanKeepBytes => _sourceBuilder != null || this.IsQuickToDecode;
+		public bool CanKeepBytes => _storageMode == StorageMode.Disk || this.IsQuickToDecode;
 
 		/// <summary>
 		/// Where the next line starts in the file.
@@ -192,7 +200,7 @@ namespace BlueDotBrigade.Weevil.IO
 		{
 			ContentChunk chunk;
 
-			if (_sourceBuilder != null)
+			if (_storageMode == StorageMode.Disk)
 			{
 				// Its bytes have been appended to the source already, when they were read.
 				chunk = new ContentChunk(_sourceBuilder.Source, _chunkStart, (int)(endOffset - _chunkStart), this.Encoding);
@@ -211,9 +219,12 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// In disk mode, completes the source the chunks on file read back through, once the reading is done: nothing can be read through it before.
+		/// Completes the source of the bytes read, once the reading is done: nothing can be read through it before.
 		/// </summary>
-		/// <returns>The source, or <see langword="null"/> in RAM mode.</returns>
+		/// <remarks>
+		/// In disk mode, the chunks on file read back through it. In both modes, it holds the checksums the saved index keeps (#1023).
+		/// </remarks>
+		/// <returns>The source, or <see langword="null"/> when the log is not a file.</returns>
 		public LogFileSource BuildSource()
 		{
 			return _sourceBuilder?.Build();
