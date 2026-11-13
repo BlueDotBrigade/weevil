@@ -304,6 +304,7 @@ namespace BlueDotBrigade.Weevil.IO
 			built.Parse = CreateParse();
 			built.Write(saved);
 			var original = saved.ToArray();
+			LineIndex.TryRead(new MemoryStream(original), source, out _).Should().BeTrue("the index is valid before any byte is changed");
 
 			for (var i = 0; i < original.Length; i++)
 			{
