@@ -532,6 +532,77 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
+		[TestMethod]
+		[DoNotParallelize]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenALogOfSeveralChunksOpenedBefore_WhenOpenedAgain_ThenItIsReadFromTheSavedIndexWithTheSameRecords(StorageMode storageMode)
+		{
+			// About 40 MB, so the saved table spans several 16 MB chunks, with multi-line records that cross chunk boundaries (#1023).
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "Large.log");
+				using (var writer = new StreamWriter(logPath))
+				{
+					var start = new DateTime(3050, 9, 30, 11, 26, 12);
+					for (var i = 0; i < 350_000; i++)
+					{
+						writer.Write($"{start.AddMilliseconds(i * 10):yyyy-MM-dd HH:mm:ss.fffff}\t1977\t{i % 9}\tInfo\t[Sensors] Proximity scan complete. Contacts={i % 13}, Record={i}\n");
+
+						if (i % 50 == 0)
+						{
+							writer.Write($"  continued on another line {i}\n");
+						}
+					}
+				}
+
+				var parsed = Describe(Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Records);
+				using var log = CapturingLogWriter.Register();
+
+				IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+
+				log.SeverityOfLast(IO.LineIndexFile.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information);
+				Describe(reopened.Records).Should().Equal(parsed);
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+
+			static string[] Describe(RecordList records) => records.Select(r => $"{r.LineNumber}|{r.CreatedAt:O}|{r.Severity}|{r.IsMultiLine}|{r.Content}").ToArray();
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public void GivenALogThatGrewAndAnIndexThatCannotBeSavedAgain_WhenReopened_ThenTheLogIsParsedWithItsNewRecords()
+		{
+			// The saved table covers the log as it was. If the index cannot be saved again after the log grew, it still holds that table,
+			// which would hide the records added since: the reopen must parse (#1023).
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+				var countBefore = Engine.UsingPath(logPath).Open().Count;
+				// The sample log has no line break at its end, so the line added starts with one.
+				File.AppendAllText(logPath, "\nInfo 1900-01-01 13:00:00.0000 248 Added later. Id=999");
+
+				// A folder where the temporary index file would be written makes saving fail.
+				Directory.CreateDirectory($"{logPath}.{IO.LineIndexFile.FileExtension}.tmp");
+				using var log = CapturingLogWriter.Register();
+
+				IEngine reopened = Engine.UsingPath(logPath).Open();
+
+				reopened.Count.Should().Be(countBefore + 1, "the line added since was parsed");
+				FluentActions.Invoking(() => log.Last(IO.LineIndexFile.RecordsReadFromIndexMessage)).Should().Throw<InvalidOperationException>("the saved table was not used");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
 		private static IO.SavedParse ReadSavedParse(string logPath)
 		{
 			using var log = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

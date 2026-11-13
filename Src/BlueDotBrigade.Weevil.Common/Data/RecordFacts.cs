@@ -40,5 +40,33 @@ namespace BlueDotBrigade.Weevil.Data
 		public bool WasGeneratedByUi => (_value & UserInterfaceThreadFlag) != 0;
 
 		public bool KeepsString => (_value & KeepsStringFlag) != 0;
+
+		/// <summary>
+		/// The facts in one byte, as the saved index keeps them (#1023).
+		/// </summary>
+		public byte Value => _value;
+
+		/// <summary>
+		/// Reads facts saved as <see cref="Value"/>, unless the byte holds bits no facts set.
+		/// </summary>
+		public static bool TryFromValue(byte value, out RecordFacts facts)
+		{
+			const byte KnownBits = SeverityMask | MultiLineFlag | UserInterfaceThreadFlag | KeepsStringFlag;
+
+			// The same values the constructor accepts, so a table a parser made always reads back.
+			if ((value & ~KnownBits) != 0)
+			{
+				facts = default;
+				return false;
+			}
+
+			facts = new RecordFacts(value);
+			return true;
+		}
+
+		private RecordFacts(byte value)
+		{
+			_value = value;
+		}
 	}
 }

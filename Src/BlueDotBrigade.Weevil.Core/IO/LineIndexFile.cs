@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.IO
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
+	using BlueDotBrigade.Weevil.Data;
 	using Diagnostics;
 
 	/// <summary>
@@ -16,6 +17,13 @@ namespace BlueDotBrigade.Weevil.IO
 	internal static class LineIndexFile
 	{
 		public const string FileExtension = "idx";
+
+		/// <summary>
+		/// Logged when a log is opened from the record table saved with its index, without being parsed (#1023, #1085).
+		/// </summary>
+		internal const string RecordsReadFromIndexMessage = "The records were read from the saved index, without parsing the log.";
+
+		internal const string TableRejectedMessage = "The saved record table does not match the log, so the log will be parsed.";
 
 		/// <summary>
 		/// Returns the saved index when it matches the log, after scanning any content added since. Otherwise scans the whole log.
@@ -126,7 +134,7 @@ namespace BlueDotBrigade.Weevil.IO
 			return false;
 		}
 
-		private static void TrySave(LineIndex index, string logFilePath, string indexFilePath)
+		private static void TrySave(LineIndex index, string logFilePath, string indexFilePath, RecordTable table = null)
 		{
 			if (FileHelper.IsInTemporaryDirectory(logFilePath))
 			{
@@ -143,7 +151,7 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				using (var destination = new System.IO.FileStream(temporaryFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
 				{
-					index.Write(destination);
+					index.Write(destination, table);
 				}
 
 				System.IO.File.Move(temporaryFilePath, indexFilePath, overwrite: true);
@@ -160,24 +168,107 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// After a full parse, saves with the index what parsed the log and the checksums of the bytes it read,
+		/// After a full parse, saves with the index what parsed the log, the checksums of the bytes it read, and the record table it made,
 		/// unless the saved index has them already (#1023).
 		/// </summary>
 		/// <remarks>
 		/// The line index is saved before the log is parsed, by <see cref="Load"/>, and again here once the parse is known.
 		/// </remarks>
-		public static void SaveParse(string logFilePath, LineIndex index, SavedParse parse)
+		public static void SaveParse(string logFilePath, LineIndex index, SavedParse parse, RecordTable table)
 		{
 			ArgumentNullException.ThrowIfNull(index);
 			ArgumentNullException.ThrowIfNull(parse);
+			ArgumentNullException.ThrowIfNull(table);
 
-			if (parse.IsSameAs(index.Parse))
+			if (parse.IsSameAs(index.Parse) && index.HasTable)
 			{
 				return;
 			}
 
 			index.Parse = parse;
-			TrySave(index, logFilePath, GetIndexFilePath(logFilePath));
+			TrySave(index, logFilePath, GetIndexFilePath(logFilePath), table);
+		}
+
+		/// <summary>
+		/// Builds the record table saved with the index, instead of parsing the log, when the same parser would make it and the log has not changed since (#1023).
+		/// </summary>
+		/// <remarks>
+		/// Every block of the log is checked against the checksums saved with the table: one that changed means the log must be parsed.
+		/// A log that grew since is parsed too.
+		/// </remarks>
+		/// <param name="source">On disk, the source the records read their content back through: otherwise <see langword="null"/>.</param>
+		/// <returns><see langword="false"/> when the log must be parsed.</returns>
+		public static bool TryLoadTable(string logFilePath, Stream logSource, LineIndex index, IPlugin plugin, StorageMode storageMode, out RecordTable table, out LogFileSource source)
+		{
+			table = null;
+			source = null;
+
+			SavedParse parse = index.Parse;
+
+			if (parse is null || !index.HasTable || !parse.IsSameParser(plugin, storageMode) || parse.EndOffset != logSource.Length)
+			{
+				return false;
+			}
+
+			var indexFilePath = GetIndexFilePath(logFilePath);
+			var stopwatch = Stopwatch.StartNew();
+			var originalPosition = logSource.Position;
+
+			try
+			{
+				// The log is checked while the index is open, so another instance of Weevil may still replace the index meanwhile.
+				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+
+				// Read again, from the file now open: another instance of Weevil may have replaced the index since it was loaded.
+				if (!LineIndex.TryRead(indexSource, logSource, out LineIndex saved) || !saved.HasTable || !parse.IsSameAs(saved.Parse))
+				{
+					Log.Default.Write(
+						LogSeverityType.Information,
+						$"The saved index changed after it was loaded, so the log will be parsed. IndexFilePath={indexFilePath}");
+					return false;
+				}
+
+				indexSource.Position = saved.TableOffset;
+
+				if (!SavedTableReader.TryRead(indexSource, logSource, System.IO.Path.GetFullPath(logFilePath), parse, index.ContentEncoding, storageMode, out table, out source))
+				{
+					Log.Default.Write(
+						LogSeverityType.Information,
+						$"{TableRejectedMessage} IndexFilePath={indexFilePath}");
+
+					// So the parse that follows saves a table again, rather than leaving one that every open rejects.
+					index.HasTable = false;
+					return false;
+				}
+			}
+			// ArgumentException too: a defect in reading the table should cost a parse, not the open.
+			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException || exception is FormatException || exception is ArgumentException)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					exception,
+					$"The saved record table could not be read, so the log will be parsed. IndexFilePath={indexFilePath}");
+				index.HasTable = false;
+				table = null;
+				source = null;
+				return false;
+			}
+			finally
+			{
+				logSource.Position = originalPosition;
+			}
+
+			Log.Default.Write(
+				LogSeverityType.Information,
+				RecordsReadFromIndexMessage,
+				new Dictionary<string, object>
+				{
+					{ "RecordCount", table.Count },
+					{ "Duration", stopwatch.Elapsed.TotalSeconds },
+					{ "IndexFilePath", indexFilePath },
+				});
+
+			return true;
 		}
 
 		/// <summary>

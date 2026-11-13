@@ -23,6 +23,21 @@ namespace BlueDotBrigade.Weevil.IO
 		/// What parsed the log, and the checksums of the bytes it read. Only an index saved after a full parse has it.
 		/// </summary>
 		Parse = 3,
+
+		/// <summary>
+		/// The record table's chunk directory. This and the next two sections hold the table a full parse made.
+		/// </summary>
+		Chunks = 4,
+
+		/// <summary>
+		/// The strings of the rows that keep one.
+		/// </summary>
+		Strings = 5,
+
+		/// <summary>
+		/// Every row's columns.
+		/// </summary>
+		Rows = 6,
 	}
 
 	/// <summary>
@@ -59,6 +74,8 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				writeBytes?.Invoke(writer);
 			}
+
+			bytes.Flush();
 
 			var sectionEnd = destination.Position;
 			destination.Position = sectionStart;
@@ -106,6 +123,27 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
+		/// Moves past the next section, when it is of <paramref name="expectedKind"/>, without reading or checking its bytes.
+		/// </summary>
+		/// <remarks>
+		/// For the record table, which is read and checked only when it is used, so a damaged table never costs the line index.
+		/// </remarks>
+		public static bool TrySkip(Stream source, IndexSectionKind expectedKind)
+		{
+			if (!TryRead(source, expectedKind, out Reader reader))
+			{
+				return false;
+			}
+
+			using (reader)
+			{
+				source.Position += reader.Remaining;
+			}
+
+			return true;
+		}
+
+		/// <summary>
 		/// The bytes of one section, read through a <see cref="BinaryReader"/>, and checked against the section's checksum once all are read.
 		/// </summary>
 		internal sealed class Reader : IDisposable
@@ -139,10 +177,17 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Passes the bytes written on to another stream, counting them and computing their checksum.
 		/// </summary>
+		/// <remarks>
+		/// A table's rows are written a field at a time, so the bytes are gathered into a buffer, and hashed and written a buffer at a time.
+		/// </remarks>
 		private sealed class HashingStream : Stream
 		{
+			private const int BufferSize = 64 * 1024;
+
 			private readonly Stream _destination;
 			private readonly XxHash3 _hash = new XxHash3();
+			private readonly byte[] _buffer = new byte[BufferSize];
+			private int _buffered;
 			private long _length;
 
 			public HashingStream(Stream destination)
@@ -170,12 +215,36 @@ namespace BlueDotBrigade.Weevil.IO
 
 			public override void Write(ReadOnlySpan<byte> buffer)
 			{
-				_hash.Append(buffer);
-				_destination.Write(buffer);
 				_length += buffer.Length;
+
+				while (!buffer.IsEmpty)
+				{
+					var count = System.Math.Min(buffer.Length, BufferSize - _buffered);
+					buffer.Slice(0, count).CopyTo(_buffer.AsSpan(_buffered));
+					_buffered += count;
+					buffer = buffer.Slice(count);
+
+					if (_buffered == BufferSize)
+					{
+						Flush();
+					}
+				}
 			}
 
-			public override void Flush() => _destination.Flush();
+			public override void WriteByte(byte value) => Write([value]);
+
+			/// <summary>
+			/// Hashes and writes the bytes gathered so far: call it before reading <see cref="GetHash"/>.
+			/// </summary>
+			public override void Flush()
+			{
+				if (_buffered > 0)
+				{
+					_hash.Append(_buffer.AsSpan(0, _buffered));
+					_destination.Write(_buffer, 0, _buffered);
+					_buffered = 0;
+				}
+			}
 
 			public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
@@ -187,22 +256,33 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Reads at most a section's bytes from another stream, computing their checksum as they are read.
 		/// </summary>
+		/// <remarks>
+		/// A table's rows are read a field at a time, so the section is read, and hashed, a buffer at a time.
+		/// <see cref="Position"/> counts the bytes handed out, so a reader still knows how many it has not read.
+		/// </remarks>
 		private sealed class HashingReadStream : Stream
 		{
+			private const int BufferSize = 64 * 1024;
+
 			private readonly Stream _source;
 			private readonly long _length;
 			private readonly ulong _expectedChecksum;
 			private readonly XxHash3 _hash = new XxHash3();
+			private readonly byte[] _buffer;
+			private int _bufferStart;
+			private int _bufferEnd;
 			private long _position;
+			private long _sourceRead;
 
 			public HashingReadStream(Stream source, long length, ulong expectedChecksum)
 			{
 				_source = source;
 				_length = length;
 				_expectedChecksum = expectedChecksum;
+				_buffer = new byte[(int)System.Math.Min(BufferSize, System.Math.Max(length, 1))];
 			}
 
-			public bool IsChecksumMatched => _position == _length && _hash.GetCurrentHashAsUInt64() == _expectedChecksum;
+			public bool IsChecksumMatched => _position == _length && _sourceRead == _length && _hash.GetCurrentHashAsUInt64() == _expectedChecksum;
 
 			public override bool CanRead => true;
 
@@ -222,18 +302,46 @@ namespace BlueDotBrigade.Weevil.IO
 
 			public override int Read(Span<byte> buffer)
 			{
-				var count = (int)System.Math.Min(buffer.Length, _length - _position);
-
-				if (count <= 0)
+				if (_bufferStart == _bufferEnd && !Fill())
 				{
 					return 0;
 				}
 
-				var read = _source.Read(buffer.Slice(0, count));
-				_hash.Append(buffer.Slice(0, read));
-				_position += read;
+				var count = System.Math.Min(buffer.Length, _bufferEnd - _bufferStart);
+				_buffer.AsSpan(_bufferStart, count).CopyTo(buffer);
+				_bufferStart += count;
+				_position += count;
 
-				return read;
+				return count;
+			}
+
+			public override int ReadByte()
+			{
+				if (_bufferStart == _bufferEnd && !Fill())
+				{
+					return -1;
+				}
+
+				_position++;
+				return _buffer[_bufferStart++];
+			}
+
+			private bool Fill()
+			{
+				var count = (int)System.Math.Min(_buffer.Length, _length - _sourceRead);
+
+				if (count <= 0)
+				{
+					return false;
+				}
+
+				var read = _source.Read(_buffer, 0, count);
+				_hash.Append(_buffer.AsSpan(0, read));
+				_sourceRead += read;
+				_bufferStart = 0;
+				_bufferEnd = read;
+
+				return read > 0;
 			}
 
 			public override void Flush()

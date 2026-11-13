@@ -64,12 +64,7 @@ namespace BlueDotBrigade.Weevil.IO
 			// The byte order mark is only at the top of the file, so it is read there even when reading starts further in.
 			(_unitSize, _isBigEndian, var preambleLength) = LineIndex.DetectEncoding(source);
 
-			this.Encoding = _unitSize switch
-			{
-				1 => new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
-				2 => new UnicodeEncoding(_isBigEndian, byteOrderMark: false),
-				_ => new UTF32Encoding(_isBigEndian, byteOrderMark: false),
-			};
+			this.Encoding = LineIndex.CreateEncoding(_unitSize, _isBigEndian);
 
 			_bufferOffset = Math.Max(startOffset, preambleLength);
 			_chunkStart = _bufferOffset;

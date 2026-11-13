@@ -17,6 +17,14 @@ namespace BlueDotBrigade.Weevil.Data
 		// Null when the list holds every record of the table, in order.
 		private readonly int[] _recordNumbers;
 
+		/// <summary>
+		/// The table, when the list holds every one of its records in order, as after a full parse: otherwise <see langword="null"/>.
+		/// </summary>
+		/// <remarks>
+		/// The saved index keeps this table, so a log can be reopened without parsing (#1023).
+		/// </remarks>
+		internal RecordTable WholeTable => _recordNumbers == null ? _table : null;
+
 		public TableRecordList(RecordTable table)
 			: this(table, null)
 		{

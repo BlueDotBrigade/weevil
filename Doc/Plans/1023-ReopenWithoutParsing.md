@@ -80,9 +80,10 @@ Version 2, which replaces version 1. The format is new in Weevil 3.0, so an old 
 The table is saved with what produced it. Any difference means a parse:
 
 - **the plugin's name**, and the **MVID** (module version ID) of its assembly. Builds are deterministic, so an MVID is a hash of the assembly's compiled output: a build that changed the plugin, even with the same version number, never reuses an old table, and a rebuild without a change keeps it. After installing a new Weevil or plugin, the first open of each log parses it again, and later opens are fast again;
-- **the MVID of Weevil's Core**, whose parser joins continuation lines;
-- **the storage mode**, because UTF-16 in the other byte order and UTF-32 keep strings in RAM and bytes on disk;
-- **for a plugin with its own Open As window**, a hash of the context it returned, in case its parser depends on it.
+- **the MVIDs of Weevil's Core and Common**: the same build of Weevil. Core's parser joins continuation lines, and Common holds the records and chunks the table is made of;
+- **the storage mode**, because UTF-16 in the other byte order and UTF-32 keep strings in RAM and bytes on disk.
+
+The Open As context is not part of it (decided 2026-11-13): the sidecar keeps it, and it never reaches the parser, since `GetRecordParser()` takes no argument.
 
 The MVID needs no new member on `IPlugin`.
 
@@ -120,6 +121,7 @@ Decided by the owner on 2026-11-13:
 3. **A plugin is identified by its assembly's MVID,** not a version member on `IPlugin`. An unneeded parse after a build that did not change parsing is safer than stale records after a forgotten version bump.
 4. **A grown log is parsed only in its new part,** in its own step.
 5. **The index saves the length column,** as the table holds it. The last 4 bytes per record of #1086 (open question 1 of [RecordsOnDemand](../Research/Weevil3/RecordsOnDemand/README.md)) stay a separate decision.
+6. **A saved table is reused only when the same build of Weevil, Core and Common, and the same build of the plugin made it** (decided after step 2). The Open As context is left out: the sidecar keeps it, and it never reaches the parser.
 
 ## Steps
 
@@ -140,8 +142,8 @@ One pull request per step, in order.
      - The test of a file larger than 2 GB moves to step 3. Until the table is saved, an index holds a few MB at most, and the sections already use 64-bit lengths and stream.
      - What parsed the log and the block checksums share one optional Parse section, flagged in the header, rather than the header and a section of their own.
    - For step 3, from the review of step 2:
-     - **The Open As context is lost on Reload,** which builds without it, so for a plugin with its own Open As window the saved context hash alternates with 0. Decide whether to keep the context in the identity, hash the engine's own context, or carry it on Reload. No built-in plugin has an Open As window.
-     - **An MVID changes only with its own assembly.** A change only to Common, where records and chunks live, changes neither Core's MVID nor a plugin's. Decide whether Common's MVID, or the parser's own assembly's, joins the identity.
+     - **The Open As context is lost on Reload.** Decided: the context leaves the identity (decision 6).
+     - **An MVID changes only with its own assembly.** Decided: Common's MVID joins Core's (decision 6).
      - **A log written to while it is parsed** can have a parse that ends past the line index, possibly within a record. Reusing the table of a grown log must allow for it.
 3. **The table is saved, and reopening uses it.**
    - A full parse saves the table. Every open with a matching index builds its table from it, and an open with a start line or range takes the rows it needs.
@@ -153,6 +155,18 @@ One pull request per step, in order.
        - a change in the middle that keeps the length;
        - a truncated or corrupt log or index. Until step 4, a grown log is parsed in full.
      - The equivalence harness compares reopened and parsed tables over the 120 test logs.
+   - Done on 2026-11-13. Changes from the plan:
+     - **An open from a start line, of a range or up to a limit still parses.** Taking its rows from the saved full table would not always give the same records: a parse from a start line searches only 256 lines for its first record, and a range search reaches further than a full parse's. Only plugins with their own Open As window open part of a log, and no built-in plugin has one.
+     - **A damaged table costs only the table:** reading the index skips the table's sections, and they are checked when the table is used, so the line index is kept.
+     - **The equivalence harness is replaced by tests** that compare a reopen with a parse: 9 encodings and line endings, in RAM and on disk, a log of several 16 MB chunks, and rows whose text a plugin changed.
+     - **The #1085 test checks the log entry a reopen writes**, "The records were read from the saved index", rather than counting a parser's calls: a reopen that uses the table skips the parse entirely.
+   - From the review of step 3:
+     - **A parser must depend only on the log's lines,** which `IRecordParser` and `IPlugin.GetExtension` now say: a reopen no longer calls it. The identity cannot tell two parsers of one plugin assembly apart, which is safe while the choice depends only on the log's content, as it does for the built-in plugins.
+     - **Switching between RAM and disk parses again,** and saves the table again (about 221 MB for 10 million records), because the storage mode is part of the identity (decision 6).
+     - **The first open writes the table before it returns,** beside the log. For a log on a network share or a slow USB drive, that is about 22 bytes per record written to it. Writing the table after the engine is returned, or not for a remote path, is left for step 5's measurements.
+     - **For step 4: a stale line index.** A change in the middle of a log that keeps its length, and adds or removes a line break, passes the line index's checks. The table is then rejected, and the log parsed, but the stale line index is saved with the new parse. When the block check fails, the line index should be rebuilt too.
+     - **Notes, not changed:** a string a plugin cut in the middle of a surrogate pair reads back with U+FFFD, since strings are saved in UTF-8; a UTF-16 BE or UTF-32 log in RAM, whose rows all keep strings, takes about 28 bytes per record more while its table loads.
+   - Measured on the 1 GB, 10-million-record UTF-8 log, in Release, alternating with `main` in one session: a first open in RAM takes 9.2 – 9.5 s against 8.4 s, to write the table, and a reopen takes 1.9 – 2.0 s against 7.4 – 7.6 s. On disk, a reopen takes 0.9 s. The `.idx` holds 221 MB, 22 bytes per record.
 4. **A grown log is parsed only in its new part.**
    - Tests: records appended at the end; a last record that gains continuation lines; growth that starts a new chunk; a log that grew and also changed in its old part, which is parsed in full; the extended table equals a full parse, in RAM and on disk.
 5. **Measured and documented.**
