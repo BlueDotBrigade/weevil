@@ -17,7 +17,7 @@
 	using Navigation;
 	using Reports;
 
-	[DebuggerDisplay("InstanceId={_instanceId}, Records={Count}, Results={Filter.Results.Length}")]
+	[DebuggerDisplay("InstanceId={_instanceId}, Records={Count}, Results={Filter.Results.Count}")]
 	internal partial class CoreEngine : ICoreEngine
 	{
 		#region Fields

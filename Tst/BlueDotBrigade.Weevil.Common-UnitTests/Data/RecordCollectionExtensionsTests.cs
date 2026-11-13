@@ -252,7 +252,7 @@
 			// Compact removes nulls from an array, so this test means an array, not a record list.
 			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 4).ToImmutableArray();
 
-			RecordList results = records.Compact(records.Length);
+			ImmutableArray<IRecord> results = records.Compact(records.Length);
 
 			results.Should().Equal(records);
 		}
@@ -262,9 +262,9 @@
 		{
 			var records = ImmutableArray.Create<IRecord>(null, null);
 
-			RecordList results = records.Compact(0);
+			ImmutableArray<IRecord> results = records.Compact(0);
 
-			results.Should().NotBeNull();
+			results.IsDefault.Should().BeFalse();
 			results.Should().BeEmpty();
 		}
 

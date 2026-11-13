@@ -14,7 +14,7 @@
 	using Data;
 	using Diagnostics;
 
-	[DebuggerDisplay("Results={Results.Length}, InclusiveFilter={_currentFilter.Criteria.Include}")]
+	[DebuggerDisplay("Results={Results.Count}, InclusiveFilter={_currentFilter.Criteria.Include}")]
 	internal class FilterManager : IClonableInternally<FilterManager>, IFilter
 	{
 		public const int MaxFilterHistory = 32;
