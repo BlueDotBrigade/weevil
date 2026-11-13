@@ -389,7 +389,6 @@
 			}
 			finally
 			{
-				GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 				_operationState = OperationInactive;
 			}
 

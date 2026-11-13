@@ -86,6 +86,43 @@
 			memoryPerByteOfLog.Should().BeLessThanOrEqualTo(maximumMemoryPerByteOfLog, "a log on disk keeps its record table in memory, and none of its content");
 		}
 
+		[TestMethod]
+		[DoNotParallelize]
+		public void GivenAReferenceLog_WhenAllButOnePercentOfItIsCleared_ThenTheMemoryOfTheClearedRecordsIsFreedAtOnce()
+		{
+			// Opened once first, so the memory of loading Weevil itself is not counted.
+			_ = Engine.UsingPath(ReferenceLog.Create(_folder, 10)).Open();
+			var before = GC.GetTotalMemory(forceFullCollection: true);
+
+			IEngine engine = Engine.UsingPath(ReferenceLog.Create(_folder, RecordCount)).Open();
+			var memoryWhenOpened = GC.GetTotalMemory(forceFullCollection: true) - before;
+
+			var keptCount = RecordCount / 100;
+			SelectFirstRecords(engine, keptCount);
+			engine.Clear(ClearOperation.Unselected);
+
+			// Read without collecting: Clear itself frees what it can, as it always has, so memory falls as soon as it returns.
+			// The records kept hold the content chunk they were read from, so a later collection is the measure of what can be freed.
+			var memoryAfterClear = GC.GetTotalMemory(forceFullCollection: false) - before;
+			var memoryThatCanBeKept = GC.GetTotalMemory(forceFullCollection: true) - before;
+			TestContext.WriteLine($"Managed memory kept: {memoryWhenOpened / 1_000_000.0:N1} MB when opened; once {keptCount:N0} of {RecordCount:N0} records are kept, {memoryAfterClear / 1_000_000.0:N1} MB as Clear returns and {memoryThatCanBeKept / 1_000_000.0:N1} MB after a collection.");
+
+			engine.Count.Should().Be(keptCount);
+			memoryThatCanBeKept.Should().BeLessThan(memoryWhenOpened * 3 / 4, "the content chunks only the records cleared were read from are freed");
+			(memoryAfterClear - memoryThatCanBeKept).Should().BeLessThan(memoryWhenOpened / 20, "Clear frees the memory of the records it clears before it returns");
+			GC.KeepAlive(engine);
+		}
+
+		/// <summary>
+		/// Selects the first records, in a method of its own, so that this test's own method holds none of the records Clear frees,
+		/// even in a Debug build, which keeps a method's temporaries until it returns.
+		/// </summary>
+		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+		private static void SelectFirstRecords(IEngine engine, int count)
+		{
+			engine.Selector.SelectRange(engine.Records.GetLineNumber(0), engine.Records.GetLineNumber(count - 1));
+		}
+
 		/// <summary>
 		/// Opens the reference log, and returns the managed memory the engine keeps per record.
 		/// </summary>
