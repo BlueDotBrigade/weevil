@@ -106,30 +106,6 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// Peeks at the kind of the next section, and leaves the stream where it was.
-		/// </summary>
-		public static bool TryPeekKind(Stream source, out IndexSectionKind kind)
-		{
-			kind = IndexSectionKind.End;
-			var position = source.Position;
-
-			try
-			{
-				using var header = new BinaryReader(source, Encoding.UTF8, leaveOpen: true);
-				kind = (IndexSectionKind)header.ReadInt32();
-				return true;
-			}
-			catch (EndOfStreamException)
-			{
-				return false;
-			}
-			finally
-			{
-				source.Position = position;
-			}
-		}
-
-		/// <summary>
 		/// The bytes of one section, read through a <see cref="BinaryReader"/>, and checked against the section's checksum once all are read.
 		/// </summary>
 		internal sealed class Reader : IDisposable

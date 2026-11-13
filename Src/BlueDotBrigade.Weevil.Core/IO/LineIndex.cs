@@ -65,7 +65,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// What parsed the log, and the checksums of the bytes it read, after a full parse: otherwise <see langword="null"/> (#1023).
 		/// </summary>
 		/// <remarks>
-		/// It describes the log as it was parsed, so after <see cref="Update"/> it may cover less of the log than the index.
+		/// It describes the log as it was parsed, so it may cover less of the log than the index, after <see cref="Update"/>,
+		/// or more, for a log written to while it was parsed after being indexed.
 		/// </remarks>
 		public SavedParse Parse { get; set; }
 
@@ -348,14 +349,17 @@ namespace BlueDotBrigade.Weevil.IO
 					return false;
 				}
 
-				var checkpoints = new List<long>(checkpointCount);
+				List<long> checkpoints;
 
 				using (checkpointSection)
 				{
+					// Checked before the list is made: the checksum detects damage, not a file made to claim billions of lines.
 					if (checkpointSection.Remaining != checkpointCount * (long)sizeof(long))
 					{
 						return false;
 					}
+
+					checkpoints = new List<long>(checkpointCount);
 
 					for (var i = 0; i < checkpointCount; i++)
 					{

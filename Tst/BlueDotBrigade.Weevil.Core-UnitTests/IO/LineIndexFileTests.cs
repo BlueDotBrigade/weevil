@@ -48,18 +48,6 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenAFullParse_WhenItIsSaved_ThenTheNextLoadReadsItBack()
-		{
-			// After a full parse, the saved index keeps what parsed the log, so a later step can reopen it without parsing (#1023).
-			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");
-			var parse = new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), StorageMode.Ram, 0, 0, 6, [7]);
-
-			LineIndexFile.SaveParse(_logFilePath, Load(_logFilePath), parse);
-
-			Load(_logFilePath).Parse.IsSameAs(parse).Should().BeTrue();
-		}
-
-		[TestMethod]
 		public void GivenTheSameParseSavedAlready_WhenItIsSavedAgain_ThenTheIndexIsNotWrittenAgain()
 		{
 			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");

@@ -504,16 +504,25 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
-		public void GivenALogOpenedFromALine_WhenItsIndexIsRead_ThenItKeepsNoParse()
+		[DataRow("StartLine")]
+		[DataRow("Range")]
+		[DataRow("Limit")]
+		public void GivenALogOpenedInPart_WhenItsIndexIsRead_ThenItKeepsNoParse(string part)
 		{
-			// A parse from a start line reads only part of the log, so its table could not be reused for the whole log (#1023).
+			// A parse from a start line, of a range or up to a limit keeps only part of the log, so its table could not be reused for the whole log (#1023).
+			// A range still reads the whole log, so its checksums would look like a full parse's.
 			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
 			try
 			{
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
 
-				_ = Engine.UsingPath(logPath, 100).Open();
+				_ = part switch
+				{
+					"StartLine" => Engine.UsingPath(logPath, 100).Open(),
+					"Range" => Engine.UsingPath(logPath).UsingRange(new Range(1, 100)).Open(),
+					_ => Engine.UsingPath(logPath).UsingLimit(100).Open(),
+				};
 
 				ReadSavedParse(logPath).Should().BeNull();
 			}
