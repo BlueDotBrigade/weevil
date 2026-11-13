@@ -74,7 +74,10 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// The saved index holds the record table its <see cref="Parse"/> made, from <see cref="TableOffset"/> in the file (#1023).
 		/// </summary>
-		public bool HasTable { get; private set; }
+		/// <remarks>
+		/// Cleared when the table is found damaged, so the next parse saves it again (#1023).
+		/// </remarks>
+		public bool HasTable { get; internal set; }
 
 		/// <summary>
 		/// Where the record table's sections start in the saved index, when it has one.

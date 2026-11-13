@@ -53,7 +53,8 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			const byte KnownBits = SeverityMask | MultiLineFlag | UserInterfaceThreadFlag | KeepsStringFlag;
 
-			if ((value & ~KnownBits) != 0 || !Enum.IsDefined((SeverityType)(value & SeverityMask)))
+			// The same values the constructor accepts, so a table a parser made always reads back.
+			if ((value & ~KnownBits) != 0)
 			{
 				facts = default;
 				return false;

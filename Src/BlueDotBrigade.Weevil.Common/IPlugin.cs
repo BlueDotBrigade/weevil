@@ -24,6 +24,10 @@
 		/// </remarks>
 		void ShowDashboard(Version weevilVersion, IEngine engine, IInsight[] insights);
 
+		/// <remarks>
+		/// Which extension, and so which record parser, is returned must depend only on the log's content, not on its path:
+		/// a log reopened from its saved index, even after it was renamed, keeps the records the parser made (#1023). See <see cref="Data.IRecordParser"/>.
+		/// </remarks>
 		ICoreExtension GetExtension(string sourceFilePath);
 
 		IList<string> GetDefaultInclusiveHistory();

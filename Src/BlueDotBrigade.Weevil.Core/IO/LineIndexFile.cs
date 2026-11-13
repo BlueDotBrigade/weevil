@@ -215,13 +215,26 @@ namespace BlueDotBrigade.Weevil.IO
 			try
 			{
 				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-				indexSource.Position = index.TableOffset;
+
+				// Read again, from the file now open: another instance of Weevil may have replaced the index since it was loaded.
+				if (!LineIndex.TryRead(indexSource, logSource, out LineIndex saved) || !saved.HasTable || !parse.IsSameAs(saved.Parse))
+				{
+					Log.Default.Write(
+						LogSeverityType.Information,
+						$"The saved index changed after it was loaded, so the log will be parsed. IndexFilePath={indexFilePath}");
+					return false;
+				}
+
+				indexSource.Position = saved.TableOffset;
 
 				if (!SavedTableReader.TryRead(indexSource, logSource, System.IO.Path.GetFullPath(logFilePath), parse, index.ContentEncoding, storageMode, out table, out source))
 				{
 					Log.Default.Write(
 						LogSeverityType.Information,
 						$"The saved record table does not match the log, so the log will be parsed. IndexFilePath={indexFilePath}");
+
+					// So the parse that follows saves a table again, rather than leaving one that every open rejects.
+					index.HasTable = false;
 					return false;
 				}
 			}
@@ -231,6 +244,7 @@ namespace BlueDotBrigade.Weevil.IO
 					LogSeverityType.Warning,
 					exception,
 					$"The saved record table could not be read, so the log will be parsed. IndexFilePath={indexFilePath}");
+				index.HasTable = false;
 				table = null;
 				source = null;
 				return false;

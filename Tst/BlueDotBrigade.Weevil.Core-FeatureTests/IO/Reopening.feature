@@ -45,3 +45,12 @@ Scenario: A log whose saved record table is damaged is parsed again
 	When the saved log file is opened again in RAM
 	Then it will have been parsed
 	And it will show the same records as a parse of the log
+
+Scenario: A damaged record table is saved again by the parse that replaces it
+	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings
+	And that the saved log file has been opened in RAM
+	And one byte of the saved record table has been changed
+	And that the saved log file has been opened in RAM
+	When the saved log file is opened again in RAM
+	Then it will have been opened without being parsed
+	And it will show the same records as a parse of the log
