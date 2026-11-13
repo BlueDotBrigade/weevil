@@ -51,7 +51,7 @@
 		/// <exception cref="RecordNotFoundException"/>
 		private static int IndexOf<T>(RecordList records, T desiredValue, MagnitudeComparer<T> comparer, RecordSearchType searchType = RecordSearchType.ExactMatch)
 		{
-			if (records.Length == 0)
+			if (records.Count == 0)
 			{
 				throw new RecordNotFoundException($"Unable to find record. Value={desiredValue}");
 			}
@@ -81,7 +81,7 @@
 				// Unable to find exact match?
 				if (index < 0)
 				{
-					if (records.Length == 1)
+					if (records.Count == 1)
 					{
 						index = 0; // return the first & only record
 					}
@@ -91,9 +91,9 @@
 						index = 0;
 					}
 					// Is desired value greater than last value in array?
-					else if (Math.Abs(index) - 1 == records.Length)
+					else if (Math.Abs(index) - 1 == records.Count)
 					{
-						index = records.Length - 1;
+						index = records.Count - 1;
 					}
 					else
 					{
@@ -116,7 +116,7 @@
 				}
 			}
 
-			if (index < 0 || index > records.Length - 1)
+			if (index < 0 || index > records.Count - 1)
 			{
 				throw new RecordNotFoundException($"Unable to find record. Value={desiredValue}");
 			}

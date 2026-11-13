@@ -76,7 +76,7 @@
 				RecordList dataSource = _activeRecord.DataSource;
 				var index = _activeRecord.Index;
 
-				return index >= 0 && index < dataSource.Length ? dataSource.GetLineNumber(index) : -1;
+				return index >= 0 && index < dataSource.Count ? dataSource.GetLineNumber(index) : -1;
 			}
 		}
 
@@ -150,7 +150,7 @@
 						{ "Duration", Stopwatch.GetElapsedTime(startedAt).TotalSeconds },
 						{ "WasFound", Record.IsGenuine(record) },
 						{ "WasCancelled", wasCancelled },
-						{ "Records", _activeRecord.DataSource.Length },
+						{ "Records", _activeRecord.DataSource.Count },
 					});
 			}
 		}

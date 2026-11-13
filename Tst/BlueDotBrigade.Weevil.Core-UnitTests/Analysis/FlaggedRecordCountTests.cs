@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenOneRecordWithTwoCapturedValues_WhenDetectDataRuns_ThenOneFlaggedRecordIsReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("A=1 B=2");
+			RecordList records = BuildRecords("A=1 B=2");
 			var analyzer = new DetectDataAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -30,7 +30,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenOneRecordWithTwoFirstOccurrences_WhenFirstOccurrenceRuns_ThenOneFlaggedRecordIsReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("A=1 B=2");
+			RecordList records = BuildRecords("A=1 B=2");
 			var analyzer = new FirstOccurrenceAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -45,7 +45,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenOneRecordWithTwoLastOccurrences_WhenLastOccurrenceRuns_ThenOneFlaggedRecordIsReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("A=1 B=2");
+			RecordList records = BuildRecords("A=1 B=2");
 			var analyzer = new LastOccurrenceAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -60,7 +60,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenTwoRecordsWhereTwoValuesTransitionTogether_WhenStateTransitionsRuns_ThenTwoFlaggedRecordsAreReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("A=1 B=10", "A=2 B=20");
+			RecordList records = BuildRecords("A=1 B=10", "A=2 B=20");
 			var analyzer = new StateTransitionsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -75,7 +75,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenOneSingleRecordRun_WhenStableValueRunsRuns_ThenOneFlaggedRecordIsReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("A=1");
+			RecordList records = BuildRecords("A=1");
 			var analyzer = new StableValueRunsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -90,7 +90,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenTwoValuesRiseTogether_WhenRisingEdgesRuns_ThenOneFlaggedRecordIsReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("A=1 B=10", "A=2 B=20");
+			RecordList records = BuildRecords("A=1 B=10", "A=2 B=20");
 			var analyzer = new DetectRisingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -106,7 +106,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenTwoValuesFallTogether_WhenFallingEdgesRuns_ThenOneFlaggedRecordIsReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("A=2 B=20", "A=1 B=10");
+			RecordList records = BuildRecords("A=2 B=20", "A=1 B=10");
 			var analyzer = new DetectFallingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -122,7 +122,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[WorkItem(930)]
 		public void GivenNumericSamples_WhenStatisticsRuns_ThenNoFlaggedRecordsAreReported()
 		{
-			ImmutableArray<IRecord> records = BuildRecords("Value=1", "Value=2");
+			RecordList records = BuildRecords("Value=1", "Value=2");
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
@@ -134,7 +134,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			records.Should().NotContain(record => state.IsFlagged(record));
 		}
 
-		private static Results Analyze(IRecordAnalyzer analyzer, ImmutableArray<IRecord> records, IRecordState state, string regex)
+		private static Results Analyze(IRecordAnalyzer analyzer, RecordList records, IRecordState state, string regex)
 		{
 			return analyzer.Analyze(
 				records,
@@ -144,7 +144,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				canUpdateMetadata: true);
 		}
 
-		private static ImmutableArray<IRecord> BuildRecords(params string[] contents)
+		private static RecordList BuildRecords(params string[] contents)
 		{
 			DateTime start = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 

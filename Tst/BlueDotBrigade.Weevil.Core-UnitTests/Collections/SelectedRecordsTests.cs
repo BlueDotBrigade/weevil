@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenSelectedPositions_WhenRead_ThenTheRecordsAreKeyedByLineNumberInOrder()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			RecordList results = R.WithLineNumbers(11, 20);
 			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 1, 2, 5 });
 
 			var selected = new SelectedRecords(selection, results);
@@ -27,7 +27,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenSelectedPositions_WhenTheirLinesAreLookedUp_ThenNoRecordIsCreated()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			RecordList results = R.WithLineNumbers(11, 20);
 			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 1, 2, 5 });
 
 			var selected = new SelectedRecords(selection, new ColumnsOnlyRecordList(results));
@@ -42,7 +42,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		public void GivenAnotherRecordForASelectedLine_WhenLookedFor_ThenItIsFound()
 		{
 			// Records are equal by line number, so a record created again for a selected line is still selected (#1135).
-			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			RecordList results = R.WithLineNumbers(11, 20);
 			var selected = new SelectedRecords(PositionRanges.FromPositions(new List<int> { 1, 2, 5 }), results);
 			IRecord again = R.WithLineNumber(12);
 
@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenARecordForAnUnselectedLine_WhenLookedFor_ThenItIsNotFound()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			RecordList results = R.WithLineNumbers(11, 20);
 			var selected = new SelectedRecords(PositionRanges.FromPositions(new List<int> { 1, 2, 5 }), results);
 
 			selected.Values.Contains(R.WithLineNumber(14)).Should().BeFalse();
@@ -64,7 +64,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenALineThatIsNotSelected_WhenLookedUp_ThenItIsNotFound()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			RecordList results = R.WithLineNumbers(11, 20);
 			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 1 });
 
 			var selected = new SelectedRecords(selection, results);

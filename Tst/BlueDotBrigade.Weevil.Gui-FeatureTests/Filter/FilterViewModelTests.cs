@@ -286,7 +286,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			await viewModel.BackgroundTask;
 			System.IO.File.Delete(logPath);
 
-			graphed.Length.Should().Be(viewModel.Rows.Count, "every record was selected");
+			graphed.Count.Should().Be(viewModel.Rows.Count, "every record was selected");
 			graphed[0].Content.Should().NotBeNullOrEmpty("the graph reads its own copy, not the log");
 		}
 

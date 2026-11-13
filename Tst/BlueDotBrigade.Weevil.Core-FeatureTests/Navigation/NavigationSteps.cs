@@ -41,7 +41,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 		{
 			IRecord currentRecord = this.Context.Engine.Selector.GetSelected().Last();
 			var currentIndex = this.Context.Results.IndexOfLineNumber(currentRecord.LineNumber);
-			(currentIndex + 1).Should().BeLessThan(this.Context.Results.Length, "a next record must exist after the current selection");
+			(currentIndex + 1).Should().BeLessThan(this.Context.Results.Count, "a next record must exist after the current selection");
 			IRecord nextRecord = this.Context.Results[currentIndex + 1];
 
 			this.Context.Engine.Selector.ClearAll();

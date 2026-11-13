@@ -21,7 +21,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 			var sidecarManager = new SidecarManager(tempPath);
 			var sidecarData = new SidecarData
 			{
-				Records = ImmutableArray<IRecord>.Empty,
+				Records = RecordList.Empty,
 				Context = new ContextDictionary(),
 				FilterTraits = null,
 				SourceFileRemarks = string.Empty,
@@ -50,7 +50,7 @@ namespace BlueDotBrigade.Weevil.Configuration.Sidecar
 				var sidecarManager = new SidecarManager(tempFile);
 				var sidecarData = new SidecarData
 				{
-					Records = ImmutableArray<IRecord>.Empty,
+					Records = RecordList.Empty,
 					Context = new ContextDictionary(),
 					FilterTraits = null,
 					SourceFileRemarks = "Test remarks",

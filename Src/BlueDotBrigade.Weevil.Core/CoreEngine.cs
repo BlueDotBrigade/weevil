@@ -17,7 +17,7 @@
 	using Navigation;
 	using Reports;
 
-	[DebuggerDisplay("InstanceId={_instanceId}, Records={Count}, Results={Filter.Results.Length}")]
+	[DebuggerDisplay("InstanceId={_instanceId}, Records={Count}, Results={Filter.Results.Count}")]
 	internal partial class CoreEngine : ICoreEngine
 	{
 		#region Fields
@@ -139,7 +139,7 @@
 					new Dictionary<string, object>
 					{
 						{ "SourceFileLoadingPeriod", sourceFileLoadingPeriod.TotalSeconds},
-						{ "RecordCount", records.Length},
+						{ "RecordCount", records.Count},
 						{ "FileSize", sourceFileLength},
 						{ "SourceFilePath", _sourceFilePath},
 					});
@@ -191,7 +191,7 @@
 
 			_logFileMetrics = new LogFileMetrics(
 				sourceFileLength,
-				records.Length,
+				records.Count,
 				sourceFileLoadingPeriod,
 				recordAndMetadataLoadingStopwatch.Elapsed);
 
@@ -288,7 +288,7 @@
 
 		public RecordList Records => _scope.Records;
 
-		public int Count => _scope.Records.Length;
+		public int Count => _scope.Records.Count;
 
 		public bool HasBeenCleared => _hasBeenCleared;
 
@@ -384,7 +384,7 @@
 			_hasBeenCleared = true;
 			_logFileMetrics = new LogFileMetrics(
 				_logFileMetrics.FileSize,
-				kept.Length,
+				kept.Count,
 				_logFileMetrics.SourceFileLoadingPeriod,
 				_logFileMetrics.RecordAndMetadataLoadDuration);
 
@@ -399,11 +399,11 @@
 				new Dictionary<string, object>
 				{
 					{ "ClearOperation", clearOperation },
-					{ "RecordsKept", kept.Length },
+					{ "RecordsKept", kept.Count },
 					{ "SelectedRecordsKept", _selectionManager.Selected.Count },
 				});
 
-			return kept.Length < records.Length;
+			return kept.Count < records.Count;
 		}
 
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)

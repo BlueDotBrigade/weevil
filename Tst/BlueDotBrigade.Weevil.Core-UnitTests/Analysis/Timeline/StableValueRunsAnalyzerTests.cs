@@ -9,7 +9,7 @@
 	{
 		#region Setup helpers
 
-		private static Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string regex)
+		private static Results Analyze(RecordList records, IRecordState state, string regex)
 		{
 			var analyzer = new StableValueRunsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
@@ -56,7 +56,7 @@
 		private static void AssertFlagsMatchExpected(
 			string pattern,
 			string expected,
-			ImmutableArray<IRecord> records,
+			RecordList records,
 			IRecordState state,
 			Results results,
 			string label)

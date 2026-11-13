@@ -10,7 +10,7 @@
 		[TestMethod]
 		public void IsMatch_ElapsedTimeSameAsSpecifiedPeriod_ReturnsFalse()
 		{
-			ImmutableArray<IRecord> records = CreateRecordsMillisecondsApart(100);
+			RecordList records = CreateRecordsMillisecondsApart(100);
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(records));
 
@@ -20,7 +20,7 @@
 		[TestMethod]
 		public void IsMatch_ElapsedTimeLessThanSpecifiedPeriod_ReturnsFalse()
 		{
-			ImmutableArray<IRecord> records = CreateRecordsMillisecondsApart(1);
+			RecordList records = CreateRecordsMillisecondsApart(1);
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(records));
 
@@ -30,7 +30,7 @@
 		[TestMethod]
 		public void IsMatch_ElapsedTimeGreaterThanSpecifiedPeriod_ReturnsTrue()
 		{
-			ImmutableArray<IRecord> records = CreateRecordsMillisecondsApart(3_600_000);
+			RecordList records = CreateRecordsMillisecondsApart(3_600_000);
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(records));
 
@@ -40,15 +40,15 @@
 		[TestMethod]
 		public void GivenRecordThePreviousFilterHid_WhenMatched_ThenItDoesNotMatch()
 		{
-			ImmutableArray<IRecord> records = CreateRecordsMillisecondsApart(3_600_000);
-			ImmutableArray<IRecord> previousResults = ImmutableArray.Create(records[0]);
+			RecordList records = CreateRecordsMillisecondsApart(3_600_000);
+			RecordList previousResults = ImmutableArray.Create(records[0]);
 
 			var expression = new ElapsedGreaterThanExpression("@Elapsed>100", ElapsedTimes.Calculate(previousResults));
 
 			(expression.IsMatch(records[1], new ContentBuffer())).Should().BeFalse();
 		}
 
-		private static ImmutableArray<IRecord> CreateRecordsMillisecondsApart(int milliseconds)
+		private static RecordList CreateRecordsMillisecondsApart(int milliseconds)
 		{
 			return R.Create()
 				.WithCreatedAt(1, new System.DateTime(2026, 10, 22, 10, 0, 0))

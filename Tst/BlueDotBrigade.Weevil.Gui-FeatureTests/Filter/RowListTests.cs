@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenRecordsWithGapsInTheirLineNumbers_WhenARowIsLookedUp_ThenItsPositionIsFound()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 20).Where(r => r.LineNumber % 2 == 0).ToImmutableArray();
+			RecordList results = R.WithLineNumbers(1, 20).Where(r => r.LineNumber % 2 == 0).ToImmutableArray();
 			var annotations = new AnnotationStore();
 			var rows = new RowList(results, annotations, Substitute.For<ISelect>(), new UiDispatcherFake());
 
@@ -143,7 +143,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenSelectedRecords_WhenTheSelectionChanges_ThenTheRowsStillHeldShowIt()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
+			RecordList results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(Selected(results, 2));
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
@@ -162,7 +162,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenRowsOnScreen_WhenTheSelectionChanges_ThenOnlyTheRowsThatChangedAreReported()
 		{
 			// The grid tells screen readers about these rows.
-			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
+			RecordList results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(Selected(results, 2, 5));
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
@@ -180,7 +180,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenSelectedRecords_WhenTheSelectedRowsAfterARowAreAskedFor_ThenTheyAreFoundInOrder()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(1, 10);
+			RecordList results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
 			selector.Selected.Returns(Selected(results, 3, 7, 9));
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
@@ -200,7 +200,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			add.Should().Throw<NotSupportedException>();
 		}
 
-		private static IDictionary<int, IRecord> Selected(ImmutableArray<IRecord> results, params int[] lineNumbers)
+		private static IDictionary<int, IRecord> Selected(RecordList results, params int[] lineNumbers)
 		{
 			return lineNumbers.ToDictionary(lineNumber => lineNumber, lineNumber => results[lineNumber - 1]);
 		}

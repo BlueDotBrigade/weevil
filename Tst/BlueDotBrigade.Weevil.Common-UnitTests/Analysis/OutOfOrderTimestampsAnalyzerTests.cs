@@ -16,7 +16,7 @@
 			[TestMethod]
 			public void Analyze_NotInChronologicalOrder_CommentUpdated()
 			{
-				ImmutableArray<IRecord> records = R.Create()
+				RecordList records = R.Create()
 					.WithCreatedAt(0, "10:00:00")
 					.WithCreatedAt(1, "10:15:00")
 					.WithCreatedAt(2, "10:45:00")
@@ -40,7 +40,7 @@
 			[TestMethod]
 			public void GivenAnEarlierRunFlaggedRecords_WhenAnalyzedAgain_ThenOnlyTheRecordOutOfOrderIsFlagged()
 			{
-				ImmutableArray<IRecord> records = R.Create()
+				RecordList records = R.Create()
 					.WithCreatedAt(0, "10:00:00")
 					.WithCreatedAt(1, "10:15:00")
 					.WithCreatedAt(2, "10:45:00")
@@ -61,7 +61,7 @@
 			public void GivenTimestampsInOrder_WhenAnalyzed_ThenNoRecordIsCreated()
 			{
 				// Only a row the analyzer flags is created as a record (#1150); the list throws if any other is read.
-				ImmutableArray<IRecord> records = R.Create()
+				RecordList records = R.Create()
 					.WithCreatedAt(0, "10:00:00")
 					.WithCreatedAt(1, "10:15:00")
 					.WithCreatedAt(2, "10:30:00")

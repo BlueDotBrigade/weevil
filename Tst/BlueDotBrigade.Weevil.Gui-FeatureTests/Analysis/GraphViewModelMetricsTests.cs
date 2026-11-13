@@ -124,7 +124,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		public void SerializeMetrics_WithEmptySeries_ShouldShowNA()
 		{
 			// Arrange
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 			var expression = "Value=(?<value>\\d+)";
 
 			var viewModel = new GraphViewModel(records, expression, "title", "source");

@@ -14,7 +14,7 @@
 		[TestMethod]
 		public void Count_InChronologicalOrder_Returns0()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:30:00")
@@ -32,7 +32,7 @@
 		[TestMethod]
 		public void FirstOccurredOnLine_InChronologicalOrder_ReturnsDummyLine()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:30:00")
@@ -50,7 +50,7 @@
 		[TestMethod]
 		public void Threshold_ErrorLessThanThreshold_Returns0()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:45:00")
@@ -68,7 +68,7 @@
 		[TestMethod]
 		public void Threshold_ErrorGreaterThanThreshold_Returns1()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:45:00")
@@ -86,7 +86,7 @@
 		[TestMethod]
 		public void Count_NotInChronologicalOrder_Returns1()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:45:00")
@@ -104,7 +104,7 @@
 		[TestMethod]
 		public void FirstOccurredOnLine_NotInChronologicalOrder_Returns3()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:45:00")
@@ -123,7 +123,7 @@
 		[TestMethod]
 		public void BiggestAnomaly_NotInChronologicalOrder_Returns9()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:39:00") // 9min error
 				.WithCreatedAt(2, "10:30:00")
@@ -141,7 +141,7 @@
 		[TestMethod]
 		public void BiggestAnomalyOnLine_NotInChronologicalOrder_Returns1()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00")
 				.WithCreatedAt(1, "10:39:00") // 9min error
 				.WithCreatedAt(2, "10:30:00")

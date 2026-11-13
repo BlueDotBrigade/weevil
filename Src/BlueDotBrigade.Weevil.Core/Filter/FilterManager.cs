@@ -14,7 +14,7 @@
 	using Data;
 	using Diagnostics;
 
-	[DebuggerDisplay("Results={Results.Length}, InclusiveFilter={_currentFilter.Criteria.Include}")]
+	[DebuggerDisplay("Results={Results.Count}, InclusiveFilter={_currentFilter.Criteria.Include}")]
 	internal class FilterManager : IClonableInternally<FilterManager>, IFilter
 	{
 		public const int MaxFilterHistory = 32;
@@ -347,8 +347,8 @@
 					{"FilterType", filterType},
 					{"FilterCriteria", criteria},
 					{"TimeElapsed", _filterExecutionTime},
-					{"TotalRecords", _scope.Records.Length},
-					{"VisibleRecords", _latestFilterResults.Length},
+					{"TotalRecords", _scope.Records.Count},
+					{"VisibleRecords", _latestFilterResults.Count},
 				};
 
 				if (_source != null)

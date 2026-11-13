@@ -61,7 +61,7 @@ internal sealed class FilteringSteps : ReqnrollSteps
 	[Then($@"there will be {X.WholeNumber} matching records")]
 	public void ThenThereWillBeMatchingRecords(int recordCount)
 	{
-		this.Context.Results.Length
+		this.Context.Results.Count
 			.Should()
 			.Be(recordCount);
 	}

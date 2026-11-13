@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	{
 		#region Setup helpers
 
-		private static Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string regex, string analysisOrder = "Ascending")
+		private static Results Analyze(RecordList records, IRecordState state, string regex, string analysisOrder = "Ascending")
 		{
 			var analyzer = new DetectFallingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex, analysisOrder);
@@ -59,7 +59,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private static void AssertFlagsMatchExpected(
 			string pattern,
 			string expected,
-			ImmutableArray<IRecord> records,
+			RecordList records,
 			IRecordState state,
 			Results results,
 			string label)

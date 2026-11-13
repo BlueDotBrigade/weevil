@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenNoRecords_WhenCalculated_ThenNoLineHasAnElapsedTime()
 		{
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(ImmutableArray<IRecord>.Empty);
+			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(RecordList.Empty);
 
 			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 		}
@@ -20,7 +20,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenOneRecordWithTimestamp_WhenCalculated_ThenItHasNoElapsedTime()
 		{
-			ImmutableArray<IRecord> records = R.Create().WithCreatedAt(1, Start).GetRecords();
+			RecordList records = R.Create().WithCreatedAt(1, Start).GetRecords();
 
 			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
 
@@ -30,7 +30,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenTwoRecordsWithTimestamps_WhenCalculated_ThenTheSecondHasTheTimeBetweenThem()
 		{
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(1, Start.AddMilliseconds(100))
 				.WithCreatedAt(2, Start.AddMilliseconds(300))
 				.GetRecords();
@@ -44,7 +44,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenRecordWithoutTimestamp_WhenCalculated_ThenTheNextIsMeasuredFromTheOneBefore()
 		{
-			ImmutableArray<IRecord> records = ImmutableArray.Create<IRecord>(
+			RecordList records = ImmutableArray.Create<IRecord>(
 				new Record(1, Start, SeverityType.Debug, string.Empty),
 				new Record(2, Record.CreationTimeUnknown, SeverityType.Debug, string.Empty),
 				new Record(3, Start.AddMilliseconds(500), SeverityType.Debug, string.Empty));
@@ -59,7 +59,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenOnlyTheLastRecordHasATimestamp_WhenCalculated_ThenNeitherHasAnElapsedTime()
 		{
-			ImmutableArray<IRecord> records = ImmutableArray.Create<IRecord>(
+			RecordList records = ImmutableArray.Create<IRecord>(
 				new Record(1, Record.CreationTimeUnknown, SeverityType.Debug, string.Empty),
 				new Record(2, Start, SeverityType.Debug, string.Empty));
 
@@ -73,7 +73,7 @@ namespace BlueDotBrigade.Weevil.Data
 		public void GivenResultsOfAFilter_WhenCalculated_ThenEachIsMeasuredFromThePreviousResultAndHiddenLinesHaveNone()
 		{
 			// Lines 2, 10 and 11 are shown; lines 3 to 9 are hidden by the filter.
-			ImmutableArray<IRecord> results = R.Create()
+			RecordList results = R.Create()
 				.WithCreatedAt(2, Start)
 				.WithCreatedAt(10, Start.AddSeconds(8))
 				.WithCreatedAt(11, Start.AddSeconds(9))

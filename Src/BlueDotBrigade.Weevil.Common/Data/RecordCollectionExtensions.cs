@@ -15,8 +15,8 @@
 		{
 			var result = Record.CreationTimeUnknown;
 
-			var maxIndex = sourceRecords.Length < AttemptCount
-				? sourceRecords.Length
+			var maxIndex = sourceRecords.Count < AttemptCount
+				? sourceRecords.Count
 				: AttemptCount;
 
 			for (var i = 0; i < maxIndex; i++)
@@ -37,11 +37,11 @@
 		{
 			var result = Record.CreationTimeUnknown;
 
-			var minIndex = sourceRecords.Length > AttemptCount
-				? sourceRecords.Length - AttemptCount - 1
+			var minIndex = sourceRecords.Count > AttemptCount
+				? sourceRecords.Count - AttemptCount - 1
 				: 0;
 
-			for (var i = sourceRecords.Length-1; minIndex <= i; i--)
+			for (var i = sourceRecords.Count-1; minIndex <= i; i--)
 			{
 				var createdAt = sourceRecords.GetCreatedAt(i);
 
@@ -202,7 +202,7 @@
 		{
 			IRecord result = Record.Dummy;
 
-			for (int i = 0; i < sourceRecords.Length; i++)
+			for (int i = 0; i < sourceRecords.Count; i++)
 			{
 				if (sourceRecords.GetCreatedAt(i) != Record.CreationTimeUnknown)
 				{
@@ -227,7 +227,7 @@
 		/// </summary>
 		public static IRecord Last(this RecordList sourceRecords)
 		{
-			return sourceRecords[sourceRecords.Length - 1];
+			return sourceRecords[sourceRecords.Count - 1];
 		}
 
 		public static (DateTime From, DateTime To) GetRange(this RecordList sourceRecords)
@@ -235,9 +235,9 @@
 			var from = Record.CreationTimeUnknown;
 			var to = Record.CreationTimeUnknown;
 
-			if (sourceRecords.Length > 0)
+			if (sourceRecords.Count > 0)
 			{
-				if (sourceRecords.Length == 1)
+				if (sourceRecords.Count == 1)
 				{
 					from = sourceRecords.GetCreatedAt(0);
 					to = sourceRecords.GetCreatedAt(0);
@@ -245,7 +245,7 @@
 				else
 				{
 					from = sourceRecords.GetCreatedAt(0);
-					to = sourceRecords.GetCreatedAt(sourceRecords.Length - 1);
+					to = sourceRecords.GetCreatedAt(sourceRecords.Count - 1);
 				}
 			}
 
@@ -257,9 +257,9 @@
 			var from = Record.CreationTimeUnknown;
 			var to = Record.CreationTimeUnknown;
 
-			if (sourceRecords.Length > 0)
+			if (sourceRecords.Count > 0)
 			{
-				if (sourceRecords.Length == 1)
+				if (sourceRecords.Count == 1)
 				{
 					from = EstimateFirstTimestamp(sourceRecords);
 					to = from;
@@ -286,7 +286,7 @@
 		/// <exception cref="RecordNotFoundException"/>
 		public static int GoToPrevious(this RecordList sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
 		{
-			return FindPrevious(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords[position]));
+			return FindPrevious(sourceRecords.Count, startAt, position => checkIfMatches(sourceRecords[position]));
 		}
 
 		/// <summary>
@@ -295,7 +295,7 @@
 		/// <inheritdoc cref="GoToPrevious(RecordList, int, Func{IRecord, bool})"/>
 		public static int GoToPreviousLineNumber(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
 		{
-			return FindPrevious(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords.GetLineNumber(position)));
+			return FindPrevious(sourceRecords.Count, startAt, position => checkIfMatches(sourceRecords.GetLineNumber(position)));
 		}
 
 		/// <summary>
@@ -304,7 +304,7 @@
 		/// <inheritdoc cref="GoToPrevious(RecordList, int, Func{IRecord, bool})"/>
 		public static int GoToPreviousPosition(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
 		{
-			return FindPrevious(sourceRecords.Length, startAt, checkIfMatches);
+			return FindPrevious(sourceRecords.Count, startAt, checkIfMatches);
 		}
 
 		/// <summary>
@@ -319,7 +319,7 @@
 		/// <exception cref="RecordNotFoundException"/>
 		public static int GoToNext(this RecordList sourceRecords, int startAt, Func<IRecord, bool> checkIfMatches)
 		{
-			return FindNext(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords[position]));
+			return FindNext(sourceRecords.Count, startAt, position => checkIfMatches(sourceRecords[position]));
 		}
 
 		/// <summary>
@@ -328,7 +328,7 @@
 		/// <inheritdoc cref="GoToNext(RecordList, int, Func{IRecord, bool})"/>
 		public static int GoToNextLineNumber(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
 		{
-			return FindNext(sourceRecords.Length, startAt, position => checkIfMatches(sourceRecords.GetLineNumber(position)));
+			return FindNext(sourceRecords.Count, startAt, position => checkIfMatches(sourceRecords.GetLineNumber(position)));
 		}
 
 		/// <summary>
@@ -337,7 +337,7 @@
 		/// <inheritdoc cref="GoToNext(RecordList, int, Func{IRecord, bool})"/>
 		public static int GoToNextPosition(this RecordList sourceRecords, int startAt, Func<int, bool> checkIfMatches)
 		{
-			return FindNext(sourceRecords.Length, startAt, checkIfMatches);
+			return FindNext(sourceRecords.Count, startAt, checkIfMatches);
 		}
 
 		/// <summary>
@@ -428,7 +428,7 @@
 
 			var lastLineNumber = (nextSection != null)
 				? nextSection.LineNumber
-				: records.GetLineNumber(records.Length - 1);
+				: records.GetLineNumber(records.Count - 1);
 
 			var lastIndex = records.IndexOfLineNumber(
 				lastLineNumber, 

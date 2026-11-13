@@ -249,7 +249,8 @@
 		[TestMethod]
 		public void GivenArrayWithoutNulls_WhenCompacting_ThenAllRecordsAreKept()
 		{
-			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 4);
+			// Compact removes nulls from an array, so this test means an array, not a record list.
+			ImmutableArray<IRecord> records = R.WithLineNumbers(1, 4).ToImmutableArray();
 
 			ImmutableArray<IRecord> results = records.Compact(records.Length);
 

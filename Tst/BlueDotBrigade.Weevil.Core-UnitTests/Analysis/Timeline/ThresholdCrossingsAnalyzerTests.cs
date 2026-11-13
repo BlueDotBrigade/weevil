@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	{
 		#region Setup helpers
 
-		private static Results Analyze(ImmutableArray<IRecord> records, IRecordState state, string regex, string threshold, string comparison)
+		private static Results Analyze(RecordList records, IRecordState state, string regex, string threshold, string comparison)
 		{
 			var analyzer = new ThresholdCrossingsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
 			var userDialog = Substitute.For<IUserDialog>();
@@ -60,7 +60,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private static void AssertFlagsMatchExpected(
 			string pattern,
 			string expected,
-			ImmutableArray<IRecord> records,
+			RecordList records,
 			IRecordState state,
 			Results results,
 			string label)

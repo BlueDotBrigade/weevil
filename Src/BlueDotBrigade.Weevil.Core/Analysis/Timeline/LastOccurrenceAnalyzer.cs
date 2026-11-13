@@ -48,7 +48,7 @@
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
 
 			// Show analysis dialog to get custom regex
-			var recordsDescription = records.Length.ToString("N0");
+			var recordsDescription = records.Count.ToString("N0");
 
 			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
 			{
@@ -79,7 +79,7 @@
 			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
 			var buffer = new ContentBuffer();
 
-			for (var i = records.Length - 1; i >= 0; i--)
+			for (var i = records.Count - 1; i >= 0; i--)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 

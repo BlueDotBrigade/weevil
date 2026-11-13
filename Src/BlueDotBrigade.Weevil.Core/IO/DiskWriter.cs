@@ -61,9 +61,9 @@
 			}
 			else
 			{
-				if (records.Length == 0)
+				if (records.Count == 0)
 				{
-					Log.Default.Write(LogSeverityType.Warning, $"Records could not be saved - no records have been provided. Count={records.Length}");
+					Log.Default.Write(LogSeverityType.Warning, $"Records could not be saved - no records have been provided. Count={records.Count}");
 				}
 
 				cancellationToken.ThrowIfCancellationRequested();
@@ -109,7 +109,7 @@
 					}
 				}
 
-				Log.Default.Write($"Records have been saved. Format={_fileFormatType}, Count={records.Length}.");
+				Log.Default.Write($"Records have been saved. Format={_fileFormatType}, Count={records.Count}.");
 			}
 		}
 

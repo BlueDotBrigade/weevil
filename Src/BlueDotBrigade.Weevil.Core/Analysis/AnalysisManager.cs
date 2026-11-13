@@ -143,7 +143,7 @@
 
 			var attentionRequiredCount = insights.Count(x => x.IsAttentionRequired);
 
-			Log.Default.Write(LogSeverityType.Information, $"Insight has been gathered. Records={_coreEngine.Records.Length:###,###,###,###}, Insights={insights.Count()}, AttentionRequired={attentionRequiredCount}, ExecutionTime={stopwatch.Elapsed.ToHumanReadable()}");
+			Log.Default.Write(LogSeverityType.Information, $"Insight has been gathered. Records={_coreEngine.Records.Count:###,###,###,###}, Insights={insights.Count()}, AttentionRequired={attentionRequiredCount}, ExecutionTime={stopwatch.Elapsed.ToHumanReadable()}");
 
 			return ImmutableArray.Create(insights.ToArray());
 		}

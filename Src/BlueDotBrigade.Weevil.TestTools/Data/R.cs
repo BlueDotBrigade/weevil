@@ -26,7 +26,7 @@
 			return new R();
 		}
 
-		public ImmutableArray<IRecord> GetRecords()
+		public RecordList GetRecords()
 		{
 			return _records.ToImmutableArray();
 		}
@@ -85,7 +85,7 @@
 				$"Fake record used for testing. Has line number: {lineNumber}");
 		}
 
-		public static ImmutableArray<IRecord> WithLineNumbers(int minLineNumber, int maxLineNumber)
+		public static RecordList WithLineNumbers(int minLineNumber, int maxLineNumber)
 		{
 			var records = new List<IRecord>();
 

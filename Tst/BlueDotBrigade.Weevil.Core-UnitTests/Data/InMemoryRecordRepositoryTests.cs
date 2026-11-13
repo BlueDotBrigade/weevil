@@ -19,8 +19,8 @@
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
-				ImmutableArray<IRecord>.Empty,
-				ImmutableArray<IRecord>.Empty,
+				RecordList.Empty,
+				RecordList.Empty,
 				ClearOperation.BeyondRegions,
 				regions.ToImmutableArray());
 
@@ -28,7 +28,7 @@
 			var filteredRecords = repository.GetAll();
 
 			// Assert
-			filteredRecords.Length.Should().Be(10);
+			filteredRecords.Count.Should().Be(10);
 		}
 
         [TestMethod]
@@ -43,8 +43,8 @@
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
-				ImmutableArray<IRecord>.Empty,
-				ImmutableArray<IRecord>.Empty,
+				RecordList.Empty,
+				RecordList.Empty,
 				ClearOperation.BeyondRegions,
 				regions.ToImmutableArray());
 
@@ -52,7 +52,7 @@
 			var filteredRecords = repository.GetAll();
 
 			// Assert
-			filteredRecords.Length.Should().Be(3);
+			filteredRecords.Count.Should().Be(3);
 			filteredRecords[0].LineNumber.Should().Be(14);
 			filteredRecords[1].LineNumber.Should().Be(15);
                         filteredRecords[2].LineNumber.Should().Be(16);
@@ -73,8 +73,8 @@
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
-				ImmutableArray<IRecord>.Empty,
-				ImmutableArray<IRecord>.Empty,
+				RecordList.Empty,
+				RecordList.Empty,
 				ClearOperation.BeyondRegions,
 				regions.ToImmutableArray());
 
@@ -82,7 +82,7 @@
 			var filteredRecords = repository.GetAll();
 
 			// Assert - Records should be in sequential order by line number
-			filteredRecords.Length.Should().Be(5);
+			filteredRecords.Count.Should().Be(5);
 			filteredRecords[0].LineNumber.Should().Be(10);
 			filteredRecords[1].LineNumber.Should().Be(11);
 			filteredRecords[2].LineNumber.Should().Be(20);
@@ -103,7 +103,7 @@
 
                         var repository = new InMemoryRecordRepository(
                                 allRecords.ToImmutableArray(),
-                                ImmutableArray<IRecord>.Empty,
+                                RecordList.Empty,
                                 selectedRecords.ToImmutableArray(),
                                 ClearOperation.Selected,
                                 ImmutableArray<Region>.Empty);

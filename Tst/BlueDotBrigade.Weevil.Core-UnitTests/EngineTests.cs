@@ -43,14 +43,14 @@ namespace BlueDotBrigade.Weevil
 		{
 			IEngine engine = OpenCopy();
 			var results = new List<int>();
-			engine.FilterResultsChanged += (sender, e) => results.Add(e.Records.Length);
+			engine.FilterResultsChanged += (sender, e) => results.Add(e.Records.Count);
 
 			engine.Selector.Select(lineNumber: 101);
 			engine.Clear(ClearOperation.BeforeSelected);
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 
 			results.Should().ContainSingle()
-				.Which.Should().Be(engine.Filter.Results.Length);
+				.Which.Should().Be(engine.Filter.Results.Count);
 		}
 
 		[TestMethod]
@@ -60,14 +60,14 @@ namespace BlueDotBrigade.Weevil
 			IEngine engine = OpenCopy();
 			IFilter filter = engine.Filter;
 			var results = new List<int>();
-			filter.ResultsChanged += (sender, e) => results.Add(e.Records.Length);
+			filter.ResultsChanged += (sender, e) => results.Add(e.Records.Count);
 
 			engine.Selector.Select(lineNumber: 101);
 			engine.Clear(ClearOperation.BeforeSelected);
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 
 			engine.Filter.Should().BeSameAs(filter);
-			results.Should().EndWith(engine.Filter.Results.Length);
+			results.Should().EndWith(engine.Filter.Results.Count);
 		}
 
 		[TestMethod]
@@ -132,12 +132,12 @@ namespace BlueDotBrigade.Weevil
 			IEngine engine = OpenCopy();
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 			var results = new List<int>();
-			engine.FilterResultsChanged += (sender, e) => results.Add(e.Records.Length);
+			engine.FilterResultsChanged += (sender, e) => results.Add(e.Records.Count);
 
 			engine.Reload();
 
 			results.Should().ContainSingle()
-				.Which.Should().Be(engine.Filter.Results.Length);
+				.Which.Should().Be(engine.Filter.Results.Count);
 		}
 
 		[TestMethod]
@@ -257,7 +257,7 @@ namespace BlueDotBrigade.Weevil
 			var recordCount = engine.Count;
 			engine.RecordState.SetComment(engine.Records[0], "Checked");
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
-			var resultCount = engine.Filter.Results.Length;
+			var resultCount = engine.Filter.Results.Count;
 
 			File.Move(logPath, $"{logPath}~");
 			FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();
@@ -266,7 +266,7 @@ namespace BlueDotBrigade.Weevil
 			engine.Reload();
 
 			engine.Count.Should().Be(recordCount);
-			engine.Filter.Results.Length.Should().Be(resultCount);
+			engine.Filter.Results.Count.Should().Be(resultCount);
 			engine.RecordState.GetComment(engine.Records[0]).Should().Be("Checked");
 		}
 
@@ -620,7 +620,7 @@ namespace BlueDotBrigade.Weevil
 			log.SeverityOfLast("Search complete.").Should().Be(LogSeverityType.Information);
 			entry["Search"].Should().Be(nameof(INavigate.PreviousContent));
 			entry["WasFound"].Should().Be(true);
-			entry["Records"].Should().Be(engine.Filter.Results.Length).And.NotBe(engine.Count);
+			entry["Records"].Should().Be(engine.Filter.Results.Count).And.NotBe(engine.Count);
 		}
 
 		[TestMethod]
