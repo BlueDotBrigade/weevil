@@ -532,6 +532,47 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
+		[TestMethod]
+		[DoNotParallelize]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenALogOfSeveralChunksOpenedBefore_WhenOpenedAgain_ThenItIsReadFromTheSavedIndexWithTheSameRecords(StorageMode storageMode)
+		{
+			// About 40 MB, so the saved table spans several 16 MB chunks, with multi-line records that cross chunk boundaries (#1023).
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "Large.log");
+				using (var writer = new StreamWriter(logPath))
+				{
+					var start = new DateTime(3050, 9, 30, 11, 26, 12);
+					for (var i = 0; i < 350_000; i++)
+					{
+						writer.Write($"{start.AddMilliseconds(i * 10):yyyy-MM-dd HH:mm:ss.fffff}\t1977\t{i % 9}\tInfo\t[Sensors] Proximity scan complete. Contacts={i % 13}, Record={i}\n");
+
+						if (i % 50 == 0)
+						{
+							writer.Write($"  continued on another line {i}\n");
+						}
+					}
+				}
+
+				var parsed = Describe(Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Records);
+				using var log = CapturingLogWriter.Register();
+
+				IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+
+				log.SeverityOfLast(IO.LineIndexFile.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information);
+				Describe(reopened.Records).Should().Equal(parsed);
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+
+			static string[] Describe(RecordList records) => records.Select(r => $"{r.LineNumber}|{r.CreatedAt:O}|{r.Severity}|{r.IsMultiLine}|{r.Content}").ToArray();
+		}
+
 		private static IO.SavedParse ReadSavedParse(string logPath)
 		{
 			using var log = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

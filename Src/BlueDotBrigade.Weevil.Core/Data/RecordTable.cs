@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 
 	/// <summary>
 	/// A log's records in columns, 21 bytes per record, from which records are created when they are needed (#1021, #1138).
@@ -173,6 +174,140 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 
 			return _chunks[low];
+		}
+
+		/// <summary>
+		/// Writes the chunk directory, as the saved index keeps it (#1023): for each chunk, the record it starts at and the bytes of the log it holds.
+		/// </summary>
+		internal void WriteChunks(BinaryWriter writer)
+		{
+			writer.Write(_chunks.Length);
+
+			for (var index = 0; index < _chunks.Length; index++)
+			{
+				writer.Write(_chunkStarts[index]);
+				writer.Write(_chunks[index].FileOffset);
+				writer.Write(_chunks[index].Length);
+			}
+		}
+
+		/// <summary>
+		/// Writes the strings of the rows that keep one, as the saved index keeps them (#1023): each row's number, then its string.
+		/// </summary>
+		internal void WriteStrings(BinaryWriter writer)
+		{
+			var count = 0;
+
+			for (var recordNumber = 0; recordNumber < this.Count; recordNumber++)
+			{
+				if (GetBlock(recordNumber).Facts[recordNumber % BlockSize].KeepsString)
+				{
+					count++;
+				}
+			}
+
+			writer.Write(count);
+
+			for (var recordNumber = 0; recordNumber < this.Count; recordNumber++)
+			{
+				Block block = GetBlock(recordNumber);
+				var row = recordNumber % BlockSize;
+
+				if (block.Facts[row].KeepsString)
+				{
+					writer.Write(recordNumber);
+					writer.Write(block.GetString(row));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Writes every row's columns, as the saved index keeps them (#1023): 22 bytes per row.
+		/// </summary>
+		/// <remarks>
+		/// The timestamp is saved as its ticks and its kind, so it reads back exactly, whatever the time zone.
+		/// </remarks>
+		internal void WriteRows(BinaryWriter writer)
+		{
+			writer.Write(this.Count);
+
+			for (var recordNumber = 0; recordNumber < this.Count; recordNumber++)
+			{
+				Block block = GetBlock(recordNumber);
+				var row = recordNumber % BlockSize;
+
+				writer.Write(block.LineNumbers[row]);
+				writer.Write(block.Offsets[row]);
+				writer.Write(block.Lengths[row]);
+				writer.Write(block.Facts[row].Value);
+				writer.Write(block.CreatedAt[row].Ticks);
+				writer.Write((byte)block.CreatedAt[row].Kind);
+			}
+		}
+
+		/// <summary>
+		/// Builds a table from rows saved by <see cref="WriteRows"/>, the strings saved by <see cref="WriteStrings"/>,
+		/// and chunks made for the directory saved by <see cref="WriteChunks"/>, through the same <see cref="Builder"/> a parse uses (#1023).
+		/// </summary>
+		/// <param name="chunks">The chunks, in the directory's order, with the record each starts at.</param>
+		/// <param name="strings">The strings of the rows that keep one, by record number.</param>
+		/// <returns>The table, or <see langword="null"/> when the rows do not fit the chunks and strings.</returns>
+		internal static RecordTable ReadRows(BinaryReader reader, IReadOnlyList<(int Start, ContentChunk Chunk)> chunks, IReadOnlyDictionary<int, string> strings)
+		{
+			var count = reader.ReadInt32();
+
+			if (count < 0)
+			{
+				return null;
+			}
+
+			var builder = new Builder();
+			var chunkIndex = -1;
+
+			for (var recordNumber = 0; recordNumber < count; recordNumber++)
+			{
+				var lineNumber = reader.ReadInt32();
+				var offset = reader.ReadInt32();
+				var length = reader.ReadInt32();
+				var factsValue = reader.ReadByte();
+				var ticks = reader.ReadInt64();
+				var kind = (DateTimeKind)reader.ReadByte();
+
+				if (!RecordFacts.TryFromValue(factsValue, out RecordFacts facts) ||
+				    ticks < DateTime.MinValue.Ticks || ticks > DateTime.MaxValue.Ticks ||
+				    !Enum.IsDefined(kind))
+				{
+					return null;
+				}
+
+				var createdAt = new DateTime(ticks, kind);
+
+				if (facts.KeepsString)
+				{
+					if (!strings.TryGetValue(recordNumber, out var content))
+					{
+						return null;
+					}
+
+					builder.Add(lineNumber, createdAt, facts, content);
+				}
+				else
+				{
+					while (chunkIndex + 1 < chunks.Count && chunks[chunkIndex + 1].Start <= recordNumber)
+					{
+						chunkIndex++;
+					}
+
+					if (chunkIndex < 0 || offset < 0 || length < 0 || offset > chunks[chunkIndex].Chunk.Length - length)
+					{
+						return null;
+					}
+
+					builder.Add(lineNumber, createdAt, facts, chunks[chunkIndex].Chunk, offset, length);
+				}
+			}
+
+			return builder.Build();
 		}
 
 		private sealed class Block

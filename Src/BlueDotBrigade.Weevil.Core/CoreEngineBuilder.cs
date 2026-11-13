@@ -242,36 +242,41 @@
 					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 					Range lineNumberRange = GetLineNumberRange();
 
-					// Reading starts at the start line's byte offset, taken from the line index (#977).
-					// A start line beyond the end of the log reads from the top, which finds no records to keep.
-					// In disk mode, the records read their content back from the log, through a source complete before Get returns (#1025).
-					var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
-						? new SerializedRecordRepository(
-							 dataSource,
-							 coreExtension.GetRecordParser(),
-							 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
-							 startAtLineNumber,
-							 true,
-							 storageMode: _storageMode)
-						: new SerializedRecordRepository(
-							 dataSource,
-							 coreExtension.GetRecordParser(),
-							 GetMaximumLinesToSearch(lineNumberRange),
-							 _storageMode);
+					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index (#1023).
+					var isFullOpen = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
 
-					records = repository.Get(lineNumberRange, maxRecords);
-					source = repository.Source;
-
-					// After a full parse, the saved index keeps what parsed the log and the checksums of the bytes read,
-					// so the log can later be reopened without parsing (#1023). A parse from a start line or of a range reads only part of it.
-					var isFullParse = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
-
-					if (isFullParse && repository.ParsedSource != null)
+					if (isFullOpen && LineIndexFile.TryLoadTable(_sourceFilePath, dataSource, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
 					{
-						LineIndexFile.SaveParse(
-							_sourceFilePath,
-							lineIndex,
-							SavedParse.Create(plugin, _storageMode, _isUsingUserDefinedContext ? _userDefinedContext : null, repository.ParsedSource));
+						records = new TableRecordList(savedTable);
+					}
+					else
+					{
+						// Reading starts at the start line's byte offset, taken from the line index (#977).
+						// A start line beyond the end of the log reads from the top, which finds no records to keep.
+						// In disk mode, the records read their content back from the log, through a source complete before Get returns (#1025).
+						var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
+							? new SerializedRecordRepository(
+								 dataSource,
+								 coreExtension.GetRecordParser(),
+								 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
+								 startAtLineNumber,
+								 true,
+								 storageMode: _storageMode)
+							: new SerializedRecordRepository(
+								 dataSource,
+								 coreExtension.GetRecordParser(),
+								 GetMaximumLinesToSearch(lineNumberRange),
+								 _storageMode);
+
+						records = repository.Get(lineNumberRange, maxRecords);
+						source = repository.Source;
+
+						// After a full parse, the saved index keeps what parsed the log, the checksums of the bytes read and the record table,
+						// so the log can be reopened without parsing (#1023). A parse from a start line, of a range or up to a limit keeps only part of it.
+						if (isFullOpen && repository.ParsedSource != null && records is TableRecordList { WholeTable: RecordTable parsedTable })
+						{
+							LineIndexFile.SaveParse(_sourceFilePath, lineIndex, SavedParse.Create(plugin, _storageMode, repository.ParsedSource), parsedTable);
+						}
 					}
 
 					loadingStopwatch.Stop();

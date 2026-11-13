@@ -7,6 +7,7 @@ namespace BlueDotBrigade.Weevil.IO
 	using System.Runtime.InteropServices;
 	using System.Security.Cryptography;
 	using System.Text;
+	using BlueDotBrigade.Weevil.Data;
 
 	/// <summary>
 	/// The byte offset of every line in a log file, found by scanning the file's bytes for line breaks.
@@ -69,6 +70,21 @@ namespace BlueDotBrigade.Weevil.IO
 		/// or more, for a log written to while it was parsed after being indexed.
 		/// </remarks>
 		public SavedParse Parse { get; set; }
+
+		/// <summary>
+		/// The saved index holds the record table its <see cref="Parse"/> made, from <see cref="TableOffset"/> in the file (#1023).
+		/// </summary>
+		public bool HasTable { get; private set; }
+
+		/// <summary>
+		/// Where the record table's sections start in the saved index, when it has one.
+		/// </summary>
+		public long TableOffset { get; private set; }
+
+		/// <summary>
+		/// The log's encoding, without a byte order mark, as the parser decodes it.
+		/// </summary>
+		public Encoding ContentEncoding => CreateEncoding(_unitSize, _isBigEndian);
 
 		/// <summary>
 		/// Scans the whole log.
@@ -140,6 +156,7 @@ namespace BlueDotBrigade.Weevil.IO
 			(_unitSize, _isBigEndian, _preambleLength) = encoding;
 			_checkpoints.Clear();
 			this.Parse = null;
+			this.HasTable = false;
 			LineCount = 0;
 			IndexedLength = encoding.PreambleLength;
 			_endState = ScanState.AtLineStart;
@@ -201,8 +218,14 @@ namespace BlueDotBrigade.Weevil.IO
 		/// what parsed the log when <see cref="Parse"/> is set, and an end marker. They stream, so the file can be larger than 2 GB.
 		/// </remarks>
 		/// <param name="destination">A stream that can seek, such as a file.</param>
-		public void Write(Stream destination)
+		/// <param name="table">The record table that <see cref="Parse"/> made, to save after it, or <see langword="null"/> (#1023).</param>
+		public void Write(Stream destination, RecordTable table = null)
 		{
+			if (table != null && this.Parse == null)
+			{
+				throw new InvalidOperationException("A record table is saved only with the parse that made it.");
+			}
+
 			using (var writer = new BinaryWriter(destination, Encoding.UTF8, leaveOpen: true))
 			{
 				writer.Write(Signature);
@@ -223,6 +246,7 @@ namespace BlueDotBrigade.Weevil.IO
 				writer.Write(_tailHash);
 				writer.Write(_checkpoints.Count);
 				writer.Write(this.Parse != null);
+				writer.Write(table != null);
 			});
 
 			IndexSection.Write(destination, IndexSectionKind.Checkpoints, writer =>
@@ -237,6 +261,16 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				IndexSection.Write(destination, IndexSectionKind.Parse, this.Parse.Write);
 			}
+
+			if (table != null)
+			{
+				this.TableOffset = destination.Position;
+				IndexSection.Write(destination, IndexSectionKind.Chunks, table.WriteChunks);
+				IndexSection.Write(destination, IndexSectionKind.Strings, table.WriteStrings);
+				IndexSection.Write(destination, IndexSectionKind.Rows, table.WriteRows);
+			}
+
+			this.HasTable = table != null;
 
 			IndexSection.Write(destination, IndexSectionKind.End, writeBytes: null);
 		}
@@ -309,6 +343,7 @@ namespace BlueDotBrigade.Weevil.IO
 				byte[] tailHash;
 				int checkpointCount;
 				bool hasParse;
+				bool hasTable;
 
 				using (header)
 				{
@@ -328,6 +363,7 @@ namespace BlueDotBrigade.Weevil.IO
 					tailHash = reader.ReadBytes(HashLength);
 					checkpointCount = reader.ReadInt32();
 					hasParse = reader.ReadBoolean();
+					hasTable = reader.ReadBoolean();
 
 					if (!header.IsIntact)
 					{
@@ -336,6 +372,7 @@ namespace BlueDotBrigade.Weevil.IO
 				}
 
 				var isConsistent =
+					(hasParse || !hasTable) &&
 					checkpointInterval >= 1 &&
 					lineCount >= 0 &&
 					checkpointCount == (lineCount + (long)checkpointInterval - 1) / checkpointInterval &&
@@ -392,6 +429,21 @@ namespace BlueDotBrigade.Weevil.IO
 					}
 				}
 
+				// The record table is checked only when it is used, so a damaged table costs only the table (#1023).
+				long tableOffset = 0;
+
+				if (hasTable)
+				{
+					tableOffset = indexSource.Position;
+
+					if (!IndexSection.TrySkip(indexSource, IndexSectionKind.Chunks) ||
+					    !IndexSection.TrySkip(indexSource, IndexSectionKind.Strings) ||
+					    !IndexSection.TrySkip(indexSource, IndexSectionKind.Rows))
+					{
+						return false;
+					}
+				}
+
 				// The end marker, at the end of the file, so a truncated or extended file is rejected.
 				if (!IndexSection.TryRead(indexSource, IndexSectionKind.End, out IndexSection.Reader end))
 				{
@@ -438,6 +490,8 @@ namespace BlueDotBrigade.Weevil.IO
 					_headHash = headHash,
 					_tailHash = tailHash,
 					Parse = parse,
+					HasTable = hasTable,
+					TableOffset = tableOffset,
 				};
 
 				return true;
@@ -447,6 +501,19 @@ namespace BlueDotBrigade.Weevil.IO
 				// A damaged file: a string's length, or a build ID, that is not what was written.
 				return false;
 			}
+		}
+
+		/// <summary>
+		/// The encoding of a log whose characters' code units are <paramref name="unitSize"/> bytes, without a byte order mark.
+		/// </summary>
+		internal static Encoding CreateEncoding(int unitSize, bool isBigEndian)
+		{
+			return unitSize switch
+			{
+				1 => new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+				2 => new UnicodeEncoding(isBigEndian, byteOrderMark: false),
+				_ => new UTF32Encoding(isBigEndian, byteOrderMark: false),
+			};
 		}
 
 		private static bool TryReadSignature(Stream indexSource)

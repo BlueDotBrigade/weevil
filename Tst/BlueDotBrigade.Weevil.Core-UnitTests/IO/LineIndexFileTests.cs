@@ -51,12 +51,15 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenTheSameParseSavedAlready_WhenItIsSavedAgain_ThenTheIndexIsNotWrittenAgain()
 		{
 			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");
-			var parse = new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), StorageMode.Ram, 0, 0, 6, [7]);
-			LineIndexFile.SaveParse(_logFilePath, Load(_logFilePath), parse);
+			var parse = new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), StorageMode.Ram, 0, 6, [7]);
+			var builder = new BlueDotBrigade.Weevil.Data.RecordTable.Builder();
+			builder.Add(1, DateTime.MaxValue, new BlueDotBrigade.Weevil.Data.RecordFacts(BlueDotBrigade.Weevil.Data.SeverityType.Information, false, false), "a");
+			BlueDotBrigade.Weevil.Data.RecordTable table = builder.Build();
+			LineIndexFile.SaveParse(_logFilePath, Load(_logFilePath), parse, table);
 			var savedAt = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 			System.IO.File.SetLastWriteTimeUtc(_indexFilePath, savedAt);
 
-			LineIndexFile.SaveParse(_logFilePath, Load(_logFilePath), new SavedParse(parse.PluginName, parse.PluginBuildId, parse.CoreBuildId, StorageMode.Ram, 0, 0, 6, [7]));
+			LineIndexFile.SaveParse(_logFilePath, Load(_logFilePath), new SavedParse(parse.PluginName, parse.PluginBuildId, parse.CoreBuildId, parse.CommonBuildId, StorageMode.Ram, 0, 6, [7]), table);
 
 			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt);
 		}

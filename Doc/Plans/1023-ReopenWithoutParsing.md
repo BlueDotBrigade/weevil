@@ -155,6 +155,11 @@ One pull request per step, in order.
        - a change in the middle that keeps the length;
        - a truncated or corrupt log or index. Until step 4, a grown log is parsed in full.
      - The equivalence harness compares reopened and parsed tables over the 120 test logs.
+   - Done on 2026-11-13. Changes from the plan:
+     - **An open from a start line, of a range or up to a limit still parses.** Taking its rows from the saved full table would not always give the same records: a parse from a start line searches only 256 lines for its first record, and a range search reaches further than a full parse's. Only plugins with their own Open As window open part of a log, and no built-in plugin has one.
+     - **A damaged table costs only the table:** reading the index skips the table's sections, and they are checked when the table is used, so the line index is kept.
+     - **The equivalence harness is replaced by tests** that compare a reopen with a parse: 9 encodings and line endings, in RAM and on disk, a log of several 16 MB chunks, and rows whose text a plugin changed.
+   - Measured on the 1 GB, 10-million-record UTF-8 log, in Release, alternating with `main` in one session: a first open in RAM takes 9.2 – 9.5 s against 8.4 s, to write the table, and a reopen takes 1.9 – 2.0 s against 7.4 – 7.6 s. On disk, a reopen takes 0.9 s. The `.idx` holds 221 MB, 22 bytes per record.
 4. **A grown log is parsed only in its new part.**
    - Tests: records appended at the end; a last record that gains continuation lines; growth that starts a new chunk; a log that grew and also changed in its old part, which is parsed in full; the extended table equals a full parse, in RAM and on disk.
 5. **Measured and documented.**

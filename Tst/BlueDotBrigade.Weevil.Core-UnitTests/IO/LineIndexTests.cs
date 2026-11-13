@@ -320,7 +320,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		private static SavedParse CreateParse()
 		{
-			return new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), StorageMode.Disk, contextHash: 42, startOffset: 0, endOffset: 8, checksums: [123]);
+			return new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), StorageMode.Disk, startOffset: 0, endOffset: 8, checksums: [123]);
 		}
 
 		[TestMethod]
