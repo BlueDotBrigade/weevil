@@ -11,9 +11,10 @@ namespace BlueDotBrigade.Weevil.IO
 		private const int BytesPerRecord = MemoryEstimator.BytesPerRecord;
 
 		/// <summary>
-		/// Where the index's header keeps the line count: after its signature, format version, checkpoint interval, unit size, byte order and preamble length.
+		/// Where the index's header keeps the line count: after its signature and format version, the header section's kind, length and checksum,
+		/// then the checkpoint interval, unit size, byte order and preamble length.
 		/// </summary>
-		private const int LineCountOffset = 4 + 4 + 4 + 1 + 1 + 1;
+		private const int LineCountOffset = 4 + 4 + (4 + 8 + 8) + 4 + 1 + 1 + 1;
 
 		private string _folder = string.Empty;
 

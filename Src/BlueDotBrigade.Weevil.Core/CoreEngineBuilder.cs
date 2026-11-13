@@ -262,6 +262,18 @@
 					records = repository.Get(lineNumberRange, maxRecords);
 					source = repository.Source;
 
+					// After a full parse, the saved index keeps what parsed the log and the checksums of the bytes read,
+					// so the log can later be reopened without parsing (#1023). A parse from a start line or of a range reads only part of it.
+					var isFullParse = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
+
+					if (isFullParse && repository.ParsedSource != null)
+					{
+						LineIndexFile.SaveParse(
+							_sourceFilePath,
+							lineIndex,
+							SavedParse.Create(plugin, _storageMode, _isUsingUserDefinedContext ? _userDefinedContext : null, repository.ParsedSource));
+					}
+
 					loadingStopwatch.Stop();
 
 					sidecarManager.Load(

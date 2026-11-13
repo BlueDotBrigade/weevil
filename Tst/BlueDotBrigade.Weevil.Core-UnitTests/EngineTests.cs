@@ -476,6 +476,72 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenALogOpenedInFull_WhenItsIndexIsRead_ThenItKeepsWhatParsedTheLogAndTheChecksumsOfEveryByte(StorageMode storageMode)
+		{
+			// The saved index keeps the parse, so a later step can reopen the log without parsing it (#1023).
+			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+
+				_ = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+
+				IO.SavedParse parse = ReadSavedParse(logPath);
+				parse.Should().NotBeNull();
+				parse.StorageMode.Should().Be(storageMode);
+				parse.PluginName.Should().NotBeNullOrEmpty();
+				parse.EndOffset.Should().Be(new FileInfo(logPath).Length, "the whole log was parsed");
+				parse.Checksums.Should().HaveCount((int)((parse.EndOffset - 1) / IO.LogFileSource.BlockSize) + 1);
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[DataRow("StartLine")]
+		[DataRow("Range")]
+		[DataRow("Limit")]
+		public void GivenALogOpenedInPart_WhenItsIndexIsRead_ThenItKeepsNoParse(string part)
+		{
+			// A parse from a start line, of a range or up to a limit keeps only part of the log, so its table could not be reused for the whole log (#1023).
+			// A range still reads the whole log, so its checksums would look like a full parse's.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+
+				_ = part switch
+				{
+					"StartLine" => Engine.UsingPath(logPath, 100).Open(),
+					"Range" => Engine.UsingPath(logPath).UsingRange(new Range(1, 100)).Open(),
+					_ => Engine.UsingPath(logPath).UsingLimit(100).Open(),
+				};
+
+				ReadSavedParse(logPath).Should().BeNull();
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		private static IO.SavedParse ReadSavedParse(string logPath)
+		{
+			using var log = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			using var index = new FileStream($"{logPath}.{IO.LineIndexFile.FileExtension}", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			IO.LineIndex.TryRead(index, log, out IO.LineIndex lineIndex).Should().BeTrue();
+
+			return lineIndex.Parse;
+		}
+
+		[TestMethod]
 		[WorkItem(1147)]
 		[DoNotParallelize]
 		public void GivenASidecarEditedSoTwoRegionsOverlap_WhenClearedBeyondRegions_ThenEachLineIsKeptOnceInOrder()
