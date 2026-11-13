@@ -51,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		public event EventHandler<IReadOnlyList<RowViewModel>> SelectionRefreshed;
 
-		public int Count => _results.Length;
+		public int Count => _results.Count;
 
 		/// <summary>
 		/// The number of selected records.
@@ -74,7 +74,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		public RowViewModel GetRow(int position)
 		{
-			if ((uint)position >= (uint)_results.Length)
+			if ((uint)position >= (uint)_results.Count)
 			{
 				throw new ArgumentOutOfRangeException(nameof(position), position, "The position is outside the filter results.");
 			}
@@ -118,7 +118,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var position = IndexOfLineNumberOrNext(lineNumber);
 
-			return position < _results.Length && _results.GetLineNumber(position) == lineNumber ? position : -1;
+			return position < _results.Count && _results.GetLineNumber(position) == lineNumber ? position : -1;
 		}
 
 		/// <summary>
@@ -127,7 +127,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public int IndexOfLineNumberOrNext(int lineNumber)
 		{
 			var low = 0;
-			var high = _results.Length;
+			var high = _results.Count;
 
 			while (low < high)
 			{
@@ -266,7 +266,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </remarks>
 		public IEnumerator GetEnumerator()
 		{
-			for (var position = 0; position < _results.Length; position++)
+			for (var position = 0; position < _results.Count; position++)
 			{
 				yield return GetRow(position);
 			}
@@ -274,7 +274,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		public void CopyTo(Array array, int index)
 		{
-			for (var position = 0; position < _results.Length; position++)
+			for (var position = 0; position < _results.Count; position++)
 			{
 				array.SetValue(GetRow(position), index + position);
 			}

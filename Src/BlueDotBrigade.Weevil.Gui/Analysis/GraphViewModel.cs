@@ -408,7 +408,7 @@
 				// Initialize series names on first load from RegEx named groups
 				// After initialization, series names are preserved even if RegEx changes,
 				// allowing users to customize series names without them being overwritten
-				if (isInitializing && _records.Length > 0)
+				if (isInitializing && _records.Count > 0)
 				{
 					var seriesNames = GetSeriesNames(_records, this.RegularExpression);
 					if (seriesNames.Count > 0)
@@ -901,7 +901,7 @@
 			
 			var expressions = ParseRegularExpressions(regularExpression);
 
-			if (records.Length > 0)
+			if (records.Count > 0)
 			{
 				// First pass: collect raw string values to determine if each series is all-boolean
 				var rawSeriesData = new List<(DateTime Timestamp, string Value)>[MaxSeriesCount];

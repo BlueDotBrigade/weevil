@@ -1436,7 +1436,7 @@
 		private static RecordList CopyWithText(RecordList records, CancellationToken cancellationToken)
 		{
 			var buffer = new ContentBuffer();
-			var copies = ImmutableArray.CreateBuilder<IRecord>(records.Length);
+			var copies = ImmutableArray.CreateBuilder<IRecord>(records.Count);
 
 			foreach (IRecord record in records)
 			{
