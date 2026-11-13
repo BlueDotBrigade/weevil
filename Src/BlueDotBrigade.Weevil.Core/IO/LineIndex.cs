@@ -25,8 +25,8 @@ namespace BlueDotBrigade.Weevil.IO
 		public const int DefaultBufferSize = 1024 * 1024;
 		public const int DefaultLookupBufferSize = 16 * 1024;
 
-		// Version 2 adds sections, each with its own checksum, and what parsed the log (#1023). An index of another version is rebuilt.
-		private const int FormatVersion = 2;
+		// Version 2 adds sections, each with its own checksum, and what parsed the log; version 3 adds the record table (#1023). An index of another version is rebuilt.
+		private const int FormatVersion = 3;
 		private const int FingerprintLength = 4096;
 		private const int HashLength = 32;
 		private const int MinimumBufferSize = 4;

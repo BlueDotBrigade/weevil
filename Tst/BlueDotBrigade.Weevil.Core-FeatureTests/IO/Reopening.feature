@@ -28,7 +28,7 @@ Scenario: A log changed in the middle since it was opened is parsed again
 	And that the saved log file has been opened in RAM
 	And one character in the middle of the saved log file has been changed
 	When the saved log file is opened again in RAM
-	Then it will have been parsed
+	Then it will have been parsed, because its saved record table does not match it
 	And it will show the same records as a parse of the log
 
 Scenario: A log opened in RAM is parsed again when it is reopened on disk
@@ -43,7 +43,7 @@ Scenario: A log whose saved record table is damaged is parsed again
 	And that the saved log file has been opened in RAM
 	And one byte of the saved record table has been changed
 	When the saved log file is opened again in RAM
-	Then it will have been parsed
+	Then it will have been parsed, because its saved record table does not match it
 	And it will show the same records as a parse of the log
 
 Scenario: A damaged record table is saved again by the parse that replaces it

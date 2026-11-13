@@ -108,6 +108,13 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 		_messages.Should().NotContain(LineIndexFile.RecordsReadFromIndexMessage);
 	}
 
+	[Then("it will have been parsed, because its saved record table does not match it")]
+	public void ThenItWillHaveBeenParsedBecauseItsSavedRecordTableDoesNotMatchIt()
+	{
+		ThenItWillHaveBeenParsed();
+		_messages.Should().Contain(message => message.StartsWith(LineIndexFile.TableRejectedMessage));
+	}
+
 	/// <remarks>
 	/// The parse opens a copy in the temporary folder, where no index is read or saved, in the same mode as the log reopened.
 	/// </remarks>

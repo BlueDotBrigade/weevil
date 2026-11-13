@@ -23,6 +23,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		internal const string RecordsReadFromIndexMessage = "The records were read from the saved index, without parsing the log.";
 
+		internal const string TableRejectedMessage = "The saved record table does not match the log, so the log will be parsed.";
+
 		/// <summary>
 		/// Returns the saved index when it matches the log, after scanning any content added since. Otherwise scans the whole log.
 		/// </summary>
@@ -214,7 +216,8 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+				// The log is checked while the index is open, so another instance of Weevil may still replace the index meanwhile.
+				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
 
 				// Read again, from the file now open: another instance of Weevil may have replaced the index since it was loaded.
 				if (!LineIndex.TryRead(indexSource, logSource, out LineIndex saved) || !saved.HasTable || !parse.IsSameAs(saved.Parse))
@@ -231,13 +234,14 @@ namespace BlueDotBrigade.Weevil.IO
 				{
 					Log.Default.Write(
 						LogSeverityType.Information,
-						$"The saved record table does not match the log, so the log will be parsed. IndexFilePath={indexFilePath}");
+						$"{TableRejectedMessage} IndexFilePath={indexFilePath}");
 
 					// So the parse that follows saves a table again, rather than leaving one that every open rejects.
 					index.HasTable = false;
 					return false;
 				}
 			}
+			// ArgumentException too: a defect in reading the table should cost a parse, not the open.
 			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException || exception is FormatException || exception is ArgumentException)
 			{
 				Log.Default.Write(
