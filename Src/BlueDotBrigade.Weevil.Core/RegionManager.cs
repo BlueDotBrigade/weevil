@@ -14,6 +14,7 @@ namespace BlueDotBrigade.Weevil
 	internal class RegionManager : IRegionManager
 	{
 		internal const string RegionOverlapsMessage = "A region overlaps another, so it was not loaded.";
+		internal const string RegionEndsBeforeItStartsMessage = "A region ends before it starts, so it was not loaded.";
 
 		private readonly object _writeLock;
 		private ImmutableArray<Region> _regions = ImmutableArray<Region>.Empty;
@@ -38,7 +39,7 @@ namespace BlueDotBrigade.Weevil
 		/// Replaces every region, such as with those read from the sidecar.
 		/// </summary>
 		/// <remarks>
-		/// A region that overlaps one already kept is skipped with a warning, as creating it would have been refused (#1147).
+		/// A region that overlaps one already kept, or that ends before it starts, is skipped with a warning, as no command creates one (#1147).
 		/// </remarks>
 		internal void Load(ImmutableArray<Region> regions)
 		{
@@ -61,7 +62,20 @@ namespace BlueDotBrigade.Weevil
 
 			foreach (Region region in regions)
 			{
-				if (kept.Any(r => r.OverlapsWith(region)))
+				// Checked first, so a region that ends before it starts, which no command creates, cannot push out a genuine one.
+				if (region.Minimum.LineNumber > region.Maximum.LineNumber)
+				{
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						RegionEndsBeforeItStartsMessage,
+						new Dictionary<string, object>
+						{
+							{ "Name", region.Name },
+							{ "StartLineNumber", region.Minimum.LineNumber },
+							{ "EndLineNumber", region.Maximum.LineNumber },
+						});
+				}
+				else if (kept.Any(r => r.OverlapsWith(region)))
 				{
 					Log.Default.Write(
 						LogSeverityType.Warning,
