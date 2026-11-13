@@ -32,11 +32,11 @@ The parser fills a `RecordTable` (`BlueDotBrigade.Weevil.Data`, Core). It keeps 
 
   Find, the time-gap analyzers, the insights and elapsed times read rows this way (#1137, #1150). A filter still creates one record per row, because `IFilterStrategy.CanKeep` takes a record.
 - **Filter results and the selection** are record lists over the view's table.
-- **Clear** builds a new table of only the records it keeps. The records it clears, and the chunks only they were read from, are freed before Clear returns (#1022). Only whole chunks are freed.
+- **Clear** builds a new table of only the records it keeps, unless it keeps every record, when it keeps the list as it is. The records it clears, and the chunks only they were read from, are freed before Clear returns (#1022). Only whole chunks are freed.
 
 ## Memory
 
 - **Working set per GB of log,** on the 4 GB log of the memory harness: 1.22 GB, against 3.0 GB for Weevil 2.12.1. #1086 asks for at most 1.2.
-- **Managed memory per record,** on the reference log of the performance tests: 153 bytes in RAM, and 22 in disk mode.
+- **Managed memory per record,** on the reference log of the performance tests: 153 bytes in RAM, and 22 – 24 in disk mode.
 
 The memory harness's [results](../Research/Weevil3/MemoryHarness/README.md#results) give each step's figures.

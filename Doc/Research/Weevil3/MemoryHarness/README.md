@@ -99,7 +99,7 @@ Weevil now needs about **1.62 GB of RAM per GB of log**, both at the peak while 
 
 ### After step 3 of #988: records created when they are read (2026-11-13)
 
-Weevil now needs about **1.22 GB of RAM per GB of log**, both at the peak while opening and once the log is open. That is 25% less than after step 1, and 63% less than 2.12.1 at the peak. Records live in a record table, and a record is created only when it is read (#1021). #1086 asks for at most 1.2. The full report is in [Results-2026-11-13-RecordsOnDemand.md](Results-2026-11-13-RecordsOnDemand.md).
+Weevil now needs about **1.22 GB of RAM per GB of log**, both at the peak while opening and once the log is open. That is 25% less than after step 1, and 62% less than 2.12.1 at the peak. Records live in a record table, and a record is created only when it is read (#1021). #1086 asks for at most 1.2. The full report is in [Results-2026-11-13-RecordsOnDemand.md](Results-2026-11-13-RecordsOnDemand.md).
 
 | Log | 2.12.1 | After step 1 (#1133) | After step 3 (#1021) | Source |
 |---|---|---|---|---|
