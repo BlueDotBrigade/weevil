@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
@@ -12,6 +13,8 @@ namespace BlueDotBrigade.Weevil
 	[DebuggerDisplay("Count={_regions.Length}")]
 	internal class RegionManager : IRegionManager
 	{
+		internal const string RegionOverlapsMessage = "A region overlaps another, so it was not loaded.";
+
 		private readonly object _writeLock;
 		private ImmutableArray<Region> _regions = ImmutableArray<Region>.Empty;
 
@@ -62,7 +65,13 @@ namespace BlueDotBrigade.Weevil
 				{
 					Log.Default.Write(
 						LogSeverityType.Warning,
-						$"A region overlaps another, so it was not loaded. Name={region.Name}, StartLineNumber={region.Minimum.LineNumber}, EndLineNumber={region.Maximum.LineNumber}");
+						RegionOverlapsMessage,
+						new Dictionary<string, object>
+						{
+							{ "Name", region.Name },
+							{ "StartLineNumber", region.Minimum.LineNumber },
+							{ "EndLineNumber", region.Maximum.LineNumber },
+						});
 				}
 				else
 				{

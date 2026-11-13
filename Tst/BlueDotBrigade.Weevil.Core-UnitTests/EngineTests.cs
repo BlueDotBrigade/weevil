@@ -479,9 +479,11 @@ namespace BlueDotBrigade.Weevil
 
 		[TestMethod]
 		[WorkItem(1147)]
+		[DoNotParallelize]
 		public void GivenASidecarEditedSoTwoRegionsOverlap_WhenClearedBeyondRegions_ThenEachLineIsKeptOnceInOrder()
 		{
 			// A sidecar's regions were loaded without the overlap check, so Clear Beyond Regions kept the shared lines twice.
+			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
 			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
 			try
 			{
@@ -503,9 +505,12 @@ namespace BlueDotBrigade.Weevil
 				secondStart.Value = "25";
 				sidecar.Save(sidecarPath);
 
+				using var log = CapturingLogWriter.Register();
 				IEngine reopened = Engine.UsingPath(logPath).Open();
 				reopened.Clear(ClearOperation.BeyondRegions);
 
+				log.SeverityOfLast(RegionManager.RegionOverlapsMessage).Should().Be(LogSeverityType.Warning);
+				log.Last(RegionManager.RegionOverlapsMessage)["Name"].Should().Be("Second");
 				var lineNumbers = Enumerable.Range(0, reopened.Records.Count).Select(reopened.Records.GetLineNumber).ToArray();
 				lineNumbers.Should().Equal(Enumerable.Range(20, 11));
 				reopened.Regions.Regions.Select(r => r.Name).Should().Equal("First");
