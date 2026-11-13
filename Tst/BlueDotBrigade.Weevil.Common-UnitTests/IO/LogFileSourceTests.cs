@@ -233,6 +233,51 @@ namespace BlueDotBrigade.Weevil.IO
 			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(1), "a read never waits for the log, as FileHelper.Open does for 2 seconds");
 		}
 
+		[TestMethod]
+		[DataRow(StartOffset, LogLength, DisplayName = "The whole log")]
+		[DataRow(StartOffset, 2 * LogFileSource.BlockSize, DisplayName = "Ending on a block boundary")]
+		[DataRow((2 * LogFileSource.BlockSize) + 100, LogLength, DisplayName = "Parsed from past the first blocks")]
+		public void GivenTheChecksumsOfALogParsed_WhenASourceIsCreatedFromThem_ThenItReadsBackTheBytesParsed(int startOffset, int endOffset)
+		{
+			// A log reopened from its saved index reads back through a source made from the checksums saved (#1023).
+			var checksums = Parse(startOffset, endOffset).GetChecksums().ToArray();
+
+			LogFileSource source = LogFileSource.Create(_logPath, startOffset, endOffset, LogLength, checksums);
+			var destination = new byte[endOffset - startOffset];
+			source.Read(startOffset, destination);
+
+			destination.Should().Equal(_bytes.AsSpan(startOffset, endOffset - startOffset).ToArray());
+			source.GetChecksums().ToArray().Should().Equal(checksums);
+		}
+
+		[TestMethod]
+		public void GivenASourceCreatedFromSavedChecksums_WhenABlockChangedSince_ThenTheBlockIsReportedAsChanged()
+		{
+			var checksums = Parse(StartOffset, LogLength).GetChecksums().ToArray();
+			const int ChangedByte = (2 * LogFileSource.BlockSize) + 777;
+			using (FileStream log = System.IO.File.OpenWrite(_logPath))
+			{
+				log.Position = ChangedByte;
+				log.WriteByte((byte)(_bytes[ChangedByte] ^ 1));
+			}
+
+			LogFileSource source = LogFileSource.Create(_logPath, StartOffset, LogLength, LogLength, checksums);
+			Action read = () => source.Read(ChangedByte + 100, new byte[10]);
+
+			read.Should().Throw<LogFileChangedException>().Which.ChangedOffset.Should().Be(2 * LogFileSource.BlockSize);
+		}
+
+		[TestMethod]
+		public void GivenChecksumsOfAnotherRange_WhenASourceIsCreated_ThenItIsRefused()
+		{
+			// The checksums of three blocks, for a range of four.
+			var checksums = Parse(StartOffset, 3 * LogFileSource.BlockSize).GetChecksums().ToArray();
+
+			Action create = () => LogFileSource.Create(_logPath, StartOffset, LogLength, LogLength, checksums);
+
+			create.Should().Throw<ArgumentException>().Which.ParamName.Should().Be("checksums");
+		}
+
 		/// <summary>
 		/// Appends the log's bytes from <paramref name="startOffset"/> to <paramref name="endOffset"/>,
 		/// in pieces that do not line up with the blocks, as a parser reads them.

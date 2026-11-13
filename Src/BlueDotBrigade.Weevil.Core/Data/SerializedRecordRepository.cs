@@ -17,6 +17,7 @@
 		public const int FirstRecordLineNumber = 1;
 
 		private readonly Stream _source;
+		private readonly StorageMode _storageMode;
 		private readonly long _firstRecordByteOffset;
 		private readonly int _firstRecordLineNumber;
 		private readonly LogLineReader _reader;
@@ -40,6 +41,7 @@
 		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram)
 		{
 			_source = source;
+			_storageMode = storageMode;
 			_firstRecordByteOffset = firstRecordByteOffset;
 			_firstRecordLineNumber = firstRecordLineNumber;
 
@@ -60,6 +62,15 @@
 		/// In disk mode, the source the records read their content back through, once <see cref="Get(Range, int)"/> has read the log: otherwise <see langword="null"/>.
 		/// </summary>
 		internal LogFileSource Source { get; private set; }
+
+		/// <summary>
+		/// The bytes read, with a checksum of each block, in both modes, once <see cref="Get(Range, int)"/> has read the log,
+		/// so they can be saved with the log's index (#1023). <see langword="null"/> when the log is not a file.
+		/// </summary>
+		/// <remarks>
+		/// Only disk mode reads content back through it: in RAM mode the records keep their content, so it is not the engine's <see cref="Source"/>.
+		/// </remarks>
+		internal LogFileSource ParsedSource { get; private set; }
 
 		public IRecord GetNext()
 		{
@@ -106,7 +117,8 @@
 			} while (hasRecord && table.Count < maximumCount);
 
 			// In disk mode, the records read their content back through the source, which can be read only once complete.
-			this.Source = _reader.BuildSource();
+			this.ParsedSource = _reader.BuildSource();
+			this.Source = _storageMode == StorageMode.Disk ? this.ParsedSource : null;
 
 			return new TableRecordList(table.Build());
 		}

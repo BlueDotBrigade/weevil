@@ -124,6 +124,41 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 		}
 
+		[TestMethod]
+		public void GivenALogFile_WhenParsedInRam_ThenItHasTheChecksumsOfAParseOnDiskButNoSourceToReadBack()
+		{
+			// The saved index keeps the checksums, so a log opened in either mode can be reopened from it (#1023).
+			// In RAM mode the records keep their content, so the engine still gets no source: a source means disk mode.
+			var folder = Directory.CreateTempSubdirectory("Weevil.SerializedRecordRepositoryTests.").FullName;
+
+			try
+			{
+				var logPath = Path.Combine(folder, "Log.txt");
+				File.WriteAllText(logPath, string.Concat(Enumerable.Range(1, 20_000).Select(i => $"Line {i}\r\n")), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+
+				SerializedRecordRepository inRam = Parse(logPath, StorageMode.Ram);
+				SerializedRecordRepository onDisk = Parse(logPath, StorageMode.Disk);
+
+				inRam.Source.Should().BeNull();
+				inRam.ParsedSource.GetChecksums().Length.Should().BeGreaterThan(1, "the log spans several blocks");
+				inRam.ParsedSource.GetChecksums().ToArray().Should().Equal(onDisk.ParsedSource.GetChecksums().ToArray());
+				inRam.ParsedSource.EndOffset.Should().Be(onDisk.ParsedSource.EndOffset);
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+
+			static SerializedRecordRepository Parse(string logPath, StorageMode storageMode)
+			{
+				using var log = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+				var repository = new SerializedRecordRepository(log, new DefaultRecordParser(), MultilineRecordParser.MaximumLinesToSearch, storageMode);
+				_ = repository.Get(Range.All, int.MaxValue);
+
+				return repository;
+			}
+		}
+
 		/// <summary>
 		/// Upper-cases the lines that start with "change", and marks them as written by the user interface thread.
 		/// Lines that start with a space continue the record before them.
