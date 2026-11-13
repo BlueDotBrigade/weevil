@@ -10,7 +10,8 @@ Step 5 of the [#988 plan](988-IndexingService.md#steps), and the last. Task #102
 
 - The `.idx` beside a log saves its record table, as well as the line index it holds today.
 - When a log is opened again and its saved index matches it, Weevil builds the table from the index instead of parsing the log.
-- The index is rejected, and the log parsed as today, when the log, the plugin or Weevil itself has changed. That includes a change in the middle of the log that keeps its length, which the index cannot see today (the issue's comment of 2026-11-10).
+- A log that has grown since is parsed only in its new part.
+- The index is rejected, and the log parsed as today, when the log has changed, or when the plugin or Weevil itself is a new build. That includes a change in the middle of the log that keeps its length, which the index cannot see today (the issue's comment of 2026-11-10).
 - An index file can be larger than 2 GB.
 - Nothing else changes: the same records, in RAM and on disk, and the sidecar keeps its format.
 
@@ -78,7 +79,7 @@ Version 2, which replaces version 1. The format is new in Weevil 3.0, so an old 
 
 The table is saved with what produced it. Any difference means a parse:
 
-- **the plugin's name**, and the **MVID** (module version ID) of its assembly. It changes with every build, so a rebuilt plugin, even within one version number, never reuses an old table;
+- **the plugin's name**, and the **MVID** (module version ID) of its assembly: a GUID the compiler gives each build. A new build of the plugin, even with the same version number, never reuses an old table: after installing a new Weevil or plugin, the first open of each log parses it again, and later opens are fast again;
 - **the MVID of Weevil's Core**, whose parser joins continuation lines;
 - **the storage mode**, because UTF-16 in the other byte order and UTF-32 keep strings in RAM and bytes on disk;
 - **for a plugin with its own Open As window**, a hash of the context it returned, in case its parser depends on it.
@@ -95,8 +96,14 @@ The MVID needs no new member on `IPlugin`.
 
 ### A Log That Has Grown
 
-- The line index is still updated only in its new part, as today.
-- **The table is not reused in this plan: a grown log is parsed in full,** and its table saved again. Parsing only the new part must reopen the last record, which may have gained continuation lines, and the last chunk. That is left to a follow-up if reopening growing logs proves slow.
+Logs usually grow, with records appended at the end, so a grown log is parsed only in its new part (decided 2026-11-13):
+
+1. The saved table is loaded, and the log's old part is checked against the saved block checksums. A changed block means the log was not only appended to, so it is parsed in full.
+2. The last record is dropped, because the lines added may continue it, and so is the last chunk, which may now extend further.
+3. The log is parsed from that record's start to its end, with the last record's line number as the first line number.
+4. The rows are appended to the table, and the extended table and checksums are saved.
+
+The line index is still updated only in its new part, as today. A reopen of a grown log then costs the check of its old part plus a parse of its new lines.
 
 ### Memory and Time
 
@@ -104,13 +111,15 @@ The MVID needs no new member on `IPlugin`.
 - **A table on disk takes about 22 bytes per record** plus the strings, or about 0.17 GB per GB of the reference log. Writing it adds a few seconds to a first open of a 20 GB log.
 - **#1085 sets no time target.** The plan measures a reopen against a first open.
 
-## Decisions for the Owner
+## Decisions
 
-1. **Check every block when reopening?** Recommended: yes, in both modes. It costs a full read on disk, but rejects a stale index wherever it came from. The alternative is to trust the head and tail hashes, and let disk mode's checks on each read find a change later. That is faster on disk, but the stale-index case in the issue's comment stays open.
-2. **Compute block checksums in RAM mode too?** Recommended: yes, so one index serves both modes, at about 0.14 s per GB on every first open in RAM.
-3. **Identify a plugin by its assembly's MVID?** Recommended: yes. A plugin then needs no version member, and any rebuild parses again. The alternative is a version member on `IPlugin`, a public contract change that each plugin would have to keep up to date.
-4. **A grown log is parsed in full** in this plan. Recommended: yes. Parsing only the new part is a follow-up if needed.
-5. **The 4 bytes per record of #1086** (open question 1 of [RecordsOnDemand](../Research/Weevil3/RecordsOnDemand/README.md)): the index saves the length column, as the table holds it. Recommended: keep the length, and leave the 4 bytes to a separate decision. Deriving the length would need a table of exceptions in memory and in the file.
+Decided by the owner on 2026-11-13:
+
+1. **Reopening checks every block** against the saved checksums, in both modes. It costs a full read on disk, about 6 s for 20 GB on NVMe, but rejects a stale index wherever it came from.
+2. **RAM mode computes the block checksums too,** so one index serves both modes, at about 0.14 s per GB on a first open in RAM.
+3. **A plugin is identified by its assembly's MVID,** not a version member on `IPlugin`. An unneeded parse after a build that did not change parsing is safer than stale records after a forgotten version bump.
+4. **A grown log is parsed only in its new part,** in its own step.
+5. **The index saves the length column,** as the table holds it. The last 4 bytes per record of #1086 (open question 1 of [RecordsOnDemand](../Research/Weevil3/RecordsOnDemand/README.md)) stay a separate decision.
 
 ## Steps
 
@@ -133,17 +142,18 @@ One pull request per step, in order.
      - **Rejection:**
        - a changed plugin, a changed Core, the other storage mode, or a changed Open As context;
        - a change in the middle that keeps the length;
-       - a truncated, grown or corrupt log or index.
+       - a truncated or corrupt log or index. Until step 4, a grown log is parsed in full.
      - The equivalence harness compares reopened and parsed tables over the 120 test logs.
-4. **Measured and documented.**
+4. **A grown log is parsed only in its new part.**
+   - Tests: records appended at the end; a last record that gains continuation lines; growth that starts a new chunk; a log that grew and also changed in its old part, which is parsed in full; the extended table equals a full parse, in RAM and on disk.
+5. **Measured and documented.**
    - A reopen benchmark, with logs outside the temporary folder.
-   - A reopen case in the memory harness, on the 1 GB and 4 GB logs.
+   - A reopen case in the memory harness, on the 1 GB and 4 GB logs, and a reopen after the log grew.
    - [RecordTable.md](../Design/RecordTable.md) and [DiskMode.md](../Design/DiskMode.md) describe the saved table.
    - Step 5 of the #988 plan is marked done.
 
 ## Not in This Plan
 
-- Parsing only the new part of a grown log.
 - Removing the 4-byte length column (#1086's last 4 bytes).
 - Memory-mapping the `.idx`. Loading reads it into the table's arrays. Mapping stays possible if a table is ever too large to hold.
 - Reading the log once on a first open, instead of twice: a future consideration of the #988 plan.
