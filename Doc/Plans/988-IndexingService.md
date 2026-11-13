@@ -57,7 +57,8 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
      4. The parser fills a record table, and Core builds its records from it (#1138). **Done 2026-11-02.**
      5. Insights and the graph stop keeping records of a log that is no longer open (#1139). **Done 2026-11-02.**
      6. Filter results, the selection and Clear hold record numbers, and records are created only when read (#1140). **Done 2026-11-07.**
-     7. Tests use record lists, the temporary forwarders go, and records on demand are measured (#1141).
+     7. Tests use record lists, the temporary forwarders go, and records on demand are measured (#1141). **Done 2026-11-13.**
+   - **Done 2026-11-13.** On the 4 GB log of the memory harness, Weevil needs 1.22 GB of working set per GB of log, at the peak and after opening, against 1.62 after step 1 and 3.25 at the peak for 2.12.1 ([results](../Research/Weevil3/MemoryHarness/README.md#results)). #1086 asks for 1.2. [RecordTable.md](../Design/RecordTable.md) describes the result.
    - **Decisions (2026-10-30):**
      - About 161 bytes per record is accepted for now. The last 4 bytes to reach #1086's 157 are revisited with #1023.
      - The graph graphs at most 100,000 selected records, like Copy and Paste.
