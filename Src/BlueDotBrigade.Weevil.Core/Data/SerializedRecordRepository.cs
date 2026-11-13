@@ -6,8 +6,8 @@
 	using Diagnostics;
 
 	/// <remarks>
-	/// In disk mode, the records' content is read back from the log, so a repository reads once: <see cref="Get(Range, int)"/> completes
-	/// the source the records read through before it returns them (#1025).
+	/// A repository over a file reads once: <see cref="Get(Range, int)"/> completes the source of the bytes read before it returns the records.
+	/// In disk mode, the records read their content back through it (#1025). In both modes, it holds the checksums the saved index keeps (#1023).
 	/// </remarks>
 	internal class SerializedRecordRepository : IRecordRepository
 	{

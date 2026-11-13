@@ -237,6 +237,7 @@ namespace BlueDotBrigade.Weevil.IO
 		[DataRow(StartOffset, LogLength, DisplayName = "The whole log")]
 		[DataRow(StartOffset, 2 * LogFileSource.BlockSize, DisplayName = "Ending on a block boundary")]
 		[DataRow((2 * LogFileSource.BlockSize) + 100, LogLength, DisplayName = "Parsed from past the first blocks")]
+		[DataRow(StartOffset, StartOffset, DisplayName = "Nothing parsed, as for a log with only a byte order mark")]
 		public void GivenTheChecksumsOfALogParsed_WhenASourceIsCreatedFromThem_ThenItReadsBackTheBytesParsed(int startOffset, int endOffset)
 		{
 			// A log reopened from its saved index reads back through a source made from the checksums saved (#1023).

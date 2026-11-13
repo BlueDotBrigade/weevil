@@ -13,6 +13,7 @@ namespace BlueDotBrigade.Weevil.IO
 	/// </summary>
 	/// <remarks>
 	/// A <see cref="LogFileSourceBuilder"/> makes it while the log is parsed, so chunks on file can refer to it, and completes it at the end.
+	/// <see cref="Create"/> makes a complete one from checksums saved with the log's index, for a log reopened without parsing (#1023).
 	///
 	/// Thread-safe once complete. Each read opens its own handle, which lets other applications read, write and delete the log, and closes it before returning.
 	/// It never memory-maps the log, never retries and keeps no cache.
@@ -104,7 +105,8 @@ namespace BlueDotBrigade.Weevil.IO
 				throw new ArgumentException($"The range is expected to have one checksum for each of its {blockCount} blocks, but {checksums.Length} were given.", nameof(checksums));
 			}
 
-			var source = new LogFileSource(path, startOffset, lengthWhenOpened);
+			// The full path, as the builder keeps, so reads still find the log if the working directory changes.
+			var source = new LogFileSource(System.IO.Path.GetFullPath(path), startOffset, lengthWhenOpened);
 			source.Extend(endOffset);
 			source.Complete(checksums.ToArray());
 
@@ -211,7 +213,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// The number of blocks, and so of checksums, in the range from <paramref name="startOffset"/> to <paramref name="endOffset"/>.
 		/// </summary>
-		internal static int GetBlockCount(long startOffset, long endOffset)
+		private static int GetBlockCount(long startOffset, long endOffset)
 		{
 			return endOffset == startOffset
 				? 0
