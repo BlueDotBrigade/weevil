@@ -345,7 +345,7 @@
 		internal void Clear(ClearOperation clearOperation)
 		{
 			// Only once Narrow returns do the view, its filter and its selection hold nothing but the records kept,
-			// so the records cleared, and the chunks only they were read from, can be freed at once, as Clear always has (#1022).
+			// so Clear's forced collection frees the records cleared, and the chunks only they were read from, at once (#1022).
 			// Narrow reads the records, so this method holds none, even in a Debug build, which keeps a method's temporaries until it returns.
 			if (Narrow(clearOperation))
 			{
@@ -356,11 +356,11 @@
 		/// <returns><see langword="true"/> if records were cleared.</returns>
 		private bool Narrow(ClearOperation clearOperation)
 		{
-			var recordCount = _scope.Records.Length;
+			RecordList records = _scope.Records;
 			RecordList selected = _selectionManager.GetSelected();
 
 			RecordList kept = new InMemoryRecordRepository(
-					_scope.Records,
+					records,
 					_filterManager.Results,
 					selected,
 					clearOperation,
@@ -401,7 +401,7 @@
 					{ "SelectedRecordsKept", _selectionManager.Selected.Count },
 				});
 
-			return kept.Length < recordCount;
+			return kept.Length < records.Length;
 		}
 
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)

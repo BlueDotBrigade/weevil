@@ -222,17 +222,15 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenAnOpenLog_WhenRecordsAreCleared_ThenTheRecordTableTheyWereReadFromHasBeenFreed()
 		{
-			// Clear keeps a record table of only the records it keeps, so the records it clears can be freed (#1140).
+			// Clear keeps a record table of only the records it keeps, so the records it clears can be freed (#1140),
+			// and it collects them itself, once nothing holds them, rather than leaving them to a later collection (#1022).
 			IEngine engine = OpenCopy();
 			WeakReference previousTable = TrackRecordTable(engine);
 			engine.Selector.SelectOnly(10, 20);
 
 			engine.Clear(ClearOperation.BeforeSelected);
-			GC.Collect();
-			GC.WaitForPendingFinalizers();
-			GC.Collect();
 
-			previousTable.IsAlive.Should().BeFalse("Clear keeps a record table of only the records it keeps");
+			previousTable.IsAlive.Should().BeFalse("Clear keeps a record table of only the records it keeps, and collects the one it replaced");
 			engine.Records.GetLineNumber(0).Should().Be(10);
 		}
 
