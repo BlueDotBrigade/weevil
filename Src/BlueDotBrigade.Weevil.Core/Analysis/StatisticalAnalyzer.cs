@@ -79,7 +79,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var defaultRegex = Timeline.AnalysisHelper.GetDefaultRegex(_filterStrategy);
 
 			// Show analysis dialog to get custom regex
-			var recordsDescription = records.Length.ToString("N0");
+			var recordsDescription = records.Count.ToString("N0");
 
 			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
 			{

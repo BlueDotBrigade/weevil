@@ -124,7 +124,7 @@
 		{
 			var position = PositionRanges.LowerBound(visibleRecords, lineNumber, 0);
 
-			return position < visibleRecords.Length && visibleRecords.GetLineNumber(position) == lineNumber
+			return position < visibleRecords.Count && visibleRecords.GetLineNumber(position) == lineNumber
 				? position
 				: -1;
 		}
@@ -378,7 +378,7 @@
 
 				Log.Default.Write(
 					LogSeverityType.Trace,
-					$"Selected records have been saved to disk. Count={sortedRecords.Length}");
+					$"Selected records have been saved to disk. Count={sortedRecords.Count}");
 			}
 
 			return this;
@@ -475,7 +475,7 @@
 
 			lock (_selectionPadlock)
 			{
-				_selection = PositionRanges.FromRange(0, _visibleRecords.Length - 1);
+				_selection = PositionRanges.FromRange(0, _visibleRecords.Count - 1);
 				_selectionPeriod = CalculateTimePeriod(_selection, _visibleRecords);
 				count = _selection.Count;
 			}
@@ -580,7 +580,7 @@
 
 			Log.Default.Write(
 				LogSeverityType.Information,
-				$"The number of selected records has changed. Previous={clearedRecords.Length}, Current=0");
+				$"The number of selected records has changed. Previous={clearedRecords.Count}, Current=0");
 
 			return clearedRecords;
 		}
@@ -596,7 +596,7 @@
 
 			Log.Default.Write(
 				LogSeverityType.Debug,
-				$"The selected records have been requested. Selected={selectedRecords.Length}");
+				$"The selected records have been requested. Selected={selectedRecords.Count}");
 
 			return selectedRecords;
 		}

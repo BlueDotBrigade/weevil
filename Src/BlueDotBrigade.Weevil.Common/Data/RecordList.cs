@@ -23,11 +23,6 @@ namespace BlueDotBrigade.Weevil.Data
 
 		public abstract int Count { get; }
 
-		/// <summary>
-		/// The same as <see cref="Count"/>, for callers written for <see cref="ImmutableArray{T}"/>. Removed by #1141.
-		/// </summary>
-		public int Length => this.Count;
-
 		public bool IsEmpty => this.Count == 0;
 
 		public bool IsReadOnly => true;

@@ -42,7 +42,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		{
 			var count = 0;
 			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
-			var recordsDescription = records.Length.ToString("N0");
+			var recordsDescription = records.Count.ToString("N0");
 			const string defaultThreshold = "0";
 			const string defaultComparison = ">";
 

@@ -53,7 +53,7 @@
 			else
 			{
 				// Update the active record.
-				if (index < _dataSource.Length)
+				if (index < _dataSource.Count)
 				{
 					_activeIndex = index;
 					_activeRecord = _dataSource[index];
@@ -83,7 +83,7 @@
 			}
 
 			// Is collection empty?
-			if (newRecordCollection.Length == 0)
+			if (newRecordCollection.Count == 0)
 			{
 				_activeIndex = UnknownIndex;
 				_activeRecord = Data.Record.Dummy;

@@ -203,7 +203,7 @@
 				// No new data?
 				// ... then just save what we had before
 				// ... otherwise merge the old with the new
-				if (newData.Records.Length == 0)
+				if (newData.Records.Count == 0)
 				{
 					foreach (RecordInfo oldRecord in oldData.CommonData.Records)
 					{

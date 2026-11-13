@@ -347,8 +347,8 @@
 					{"FilterType", filterType},
 					{"FilterCriteria", criteria},
 					{"TimeElapsed", _filterExecutionTime},
-					{"TotalRecords", _scope.Records.Length},
-					{"VisibleRecords", _latestFilterResults.Length},
+					{"TotalRecords", _scope.Records.Count},
+					{"VisibleRecords", _latestFilterResults.Count},
 				};
 
 				if (_source != null)

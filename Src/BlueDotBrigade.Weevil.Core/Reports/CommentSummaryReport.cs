@@ -31,7 +31,7 @@
 			{
 				streamWriter.WriteLine("Timestamp\tComment");
 
-				for (var i = 0; i < _records.Length; i++)
+				for (var i = 0; i < _records.Count; i++)
 				{
 					IRecord currentRecord = _records[i];
 
@@ -45,7 +45,7 @@
 						}
 						else
 						{
-							if (i + 1 < _records.Length)
+							if (i + 1 < _records.Count)
 							{
 								IRecord nextRecord = _records[i + 1];
 								if (nextRecord.HasCreationTime)

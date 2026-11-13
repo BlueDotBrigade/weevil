@@ -229,7 +229,7 @@ namespace BlueDotBrigade.Weevil.Collections
 				var firstInLog = LowerBound(allRecords, firstLine, 0);
 				var lastInLog = LowerBound(allRecords, lastLine, firstInLog);
 				var spanInLog = lastInLog - firstInLog + 1;
-				if (spanInLog == range.Count && lastInLog < allRecords.Length && allRecords.GetLineNumber(lastInLog) == lastLine)
+				if (spanInLog == range.Count && lastInLog < allRecords.Count && allRecords.GetLineNumber(lastInLog) == lastLine)
 				{
 					remapped.Append(low, high);
 					continue;
@@ -270,11 +270,11 @@ namespace BlueDotBrigade.Weevil.Collections
 		/// </remarks>
 		internal static int IndexOfLineNumber(RecordList records, int lineNumber, int from)
 		{
-			var position = from < records.Length && records.GetLineNumber(from) == lineNumber
+			var position = from < records.Count && records.GetLineNumber(from) == lineNumber
 				? from
 				: LowerBound(records, lineNumber, from);
 
-			return position < records.Length && records.GetLineNumber(position) == lineNumber
+			return position < records.Count && records.GetLineNumber(position) == lineNumber
 				? position
 				: -1;
 		}
@@ -286,7 +286,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		internal static int LowerBound(RecordList records, int lineNumber, int from)
 		{
 			var low = from;
-			var high = records.Length;
+			var high = records.Count;
 			while (low < high)
 			{
 				var middle = low + ((high - low) / 2);

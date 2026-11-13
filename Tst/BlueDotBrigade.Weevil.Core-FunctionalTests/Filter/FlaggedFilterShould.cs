@@ -33,7 +33,7 @@
 
 			// Verify we have the expected flagged records
 			var expectedFlaggedLines = new[] { 100, 200, 300, 400, 500 };
-			engine.Filter.Results.Length.Should().Be(expectedFlaggedLines.Length);
+			engine.Filter.Results.Count.Should().Be(expectedFlaggedLines.Length);
 		}
 
 		[TestMethod]
@@ -59,7 +59,7 @@
 				engine.RecordState.IsFlagged(record).Should().BeTrue($"Record {record.LineNumber} should be flagged");
 			}
 
-			(engine.Filter.Results.Length > 0).Should().BeTrue("Should find flagged records with lowercase moniker");
+			(engine.Filter.Results.Count > 0).Should().BeTrue("Should find flagged records with lowercase moniker");
 		}
 
 		[TestMethod]
@@ -104,7 +104,7 @@
 			var initialFilter = "Error||@Flagged";
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria(initialFilter));
 
-			var initialCount = engine.Filter.Results.Length;
+			var initialCount = engine.Filter.Results.Count;
 
 			// Verify the filter criteria is stored correctly
 			engine.Filter.Criteria.Include.Should().Be(initialFilter);

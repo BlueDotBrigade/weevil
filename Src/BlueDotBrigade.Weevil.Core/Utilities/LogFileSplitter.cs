@@ -41,7 +41,7 @@
 			}
 			else
 			{
-				if (records.Length == 0)
+				if (records.Count == 0)
 				{
 					Log.Default.Write(LogSeverityType.Warning, "Application start analysis cannot be performed - no items have been selected.");
 					// TODO: replace

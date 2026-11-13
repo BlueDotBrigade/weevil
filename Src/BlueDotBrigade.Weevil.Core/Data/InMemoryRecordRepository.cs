@@ -86,7 +86,7 @@
 		{
 			var results = new List<int>();
 
-			if (records.Length > 0 && selectedRecords.Length > 0)
+			if (records.Count > 0 && selectedRecords.Count > 0)
 			{
 				var lowestSelectedLine = GetLineNumberRange(selectedRecords).Lowest;
 
@@ -116,7 +116,7 @@
 		{
 			var results = new List<int>();
 
-			if (records.Length > 0 && selectedRecords.Length > 0)
+			if (records.Count > 0 && selectedRecords.Count > 0)
 			{
 				var highestSelectedLine = GetLineNumberRange(selectedRecords).Highest;
 
@@ -140,7 +140,7 @@
 		{
 			var results = new List<int>();
 
-			if (records.Length > 0 && selectedRecords.Length > 0)
+			if (records.Count > 0 && selectedRecords.Count > 0)
 			{
 				(var lowestSelectedLine, var highestSelectedLine) = GetLineNumberRange(selectedRecords);
 
@@ -169,7 +169,7 @@
 		{
 			var results = new List<int>();
 
-			if (records.Length >= 2 && selectedRecords.Length >= 2)
+			if (records.Count >= 2 && selectedRecords.Count >= 2)
 			{
 				(var lowestSelectedLine, var highestSelectedLine) = GetLineNumberRange(selectedRecords);
 
@@ -195,7 +195,7 @@
 		/// </remarks>
 		private static List<int> ClearSelected(RecordList records, RecordList selectedRecords)
 		{
-			var results = new List<int>(records.Length - selectedRecords.Length);
+			var results = new List<int>(records.Count - selectedRecords.Count);
 
 			var blacklist = Enumerable.Range(0, selectedRecords.Count).Select(selectedRecords.GetLineNumber).ToImmutableHashSet();
 
@@ -313,7 +313,7 @@
 			try
 			{
 				// Early exit?
-				if (_selectedRecords.Length == 0 && _clearOperation != ClearOperation.BeyondRegions)
+				if (_selectedRecords.Count == 0 && _clearOperation != ClearOperation.BeyondRegions)
 				{
 					keptPositions = null;
 				}
@@ -354,12 +354,12 @@
 					}
 
 					// A Clear that keeps every record, as after Select All, keeps the list rather than copying its table.
-					if (keptPositions != null && IsEveryPosition(keptPositions, _allRecords.Length))
+					if (keptPositions != null && IsEveryPosition(keptPositions, _allRecords.Count))
 					{
 						keptPositions = null;
 					}
 
-					var recordsCleared = _allRecords.Length - (keptPositions?.Count ?? _allRecords.Length);
+					var recordsCleared = _allRecords.Count - (keptPositions?.Count ?? _allRecords.Count);
 
 					if (recordsCleared > 0)
 					{
@@ -376,7 +376,7 @@
 				if (maxRecords != int.MinValue &&
 					maxRecords != int.MaxValue)
 				{
-					var keptCount = keptPositions?.Count ?? _allRecords.Length;
+					var keptCount = keptPositions?.Count ?? _allRecords.Count;
 
 					if (keptCount >= maxRecords)
 					{
@@ -406,7 +406,7 @@
 
 		public RecordList GetAll()
 		{
-			return Get(_allRecords.Length);
+			return Get(_allRecords.Count);
 		}
 	}
 }

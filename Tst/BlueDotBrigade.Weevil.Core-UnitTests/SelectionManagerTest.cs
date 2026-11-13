@@ -24,7 +24,7 @@
 
 			RecordList selectedRecords = engine.Selector.GetSelected();
 
-			selectedRecords.Length.Should().Be(1);
+			selectedRecords.Count.Should().Be(1);
 			selectedRecords[0].LineNumber.Should().Be(1);
 		}
 		[TestMethod]
@@ -38,7 +38,7 @@
 
 			RecordList selectedRecords = engine.Selector.GetSelected();
 
-			selectedRecords.Length.Should().Be(1);
+			selectedRecords.Count.Should().Be(1);
 			selectedRecords[0].LineNumber.Should().Be(32);
 		}
 
@@ -82,7 +82,7 @@
 			selector.Select(others);
 
 			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(5));
-			selector.Selected.Count.Should().Be(records.Length);
+			selector.Selected.Count.Should().Be(records.Count);
 		}
 
 		[TestMethod]
