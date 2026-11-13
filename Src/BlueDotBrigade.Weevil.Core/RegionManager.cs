@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil
 	using System.Linq;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	/// <remarks>
 	/// Writes are serialized by the session's lock (#1107). Each write publishes a new array, so reads never wait.
@@ -33,12 +34,43 @@ namespace BlueDotBrigade.Weevil
 		/// <summary>
 		/// Replaces every region, such as with those read from the sidecar.
 		/// </summary>
+		/// <remarks>
+		/// A region that overlaps one already kept is skipped with a warning, as creating it would have been refused (#1147).
+		/// </remarks>
 		internal void Load(ImmutableArray<Region> regions)
 		{
+			ImmutableArray<Region> kept = KeepWithoutOverlaps(regions);
+
 			lock (_writeLock)
 			{
-				Publish(regions.IsDefault ? ImmutableArray<Region>.Empty : regions);
+				Publish(kept);
 			}
+		}
+
+		private static ImmutableArray<Region> KeepWithoutOverlaps(ImmutableArray<Region> regions)
+		{
+			if (regions.IsDefaultOrEmpty)
+			{
+				return ImmutableArray<Region>.Empty;
+			}
+
+			ImmutableArray<Region>.Builder kept = ImmutableArray.CreateBuilder<Region>(regions.Length);
+
+			foreach (Region region in regions)
+			{
+				if (kept.Any(r => r.OverlapsWith(region)))
+				{
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						$"A region overlaps another, so it was not loaded. Name={region.Name}, StartLineNumber={region.Minimum.LineNumber}, EndLineNumber={region.Maximum.LineNumber}");
+				}
+				else
+				{
+					kept.Add(region);
+				}
+			}
+
+			return kept.ToImmutable();
 		}
 
 		public void CreateFromSelection(string regionName, int[] selectedLineNumbers)
