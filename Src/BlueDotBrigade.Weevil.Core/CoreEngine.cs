@@ -344,10 +344,25 @@
 		/// </remarks>
 		internal void Clear(ClearOperation clearOperation)
 		{
+			// Only once Narrow returns do the view, its filter and its selection hold nothing but the records kept,
+			// so Clear's forced collection frees the records cleared, and the chunks only they were read from, at once (#1022).
+			// Narrow reads the records, so this method holds none, even in a Debug build, which keeps a method's temporaries until it returns.
+			if (Narrow(clearOperation))
+			{
+				// Aggressive, not Forced: Forced keeps the freed memory committed, so the working set barely falls.
+				// Aggressive returns it to the operating system, as opening does (#969).
+				GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+			}
+		}
+
+		/// <returns><see langword="true"/> if records were cleared.</returns>
+		private bool Narrow(ClearOperation clearOperation)
+		{
+			RecordList records = _scope.Records;
 			RecordList selected = _selectionManager.GetSelected();
 
 			RecordList kept = new InMemoryRecordRepository(
-					_scope.Records,
+					records,
 					_filterManager.Results,
 					selected,
 					clearOperation,
@@ -387,6 +402,8 @@
 					{ "RecordsKept", kept.Length },
 					{ "SelectedRecordsKept", _selectionManager.Selected.Count },
 				});
+
+			return kept.Length < records.Length;
 		}
 
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)

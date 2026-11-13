@@ -4,7 +4,7 @@
 	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	/// <summary>
-	/// Checks that opening a log does not take noticeably more memory than it does today.
+	/// Checks that opening a log does not take noticeably more memory than it does today, and that Clear frees the memory of the records it clears.
 	/// </summary>
 	/// <remarks>
 	/// Sanity checks that run in CI on logs smaller than the reference log. The requirements' full-size targets are measured on the reference machine.
@@ -84,6 +84,41 @@
 			var memoryPerByteOfLog = MeasureMemoryPerByteOfLog(logName, StorageMode.Disk);
 
 			memoryPerByteOfLog.Should().BeLessThanOrEqualTo(maximumMemoryPerByteOfLog, "a log on disk keeps its record table in memory, and none of its content");
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public void GivenAReferenceLog_WhenAllButOnePercentOfItIsCleared_ThenTheContentChunksOnlyTheClearedRecordsWereReadFromAreFreed()
+		{
+			// Opened once first, so the memory of loading Weevil itself is not counted.
+			_ = Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(StorageMode.Ram).Open();
+			var before = GC.GetTotalMemory(forceFullCollection: true);
+
+			// In RAM, where the log's content is held in chunks of about 16 MB.
+			IEngine engine = Engine.UsingPath(ReferenceLog.Create(_folder, RecordCount)).UsingStorage(StorageMode.Ram).Open();
+			var memoryWhenOpened = GC.GetTotalMemory(forceFullCollection: true) - before;
+
+			var keptCount = RecordCount / 100;
+			SelectFirstRecords(engine, keptCount);
+			engine.Clear(ClearOperation.Unselected);
+
+			// The records kept still hold the chunk they were read from: only whole chunks are freed (#1022).
+			var memoryAfterClear = GC.GetTotalMemory(forceFullCollection: true) - before;
+			TestContext.WriteLine($"Managed memory kept: {memoryWhenOpened / 1_000_000.0:N1} MB when opened, {memoryAfterClear / 1_000_000.0:N1} MB once {keptCount:N0} of {RecordCount:N0} records are kept.");
+
+			engine.Count.Should().Be(keptCount);
+			memoryAfterClear.Should().BeLessThan(memoryWhenOpened * 3 / 4, "the content chunks only the records cleared were read from are freed");
+			GC.KeepAlive(engine);
+		}
+
+		/// <summary>
+		/// Selects the first records, in a method of its own, so that this test's own method holds none of the records Clear frees,
+		/// even in a Debug build, which keeps a method's temporaries until it returns.
+		/// </summary>
+		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+		private static void SelectFirstRecords(IEngine engine, int count)
+		{
+			engine.Selector.SelectRange(engine.Records.GetLineNumber(0), engine.Records.GetLineNumber(count - 1));
 		}
 
 		/// <summary>
