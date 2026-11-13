@@ -80,9 +80,10 @@ Version 2, which replaces version 1. The format is new in Weevil 3.0, so an old 
 The table is saved with what produced it. Any difference means a parse:
 
 - **the plugin's name**, and the **MVID** (module version ID) of its assembly. Builds are deterministic, so an MVID is a hash of the assembly's compiled output: a build that changed the plugin, even with the same version number, never reuses an old table, and a rebuild without a change keeps it. After installing a new Weevil or plugin, the first open of each log parses it again, and later opens are fast again;
-- **the MVID of Weevil's Core**, whose parser joins continuation lines;
-- **the storage mode**, because UTF-16 in the other byte order and UTF-32 keep strings in RAM and bytes on disk;
-- **for a plugin with its own Open As window**, a hash of the context it returned, in case its parser depends on it.
+- **the MVIDs of Weevil's Core and Common**: the same build of Weevil. Core's parser joins continuation lines, and Common holds the records and chunks the table is made of;
+- **the storage mode**, because UTF-16 in the other byte order and UTF-32 keep strings in RAM and bytes on disk.
+
+The Open As context is not part of it (decided 2026-11-13): the sidecar keeps it, and it never reaches the parser, since `GetRecordParser()` takes no argument.
 
 The MVID needs no new member on `IPlugin`.
 
@@ -120,6 +121,7 @@ Decided by the owner on 2026-11-13:
 3. **A plugin is identified by its assembly's MVID,** not a version member on `IPlugin`. An unneeded parse after a build that did not change parsing is safer than stale records after a forgotten version bump.
 4. **A grown log is parsed only in its new part,** in its own step.
 5. **The index saves the length column,** as the table holds it. The last 4 bytes per record of #1086 (open question 1 of [RecordsOnDemand](../Research/Weevil3/RecordsOnDemand/README.md)) stay a separate decision.
+6. **A saved table is reused only when the same build of Weevil, Core and Common, and the same build of the plugin made it** (decided after step 2). The Open As context is left out: the sidecar keeps it, and it never reaches the parser.
 
 ## Steps
 
@@ -140,8 +142,8 @@ One pull request per step, in order.
      - The test of a file larger than 2 GB moves to step 3. Until the table is saved, an index holds a few MB at most, and the sections already use 64-bit lengths and stream.
      - What parsed the log and the block checksums share one optional Parse section, flagged in the header, rather than the header and a section of their own.
    - For step 3, from the review of step 2:
-     - **The Open As context is lost on Reload,** which builds without it, so for a plugin with its own Open As window the saved context hash alternates with 0. Decide whether to keep the context in the identity, hash the engine's own context, or carry it on Reload. No built-in plugin has an Open As window.
-     - **An MVID changes only with its own assembly.** A change only to Common, where records and chunks live, changes neither Core's MVID nor a plugin's. Decide whether Common's MVID, or the parser's own assembly's, joins the identity.
+     - **The Open As context is lost on Reload.** Decided: the context leaves the identity (decision 6).
+     - **An MVID changes only with its own assembly.** Decided: Common's MVID joins Core's (decision 6).
      - **A log written to while it is parsed** can have a parse that ends past the line index, possibly within a record. Reusing the table of a grown log must allow for it.
 3. **The table is saved, and reopening uses it.**
    - A full parse saves the table. Every open with a matching index builds its table from it, and an open with a start line or range takes the rows it needs.
