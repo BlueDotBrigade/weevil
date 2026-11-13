@@ -1,6 +1,6 @@
 # 1023: Reopen a Log Without Parsing It Again
 
-> **Status:** Draft
+> **Status:** In progress
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -129,6 +129,7 @@ One pull request per step, in order.
    - `LogFileSource` gains its public API (Common).
    - RAM mode computes the checksums too. The cost is measured on the 10-million-record log.
    - Tests: the checksums round-trip; a source built from saved checksums detects a changed block.
+   - Done on 2026-11-13: opening the 1 GB, 10-million-record log in RAM took 7.73 s against 7.60 s on `main` (median of three rounds, alternated, Release): about 0.13 s, within the machine's noise and as estimated. In RAM, the engine still gets no source, because `FilterManager` takes a source to mean disk mode.
 2. **The `.idx` version 2 holds today's line index, in sections.**
    - It streams, and a file can exceed 2 GB.
    - It adds the block checksums and the parse's identity. There is no table yet.
