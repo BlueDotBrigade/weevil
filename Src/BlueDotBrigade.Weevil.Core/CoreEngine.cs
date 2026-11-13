@@ -349,7 +349,9 @@
 			// Narrow reads the records, so this method holds none, even in a Debug build, which keeps a method's temporaries until it returns.
 			if (Narrow(clearOperation))
 			{
-				GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+				// Aggressive, not Forced: Forced keeps the freed memory committed, so the working set barely falls.
+				// Aggressive returns it to the operating system, as opening does (#969).
+				GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
 			}
 		}
 
