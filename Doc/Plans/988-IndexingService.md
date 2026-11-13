@@ -79,6 +79,7 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
    - Only whole chunks are released: up to about 16 MB stays at each edge of a kept range, and `Clear Selected` frees nothing.
    - Released chunks are not read back until #986, so cleared records return after Reload, as today.
    - This needs only one view, so it does not depend on #991.
+   - **Done 2026-11-13.** Since #1140 the records Clear keeps get a table of their own, so the chunks only the cleared records were read from can be freed. But Clear forced its collection before the view, the filter and the selection had let go of the old table, so the memory was freed only by a later collection. The collection now runs once they hold only the records kept. On the reference log in a performance test, keeping 1% of 200,000 records: 30.6 MB when opened, and 17.1 MB as soon as Clear returns, against 32.3 MB before. The 17.1 MB is mostly the 16 MB chunk the kept records were read from.
 5. **Reopen without parsing (#1023).**
    - The `.idx` file gains the record table: which lines start records, the facts byte and the timestamps.
    - The header already holds a format version, the encoding, the line count, the length indexed, and hashes of the first and last 4 KB. Those are how it detects a grown log and indexes only the new part.
