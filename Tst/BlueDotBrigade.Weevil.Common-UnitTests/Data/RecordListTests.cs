@@ -11,7 +11,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenAnArrayOfRecords_WhenWrapped_ThenTheListReadsThemInOrder()
 		{
-			ImmutableArray<IRecord> records = R.WithLineNumbers(11, 13);
+			RecordList records = R.WithLineNumbers(11, 13);
 
 			RecordList list = records;
 

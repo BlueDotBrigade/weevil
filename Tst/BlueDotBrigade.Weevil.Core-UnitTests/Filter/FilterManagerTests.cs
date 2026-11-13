@@ -16,7 +16,7 @@ namespace BlueDotBrigade.Weevil.Filter
 		{
 			// Regression: Issue #1016. The filter erased the elapsed time of each record it hid, before it checked
 			// whether it had been aborted, so the results still shown lost their elapsed times.
-			ImmutableArray<IRecord> records = CreateRecordsOneSecondApart(100);
+			RecordList records = CreateRecordsOneSecondApart(100);
 			var abortsWhenARecordIsKept = false;
 			FilterManager filter = null;
 			IMetricCollector collector = Substitute.For<IMetricCollector>();
@@ -42,7 +42,7 @@ namespace BlueDotBrigade.Weevil.Filter
 		[TestMethod]
 		public void GivenRecordsOneSecondApart_WhenEveryOtherIsShown_ThenElapsedTimesAreMeasuredBetweenTheShownRecords()
 		{
-			ImmutableArray<IRecord> records = CreateRecordsOneSecondApart(6);
+			RecordList records = CreateRecordsOneSecondApart(6);
 			FilterManager filter = CreateFilterManager(records, Substitute.For<IMetricCollector>());
 			filter.Apply(FilterType.PlainText, FilterCriteria.None);
 
@@ -122,7 +122,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			return builder.Build();
 		}
 
-		private static ImmutableArray<IRecord> CreateRecordsOneSecondApart(int count)
+		private static RecordList CreateRecordsOneSecondApart(int count)
 		{
 			// Each record's content ends with its line number, for example "Has line number: 7".
 			R records = R.Create();
@@ -153,7 +153,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				new FilterHistory());
 		}
 
-		private static Dictionary<int, TimeSpan> ElapsedTimesByLine(IFilter filter, ImmutableArray<IRecord> records)
+		private static Dictionary<int, TimeSpan> ElapsedTimesByLine(IFilter filter, RecordList records)
 		{
 			return records.ToDictionary(r => r.LineNumber, r => filter.ElapsedTimes.Get(r.LineNumber));
 		}

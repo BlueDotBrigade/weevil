@@ -79,34 +79,34 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenEveryRecordSelected_WhenANarrowerFilterIsApplied_ThenAllOfItsResultsAreSelectedInOneRange()
 		{
-			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 100);
-			ImmutableArray<IRecord> even = Keep(all, r => r.LineNumber % 2 == 0);
-			PositionRanges selection = Positions(0, all.Length - 1);
+			RecordList all = R.WithLineNumbers(1, 100);
+			RecordList even = Keep(all, r => r.LineNumber % 2 == 0);
+			PositionRanges selection = Positions(0, all.Count - 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, all, even, all);
 
-			remapped.Ranges.Should().Equal(new PositionRange(0, even.Length - 1));
+			remapped.Ranges.Should().Equal(new PositionRange(0, even.Count - 1));
 		}
 
 		[TestMethod]
 		public void GivenEveryShownRecordSelected_WhenANarrowerFilterIsApplied_ThenTheSelectedRecordsItStillShowsStaySelected()
 		{
-			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 100);
-			ImmutableArray<IRecord> even = Keep(all, r => r.LineNumber % 2 == 0);
-			ImmutableArray<IRecord> tenth = Keep(all, r => r.LineNumber % 10 == 0);
-			PositionRanges selection = Positions(0, even.Length - 1);
+			RecordList all = R.WithLineNumbers(1, 100);
+			RecordList even = Keep(all, r => r.LineNumber % 2 == 0);
+			RecordList tenth = Keep(all, r => r.LineNumber % 10 == 0);
+			PositionRanges selection = Positions(0, even.Count - 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, even, tenth, all);
 
-			remapped.Ranges.Should().Equal(new PositionRange(0, tenth.Length - 1));
+			remapped.Ranges.Should().Equal(new PositionRange(0, tenth.Count - 1));
 		}
 
 		[TestMethod]
 		public void GivenSelectedRecords_WhenAFilterShowsRecordsThatWereHidden_ThenOnlyTheSelectedOnesAreSelected()
 		{
-			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 10);
-			ImmutableArray<IRecord> even = Keep(all, r => r.LineNumber % 2 == 0);
-			PositionRanges selection = Positions(0, even.Length - 1);
+			RecordList all = R.WithLineNumbers(1, 10);
+			RecordList even = Keep(all, r => r.LineNumber % 2 == 0);
+			PositionRanges selection = Positions(0, even.Count - 1);
 
 			// Lists that cannot create records show that remapping, which runs after every filter, creates none (#1137).
 			PositionRanges remapped = PositionRanges.Remap(selection, new ColumnsOnlyRecordList(even), new ColumnsOnlyRecordList(all), new ColumnsOnlyRecordList(all));
@@ -118,8 +118,8 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenASelectedRecord_WhenTheFilterHidesIt_ThenItIsNoLongerSelected()
 		{
-			ImmutableArray<IRecord> all = R.WithLineNumbers(1, 10);
-			ImmutableArray<IRecord> odd = Keep(all, r => r.LineNumber % 2 == 1);
+			RecordList all = R.WithLineNumbers(1, 10);
+			RecordList odd = Keep(all, r => r.LineNumber % 2 == 1);
 			PositionRanges selection = Positions(1, 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, all, odd, all);
@@ -131,15 +131,15 @@ namespace BlueDotBrigade.Weevil.Collections
 		public void GivenRecordsWithGapsInTheirLineNumbers_WhenEveryOneIsSelectedAndFiltered_ThenTheShownOnesStaySelected()
 		{
 			// Multi-line records leave gaps in the line numbers: 1 to 3, then 10 to 12.
-			ImmutableArray<IRecord> all = ImmutableArray.Create(
+			RecordList all = ImmutableArray.Create(
 				R.WithLineNumber(1), R.WithLineNumber(2), R.WithLineNumber(3),
 				R.WithLineNumber(10), R.WithLineNumber(11), R.WithLineNumber(12));
-			ImmutableArray<IRecord> filtered = Keep(all, r => r.LineNumber != 2);
-			PositionRanges selection = Positions(0, all.Length - 1);
+			RecordList filtered = Keep(all, r => r.LineNumber != 2);
+			PositionRanges selection = Positions(0, all.Count - 1);
 
 			PositionRanges remapped = PositionRanges.Remap(selection, all, filtered, all);
 
-			remapped.Ranges.Should().Equal(new PositionRange(0, filtered.Length - 1));
+			remapped.Ranges.Should().Equal(new PositionRange(0, filtered.Count - 1));
 		}
 
 		private static PositionRanges Positions(int first, int last)
@@ -147,7 +147,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			return PositionRanges.FromPositions(Enumerable.Range(first, last - first + 1).ToList());
 		}
 
-		private static ImmutableArray<IRecord> Keep(ImmutableArray<IRecord> records, Func<IRecord, bool> filter)
+		private static RecordList Keep(RecordList records, Func<IRecord, bool> filter)
 		{
 			return records.Where(filter).ToImmutableArray();
 		}

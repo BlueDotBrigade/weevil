@@ -14,15 +14,15 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         internal const string DecimalRegex = @"(?<Value>\d+\.\d+)$";
         internal const char FlagMarker = '^';
 
-        internal static int[] GetFlaggedIndices(ImmutableArray<IRecord> records, IRecordState state) =>
-            Enumerable.Range(0, records.Length)
+        internal static int[] GetFlaggedIndices(RecordList records, IRecordState state) =>
+            Enumerable.Range(0, records.Count)
                 .Where(i => state.IsFlagged(records[i]))
                 .ToArray();
 
         internal static int CountExpectedFlags(string expected) =>
             Enumerable.Count(expected, c => c == FlagMarker);
 
-        internal static ImmutableArray<IRecord> BuildIntegerRecords(string pattern)
+        internal static RecordList BuildIntegerRecords(string pattern)
         {
             var builder = R.Create();
             for (var i = 0; i < pattern.Length; i++)
@@ -33,7 +33,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             return builder.GetRecords();
         }
 
-        internal static ImmutableArray<IRecord> BuildDecimalRecords(string pattern)
+        internal static RecordList BuildDecimalRecords(string pattern)
         {
             var builder = R.Create();
             for (var i = 0; i < pattern.Length; i++)
@@ -44,7 +44,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             return builder.GetRecords();
         }
 
-        internal static ImmutableArray<IRecord> BuildRecords(params (int LineNumber, string Timestamp, string Content)[] entries)
+        internal static RecordList BuildRecords(params (int LineNumber, string Timestamp, string Content)[] entries)
         {
             return entries
                 .Select(record => (IRecord)new Record(
@@ -60,7 +60,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         internal static void AssertFlagsMatchExpected(
             string pattern,
             string expected,
-            ImmutableArray<IRecord> records,
+            RecordList records,
             IRecordState state,
             string label,
             string mismatchLabel)
@@ -101,7 +101,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
             string pattern,
             string expected,
             string actualRendered,
-            ImmutableArray<IRecord> records,
+            RecordList records,
             IRecordState state,
             int[] expectedIndices,
             int[] actualIndices)

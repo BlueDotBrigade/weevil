@@ -81,7 +81,7 @@
 			// Arrange
 			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -96,7 +96,7 @@
 			// Arrange
 			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -111,7 +111,7 @@
 			// Arrange
 			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -130,7 +130,7 @@
 			// Arrange
 			var analyzer = new StableValueRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -145,7 +145,7 @@
 			// Arrange
 			var analyzer = new StableValueRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -164,7 +164,7 @@
 			// Arrange
 			var analyzer = new DetectRisingEdgeAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -179,7 +179,7 @@
 			// Arrange
 			var analyzer = new DetectRisingEdgeAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -198,7 +198,7 @@
 			// Arrange
 			var analyzer = new DetectFallingEdgeAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -213,7 +213,7 @@
 			// Arrange
 			var analyzer = new DetectFallingEdgeAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "  ");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -232,7 +232,7 @@
 			// Arrange
 			var analyzer = new ThresholdCrossingsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -247,7 +247,7 @@
 			// Arrange
 			var analyzer = new ThresholdCrossingsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: " ");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -266,7 +266,7 @@
 			// Arrange
 			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -281,7 +281,7 @@
 			// Arrange
 			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -296,7 +296,7 @@
 			// Arrange
 			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -315,7 +315,7 @@
 			// Arrange
 			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -330,7 +330,7 @@
 			// Arrange
 			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -345,7 +345,7 @@
 			// Arrange
 			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -364,7 +364,7 @@
 			// Arrange
 			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -379,7 +379,7 @@
 			// Arrange
 			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
@@ -394,7 +394,7 @@
 			// Arrange
 			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
 			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = ImmutableArray<IRecord>.Empty;
+			var records = RecordList.Empty;
 
 			// Act
 			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);

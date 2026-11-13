@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenSelectedRangesApart_WhenReadByPosition_ThenEachPositionIsTheNextSelectedRecord()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			RecordList results = R.WithLineNumbers(11, 20);
 			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 1, 2, 5, 8, 9 });
 
 			var selected = new SelectedRecordList(selection, results);
@@ -26,7 +26,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenSelectedRanges_WhenTheirLinesAreRead_ThenNoRecordIsCreated()
 		{
-			ImmutableArray<IRecord> results = R.WithLineNumbers(11, 20);
+			RecordList results = R.WithLineNumbers(11, 20);
 			PositionRanges selection = PositionRanges.FromPositions(new List<int> { 0, 4, 5, 9 });
 
 			var selected = new SelectedRecordList(selection, new ColumnsOnlyRecordList(results));

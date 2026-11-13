@@ -19,8 +19,8 @@
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
-				ImmutableArray<IRecord>.Empty,
-				ImmutableArray<IRecord>.Empty,
+				RecordList.Empty,
+				RecordList.Empty,
 				ClearOperation.BeyondRegions,
 				regions.ToImmutableArray());
 
@@ -43,8 +43,8 @@
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
-				ImmutableArray<IRecord>.Empty,
-				ImmutableArray<IRecord>.Empty,
+				RecordList.Empty,
+				RecordList.Empty,
 				ClearOperation.BeyondRegions,
 				regions.ToImmutableArray());
 
@@ -73,8 +73,8 @@
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
-				ImmutableArray<IRecord>.Empty,
-				ImmutableArray<IRecord>.Empty,
+				RecordList.Empty,
+				RecordList.Empty,
 				ClearOperation.BeyondRegions,
 				regions.ToImmutableArray());
 
@@ -103,7 +103,7 @@
 
                         var repository = new InMemoryRecordRepository(
                                 allRecords.ToImmutableArray(),
-                                ImmutableArray<IRecord>.Empty,
+                                RecordList.Empty,
                                 selectedRecords.ToImmutableArray(),
                                 ClearOperation.Selected,
                                 ImmutableArray<Region>.Empty);

@@ -11,7 +11,7 @@
 	[TestClass]
 	public class TimeGapUiAnalyzerTests
 	{
-		private ImmutableArray<IRecord> _records;
+		private RecordList _records;
 
 		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
 		{
@@ -57,7 +57,7 @@
 				Console.WriteLine(record.ToString());
 			}
 
-			_records.Clear();
+			_records = RecordList.Empty;
 		}
 
 		[TestMethod]
@@ -205,7 +205,7 @@
 		{
 			// The first timestamped UI record has none before it, so its elapsed time is zero, as in TimeGapAnalyzer (#1150).
 			var start = new DateTime(2026, 11, 7, 9, 0, 0);
-			ImmutableArray<IRecord> records = ImmutableArray.Create<IRecord>(
+			RecordList records = ImmutableArray.Create<IRecord>(
 				new Record(10, Record.CreationTimeUnknown, SeverityType.Information, "Starting", isMultiLine: false, wasGeneratedByUi: true),
 				new Record(20, start, SeverityType.Information, "Shown", isMultiLine: false, wasGeneratedByUi: true),
 				new Record(30, start.AddSeconds(1), SeverityType.Information, "Clicked", isMultiLine: false, wasGeneratedByUi: true));

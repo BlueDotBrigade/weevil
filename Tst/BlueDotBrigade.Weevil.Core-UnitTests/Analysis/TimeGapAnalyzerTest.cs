@@ -12,7 +12,7 @@
 	[TestClass]
 	public class TimeGapAnalyzerTest
 	{
-		private ImmutableArray<IRecord> _records;
+		private RecordList _records;
 
 		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
 		{
@@ -57,7 +57,7 @@
 				Console.WriteLine(record.ToString());
 			}
 
-			_records.Clear();
+			_records = RecordList.Empty;
 		}
 
 		[TestMethod]
@@ -203,7 +203,7 @@
 		{
 			// An analyzer reads the selection or the filter results, so a line it does not read keeps its flag (#1150).
 			var start = new DateTime(2026, 11, 6, 9, 0, 0);
-			ImmutableArray<IRecord> analyzed = R.Create()
+			RecordList analyzed = R.Create()
 				.WithCreatedAt(10, start)
 				.WithCreatedAt(20, start.AddSeconds(1))
 				.GetRecords();
@@ -222,7 +222,7 @@
 		{
 			// Only a row the analyzer flags is created as a record (#1150); the list throws if any other is read.
 			var start = new DateTime(2026, 11, 6, 9, 0, 0);
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(10, start)
 				.WithCreatedAt(20, Record.CreationTimeUnknown)
 				.WithCreatedAt(30, start.AddSeconds(2))
@@ -243,7 +243,7 @@
 		{
 			// The first timestamped record has none before it, so its elapsed time is zero (#1140).
 			var start = new DateTime(2026, 11, 6, 9, 0, 0);
-			ImmutableArray<IRecord> records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(10, Record.CreationTimeUnknown)
 				.WithCreatedAt(20, start)
 				.WithCreatedAt(30, start.AddSeconds(1))
