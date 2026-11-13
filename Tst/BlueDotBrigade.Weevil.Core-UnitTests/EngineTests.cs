@@ -7,6 +7,7 @@ namespace BlueDotBrigade.Weevil
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using System.Threading;
+	using System.Xml.Linq;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
@@ -469,6 +470,50 @@ namespace BlueDotBrigade.Weevil
 				reopened.SourceFileRemarks.Should().Be("Reviewed");
 				reopened.Filter.IncludeHistory.Take(2).Should().Equal("Id=2", "Id=1");
 				reopened.Filter.ExcludeHistory.Take(2).Should().Equal("Id=98", "Id=99");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1147)]
+		[DoNotParallelize]
+		public void GivenASidecarEditedSoTwoRegionsOverlap_WhenClearedBeyondRegions_ThenEachLineIsKeptOnceInOrder()
+		{
+			// A sidecar's regions were loaded without the overlap check, so Clear Beyond Regions kept the shared lines twice.
+			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "SampleData.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
+				IEngine engine = Engine.UsingPath(logPath).Open();
+				engine.Regions.CreateFromSelection("First", new[] { 20, 30 });
+				engine.Regions.CreateFromSelection("Second", new[] { 40, 50 });
+				engine.Save();
+
+				// Edited by hand: the second region now starts inside the first.
+				var sidecarPath = logPath + ".xml";
+				XDocument sidecar = XDocument.Load(sidecarPath);
+				XElement secondStart = sidecar.Descendants()
+					.Where(e => e.Name.LocalName == "Region")
+					.Single(e => e.Elements().Single(n => n.Name.LocalName == "Name").Value == "Second")
+					.Elements().Single(e => e.Name.LocalName == "Minimum")
+					.Elements().Single(e => e.Name.LocalName == "LineNumber");
+				secondStart.Value = "25";
+				sidecar.Save(sidecarPath);
+
+				using var log = CapturingLogWriter.Register();
+				IEngine reopened = Engine.UsingPath(logPath).Open();
+				reopened.Clear(ClearOperation.BeyondRegions);
+
+				log.SeverityOfLast(RegionManager.RegionOverlapsMessage).Should().Be(LogSeverityType.Warning);
+				log.Last(RegionManager.RegionOverlapsMessage)["Name"].Should().Be("Second");
+				var lineNumbers = Enumerable.Range(0, reopened.Records.Count).Select(reopened.Records.GetLineNumber).ToArray();
+				lineNumbers.Should().Equal(Enumerable.Range(20, 11));
+				reopened.Regions.Regions.Select(r => r.Name).Should().Equal("First");
 			}
 			finally
 			{

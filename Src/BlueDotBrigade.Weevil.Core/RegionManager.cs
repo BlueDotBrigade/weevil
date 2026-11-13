@@ -1,9 +1,11 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
+	using BlueDotBrigade.Weevil.Diagnostics;
 
 	/// <remarks>
 	/// Writes are serialized by the session's lock (#1107). Each write publishes a new array, so reads never wait.
@@ -11,6 +13,9 @@ namespace BlueDotBrigade.Weevil
 	[DebuggerDisplay("Count={_regions.Length}")]
 	internal class RegionManager : IRegionManager
 	{
+		internal const string RegionOverlapsMessage = "A region overlaps another, so it was not loaded.";
+		internal const string RegionEndsBeforeItStartsMessage = "A region ends before it starts, so it was not loaded.";
+
 		private readonly object _writeLock;
 		private ImmutableArray<Region> _regions = ImmutableArray<Region>.Empty;
 
@@ -33,12 +38,62 @@ namespace BlueDotBrigade.Weevil
 		/// <summary>
 		/// Replaces every region, such as with those read from the sidecar.
 		/// </summary>
+		/// <remarks>
+		/// A region that overlaps one already kept, or that ends before it starts, is skipped with a warning, as no command creates one (#1147).
+		/// </remarks>
 		internal void Load(ImmutableArray<Region> regions)
 		{
+			ImmutableArray<Region> kept = KeepWithoutOverlaps(regions);
+
 			lock (_writeLock)
 			{
-				Publish(regions.IsDefault ? ImmutableArray<Region>.Empty : regions);
+				Publish(kept);
 			}
+		}
+
+		private static ImmutableArray<Region> KeepWithoutOverlaps(ImmutableArray<Region> regions)
+		{
+			if (regions.IsDefaultOrEmpty)
+			{
+				return ImmutableArray<Region>.Empty;
+			}
+
+			ImmutableArray<Region>.Builder kept = ImmutableArray.CreateBuilder<Region>(regions.Length);
+
+			foreach (Region region in regions)
+			{
+				// Checked first, so a region that ends before it starts, which no command creates, cannot push out a genuine one.
+				if (region.Minimum.LineNumber > region.Maximum.LineNumber)
+				{
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						RegionEndsBeforeItStartsMessage,
+						new Dictionary<string, object>
+						{
+							{ "Name", region.Name },
+							{ "StartLineNumber", region.Minimum.LineNumber },
+							{ "EndLineNumber", region.Maximum.LineNumber },
+						});
+				}
+				else if (kept.Any(r => r.OverlapsWith(region)))
+				{
+					Log.Default.Write(
+						LogSeverityType.Warning,
+						RegionOverlapsMessage,
+						new Dictionary<string, object>
+						{
+							{ "Name", region.Name },
+							{ "StartLineNumber", region.Minimum.LineNumber },
+							{ "EndLineNumber", region.Maximum.LineNumber },
+						});
+				}
+				else
+				{
+					kept.Add(region);
+				}
+			}
+
+			return kept.ToImmutable();
 		}
 
 		public void CreateFromSelection(string regionName, int[] selectedLineNumbers)

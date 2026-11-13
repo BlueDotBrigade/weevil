@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BlueDotBrigade.Weevil.Core;
 using NSubstitute;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using BlueDotBrigade.Weevil.Data;
 using System.Linq;
 
@@ -108,6 +109,15 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 			// Assert
 			wasCleared.Should().BeFalse();
 			_regionManager.Regions.Length.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void GivenARegionThatEndsBeforeItStartsListedFirst_WhenLoaded_ThenTheGenuineRegionAfterItIsKept()
+		{
+			// A region edited by hand to end before it starts must not count as overlapping the genuine region that encloses it.
+			_regionManager.Load(ImmutableArray.Create(new Region("Reversed", 30, 20), new Region("Genuine", 10, 40)));
+
+			_regionManager.Regions.Select(r => r.Name).Should().Equal("Genuine");
 		}
 	}
 }
