@@ -160,6 +160,27 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
+		/// After a full parse, saves with the index what parsed the log and the checksums of the bytes it read,
+		/// unless the saved index has them already (#1023).
+		/// </summary>
+		/// <remarks>
+		/// The line index is saved before the log is parsed, by <see cref="Load"/>, and again here once the parse is known.
+		/// </remarks>
+		public static void SaveParse(string logFilePath, LineIndex index, SavedParse parse)
+		{
+			ArgumentNullException.ThrowIfNull(index);
+			ArgumentNullException.ThrowIfNull(parse);
+
+			if (parse.IsSameAs(index.Parse))
+			{
+				return;
+			}
+
+			index.Parse = parse;
+			TrySave(index, logFilePath, GetIndexFilePath(logFilePath));
+		}
+
+		/// <summary>
 		/// Deletes the saved index, so the next open rebuilds it: it checks only the start and end of the log,
 		/// so it can still match a log changed in the middle (#1025).
 		/// </summary>

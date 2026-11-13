@@ -276,11 +276,33 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
+		public void GivenASavedIndexWithAParse_WhenReading_ThenTheParseIsReadBack()
+		{
+			// After a full parse, the index keeps what parsed the log and the checksums of the bytes read (#1023).
+			using MemoryStream source = ToStream("a\nb\nc\nd\n", new UTF8Encoding(false));
+			LineIndex original = LineIndex.Build(source);
+			SavedParse parse = CreateParse();
+			original.Parse = parse;
+			using var saved = new MemoryStream();
+			original.Write(saved);
+			saved.Position = 0;
+
+			LineIndex.TryRead(saved, source, out LineIndex index).Should().BeTrue();
+
+			index.Parse.IsSameAs(parse).Should().BeTrue();
+			index.Parse.PluginName.Should().Be(parse.PluginName);
+			index.Parse.Checksums.Should().Equal(parse.Checksums);
+		}
+
+		[TestMethod]
 		public void GivenAnyByteOfSavedIndexChanged_WhenReading_ThenReturnsFalse()
 		{
+			// Every section, the parse included, is covered by its checksum, or by the signature and version (#1023).
 			using MemoryStream source = ToStream("a\nb\nc\nd\n", new UTF8Encoding(false));
 			using var saved = new MemoryStream();
-			LineIndex.Build(source, checkpointInterval: 1).Write(saved);
+			LineIndex built = LineIndex.Build(source, checkpointInterval: 1);
+			built.Parse = CreateParse();
+			built.Write(saved);
 			var original = saved.ToArray();
 
 			for (var i = 0; i < original.Length; i++)
@@ -290,6 +312,14 @@ namespace BlueDotBrigade.Weevil.IO
 
 				LineIndex.TryRead(new MemoryStream(damaged), source, out _).Should().BeFalse($"byte {i} was changed");
 			}
+		}
+
+		/// <summary>
+		/// A parse of the 8 bytes of "a\nb\nc\nd\n": one block, so one checksum.
+		/// </summary>
+		private static SavedParse CreateParse()
+		{
+			return new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), StorageMode.Disk, contextHash: 42, startOffset: 0, endOffset: 8, checksums: [123]);
 		}
 
 		[TestMethod]

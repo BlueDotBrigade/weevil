@@ -24,7 +24,8 @@ namespace BlueDotBrigade.Weevil.IO
 		public const int DefaultBufferSize = 1024 * 1024;
 		public const int DefaultLookupBufferSize = 16 * 1024;
 
-		private const int FormatVersion = 1;
+		// Version 2 adds sections, each with its own checksum, and what parsed the log (#1023). An index of another version is rebuilt.
+		private const int FormatVersion = 2;
 		private const int FingerprintLength = 4096;
 		private const int HashLength = 32;
 		private const int MinimumBufferSize = 4;
@@ -59,6 +60,14 @@ namespace BlueDotBrigade.Weevil.IO
 		/// The number of bytes of the log that have been scanned.
 		/// </summary>
 		public long IndexedLength { get; private set; }
+
+		/// <summary>
+		/// What parsed the log, and the checksums of the bytes it read, after a full parse: otherwise <see langword="null"/> (#1023).
+		/// </summary>
+		/// <remarks>
+		/// It describes the log as it was parsed, so after <see cref="Update"/> it may cover less of the log than the index.
+		/// </remarks>
+		public SavedParse Parse { get; set; }
 
 		/// <summary>
 		/// Scans the whole log.
@@ -129,6 +138,7 @@ namespace BlueDotBrigade.Weevil.IO
 		{
 			(_unitSize, _isBigEndian, _preambleLength) = encoding;
 			_checkpoints.Clear();
+			this.Parse = null;
 			LineCount = 0;
 			IndexedLength = encoding.PreambleLength;
 			_endState = ScanState.AtLineStart;
@@ -185,36 +195,49 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Saves the index in a binary format that <see cref="TryRead"/> can read.
 		/// </summary>
+		/// <remarks>
+		/// After the signature and the format version come sections, each with its own checksum (#1023): the header, the checkpoints,
+		/// what parsed the log when <see cref="Parse"/> is set, and an end marker. They stream, so the file can be larger than 2 GB.
+		/// </remarks>
+		/// <param name="destination">A stream that can seek, such as a file.</param>
 		public void Write(Stream destination)
 		{
-			using var payload = new MemoryStream();
-			using var writer = new BinaryWriter(payload, Encoding.UTF8, leaveOpen: true);
-
-			writer.Write(Signature);
-			writer.Write(FormatVersion);
-			writer.Write(_checkpointInterval);
-			writer.Write((byte)_unitSize);
-			writer.Write(_isBigEndian);
-			writer.Write((byte)_preambleLength);
-			writer.Write(LineCount);
-			writer.Write(IndexedLength);
-			writer.Write(_endState.IsLineStartPending);
-			writer.Write(_endState.IsCarriageReturnPending);
-			writer.Write(_headHash);
-			writer.Write(_tailHash);
-			writer.Write(_checkpoints.Count);
-
-			foreach (var checkpoint in _checkpoints)
+			using (var writer = new BinaryWriter(destination, Encoding.UTF8, leaveOpen: true))
 			{
-				writer.Write(checkpoint);
+				writer.Write(Signature);
+				writer.Write(FormatVersion);
 			}
 
-			writer.Flush();
+			IndexSection.Write(destination, IndexSectionKind.Header, writer =>
+			{
+				writer.Write(_checkpointInterval);
+				writer.Write((byte)_unitSize);
+				writer.Write(_isBigEndian);
+				writer.Write((byte)_preambleLength);
+				writer.Write(LineCount);
+				writer.Write(IndexedLength);
+				writer.Write(_endState.IsLineStartPending);
+				writer.Write(_endState.IsCarriageReturnPending);
+				writer.Write(_headHash);
+				writer.Write(_tailHash);
+				writer.Write(_checkpoints.Count);
+				writer.Write(this.Parse != null);
+			});
 
-			// The checksum identifies a damaged index file, so that it is rebuilt.
-			var payloadBytes = payload.GetBuffer().AsSpan(0, (int)payload.Length);
-			destination.Write(payloadBytes);
-			destination.Write(SHA256.HashData(payloadBytes));
+			IndexSection.Write(destination, IndexSectionKind.Checkpoints, writer =>
+			{
+				foreach (var checkpoint in _checkpoints)
+				{
+					writer.Write(checkpoint);
+				}
+			});
+
+			if (this.Parse != null)
+			{
+				IndexSection.Write(destination, IndexSectionKind.Parse, this.Parse.Write);
+			}
+
+			IndexSection.Write(destination, IndexSectionKind.End, writeBytes: null);
 		}
 
 		/// <summary>
@@ -230,20 +253,21 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				using var reader = new BinaryReader(indexSource, Encoding.UTF8, leaveOpen: true);
-
-				if (!reader.ReadBytes(Signature.Length).AsSpan().SequenceEqual(Signature) ||
-				    reader.ReadInt32() != FormatVersion)
+				if (!TryReadSignature(indexSource) || !IndexSection.TryRead(indexSource, IndexSectionKind.Header, out IndexSection.Reader header))
 				{
 					return false;
 				}
 
-				reader.ReadInt32(); // checkpoint interval
-				reader.ReadByte(); // unit size
-				reader.ReadBoolean(); // big endian
-				reader.ReadByte(); // preamble length
-				lineCount = reader.ReadInt32();
-				indexedLength = reader.ReadInt64();
+				using (header)
+				{
+					BinaryReader reader = header.Binary;
+					reader.ReadInt32(); // checkpoint interval
+					reader.ReadByte(); // unit size
+					reader.ReadBoolean(); // big endian
+					reader.ReadByte(); // preamble length
+					lineCount = reader.ReadInt32();
+					indexedLength = reader.ReadInt64();
+				}
 			}
 			catch (EndOfStreamException)
 			{
@@ -260,73 +284,122 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <remarks>
 		/// The log is identified by its content only, so an index stays valid when the files are copied elsewhere.
 		/// If the log has grown since, call <see cref="Update"/> to scan the new content.
+		/// The index is read as it streams, so its size has no limit.
 		/// </remarks>
 		public static bool TryRead(Stream indexSource, Stream logSource, out LineIndex index)
 		{
 			index = null;
 
-			var length = indexSource.Length - indexSource.Position;
-
-			if (length < HashLength || length > int.MaxValue)
-			{
-				return false;
-			}
-
-			var bytes = new byte[length];
-			indexSource.ReadExactly(bytes);
-
-			var payloadLength = bytes.Length - HashLength;
-
-			if (!SHA256.HashData(bytes.AsSpan(0, payloadLength)).AsSpan().SequenceEqual(bytes.AsSpan(payloadLength)))
-			{
-				return false;
-			}
-
 			try
 			{
-				using var reader = new BinaryReader(new MemoryStream(bytes, 0, payloadLength));
-
-				if (!reader.ReadBytes(Signature.Length).AsSpan().SequenceEqual(Signature) ||
-				    reader.ReadInt32() != FormatVersion)
+				if (!TryReadSignature(indexSource) || !IndexSection.TryRead(indexSource, IndexSectionKind.Header, out IndexSection.Reader header))
 				{
 					return false;
 				}
 
-				var checkpointInterval = reader.ReadInt32();
-				int unitSize = reader.ReadByte();
-				var isBigEndian = reader.ReadBoolean();
-				int preambleLength = reader.ReadByte();
-				var lineCount = reader.ReadInt32();
-				var indexedLength = reader.ReadInt64();
-				var endState = new ScanState
+				int checkpointInterval;
+				int unitSize;
+				bool isBigEndian;
+				int preambleLength;
+				int lineCount;
+				long indexedLength;
+				ScanState endState;
+				byte[] headHash;
+				byte[] tailHash;
+				int checkpointCount;
+				bool hasParse;
+
+				using (header)
 				{
-					IsLineStartPending = reader.ReadBoolean(),
-					IsCarriageReturnPending = reader.ReadBoolean(),
-				};
-				var headHash = reader.ReadBytes(HashLength);
-				var tailHash = reader.ReadBytes(HashLength);
-				var checkpointCount = reader.ReadInt32();
+					BinaryReader reader = header.Binary;
+					checkpointInterval = reader.ReadInt32();
+					unitSize = reader.ReadByte();
+					isBigEndian = reader.ReadBoolean();
+					preambleLength = reader.ReadByte();
+					lineCount = reader.ReadInt32();
+					indexedLength = reader.ReadInt64();
+					endState = new ScanState
+					{
+						IsLineStartPending = reader.ReadBoolean(),
+						IsCarriageReturnPending = reader.ReadBoolean(),
+					};
+					headHash = reader.ReadBytes(HashLength);
+					tailHash = reader.ReadBytes(HashLength);
+					checkpointCount = reader.ReadInt32();
+					hasParse = reader.ReadBoolean();
+
+					if (!header.IsIntact)
+					{
+						return false;
+					}
+				}
 
 				var isConsistent =
 					checkpointInterval >= 1 &&
 					lineCount >= 0 &&
 					checkpointCount == (lineCount + (long)checkpointInterval - 1) / checkpointInterval &&
-					reader.BaseStream.Length - reader.BaseStream.Position == checkpointCount * (long)sizeof(long) &&
 					headHash.Length == HashLength &&
 					tailHash.Length == HashLength &&
 					indexedLength >= preambleLength &&
 					logSource.Length >= indexedLength;
 
-				if (!isConsistent)
+				if (!isConsistent || !IndexSection.TryRead(indexSource, IndexSectionKind.Checkpoints, out IndexSection.Reader checkpointSection))
 				{
 					return false;
 				}
 
 				var checkpoints = new List<long>(checkpointCount);
 
-				for (var i = 0; i < checkpointCount; i++)
+				using (checkpointSection)
 				{
-					checkpoints.Add(reader.ReadInt64());
+					if (checkpointSection.Remaining != checkpointCount * (long)sizeof(long))
+					{
+						return false;
+					}
+
+					for (var i = 0; i < checkpointCount; i++)
+					{
+						checkpoints.Add(checkpointSection.Binary.ReadInt64());
+					}
+
+					if (!checkpointSection.IsIntact)
+					{
+						return false;
+					}
+				}
+
+				SavedParse parse = null;
+
+				if (hasParse)
+				{
+					if (!IndexSection.TryRead(indexSource, IndexSectionKind.Parse, out IndexSection.Reader parseSection))
+					{
+						return false;
+					}
+
+					using (parseSection)
+					{
+						parse = SavedParse.Read(parseSection, logSource.Length);
+
+						if (parse is null || !parseSection.IsIntact)
+						{
+							return false;
+						}
+					}
+				}
+
+				// The end marker, at the end of the file, so a truncated or extended file is rejected.
+				if (!IndexSection.TryRead(indexSource, IndexSectionKind.End, out IndexSection.Reader end))
+				{
+					return false;
+				}
+
+				using (end)
+				{
+					if (!end.IsIntact || indexSource.Position != indexSource.Length)
+					{
+						return false;
+					}
 				}
 
 				var originalPosition = logSource.Position;
@@ -360,14 +433,24 @@ namespace BlueDotBrigade.Weevil.IO
 					_endState = endState,
 					_headHash = headHash,
 					_tailHash = tailHash,
+					Parse = parse,
 				};
 
 				return true;
 			}
-			catch (EndOfStreamException)
+			catch (Exception exception) when (exception is EndOfStreamException || exception is FormatException || exception is ArgumentException)
 			{
+				// A damaged file: a string's length, or a build ID, that is not what was written.
 				return false;
 			}
+		}
+
+		private static bool TryReadSignature(Stream indexSource)
+		{
+			using var reader = new BinaryReader(indexSource, Encoding.UTF8, leaveOpen: true);
+
+			return reader.ReadBytes(Signature.Length).AsSpan().SequenceEqual(Signature) &&
+			       reader.ReadInt32() == FormatVersion;
 		}
 
 		/// <summary>

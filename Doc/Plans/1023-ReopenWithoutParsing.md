@@ -135,6 +135,9 @@ One pull request per step, in order.
    - It adds the block checksums and the parse's identity. There is no table yet.
    - `MemoryEstimator` reads the new header.
    - Tests: today's `LineIndexTests`, `LineIndexFileTests` and `MemoryEstimatorTests` move to version 2. A section whose checksum fails is rejected. A file larger than 2 GB is written and read back, in a test that creates a sparse file where the system allows.
+   - Done on 2026-11-13. Two changes from the plan:
+     - The line index is still saved before the parse, as before, and a full parse saves the index again with its parse. So nothing else about loading changed, and an open from a start line, or of a range, saves no parse.
+     - The test of a file larger than 2 GB moves to step 3. Until the table is saved, an index holds a few MB at most, and the sections already use 64-bit lengths and stream.
 3. **The table is saved, and reopening uses it.**
    - A full parse saves the table. Every open with a matching index builds its table from it, and an open with a start line or range takes the rows it needs.
    - Tests:
