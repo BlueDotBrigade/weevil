@@ -41,6 +41,9 @@ namespace BlueDotBrigade.Weevil
 		public void GivenOpenBenchmarks_WhenRun_ThenReportIsWritten() => Run<OpenBenchmarks>();
 
 		[TestMethod]
+		public void GivenReopenBenchmarks_WhenRun_ThenReportIsWritten() => Run<ReopenBenchmarks>();
+
+		[TestMethod]
 		public void GivenFilterBenchmarks_WhenRun_ThenReportIsWritten() => Run<FilterBenchmarks>();
 
 		[TestMethod]
