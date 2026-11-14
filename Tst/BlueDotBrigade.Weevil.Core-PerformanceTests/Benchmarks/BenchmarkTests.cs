@@ -83,13 +83,7 @@ namespace BlueDotBrigade.Weevil
 		/// BenchmarkDotNet's defaults, without its CSV, HTML and Markdown reports: <see cref="Run{TBenchmarks}"/> writes the Markdown one.
 		/// </summary>
 		/// <remarks>
-		/// <list type="bullet">
-		///   <item>
-		///   BenchmarkDotNet refuses an assembly that references an unoptimized one, and DatenLokator, which only the tests use, ships unoptimized (#1180).
-		///   So its check is turned off, and the <c>#if DEBUG</c> in <see cref="Run{TBenchmarks}"/> takes its place: this project, Core and Common are built in Release.
-		///   </item>
-		///   <item>The environment variable <c>WEEVIL_BENCHMARK_JOB=Short</c> picks BenchmarkDotNet's short job, for a quick look. Otherwise the default job measures more precisely, and takes longer.</item>
-		/// </list>
+		/// The environment variable <c>WEEVIL_BENCHMARK_JOB=Short</c> picks BenchmarkDotNet's short job, for a quick look. Otherwise the default job measures more precisely, and takes longer.
 		/// </remarks>
 		private static IConfig CreateConfig()
 		{
@@ -100,8 +94,7 @@ namespace BlueDotBrigade.Weevil
 				.AddLogger(defaults.GetLoggers().ToArray())
 				.AddAnalyser(defaults.GetAnalysers().ToArray())
 				.AddValidator(defaults.GetValidators().ToArray())
-				.WithArtifactsPath(ArtifactsPath)
-				.WithOptions(ConfigOptions.DisableOptimizationsValidator);
+				.WithArtifactsPath(ArtifactsPath);
 
 			if (string.Equals(Environment.GetEnvironmentVariable("WEEVIL_BENCHMARK_JOB"), "Short", StringComparison.OrdinalIgnoreCase))
 			{
