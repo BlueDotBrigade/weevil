@@ -1,6 +1,6 @@
 # 1023: Reopen a Log Without Parsing It Again
 
-> **Status:** In progress
+> **Status:** Done
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -184,6 +184,9 @@ One pull request per step, in order.
    - A reopen case in the memory harness, on the 1 GB and 4 GB logs, and a reopen after the log grew.
    - [RecordTable.md](../Design/RecordTable.md) and [DiskMode.md](../Design/DiskMode.md) describe the saved table.
    - Step 5 of the #988 plan is marked done.
+   - **Done.** `ReopenBenchmarks` reopens the reference logs, copied outside the temporary folder once per storage mode, and checks that each reopen reads the saved index. The memory harness's `--reopen` measures a reopen and a reopen after the log grew 1% ([results](../Research/Weevil3/MemoryHarness/README.md#reopening-after-1023-2026-11-14)). [RecordTable.md](../Design/RecordTable.md#saved-with-the-index) and [DiskMode.md](../Design/DiskMode.md#reopening-a-log-on-disk) describe the saved table.
+     - **Found by the harness, and fixed:** after a grown reopen the saved table stayed in memory, about 22 bytes per record, because the method that opened the log still held it, through an `out` variable, when the engine's collection ran. The reopen now runs in a method of its own.
+     - **Left for #1201:** a grown reopen peaks at about 1.37 GB per GB of log while it copies the saved rows, against 1.22 for a first open. Sharing the saved table's blocks would remove the copy.
 
 ## Not in This Plan
 

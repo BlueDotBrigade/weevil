@@ -183,6 +183,46 @@
 			}
 
 			/// <summary>
+			/// Reopens the log from the record table saved with its index, parsing only what it grew by since (#1023).
+			/// </summary>
+			/// <remarks>
+			/// A method of its own, so the saved table that a grown log's longer table replaces is not kept by <see cref="Build"/>'s frame
+			/// when the engine is created, whose collection would otherwise keep it: about 22 bytes per record.
+			/// </remarks>
+			/// <param name="source">On disk, the source the records read their content back through: otherwise <see langword="null"/>.</param>
+			/// <returns><see langword="false"/> when the log must be parsed.</returns>
+			private bool TryReopen(FileStream dataSource, LineIndex lineIndex, IPlugin plugin, ICoreExtension coreExtension, out RecordList records, out LogFileSource source)
+			{
+				records = null;
+
+				if (!LineIndexFile.TryLoadTable(_sourceFilePath, dataSource, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
+				{
+					return false;
+				}
+
+				SavedParse savedParse = lineIndex.Parse;
+
+				if (savedParse.EndOffset == dataSource.Length)
+				{
+					records = new TableRecordList(savedTable);
+					return true;
+				}
+
+				if (!GrownLogParser.TryParse(dataSource, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
+				{
+					source = null;
+					return false;
+				}
+
+				// The log grew since it was indexed: only its new part was parsed, and the longer table is saved.
+				records = new TableRecordList(grownTable);
+				source = _storageMode == StorageMode.Disk ? parsedSource : null;
+				LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
+
+				return true;
+			}
+
+			/// <summary>
 			/// Creates an instance of <see cref="CoreEngine"/> based on the provided parameters.
 			/// </summary>
 			public CoreEngine Build()
@@ -247,21 +287,9 @@
 					records = null;
 					source = null;
 
-					if (isFullOpen && LineIndexFile.TryLoadTable(_sourceFilePath, dataSource, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
+					if (isFullOpen)
 					{
-						SavedParse savedParse = lineIndex.Parse;
-
-						if (savedParse.EndOffset == dataSource.Length)
-						{
-							records = new TableRecordList(savedTable);
-						}
-						else if (GrownLogParser.TryParse(dataSource, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
-						{
-							// The log grew since it was indexed: only its new part was parsed, and the longer table is saved.
-							records = new TableRecordList(grownTable);
-							source = _storageMode == StorageMode.Disk ? parsedSource : null;
-							LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
-						}
+						_ = TryReopen(dataSource, lineIndex, plugin, coreExtension, out records, out source);
 					}
 
 					if (records == null)

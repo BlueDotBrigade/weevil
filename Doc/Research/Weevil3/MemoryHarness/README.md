@@ -22,7 +22,7 @@ A log too big for the RAM would make the computer page to disk. The harness stop
 
 Logs it cannot measure, and the sizes given to `--estimate-gb`, are estimated from the largest log it measured: the memory before opening, plus the memory per GB of log times the log's size. The report labels them as estimates.
 
-Each synthetic log is measured as a first open: the harness deletes the log's saved line index (`.idx`) before opening it.
+Each synthetic log is measured as a first open: the harness deletes the log's saved line index (`.idx`) before opening it. With `--reopen`, it then opens the log again, from the record table saved with its index (#1023), and opens each synthetic log again after it grew: its first 99% is opened, so its index is saved, then the rest is appended. Weevil saves no index in the temporary folder, so `--reopen` needs `--log-folder` elsewhere.
 
 ## Run It
 
@@ -49,6 +49,7 @@ dotnet run -c Release -- --size-mb 1000,4000,8000 --delete-logs --report after.m
 | `--record-bytes <70-4000>` | Average record size in the synthetic logs. Default 131. |
 | `--log-folder <path>` | Where the synthetic logs are written. Default: the temporary folder. |
 | `--delete-logs` | Delete each synthetic log after measuring it. |
+| `--reopen` | Also reopen each log from its saved index, and each synthetic log after it grew 1%. Needs logs outside the temporary folder. |
 | `--file <path>` | Open a real log instead; repeat for several. |
 | `--estimate-gb <list>` | Log sizes to estimate, in GB, separated by commas. Default 12,16,20,24. |
 | `--ram-percent <10-100>` | Stop opening a log once it uses this share of the RAM free when the run started. Default 90. |
@@ -110,3 +111,15 @@ Weevil now needs about **1.22 GB of RAM per GB of log**, both at the peak while 
 
 - **On a PC:** with 32 GB of RAM, the largest log that fits is now about 20 GB, instead of about 16 GB after step 1.
 - **Opening times** are from the same kind of machine, but its speed varies between sessions, so compare them only roughly: the 4 GB log took 75 s on 2026-10-29.
+
+### Reopening, after #1023 (2026-11-14)
+
+A reopen builds the record table saved with the log's index instead of parsing the log, and takes the same memory as a first open. A reopen after the log grew 1% parses only its new part. While it copies the saved rows into the longer table, it holds both, about 22 bytes per record more, so its peak is about 1.37 GB per GB of log; #1201 removes the copy. The full report is in [Results-2026-11-14-Reopen.md](Results-2026-11-14-Reopen.md).
+
+| Log | First open | Reopen | Reopen after growing 1% |
+|---|---|---|---|
+| 1 GB | 7.8 s, 1.4 GB | 2.7 s, 1.4 GB | 3.4 s, 1.4 GB, peak 1.5 GB |
+| 4 GB | 30.8 s, 4.9 GB | 10.4 s, 4.9 GB | 16.2 s, 4.9 GB, peak 5.5 GB |
+
+- **The first measurement kept the saved table** after a grown reopen: 5.5 GB once the 4 GB log was open. The engine's collection ran while the method that opened the log still held the table, even in a Release build, through an `out` variable, and clearing the variable did not free it. The reopen now runs in a method of its own (`CoreEngineBuilder.TryReopen`).
+- **The 4 GB reopen takes 10 s,** a third of a first open: it still reads the whole log, to check it against the saved checksums, and reads the 0.66 GB table.

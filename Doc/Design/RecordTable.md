@@ -52,7 +52,9 @@ After a full open, the table is saved in the log's `.idx` file, beside the line 
 | Reopen after growing 1% | 3.0 s | 2.1 s |
 | Full open of the grown log | 8.4 s | 7.6 s |
 
-A reopen takes the same memory as a parse ([Memory](#memory)). A reopen after the log grew holds the saved rows and the longer table's at once while it copies them.
+`ReopenBenchmarks`, in the performance tests, measures a reopen of the reference logs; on 1 million records, 0.29 s in RAM and 0.18 s on disk, against 0.93 s for `OpenBenchmarks` to parse it (short job, Linux, 4 cores).
+
+A reopen takes the same memory as a parse ([Memory](#memory)). A reopen after the log grew holds the saved rows and the longer table's at once while it copies them, so it peaks at about 1.37 GB per GB of log, against 1.22, until #1201 shares the saved blocks instead.
 
 ## Memory
 

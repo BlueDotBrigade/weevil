@@ -1,6 +1,6 @@
 # 988: Keep a Log in Much Less Memory
 
-> **Status:** In progress
+> **Status:** Done
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -87,6 +87,7 @@ Before step 1, #1019 measures Weevil 2.12.1's memory as the baseline: 1, 4 and 8
    - The header also gains the plugin's name and version and its Open As settings, so a change of plugin rebuilds the record table.
    - This needs a new layout, not just a new version number. Today the whole index is written through one memory buffer, and files over 2 GB are rejected; a 64 GB log's record table takes several GB.
    - When the saved index matches the log, Weevil builds the table from it instead of parsing. Older index files are rebuilt.
+   - **Done 2026-11-14,** in five steps of [1023-ReopenWithoutParsing.md](1023-ReopenWithoutParsing.md), which records the decisions and how they changed this outline: the parse is identified by the builds of the plugin, Core and Common, and its storage mode, not by a version and the Open As settings; every block of the log is checked against a saved checksum; and a log that grew is parsed only in its new part. The 1 GB reference log reopens in 2.0 s in RAM and 0.9 s on disk, against 8.4 s to parse it, in the same memory. [RecordTable.md](../Design/RecordTable.md#saved-with-the-index) describes the result.
 
 ## Compatibility
 
