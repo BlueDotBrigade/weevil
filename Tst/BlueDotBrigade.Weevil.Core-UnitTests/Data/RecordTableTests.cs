@@ -149,6 +149,96 @@ namespace BlueDotBrigade.Weevil.Data
 			FluentActions.Invoking(() => table.CreateRecord(0)).Should().Throw<ArgumentOutOfRangeException>();
 		}
 
+		[TestMethod]
+		[DataRow(0)]
+		[DataRow(10)]
+		[DataRow(RecordTable.BlockSize)]
+		[DataRow(RecordTable.BlockSize + 5)]
+		[DataRow(2 * RecordTable.BlockSize)]
+		[DataRow((2 * RecordTable.BlockSize) + 3)]
+		public void GivenATableOfSeveralBlocks_WhenItsFirstRecordsAreAppendedTo_ThenItHasThoseRecordsThenTheNewOnes(int count)
+		{
+			// A grown log keeps the saved table's first records, sharing its full blocks, and adds the records parsed since (#1023, #1201).
+			(RecordTable saved, Action<RecordTable.Builder, int>[] savedRows) = CreateTableOfSeveralBlocks("ab");
+			(RecordTable next, Action<RecordTable.Builder, int>[] nextRows) = CreateTableOfSeveralBlocks("cd", rowCount: 10);
+
+			RecordTable appended = saved.Append(count, next, chunk => chunk);
+
+			var expected = new RecordTable.Builder();
+			for (var index = 0; index < count; index++)
+			{
+				savedRows[index](expected, index + 1);
+			}
+
+			for (var index = 0; index < nextRows.Length; index++)
+			{
+				// The records parsed since keep the line numbers their parse gave them.
+				nextRows[index](expected, index + 1);
+			}
+
+			Describe(appended, count, count + 10).Should().Equal(Describe(expected.Build(), count, count + 10));
+			Describe(appended, 0, count).Should().Equal(Describe(saved, 0, count));
+		}
+
+		[TestMethod]
+		public void GivenChunksToReplace_WhenATableIsAppendedTo_ThenEveryKeptRowReadsItsReplacedChunk()
+		{
+			// On disk, every chunk of a grown log's table reads through one source, so the shared blocks' rows must read the replaced chunks too (#1023, #1201).
+			(RecordTable saved, _) = CreateTableOfSeveralBlocks("ab");
+			(RecordTable next, _) = CreateTableOfSeveralBlocks("cd", rowCount: 10);
+			var count = (2 * RecordTable.BlockSize) + 3;
+
+			RecordTable appended = saved.Append(count, next, chunk => new ContentChunk(chunk.FileOffset, Encoding.UTF8.GetBytes("XY"), Encoding.UTF8));
+
+			for (var recordNumber = 0; recordNumber < appended.Count; recordNumber++)
+			{
+				var content = appended.CreateRecord(recordNumber).Content;
+
+				if (!content.StartsWith("String", StringComparison.Ordinal))
+				{
+					content.Should().BeOneOf(["X", "Y"], $"record {recordNumber} reads a replaced chunk");
+				}
+			}
+		}
+
+		/// <summary>
+		/// A table of string rows and rows that read one of three chunks, over two full blocks and a few rows more, with a chunk that crosses each block boundary.
+		/// </summary>
+		/// <returns>The table, and how to add each of its rows to another builder, with a line number.</returns>
+		private static (RecordTable Table, Action<RecordTable.Builder, int>[] Rows) CreateTableOfSeveralBlocks(string letters, int rowCount = (2 * RecordTable.BlockSize) + 10)
+		{
+			ContentChunk[] chunks = Enumerable.Range(0, 3)
+				.Select(index => new ContentChunk(index * 2, Encoding.UTF8.GetBytes(letters), Encoding.UTF8))
+				.ToArray();
+			var facts = new RecordFacts(SeverityType.Information, isMultiLine: false, wasGeneratedByUi: false);
+			var rows = new Action<RecordTable.Builder, int>[rowCount];
+
+			for (var index = 0; index < rowCount; index++)
+			{
+				var row = index;
+				ContentChunk chunk = chunks[System.Math.Min(row * 3 / rowCount, 2)];
+				rows[index] = row % 1_000 == 7
+					? (builder, lineNumber) => builder.Add(lineNumber, Start.AddSeconds(row), facts, $"String {row}")
+					: (builder, lineNumber) => builder.Add(lineNumber, Start.AddSeconds(row), facts, chunk, row % 2, 1);
+			}
+
+			var table = new RecordTable.Builder();
+			for (var index = 0; index < rowCount; index++)
+			{
+				rows[index](table, index + 1);
+			}
+
+			return (table.Build(), rows);
+		}
+
+		private static string[] Describe(RecordTable table, int start, int end)
+		{
+			return Enumerable.Range(start, end - start)
+				.Select(recordNumber => table.CreateRecord(recordNumber))
+				.Select(record => $"{record.LineNumber}|{record.CreatedAt:O}|{record.Severity}|{record.Content}")
+				.ToArray();
+		}
+
 		private static void ShouldBe(IRecord record, int lineNumber, DateTime createdAt, SeverityType severity, bool isMultiLine, bool wasGeneratedByUi, string content)
 		{
 			record.LineNumber.Should().Be(lineNumber);

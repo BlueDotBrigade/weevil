@@ -150,6 +150,10 @@ namespace BlueDotBrigade.Weevil.Data
 		/// <summary>
 		/// Returns a new table of this table's first <paramref name="count"/> records, then every record of <paramref name="next"/>, for a log that grew (#1023).
 		/// </summary>
+		/// <remarks>
+		/// The new table shares this table's full blocks before <paramref name="count"/>, which never change, rather than copying their rows,
+		/// so the two tables together take little more memory than one (#1201). Only the rows after the last full block, and <paramref name="next"/>'s, are copied.
+		/// </remarks>
 		/// <param name="replaceChunk">Gives the chunk each row reads, so that on disk every chunk reads through one source: called once per chunk.</param>
 		internal RecordTable Append(int count, RecordTable next, Func<ContentChunk, ContentChunk> replaceChunk)
 		{
@@ -158,22 +162,35 @@ namespace BlueDotBrigade.Weevil.Data
 			ArgumentNullException.ThrowIfNull(next);
 			ArgumentNullException.ThrowIfNull(replaceChunk);
 
+			Func<int, ContentChunk> getChunk = ReplaceChunks(replaceChunk);
 			var builder = new Builder();
-			AddRows(builder, count, replaceChunk);
-			next.AddRows(builder, next.Count, replaceChunk);
+
+			var sharedRows = builder.Share(this, count / BlockSize, getChunk);
+			AddRows(builder, sharedRows, count, getChunk);
+			next.AddRows(builder, 0, next.Count, next.ReplaceChunks(replaceChunk));
 
 			return builder.Build();
 		}
 
 		/// <summary>
-		/// Adds the first <paramref name="count"/> rows to <paramref name="builder"/>, walking the chunk directory alongside rather than searching it for each row.
+		/// Returns the chunk at each index of the directory, replaced once: the same object each time, so a builder sees one chunk.
 		/// </summary>
-		private void AddRows(Builder builder, int count, Func<ContentChunk, ContentChunk> replaceChunk)
+		private Func<int, ContentChunk> ReplaceChunks(Func<ContentChunk, ContentChunk> replaceChunk)
 		{
 			var replaced = new ContentChunk[_chunks.Length];
+			return index => replaced[index] ??= replaceChunk(_chunks[index]);
+		}
+
+		/// <summary>
+		/// Adds the rows from <paramref name="start"/> to before <paramref name="end"/> to <paramref name="builder"/>,
+		/// walking the chunk directory alongside rather than searching it for each row.
+		/// </summary>
+		/// <param name="getChunk">Gives the chunk at an index of the directory: the same object each time for the same index, so the builder sees one chunk.</param>
+		private void AddRows(Builder builder, int start, int end, Func<int, ContentChunk> getChunk)
+		{
 			var chunkIndex = -1;
 
-			for (var recordNumber = 0; recordNumber < count; recordNumber++)
+			for (var recordNumber = start; recordNumber < end; recordNumber++)
 			{
 				Block block = _blocks[recordNumber / BlockSize];
 				var row = recordNumber % BlockSize;
@@ -190,7 +207,7 @@ namespace BlueDotBrigade.Weevil.Data
 					chunkIndex++;
 				}
 
-				ContentChunk chunk = replaced[chunkIndex] ??= replaceChunk(_chunks[chunkIndex]);
+				ContentChunk chunk = getChunk(chunkIndex);
 				builder.Add(block.LineNumbers[row], block.CreatedAt[row], facts, chunk, block.Offsets[row], block.Lengths[row]);
 			}
 		}
@@ -466,6 +483,38 @@ namespace BlueDotBrigade.Weevil.Data
 			private Block _current;
 
 			public int Count { get; private set; }
+
+			/// <summary>
+			/// Starts an empty builder with <paramref name="table"/>'s first <paramref name="blockCount"/> blocks, all full, and the chunks their rows read (#1201).
+			/// </summary>
+			/// <remarks>
+			/// A block never changes once built, so two tables can share it. The directory's first entries are the same, in the same order,
+			/// so each shared block's first chunk stays at the same index.
+			/// </remarks>
+			/// <param name="getChunk">Gives the chunk at an index of <paramref name="table"/>'s directory.</param>
+			/// <returns>The number of rows the shared blocks hold.</returns>
+			internal int Share(RecordTable table, int blockCount, Func<int, ContentChunk> getChunk)
+			{
+				if (this.Count != 0)
+				{
+					throw new InvalidOperationException("Only an empty builder can start with another table's blocks.");
+				}
+
+				for (var index = 0; index < blockCount; index++)
+				{
+					_blocks.Add(table._blocks[index]);
+				}
+
+				this.Count = blockCount * BlockSize;
+
+				for (var index = 0; index < table._chunkStarts.Length && table._chunkStarts[index] < this.Count; index++)
+				{
+					_chunkStarts.Add(table._chunkStarts[index]);
+					_chunks.Add(getChunk(index));
+				}
+
+				return this.Count;
+			}
 
 			/// <summary>
 			/// Adds a record whose content is <paramref name="length"/> bytes at <paramref name="offset"/> in <paramref name="chunk"/>.
