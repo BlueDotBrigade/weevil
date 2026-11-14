@@ -366,8 +366,8 @@ MigrationBackup/
 # We require log files for testing purposes (logs were previously blocked by global gitignore):
 !*.log
 
-# This directory temporarily holds data used by the automated tests:
-*~ZIP/
+# These directories temporarily hold data used by the automated tests: DatenLokator extracts archives into them.
+*~TMP/
 
 # Do not commit Gherkin code-behind.
 **/*.feature.cs
