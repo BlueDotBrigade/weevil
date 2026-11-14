@@ -54,3 +54,55 @@ Scenario: A damaged record table is saved again by the parse that replaces it
 	When the saved log file is opened again in RAM
 	Then it will have been opened without being parsed
 	And it will show the same records as a parse of the log
+
+Scenario Outline: A log that grew since it was opened is parsed only in its new part, with the same records
+	Given that the default log file has been saved beside the tests as <Encoding> with <Line Endings> line endings
+	And that the saved log file has been opened in <Mode>
+	And records have been appended to the saved log file
+	When the saved log file is opened again in <Mode>
+	Then it will have been parsed only in its new part
+	And it will show the same records as a parse of the log
+
+Examples:
+	| Encoding       | Line Endings | Mode |
+	| UTF-8          | LF           | RAM  |
+	| UTF-8 with BOM | CRLF         | Disk |
+	| UTF-16 LE      | CR           | Disk |
+	| UTF-16 BE      | LF           | RAM  |
+	| UTF-32 LE      | CRLF         | RAM  |
+
+Scenario: A log whose last record gained lines since it was opened shows them in that record
+	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings
+	And that the saved log file has been opened in RAM
+	And lines that continue the last record have been appended to the saved log file
+	When the saved log file is opened again in RAM
+	Then it will have been parsed only in its new part
+	And its last record will span several lines
+	And it will show the same records as a parse of the log
+
+Scenario: A log that grew twice is parsed only in its new part each time
+	Given that the default log file has been saved beside the tests as UTF-8 with CRLF line endings
+	And that the saved log file has been opened in Disk
+	And records have been appended to the saved log file
+	And that the saved log file has been opened in Disk
+	And records have been appended to the saved log file
+	When the saved log file is opened again in Disk
+	Then it will have been parsed only in its new part
+	And it will show the same records as a parse of the log
+
+Scenario: A log that grew and also changed in its old part is parsed in full
+	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings
+	And that the saved log file has been opened in RAM
+	And one character in the middle of the saved log file has been changed
+	And records have been appended to the saved log file
+	When the saved log file is opened again in RAM
+	Then it will have been parsed, because its saved record table does not match it
+	And it will show the same records as a parse of the log
+
+Scenario: A log given a line break in the middle since it was opened is indexed again
+	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings
+	And that the saved log file has been opened in RAM
+	And a line break has replaced one character in the middle of the saved log file
+	And that the saved log file has been opened in RAM
+	When the saved log file is opened again in RAM from line 350
+	Then it will show the same records as a parse of the log

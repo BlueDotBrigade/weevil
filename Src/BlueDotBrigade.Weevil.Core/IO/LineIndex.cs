@@ -152,6 +152,28 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
+		/// Forgets everything scanned, with the parse saved with it, and scans the whole log again.
+		/// </summary>
+		/// <remarks>
+		/// For a log found changed in the middle, which <see cref="TryRead"/> cannot see, as it checks only the start and end of what was scanned (#1023).
+		/// </remarks>
+		public void Rebuild(Stream source, int bufferSize = DefaultBufferSize)
+		{
+			var originalPosition = source.Position;
+
+			try
+			{
+				Reset(DetectEncoding(source));
+			}
+			finally
+			{
+				source.Position = originalPosition;
+			}
+
+			Update(source, bufferSize);
+		}
+
+		/// <summary>
 		/// Forgets everything scanned, so that scanning restarts after the byte order mark of the given encoding.
 		/// </summary>
 		private void Reset((int UnitSize, bool IsBigEndian, int PreambleLength) encoding)

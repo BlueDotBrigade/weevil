@@ -25,11 +25,15 @@ namespace BlueDotBrigade.Weevil.IO
 
 		internal const string TableRejectedMessage = "The saved record table does not match the log, so the log will be parsed.";
 
+		internal const string OldRecordsReadFromIndexMessage = "The records of the log's old part were read from the saved index: the log grew since.";
+
 		/// <summary>
 		/// Returns the saved index when it matches the log, after scanning any content added since. Otherwise scans the whole log.
 		/// </summary>
 		/// <remarks>
 		/// The index is saved whenever it changes, unless it cannot be: Weevil then continues without saving it.
+		/// An index that holds a record table is not saved when the log grew, as that would drop the table: a full open extends the table,
+		/// and saves both (#1023). After any other open, the next one scans the new content again.
 		/// </remarks>
 		public static LineIndex Load(string logFilePath, Stream logSource)
 		{
@@ -51,7 +55,7 @@ namespace BlueDotBrigade.Weevil.IO
 				index = LineIndex.Build(logSource);
 			}
 
-			if (hasChanged)
+			if (hasChanged && !index.HasTable)
 			{
 				TrySave(index, logFilePath, indexFilePath);
 			}
@@ -193,8 +197,9 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Builds the record table saved with the index, instead of parsing the log, when the same parser would make it and the log has not changed since (#1023).
 		/// </summary>
 		/// <remarks>
-		/// Every block of the log is checked against the checksums saved with the table: one that changed means the log must be parsed.
-		/// A log that grew since is parsed too.
+		/// Every block of the log that was parsed is checked against the checksums saved with the table: one that changed means the log must be parsed,
+		/// and since the line index cannot see such a change, it is rebuilt.
+		/// For a log that grew since, the table holds only its old part, up to <see cref="SavedParse.EndOffset"/>: see <see cref="GrownLogParser"/>.
 		/// </remarks>
 		/// <param name="source">On disk, the source the records read their content back through: otherwise <see langword="null"/>.</param>
 		/// <returns><see langword="false"/> when the log must be parsed.</returns>
@@ -205,7 +210,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			SavedParse parse = index.Parse;
 
-			if (parse is null || !index.HasTable || !parse.IsSameParser(plugin, storageMode) || parse.EndOffset != logSource.Length)
+			if (parse is null || !index.HasTable || !parse.IsSameParser(plugin, storageMode) || parse.EndOffset > logSource.Length)
 			{
 				return false;
 			}
@@ -236,8 +241,9 @@ namespace BlueDotBrigade.Weevil.IO
 						LogSeverityType.Information,
 						$"{TableRejectedMessage} IndexFilePath={indexFilePath}");
 
-					// So the parse that follows saves a table again, rather than leaving one that every open rejects.
-					index.HasTable = false;
+					// The log may have changed in the middle, where the line index cannot see it. This also clears the table,
+					// so the parse that follows saves one again, rather than leaving one that every open rejects.
+					index.Rebuild(logSource);
 					return false;
 				}
 			}
@@ -260,7 +266,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			Log.Default.Write(
 				LogSeverityType.Information,
-				RecordsReadFromIndexMessage,
+				parse.EndOffset == logSource.Length ? RecordsReadFromIndexMessage : OldRecordsReadFromIndexMessage,
 				new Dictionary<string, object>
 				{
 					{ "RecordCount", table.Count },

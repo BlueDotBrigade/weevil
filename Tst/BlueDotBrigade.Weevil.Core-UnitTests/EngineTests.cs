@@ -578,7 +578,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenALogThatGrewAndAnIndexThatCannotBeSavedAgain_WhenReopened_ThenTheLogIsParsedWithItsNewRecords()
 		{
 			// The saved table covers the log as it was. If the index cannot be saved again after the log grew, it still holds that table,
-			// which would hide the records added since: the reopen must parse (#1023).
+			// which would hide the records added since: the reopen must parse the new part (#1023).
 			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
 			try
 			{
@@ -601,6 +601,67 @@ namespace BlueDotBrigade.Weevil
 			{
 				Directory.Delete(folder, recursive: true);
 			}
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenALogOfSeveralChunksThatGrewIntoANewChunk_WhenReopenedTwice_ThenOnlyTheNewPartIsParsedAndTheLongerTableIsSaved(StorageMode storageMode)
+		{
+			// About 40 MB, then 25 MB more, so the rows of the first chunks are kept, the last chunk is parsed again and grows,
+			// and the checksums of the new part follow those saved for the old (#1023).
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+			var copyFolder = Directory.CreateTempSubdirectory("Weevil.EngineTests.").FullName;
+			try
+			{
+				var logPath = Path.Combine(folder, "Large.log");
+				WriteLines(logPath, 0, 350_000);
+				_ = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+				WriteLines(logPath, 350_000, 570_000);
+
+				var copyPath = Path.Combine(copyFolder, "Large.log");
+				File.Copy(logPath, copyPath);
+				var parsed = Describe(Engine.UsingPath(copyPath).UsingStorage(storageMode).Open().Records);
+
+				string[] grown;
+				using (var log = CapturingLogWriter.Register())
+				{
+					grown = Describe(Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Records);
+					log.SeverityOfLast(IO.GrownLogParser.NewPartParsedMessage).Should().Be(LogSeverityType.Information);
+				}
+
+				using (var log = CapturingLogWriter.Register())
+				{
+					IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+					log.SeverityOfLast(IO.LineIndexFile.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information, "the longer table was saved, with checksums that match the log");
+					Describe(reopened.Records).Should().Equal(parsed);
+				}
+
+				grown.Should().Equal(parsed);
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+				Directory.Delete(copyFolder, recursive: true);
+			}
+
+			static void WriteLines(string path, int from, int to)
+			{
+				using var writer = new StreamWriter(path, append: true);
+				var start = new DateTime(3050, 9, 30, 11, 26, 12);
+				for (var i = from; i < to; i++)
+				{
+					writer.Write($"{start.AddMilliseconds(i * 10):yyyy-MM-dd HH:mm:ss.fffff}\t1977\t{i % 9}\tInfo\t[Sensors] Proximity scan complete. Contacts={i % 13}, Record={i}\n");
+
+					if (i % 50 == 0)
+					{
+						writer.Write($"  continued on another line {i}\n");
+					}
+				}
+			}
+
+			static string[] Describe(RecordList records) => records.Select(r => $"{r.LineNumber}|{r.CreatedAt:O}|{r.Severity}|{r.IsMultiLine}|{r.Content}").ToArray();
 		}
 
 		private static IO.SavedParse ReadSavedParse(string logPath)

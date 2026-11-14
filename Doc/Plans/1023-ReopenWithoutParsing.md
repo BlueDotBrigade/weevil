@@ -169,6 +169,14 @@ One pull request per step, in order.
    - Measured on the 1 GB, 10-million-record UTF-8 log, in Release, alternating with `main` in one session: a first open in RAM takes 9.2 – 9.5 s against 8.4 s, to write the table, and a reopen takes 1.9 – 2.0 s against 7.4 – 7.6 s. On disk, a reopen takes 0.9 s. The `.idx` holds 221 MB, 22 bytes per record.
 4. **A grown log is parsed only in its new part.**
    - Tests: records appended at the end; a last record that gains continuation lines; growth that starts a new chunk; a log that grew and also changed in its old part, which is parsed in full; the extended table equals a full parse, in RAM and on disk.
+   - **Done.** `GrownLogParser` extends the saved table; `LineIndexFile.Load` no longer saves the index of a grown log that holds a table, which dropped the table.
+     - **The rows from the last chunk's first record on are dropped,** which includes the last record, and the log is parsed from there. A log under 16 MB has one chunk, so it is parsed again in full, which costs at most 16 MB. A table of only strings, such as UTF-16 BE in RAM, has no chunk, so only its last record is dropped, and the line index says where it starts.
+     - **The checksums of the new part follow those saved for the old part:** the parse hashes from the start of the block that holds its first byte.
+     - **The whole table is saved again,** about 0.8 s for 10 million records. Appending to the `.idx` in place is left out.
+     - **After a partial open of a grown log, the line index's new part is not saved,** so the next open scans it again. A full open saves both.
+     - **The stale line index is fixed:** when a table is rejected, the line index is rebuilt, since a change in the middle of the log is what it cannot see.
+     - Tests: appended records in 5 encodings and line endings, in RAM and on disk; a last record that gains lines; a log that grew twice; a log that grew and changed in its old part; a line break put in the middle, then an open from a start line; a 40 MB log that grows by 25 MB into a new chunk, reopened twice, in RAM and on disk.
+   - Measured on the 1 GB, 10-million-record UTF-8 log, in Release: its first 99% opened, then grown back by 1% (about 10 MB). A reopen takes 3.0 s in RAM and 2.1 s on disk, against 8.4 s and 7.6 s to open it in full.
 5. **Measured and documented.**
    - A reopen benchmark, with logs outside the temporary folder.
    - A reopen case in the memory harness, on the 1 GB and 4 GB logs, and a reopen after the log grew.
