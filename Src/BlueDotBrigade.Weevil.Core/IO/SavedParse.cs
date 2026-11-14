@@ -114,6 +114,43 @@ namespace BlueDotBrigade.Weevil.IO
 			       this.Checksums.SequenceEqual(other.Checksums);
 		}
 
+		/// <summary>
+		/// The bytes both parses read are the same, as far as their checksums tell: those of every block both read in full, and of the last block when they end at the same point.
+		/// </summary>
+		/// <remarks>
+		/// A log whose bytes differ from an earlier parse changed in the middle, which the line index cannot see, as it checks only the start and end of the log (#1023).
+		/// </remarks>
+		public bool HasSameBytesAs(SavedParse other)
+		{
+			ArgumentNullException.ThrowIfNull(other);
+
+			if (this.StartOffset != other.StartOffset)
+			{
+				return false;
+			}
+
+			// Blocks start at multiples of the block size in the file, so the shorter parse's last block is partial unless it ends on a boundary.
+			var end = System.Math.Min(this.EndOffset, other.EndOffset);
+			var count = this.EndOffset == other.EndOffset
+				? this.Checksums.Count
+				: (int)((end / LogFileSource.BlockSize) - (this.StartOffset / LogFileSource.BlockSize));
+
+			if (count > this.Checksums.Count || count > other.Checksums.Count)
+			{
+				return false;
+			}
+
+			for (var index = 0; index < count; index++)
+			{
+				if (this.Checksums[index] != other.Checksums[index])
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		internal void Write(BinaryWriter writer)
 		{
 			writer.Write(this.PluginName);

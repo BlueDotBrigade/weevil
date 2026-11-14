@@ -38,7 +38,8 @@
 		}
 
 		/// <param name="storageMode">Whether the records keep their content, or read it back from the log, which must then be a file.</param>
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram)
+		/// <param name="checksumStartOffset">Where the checksums of the bytes read start, at or before <paramref name="firstRecordByteOffset"/>: by default, there.</param>
+		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1)
 		{
 			_source = source;
 			_storageMode = storageMode;
@@ -49,7 +50,7 @@
 				LogSeverityType.Debug,
 				$"Preparing to read records from disk. {nameof(firstRecordByteOffset)}={firstRecordByteOffset}, {nameof(firstRecordLineNumber)}={firstRecordLineNumber}");
 
-			_reader = new LogLineReader(_source, _firstRecordByteOffset, storageMode: storageMode);
+			_reader = new LogLineReader(_source, _firstRecordByteOffset, storageMode: storageMode, checksumStartOffset: checksumStartOffset);
 			_recordParser = new MultilineRecordParser(
 				_reader,
 				recordParser,

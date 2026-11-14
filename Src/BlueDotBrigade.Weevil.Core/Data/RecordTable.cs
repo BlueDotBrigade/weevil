@@ -134,6 +134,67 @@ namespace BlueDotBrigade.Weevil.Data
 			return kept.Build();
 		}
 
+		/// <summary>
+		/// Returns where the record at <paramref name="recordNumber"/> starts in the log, when its row holds the log's bytes (#1023).
+		/// </summary>
+		/// <returns><see langword="false"/> for a row that keeps its content as a string.</returns>
+		internal bool TryGetFileOffset(int recordNumber, out long fileOffset)
+		{
+			Block block = GetBlock(recordNumber);
+			var row = recordNumber % BlockSize;
+
+			fileOffset = block.Facts[row].KeepsString ? -1 : GetChunk(recordNumber).FileOffset + block.Offsets[row];
+			return fileOffset >= 0;
+		}
+
+		/// <summary>
+		/// Returns a new table of this table's first <paramref name="count"/> records, then every record of <paramref name="next"/>, for a log that grew (#1023).
+		/// </summary>
+		/// <param name="replaceChunk">Gives the chunk each row reads, so that on disk every chunk reads through one source: called once per chunk.</param>
+		internal RecordTable Append(int count, RecordTable next, Func<ContentChunk, ContentChunk> replaceChunk)
+		{
+			ArgumentOutOfRangeException.ThrowIfNegative(count);
+			ArgumentOutOfRangeException.ThrowIfGreaterThan(count, this.Count);
+			ArgumentNullException.ThrowIfNull(next);
+			ArgumentNullException.ThrowIfNull(replaceChunk);
+
+			var builder = new Builder();
+			AddRows(builder, count, replaceChunk);
+			next.AddRows(builder, next.Count, replaceChunk);
+
+			return builder.Build();
+		}
+
+		/// <summary>
+		/// Adds the first <paramref name="count"/> rows to <paramref name="builder"/>, walking the chunk directory alongside rather than searching it for each row.
+		/// </summary>
+		private void AddRows(Builder builder, int count, Func<ContentChunk, ContentChunk> replaceChunk)
+		{
+			var replaced = new ContentChunk[_chunks.Length];
+			var chunkIndex = -1;
+
+			for (var recordNumber = 0; recordNumber < count; recordNumber++)
+			{
+				Block block = _blocks[recordNumber / BlockSize];
+				var row = recordNumber % BlockSize;
+				RecordFacts facts = block.Facts[row];
+
+				if (facts.KeepsString)
+				{
+					builder.Add(block.LineNumbers[row], block.CreatedAt[row], facts, block.GetString(row));
+					continue;
+				}
+
+				while (chunkIndex + 1 < _chunkStarts.Length && _chunkStarts[chunkIndex + 1] <= recordNumber)
+				{
+					chunkIndex++;
+				}
+
+				ContentChunk chunk = replaced[chunkIndex] ??= replaceChunk(_chunks[chunkIndex]);
+				builder.Add(block.LineNumbers[row], block.CreatedAt[row], facts, chunk, block.Offsets[row], block.Lengths[row]);
+			}
+		}
+
 		private Block GetBlock(int recordNumber)
 		{
 			if ((uint)recordNumber >= (uint)this.Count)

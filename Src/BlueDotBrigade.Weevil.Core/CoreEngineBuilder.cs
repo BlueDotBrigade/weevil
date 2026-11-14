@@ -244,12 +244,27 @@
 
 					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index (#1023).
 					var isFullOpen = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
+					records = null;
+					source = null;
 
 					if (isFullOpen && LineIndexFile.TryLoadTable(_sourceFilePath, dataSource, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
 					{
-						records = new TableRecordList(savedTable);
+						SavedParse savedParse = lineIndex.Parse;
+
+						if (savedParse.EndOffset == dataSource.Length)
+						{
+							records = new TableRecordList(savedTable);
+						}
+						else if (GrownLogParser.TryParse(dataSource, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
+						{
+							// The log grew since it was indexed: only its new part was parsed, and the longer table is saved.
+							records = new TableRecordList(grownTable);
+							source = _storageMode == StorageMode.Disk ? parsedSource : null;
+							LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
+						}
 					}
-					else
+
+					if (records == null)
 					{
 						// Reading starts at the start line's byte offset, taken from the line index (#977).
 						// A start line beyond the end of the log reads from the top, which finds no records to keep.
@@ -275,7 +290,7 @@
 						// so the log can be reopened without parsing (#1023). A parse from a start line, of a range or up to a limit keeps only part of it.
 						if (isFullOpen && repository.ParsedSource != null && records is TableRecordList { WholeTable: RecordTable parsedTable })
 						{
-							LineIndexFile.SaveParse(_sourceFilePath, lineIndex, SavedParse.Create(plugin, _storageMode, repository.ParsedSource), parsedTable);
+							LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, repository.ParsedSource), parsedTable);
 						}
 					}
 
