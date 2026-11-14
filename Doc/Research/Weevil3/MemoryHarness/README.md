@@ -123,3 +123,14 @@ A reopen builds the record table saved with the log's index instead of parsing t
 
 - **The first measurement kept the saved table** after a grown reopen: 5.5 GB once the 4 GB log was open. The engine's collection ran while the method that opened the log still held the table in its frame, and clearing the `out` variable did not free it. The reopen now runs in a method of its own, never inlined (`CoreEngineBuilder.TryReopen`).
 - **The 4 GB reopen takes 10 s,** a third of a first open: it still reads the whole log, to check it against the saved checksums, and reads the 0.66 GB table.
+
+### Reopening a grown log without copying its rows, after #1201 (2026-11-14)
+
+The longer table of a grown log now shares the saved table's full blocks, instead of copying their rows. On the 4 GB log, a reopen after growing 1% peaks at 5.0 GB instead of 5.5 GB, against 4.9 GB for a first open. It takes 3.6 s more than a plain reopen in the same run, against 5.8 s before; compare whole times between the two runs only roughly, since the plain reopen also moved, from 10.4 s to 8.1 s. The full report is in [Results-2026-11-14-SharedBlocks.md](Results-2026-11-14-SharedBlocks.md).
+
+- **What is left of the peak** is estimated at tens of MB, within the report's rounding to 0.1 GB: the saved table's last chunk, which the new part's parse reads again, the rows of the new part, which are copied, and the parse's buffers.
+
+| Log | First open | Reopen | Reopen after growing 1% |
+|---|---|---|---|
+| 1 GB | 7.3 s, 1.4 GB | 2.3 s, 1.4 GB | 3.0 s, 1.4 GB, peak 1.4 GB |
+| 4 GB | 26.1 s, 4.9 GB | 8.1 s, 4.9 GB | 11.7 s, 4.9 GB, peak 5.0 GB |

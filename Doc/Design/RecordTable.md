@@ -55,7 +55,7 @@ In another session, the same log's first 99% was opened, then the log grew back 
 
 `ReopenBenchmarks`, in the performance tests, reopens the reference logs of `ReferenceLog.cs`: on 1 million records, 0.29 s in RAM and 0.18 s on disk, against 0.93 s in RAM for `OpenBenchmarks` to parse them (short job, Linux, 4 cores).
 
-A reopen takes the same memory as a parse ([Memory](#memory)). A reopen after the log grew holds the saved rows and the longer table's at once while it copies them, so it peaks at about 1.37 GB per GB of log, against 1.22, until #1201 shares the saved blocks instead.
+A reopen takes the same memory as a parse ([Memory](#memory)). After the log grew, the longer table shares the saved table's full blocks, which never change, and copies only the rows after the last of them and the new ones (#1201): on the 4 GB log of the memory harness, it peaks at 5.0 GB, against 4.9 GB for a first open, and 5.5 GB when it copied every row. What is left is the last chunk, parsed again, and the new rows: tens of MB.
 
 ## Memory
 
