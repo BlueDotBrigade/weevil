@@ -7,6 +7,7 @@ namespace BlueDotBrigade.Weevil
 	/// BenchmarkDotNet runs each benchmark in its own process, so a log is written only when it is missing.
 	/// It is written under another name and then moved into place, so a run that is stopped, or another run at the same time, never leaves or reads a partial log.
 	/// The reference log is the same for a given record count. After a change to <c>ReferenceLog.cs</c>, delete the folder.
+	/// <see cref="ReopenBenchmarks"/> keeps copies outside it, in the local application data folder's <c>Weevil.Benchmarks</c>: about 350 MB, which can be deleted too.
 	/// Weevil saves no line index or sidecar in the temporary folder, so each open starts from the same state: without a saved line index.
 	/// </remarks>
 	internal static class BenchmarkLogs

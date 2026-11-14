@@ -86,6 +86,8 @@ internal static class Program
 				DeleteLineIndex(path);
 			}
 
+			var current = FirstOpen;
+
 			try
 			{
 				Result firstOpen = Measure(path, FirstOpen, limitBytes, results);
@@ -93,17 +95,24 @@ internal static class Program
 				// A reopen reads the record table saved with the index, instead of parsing the log (#1023).
 				if (arguments.Reopen && !firstOpen.IsTooBig)
 				{
+					current = Reopen;
 					Measure(path, Reopen, limitBytes, results);
 
 					// Only a synthetic log is changed: its first 99% is opened, so its index is saved, then the rest is appended again.
 					if (arguments.IsSynthetic(path))
 					{
+						current = ReopenAfterGrowing;
 						var tail = RemoveTail(path, GrowthShare);
 						DeleteLineIndex(path);
 						Console.Error.WriteLine($"Opening its first {100 - (GrowthShare * 100):N0}%, to save its index...");
-						_ = MeasureInChildProcess(path, limitBytes);
+						var isSaved = !MeasureInChildProcess(path, limitBytes).IsTooBig;
 						AppendTail(path, tail);
-						Measure(path, ReopenAfterGrowing, limitBytes, results);
+
+						// Without its saved index, the reopen would be a first open.
+						if (isSaved)
+						{
+							Measure(path, ReopenAfterGrowing, limitBytes, results);
+						}
 					}
 				}
 			}
@@ -111,7 +120,7 @@ internal static class Program
 			{
 				// One failure does not lose the other logs' results.
 				Console.Error.WriteLine($"  {e.Message}");
-				results.Add(new Result(path, FirstOpen, new FileInfo(path).Length, 0, 0, 0, 0, 0, 0, IsTooBig: false, Error: e.Message));
+				results.Add(new Result(path, current, new FileInfo(path).Length, 0, 0, 0, 0, 0, 0, IsTooBig: false, Error: e.Message));
 			}
 			finally
 			{

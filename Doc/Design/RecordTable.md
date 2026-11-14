@@ -45,14 +45,15 @@ After a full open, the table is saved in the log's `.idx` file, beside the line 
 - **The parser** must make the same records from the same lines, whatever the culture, time zone, clock or settings, as `IRecordParser` says, because a reopen does not call it.
 - **The line index** is rebuilt when a full parse finds the bytes it read differ from the earlier parse's: the log changed in the middle, which the line index cannot see.
 
-| 1 GB reference log, 10 million records | RAM | Disk |
+| 1 GB, 10-million-record UTF-8 log | RAM | Disk |
 |---|---|---|
+| Parse on `main`, before #1023 | 8.4 s | |
 | First open: parse, and save the table (221 MB) | 9.2 – 9.5 s | |
 | Reopen | 1.9 – 2.0 s | 0.9 s |
-| Reopen after growing 1% | 3.0 s | 2.1 s |
-| Full open of the grown log | 8.4 s | 7.6 s |
 
-`ReopenBenchmarks`, in the performance tests, measures a reopen of the reference logs; on 1 million records, 0.29 s in RAM and 0.18 s on disk, against 0.93 s for `OpenBenchmarks` to parse it (short job, Linux, 4 cores).
+In another session, the same log's first 99% was opened, then the log grew back by 1%: a reopen took 3.0 s in RAM and 2.1 s on disk, against 8.4 s and 7.6 s for a first open of the grown log.
+
+`ReopenBenchmarks`, in the performance tests, reopens the reference logs of `ReferenceLog.cs`: on 1 million records, 0.29 s in RAM and 0.18 s on disk, against 0.93 s in RAM for `OpenBenchmarks` to parse them (short job, Linux, 4 cores).
 
 A reopen takes the same memory as a parse ([Memory](#memory)). A reopen after the log grew holds the saved rows and the longer table's at once while it copies them, so it peaks at about 1.37 GB per GB of log, against 1.22, until #1201 shares the saved blocks instead.
 

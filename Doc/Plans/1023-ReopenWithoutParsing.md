@@ -185,7 +185,9 @@ One pull request per step, in order.
    - [RecordTable.md](../Design/RecordTable.md) and [DiskMode.md](../Design/DiskMode.md) describe the saved table.
    - Step 5 of the #988 plan is marked done.
    - **Done.** `ReopenBenchmarks` reopens the reference logs, copied outside the temporary folder once per storage mode, and checks that each reopen reads the saved index. The memory harness's `--reopen` measures a reopen and a reopen after the log grew 1% ([results](../Research/Weevil3/MemoryHarness/README.md#reopening-after-1023-2026-11-14)). [RecordTable.md](../Design/RecordTable.md#saved-with-the-index) and [DiskMode.md](../Design/DiskMode.md#reopening-a-log-on-disk) describe the saved table.
-     - **Found by the harness, and fixed:** after a grown reopen the saved table stayed in memory, about 22 bytes per record, because the method that opened the log still held it, through an `out` variable, when the engine's collection ran. The reopen now runs in a method of its own.
+     - **Found by the harness, and fixed:** after a grown reopen the saved table stayed in memory, about 22 bytes per record, because the method that opened the log still held it in its frame when the engine's collection ran. The reopen now runs in a method of its own, never inlined.
+     - **The table is still written before the first open returns,** as step 3 left for these measurements to settle: it costs about 1 s on 10 million records, which the first reopen repays six times over, and writing it later would run beside the engine and its collection for no measured gain. A log on a slow network share was not measured; an issue can follow if it proves costly.
+     - **Correction to "Where Things Stand":** a build without a change does get a new MVID, because every build stamps a new file version. So each new build of Weevil or of the plugin parses again on its first open.
      - **Left for #1201:** a grown reopen peaks at about 1.37 GB per GB of log while it copies the saved rows, against 1.22 for a first open. Sharing the saved table's blocks would remove the copy.
 
 ## Not in This Plan

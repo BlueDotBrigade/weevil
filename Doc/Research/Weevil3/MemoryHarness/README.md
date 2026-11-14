@@ -121,5 +121,5 @@ A reopen builds the record table saved with the log's index instead of parsing t
 | 1 GB | 7.8 s, 1.4 GB | 2.7 s, 1.4 GB | 3.4 s, 1.4 GB, peak 1.5 GB |
 | 4 GB | 30.8 s, 4.9 GB | 10.4 s, 4.9 GB | 16.2 s, 4.9 GB, peak 5.5 GB |
 
-- **The first measurement kept the saved table** after a grown reopen: 5.5 GB once the 4 GB log was open. The engine's collection ran while the method that opened the log still held the table, even in a Release build, through an `out` variable, and clearing the variable did not free it. The reopen now runs in a method of its own (`CoreEngineBuilder.TryReopen`).
+- **The first measurement kept the saved table** after a grown reopen: 5.5 GB once the 4 GB log was open. The engine's collection ran while the method that opened the log still held the table in its frame, and clearing the `out` variable did not free it. The reopen now runs in a method of its own, never inlined (`CoreEngineBuilder.TryReopen`).
 - **The 4 GB reopen takes 10 s,** a third of a first open: it still reads the whole log, to check it against the saved checksums, and reads the 0.66 GB table.

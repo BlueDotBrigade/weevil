@@ -8,7 +8,8 @@ namespace BlueDotBrigade.Weevil
 	/// </summary>
 	/// <remarks>
 	/// Weevil saves no index in the temporary folder, so each reference log is copied to a folder of its own, outside it, once for each storage mode:
-	/// the saved table is reused only in the mode that made it. Compare with <see cref="OpenBenchmarks"/>, which parses the log.
+	/// the saved table is reused only in the mode that made it. A copy whose length differs from the reference log is copied again, as after a change to <c>ReferenceLog.cs</c>.
+	/// Compare with <see cref="OpenBenchmarks"/>, which parses the log. The log was just read, so a reopen reads it from the operating system's cache.
 	/// </remarks>
 	[MemoryDiagnoser]
 	public class ReopenBenchmarks
@@ -31,11 +32,14 @@ namespace BlueDotBrigade.Weevil
 		{
 			_logPath = Path.Combine(Folder, $"ReferenceLog.{this.Records}.{this.Storage}.log");
 
-			if (!File.Exists(_logPath))
+			var referencePath = BenchmarkLogs.GetPath(this.Records);
+
+			if (!File.Exists(_logPath) || new FileInfo(_logPath).Length != new FileInfo(referencePath).Length)
 			{
 				Directory.CreateDirectory(Folder);
+				File.Delete(_logPath);
 				var copyPath = $"{_logPath}.{Environment.ProcessId}";
-				File.Copy(BenchmarkLogs.GetPath(this.Records), copyPath, overwrite: true);
+				File.Copy(referencePath, copyPath, overwrite: true);
 
 				try
 				{

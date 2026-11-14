@@ -28,7 +28,7 @@ A buffer reads a whole chunk only when two records in a row come from it, so a s
 
 A log opened before is reopened from the record table saved with its index ([RecordTable.md](RecordTable.md#saved-with-the-index)), in disk mode as in RAM, but only in the mode that saved it: switching modes parses the log again.
 
-On disk, the reopen still reads the whole log once, to check every 64 KB block against the checksums saved with the table, but parses nothing. The chunks on file then read back through a `LogFileSource` made from those checksums (`LogFileSource.Create`), as they would through one a parse completed. The 1 GB reference log reopens in 0.9 s, against 7.6 s to parse it.
+On disk, the reopen still reads the whole log once, to check every 64 KB block against the checksums saved with the table, but parses nothing. The chunks on file then read back through a `LogFileSource` made from those checksums (`LogFileSource.Create`), as they would through one a parse completed. The 1 GB, 10-million-record UTF-8 log reopens in 0.9 s, against about 7.6 s for a first open on disk.
 
 ## A Log That Changed
 

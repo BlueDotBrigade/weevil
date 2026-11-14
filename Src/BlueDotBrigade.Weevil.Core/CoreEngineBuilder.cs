@@ -6,6 +6,7 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using System.Text;
 	using BlueDotBrigade.Weevil.Collections.Generic;
 	using BlueDotBrigade.Weevil.IO;
@@ -186,11 +187,12 @@
 			/// Reopens the log from the record table saved with its index, parsing only what it grew by since (#1023).
 			/// </summary>
 			/// <remarks>
-			/// A method of its own, so the saved table that a grown log's longer table replaces is not kept by <see cref="Build"/>'s frame
-			/// when the engine is created, whose collection would otherwise keep it: about 22 bytes per record.
+			/// A method of its own, never inlined, so the saved table that a grown log's longer table replaces is not kept by <see cref="Build"/>'s frame
+			/// when the engine is created, whose collection would otherwise keep it: about 22 bytes per record. Clearing the variable in <see cref="Build"/> did not free it.
 			/// </remarks>
 			/// <param name="source">On disk, the source the records read their content back through: otherwise <see langword="null"/>.</param>
 			/// <returns><see langword="false"/> when the log must be parsed.</returns>
+			[MethodImpl(MethodImplOptions.NoInlining)]
 			private bool TryReopen(FileStream dataSource, LineIndex lineIndex, IPlugin plugin, ICoreExtension coreExtension, out RecordList records, out LogFileSource source)
 			{
 				records = null;
