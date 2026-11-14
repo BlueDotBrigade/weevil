@@ -34,6 +34,29 @@ The parser fills a `RecordTable` (`BlueDotBrigade.Weevil.Data`, Core). It keeps 
 - **Filter results and the selection** are record lists over the view's table.
 - **Clear** builds a new table of only the records it keeps, unless it keeps every record, when it keeps the list as it is. The records it clears, and the chunks only they were read from, are freed before Clear returns (#1022). Only whole chunks are freed.
 
+## Saved With the Index
+
+After a full open, the table is saved in the log's `.idx` file, beside the line index, so the log can be reopened without being parsed (#1023, #1085). The plan and its decisions are in [1023-ReopenWithoutParsing.md](../Plans/1023-ReopenWithoutParsing.md).
+
+- **The file** (`LineIndex`, `IndexSection`, Core) is a signature and a format version, then sections that each hold a kind, a 64-bit length and an XxHash3 checksum of their bytes: the header, the line index's checkpoints, the parse, then the table's chunk directory, the strings of the rows that keep one, and the rows, 22 bytes each. A section streams, so a file can be larger than 2 GB. An index of another version, or one whose header or checkpoints are damaged, is rebuilt; a damaged table section costs only the table.
+- **The parse** (`SavedParse`) says what made the table: the plugin's name, the builds of the plugin, Core and Common (their assemblies' MVIDs), the storage mode, the range of the log parsed, and a checksum of each 64 KB block of it. A build of Weevil or of the plugin that changed nothing still has a new MVID, so its first open parses again.
+- **A full open reuses the table** (`LineIndexFile.TryLoadTable`, `SavedTableReader`) when the same parse would make it, after reading the whole log and checking every block against its checksum. A change anywhere in the log, even one that keeps its length, rejects the table, and the log is parsed. An open from a start line, of a range, or up to a limit always parses, and saves no table.
+- **A log that grew** keeps the rows before its last chunk, and is parsed from the last chunk's first record to its end (`GrownLogParser`); the longer table is then saved again, whole. A table with no chunk, whose rows all keep a string, is parsed in full.
+- **The parser** must make the same records from the same lines, whatever the culture, time zone, clock or settings, as `IRecordParser` says, because a reopen does not call it.
+- **The line index** is rebuilt when a full parse finds the bytes it read differ from the earlier parse's: the log changed in the middle, which the line index cannot see.
+
+| 1 GB, 10-million-record UTF-8 log | RAM | Disk |
+|---|---|---|
+| Parse on `main`, before #1023 | 8.4 s | |
+| First open: parse, and save the table (221 MB) | 9.2 – 9.5 s | |
+| Reopen | 1.9 – 2.0 s | 0.9 s |
+
+In another session, the same log's first 99% was opened, then the log grew back by 1%: a reopen took 3.0 s in RAM and 2.1 s on disk, against 8.4 s and 7.6 s for a first open of the grown log.
+
+`ReopenBenchmarks`, in the performance tests, reopens the reference logs of `ReferenceLog.cs`: on 1 million records, 0.29 s in RAM and 0.18 s on disk, against 0.93 s in RAM for `OpenBenchmarks` to parse them (short job, Linux, 4 cores).
+
+A reopen takes the same memory as a parse ([Memory](#memory)). A reopen after the log grew holds the saved rows and the longer table's at once while it copies them, so it peaks at about 1.37 GB per GB of log, against 1.22, until #1201 shares the saved blocks instead.
+
 ## Memory
 
 - **Working set per GB of log,** on the 4 GB log of the memory harness: 1.22 GB, against 3.0 GB for Weevil 2.12.1. #1086 asks for at most 1.2.

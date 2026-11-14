@@ -13,7 +13,7 @@ namespace BlueDotBrigade.Weevil.IO
 	/// A record table saved with the index is reused only when the parse that would make it again is the same:
 	/// - the same plugin, in the same build, identified by its assembly's MVID, since every build of a release has the same version;
 	/// - the same build of Weevil: of Core, whose parser joins continuation lines, and of Common, which holds the records and chunks the table is made of.
-	///   Builds are deterministic, so an MVID is a hash of the assembly's own compiled output: rebuilding without a change keeps it;
+	///   An MVID is a hash of the assembly's compiled output, which holds its file version, and every build stamps a new one: each build parses again;
 	/// - the same storage mode, because some encodings keep strings in RAM and bytes on disk.
 	/// The Open As context is not part of it: the sidecar keeps it, and it never reaches the parser (decided 2026-11-13).
 	/// The checksums say whether the log is still the one parsed.

@@ -24,6 +24,12 @@ Code that reads many records reads them through one `ContentBuffer` per pass, wi
 
 A buffer reads a whole chunk only when two records in a row come from it, so a sparse list, such as a few filter results spread over a large log, reads only each record's blocks. It reads a chunk whole once at most: a pass that comes back to a chunk, such as records sorted by time, reads only each record's blocks from it. A pass therefore never reads more than the log once, plus 64 KB per record.
 
+## Reopening a Log on Disk
+
+A log opened before is reopened from the record table saved with its index ([RecordTable.md](RecordTable.md#saved-with-the-index)), in disk mode as in RAM, but only in the mode that saved it: switching modes parses the log again.
+
+On disk, the reopen still reads the whole log once, to check every 64 KB block against the checksums saved with the table, but parses nothing. The chunks on file then read back through a `LogFileSource` made from those checksums (`LogFileSource.Create`), as they would through one a parse completed. The 1 GB, 10-million-record UTF-8 log reopens in 0.9 s, against about 7.6 s for a first open on disk.
+
 ## A Log That Changed
 
 A log that has only grown is normal: the first read that finds it longer logs a warning, and reads go on with the bytes parsed.
@@ -34,7 +40,7 @@ A log that was truncated, replaced or corrupted must be reloaded (#1168):
 2. The first such read logs one warning and sets `LogFileSource.HasChanged`.
 3. A filter throws the same exception, not an `AggregateException` from its parallel workers, and does not log it as an unexpected error.
 4. The caller shows the warning and calls `Engine.Reload()`. Core never reloads by itself: a reader such as a filter worker cannot swap the engine it is reading.
-5. Reload deletes the saved line index first, because the index checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
+5. Reload deletes the saved index first, with the record table saved with it, because the line index checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
 6. If the log changes again before Reload applies the filter, Reload deletes the line index it has just saved, and ends like one that could not read the log: the engine shows the log without records, keeps the filter for the next Reload, and Reload throws what the read threw.
 
 The CLI and PowerShell do step 4 through the extension method `EngineExtensions.RunReloadingOnChange`: it runs their work, such as a filter, and on a change reloads once and runs it again. Opening the log is not part of that work: a log that changes while it opens is read as it was. A second change, or what Reload throws in step 6, reaches them as an error. The GUI does step 4 once per log: each open and each Reload starts a new generation of the log, and the first change a read finds in a generation, from a row on screen, a filter, F5, an analysis or other work, shows one warning and reloads (`FilterViewModel.OnFailedRead`, #1028). A row whose read fails shows a placeholder instead of its text, because WPF does not catch a converter's exception. A log that can no longer be read shows one error from the rows, a filter or F5, and is not reloaded; an analysis, a save, a split or a search shows its own error, because their other I/O errors, such as a save to a locked file, are not the log's. The dashboard's Refresh shows its own message. A graph on disk copies the text of its records in the background when it opens, where Escape stops the copy, so the graph never reads a log. A read that fails because the log can no longer be opened, with another `IOException` or an `UnauthorizedAccessException`, is thrown as it is by a filter, as in step 3, and ends a Reload as in step 6. Unlike a change, the filter logs it as an error, because nothing has logged it before.

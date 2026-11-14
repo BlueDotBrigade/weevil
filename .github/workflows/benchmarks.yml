@@ -10,7 +10,7 @@ on:
         # A new benchmark class needs an entry here, as well as its test method in BenchmarkTests.
         description: Which benchmark class to run
         type: choice
-        options: [All, Open, Filter, Find, Export, Analyzer, ScreenRows]
+        options: [All, Open, Reopen, Filter, Find, Export, Analyzer, ScreenRows]
         default: All
       job:
         description: BenchmarkDotNet's job. Short takes a few minutes, and measures less precisely.
@@ -59,7 +59,8 @@ jobs:
           WEEVIL_BENCHMARK_JOB: ${{ inputs.job }}
         run: |
           filter="TestCategory=Benchmark"
-          if [[ "$BENCHMARKS" != "All" ]]; then filter="$filter&Name~${BENCHMARKS}Benchmarks"; fi
+          # "Given" too, so Open does not also match Reopen.
+          if [[ "$BENCHMARKS" != "All" ]]; then filter="$filter&Name~Given${BENCHMARKS}Benchmarks_"; fi
           dotnet test Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/BlueDotBrigade.Weevil.Core-PerformanceTests.csproj --configuration Release -p:Platform=x64 --filter "$filter" --logger "console;verbosity=detailed"
 
       # Even after a failure or a timeout, so the reports of the classes already measured, and each class's log, are kept.

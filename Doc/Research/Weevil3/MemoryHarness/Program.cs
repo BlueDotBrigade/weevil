@@ -19,6 +19,13 @@ internal static class Program
 	private const string ResultPrefix = "RESULT";
 	private const double Gigabyte = 1_000_000_000;
 
+	private const string FirstOpen = "First open";
+	private const string Reopen = "Reopen";
+	private const string ReopenAfterGrowing = "Reopen after growing 1%";
+
+	// The share of a synthetic log appended after its index is saved, for a reopen after the log grew.
+	private const double GrowthShare = 0.01;
+
 	// Smaller logs are dominated by the fixed memory of the process, so they give no useful figure per GB.
 	private const long SmallestLogToEstimateFrom = 100_000_000;
 
@@ -79,21 +86,41 @@ internal static class Program
 				DeleteLineIndex(path);
 			}
 
-			Console.Error.WriteLine($"Opening {path}...");
+			var current = FirstOpen;
 
 			try
 			{
-				Result result = MeasureInChildProcess(path, limitBytes);
-				Console.Error.WriteLine(result.IsTooBig
-					? $"  Too big: stopped at {Gb(result.PeakWorkingSetBytes)} GB after {result.OpenSeconds:N0} s."
-					: $"  {result.Records:N0} records in {result.OpenSeconds:N1} s, working set {Gb(result.WorkingSetBytes)} GB, peak {Gb(result.PeakWorkingSetBytes)} GB.");
-				results.Add(result);
+				Result firstOpen = Measure(path, FirstOpen, limitBytes, results);
+
+				// A reopen reads the record table saved with the index, instead of parsing the log (#1023).
+				if (arguments.Reopen && !firstOpen.IsTooBig)
+				{
+					current = Reopen;
+					Measure(path, Reopen, limitBytes, results);
+
+					// Only a synthetic log is changed: its first 99% is opened, so its index is saved, then the rest is appended again.
+					if (arguments.IsSynthetic(path))
+					{
+						current = ReopenAfterGrowing;
+						var tail = RemoveTail(path, GrowthShare);
+						DeleteLineIndex(path);
+						Console.Error.WriteLine($"Opening its first {100 - (GrowthShare * 100):N0}%, to save its index...");
+						var isSaved = !MeasureInChildProcess(path, limitBytes).IsTooBig;
+						AppendTail(path, tail);
+
+						// Without its saved index, the reopen would be a first open.
+						if (isSaved)
+						{
+							Measure(path, ReopenAfterGrowing, limitBytes, results);
+						}
+					}
+				}
 			}
 			catch (InvalidOperationException e)
 			{
 				// One failure does not lose the other logs' results.
 				Console.Error.WriteLine($"  {e.Message}");
-				results.Add(new Result(path, new FileInfo(path).Length, 0, 0, 0, 0, 0, 0, IsTooBig: false, Error: e.Message));
+				results.Add(new Result(path, current, new FileInfo(path).Length, 0, 0, 0, 0, 0, 0, IsTooBig: false, Error: e.Message));
 			}
 			finally
 			{
@@ -145,6 +172,45 @@ internal static class Program
 
 		GC.KeepAlive(engine);
 		return 0;
+	}
+
+	private static Result Measure(string path, string kind, long limitBytes, List<Result> results)
+	{
+		Console.Error.WriteLine($"{kind}: {path}...");
+
+		Result result = MeasureInChildProcess(path, limitBytes) with { Case = kind };
+		Console.Error.WriteLine(result.IsTooBig
+			? $"  Too big: stopped at {Gb(result.PeakWorkingSetBytes)} GB after {result.OpenSeconds:N0} s."
+			: $"  {result.Records:N0} records in {result.OpenSeconds:N1} s, working set {Gb(result.WorkingSetBytes)} GB, peak {Gb(result.PeakWorkingSetBytes)} GB.");
+		results.Add(result);
+
+		return result;
+	}
+
+	/// <summary>
+	/// Cuts the log at the first line break after the given share from its end, and returns the bytes cut off.
+	/// </summary>
+	private static byte[] RemoveTail(string logPath, double share)
+	{
+		using var log = new FileStream(logPath, FileMode.Open, FileAccess.ReadWrite);
+		var buffer = new byte[64 * 1024];
+		log.Position = (long)(log.Length * (1 - share));
+		var read = log.Read(buffer);
+		var lineBreak = Array.IndexOf(buffer, (byte)'\n', 0, read);
+		var cut = lineBreak < 0 ? log.Length : log.Position - read + lineBreak + 1;
+
+		var tail = new byte[log.Length - cut];
+		log.Position = cut;
+		log.ReadExactly(tail);
+		log.SetLength(cut);
+
+		return tail;
+	}
+
+	private static void AppendTail(string logPath, byte[] tail)
+	{
+		using var log = new FileStream(logPath, FileMode.Append, FileAccess.Write);
+		log.Write(tail);
 	}
 
 	private static void DeleteLineIndex(string logPath)
@@ -235,7 +301,7 @@ internal static class Program
 
 		if (isTooBig || (line is null && ranOutOfMemory))
 		{
-			return new Result(path, logBytes, Records: 0, seconds, 0, 0, 0, Math.Max(highestBytes, limitBytes), IsTooBig: true);
+			return new Result(path, FirstOpen, logBytes, Records: 0, seconds, 0, 0, 0, Math.Max(highestBytes, limitBytes), IsTooBig: true);
 		}
 
 		if (child.ExitCode != 0 || line is null)
@@ -246,6 +312,7 @@ internal static class Program
 		var fields = line.Split('\t');
 		return new Result(
 			path,
+			FirstOpen,
 			long.Parse(fields[1], CultureInfo.InvariantCulture),
 			int.Parse(fields[2], CultureInfo.InvariantCulture),
 			double.Parse(fields[3], CultureInfo.InvariantCulture),
@@ -281,19 +348,25 @@ internal static class Program
 		w.WriteLine("- **Peak:** the most it held while opening.");
 		w.WriteLine("- **Managed heap:** the .NET objects in that working set.");
 		w.WriteLine($"- **Too big:** opening was stopped when the working set passed {Gb(limitBytes)} GB: {arguments.RamPercent}% of the RAM free when the run started.");
+		if (arguments.Reopen)
+		{
+			w.WriteLine("- **Reopen:** the log opened again, from the record table saved with its index (#1023). **Reopen after growing 1%:** its first 99% opened, then the rest appended, and opened again: only the new part is parsed.");
+		}
+
 		w.WriteLine();
-		w.WriteLine("| Log | Records | Bytes per record | Open | Before opening | Managed heap | Working set | Peak |");
-		w.WriteLine("|---|---|---|---|---|---|---|---|");
+		w.WriteLine("| Log | Case | Records | Bytes per record | Open | Before opening | Managed heap | Working set | Peak |");
+		w.WriteLine("|---|---|---|---|---|---|---|---|---|");
 		foreach (Result r in results)
 		{
 			w.WriteLine(r.Error is not null
-				? $"| {Size(r.LogBytes)} | | | **Failed:** {r.Error.ReplaceLineEndings(" ")} | | | | |"
+				? $"| {Size(r.LogBytes)} | {r.Case} | | | **Failed:** {r.Error.ReplaceLineEndings(" ")} | | | | |"
 				: r.IsTooBig
-					? $"| {Size(r.LogBytes)} | | | stopped after {r.OpenSeconds:N0} s | | | | **Too big:** over {Gb(limitBytes)} GB |"
-					: $"| {Size(r.LogBytes)} | {r.Records:N0} | {(r.Records == 0 ? string.Empty : ((double)r.LogBytes / r.Records).ToString("N0", CultureInfo.InvariantCulture))} | {r.OpenSeconds:N1} s | {Gb(r.BaselineBytes)} GB | {Gb(r.ManagedBytes)} GB | {Gb(r.WorkingSetBytes)} GB | {Gb(r.PeakWorkingSetBytes)} GB |");
+					? $"| {Size(r.LogBytes)} | {r.Case} | | | stopped after {r.OpenSeconds:N0} s | | | | **Too big:** over {Gb(limitBytes)} GB |"
+					: $"| {Size(r.LogBytes)} | {r.Case} | {r.Records:N0} | {(r.Records == 0 ? string.Empty : ((double)r.LogBytes / r.Records).ToString("N0", CultureInfo.InvariantCulture))} | {r.OpenSeconds:N1} s | {Gb(r.BaselineBytes)} GB | {Gb(r.ManagedBytes)} GB | {Gb(r.WorkingSetBytes)} GB | {Gb(r.PeakWorkingSetBytes)} GB |");
 		}
 
-		var measured = results.Where(r => !r.IsTooBig && r.Error is null).ToList();
+		// The figures per GB, and the estimates, are for a first open.
+		var measured = results.Where(r => r.Case == FirstOpen && !r.IsTooBig && r.Error is null).ToList();
 		Result? largest = measured.MaxBy(r => r.LogBytes);
 		if (largest is null || largest.LogBytes < SmallestLogToEstimateFrom)
 		{
@@ -350,6 +423,7 @@ internal static class Program
 
 	private sealed record Result(
 		string Path,
+		string Case,
 		long LogBytes,
 		int Records,
 		double OpenSeconds,
@@ -469,6 +543,7 @@ internal sealed class Arguments
 	public string LogFolder { get; private set; } = Path.GetTempPath();
 	public int RamPercent { get; private set; } = 90;
 	public bool DeleteLogs { get; private set; }
+	public bool Reopen { get; private set; }
 	public string? ReportPath { get; private set; }
 	public bool ShowHelp { get; private set; }
 
@@ -529,6 +604,9 @@ internal sealed class Arguments
 				case "--delete-logs":
 					arguments.DeleteLogs = true;
 					break;
+				case "--reopen":
+					arguments.Reopen = true;
+					break;
 				case "--report":
 					arguments.ReportPath = Value();
 					break;
@@ -539,6 +617,16 @@ internal sealed class Arguments
 				default:
 					throw new ArgumentException($"Unknown option: {name}");
 			}
+		}
+
+		// Weevil saves no index for a log in the temporary folder, as it does for one extracted from an archive, so every open would be a first open.
+		var temporaryFolder = Path.GetFullPath(Path.GetTempPath());
+		bool IsTemporary(string path) => Path.GetFullPath(path).StartsWith(temporaryFolder, StringComparison.OrdinalIgnoreCase);
+		var hasSyntheticLogs = arguments.SizesMegabytes.Count > 0 || arguments.Files.Count == 0;
+
+		if (arguments.Reopen && ((hasSyntheticLogs && IsTemporary(arguments.LogFolder)) || arguments.Files.Any(IsTemporary)))
+		{
+			throw new ArgumentException("--reopen needs logs outside the temporary folder, where Weevil saves no index: use --log-folder.");
 		}
 
 		return arguments;
@@ -557,6 +645,7 @@ internal sealed class Arguments
 		Console.WriteLine("  --record-bytes <70-4000>  Average record size in the synthetic logs. Default 131.");
 		Console.WriteLine("  --log-folder <path>       Where the synthetic logs are written. Default: the temporary folder.");
 		Console.WriteLine("  --delete-logs             Delete each synthetic log after measuring it, to save disk space.");
+		Console.WriteLine("  --reopen                  Also reopen each log from its saved index, and each synthetic log after it grew 1%. Needs --log-folder.");
 		Console.WriteLine("  --file <path>             Open a real log instead; repeat for several.");
 		Console.WriteLine("  --estimate-gb <list>      Log sizes to estimate, in GB, separated by commas. Default 12,16,20,24.");
 		Console.WriteLine("  --ram-percent <10-100>    Stop opening a log once it uses this share of the RAM. Default 90.");

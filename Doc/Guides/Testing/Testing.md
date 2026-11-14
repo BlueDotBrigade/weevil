@@ -53,7 +53,7 @@ Everything about performance lives in `BlueDotBrigade.Weevil.Core-PerformanceTes
 | Kind | Where | Runs | Catches |
 |---|---|---|---|
 | **Budget**: a limit that must hold | An MSTest `[TestClass]` | In CI, with `dotnet test` | Large regressions: memory kept per record in RAM and on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
-| **Benchmark**: a measurement to compare two versions | A BenchmarkDotNet class in `Benchmarks/`, run by a test in `BenchmarkTests`, in the `Benchmark` category | On demand, in Release: locally, or with the Benchmarks workflow | Smaller regressions in time and memory allocated: opening (without a saved line index), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
+| **Benchmark**: a measurement to compare two versions | A BenchmarkDotNet class in `Benchmarks/`, run by a test in `BenchmarkTests`, in the `Benchmark` category | On demand, in Release: locally, or with the Benchmarks workflow | Smaller regressions in time and memory allocated: opening (without a saved line index), reopening (from the saved record table), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
 
 Add a budget when a limit must never be crossed, and a benchmark when you want to see how a change moves a number. A CI runner is too noisy to fail a build on a 10% slowdown, so that is a benchmark, not a budget. To add a benchmark class, also add a test method for it to `BenchmarkTests`, without which it never runs, and add the class to the `options` of the Benchmarks workflow's `benchmarks` input.
 
@@ -65,10 +65,10 @@ Run them in Release, on a quiet computer, from the repository's root folder:
 dotnet test Tst/BlueDotBrigade.Weevil.Core-PerformanceTests -c Release -p:Platform=x64 --filter TestCategory=Benchmark --logger "console;verbosity=detailed"
 ```
 
-- `--filter "TestCategory=Benchmark&Name~FilterBenchmarks"` runs one class's benchmarks.
+- `--filter "TestCategory=Benchmark&Name~GivenFilterBenchmarks_"` runs one class's benchmarks. The `Given` and `_` keep `Open` from matching `Reopen` too.
 - Set the environment variable `WEEVIL_BENCHMARK_JOB=Short` for a quick look: it takes a few minutes. Without it, the default job takes longer and measures more precisely.
 - CI's test runs leave the `Benchmark` category out. So should yours in Release: there, a run without a filter, or Run All in Visual Studio's Test Explorer, includes every benchmark, which takes many minutes. Exclude them with `--filter TestCategory!=Benchmark`.
-- The first run writes the reference logs to the temporary folder (`Weevil.Benchmarks`), and later runs reuse them. After a change to `ReferenceLog.cs`, delete that folder.
+- The first run writes the reference logs to the temporary folder (`Weevil.Benchmarks`), and later runs reuse them. After a change to `ReferenceLog.cs`, delete that folder. The reopen benchmarks copy them, once per storage mode, to `Weevil.Benchmarks` in the local application data folder, where Weevil saves their index: about 350 MB, which you can delete when you no longer run them.
 - The Benchmarks workflow (`.github/workflows/benchmarks.yml`) runs them on demand on a GitHub runner, from the Actions tab. It shows the reports on the run's summary page and keeps them as the `benchmark-reports` artifact. A shared runner is noisy, so compare runs of the same workflow, not a runner with your computer.
 
 ### Where the Results Go
