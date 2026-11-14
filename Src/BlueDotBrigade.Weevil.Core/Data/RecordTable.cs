@@ -500,6 +500,9 @@ namespace BlueDotBrigade.Weevil.Data
 					throw new InvalidOperationException("Only an empty builder can start with another table's blocks.");
 				}
 
+				// Only full blocks: the last block may have been trimmed.
+				ArgumentOutOfRangeException.ThrowIfGreaterThan(blockCount, table.Count / BlockSize);
+
 				for (var index = 0; index < blockCount; index++)
 				{
 					_blocks.Add(table._blocks[index]);
