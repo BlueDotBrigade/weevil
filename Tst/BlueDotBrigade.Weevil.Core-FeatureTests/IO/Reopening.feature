@@ -68,8 +68,16 @@ Examples:
 	| UTF-8          | LF           | RAM  |
 	| UTF-8 with BOM | CRLF         | Disk |
 	| UTF-16 LE      | CR           | Disk |
-	| UTF-16 BE      | LF           | RAM  |
-	| UTF-32 LE      | CRLF         | RAM  |
+	| UTF-16 BE      | LF           | Disk |
+	| UTF-32 LE      | CRLF         | Disk |
+
+Scenario: A log that grew, whose records all keep a string in RAM, is parsed in full
+	Given that the default log file has been saved beside the tests as UTF-16 BE with LF line endings
+	And that the saved log file has been opened in RAM
+	And records have been appended to the saved log file
+	When the saved log file is opened again in RAM
+	Then it will have been parsed
+	And it will show the same records as a parse of the log
 
 Scenario: A log whose last record gained lines since it was opened shows them in that record
 	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings
@@ -99,10 +107,15 @@ Scenario: A log that grew and also changed in its old part is parsed in full
 	Then it will have been parsed, because its saved record table does not match it
 	And it will show the same records as a parse of the log
 
-Scenario: A log given a line break in the middle since it was opened is indexed again
+Scenario Outline: A log given a line break in the middle since it was opened is indexed again
 	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings
 	And that the saved log file has been opened in RAM
 	And a line break has replaced one character in the middle of the saved log file
-	And that the saved log file has been opened in RAM
-	When the saved log file is opened again in RAM from line 350
+	And that the saved log file has been opened in <Mode>
+	When the saved log file is opened again in <Mode> from line 350
 	Then it will show the same records as a parse of the log
+
+Examples:
+	| Mode |
+	| RAM  |
+	| Disk |

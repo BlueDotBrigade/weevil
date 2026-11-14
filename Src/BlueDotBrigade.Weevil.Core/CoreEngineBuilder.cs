@@ -255,12 +255,12 @@
 						{
 							records = new TableRecordList(savedTable);
 						}
-						else if (GrownLogParser.TryParse(dataSource, _sourceFilePath, lineIndex, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
+						else if (GrownLogParser.TryParse(dataSource, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
 						{
 							// The log grew since it was indexed: only its new part was parsed, and the longer table is saved.
 							records = new TableRecordList(grownTable);
 							source = _storageMode == StorageMode.Disk ? parsedSource : null;
-							LineIndexFile.SaveParse(_sourceFilePath, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
+							LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
 						}
 					}
 
@@ -290,7 +290,7 @@
 						// so the log can be reopened without parsing (#1023). A parse from a start line, of a range or up to a limit keeps only part of it.
 						if (isFullOpen && repository.ParsedSource != null && records is TableRecordList { WholeTable: RecordTable parsedTable })
 						{
-							LineIndexFile.SaveParse(_sourceFilePath, lineIndex, SavedParse.Create(plugin, _storageMode, repository.ParsedSource), parsedTable);
+							LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, repository.ParsedSource), parsedTable);
 						}
 					}
 

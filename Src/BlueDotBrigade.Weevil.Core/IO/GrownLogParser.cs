@@ -13,9 +13,11 @@ namespace BlueDotBrigade.Weevil.IO
 	/// </summary>
 	/// <remarks>
 	/// Logs grow by appending, so the saved table still holds the log's old part, once its blocks are checked against the saved checksums.
-	/// - The rows from the start of the last chunk on are dropped: the lines added may continue the last record, and parsing from the chunk's start
-	///   lets that chunk grow, as a full parse would. A table of only strings has no chunk, so only its last record is dropped.
+	/// - The rows from the last chunk's first record on are dropped: the lines added may continue the last record, and parsing from the chunk's start
+	///   lets that chunk grow, as a full parse would.
 	/// - The log is parsed from that record to its end, with its line number, and the checksums of the new part follow those saved for the old part.
+	/// - Where that record starts comes from the table, which the checksums vouch for, never from the line index, which can be stale.
+	///   A table with no chunk, whose rows all keep a string, as UTF-16 in the other byte order and UTF-32 in RAM, cannot say, so its log is parsed in full.
 	/// </remarks>
 	internal static class GrownLogParser
 	{
@@ -23,7 +25,6 @@ namespace BlueDotBrigade.Weevil.IO
 
 		/// <param name="log">The log, now longer than <see cref="SavedParse.EndOffset"/>.</param>
 		/// <param name="logPath">The log's path, which chunks on file read back from.</param>
-		/// <param name="lineIndex">The log's line index, updated for its new part, to find where a row that keeps a string starts.</param>
 		/// <param name="saved">The table saved for the log's old part, already checked against it.</param>
 		/// <param name="parse">The parse that made <paramref name="saved"/>.</param>
 		/// <param name="parser">The parser, the same as made <paramref name="saved"/>.</param>
@@ -33,7 +34,6 @@ namespace BlueDotBrigade.Weevil.IO
 		public static bool TryParse(
 			Stream log,
 			string logPath,
-			LineIndex lineIndex,
 			RecordTable saved,
 			SavedParse parse,
 			IRecordParser parser,
@@ -45,26 +45,17 @@ namespace BlueDotBrigade.Weevil.IO
 			table = null;
 			parsed = null;
 
-			if (saved.Count == 0)
+			if (saved.ChunkStarts.Count == 0)
 			{
 				return false;
 			}
 
+			// A chunk starts at a row that holds the log's bytes, so where it starts in the log is known.
 			var stopwatch = Stopwatch.StartNew();
-			var resumeAt = saved.ChunkStarts.Count > 0 ? saved.ChunkStarts[saved.ChunkStarts.Count - 1] : saved.Count - 1;
+			var resumeAt = saved.ChunkStarts[saved.ChunkStarts.Count - 1];
 			var lineNumber = saved.GetLineNumber(resumeAt);
 
-			if (!saved.TryGetFileOffset(resumeAt, out var resumeOffset))
-			{
-				if (lineNumber < 1 || lineNumber > lineIndex.LineCount)
-				{
-					return false;
-				}
-
-				resumeOffset = lineIndex.GetByteOffset(log, lineNumber);
-			}
-
-			if (resumeOffset < parse.StartOffset || resumeOffset > parse.EndOffset)
+			if (!saved.TryGetFileOffset(resumeAt, out var resumeOffset) || resumeOffset < parse.StartOffset || resumeOffset >= parse.EndOffset)
 			{
 				return false;
 			}

@@ -628,7 +628,9 @@ namespace BlueDotBrigade.Weevil
 				using (var log = CapturingLogWriter.Register())
 				{
 					grown = Describe(Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Records);
-					log.SeverityOfLast(IO.GrownLogParser.NewPartParsedMessage).Should().Be(LogSeverityType.Information);
+					IDictionary<string, object> newPart = log.Last(IO.GrownLogParser.NewPartParsedMessage);
+					((int)newPart["RecordsKept"]).Should().BeGreaterThan(0, "the rows of the chunks before the last were kept");
+					((long)newPart["BytesParsed"]).Should().BeLessThan(new FileInfo(logPath).Length / 2, "only the last chunk and the new part were parsed");
 				}
 
 				using (var log = CapturingLogWriter.Register())

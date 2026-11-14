@@ -55,11 +55,12 @@ namespace BlueDotBrigade.Weevil.IO
 			var builder = new BlueDotBrigade.Weevil.Data.RecordTable.Builder();
 			builder.Add(1, DateTime.MaxValue, new BlueDotBrigade.Weevil.Data.RecordFacts(BlueDotBrigade.Weevil.Data.SeverityType.Information, false, false), "a");
 			BlueDotBrigade.Weevil.Data.RecordTable table = builder.Build();
-			LineIndexFile.SaveParse(_logFilePath, Load(_logFilePath), parse, table);
+			using var logSource = new System.IO.FileStream(_logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			LineIndexFile.SaveParse(_logFilePath, logSource, Load(_logFilePath), parse, table);
 			var savedAt = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 			System.IO.File.SetLastWriteTimeUtc(_indexFilePath, savedAt);
 
-			LineIndexFile.SaveParse(_logFilePath, Load(_logFilePath), new SavedParse(parse.PluginName, parse.PluginBuildId, parse.CoreBuildId, parse.CommonBuildId, StorageMode.Ram, 0, 6, [7]), table);
+			LineIndexFile.SaveParse(_logFilePath, logSource, Load(_logFilePath), new SavedParse(parse.PluginName, parse.PluginBuildId, parse.CoreBuildId, parse.CommonBuildId, StorageMode.Ram, 0, 6, [7]), table);
 
 			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt);
 		}
