@@ -99,7 +99,7 @@ namespace BlueDotBrigade.Weevil.Data
 		/// </summary>
 		/// <remarks>
 		/// Only the elapsed times already looked up by line number are kept, as an @Elapsed filter looks them up: otherwise none.
-		/// So keeping them allocates nothing.
+		/// Nothing is copied, but that array, 8 bytes per line up to the last line shown, is kept with them.
 		/// </remarks>
 		public ElapsedTimes WithoutRecords()
 		{

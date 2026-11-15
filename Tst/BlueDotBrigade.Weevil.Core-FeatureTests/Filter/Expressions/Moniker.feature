@@ -45,3 +45,16 @@ Scenario: Reloading a log filtered by elapsed time keeps the same records
 	Then there will be 2 matching records
 	And line number 3 will be visible
 	And line number 5 will be visible
+
+# A log that grew has no results shown before the filter for its new records, so the filter measures as it did before, and finds them.
+@Bug:1224
+Scenario: Reloading a log that grew since it was filtered by elapsed time shows the new records that match
+	Given that a copy of the "ElapsedTime.log" log file is open
+	When applying the include filter: Alpha
+	And applying the include filter: @Elapsed=1500
+	And this record is appended to the log:
+		"""
+		3050-09-30 11:26:20.00000	1977	2	Info	Alpha: 9 seconds after the previous Alpha
+		"""
+	And reloading the log
+	Then line number 7 will be visible

@@ -205,6 +205,17 @@
 		/// <remarks>
 		/// If reading fails, the engine stays, so it still saves this log's sidecar, and a retry reloads this log.
 		/// </remarks>
+		/// <summary>
+		/// Says whether this engine read the same log as another: the same length and number of lines.
+		/// A log that changed or grew in between differs, so what was kept by line number no longer applies (#1224).
+		/// </summary>
+		internal bool HasReadSameLogAs(CoreEngine other)
+		{
+			return other is not null &&
+			       _logFileMetrics.FileSize == other._logFileMetrics.FileSize &&
+			       _lineIndex.LineCount == other._lineIndex.LineCount;
+		}
+
 		internal CoreEngine WithoutRecords()
 		{
 			// Without the records they were calculated from, which this engine lets go of (#1126, #1224).
@@ -217,7 +228,9 @@
 		/// <remarks>
 		/// Reload uses it when the filter it applies again cannot read the log, so a retry keeps that filter (#1025).
 		/// </remarks>
-		/// <param name="comparedElapsedTimes">The elapsed times the filter compared, which applying it again compares too (#1224).</param>
+		/// <param name="comparedElapsedTimes">
+		/// The elapsed times the filter compared, which applying it again compares too (#1224), or <see langword="null"/> for those of the results shown.
+		/// </param>
 		internal CoreEngine WithoutRecords(FilterType filterType, IFilterCriteria criteria, ElapsedTimes comparedElapsedTimes)
 		{
 			var empty = new CoreEngine(
