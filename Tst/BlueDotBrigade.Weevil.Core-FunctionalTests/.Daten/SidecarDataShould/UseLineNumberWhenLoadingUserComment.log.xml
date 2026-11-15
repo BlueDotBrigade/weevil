@@ -1,5 +1,8 @@
-<WeevilSidecar xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Configuration.Sidecar.v2" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WeevilSidecar xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/BlueDotBrigade.Weevil.Configuration.Sidecar.v2">
 	<CommonData>
+		<Bookmarks />
+		<Context />
 		<FilterHistory>
 			<ExclusiveFilters>
 				<Filter>
@@ -28,7 +31,7 @@
 				<Id>1</Id>
 				<IsPinned>true</IsPinned>
 				<RelatesTo>
-					<ByteOffset>-1</ByteOffset>
+					<ByteOffset>0</ByteOffset>
 					<LineNumber>1</LineNumber>
 				</RelatesTo>
 			</Record>
@@ -37,11 +40,12 @@
 				<Id>32</Id>
 				<IsPinned>true</IsPinned>
 				<RelatesTo>
-					<ByteOffset>-1</ByteOffset>
+					<ByteOffset>2201</ByteOffset>
 					<LineNumber>32</LineNumber>
 				</RelatesTo>
 			</Record>
 		</Records>
+		<Regions />
 		<TableOfContents>
 			<Section>
 				<Level>1</Level>
@@ -60,16 +64,16 @@
 				</RelatesTo>
 			</Section>
 		</TableOfContents>
-		<UserRemarks/>
+		<UserRemarks></UserRemarks>
 	</CommonData>
 	<Header>
-		<SavedAt>2020-10-31T21:05:11.5406852-04:00</SavedAt>
-		<SchemaVersion xmlns:a="http://schemas.datacontract.org/2004/07/System">
-			<a:_Build>0</a:_Build>
-			<a:_Major>4</a:_Major>
-			<a:_Minor>0</a:_Minor>
-			<a:_Revision>-1</a:_Revision>
+		<SavedAt>2026-11-15T00:19:53.6592465+00:00</SavedAt>
+		<SchemaVersion xmlns:d3p1="http://schemas.datacontract.org/2004/07/System">
+			<d3p1:_Build>-1</d3p1:_Build>
+			<d3p1:_Major>4</d3p1:_Major>
+			<d3p1:_Minor>2</d3p1:_Minor>
+			<d3p1:_Revision>-1</d3p1:_Revision>
 		</SchemaVersion>
 	</Header>
-	<PluginData i:nil="true"/>
+	<PluginData i:nil="true" />
 </WeevilSidecar>

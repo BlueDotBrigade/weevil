@@ -31,3 +31,11 @@ Get-Records -FilePath .\Sample.log -Include Error -Storage Disk
 ```
 
 With `-Storage Disk`, the records `Get-Records` returns read their text from the log when the pipeline uses them. If the log is truncated, replaced or deleted before then, those reads fail. If the log changes while it is filtered, the cmdlet reloads it once and filters it again.
+
+## One Region
+
+`-Region` opens only one region, one of those the log's sidecar lists, so a large log opens faster:
+
+```PowerShell
+Get-Records -FilePath .\Sample.log -Include Error -Region "Startup"
+```

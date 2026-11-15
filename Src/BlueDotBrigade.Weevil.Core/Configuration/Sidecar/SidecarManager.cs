@@ -117,6 +117,16 @@
 			}
 		}
 
+		/// <summary>
+		/// Reads the regions the sidecar lists, without the log's records: none when the log has no sidecar (#1213).
+		/// </summary>
+		/// <exception cref="NotSupportedException">The sidecar is not compatible with this version of Weevil.</exception>
+		public List<Region> LoadRegions()
+		{
+			Load(null, null, out _, out _, out _, out _, out _, out List<Region> regions, out _);
+			return regions;
+		}
+
 		public void Save(SidecarData data, bool deleteBackup)
 		{
 			// Skip save operation if the file is from a compressed archive (in temp directory)

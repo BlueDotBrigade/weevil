@@ -29,6 +29,17 @@
 		IEngineBuilder UsingRange(Range range);
 
 		/// <summary>
+		/// During the loading process only the records of the region with this name will be loaded, from the regions the log's sidecar lists (#1213).
+		/// </summary>
+		/// <remarks>
+		/// The region replaces any range. <see cref="Open"/> throws a <see cref="System.Collections.Generic.KeyNotFoundException"/>
+		/// when the sidecar lists no region with this name.
+		/// </remarks>
+		/// <param name="regionName">The region's name, ignoring case.</param>
+		/// <exception cref="ArgumentException"><paramref name="regionName"/> is empty.</exception>
+		IEngineBuilder UsingRegion(string regionName);
+
+		/// <summary>
 		/// Keeps the log's content in RAM, the default, or reads it back from the log whenever it is needed (#421).
 		/// </summary>
 		/// <remarks>
