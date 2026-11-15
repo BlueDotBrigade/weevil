@@ -84,6 +84,48 @@
 		}
 
 		[TestMethod]
+		[WorkItem(1235)]
+		public void GivenADateWrittenWithDots_WhenGoingToIt_ThenTheRecordOnThatDayIsFound()
+		{
+			// A date written with dots was taken for a time alone, on the selected record's day.
+			var records = R.Create()
+				.WithCreatedAt(1, "2024-01-01 10:00:00")
+				.WithCreatedAt(2, "2024-01-02 10:00:00")
+				.GetRecords();
+			CultureInfo original = CultureInfo.CurrentCulture;
+
+			try
+			{
+				CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+
+				IRecord result = new TimestampNavigator(new ActiveRecord(records)).Find("02.01.2024 10:00:00");
+
+				result.LineNumber.Should().Be(2);
+			}
+			finally
+			{
+				CultureInfo.CurrentCulture = original;
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1235)]
+		public void GivenATimeWithFractionsOfASecond_WhenGoingToIt_ThenTheSelectedRecordsDayIsUsed()
+		{
+			// The dot in a time's fractions of a second must not be read as a date.
+			var records = R.Create()
+				.WithCreatedAt(1, "2024-01-01 11:00:00")
+				.WithCreatedAt(2, "2024-01-02 11:00:00")
+				.GetRecords();
+			var activeRecord = new ActiveRecord(records);
+			activeRecord.SetActiveIndex(1);
+
+			IRecord result = new TimestampNavigator(activeRecord).Find("11:00:00.000");
+
+			result.LineNumber.Should().Be(2);
+		}
+
+		[TestMethod]
 		[WorkItem(1225)]
 		public void GivenTextThatIsNotADate_WhenGoingToIt_ThenNoRecordIsFound()
 		{

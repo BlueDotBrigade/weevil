@@ -61,7 +61,7 @@
 				// Search value includes: day of month?
 				// ... yes: use given value
 				// ... no: use day of month from selected record
-				if (value.Contains("/") || value.Contains("-"))
+				if (IncludesDate(value))
 				{
 					if (TryParseTimestamp(value, out var requestedTime))
 					{
@@ -99,6 +99,21 @@
 			}
 
 			return (referenceTime, tolerance);
+		}
+
+		/// <summary>
+		/// Says whether the analyst typed a date, such as <c>2024-01-02</c>, <c>01/02/2024</c> or <c>02.01.2024</c>, rather than a time alone (#1235).
+		/// </summary>
+		/// <remarks>
+		/// Only the text before the time is checked, so the dot in a time's fractions of a second, as in <c>10:00:03.123</c>, is not taken for a date.
+		/// </remarks>
+		private static bool IncludesDate(string value)
+		{
+			var timeStartsAt = value.IndexOf(':');
+			var beforeTime = timeStartsAt < 0 ? value : value.Substring(0, timeStartsAt);
+
+			return beforeTime.IndexOfAny(new[] { '/', '-', '.' }) >= 0 ||
+			       beforeTime.Contains(CultureInfo.CurrentCulture.DateTimeFormat.DateSeparator, StringComparison.Ordinal);
 		}
 
 		/// <summary>
