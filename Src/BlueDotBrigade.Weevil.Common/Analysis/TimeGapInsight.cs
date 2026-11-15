@@ -33,23 +33,28 @@
 
 			if (analyzer.Count > 0)
 			{
-				this.MetricValue = analyzer.Count.ToString("#,##0.0");
+				// The longest gap, in seconds as the unit says, and the record that ends it (#1226).
+				this.MetricValue = analyzer.MaximumPeriodDetected.TotalSeconds.ToString("#,##0.0");
 				this.IsAttentionRequired = true;
+				this.RelatedLineNumbers = new[] { analyzer.MaximumPeriodLineNumber };
+
+				var longestGapEndedAt = FindCreatedAt(records, analyzer.MaximumPeriodLineNumber);
 				this.Details = $"A threshold of {_threshold.ToHumanReadable()}, resulted in {analyzer.Count} unexpected gaps in time. " +
-				               $"The longest gap occurred at {analyzer.FirstOccurrenceAt.ToString("HH:mm:ss")}.";
+				               $"The longest gap, {analyzer.MaximumPeriodDetected.ToHumanReadable()}, ended at {longestGapEndedAt:HH:mm:ss}.";
+			}
+		}
 
-				// Find the first record that matches the first occurrence timestamp, by its timestamp alone
-				for (var position = 0; position < records.Count; position++)
+		private static DateTime FindCreatedAt(RecordList records, int lineNumber)
+		{
+			for (var position = 0; position < records.Count; position++)
+			{
+				if (records.GetLineNumber(position) == lineNumber)
 				{
-					var createdAt = records.GetCreatedAt(position);
-
-					if (createdAt != Record.CreationTimeUnknown && createdAt == analyzer.FirstOccurrenceAt)
-					{
-						this.RelatedLineNumbers = new[] { records.GetLineNumber(position) };
-						break;
-					}
+					return records.GetCreatedAt(position);
 				}
 			}
+
+			return Record.CreationTimeUnknown;
 		}
 	}
 }
