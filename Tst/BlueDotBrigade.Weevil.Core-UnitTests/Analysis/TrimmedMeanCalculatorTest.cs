@@ -27,6 +27,16 @@ namespace BlueDotBrigade.Weevil.Math
 		}
 
 		[TestMethod]
+		[WorkItem(1228)]
+		public void GivenAMeanWithManyDecimals_WhenCalculated_ThenItIsRoundedToThreeDecimals()
+		{
+			// The trimmed mean was returned unrounded, unlike the other calculators.
+			var result = new TrimmedMeanCalculator(0.1).Calculate(new List<double> { 1, 2, 4 });
+
+			result.Should().Be(2.333);
+		}
+
+		[TestMethod]
 		public void Calculate_WithEmptyList_ReturnsNull()
 		{
 			// Arrange
