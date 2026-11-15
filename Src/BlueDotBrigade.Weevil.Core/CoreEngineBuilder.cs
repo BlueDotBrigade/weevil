@@ -543,13 +543,6 @@
 			}
 
 			/// <summary>
-			/// Returns the number of lines that can be read while searching for the first record.
-			/// </summary>
-			/// <remarks>
-			/// Reading starts at the top of the file, so the search must be able to reach the start line,
-			/// plus the usual allowance for lines that do not start a record.
-			/// </remarks>
-			/// <summary>
 			/// Returns the number of lines that can be read from a start line while searching for the first record (#1237).
 			/// </summary>
 			/// <remarks>
@@ -563,6 +556,13 @@
 				return (int)System.Math.Min(linesFromStart + MultilineRecordParser.MaximumLinesToSearch, int.MaxValue);
 			}
 
+			/// <summary>
+			/// Returns the number of lines that can be read while searching for the first record.
+			/// </summary>
+			/// <remarks>
+			/// Reading starts at the top of the file, so the search must be able to reach the start line,
+			/// plus the usual allowance for lines that do not start a record.
+			/// </remarks>
 			private static int GetMaximumLinesToSearch(Range lineNumberRange)
 			{
 				long linesBeforeStart = System.Math.Max(lineNumberRange.Start.Value, FirstRecordLineNumber) - 1;

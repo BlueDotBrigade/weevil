@@ -109,12 +109,6 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
-		/// <summary>
-		/// Writes a log of 300 lines of 54 bytes, so line 100 is past the first 4 KB and before the last 4 KB.
-		/// </summary>
-		/// <remarks>
-		/// A log in the temporary folder gets no saved line index, so this one is kept beside the tests.
-		/// </remarks>
 		[TestMethod]
 		[WorkItem(1237)]
 		[DataRow(StorageMode.Ram, false)]
@@ -144,6 +138,12 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
+		/// <summary>
+		/// Writes a log of 300 lines of 54 bytes, so line 100 is past the first 4 KB and before the last 4 KB.
+		/// </summary>
+		/// <remarks>
+		/// A log in the temporary folder gets no saved line index, so this one is kept beside the tests.
+		/// </remarks>
 		private static (string Folder, string LogPath, string[] Lines) CreateLogBesideTheTests()
 		{
 			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(OpeningFileShould), Guid.NewGuid().ToString("N"))).FullName;
