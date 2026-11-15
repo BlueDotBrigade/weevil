@@ -19,7 +19,7 @@ Open is the first thing an analyst does, so it should feel like Weevil from the 
 
 Decided by the owner on 2026-11-14:
 
-1. **Built in WPF, from scratch,** rather than hosting Windows' Explorer browser through COM, which would bring focus, DPI and layering problems. Open-source code with a permissive licence (MIT, BSD or Apache-2.0) may be copied as a starting point, with its notice, but never added as a dependency. No new dependency at all.
+1. **Built in WPF, from scratch,** rather than hosting Windows' Explorer browser through COM, which would bring focus, DPI and layering problems. No third-party code is copied and no dependency is added: on 2026-11-15, a search of 15 open-source projects found nothing worth copying. Windows' own functions, such as `StrCmpLogicalW` for sorting `app.log.2` before `app.log.10`, may be called.
 2. **The browser offers what an analyst uses in the Windows dialog,** and leaves out five things that are not worth rebuilding: Windows' indexed search (a filter by name in the current folder instead), the right-click menu, Quick Access pins (recent and favourite folders instead), browsing a network's servers (typing `\\server\share` still works), and thumbnails or the preview pane (the details panel replaces them). Anything else that proves complicated, such as OneDrive beyond its status icon, is raised before it is built.
 3. **A zip is a container, like a folder.** It may hold folders, logs, sidecars and other zips, to any depth. A log in a zip has a sidecar when one is beside it in the archive, named after the log as everywhere else: `Application.log`, `Application.log.xml`, `Application.log.idx`. Opening extracts the log with its sidecar and index.
 4. **Changes to a log opened from a zip are not saved,** as today.
