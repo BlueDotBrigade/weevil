@@ -359,7 +359,8 @@
 								 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
 								 startAtLineNumber,
 								 true,
-								 storageMode: _storageMode)
+								 GetMaximumLinesToSearch(startAtLineNumber, lineIndex.LineCount),
+								 _storageMode)
 							: new SerializedRecordRepository(
 								 dataSource,
 								 coreExtension.GetRecordParser(),
@@ -539,6 +540,20 @@
 				}
 
 				return new Range(region.Minimum.LineNumber, region.Maximum.LineNumber);
+			}
+
+			/// <summary>
+			/// Returns the number of lines that can be read from a start line while searching for the first record (#1237).
+			/// </summary>
+			/// <remarks>
+			/// The start line can be inside a record of many lines, such as a long stack trace, so the search can reach the end of the log,
+			/// plus the usual allowance in case the log grew since it was indexed.
+			/// </remarks>
+			private static int GetMaximumLinesToSearch(int startAtLineNumber, int lineCount)
+			{
+				long linesFromStart = System.Math.Max((long)lineCount - startAtLineNumber + 1, 0);
+
+				return (int)System.Math.Min(linesFromStart + MultilineRecordParser.MaximumLinesToSearch, int.MaxValue);
 			}
 
 			/// <summary>
