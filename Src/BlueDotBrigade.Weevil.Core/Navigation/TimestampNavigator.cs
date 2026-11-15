@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
 
@@ -32,6 +33,13 @@
 			(DateTime referenceTime, TimeSpan tolerance) searchValue =
 				ConvertToDateTime(referenceRecord, timestamp);
 
+			// Text that is not a time would otherwise be searched as a time before every record (#1225).
+			if (searchValue.referenceTime == Record.CreationTimeUnknown)
+			{
+				throw new RecordNotFoundException(
+					$"Unable to find record - the value is not a date or time. Value={timestamp}, SearchType={searchType}");
+			}
+
 			var index = _activeRecord.DataSource.IndexOfCreatedAt(searchValue.referenceTime, searchType);
 			return _activeRecord.SetActiveIndex(index);
 		}
@@ -55,7 +63,7 @@
 				// ... no: use day of month from selected record
 				if (value.Contains("/") || value.Contains("-"))
 				{
-					if (DateTime.TryParse(value, out var requestedTime))
+					if (TryParseTimestamp(value, out var requestedTime))
 					{
 						referenceTime = requestedTime;
 						tolerance = TimeSpan.FromDays(1);
@@ -63,7 +71,7 @@
 				}
 				else
 				{
-					if (DateTime.TryParse(value, out var requestedTime))
+					if (TryParseTimestamp(value, out var requestedTime))
 					{
 						var referenceDate = new DateTime(
 							activeRecord.CreatedAt.Year,
@@ -91,6 +99,40 @@
 			}
 
 			return (referenceTime, tolerance);
+		}
+
+		/// <summary>
+		/// Reads a date or time that the analyst typed, with the Gregorian calendar that records' timestamps use (#1225).
+		/// </summary>
+		/// <remarks>
+		/// The regional settings still decide the order of the day and month. Only their calendar is replaced, such as the Thai Buddhist one,
+		/// which would read 2024 as Gregorian 1481.
+		/// </remarks>
+		private static bool TryParseTimestamp(string value, out DateTime result)
+		{
+			return DateTime.TryParse(value, GetGregorianCulture(), DateTimeStyles.None, out result)
+				|| DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out result);
+		}
+
+		private static CultureInfo GetGregorianCulture()
+		{
+			CultureInfo current = CultureInfo.CurrentCulture;
+
+			if (current.Calendar is GregorianCalendar)
+			{
+				return current;
+			}
+
+			GregorianCalendar gregorian = current.OptionalCalendars.OfType<GregorianCalendar>().FirstOrDefault();
+
+			if (gregorian is null)
+			{
+				return CultureInfo.InvariantCulture;
+			}
+
+			var culture = (CultureInfo)current.Clone();
+			culture.DateTimeFormat.Calendar = gregorian;
+			return culture;
 		}
 	}
 }
