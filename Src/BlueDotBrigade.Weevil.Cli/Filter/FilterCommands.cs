@@ -28,7 +28,9 @@
 			[Option(Description = "Ram keeps the log in memory. Disk reads it back from the log, for a log larger than memory.")]
 			StorageMode storage = StorageMode.Ram,
 			[Option(Description = "Filters only this region, one of those the log's sidecar lists.")]
-			string? region = null)
+			string? region = null,
+			[Option(Description = "Filters only this level-1 section, one of those the log's sidecar lists, with the sections nested in it.")]
+			string? section = null)
 		{
 			var telemetry = TelemetrySessionLifecycle.Shared;
 			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
@@ -42,8 +44,10 @@
 						.UsingTelemetry(telemetry)
 						.UsingStorage(storage);
 
-				// Only the region's records are opened (#1213).
-				IEngine engine = (region is null ? builder : builder.UsingRegion(region)).Open();
+				// Only the region's or the section's records are opened (#1213, #1212).
+				builder = region is null ? builder : builder.UsingRegion(region);
+				builder = section is null ? builder : builder.UsingSection(section);
+				IEngine engine = builder.Open();
 
 				var destinationFile =
 					Path.GetFileNameWithoutExtension(logPath) +

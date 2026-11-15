@@ -39,3 +39,11 @@ With `-Storage Disk`, the records `Get-Records` returns read their text from the
 ```PowerShell
 Get-Records -FilePath .\Sample.log -Include Error -Region "Startup"
 ```
+
+## One Section
+
+`-Section` opens only one level-1 section of the log's table of contents, with the sections nested in it. It runs to the line before the next level-1 section, or to the end of the log:
+
+```PowerShell
+Get-Records -FilePath .\Sample.log -Include Error -Section "Startup"
+```
