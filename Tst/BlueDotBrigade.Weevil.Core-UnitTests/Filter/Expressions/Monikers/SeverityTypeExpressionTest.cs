@@ -31,7 +31,6 @@
 
 		[TestMethod]
 		[WorkItem(1227)]
-		[DataRow("@Severity=Information")]
 		[DataRow("@Severity=information")]
 		[DataRow("@Severity=INFO")]
 		[DataRow("@Severity=Info ")]

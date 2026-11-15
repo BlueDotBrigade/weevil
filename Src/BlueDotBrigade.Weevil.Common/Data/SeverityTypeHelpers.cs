@@ -29,7 +29,7 @@
 		/// <summary>
 		/// Converts a severity's name that a person typed, such as in a filter, ignoring case and the white space around it (#1227).
 		/// </summary>
-		public static bool TryParseName(string value, out SeverityType severityType)
+		public static bool TryParseIgnoringCase(string value, out SeverityType severityType)
 		{
 			if (value is not null && SeverityNameMap.TryGetValue(value.Trim(), out severityType))
 			{

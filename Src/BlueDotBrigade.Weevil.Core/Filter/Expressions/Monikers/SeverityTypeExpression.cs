@@ -24,7 +24,7 @@
 				if (Moniker.HasParameter(serializedExpression))
 				{
 					// Typed by the analyst, so its case and the spaces around it do not matter (#1227).
-					if (SeverityTypeHelpers.TryParseName(Moniker.GetParameter(serializedExpression), out SeverityType severityType))
+					if (SeverityTypeHelpers.TryParseIgnoringCase(Moniker.GetParameter(serializedExpression), out SeverityType severityType))
 					{
 						_isMatchDelegate = s => s == severityType;
 					}
