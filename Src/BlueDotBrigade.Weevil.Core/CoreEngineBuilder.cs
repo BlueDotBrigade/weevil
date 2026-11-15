@@ -65,6 +65,11 @@
 			/// </summary>
 			private Range _range = Range.All;
 
+			/// <summary>
+			/// The name of the region whose line numbers will be loaded, in place of <see cref="_range"/>: otherwise <see langword="null"/>.
+			/// </summary>
+			private string _regionName;
+
 			private Session _session;
 
 			private RecordState _recordState;
@@ -184,6 +189,26 @@
 			}
 
 			/// <summary>
+			/// During the loading process only the records of the region with this name will be loaded, from the regions the log's sidecar lists (#1213).
+			/// </summary>
+			/// <remarks>
+			/// The region replaces any range. <see cref="Build"/> throws a <see cref="KeyNotFoundException"/> when the sidecar lists no region with this name.
+			/// </remarks>
+			/// <param name="regionName">The region's name, ignoring case.</param>
+			public CoreEngineBuilder UsingRegion(string regionName)
+			{
+				_regionName = string.IsNullOrWhiteSpace(regionName)
+					? throw new ArgumentException("A region's name is expected.", nameof(regionName))
+					: regionName;
+
+				Log.Default.Write(
+					LogSeverityType.Debug,
+					$"Core engine construction will load one region. Region=`{regionName}`");
+
+				return this;
+			}
+
+			/// <summary>
 			/// Reopens the log from the record table saved with its index, parsing only what it grew by since (#1023).
 			/// </summary>
 			/// <remarks>
@@ -282,7 +307,7 @@
 					recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
 
 					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
-					Range lineNumberRange = GetLineNumberRange();
+					Range lineNumberRange = GetLineNumberRange(_regionName is null ? _range : GetRegionRange(sidecarManager));
 
 					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index (#1023).
 					var isFullOpen = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
@@ -417,19 +442,37 @@
 			/// <summary>
 			/// Returns the line numbers to load, combining the start line with the requested range.
 			/// </summary>
-			private Range GetLineNumberRange()
+			private Range GetLineNumberRange(Range range)
 			{
 				if (_startAtLineNumber <= FirstRecordLineNumber)
 				{
-					return _range;
+					return range;
 				}
 
-				if (_range.Equals(Range.All))
+				if (range.Equals(Range.All))
 				{
 					return new Range(_startAtLineNumber, int.MaxValue);
 				}
 
-				return new Range(System.Math.Max(_range.Start.Value, _startAtLineNumber), _range.End);
+				return new Range(System.Math.Max(range.Start.Value, _startAtLineNumber), range.End);
+			}
+
+			/// <summary>
+			/// Returns the line numbers of the region named by <see cref="UsingRegion"/>, from its first line to its last.
+			/// </summary>
+			/// <exception cref="KeyNotFoundException">The sidecar lists no region with that name.</exception>
+			private Range GetRegionRange(SidecarManager sidecarManager)
+			{
+				List<Region> regions = sidecarManager.LoadRegions();
+				Region region = regions.FirstOrDefault(r => string.Equals(r.Name, _regionName, StringComparison.OrdinalIgnoreCase));
+
+				if (region is null)
+				{
+					var names = regions.Count == 0 ? "none" : string.Join(", ", regions.Select(r => $"`{r.Name}`"));
+					throw new KeyNotFoundException($"The log's sidecar lists no region named `{_regionName}`. Its regions: {names}.");
+				}
+
+				return new Range(region.Minimum.LineNumber, region.Maximum.LineNumber);
 			}
 
 			/// <summary>

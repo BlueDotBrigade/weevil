@@ -13,6 +13,9 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
 	# A log larger than memory
 	$records = Get-Records -FilePath $logFilePath -Include "Id=2" -Storage Disk
+
+	# Only one region, of those the log's sidecar lists
+	$records = Get-Records -FilePath $logFilePath -Include "Id=2" -Region "Startup"
 	*/
 	[Cmdlet(VerbsCommon.Get, "Records")]
     public class GetRecordsCmdlet : Cmdlet
@@ -38,14 +41,21 @@ namespace BlueDotBrigade.Weevil.PowerShell
         [Parameter(Mandatory = false, HelpMessage = "Ram keeps the log in memory. Disk reads it back from the log, for a log larger than memory.")]
         public StorageMode Storage { get; set; } = StorageMode.Ram;
 
+        /// <summary>
+        /// Opens only this region, one of those the log's sidecar lists (#1213). By default, the whole log is opened.
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "Opens only this region, one of those the log's sidecar lists.")]
+        public string Region { get; set; }
+
         protected override void ProcessRecord()
         {
             try
             {
-                IEngine engine = Engine
+                IEngineBuilder builder = Engine
                     .UsingPath(this.FilePath)
-                    .UsingStorage(this.Storage)
-                    .Open();
+                    .UsingStorage(this.Storage);
+
+                IEngine engine = (string.IsNullOrEmpty(this.Region) ? builder : builder.UsingRegion(this.Region)).Open();
 
                 var filterCriteria = new FilterCriteria(this.Include, this.Exclude);
 
