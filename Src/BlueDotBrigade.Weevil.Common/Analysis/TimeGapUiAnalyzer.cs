@@ -19,12 +19,14 @@
 		private TimeSpan _maximumPeriodDetected;
 		private int _count;
 		private DateTime _firstOccurrenceAt;
+		private int _maximumPeriodLineNumber;
 
 		public TimeGapUiAnalyzer()
 		{
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = -1;
 			_firstOccurrenceAt = DateTime.MaxValue;
+			_maximumPeriodLineNumber = -1;
 		}
 
 		public virtual string Key => AnalysisType.ElapsedTimeUiThread.ToString();
@@ -37,11 +39,17 @@
 
 		public DateTime FirstOccurrenceAt => _firstOccurrenceAt;
 
+		/// <summary>
+		/// The line of the record that ends the longest period, <see cref="MaximumPeriodDetected"/>, or -1 when there is none (#1226).
+		/// </summary>
+		public int MaximumPeriodLineNumber => _maximumPeriodLineNumber;
+
 		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
 		{
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = 0;
 			_firstOccurrenceAt = DateTime.MaxValue;
+			_maximumPeriodLineNumber = -1;
 
 			Results results = Results.None;
 
@@ -68,6 +76,7 @@
 			_maximumPeriodDetected = TimeSpan.Zero;
 			_count = 0;
 			_firstOccurrenceAt = DateTime.MaxValue;
+			_maximumPeriodLineNumber = -1;
 
 			if (canUpdateMetadata)
 			{
@@ -108,9 +117,11 @@
 		{
 			TimeSpan elapsedTime = createdAt - previousCreatedAt;
 
-			_maximumPeriodDetected = elapsedTime > _maximumPeriodDetected
-				? elapsedTime
-				: _maximumPeriodDetected;
+			if (elapsedTime > _maximumPeriodDetected)
+			{
+				_maximumPeriodDetected = elapsedTime;
+				_maximumPeriodLineNumber = records.GetLineNumber(position);
+			}
 
 			if (elapsedTime > maximumAllowedPeriod)
 			{
