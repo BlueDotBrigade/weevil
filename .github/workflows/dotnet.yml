@@ -98,7 +98,8 @@ jobs:
       - name: Test (Debug, x64)
         run: |
           for project in Tst/*/*.csproj; do
-            if [[ "$project" == *Gui* ]]; then continue; fi
+            # The GUI and the WPF library's tests run only on Windows.
+            if [[ "$project" == *Gui* || "$project" == *Weevil.Windows-* ]]; then continue; fi
             dotnet test "$project" --configuration Debug -p:Platform=x64 --verbosity normal --filter "TestCategory!=Benchmark"
           done
 
