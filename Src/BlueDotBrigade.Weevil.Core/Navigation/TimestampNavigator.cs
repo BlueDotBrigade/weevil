@@ -112,8 +112,9 @@
 			var timeStartsAt = value.IndexOf(':');
 			var beforeTime = timeStartsAt < 0 ? value : value.Substring(0, timeStartsAt);
 
-			return beforeTime.IndexOfAny(new[] { '/', '-', '.' }) >= 0 ||
-			       beforeTime.Contains(CultureInfo.CurrentCulture.DateTimeFormat.DateSeparator, StringComparison.Ordinal);
+			// Every regional date separator contains one of these, so the regional settings' own separator is not checked:
+			// a customised one that is empty, or a space, would make every time look like a date.
+			return beforeTime.IndexOfAny(new[] { '/', '-', '.' }) >= 0;
 		}
 
 		/// <summary>
