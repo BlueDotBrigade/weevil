@@ -199,6 +199,20 @@
 		}
 
 		/// <summary>
+		/// Says whether this engine read the same log as another: the same length and number of lines.
+		/// A log that changed or grew in between differs, so what was kept by line number no longer applies (#1224).
+		/// </summary>
+		/// <remarks>
+		/// A log rewritten with the same length and number of lines is not told apart.
+		/// </remarks>
+		internal bool HasReadSameLogAs(CoreEngine other)
+		{
+			return other is not null &&
+			       _logFileMetrics.FileSize == other._logFileMetrics.FileSize &&
+			       _lineIndex.LineCount == other._lineIndex.LineCount;
+		}
+
+		/// <summary>
 		/// Returns an engine for the same log, with the same session, flags and filter, that holds none of the records.
 		/// Reload uses it while it reads the log again, so the engine holds none of the previous records meanwhile (#1126).
 		/// </summary>
@@ -207,7 +221,8 @@
 		/// </remarks>
 		internal CoreEngine WithoutRecords()
 		{
-			return WithoutRecords(_filterManager.FilterType, _filterManager.Criteria);
+			// Without the records they were calculated from, which this engine lets go of (#1126, #1224).
+			return WithoutRecords(_filterManager.FilterType, _filterManager.Criteria, _filterManager.ComparedElapsedTimes.WithoutRecords());
 		}
 
 		/// <summary>
@@ -216,7 +231,10 @@
 		/// <remarks>
 		/// Reload uses it when the filter it applies again cannot read the log, so a retry keeps that filter (#1025).
 		/// </remarks>
-		internal CoreEngine WithoutRecords(FilterType filterType, IFilterCriteria criteria)
+		/// <param name="comparedElapsedTimes">
+		/// The elapsed times the filter compared, which applying it again compares too (#1224), or <see langword="null"/> for those of the results shown.
+		/// </param>
+		internal CoreEngine WithoutRecords(FilterType filterType, IFilterCriteria criteria, ElapsedTimes comparedElapsedTimes)
 		{
 			var empty = new CoreEngine(
 				_sourceFilePath,
@@ -236,7 +254,7 @@
 				hasReadLog: false);
 
 			// Not a user action, so no telemetry, as when the engine was created.
-			empty._filterManager.ApplyInternal(filterType, criteria);
+			empty._filterManager.ApplyInternal(filterType, criteria, comparedElapsedTimes);
 
 			return empty;
 		}

@@ -47,6 +47,15 @@ internal sealed class FilteringSteps : ReqnrollSteps
 			this.Context.FilterCriteria);
 	}
 
+	/// <summary>
+	/// Applies the current filter again, as F5 does.
+	/// </summary>
+	[When("refreshing the filter")]
+	public void WhenRefreshingTheFilter()
+	{
+		this.Context.Engine.Filter.ReApply();
+	}
+
 	/// <seealso cref="WhenEnteringTheExcludeFilter"/>
 	[When($"applying the exclude filter: {X.AnyText}")]
 	public void WhenApplyingTheExcludeFilter(string excludeFilter)
