@@ -22,8 +22,12 @@ dotnet run -c Release --project Doc\Research\Weevil3\OpenAsDialogPoC\App
 
 Logs with sidecars to try:
 - Sections: `Tst\BlueDotBrigade.Weevil.Core-FeatureTests\.Daten\.Global\Droid.log`
-- Regions: `Tst\BlueDotBrigade.Weevil.Core-FunctionalTests\.Daten\.Global\GlobalDefault.log`
-- A zip of both, with their sidecars:
+- Regions: no test log has them, so make one in `C:\Temp`:
+  ```powershell
+  Copy-Item 'Tst\BlueDotBrigade.Weevil.Core-FeatureTests\.Daten\.Global\Droid.log' C:\Temp\Regions.log
+  Copy-Item 'Doc\Research\Weevil3\OpenAsDialogPoC\Samples\Regions.log.xml' C:\Temp\
+  ```
+- A zip of the sections log, with its sidecar:
   ```powershell
   $d = 'Tst\BlueDotBrigade.Weevil.Core-FeatureTests\.Daten\.Global'
   Compress-Archive -Path "$d\Droid.log", "$d\Droid.log.xml" -DestinationPath C:\Temp\Logs.zip -Force
@@ -38,7 +42,7 @@ Press **Open** (Ctrl+O). Note anything that looks or feels wrong.
 - [ ] **File type:** "Log files" shows `Droid.log` but hides `Droid.log.xml`; "All files" shows both.
 - [ ] **Find:** type part of a name; only matching items remain.
 - [ ] **Sections:** select `Droid.log`. The panel shows its size and 5 sections. Pick one, and Open: the result names it.
-- [ ] **Regions:** select `GlobalDefault.log`. Its regions are listed.
+- [ ] **Regions:** select `C:\Temp\Regions.log`. Its two regions, Startup and Shutdown, are listed.
 - [ ] **Zip:** open `C:\Temp\Logs.zip` like a folder, select `Droid.log`, and see its sections. Open: the result says it was extracted with its sidecar.
 - [ ] **RAM or Disk:** pick Disk, then select another log. It stays Disk.
 - [ ] **Keyboard only:** Tab moves through the dialog. In the list: arrows, Enter opens, Backspace goes up. Alt+Left goes back, Ctrl+L goes to the path box, Ctrl+F to Find, Escape cancels.
