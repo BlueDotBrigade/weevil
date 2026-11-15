@@ -23,4 +23,4 @@ Scenario: Opening a region the sidecar does not list names the regions it does l
 		| Startup  | 10         | 40        |
 		| Shutdown | 350        | 399       |
 	When its "Teardown" region is opened in RAM
-	Then the log will not open, and the reason will name the regions Startup and Shutdown
+	Then the log will not open, and the reason will name: Startup, Shutdown

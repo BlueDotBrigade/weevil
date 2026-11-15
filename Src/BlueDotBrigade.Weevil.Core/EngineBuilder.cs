@@ -50,6 +50,13 @@
 		}
 
 		/// <inheritdoc />
+		public IEngineBuilder UsingSection(string sectionName)
+		{
+			_coreEngineBuilder.UsingSection(sectionName);
+			return this;
+		}
+
+		/// <inheritdoc />
 		public IEngineBuilder UsingStorage(StorageMode storageMode)
 		{
 			_coreEngineBuilder.UsingStorage(storageMode);

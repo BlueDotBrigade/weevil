@@ -20,7 +20,24 @@
 			<InclusiveFilters/>
 		</FilterHistory>
 		<Records/>
-		<TableOfContents/>
+		<TableOfContents>
+			<Section>
+				<Level>1</Level>
+				<Name>Connecting</Name>
+				<RelatesTo>
+					<ByteOffset>-1</ByteOffset>
+					<LineNumber>2</LineNumber>
+				</RelatesTo>
+			</Section>
+			<Section>
+				<Level>1</Level>
+				<Name>Running</Name>
+				<RelatesTo>
+					<ByteOffset>-1</ByteOffset>
+					<LineNumber>7</LineNumber>
+				</RelatesTo>
+			</Section>
+		</TableOfContents>
 		<UserRemarks/>
 	</CommonData>
 	<Header>

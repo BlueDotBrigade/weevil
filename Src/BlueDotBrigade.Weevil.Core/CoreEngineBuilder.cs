@@ -70,6 +70,11 @@
 			/// </summary>
 			private string _regionName;
 
+			/// <summary>
+			/// The name of the level-1 section whose line numbers will be loaded, in place of <see cref="_range"/>: otherwise <see langword="null"/>.
+			/// </summary>
+			private string _sectionName;
+
 			private Session _session;
 
 			private RecordState _recordState;
@@ -192,7 +197,8 @@
 			/// During the loading process only the records of the region with this name will be loaded, from the regions the log's sidecar lists (#1213).
 			/// </summary>
 			/// <remarks>
-			/// The region replaces any range. <see cref="Build"/> throws a <see cref="KeyNotFoundException"/> when the sidecar lists no region with this name.
+			/// The region replaces any range. <see cref="Build"/> throws a <see cref="KeyNotFoundException"/> when the sidecar lists no region with this name,
+			/// and an <see cref="InvalidOperationException"/> when a section was also named.
 			/// </remarks>
 			/// <param name="regionName">The region's name, ignoring case.</param>
 			public CoreEngineBuilder UsingRegion(string regionName)
@@ -204,6 +210,28 @@
 				Log.Default.Write(
 					LogSeverityType.Debug,
 					$"Core engine construction will load one region. Region=`{regionName}`");
+
+				return this;
+			}
+
+			/// <summary>
+			/// During the loading process only the records of the level-1 section with this name will be loaded, from the log's sidecar (#1212):
+			/// from its line to the line before the next level-1 section, or to the end of the log, so the sections nested in it are loaded too.
+			/// </summary>
+			/// <remarks>
+			/// The section replaces any range. <see cref="Build"/> throws a <see cref="KeyNotFoundException"/> when the sidecar lists no level-1 section with this name,
+			/// and an <see cref="InvalidOperationException"/> when a region was also named.
+			/// </remarks>
+			/// <param name="sectionName">The section's name, ignoring case.</param>
+			public CoreEngineBuilder UsingSection(string sectionName)
+			{
+				_sectionName = string.IsNullOrWhiteSpace(sectionName)
+					? throw new ArgumentException("A section's name is expected.", nameof(sectionName))
+					: sectionName;
+
+				Log.Default.Write(
+					LogSeverityType.Debug,
+					$"Core engine construction will load one section. Section=`{sectionName}`");
 
 				return this;
 			}
@@ -307,7 +335,7 @@
 					recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
 
 					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
-					Range lineNumberRange = GetLineNumberRange(_regionName is null ? _range : GetRegionRange(sidecarManager));
+					Range lineNumberRange = GetLineNumberRange(GetRequestedRange(sidecarManager));
 
 					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index (#1023).
 					var isFullOpen = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
@@ -455,6 +483,44 @@
 				}
 
 				return new Range(System.Math.Max(range.Start.Value, _startAtLineNumber), range.End);
+			}
+
+			/// <summary>
+			/// Returns the line numbers asked for: those of the region or section named, or else the range.
+			/// </summary>
+			/// <exception cref="InvalidOperationException">Both a region and a section were named.</exception>
+			private Range GetRequestedRange(SidecarManager sidecarManager)
+			{
+				if (_regionName is not null && _sectionName is not null)
+				{
+					throw new InvalidOperationException($"Only one part of a log can be opened: the region `{_regionName}` or the section `{_sectionName}`, not both.");
+				}
+
+				return _regionName is not null ? GetRegionRange(sidecarManager)
+					: _sectionName is not null ? GetSectionRange(sidecarManager)
+					: _range;
+			}
+
+			/// <summary>
+			/// Returns the line numbers of the level-1 section named by <see cref="UsingSection"/>,
+			/// from its line to the line before the next level-1 section, or to the end of the log.
+			/// </summary>
+			/// <exception cref="KeyNotFoundException">The sidecar lists no level-1 section with that name.</exception>
+			private Range GetSectionRange(SidecarManager sidecarManager)
+			{
+				List<Section> sections = new TableOfContents(sidecarManager.LoadSections()).Sections
+					.Where(s => s.Level == 1)
+					.ToList();
+				var index = sections.FindIndex(s => string.Equals(s.Name, _sectionName, StringComparison.OrdinalIgnoreCase));
+
+				if (index < 0)
+				{
+					var names = sections.Count == 0 ? "none" : string.Join(", ", sections.Select(s => $"`{s.Name}`"));
+					throw new KeyNotFoundException($"The log's sidecar lists no level-1 section named `{_sectionName}`. Its level-1 sections: {names}.");
+				}
+
+				var lastLine = index + 1 < sections.Count ? sections[index + 1].LineNumber - 1 : int.MaxValue;
+				return new Range(sections[index].LineNumber, lastLine);
 			}
 
 			/// <summary>
