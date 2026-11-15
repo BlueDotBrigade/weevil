@@ -170,17 +170,15 @@ try
 	using (Stream stream = reader.OpenRead(serverSidecar))
 	{
 		var (sections, regions) = Sidecar.Read(stream);
-		Check(sections.Count == 4 && regions.Count == 1, "a sidecar is read straight from the zip");
-		Check(sections[0] == new SidecarSection("Start", 1, 1, 99), $"a level-1 section runs to the next level-1 section: {sections[0]}");
-		Check(sections[1] == new SidecarSection("Login", 2, 20, 29) && sections[2] == new SidecarSection("Upload", 2, 30, 99),
-			$"a level-2 section ends at the next section at its level or above: {sections[1]}, {sections[2]}");
-		Check(sections[3].LastLine is null, "the last section runs to the end of the log");
+		Check(sections.Count == 2 && regions.Count == 1, "a sidecar is read straight from the zip, with only its level-1 sections");
+		Check(sections[0] == new SidecarSection("Start", 1, 99), $"a level-1 section runs to the next level-1 section, holding its level-2 sections: {sections[0]}");
+		Check(sections[1] == new SidecarSection("Shutdown", 100, null), $"the last section runs to the end of the log: {sections[1]}");
 		Check(regions[0] == new SidecarRegion("Crash", 40, 45), $"a region: {regions[0]}");
 	}
 
 	using (Stream stream = reader.OpenRead(ContainerReader.GetSibling(oldLog.Location, "Old.log.xml")))
 	{
-		Check(Sidecar.Read(stream).Sections.Count == 4, "a sidecar is read from a zip in a zip");
+		Check(Sidecar.Read(stream).Sections.Count == 2, "a sidecar is read from a zip in a zip");
 	}
 
 	// Opening: a file on disk stays where it is; a file in a zip comes out with its companions.

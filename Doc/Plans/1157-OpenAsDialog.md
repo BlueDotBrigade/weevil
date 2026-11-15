@@ -48,7 +48,7 @@ Decided by the owner on 2026-11-14:
 ### Weevil
 
 - **Its options panel:** the log's details, then Whole log, Section, Region or Lines, then RAM or Disk with its advice and warnings.
-- **Core loads one section, region or range.** Core already loads a range of lines. A section runs from its line to the line before the next section at the same or a higher level (proposed), and a region from its first line to its last.
+- **Core loads one section, region or range.** Core already loads a range of lines. Only level-1 sections are offered, and one runs from its line to the line before the next level-1 section, or to the end of the log, so it holds the sections nested in it (decided by the owner on 2026-11-15). A region runs from its first line to its last.
 - **The CLI and PowerShell** gain the same choices.
 - **Plugins:** a new optional interface supplies a plugin's options panel. It replaces `IPlugin.ShowOpenAs`, which shows a plugin's own window after Weevil's today.
 

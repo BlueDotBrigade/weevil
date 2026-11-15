@@ -7,15 +7,16 @@ namespace OpenAsDialogPoC
 	using System.Xml.Linq;
 
 	/// <summary>
-	/// A section of a log's table of contents: from its line to the line before the next section at the same or a higher level.
+	/// A level-1 section of a log's table of contents: from its line to the line before the next level-1 section,
+	/// so it holds the sections nested in it (decided by the owner on 2026-11-15).
 	/// </summary>
 	/// <param name="LastLine">The section's last line, or <see langword="null"/> when it runs to the end of the log.</param>
-	public sealed record SidecarSection(string Name, int Level, int FirstLine, int? LastLine)
+	public sealed record SidecarSection(string Name, int FirstLine, int? LastLine)
 	{
 		public override string ToString()
 		{
 			var lines = this.LastLine is int last ? $"lines {this.FirstLine:N0}–{last:N0}" : $"line {this.FirstLine:N0} to the end";
-			return $"{new string(' ', System.Math.Max(0, this.Level - 1) * 3)}{this.Name}  ({lines})";
+			return $"{this.Name}  ({lines})";
 		}
 	}
 
@@ -39,7 +40,7 @@ namespace OpenAsDialogPoC
 					Name: Child(element, "Name") ?? "(no name)",
 					Level: ToInt(Child(element, "Level")) ?? 1,
 					Line: ToInt(element.Descendants().FirstOrDefault(child => child.Name.LocalName == "LineNumber")?.Value)))
-				.Where(section => section.Line is not null)
+				.Where(section => section.Line is not null && section.Level == 1)
 				.OrderBy(section => section.Line)
 				.ToList();
 
@@ -48,8 +49,8 @@ namespace OpenAsDialogPoC
 			for (var index = 0; index < starts.Count; index++)
 			{
 				var start = starts[index];
-				var next = starts.Skip(index + 1).FirstOrDefault(other => other.Level <= start.Level);
-				sections.Add(new SidecarSection(start.Name, start.Level, start.Line.Value, next.Line is int nextLine ? nextLine - 1 : null));
+				int? nextLine = index + 1 < starts.Count ? starts[index + 1].Line : null;
+				sections.Add(new SidecarSection(start.Name, start.Line.Value, nextLine - 1));
 			}
 
 			var regions = document.Descendants()

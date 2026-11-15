@@ -31,7 +31,40 @@
 			<InclusiveFilters/>
 		</FilterHistory>
 		<Records/>
-		<TableOfContents/>
+		<TableOfContents>
+			<Section>
+				<Level>1</Level>
+				<Name>Startup</Name>
+				<RelatesTo>
+					<ByteOffset>-1</ByteOffset>
+					<LineNumber>1</LineNumber>
+				</RelatesTo>
+			</Section>
+			<Section>
+				<Level>1</Level>
+				<Name>Patrol</Name>
+				<RelatesTo>
+					<ByteOffset>-1</ByteOffset>
+					<LineNumber>120</LineNumber>
+				</RelatesTo>
+			</Section>
+			<Section>
+				<Level>2</Level>
+				<Name>Contact</Name>
+				<RelatesTo>
+					<ByteOffset>-1</ByteOffset>
+					<LineNumber>150</LineNumber>
+				</RelatesTo>
+			</Section>
+			<Section>
+				<Level>1</Level>
+				<Name>Shutdown</Name>
+				<RelatesTo>
+					<ByteOffset>-1</ByteOffset>
+					<LineNumber>300</LineNumber>
+				</RelatesTo>
+			</Section>
+		</TableOfContents>
 		<UserRemarks/>
 	</CommonData>
 	<Header>
