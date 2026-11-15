@@ -21,3 +21,27 @@ Scenario: Filtering by elapsed time after another filter
 	Then there will be 2 matching records
 	And line number 3 will be visible
 	And line number 5 will be visible
+
+# Refreshing measured the records the elapsed-time filter showed, rather than those before it, so the results changed each time.
+@Bug:1224
+Scenario: Refreshing a filter by elapsed time keeps the same records
+	Given that the "ElapsedTime.log" log file name is open
+	When applying the include filter: Alpha
+	And applying the include filter: @Elapsed=1500
+	And refreshing the filter
+	And refreshing the filter
+	Then there will be 2 matching records
+	And line number 3 will be visible
+	And line number 5 will be visible
+
+# Reloading measured every record of the log, rather than those the earlier filter showed.
+@Bug:1224
+Scenario: Reloading a log filtered by elapsed time keeps the same records
+	Given that the "ElapsedTime.log" log file name is open
+	When applying the include filter: Alpha
+	And applying the include filter: @Elapsed=1500
+	And reloading the log
+	And refreshing the filter
+	Then there will be 2 matching records
+	And line number 3 will be visible
+	And line number 5 will be visible

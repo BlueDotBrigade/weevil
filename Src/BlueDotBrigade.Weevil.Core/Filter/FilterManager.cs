@@ -42,6 +42,12 @@
 
 		private Filter _currentFilter;
 
+		/// <summary>
+		/// The elapsed times the current filter compared: those of the results shown before it (#1016).
+		/// Applying the filter again compares them again, so @Elapsed keeps its results (#1224).
+		/// </summary>
+		private ElapsedTimes _comparedElapsedTimes = ElapsedTimes.None;
+
 		// The histories belong to the log, so they live in the session (#1109).
 		private readonly FilterHistory _includeHistory;
 		private readonly FilterHistory _excludeHistory;
@@ -97,6 +103,11 @@
 		public RecordList Results => _latestFilterResults;
 
 		public ElapsedTimes ElapsedTimes => _recordState.ElapsedTimes;
+
+		/// <summary>
+		/// The elapsed times the current filter compared, which applying it again compares too (#1224).
+		/// </summary>
+		internal ElapsedTimes ComparedElapsedTimes => _comparedElapsedTimes;
 
 		public IReadOnlyList<string> IncludeHistory => _includeHistory;
 
@@ -291,7 +302,8 @@
 				"Re-applying the most recent filter to the in-memory records...");
 
 			// Re-applying is not a user-initiated filter action, so it is not recorded as telemetry.
-			return ApplyInternal(_currentFilter.Type, _currentFilter.Criteria);
+			// It compares the elapsed times the filter compared before, not those of its own results (#1224).
+			return ApplyInternal(_currentFilter.Type, _currentFilter.Criteria, _comparedElapsedTimes);
 		}
 
 		public IFilter Apply(FilterType filterType, IFilterCriteria criteria)
@@ -322,8 +334,10 @@
 						{"FilterCriteria", criteria},
 					});
 
+				ElapsedTimes comparedElapsedTimes = previousElapsedTimes ?? _recordState.ElapsedTimes;
+
 				_latestFilterStrategy =
-					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _recordState, previousElapsedTimes ?? _recordState.ElapsedTimes);
+					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _recordState, comparedElapsedTimes);
 
 				_filterExecutionTime = TimeSpan.Zero;
 				var exectionTimeStopwatch = Stopwatch.StartNew();
@@ -332,6 +346,7 @@
 				_latestFilterResults = FilterAndCalculateMetrics(_latestFilterStrategy);
 
 				_currentFilter = new Filter(filterType, criteria);
+				_comparedElapsedTimes = comparedElapsedTimes;
 
 				UpdateFilterHistory(_includeHistory, criteria.Include);
 				UpdateFilterHistory(_excludeHistory, criteria.Exclude);

@@ -196,6 +196,9 @@
 		{
 			(CoreEngine.CoreEngineBuilder builder, SelectionManager.Snapshot selection, FilterType filterType, IFilterCriteria filterCriteria) = Release();
 
+			// The engine without records keeps the elapsed times the filter compared, so @Elapsed keeps its results (#1224).
+			ElapsedTimes comparedElapsedTimes = _coreEngine.Filter.ComparedElapsedTimes;
+
 			Replace(builder.Build());
 
 			// Before the filter, which then narrows the selection as any filter does (#1062).
@@ -204,13 +207,13 @@
 			try
 			{
 				// Not a filter the user asked for, so not counted as one (#1185).
-				_coreEngine.Filter.ApplyInternal(filterType, filterCriteria);
+				_coreEngine.Filter.ApplyInternal(filterType, filterCriteria, comparedElapsedTimes);
 			}
 			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
 			{
 				// The log changed or went away again once read: end like a Reload that could not read it, keeping the filter for the next one (#1025).
 				DeleteLineIndexIfChanged();
-				Replace(_coreEngine.WithoutRecords(filterType, filterCriteria));
+				Replace(_coreEngine.WithoutRecords(filterType, filterCriteria, comparedElapsedTimes));
 				throw;
 			}
 		}
