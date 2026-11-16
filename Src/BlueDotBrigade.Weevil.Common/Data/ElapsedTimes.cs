@@ -38,6 +38,12 @@ namespace BlueDotBrigade.Weevil.Data
 			_results = results;
 		}
 
+		private ElapsedTimes(TimeSpan[] byLineNumber)
+		{
+			_results = RecordList.Empty;
+			_byLineNumber = byLineNumber;
+		}
+
 		/// <summary>
 		/// Returns the elapsed times of the records a view shows, in the order it shows them. They are calculated when read.
 		/// </summary>
@@ -86,6 +92,20 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 
 			return Unknown;
+		}
+
+		/// <summary>
+		/// Returns these elapsed times without the records they were calculated from, so keeping them does not keep those records (#1224).
+		/// </summary>
+		/// <remarks>
+		/// Only the elapsed times already looked up by line number are kept, as an @Elapsed filter looks them up: otherwise none.
+		/// Nothing is copied, but that array, 8 bytes per line up to the last line shown, is kept with them.
+		/// </remarks>
+		public ElapsedTimes WithoutRecords()
+		{
+			TimeSpan[] byLineNumber = Volatile.Read(ref _byLineNumber);
+
+			return byLineNumber is null ? None : new ElapsedTimes(byLineNumber);
 		}
 
 		/// <summary>

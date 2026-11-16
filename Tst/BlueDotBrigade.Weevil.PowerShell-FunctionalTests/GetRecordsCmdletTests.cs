@@ -42,6 +42,38 @@ namespace BlueDotBrigade.Weevil.PowerShell
 		}
 
 		[TestMethod]
+		public void GivenARegion_WhenGettingRecords_ThenReturnsOnlyMatchesInThatRegion()
+		{
+			var cmdlet = new GetRecordsCmdlet
+			{
+				FilePath = new Daten().AsFilePath("Application.log"),
+				Include = "Error",
+				Region = "Connecting",
+			};
+
+			var output = cmdlet.Invoke().Cast<object>().ToList();
+
+			output.Should().AllBeAssignableTo<IRecord>();
+			output.Cast<IRecord>().Select(record => record.LineNumber).Should().Equal(3, 5);
+		}
+
+		[TestMethod]
+		public void GivenASection_WhenGettingRecords_ThenReturnsOnlyMatchesInThatSection()
+		{
+			var cmdlet = new GetRecordsCmdlet
+			{
+				FilePath = new Daten().AsFilePath("Application.log"),
+				Include = "Error",
+				Section = "Running",
+			};
+
+			var output = cmdlet.Invoke().Cast<object>().ToList();
+
+			output.Should().AllBeAssignableTo<IRecord>();
+			output.Cast<IRecord>().Select(record => record.LineNumber).Should().Equal(8);
+		}
+
+		[TestMethod]
 		public void GivenStorageDisk_WhenGettingRecords_ThenReturnsTheSameRecordsAsInRam()
 		{
 			var cmdlet = new GetRecordsCmdlet

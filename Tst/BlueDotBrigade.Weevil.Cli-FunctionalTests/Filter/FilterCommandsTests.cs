@@ -60,6 +60,32 @@ namespace BlueDotBrigade.Weevil.Cli.Filter
 				.Should().Equal(lines[1], lines[5]);
 		}
 
+		[TestMethod]
+		public void GivenARegion_WhenFiltering_ThenResultsFileHasOnlyMatchingRecordsOfThatRegion()
+		{
+			var logPath = CopyLog("Application.log");
+			_ = CopyLog("Application.log.xml");
+			var lines = File.ReadAllLines(logPath);
+
+			new FilterCommands().Filter(logPath, include: "Error", exclude: null, region: "Connecting");
+
+			File.ReadAllLines(Path.Combine(_folder, "Application.Results.log"))
+				.Should().Equal(lines[2], lines[4]);
+		}
+
+		[TestMethod]
+		public void GivenASection_WhenFiltering_ThenResultsFileHasOnlyMatchingRecordsOfThatSection()
+		{
+			var logPath = CopyLog("Application.log");
+			_ = CopyLog("Application.log.xml");
+			var lines = File.ReadAllLines(logPath);
+
+			new FilterCommands().Filter(logPath, include: "Error", exclude: null, section: "Running");
+
+			File.ReadAllLines(Path.Combine(_folder, "Application.Results.log"))
+				.Should().Equal(lines[7]);
+		}
+
 		private string CopyLog(string fileName)
 		{
 			var logPath = Path.Combine(_folder, fileName);

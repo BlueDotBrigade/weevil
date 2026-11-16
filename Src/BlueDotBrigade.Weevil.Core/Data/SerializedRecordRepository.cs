@@ -109,9 +109,13 @@
 				hasRecord = _recordParser.TryReadNext(out MultilineRecordParser.ParsedRecord record) &&
 				            record.LineNumber != Record.Dummy.LineNumber;
 
-				if (hasRecord &&
-				    range.Start.Value <= record.LineNumber &&
-				    record.LineNumber <= range.End.Value)
+				// Records are read in line order, so the rest of the log is not read once the range ends, as when one region is opened (#1213).
+				if (hasRecord && record.LineNumber > range.End.Value)
+				{
+					break;
+				}
+
+				if (hasRecord && range.Start.Value <= record.LineNumber)
 				{
 					record.AddTo(table);
 				}

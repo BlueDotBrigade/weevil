@@ -29,6 +29,29 @@
 		IEngineBuilder UsingRange(Range range);
 
 		/// <summary>
+		/// During the loading process only the records of the region with this name will be loaded, from the regions the log's sidecar lists (#1213).
+		/// </summary>
+		/// <remarks>
+		/// The region replaces any range. <see cref="Open"/> throws a <see cref="System.Collections.Generic.KeyNotFoundException"/>
+		/// when the sidecar lists no region with this name, and an <see cref="InvalidOperationException"/> when a section was also named.
+		/// </remarks>
+		/// <param name="regionName">The region's name, ignoring case.</param>
+		/// <exception cref="ArgumentException"><paramref name="regionName"/> is empty.</exception>
+		IEngineBuilder UsingRegion(string regionName);
+
+		/// <summary>
+		/// During the loading process only the records of the level-1 section with this name will be loaded, from the log's sidecar (#1212):
+		/// from its line to the line before the next level-1 section, or to the end of the log, so the sections nested in it are loaded too.
+		/// </summary>
+		/// <remarks>
+		/// The section replaces any range. <see cref="Open"/> throws a <see cref="System.Collections.Generic.KeyNotFoundException"/>
+		/// when the sidecar lists no level-1 section with this name, and an <see cref="InvalidOperationException"/> when a region was also named.
+		/// </remarks>
+		/// <param name="sectionName">The section's name, ignoring case.</param>
+		/// <exception cref="ArgumentException"><paramref name="sectionName"/> is empty.</exception>
+		IEngineBuilder UsingSection(string sectionName);
+
+		/// <summary>
 		/// Keeps the log's content in RAM, the default, or reads it back from the log whenever it is needed (#421).
 		/// </summary>
 		/// <remarks>

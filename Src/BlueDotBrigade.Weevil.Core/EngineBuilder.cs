@@ -43,6 +43,20 @@
 		}
 
 		/// <inheritdoc />
+		public IEngineBuilder UsingRegion(string regionName)
+		{
+			_coreEngineBuilder.UsingRegion(regionName);
+			return this;
+		}
+
+		/// <inheritdoc />
+		public IEngineBuilder UsingSection(string sectionName)
+		{
+			_coreEngineBuilder.UsingSection(sectionName);
+			return this;
+		}
+
+		/// <inheritdoc />
 		public IEngineBuilder UsingStorage(StorageMode storageMode)
 		{
 			_coreEngineBuilder.UsingStorage(storageMode);
