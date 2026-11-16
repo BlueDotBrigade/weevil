@@ -91,6 +91,33 @@ Significant findings use this form. Minor ones get one line in a "Minor" list.
 
 High-priority findings go to a sceptic agent with only the code and the claim, not this reasoning.
 
+## External Evidence: SonarCloud
+
+[SonarCloud](https://sonarcloud.io/project/overview?id=BlueDotBrigade_weevil) analysed `main` at `7c6a061c` on 2026-11-16. Read through its public API, for example `https://sonarcloud.io/api/issues/search?componentKeys=BlueDotBrigade_weevil&resolved=false&facets=rules`.
+
+| Measure | Value |
+|---|---|
+| Lines of code | 28,509 |
+| Open issues | 1,008: 944 code smells, 34 bugs, 30 vulnerabilities |
+| Ratings | Maintainability A (2,250 min of debt); Reliability D (from the bugs) |
+| Duplication | 2.3% |
+| Coverage | 67.8% |
+| Cognitive complexity | 3,527 in total |
+
+**Most issues come from the Roslyn rules that the build turns on, not from Sonar's own rules.** At least 622 of the 1,008 are `external_roslyn:*`, mostly style: `IDE0008` (explicit type, 128), `CA1704` (spelling, 73), `MSTEST0049` (60), `IDE0028` and `IDE0009`. Sonar's own rules (`csharpsquid:*`) raise about 340. Treat the total as noise. The few Sonar rules below are worth using as evidence.
+
+Sonar cannot tell new code from code inherited from 2.x. Before citing one of its issues as a 3.0 problem, check `git blame` or `Releases/2.x`.
+
+Leads by unit:
+
+| Unit | Sonar lead |
+|---|---|
+| U1 | Cognitive complexity (S3776): `LineIndex.cs:349` 28, `LogLineReader.cs:133` 21 and `:289` 16 |
+| U2 | `RecordTable.cs:333` 19, `InMemoryRecordRepository.cs:303` 16; a possible null `nextSection` (S2259) at `RecordCollectionExtensions.cs:440` |
+| U4 | `SidecarLoader.cs:194` 36 and `:57` 23; a possible null `_sidecar` (S2259) at `SidecarLoader.cs:62,70` |
+| U5 | `FilterManager.cs:134` 20, `FilterStrategy.cs:129` 20, `RecordSearch.cs:52` 22; timeline analyzers 18–46, which #990 and #988 changed only mechanically, so the complexity is probably inherited; regular expressions without a timeout (S6444) in `ContentNavigator.cs:55` and `CommentNavigator.cs:54,90` |
+| U6 | `FilterViewModel.cs` has six methods over 15 (the worst is 35, at line 769) and 11 calls that ignore the available cancellation token (S8949, lines 591–2151) |
+
 ## Findings So Far
 
 None yet. See [Scope.md](Scope.md#first-observations) for what to look at first.
