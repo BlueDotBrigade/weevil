@@ -287,6 +287,24 @@
 					"Core engine is being constructed.");
 
 				var openingStopwatch = Stopwatch.StartNew();
+
+				CoreEngine coreEngine = BuildEngine();
+
+				// Opening's only forced collection. It runs once BuildEngine has returned, so nothing still refers to what parsing
+				// and the first filter left behind (#1240). Aggressive mode returns that memory to the operating system (#969).
+				GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+
+				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);
+
+				return coreEngine;
+			}
+
+			/// <remarks>
+			/// Not inlined: <see cref="Build"/>'s collection can free this method's temporaries only once it has returned (#1240).
+			/// </remarks>
+			[MethodImpl(MethodImplOptions.NoInlining)]
+			private CoreEngine BuildEngine()
+			{
 				var sourceFileRemarks = string.Empty;
 
 				string sourceFilePath;
@@ -416,7 +434,7 @@
 
 				ContextDictionary context = GetContext(coreExtension, knownContext, records);
 
-				var coreEngine = new CoreEngine(
+				return new CoreEngine(
 					sourceFilePath,
 					sourceFileLength,
 					sourceFileEncoding,
@@ -432,10 +450,6 @@
 					_storageMode,
 					source,
 					hasReadLog: true);
-
-				LogFileLoaded(coreEngine, openingStopwatch.Elapsed);
-
-				return coreEngine;
 			}
 
 			/// <summary>
@@ -443,7 +457,7 @@
 			/// so a shared application log is enough to compare them (#1105).
 			/// </summary>
 			/// <remarks>
-			/// The engine has already collected the memory used while parsing. The memory is the whole process's:
+			/// Opening has already collected the memory that parsing and the first filter left behind (#1240). The memory is the whole process's:
 			/// it includes the application, and any engine the caller still holds, such as the one a second open replaces.
 			/// Reload lets go of the engine it replaces before parsing (#1126).
 			/// </remarks>

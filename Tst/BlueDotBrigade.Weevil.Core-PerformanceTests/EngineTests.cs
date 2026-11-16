@@ -23,6 +23,9 @@
 		// #1087's estimate was 18, or 137 MB per GB of the reference log: 22 is about 170 MB per GB. The droid log's budget below is the tighter one.
 		private const int MaximumBytesPerRecordOnDisk = 27;
 
+		// What opening may leave for the next collection. Measured on 2026-11-16 with 200,000 records, in a Debug build: 0 bytes per record, down from 275 (#1240).
+		private const double MaximumGarbagePerRecord = 1;
+
 		private string _folder = string.Empty;
 
 		public TestContext TestContext { get; set; } = null!;
@@ -84,6 +87,30 @@
 			var memoryPerByteOfLog = MeasureMemoryPerByteOfLog(logName, StorageMode.Disk);
 
 			memoryPerByteOfLog.Should().BeLessThanOrEqualTo(maximumMemoryPerByteOfLog, "a log on disk keeps its record table in memory, and none of its content");
+		}
+
+		[TestMethod]
+		[WorkItem(1240)]
+		[DoNotParallelize]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenAReferenceLog_WhenOpened_ThenNoGarbageIsLeftForTheNextCollection(StorageMode storageMode)
+		{
+			// Opened once first, so the memory of loading Weevil itself is not counted.
+			_ = Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(storageMode).Open();
+			var logPath = ReferenceLog.Create(_folder, RecordCount);
+			var before = GC.GetTotalMemory(forceFullCollection: true);
+
+			IEngine engine = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+
+			// #1240: opening collected before its first filter, and while its builder still held the parser's temporaries, so their garbage stayed in the working set.
+			var memoryAfterOpening = GC.GetTotalMemory(forceFullCollection: false) - before;
+			var memoryKept = GC.GetTotalMemory(forceFullCollection: true) - before;
+			var garbagePerRecord = (memoryAfterOpening - memoryKept) / (double)engine.Count;
+			TestContext.WriteLine($"Storage: {storageMode}. Managed memory per record: {memoryAfterOpening / (double)engine.Count:N1} bytes after opening, {memoryKept / (double)engine.Count:N1} kept.");
+
+			garbagePerRecord.Should().BeLessThan(MaximumGarbagePerRecord, "opening collects once it has finished, so it leaves no garbage behind");
+			GC.KeepAlive(engine);
 		}
 
 		[TestMethod]
