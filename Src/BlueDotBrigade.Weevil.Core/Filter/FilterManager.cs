@@ -306,6 +306,10 @@
 			return ApplyInternal(_currentFilter.Type, _currentFilter.Criteria, _comparedElapsedTimes);
 		}
 
+		/// <remarks>
+		/// Applying a filter, even the same one again, measures elapsed times over the records shown now, because new options or a Clear
+		/// change which records are visible (#1231). Only <see cref="ReApply"/> (F5) and Reload keep the elapsed times the filter compared (#1224).
+		/// </remarks>
 		public IFilter Apply(FilterType filterType, IFilterCriteria criteria)
 		{
 			_telemetryRecorder.Increment(TelemetryMetrics.FilterApplied);

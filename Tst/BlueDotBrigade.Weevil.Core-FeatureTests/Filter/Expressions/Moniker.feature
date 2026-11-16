@@ -58,3 +58,13 @@ Scenario: Reloading a log that grew since it was filtered by elapsed time shows 
 		"""
 	And reloading the log
 	Then line number 7 will be visible
+
+# Applying a filter again, as new options or a Clear do, measures the records shown now (#1231): line 3 has no visible record before it.
+# Only refreshing (F5) and reloading keep the elapsed times the filter compared (#1224).
+Scenario: Applying a filter by elapsed time again measures the records it shows
+	Given that the "ElapsedTime.log" log file name is open
+	When applying the include filter: Alpha
+	And applying the include filter: @Elapsed=1500
+	And applying the include filter: @Elapsed=1500
+	Then there will be 1 matching records
+	And line number 5 will be visible
