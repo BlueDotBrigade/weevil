@@ -34,6 +34,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 | `BlueDotBrigade.Weevil.Core-FeatureTests` | BDD feature tests for the core engine |
 | `BlueDotBrigade.Weevil.Core-FunctionalTests` | Functional tests with real I/O and persistence |
 | `BlueDotBrigade.Weevil.Gui-FeatureTests` | Feature tests for genuine GUI-specific user journeys |
+| `BlueDotBrigade.Weevil.Windows-UnitTests` | Unit tests for the WPF library's types that need no window, such as the file browser's model; Windows only |
 | `BlueDotBrigade.Weevil.Cli-FunctionalTests` | Functional tests for the command-line interface's commands, with real I/O |
 | `BlueDotBrigade.Weevil.PowerShell-FunctionalTests` | Functional tests for the PowerShell cmdlets, with real I/O |
 | `BlueDotBrigade.Weevil.Core-PerformanceTests` | CPU, RAM and I/O checks of the performance requirements, on logs small enough for CI, and BenchmarkDotNet benchmarks, in the `Benchmark` category, run on demand |
@@ -44,7 +45,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 - Add GUI feature tests only for behaviors that cannot be validated through the core library's public API.
 - Use core feature tests for: filtering logic, analysis results, navigation, data transformations, persistence.
 - Use GUI feature tests for: workflow sequencing requiring UI state, visual concerns, end-user journeys spanning multiple ViewModels.
-- A test that needs Windows, for example to exercise WPF, in a project that otherwise runs on any system, carries `[OSCondition(OperatingSystems.Windows)]`, so other systems skip it. `BlueDotBrigade.Weevil.Gui-FeatureTests` builds only on Windows, so its tests need not.
+- A test that needs Windows, for example to exercise WPF, in a project that otherwise runs on any system, carries `[OSCondition(OperatingSystems.Windows)]`, so other systems skip it. `BlueDotBrigade.Weevil.Gui-FeatureTests` and `BlueDotBrigade.Weevil.Windows-UnitTests` run only on Windows, so their tests need not.
 - Put performance tests in `BlueDotBrigade.Weevil.Core-PerformanceTests`, so they need no category to be found. A budget that must hold is an MSTest test; a measurement to compare two versions is a BenchmarkDotNet class in its `Benchmarks/` folder, with a test method in `BenchmarkTests` and an entry in the Benchmarks workflow's choices; `BenchmarkTests` carries the `Benchmark` category so that CI leaves it out. See [Testing.md](../../Doc/Guides/Testing/Testing.md#performance).
 
 ## Naming Convention
