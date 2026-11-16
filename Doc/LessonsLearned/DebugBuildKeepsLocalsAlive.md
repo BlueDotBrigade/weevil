@@ -1,6 +1,6 @@
 # A Debug Build Keeps a Method's Locals Alive
 
-> Notes from #1126, 2026-10-29.
+> Notes from #1126, 2026-10-29, and #1240, 2026-11-16.
 
 ## Symptom
 
@@ -8,7 +8,7 @@ Reload let go of the old engine before it read the log again, and nothing referr
 
 ## Cause
 
-In a Debug build, the JIT keeps every local variable and temporary of a method alive until the method returns, so the debugger can show them. A Release build lets the garbage collector free an object after its last use.
+In a Debug build, the JIT keeps every local variable and temporary of a method alive until the method returns, so the debugger can show them. A Release build lets the garbage collector free an object after its last use, but only in code the JIT has optimized: see *A Method That Runs Once* below.
 
 In `Engine.Reload`, a temporary holding the old filter kept the old engine's filter alive until Reload returned. Through it, all 10 million old records stayed alive, so the forced collection during the read still found two copies of the log.
 
@@ -17,6 +17,17 @@ CI builds and tests in Debug, so the tests see this behaviour too.
 ## Fix
 
 Move the code that reads the old object into a method of its own, marked `[MethodImpl(MethodImplOptions.NoInlining)]`, and return only what must outlive it. Its locals die when it returns. See `Engine.Release`.
+
+## A Method That Runs Once Keeps Its Locals Alive in Release Too
+
+The JIT first compiles a method quickly, without optimizing it (tier 0), and optimizes it only once it has been called many times. Unoptimized code keeps every local alive until the method returns, as a Debug build does. A method that runs once, such as `CoreEngineBuilder.Build`, keeps this behaviour in a Release build too.
+
+**In #1240:**
+- Opening's forced collection ran inside `Build`, through the `CoreEngine` constructor. `Build`'s locals still referred to the parser's temporaries, so the collection couldn't free them.
+- On a 20-million-record log in a Release build, 57 MB of garbage remained after opening.
+- Moving the work into `BuildEngine`, marked `NoInlining`, and collecting after it returns left none.
+
+The same fix applies: put the work in a method of its own, and collect after it returns.
 
 ## A Finalizer Has the Same Effect
 
