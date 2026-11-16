@@ -1,6 +1,6 @@
 # 986: Open a Log in RAM or on Disk
 
-> **Status:** In progress
+> **Status:** Done
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
@@ -35,7 +35,9 @@ Phase 4 of the [Weevil 3.0 feasibility study](../Research/Weevil3/Feasibility.md
 
 ## Steps
 
-Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the plan can be traced through them. Step 6 is user story #1157, under #986, created on 2026-11-07. One pull request per step, in order.
+Steps 1 – 5 are sub-issues of #421, created on 2026-10-20, so a change to the plan can be traced through them. Step 6 is user story #1157, created on 2026-11-07 under #986. One pull request per step, in order.
+
+Done on 2026-11-16: the owner closed epic #986 after step 5. Step 6 (#1157) improves the Open dialog and continues on its own, outside the epic. The step 1 measurements on NVMe and SATA (#1024) were not taken.
 
 1. **Proof of concept: disk filtering (#1024).** This adds the disk case to the [storage benchmark](../Research/LargeLogFiles/StorageBenchmarks/README.md), as [LargeLogFileStrategy.md](../Research/LargeLogFiles/LargeLogFileStrategy.md) planned.
    - Measure a parallel streaming filter over a 20 GB log on NVMe and on SATA, and the time to read a screen of rows through the line index.
