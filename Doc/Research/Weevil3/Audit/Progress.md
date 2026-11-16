@@ -2,7 +2,7 @@
 
 An independent review of the Weevil 3.0 code on `main` against Weevil 2.x. It asks whether the new code captures its **intent** clearly and is **maintainable**, whether the architecture suits large logs in RAM and on disk, and whether the claims about CPU and RAM hold.
 
-> **Status:** Stage 0 done. Next: Stage 1, unit U1.
+> **Status:** Stage 1 in progress: units U1 to U7 are under review (started 2026-11-16).
 >
 > **AI agents:** Read this file first. It is the authoritative record of the audit. Continue from **Next Steps**. Do not repeat a completed step unless a finding needs checking again.
 
@@ -26,7 +26,9 @@ Agreed with the owner on 2026-11-16.
 | Epics | #986 Disk Mode, #988 Less Memory, #990 Immutable Core. #991 Multiple Views is a draft: check only that the design leaves room for it |
 | Main deliverable | Code quality: intent and maintainability. Correctness gets a light check; this is not a bug hunt |
 | CPU and RAM | Light: check the claims and the existing benchmarks against the code, and list the evidence gaps |
-| Benchmarks | Run here, on Linux, with the .NET 10 SDK installed. Label every result as Linux. Compare `Releases/2.x` with `main` on the same machine |
+| Benchmarks | Run here, on Linux, with the .NET 10 SDK installed. Label every result as Linux. Compare 2.x with `main` on the same machine |
+| Benchmark logs | **4 GB is the largest log this environment can open** (owner, 2026-11-16; uploads are limited to 30 MB). Generate synthetic logs with the [memory harness](../MemoryHarness/README.md); use the 10-million-record droid logs from Git LFS (`git lfs pull`, about 141 MB) for numbers comparable with the repo's. Larger logs, such as the 20 GB disk-mode target (#1024), are a gap for the owner to measure on Windows |
+| Pacing | Run every stage without stopping. Commit and push after each unit |
 | Sceptic | A fresh-context agent tries to disprove each **high-priority** finding before it is recorded |
 | Rules | No changes to source code. No GitHub issues. Only files in this folder change. Compiler warnings are expected, from the many analyzers turned on; ignore them |
 
@@ -35,22 +37,30 @@ Agreed with the owner on 2026-11-16.
 | Stage | Work | Output | Status |
 |---|---|---|---|
 | 0 | Map the changed files to the epics; define review units | [Scope.md](Scope.md), [scope.py](scope.py) | Done |
-| 1 | Review units U1 to U7, one at a time, through every lens below | `Findings/U<n>-<Name>.md` | Not started |
+| 1 | Review units U1 to U7 through every lens below | `Findings/U<n>-<Name>.md` | In progress |
 | 2 | Check the performance claims: build both branches, run the memory harness and the benchmarks on Linux | `Findings/Performance.md` | Not started |
 | 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | Not started |
 | 4 | Sceptic pass on high-priority findings not yet challenged; write the report | `Report.md` | Not started |
 
 ### Stage 1 Units
 
-| Unit | Area | Status |
+A unit's status is the status note at the top of its findings file:
+
+- **No file:** not started, or its review was lost. Review it again.
+- **Draft, sceptic pass pending:** reviewed; its high-priority findings are not yet challenged.
+- **Final:** reviewed and challenged.
+
+| Unit | Area | Findings file |
 |---|---|---|
-| U1 | Line index and parsing (#988) | Not started |
-| U2 | Record representation (#988) | Not started |
-| U3 | Disk mode and the log file source (#986) | Not started |
-| U4 | Engine composition and session state (#990) | Not started |
-| U5 | Filtering, selection, navigation, analyzers (#990, #988) | Not started |
-| U6 | GUI over the new Core (#990, #986) | Not started |
-| U7 | Open As dialog and file browser (#1157, light) | Not started |
+| U1 | Line index and parsing (#988) | `Findings/U1-LineIndex.md` |
+| U2 | Record representation (#988) | `Findings/U2-RecordRepresentation.md` |
+| U3 | Disk mode and the log file source (#986) | `Findings/U3-DiskMode.md` |
+| U4 | Engine composition and session state (#990) | `Findings/U4-EngineAndSession.md` |
+| U5 | Filtering, selection, navigation, analyzers (#990, #988) | `Findings/U5-FilterSelectionAnalysis.md` |
+| U6 | GUI over the new Core (#990, #986) | `Findings/U6-Gui.md` |
+| U7 | Open As dialog and file browser (#1157, light) | `Findings/U7-OpenAsDialog.md` |
+
+Each unit is reviewed by two or three agents with different lenses (design and intent; runtime behaviour, tests and documents). A third agent merges their findings, checks every reference and writes the file.
 
 ## How Each Unit Is Reviewed
 
@@ -91,6 +101,15 @@ Significant findings use this form. Minor ones get one line in a "Minor" list.
 
 High-priority findings go to a sceptic agent with only the code and the claim, not this reasoning.
 
+## Existing Measurements
+
+Stage 2 checks these; it does not start from nothing.
+
+- **Memory harness:** [`../MemoryHarness/`](../MemoryHarness/README.md) has dated results from 2026-10-20 (Weevil 2.12.1, the baseline) to 2026-11-14 (reopen, shared blocks). `-p:WeevilVersion=2.12.1` builds it against 2.12.1 from NuGet, so both versions open the same synthetic logs. Baseline: 2.12.1 opened a 4 GB log with a 13.0 GB peak on a 14.2 GB Linux container.
+- **Benchmarks:** `Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/Benchmarks/` (BenchmarkDotNet, #1177) exists only on `main`, so it measures 3.0 alone.
+- **Budget tests:** `Core-PerformanceTests` holds memory-per-record and time-limit tests (#1086, #1091, #1103).
+- **Research:** `../RawContent/`, `../RecordsOnDemand/`, `../TimestampPoC/`, `../VirtualListPoC/` each record timings behind a decision.
+
 ## External Evidence: SonarCloud
 
 [SonarCloud](https://sonarcloud.io/project/overview?id=BlueDotBrigade_weevil) analysed `main` at `7c6a061c` on 2026-11-16. Read through its public API, for example `https://sonarcloud.io/api/issues/search?componentKeys=BlueDotBrigade_weevil&resolved=false&facets=rules`.
@@ -128,12 +147,12 @@ None yet. See [Scope.md](Scope.md#first-observations) for what to look at first.
 
 ## Next Steps
 
-1. **Stage 1, U1: Line index and parsing.** Start with `Doc/Design/RecordTable.md` and `Doc/Plans/988-IndexingService.md`, then `Core/IO/LineIndex.cs` (721 lines), `IndexSection.cs`, `LineIndexFile.cs`, `LogLineReader.cs`, `SavedParse.cs`, `SavedTableReader.cs`, `GrownLogParser.cs` and `Core/Data/MultiLineRecordParser.cs`. Compare parsing with `Releases/2.x`.
-2. Write `Findings/U1-LineIndex.md`; update the unit table and **Next Steps**; commit and push.
-3. Continue with U2.
+1. **Stage 1.** Check which findings files exist in `Findings/` and their status notes. Review any unit with no file; run the sceptic pass on the high-priority findings of any file still marked Draft.
+2. When all seven are Final, summarise them under **Findings So Far**, then start Stage 2.
+3. **Stage 2.** Install the .NET 10 SDK; build the memory harness against 2.12.1 and against `main`; open 1 GB and 4 GB synthetic logs with each; run the droid-log budget tests and benchmarks on `main`. Write `Findings/Performance.md`.
 
 ## Log
 
 | Date | Session work |
 |---|---|
-| 2026-11-16 | Agreed the plan with the owner. Stage 0: mapped 454 commits and 113 source files to the epics; defined units U1–U7 |
+| 2026-11-16 | Agreed the plan with the owner. Stage 0: mapped 454 commits and 113 source files to the epics; defined units U1–U7. Recorded SonarCloud's leads. Started Stage 1 |
