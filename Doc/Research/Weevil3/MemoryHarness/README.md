@@ -26,7 +26,7 @@ Each synthetic log is measured as a first open: the harness deletes the log's sa
 
 ## Run It
 
-The project is not part of `Weevil-v2.sln`. Building it needs the .NET 10 SDK.
+The project is not part of `Weevil.sln`. Building it needs the .NET 10 SDK.
 
 ```powershell
 cd Doc\Research\Weevil3\MemoryHarness

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The generic Open As dialog: no reference to Weevil, MaterialDesign or any package (#1157). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- Lets the project build on Linux too; it only runs on Windows. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>BlueDotBrigade.Windows.Dialogs</RootNamespace>
+  </PropertyGroup>
+</Project>

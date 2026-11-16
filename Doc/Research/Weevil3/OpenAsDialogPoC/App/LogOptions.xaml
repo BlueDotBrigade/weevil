@@ -1,0 +1,49 @@
+<UserControl x:Class="OpenAsDialogPoC.LogOptions"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Weevil-like options, which the generic dialog shows beside its browser (#1157). -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
+    </UserControl.Resources>
+    <StackPanel>
+        <GroupBox Header="Log" Padding="6">
+            <StackPanel>
+                <TextBlock Text="{Binding Details}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding SidecarStatus}" TextWrapping="Wrap" Margin="0,6,0,0" />
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Header="Load" Padding="6" Margin="0,8,0,0" IsEnabled="{Binding HasFile}">
+            <StackPanel>
+                <RadioButton Content="_Whole log" GroupName="Narrowing" IsChecked="{Binding IsWholeLog}" Margin="0,2" />
+
+                <RadioButton x:Name="SectionRadio" Content="_Section" GroupName="Narrowing" IsChecked="{Binding IsSection}"
+                             IsEnabled="{Binding HasSections}" Margin="0,6,0,2" />
+                <ComboBox ItemsSource="{Binding Sections}" SelectedItem="{Binding SelectedSection}" IsEnabled="{Binding HasSections}"
+                          AutomationProperties.Name="Section" Margin="20,0,0,0" />
+
+                <RadioButton Content="_Region" GroupName="Narrowing" IsChecked="{Binding IsRegion}"
+                             IsEnabled="{Binding HasRegions}" Margin="0,6,0,2" />
+                <ComboBox ItemsSource="{Binding Regions}" SelectedItem="{Binding SelectedRegion}" IsEnabled="{Binding HasRegions}"
+                          AutomationProperties.Name="Region" Margin="20,0,0,0" />
+
+                <RadioButton Content="_Lines" GroupName="Narrowing" IsChecked="{Binding IsLines}" Margin="0,6,0,2" />
+                <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                    <TextBox Width="90" Text="{Binding FromLine, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="From line" />
+                    <TextBlock Text="to" Margin="6,0" VerticalAlignment="Center" />
+                    <TextBox Width="90" Text="{Binding ToLine, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="To line" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Header="Keep records in" Padding="6" Margin="0,8,0,0" IsEnabled="{Binding HasFile}">
+            <StackPanel>
+                <RadioButton Content="R_AM: fastest, while the log fits in memory" GroupName="Mode" IsChecked="{Binding IsRam}" Margin="0,2" />
+                <RadioButton Content="_Disk: reads the log back, for a log larger than memory" GroupName="Mode" IsChecked="{Binding IsDisk}" Margin="0,2" />
+                <TextBlock Text="{Binding Advice}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                <TextBlock Text="{Binding Warning}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,6,0,0"
+                           Visibility="{Binding HasWarning, Converter={StaticResource BooleanToVisibility}}" />
+            </StackPanel>
+        </GroupBox>
+    </StackPanel>
+</UserControl>

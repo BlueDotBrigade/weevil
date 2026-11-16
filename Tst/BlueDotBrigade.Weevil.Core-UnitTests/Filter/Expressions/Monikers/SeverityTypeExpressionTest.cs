@@ -28,5 +28,22 @@
 
 			(expression.IsMatch(record, new ContentBuffer())).Should().BeFalse();
 		}
+
+		[TestMethod]
+		[WorkItem(1227)]
+		[DataRow("@Severity=information")]
+		[DataRow("@Severity=INFO")]
+		[DataRow("@Severity=Info ")]
+		[DataRow("@Severity= info")]
+		public void GivenASeverityInAnyCaseOrWithSpaces_WhenMatchedAgainstThatSeverity_ThenItMatches(string serializedExpression)
+		{
+			// A severity whose case differed from the expected name, or that had a space after it, matched nothing.
+			var record = Substitute.For<IRecord>();
+			record.Severity.Returns(SeverityType.Information);
+
+			var expression = new SeverityTypeExpression(serializedExpression);
+
+			expression.IsMatch(record, new ContentBuffer()).Should().BeTrue();
+		}
 	}
 }

@@ -25,5 +25,27 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 			insight.IsAttentionRequired.Should().BeTrue();
 			insight.RelatedLineNumbers.Should().Equal(3);
 		}
+
+		[TestMethod]
+		[WorkItem(1226)]
+		public void GivenAShortGapThenALongerOne_WhenRefreshed_ThenTheLongestGapIsNamedAndMeasuredInSeconds()
+		{
+			// The insight called the first gap over the threshold the longest, and showed the number of gaps as seconds.
+			var start = new DateTime(2026, 11, 7, 10, 0, 0);
+			RecordList records = ImmutableArray.Create<IRecord>(
+				new Record(1, start, SeverityType.Information, "a", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(2, start.AddSeconds(1), SeverityType.Information, "b", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(3, start.AddSeconds(3), SeverityType.Information, "c", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(4, start.AddSeconds(4), SeverityType.Information, "d", isMultiLine: false, wasGeneratedByUi: true),
+				new Record(5, start.AddSeconds(14), SeverityType.Information, "e", isMultiLine: false, wasGeneratedByUi: true));
+			var insight = new TimeGapInsight();
+
+			insight.Refresh(records);
+
+			insight.RelatedLineNumbers.Should().Equal(5);
+			insight.Details.Should().Contain("10:00:14").And.NotContain("10:00:03");
+			insight.MetricValue.Should().Be(10.0.ToString("#,##0.0"));
+			insight.MetricUnit.Should().Be("sec");
+		}
 	}
 }

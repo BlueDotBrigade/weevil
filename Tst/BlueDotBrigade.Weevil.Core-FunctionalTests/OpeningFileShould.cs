@@ -109,6 +109,35 @@ namespace BlueDotBrigade.Weevil
 			}
 		}
 
+		[TestMethod]
+		[WorkItem(1237)]
+		[DataRow(StorageMode.Ram, false)]
+		[DataRow(StorageMode.Ram, true)]
+		[DataRow(StorageMode.Disk, false)]
+		[DataRow(StorageMode.Disk, true)]
+		public void GivenAStartLineInsideARecordOfManyLines_WhenOpening_ThenTheRecordsAfterItAreLoaded(StorageMode storageMode, bool hasRange)
+		{
+			// The search for the first record from a start line gave up after 256 lines, so the log opened with no records.
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(OpeningFileShould), Guid.NewGuid().ToString("N"))).FullName;
+
+			try
+			{
+				string Record(int lineNumber) => $"2024-01-02 03:04:{lineNumber % 60:00}.12345\t100\t{lineNumber}\tInfo\tRecord {lineNumber}";
+				var stackTrace = Enumerable.Range(0, 300).Select(frame => $"   at Frame{frame}");
+				var logPath = Path.Combine(folder, "StackTrace.tsv");
+				File.WriteAllText(logPath, string.Join("\n", new[] { Record(1) }.Concat(stackTrace).Concat(Enumerable.Range(302, 9).Select(Record))) + "\n");
+
+				IEngineBuilder builder = Engine.UsingPath(logPath, startAtLineNumber: 5).UsingStorage(storageMode);
+				IEngine engine = (hasRange ? builder.UsingRange(new Range(5, 310)) : builder).Open();
+
+				engine.Records.Select(record => record.LineNumber).Should().Equal(Enumerable.Range(302, 9));
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
 		/// <summary>
 		/// Writes a log of 300 lines of 54 bytes, so line 100 is past the first 4 KB and before the last 4 KB.
 		/// </summary>
