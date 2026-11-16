@@ -8,7 +8,8 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
         <local:ItemGlyphConverter x:Key="ItemGlyph" />
         <local:SizeConverter x:Key="Size" />
-        <Style x:Key="GlyphButton" TargetType="Button">
+        <!-- Based on the host's button style, so the host's theme still reaches these buttons. -->
+        <Style x:Key="GlyphButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="FontFamily" Value="{x:Static local:Glyphs.FontFamily}" />
             <Setter Property="MinWidth" Value="32" />
             <Setter Property="Margin" Value="0,0,4,0" />
@@ -81,16 +82,12 @@
 
             <ListView x:Name="ItemsList" Grid.Column="2" ItemsSource="{Binding VisibleItems}" SelectedItem="{Binding SelectedItem}"
                       SelectionMode="Single" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      AutomationProperties.Name="Folders and files" PreviewKeyDown="OnItemsListPreviewKeyDown">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <EventSetter Event="MouseDoubleClick" Handler="OnItemDoubleClick" />
-                        <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
-                    </Style>
-                </ListView.ItemContainerStyle>
+                      AutomationProperties.Name="Folders and files" PreviewKeyDown="OnItemsListPreviewKeyDown" MouseDoubleClick="OnItemDoubleClick">
+                <!-- No ItemContainerStyle: it would hide the host's row style. Narrator reads each row's name from BrowserItem.ToString(). -->
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="300">
+                        <!-- The columns fit the list at the dialog's default size, without a horizontal scroll bar. -->
+                        <GridViewColumn Width="190">
                             <GridViewColumnHeader Content="Name" Tag="{x:Static local:SortColumn.Name}" Click="OnHeaderClick" />
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -102,13 +99,13 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="150" DisplayMemberBinding="{Binding Modified, StringFormat=g}">
+                        <GridViewColumn Width="125" DisplayMemberBinding="{Binding Modified, StringFormat=g}">
                             <GridViewColumnHeader Content="Date modified" Tag="{x:Static local:SortColumn.Modified}" Click="OnHeaderClick" />
                         </GridViewColumn>
-                        <GridViewColumn Width="130" DisplayMemberBinding="{Binding TypeName}">
+                        <GridViewColumn Width="115" DisplayMemberBinding="{Binding TypeName}">
                             <GridViewColumnHeader Content="Type" Tag="{x:Static local:SortColumn.Type}" Click="OnHeaderClick" />
                         </GridViewColumn>
-                        <GridViewColumn Width="100">
+                        <GridViewColumn Width="70">
                             <GridViewColumnHeader Content="Size" Tag="{x:Static local:SortColumn.Size}" Click="OnHeaderClick" />
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>

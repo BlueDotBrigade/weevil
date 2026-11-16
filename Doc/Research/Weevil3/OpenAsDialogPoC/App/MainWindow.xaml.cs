@@ -3,7 +3,9 @@ namespace OpenAsDialogPoC
 	using System;
 	using System.Collections.Generic;
 	using System.Windows;
+	using System.Runtime.InteropServices;
 	using System.Windows.Input;
+	using System.Windows.Interop;
 	using System.Windows.Media;
 	using BlueDotBrigade.Windows.Dialogs;
 	using BlueDotBrigade.Windows.Dialogs.Storage;
@@ -93,6 +95,23 @@ namespace OpenAsDialogPoC
 			var isDark = this.DarkThemeBox.IsChecked == true;
 			window.Background = isDark ? (Brush)_darkTheme["DarkBackground"] : SystemColors.WindowBrush;
 			window.Foreground = isDark ? (Brush)_darkTheme["DarkText"] : SystemColors.WindowTextBrush;
+			SetDarkTitleBar(window, isDark);
 		}
+
+		/// <summary>
+		/// Styles cannot reach a window's title bar, which Windows draws, so the host asks Windows for a dark one.
+		/// </summary>
+		private static void SetDarkTitleBar(Window window, bool isDark)
+		{
+			var handle = new WindowInteropHelper(window).EnsureHandle();
+			var value = isDark ? 1 : 0;
+			DwmSetWindowAttribute(handle, UseImmersiveDarkMode, ref value, sizeof(int));
+		}
+
+		// DWMWA_USE_IMMERSIVE_DARK_MODE: Windows 10 20H1 and later.
+		private const int UseImmersiveDarkMode = 20;
+
+		[DllImport("dwmapi.dll")]
+		private static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
 	}
 }

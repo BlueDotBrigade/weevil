@@ -208,7 +208,9 @@ namespace BlueDotBrigade.Windows.Dialogs
 
 		private async void OnItemDoubleClick(object sender, MouseButtonEventArgs e)
 		{
-			if (sender is ListViewItem { DataContext: BrowserItem item } && e.ChangedButton == MouseButton.Left)
+			if (e.ChangedButton == MouseButton.Left
+				&& e.OriginalSource is DependencyObject source
+				&& this.ItemsList.ContainerFromElement(source) is ListViewItem { DataContext: BrowserItem item })
 			{
 				e.Handled = true;
 				_isFocusingList = true;
