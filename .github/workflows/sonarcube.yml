@@ -1,47 +1,69 @@
 name: SonarQube
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened]
+      - 'Releases/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Avoid wasting runner time when a newer commit replaces an older analysis.
+concurrency:
+  group: sonar-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build and analyze
     runs-on: windows-latest
+    # Static analysis is advisory and must not fail the CI workflow.
+    continue-on-error: true
+
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - name: Set up JDK 21
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+        uses: actions/setup-java@v4
         with:
-          java-version: 21
-          distribution: 'zulu' # Alternative distribution options are available.
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+          java-version: '21'
+          distribution: zulu
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Cache SonarQube Cloud packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ~\sonar\cache
+          path: ~\\sonar\\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      - name: Cache SonarQube Cloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ runner.temp }}\scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
-      - name: Install SonarQube Cloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
-      - name: Build and analyze
+
+      - name: Install SonarScanner for .NET
+        shell: pwsh
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Analyze Weevil (Debug, x64)
+        shell: pwsh
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"BlueDotBrigade_weevil" /o:"bluedotbrigade" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-          dotnet build
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          $ErrorActionPreference = 'Stop'
+          dotnet sonarscanner begin /k:"BlueDotBrigade_weevil" /o:"bluedotbrigade" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.qualitygate.wait=false
+          if ($LASTEXITCODE -ne 0) { throw "SonarScanner begin failed" }
+
+          dotnet restore Weevil-v2.sln -p:Platform=x64
+          if ($LASTEXITCODE -ne 0) { throw "Restore failed" }
+
+          dotnet build Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-restore --no-incremental
+          if ($LASTEXITCODE -ne 0) { throw "Build failed" }
+
+          dotnet sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
+          if ($LASTEXITCODE -ne 0) { throw "SonarScanner end failed" }
