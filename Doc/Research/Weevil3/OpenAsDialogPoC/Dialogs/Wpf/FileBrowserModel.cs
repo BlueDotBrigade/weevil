@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Windows.Dialogs
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
+	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using System.Threading.Tasks;
@@ -82,9 +83,31 @@ namespace BlueDotBrigade.Windows.Dialogs
 				if (Set(ref _currentLocation, value))
 				{
 					OnPropertyChanged(nameof(this.CanGoUp));
+					OnPropertyChanged(nameof(this.LocationKind));
+					OnPropertyChanged(nameof(this.LocationGlyph));
 				}
 			}
 		}
+
+		/// <summary>
+		/// What the browser is showing, a zip or a folder, for the icon in the path box, the item count and Narrator.
+		/// </summary>
+		public string LocationKind => _currentLocation switch
+		{
+			null => string.Empty,
+			{ IsComputer: true } => "Computer",
+			{ IsInArchive: true } => "Zip",
+			_ when IsDrive(_currentLocation) => "Drive",
+			_ => "Folder",
+		};
+
+		public string LocationGlyph => this.LocationKind switch
+		{
+			"Computer" => Glyphs.Computer,
+			"Zip" => Glyphs.Zip,
+			"Drive" => Glyphs.Drive,
+			_ => Glyphs.Folder,
+		};
 
 		/// <summary>
 		/// The text of the path box: where the browser is, or what the analyst is typing.
@@ -169,7 +192,22 @@ namespace BlueDotBrigade.Windows.Dialogs
 
 		public bool CanGoUp => _currentLocation is not null && !_currentLocation.IsComputer;
 
-		public string StatusText => this.IsBusy ? "Loading…" : this.VisibleItems.Count == 1 ? "1 item" : $"{this.VisibleItems.Count:N0} items";
+		public string StatusText
+		{
+			get
+			{
+				if (this.IsBusy)
+				{
+					return "Loading…";
+				}
+
+				var count = this.VisibleItems.Count == 1 ? "1 item" : $"{this.VisibleItems.Count:N0} items";
+				return _currentLocation is { IsInArchive: true } ? $"{count} in a zip" : count;
+			}
+		}
+
+		private static bool IsDrive(Location location) =>
+			string.Equals(Path.GetPathRoot(location.FileSystemPath), location.FileSystemPath, StringComparison.OrdinalIgnoreCase);
 
 		public Task NavigateAsync(Location location) => NavigateAsync(location, selectName: null, isBackOrForward: false);
 
