@@ -27,7 +27,7 @@ The report scales the workloads that read every record to a 20 GB log, then appl
 
 ## Run It
 
-The project is self-contained: it does not reference any Weevil project and is not part of `Weevil-v2.sln`. It needs no NuGet packages. Building it needs the .NET 10 SDK.
+The project is self-contained: it does not reference any Weevil project and is not part of `Weevil.sln`. It needs no NuGet packages. Building it needs the .NET 10 SDK.
 
 ```powershell
 cd Doc\Research\Weevil3\TimestampPoC

@@ -114,6 +114,6 @@ A regression test guards a filed bug: a GitHub issue of type Bug.
 
 ## Test Configuration
 
-- Tests run using: `dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build`
+- Tests run using: `dotnet test Weevil.sln --configuration Debug -p:Platform=x64 --no-build`
 - The `InternalsVisibleTo` attribute is only active in `Debug` configuration; always use `Debug` when running tests, except the benchmarks (the `Benchmark` category), which measure only in Release.
 - Do not introduce test-only public APIs or loosen access modifiers solely for test purposes.

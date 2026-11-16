@@ -20,7 +20,7 @@ A window like Weevil's filter results, over a synthetic log that exists only as 
 
 ## Run It
 
-The project is self-contained: it does not reference any Weevil project and is not part of `Weevil-v2.sln`. It runs only on Windows, but also builds on Linux.
+The project is self-contained: it does not reference any Weevil project and is not part of `Weevil.sln`. It runs only on Windows, but also builds on Linux.
 
 What the Windows PC needs:
 

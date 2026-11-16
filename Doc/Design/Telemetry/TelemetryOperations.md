@@ -84,4 +84,4 @@ The existing telemetry unit tests cover the main operational guarantees:
 
 Run from the repository root:
 
-`dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build`
+`dotnet test Weevil.sln --configuration Debug -p:Platform=x64 --no-build`

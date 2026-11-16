@@ -42,17 +42,17 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Weevil-v2.sln
+        run: dotnet restore Weevil.sln
 
       # Some automated tests rely on InternalsVisibleTo to access internal implementation types.
       # InternalsVisibleTo is intentionally restricted to DEBUG builds to avoid widening
       # the public surface area in Release, so CI must use the Debug configuration.
       - name: Build (Debug, x64)
-        run: dotnet build Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-restore
+        run: dotnet build Weevil.sln --configuration Debug -p:Platform=x64 --no-restore
 
       # The benchmarks take minutes and need a Release build, so CI leaves them out. The Benchmarks workflow runs them on demand (#1177).
       - name: Test (Debug, x64)
-        run: dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal --filter "TestCategory!=Benchmark"
+        run: dotnet test Weevil.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal --filter "TestCategory!=Benchmark"
 
       # Runs the Core and CLI tests again with every log opened on disk, unless a test chooses a mode (#1025, #1027).
       # Only these projects: a Debug GUI follows the same setting, and each performance test chooses its own mode.
