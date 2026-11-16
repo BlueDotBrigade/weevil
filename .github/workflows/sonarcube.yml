@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - 'Releases/**'
+      - 'Releases/3.x'
   workflow_dispatch:
 
 permissions:
