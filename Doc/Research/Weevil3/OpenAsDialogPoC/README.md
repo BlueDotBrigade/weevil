@@ -10,7 +10,7 @@ Step 1 of the [#1157 plan](../../../Plans/1157-OpenAsDialog.md). **Question:** c
 | `App` | A sample host with Weevil-like options, which reads sidecars with plain XML. |
 | `SelfTest` | Checks `Storage` and the sidecar reader on any operating system: `dotnet run -c Release` in that folder. |
 
-None of them is part of `Weevil-v2.sln`.
+None of them is part of `Weevil.sln`.
 
 ## Run It on Windows
 

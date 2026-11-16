@@ -57,11 +57,11 @@ These concepts should **not** be applied if they will make the source code unnec
 
 CI builds and tests using .NET 10, Debug configuration, x64 platform on Windows.
 ```
-dotnet restore Weevil-v2.sln
+dotnet restore Weevil.sln
 
-dotnet build Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-restore
+dotnet build Weevil.sln --configuration Debug -p:Platform=x64 --no-restore
 
-dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build
+dotnet test Weevil.sln --configuration Debug -p:Platform=x64 --no-build
 ```
 > **Note:** The GUI project contains post-build scripts and must be built on Windows. All projects using `InternalsVisibleTo` restrict it to DEBUG builds, so CI always uses `--configuration Debug`. If the build fails in this workspace, likely cause is a running Weevil instance; close any running Weevil instances before attempting a build.
 

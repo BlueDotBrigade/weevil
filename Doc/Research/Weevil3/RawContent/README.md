@@ -4,7 +4,7 @@
 
 **Status (2026-10-29):** every record was identical on 120 logs, and filters were as fast or faster. A Find through every record of a UTF-16 log was slower. The review of #1134 found defects, all fixed before it merged: see [its review comment](https://github.com/BlueDotBrigade/weevil/pull/1134#issuecomment-6506647118) and the pull request's description.
 
-The tools here are throwaway: none of them is part of `Weevil-v2.sln`.
+The tools here are throwaway: none of them is part of `Weevil.sln`.
 
 ## Equivalence: Every Record Identical
 

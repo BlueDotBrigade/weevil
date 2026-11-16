@@ -197,7 +197,7 @@ namespace BlueDotBrigade.Weevil.Gui
 		{
 			var current = new DirectoryInfo(AppContext.BaseDirectory);
 
-			while (current is not null && !File.Exists(Path.Combine(current.FullName, "Weevil-v2.sln")))
+			while (current is not null && !File.Exists(Path.Combine(current.FullName, "Weevil.sln")))
 			{
 				current = current.Parent;
 			}
