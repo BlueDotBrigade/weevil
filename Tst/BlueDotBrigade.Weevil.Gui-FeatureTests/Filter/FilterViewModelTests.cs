@@ -510,7 +510,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			// Going to an insight's record only set the filter box's text, and after 500 ms went to the nearest record still shown.
 			var bulletinMediator = new BulletinMediator();
 			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, Substitute.For<IDialogBoxService>());
-			await OpenAsync(viewModel);
+
+			// A copy without the sidecar, so the filter history is empty until the filter below has run.
+			await viewModel.OpenAsync(CopyLog("Insight.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
 			var hiddenLineNumber = viewModel.VisibleItems.First(record => !record.Content.Contains(IncludeFilter)).LineNumber;
 
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
@@ -526,6 +529,31 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.VisibleItems.Should().Contain(record => record.LineNumber == hiddenLineNumber, "the filter now shows flagged records");
 			scrolledTo.Should().NotBeNull("Weevil goes to the insight's record");
 			viewModel.Rows.GetRow(scrolledTo!.Value).LineNumber.Should().Be(hiddenLineNumber);
+		}
+
+		[TestMethod]
+		[WorkItem(998)]
+		public async Task GivenAnInsightRecordTheExcludeFilterHides_WhenGoingToIt_ThenWeevilSaysSoInsteadOfGoingToAnotherRecord()
+		{
+			// Going to an insight's record that stayed hidden went silently to the nearest record shown instead.
+			var bulletinMediator = new BulletinMediator();
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+			await viewModel.OpenAsync(CopyLog("Excluded.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+			var hiddenLineNumber = viewModel.VisibleItems.First(record => !record.Content.Contains(IncludeFilter)).LineNumber;
+			var exclusiveFilter = $"@Line={hiddenLineNumber}";
+
+			viewModel.FilterManually(new object[] { IncludeFilter, exclusiveFilter });
+			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+
+			var wasScrolled = false;
+			viewModel.ScrollRequested += (_, _) => wasScrolled = true;
+			bulletinMediator.Post(new NavigateToInsightRecordBulletin(new[] { hiddenLineNumber }));
+			WaitUntil(() => dialog.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IDialogBoxService.ShowMessage)) && viewModel.IsMenuEnabled);
+
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("exclude filter")), "Not Found");
+			wasScrolled.Should().BeFalse("Weevil does not go to a record that isn't the insight's");
 		}
 
 		/// <remarks>Regression: #1011. A failed open unsubscribed the open log from its filter history changes.</remarks>

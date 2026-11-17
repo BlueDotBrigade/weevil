@@ -2171,16 +2171,50 @@
 
 						_uiDispatcher.Invoke(() =>
 						{
+							// The exclude filter can still hide the insight's records: go to the first one shown, never to a neighbour (#998).
+							var lineNumber = FindFirstShown(_engine.Filter.Results, bulletin.RelatedLineNumbers);
+
+							if (lineNumber is null)
+							{
+								var message = "The insight's records are not shown, because the exclude filter hides them.";
+								Log.Default.Write(LogSeverityType.Warning, $"{message} FirstLine={firstLineNumber}");
+								_dialogBox.ShowMessage(message, "Not Found");
+								return;
+							}
+
 							SearchFilterResults(
-								$"Unable to find the insight's related record in the search results. Line={firstLineNumber}",
+								$"Unable to find the insight's related record in the search results. Line={lineNumber}",
 								() => _engine
 									.Navigate
-									.GoTo(firstLineNumber, RecordSearchType.NearestNeighbor)
+									.GoTo(lineNumber.Value, RecordSearchType.ExactMatch)
 									.ToIndexUsing(_engine.Filter.Results));
 						});
 					},
 					TaskScheduler.Default);
 			}
+		}
+
+		/// <summary>
+		/// Returns the first of <paramref name="lineNumbers"/> that <paramref name="results"/> shows, or <see langword="null"/> when it shows none.
+		/// </summary>
+		private static int? FindFirstShown(RecordList results, IEnumerable<int> lineNumbers)
+		{
+			foreach (var lineNumber in lineNumbers)
+			{
+				try
+				{
+					if (results.IndexOfLineNumber(lineNumber) >= 0)
+					{
+						return lineNumber;
+					}
+				}
+				catch (RecordNotFoundException)
+				{
+					// Not shown: try the next.
+				}
+			}
+
+			return null;
 		}
 
 		public void GoToPreviousPin()
