@@ -242,6 +242,40 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1245)]
+		public async Task GivenAFilteredLogOnDisk_WhenRefreshed_ThenTheFilterRunsAgainInBackgroundWhereAbortIsAvailable()
+		{
+			// F5 re-ran the filter on the UI thread, so on disk it read the whole log there, and Escape could not stop it.
+			using var uiDispatcher = new PausableUiDispatcher();
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+			await OpenOnDiskAsync(viewModel, CopyLog("Refresh.log"));
+			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && viewModel.InclusiveFilter == IncludeFilter);
+			var filteredCount = viewModel.VisibleItems.Count;
+
+			// The UI thread is busy, so the filter cannot show its results yet.
+			uiDispatcher.Pause();
+			var stopwatch = Stopwatch.StartNew();
+			viewModel.RefreshCommand.Execute(null);
+			TimeSpan commandTime = stopwatch.Elapsed;
+
+			try
+			{
+				commandTime.Should().BeLessThan(GateTimeout, "F5 returns while the filter runs in the background");
+				WaitUntil(() => viewModel.IsFilterInProgress);
+				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("Escape can stop the filter F5 started");
+			}
+			finally
+			{
+				uiDispatcher.Resume();
+			}
+
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			viewModel.InclusiveFilter.Should().Be(IncludeFilter, "F5 runs the same filter again");
+			viewModel.VisibleItems.Count.Should().Be(filteredCount, "the log has not changed");
+		}
+
+		[TestMethod]
 		public async Task GivenALogOnDiskThatWasDeleted_WhenFiltered_ThenTheProgressBarIsHiddenAndOneMessageIsShown()
 		{
 			// A filter from the filter box caught only an invalid expression, so a failed read left the progress bar running (#1028).
