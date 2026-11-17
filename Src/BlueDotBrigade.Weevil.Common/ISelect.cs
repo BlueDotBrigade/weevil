@@ -6,6 +6,14 @@
 	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.Data;
 
+	/// <summary>
+	/// The selected records of the filter results, chosen by line number.
+	/// </summary>
+	/// <remarks>
+	/// A line the filter hides is never selected: <see cref="Select"/>, <see cref="Unselect"/> and <see cref="Toggle"/> throw
+	/// <see cref="RecordNotFoundException"/> and change nothing, and <see cref="SelectOnly"/> and <see cref="SelectRange"/> select
+	/// only the records the filter shows in their range (#1249).
+	/// </remarks>
 	public interface ISelect
 	{
 		IDictionary<int, IRecord> Selected { get; }
