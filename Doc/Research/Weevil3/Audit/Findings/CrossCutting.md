@@ -2,7 +2,7 @@
 
 Stage 3 of the [Weevil 3.0 audit](../Progress.md). This stage asks how the units fit together. It covers patterns that recur across them, RAM against disk mode as a whole, the room left for #991, and whether the added complexity pays for itself. It builds on the unit findings (U1 to U7) and on [Performance.md](Performance.md), and does not repeat their evidence.
 
-> **Status:** Draft, sceptic pass pending. Written on 2026-11-17 at `main` e3dee822.
+> **Status:** Final. Written and challenged on 2026-11-17 at `main` e3dee822.
 
 ## Summary
 
@@ -26,29 +26,30 @@ Stage 3 of the [Weevil 3.0 audit](../Progress.md). This stage asks how the units
 
 ### X-1. Disk mode turned two inherited UI-thread paths into file I/O: F5 and Copy
 
-- **Priority:** High
+- **Priority:** High, for F5. Copy alone would be Medium.
 - **Kind:** Architecture
-- **New in 3.0?** Regression in disk mode. Both paths ran on the UI thread in 2.x, but read only memory there.
+- **New in 3.0?** An existing weakness that disk mode makes worse. Both paths ran on the UI thread in 2.x, and F5 already froze the window there for seconds on a large log. On disk, both now read the log on the UI thread.
 - **Evidence:**
   - **The rule.** "Preserve UI responsiveness; do not block the UI thread" (`.github/copilot-instructions.md`, Architectural Rules). The review rules flag "any code placed on the UI thread that performs I/O, filtering, or other long-running operations" (`.github/instructions/review.instructions.md`).
-  - **F5 (U6a-3).** `Refresh` runs `_engine.Filter.ReApply()` inside the command handler (`Src/BlueDotBrigade.Weevil.Gui/Filter/FilterViewModel.cs:1711-1726`; `Gui/Input/UiBoundCommand.cs:102-119`). On disk, a filter reads the whole log. Measured on the 4 GB log on disk, from the page cache: 0.41–3.3 s per filter ([Ops-4gb-main-disk-run2.txt](../Measurements/Ops-4gb-main-disk-run2.txt)). The window has no progress bar while it runs, and Escape can't stop it.
-  - **Copy (U2-1).** Ctrl+C formats the selection one record at a time through `record.Content` on the UI thread (`Gui/ClipboardHelper.cs:22-49`; `FilterViewModel.cs:1143-1161`). On disk, each read opens the log and reads and hashes at least one 64 KB block (`Src/BlueDotBrigade.Weevil.Common/IO/LogFileSource.cs:154-183`). Measured for Copy's limit of 100,000 records spread over the log: 0.03–0.09 s in RAM; 0.9–1.0 s on disk for the 1 GB log; 1.2–1.3 s for the 4 GB log ([Copy-100k.txt](../Measurements/Copy-100k.txt)).
-  - **Why it was missed.** #1028's inventory of UI-thread work moved export, split and Find off the UI thread, but listed neither F5 nor Copy (`Doc/Plans/1028-OpenAs.md:47-52`, `:177-187`). The graph's copy of the same records already runs in the background through one `ContentBuffer` (`FilterViewModel.cs:1436-1455`, `:1549-1556`).
+  - **F5 (U6a-3).** `Refresh` runs `_engine.Filter.ReApply()` inside the command handler (`Src/BlueDotBrigade.Weevil.Gui/Filter/FilterViewModel.cs:1711-1726`; `Gui/Input/UiBoundCommand.cs:102-119`). `ReApply` runs a full filter (`Src/BlueDotBrigade.Weevil.Core/Filter/FilterManager.cs:298-306`). On disk, a filter that tests text reads the whole log; with no filter, F5 reads nothing (`Core/Filter/FilterStrategy.cs:133-137`). The window has no progress bar while it runs, and Escape can't stop it.
+  - **What the timings show.** From the page cache, a filter on the 4 GB log takes 0.41–3.3 s on disk and 0.44–3.1 s in RAM ([Ops-4gb-main-disk-run2.txt](../Measurements/Ops-4gb-main-disk-run2.txt), [Ops-4gb-main-ram-run2.txt](../Measurements/Ops-4gb-main-ram-run2.txt)). 2.12.1 took 3.2–4.1 s on the 1 GB log in RAM ([Ops-1gb-2.12.1-run2.txt](../Measurements/Ops-1gb-2.12.1-run2.txt)). So with a warm cache, the F5 freeze is the inherited one, and it lasts as long in RAM as on disk. Disk mode adds the cost of reading the drive. Open As suggests Disk only when the log's estimate plus 1 GB exceeds the available memory (`Gui/IO/OpenAsAdvice.cs:49-54`). A log well past that, the case disk mode is for (`Doc/Plans/986-DiskMode.md:12-13`), can't stay in the page cache, so every F5 with a text filter reads it from the drive or the network. That cost has not been measured.
+  - **Copy (U2-1).** Ctrl+C formats the selection one record at a time through `record.Content` on the UI thread (`Gui/ClipboardHelper.cs:22-49`; `FilterViewModel.cs:1143-1161`). On disk, each read opens the log and reads and hashes at least one 64 KB block (`Src/BlueDotBrigade.Weevil.Common/IO/LogFileSource.cs:154-183`). Copy refuses more than 100,000 records. The limit was set so the window wouldn't freeze while the clipboard fills (`FilterViewModel.cs:66-69`, `:1193-1206`). At that limit, with the records spread over the log, Copy takes 0.03–0.09 s in RAM, 0.9–1.0 s on disk for the 1 GB log and 1.2–1.3 s for the 4 GB log ([Copy-100k.txt](../Measurements/Copy-100k.txt)). A usual selection of a few rows takes milliseconds. One `ContentBuffer` saves little for spread records on the 4 GB log (1.0 s against 1.2), so the gain would come from leaving the UI thread, not from the buffer.
+  - **Why they are there.** #1027 left Copy out on purpose: "A selection is usually small; selecting every record of a large log on disk is slow, as it is in RAM" (`Doc/Plans/1027-StreamingReads.md:93`). At the limit, though, disk is 10 or more times slower than RAM. #1028 gave F5 its failed-read catch (`Doc/Plans/1028-OpenAs.md:155`, commit d2a74c3f), but moved only export, split and Find off the UI thread (`:47-52`, `:177-187`). It records no reason for leaving F5 behind. The graph's copy of the same records already runs in the background through one `ContentBuffer` (`FilterViewModel.cs:1436-1455`, `:1549-1556`).
   - **Smaller paths of the same kind** (from U1, U6a, U6b and U7):
     - Ctrl+S and Exit save the sidecar in the handler, and a save opens the log to find each annotated line's byte offset (`FilterViewModel.cs:1069-1072`, `:1307-1312`; `Src/BlueDotBrigade.Weevil.Core/CoreEngine.cs:441-456`).
     - Each realized grid row reads its text two or three times. #1028 measured that design at 1.9 ms a screen.
     - `Location.Parse` checks the disk on the UI thread (U7-1), but nothing uses it yet.
 - **Impact:**
-  - **Measured here.** Every figure above is from Linux, with the log in the page cache and at most 4 GB. They are the best case.
-  - **Expected where disk mode is used.** Disk mode exists for logs too large for RAM; its target is 20 GB. It is also the mode the Open As window suggests for a log on a network share it warns about. There, F5 reads 5 times as much as on the 4 GB log. Copy opens the file once for each record, so on a network share each of 100,000 opens crosses the network. Weevil's own monitor calls 1 s unresponsive (`Gui/Analysis/UiResponsivenessMonitor.cs:17`).
-  - **The result:** the window freezes with no progress bar and no way to cancel, in exactly the setting disk mode was built for.
+  - **Measured here.** Every figure above is from Linux, with the log in the page cache and at most 4 GB. They are the best case, and for F5 they match RAM mode.
+  - **Expected where disk mode is used.** Disk mode exists for logs too large for RAM. Its target is a 20 GB log filtered in under 10 s on NVMe, and several times slower on a SATA SSD or a network drive (`986-DiskMode.md:13`, `:74`). An F5 freezes the window for as long as that filter takes. Open As warns when Disk is chosen for a log on a network drive, but allows it (`OpenAsAdvice.cs:76-78`). Copy opens the file once for each record, so on a network share each of up to 100,000 opens crosses the network. Weevil's own monitor treats a 1 s delay as unresponsive (`Gui/Analysis/UiResponsivenessMonitor.cs:17`).
+  - **The result:** the window freezes with no progress bar and no way to cancel, in exactly the setting disk mode was built for. F5 carries the risk. Copy takes at most about 1.3 s on a local drive.
 - **Recommendation:**
-  - **F5.** Before 3.0 ships, run it through the filter's background path, as a re-apply variant of `FilterAsynchronously`, so it shows progress and Escape aborts it.
-  - **Copy.** Move it into `RunInBackground`, reading through one `ContentBuffer` as the graph does. Per U2-1, move `CopyWithText` into Core first, so the CLI and PowerShell share it.
+  - **F5.** Before 3.0 ships, run it through the filter's background path, so it shows progress and Escape aborts it. Use a re-apply variant of `FilterAsynchronously` that calls `ReApply` on the worker. Its `FilterAsync` calls `Apply` (`Gui/Filter/FilterExtensions.cs:20`), which would change what F5 does: it would measure new elapsed times instead of keeping those its filter compared (#1224), and it would record telemetry.
+  - **Copy.** This can wait until after 3.0. Move it into `RunInBackground` with a snapshot of the selection, as the graph does, and set the clipboard in `onSucceeded`, on the UI thread. Per U2-1, move `CopyWithText` into Core first, so the CLI and PowerShell share it.
   - **Ctrl+S and Exit.** Move the sidecar save off the UI thread once it saves from the store (U4-1).
   - **Prevent recurrences.** Add one GUI feature test that opens a log on disk and checks that F5 shows the progress bar.
   - **Complexity:** S for F5 and Copy.
-- **Sceptic:** Not challenged
+- **Sceptic:** Revised: the priority stays High, because of F5. The warm-cache F5 timings are as long in RAM and were longer in 2.12.1, so they show the inherited freeze, not a disk-mode cost. The disk-mode cost is reading a log larger than the page cache from the drive, which has not been measured. Copy is a choice #1027 recorded, its limit holds it to about 1.3 s, and on its own it is Medium; Open As does not suggest Disk for a network log; and the F5 fix must call `ReApply`, not `Apply`, to keep #1224's behaviour.
 
 ### X-2. The mode is hidden for the text, not for cost and failure
 
