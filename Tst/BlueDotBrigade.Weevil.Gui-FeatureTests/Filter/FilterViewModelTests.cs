@@ -249,28 +249,33 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			using var uiDispatcher = new PausableUiDispatcher();
 			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
 			await OpenOnDiskAsync(viewModel, CopyLog("Refresh.log"));
+			var totalCount = viewModel.VisibleItems.Count;
+
+			// The history changes only once the filter has run; the filter box changes at once.
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
-			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && viewModel.InclusiveFilter == IncludeFilter);
+			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
 			var filteredCount = viewModel.VisibleItems.Count;
+			filteredCount.Should().BeLessThan(totalCount, "the filter should hide records before F5 runs it again");
+
+			var resultsChanged = 0;
+			viewModel.ResultsChanged += (_, _) => resultsChanged++;
 
 			// The UI thread is busy, so the filter cannot show its results yet.
 			uiDispatcher.Pause();
-			var stopwatch = Stopwatch.StartNew();
 			viewModel.RefreshCommand.Execute(null);
-			TimeSpan commandTime = stopwatch.Elapsed;
 
 			try
 			{
-				commandTime.Should().BeLessThan(GateTimeout, "F5 returns while the filter runs in the background");
 				WaitUntil(() => viewModel.IsFilterInProgress);
-				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("Escape can stop the filter F5 started");
+				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("F5 returns while the filter runs in the background, where Escape can stop it");
 			}
 			finally
 			{
 				uiDispatcher.Resume();
 			}
 
-			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && resultsChanged > 0);
+			resultsChanged.Should().Be(1, "F5 refreshes the results, and with them the columns' widths");
 			viewModel.InclusiveFilter.Should().Be(IncludeFilter, "F5 runs the same filter again");
 			viewModel.VisibleItems.Count.Should().Be(filteredCount, "the log has not changed");
 		}

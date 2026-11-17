@@ -1718,11 +1718,14 @@
 		/// </remarks>
 		private void Refresh()
 		{
+			IFilter filter = _engine.Filter;
+
+			// Core's "Re-applying the most recent filter" then shows a worker's ThreadId, not the UI thread's.
 			Log.Default.Write(
 				LogSeverityType.Information,
-				$"Refresh (F5) is re-applying the filter on a background thread. FilterType={_engine.Filter.FilterType}, {_engine.Filter.Criteria}");
+				"Refresh (F5) queued the filter to run again on a background thread.");
 
-			FilterAsynchronously(_engine.Filter.FilterType, _engine.Filter.Criteria, () => _engine.ReApplyAsync(CancellationToken.None));
+			FilterAsynchronously(filter.FilterType, filter.Criteria, () => _engine.ReApplyAsync(CancellationToken.None));
 		}
 
 		/// <summary>
