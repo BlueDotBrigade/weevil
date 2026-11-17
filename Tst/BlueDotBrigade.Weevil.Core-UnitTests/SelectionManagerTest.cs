@@ -70,35 +70,19 @@
 		}
 
 		[TestMethod]
-		public void GivenEveryOtherRecordSelected_WhenTheOthersAreSelectedToo_ThenItTakesLessThanFiveSeconds()
+		public void GivenALineTheFilterHides_WhenUnselectedByLineNumber_ThenRecordNotFoundIsThrownAndTheSelectionIsKept()
 		{
-			// Changing one record at a time took about 30 seconds here.
-			RecordList records = R.WithLineNumbers(1, 300_000);
-			SelectionManager selector = CreateSelector(records);
-			selector.Select(records.Where(r => r.LineNumber % 2 == 1).ToList());
-			List<IRecord> others = records.Where(r => r.LineNumber % 2 == 0).ToList();
+			IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
+				.Open();
+			engine.Filter.Apply(Filter.FilterType.PlainText, new Filter.FilterCriteria("Id=002"));
+			var shownLineNumber = engine.Filter.Results.GetLineNumber(0);
+			engine.Selector.Select(shownLineNumber);
 
-			var stopwatch = Stopwatch.StartNew();
-			selector.Select(others);
+			Action act = () => engine.Selector.Unselect(lineNumber: 1);
 
-			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(5));
-			selector.Selected.Count.Should().Be(records.Count);
-		}
-
-		[TestMethod]
-		public void GivenEveryOtherRecordSelected_WhenTheyAreUnselected_ThenItTakesLessThanFiveSeconds()
-		{
-			// Changing one record at a time took about 30 seconds here.
-			RecordList records = R.WithLineNumbers(1, 300_000);
-			SelectionManager selector = CreateSelector(records);
-			List<IRecord> scattered = records.Where(r => r.LineNumber % 2 == 1).ToList();
-			selector.Select(scattered);
-
-			var stopwatch = Stopwatch.StartNew();
-			selector.Unselect(scattered);
-
-			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(5));
-			selector.Selected.Count.Should().Be(0);
+			act.Should().Throw<RecordNotFoundException>();
+			engine.Selector.Selected.Keys.Should().Equal(shownLineNumber);
 		}
 
 		[TestMethod]

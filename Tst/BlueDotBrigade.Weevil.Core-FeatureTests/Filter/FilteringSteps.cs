@@ -183,11 +183,8 @@ internal sealed class FilteringSteps : ReqnrollSteps
 	[When($"selecting the records on lines {X.WholeNumber} to {X.WholeNumber}")]
 	public void WhenSelectingTheRecordsOnLines(int firstLineNumber, int lastLineNumber)
 	{
-		var records = this.Context.Engine.Filter.Results
-			.Where(r => r.LineNumber >= firstLineNumber && r.LineNumber <= lastLineNumber)
-			.ToList();
-
-		this.Context.Engine.Selector.Select(records);
+		// Selects the records the filter shows from the first line to the last, as a Shift+click does.
+		this.Context.Engine.Selector.SelectOnly(firstLineNumber, lastLineNumber);
 	}
 
 	[Then($"{X.WholeNumber} records will be selected")]
