@@ -199,6 +199,12 @@ Taken with the owner on 2026-11-17, one bug at a time. Each becomes a GitHub iss
 | U2-6 | File a bug in milestone 8 and fix: **delete `GetSectionRecords` and `Compact<T>`** with their tests |
 | U7-4 | File a bug under #1157 in milestone 8 and fix before the dialog is wired in: **Cancel stops a zip extraction and deletes the partial copy**; nothing is set on a closed window |
 | P-4 and zipped logs | Replaced by a **user story under #1157, milestone 8: keep the annotations and `.idx` of a log opened from a zip.** Extract to `%LOCALAPPDATA%\BlueDotBrigade\Weevil\Zips\<16-character key>\<file name>` (key: hash of the zip's path, the entry's name, CRC-32 and size); on close delete only the `.log`. Keep it simple: no size cap, no automatic clean-up, short paths (Windows `MAX_PATH`). Reverses #1157's "changes to a zipped log are not saved" |
+| Minor: misleading message on a failed reopen | No separate bug: fold into the U1-1 work (log which file failed; keep the saved table when only the log failed) |
+| Minor: shared temporary `.idx` name | Replaced by a **user story in milestone 8: one Weevil instance per log.** While a log is open, Weevil holds `<log>.lock` open exclusively (deleted on close; Windows releases it on a crash). A second instance, or another PC on a share, **refuses to open the log** and shows and logs a warning naming who has it. The CLI and PowerShell print the warning |
+| Minor: more than 2,147,483,647 lines | File a Low bug in milestone 8: keep the 32-bit limit, replace the raw `OverflowException` with a plain message; Open As can warn first |
+| Minor: insight navigation | File a bug in milestone 8 and fix: **apply the `@Flagged` filter through the normal path, then go to the first related record when it completes** (no 500 ms timer). Inherited from 2.x |
+| Minor: unknown analyzer key | Clear `ArgumentException` naming the key; fold into the next change to `AnalysisManager` (U5b-1) |
+| Minor: filter time excludes keeping the selection | Fold into the U5b-2 fix: time the whole run; log the selection step at Debug |
 | `Doc/Design` | Update the official architecture and design documents |
 | Recommendation 2 (P-1) | Explain in plain English and confirm it is a bug; start work only with the owner's permission |
 
