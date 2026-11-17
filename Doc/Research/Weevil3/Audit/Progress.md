@@ -2,7 +2,7 @@
 
 An independent review of the Weevil 3.0 code on `main` against Weevil 2.x. It asks whether the new code captures its **intent** clearly and is **maintainable**, whether the architecture suits large logs in RAM and on disk, and whether the claims about CPU and RAM hold.
 
-> **Status:** Stage 1: U1 to U6a Final; U6b and U7 under review. Stage 2: drafted (`Findings/Performance.md`). Stage 3 next.
+> **Status:** Stage 1 done (all units Final). Stage 2 drafted (`Findings/Performance.md`). Stage 3 in progress.
 >
 > **AI agents:** Read this file first. It is the authoritative record of the audit. Continue from **Next Steps**. Do not repeat a completed step unless a finding needs checking again.
 
@@ -38,9 +38,9 @@ Agreed with the owner on 2026-11-16.
 | Stage | Work | Output | Status |
 |---|---|---|---|
 | 0 | Map the changed files to the epics; define review units | [Scope.md](Scope.md), [scope.py](scope.py) | Done |
-| 1 | Review units U1 to U7 through every lens below | `Findings/U<n>-<Name>.md` | In progress: U6b and U7 remain |
+| 1 | Review units U1 to U7 through every lens below | `Findings/U<n>-<Name>.md` | Done |
 | 2 | Check the performance claims: build both branches, run the memory harness and the benchmarks on Linux | `Findings/Performance.md`, [Measurements/](Measurements/README.md) | Drafted |
-| 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | Not started |
+| 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | In progress |
 | 4 | Sceptic pass on high-priority findings not yet challenged; write the report | `Report.md` | Not started |
 
 ### Stage 1 Units
@@ -159,6 +159,8 @@ Leads by unit:
 | U5a | 0 / 2 / 4 | Ranges are sound; `ISelect` keeps two ways to select with different rules (U5a-1) |
 | U5b | 0 / 2 / 3 | Filters keep 2.x semantics and are far faster; analyzers are near-copies changed by hand (U5b-1); a filter is stopped by a shared 2.x flag and no contract says which thread owns the engine (U5b-2) |
 | U6a | 0 / 3 / 2 | Epics put logic in Core, not here; "is anything running" is seven flags (U6a-1); log lifetime and view state share one class (U6a-2); F5 still filters on the UI thread, which on disk reads the log (U6a-3) |
+| U6b | 0 / 3 / 2 | One of the clearest parts of 3.0: Core owns the selection, the GUI owns the caret; the property that lets it scale (WPF never walks `RowList`) is neither tested nor detected (U6b-1); no design note, and the GUI instructions contradict three choices (U6b-3) |
+| U7 | 0 / 2 / 3 | A sound foundation that nothing uses yet; `Location.Parse` checks the disk on the UI thread (U7-1); nothing guards the "knows nothing about Weevil" boundary (U7-2) |
 | Stage 2 | 0 / 2 / 3 | Claims confirmed: 62% less memory at the peak, filters 4–24× faster; disk filters churn 16 MB buffers (P-1); a mode switch is a full parse (P-2) |
 
 Themes that recur across units, for Stage 3:
@@ -175,9 +177,8 @@ Themes that recur across units, for Stage 3:
 
 ## Next Steps
 
-1. **Stage 1.** If `Findings/U6b-Grid.md` or `Findings/U7-OpenAsDialog.md` is missing, review that unit: the reviewer prompt is in the workflow script `weevil3-audit-stage1b` (one reviewer that writes and pushes the file, then a sceptic per High finding). Add their rows to **Findings So Far**.
-2. **Stage 3.** Write `Findings/CrossCutting.md`. Read every findings file's Summary and Findings headings (not the full files), test the themes listed under **Findings So Far**, decide whether any combination deserves High (for example U6a-3 with U2-1 and U3-1: disk reads on the UI thread), and assess RAM against disk mode as a whole and the room for #991.
-3. **Stage 4.** A sceptic on each High finding still unchallenged; then `Report.md` with the structure in the owner's brief (executive summary, architecture, code quality, CPU, RAM, trade-offs, prioritised recommendations, final assessment).
+1. **Stage 3.** Write `Findings/CrossCutting.md`. Read every findings file's Summary and Findings headings (not the full files), test the themes listed under **Findings So Far**, decide whether any combination deserves High (for example U6a-3 with U2-1 and U3-1: disk reads on the UI thread), and assess RAM against disk mode as a whole and the room for #991.
+2. **Stage 4.** One task at a time (owner, 2026-11-17): a sceptic on each High finding still unchallenged; then `Report.md` with the structure in the owner's brief (executive summary, architecture, code quality, CPU, RAM, trade-offs, prioritised recommendations, final assessment).
 
 ## Log
 
