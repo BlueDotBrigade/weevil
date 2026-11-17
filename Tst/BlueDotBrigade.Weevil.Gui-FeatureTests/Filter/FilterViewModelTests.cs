@@ -503,6 +503,31 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			}
 		}
 
+		[TestMethod]
+		[WorkItem(998)]
+		public async Task GivenAnInsightRecordTheFilterHides_WhenGoingToIt_ThenTheFilterShowsFlaggedRecordsAndTheRecordIsActive()
+		{
+			// Going to an insight's record only set the filter box's text, and after 500 ms went to the nearest record still shown.
+			var bulletinMediator = new BulletinMediator();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, Substitute.For<IDialogBoxService>());
+			await OpenAsync(viewModel);
+			var hiddenLineNumber = viewModel.VisibleItems.First(record => !record.Content.Contains(IncludeFilter)).LineNumber;
+
+			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
+			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			viewModel.VisibleItems.Should().NotContain(record => record.LineNumber == hiddenLineNumber, "the filter should hide the insight's record");
+
+			int? scrolledTo = null;
+			viewModel.ScrollRequested += (_, position) => scrolledTo = position;
+			bulletinMediator.Post(new NavigateToInsightRecordBulletin(new[] { hiddenLineNumber }));
+			WaitUntil(() => scrolledTo.HasValue && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+
+			viewModel.InclusiveFilter.Should().Be($"{IncludeFilter}||@Flagged");
+			viewModel.VisibleItems.Should().Contain(record => record.LineNumber == hiddenLineNumber, "the filter now shows flagged records");
+			scrolledTo.Should().NotBeNull("Weevil goes to the insight's record");
+			viewModel.Rows.GetRow(scrolledTo!.Value).LineNumber.Should().Be(hiddenLineNumber);
+		}
+
 		/// <remarks>Regression: #1011. A failed open unsubscribed the open log from its filter history changes.</remarks>
 		[TestMethod]
 		public async Task GivenOpeningAnotherLogFailed_WhenFilteringTheOpenLog_ThenIncludeHistoryShowsTheFilter()
