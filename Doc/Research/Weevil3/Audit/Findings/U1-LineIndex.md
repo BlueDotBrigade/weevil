@@ -2,7 +2,7 @@
 
 Part of the [Weevil 3.0 audit](../Progress.md). This code reads a log once, records the byte offset of every line, parses records into a record table, and saves the index and table beside the log (`<log>.idx`) so a later open can skip the parse.
 
-> **Status:** Draft, sceptic pass pending. Reviewed on 2026-11-17 at `main` e3dee822, by two reviewers (design and intent; runtime, tests and documents), merged and checked by the editor.
+> **Status:** Final. Reviewed and challenged on 2026-11-17 at `main` e3dee822.
 
 ## Summary
 
@@ -10,7 +10,7 @@ Each class in this unit is careful and readable on its own. Each says what it is
 
 Against 2.x (a `StreamReader`, a 190-line parser and a list of records, about 290 lines) this is roughly nine times the code. Most of that buys real capability: byte offsets per line, raw-byte content chunks, disk mode, and a saved table that makes a reopen 3 to 8 times faster than a parse.
 
-**The weakness is between the classes, not in them.** What an open reads, reuses and writes (parse, reopen, extend or rebuild, and what to save) is decided across four classes, coordinated through settable flags on `LineIndex`. No method and no current design note lists the cases. The plan's own review history records three defects of exactly this kind. This is the one High finding: it costs maintainers, not users, because the `.idx` is a versioned, rebuildable cache.
+**The weakness is between the classes, not in them.** What an open reuses and writes is decided in `LineIndexFile`. `CoreEngineBuilder` calls those rules in order around the parse, and the two share settable flags on `LineIndex`, where `HasTable` has three meanings. The design notes say what each open reads, but what it writes is only in code remarks and the dated plan. This is Medium, not High (U1-1). Every rule the review history fixed is now pinned by a scenario, and #1212 and #1213 (sections and regions) went in without touching the policy. The cost falls on whoever next changes what an open reuses or saves, which no planned 3.0 work does. The unit has no High finding.
 
 Second, **"no source means RAM" is a protocol, not a type**, and `FilterManager` reads the storage mode back from a null. Third, **users are never told about the `.idx`** that now appears beside every log they open. It's about a fifth of the log's size, and nothing can turn it off.
 
@@ -37,27 +37,27 @@ Second, **"no source means RAM" is a protocol, not a type**, and `FilterManager`
 
 ## Findings
 
-### U1-1. The open-and-save policy is spread over four classes and coordinated by mutable flags
+### U1-1. The open-and-save policy is split between `LineIndexFile` and `CoreEngineBuilder`, which coordinate through flags on `LineIndex`
 
-- **Priority:** High
+- **Priority:** Medium
 - **Kind:** Maintainability
 - **New in 3.0?** New design
 - **Evidence:**
-  - **The state.** `LineIndex` carries what is on disk as settable properties: `Parse` (public set, `Src/BlueDotBrigade.Weevil.Core/IO/LineIndex.cs:72`), `HasTable` (internal set, `:80`) and `TableOffset` (`:85`). `Write` sets them as a side effect (`:292`, `:298`) and `Reset` clears them (`:183-184`). `LineCount` and `IndexedLength` describe memory instead, and they run ahead of the file after `Update`.
-  - **The rules that read or flip those flags:**
-    - `IO/LineIndexFile.cs:60`: a grown index that holds a table is not saved, or the table would be dropped.
-    - `:192`: skips the save.
-    - `:197-203`: rebuilds the line index when the parsed bytes differ.
-    - `:205`: assigns `Parse`.
-    - `:258` and `:269`: clear `HasTable` "so the parse that follows saves a table again", which turns `HasTable` into a "please save" signal.
-    - `CoreEngineBuilder.cs:359` (`isFullOpen`), `:253-275` (`TryReopen`) and `:393-395` (save after a parse).
-    - `IO/GrownLogParser.cs:48`, `:58` (fall back to a full parse); `Engine.cs:233-238` (delete the index on Reload).
-  - **Nine open paths.** First open; reopen; grown reopen; table rejected; plugin, build or mode changed; partial open with a table; partial open without; temporary folder; Reload after a change. Each writes, keeps or drops the `.idx` by a different combination of these rules. No method lists them. The only complete account is the dated plan; `Doc/Design/RecordTable.md:39-46` gives the file layout but not the sequence.
-  - **History.** `Doc/Plans/1023-ReopenWithoutParsing.md:167`, `:172` and `:174` record three review defects of this kind, found within two days: a stale line index saved with a new parse; `Load` saving a grown index, which dropped the table; resuming from a stale line index, which lost a record.
-  - **An example.** When a save fails, `HasTable` and `Parse` stay set in memory although the file was not replaced (`LineIndex.cs:298` runs before the move at `LineIndexFile.cs:163`; the catch undoes nothing). This is harmless today only because the engine later reads just `LineCount` and `GetByteOffset`.
-- **Impact:** Anyone who changes how a log opens has to read five files to learn when the `.idx` is written and with what. That includes #1157's Open As work (sections, regions, ranges), and ideas the plans already list: partial opens that reuse the table, one pass on a first open, appending to the `.idx`. Calling the save in the wrong state silently drops or keeps a stale table, as the review history shows. Users are not at risk, since the cache is rebuilt when wrong.
-- **Recommendation:** Give the policy one home in `Core/IO`, for example a `SavedIndex` class that loads the line index, decides parse, reopen, extend or rebuild, and saves. What is on disk becomes an immutable value read with the index, instead of flags on `LineIndex`. The save takes the table explicitly, with one rule for when a table may be dropped, and `TryLoadTable` returns "table rejected" instead of storing it in `HasTable`. `CoreEngineBuilder.BuildEngine` then calls one method, and loses `TryReopen` and lines 359-397. At the least, add the nine-path table (what is read, checked and written, and which class decides) to `Doc/Design/RecordTable.md`. That costs an hour and helps the next maintainer immediately. Behaviour and file format stay the same. **Complexity:** M.
-- **Sceptic:** Not challenged
+  - **The shared state.** `LineIndex` carries what the saved file holds as settable properties: `Parse` (public set, `Src/BlueDotBrigade.Weevil.Core/IO/LineIndex.cs:72`) and `HasTable` (internal set, `:80`). `Write` sets `HasTable` as a side effect (`:298`), and `Reset` clears both (`:183-184`). `TableOffset` (`:85`) is not part of this: its setter is private, and it is read only from an index just read from the file (`IO/LineIndexFile.cs:249`).
+  - **`HasTable` has three meanings.** After `TryRead` it means "the file holds a table" (`LineIndex.cs:518`). In `Load` it means "do not save over the file, or the table is lost" (`IO/LineIndexFile.cs:60`). After a rejected table it is cleared "so the parse that follows saves a table again" (`:258`, `:269`), which `SaveParse` reads as "save" (`:192`). `SaveParse` also assigns `Parse` (`:205`) and may rebuild the line index (`:197-203`).
+  - **Two classes decide, in order.** `LineIndexFile` holds the rules: load, the line-index save, table reuse, the save after a parse, and deletion. `CoreEngineBuilder` runs them around the parse: `isFullOpen` (`CoreEngineBuilder.cs:359`), `TryReopen` (`:253-275`) and the save after a parse (`:393-395`). The other checks are local. `GrownLogParser.cs:48` and `:58` are preconditions of its own algorithm, and `Engine.cs:233-238` deletes the index on Reload, as `Doc/Design/DiskMode.md:43-44` says. The line index is saved before the parse and again after it. Step 2 of the #1023 plan chose this so that loading did not change (`Doc/Plans/1023-ReopenWithoutParsing.md:141`).
+  - **About nine open paths.** First open; reopen; grown reopen; table rejected; plugin, build or mode changed; partial open with a table; partial open without; temporary folder; Reload after a change. The design notes describe what each open reads: which opens reuse, parse, extend or rebuild (`Doc/Design/RecordTable.md:43-46`, `DiskMode.md:29`, `:43-44`). What each open writes is only in code remarks (`LineIndexFile.cs:35-38`) and the dated plan (`1023-ReopenWithoutParsing.md:177-178`). That covers when `Load` saves the line index, that a partial open of a grown log saves nothing, and that a damaged table is saved again.
+  - **History.** Review found two defects of this kind: a stale line index saved with a new parse (`1023-ReopenWithoutParsing.md:167`), and resuming from a stale line index, which lost a record (`:174`). Step 4 also had to stop `Load` saving a grown index, which dropped the table (`:172`). A review added the `HasTable` reset (commit c78a9793). All were caught before merge, and a `Reopening.feature` scenario now pins each rule (`Tst/BlueDotBrigade.Weevil.Core-FeatureTests/IO/Reopening.feature:49`, `:74`, `:91`, `:110`).
+  - **Memory can disagree with the file.** When the move after a save fails, `HasTable` and `Parse` stay set although the file was not replaced (`LineIndex.cs:298` runs before the move at `LineIndexFile.cs:163`). This is harmless today. The engine then reads only `LineCount` and `GetByteOffset`, and `TryLoadTable` reads the file again (`:241`).
+- **Impact:** Anyone who next changes what an open reuses or saves must read `LineIndexFile`, two blocks of `CoreEngineBuilder` and the dated plan to learn the save rules, then get the call order and the flags right. The ideas the plans list are that kind of change: partial opens that reuse the table, appending to the `.idx`, and one pass on a first open (`1023-ReopenWithoutParsing.md:159`, `:176`; `988-IndexingService.md:107`). None is planned for 3.0. Changes that only narrow an open leave the policy alone. #1212 and #1213 (sections and regions, the Core part of #1157) became ranges, and `isFullOpen` kept them from reusing or saving a table. Users are mostly protected: every block is checked before a table is reused. A save in the wrong state can still keep a stale line index, which is checked only at its start and end.
+- **Recommendation:** Now, extend `Doc/Design/RecordTable.md#saved-with-the-index` with what each open writes, and a table of the open paths: what is read, checked and written, and which class decides. That takes about an hour. Later, as the first step of any change to what an open reuses or saves, make `LineIndexFile` the one home of the policy:
+  - move `TryReopen` and the save after a parse into it, so that one method opens the saved index and one saves it;
+  - consider renaming it, for example `SavedIndex`, since half of it is about the table;
+  - replace the `HasTable` writes with return values: `TryLoadTable` returns that the table was rejected, and the save takes that result;
+  - keep the reopen out of the opening method's frame (`CoreEngineBuilder.cs:243-248`).
+
+  Do not do this before 3.0: it would rework fresh, reviewed code with no change in behaviour or file format. **Complexity:** S for the document, M for the refactor.
+- **Sceptic:** Revised: High to Medium. The policy lives in two classes, not four. `GrownLogParser`'s checks are its own, and `Engine`'s delete is documented. `TableOffset` is not settable. `RecordTable.md:43-46` already lists what each open reads, so only what it writes is undocumented. Every past defect is now pinned by a scenario. The #1157 sections and regions (#1212, #1213) went in without touching the policy, and no planned 3.0 work changes it.
 
 ### U1-2. "No source means RAM" is a protocol, not a type
 
