@@ -27,7 +27,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			await options.SelectAsync(LargeLog);
 
-			options.IsDiskChosen.Should().BeTrue("the large log does not fit in the free memory");
+			options.ChosenMode.Should().Be(StorageMode.Disk, "the large log does not fit in the free memory");
 			options.Suggestion.Should().Contain("Disk");
 			options.CanOpen.Should().BeTrue();
 		}
@@ -38,13 +38,13 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			// Once the analyst picks a mode, selecting another log does not change it (decision 7 of the #1157 plan).
 			var options = new OpenAsOptionsViewModel(Advise);
 			await options.SelectAsync(LargeLog);
-			options.IsDiskChosen.Should().BeTrue("Disk is suggested for the large log");
-			options.IsRamChosen = true;
+			options.ChosenMode.Should().Be(StorageMode.Disk, "Disk is suggested for the large log");
+			options.ChosenMode = StorageMode.Ram;
 
 			await options.SelectAsync(SmallLog);
 			await options.SelectAsync(LargeLog);
 
-			options.IsRamChosen.Should().BeTrue();
+			options.ChosenMode.Should().Be(StorageMode.Ram);
 			options.Suggestion.Should().Contain("Disk", "Weevil still says what it would suggest");
 			options.Warning.Should().Contain("may become slow");
 		}
@@ -70,7 +70,19 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			await slowSelection;
 
 			options.Advice.FileName.Should().Be("Small.log");
-			options.IsRamChosen.Should().BeTrue();
+			options.ChosenMode.Should().Be(StorageMode.Ram);
+		}
+
+		[TestMethod]
+		public async Task GivenAFileWhoseAdviceFails_WhenSelected_ThenItCanStillBeOpenedInRam()
+		{
+			// Browsing must never stop Weevil: the open itself reports why a log cannot be read.
+			var options = new OpenAsOptionsViewModel(_ => throw new InvalidOperationException("Unexpected."));
+
+			await options.SelectAsync(SmallLog);
+
+			options.CanOpen.Should().BeTrue();
+			options.ChosenMode.Should().Be(StorageMode.Ram);
 		}
 
 		[TestMethod]

@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	using System;
 	using System.Globalization;
 	using System.Threading.Tasks;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 	using Metalama.Patterns.Observability;
@@ -54,29 +55,18 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 		public string Details { get; private set; } = NoFileDetails;
 
-		public bool IsRamChosen
+		/// <summary>
+		/// The mode the radio buttons show and set: setting it is the analyst's pick.
+		/// </summary>
+		/// <remarks>
+		/// One property for both radio buttons, bound through <c>EnumToBooleanConverter</c>, which writes nothing when a button is unchecked.
+		/// A <see langword="bool"/> per button would not do: Metalama raises <c>PropertyChanged</c> when the button unchecked writes <see langword="false"/>
+		/// to a property that still reads <see langword="true"/>, and WPF would then check that button again, losing the click.
+		/// </remarks>
+		public StorageMode ChosenMode
 		{
-			get => this.StorageMode == StorageMode.Ram;
-			set
-			{
-				// Only the radio button checked is a choice: the other is unchecked as a consequence.
-				if (value)
-				{
-					Choose(StorageMode.Ram);
-				}
-			}
-		}
-
-		public bool IsDiskChosen
-		{
-			get => this.StorageMode == StorageMode.Disk;
-			set
-			{
-				if (value)
-				{
-					Choose(StorageMode.Disk);
-				}
-			}
+			get => this.StorageMode;
+			set => Choose(value);
 		}
 
 		public string RamDescription { get; private set; } = DefaultRamDescription;
@@ -114,7 +104,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 				return;
 			}
 
-			OpenAsAdvice advice = await Task.Run(() => _readAdvice(file));
+			OpenAsAdvice advice = await Task.Run(() => ReadAdvice(file));
 
 			if (selection != _selection)
 			{
@@ -127,6 +117,22 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			}
 
 			ShowAdvice(advice);
+		}
+
+		/// <summary>
+		/// The advice for the file, or advice as for a log that cannot be read: browsing must never stop Weevil.
+		/// </summary>
+		private OpenAsAdvice ReadAdvice(BrowserItem file)
+		{
+			try
+			{
+				return _readAdvice(file);
+			}
+			catch (Exception e)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, $"Open As could not work out its advice for a file. File={file.Name}");
+				return new OpenAsAdvice(file.Name, StorageUnit.Zero, estimate: null, availableMemory: null, isOnNetworkDrive: false);
+			}
 		}
 
 		private void Choose(StorageMode storageMode)

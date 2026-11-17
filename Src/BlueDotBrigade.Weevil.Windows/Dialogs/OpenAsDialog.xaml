@@ -20,7 +20,7 @@
         <local:FileBrowser x:Name="FileBrowserControl" Grid.Row="0" Grid.Column="0" />
 
         <!-- The host's options, such as which part of the file to open. -->
-        <ScrollViewer Grid.Row="0" Grid.Column="2" Width="340" VerticalScrollBarVisibility="Auto" Focusable="False">
+        <ScrollViewer x:Name="OptionsArea" Grid.Row="0" Grid.Column="2" Width="340" VerticalScrollBarVisibility="Auto" Focusable="False">
             <ContentPresenter Content="{Binding OptionsContent, ElementName=Self}" />
         </ScrollViewer>
 

@@ -1,8 +1,10 @@
 <UserControl x:Class="BlueDotBrigade.Weevil.Gui.IO.OpenAsOptionsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters">
     <!-- Weevil's options, which the Open As dialog shows beside its file browser (#1215). -->
     <UserControl.Resources>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         <Style TargetType="TextBlock">
             <Setter Property="Margin" Value="5" />
             <Setter Property="Foreground" Value="{StaticResource TextForeground}" />
@@ -29,12 +31,12 @@
             <TextBlock Text="Where should Weevil keep the log's text while it is open?" FontWeight="SemiBold" />
 
             <RadioButton x:Name="RamRadioButton" GroupName="StorageMode" Content="_RAM"
-                         IsChecked="{Binding IsRamChosen, Mode=TwoWay}"
+                         IsChecked="{Binding ChosenMode, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Ram}"
                          AutomationProperties.HelpText="{Binding RamDescription}" />
             <TextBlock Text="{Binding RamDescription}" Margin="30,0,5,5" />
 
             <RadioButton x:Name="DiskRadioButton" GroupName="StorageMode" Content="_Disk"
-                         IsChecked="{Binding IsDiskChosen, Mode=TwoWay}"
+                         IsChecked="{Binding ChosenMode, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Disk}"
                          AutomationProperties.HelpText="{Binding DiskDescription}" />
             <TextBlock Text="{Binding DiskDescription}" Margin="30,0,5,5" />
 
