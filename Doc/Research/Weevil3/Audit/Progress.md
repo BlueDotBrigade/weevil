@@ -2,7 +2,7 @@
 
 An independent review of the Weevil 3.0 code on `main` against Weevil 2.x. It asks whether the new code captures its **intent** clearly and is **maintainable**, whether the architecture suits large logs in RAM and on disk, and whether the claims about CPU and RAM hold.
 
-> **Status:** Stage 1 done (all units Final). Stage 2 drafted (`Findings/Performance.md`). Stage 3 in progress.
+> **Status:** Stage 1 done (all units Final). Stage 2 drafted (`Findings/Performance.md`). Stage 3 drafted (`Findings/CrossCutting.md`, one High: X-1). Stage 4 next.
 >
 > **AI agents:** Read this file first. It is the authoritative record of the audit. Continue from **Next Steps**. Do not repeat a completed step unless a finding needs checking again.
 
@@ -40,7 +40,7 @@ Agreed with the owner on 2026-11-16.
 | 0 | Map the changed files to the epics; define review units | [Scope.md](Scope.md), [scope.py](scope.py) | Done |
 | 1 | Review units U1 to U7 through every lens below | `Findings/U<n>-<Name>.md` | Done |
 | 2 | Check the performance claims: build both branches, run the memory harness and the benchmarks on Linux | `Findings/Performance.md`, [Measurements/](Measurements/README.md) | Drafted |
-| 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | In progress |
+| 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | Drafted |
 | 4 | Sceptic pass on high-priority findings not yet challenged; write the report | `Report.md` | Not started |
 
 ### Stage 1 Units
