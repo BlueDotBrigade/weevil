@@ -310,19 +310,63 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public void GivenTheOpenButton_WhenALogIsChosen_ThenOpenAsIsShownForIt()
+		public void GivenTheOpenButton_WhenALogAndDiskAreChosen_ThenTheLogOpensOnDisk()
 		{
-			// The Open button, Ctrl+O and the menu's Open… show the Windows file dialog, then Open As (#1028).
+			// The Open button, Ctrl+O and the menu's Open… show one dialog, which finds the log and chooses RAM or Disk (#1215).
 			var dialog = Substitute.For<IDialogBoxService>();
-			dialog.ShowOpenFile(Arg.Any<string>()).Returns(CopyLog("Chosen.log"));
-			AcceptOpenAs(dialog, StorageMode.Ram);
-			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			ChooseInOpenAs(dialog, new OpenAsChoice(CopyLog("Chosen.log"), ExtractedFolder: null, StorageMode.Disk, Advice: null));
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
 
 			viewModel.OpenLogCommand.Execute(null);
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 
-			dialog.Received(1).TryShowOpenAs(Arg.Is<OpenAsAdvice>(advice => advice.FileName == "Chosen.log"), out Arg.Any<StorageMode>());
-			viewModel.IsLogFileOpen.Should().BeTrue("the chosen log opens in the mode chosen");
+			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin =>
+				Path.GetFileName(bulletin.SourceFilePath) == "Chosen.log" && bulletin.StorageMode == StorageMode.Disk));
+		}
+
+		[TestMethod]
+		public void GivenTheOpenButton_WhenCancelled_ThenNothingOpensAndOpenIsAvailableAgain()
+		{
+			var dialog = Substitute.For<IDialogBoxService>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+
+			// The substitute answers false: the user cancelled.
+			viewModel.OpenLogCommand.Execute(null);
+
+			dialog.Received(1).TryShowOpenAs(out Arg.Any<OpenAsChoice>());
+			bulletinMediator.DidNotReceive().Post(Arg.Any<SourceFileOpenedBulletin>());
+			viewModel.CanOpenLogFile.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public async Task GivenTheOpenButton_WhenALogInAZipIsChosen_ThenItsCopyIsKeptUntilAnotherLogOpens()
+		{
+			// The dialog extracts a log in a zip to a folder of its own, which Weevil deletes once nothing reads it (#1162).
+			var extractedFolder = System.IO.Directory.CreateTempSubdirectory("WeevilGui.Extracted.").FullName;
+			var extractedLog = Path.Combine(extractedFolder, "A.log");
+			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), extractedLog);
+			var dialog = Substitute.For<IDialogBoxService>();
+			ChooseInOpenAs(dialog, new OpenAsChoice(extractedLog, extractedFolder, StorageMode.Ram, Advice: null));
+			AcceptOpenAs(dialog, StorageMode.Ram);
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+
+			try
+			{
+				viewModel.OpenLogCommand.Execute(null);
+				WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
+				viewModel.IsLogFileOpen.Should().BeTrue();
+				System.IO.File.Exists(extractedLog).Should().BeTrue("Reload and disk mode read the log again");
+
+				await viewModel.OpenCompressedAsync(CopyLog("B.log"));
+
+				System.IO.Directory.Exists(extractedFolder).Should().BeFalse("nothing reads the previous log's copy any more");
+			}
+			finally
+			{
+				DeleteExtractedFolder(extractedLog);
+			}
 		}
 
 		[TestMethod]
@@ -933,6 +977,18 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.VisibleItems.Should().NotBeNullOrEmpty("the open log's records are shown");
 
 			return new WeakReference(viewModel.VisibleItems, trackResurrection: true);
+		}
+
+		/// <summary>
+		/// Makes the Open As dialog answer with <paramref name="choice"/>, as if the user found a log and chose how to open it.
+		/// </summary>
+		private static void ChooseInOpenAs(IDialogBoxService dialogBox, OpenAsChoice choice)
+		{
+			dialogBox.TryShowOpenAs(out Arg.Any<OpenAsChoice>()).Returns(x =>
+			{
+				x[0] = choice;
+				return true;
+			});
 		}
 
 		/// <summary>

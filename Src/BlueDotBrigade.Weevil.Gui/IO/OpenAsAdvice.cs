@@ -3,7 +3,10 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	using System;
 	using System.Globalization;
 	using System.IO;
+	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Gui.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
 	/// <summary>
 	/// What the Open As window offers for one log: the storage mode it suggests, and the warning for each choice (#1028).
@@ -31,6 +34,56 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			this.Estimate = estimate;
 			this.AvailableMemory = availableMemory;
 			this.IsOnNetworkDrive = isOnNetworkDrive;
+		}
+
+		/// <summary>
+		/// Works out the advice for a log on disk: its size, the memory it needs in RAM, and whether it is on the network.
+		/// </summary>
+		/// <remarks>
+		/// It reads up to 1 MB of the log, so call it off the UI thread. A log that cannot be read is advised as if empty: the open itself reports why.
+		/// </remarks>
+		public static OpenAsAdvice Read(string logPath)
+		{
+			StorageUnit fileSize;
+			StorageUnit? estimate;
+
+			try
+			{
+				fileSize = new StorageUnit(new FileInfo(logPath).Length);
+				estimate = Engine.EstimateMemory(logPath);
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, "The memory the log needs could not be estimated.");
+				fileSize = StorageUnit.Zero;
+				estimate = null;
+			}
+
+			return new OpenAsAdvice(Path.GetFileName(logPath), fileSize, estimate, ComputerSnapshot.ReadAvailableMemory(), IsNetworkPath(logPath));
+		}
+
+		/// <summary>
+		/// Works out the advice for the file selected in the Open As dialog (#1215).
+		/// </summary>
+		/// <remarks>
+		/// Call it off the UI thread. A file in a zip, or one that OneDrive keeps online only, is not read:
+		/// the first is not extracted until it is opened, and reading the second would download it. Its memory is then unknown, so RAM is suggested.
+		/// </remarks>
+		public static OpenAsAdvice Read(BrowserItem file)
+		{
+			ArgumentNullException.ThrowIfNull(file);
+
+			if (file.Location.IsInArchive || file.IsOnlineOnly)
+			{
+				return new OpenAsAdvice(
+					file.Name,
+					new StorageUnit(file.Size ?? 0),
+					estimate: null,
+					ComputerSnapshot.ReadAvailableMemory(),
+					isOnNetworkDrive: !file.Location.IsInArchive && IsNetworkPath(file.Location.FileSystemPath));
+			}
+
+			return Read(file.Location.FileSystemPath);
 		}
 
 		public string FileName { get; }
