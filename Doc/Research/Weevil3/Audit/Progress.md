@@ -2,7 +2,7 @@
 
 An independent review of the Weevil 3.0 code on `main` against Weevil 2.x. It asks whether the new code captures its **intent** clearly and is **maintainable**, whether the architecture suits large logs in RAM and on disk, and whether the claims about CPU and RAM hold.
 
-> **Status:** Stage 1 in progress: units U1 to U7 are under review (started 2026-11-16).
+> **Status:** Stage 1 in progress (U1 done; U2 to U7 under review). Stage 2 measurements partly taken (see `Measurements/`).
 >
 > **AI agents:** Read this file first. It is the authoritative record of the audit. Continue from **Next Steps**. Do not repeat a completed step unless a finding needs checking again.
 
@@ -29,6 +29,7 @@ Agreed with the owner on 2026-11-16.
 | Benchmarks | Run here, on Linux, with the .NET 10 SDK installed. Label every result as Linux. Compare 2.x with `main` on the same machine |
 | Benchmark logs | **4 GB is the largest log this environment can open** (owner, 2026-11-16; uploads are limited to 30 MB). Generate synthetic logs with the [memory harness](../MemoryHarness/README.md); use the 10-million-record droid logs from Git LFS (`git lfs pull`, about 141 MB) for numbers comparable with the repo's. Larger logs, such as the 20 GB disk-mode target (#1024), are a gap for the owner to measure on Windows |
 | Pacing | Run every stage without stopping. Commit and push after each unit |
+| Agents | At most four background agents at a time (owner, 2026-11-17). Usage limits interrupted two runs, so each agent now writes and pushes its own file |
 | Sceptic | A fresh-context agent tries to disprove each **high-priority** finding before it is recorded |
 | Rules | No changes to source code. No GitHub issues. Only files in this folder change. Compiler warnings are expected, from the many analyzers turned on; ignore them |
 
@@ -56,11 +57,19 @@ A unit's status is the status note at the top of its findings file:
 | U2 | Record representation (#988) | `Findings/U2-RecordRepresentation.md` |
 | U3 | Disk mode and the log file source (#986) | `Findings/U3-DiskMode.md` |
 | U4 | Engine composition and session state (#990) | `Findings/U4-EngineAndSession.md` |
-| U5 | Filtering, selection, navigation, analyzers (#990, #988) | `Findings/U5-FilterSelectionAnalysis.md` |
-| U6 | GUI over the new Core (#990, #986) | `Findings/U6-Gui.md` |
+| U5a | Selection (#990) | `Findings/U5a-Selection.md` |
+| U5b | Filtering, navigation, analyzers (#990, #988) | `Findings/U5b-FilterNavigationAnalysis.md` |
+| U6a | `FilterViewModel` (#990, #986) | `Findings/U6a-FilterViewModel.md` |
+| U6b | The grid over Core (#990) | `Findings/U6b-Grid.md` |
 | U7 | Open As dialog and file browser (#1157, light) | `Findings/U7-OpenAsDialog.md` |
 
-Each unit is reviewed by two or three agents with different lenses (design and intent; runtime behaviour, tests and documents). A third agent merges their findings, checks every reference and writes the file.
+U5 and U6 are split in two because of their size.
+
+How units were reviewed:
+
+- **U1:** two reviewers, one for design and intent, one for runtime, tests and documents. The main session merged their findings and checked the key references.
+- **U2 to U7:** after two usage-limit interruptions, each unit has one reviewer covering every lens, who writes and pushes the file.
+- **All units:** a sceptic then challenges each High finding and records its verdict in the file.
 
 ## How Each Unit Is Reviewed
 
@@ -155,4 +164,5 @@ None yet. See [Scope.md](Scope.md#first-observations) for what to look at first.
 
 | Date | Session work |
 |---|---|
+| 2026-11-17 | Two workflow runs stopped at the usage limit; only U1's two reviews survived. Wrote U1 from them. Installed the .NET 10 SDK from Ubuntu's archive (`apt-get install dotnet-sdk-10.0`; Microsoft's download hosts are blocked here). Measured memory of 2.12.1 and `main` on 1 GB and 4 GB logs, and filter and Find times on 1 GB. Relaunched U2 to U7 with one reviewer each |
 | 2026-11-16 | Agreed the plan with the owner. Stage 0: mapped 454 commits and 113 source files to the epics; defined units U1–U7. Recorded SonarCloud's leads. Started Stage 1 |
