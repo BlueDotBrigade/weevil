@@ -183,6 +183,19 @@ The audit is complete. What remains is the owner's:
 2. Run the Windows measurements listed in the report's section 7 and in [Findings/Performance.md](Findings/Performance.md#not-measured-for-the-owner-on-windows).
 3. If a finding becomes work, create its issue; the audit created none.
 
+## Owner Decisions After the Audit
+
+Taken with the owner on 2026-11-17, one bug at a time. Each becomes a GitHub issue; none is implemented yet unless its issue says so.
+
+| Finding | Decision |
+|---|---|
+| X-1 | File a bug in milestone 8 and fix it on `BugFix/<N>-RefreshOnUiThread`. F5 re-runs the filter on a background thread (`ReApply`, not `Apply`), then refreshes the UI, for example the ListView's default column sizing. Add logging, so the fix can be checked in Weevil's log. Open a pull request so CI runs |
+| U4-1 | File a bug in milestone 8 (Clear fails where the sidecar can't be written). Don't fix yet |
+| U3-3 | File a bug in milestone 8. **Reload re-runs the same request against the latest data.** A region or section is found again by name; "from line N" grows to include appended lines; a fixed range stays fixed; the status bar shows a partial open. Also answers #1157 step 5 |
+| U3-4 | File a bug in milestone 8 and fix it. **Always let other applications rename or delete a log while Weevil reads it** (`FileShare.Delete`). GUI: on a changed log, say so and name **Ctrl+F5** to reload; don't reload automatically. CLI and PowerShell: no automatic retry; keep the result and warn that the file was renamed or deleted while it was read. Document this briefly on `Open()` |
+| `Doc/Design` | Update the official architecture and design documents |
+| Recommendation 2 (P-1) | Explain in plain English and confirm it is a bug; start work only with the owner's permission |
+
 ## Log
 
 | Date | Session work |
