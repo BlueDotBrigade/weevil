@@ -2,7 +2,7 @@
 
 An independent review of the Weevil 3.0 code on `main` against Weevil 2.x. It asks whether the new code captures its **intent** clearly and is **maintainable**, whether the architecture suits large logs in RAM and on disk, and whether the claims about CPU and RAM hold.
 
-> **Status:** Stage 1 done (all units Final). Stage 2 drafted (`Findings/Performance.md`). Stage 3 drafted (`Findings/CrossCutting.md`, one High: X-1). Stage 4 next.
+> **Status:** Done (2026-11-17). The deliverable is [Report.md](Report.md).
 >
 > **AI agents:** Read this file first. It is the authoritative record of the audit. Continue from **Next Steps**. Do not repeat a completed step unless a finding needs checking again.
 
@@ -39,9 +39,9 @@ Agreed with the owner on 2026-11-16.
 |---|---|---|---|
 | 0 | Map the changed files to the epics; define review units | [Scope.md](Scope.md), [scope.py](scope.py) | Done |
 | 1 | Review units U1 to U7 through every lens below | `Findings/U<n>-<Name>.md` | Done |
-| 2 | Check the performance claims: build both branches, run the memory harness and the benchmarks on Linux | `Findings/Performance.md`, [Measurements/](Measurements/README.md) | Drafted |
-| 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | Drafted |
-| 4 | Sceptic pass on high-priority findings not yet challenged; write the report | `Report.md` | Not started |
+| 2 | Check the performance claims: build both branches, run the memory harness and the benchmarks on Linux | `Findings/Performance.md`, [Measurements/](Measurements/README.md) | Done |
+| 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | Done |
+| 4 | Sceptic pass on high-priority findings not yet challenged; write the report | [Report.md](Report.md) | Done |
 
 ### Stage 1 Units
 
@@ -177,13 +177,17 @@ Themes that recur across units, for Stage 3:
 
 ## Next Steps
 
-1. **Stage 3.** Write `Findings/CrossCutting.md`. Read every findings file's Summary and Findings headings (not the full files), test the themes listed under **Findings So Far**, decide whether any combination deserves High (for example U6a-3 with U2-1 and U3-1: disk reads on the UI thread), and assess RAM against disk mode as a whole and the room for #991.
-2. **Stage 4.** One task at a time (owner, 2026-11-17): a sceptic on each High finding still unchallenged; then `Report.md` with the structure in the owner's brief (executive summary, architecture, code quality, CPU, RAM, trade-offs, prioritised recommendations, final assessment).
+The audit is complete. What remains is the owner's:
+
+1. Read [Report.md](Report.md), and decide recommendation 7 (the storage mode in a saved parse's identity).
+2. Run the Windows measurements listed in the report's section 7 and in [Findings/Performance.md](Findings/Performance.md#not-measured-for-the-owner-on-windows).
+3. If a finding becomes work, create its issue; the audit created none.
 
 ## Log
 
 | Date | Session work |
 |---|---|
+| 2026-11-17 (end) | Finished U6b and U7. Measured Copy's read path. Wrote `CrossCutting.md`; its sceptic kept X-1 High for F5 and lowered Copy to Medium. Wrote `Report.md` |
 | 2026-11-17 (later) | The usage limit stopped U5b, U6a, U6b and U7; relaunched two at a time. Stage 2: timed the `.idx` open paths, filtered the 4 GB log on disk with the heap capped, confirmed the cause of P-1 with an instrumented scratch build and measured a prototype fix. Found P-4 (temporary-folder check) in passing. Wrote `Performance.md` |
 | 2026-11-17 | Two workflow runs stopped at the usage limit; only U1's two reviews survived. Wrote U1 from them. Installed the .NET 10 SDK from Ubuntu's archive (`apt-get install dotnet-sdk-10.0`; Microsoft's download hosts are blocked here). Measured memory of 2.12.1 and `main` on 1 GB and 4 GB logs, and filter and Find times on 1 GB. Relaunched U2 to U7 with one reviewer each |
 | 2026-11-16 | Agreed the plan with the owner. Stage 0: mapped 454 commits and 113 source files to the epics; defined units U1–U7. Recorded SonarCloud's leads. Started Stage 1 |

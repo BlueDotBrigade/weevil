@@ -2,7 +2,7 @@
 
 Stage 2 of the [Weevil 3.0 audit](../Progress.md). Checks the CPU and RAM claims made for 3.0 against measurements taken for this audit, and lists what is still unmeasured.
 
-> **Status:** Draft, sceptic pass pending. Measured on 2026-11-16 and 2026-11-17 at `main` e3dee822 against Weevil 2.12.1 from NuGet. Raw results and the tools are in [Measurements/](../Measurements/README.md).
+> **Status:** Final (no High finding, so no sceptic pass). Measured on 2026-11-16 and 2026-11-17 at `main` e3dee822 against Weevil 2.12.1 from NuGet. Raw results and the tools are in [Measurements/](../Measurements/README.md).
 
 ## Summary
 
