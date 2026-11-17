@@ -1,6 +1,5 @@
 // Times the same operations against Weevil 2.12.1 (NuGet, WEEVIL2) and against this repository's Core.
-// Usage: OpsHarness <log> <runs> [ram|disk] [text of the last record, for Find]
-// Build against main: dotnet build -c Release. Against 2.12.1: dotnet build -c Release -p:WeevilVersion=2.12.1
+// Usage: OpsHarness <log> <runs> [ram|disk]
 using System.Diagnostics;
 using System.Globalization;
 using BlueDotBrigade.Weevil;
@@ -65,7 +64,7 @@ internal static class Program
 		{
 			if (line.StartsWith("VmHWM:", StringComparison.Ordinal))
 			{
-				return long.Parse(line.Split(' ', StringSplitOptions.RemoveEmptyEntries)[1], CultureInfo.InvariantCulture) * 1024 / 1e9;
+				return long.Parse(line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)[1], CultureInfo.InvariantCulture) * 1024 / 1e9;
 			}
 		}
 
