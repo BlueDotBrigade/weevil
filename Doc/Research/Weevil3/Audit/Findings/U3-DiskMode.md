@@ -20,7 +20,7 @@ Disk mode is well shaped. One small class, `LogFileSource`, owns reading back fr
 - 2.x: `FilterViewModel.OpenCompressedAsync`, `FileHelper.cs`, `DiskWriter.cs`, `ContentNavigator.cs`, the CLI's `FilterCommands.cs`.
 - Documents: `Doc/Design/DiskMode.md`; `Doc/Plans/986-DiskMode.md`, `1025-ContentFromFile.md`, `1028-OpenAs.md`, `1157-OpenAsDialog.md`, `991-MultipleViews.md`; `Doc/Notes/Release/Help.md`; `.github/instructions/*.md`; `.github/workflows/dotnet.yml`.
 - Tests: `LogFileSourceTests`, `EngineExtensionsTests`, `MemoryEstimatorTests`, `RecordRangesTests`, the disk tests in Core `EngineTests`, `OpeningOnDisk.feature`, `OpenAsAdviceTests`, the disk and zip tests in `FilterViewModelTests`, the CLI and PowerShell disk tests, the disk budgets in `Core-PerformanceTests`, `Tst/Disk.runsettings`.
-- Measurements: [Memory-Main.md](../Measurements/Memory-Main.md), [Memory-Main-Run2.md](../Measurements/Memory-Main-Run2.md), and the OpsHarness runs of 2026-11-17 on the 1 GB and 4 GB logs in both modes (quoted in U3-2; the files are not yet in `Measurements/`).
+- Measurements: [Memory-Main.md](../Measurements/Memory-Main.md), [Memory-Main-Run2.md](../Measurements/Memory-Main-Run2.md), the OpsHarness runs on the 1 GB and 4 GB logs in both modes ([Ops-1gb-main-ram-run2.txt](../Measurements/Ops-1gb-main-ram-run2.txt), [Ops-1gb-main-disk-run2.txt](../Measurements/Ops-1gb-main-disk-run2.txt), [Ops-4gb-main-ram-run2.txt](../Measurements/Ops-4gb-main-ram-run2.txt), [Ops-4gb-main-disk-run2.txt](../Measurements/Ops-4gb-main-disk-run2.txt), [Ops-1gb-2.12.1-run2.txt](../Measurements/Ops-1gb-2.12.1-run2.txt)), and [AllocDiag-1gb.txt](../Measurements/AllocDiag-1gb.txt).
 - SonarCloud issues on every file in the unit.
 
 ## Strengths
@@ -76,7 +76,7 @@ Disk mode is well shaped. One small class, `LogFileSource`, owns reading back fr
 - **Kind:** RAM
 - **New in 3.0?** New design
 - **Evidence:**
-  - **Measured.** Linux, 4 vCPUs, the page cache warm. OpsHarness ran an open, then nine operations in a row (eight filters and a Find), with `DOTNET_GCHeapHardLimitPercent=0x63`. Each figure is the median of 5:
+  - **Measured.** Linux, 4 vCPUs, the page cache warm. OpsHarness ran an open, then nine operations in a row (eight filters and a Find), with `DOTNET_GCHeapHardLimitPercent=0x63`. Each figure is the median of 5 (`Measurements/Ops-{1gb,4gb}-main-{ram,disk}-run2.txt`):
 
     | Log | Mode | After open: working set / heap | Allocated per filter that reads text | At the end: working set / heap after a full GC | Highest peak in one operation |
     |---|---|---|---|---|---|
@@ -86,14 +86,15 @@ Disk mode is well shaped. One small class, `LogFileSource`, owns reading back fr
     | 4 GB | Disk | 0.69 / 0.67 GB | 3,011–4,718 MB | 4.79 / 0.67 GB | 5.10 GB |
 
   - **The extra comes from reading text.** A filter on a moniker reads no text, and it allocates the same in both modes: 372 MB on the 1 GB log, 1,480 MB on the 4 GB log.
-  - **Suspected cause, not verified.** `Parallel.ForEach` creates a new `FilterMapReduceState` for each local state (`Src/BlueDotBrigade.Weevil.Core/Filter/FilterManager.cs:163`). Each holds a new `ContentBuffer` (`Filter/FilterMapReduceState.cs:19`), whose first whole-chunk read allocates a new 16 MB array (`Common/Data/ContentBuffer.cs:120-123`; `Core/IO/LogLineReader.cs:28`).
+  - **The extra is large arrays of bytes.** One plain filter on the 1 GB log allocated 820 MB on disk, 436 MB of it `byte[]` on the large object heap, and caused one full (gen 2) collection. In RAM it allocated 384 MB, with no `byte[]` and no full collection ([AllocDiag-1gb.txt](../Measurements/AllocDiag-1gb.txt)). 436 MB is about 27 arrays of 16 MB.
+  - **Which code allocates them is suspected, not verified.** `Parallel.ForEach` creates a new `FilterMapReduceState` for each local state (`Src/BlueDotBrigade.Weevil.Core/Filter/FilterManager.cs:163`). Each holds a new `ContentBuffer` (`Filter/FilterMapReduceState.cs:19`), whose first whole-chunk read allocates a new 16 MB array (`Common/Data/ContentBuffer.cs:120-123`; `Core/IO/LogLineReader.cs:28`).
     - The extra allocation equals about 18 to 200 such arrays per filter: for example, +3,229 MB is about 200 arrays on the 4 GB log's roughly 250 chunks. Four workers would need four.
     - .NET's parallel loops yield every 100 ms or so and start again with a new local state. They yield between ranges, and each range is one chunk, which would explain why the bytes read stay at once per chunk while the allocations grow.
   - **The claims cover only the memory kept after opening.**
     - **Documents:** `Doc/Design/DiskMode.md:10` says "only the record table stays in memory". `Doc/Notes/Release/Help.md:79` and the Open As window (`Gui/IO/OpenAsAdvice.cs:63`) say "Keeps about 22 bytes per record in memory".
     - **Tests:** the budget tests measure memory kept after opening (`Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/EngineTests.cs:55-63`, `:78-90`). The disk filter test pins the bytes read, not the bytes allocated (`Filter/FilterManagerTests.cs:43-71`).
 - **Impact:** Users choose Disk because memory is short. Most of the extra memory is garbage: after a full collection, the live heap is back to 22 bytes per record. So the working set measured here is mostly freed memory that a collector under pressure might return. Two costs remain:
-  - **More full collections.** Arrays of 16 MB go to the large object heap, which only a full (gen 2) collection frees, so each filter on disk probably triggers extra full collections.
+  - **More full collections.** The arrays go to the large object heap, which only a full (gen 2) collection frees. One filter on the 1 GB log caused one full collection on disk and none in RAM.
   - **An unknown footprint where it matters.** Nothing measures the footprint while filtering when memory is short, which is the situation disk mode exists for: a 64 GB log on a 32 GB machine (`Doc/Plans/986-DiskMode.md:12`).
 - **Recommendation:**
   - **Measure first** (see To Measure).
@@ -219,10 +220,9 @@ Disk mode is well shaped. One small class, `LogFileSource`, owns reading back fr
 ## To Measure in Stage 2
 
 - **Why a filter on disk allocates more (U3-2).**
-  - On the 4 GB log on disk, count the `FilterMapReduceState` and `ContentBuffer` objects created per filter, and the 16 MB arrays allocated.
+  - On the 4 GB log on disk, count the `FilterMapReduceState` and `ContentBuffer` objects created per filter, to confirm that the `byte[]` seen in `AllocDiag-1gb.txt` are `ContentBuffer._fileBytes`.
   - Run the same filters with `DOTNET_GCHeapHardLimit=0x60000000` (1.5 GB). Do they finish, and how much slower?
-  - Record full (gen 2) collections per filter, in both modes.
-  - Copy the OpsHarness results quoted in U3-2 into `Measurements/`.
+  - Record full (gen 2) collections per filter on the 4 GB log, in both modes; the 1 GB log is measured.
 - **Reopening on disk.** `DiskMode.md:31` claims 0.9 s for the 1 GB log. Reopen the 1 GB and 4 GB harness logs on disk, from an `.idx` saved on disk. Compare with the first opens measured here: 7.1 s and 24.1 s, both mode-switch parses (U1-7).
 - **Cold cache.** Every disk figure here read the log from the page cache, since a 4 GB log fits in 15 GB. Drop the cache and repeat one filter on disk, to separate I/O from CPU. The 20 GB NVMe target (`986-DiskMode.md:13`) remains #1024's measurement, on the owner's PC.
 - **One read on Windows, and on a share.** `ScreenRowsBenchmarks` measured 7.6 µs per read on Linux (`1028-OpenAs.md:168-173`). On Windows, each read opens a handle (`LogFileSource.cs:158`), which antivirus may scan. Run it on Windows, on a local SSD and on an SMB share.
