@@ -3,17 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.Navigation;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
 	public class RecordCollectionExtensionsTests
 	{
-		const int DefaultLevel = 1;
-		const int DefaultOffset = 0;
-
 		private RecordList GetRecords(IList<DateTime> timestamps)
 		{
 			var records = new List<IRecord>();
