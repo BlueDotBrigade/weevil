@@ -1720,7 +1720,7 @@
 		{
 			IFilter filter = _engine.Filter;
 
-			// Core's "Re-applying the most recent filter" then shows a worker's ThreadId, not the UI thread's.
+			// To verify #1245 in Weevil's log: this line has the UI thread's ThreadId, and Core's "Re-applying the most recent filter" that follows has another.
 			Log.Default.Write(
 				LogSeverityType.Information,
 				"Refresh (F5) queued the filter to run again on a background thread.");
