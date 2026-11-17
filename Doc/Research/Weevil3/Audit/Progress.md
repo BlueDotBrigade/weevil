@@ -2,7 +2,7 @@
 
 An independent review of the Weevil 3.0 code on `main` against Weevil 2.x. It asks whether the new code captures its **intent** clearly and is **maintainable**, whether the architecture suits large logs in RAM and on disk, and whether the claims about CPU and RAM hold.
 
-> **Status:** Done (2026-11-17). The deliverable is [Report.md](Report.md).
+> **Status:** Done (2026-11-17). The owner's summary is [Weevil-v3_0-AuditFindings.md](Weevil-v3_0-AuditFindings.md); the technical audit is [Report.md](Report.md). Issues filed from it: [Issues.tsv](Issues.tsv).
 >
 > **AI agents:** Read this file first. It is the authoritative record of the audit. Continue from **Next Steps**. Do not repeat a completed step unless a finding needs checking again.
 

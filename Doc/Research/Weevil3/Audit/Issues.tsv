@@ -1,0 +1,18 @@
+Finding	Issue	Type	Title
+X-1	1245	Bug	F5 freezes the window while it re-runs the filter, and on a large log on disk it can't be stopped
+U4-1	1246	Bug	Clear fails in a folder where the sidecar can't be written
+U3-4	1247	Bug	Weevil stops other applications from renaming or deleting a log while it reads it
+U5b-2	1248	Bug	A new filter can cancel the Stop meant for the previous one, so a running filter can't always be stopped
+U5a-1	1249	Bug	ISelect's record-based Select and Unselect throw for a record the filter hides
+U2-6	1250	Bug	GetSectionRecords throws for the last section of a log
+U7-4	1251	Bug	Closing the Open As dialog during a zip extraction leaves a full copy of the log in %TEMP%
+Line limit	1252	Bug	A log of more than 2,147,483,647 lines fails to open with an OverflowException
+Story zip	1253	Feature	As an analyst, I want the comments, pins and bookmarks I add to a log opened from a zip to be kept, in order to continue my analysis when I open it again
+Story lock	1254	Feature	As an analyst, I want Weevil to refuse to open a log that another Weevil already has open, in order not to lose comments and pins to the other window's saves
+U1-2	1255	Task	Core passes the storage mode as an enum, not as a missing content source
+U1-1	1256	Task	Give the saved index's open-and-save rules one home
+U6a-1	1257	Task	Replace FilterViewModel's seven "is anything running?" flags with one busy state
+U5b-1	1258	Task	Share the analyzers' common code, so a change to the record model is made once
+X-6	1259	Task	Add a memory budget for a filter, in RAM and on disk
+Minor 4	998	Bug (existing)	Go to Record doesn't show an insight's record when the filter hides it
+U3-3	1219	Existing	Show a partial open in the status bar, and reload it
