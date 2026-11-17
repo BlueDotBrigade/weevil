@@ -2,7 +2,7 @@
 
 An independent review of the Weevil 3.0 code on `main` against Weevil 2.x. It asks whether the new code captures its **intent** clearly and is **maintainable**, whether the architecture suits large logs in RAM and on disk, and whether the claims about CPU and RAM hold.
 
-> **Status:** Stage 1 in progress (U1 done; U2 to U7 under review). Stage 2 measurements partly taken (see `Measurements/`).
+> **Status:** Stage 1: U1 to U6a Final; U6b and U7 under review. Stage 2: drafted (`Findings/Performance.md`). Stage 3 next.
 >
 > **AI agents:** Read this file first. It is the authoritative record of the audit. Continue from **Next Steps**. Do not repeat a completed step unless a finding needs checking again.
 
@@ -38,8 +38,8 @@ Agreed with the owner on 2026-11-16.
 | Stage | Work | Output | Status |
 |---|---|---|---|
 | 0 | Map the changed files to the epics; define review units | [Scope.md](Scope.md), [scope.py](scope.py) | Done |
-| 1 | Review units U1 to U7 through every lens below | `Findings/U<n>-<Name>.md` | In progress |
-| 2 | Check the performance claims: build both branches, run the memory harness and the benchmarks on Linux | `Findings/Performance.md` | Not started |
+| 1 | Review units U1 to U7 through every lens below | `Findings/U<n>-<Name>.md` | In progress: U6b and U7 remain |
+| 2 | Check the performance claims: build both branches, run the memory harness and the benchmarks on Linux | `Findings/Performance.md`, [Measurements/](Measurements/README.md) | Drafted |
 | 3 | Cross-cutting assessment: how the units fit together, RAM vs disk, room for #991 | `Findings/CrossCutting.md` | Not started |
 | 4 | Sceptic pass on high-priority findings not yet challenged; write the report | `Report.md` | Not started |
 
@@ -148,7 +148,26 @@ Leads by unit:
 
 ## Findings So Far
 
-None yet. See [Scope.md](Scope.md#first-observations) for what to look at first.
+**No unit has a High finding.** Two High candidates were raised; the sceptic lowered U1-1 to Medium, and no other unit raised one.
+
+| Unit | Counts (High / Medium / Low) | Headline |
+|---|---|---|
+| U1 | 0 / 7 / 5 | Careful classes; the open-and-save policy is spread across classes and flags (U1-1); "no source means RAM" is a null protocol (U1-2); users aren't told about the `.idx` (U1-5) |
+| U2 | 0 / 3 / 3 | `Record` is now truly immutable; `IRecord.Content` reads the log on disk and can throw, and its contract doesn't say so (U2-1); a record keeps its 16 MB chunk alive (U2-2) |
+| U3 | 0 / 4 / 3 | One small class owns reads from the log; a read can fail only on disk, documented in one paragraph (U3-1); disk filters allocate far more than the table (U3-2, confirmed as P-1) |
+| U4 | 0 / 3 / 4 | Records hold no state, stores have one home; Clear now saves the sidecar first and fails where it can't (U4-1); no type for "the log" against "a view", the first obstacle for #991 (U4-2) |
+| U5a | 0 / 2 / 4 | Ranges are sound; `ISelect` keeps two ways to select with different rules (U5a-1) |
+| U5b | 0 / 2 / 3 | Filters keep 2.x semantics and are far faster; analyzers are near-copies changed by hand (U5b-1); a filter is stopped by a shared 2.x flag and no contract says which thread owns the engine (U5b-2) |
+| U6a | 0 / 3 / 2 | Epics put logic in Core, not here; "is anything running" is seven flags (U6a-1); log lifetime and view state share one class (U6a-2); F5 still filters on the UI thread, which on disk reads the log (U6a-3) |
+| Stage 2 | 0 / 2 / 3 | Claims confirmed: 62% less memory at the peak, filters 4–24× faster; disk filters churn 16 MB buffers (P-1); a mode switch is a full parse (P-2) |
+
+Themes that recur across units, for Stage 3:
+
+- **A read can fail only on disk, and the contract doesn't say so:** U2-1, U3-1, U6a-3.
+- **The log, the view and the session have no types of their own:** U4-2, U6a-2. This is the first obstacle for #991.
+- **No design note** for the open sequence (U1-1), the engine and session (U4-3) or filtering (U5b-5). The finished plans are the only descriptions.
+- **Concurrency is a GUI convention:** U5b-2, U6a-1.
+- **2.x API kept beside the 3.0 API:** U5a-1, U5a-2.
 
 ## Open Questions
 
@@ -156,13 +175,14 @@ None yet. See [Scope.md](Scope.md#first-observations) for what to look at first.
 
 ## Next Steps
 
-1. **Stage 1.** Check which findings files exist in `Findings/` and their status notes. Review any unit with no file; run the sceptic pass on the high-priority findings of any file still marked Draft.
-2. When all seven are Final, summarise them under **Findings So Far**, then start Stage 2.
-3. **Stage 2.** Install the .NET 10 SDK; build the memory harness against 2.12.1 and against `main`; open 1 GB and 4 GB synthetic logs with each; run the droid-log budget tests and benchmarks on `main`. Write `Findings/Performance.md`.
+1. **Stage 1.** If `Findings/U6b-Grid.md` or `Findings/U7-OpenAsDialog.md` is missing, review that unit: the reviewer prompt is in the workflow script `weevil3-audit-stage1b` (one reviewer that writes and pushes the file, then a sceptic per High finding). Add their rows to **Findings So Far**.
+2. **Stage 3.** Write `Findings/CrossCutting.md`. Read every findings file's Summary and Findings headings (not the full files), test the themes listed under **Findings So Far**, decide whether any combination deserves High (for example U6a-3 with U2-1 and U3-1: disk reads on the UI thread), and assess RAM against disk mode as a whole and the room for #991.
+3. **Stage 4.** A sceptic on each High finding still unchallenged; then `Report.md` with the structure in the owner's brief (executive summary, architecture, code quality, CPU, RAM, trade-offs, prioritised recommendations, final assessment).
 
 ## Log
 
 | Date | Session work |
 |---|---|
+| 2026-11-17 (later) | The usage limit stopped U5b, U6a, U6b and U7; relaunched two at a time. Stage 2: timed the `.idx` open paths, filtered the 4 GB log on disk with the heap capped, confirmed the cause of P-1 with an instrumented scratch build and measured a prototype fix. Found P-4 (temporary-folder check) in passing. Wrote `Performance.md` |
 | 2026-11-17 | Two workflow runs stopped at the usage limit; only U1's two reviews survived. Wrote U1 from them. Installed the .NET 10 SDK from Ubuntu's archive (`apt-get install dotnet-sdk-10.0`; Microsoft's download hosts are blocked here). Measured memory of 2.12.1 and `main` on 1 GB and 4 GB logs, and filter and Find times on 1 GB. Relaunched U2 to U7 with one reviewer each |
 | 2026-11-16 | Agreed the plan with the owner. Stage 0: mapped 454 commits and 113 source files to the epics; defined units U1–U7. Recorded SonarCloud's leads. Started Stage 1 |
