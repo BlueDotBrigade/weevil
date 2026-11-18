@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				if (_includeDebugRecords != value)
 				{
 					_includeDebugRecords = value;
-					OnPropertyChanged(nameof(IncludeDebugRecords));
+					OnPropertyChanged(nameof(this.IncludeDebugRecords));
 				}
 			}
 		}
@@ -51,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				if (_includeTraceRecords != value)
 				{
 					_includeTraceRecords = value;
-					OnPropertyChanged(nameof(IncludeTraceRecords));
+					OnPropertyChanged(nameof(this.IncludeTraceRecords));
 				}
 			}
 		}
@@ -64,7 +64,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				if (_includePinned != value)
 				{
 					_includePinned = value;
-					OnPropertyChanged(nameof(IncludePinned));
+					OnPropertyChanged(nameof(this.IncludePinned));
 				}
 			}
 		}
@@ -77,7 +77,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				if (_includeBookmarks != value)
 				{
 					_includeBookmarks = value;
-					OnPropertyChanged(nameof(IncludeBookmarks));
+					OnPropertyChanged(nameof(this.IncludeBookmarks));
 				}
 			}
 		}
@@ -90,7 +90,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				if (_isFilterCaseSensitive != value)
 				{
 					_isFilterCaseSensitive = value;
-					OnPropertyChanged(nameof(IsFilterCaseSensitive));
+					OnPropertyChanged(nameof(this.IsFilterCaseSensitive));
 				}
 			}
 		}
@@ -103,7 +103,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				if (_filterExpressionType != value)
 				{
 					_filterExpressionType = value;
-					OnPropertyChanged(nameof(FilterExpressionType));
+					OnPropertyChanged(nameof(this.FilterExpressionType));
 				}
 			}
 		}

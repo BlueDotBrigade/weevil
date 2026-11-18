@@ -42,7 +42,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			var gigabytes = source.EndOffset / 1_000_000_000.0;
 			var secondsPerGigabyte = checksumming.Elapsed.TotalSeconds / gigabytes;
-			TestContext.WriteLine($"Checksums of {gigabytes:N2} GB computed in {checksumming.Elapsed.TotalSeconds:N2} s: {secondsPerGigabyte:N3} s per GB, or {20 * secondsPerGigabyte:N1} s for a 20 GB log.");
+			this.TestContext.WriteLine($"Checksums of {gigabytes:N2} GB computed in {checksumming.Elapsed.TotalSeconds:N2} s: {secondsPerGigabyte:N3} s per GB, or {20 * secondsPerGigabyte:N1} s for a 20 GB log.");
 			secondsPerGigabyte.Should().BeLessThanOrEqualTo(MaximumSecondsPerGigabyte, "computing the checksums should add little to the time a log takes to open");
 		}
 	}

@@ -303,7 +303,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			public void Count(IRecord record)
 			{
 				Interlocked.Increment(ref _count);
-				OnCount?.Invoke();
+				this.OnCount?.Invoke();
 			}
 
 			public void Reset() => Interlocked.Exchange(ref _count, 0);

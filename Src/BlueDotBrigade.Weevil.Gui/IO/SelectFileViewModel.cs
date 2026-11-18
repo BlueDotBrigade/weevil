@@ -28,7 +28,7 @@
 			set
 			{
 				_fileNames = value.Where(x => !x.ToUpper().EndsWith(".LOG.XML")).ToArray();
-				RaisePropertyChanged(nameof(FileNames));
+				RaisePropertyChanged(nameof(this.FileNames));
 			}
 		}
 

@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 		public string SeriesName { get; }
 			public Color SeriesColor { get; }
-			public SolidColorBrush SeriesBrush => new SolidColorBrush(SeriesColor);
+			public SolidColorBrush SeriesBrush => new SolidColorBrush(this.SeriesColor);
 			public int Count { get; }
 		public double? Min { get; }
 		public double? Max { get; }
@@ -50,13 +50,13 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		/// <summary>
 		/// Returns a formatted string representation suitable for display.
 		/// </summary>
-		public string MinFormatted => Min.HasValue ? Min.Value.ToString(NumericFormat) : "N/A";
-		public string MaxFormatted => Max.HasValue ? Max.Value.ToString(NumericFormat) : "N/A";
-		public string MeanFormatted => Mean.HasValue ? Mean.Value.ToString(NumericFormat) : "N/A";
-		public string MedianFormatted => Median.HasValue ? Median.Value.ToString(NumericFormat) : "N/A";
-		public string StandardDeviationFormatted => StandardDeviation.HasValue ? StandardDeviation.Value.ToString(NumericFormat) : "N/A";
-		public string RangeStartFormatted => RangeStart.HasValue ? RangeStart.Value.ToString(DateTimeFormat) : "N/A";
-		public string RangeEndFormatted => RangeEnd.HasValue ? RangeEnd.Value.ToString(DateTimeFormat) : "N/A";
+		public string MinFormatted => this.Min.HasValue ? this.Min.Value.ToString(NumericFormat) : "N/A";
+		public string MaxFormatted => this.Max.HasValue ? this.Max.Value.ToString(NumericFormat) : "N/A";
+		public string MeanFormatted => this.Mean.HasValue ? this.Mean.Value.ToString(NumericFormat) : "N/A";
+		public string MedianFormatted => this.Median.HasValue ? this.Median.Value.ToString(NumericFormat) : "N/A";
+		public string StandardDeviationFormatted => this.StandardDeviation.HasValue ? this.StandardDeviation.Value.ToString(NumericFormat) : "N/A";
+		public string RangeStartFormatted => this.RangeStart.HasValue ? this.RangeStart.Value.ToString(DateTimeFormat) : "N/A";
+		public string RangeEndFormatted => this.RangeEnd.HasValue ? this.RangeEnd.Value.ToString(DateTimeFormat) : "N/A";
 	}
 }
 

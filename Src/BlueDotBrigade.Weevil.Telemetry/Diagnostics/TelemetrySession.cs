@@ -89,13 +89,13 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			ArgumentException.ThrowIfNullOrWhiteSpace(metricKey);
 
-			TelemetrySessionMetric metric = Metrics.SingleOrDefault(x => x.MetricKey == metricKey);
+			TelemetrySessionMetric metric = this.Metrics.SingleOrDefault(x => x.MetricKey == metricKey);
 
 			if (metric is null)
 			{
-				Metrics.Add(new TelemetrySessionMetric
+				this.Metrics.Add(new TelemetrySessionMetric
 				{
-					SessionId = SessionId,
+					SessionId = this.SessionId,
 					MetricKey = metricKey,
 					MetricCount = 1,
 				});

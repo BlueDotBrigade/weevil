@@ -389,7 +389,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenNoStorageMode_WhenALogIsOpened_ThenItOpensInRamUnlessTheTestsRunOnDisk()
 		{
 			// Tst/Disk.runsettings marks the disk run, so this also fails if that run silently opens its logs in RAM (#1025).
-			var isDiskRun = TestContext.Properties.TryGetValue("StorageMode", out var runMode) && string.Equals(runMode as string, nameof(StorageMode.Disk), StringComparison.Ordinal);
+			var isDiskRun = this.TestContext.Properties.TryGetValue("StorageMode", out var runMode) && string.Equals(runMode as string, nameof(StorageMode.Disk), StringComparison.Ordinal);
 
 			IEngine engine = OpenCopy();
 

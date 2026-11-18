@@ -107,7 +107,7 @@
 			var memoryAfterOpening = GC.GetTotalMemory(forceFullCollection: false) - before;
 			var memoryKept = GC.GetTotalMemory(forceFullCollection: true) - before;
 			var garbagePerRecord = (memoryAfterOpening - memoryKept) / (double)engine.Count;
-			TestContext.WriteLine($"Storage: {storageMode}. Managed memory per record: {memoryAfterOpening / (double)engine.Count:N1} bytes after opening, {memoryKept / (double)engine.Count:N1} kept.");
+			this.TestContext.WriteLine($"Storage: {storageMode}. Managed memory per record: {memoryAfterOpening / (double)engine.Count:N1} bytes after opening, {memoryKept / (double)engine.Count:N1} kept.");
 
 			garbagePerRecord.Should().BeLessThan(MaximumGarbagePerRecord, "opening collects once it has finished, so it leaves no garbage behind");
 			GC.KeepAlive(engine);
@@ -131,7 +131,7 @@
 
 			// The records kept still hold the chunk they were read from: only whole chunks are freed (#1022).
 			var memoryAfterClear = GC.GetTotalMemory(forceFullCollection: true) - before;
-			TestContext.WriteLine($"Managed memory kept: {memoryWhenOpened / 1_000_000.0:N1} MB when opened, {memoryAfterClear / 1_000_000.0:N1} MB once {keptCount:N0} of {RecordCount:N0} records are kept.");
+			this.TestContext.WriteLine($"Managed memory kept: {memoryWhenOpened / 1_000_000.0:N1} MB when opened, {memoryAfterClear / 1_000_000.0:N1} MB once {keptCount:N0} of {RecordCount:N0} records are kept.");
 
 			engine.Count.Should().Be(keptCount);
 			memoryAfterClear.Should().BeLessThan(memoryWhenOpened * 3 / 4, "the content chunks only the records cleared were read from are freed");
@@ -159,7 +159,7 @@
 			(IEngine engine, var memoryKept, _) = OpenAndMeasure(ReferenceLog.Create(_folder, RecordCount), storageMode);
 
 			var bytesPerRecord = memoryKept / (double)engine.Count;
-			TestContext.WriteLine($"Records: {engine.Count:N0}. Storage: {storageMode}. Managed memory kept: {bytesPerRecord:N1} bytes per record.");
+			this.TestContext.WriteLine($"Records: {engine.Count:N0}. Storage: {storageMode}. Managed memory kept: {bytesPerRecord:N1} bytes per record.");
 
 			return bytesPerRecord;
 		}
@@ -177,7 +177,7 @@
 			(IEngine engine, var memoryKept, TimeSpan duration) = OpenAndMeasure(logPath, storageMode);
 
 			var memoryPerByteOfLog = memoryKept / (double)new FileInfo(logPath).Length;
-			TestContext.WriteLine($"Opened in {duration.TotalSeconds:N1} s. Storage: {storageMode}. Managed memory kept: {memoryPerByteOfLog:N3} GB per GB of log, {memoryKept / (double)engine.Count:N1} bytes per record.");
+			this.TestContext.WriteLine($"Opened in {duration.TotalSeconds:N1} s. Storage: {storageMode}. Managed memory kept: {memoryPerByteOfLog:N3} GB per GB of log, {memoryKept / (double)engine.Count:N1} bytes per record.");
 			engine.Count.Should().Be(DroidLog.RecordCount);
 
 			return memoryPerByteOfLog;

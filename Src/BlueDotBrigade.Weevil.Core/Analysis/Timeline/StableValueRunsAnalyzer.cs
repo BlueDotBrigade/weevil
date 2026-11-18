@@ -168,9 +168,9 @@
                 {
                         private ValueRun(string friendlyName, string value, IRecord record)
                         {
-                                FriendlyName = friendlyName;
-                                Value = value;
-                                LastRecord = record;
+                                this.FriendlyName = friendlyName;
+                                this.Value = value;
+                                this.LastRecord = record;
                         }
 
                         public string FriendlyName { get; }
@@ -186,12 +186,12 @@
 
                         public bool ValueEquals(string value)
                         {
-                                return Value == value;
+                                return this.Value == value;
                         }
 
                         public void UpdateLastRecord(IRecord record)
                         {
-                                LastRecord = record;
+                                this.LastRecord = record;
                         }
                 }
         }

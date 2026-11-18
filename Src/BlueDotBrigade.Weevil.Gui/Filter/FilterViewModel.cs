@@ -974,7 +974,7 @@
 							this.IsProcessingLongOperation = false;      // show records
 							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
 							this.CanOpenLogFile = true;                  // enable menus now
-							OnPropertyChanged(nameof(IsMenuEnabled));  // force re-evaluation
+							OnPropertyChanged(nameof(this.IsMenuEnabled));  // force re-evaluation
 							CommandManager.InvalidateRequerySuggested();  // refresh commands
 						});
 					}
@@ -1005,7 +1005,7 @@
 							_uiDispatcher.Invoke(() =>
 							{
 								this.AreInsightsReady = true;
-								OnPropertyChanged(nameof(IsDashboardEnabled));
+								OnPropertyChanged(nameof(this.IsDashboardEnabled));
 								CommandManager.InvalidateRequerySuggested();
 							});
 						}
@@ -2453,7 +2453,7 @@
 						this.IsProcessingLongOperation = false;
 						this.IsFilterToolboxEnabled = wasFilterToolboxEnabled;
 						this.CanOpenLogFile = true;
-						OnPropertyChanged(nameof(IsMenuEnabled));
+						OnPropertyChanged(nameof(this.IsMenuEnabled));
 						CommandManager.InvalidateRequerySuggested();
 
 						if (hasSucceeded)

@@ -126,10 +126,10 @@ namespace BlueDotBrigade.Weevil.IO
 					Reset(encoding);
 				}
 
-				var lineCount = LineCount;
+				var lineCount = this.LineCount;
 				ScanState state = _endState;
 
-				IndexedLength = Scan(source, IndexedLength, ref state, bufferSize, lineStart =>
+				this.IndexedLength = Scan(source, this.IndexedLength, ref state, bufferSize, lineStart =>
 				{
 					lineCount = checked(lineCount + 1);
 
@@ -141,9 +141,9 @@ namespace BlueDotBrigade.Weevil.IO
 					return true;
 				});
 
-				LineCount = lineCount;
+				this.LineCount = lineCount;
 				_endState = state;
-				(_headHash, _tailHash) = ComputeFingerprint(source, IndexedLength);
+				(_headHash, _tailHash) = ComputeFingerprint(source, this.IndexedLength);
 			}
 			finally
 			{
@@ -182,8 +182,8 @@ namespace BlueDotBrigade.Weevil.IO
 			_checkpoints.Clear();
 			this.Parse = null;
 			this.HasTable = false;
-			LineCount = 0;
-			IndexedLength = encoding.PreambleLength;
+			this.LineCount = 0;
+			this.IndexedLength = encoding.PreambleLength;
 			_endState = ScanState.AtLineStart;
 		}
 
@@ -192,9 +192,9 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public long GetByteOffset(Stream source, int lineNumber, int bufferSize = DefaultLookupBufferSize)
 		{
-			if (lineNumber < 1 || lineNumber > LineCount)
+			if (lineNumber < 1 || lineNumber > this.LineCount)
 			{
-				throw new ArgumentOutOfRangeException(nameof(lineNumber), lineNumber, $"A line number from 1 to {LineCount} was expected.");
+				throw new ArgumentOutOfRangeException(nameof(lineNumber), lineNumber, $"A line number from 1 to {this.LineCount} was expected.");
 			}
 
 			var checkpointOffset = _checkpoints[(lineNumber - 1) / _checkpointInterval];
@@ -263,8 +263,8 @@ namespace BlueDotBrigade.Weevil.IO
 				writer.Write((byte)_unitSize);
 				writer.Write(_isBigEndian);
 				writer.Write((byte)_preambleLength);
-				writer.Write(LineCount);
-				writer.Write(IndexedLength);
+				writer.Write(this.LineCount);
+				writer.Write(this.IndexedLength);
 				writer.Write(_endState.IsLineStartPending);
 				writer.Write(_endState.IsCarriageReturnPending);
 				writer.Write(_headHash);
