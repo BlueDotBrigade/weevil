@@ -20,3 +20,5 @@ X-4	1268	Task	Write the Doc/Design notes that Weevil 3.0's design is missing
 P-1	1269	Bug	A filter on a log opened on disk allocates a new 16 MB buffer again and again, so it can run out of memory
 X-7, U4-6	1293	Task	Remove the 2.x shapes 3.0 kept, and hide Core's stores, before 3.0's API is published
 TSV #IPv4	1294	Bug	The #IPv4 filter alias probably never matches an IP address in a TSV log
+Rec 6 (X-2)	1295	Task	One exception for a log on disk that can no longer be read, documented on IRecord.Content
+Rec 7 (P-2)	1296	Task	Reopening a UTF-8 or UTF-16 log in the other storage mode reuses its saved index instead of parsing it again

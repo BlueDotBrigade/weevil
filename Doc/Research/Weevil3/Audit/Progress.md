@@ -209,6 +209,8 @@ Taken with the owner on 2026-11-17, one bug at a time. Each becomes a GitHub iss
 | Recommendation 2 (P-1) | Explain in plain English and confirm it is a bug; start work only with the owner's permission |
 | Recommendation 2 (P-1), 2026-11-18 | Approved and fixed: #1269 |
 | Recommendation 4 (U1-5), 2026-11-18 | Don't explain the `.idx` in Help |
+| Recommendation 6 (X-2), 2026-11-18 | Docs on `IRecord.Content` and one exception for a log that can no longer be read; the running operation stops, the error is logged, and the GUI, CLI and PowerShell tell the user: #1295 |
+| Recommendation 7 (P-2), 2026-11-18 | Reuse the saved index across storage modes for UTF-8 and UTF-16: #1296 |
 | Recommendation 8 (X-7, U4-6), 2026-11-18 | Filed as #1293, label `technical_debt`, milestone 8 |
 | TSV `#IPv4` alias, 2026-11-18 | Filed as #1294 in milestone 8, to be confirmed before it is fixed |
 | `CoreEngineBuilder` messages, 2026-11-18 | Fixed against the release issue #1114, with the lessons-learned notes, on `Feature/1114-BuilderMessagesAndLessons` |
