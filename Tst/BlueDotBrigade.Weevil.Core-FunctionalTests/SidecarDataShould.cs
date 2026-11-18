@@ -166,6 +166,9 @@
 			{
 				IEngine engine = Engine.UsingPath(logFilePath).Open();
 
+				// Under the temporary folder, Weevil saves no sidecar, and the test would pass without testing anything.
+				engine.Invoking(e => e.Save()).Should().Throw<UnauthorizedAccessException>();
+
 				ClearLinesOneToTwelve(engine);
 
 				engine.Filter.Results.Should().HaveCount(288);

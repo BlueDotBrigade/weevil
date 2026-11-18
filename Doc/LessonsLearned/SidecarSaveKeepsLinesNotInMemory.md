@@ -12,4 +12,4 @@ A save writes the comments and pins of the records in memory, and keeps what the
 
 ## Fix
 
-Clear saves the sidecar first (#1004). Code that removes records from memory, or replaces them, must save before it does, as Clear does. A Reload that fails leaves an engine without records, so a save then keeps only what was already saved.
+Clear saves the sidecar first (#1004). Code that removes records from memory, or replaces them, must save before it does, as Clear does. Where the sidecar can never be written, as in a read-only folder, Clear goes ahead without saving, since no save could keep those changes; a failure that may pass, such as a lock, stops it (#1246). A Reload that fails leaves an engine without records, so a save then keeps only what was already saved.

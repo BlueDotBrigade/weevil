@@ -180,10 +180,11 @@
 				{
 					_coreEngine.Save();
 				}
-				catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+				catch (Exception exception) when (IsNeverWritable(exception))
 				{
-					// As in a read-only folder: the sidecar couldn't be saved now or later, so Clear still narrows the records, as 2.x did (#1246).
-					Diagnostics.Log.Default.Write(Diagnostics.LogSeverityType.Warning, exception, "The sidecar couldn't be saved before clearing the records, so they are cleared without it.");
+					// A read-only folder, file or drive: no later save could keep the unsaved comments and pins on the records cleared either,
+					// so Clear still narrows the records, as 2.x did (#1246). A lock or a full disk may pass, so it still fails Clear, and nothing is lost.
+					Diagnostics.Log.Default.Write(Diagnostics.LogSeverityType.Warning, exception, "The sidecar can't be written, so the records are cleared without saving it first.");
 				}
 			}
 
@@ -198,6 +199,18 @@
 			{
 				SubscribeTo(_coreEngine);
 			}
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> when a save failed because the sidecar can never be written where it is, as in a read-only folder.
+		/// </summary>
+		private static bool IsNeverWritable(Exception exception)
+		{
+			// ERROR_WRITE_PROTECT, from a read-only drive on Windows.
+			const int WriteProtected = unchecked((int)0x80070013);
+
+			return exception is UnauthorizedAccessException ||
+			       (exception is IOException && exception.HResult == WriteProtected);
 		}
 
 		public void Reload()
