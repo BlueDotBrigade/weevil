@@ -153,21 +153,26 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// Returns <paramref name="lineCount"/> plus the line just found.
+		/// The most lines a log can have for Weevil to open it (#1252).
 		/// </summary>
 		/// <remarks>
-		/// Weevil numbers lines with an <see cref="int"/> throughout, so a log of more lines can't be opened (#1252).
+		/// Weevil numbers lines with an <see cref="int"/>, and the session keeps a byte for each line and one more, in one array.
 		/// That is about 200 GB of 100-byte lines, ten times disk mode's 20 GB target.
 		/// </remarks>
-		/// <exception cref="NotSupportedException">The log has more than <see cref="int.MaxValue"/> lines.</exception>
+		internal static readonly int MaximumLineCount = Array.MaxLength - 1;
+
+		/// <summary>
+		/// Returns <paramref name="lineCount"/> plus the line just found.
+		/// </summary>
+		/// <exception cref="NotSupportedException">The log has more than <see cref="MaximumLineCount"/> lines.</exception>
 		internal static int CountLine(int lineCount)
 		{
-			return lineCount < int.MaxValue
+			return lineCount < MaximumLineCount
 				? lineCount + 1
 				: throw new NotSupportedException(string.Format(
 					CultureInfo.InvariantCulture,
 					"Weevil can open logs of up to {0:N0} lines. This log has more.",
-					int.MaxValue));
+					MaximumLineCount));
 		}
 
 		/// <summary>

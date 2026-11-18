@@ -62,12 +62,12 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenAsManyLinesAsWeevilCanNumber_WhenAnotherLineIsFound_ThenTheMessageSaysTheLogIsTooLarge()
 		{
 			// A log of more than 2,147,483,647 lines failed to open with a raw OverflowException.
-			LineIndex.CountLine(int.MaxValue - 1).Should().Be(int.MaxValue);
+			LineIndex.CountLine(LineIndex.MaximumLineCount - 1).Should().Be(LineIndex.MaximumLineCount);
 
-			Action countingOneMore = () => LineIndex.CountLine(int.MaxValue);
+			Action countingOneMore = () => LineIndex.CountLine(LineIndex.MaximumLineCount);
 
 			countingOneMore.Should().Throw<NotSupportedException>()
-				.WithMessage("Weevil can open logs of up to 2,147,483,647 lines. This log has more.");
+				.WithMessage("Weevil can open logs of up to 2,147,483,590 lines. This log has more.");
 		}
 
 		[TestMethod]
