@@ -8,7 +8,7 @@
 	/// Matches records whose elapsed time is greater than the given number of milliseconds, 3 seconds by default.
 	/// </summary>
 	/// <remarks>
-	/// It compares the elapsed times of the results the previous filter showed, which the view passes in (#1016).
+	/// It compares the elapsed times of the results the previous filter showed, which the filter passes in (#1016). F5 and Reload compare those the filter compared when it was applied (#1224).
 	/// A record the previous filter hid has none, so it never matches.
 	/// </remarks>
 	internal class ElapsedGreaterThanExpression : IExpression

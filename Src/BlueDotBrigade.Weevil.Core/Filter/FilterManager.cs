@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Concurrent;
 	using System.Collections.Immutable;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
@@ -171,11 +172,24 @@
 
 			// Set `MaxDegreeOfParallelism=1` to force the loop to be executed by only one thread.
 			// ... This can simplify the debugging process.
-			var parallelOptions = new ParallelOptions();
+			//
+			// At most one worker per core, in RAM as on disk, because of a log on disk (#1269):
+			// - The scenario: each worker holds a buffer of about 17 MB, the 16 MB chunk it reads. Without a cap, the thread pool adds
+			//   workers while the others wait for the disk, for example with a cold cache or a log on a network share. A filter would then
+			//   hold one buffer per thread, as many as the thread pool decides, rather than one per core.
+			// - The cost: with a cold cache, a filter keeps fewer reads in flight. On 4 cores and the 10-million-record log,
+			//   it was about 2% slower than without the cap (#1287).
+			// - Kept by the owner's decision: a bounded working set matters more than those 2%.
+			var workerCount = Environment.ProcessorCount;
+			var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = workerCount };
 
 			// On disk, each worker reads whole ranges of records that share a content chunk, so the log is read once (#1027).
 			// In RAM, ranges of about the same size keep every core busy, however small the log.
-			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: Environment.ProcessorCount);
+			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: workerCount);
+
+			// The loop creates many more worker states than workers, so they share content buffers, which hold a chunk each on disk:
+			// a filter allocates a buffer per worker, not per state (#1269).
+			var buffers = new ConcurrentBag<ContentBuffer>();
 
 			try
 			{
@@ -184,7 +198,7 @@
 								 Partitioner.Create((IEnumerable<(int Start, int End)>)ranges, EnumerablePartitionerOptions.NoBuffering),
 								 parallelOptions,
 						  // FMR Part1: initialize thread local storage
-						  () => { return new FilterMapReduceState(); },
+						  () => new FilterMapReduceState(buffers.TryTake(out ContentBuffer buffer) ? buffer : new ContentBuffer()),
 
 						  // FMR Part2: define task to perform
 						  (range, parallelLoopState, results) =>
@@ -216,6 +230,7 @@
 						  // FMR Part3: merge the results
 						  (results) =>
 						  {
+							  buffers.Add(results.Content);
 							  Interlocked.Add(ref resultsCount, results.Count);
 						  }
 				);
@@ -430,6 +445,20 @@
 			return this;
 		}
 
+		private static (long WorkingSetBytes, long PeakWorkingSetBytes)? ReadProcessMemory()
+		{
+			try
+			{
+				using var process = Process.GetCurrentProcess();
+				return (process.WorkingSet64, process.PeakWorkingSet64);
+			}
+			catch (Exception exception) when (exception is Win32Exception or InvalidOperationException or NotSupportedException)
+			{
+				// Process memory counters are optional diagnostics.
+				return null;
+			}
+		}
+
 		private void Run(FilterType filterType, IFilterCriteria criteria, ElapsedTimes previousElapsedTimes, CancellationTokenSource run, Stopwatch stopwatch)
 		{
 			try
@@ -465,8 +494,18 @@
 				try
 				{
 					var bytesReadBefore = _source?.BytesRead ?? 0;
+					var isOnDisk = _source != null;
+					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryBefore = isOnDisk ? ReadProcessMemory() : null;
+					var gen2Before = isOnDisk ? GC.CollectionCount(2) : 0;
+					var allocatedBefore = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) : 0;
+					var scanStarted = isOnDisk ? Stopwatch.GetTimestamp() : 0;
 
 					RecordList results = FilterAndCalculateMetrics(strategy, run.Token);
+
+					TimeSpan scanElapsed = isOnDisk ? Stopwatch.GetElapsedTime(scanStarted) : TimeSpan.Zero;
+					var allocatedBytes = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) - allocatedBefore : 0;
+					var gen2Collections = isOnDisk ? GC.CollectionCount(2) - gen2Before : 0;
+					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryAfter = isOnDisk ? ReadProcessMemory() : null;
 					IDictionary<string, object> metrics = CollectMetrics();
 					ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
 
@@ -514,6 +553,18 @@
 					{
 						// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
 						completed.Add("BytesRead", _source.BytesRead - bytesReadBefore);
+						completed.Add("ProcessorCount", Environment.ProcessorCount);
+						completed.Add("FilterScanElapsed", scanElapsed);
+						completed.Add("ProcessManagedAllocatedBytes", allocatedBytes);
+						completed.Add("ProcessGen2Collections", gen2Collections);
+
+						if (memoryBefore is { } before && memoryAfter is { } after)
+						{
+							completed.Add("ProcessWorkingSetBeforeBytes", before.WorkingSetBytes);
+							completed.Add("ProcessWorkingSetAfterBytes", after.WorkingSetBytes);
+							completed.Add("ProcessPeakWorkingSetBeforeBytes", before.PeakWorkingSetBytes);
+							completed.Add("ProcessPeakWorkingSetAfterBytes", after.PeakWorkingSetBytes);
+						}
 					}
 
 					Log.Default.Write(LogSeverityType.Information, $"Filtering complete.", completed);

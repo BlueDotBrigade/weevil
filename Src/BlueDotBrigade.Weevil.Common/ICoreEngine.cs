@@ -10,7 +10,7 @@
 	{
 		IRecord this[int index] { get; }
 		/// <summary>
-		/// Represents all of the records that have been loaded from the <see cref="SourceFilePath"/>.
+		/// Represents the records loaded from the <see cref="SourceFilePath"/> that the engine keeps: all of them, until a Clear removes some.
 		/// </summary>
 		/// <remarks>
 		/// This property is intended to provide readonly access to the records via LINQ queries.
