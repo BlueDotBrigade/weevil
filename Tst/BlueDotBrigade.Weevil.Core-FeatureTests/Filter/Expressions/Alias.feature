@@ -13,4 +13,5 @@ Scenario: Filtering a TSV log with the IPv4 alias keeps the records that hold an
   Given that the "IpAddresses.log" log file name is open
   When applying the include filter: #IPv4
   Then there will be 2 matching records
-    And all records will include: [Network]
+    And line number 1 will be visible
+    And line number 3 will be visible
