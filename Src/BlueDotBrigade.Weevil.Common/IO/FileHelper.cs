@@ -30,12 +30,17 @@
 
 		/// <summary>Opens a read-only <see cref="T:System.IO.FileStream" /> on the specified path.</summary>
 		/// <param name="path">The file to open.</param>
-		/// <returns>An unshared <see cref="T:System.IO.FileStream" /> that provides access to the specified file, with the specified mode and access.</returns>
+		/// <returns>
+		/// A <see cref="T:System.IO.FileStream" /> that lets other applications write, rename and delete the file meanwhile,
+		/// so Weevil never blocks the application that writes a log, for example when it rolls the log (#1247).
+		/// The stream keeps reading the file it opened, whatever its name becomes.
+		/// </returns>
 		public static FileStream Open(string path)
 		{
 			// FileShare.Read is not good enough, you need to use `FileShare.ReadWrite` as indicated by:
 			// ... https://stackoverflow.com/a/12942773/94968
-			return Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			// On Windows, renaming or moving a file also needs `FileShare.Delete`.
+			return Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 		}
 
 		/// <summary>Opens a <see cref="T:System.IO.FileStream" /> on the specified path, with the specified mode and access with no sharing.</summary>

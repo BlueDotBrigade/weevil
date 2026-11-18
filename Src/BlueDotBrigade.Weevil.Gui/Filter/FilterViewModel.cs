@@ -1468,7 +1468,7 @@
 		/// Handles a read of a log on disk that failed, from any thread (#1028).
 		/// </summary>
 		/// <remarks>
-		/// Always queued, so a read that fails while the grid draws its rows, or on a background thread, never shows a message or reloads from inside that read.
+		/// Always queued, so a read that fails while the grid draws its rows, or on a background thread, never shows a message from inside that read.
 		/// </remarks>
 		private void ReportFailedRead(Exception exception, int generation)
 		{
@@ -1476,18 +1476,18 @@
 		}
 
 		/// <summary>
-		/// Shows one warning and reloads a log that changed on disk, or shows one error for a log that can no longer be read, once per log (#1028).
+		/// Shows one warning, naming Ctrl+F5, for a log that changed on disk, or one error for a log that can no longer be read, once per log (#1028).
 		/// </summary>
 		/// <remarks>
+		/// Nothing reloads by itself: the analyst decides when to read the latest data (#1247).
 		/// Each open and each Reload starts a new generation, so a failure from an earlier one, such as a row still on screen from before Reload, is ignored.
 		/// Later failures of the same kind and generation show nothing, so scrolling a log that is gone does not repeat the message.
-		/// If Reload fails because the log changed again, Reload shows that message itself, and nothing reloads again by itself.
 		/// </remarks>
 		private void OnFailedRead(Exception exception, int generation)
 		{
 			var isChange = exception is LogFileChangedException;
 
-			// A change is handled even after the log could not be read, for example while it was replaced, so it is still reloaded.
+			// A change is reported even after the log could not be read, for example while it was replaced.
 			if (generation != Volatile.Read(ref _logGeneration) ||
 			    generation == (isChange ? _changedLogGeneration : _unreadableLogGeneration))
 			{
@@ -1504,9 +1504,8 @@
 			if (isChange)
 			{
 				_changedLogGeneration = generation;
-				Log.Default.Write(LogSeverityType.Warning, exception, "The log changed on disk, so it is reloaded.");
-				_dialogBox.ShowMessage("The log changed on disk, so Weevil reloads it.", "Log Changed");
-				Reload();
+				Log.Default.Write(LogSeverityType.Warning, exception, "The log changed on disk. The analyst is told to press Ctrl+F5 to reload it.");
+				_dialogBox.ShowMessage("The log changed on disk. Press Ctrl+F5 to reload the latest data.", "Log Changed");
 			}
 			else
 			{
@@ -2393,7 +2392,7 @@
 				}
 				catch (LogFileChangedException e)
 				{
-					// Shown once, and the log reloaded, as for any read of a log on disk that changed (#1028).
+					// Shown once, naming Ctrl+F5, as for any read of a log on disk that changed (#1028, #1247).
 					Log.Default.Write(LogSeverityType.Warning, e, $"{operation} stopped, because the log changed on disk.");
 					reportFailedRead(e);
 				}

@@ -80,7 +80,7 @@ Each time you open a log, Weevil asks where to keep its text while it is open:
 
 Weevil chooses for you from the log's size and the memory that is free, so you can usually press **Enter**. It warns you when RAM may not fit, and when a log on a network drive would be slow on disk. The status bar shows which you chose. **Reload** (`Ctrl+F5`) keeps your choice.
 
-On disk, if another application truncates or replaces the log, Weevil says so once and reloads it. If the log is deleted, its rows show **Log can't be read**.
+Weevil never stops another application from writing, renaming or deleting a log it has open. On disk, if another application truncates or replaces the log, Weevil says so once: press **Ctrl+F5** to reload the latest data. If the log is renamed or deleted, its rows show **Log can't be read**.
 
 ---
 
