@@ -242,6 +242,45 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1245)]
+		public async Task GivenAFilteredLogOnDisk_WhenRefreshed_ThenTheFilterRunsAgainInBackgroundWhereAbortIsAvailable()
+		{
+			// F5 re-ran the filter on the UI thread, so on disk it read the whole log there, and Escape could not stop it.
+			using var uiDispatcher = new PausableUiDispatcher();
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+			await OpenOnDiskAsync(viewModel, CopyLog("Refresh.log"));
+			var totalCount = viewModel.VisibleItems.Count;
+
+			// The history changes only once the filter has run; the filter box changes at once.
+			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
+			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			var filteredCount = viewModel.VisibleItems.Count;
+			filteredCount.Should().BeLessThan(totalCount, "the filter should hide records before F5 runs it again");
+
+			var resultsChanged = 0;
+			viewModel.ResultsChanged += (_, _) => resultsChanged++;
+
+			// The UI thread is busy, so the filter cannot show its results yet.
+			uiDispatcher.Pause();
+			viewModel.RefreshCommand.Execute(null);
+
+			try
+			{
+				WaitUntil(() => viewModel.IsFilterInProgress);
+				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("F5 returns while the filter runs in the background, where Escape can stop it");
+			}
+			finally
+			{
+				uiDispatcher.Resume();
+			}
+
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && resultsChanged > 0);
+			resultsChanged.Should().Be(1, "F5 refreshes the results, and with them the columns' widths");
+			viewModel.InclusiveFilter.Should().Be(IncludeFilter, "F5 runs the same filter again");
+			viewModel.VisibleItems.Count.Should().Be(filteredCount, "the log has not changed");
+		}
+
+		[TestMethod]
 		public async Task GivenALogOnDiskThatWasDeleted_WhenFiltered_ThenTheProgressBarIsHiddenAndOneMessageIsShown()
 		{
 			// A filter from the filter box caught only an invalid expression, so a failed read left the progress bar running (#1028).
