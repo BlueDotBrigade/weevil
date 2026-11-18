@@ -15,7 +15,7 @@
     - With -p:WeevilVersion=2.12.1, that release from NuGet: the "before" figures.
   -->
   <ItemGroup Condition="'$(WeevilVersion)' == ''">
-    <ProjectReference Include="..\..\..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+    <ProjectReference Include="..\..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(WeevilVersion)' != ''">
     <PackageReference Include="BlueDotBrigade.Weevil.Core" Version="$(WeevilVersion)" />

@@ -48,7 +48,7 @@ CI runs the Core unit, feature and functional tests, and the CLI's functional te
 
 ## Performance
 
-Everything about performance lives in `BlueDotBrigade.Weevil.Core-PerformanceTests`, as MSTest tests of two kinds (#1177):
+The performance tests live in `BlueDotBrigade.Weevil.Core-PerformanceTests`, as MSTest tests of two kinds (#1177). Harnesses that measure what these tests can't, such as the RAM a whole process uses or a filter with a cold cache, are console programs in [`Dep/TestHarnesses/`](../../../Dep/TestHarnesses/) (#1290).
 
 | Kind | Where | Runs | Catches |
 |---|---|---|---|

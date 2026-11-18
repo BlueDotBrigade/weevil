@@ -436,7 +436,7 @@ internal static class Program
 }
 
 /// <summary>
-/// A repeatable Weevil TSV log, made the same way as the timestamp proof of concept's (`../TimestampPoC`):
+/// A repeatable Weevil TSV log, made the same way as the timestamp proof of concept's (`Doc/Research/Weevil3/TimestampPoC`):
 /// times that mostly move forward, occasional gaps and out-of-order records, and 20% of records on the UI thread.
 /// </summary>
 internal static class SyntheticLog
