@@ -43,14 +43,19 @@ namespace BlueDotBrigade.Weevil.PowerShell
                     .UsingStorage(this.Storage)
                     .Open();
 
-                // On disk, a log that changed while it was read is reloaded, and read once more (#1028).
-                ImmutableArray<IInsight> insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
-
-                // After the insights, so that the report's metrics describe the same log, if it was reloaded.
-                var period = engine.Records.GetEstimatedRange();
                 var version = typeof(GetInsightCmdlet).Assembly.GetName().Version ?? new Version(0, 0);
 
-                this.WriteObject(new InsightReportGenerator().Create(version, engine, insights, period.From, period.To));
+                // A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the cmdlet again (#1247).
+                InsightReport report = engine.RunOnce(
+                    () =>
+                    {
+                        ImmutableArray<IInsight> insights = engine.Analyzer.GetInsights();
+                        var period = engine.Records.GetEstimatedRange();
+                        return new InsightReportGenerator().Create(version, engine, insights, period.From, period.To);
+                    },
+                    this.WriteWarning);
+
+                this.WriteObject(report);
             }
             catch (Exception ex)
             {

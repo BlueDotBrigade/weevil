@@ -112,6 +112,20 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		}
 
 		[TestMethod]
+		public async Task GivenAZip_WhenEntered_ThenTheItemCountSaysItIsInAZip()
+		{
+			Location bundle = Location.ForArchive(Path.Combine(Logs.FileSystemPath, "Bundle.zip"));
+			_reader.List(bundle).Returns(new ListingResult(bundle, new[] { File(bundle, "a.log"), File(bundle, "b.log") }));
+
+			await _model.NavigateAsync(Logs);
+			_model.StatusText.Should().Be("5 items");
+
+			await _model.NavigateAsync(bundle);
+			_model.StatusText.Should().Be("2 items in a zip");
+			_model.LocationKind.Should().Be("Zip");
+		}
+
+		[TestMethod]
 		public async Task GivenTwoPlacesVisited_WhenGoingBackThenForward_ThenEachIsShownAgain()
 		{
 			await _model.NavigateAsync(Logs);

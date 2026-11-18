@@ -3,8 +3,10 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
 	/// <summary>
@@ -47,9 +49,20 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			nameof(OptionsContent), typeof(object), typeof(OpenAsDialog));
 
 		public static readonly DependencyProperty CanOpenProperty = DependencyProperty.Register(
-			nameof(CanOpen), typeof(bool), typeof(OpenAsDialog), new PropertyMetadata(true, (dialog, _) => ((OpenAsDialog)dialog).UpdateOpenButton()));
+			nameof(CanOpen), typeof(bool), typeof(OpenAsDialog), new PropertyMetadata(true, (dialog, _) => ((OpenAsDialog)dialog).OnCanOpenChanged()));
 
 		private bool _isOpening;
+		private bool _isClosed;
+
+		/// <summary>
+		/// Stops the extraction that is running, or <see langword="null"/>.
+		/// </summary>
+		private CancellationTokenSource _extraction;
+
+		/// <summary>
+		/// A file double-clicked, or chosen with Enter, before the host's options were valid: it opens once they are.
+		/// </summary>
+		private BrowserItem _pendingActivation;
 
 		public OpenAsDialog()
 		{
@@ -58,11 +71,17 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			this.FileBrowserControl.SelectionChanged += (_, item) =>
 			{
 				this.MessageText.Text = string.Empty;
+				_pendingActivation = null;
 				UpdateOpenButton();
 				this.SelectionChanged?.Invoke(this, item);
 			};
 
-			this.FileBrowserControl.FileActivated += async (_, _) => await OpenAsync();
+			this.FileBrowserControl.FileActivated += async (_, item) =>
+			{
+				// The host may still be reading the file, for example on a slow share, when the analyst double-clicks it.
+				_pendingActivation = this.CanOpen ? null : item;
+				await OpenAsync();
+			};
 		}
 
 		/// <summary>
@@ -118,8 +137,19 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// </summary>
 		public OpenAsResult Result { get; private set; }
 
+		/// <remarks>
+		/// Closing the window, for example with Cancel, stops an extraction that is running (#1251).
+		/// </remarks>
 		protected override void OnClosed(EventArgs e)
 		{
+			_isClosed = true;
+
+			if (_extraction is not null)
+			{
+				Log.Default.Write(LogSeverityType.Information, "The Open As dialog closed during an extraction, so the extraction was cancelled.");
+				_extraction.Cancel();
+			}
+
 			this.Browser.Dispose();
 			base.OnClosed(e);
 		}
@@ -139,26 +169,76 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			UpdateOpenButton();
 			this.MessageText.Text = file.Location.IsInArchive ? "Extracting…" : string.Empty;
 
-			try
-			{
-				var destination = Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
-				var localPath = await Task.Run(() => this.Browser.Reader.Extract(file.Location, this.CompanionSuffixes, destination));
+			// While a file is extracted, another selection must not change the options it opens with.
+			this.FileBrowserControl.IsEnabled = false;
+			this.OptionsArea.IsEnabled = false;
 
+			var destination = Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
+			var localPath = await ExtractAsync(file, destination);
+
+			_isOpening = false;
+
+			if (_isClosed)
+			{
+				// The copy finished as the window closed: nobody will open it.
+				if (localPath is not null && file.Location.IsInArchive)
+				{
+					ContainerReader.TryDeleteFolder(destination);
+				}
+			}
+			else if (localPath is null)
+			{
+				this.FileBrowserControl.IsEnabled = true;
+				this.OptionsArea.IsEnabled = true;
+				UpdateOpenButton();
+			}
+			else
+			{
 				this.Result = new OpenAsResult(file, localPath, file.Location.IsInArchive ? destination : null);
 				this.DialogResult = true;
+			}
+		}
+
+		/// <returns>The file on disk, or <see langword="null"/> when the extraction failed or was cancelled, leaving nothing behind.</returns>
+		private async Task<string> ExtractAsync(BrowserItem file, string destination)
+		{
+			using var extraction = new CancellationTokenSource();
+			_extraction = extraction;
+
+			try
+			{
+				return await Task.Run(() => this.Browser.Reader.Extract(file.Location, this.CompanionSuffixes, destination, extraction.Token));
+			}
+			catch (Exception exception) when (_isClosed)
+			{
+				// The analyst closed the window, so there is nothing to show. Logged, so a defect is not hidden.
+				if (exception is not OperationCanceledException)
+				{
+					Log.Default.Write(LogSeverityType.Warning, exception, "An extraction failed after the Open As dialog closed.");
+				}
+
+				return null;
 			}
 			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
 			{
 				this.MessageText.Text = $"The file could not be opened: {exception.Message}";
+				return null;
 			}
 			finally
 			{
-				_isOpening = false;
+				_extraction = null;
+			}
+		}
 
-				if (this.IsLoaded)
-				{
-					UpdateOpenButton();
-				}
+		private async void OnCanOpenChanged()
+		{
+			UpdateOpenButton();
+
+			// The host's options may become valid after the window closed.
+			if (!_isClosed && this.CanOpen && _pendingActivation is { } file && file.Location.Equals(this.Browser.SelectedFile?.Location))
+			{
+				_pendingActivation = null;
+				await OpenAsync();
 			}
 		}
 

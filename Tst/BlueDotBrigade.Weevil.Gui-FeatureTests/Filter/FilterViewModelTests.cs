@@ -212,9 +212,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public async Task GivenALogOnDiskThatWasTruncated_WhenARowIsShown_ThenTheLogIsReloadedOnce()
+		[WorkItem(1247)]
+		public async Task GivenALogOnDiskThatWasTruncated_WhenARowIsShown_ThenOneMessageAsksForCtrlF5AndNothingReloads()
 		{
-			// A log that changes while it is open on disk shows one warning, and is reloaded as Ctrl+F5 does (#1028).
+			// Weevil reloaded a log that changed on disk by itself, rather than leaving the analyst to choose when.
 			var uiDispatcher = new DeferredUiDispatcherFake();
 			var dialog = Substitute.For<IDialogBoxService>();
 			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
@@ -230,15 +231,60 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			lastRow.ReadContent().Should().Be(RowViewModel.ChangedLogPlaceholder);
 			lastRow.ReadContent();
 			uiDispatcher.RunQueued();
-			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.Rows?.Count < recordCount);
 
-			// A row of the log as it was before Reload is ignored.
+			// Reload would disable the menus at once, so they show that nothing reloads until the analyst presses Ctrl+F5.
+			viewModel.IsMenuEnabled.Should().BeTrue();
+			viewModel.CanOpenLogFile.Should().BeTrue();
+			viewModel.Rows.Count.Should().Be(recordCount);
+
+			// Ctrl+F5 reloads. A row of the log as it was before is then ignored.
+			viewModel.Reload();
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.Rows?.Count < recordCount);
 			lastRow.ReadContent();
 			uiDispatcher.RunQueued();
 
-			viewModel.Rows.Count.Should().BeInRange(1, recordCount - 1, "the log was reloaded, with about half of its records");
-			dialog.Received(1).ShowMessage(Arg.Any<string>(), "Log Changed");
+			viewModel.Rows.Count.Should().BeInRange(1, recordCount - 1, "Ctrl+F5 reloaded the log, with about half of its records");
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Ctrl+F5")), "Log Changed");
 			dialog.ReceivedWithAnyArgs(1).ShowMessage(default, default);
+		}
+
+		[TestMethod]
+		[WorkItem(1245)]
+		public async Task GivenAFilteredLogOnDisk_WhenRefreshed_ThenTheFilterRunsAgainInBackgroundWhereAbortIsAvailable()
+		{
+			// F5 re-ran the filter on the UI thread, so on disk it read the whole log there, and Escape could not stop it.
+			using var uiDispatcher = new PausableUiDispatcher();
+			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+			await OpenOnDiskAsync(viewModel, CopyLog("Refresh.log"));
+			var totalCount = viewModel.VisibleItems.Count;
+
+			// The history changes only once the filter has run; the filter box changes at once.
+			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
+			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			var filteredCount = viewModel.VisibleItems.Count;
+			filteredCount.Should().BeLessThan(totalCount, "the filter should hide records before F5 runs it again");
+
+			var resultsChanged = 0;
+			viewModel.ResultsChanged += (_, _) => resultsChanged++;
+
+			// The UI thread is busy, so the filter cannot show its results yet.
+			uiDispatcher.Pause();
+			viewModel.RefreshCommand.Execute(null);
+
+			try
+			{
+				WaitUntil(() => viewModel.IsFilterInProgress);
+				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("F5 returns while the filter runs in the background, where Escape can stop it");
+			}
+			finally
+			{
+				uiDispatcher.Resume();
+			}
+
+			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && resultsChanged > 0);
+			resultsChanged.Should().Be(1, "F5 refreshes the results, and with them the columns' widths");
+			viewModel.InclusiveFilter.Should().Be(IncludeFilter, "F5 runs the same filter again");
+			viewModel.VisibleItems.Count.Should().Be(filteredCount, "the log has not changed");
 		}
 
 		[TestMethod]
@@ -310,19 +356,63 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public void GivenTheOpenButton_WhenALogIsChosen_ThenOpenAsIsShownForIt()
+		public void GivenTheOpenButton_WhenALogAndDiskAreChosen_ThenTheLogOpensOnDisk()
 		{
-			// The Open button, Ctrl+O and the menu's Open… show the Windows file dialog, then Open As (#1028).
+			// The Open button, Ctrl+O and the menu's Open… show one dialog, which finds the log and chooses RAM or Disk (#1215).
 			var dialog = Substitute.For<IDialogBoxService>();
-			dialog.ShowOpenFile(Arg.Any<string>()).Returns(CopyLog("Chosen.log"));
-			AcceptOpenAs(dialog, StorageMode.Ram);
-			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			ChooseInOpenAs(dialog, new OpenAsChoice(CopyLog("Chosen.log"), ExtractedFolder: null, StorageMode.Disk, Advice: null));
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
 
 			viewModel.OpenLogCommand.Execute(null);
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 
-			dialog.Received(1).TryShowOpenAs(Arg.Is<OpenAsAdvice>(advice => advice.FileName == "Chosen.log"), out Arg.Any<StorageMode>());
-			viewModel.IsLogFileOpen.Should().BeTrue("the chosen log opens in the mode chosen");
+			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin =>
+				Path.GetFileName(bulletin.SourceFilePath) == "Chosen.log" && bulletin.StorageMode == StorageMode.Disk));
+		}
+
+		[TestMethod]
+		public void GivenTheOpenButton_WhenCancelled_ThenNothingOpensAndOpenIsAvailableAgain()
+		{
+			var dialog = Substitute.For<IDialogBoxService>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+
+			// The substitute answers false: the user cancelled.
+			viewModel.OpenLogCommand.Execute(null);
+
+			dialog.Received(1).TryShowOpenAs(out Arg.Any<OpenAsChoice>());
+			bulletinMediator.DidNotReceive().Post(Arg.Any<SourceFileOpenedBulletin>());
+			viewModel.CanOpenLogFile.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public async Task GivenTheOpenButton_WhenALogInAZipIsChosen_ThenItsCopyIsKeptUntilAnotherLogOpens()
+		{
+			// The dialog extracts a log in a zip to a folder of its own, which Weevil deletes once nothing reads it (#1162).
+			var extractedFolder = System.IO.Directory.CreateTempSubdirectory("WeevilGui.Extracted.").FullName;
+			var extractedLog = Path.Combine(extractedFolder, "A.log");
+			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), extractedLog);
+			var dialog = Substitute.For<IDialogBoxService>();
+			ChooseInOpenAs(dialog, new OpenAsChoice(extractedLog, extractedFolder, StorageMode.Ram, Advice: null));
+			AcceptOpenAs(dialog, StorageMode.Ram);
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+
+			try
+			{
+				viewModel.OpenLogCommand.Execute(null);
+				WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
+				viewModel.IsLogFileOpen.Should().BeTrue();
+				System.IO.File.Exists(extractedLog).Should().BeTrue("Reload and disk mode read the log again");
+
+				await viewModel.OpenCompressedAsync(CopyLog("B.log"));
+
+				System.IO.Directory.Exists(extractedFolder).Should().BeFalse("nothing reads the previous log's copy any more");
+			}
+			finally
+			{
+				DeleteExtractedFolder(extractedLog);
+			}
 		}
 
 		[TestMethod]
@@ -501,6 +591,59 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				releasePrompt.Set();
 				await analysis;
 			}
+		}
+
+		[TestMethod]
+		[WorkItem(998)]
+		public async Task GivenAnInsightRecordTheFilterHides_WhenGoingToIt_ThenTheFilterShowsFlaggedRecordsAndTheRecordIsActive()
+		{
+			// Going to an insight's record only set the filter box's text, and after 500 ms went to the nearest record still shown.
+			var bulletinMediator = new BulletinMediator();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, Substitute.For<IDialogBoxService>());
+
+			// A copy without the sidecar, so the filter history is empty until the filter below has run.
+			await viewModel.OpenAsync(CopyLog("Insight.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+			var hiddenLineNumber = viewModel.VisibleItems.First(record => !record.Content.Contains(IncludeFilter)).LineNumber;
+
+			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
+			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			viewModel.VisibleItems.Should().NotContain(record => record.LineNumber == hiddenLineNumber, "the filter should hide the insight's record");
+
+			int? scrolledTo = null;
+			viewModel.ScrollRequested += (_, position) => scrolledTo = position;
+			bulletinMediator.Post(new NavigateToInsightRecordBulletin(new[] { hiddenLineNumber }));
+			WaitUntil(() => scrolledTo.HasValue && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+
+			viewModel.InclusiveFilter.Should().Be($"{IncludeFilter}||@Flagged");
+			viewModel.VisibleItems.Should().Contain(record => record.LineNumber == hiddenLineNumber, "the filter now shows flagged records");
+			scrolledTo.Should().NotBeNull("Weevil goes to the insight's record");
+			viewModel.Rows.GetRow(scrolledTo!.Value).LineNumber.Should().Be(hiddenLineNumber);
+		}
+
+		[TestMethod]
+		[WorkItem(998)]
+		public async Task GivenAnInsightRecordTheExcludeFilterHides_WhenGoingToIt_ThenWeevilSaysSoInsteadOfGoingToAnotherRecord()
+		{
+			// Going to an insight's record that stayed hidden went silently to the nearest record shown instead.
+			var bulletinMediator = new BulletinMediator();
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog);
+			await viewModel.OpenAsync(CopyLog("Excluded.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+			var hiddenLineNumber = viewModel.VisibleItems.First(record => !record.Content.Contains(IncludeFilter)).LineNumber;
+			var exclusiveFilter = $"@Line={hiddenLineNumber}";
+
+			viewModel.FilterManually(new object[] { IncludeFilter, exclusiveFilter });
+			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+
+			var wasScrolled = false;
+			viewModel.ScrollRequested += (_, _) => wasScrolled = true;
+			bulletinMediator.Post(new NavigateToInsightRecordBulletin(new[] { hiddenLineNumber }));
+			WaitUntil(() => dialog.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IDialogBoxService.ShowMessage)) && viewModel.IsMenuEnabled);
+
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("exclude filter")), "Not Found");
+			wasScrolled.Should().BeFalse("Weevil does not go to a record that isn't the insight's");
 		}
 
 		/// <remarks>Regression: #1011. A failed open unsubscribed the open log from its filter history changes.</remarks>
@@ -933,6 +1076,18 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.VisibleItems.Should().NotBeNullOrEmpty("the open log's records are shown");
 
 			return new WeakReference(viewModel.VisibleItems, trackResurrection: true);
+		}
+
+		/// <summary>
+		/// Makes the Open As dialog answer with <paramref name="choice"/>, as if the user found a log and chose how to open it.
+		/// </summary>
+		private static void ChooseInOpenAs(IDialogBoxService dialogBox, OpenAsChoice choice)
+		{
+			dialogBox.TryShowOpenAs(out Arg.Any<OpenAsChoice>()).Returns(x =>
+			{
+				x[0] = choice;
+				return true;
+			});
 		}
 
 		/// <summary>

@@ -7,7 +7,7 @@ Weevil is a .NET 10 log analysis platform.
 - Primary UI is a WPF desktop application (`BlueDotBrigade.Weevil.Gui`).
 - The repository includes core libraries, a CLI tool, PowerShell modules, plugins, and a WiX installer.
 - Log file operations are always non-destructive; the original file is never modified.
-- Persisted state is stored in XML sidecar files.
+- Persisted state is stored in XML sidecar files. A `.idx` cache of the line index and record table is also saved beside the log, and is always safe to delete ([OpeningALog.md](../Doc/Design/OpeningALog.md)).
 
 ## Directory Structure
 ```
@@ -22,6 +22,8 @@ Src/BlueDotBrigade.Weevil.TestTools   # Shared test helpers and utilities
 Src/BlueDotBrigade.Weevil.Windows     # Windows-specific platform abstractions
 Tst/                                  # Unit tests, feature tests, and functional tests
 Doc/                                  # Supporting documentation; Doc/README.md says what goes where
+Dep/Scripts                           # Developer scripts, such as setting up a developer's computer
+Dep/TestHarnesses                     # Console programs that measure Weevil's RAM and speed, outside Weevil.sln
 ```
 ## Architectural Rules
 
@@ -33,7 +35,7 @@ Doc/                                  # Supporting documentation; Doc/README.md 
 - Never modify the original log file; all operations must remain non-destructive.
 - Preserve UI responsiveness; do not block the UI thread.
 - Maintain existing WPF data-binding patterns.
-- GUI ViewModels (`BlueDotBrigade.Weevil.Gui`) use the **Metalama.Patterns.Observability** aspect-oriented framework to implement `INotifyPropertyChanged`. Classes decorated with `[Observable]` (e.g. `FilterViewModel`, `MainWindowViewModel`, `StatusBarViewModel`) get `PropertyChanged` woven in at build time for plain auto-properties — do **not** add manual `OnPropertyChanged` calls or backing fields. Use `[NotObservable]` to opt out a specific member. **Caveat:** Metalama suppresses `PropertyChanged` when the new value equals the current; if a binding must refresh on every assignment (even to the same value), the auto-property approach is insufficient and a manual property is required.
+- GUI ViewModels (`BlueDotBrigade.Weevil.Gui`) use the **Metalama.Patterns.Observability** aspect-oriented framework to implement `INotifyPropertyChanged`. Classes decorated with `[Observable]` (e.g. `FilterViewModel`, `MainWindowViewModel`, `StatusBarViewModel`) get `PropertyChanged` woven in at build time for plain auto-properties — do **not** add manual `OnPropertyChanged` calls or backing fields. Use `[NotObservable]` to opt out a specific member. **Caveat:** Metalama suppresses `PropertyChanged` when the new value equals the current; if a binding must refresh on every assignment (even to the same value), the auto-property approach is insufficient and a manual property is required. A ViewModel whose values live elsewhere, where Metalama can't see them change, also raises `PropertyChanged` itself: `RowViewModel` reads its pin and comment from Core's store ([RecordGrid.md](../Doc/Design/RecordGrid.md)).
 - The majority of business logic must reside in `Core` so the application can run headless. Weevil's UI layer is interchangeable — it could be a WPF application, CLI, PowerShell module, or a test framework like Reqnroll.
   - The WPF application is a thin layer over `Core`. Logic that the CLI, PowerShell or a test would also need belongs in `Core`, for example flagging records or putting a comment on the selected records.
   - A ViewModel may hold logic that exists only to make the screen work, for example reading the clipboard, showing a message, editing the filter box or building rows. Keep that logic out of `Core`.
