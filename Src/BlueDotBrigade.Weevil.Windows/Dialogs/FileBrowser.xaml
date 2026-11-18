@@ -8,7 +8,8 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
         <local:ItemGlyphConverter x:Key="ItemGlyph" />
         <local:SizeConverter x:Key="Size" />
-        <Style x:Key="GlyphButton" TargetType="Button">
+        <!-- Based on the host's button style, so the host's theme still reaches these buttons. -->
+        <Style x:Key="GlyphButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="FontFamily" Value="{x:Static local:Glyphs.FontFamily}" />
             <Setter Property="MinWidth" Value="32" />
             <Setter Property="Margin" Value="0,0,4,0" />
@@ -17,114 +18,118 @@
     </UserControl.Resources>
 
     <!-- The model is the inner panel's data context, not the control's, so the host's bindings on the control keep working. -->
+    <!-- One grid, so the path box, the list and the item count share a left edge, even when the splitter moves.
+         The buttons sit above the places, which run to the bottom. -->
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <!-- At least as wide as the four buttons. -->
+            <ColumnDefinition Width="180" MinWidth="150" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,6">
-            <Button DockPanel.Dock="Left" Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Back}"
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,6">
+            <Button Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Back}"
                     AutomationProperties.Name="Back" ToolTip="Back (Alt+Left)" IsEnabled="{Binding CanGoBack}" Click="OnBackClick" />
-            <Button DockPanel.Dock="Left" Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Forward}"
+            <Button Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Forward}"
                     AutomationProperties.Name="Forward" ToolTip="Forward (Alt+Right)" IsEnabled="{Binding CanGoForward}" Click="OnForwardClick" />
-            <Button DockPanel.Dock="Left" Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Up}"
+            <Button Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Up}"
                     AutomationProperties.Name="Up" ToolTip="Up (Alt+Up)" IsEnabled="{Binding CanGoUp}" Click="OnUpClick" />
-            <Button DockPanel.Dock="Left" Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Refresh}"
+            <Button Style="{StaticResource GlyphButton}" Content="{x:Static local:Glyphs.Refresh}"
                     AutomationProperties.Name="Refresh" ToolTip="Refresh (F5)" Click="OnRefreshClick" />
+        </StackPanel>
+
+        <DockPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,6">
             <TextBox x:Name="NameFilterBox" DockPanel.Dock="Right" Width="180" VerticalContentAlignment="Center"
                      Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}"
                      AutomationProperties.Name="Show names containing" ToolTip="Show only the names that contain this text (Ctrl+F)" />
             <Label DockPanel.Dock="Right" Content="_Find:" Target="{Binding ElementName=NameFilterBox}" Margin="8,0,0,0" Padding="0,0,4,0" VerticalAlignment="Center" />
-            <TextBox x:Name="PathBox" VerticalContentAlignment="Center" Text="{Binding PathText, UpdateSourceTrigger=PropertyChanged}"
-                     AutomationProperties.Name="Location" ToolTip="Type or paste a folder, zip or file, then press Enter (Ctrl+L)"
-                     KeyDown="OnPathBoxKeyDown" />
+            <!-- The icon of the place shown, inside the box as in Explorer: a zip's icon shows the list is inside a zip. -->
+            <Grid>
+                <TextBox x:Name="PathBox" VerticalContentAlignment="Center" Padding="22,0,0,0" Text="{Binding PathText, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="Location" AutomationProperties.ItemStatus="{Binding LocationKind}"
+                         ToolTip="Type or paste a folder, zip or file, then press Enter (Ctrl+L)" KeyDown="OnPathBoxKeyDown" />
+                <TextBlock Text="{Binding LocationGlyph}" FontFamily="{x:Static local:Glyphs.FontFamily}" Margin="7,0,0,0"
+                           HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False" />
+            </Grid>
         </DockPanel>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180" MinWidth="120" />
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto" Focusable="False">
+            <StackPanel>
+                <ListBox x:Name="PlacesList" ItemsSource="{Binding Places}" BorderThickness="0"
+                         AutomationProperties.Name="Places" KeyDown="OnPlaceKeyDown" MouseUp="OnPlaceMouseUp">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="local:Place">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Glyph}" FontFamily="{x:Static local:Glyphs.FontFamily}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Text="Recent" FontWeight="SemiBold" Margin="4,12,0,4" />
+                <ListBox x:Name="RecentList" ItemsSource="{Binding RecentFolders}" BorderThickness="0"
+                         AutomationProperties.Name="Recent folders" KeyDown="OnPlaceKeyDown" MouseUp="OnPlaceMouseUp">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="local:Place">
+                            <StackPanel Orientation="Horizontal" ToolTip="{Binding Location}">
+                                <TextBlock Text="{Binding Glyph}" FontFamily="{x:Static local:Glyphs.FontFamily}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </ScrollViewer>
 
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Focusable="False">
-                <StackPanel>
-                    <ListBox x:Name="PlacesList" ItemsSource="{Binding Places}" BorderThickness="0"
-                             AutomationProperties.Name="Places" KeyDown="OnPlaceKeyDown" MouseUp="OnPlaceMouseUp">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="local:Place">
+        <GridSplitter Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Width="5" HorizontalAlignment="Stretch" Focusable="False" />
+
+        <ListView x:Name="ItemsList" Grid.Row="1" Grid.Column="2" ItemsSource="{Binding VisibleItems}" SelectedItem="{Binding SelectedItem}"
+                  SelectionMode="Single" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling"
+                  AutomationProperties.Name="Folders and files" PreviewKeyDown="OnItemsListPreviewKeyDown" MouseDoubleClick="OnItemDoubleClick">
+            <!-- No ItemContainerStyle: it would hide the host's row style. Narrator reads each row's name from BrowserItem.ToString(). -->
+            <ListView.View>
+                <GridView>
+                    <!-- The columns fit the list at the dialog's default size, without a horizontal scroll bar. -->
+                    <GridViewColumn Width="190">
+                        <GridViewColumnHeader Content="Name" Tag="{x:Static local:SortColumn.Name}" Click="OnHeaderClick" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Glyph}" FontFamily="{x:Static local:Glyphs.FontFamily}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Converter={StaticResource ItemGlyph}}" FontFamily="{x:Static local:Glyphs.FontFamily}"
+                                               Margin="0,0,6,0" VerticalAlignment="Center" />
                                     <TextBlock Text="{Binding Name}" />
                                 </StackPanel>
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <TextBlock Text="Recent" FontWeight="SemiBold" Margin="4,12,0,4" />
-                    <ListBox x:Name="RecentList" ItemsSource="{Binding RecentFolders}" BorderThickness="0"
-                             AutomationProperties.Name="Recent folders" KeyDown="OnPlaceKeyDown" MouseUp="OnPlaceMouseUp">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="local:Place">
-                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Location}">
-                                    <TextBlock Text="{Binding Glyph}" FontFamily="{x:Static local:Glyphs.FontFamily}" Margin="0,0,6,0" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding Name}" />
-                                </StackPanel>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="125" DisplayMemberBinding="{Binding Modified, StringFormat=g}">
+                        <GridViewColumnHeader Content="Date modified" Tag="{x:Static local:SortColumn.Modified}" Click="OnHeaderClick" />
+                    </GridViewColumn>
+                    <GridViewColumn Width="115" DisplayMemberBinding="{Binding TypeName}">
+                        <GridViewColumnHeader Content="Type" Tag="{x:Static local:SortColumn.Type}" Click="OnHeaderClick" />
+                    </GridViewColumn>
+                    <GridViewColumn Width="70">
+                        <GridViewColumnHeader Content="Size" Tag="{x:Static local:SortColumn.Size}" Click="OnHeaderClick" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Size, Converter={StaticResource Size}}" TextAlignment="Right" />
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-            </ScrollViewer>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Focusable="False" />
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Error}" Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibility}}"
+                   TextWrapping="Wrap" Margin="12,40,12,0" HorizontalAlignment="Center" VerticalAlignment="Top" />
 
-            <ListView x:Name="ItemsList" Grid.Column="2" ItemsSource="{Binding VisibleItems}" SelectedItem="{Binding SelectedItem}"
-                      SelectionMode="Single" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      AutomationProperties.Name="Folders and files" PreviewKeyDown="OnItemsListPreviewKeyDown">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <EventSetter Event="MouseDoubleClick" Handler="OnItemDoubleClick" />
-                        <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Width="300">
-                            <GridViewColumnHeader Content="Name" Tag="{x:Static local:SortColumn.Name}" Click="OnHeaderClick" />
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Converter={StaticResource ItemGlyph}}" FontFamily="{x:Static local:Glyphs.FontFamily}"
-                                                   Margin="0,0,6,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding Name}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="150" DisplayMemberBinding="{Binding Modified, StringFormat=g}">
-                            <GridViewColumnHeader Content="Date modified" Tag="{x:Static local:SortColumn.Modified}" Click="OnHeaderClick" />
-                        </GridViewColumn>
-                        <GridViewColumn Width="130" DisplayMemberBinding="{Binding TypeName}">
-                            <GridViewColumnHeader Content="Type" Tag="{x:Static local:SortColumn.Type}" Click="OnHeaderClick" />
-                        </GridViewColumn>
-                        <GridViewColumn Width="100">
-                            <GridViewColumnHeader Content="Size" Tag="{x:Static local:SortColumn.Size}" Click="OnHeaderClick" />
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Size, Converter={StaticResource Size}}" TextAlignment="Right" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-
-            <TextBlock Grid.Column="2" Text="{Binding Error}" Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibility}}"
-                       TextWrapping="Wrap" Margin="12,40,12,0" HorizontalAlignment="Center" VerticalAlignment="Top" />
-        </Grid>
-
-        <DockPanel Grid.Row="2" Margin="0,6,0,0">
+        <DockPanel Grid.Row="2" Grid.Column="2" Margin="0,6,0,0">
             <ComboBox x:Name="FileTypeBox" DockPanel.Dock="Right" MinWidth="200" ItemsSource="{Binding FileTypes}" SelectedItem="{Binding SelectedFileType}"
                       AutomationProperties.Name="File type" />
             <Label DockPanel.Dock="Right" Content="File _type:" Target="{Binding ElementName=FileTypeBox}" Padding="0,0,4,0" VerticalAlignment="Center" />
