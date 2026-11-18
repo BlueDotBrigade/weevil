@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			// Regression: Sub-task 3 (PR-3)
 			var t0 = new DateTime(2026, 4, 1, 10, 0, 0, DateTimeKind.Utc);
-			var t1 = t0.AddSeconds(10);
+			DateTime t1 = t0.AddSeconds(10);
 			var times = new Queue<DateTime>(new[] { t0, t1 });
 			var tracker = new TelemetrySessionLifecycle(() => times.Dequeue(), TimeSpan.FromMinutes(1));
 
@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			try
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(1, 2, 3), firstPath);
-				var firstSessionId = tracker.CurrentSession.SessionId;
+				Guid firstSessionId = tracker.CurrentSession.SessionId;
 
 				tracker.StartSession("WeevilGui.exe", new Version(1, 2, 3), secondPath);
 
@@ -63,7 +63,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				tracker.StartSession("WeevilGui.exe", new Version(3, 1), sourcePath);
 				tracker.RecordHelpOpen();
 				tracker.RecordHelpOpen();
-				var endedSession = tracker.EndSession();
+				TelemetrySession endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
 				endedSession!.Metrics.Single(m => m.MetricKey == "Help.Opened").MetricCount.Should().Be(2);
@@ -195,7 +195,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				tracker.StartSession("WeevilCli.exe", new Version(2, 0), sourcePath);
 				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
-				var endedSession = tracker.EndSession();
+				TelemetrySession endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
 				endedSession!.SessionActiveMinutes.Should().Be(20);
@@ -223,7 +223,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
-				var ended = tracker.EndSession();
+				TelemetrySession ended = tracker.EndSession();
 
 				ended.Should().NotBeNull();
 				ended!.SessionActiveMinutes.Should().Be(12);
@@ -253,7 +253,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 				tracker.RecordActivity(TelemetryActivityKind.ViewportChanged);
 				tracker.RecordActivity(TelemetryActivityKind.ViewportChanged);
-				var ended = tracker.EndSession();
+				TelemetrySession ended = tracker.EndSession();
 
 				ended.Should().NotBeNull();
 				ended!.SessionActiveMinutes.Should().Be(30);
@@ -283,7 +283,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 				tracker.RecordActivity(TelemetryActivityKind.FilterApplied);
 				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
-				var ended = tracker.EndSession();
+				TelemetrySession ended = tracker.EndSession();
 
 				ended.Should().NotBeNull();
 				ended!.SessionActiveMinutes.Should().Be(25);
@@ -311,7 +311,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 				tracker.RecordActivity(TelemetryActivityKind.RecordSelectionChanged);
-				var ended = tracker.EndSession();
+				TelemetrySession ended = tracker.EndSession();
 
 				ended.Should().NotBeNull();
 				ended!.SessionActiveMinutes.Should().Be(17);
@@ -337,7 +337,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			try
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
-				var ended = tracker.EndSession();
+				TelemetrySession ended = tracker.EndSession();
 
 				ended.Should().NotBeNull();
 				ended!.SessionActiveMinutes.Should().Be(15);
@@ -369,7 +369,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				tracker.StartSession("WeevilGui.exe", new Version(3, 1), sourcePath);
 				tracker.Increment(TelemetryMetrics.FilterApplied);
 				tracker.Increment(TelemetryMetrics.FilterApplied);
-				var endedSession = tracker.EndSession();
+				TelemetrySession endedSession = tracker.EndSession();
 
 				endedSession.Should().NotBeNull();
 				endedSession!.Metrics.Single(m => m.MetricKey == "Filter.Applied").MetricCount.Should().Be(2);
@@ -385,7 +385,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		public void GivenActiveSession_WhenNewFileOpened_ThenPreviousSessionIsSavedAndUploadTriggered()
 		{
 			var t0 = new DateTime(2026, 4, 1, 10, 0, 0, DateTimeKind.Utc);
-			var t1 = t0.AddSeconds(10);
+			DateTime t1 = t0.AddSeconds(10);
 			var times = new Queue<DateTime>(new[] { t0, t1 });
 			var store = new SpyTelemetrySessionStore();
 			var uploadWorker = new SpyTelemetryUploadWorker();
@@ -397,7 +397,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			try
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), firstPath);
-				var firstSessionId = tracker.CurrentSession.SessionId;
+				Guid firstSessionId = tracker.CurrentSession.SessionId;
 				uploadWorker.Reset();
 
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), secondPath);
@@ -427,10 +427,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			try
 			{
 				tracker.StartSession("WeevilCli.exe", new Version(2, 0), sourcePath);
-				var sessionId = tracker.CurrentSession.SessionId;
+				Guid sessionId = tracker.CurrentSession.SessionId;
 				uploadWorker.Reset();
 
-				var endedSession = tracker.EndSession();
+				TelemetrySession endedSession = tracker.EndSession();
 
 				store.SavedSessions.Should().ContainSingle()
 					.Which.SessionId.Should().Be(sessionId);
@@ -486,7 +486,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			// Regression: Issue #919
 			var start = new DateTime(2026, 7, 1, 9, 0, 0, DateTimeKind.Utc);
-			var activityRecordedAt = start.AddSeconds(20);
+			DateTime activityRecordedAt = start.AddSeconds(20);
 			var times = new Queue<DateTime>(new[] { start, activityRecordedAt, activityRecordedAt });
 			var store = new SpyTelemetrySessionStore();
 			var uploadWorker = new SpyTelemetryUploadWorker();
@@ -503,7 +503,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				tracker.StartSession("WeevilGui.exe", new Version(1, 0), sourcePath);
 				tracker.RecordHelpOpen();
-				var endedSession = tracker.EndSession();
+				TelemetrySession endedSession = tracker.EndSession();
 
 				tracker.CurrentSession.Should().BeNull();
 				endedSession.Should().NotBeNull();

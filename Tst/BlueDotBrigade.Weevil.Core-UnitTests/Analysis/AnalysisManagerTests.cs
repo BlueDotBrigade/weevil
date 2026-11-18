@@ -1,5 +1,7 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
+	using BlueDotBrigade.Weevil.Data;
+
 	[TestClass]
 	public class AnalysisManagerTests
 	{
@@ -13,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			// Remove All Flags and Unpin All skipped the last record.
 			IEngine engine = OpenEngine(fileName);
 
-			foreach (var record in engine.Records)
+			foreach (IRecord record in engine.Records)
 			{
 				engine.RecordState.SetFlagged(record, true);
 			}
@@ -34,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			// Remove All Flags and Unpin All skipped the last record.
 			IEngine engine = OpenEngine(fileName);
 
-			foreach (var record in engine.Records)
+			foreach (IRecord record in engine.Records)
 			{
 				engine.RecordState.SetPinned(record, true);
 			}

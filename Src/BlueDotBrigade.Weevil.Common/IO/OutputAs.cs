@@ -31,7 +31,7 @@ namespace BlueDotBrigade.Weevil.IO
 				throw new ArgumentException($"--output-as needs a value. Use {SupportedValues}.");
 			}
 
-			return TryParseFormat(value, out var format)
+			return TryParseFormat(value, out OutputFormat format)
 				? format
 				: throw new ArgumentException($"--output-as {value} is not supported. Use {SupportedValues}.");
 		}

@@ -7,13 +7,14 @@
 	using System.ComponentModel;
 	using System.Globalization;
 	using System.Linq;
-  using System.Text.RegularExpressions;
 	using System.Runtime.CompilerServices;
+  using System.Text.RegularExpressions;
 	using System.Windows;
 	using System.Windows.Input;
-	using BlueDotBrigade.Weevil.Filter;
+	using System.Windows.Media;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Gui.Input;
@@ -25,7 +26,6 @@
 	using LiveChartsCore.SkiaSharpView;
 	using LiveChartsCore.SkiaSharpView.Painting;
 	using SkiaSharp;
-	using System.Windows.Media;
 
 	public class GraphViewModel : INotifyPropertyChanged
 	{

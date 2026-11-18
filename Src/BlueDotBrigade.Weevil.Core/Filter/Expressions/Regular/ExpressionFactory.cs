@@ -30,7 +30,7 @@
 
 			if (!string.IsNullOrEmpty(serializedExpression))
 			{
-				var regexOptions = RegexOptions.Compiled;
+				RegexOptions regexOptions = RegexOptions.Compiled;
 
 				if (_isCaseSensitive)
 				{

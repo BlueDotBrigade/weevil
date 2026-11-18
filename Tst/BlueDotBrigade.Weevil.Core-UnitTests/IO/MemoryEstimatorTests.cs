@@ -125,8 +125,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </remarks>
 		private static void SaveIndex(string logPath)
 		{
-			using var log = System.IO.File.OpenRead(logPath);
-			using var index = System.IO.File.Create($"{logPath}.{LineIndexFile.FileExtension}");
+			using FileStream log = System.IO.File.OpenRead(logPath);
+			using FileStream index = System.IO.File.Create($"{logPath}.{LineIndexFile.FileExtension}");
 			LineIndex.Build(log).Write(index);
 		}
 	}

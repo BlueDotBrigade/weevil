@@ -43,14 +43,14 @@ namespace BlueDotBrigade.Weevil.PowerShell
                     .UsingStorage(this.Storage)
                     .Open();
 
-                var version = typeof(GetInsightCmdlet).Assembly.GetName().Version ?? new Version(0, 0);
+				Version version = typeof(GetInsightCmdlet).Assembly.GetName().Version ?? new Version(0, 0);
 
                 // A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the cmdlet again (#1247).
                 InsightReport report = engine.RunOnce(
                     () =>
                     {
                         ImmutableArray<IInsight> insights = engine.Analyzer.GetInsights();
-                        var period = engine.Records.GetEstimatedRange();
+						(DateTime From, DateTime To) period = engine.Records.GetEstimatedRange();
                         return new InsightReportGenerator().Create(version, engine, insights, period.From, period.To);
                     },
                     this.WriteWarning);

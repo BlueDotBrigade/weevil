@@ -39,7 +39,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			[Option(Description = "Ram keeps the log in memory. Disk reads it back from the log, for a log larger than memory.")]
 			StorageMode storage = StorageMode.Ram)
 		{
-			var telemetry = TelemetrySessionLifecycle.Shared;
+			TelemetrySessionLifecycle telemetry = TelemetrySessionLifecycle.Shared;
 			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
 			try
@@ -57,8 +57,8 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 				InsightReport report = engine.RunOnce(
 					() =>
 					{
-						var insights = engine.Analyzer.GetInsights();
-						var period = engine.Records.GetEstimatedRange();
+						ImmutableArray<IInsight> insights = engine.Analyzer.GetInsights();
+						(DateTime From, DateTime To) period = engine.Records.GetEstimatedRange();
 						return new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
 					},
 					Program.ReportWarning);
@@ -83,7 +83,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 					}
 				}
 
-				var shown = verbose
+				ImmutableArray<InsightReportItem> shown = verbose
 					? report.Insights
 					: report.Insights.Where(insight => insight.IsAttentionRequired).ToImmutableArray();
 

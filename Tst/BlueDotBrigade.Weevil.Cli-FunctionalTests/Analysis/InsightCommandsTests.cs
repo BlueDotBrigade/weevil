@@ -5,10 +5,10 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 	using System.Linq;
 	using System.Text.Json;
 	using IOutputWriter = BlueDotBrigade.Weevil.IO.IOutputWriter;
-	using OutputWriterContext = BlueDotBrigade.Weevil.IO.OutputWriterContext;
 	using OutputAs = BlueDotBrigade.Weevil.IO.OutputAs;
 	using OutputFormat = BlueDotBrigade.Weevil.IO.OutputFormat;
 	using OutputOptions = BlueDotBrigade.Weevil.Cli.IO.OutputOptions;
+	using OutputWriterContext = BlueDotBrigade.Weevil.IO.OutputWriterContext;
 	using PlainTextFormatter = BlueDotBrigade.Weevil.IO.PlainTextFormatter;
 
 	[TestClass]

@@ -1,8 +1,8 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Concurrent;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.ComponentModel;
 	using System.Diagnostics;

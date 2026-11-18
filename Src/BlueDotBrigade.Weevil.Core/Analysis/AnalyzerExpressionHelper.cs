@@ -51,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 					continue;
 				}
 
-				if (expressionBuilder != null && expressionBuilder.TryGetExpression(trimmedSegment, out var expression))
+				if (expressionBuilder != null && expressionBuilder.TryGetExpression(trimmedSegment, out IExpression expression))
 				{
 					if (expression is RegularExpression regexExpression)
 					{
@@ -100,7 +100,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 					continue;
 				}
 
-				if (expressionBuilder != null && expressionBuilder.TryGetExpression(trimmedSegment, out var expression))
+				if (expressionBuilder != null && expressionBuilder.TryGetExpression(trimmedSegment, out IExpression expression))
 				{
 					results.Add(expression);
 				}

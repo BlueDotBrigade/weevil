@@ -13,7 +13,7 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			// A filter's worker reads a whole range, so it reads each chunk of a log on disk once (#1027).
 			// Records kept as strings read no chunk, so the first range starts before any chunk does.
-			var ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 2);
+			(int Start, int End)[] ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 2);
 
 			ranges.Should().Equal((0, 2), (2, 6), (6, 8));
 		}
@@ -23,7 +23,7 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			// In RAM, reading a chunk costs nothing, so a small log still keeps every core busy.
 			// 4 ranges per worker.
-			var ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: false, workerCount: 1);
+			(int Start, int End)[] ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: false, workerCount: 1);
 
 			ranges.Should().Equal((0, 2), (2, 4), (4, 6), (6, 8));
 		}
@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Data
 		public void GivenAtMostHalfAsManyChunksAsWorkersOnDisk_WhenSplit_ThenEachChunksRangeIsSplitSoMoreWorkersAreBusy()
 		{
 			// A small log on disk keeps more cores busy: each worker reads its chunk once. The table's 3 ranges each split in 2 for 6 workers.
-			var ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 6);
+			(int Start, int End)[] ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 6);
 
 			ranges.Should().Equal((0, 1), (1, 2), (2, 4), (4, 6), (6, 7), (7, 8));
 		}
@@ -41,7 +41,7 @@ namespace BlueDotBrigade.Weevil.Data
 		public void GivenMoreThanHalfAsManyChunksAsWorkersOnDisk_WhenSplit_ThenEachRangeIsAWholeChunk()
 		{
 			// Splitting the table's 3 ranges in 2 for 5 workers would not finish sooner, and would read the log twice.
-			var ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 5);
+			(int Start, int End)[] ranges = RecordRanges.Split(CreateTableOfTwoChunks(), alignToChunks: true, workerCount: 5);
 
 			ranges.Should().Equal((0, 2), (2, 6), (6, 8));
 		}
@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Data
 				builder.Add(lineNumber, DateTime.MinValue, Facts, "Kept as a string");
 			}
 
-			var ranges = RecordRanges.Split(new TableRecordList(builder.Build()), alignToChunks: true, workerCount: 1);
+			(int Start, int End)[] ranges = RecordRanges.Split(new TableRecordList(builder.Build()), alignToChunks: true, workerCount: 1);
 
 			ranges.Should().Equal((0, 2), (2, 4), (4, 5));
 		}

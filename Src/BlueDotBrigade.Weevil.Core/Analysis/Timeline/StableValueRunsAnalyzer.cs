@@ -4,7 +4,8 @@
         using System.Collections.Immutable;
         using System.Linq;
         using System.Threading;
-        using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
+	using BlueDotBrigade.Weevil.IO;
         using Data;
         using Filter;
         using Filter.Expressions.Regular;
@@ -65,8 +66,8 @@
                                 return new Results(0);
                         }
 
-                        // Parse expressions with alias expansion and || support
-                        var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
+			// Parse expressions with alias expansion and || support
+			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
                         ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
                                 customRegex,
                                 _aliasExpander,
@@ -92,7 +93,7 @@
                                                 {
                                                         matchedKeys.Add(currentState.Key);
 
-                                                        if (activeRuns.TryGetValue(currentState.Key, out var existingRun))
+                                                        if (activeRuns.TryGetValue(currentState.Key, out ValueRun existingRun))
                                                         {
                                                                 if (existingRun.ValueEquals(currentState.Value))
                                                                 {
@@ -118,7 +119,7 @@
 
                                                                 foreach (string key in keysToFinalize)
                                                                 {
-                                                                        if (activeRuns.TryGetValue(key, out var run))
+                                                                        if (activeRuns.TryGetValue(key, out ValueRun run))
                                                                         {
                                                                                 FinalizeRun(key, run);
                                                                         }

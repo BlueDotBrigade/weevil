@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			Log.Default.Write(LogSeverityType.Information, $"Caching telemetry session. SessionId={session.SessionId}; Path='{finalPath}'");
 
-			using (var stream = File.Open(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None))
+			using (FileStream stream = File.Open(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None))
 			{
 				Serializer.Serialize(stream, session);
 			}
@@ -62,7 +62,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			{
 				try
 				{
-					using var stream = File.OpenRead(filePath);
+					using FileStream stream = File.OpenRead(filePath);
 					if (Serializer.Deserialize(stream) is TelemetrySessionDto session)
 					{
 						sessions.Add(new PendingTelemetrySession

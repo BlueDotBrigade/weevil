@@ -2,6 +2,7 @@
 {
 	using System.Collections.Immutable;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
@@ -12,7 +13,7 @@
 		private static Results Analyze(RecordList records, IRecordState state, string regex)
 		{
 			var analyzer = new LastOccurrenceAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
+			IUserDialog userDialog = RecordAnalyzerTestContext.CreateDialog(regex);
 
 			return analyzer.Analyze(
 				records,
@@ -39,18 +40,18 @@
 
 		private static void AssertIntegerScenario(string pattern, string expected)
 		{
-			var records = AnalysisHelper.BuildIntegerRecords(pattern);
+			RecordList records = AnalysisHelper.BuildIntegerRecords(pattern);
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.IntegerRegex);
+			Results results = Analyze(records, state, AnalysisHelper.IntegerRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, state, results, label: "integer scenario");
 		}
 
 		private static void AssertDecimalScenario(string pattern, string expected)
 		{
-			var records = AnalysisHelper.BuildDecimalRecords(pattern);
+			RecordList records = AnalysisHelper.BuildDecimalRecords(pattern);
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.DecimalRegex);
+			Results results = Analyze(records, state, AnalysisHelper.DecimalRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, state, results, label: "decimal scenario");
 		}
@@ -143,7 +144,7 @@
 			// Same noisy sequence as the other analyzers. LastOccurrenceAnalyzer flags the last
 			// occurrence of each distinct decimal value: 32.999 (idx 2), 32.998 (idx 5),
 			// 33.000 (idx 6), 32.997 (idx 8).
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("15:02:00.000 33.000")
 				.WithContent("15:02:01.000 33.000")
 				.WithContent("15:02:02.000 32.999")
@@ -156,7 +157,7 @@
 				.GetRecords();
 
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.DecimalRegex);
+			Results results = Analyze(records, state, AnalysisHelper.DecimalRegex);
 
 			AnalysisHelper.GetFlaggedIndices(records, state).Should().Equal(2, 5, 6, 8);
 			results.FlaggedRecords.Should().Be(4);

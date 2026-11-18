@@ -10,7 +10,7 @@
 		[TestMethod]
 		public void IsMatch_RecordHasDefaultSeverity_ReturnsFalse()
 		{
-			var record = Substitute.For<IRecord>();
+			IRecord record = Substitute.For<IRecord>();
 
 			var expression = new SeverityTypeExpression(SeverityType.Error);
 
@@ -20,7 +20,7 @@
 		[TestMethod] // TODO: Move severity to metadata? Check UI first.
 		public void IsMatch_RecordHasDifferentSeverity_ReturnsFalse()
 		{
-			var record = Substitute.For<IRecord>();
+			IRecord record = Substitute.For<IRecord>();
 			
 			record.Severity.Returns(SeverityType.Debug);
 			
@@ -38,7 +38,7 @@
 		public void GivenASeverityInAnyCaseOrWithSpaces_WhenMatchedAgainstThatSeverity_ThenItMatches(string serializedExpression)
 		{
 			// A severity whose case differed from the expected name, or that had a space after it, matched nothing.
-			var record = Substitute.For<IRecord>();
+			IRecord record = Substitute.For<IRecord>();
 			record.Severity.Returns(SeverityType.Information);
 
 			var expression = new SeverityTypeExpression(serializedExpression);

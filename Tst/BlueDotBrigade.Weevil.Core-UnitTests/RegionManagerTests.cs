@@ -1,11 +1,11 @@
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using BlueDotBrigade.Weevil.Core;
-using NSubstitute;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using BlueDotBrigade.Weevil.Data;
 using System.Linq;
+using BlueDotBrigade.Weevil.Core;
+using BlueDotBrigade.Weevil.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace BlueDotBrigade.Weevil.Core.UnitTests
 {

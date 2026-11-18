@@ -1,24 +1,22 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Converters
 {
 	using System;
+	using System;
+	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
+	using System.Globalization;
 	using System.Globalization;
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
+	using System.Windows;
+	using System.Windows;
+	using System.Windows.Data;
+	using System.Windows.Data;
+	using System.Windows.Data;
 	using BlueDotBrigade.Weevil.Data;
-	using System.Windows.Data;
-	using System.Windows;
 	using BlueDotBrigade.Weevil.Gui.Filter;
-
-	using System;
-	using System.Globalization;
-	using System.Windows;
-	using System.Windows.Data;
-
-	using System;
-	using System.Globalization;
-	using System.Windows.Data;
 	using global::BlueDotBrigade.Weevil.Data;
 	using global::BlueDotBrigade.Weevil.Gui.Filter;
 

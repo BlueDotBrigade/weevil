@@ -33,7 +33,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 
 			// Find records with elapsed time between 2000ms and 4000ms
 			// Should find the first matching record with 2000ms elapsed time (lineNumber 52)
-			var result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(2000, 4000);
+			IRecord result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(2000, 4000);
 			
 			result.LineNumber.Should().Be(52);
 		}
@@ -46,7 +46,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 
 			// Find records with elapsed time >= 200ms (no maximum)
 			// Should find the first record with 200ms elapsed time (lineNumber 52)
-			var result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(200, null);
+			IRecord result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(200, null);
 			
 			result.LineNumber.Should().Be(52);
 		}
@@ -59,7 +59,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 
 			// Find records with elapsed time <= 200ms (no minimum)
 			// Should find the first record with 100ms elapsed time (lineNumber 51)
-			var result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(null, 200);
+			IRecord result = new ElapsedTimeNavigator(new ActiveRecord(records)).FindNext(null, 200);
 			
 			result.LineNumber.Should().Be(51);
 		}
@@ -73,10 +73,10 @@ namespace BlueDotBrigade.Weevil.Navigation
 			var activeRecord = new ActiveRecord(records);
 			// Set active record to the end
 			activeRecord.SetActiveIndex(records.Count - 1);
-			
+
 			// Find records with elapsed time between 2000ms and 4000ms, going backwards
 			// Should find the first matching record going backwards with 4000ms elapsed time (lineNumber 54)
-			var result = new ElapsedTimeNavigator(activeRecord).FindPrevious(2000, 4000);
+			IRecord result = new ElapsedTimeNavigator(activeRecord).FindPrevious(2000, 4000);
 			
 			result.LineNumber.Should().Be(54);
 		}

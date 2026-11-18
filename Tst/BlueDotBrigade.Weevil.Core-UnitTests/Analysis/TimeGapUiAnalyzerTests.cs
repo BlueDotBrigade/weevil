@@ -15,7 +15,7 @@
 
 		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
 		{
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
@@ -177,7 +177,7 @@
 		public void GivenPreviousRunHasGapsAndInvalidThreshold_WhenAnalyzeCalled_ThenResultsAndPublicStateAreReset()
 		{
 			// Regression: Issue #934
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns("not-a-number");
@@ -186,7 +186,7 @@
 			analyzer.Analyze(_records, new RecordState(), TimeSpan.FromMilliseconds(1), canUpdateMetadata: false);
 			analyzer.Count.Should().BeGreaterThan(0);
 
-			var results = analyzer.Analyze(
+			Results results = analyzer.Analyze(
 				_records,
 				new RecordState(),
 				string.Empty,

@@ -24,7 +24,7 @@
 					.WithCreatedAt(4, "11:00:00")
 					.GetRecords();
 
-				var dialog = Substitute.For<IUserDialog>();
+				IUserDialog dialog = Substitute.For<IUserDialog>();
 				dialog
 					.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 					.Returns("0");

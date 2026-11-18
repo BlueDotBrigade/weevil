@@ -8,7 +8,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenKnownSeverityInSpan_WhenParsing_ThenReturnsSeverity()
 		{
-			var line = "Warning\tmessage".AsSpan();
+			ReadOnlySpan<char> line = "Warning\tmessage".AsSpan();
 
 			var isKnown = SeverityTypeHelpers.TryParse(line[..7], out SeverityType severityType);
 

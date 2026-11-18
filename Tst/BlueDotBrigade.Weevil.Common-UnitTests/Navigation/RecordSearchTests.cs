@@ -94,7 +94,7 @@
 		[DataRow("12:00", 4)]
 		public void IndexOfCreatedAt_NearestNeighbor_ReturnsIndex(string createdAt, int expectedIndex)
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(0, "10:00:00") 
 				.WithCreatedAt(1, "10:15:00")
 				.WithCreatedAt(2, "10:30:00")

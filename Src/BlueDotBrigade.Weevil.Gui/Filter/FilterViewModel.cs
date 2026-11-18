@@ -36,8 +36,8 @@
 	using BlueDotBrigade.Weevil.Reports;
 	using BlueDotBrigade.Weevil.Runtime.Serialization;
 	using BlueDotBrigade.Weevil.Utilities;
-	using Newtonsoft.Json.Linq;
 	using Metalama.Patterns.Observability;
+	using Newtonsoft.Json.Linq;
 	using Directory = System.IO.Directory;
 	using File = System.IO.File;
 

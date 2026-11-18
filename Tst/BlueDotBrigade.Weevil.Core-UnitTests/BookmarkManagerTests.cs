@@ -113,7 +113,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                         _bookmarkManager.Create(3, "MyBookmark", 50);
 
                         // Act
-                        var found = _bookmarkManager.TryGetBookmarkById(3, out var bookmark);
+                        var found = _bookmarkManager.TryGetBookmarkById(3, out Bookmark bookmark);
 
                         // Assert
                         found.Should().BeTrue();
@@ -130,7 +130,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                         _bookmarkManager.Create(1, "Test", 10);
 
                         // Act
-                        var found = _bookmarkManager.TryGetBookmarkById(5, out var bookmark);
+                        var found = _bookmarkManager.TryGetBookmarkById(5, out Bookmark bookmark);
 
                         // Assert
                         found.Should().BeFalse();
@@ -148,7 +148,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 
                         // Assert - The old bookmark should be replaced; only one bookmark with ID=2 should exist
                         _bookmarkManager.Bookmarks.Length.Should().Be(1);
-                        var found = _bookmarkManager.TryGetBookmarkById(2, out var bookmark);
+                        var found = _bookmarkManager.TryGetBookmarkById(2, out Bookmark bookmark);
                         found.Should().BeTrue();
                         bookmark.Name.Should().Be("Second");
                         bookmark.Record.LineNumber.Should().Be(20);
@@ -161,7 +161,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                         _bookmarkManager.Create(3, "Test", 100);
 
                         // Act
-                        var found = _bookmarkManager.TryGetBookmark(100, out var bookmark);
+                        var found = _bookmarkManager.TryGetBookmark(100, out Bookmark bookmark);
 
                         // Assert
                         found.Should().BeTrue();
@@ -200,7 +200,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                         _bookmarkManager.Create(1, "Test", 10);
 
                         // Act
-                        var found = _bookmarkManager.TryGetBookmark(999, out var bookmark);
+                        var found = _bookmarkManager.TryGetBookmark(999, out Bookmark bookmark);
 
                         // Assert
                         found.Should().BeFalse();

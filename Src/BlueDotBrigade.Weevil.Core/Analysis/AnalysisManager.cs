@@ -80,8 +80,8 @@
 
 			if ((componentType & ComponentType.Core) == ComponentType.Core)
 			{
-				var filterStrategy = _coreEngine.Filter.FilterStrategy;
-				var aliasExpander = _coreEngine.Filter.AliasExpander;
+				FilterStrategy filterStrategy = _coreEngine.Filter.FilterStrategy;
+				IFilterAliasExpander aliasExpander = _coreEngine.Filter.AliasExpander;
 
 				analyzers.AddRange(new List<IRecordAnalyzer>()
 				{

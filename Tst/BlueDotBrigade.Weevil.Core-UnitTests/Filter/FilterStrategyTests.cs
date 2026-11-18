@@ -26,7 +26,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 
 		private IRecord CreateRecord(string content, int lineNumber, bool isPinned)
 		{
-			var record = Substitute.For<IRecord>();
+			IRecord record = Substitute.For<IRecord>();
 			record.Content.Returns(content);
 			record.LineNumber.Returns(lineNumber);
 			_annotations.SetPinned(lineNumber, isPinned);
@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 
 		private static IBookmarkManager CreateBookmarkManager(bool hasBookmark, int lineNumber)
 		{
-			var bookmarkManager = Substitute.For<IBookmarkManager>();
+			IBookmarkManager bookmarkManager = Substitute.For<IBookmarkManager>();
 			string bookmarkName;
 			bookmarkManager.TryGetBookmarkName(lineNumber, out bookmarkName)
 				.Returns(x =>
@@ -59,9 +59,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			bool showBookmarks,
 			IBookmarkManager bookmarkManager)
 		{
-			var coreExtension = Substitute.For<ICoreExtension>();
+			ICoreExtension coreExtension = Substitute.For<ICoreExtension>();
 			var context = new ContextDictionary();
-			var filterAliasExpander = Substitute.For<IFilterAliasExpander>();
+			IFilterAliasExpander filterAliasExpander = Substitute.For<IFilterAliasExpander>();
 			filterAliasExpander.Expand(Arg.Any<string>()).Returns(x => x.Arg<string>());
 			
 			var configuration = new ConcurrentDictionary<string, object>();
@@ -69,7 +69,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 			configuration["IncludeBookmarks"] = showBookmarks;
 			
 			var filterCriteria = new FilterCriteria(includeFilter, excludeFilter, configuration);
-			var regionManager = Substitute.For<IRegionManager>();
+			IRegionManager regionManager = Substitute.For<IRegionManager>();
 			
 			return new FilterStrategy(
 				coreExtension,
@@ -90,9 +90,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -113,9 +113,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_Pinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -133,9 +133,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_Pinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: true,
@@ -156,9 +156,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -176,9 +176,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -196,9 +196,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_NotPinned_Bookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: true,
@@ -216,9 +216,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_Pinned_Bookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: true,
@@ -236,9 +236,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_Pinned_Bookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -256,9 +256,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_NoFilters_Pinned_Bookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: string.Empty,
 				showPinned: true,
@@ -280,9 +280,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeMatches_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -300,9 +300,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeMatches_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: string.Empty,
 				showPinned: true,
@@ -324,9 +324,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -344,9 +344,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: string.Empty,
 				showPinned: true,
@@ -368,9 +368,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeNoMatch_Pinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -388,9 +388,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeNoMatch_Pinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: string.Empty,
 				showPinned: true,
@@ -412,9 +412,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeNoMatch_NotPinned_Bookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: string.Empty,
 				showPinned: false,
@@ -436,9 +436,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -456,9 +456,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: true,
@@ -476,9 +476,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -496,9 +496,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOn_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: true,
@@ -520,9 +520,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_Pinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -540,9 +540,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_Pinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: true,
@@ -564,9 +564,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_NotPinned_Bookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -584,9 +584,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeMatches_NotPinned_Bookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -608,9 +608,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -628,9 +628,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: true,
@@ -648,9 +648,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_ExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: string.Empty,
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -671,9 +671,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_BothMatch_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -691,9 +691,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_BothMatch_Pinned_NotBookmarked_ShowPinnedOn_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: "ERROR",
 				showPinned: true,
@@ -711,9 +711,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_BothMatch_NotPinned_Bookmarked_ShowPinnedOff_ShowBookmarksOn_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: true, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: "ERROR",
 				showPinned: false,
@@ -735,9 +735,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeMatchesExcludeNoMatch_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsTrue()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: "DEBUG",
 				showPinned: false,
@@ -759,9 +759,9 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		public void CanKeep_IncludeNoMatchExcludeMatches_NotPinned_NotBookmarked_ShowPinnedOff_ShowBookmarksOff_ReturnsFalse()
 		{
 			// Arrange
-			var record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
-			var bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
-			var strategy = CreateFilterStrategy(
+			IRecord record = CreateRecord(SAMPLE_CONTENT_NO_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IBookmarkManager bookmarkManager = CreateBookmarkManager(hasBookmark: false, SAMPLE_LINE_NUMBER);
+			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "ERROR",
 				excludeFilter: "INFO",
 				showPinned: false,
@@ -782,7 +782,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		[TestMethod]
 		public void GivenAFilterOfOnlyMonikers_WhenARecordIsChecked_ThenItsContentIsNotRead()
 		{
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: true);
 			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "@Pinned",
 				excludeFilter: "@Flagged",
@@ -798,7 +798,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 		[TestMethod]
 		public void GivenSeveralTextExpressions_WhenARecordIsChecked_ThenItsContentIsReadOnce()
 		{
-			var record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
+			IRecord record = CreateRecord(SAMPLE_CONTENT_MATCH, SAMPLE_LINE_NUMBER, isPinned: false);
 			FilterStrategy strategy = CreateFilterStrategy(
 				includeFilter: "WARN||FATAL||ERROR",
 				excludeFilter: "DEBUG||TRACE",

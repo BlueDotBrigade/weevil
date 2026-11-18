@@ -10,14 +10,14 @@ namespace BlueDotBrigade.Weevil.Analysis
 	{
 		public static FilterStrategy CreateFilterStrategy(FilterType filterType = FilterType.RegularExpression)
 		{
-			var coreExtension = Substitute.For<ICoreExtension>();
+			ICoreExtension coreExtension = Substitute.For<ICoreExtension>();
 			var context = new ContextDictionary();
-			var filterAliasExpander = Substitute.For<IFilterAliasExpander>();
+			IFilterAliasExpander filterAliasExpander = Substitute.For<IFilterAliasExpander>();
 			filterAliasExpander.Expand(Arg.Any<string>()).Returns(x => x.Arg<string>());
 
 			var filterCriteria = new FilterCriteria(string.Empty, string.Empty, new ConcurrentDictionary<string, object>());
-			var regionManager = Substitute.For<IRegionManager>();
-			var bookmarkManager = Substitute.For<IBookmarkManager>();
+			IRegionManager regionManager = Substitute.For<IRegionManager>();
+			IBookmarkManager bookmarkManager = Substitute.For<IBookmarkManager>();
 
 			return new FilterStrategy(
 				coreExtension,
@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		public static IUserDialog CreateDialog(string regex, string analysisOrder = "Ascending")
 		{
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())

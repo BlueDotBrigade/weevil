@@ -5,11 +5,11 @@
 	using System.Collections.Immutable;
 	using System.Linq;
 	using System.Runtime.Serialization;
+	using BlueDotBrigade.Weevil.Collections.Generic;
 	using Data;
 	using Diagnostics;
 	using IO;
 	using Navigation;
-	using BlueDotBrigade.Weevil.Collections.Generic;
 	using Runtime.Serialization;
 
 	internal class SidecarLoader

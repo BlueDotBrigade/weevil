@@ -92,7 +92,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[Given("records have been appended to the saved log file")]
 	public void GivenRecordsHaveBeenAppendedToTheSavedLogFile()
 	{
-		var lines = File.ReadAllLines(new Daten().AsFilePath(From.GlobalDefault)).Take(20);
+		IEnumerable<string> lines = File.ReadAllLines(new Daten().AsFilePath(From.GlobalDefault)).Take(20);
 		Append(string.Join(_lineEnding, lines) + _lineEnding);
 	}
 

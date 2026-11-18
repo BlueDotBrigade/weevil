@@ -123,7 +123,7 @@ namespace BlueDotBrigade.Weevil
 			try
 			{
 				string Record(int lineNumber) => $"2024-01-02 03:04:{lineNumber % 60:00}.12345\t100\t{lineNumber}\tInfo\tRecord {lineNumber}";
-				var stackTrace = Enumerable.Range(0, 300).Select(frame => $"   at Frame{frame}");
+				IEnumerable<string> stackTrace = Enumerable.Range(0, 300).Select(frame => $"   at Frame{frame}");
 				var logPath = Path.Combine(folder, "StackTrace.tsv");
 				File.WriteAllText(logPath, string.Join("\n", new[] { Record(1) }.Concat(stackTrace).Concat(Enumerable.Range(302, 9).Select(Record))) + "\n");
 

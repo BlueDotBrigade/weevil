@@ -13,7 +13,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private static Results Analyze(RecordList records, IRecordState state, string regex, string threshold, string comparison)
 		{
 			var analyzer = new ThresholdCrossingsAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 
 			userDialog
 				.TryGetThreshold(
@@ -41,18 +41,18 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		private static void AssertIntegerScenario(string pattern, string threshold, string comparison, string expected)
 		{
-			var records = AnalysisHelper.BuildIntegerRecords(pattern);
+			RecordList records = AnalysisHelper.BuildIntegerRecords(pattern);
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.IntegerRegex, threshold, comparison);
+			Results results = Analyze(records, state, AnalysisHelper.IntegerRegex, threshold, comparison);
 
 			AssertFlagsMatchExpected(pattern, expected, records, state, results, $"integer scenario ({comparison} {threshold})");
 		}
 
 		private static void AssertDecimalScenario(string pattern, string threshold, string comparison, string expected)
 		{
-			var records = AnalysisHelper.BuildDecimalRecords(pattern);
+			RecordList records = AnalysisHelper.BuildDecimalRecords(pattern);
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.DecimalRegex, threshold, comparison);
+			Results results = Analyze(records, state, AnalysisHelper.DecimalRegex, threshold, comparison);
 
 			AssertFlagsMatchExpected(pattern, expected, records, state, results, $"decimal scenario ({comparison} {threshold})");
 		}
@@ -84,9 +84,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		[TestMethod]
 		public void GivenDialogReturnsBlankThresholdAndComparison_WhenAnalyze_ThenDefaultsAreApplied()
 		{
-			var records = AnalysisHelper.BuildIntegerRecords("1");
+			RecordList records = AnalysisHelper.BuildIntegerRecords("1");
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.IntegerRegex, string.Empty, string.Empty);
+			Results results = Analyze(records, state, AnalysisHelper.IntegerRegex, string.Empty, string.Empty);
 
 			results.FlaggedRecords.Should().Be(1);
 			state.IsFlagged(records[0]).Should().BeTrue();

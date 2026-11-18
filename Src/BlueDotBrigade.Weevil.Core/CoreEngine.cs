@@ -146,7 +146,7 @@
 
 			_analysisManager = new AnalysisManager(this, _coreExtension, _telemetryRecorder);
 
-			var filterAliases = _coreExtension.GetFilterAliases(_context);
+			IDictionary<string, string> filterAliases = _coreExtension.GetFilterAliases(_context);
 			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
 			_filterManager = new FilterManager(

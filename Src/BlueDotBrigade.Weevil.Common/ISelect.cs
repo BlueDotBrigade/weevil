@@ -3,8 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Analysis;
-	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Navigation;
 
 	/// <summary>
 	/// The selected records of the filter results, chosen by line number.

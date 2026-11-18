@@ -34,14 +34,14 @@
 		[TestMethod]
 		public void FindNext_CaseIgnored_RecordFound()
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("The quick brown fox")
 				.WithContent("jumps OVER")
 				.WithContent("the lazy dog")
 				.GetRecords();
 
 			var activeRecord = new ActiveRecord(records);
-			var result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: false);
+			IRecord result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: false);
 
 			result.LineNumber.Should().Be(2);
 		}
@@ -49,7 +49,7 @@
 		[TestMethod]
 		public void FindNext_CaseSensitive_Throws()
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("The quick brown fox")
 				.WithContent("jumps OVER")
 				.WithContent("the lazy dog")
@@ -63,14 +63,14 @@
 		[TestMethod]
 		public void FindNext_RegexPattern_RecordFound()
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("The quick brown fox")
 				.WithContent("jumps over 123")
 				.WithContent("the lazy dog")
 				.GetRecords();
 
 			var activeRecord = new ActiveRecord(records);
-			var result = new ContentNavigator(activeRecord).FindNext(@"\d+", isCaseSensitive: false, useRegex: true);
+			IRecord result = new ContentNavigator(activeRecord).FindNext(@"\d+", isCaseSensitive: false, useRegex: true);
 
 			result.LineNumber.Should().Be(2);
 		}
@@ -78,14 +78,14 @@
 		[TestMethod]
 		public void FindNext_RegexCaseInsensitive_RecordFound()
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("The quick brown fox")
 				.WithContent("jumps OVER")
 				.WithContent("the lazy dog")
 				.GetRecords();
 
 			var activeRecord = new ActiveRecord(records);
-			var result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: false, useRegex: true);
+			IRecord result = new ContentNavigator(activeRecord).FindNext("over", isCaseSensitive: false, useRegex: true);
 
 			result.LineNumber.Should().Be(2);
 		}
@@ -93,7 +93,7 @@
 		[TestMethod]
 		public void FindNext_RegexCaseSensitive_Throws()
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("The quick brown fox")
 				.WithContent("jumps OVER")
 				.WithContent("the lazy dog")
@@ -107,7 +107,7 @@
 		[TestMethod]
 		public void FindPrevious_RegexPattern_RecordFound()
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("The quick brown fox")
 				.WithContent("jumps over 456")
 				.WithContent("the lazy dog 789")
@@ -115,7 +115,7 @@
 
 			var activeRecord = new ActiveRecord(records);
 			activeRecord.SetActiveIndex(2); // Start from the last record
-			var result = new ContentNavigator(activeRecord).FindPrevious(@"\d+", isCaseSensitive: false, useRegex: true);
+			IRecord result = new ContentNavigator(activeRecord).FindPrevious(@"\d+", isCaseSensitive: false, useRegex: true);
 
 			result.LineNumber.Should().Be(2);
 		}

@@ -64,8 +64,8 @@
                 return new Results(0);
             }
 
-            // Parse expressions with alias expansion and || support
-            var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
+			// Parse expressions with alias expansion and || support
+			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
             ImmutableArray<IExpression> expressions = AnalyzerExpressionHelper.ParseAllExpressions(
                 customRegex,
                 _aliasExpander,

@@ -96,7 +96,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 				lock (_gate)
 				{
-					var now = _utcNow();
+					DateTime now = _utcNow();
 					endedSession = EndCurrentSessionInternal(now);
 
 					CurrentSession = new TelemetrySession
@@ -192,7 +192,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 						return;
 					}
 
-					var now = _utcNow();
+					DateTime now = _utcNow();
 					_activeUsageAccumulator.Renew(now);
 					CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
 					CurrentSession.Increment(metricKey);

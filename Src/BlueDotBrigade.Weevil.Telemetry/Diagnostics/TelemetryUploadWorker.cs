@@ -75,9 +75,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			try
 			{
-				foreach (var pendingSession in _sessionStore.GetPendingSessions(_maxPendingSessionsPerBatch))
+				foreach (PendingTelemetrySession pendingSession in _sessionStore.GetPendingSessions(_maxPendingSessionsPerBatch))
 				{
-					var uploadStatus = await UploadWithRetryAsync(pendingSession).ConfigureAwait(false);
+					TelemetryUploadStatus uploadStatus = await UploadWithRetryAsync(pendingSession).ConfigureAwait(false);
 
 					switch (uploadStatus)
 					{
@@ -109,8 +109,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			for (var attempt = 1; attempt <= _maxRetryAttempts; attempt++)
 			{
-				var client = _clientAccessor() ?? NullTelemetryClient.Instance;
-				var uploadStatus = await client
+				ITelemetryClient client = _clientAccessor() ?? NullTelemetryClient.Instance;
+				TelemetryUploadStatus uploadStatus = await client
 					.UploadAsync(TelemetrySessionMapper.ToSession(pendingSession.Session), CancellationToken.None)
 					.ConfigureAwait(false);
 

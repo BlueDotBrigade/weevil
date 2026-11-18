@@ -23,7 +23,7 @@ namespace BlueDotBrigade.Weevil.Math
 
 			if (trimCount * 2 >= sorted.Length) return null;
 
-			var trimmed = sorted.Skip(trimCount).Take(sorted.Length - 2 * trimCount);
+			IEnumerable<double> trimmed = sorted.Skip(trimCount).Take(sorted.Length - 2 * trimCount);
 			return System.Math.Round(trimmed.Average(), 3);
 		}
 	}

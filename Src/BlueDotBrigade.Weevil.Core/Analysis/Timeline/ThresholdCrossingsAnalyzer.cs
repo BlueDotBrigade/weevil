@@ -5,6 +5,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	using System.Collections.Immutable;
 	using System.Globalization;
 	using System.Threading;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -71,7 +72,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
-			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
+			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
 			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
 				customRegex,
 				_aliasExpander,
@@ -87,7 +88,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
-			if (!TryGetComparison(comparisonInput, out var comparison))
+			if (!TryGetComparison(comparisonInput, out ThresholdComparison comparison))
 			{
 				return new Results(0);
 			}

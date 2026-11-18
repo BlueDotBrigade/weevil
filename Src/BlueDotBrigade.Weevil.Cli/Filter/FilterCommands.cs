@@ -32,7 +32,7 @@
 			[Option(Description = "Filters only this level-1 section, one of those the log's sidecar lists, with the sections nested in it.")]
 			string? section = null)
 		{
-			var telemetry = TelemetrySessionLifecycle.Shared;
+			TelemetrySessionLifecycle telemetry = TelemetrySessionLifecycle.Shared;
 			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
 			try
@@ -50,7 +50,7 @@
 
 				// Before the log opens, so a log renamed meanwhile does not stop a save that has every record it needs (#1247).
 				Encoding encoding;
-				using (var log = FileHelper.Open(logPath))
+				using (FileStream log = FileHelper.Open(logPath))
 				{
 					encoding = EncodingHelper.GetEncoding(log);
 				}
