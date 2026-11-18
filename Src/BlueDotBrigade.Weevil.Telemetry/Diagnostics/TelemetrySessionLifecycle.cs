@@ -99,7 +99,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 					DateTime now = _utcNow();
 					endedSession = EndCurrentSessionInternal(now);
 
-					CurrentSession = new TelemetrySession
+					this.CurrentSession = new TelemetrySession
 					{
 						SessionId = Guid.NewGuid(),
 						Application = string.IsNullOrWhiteSpace(application) ? "Weevil" : application,
@@ -187,15 +187,15 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 				lock (_gate)
 				{
-					if (CurrentSession is null)
+					if (this.CurrentSession is null)
 					{
 						return;
 					}
 
 					DateTime now = _utcNow();
 					_activeUsageAccumulator.Renew(now);
-					CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
-					CurrentSession.Increment(metricKey);
+					this.CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
+					this.CurrentSession.Increment(metricKey);
 				}
 			}
 			catch (Exception exception)
@@ -301,32 +301,32 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		// Heartbeat only: keeps the active-usage window alive. Metric counts are recorded via Increment(...).
 		private void RecordActivityInternal(DateTime now)
 		{
-			if (CurrentSession is null)
+			if (this.CurrentSession is null)
 			{
 				return;
 			}
 
 			_activeUsageAccumulator.Renew(now);
-			CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
+			this.CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
 		}
 
 		private TelemetrySession EndCurrentSessionInternal(DateTime endedAtUtc)
 		{
-			if (CurrentSession is null)
+			if (this.CurrentSession is null)
 			{
 				return null;
 			}
 
 			_activeUsageAccumulator.Renew(endedAtUtc);
 
-			CurrentSession.SessionEndUtc = endedAtUtc;
-			CurrentSession.SessionActiveMinutes = System.Math.Round(_activeUsageAccumulator.ActiveMinutes, 3);
+			this.CurrentSession.SessionEndUtc = endedAtUtc;
+			this.CurrentSession.SessionActiveMinutes = System.Math.Round(_activeUsageAccumulator.ActiveMinutes, 3);
 
-			LastEndedSession = CurrentSession;
-			CurrentSession = null;
+			this.LastEndedSession = this.CurrentSession;
+			this.CurrentSession = null;
 			_activeUsageAccumulator.Clear();
 
-			return LastEndedSession;
+			return this.LastEndedSession;
 		}
 
 		private ITelemetryClient GetConfiguredClient()
@@ -430,8 +430,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			public StartupContext(string source, bool isDebugging)
 			{
-				Source = source;
-				IsDebugging = isDebugging;
+				this.Source = source;
+				this.IsDebugging = isDebugging;
 			}
 
 			public static StartupContext Default => new StartupContext("unknown", false);

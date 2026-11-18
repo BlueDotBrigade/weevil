@@ -43,6 +43,6 @@
 			this.ExcludeFilter, 
 			this.Configuration);
 
-		public RecordList Results => Engine.Filter.Results;
+		public RecordList Results => this.Engine.Filter.Results;
 	}
 }

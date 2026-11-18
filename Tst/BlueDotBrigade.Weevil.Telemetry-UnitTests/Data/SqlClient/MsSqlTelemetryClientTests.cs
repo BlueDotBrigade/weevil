@@ -279,7 +279,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			{
 				if (severity == LogSeverityType.Warning)
 				{
-					Warnings.Add(message);
+					this.Warnings.Add(message);
 				}
 			}
 
@@ -287,7 +287,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			{
 				if (severity == LogSeverityType.Warning)
 				{
-					Warnings.Add(message);
+					this.Warnings.Add(message);
 				}
 			}
 		}

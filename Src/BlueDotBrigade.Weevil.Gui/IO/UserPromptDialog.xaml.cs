@@ -68,13 +68,13 @@
 			{
 				_validationMessage = value;
 				RaisePropertyChanged(nameof(this.ValidationMessage));
-				RaisePropertyChanged(nameof(IsValidationMessageVisible));
+				RaisePropertyChanged(nameof(this.IsValidationMessageVisible));
 			}
 		}
 
 		public bool IsValidationMessageVisible
 		{
-			get => !string.IsNullOrWhiteSpace(ValidationMessage);
+			get => !string.IsNullOrWhiteSpace(this.ValidationMessage);
 		}
 
 		public UserPromptDialog() : this (string.Empty, string.Empty)
@@ -102,7 +102,7 @@
 			var validationResult = _validator?.Validate(this);
 			if (validationResult != null && !validationResult.IsValid)
 			{
-				ValidationMessage = validationResult.Errors[0].ErrorMessage;
+				this.ValidationMessage = validationResult.Errors[0].ErrorMessage;
 				return;
 			}
 
@@ -114,7 +114,7 @@
 			if (_validator != null)
 			{
 				var validationResult = _validator.Validate(this);
-				ValidationMessage = validationResult.IsValid ? string.Empty : validationResult.Errors[0].ErrorMessage;
+				this.ValidationMessage = validationResult.IsValid ? string.Empty : validationResult.Errors[0].ErrorMessage;
 			}
 		}
 	}

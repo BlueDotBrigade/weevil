@@ -31,7 +31,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			engine.Filter.Apply(filterType, new FilterCriteria(expression));
 			stopwatch.Stop();
 
-			TestContext.WriteLine($"Filtered {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
+			this.TestContext.WriteLine($"Filtered {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
 			engine.Filter.Results.Should().HaveCount(matchingRecords);
 			stopwatch.Elapsed.Should().BeLessThan(MaximumDuration);
 		}
@@ -50,7 +50,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			// The old code allocated about 1 GB on this log, so on more than about 48 cores the budget no longer tells them apart.
 			const long ChunkBytes = 17L * 1024 * 1024;
 			var budget = (Environment.ProcessorCount + 1) * ChunkBytes;
-			TestContext.WriteLine($"Allocated {inRam / 1_048_576.0:N0} MB in RAM and {onDisk / 1_048_576.0:N0} MB on disk; the budget for the difference is {budget / 1_048_576.0:N0} MB.");
+			this.TestContext.WriteLine($"Allocated {inRam / 1_048_576.0:N0} MB in RAM and {onDisk / 1_048_576.0:N0} MB on disk; the budget for the difference is {budget / 1_048_576.0:N0} MB.");
 
 			(onDisk - inRam).Should().BeLessThan(budget);
 		}
@@ -84,7 +84,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			}
 
 			var logLength = new FileInfo(logPath).Length;
-			TestContext.WriteLine($"Read {writer.BytesRead / (double)logLength:N3} times the log's {logLength:N0} bytes.");
+			this.TestContext.WriteLine($"Read {writer.BytesRead / (double)logLength:N3} times the log's {logLength:N0} bytes.");
 
 			// Each chunk's first record reads its own 64 KB block first: 0.4% of a 16 MB chunk. Only the byte order mark is not read.
 			writer.BytesRead.Should().BeInRange(logLength - 4, logLength + (logLength / 50), "each chunk of the log is read once");
@@ -115,7 +115,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			{
 				if (message == "Filtering complete.")
 				{
-					BytesRead = (long)metadata.Single(entry => entry.Key == "BytesRead").Value;
+					this.BytesRead = (long)metadata.Single(entry => entry.Key == "BytesRead").Value;
 				}
 			}
 

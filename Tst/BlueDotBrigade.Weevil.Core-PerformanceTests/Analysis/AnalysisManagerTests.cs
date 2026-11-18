@@ -26,7 +26,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			Results results = engine.Analyzer.Analyze(AnalysisType.DetectData, dialog);
 			stopwatch.Stop();
 
-			TestContext.WriteLine($"Analyzed {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s, and flagged {results.FlaggedRecords:N0}.");
+			this.TestContext.WriteLine($"Analyzed {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s, and flagged {results.FlaggedRecords:N0}.");
 			results.FlaggedRecords.Should().Be(34);
 			stopwatch.Elapsed.Should().BeLessThan(MaximumDuration);
 		}

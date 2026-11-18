@@ -142,7 +142,7 @@ namespace BlueDotBrigade.Weevil
 
 			public void Increment(string metricKey)
 			{
-				Metrics.Add(metricKey);
+				this.Metrics.Add(metricKey);
 			}
 		}
 	}

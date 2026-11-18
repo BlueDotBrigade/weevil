@@ -42,7 +42,7 @@ namespace BlueDotBrigade.Weevil
 			engine.Selector.SaveSelection(destinationPath, FileFormatType.Raw);
 			stopwatch.Stop();
 
-			TestContext.WriteLine($"Saved {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
+			this.TestContext.WriteLine($"Saved {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
 			new FileInfo(destinationPath).Length.Should().BeGreaterThan(new FileInfo(logPath).Length * 9 / 10, "every record is saved");
 			stopwatch.Elapsed.Should().BeLessThan(MaximumDuration);
 		}

@@ -524,7 +524,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			public void Save(TelemetrySessionDto session)
 			{
-				SavedSessions.Add(session);
+				this.SavedSessions.Add(session);
 			}
 
 			public IReadOnlyList<PendingTelemetrySession> GetPendingSessions(int maxCount)
@@ -544,12 +544,12 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 			public void TriggerUpload()
 			{
-				TriggerCount++;
+				this.TriggerCount++;
 			}
 
 			public void Reset()
 			{
-				TriggerCount = 0;
+				this.TriggerCount = 0;
 			}
 		}
 	}

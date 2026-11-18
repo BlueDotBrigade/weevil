@@ -58,7 +58,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
 		public async Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 		{
-			if (IsUploadDisabled)
+			if (this.IsUploadDisabled)
 			{
 				return TelemetryUploadStatus.Disabled;
 			}

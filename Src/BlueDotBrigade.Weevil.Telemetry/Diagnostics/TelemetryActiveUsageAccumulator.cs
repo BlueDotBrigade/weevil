@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// <param name="activityObservedAtUtc">The observed activity time in UTC.</param>
 		public void Reset(DateTime activityObservedAtUtc)
 		{
-			ActiveMinutes = 0;
+			this.ActiveMinutes = 0;
 			_lastActivityUtc = activityObservedAtUtc;
 		}
 
@@ -56,7 +56,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			TimeSpan elapsed = activityObservedAtUtc - _lastActivityUtc.Value;
 			if (elapsed > TimeSpan.Zero)
 			{
-				ActiveMinutes += System.Math.Min(elapsed.TotalMinutes, _maxLeaseMinutes);
+				this.ActiveMinutes += System.Math.Min(elapsed.TotalMinutes, _maxLeaseMinutes);
 			}
 
 			_lastActivityUtc = activityObservedAtUtc;
@@ -67,7 +67,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// </summary>
 		public void Clear()
 		{
-			ActiveMinutes = 0;
+			this.ActiveMinutes = 0;
 			_lastActivityUtc = null;
 		}
 	}
