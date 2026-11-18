@@ -52,7 +52,7 @@ Everything about performance lives in `BlueDotBrigade.Weevil.Core-PerformanceTes
 
 | Kind | Where | Runs | Catches |
 |---|---|---|---|
-| **Budget**: a limit that must hold | An MSTest `[TestClass]` | In CI, with `dotnet test` | Large regressions: memory kept per record in RAM and on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
+| **Budget**: a limit that must hold | An MSTest `[TestClass]` | In CI, with `dotnet test` | Large regressions: memory kept per record in RAM and on disk, memory a filter allocates on disk, and filters, export and an analyzer far over a generous time limit, which on disk also catches an analyzer or export reading the log once per record |
 | **Benchmark**: a measurement to compare two versions | A BenchmarkDotNet class in `Benchmarks/`, run by a test in `BenchmarkTests`, in the `Benchmark` category | On demand, in Release: locally, or with the Benchmarks workflow | Smaller regressions in time and memory allocated: opening (without a saved line index), reopening (from the saved record table), filtering, Find, export and an analyzer, on logs of 100,000 and 1,000,000 records |
 
 Add a budget when a limit must never be crossed, and a benchmark when you want to see how a change moves a number. A CI runner is too noisy to fail a build on a 10% slowdown, so that is a benchmark, not a budget. To add a benchmark class, also add a test method for it to `BenchmarkTests`, without which it never runs, and add the class to the `options` of the Benchmarks workflow's `benchmarks` input.

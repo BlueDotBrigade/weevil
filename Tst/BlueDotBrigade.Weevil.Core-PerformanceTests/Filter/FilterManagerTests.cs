@@ -39,14 +39,15 @@ namespace BlueDotBrigade.Weevil.Filter
 		[TestMethod]
 		[WorkItem(1269)]
 		[DoNotParallelize]
-		public void GivenADroidLogOpenedOnDisk_WhenFiltered_ThenItAllocatesAtMostAboutOneChunkPerWorkerMoreThanInRam()
+		public void GivenADroidLogOpenedOnDisk_WhenFiltered_ThenItAllocatesAboutOneChunkPerCoreMoreThanInRam()
 		{
 			// Each of the filter's many worker states allocated its own 16 MB buffer, so one filter on disk allocated about half the log's size again.
 			var logPath = DroidLog.GetPath(DroidLog.Utf8);
 			var inRam = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Ram).Open());
 			var onDisk = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open());
 
-			// A buffer per worker, each sized to the longest chunk, which is a few bytes over 16 MB, plus one for a worker the loop replaces.
+			// A buffer per core, of a 16 MB chunk and a 1/16 margin, plus one buffer of margin.
+			// The old code allocated about 1 GB on this log, so on more than about 48 cores the budget no longer tells them apart.
 			const long ChunkBytes = 17L * 1024 * 1024;
 			var budget = (Environment.ProcessorCount + 1) * ChunkBytes;
 			TestContext.WriteLine($"Allocated {inRam / 1_048_576.0:N0} MB in RAM and {onDisk / 1_048_576.0:N0} MB on disk; the budget for the difference is {budget / 1_048_576.0:N0} MB.");

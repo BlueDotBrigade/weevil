@@ -43,24 +43,6 @@ namespace BlueDotBrigade.Weevil.Data
 		/// </remarks>
 		public IReadOnlyList<int> ChunkStarts => _chunkStarts;
 
-		/// <summary>
-		/// The length in bytes of the longest chunk the records read, or 0 when they read none.
-		/// </summary>
-		internal int LongestChunkLength
-		{
-			get
-			{
-				var longest = 0;
-
-				foreach (ContentChunk chunk in _chunks)
-				{
-					longest = System.Math.Max(longest, chunk.Length);
-				}
-
-				return longest;
-			}
-		}
-
 		public int GetLineNumber(int recordNumber) => GetBlock(recordNumber).LineNumbers[recordNumber % BlockSize];
 
 		public DateTime GetCreatedAt(int recordNumber) => GetBlock(recordNumber).CreatedAt[recordNumber % BlockSize];

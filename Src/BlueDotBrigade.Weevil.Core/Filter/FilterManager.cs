@@ -179,10 +179,9 @@
 			// In RAM, ranges of about the same size keep every core busy, however small the log.
 			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: workerCount);
 
-			// The loop creates many more worker states than workers, so they share content buffers, which hold a chunk each on disk.
-			// Each is sized to the longest chunk, so it never grows: a filter allocates a buffer per worker, not per state (#1269).
+			// The loop creates many more worker states than workers, so they share content buffers, which hold a chunk each on disk:
+			// a filter allocates a buffer per worker, not per state (#1269).
 			var buffers = new ConcurrentBag<ContentBuffer>();
-			var chunkCapacity = _source != null && records is TableRecordList list ? list.Table.LongestChunkLength : 0;
 
 			try
 			{
@@ -191,7 +190,7 @@
 								 Partitioner.Create((IEnumerable<(int Start, int End)>)ranges, EnumerablePartitionerOptions.NoBuffering),
 								 parallelOptions,
 						  // FMR Part1: initialize thread local storage
-						  () => new FilterMapReduceState(buffers.TryTake(out ContentBuffer buffer) ? buffer : new ContentBuffer(chunkCapacity)),
+						  () => new FilterMapReduceState(buffers.TryTake(out ContentBuffer buffer) ? buffer : new ContentBuffer()),
 
 						  // FMR Part2: define task to perform
 						  (range, parallelLoopState, results) =>
