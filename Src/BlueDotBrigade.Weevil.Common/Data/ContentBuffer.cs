@@ -7,7 +7,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// Holds the content of one record at a time, so code that reads many records, such as a filter, reads each record's content once (#1131).
 	/// </summary>
 	/// <remarks>
-	/// Not thread-safe: use one per thread. What <see cref="Read(IRecord)"/> returns is valid until it is called for another record.
+	/// Not thread-safe: one thread at a time uses it, as a filter's workers take one from a pool and give it back (#1269). What <see cref="Read(IRecord)"/> returns is valid until it is called for another record.
 	/// A record that holds the log's bytes is decoded into memory the buffer reuses, so reading it allocates no string (#1133).
 	/// The buffer also holds the bytes of one chunk on file at a time, so a scan reads each chunk once (#1025, #1027):
 	/// - The first record read from a chunk reads only the blocks that hold it, so a sparse list, such as a few filter results spread over a large log,
