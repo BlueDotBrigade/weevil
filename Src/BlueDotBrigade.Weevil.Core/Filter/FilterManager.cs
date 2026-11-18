@@ -171,11 +171,18 @@
 
 			// Set `MaxDegreeOfParallelism=1` to force the loop to be executed by only one thread.
 			// ... This can simplify the debugging process.
-			var parallelOptions = new ParallelOptions();
+			// One worker per core, so a filter on disk holds at most one chunk per core (#1269).
+			var workerCount = Environment.ProcessorCount;
+			var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = workerCount };
 
 			// On disk, each worker reads whole ranges of records that share a content chunk, so the log is read once (#1027).
 			// In RAM, ranges of about the same size keep every core busy, however small the log.
-			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: Environment.ProcessorCount);
+			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: workerCount);
+
+			// The loop creates many more worker states than workers, so they share content buffers, which hold a chunk each on disk.
+			// Each is sized to the longest chunk, so it never grows: a filter allocates a buffer per worker, not per state (#1269).
+			var buffers = new ConcurrentBag<ContentBuffer>();
+			var chunkCapacity = _source != null && records is TableRecordList list ? list.Table.LongestChunkLength : 0;
 
 			try
 			{
@@ -184,7 +191,7 @@
 								 Partitioner.Create((IEnumerable<(int Start, int End)>)ranges, EnumerablePartitionerOptions.NoBuffering),
 								 parallelOptions,
 						  // FMR Part1: initialize thread local storage
-						  () => { return new FilterMapReduceState(); },
+						  () => new FilterMapReduceState(buffers.TryTake(out ContentBuffer buffer) ? buffer : new ContentBuffer(chunkCapacity)),
 
 						  // FMR Part2: define task to perform
 						  (range, parallelLoopState, results) =>
@@ -216,6 +223,7 @@
 						  // FMR Part3: merge the results
 						  (results) =>
 						  {
+							  buffers.Add(results.Content);
 							  Interlocked.Add(ref resultsCount, results.Count);
 						  }
 				);

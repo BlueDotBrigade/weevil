@@ -37,6 +37,24 @@ namespace BlueDotBrigade.Weevil.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1269)]
+		[DoNotParallelize]
+		public void GivenADroidLogOpenedOnDisk_WhenFiltered_ThenItAllocatesAtMostAboutOneChunkPerWorkerMoreThanInRam()
+		{
+			// Each of the filter's many worker states allocated its own 16 MB buffer, so one filter on disk allocated about half the log's size again.
+			var logPath = DroidLog.GetPath(DroidLog.Utf8);
+			var inRam = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Ram).Open());
+			var onDisk = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open());
+
+			// A buffer per worker, each sized to the longest chunk, which is a few bytes over 16 MB, plus one for a worker the loop replaces.
+			const long ChunkBytes = 17L * 1024 * 1024;
+			var budget = (Environment.ProcessorCount + 1) * ChunkBytes;
+			TestContext.WriteLine($"Allocated {inRam / 1_048_576.0:N0} MB in RAM and {onDisk / 1_048_576.0:N0} MB on disk; the budget for the difference is {budget / 1_048_576.0:N0} MB.");
+
+			(onDisk - inRam).Should().BeLessThan(budget);
+		}
+
+		[TestMethod]
 		[DoNotParallelize]
 		[DataRow(DroidLog.Utf8)]
 		[DataRow(DroidLog.Utf16LittleEndian)]
@@ -69,6 +87,20 @@ namespace BlueDotBrigade.Weevil.Filter
 
 			// Each chunk's first record reads its own 64 KB block first: 0.4% of a 16 MB chunk. Only the byte order mark is not read.
 			writer.BytesRead.Should().BeInRange(logLength - 4, logLength + (logLength / 50), "each chunk of the log is read once");
+		}
+
+		/// <summary>
+		/// Returns the bytes one filter allocates, after a first filter has warmed it up.
+		/// </summary>
+		private static long MeasureFilterAllocations(IEngine engine)
+		{
+			var criteria = new FilterCriteria("Blaster");
+			engine.Filter.Apply(FilterType.PlainText, criteria);
+
+			var before = GC.GetTotalAllocatedBytes(precise: true);
+			engine.Filter.Apply(FilterType.PlainText, criteria);
+
+			return GC.GetTotalAllocatedBytes(precise: true) - before;
 		}
 
 		/// <summary>

@@ -21,6 +21,8 @@ namespace BlueDotBrigade.Weevil.Data
 	/// </remarks>
 	public sealed class ContentBuffer
 	{
+		private readonly int _chunkCapacity;
+
 		private IRecord _record;
 
 		// The record's string, or null when its bytes were decoded into the first `_length` characters of `_chars`.
@@ -38,6 +40,21 @@ namespace BlueDotBrigade.Weevil.Data
 
 		// The chunks on file this buffer has read whole, or null before the first.
 		private HashSet<ContentChunk> _chunksReadWhole;
+
+		public ContentBuffer()
+		{
+		}
+
+		/// <summary>
+		/// A buffer that reserves room for a chunk of <paramref name="chunkCapacity"/> bytes when it first reads a chunk whole,
+		/// so a buffer reused for chunks of slightly different lengths never grows (#1269).
+		/// </summary>
+		/// <param name="chunkCapacity">The length of the longest chunk the buffer will read, or 0 to size it to each chunk as needed.</param>
+		public ContentBuffer(int chunkCapacity)
+		{
+			ArgumentOutOfRangeException.ThrowIfNegative(chunkCapacity);
+			_chunkCapacity = chunkCapacity;
+		}
 
 		/// <summary>
 		/// Returns the content of <paramref name="record"/>, and reads it only if this buffer does not hold it already.
@@ -119,7 +136,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 				if (_fileBytes.Length < chunk.Length)
 				{
-					_fileBytes = new byte[chunk.Length];
+					_fileBytes = new byte[Math.Max(chunk.Length, _chunkCapacity)];
 				}
 
 				chunk.ReadFromFile(_fileBytes.AsSpan(0, chunk.Length));
