@@ -172,7 +172,14 @@
 
 			// Set `MaxDegreeOfParallelism=1` to force the loop to be executed by only one thread.
 			// ... This can simplify the debugging process.
-			// One worker per core, so a filter on disk holds at most one chunk per core (#1269).
+			//
+			// At most one worker per core, in RAM as on disk, because of a log on disk (#1269):
+			// - The scenario: each worker holds a buffer of about 17 MB, the 16 MB chunk it reads. Without a cap, the thread pool adds
+			//   workers while the others wait for the disk, for example with a cold cache or a log on a network share. A filter would then
+			//   hold one buffer per thread, as many as the thread pool decides, rather than one per core.
+			// - The cost: with a cold cache, a filter keeps fewer reads in flight. On 4 cores and the 10-million-record log,
+			//   it was about 2% slower than without the cap (#1287).
+			// - Kept by the owner's decision: a bounded working set matters more than those 2%.
 			var workerCount = Environment.ProcessorCount;
 			var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = workerCount };
 
