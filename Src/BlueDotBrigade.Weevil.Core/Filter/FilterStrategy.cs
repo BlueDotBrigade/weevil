@@ -122,9 +122,9 @@
 		/// 3. Only exclude: all records visible except those matching exclude filter
 		/// 4. Include and exclude: records matching include filter, then exclude matching records
 		/// 
-		/// Special Records (override EXCLUDE filter):
-		/// - If "show pinned" is enabled: pinned records are ALWAYS visible (even if they match exclude filter)
-		/// - If "show bookmarks" is enabled: bookmarked records are ALWAYS visible (even if they match exclude filter)
+		/// Special Records (override the include and exclude filters):
+		/// - If "show pinned" is enabled: pinned records are ALWAYS visible
+		/// - If "show bookmarks" is enabled: bookmarked records are ALWAYS visible
 		/// </summary>
 		public bool CanKeep(IRecord record, ContentBuffer content)
 		{

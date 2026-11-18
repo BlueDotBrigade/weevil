@@ -12,14 +12,14 @@ These instructions apply to the WPF desktop application (`BlueDotBrigade.Weevil.
 
 - Follow the MVVM (Model-View-ViewModel) pattern throughout.
 - ViewModels are internal classes annotated with `[Observable]` from `Metalama.Patterns.Observability` to automatically generate `INotifyPropertyChanged` implementations.
-- Do not manually implement `INotifyPropertyChanged` in ViewModels; rely on the `[Observable]` attribute.
+- Do not manually implement `INotifyPropertyChanged` in ViewModels; rely on the `[Observable]` attribute. The exception is a ViewModel whose values live elsewhere, where Metalama can't see them change: `RowViewModel` reads its pin and comment from Core's store, so it raises `PropertyChanged` itself ([RecordGrid.md](../../Doc/Design/RecordGrid.md)).
 - XAML views bind to ViewModel properties. Do not place business logic in code-behind files.
 - Apply MVVM best practices, SOLID principles, and Gang of Four patterns only when they meaningfully improve the code. Do not introduce these patterns if they make the source code unnecessarily complicated.
 
 ## UI Thread Safety
 
 - Never block the UI thread. All long-running operations must execute on a background thread.
-- Use `IUiDispatcher.Invoke()` to marshal results back to the UI thread after background processing.
+- Marshal work to the UI thread through `IUiDispatcher`. A handler of a Core event, which may run on any thread, queues its work with `BeginInvoke()` and never waits with `Invoke()` (decision 4 of the #990 plan).
 - The `UiResponsivenessMonitor` detects UI thread delays; changes that cause delays will be caught in testing.
 - Disable the responsiveness monitor only when a debugger is attached (existing pattern — do not change this logic).
 
@@ -28,11 +28,12 @@ These instructions apply to the WPF desktop application (`BlueDotBrigade.Weevil.
 - Use `IBulletinMediator` (implemented by `BulletinMediator`) for decoupled message passing between ViewModels.
 - Subscribe to messages using `bulletinMediator.Subscribe<T>(recipient, callback)`.
 - Publish messages using `bulletinMediator.Post<T>(bulletin)`.
-- Do not create direct dependencies between ViewModels; route all cross-ViewModel communication through the mediator.
+- Do not create direct dependencies between sibling ViewModels; route their communication through the mediator. A ViewModel may own and call its children, as `FilterViewModel` does with the record grid's rows through `RowList`.
 
 ## Data Binding
 
-- Maintain existing WPF data-binding patterns. Do not replace bindings with code-behind event handlers.
+- Maintain existing WPF data-binding patterns. Do not replace bindings with code-behind event handlers. Code-behind may pass input events on to the ViewModel without logic of its own, as `FilterView` does for the record grid's clicks and keys.
+- The record grid's `ItemsSource`, `RowList`, creates a row and a record for each item read. Never enumerate it, bind WPF's selection to it, or sort, group or filter its view ([RecordGrid.md](../../Doc/Design/RecordGrid.md)).
 - Use value converters in the `Converters/` directory for type transformations in XAML.
 - DataGrid columns for legend entries use 24px width with centered 12×12 `Rectangle` elements bound to `SeriesColor`.
 - Graph series use the established Fluent Design color palette: Purple `#744DA9`, Red `#E74856`, Orange `#FF8C00`, Cyan `#0099BC`.

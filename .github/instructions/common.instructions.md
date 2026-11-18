@@ -31,7 +31,7 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. B
 
 - `IRecord` is the immutable public contract for a log record. Do not modify `IRecord` without a compatibility review.
 - `Record` is the sealed, thread-safe implementation. Records must never be mutated after creation.
-- Records hold no mutable state. A record's comment, pin, flag and elapsed time are kept by line number, and read and written through `IRecordState` (decision 7 of the #990 plan). Elapsed times are calculated when read (#1150): `ElapsedTimes.Measure(records, position)` measures one row of a list, while `ElapsedTimes.Get(lineNumber)` calculates every line's on its first call, so call it only where a lookup by line number is needed. Code that works one record at a time takes an `IRecordState`. Bulk changes and the sidecar use the stores directly (`AnnotationStore`, `FlagSet`), so many lines change under one lock with one event. Code that has only an `IRecordState`, such as an analyzer, flags or unflags many rows with one call to `SetFlagged(RecordList, bool)` (#1150).
+- Records hold no mutable state. A record's comment, pin and flag are kept by line number, and read and written through `IRecordState`, which also reads its elapsed time (decision 7 of the #990 plan). Elapsed times are calculated when read (#1150): `ElapsedTimes.Measure(records, position)` measures one row of a list, while `ElapsedTimes.Get(lineNumber)` calculates every line's on its first call, so call it only where a lookup by line number is needed. Code that works one record at a time takes an `IRecordState`. Bulk changes use the stores directly (`AnnotationStore`, `FlagSet`), so many lines change under one lock. The sidecar saves the annotation store; flags are not saved. Code that has only an `IRecordState`, such as an analyzer, flags or unflags many rows with one call to `SetFlagged(RecordList, bool)` (#1150).
 - Use `RecordList` for record collections passed across boundaries (#1136). It is a read-only list that may create each record it returns (#1021), so two reads of a position may return different objects: read a record once rather than reading the same position many times, and compare records by line number (`Equals`), never by reference. Code that needs only a line number, a timestamp, a row's facts or its text reads `GetLineNumber(position)`, `GetCreatedAt(position)`, `GetFacts(position)` or `ReadContent(position, content)`, which create no record (#1137, #1150). `IndexOf` and `Contains` find records by line number.
 - Use `Record.Dummy` as the null object when a genuine record is absent.
 - Use `Record.IsGenuine(record)` or `Record.IsDummyOrNull(record)` to validate record references.
@@ -41,7 +41,7 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. B
 - `IFilterStrategy` defines the filtering contract: `FilterType`, `FilterCriteria`, and `CanKeep(IRecord, ContentBuffer)`.
 - An expression that tests a record's text reads it with `content.Read(record)`, not `record.Content`, so a filter reads each record's content once (#1131).
 - `FilterCriteria` is constructed directly: `new FilterCriteria(includeExpression)` or use `FilterCriteria.None` when no filter should be applied.
-- `FilterType` specifies how the expression is interpreted (e.g., `PlainText`, `RegularExpression`, `Temporal`).
+- `FilterType` specifies how the expression is interpreted: `PlainText` or `RegularExpression`.
 - Do not change `IFilterCriteria` or `FilterCriteria` in ways that break existing serialized filter history.
 
 ## Logging

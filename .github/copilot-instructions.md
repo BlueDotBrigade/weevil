@@ -7,7 +7,7 @@ Weevil is a .NET 10 log analysis platform.
 - Primary UI is a WPF desktop application (`BlueDotBrigade.Weevil.Gui`).
 - The repository includes core libraries, a CLI tool, PowerShell modules, plugins, and a WiX installer.
 - Log file operations are always non-destructive; the original file is never modified.
-- Persisted state is stored in XML sidecar files.
+- Persisted state is stored in XML sidecar files. A `.idx` cache of the line index and record table is also saved beside the log, and is always safe to delete ([OpeningALog.md](../Doc/Design/OpeningALog.md)).
 
 ## Directory Structure
 ```

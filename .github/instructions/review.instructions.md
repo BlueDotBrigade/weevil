@@ -20,7 +20,7 @@ These instructions guide Copilot during pull request reviews. Every review shoul
 ## UI Responsiveness
 
 - Flag any code placed on the UI thread that performs I/O, filtering, or other long-running operations.
-- Confirm that background operations marshal results back to the UI thread using `IUiDispatcher.Invoke()`.
+- Confirm that background operations marshal results back to the UI thread through `IUiDispatcher`, and that a handler of a Core event queues with `BeginInvoke()` rather than waiting with `Invoke()`.
 - Flag removal or bypass of the `UiResponsivenessMonitor`.
 
 ## Regression Tests
