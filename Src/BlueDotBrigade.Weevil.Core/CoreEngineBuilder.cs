@@ -151,7 +151,7 @@
 				_maxRecords = maxRecords > 0
 					? maxRecords
 					: throw new ArgumentOutOfRangeException(nameof(maxRecords),
-						"Value is expected to be greater than or equal to zero.");
+						"Value is expected to be greater than zero.");
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
@@ -188,7 +188,7 @@
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
-					$"Core engine construction has a maximum record limit. Range={range}");
+					$"Core engine construction reads only a range of lines. Range={range}");
 
 				return this;
 			}
