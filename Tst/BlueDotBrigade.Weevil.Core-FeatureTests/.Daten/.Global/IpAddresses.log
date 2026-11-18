@@ -1,0 +1,5 @@
+3050-09-30 11:26:12.10230	1977	1	Info	[Network] Connected to 192.168.0.1 on port 8080
+3050-09-30 11:26:12.20230	1977	1	Info	[Network] No address in this record
+3050-09-30 11:26:12.30230	1977	1	Warning	[Network] Retrying 10.0.0.254
+3050-09-30 11:26:12.40230	1977	1	Info	[Firmware] Version 1.2.3 installed
+3050-09-30 11:26:12.50230	1977	1	Error	[Network] Address 999.1.1.1 is not valid
