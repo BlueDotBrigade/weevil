@@ -71,7 +71,15 @@ namespace BlueDotBrigade.Weevil.PowerShell
                 var filterCriteria = new FilterCriteria(this.Include, this.Exclude);
 
                 // A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the cmdlet again (#1247).
-                engine.RunOnce(() => engine.Filter.Apply(this.FilterType, filterCriteria), this.WriteWarning);
+                // On disk, the records returned read their text later, so a change is an error even when the filter finished.
+                if (engine.StorageMode == StorageMode.Disk)
+                {
+                    engine.RunOnce(() => engine.Filter.Apply(this.FilterType, filterCriteria));
+                }
+                else
+                {
+                    engine.RunOnce(() => engine.Filter.Apply(this.FilterType, filterCriteria), this.WriteWarning);
+                }
 
                 // `Apply` returns the filter itself, so the matching records are read from its results (#1002).
                 this.WriteObject(engine.Filter.Results, enumerateCollection: true);

@@ -33,15 +33,6 @@
         internal static string TelemetrySource { get; } = TelemetryClientFactory.GetTelemetrySource();
 
 		/// <summary>
-		/// Writes <paramref name="message"/> to the error stream, and makes the command end with exit code 1.
-		/// </summary>
-		internal static void ReportError(string message)
-		{
-			Console.Error.WriteLine(message);
-			Environment.ExitCode = 1;
-		}
-
-		/// <summary>
 		/// Writes <paramref name="message"/> to the error stream, so the results written to the output stay as they are (#1247).
 		/// </summary>
 		internal static void ReportWarning(string message)
@@ -61,7 +52,8 @@
 			catch (ArgumentException exception)
 			{
 				// A format Weevil does not write is an error, rather than a different format (#837).
-				ReportError(exception.Message);
+				Console.Error.WriteLine(exception.Message);
+				Environment.ExitCode = 1;
 				return;
 			}
 

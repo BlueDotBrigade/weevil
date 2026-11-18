@@ -232,7 +232,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			lastRow.ReadContent();
 			uiDispatcher.RunQueued();
 
-			viewModel.Rows.Count.Should().Be(recordCount, "nothing reloads until the analyst presses Ctrl+F5");
+			// Reload would disable the menus at once, so they show that nothing reloads until the analyst presses Ctrl+F5.
+			viewModel.IsMenuEnabled.Should().BeTrue();
+			viewModel.CanOpenLogFile.Should().BeTrue();
+			viewModel.Rows.Count.Should().Be(recordCount);
 			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Ctrl+F5")), "Log Changed");
 			dialog.ReceivedWithAnyArgs(1).ShowMessage(default, default);
 		}

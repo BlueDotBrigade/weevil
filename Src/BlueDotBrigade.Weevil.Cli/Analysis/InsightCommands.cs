@@ -103,7 +103,8 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			}
 			catch (LogFileChangedException exception)
 			{
-				Program.ReportError(exception.Message);
+				// Cocona sets the exit code from the command, so it is passed this way (#1247).
+				throw new CommandExitedException(exception.Message, 1);
 			}
 			finally
 			{

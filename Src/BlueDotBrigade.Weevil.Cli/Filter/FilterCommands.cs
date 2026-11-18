@@ -78,7 +78,8 @@
 			}
 			catch (LogFileChangedException exception)
 			{
-				Program.ReportError(exception.Message);
+				// Cocona sets the exit code from the command, so it is passed this way (#1247).
+				throw new CommandExitedException(exception.Message, 1);
 			}
 			finally
 			{
@@ -120,7 +121,7 @@
 		}
 
 		/// <summary>
-		/// Deletes the records written before a save stopped, without hiding why it stopped: a change to the log must still reach the retry.
+		/// Deletes the records written before a save stopped, without hiding why it stopped: a change to the log must still reach the caller (#1247).
 		/// </summary>
 		private static void DeleteTemporaryFile(string temporaryFilePath)
 		{

@@ -11,6 +11,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenALogThatWeevilIsReading_WhenAnotherApplicationRenamesIt_ThenTheRenameSucceedsAndTheReadFinishes()
 		{
 			// Weevil stopped the application that writes a log from rolling it, for as long as Weevil parsed the log.
+			// Only Windows enforces file sharing, so only there does this fail without the fix.
 			var folder = System.IO.Directory.CreateTempSubdirectory("Weevil.FileHelperTests.").FullName;
 			var logPath = Path.Combine(folder, "App.log");
 			System.IO.File.WriteAllLines(logPath, Enumerable.Range(1, 10_000).Select(i => $"Line {i}"));

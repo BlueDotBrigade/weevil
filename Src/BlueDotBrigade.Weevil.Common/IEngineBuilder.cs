@@ -66,13 +66,9 @@
 		/// Reads the log, and returns the engine that holds it.
 		/// </summary>
 		/// <remarks>
-		/// Weevil never stops another application from writing, renaming or deleting the log, even while it reads it (#1247).
-		/// Open finishes with the data it started reading. When the log is renamed, deleted or replaced, while Open reads it or later:
-		/// <list type="bullet">
-		/// <item>Weevil's window says so once, and asks the analyst to press Ctrl+F5 to reload. It never reloads by itself.</item>
-		/// <item>The CLI and PowerShell keep a result they could finish, with a warning. If a read fails because of the change, they stop with an error that says to run the command again. They never retry.</item>
-		/// </list>
-		/// In RAM mode, only Reload reads the log again. In disk mode, every read of a record's content goes back to the log by its path.
+		/// Weevil never stops another application from writing, renaming or deleting the log (#1247). Nothing reloads by itself.
+		/// When a read finds the log changed or gone, Weevil's window says so, and Ctrl+F5 reloads.
+		/// The CLI and PowerShell stop with an error that says to run the command again, or keep a result they could finish, with a warning.
 		/// </remarks>
 		IEngine Open();
 	}

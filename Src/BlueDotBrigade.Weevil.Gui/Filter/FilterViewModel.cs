@@ -2336,7 +2336,7 @@
 				}
 				catch (LogFileChangedException e)
 				{
-					// Shown once, and the log reloaded, as for any read of a log on disk that changed (#1028).
+					// Shown once, naming Ctrl+F5, as for any read of a log on disk that changed (#1028, #1247).
 					Log.Default.Write(LogSeverityType.Warning, e, $"{operation} stopped, because the log changed on disk.");
 					reportFailedRead(e);
 				}

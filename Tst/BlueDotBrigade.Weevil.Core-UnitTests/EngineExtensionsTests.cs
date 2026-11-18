@@ -63,6 +63,35 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenALogThatOnlyGrew_WhenRunOnce_ThenTheResultIsKeptWithoutAWarning()
+		{
+			// A live log grows while it is read, which is no reason to warn.
+			IEngine engine = OpenCopy(StorageMode.Ram);
+			File.AppendAllText(engine.SourceFilePath, "2026-11-18 10:00:00.000 Information Id=999 One more line" + System.Environment.NewLine);
+			var warnings = new List<string>();
+
+			engine.RunOnce(() => engine.Count, warnings.Add);
+
+			warnings.Should().BeEmpty();
+		}
+
+		[TestMethod]
+		[WorkItem(1247)]
+		public void GivenAResultThatStillReadsTheLog_WhenTheLogIsRenamedAsTheWorkFinishes_ThenTheErrorSaysToRunTheCommandAgain()
+		{
+			// Get-Records on disk warned, then returned records whose text could no longer be read.
+			IEngine engine = OpenCopy(StorageMode.Ram);
+
+			FluentActions.Invoking(() => engine.RunOnce(() =>
+				{
+					File.Move(engine.SourceFilePath, engine.SourceFilePath + ".1");
+					return engine.Count;
+				}))
+				.Should().Throw<LogFileChangedException>()
+				.WithMessage("*Run the command again.");
+		}
+
+		[TestMethod]
 		public void GivenWorkThatFailsForAnotherReason_WhenRunOnce_ThenItsExceptionReachesTheCaller()
 		{
 			IEngine engine = OpenCopy(StorageMode.Ram);
