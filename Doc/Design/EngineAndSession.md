@@ -79,7 +79,7 @@ Callers reach the session through the engine: `Annotations`, `Bookmarks`, `Regio
 
 **Clear** narrows the view in place (#1018):
 
-1. `Engine` saves the sidecar, then stops forwarding the filter's events until Clear ends.
+1. `Engine` saves the sidecar, then stops forwarding the filter's events until Clear ends. Where the sidecar can never be written, as in a read-only folder, it logs a warning and clears without saving, so unsaved comments and pins on the records cleared are not saved; any other failure to save stops Clear (#1246).
 2. The records kept are chosen by the rules of the `ClearOperation`. The selection becomes the selected records kept, without an anchor, and the active record the last of them, or none.
 3. `RecordScope.Narrow` replaces the list in one write, so a reader that reads it once sees the records before or after. The metrics are recounted and `HasBeenCleared` is set.
 4. An empty filter is applied, not counted as the user's. `FilterResultsChanged` is not raised: read `Filter.Results` afterwards.
