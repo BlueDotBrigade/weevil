@@ -115,11 +115,6 @@
 		/// <summary>
 		/// Returns the record's position in the filter results, or -1 when the filter hides it.
 		/// </summary>
-		private static int FindPosition(RecordList visibleRecords, IRecord record)
-		{
-			return FindPosition(visibleRecords, record.LineNumber);
-		}
-
 		private static int FindPosition(RecordList visibleRecords, int lineNumber)
 		{
 			var position = PositionRanges.LowerBound(visibleRecords, lineNumber, 0);
@@ -127,42 +122,6 @@
 			return position < visibleRecords.Count && visibleRecords.GetLineNumber(position) == lineNumber
 				? position
 				: -1;
-		}
-
-		/// <summary>
-		/// Adds or removes the positions of the given records, then publishes the new selection.
-		/// </summary>
-		/// <returns>How many records were added or removed, and how many are selected afterwards.</returns>
-		/// <remarks>
-		/// The records change the selection in one pass, not one at a time, which would cost the number of records times
-		/// the number of ranges.
-		/// </remarks>
-		private (int Changed, int Count) Change(IEnumerable<IRecord> records, bool isSelected)
-		{
-			lock (_selectionPadlock)
-			{
-				var positions = new List<int>();
-
-				foreach (IRecord record in records)
-				{
-					var position = FindPosition(_visibleRecords, record);
-					if (position >= 0)
-					{
-						positions.Add(position);
-					}
-				}
-
-				var changes = PositionRanges.FromPositions(positions);
-				PositionRanges selection = isSelected
-					? PositionRanges.Union(_selection, changes)
-					: PositionRanges.Except(_selection, changes);
-				var changed = System.Math.Abs(selection.Count - _selection.Count);
-
-				_selection = selection;
-				_selectionPeriod = CalculateTimePeriod(selection, _visibleRecords);
-
-				return (changed, selection.Count);
-			}
 		}
 
 		/// <summary>
@@ -248,110 +207,51 @@
 
 		public ISelect Select(int lineNumber)
 		{
-			// One read: a filter may replace the results meanwhile.
-			RecordList visibleRecords = _visibleRecords;
-			var index = visibleRecords.IndexOfLineNumber(lineNumber);
-
-			if (index >= 0)
-			{
-				Select(visibleRecords[index]);
-			}
-
-			return this;
-		}
-
-		/// <remarks>
-		/// A record that the filter hides is not selected.
-		/// </remarks>
-		public ISelect Select(IRecord record)
-		{
-			if (record == null)
-			{
-				throw new ArgumentNullException(nameof(record));
-			}
-
-			(var added, var count) = Change(new[] { record }, isSelected: true);
-
-			Log.Default.Write(
-				LogSeverityType.Trace,
-				$"The number of selected records has changed. Added={added}, Current={count}");
-
-			// Always update the active line number to keep navigation in sync,
-			// even if the record was already selected.
-			_navigationManager.SetActiveLineNumber(record.LineNumber);
-
-			return this;
-		}
-
-		/// <remarks>
-		/// Records that the filter hides are not selected.
-		/// </remarks>
-		public ISelect Select(IList<IRecord> records)
-		{
-			if (records == null)
-			{
-				throw new ArgumentNullException(nameof(records));
-			}
-
-			(var added, var count) = Change(records, isSelected: true);
-
-			Log.Default.Write(
-				LogSeverityType.Trace,
-				$"The number of selected records has changed. Added={added}, Current={count}");
-
-			// Always update the active line number to keep navigation in sync,
-			// even if the last record was already selected.
-			IRecord lastRecord = records.Count > 0 ? records[^1] : Record.Dummy;
-			if (!Record.IsDummyOrNull(lastRecord))
-			{
-				_navigationManager.SetActiveLineNumber(lastRecord.LineNumber);
-			}
-
-			return this;
+			return ChangeLine(lineNumber, isSelected: true);
 		}
 
 		public ISelect Unselect(int lineNumber)
 		{
-			// One read: a filter may replace the results meanwhile.
-			RecordList visibleRecords = _visibleRecords;
-			var index = visibleRecords.IndexOfLineNumber(lineNumber);
-
-			if (index >= 0)
-			{
-				Unselect(visibleRecords[index]);
-			}
-
-			return this;
+			return ChangeLine(lineNumber, isSelected: false);
 		}
 
-		public ISelect Unselect(IRecord record)
+		/// <summary>
+		/// Adds one shown line to the selection, or removes it, and makes an added line the active record.
+		/// </summary>
+		/// <exception cref="RecordNotFoundException">The filter hides the line. The selection does not change.</exception>
+		private ISelect ChangeLine(int lineNumber, bool isSelected)
 		{
-			if (record == null)
-			{
-				throw new ArgumentNullException(nameof(record));
-			}
+			int changed;
+			int count;
 
-			(var removed, var count) = Change(new[] { record }, isSelected: false);
+			lock (_selectionPadlock)
+			{
+				var position = FindPosition(_visibleRecords, lineNumber);
+				if (position < 0)
+				{
+					throw new RecordNotFoundException($"Unable to find record. LineNumber={lineNumber}");
+				}
+
+				var line = PositionRanges.FromRange(position, position);
+				PositionRanges selection = isSelected
+					? PositionRanges.Union(_selection, line)
+					: PositionRanges.Except(_selection, line);
+				changed = System.Math.Abs(selection.Count - _selection.Count);
+
+				_selection = selection;
+				_selectionPeriod = CalculateTimePeriod(selection, _visibleRecords);
+				count = selection.Count;
+			}
 
 			Log.Default.Write(
 				LogSeverityType.Trace,
-				$"The number of selected records has changed. Removed={removed}, Current={count}");
+				$"The number of selected records has changed. {(isSelected ? "Added" : "Removed")}={changed}, Current={count}");
 
-			return this;
-		}
-
-		public ISelect Unselect(IList<IRecord> records)
-		{
-			if (records == null)
+			if (isSelected)
 			{
-				throw new ArgumentNullException(nameof(records));
+				// Always update the active line number to keep navigation in sync, even if the line was already selected.
+				_navigationManager.SetActiveLineNumber(lineNumber);
 			}
-
-			(var removed, var count) = Change(records, isSelected: false);
-
-			Log.Default.Write(
-				LogSeverityType.Trace,
-				$"The number of selected records has changed. Removed={removed}, Current={count}");
 
 			return this;
 		}
@@ -565,24 +465,6 @@
 			}
 
 			return lastKept >= 0 ? selected[lastKept] : Record.Dummy;
-		}
-
-		public RecordList ClearAll()
-		{
-			RecordList clearedRecords;
-
-			lock (_selectionPadlock)
-			{
-				clearedRecords = GetRecords(_selection, _visibleRecords);
-				_selection = new PositionRanges();
-				_selectionPeriod = ElapsedTimes.Unknown;
-			}
-
-			Log.Default.Write(
-				LogSeverityType.Information,
-				$"The number of selected records has changed. Previous={clearedRecords.Count}, Current=0");
-
-			return clearedRecords;
 		}
 
 		public RecordList GetSelected()

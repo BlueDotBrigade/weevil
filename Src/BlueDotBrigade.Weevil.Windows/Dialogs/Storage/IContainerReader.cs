@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Threading;
 
 	/// <summary>
 	/// Lists and reads the drives, folders and containers, such as zips, that the file browser shows.
@@ -43,6 +44,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		/// with the companions beside it that exist, such as <c>App.log.xml</c> for <c>App.log</c>.
 		/// </summary>
 		/// <param name="companionSuffixes">What a companion's name adds to the file's, such as <c>.xml</c>.</param>
-		string Extract(Location file, IEnumerable<string> companionSuffixes, string destinationFolder);
+		/// <param name="cancellationToken">Stops the copy, for example when the dialog closes (#1251).</param>
+		/// <remarks>
+		/// A copy that is cancelled or fails deletes <paramref name="destinationFolder"/> when this call created it, so no partial copy is left.
+		/// </remarks>
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		string Extract(Location file, IEnumerable<string> companionSuffixes, string destinationFolder, CancellationToken cancellationToken = default);
 	}
 }

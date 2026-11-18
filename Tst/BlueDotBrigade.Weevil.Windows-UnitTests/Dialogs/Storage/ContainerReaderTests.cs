@@ -170,6 +170,48 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			File.Exists($"{extracted}.idx").Should().BeFalse();
 		}
 
+		[TestMethod]
+		[WorkItem(1251)]
+		public void GivenAnExtractionFromAZip_WhenCancelled_ThenNothingIsLeftInTheDestination()
+		{
+			// Closing the Open As dialog left the copy running, and the copy in the temporary folder.
+			var destination = Path.Combine(_root, "Extracted");
+			using var cancellation = new CancellationTokenSource();
+			cancellation.Cancel();
+
+			Action extract = () => _reader.Extract(Location.ForArchive(_zipPath, "2026/Server.log"), Companions, destination, cancellation.Token);
+
+			extract.Should().Throw<OperationCanceledException>();
+			Directory.Exists(destination).Should().BeFalse();
+		}
+
+		[TestMethod]
+		[WorkItem(1251)]
+		public void GivenADamagedZip_WhenALogIsExtracted_ThenNothingIsLeftInTheDestination()
+		{
+			// A failed extraction left its folder in the temporary folder.
+			var destination = Path.Combine(_root, "Extracted");
+
+			Action extract = () => _reader.Extract(Location.ForArchive(Path.Combine(_logs, "Broken.zip"), "App.log"), Companions, destination);
+
+			extract.Should().Throw<InvalidDataException>();
+			Directory.Exists(destination).Should().BeFalse();
+		}
+
+		[TestMethod]
+		[WorkItem(1251)]
+		public void GivenADisposedReader_WhenAZipInAZipIsListed_ThenAnErrorIsReturned()
+		{
+			// A listing that was still running when the dialog closed made a new copy of the inner zip, which nothing deleted.
+			Location innerZip = _reader.List(Location.ForArchive(_zipPath, "Nested")).Items.Single().Open;
+			_reader.Dispose();
+
+			ListingResult listing = _reader.List(innerZip);
+
+			listing.Error.Should().NotBeNull();
+			listing.Items.Should().BeEmpty();
+		}
+
 		private static IEnumerable<string> Names(ListingResult listing) => listing.Items.Select(item => $"{item.Name}:{item.Kind}");
 
 		private static void Add(ZipArchive zip, string name, string content) => Add(zip, name, Encoding.UTF8.GetBytes(content));
