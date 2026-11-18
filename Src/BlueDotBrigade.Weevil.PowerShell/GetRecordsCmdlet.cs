@@ -70,8 +70,8 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
                 var filterCriteria = new FilterCriteria(this.Include, this.Exclude);
 
-                // On disk, a log that changed while it was filtered is reloaded, and filtered once more (#1028).
-                engine.RunReloadingOnChange(current => current.Filter.Apply(this.FilterType, filterCriteria));
+                // A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the cmdlet again (#1247).
+                engine.RunOnce(() => engine.Filter.Apply(this.FilterType, filterCriteria), this.WriteWarning);
 
                 // `Apply` returns the filter itself, so the matching records are read from its results (#1002).
                 this.WriteObject(engine.Filter.Results, enumerateCollection: true);

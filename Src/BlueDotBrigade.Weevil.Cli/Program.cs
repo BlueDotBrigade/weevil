@@ -32,6 +32,23 @@
 		internal static bool IsDebuggerAttachedAtStartup { get; } = Debugger.IsAttached;
         internal static string TelemetrySource { get; } = TelemetryClientFactory.GetTelemetrySource();
 
+		/// <summary>
+		/// Writes <paramref name="message"/> to the error stream, and makes the command end with exit code 1.
+		/// </summary>
+		internal static void ReportError(string message)
+		{
+			Console.Error.WriteLine(message);
+			Environment.ExitCode = 1;
+		}
+
+		/// <summary>
+		/// Writes <paramref name="message"/> to the error stream, so the results written to the output stay as they are (#1247).
+		/// </summary>
+		internal static void ReportWarning(string message)
+		{
+			Console.Error.WriteLine($"Warning: {message}");
+		}
+
 		public static void Main(string[] args)
 		{
 			// The format is chosen once; a command that renders a document itself, such as Insight's JSON, receives it (#837).
@@ -44,8 +61,7 @@
 			catch (ArgumentException exception)
 			{
 				// A format Weevil does not write is an error, rather than a different format (#837).
-				Console.Error.WriteLine(exception.Message);
-				Environment.ExitCode = 1;
+				ReportError(exception.Message);
 				return;
 			}
 

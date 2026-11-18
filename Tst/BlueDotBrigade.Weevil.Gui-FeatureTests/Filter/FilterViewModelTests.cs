@@ -212,9 +212,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public async Task GivenALogOnDiskThatWasTruncated_WhenARowIsShown_ThenTheLogIsReloadedOnce()
+		[WorkItem(1247)]
+		public async Task GivenALogOnDiskThatWasTruncated_WhenARowIsShown_ThenOneMessageAsksForCtrlF5AndNothingReloads()
 		{
-			// A log that changes while it is open on disk shows one warning, and is reloaded as Ctrl+F5 does (#1028).
+			// Weevil reloaded a log that changed on disk by itself, rather than leaving the analyst to choose when.
 			var uiDispatcher = new DeferredUiDispatcherFake();
 			var dialog = Substitute.For<IDialogBoxService>();
 			var viewModel = new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
@@ -230,14 +231,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			lastRow.ReadContent().Should().Be(RowViewModel.ChangedLogPlaceholder);
 			lastRow.ReadContent();
 			uiDispatcher.RunQueued();
-			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.Rows?.Count < recordCount);
 
-			// A row of the log as it was before Reload is ignored.
-			lastRow.ReadContent();
-			uiDispatcher.RunQueued();
-
-			viewModel.Rows.Count.Should().BeInRange(1, recordCount - 1, "the log was reloaded, with about half of its records");
-			dialog.Received(1).ShowMessage(Arg.Any<string>(), "Log Changed");
+			viewModel.Rows.Count.Should().Be(recordCount, "nothing reloads until the analyst presses Ctrl+F5");
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Ctrl+F5")), "Log Changed");
 			dialog.ReceivedWithAnyArgs(1).ShowMessage(default, default);
 		}
 
