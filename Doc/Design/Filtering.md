@@ -46,7 +46,7 @@ A filter first builds a `FilterStrategy` from its `FilterCriteria`: include text
 - **Ranges:** `RecordRanges.Split` cuts the positions into ranges, and `Parallel.ForEach` hands them out one at a time, so no worker holds several while the others wait.
   - In RAM, about 4 ranges per core, of about the same size.
   - On disk, a range starts at each content chunk's first record, so one worker reads each chunk, once. A log with at most half as many chunks as cores is the exception: each chunk's range is split, and each part's worker reads the whole chunk.
-- **One `ContentBuffer` per worker,** in its `FilterMapReduceState`, because a buffer is not thread-safe.
+- **One `ContentBuffer` per worker,** because a buffer is used by one thread at a time. The loop runs at most one worker per core but creates many more worker states, so each state takes a buffer from a pool for the filter and gives it back: on disk, a filter holds one chunk per core (#1269).
 - **Reading text:** a worker creates one record per position, because `CanKeep` takes a record. Expressions read its text with `content.Read(record)`, never `record.Content`:
   - the buffer reads the record once, however many expressions test it (#1131), and decodes the log's bytes into memory it reuses, so no string is allocated (#1133);
   - on disk, it reads a whole chunk once two records in a row come from it (#1027), while `record.Content` reads the record's blocks from the log on every call.
