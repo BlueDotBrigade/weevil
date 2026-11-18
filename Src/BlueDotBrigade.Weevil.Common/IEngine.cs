@@ -57,6 +57,9 @@
 		/// <remarks>
 		/// The engine, its filter, selector and events, and the comments, pins and flags stay (#1018).
 		/// The filter is reset to show every record kept, and the selected records that are kept stay selected.
+		/// It saves the sidecar first, so the comments and pins on the records it clears are kept (#1004). When the sidecar can never be written,
+		/// as in a read-only folder, it logs a warning and clears the records anyway, so their unsaved comments and pins are not saved (#1246).
+		/// Any other failure to save, such as a locked sidecar, stops Clear, and nothing is cleared.
 		/// </remarks>
 		void Clear(ClearOperation clearOperation);
 

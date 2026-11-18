@@ -176,7 +176,16 @@
 			// Saved first: once cleared, a record's comment and pin are no longer in memory to be saved (#1004).
 			if (Engine.IsRealInstance(this))
 			{
-				_coreEngine.Save();
+				try
+				{
+					_coreEngine.Save();
+				}
+				catch (Exception exception) when (IsNeverWritable(exception))
+				{
+					// A read-only folder, file or drive: no later save could keep the unsaved comments and pins on the records cleared either,
+					// so Clear still narrows the records, as 2.x did (#1246). A lock or a full disk may pass, so it still fails Clear, and nothing is lost.
+					Diagnostics.Log.Default.Write(Diagnostics.LogSeverityType.Warning, exception, "The sidecar can't be written, so the records are cleared without saving it first.");
+				}
 			}
 
 			// Clear resets the filter without telling subscribers, as IEngine documents; the engine itself still hears of it.
@@ -190,6 +199,18 @@
 			{
 				SubscribeTo(_coreEngine);
 			}
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> when a save failed because the sidecar can never be written where it is, as in a read-only folder.
+		/// </summary>
+		private static bool IsNeverWritable(Exception exception)
+		{
+			// ERROR_WRITE_PROTECT, from a read-only drive on Windows.
+			const int WriteProtected = unchecked((int)0x80070013);
+
+			return exception is UnauthorizedAccessException ||
+			       (exception is IOException && exception.HResult == WriteProtected);
 		}
 
 		public void Reload()
