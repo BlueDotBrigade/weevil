@@ -1468,7 +1468,7 @@
 		/// Handles a read of a log on disk that failed, from any thread (#1028).
 		/// </summary>
 		/// <remarks>
-		/// Always queued, so a read that fails while the grid draws its rows, or on a background thread, never shows a message or reloads from inside that read.
+		/// Always queued, so a read that fails while the grid draws its rows, or on a background thread, never shows a message from inside that read.
 		/// </remarks>
 		private void ReportFailedRead(Exception exception, int generation)
 		{

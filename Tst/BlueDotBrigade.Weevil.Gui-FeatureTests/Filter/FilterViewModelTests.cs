@@ -236,6 +236,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			viewModel.IsMenuEnabled.Should().BeTrue();
 			viewModel.CanOpenLogFile.Should().BeTrue();
 			viewModel.Rows.Count.Should().Be(recordCount);
+
+			// Ctrl+F5 reloads. A row of the log as it was before is then ignored.
+			viewModel.Reload();
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.Rows?.Count < recordCount);
+			lastRow.ReadContent();
+			uiDispatcher.RunQueued();
+
+			viewModel.Rows.Count.Should().BeInRange(1, recordCount - 1, "Ctrl+F5 reloaded the log, with about half of its records");
 			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Ctrl+F5")), "Log Changed");
 			dialog.ReceivedWithAnyArgs(1).ShowMessage(default, default);
 		}

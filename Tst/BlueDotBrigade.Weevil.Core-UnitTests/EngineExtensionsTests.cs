@@ -63,13 +63,14 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
-		public void GivenALogThatOnlyGrew_WhenRunOnce_ThenTheResultIsKeptWithoutAWarning()
+		public void GivenALogThatIsUnchangedOrOnlyGrew_WhenRunOnce_ThenNoWarningIsGiven()
 		{
 			// A live log grows while it is read, which is no reason to warn.
 			IEngine engine = OpenCopy(StorageMode.Ram);
-			File.AppendAllText(engine.SourceFilePath, "2026-11-18 10:00:00.000 Information Id=999 One more line" + System.Environment.NewLine);
 			var warnings = new List<string>();
 
+			engine.RunOnce(() => engine.Count, warnings.Add);
+			File.AppendAllText(engine.SourceFilePath, "2026-11-18 10:00:00.000 Information Id=999 One more line" + System.Environment.NewLine);
 			engine.RunOnce(() => engine.Count, warnings.Add);
 
 			warnings.Should().BeEmpty();
