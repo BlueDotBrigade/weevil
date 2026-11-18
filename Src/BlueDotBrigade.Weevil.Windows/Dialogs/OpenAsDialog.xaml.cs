@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			nameof(OptionsContent), typeof(object), typeof(OpenAsDialog));
 
 		public static readonly DependencyProperty CanOpenProperty = DependencyProperty.Register(
-			nameof(CanOpen), typeof(bool), typeof(OpenAsDialog), new PropertyMetadata(true, (dialog, _) => ((OpenAsDialog)dialog).UpdateOpenButton()));
+			nameof(CanOpen), typeof(bool), typeof(OpenAsDialog), new PropertyMetadata(true, (dialog, _) => ((OpenAsDialog)dialog).OnCanOpenChanged()));
 
 		private bool _isOpening;
 		private bool _isClosed;
@@ -59,6 +59,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// </summary>
 		private CancellationTokenSource _extraction;
 
+		/// <summary>
+		/// A file double-clicked, or chosen with Enter, before the host's options were valid: it opens once they are.
+		/// </summary>
+		private BrowserItem _pendingActivation;
+
 		public OpenAsDialog()
 		{
 			InitializeComponent();
@@ -66,11 +71,17 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			this.FileBrowserControl.SelectionChanged += (_, item) =>
 			{
 				this.MessageText.Text = string.Empty;
+				_pendingActivation = null;
 				UpdateOpenButton();
 				this.SelectionChanged?.Invoke(this, item);
 			};
 
-			this.FileBrowserControl.FileActivated += async (_, _) => await OpenAsync();
+			this.FileBrowserControl.FileActivated += async (_, item) =>
+			{
+				// The host may still be reading the file, for example on a slow share, when the analyst double-clicks it.
+				_pendingActivation = this.CanOpen ? null : item;
+				await OpenAsync();
+			};
 		}
 
 		/// <summary>
@@ -158,6 +169,10 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			UpdateOpenButton();
 			this.MessageText.Text = file.Location.IsInArchive ? "Extracting…" : string.Empty;
 
+			// While a file is extracted, another selection must not change the options it opens with.
+			this.FileBrowserControl.IsEnabled = false;
+			this.OptionsArea.IsEnabled = false;
+
 			var destination = Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
 			var localPath = await ExtractAsync(file, destination);
 
@@ -173,6 +188,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			}
 			else if (localPath is null)
 			{
+				this.FileBrowserControl.IsEnabled = true;
+				this.OptionsArea.IsEnabled = true;
 				UpdateOpenButton();
 			}
 			else
@@ -210,6 +227,18 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			finally
 			{
 				_extraction = null;
+			}
+		}
+
+		private async void OnCanOpenChanged()
+		{
+			UpdateOpenButton();
+
+			// The host's options may become valid after the window closed.
+			if (!_isClosed && this.CanOpen && _pendingActivation is { } file && file.Location.Equals(this.Browser.SelectedFile?.Location))
+			{
+				_pendingActivation = null;
+				await OpenAsync();
 			}
 		}
 

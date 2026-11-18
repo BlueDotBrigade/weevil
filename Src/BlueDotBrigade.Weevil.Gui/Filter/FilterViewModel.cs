@@ -61,8 +61,6 @@
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 
 		private static readonly Uri RegEx101Url = new Uri(@"https://regex101.com/r/dRrRat/1");
-		private const string CompatibleFileExtensions = "Log Files (*.log, *.csv, *.txt)|*.log;*.csv;*.tsv;*.txt|Compressed Files (*.zip)|*.zip|All files (*.*)|*.*";
-
 		// Copying more would freeze the window while the clipboard fills, and Export saves any number of records to a file.
 		// Pasting one comment onto more is a mistake, and each commented record costs memory.
 		// A graph keeps its records for as long as its window is open.
@@ -530,15 +528,31 @@
 		#region Commands: General
 		public async void OpenAsync()
 		{
-			var filePath = _dialogBox.ShowOpenFile(CompatibleFileExtensions);
-			if (string.IsNullOrWhiteSpace(filePath))
+			// One window finds the log and chooses RAM or Disk (#1215). A log in a zip is extracted, with its sidecar and index, when the user opens it.
+			this.CanOpenLogFile = false;
+			OpenAsChoice choice = null;
+
+			try
 			{
-				Log.Default.Write(LogSeverityType.Debug, "Open file operation was aborted by the user.");
+				var isAccepted = _dialogBox.TryShowOpenAs(out choice);
+				LogOpenAs(choice?.Advice, isAccepted ? choice.StorageMode : null);
+
+				if (!isAccepted)
+				{
+					return;
+				}
 			}
-			else
+			finally
 			{
-				await OpenCompressedAsync(filePath);
+				if (choice is null)
+				{
+					this.CanOpenLogFile = true;
+				}
 			}
+
+			await (choice.ExtractedFolder is null
+				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode)
+				: OpenExtractedAsync(choice.ExtractedFolder, choice.LogPath, choice.StorageMode));
 		}
 
 		public async Task OpenCompressedAsync(string sourceFilePath)
@@ -546,17 +560,9 @@
 			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
 			{
 				// Cancelled: nothing opens, and the open log stays (#1028).
-				if (await ChooseStorageAsync(sourceFilePath) is not { } storageMode)
+				if (await ChooseStorageAsync(sourceFilePath) is { } storageMode)
 				{
-					return;
-				}
-
-				await OpenAsync(sourceFilePath, storageMode);
-
-				// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
-				if (!IsOpenFrom(_openExtractedLog))
-				{
-					await ReplaceExtractedLogAsync(null);
+					await OpenFromDiskAsync(sourceFilePath, storageMode);
 				}
 
 				return;
@@ -564,8 +570,7 @@
 
 			// Weevil opens a copy extracted to a folder of its own, and deletes only what it extracted, never the zip (#1156).
 			var extractedFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-			ExtractedLog extracted = null;
-			string openedFilePath = null;
+			var isOpening = false;
 
 			try
 			{
@@ -588,13 +593,52 @@
 				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName) &&
 				    await ChooseStorageAsync(Path.Combine(extractedFolder, selectedFileName)) is { } storageMode)
 				{
-					extracted = await Task.Run(() => new ExtractedLog(extractedFolder, files));
-					openedFilePath = Path.Combine(extractedFolder, selectedFileName);
-
-					// Weevil may close before the open finishes.
-					_extractedLogBeingOpened = extracted;
-					await OpenAsync(openedFilePath, storageMode);
+					isOpening = true;
+					await OpenExtractedAsync(extractedFolder, Path.Combine(extractedFolder, selectedFileName), storageMode);
 				}
+			}
+			finally
+			{
+				if (!isOpening)
+				{
+					// Nothing was opened from this copy, so nothing was saved beside it either.
+					this.CanOpenLogFile = true;
+					await Task.Run(() => DeleteFolder(extractedFolder));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Opens a log that is not in a zip, and deletes the copy of the zip the previous log was opened from, if nothing reads it any more.
+		/// </summary>
+		private async Task OpenFromDiskAsync(string logPath, StorageMode storageMode)
+		{
+			await OpenAsync(logPath, storageMode);
+
+			// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
+			if (!IsOpenFrom(_openExtractedLog))
+			{
+				await ReplaceExtractedLogAsync(null);
+			}
+		}
+
+		/// <summary>
+		/// Opens a log Weevil extracted from a zip, keeps its copy while it is open, and deletes the copy once nothing reads it (#1162).
+		/// </summary>
+		/// <param name="extractedFolder">The folder of Weevil's own that the zip's files were extracted to: everything in it is Weevil's.</param>
+		private async Task OpenExtractedAsync(string extractedFolder, string logPath, StorageMode storageMode)
+		{
+			ExtractedLog extracted = null;
+
+			try
+			{
+				extracted = await Task.Run(() => new ExtractedLog(
+					extractedFolder,
+					Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)));
+
+				// Weevil may close before the open finishes.
+				_extractedLogBeingOpened = extracted;
+				await OpenAsync(logPath, storageMode);
 			}
 			finally
 			{
@@ -605,9 +649,9 @@
 				}
 
 				// A zip can hold thousands of files, so they are deleted off the UI thread.
-				if (openedFilePath == null)
+				if (extracted == null)
 				{
-					// Open As may have taken the menus before the copy failed to open.
+					// Open As took the menus before the copy failed to open.
 					this.CanOpenLogFile = true;
 
 					// Nothing was opened from this copy, so nothing was saved beside it either.
@@ -721,43 +765,36 @@
 		private async Task<StorageMode?> AskStorageAsync(string logPath)
 		{
 			// Off the UI thread: the estimate reads up to 1 MB of the log, which takes a moment on a network drive.
-			(StorageUnit fileSize, StorageUnit? estimate, bool isOnNetworkDrive) = await Task.Run(() =>
-			{
-				try
-				{
-					return (new StorageUnit(new FileInfo(logPath).Length), (StorageUnit?)Engine.EstimateMemory(logPath), OpenAsAdvice.IsNetworkPath(logPath));
-				}
-				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-				{
-					// The open itself reports why the log cannot be read.
-					Log.Default.Write(LogSeverityType.Warning, e, "The memory the log needs could not be estimated.");
-					return (StorageUnit.Zero, (StorageUnit?)null, OpenAsAdvice.IsNetworkPath(logPath));
-				}
-			});
-
-			var advice = new OpenAsAdvice(
-				Path.GetFileName(logPath),
-				fileSize,
-				estimate,
-				BlueDotBrigade.Weevil.Gui.Diagnostics.ComputerSnapshot.ReadAvailableMemory(),
-				isOnNetworkDrive);
+			OpenAsAdvice advice = await Task.Run(() => OpenAsAdvice.Read(logPath));
 			var isAccepted = _dialogBox.TryShowOpenAs(advice, out StorageMode storageMode);
 
-			// So the suggestion can be tuned from real use. Not in the engine's context, which the sidecar saves.
-			Log.Default.Write(
-				LogSeverityType.Information,
-				isAccepted ? "Open As: a storage mode was chosen." : "Open As was cancelled.",
-				new Dictionary<string, object>
-				{
-					{ "FileSize", advice.FileSize.Bytes },
-					{ "EstimatedMemory", advice.Estimate?.Bytes },
-					{ "AvailableMemory", advice.AvailableMemory?.Bytes },
-					{ "IsOnNetworkDrive", advice.IsOnNetworkDrive },
-					{ "SuggestedStorageMode", advice.DefaultMode },
-					{ "ChosenStorageMode", isAccepted ? (object)storageMode : null },
-				});
+			LogOpenAs(advice, isAccepted ? storageMode : null);
 
 			return isAccepted ? storageMode : null;
+		}
+
+		/// <summary>
+		/// Logs what Open As suggested and what the user chose, so the suggestion can be tuned from real use.
+		/// </summary>
+		/// <remarks>
+		/// Not in the engine's context, which the sidecar saves.
+		/// </remarks>
+		/// <param name="advice">The advice for the log chosen, or <see langword="null"/> when none was worked out, for example when the user cancelled before selecting a log.</param>
+		/// <param name="chosen">The mode chosen, or <see langword="null"/> when the user cancelled.</param>
+		private static void LogOpenAs(OpenAsAdvice advice, StorageMode? chosen)
+		{
+			Log.Default.Write(
+				LogSeverityType.Information,
+				chosen is null ? "Open As was cancelled." : "Open As: a storage mode was chosen.",
+				new Dictionary<string, object>
+				{
+					{ "FileSize", advice?.FileSize.Bytes },
+					{ "EstimatedMemory", advice?.Estimate?.Bytes },
+					{ "AvailableMemory", advice?.AvailableMemory?.Bytes },
+					{ "IsOnNetworkDrive", advice?.IsOnNetworkDrive },
+					{ "SuggestedStorageMode", advice?.DefaultMode },
+					{ "ChosenStorageMode", chosen },
+				});
 		}
 
 		public Task OpenAsync(string sourceFilePath)
