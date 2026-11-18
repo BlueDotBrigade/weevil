@@ -15,7 +15,7 @@
 		{
 			// Arrange
 			var regions = new List<Region>();
-			var records = R.WithLineNumbers(11, 20);
+			RecordList records = R.WithLineNumbers(11, 20);
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
@@ -25,7 +25,7 @@
 				regions.ToImmutableArray());
 
 			// Act
-			var filteredRecords = repository.GetAll();
+			RecordList filteredRecords = repository.GetAll();
 
 			// Assert
 			filteredRecords.Count.Should().Be(10);
@@ -39,7 +39,7 @@
 			{
 				new Region("RegionOfInterest", 14, 16),
 			};
-			var records = R.WithLineNumbers(11, 20);
+			RecordList records = R.WithLineNumbers(11, 20);
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
@@ -49,7 +49,7 @@
 				regions.ToImmutableArray());
 
 			// Act
-			var filteredRecords = repository.GetAll();
+			RecordList filteredRecords = repository.GetAll();
 
 			// Assert
 			filteredRecords.Count.Should().Be(3);
@@ -69,7 +69,7 @@
 				new Region("Region2", 20, 22),
 				new Region("Region1", 10, 11),
 			};
-			var records = R.WithLineNumbers(1, 30);
+			RecordList records = R.WithLineNumbers(1, 30);
 
 			var repository = new InMemoryRecordRepository(
 				records.ToImmutableArray(),
@@ -79,7 +79,7 @@
 				regions.ToImmutableArray());
 
 			// Act
-			var filteredRecords = repository.GetAll();
+			RecordList filteredRecords = repository.GetAll();
 
 			// Assert - Records should be in sequential order by line number
 			filteredRecords.Count.Should().Be(5);
@@ -93,8 +93,8 @@
                 [TestMethod]
                 public void ClearSelected_RemovesOnlySelectedRecords()
                 {
-                        // Arrange
-                        var allRecords = R.WithLineNumbers(1, 5);
+			// Arrange
+			RecordList allRecords = R.WithLineNumbers(1, 5);
                         var selectedRecords = new List<IRecord>
                         {
                                 R.WithLineNumber(2),
@@ -108,8 +108,8 @@
                                 ClearOperation.Selected,
                                 ImmutableArray<Region>.Empty);
 
-                        // Act
-                        var filteredRecords = repository.GetAll();
+			// Act
+			RecordList filteredRecords = repository.GetAll();
 
                         // Assert
                         filteredRecords.Select(r => r.LineNumber)

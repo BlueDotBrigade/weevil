@@ -4,6 +4,7 @@
 	using System.Collections.Immutable;
       using System.Globalization;
 	using System.Threading;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -75,7 +76,7 @@
 			}
 
 			// Parse expressions with alias expansion and || support
-			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
+			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
 			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
 				customRegex,
 				_aliasExpander,
@@ -86,7 +87,7 @@
 				return new Results(0);
 			}
 
-			var analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
+			AnalysisOrder analysisOrder = AnalysisHelper.GetAnalysisOrder(userDialog);
 
 			var previous = new Dictionary<string, string>();
 			var previousRecord = new Dictionary<string, IRecord>();
@@ -113,7 +114,7 @@
 				foreach (KeyValuePair<string, string> current in keyValuePairs)
 				{
 					if (previous.TryGetValue(current.Key, out var previousRaw) &&
-						previousRecord.TryGetValue(current.Key, out var priorRecord) &&
+						previousRecord.TryGetValue(current.Key, out IRecord priorRecord) &&
 						decimal.TryParse(previousRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var previousValue) &&
 						decimal.TryParse(current.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var currentValue))
 					{

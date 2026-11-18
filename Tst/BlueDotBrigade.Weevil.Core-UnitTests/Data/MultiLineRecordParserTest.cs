@@ -214,7 +214,7 @@
 		[TestMethod]
 		public void GivenSingleLineRecords_WhenReading_ThenEachRecordIsItsLine()
 		{
-			var parser = CreateParser(FirstLine, SecondLine);
+			MultilineRecordParser parser = CreateParser(FirstLine, SecondLine);
 
 			IRecord first = parser.GetNext();
 			IRecord second = parser.GetNext();
@@ -231,7 +231,7 @@
 		[TestMethod]
 		public void GivenMultilineRecord_WhenReading_ThenContinuationLinesAreJoinedWithCrLf()
 		{
-			var parser = CreateParser(FirstLine, ContinuationLine1, ContinuationLine2, SecondLine);
+			MultilineRecordParser parser = CreateParser(FirstLine, ContinuationLine1, ContinuationLine2, SecondLine);
 
 			IRecord first = parser.GetNext();
 			IRecord second = parser.GetNext();
@@ -246,7 +246,7 @@
 		public void GivenMultilineRecordFromUiThread_WhenReading_ThenItIsStillFromTheUiThread()
 		{
 			const string UiThreadLine = "2026-10-16 10:00:00.00000\t123\t1\tError\tFirst record";
-			var parser = CreateParser(UiThreadLine, ContinuationLine1, SecondLine);
+			MultilineRecordParser parser = CreateParser(UiThreadLine, ContinuationLine1, SecondLine);
 
 			IRecord first = parser.GetNext();
 
@@ -259,7 +259,7 @@
 		[TestMethod]
 		public void GivenMultilineRecordAtEndOfFile_WhenReading_ThenContinuationLinesAreKept()
 		{
-			var parser = CreateParser(FirstLine, SecondLine, ContinuationLine1);
+			MultilineRecordParser parser = CreateParser(FirstLine, SecondLine, ContinuationLine1);
 
 			parser.GetNext();
 			IRecord last = parser.GetNext();
@@ -271,11 +271,11 @@
 		[TestMethod]
 		public void GivenParserReturnsCustomRecordType_WhenReading_ThenRecordIsReturned()
 		{
-			var customRecord = Substitute.For<IRecord>();
+			IRecord customRecord = Substitute.For<IRecord>();
 			customRecord.LineNumber.Returns(1);
 			customRecord.Content.Returns("Custom record");
 
-			var recordParser = Substitute.For<IRecordParser>();
+			IRecordParser recordParser = Substitute.For<IRecordParser>();
 			recordParser
 				.TryParse(Arg.Any<int>(), Arg.Any<string>(), out Arg.Any<IRecord>())
 				.Returns(call =>
@@ -296,7 +296,7 @@
 		public void GivenAParserThatReturnsTrueWithoutAGenuineRecord_WhenReading_ThenThatLineStartsNoRecord()
 		{
 			// "skip" returns Record.Dummy and "nothing" returns null: neither starts a record, and "nothing" still ends the one before it.
-			var recordParser = Substitute.For<IRecordParser>();
+			IRecordParser recordParser = Substitute.For<IRecordParser>();
 			recordParser
 				.TryParse(Arg.Any<int>(), Arg.Any<string>(), out Arg.Any<IRecord>())
 				.Returns(call =>
@@ -407,7 +407,7 @@
 		[TestMethod]
 		public void GivenAParserThatChangesTheText_WhenReading_ThenTheRecordKeepsTheParsersText()
 		{
-			var recordParser = Substitute.For<IRecordParser>();
+			IRecordParser recordParser = Substitute.For<IRecordParser>();
 			recordParser
 				.TryParse(Arg.Any<int>(), Arg.Is<string>(line => line.StartsWith("Record")), out Arg.Any<IRecord>())
 				.Returns(call =>

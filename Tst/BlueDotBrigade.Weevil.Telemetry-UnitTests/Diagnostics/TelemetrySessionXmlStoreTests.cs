@@ -1,7 +1,8 @@
 namespace BlueDotBrigade.Weevil.Diagnostics
 {
 using System;
-using System.IO;
+	using System.Collections.Generic;
+	using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,10 +18,10 @@ var pendingDirectory = CreateTemporaryDirectory();
 try
 {
 var store = new TelemetrySessionXmlStore(pendingDirectory);
-var session = CreateSessionDto();
+				TelemetrySessionDto session = CreateSessionDto();
 
 store.Save(session);
-var pendingSessions = store.GetPendingSessions(10);
+				IReadOnlyList<PendingTelemetrySession> pendingSessions = store.GetPendingSessions(10);
 
 pendingSessions.Should().ContainSingle();
 pendingSessions[0].FilePath.Should().Be(Path.Combine(pendingDirectory, $"{session.SessionId}.xml"));

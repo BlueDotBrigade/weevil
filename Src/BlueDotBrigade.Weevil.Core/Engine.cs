@@ -256,7 +256,7 @@
 				.UsingStateOf(_coreEngine)
 				.UsingStorage(_coreEngine.StorageMode);
 
-			var kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
+			(CoreEngine.CoreEngineBuilder builder, SelectionManager.Snapshot, FilterType FilterType, IFilterCriteria Criteria) kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
 
 			// Not the Surrogate's engine, which every engine shares: after a failed read, this engine still saves to and reloads its own log.
 			Replace(_coreEngine.WithoutRecords());

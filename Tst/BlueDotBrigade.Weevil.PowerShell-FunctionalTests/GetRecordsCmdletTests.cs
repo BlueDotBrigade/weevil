@@ -112,7 +112,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
 				File.WriteAllText(logPath, string.Empty);
 
-				var read = FluentActions.Invoking(() => records[0].Content);
+				Func<string> read = FluentActions.Invoking(() => records[0].Content);
 
 				if (readFails)
 				{

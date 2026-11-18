@@ -4,13 +4,13 @@ namespace BlueDotBrigade.Weevil.Gui
 {
 	using System.Windows;
 	using BlueDotBrigade;
+	using BlueDotBrigade.DatenLokator.TestTools.Configuration;
 	using BlueDotBrigade.Weevil;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui;
 	using BlueDotBrigade.Weevil.Gui.Configuration;
 	using BlueDotBrigade.Weevil.Gui.Configuration.Reqnroll;
-	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.TestTools.Configuration.Reqnroll;
-	using BlueDotBrigade.DatenLokator.TestTools.Configuration;
 
 	/// <summary>
 	/// Represents Reqnroll events that execute before & after every test run.

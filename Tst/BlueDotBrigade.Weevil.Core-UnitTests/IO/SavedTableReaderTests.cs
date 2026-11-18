@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
@@ -31,7 +32,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenATableWithTextAParserChanged_WhenSavedAndReadBack_ThenEveryRecordIsTheSame(StorageMode storageMode)
 		{
 			// Text a plugin's parser changed is not in the log, so the saved index keeps it, while the other rows keep their place in the log (#1023).
-			var lines = Enumerable.Range(1, 3_000).Select(i => i % 7 == 0 ? $"change {i}" : i % 11 == 0 ? $" continued {i}" : $"keep {i}");
+			IEnumerable<string> lines = Enumerable.Range(1, 3_000).Select(i => i % 7 == 0 ? $"change {i}" : i % 11 == 0 ? $" continued {i}" : $"keep {i}");
 			System.IO.File.WriteAllText(_logPath, string.Join("\n", lines) + "\n", new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
 
 			using var log = new System.IO.FileStream(_logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

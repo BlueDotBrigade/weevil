@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System.Collections.Immutable;
 	using System.Globalization;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Math;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
@@ -15,13 +16,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenRecordsWithNoNumericMatches_WhenAnalyzeRuns_ThenResultContainsNullableMetrics()
 		{
 			// Statistics with no numeric matches threw instead of reporting empty metrics.
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("NoNumbers")
 				.WithContent("AlsoNoNumbers")
 				.GetRecords();
 
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
+			IUserDialog userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
 			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: false);
 
@@ -35,14 +36,14 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[TestMethod]
 		public void GivenIntegerAndDecimalValues_WhenAnalyzeRuns_ThenStatisticsAreCalculated()
 		{
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("Value=0")
 				.WithContent("Value=2")
 				.WithContent("Value=4.5")
 				.GetRecords();
 
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
+			IUserDialog userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
 			var state = new RecordState();
 
@@ -62,8 +63,8 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenInvariantDecimalValueAndNonEnglishCulture_WhenAnalyzeRuns_ThenStatisticsAreCalculated(string cultureName)
 		{
 			// Statistics parsed numbers with the workstation's culture, so 2.5 failed where the decimal separator is a comma.
-			var originalCulture = CultureInfo.CurrentCulture;
-			var originalUiCulture = CultureInfo.CurrentUICulture;
+			CultureInfo originalCulture = CultureInfo.CurrentCulture;
+			CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
 
 			try
 			{
@@ -71,12 +72,12 @@ namespace BlueDotBrigade.Weevil.Analysis
 				CultureInfo.CurrentCulture = culture;
 				CultureInfo.CurrentUICulture = culture;
 
-				var records = R.Create()
+				RecordList records = R.Create()
 					.WithContent("Value=2.5")
 					.GetRecords();
 
 				var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-				var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
+				IUserDialog userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+(?:\.\d+)?)");
 
 				var state = new RecordState();
 
@@ -104,7 +105,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				new Record(2, Record.CreationTimeUnknown, SeverityType.Information, "Value=20"));
 
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
+			IUserDialog userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
 			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: false);
 
@@ -129,7 +130,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 				new Record(3, knownTime2, SeverityType.Information, "Value=3"));
 
 			var analyzer = new StatisticalAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
+			IUserDialog userDialog = RecordAnalyzerTestContext.CreateDialog(@"Value=(?<Value>\d+)");
 
 			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: false);
 

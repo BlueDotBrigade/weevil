@@ -93,7 +93,7 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 
 		internal static IEngine CreateEngine()
 		{
-			var engine = Substitute.For<IEngine>();
+			IEngine engine = Substitute.For<IEngine>();
 			engine.SourceFilePath.Returns("/var/log/Application.log");
 			engine.Context.Returns(ContextDictionary.Empty);
 			engine.Metrics.Returns(new LogFileMetrics(fileSize: 2048, count: 13, TimeSpan.Zero, TimeSpan.Zero));
@@ -116,7 +116,7 @@ namespace BlueDotBrigade.Weevil.Common.Analysis
 
 		internal static IInsight CreateInsight(string title, string metricValue, string details, bool isAttentionRequired, params int[] relatedLineNumbers)
 		{
-			var insight = Substitute.For<IInsight>();
+			IInsight insight = Substitute.For<IInsight>();
 			insight.Title.Returns(title);
 			insight.MetricValue.Returns(metricValue);
 			insight.MetricUnit.Returns("Σ");

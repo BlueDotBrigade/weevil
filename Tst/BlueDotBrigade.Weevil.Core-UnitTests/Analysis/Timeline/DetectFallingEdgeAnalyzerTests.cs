@@ -2,6 +2,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
 	using System.Collections.Immutable;
  using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.TestTools.Data;
 
 	[TestClass]
@@ -12,7 +13,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		private static Results Analyze(RecordList records, IRecordState state, string regex, string analysisOrder = "Ascending")
 		{
 			var analyzer = new DetectFallingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
-			var userDialog = RecordAnalyzerTestContext.CreateDialog(regex, analysisOrder);
+			IUserDialog userDialog = RecordAnalyzerTestContext.CreateDialog(regex, analysisOrder);
 
 			return analyzer.Analyze(
 				records,
@@ -40,18 +41,18 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 
 		private static void AssertIntegerScenario(string pattern, string expected)
 		{
-         var records = AnalysisHelper.BuildIntegerRecords(pattern);
+			RecordList records = AnalysisHelper.BuildIntegerRecords(pattern);
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.IntegerRegex);
+			Results results = Analyze(records, state, AnalysisHelper.IntegerRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, state, results, label: "integer scenario");
 		}
 
 		private static void AssertDecimalScenario(string pattern, string expected)
 		{
-         var records = AnalysisHelper.BuildDecimalRecords(pattern);
+			RecordList records = AnalysisHelper.BuildDecimalRecords(pattern);
 			var state = new RecordState();
-			var results = Analyze(records, state, AnalysisHelper.DecimalRegex);
+			Results results = Analyze(records, state, AnalysisHelper.DecimalRegex);
 
 			AssertFlagsMatchExpected(pattern, expected, records, state, results, label: "decimal scenario");
 		}
@@ -148,7 +149,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 			// Sequence: 33.000 33.000 32.999 33.000 32.998 32.998 33.000 32.997 32.997
 			//                  ^           ^                   ^
 			// Under the "flag the record before the fall" convention, indices 1, 3, and 6 are flagged.
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithContent("15:02:00.000 33.000")
 				.WithContent("15:02:01.000 33.000")
 				.WithContent("15:02:02.000 32.999")
@@ -161,7 +162,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				.GetRecords();
 
            var state = new RecordState();
-           var results = Analyze(records, state, AnalysisHelper.DecimalRegex);
+			Results results = Analyze(records, state, AnalysisHelper.DecimalRegex);
 
 			AnalysisHelper.GetFlaggedIndices(records, state).Should().Equal(1, 3, 6);
 			results.FlaggedRecords.Should().Be(3);
@@ -172,14 +173,14 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		public void GivenOutOfOrderTimestampsAndUnknownTimestamp_WhenAnalyzeAscending_ThenUsesChronologicalOrder()
 		{
 			// Rising and falling edges followed the file's order instead of the timestamps' order.
-			var records = AnalysisHelper.BuildRecords(
+			RecordList records = AnalysisHelper.BuildRecords(
 				(1, "2024-01-01 00:00:02", "Value=1"),
 				(2, null, "Value=0"),
 				(3, "2024-01-01 00:00:01", "Value=2"),
 				(4, "2024-01-01 00:00:03", "Value=3"));
 
 			var state = new RecordState();
-			var results = Analyze(records, state, @"(?<Value>\d+)$");
+			Results results = Analyze(records, state, @"(?<Value>\d+)$");
 
 			AnalysisHelper.GetFlaggedIndices(records, state).Should().Equal(2);
 			results.FlaggedRecords.Should().Be(1);
@@ -190,13 +191,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		public void GivenOutOfOrderTimestamps_WhenAnalyzeDescending_ThenUsesReverseChronologicalOrder()
 		{
 			// Rising and falling edges followed the file's order instead of the timestamps' order.
-			var records = AnalysisHelper.BuildRecords(
+			RecordList records = AnalysisHelper.BuildRecords(
 				(1, "2024-01-01 00:00:02", "Value=1"),
 				(2, "2024-01-01 00:00:03", "Value=2"),
 				(3, "2024-01-01 00:00:01", "Value=3"));
 
 			var state = new RecordState();
-			var results = Analyze(records, state, @"(?<Value>\d+)$", "Descending");
+			Results results = Analyze(records, state, @"(?<Value>\d+)$", "Descending");
 
 			AnalysisHelper.GetFlaggedIndices(records, state).Should().Equal(1);
 			results.FlaggedRecords.Should().Be(1);
@@ -207,13 +208,13 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 		public void GivenMatchingTimestamps_WhenAnalyzeDescending_ThenUsesLineNumberAsStableTieBreaker()
 		{
 			// Rising and falling edges followed the file's order instead of the timestamps' order.
-			var records = AnalysisHelper.BuildRecords(
+			RecordList records = AnalysisHelper.BuildRecords(
 				(1, "2024-01-01 00:00:03", "Value=2"),
 				(2, "2024-01-01 00:00:03", "Value=1"),
 				(3, "2024-01-01 00:00:01", "Value=3"));
 
 			var state = new RecordState();
-			var results = Analyze(records, state, @"(?<Value>\d+)$", "Descending");
+			Results results = Analyze(records, state, @"(?<Value>\d+)$", "Descending");
 
 			AnalysisHelper.GetFlaggedIndices(records, state).Should().Equal(0);
 			results.FlaggedRecords.Should().Be(1);

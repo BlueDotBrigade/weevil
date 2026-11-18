@@ -30,9 +30,9 @@
 		[TestMethod]
 		public void GetEstimatedRange_NoRecords_ReturnsUnknownCreationTime()
 		{
-			var records = RecordList.Empty;
+			RecordList records = RecordList.Empty;
 
-			var range = records.GetEstimatedRange();
+			(DateTime From, DateTime To) range = records.GetEstimatedRange();
 
 			range.From.Should().Be(Record.CreationTimeUnknown);
 			range.To.Should().Be(Record.CreationTimeUnknown);
@@ -41,11 +41,11 @@
 		[TestMethod]
 		public void GetEstimatedRange_OneRecord_ReturnsSameDateTime()
 		{
-			var now = DateTime.Now;
+			DateTime now = DateTime.Now;
 
-			var records = GetRecords(new List<DateTime> { now });
+			RecordList records = GetRecords(new List<DateTime> { now });
 
-			var range = records.GetEstimatedRange();
+			(DateTime From, DateTime To) range = records.GetEstimatedRange();
 
 			range.From.Should().Be(now);
 			range.To.Should().Be(now);
@@ -54,14 +54,14 @@
 		[TestMethod]
 		public void GetEstimatedRange_MissingFirstTimestamp_ReturnsNextTimestamp()
 		{
-			var records = GetRecords(new List<DateTime>
+			RecordList records = GetRecords(new List<DateTime>
 			{
 				Record.CreationTimeUnknown,
 				new DateTime(2021, 04, 11),
 				new DateTime(2021, 04, 12),
 			});
 
-			var range = records.GetEstimatedRange();
+			(DateTime From, DateTime To) range = records.GetEstimatedRange();
 
 			range.From.Should().Be(new DateTime(2021, 04, 11));
 		}
@@ -69,14 +69,14 @@
 		[TestMethod]
 		public void GetEstimatedRange_MissingLastTimestamp_ReturnsSecondLastTimestamp()
 		{
-			var records = GetRecords(new List<DateTime>
+			RecordList records = GetRecords(new List<DateTime>
 			{
 				new DateTime(2021, 04, 11),
 				new DateTime(2021, 04, 12),
 				Record.CreationTimeUnknown,
 			});
 
-			var range = records.GetEstimatedRange();
+			(DateTime From, DateTime To) range = records.GetEstimatedRange();
 
 			range.To.Should().Be(new DateTime(2021, 04, 12));
 		}

@@ -18,7 +18,7 @@
 		{
 			bool isMatch = false;
 
-			foreach (var expression in _expressions)
+			foreach (IExpression expression in _expressions)
 			{
 				if (expression.IsMatch(record, content))
 				{

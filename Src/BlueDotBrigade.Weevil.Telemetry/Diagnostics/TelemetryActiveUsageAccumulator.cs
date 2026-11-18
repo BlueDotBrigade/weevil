@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				return;
 			}
 
-			var elapsed = activityObservedAtUtc - _lastActivityUtc.Value;
+			TimeSpan elapsed = activityObservedAtUtc - _lastActivityUtc.Value;
 			if (elapsed > TimeSpan.Zero)
 			{
 				ActiveMinutes += System.Math.Min(elapsed.TotalMinutes, _maxLeaseMinutes);

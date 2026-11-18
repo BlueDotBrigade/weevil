@@ -48,7 +48,7 @@
 
 			if (useRegex)
 			{
-				var regexOptions = isCaseSensitive
+				RegexOptions regexOptions = isCaseSensitive
 					? RegexOptions.Compiled
 					: RegexOptions.Compiled | RegexOptions.IgnoreCase;
 				var regex = new Regex(value, regexOptions);
@@ -62,7 +62,7 @@
 			}
 			else
 			{
-				var comparison = isCaseSensitive
+				StringComparison comparison = isCaseSensitive
 					? StringComparison.Ordinal
 					: StringComparison.OrdinalIgnoreCase;
 
@@ -84,7 +84,7 @@
 
 			if (useRegex)
 			{
-				var regexOptions = isCaseSensitive
+				RegexOptions regexOptions = isCaseSensitive
 					? RegexOptions.Compiled
 					: RegexOptions.Compiled | RegexOptions.IgnoreCase;
 				var regex = new Regex(value, regexOptions);
@@ -98,7 +98,7 @@
 			}
 			else
 			{
-				var comparison = isCaseSensitive
+				StringComparison comparison = isCaseSensitive
 					? StringComparison.Ordinal
 					: StringComparison.OrdinalIgnoreCase;
 

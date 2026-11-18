@@ -6,11 +6,11 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System.Linq;
 	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Filter;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
+	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Math;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 
 	internal sealed class StatisticalAnalyzer : IRecordAnalyzer
 	{
@@ -94,7 +94,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			}
 
 			// Parse expressions with alias expansion and || support
-			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
+			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
 			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
 				customRegex,
 				_aliasExpander,

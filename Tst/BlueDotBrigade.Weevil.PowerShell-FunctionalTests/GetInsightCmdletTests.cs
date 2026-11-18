@@ -22,7 +22,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
 				var output = new GetInsightCmdlet { FilePath = logPath }.Invoke().Cast<object>().ToList();
 
-				var report = output.Should().ContainSingle().Which.Should().BeOfType<InsightReport>().Subject;
+				InsightReport report = output.Should().ContainSingle().Which.Should().BeOfType<InsightReport>().Subject;
 				report.SourceFileName.Should().Be("Application.log");
 				report.RecordCount.Should().Be(9);
 				report.Metrics.Should().Contain(metric => metric.Name == "Errors");

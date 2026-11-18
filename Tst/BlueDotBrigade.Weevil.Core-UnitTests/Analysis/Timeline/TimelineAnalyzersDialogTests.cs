@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.IO;
@@ -17,7 +18,7 @@
 	{
 		private IUserDialog GetUserDialogWithAnalysisDialogSupport(bool shouldCancel, string regexToReturn)
 		{
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 
 			// For rising/falling edge analyzers, mock GetAnalysisOrder prompt
 			userDialog
@@ -80,11 +81,11 @@
 		{
 			// Arrange
 			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -95,11 +96,11 @@
 		{
 			// Arrange
 			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -110,11 +111,11 @@
 		{
 			// Arrange
 			var analyzer = new StateTransitionsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -129,11 +130,11 @@
 		{
 			// Arrange
 			var analyzer = new StableValueRunsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -144,11 +145,11 @@
 		{
 			// Arrange
 			var analyzer = new StableValueRunsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -163,11 +164,11 @@
 		{
 			// Arrange
 			var analyzer = new DetectRisingEdgeAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -178,11 +179,11 @@
 		{
 			// Arrange
 			var analyzer = new DetectRisingEdgeAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -197,11 +198,11 @@
 		{
 			// Arrange
 			var analyzer = new DetectFallingEdgeAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -212,11 +213,11 @@
 		{
 			// Arrange
 			var analyzer = new DetectFallingEdgeAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "  ");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "  ");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -231,11 +232,11 @@
 		{
 			// Arrange
 			var analyzer = new ThresholdCrossingsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -246,11 +247,11 @@
 		{
 			// Arrange
 			var analyzer = new ThresholdCrossingsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: " ");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: " ");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -265,11 +266,11 @@
 		{
 			// Arrange
 			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -280,11 +281,11 @@
 		{
 			// Arrange
 			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -295,11 +296,11 @@
 		{
 			// Arrange
 			var analyzer = new MatchingRecordRunsAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -314,11 +315,11 @@
 		{
 			// Arrange
 			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -329,11 +330,11 @@
 		{
 			// Arrange
 			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -344,11 +345,11 @@
 		{
 			// Arrange
 			var analyzer = new LastOccurrenceAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -363,11 +364,11 @@
 		{
 			// Arrange
 			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: true, regexToReturn: null);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -378,11 +379,11 @@
 		{
 			// Arrange
 			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: "   ");
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);
@@ -393,11 +394,11 @@
 		{
 			// Arrange
 			var analyzer = new StatisticalAnalyzer(GetFilterStrategy());
-			var userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
-			var records = RecordList.Empty;
+			IUserDialog userDialog = GetUserDialogWithAnalysisDialogSupport(shouldCancel: false, regexToReturn: string.Empty);
+			RecordList records = RecordList.Empty;
 
 			// Act
-			var results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
+			Results results = analyzer.Analyze(records, new RecordState(), string.Empty, userDialog, canUpdateMetadata: true);
 
 			// Assert
 			results.FlaggedRecords.Should().Be(0);

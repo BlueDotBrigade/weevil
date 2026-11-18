@@ -12,7 +12,7 @@
 
 		static SimpleCallStackFormatter()
 		{
-			var options = RegexOptions.Compiled | RegexOptions.Multiline;
+			RegexOptions options = RegexOptions.Compiled | RegexOptions.Multiline;
 
 			FilePathPattern = new Regex(
 				@"in [a-zA-Z]:[\\\/].*\.cs:line",
@@ -52,7 +52,7 @@
 
 			if (isMultiLine)
 			{
-				foreach (var pattern in CallStackPatterns)
+				foreach (Regex pattern in CallStackPatterns)
 				{
 					result = pattern.Replace(result, string.Empty);
 				}

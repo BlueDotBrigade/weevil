@@ -157,7 +157,7 @@
 
 			try
 			{
-				var engine = Engine
+				IEngine engine = Engine
 					.UsingPath(filePath)
 					.Open();
 
@@ -185,7 +185,7 @@
 
 			try
 			{
-				var engine = Engine
+				IEngine engine = Engine
 					.UsingPath(filePath)
 					.Open();
 
@@ -214,7 +214,7 @@
 
 			try
 			{
-				var engine = Engine
+				IEngine engine = Engine
 					.UsingPath(filePath)
 					.Open();
 
@@ -241,7 +241,7 @@
 
 			try
 			{
-				var engine = Engine
+				IEngine engine = Engine
 					.UsingPath(filePath)
 					.Open();
 
@@ -268,7 +268,7 @@
 
 			try
 			{
-				var engine = Engine
+				IEngine engine = Engine
 					.UsingPath(filePath)
 					.Open();
 
@@ -295,7 +295,7 @@
 
 			try
 			{
-				var engine = Engine
+				IEngine engine = Engine
 					.UsingPath(filePath)
 					.Open();
 
@@ -383,7 +383,7 @@
 
 		private static IUserDialog CreateAscendingAnalysisDialog(string expression)
 		{
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 			userDialog
 				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
 				.Returns(x => { x[2] = expression; return true; });

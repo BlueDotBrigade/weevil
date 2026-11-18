@@ -18,7 +18,7 @@
 
 		public IRecord Find(string timestamp, RecordSearchType searchType = RecordSearchType.NearestNeighbor)
 		{
-			var firstRecord = _activeRecord.DataSource.GetFirstCreatedAt();
+			IRecord firstRecord = _activeRecord.DataSource.GetFirstCreatedAt();
 
 			if (Record.IsDummyOrNull(firstRecord))
 			{
@@ -26,7 +26,7 @@
 					$"Unable to find record - the collection is empty. Value={timestamp}, SearchType={searchType}");
 			}
 
-			var referenceRecord = _activeRecord.Record.HasCreationTime
+			IRecord referenceRecord = _activeRecord.Record.HasCreationTime
 				? _activeRecord.Record
 				: firstRecord;
 
@@ -53,8 +53,8 @@
 		/// </remarks>
 		private static (DateTime referenceTime, TimeSpan tolerance) ConvertToDateTime(IRecord activeRecord, string value)
 		{
-			var referenceTime = Record.CreationTimeUnknown;
-			var tolerance = TimeSpan.Zero;
+			DateTime referenceTime = Record.CreationTimeUnknown;
+			TimeSpan tolerance = TimeSpan.Zero;
 
 			if (activeRecord.HasCreationTime)
 			{
@@ -63,7 +63,7 @@
 				// ... no: use day of month from selected record
 				if (IncludesDate(value))
 				{
-					if (TryParseTimestamp(value, out var requestedTime))
+					if (TryParseTimestamp(value, out DateTime requestedTime))
 					{
 						referenceTime = requestedTime;
 						tolerance = TimeSpan.FromDays(1);
@@ -71,7 +71,7 @@
 				}
 				else
 				{
-					if (TryParseTimestamp(value, out var requestedTime))
+					if (TryParseTimestamp(value, out DateTime requestedTime))
 					{
 						var referenceDate = new DateTime(
 							activeRecord.CreatedAt.Year,

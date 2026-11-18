@@ -90,7 +90,7 @@
 		/// </summary>
 		public IDictionary<string, string> GetKeyValuePairs(IRecord record, string content)
 		{
-			var results = GetKeyValuePairs(content);
+			IDictionary<string, string> results = GetKeyValuePairs(content);
 
 			if (results.Count > 0)
 			{

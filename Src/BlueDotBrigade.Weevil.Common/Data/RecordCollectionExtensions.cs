@@ -10,7 +10,7 @@
 
 		private static DateTime EstimateFirstTimestamp(RecordList sourceRecords)
 		{
-			var result = Record.CreationTimeUnknown;
+			DateTime result = Record.CreationTimeUnknown;
 
 			var maxIndex = sourceRecords.Count < AttemptCount
 				? sourceRecords.Count
@@ -18,7 +18,7 @@
 
 			for (var i = 0; i < maxIndex; i++)
 			{
-				var createdAt = sourceRecords.GetCreatedAt(i);
+				DateTime createdAt = sourceRecords.GetCreatedAt(i);
 
 				if (createdAt != Record.CreationTimeUnknown)
 				{
@@ -32,7 +32,7 @@
 
 		private static DateTime EstimateLastTimestamp(RecordList sourceRecords)
 		{
-			var result = Record.CreationTimeUnknown;
+			DateTime result = Record.CreationTimeUnknown;
 
 			var minIndex = sourceRecords.Count > AttemptCount
 				? sourceRecords.Count - AttemptCount - 1
@@ -40,7 +40,7 @@
 
 			for (var i = sourceRecords.Count-1; minIndex <= i; i--)
 			{
-				var createdAt = sourceRecords.GetCreatedAt(i);
+				DateTime createdAt = sourceRecords.GetCreatedAt(i);
 
 				if (createdAt != Record.CreationTimeUnknown)
 				{
@@ -110,7 +110,7 @@
 		{
 			IRecord result = Record.Dummy;
 
-			if (RecordSearch.TryRecordOfLineNumber(sourceRecords, lineNumber, out var record))
+			if (RecordSearch.TryRecordOfLineNumber(sourceRecords, lineNumber, out IRecord record))
 			{
 				result = record;
 			}
@@ -199,8 +199,8 @@
 
 		public static (DateTime From, DateTime To) GetRange(this RecordList sourceRecords)
 		{
-			var from = Record.CreationTimeUnknown;
-			var to = Record.CreationTimeUnknown;
+			DateTime from = Record.CreationTimeUnknown;
+			DateTime to = Record.CreationTimeUnknown;
 
 			if (sourceRecords.Count > 0)
 			{
@@ -221,8 +221,8 @@
 
 		public static (DateTime From, DateTime To) GetEstimatedRange(this RecordList sourceRecords)
 		{
-			var from = Record.CreationTimeUnknown;
-			var to = Record.CreationTimeUnknown;
+			DateTime from = Record.CreationTimeUnknown;
+			DateTime to = Record.CreationTimeUnknown;
 
 			if (sourceRecords.Count > 0)
 			{

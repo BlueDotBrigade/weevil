@@ -40,7 +40,7 @@ namespace BlueDotBrigade.Weevil.IO
 		{
 			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");
 
-			var index = Load(_logFilePath);
+			LineIndex index = Load(_logFilePath);
 
 			index.LineCount.Should().Be(3);
 			System.IO.File.Exists(_indexFilePath).Should().BeTrue();
@@ -73,7 +73,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var savedAt = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 			System.IO.File.SetLastWriteTimeUtc(_indexFilePath, savedAt);
 
-			var index = Load(_logFilePath);
+			LineIndex index = Load(_logFilePath);
 
 			index.LineCount.Should().Be(3);
 			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt);
@@ -86,11 +86,11 @@ namespace BlueDotBrigade.Weevil.IO
 			Load(_logFilePath);
 			System.IO.File.AppendAllText(_logFilePath, "c\nd\n");
 
-			var index = Load(_logFilePath);
+			LineIndex index = Load(_logFilePath);
 
 			index.LineCount.Should().Be(4);
-			using var logSource = System.IO.File.OpenRead(_logFilePath);
-			using var indexSource = System.IO.File.OpenRead(_indexFilePath);
+			using FileStream logSource = System.IO.File.OpenRead(_logFilePath);
+			using FileStream indexSource = System.IO.File.OpenRead(_indexFilePath);
 			LineIndex.TryRead(indexSource, logSource, out LineIndex saved).Should().BeTrue();
 			saved.LineCount.Should().Be(4);
 		}
@@ -121,7 +121,7 @@ namespace BlueDotBrigade.Weevil.IO
 			// A folder where the temporary index file would be written makes saving fail.
 			System.IO.Directory.CreateDirectory(_indexFilePath + ".tmp");
 
-			var index = Load(_logFilePath);
+			LineIndex index = Load(_logFilePath);
 
 			index.LineCount.Should().Be(3);
 			System.IO.File.Exists(_indexFilePath).Should().BeFalse();
@@ -138,7 +138,7 @@ namespace BlueDotBrigade.Weevil.IO
 				var extractedLogFilePath = Path.Combine(extractedDirectory, "Application.log");
 				System.IO.File.WriteAllText(extractedLogFilePath, "a\nb\nc\n", Encoding.UTF8);
 
-				var index = Load(extractedLogFilePath);
+				LineIndex index = Load(extractedLogFilePath);
 
 				index.LineCount.Should().Be(3);
 				System.IO.File.Exists(extractedLogFilePath + ".idx").Should().BeFalse();

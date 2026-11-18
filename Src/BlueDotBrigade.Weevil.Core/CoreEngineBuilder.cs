@@ -370,7 +370,7 @@
 						// Reading starts at the start line's byte offset, taken from the line index (#977).
 						// A start line beyond the end of the log reads from the top, which finds no records to keep.
 						// In disk mode, the records read their content back from the log, through a source complete before Get returns (#1025).
-						var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
+						SerializedRecordRepository repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
 							? new SerializedRecordRepository(
 								 dataSource,
 								 coreExtension.GetRecordParser(),

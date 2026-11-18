@@ -9,14 +9,15 @@
 	using System.Text;
 	using System.Threading.Tasks;
 	using Analysis;
+	using BlueDotBrigade.Weevil.Cli.IO;
+	using BlueDotBrigade.Weevil.Diagnostics;
+	using BlueDotBrigade.Weevil.IO;
 	using Cocona;
+	using Cocona.Builder;
 	using Diagnostics;
 	using Filter;
-	using Security;
-	using BlueDotBrigade.Weevil.IO;
-	using BlueDotBrigade.Weevil.Diagnostics;
-	using BlueDotBrigade.Weevil.Cli.IO;
 	using Microsoft.Extensions.DependencyInjection;
+	using Security;
 
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class Program
@@ -70,17 +71,17 @@
 			Log.Default.Write(LogSeverityType.Information, $"Build configuration={BuildConfiguration}");
 			Log.Default.Write($"Weevil command line parameters. Arguments={Environment.GetCommandLineArgs().Length}");
 
-			var telemetryClient = TelemetryClientFactory.Create();
+			ITelemetryClient telemetryClient = TelemetryClientFactory.Create();
 			TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
 			TelemetrySessionLifecycle.Shared.ConfigureStartupContext(TelemetrySource, IsDebuggerAttachedAtStartup);
 			Log.Default.Write(LogSeverityType.Debug,
 				$"Telemetry client configured. Type={telemetryClient.GetType().Name}");
 
 			var argumentsWithoutOutputAs = OutputAs.RemoveFromArguments(args);
-			var builder = CoconaApp.CreateBuilder(argumentsWithoutOutputAs);
+			CoconaAppBuilder builder = CoconaApp.CreateBuilder(argumentsWithoutOutputAs);
 			builder.Services.AddSingleton(new OutputOptions(outputFormat));
 
-			var application = builder.Build();
+			CoconaApp application = builder.Build();
 
 			application.AddCommands<FilterCommands>();
 			application.AddCommands<InsightCommands>();

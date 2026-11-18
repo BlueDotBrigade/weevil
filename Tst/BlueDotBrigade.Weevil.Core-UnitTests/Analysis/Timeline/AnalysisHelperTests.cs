@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         [TestMethod]
         public void GivenRecordsWithFlags_WhenGetFlaggedIndices_ThenReturnsFlaggedIndexes()
         {
-            var records = AnalysisHelper.BuildIntegerRecords("12345");
+			RecordList records = AnalysisHelper.BuildIntegerRecords("12345");
             var state = new RecordState();
             state.SetFlagged(records[1], true);
             state.SetFlagged(records[3], true);
@@ -33,7 +33,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         [TestMethod]
         public void GivenDigitPattern_WhenBuildIntegerRecords_ThenCreatesTimestampedIntegerContent()
         {
-            var records = AnalysisHelper.BuildIntegerRecords("123");
+			RecordList records = AnalysisHelper.BuildIntegerRecords("123");
 
             records.Should().HaveCount(3);
             records[0].Content.Should().Be("15:02:00.000 1");
@@ -44,7 +44,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         [TestMethod]
         public void GivenDigitPattern_WhenBuildDecimalRecords_ThenCreatesTimestampedDecimalContent()
         {
-            var records = AnalysisHelper.BuildDecimalRecords("123");
+			RecordList records = AnalysisHelper.BuildDecimalRecords("123");
 
             records.Should().HaveCount(3);
             records[0].Content.Should().Be("15:02:00.000 1.0");
@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         {
             var pattern = "12345";
             var expected = "1^3^5";
-            var records = AnalysisHelper.BuildIntegerRecords(pattern);
+			RecordList records = AnalysisHelper.BuildIntegerRecords(pattern);
             var state = new RecordState();
             state.SetFlagged(records[1], true);
             state.SetFlagged(records[3], true);
@@ -78,7 +78,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         {
             var pattern = "12345";
             var expected = "1^345";
-            var records = AnalysisHelper.BuildIntegerRecords(pattern);
+			RecordList records = AnalysisHelper.BuildIntegerRecords(pattern);
             var state = new RecordState();
             state.SetFlagged(records[3], true);
             state.SetComment(records[3], "unexpected flag");
@@ -91,7 +91,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 "unit test",
                 "custom mismatch");
 
-            var exception = act.Should().Throw<Exception>().Which;
+			Exception exception = act.Should().Throw<Exception>().Which;
             exception.Message.Should().Contain("custom mismatch");
             exception.Message.Should().Contain("Expected: 1^345");
             exception.Message.Should().Contain("Actual  : 123^5");
@@ -103,7 +103,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
         {
             var pattern = "12345";
             var expected = "1^34";
-            var records = AnalysisHelper.BuildIntegerRecords(pattern);
+			RecordList records = AnalysisHelper.BuildIntegerRecords(pattern);
             var state = new RecordState();
 
             Action act = () => AnalysisHelper.AssertFlagsMatchExpected(
@@ -114,7 +114,7 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
                 "unit test",
                 "custom mismatch");
 
-            var exception = act.Should().Throw<Exception>().Which;
+			Exception exception = act.Should().Throw<Exception>().Which;
             exception.Message.Should().Contain("must be the same length");
         }
     }

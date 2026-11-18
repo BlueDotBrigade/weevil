@@ -9,10 +9,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Windows;
 	using System.Windows.Input;
-	using Metalama.Patterns.Observability;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
+	using Metalama.Patterns.Observability;
 	using Prism.Commands;
 
 	internal partial class FilterViewModel

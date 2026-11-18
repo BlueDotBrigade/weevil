@@ -1,9 +1,8 @@
 using BlueDotBrigade;
 using BlueDotBrigade.Weevil;
-using BlueDotBrigade.Weevil.Filter;
 using BlueDotBrigade.Weevil.Data;
+using BlueDotBrigade.Weevil.Filter;
 using BlueDotBrigade.Weevil.Filter.Expressions.PlainText;
-
 using static System.Net.Mime.MediaTypeNames;
 
 [Binding]
@@ -98,7 +97,7 @@ internal sealed class FilteringSteps : ReqnrollSteps
 			new[] { Environment.NewLine },
 			StringSplitOptions.RemoveEmptyEntries);
 
-		foreach (var record in this.Context.Results)
+		foreach (IRecord? record in this.Context.Results)
 		{
 			foreach (var text in textValues)
 			{

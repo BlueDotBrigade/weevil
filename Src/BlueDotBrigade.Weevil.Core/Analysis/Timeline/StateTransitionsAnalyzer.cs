@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Threading;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -73,7 +74,7 @@
 			}
 
 			// Parse expressions with alias expansion and || support
-			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
+			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
 			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
 				customRegex,
 				_aliasExpander,

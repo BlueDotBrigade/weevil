@@ -1,9 +1,9 @@
 namespace BlueDotBrigade.Weevil
 {
 	using System;
-	using System.Linq;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
+	using System.Linq;
 
 	/// <remarks>
 	/// Writes are serialized by the session's lock (#1107). Each write publishes a new array, so reads never wait.

@@ -59,7 +59,7 @@
 			{
 				IEnumerable<KeyValuePair<string, object>> keyValuePairs = metadata as KeyValuePair<string, object>[] ?? metadata.ToArray();
 
-				foreach (var item in keyValuePairs)
+				foreach (KeyValuePair<string, object> item in keyValuePairs)
 				{
 					result.AppendFormat(CultureInfo.InvariantCulture, "{0}={1};", item.Key, item.Value ?? "NULL");
 				}

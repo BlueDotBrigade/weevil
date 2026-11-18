@@ -1,9 +1,9 @@
 namespace BlueDotBrigade.Weevil.Cli.Security
 {
 	using BlueDotBrigade.Weevil.Diagnostics;
-	using IO;
 	using Cocona;
 	using Cocona.Help;
+	using IO;
 
 	[TransformHelpFactory(typeof(SecureCommandHelp))]
 	internal class SecureCommands
