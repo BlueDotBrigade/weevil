@@ -8,10 +8,15 @@
 
 	internal interface IDialogBoxService : IUserDialog
 	{
-		string ShowOpenFile(string compatibleFileExtensions);
+		/// <summary>
+		/// Shows the Open As dialog, so the user finds a log and chooses RAM or Disk in one window (#1215).
+		/// </summary>
+		/// <param name="choice">The log chosen and its mode, or <see langword="null"/> when the user cancelled.</param>
+		/// <returns><see langword="false"/> when the user cancelled: nothing opens, and nothing was extracted.</returns>
+		bool TryShowOpenAs(out OpenAsChoice choice);
 
 		/// <summary>
-		/// Shows Weevil's Open As window, so the user chooses RAM or Disk for the log about to open (#1028).
+		/// Shows Weevil's Open As window for a log already chosen, so the user chooses RAM or Disk for it (#1028).
 		/// </summary>
 		/// <param name="advice">The log, the mode suggested for it, and the warnings.</param>
 		/// <param name="storageMode">The mode chosen.</param>
