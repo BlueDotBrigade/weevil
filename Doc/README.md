@@ -13,6 +13,8 @@ Supporting documentation for developers. Pick the folder by the question you are
 
 `Notes/Release` must not move: the installer and the in-app release notification depend on its paths.
 
+Code that is not documentation lives outside `Doc/`, in `Dep/`, and ships with nothing: developer scripts in `Dep/Scripts/`, and harnesses that are used again and again to measure Weevil in `Dep/TestHarnesses/`. A one-off experiment or proof of concept stays in `Research/`, with the decision it informed.
+
 Requirements are not documents: each is a GitHub issue labelled `requirement`, and a "Requirements: vX" issue lists the ones a release supports, for example #1093.
 
 ## One Source of Truth

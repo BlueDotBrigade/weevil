@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <!--
+    Which Weevil to time:
+    - By default, this repository's Core project.
+    - With -p:WeevilRoot=<folder>, the Core of another checkout, such as a git worktree of the commit to compare with.
+  -->
+  <PropertyGroup>
+    <WeevilRoot Condition="'$(WeevilRoot)' == ''">$(MSBuildThisFileDirectory)..\..\..</WeevilRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(WeevilRoot)\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+    <!-- The same reference log as the performance tests' benchmarks. -->
+    <Compile Include="$(WeevilRoot)\Tst\BlueDotBrigade.Weevil.Core-PerformanceTests\ReferenceLog.cs" Link="ReferenceLog.cs" />
+  </ItemGroup>
+</Project>

@@ -12,13 +12,13 @@ Specifies the root directory where the search for `.feature` files should begin.
 .EXAMPLES
 
 # Example 1: Display the merged content in the console
-.\merge-feature-files.ps1 -SourceDir "..\Tst"
+.\merge-feature-files.ps1 -SourceDir "..\..\Tst"
 
 # Example 2: Save the merged content to a file
-.\merge-feature-files.ps1 -SourceDir "..\Tst" > All.feature
+.\merge-feature-files.ps1 -SourceDir "..\..\Tst" > All.feature
 
 # Example 3: Display the merged content and save it simultaneously
-.\merge-feature-files.ps1 -SourceDir "..\Tst" | Tee-Object -FilePath All.feature
+.\merge-feature-files.ps1 -SourceDir "..\..\Tst" | Tee-Object -FilePath All.feature
 #>
 
 param (

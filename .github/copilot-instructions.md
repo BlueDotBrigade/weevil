@@ -22,6 +22,8 @@ Src/BlueDotBrigade.Weevil.TestTools   # Shared test helpers and utilities
 Src/BlueDotBrigade.Weevil.Windows     # Windows-specific platform abstractions
 Tst/                                  # Unit tests, feature tests, and functional tests
 Doc/                                  # Supporting documentation; Doc/README.md says what goes where
+Dep/Scripts                           # Developer scripts, such as setting up a developer's computer
+Dep/TestHarnesses                     # Console programs that measure Weevil's RAM and speed, outside Weevil.sln
 ```
 ## Architectural Rules
 

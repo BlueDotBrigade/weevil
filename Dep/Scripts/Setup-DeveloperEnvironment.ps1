@@ -27,7 +27,7 @@ function Test-MetalamaExtensionInstalled {
 	 return $false
 }
 
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $vsConfigPath = Join-Path $repoRoot '.vsconfig'
 
 Write-Host ''
