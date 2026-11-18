@@ -1,0 +1,10 @@
+# 2026-11-17: one plain-text filter ("timeout") over the 1,000 MB log, after a warm-up filter. AllocDiag (see AllocDiag/).
+mode=ram allocated=384 MB gen2 collections=0 results=2917620
+       365 MB  SOH BlueDotBrigade.Weevil.Data.Record
+        12 MB  LOH System.Int32[]
+         8 MB  LOH System.Boolean[]
+mode=disk allocated=820 MB gen2 collections=1 results=2917620
+       436 MB  LOH System.Byte[]
+       364 MB  SOH BlueDotBrigade.Weevil.Data.Record
+        12 MB  LOH System.Int32[]
+         8 MB  LOH System.Boolean[]

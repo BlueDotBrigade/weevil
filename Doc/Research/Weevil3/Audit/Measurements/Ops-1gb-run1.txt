@@ -1,0 +1,38 @@
+# Run 1, 2026-11-17 00:18-00:22 UTC: nothing else running on the machine. 1,000 MB log, 7,547,742 records, 5 runs each.
+# Columns: operation, median s, MB allocated, results, min, max. (Peak memory was not yet recorded.)
+== main, RAM
+open	8.05	-	7547742	ws=1.22GB heap=1.17GB
+plain: timeout	0.344	381.6	2917620	min=0.329 max=0.499
+plain: sequence=123456 (rare)	0.205	369.9	11	min=0.186 max=0.218
+regex: retry.*connection	0.393	373.3	840827	min=0.354 max=0.477
+regex: (timeout|retry)\s+\w+\s+(closed|opened)	0.752	372.8	673718	min=0.665 max=0.912
+regex include timeout, exclude retry	0.383	376.3	1550868	min=0.354 max=0.392
+moniker: @Severity=Warning	0.101	372.3	604614	min=0.095 max=0.108
+regex OR: Warning||Error	0.365	374.3	1056346	min=0.362 max=0.383
+clear (show all)	0.357	369.9	7547742	min=0.344 max=0.359
+find: last record's text	0.531	0.0	7547742	min=0.524 max=0.571
+end	ws=1.37GB peak=1.79GB heap=1.17GB
+== main, Disk
+open	7.03	-	7547742	ws=0.22GB heap=0.17GB
+plain: timeout	0.435	817.8	2917620	min=0.423 max=0.714
+plain: sequence=123456 (rare)	0.288	698.8	11	min=0.276 max=0.334
+regex: retry.*connection	0.463	792.8	840827	min=0.431 max=0.699
+regex: (timeout|retry)\s+\w+\s+(closed|opened)	0.861	1060.8	673718	min=0.786 max=0.950
+regex include timeout, exclude retry	0.472	973.7	1550868	min=0.445 max=0.532
+moniker: @Severity=Warning	0.106	372.3	604614	min=0.100 max=0.122
+regex OR: Warning||Error	0.461	928.0	1056346	min=0.446 max=0.517
+clear (show all)	0.367	369.8	7547742	min=0.353 max=0.372
+find: last record's text	0.734	117.5	7547742	min=0.720 max=0.776
+end	ws=1.77GB peak=1.91GB heap=0.17GB
+== 2.12.1, RAM
+open	26.92	-	7547742	ws=3.15GB heap=3.00GB
+plain: timeout	2.777	348.6	2917620	min=2.738 max=2.804
+plain: sequence=123456 (rare)	2.227	301.9	11	min=2.189 max=2.408
+regex: retry.*connection	2.887	2752.3	840827	min=2.806 max=2.975
+regex: (timeout|retry)\s+\w+\s+(closed|opened)	2.949	2764.2	673718	min=2.915 max=3.137
+regex include timeout, exclude retry	3.133	3238.4	1550868	min=3.109 max=3.164
+moniker: @Severity=Warning	2.377	311.6	604614	min=2.323 max=2.432
+regex OR: Warning||Error	3.461	4670.9	1056346	min=3.419 max=3.566
+clear (show all)	1.998	241.5	7547742	min=1.922 max=2.093
+find: last record's text	0.450	0.0	7547742	min=0.447 max=0.466
+end	ws=3.57GB peak=3.59GB heap=3.06GB
