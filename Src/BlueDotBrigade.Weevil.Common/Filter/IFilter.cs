@@ -12,6 +12,13 @@
 		/// </summary>
 		ElapsedTimes ElapsedTimes { get; }
 
+		/// <summary>
+		/// How long the analyst waited for <see cref="Results"/>: from <see cref="IFilterBehaviors.Apply"/> until the selected records it shows were kept,
+		/// including the wait for the filter it replaced to stop (#1248).
+		/// </summary>
+		/// <remarks>
+		/// Set once the <see cref="IFilterBehaviors.ResultsChanged"/> handlers return.
+		/// </remarks>
 		TimeSpan FilterExecutionTime { get; }
 	}
 }
