@@ -488,7 +488,7 @@
 				{
 					var bytesReadBefore = _source?.BytesRead ?? 0;
 					var isOnDisk = _source != null;
-					var memoryBefore = isOnDisk ? ReadProcessMemory() : null;
+					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryBefore = isOnDisk ? ReadProcessMemory() : null;
 					var gen2Before = isOnDisk ? GC.CollectionCount(2) : 0;
 					var allocatedBefore = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) : 0;
 					var scanStarted = isOnDisk ? Stopwatch.GetTimestamp() : 0;
@@ -498,7 +498,7 @@
 					TimeSpan scanElapsed = isOnDisk ? Stopwatch.GetElapsedTime(scanStarted) : TimeSpan.Zero;
 					var allocatedBytes = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) - allocatedBefore : 0;
 					var gen2Collections = isOnDisk ? GC.CollectionCount(2) - gen2Before : 0;
-					var memoryAfter = isOnDisk ? ReadProcessMemory() : null;
+					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryAfter = isOnDisk ? ReadProcessMemory() : null;
 					IDictionary<string, object> metrics = CollectMetrics();
 					ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
 
