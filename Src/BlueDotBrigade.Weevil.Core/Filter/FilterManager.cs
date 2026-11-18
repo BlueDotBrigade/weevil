@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.Concurrent;
 	using System.Collections.Immutable;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
@@ -437,6 +438,20 @@
 			return this;
 		}
 
+		private static (long WorkingSetBytes, long PeakWorkingSetBytes)? ReadProcessMemory()
+		{
+			try
+			{
+				using var process = Process.GetCurrentProcess();
+				return (process.WorkingSet64, process.PeakWorkingSet64);
+			}
+			catch (Exception exception) when (exception is Win32Exception or InvalidOperationException or NotSupportedException)
+			{
+				// Process memory counters are optional diagnostics.
+				return null;
+			}
+		}
+
 		private void Run(FilterType filterType, IFilterCriteria criteria, ElapsedTimes previousElapsedTimes, CancellationTokenSource run, Stopwatch stopwatch)
 		{
 			try
@@ -472,8 +487,18 @@
 				try
 				{
 					var bytesReadBefore = _source?.BytesRead ?? 0;
+					var isOnDisk = _source != null;
+					var memoryBefore = isOnDisk ? ReadProcessMemory() : null;
+					var gen2Before = isOnDisk ? GC.CollectionCount(2) : 0;
+					var allocatedBefore = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) : 0;
+					var scanStarted = isOnDisk ? Stopwatch.GetTimestamp() : 0;
 
 					RecordList results = FilterAndCalculateMetrics(strategy, run.Token);
+
+					TimeSpan scanElapsed = isOnDisk ? Stopwatch.GetElapsedTime(scanStarted) : TimeSpan.Zero;
+					var allocatedBytes = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) - allocatedBefore : 0;
+					var gen2Collections = isOnDisk ? GC.CollectionCount(2) - gen2Before : 0;
+					var memoryAfter = isOnDisk ? ReadProcessMemory() : null;
 					IDictionary<string, object> metrics = CollectMetrics();
 					ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
 
@@ -521,6 +546,18 @@
 					{
 						// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
 						completed.Add("BytesRead", _source.BytesRead - bytesReadBefore);
+						completed.Add("ProcessorCount", Environment.ProcessorCount);
+						completed.Add("FilterScanElapsed", scanElapsed);
+						completed.Add("ProcessManagedAllocatedBytes", allocatedBytes);
+						completed.Add("ProcessGen2Collections", gen2Collections);
+
+						if (memoryBefore is { } before && memoryAfter is { } after)
+						{
+							completed.Add("ProcessWorkingSetBeforeBytes", before.WorkingSetBytes);
+							completed.Add("ProcessWorkingSetAfterBytes", after.WorkingSetBytes);
+							completed.Add("ProcessPeakWorkingSetBeforeBytes", before.PeakWorkingSetBytes);
+							completed.Add("ProcessPeakWorkingSetAfterBytes", after.PeakWorkingSetBytes);
+						}
 					}
 
 					Log.Default.Write(LogSeverityType.Information, $"Filtering complete.", completed);
