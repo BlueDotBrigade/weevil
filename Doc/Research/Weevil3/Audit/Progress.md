@@ -207,6 +207,11 @@ Taken with the owner on 2026-11-17, one bug at a time. Each becomes a GitHub iss
 | Minor: filter time excludes keeping the selection | Fold into the U5b-2 fix: time the whole run; log the selection step at Debug |
 | `Doc/Design` | Update the official architecture and design documents |
 | Recommendation 2 (P-1) | Explain in plain English and confirm it is a bug; start work only with the owner's permission |
+| Recommendation 2 (P-1), 2026-11-18 | Approved and fixed: #1269 |
+| Recommendation 4 (U1-5), 2026-11-18 | Don't explain the `.idx` in Help |
+| Recommendation 8 (X-7, U4-6), 2026-11-18 | Filed as #1293, label `technical_debt`, milestone 8 |
+| TSV `#IPv4` alias, 2026-11-18 | Filed as #1294 in milestone 8, to be confirmed before it is fixed |
+| `CoreEngineBuilder` messages, 2026-11-18 | Fixed against the release issue #1114, with the lessons-learned notes, on `Feature/1114-BuilderMessagesAndLessons` |
 
 ## Log
 
