@@ -12,6 +12,9 @@
 		/// </summary>
 		ElapsedTimes ElapsedTimes { get; }
 
+		/// <summary>
+		/// How long the filter that produced <see cref="Results"/> took, including keeping the selected records it shows (#1248).
+		/// </summary>
 		TimeSpan FilterExecutionTime { get; }
 	}
 }

@@ -423,8 +423,13 @@
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)
 		{
 			// Before anyone else hears of the new results, so they read the selection that matches them (#1015).
+			var stopwatch = Stopwatch.StartNew();
 			_selectionManager.KeepRecordsShownBy(e.Records);
 			_navigationManager.UpdateDataSource(e.Records);
+
+			Log.Default.Write(
+				LogSeverityType.Debug,
+				$"The selection was updated to the filter's results. TimeElapsed={stopwatch.Elapsed}");
 		}
 		#endregion
 
