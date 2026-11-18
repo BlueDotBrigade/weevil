@@ -212,6 +212,7 @@ Taken with the owner on 2026-11-17, one bug at a time. Each becomes a GitHub iss
 
 | Date | Session work |
 |---|---|
+| 2026-11-18 | Fixed and merged #1245, #1250, #1249, #998, #1251, #1248, #1247 and #1269 (recommendation 2, approved by the owner). Wrote the four `Doc/Design` notes and fixed the instructions (#1268). Added the audit's findings to the #991 plan. Open: the owner's decision on recommendation 7 |
 | 2026-11-17 (end) | Finished U6b and U7. Measured Copy's read path. Wrote `CrossCutting.md`; its sceptic kept X-1 High for F5 and lowered Copy to Medium. Wrote `Report.md` |
 | 2026-11-17 (later) | The usage limit stopped U5b, U6a, U6b and U7; relaunched two at a time. Stage 2: timed the `.idx` open paths, filtered the 4 GB log on disk with the heap capped, confirmed the cause of P-1 with an instrumented scratch build and measured a prototype fix. Found P-4 (temporary-folder check) in passing. Wrote `Performance.md` |
 | 2026-11-17 | Two workflow runs stopped at the usage limit; only U1's two reviews survived. Wrote U1 from them. Installed the .NET 10 SDK from Ubuntu's archive (`apt-get install dotnet-sdk-10.0`; Microsoft's download hosts are blocked here). Measured memory of 2.12.1 and `main` on 1 GB and 4 GB logs, and filter and Find times on 1 GB. Relaunched U2 to U7 with one reviewer each |

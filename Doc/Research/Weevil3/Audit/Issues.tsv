@@ -16,3 +16,5 @@ U5b-1	1258	Task	Share the analyzers' common code, so a change to the record mode
 X-6	1259	Task	Add a memory budget for a filter, in RAM and on disk
 Minor 4	998	Bug (existing)	Go to Record doesn't show an insight's record when the filter hides it
 U3-3	1219	Existing	Show a partial open in the status bar, and reload it
+X-4	1268	Task	Write the Doc/Design notes that Weevil 3.0's design is missing
+P-1	1269	Bug	A filter on a log opened on disk allocates a new 16 MB buffer again and again, so it can run out of memory
