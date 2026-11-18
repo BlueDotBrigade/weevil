@@ -24,7 +24,7 @@
 		}
 
 		/// <summary>
-		/// Determines if the sidecar file path is in a temporary directory.
+		/// Reads the sidecar beside the log, if there is one, into the session's stores and the context.
 		/// </summary>
 		public void Load(
 			RecordList allRecords,
