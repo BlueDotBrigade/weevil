@@ -45,22 +45,40 @@ namespace BlueDotBrigade.Weevil.Filter
 
 		[TestMethod]
 		[WorkItem(1248)]
-		public void GivenAFilterStoppedWhileItStarts_WhenANewerFilterIsAppliedOnAnotherThread_ThenOnlyTheNewerFiltersResultsAreShown()
+		public void GivenAFilterStoppedOrStillRunning_WhenANewerFilterIsAppliedOnAnotherThread_ThenOnlyTheNewerFiltersResultsAreShown()
 		{
 			// A new filter, or the filter's own start, cleared the Stop meant for the older filter, which ran on and replaced the newer filter's results.
 			RecordList records = CreateRecordsOneSecondApart(2_000);
 			var older = new FilterCriteria(@"line number: \d*[13579]$");
 			var newer = new FilterCriteria("line number: 7");
-			var olderIsStarting = new ManualResetEventSlim();
-			var stopIsSent = new ManualResetEventSlim();
-			var collector = new CountingCollector();
+			var isStoppedWhileStarting = false;
+			var olderIsHeld = new ManualResetEventSlim();
+			var olderMayGoOn = new ManualResetEventSlim();
+			var holdsOlderWhileFiltering = 0;
+			var collector = new CountingCollector
+			{
+				// The older filter is held while it filters, until the newer filter has started.
+				OnCount = () =>
+				{
+					if (Interlocked.Exchange(ref holdsOlderWhileFiltering, 0) == 1)
+					{
+						olderIsHeld.Set();
+						olderMayGoOn.Wait(TimeLimit);
+					}
+				},
+			};
 			FilterManager filter = CreateFilterManager(records, collector, expression =>
 			{
-				// The older filter is held while it builds its strategy, until the test has stopped it.
-				if (expression == older.Include)
+				if (expression == older.Include && isStoppedWhileStarting)
 				{
-					olderIsStarting.Set();
-					stopIsSent.Wait(TimeLimit);
+					// The older filter is held while it builds its strategy, until the test has stopped it.
+					olderIsHeld.Set();
+					olderMayGoOn.Wait(TimeLimit);
+				}
+				else if (expression == newer.Include)
+				{
+					// The newer filter has started.
+					olderMayGoOn.Set();
 				}
 			});
 			filter.Apply(FilterType.PlainText, newer);
@@ -68,17 +86,24 @@ namespace BlueDotBrigade.Weevil.Filter
 
 			for (var i = 0; i < 1_000; i++)
 			{
-				olderIsStarting.Reset();
-				stopIsSent.Reset();
+				// Every other time, the older filter is stopped while it starts; otherwise the newer filter alone replaces it.
+				isStoppedWhileStarting = i % 2 == 0;
+				holdsOlderWhileFiltering = isStoppedWhileStarting ? 0 : 1;
+				olderIsHeld.Reset();
+				olderMayGoOn.Reset();
 
 				Task<bool> olderRun = Task.Run(() => TryApply(filter, FilterType.RegularExpression, older));
-				olderIsStarting.Wait(TimeLimit).Should().BeTrue();
-				filter.Abort();
+				olderIsHeld.Wait(TimeLimit).Should().BeTrue();
+
+				if (isStoppedWhileStarting)
+				{
+					filter.Abort();
+				}
+
 				Task<bool> newerRun = Task.Run(() => TryApply(filter, FilterType.PlainText, newer));
-				stopIsSent.Set();
 				Task.WaitAll(new Task[] { olderRun, newerRun }, TimeLimit).Should().BeTrue();
 
-				olderRun.Result.Should().BeFalse("Stop stops the filter it was meant for (iteration {0})", i);
+				olderRun.Result.Should().BeFalse("the older filter is stopped (iteration {0})", i);
 				newerRun.Result.Should().BeTrue();
 				filter.Criteria.Should().Be(newer);
 				filter.Results.Should().HaveCount(newerCount);

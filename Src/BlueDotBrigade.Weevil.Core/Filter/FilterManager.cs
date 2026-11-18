@@ -56,6 +56,10 @@
 		/// One filter runs at a time. A newer filter waits here for the one it replaced to stop (#1248).
 		/// </summary>
 		private readonly SemaphoreSlim _runGate = new SemaphoreSlim(1, 1);
+
+		/// <summary>
+		/// Guards the newest run and what a filter publishes, so a filter is either stopped or shown (#1248).
+		/// </summary>
 		private readonly object _runSync = new object();
 
 		/// <summary>
@@ -367,7 +371,17 @@
 
 			// Re-applying is not a user-initiated filter action, so it is not recorded as telemetry.
 			// It compares the elapsed times the filter compared before, not those of its own results (#1224).
-			return ApplyInternal(_currentFilter.Type, _currentFilter.Criteria, _comparedElapsedTimes);
+			// Read together, as a filter publishes them (#1248).
+			Filter filter;
+			ElapsedTimes comparedElapsedTimes;
+
+			lock (_runSync)
+			{
+				filter = _currentFilter;
+				comparedElapsedTimes = _comparedElapsedTimes;
+			}
+
+			return ApplyInternal(filter.Type, filter.Criteria, comparedElapsedTimes);
 		}
 
 		/// <remarks>
@@ -391,30 +405,12 @@
 				throw new ArgumentNullException(nameof(criteria));
 			}
 
-			// The whole run is timed: building the strategy, and keeping the selection the results show (#1248).
 			var stopwatch = Stopwatch.StartNew();
 			CancellationTokenSource run = StartRun();
 
 			try
 			{
-				try
-				{
-					// Stop, or a newer filter, ends the wait for the filter this one replaced (#1248).
-					_runGate.Wait(run.Token);
-				}
-				catch (OperationCanceledException)
-				{
-					throw Discard(filterType, criteria);
-				}
-
-				try
-				{
-					Run(filterType, criteria, previousElapsedTimes, run.Token, stopwatch);
-				}
-				finally
-				{
-					_runGate.Release();
-				}
+				Run(filterType, criteria, previousElapsedTimes, run, stopwatch);
 			}
 			finally
 			{
@@ -424,7 +420,7 @@
 			return this;
 		}
 
-		private void Run(FilterType filterType, IFilterCriteria criteria, ElapsedTimes previousElapsedTimes, CancellationToken cancellationToken, Stopwatch stopwatch)
+		private void Run(FilterType filterType, IFilterCriteria criteria, ElapsedTimes previousElapsedTimes, CancellationTokenSource run, Stopwatch stopwatch)
 		{
 			try
 			{
@@ -437,48 +433,83 @@
 						{"FilterCriteria", criteria},
 					});
 
+				// Read once this run is the newest, which no older filter publishes after (#1248): these are the times of the results shown.
 				ElapsedTimes comparedElapsedTimes = previousElapsedTimes ?? _recordState.ElapsedTimes;
 
+				// Built before this filter's turn, so its expressions compile while the filter it replaces stops.
 				var strategy =
 					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _recordState, comparedElapsedTimes);
 
-				var bytesReadBefore = _source?.BytesRead ?? 0;
-
-				RecordList results = FilterAndCalculateMetrics(strategy, cancellationToken);
-
-				// A stopped filter never gets here, so what is shown changes all together, to the newest filter's (#1016, #1248).
-				_latestFilterStrategy = strategy;
-				_latestFilterResults = results;
-				_metrics = CollectMetrics();
-				_currentFilter = new Filter(filterType, criteria);
-				_comparedElapsedTimes = comparedElapsedTimes;
-
-				UpdateFilterHistory(_includeHistory, criteria.Include);
-				UpdateFilterHistory(_excludeHistory, criteria.Exclude);
-
-				_recordState.ElapsedTimes = ElapsedTimes.Calculate(results);
-
-				// Raised while this filter still holds the gate, so a newer filter's results are always heard last (#1248).
-				RaiseFilterChanged(new ResultsChangedEventArgs(results));
-
-				_filterExecutionTime = stopwatch.Elapsed;
-
-				var completed = new Dictionary<string, object>
+				try
 				{
-					{"FilterType", filterType},
-					{"FilterCriteria", criteria},
-					{"TimeElapsed", _filterExecutionTime},
-					{"TotalRecords", _scope.Records.Count},
-					{"VisibleRecords", results.Count},
-				};
-
-				if (_source != null)
+					// Stop, or a newer filter, ends the wait for the filter this one replaced (#1248).
+					_runGate.Wait(run.Token);
+				}
+				catch (OperationCanceledException)
 				{
-					// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
-					completed.Add("BytesRead", _source.BytesRead - bytesReadBefore);
+					throw Discard(filterType, criteria);
 				}
 
-				Log.Default.Write(LogSeverityType.Information, $"Filtering complete.", completed);
+				try
+				{
+					var bytesReadBefore = _source?.BytesRead ?? 0;
+
+					RecordList results = FilterAndCalculateMetrics(strategy, run.Token);
+					IDictionary<string, object> metrics = CollectMetrics();
+					ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
+
+					// A filter is either stopped or shown, never both: Stop, and a newer filter's start, take the same lock (#1016, #1248).
+					bool isStopped;
+
+					lock (_runSync)
+					{
+						isStopped = run.IsCancellationRequested;
+
+						if (!isStopped)
+						{
+							_latestFilterStrategy = strategy;
+							_latestFilterResults = results;
+							_metrics = metrics;
+							_currentFilter = new Filter(filterType, criteria);
+							_comparedElapsedTimes = comparedElapsedTimes;
+							_recordState.ElapsedTimes = elapsedTimes;
+						}
+					}
+
+					if (isStopped)
+					{
+						throw Discard(filterType, criteria);
+					}
+
+					UpdateFilterHistory(_includeHistory, criteria.Include);
+					UpdateFilterHistory(_excludeHistory, criteria.Exclude);
+
+					// Raised during this filter's turn, so a newer filter's results are always heard last (#1248).
+					RaiseFilterChanged(new ResultsChangedEventArgs(results));
+
+					_filterExecutionTime = stopwatch.Elapsed;
+
+					var completed = new Dictionary<string, object>
+					{
+						{"FilterType", filterType},
+						{"FilterCriteria", criteria},
+						{"TimeElapsed", _filterExecutionTime},
+						{"TotalRecords", _scope.Records.Count},
+						{"VisibleRecords", results.Count},
+					};
+
+					if (_source != null)
+					{
+						// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
+						completed.Add("BytesRead", _source.BytesRead - bytesReadBefore);
+					}
+
+					Log.Default.Write(LogSeverityType.Information, $"Filtering complete.", completed);
+				}
+				finally
+				{
+					_runGate.Release();
+				}
 			}
 			catch (Exception exception) when (exception is not IO.LogFileChangedException and not FilterAbortedException)
 			{
