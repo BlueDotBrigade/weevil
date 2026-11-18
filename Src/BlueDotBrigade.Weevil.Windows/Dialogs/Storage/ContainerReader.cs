@@ -5,6 +5,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using System.Threading;
 
 	/// <summary>
 	/// What a folder or zip holds, or why it could not be read.
@@ -53,6 +54,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		private readonly object _sync = new object();
 		private readonly Dictionary<string, string> _innerZipCopies = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 		private string _copyFolder;
+		private bool _isDisposed;
 
 		/// <param name="containerExtensions">The extensions of the files the browser enters like folders: <c>.zip</c> by default.</param>
 		public ContainerReader(IEnumerable<string> containerExtensions = null)
@@ -204,7 +206,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		/// with the companions beside it in the zip that exist, such as <c>App.log.xml</c> for <c>App.log</c>.
 		/// </summary>
 		/// <param name="companionSuffixes">What a companion's name adds to the file's, such as <c>.xml</c>.</param>
-		public string Extract(Location file, IEnumerable<string> companionSuffixes, string destinationFolder)
+		/// <inheritdoc cref="IContainerReader.Extract" path="/param[@name='cancellationToken']|/remarks|/exception"/>
+		public string Extract(Location file, IEnumerable<string> companionSuffixes, string destinationFolder, CancellationToken cancellationToken = default)
 		{
 			ArgumentNullException.ThrowIfNull(file);
 
@@ -213,28 +216,41 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				return file.FileSystemPath;
 			}
 
+			cancellationToken.ThrowIfCancellationRequested();
+
+			var isNewFolder = !Directory.Exists(destinationFolder);
 			Directory.CreateDirectory(destinationFolder);
 
-			var extracted = Path.Combine(destinationFolder, file.Name);
-			Copy(file, extracted);
-
-			foreach (var suffix in companionSuffixes ?? Enumerable.Empty<string>())
+			try
 			{
-				Location companion = GetSibling(file, file.Name + suffix);
+				var extracted = Path.Combine(destinationFolder, file.Name);
+				Copy(file, extracted, cancellationToken);
 
-				if (Exists(companion))
+				foreach (var suffix in companionSuffixes ?? Enumerable.Empty<string>())
 				{
-					Copy(companion, extracted + suffix);
-				}
-			}
+					Location companion = GetSibling(file, file.Name + suffix);
 
-			return extracted;
+					if (Exists(companion))
+					{
+						Copy(companion, extracted + suffix, cancellationToken);
+					}
+				}
+
+				return extracted;
+			}
+			catch when (isNewFolder)
+			{
+				TryDeleteFolder(destinationFolder);
+				throw;
+			}
 		}
 
 		public void Dispose()
 		{
 			lock (_sync)
 			{
+				// A copy of a zip inside a zip that is still running must not create the copy folder again (#1251).
+				_isDisposed = true;
 				_innerZipCopies.Clear();
 
 				if (_copyFolder is not null && Directory.Exists(_copyFolder))
@@ -404,12 +420,16 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			ZipArchiveEntry entry = FindEntry(outer, location.ArchivePath[level - 1])
 				?? throw new FileNotFoundException($"The zip holds no zip called `{location.ArchivePath[level - 1]}`.");
 
+			string folder;
 			string copy;
 
 			lock (_sync)
 			{
+				ObjectDisposedException.ThrowIf(_isDisposed, this);
+
 				_copyFolder ??= Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs", Guid.NewGuid().ToString("N"))).FullName;
-				copy = Path.Combine(_copyFolder, $"{Guid.NewGuid():N}.zip");
+				folder = _copyFolder;
+				copy = Path.Combine(folder, $"{Guid.NewGuid():N}.zip");
 			}
 
 			using (Stream source = entry.Open())
@@ -420,17 +440,50 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 			lock (_sync)
 			{
+				if (_isDisposed)
+				{
+					// Disposed during the copy, whose open file kept the folder from being deleted then (#1251).
+					TryDeleteFolder(folder);
+					ObjectDisposedException.ThrowIf(true, this);
+				}
+
 				_innerZipCopies[key] = copy;
 			}
 
 			return copy;
 		}
 
-		private void Copy(Location file, string destinationPath)
+		private void Copy(Location file, string destinationPath, CancellationToken cancellationToken)
 		{
 			using Stream source = OpenRead(file);
 			using FileStream target = File.Create(destinationPath);
-			source.CopyTo(target);
+
+			var buffer = new byte[81_920];
+			int read;
+
+			while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				target.Write(buffer, 0, read);
+			}
+		}
+
+		/// <summary>
+		/// Deletes <paramref name="folder"/> and what it holds, if it can.
+		/// </summary>
+		internal static void TryDeleteFolder(string folder)
+		{
+			try
+			{
+				if (Directory.Exists(folder))
+				{
+					Directory.Delete(folder, recursive: true);
+				}
+			}
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			{
+				// Left in the temporary folder.
+			}
 		}
 
 		/// <remarks>
@@ -450,7 +503,9 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 		private static bool IsReadFailure(Exception exception)
 		{
-			return exception is IOException or UnauthorizedAccessException or InvalidDataException or System.Security.SecurityException;
+			// A listing still running when the dialog closes finds the reader disposed (#1251).
+			return exception is IOException or UnauthorizedAccessException or InvalidDataException or System.Security.SecurityException ||
+			       exception is ObjectDisposedException { ObjectName: var name } && name == typeof(ContainerReader).FullName;
 		}
 
 		private static string Describe(Exception exception) => exception switch

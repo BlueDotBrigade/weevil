@@ -3,8 +3,10 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
+	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
 	/// <summary>
@@ -50,6 +52,12 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			nameof(CanOpen), typeof(bool), typeof(OpenAsDialog), new PropertyMetadata(true, (dialog, _) => ((OpenAsDialog)dialog).UpdateOpenButton()));
 
 		private bool _isOpening;
+		private bool _isClosed;
+
+		/// <summary>
+		/// Stops the extraction that is running, or <see langword="null"/>.
+		/// </summary>
+		private CancellationTokenSource _extraction;
 
 		public OpenAsDialog()
 		{
@@ -118,8 +126,19 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// </summary>
 		public OpenAsResult Result { get; private set; }
 
+		/// <remarks>
+		/// Closing the window, for example with Cancel, stops an extraction that is running (#1251).
+		/// </remarks>
 		protected override void OnClosed(EventArgs e)
 		{
+			_isClosed = true;
+
+			if (_extraction is not null)
+			{
+				Log.Default.Write(LogSeverityType.Information, "The Open As dialog closed during an extraction, so the extraction was cancelled.");
+				_extraction.Cancel();
+			}
+
 			this.Browser.Dispose();
 			base.OnClosed(e);
 		}
@@ -139,26 +158,58 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			UpdateOpenButton();
 			this.MessageText.Text = file.Location.IsInArchive ? "Extracting…" : string.Empty;
 
-			try
-			{
-				var destination = Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
-				var localPath = await Task.Run(() => this.Browser.Reader.Extract(file.Location, this.CompanionSuffixes, destination));
+			var destination = Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
+			var localPath = await ExtractAsync(file, destination);
 
+			_isOpening = false;
+
+			if (_isClosed)
+			{
+				// The copy finished as the window closed: nobody will open it.
+				if (localPath is not null && file.Location.IsInArchive)
+				{
+					ContainerReader.TryDeleteFolder(destination);
+				}
+			}
+			else if (localPath is null)
+			{
+				UpdateOpenButton();
+			}
+			else
+			{
 				this.Result = new OpenAsResult(file, localPath, file.Location.IsInArchive ? destination : null);
 				this.DialogResult = true;
+			}
+		}
+
+		/// <returns>The file on disk, or <see langword="null"/> when the extraction failed or was cancelled, leaving nothing behind.</returns>
+		private async Task<string> ExtractAsync(BrowserItem file, string destination)
+		{
+			using var extraction = new CancellationTokenSource();
+			_extraction = extraction;
+
+			try
+			{
+				return await Task.Run(() => this.Browser.Reader.Extract(file.Location, this.CompanionSuffixes, destination, extraction.Token));
+			}
+			catch (Exception exception) when (_isClosed)
+			{
+				// The analyst closed the window, so there is nothing to show. Logged, so a defect is not hidden.
+				if (exception is not OperationCanceledException)
+				{
+					Log.Default.Write(LogSeverityType.Warning, exception, "An extraction failed after the Open As dialog closed.");
+				}
+
+				return null;
 			}
 			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
 			{
 				this.MessageText.Text = $"The file could not be opened: {exception.Message}";
+				return null;
 			}
 			finally
 			{
-				_isOpening = false;
-
-				if (this.IsLoaded)
-				{
-					UpdateOpenButton();
-				}
+				_extraction = null;
 			}
 		}
 
