@@ -2,9 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
-	using System.Linq;
-	using System.Runtime.InteropServices;
 	using BlueDotBrigade.Weevil.Navigation;
 
 	public static class RecordCollectionExtensions
@@ -53,36 +50,6 @@
 			}
 
 			return result;
-		}
-
-		/// <summary>
-		/// Compresses the size of the array by removing default values (e.g. null).
-		/// </summary>
-		/// <typeparam name="T">The array type.</typeparam>
-		/// <param name="sourceRecords">The array to be compressed.</param>
-		/// <param name="count">The number of non-default items in the array.</param>
-		/// <returns>A new array that does not include default (e.g. `null`) values.</returns>
-		public static ImmutableArray<T> Compact<T>(this ImmutableArray<T> sourceRecords, int count)
-		{
-			var compressedResults = new T[count];
-
-			var insertAt = 0;
-
-			for (var i = 0; i < sourceRecords.Length; i++)
-			{
-				if (EqualityComparer<T>.Default.Equals(sourceRecords[i], default(T)))
-				{
-					// points to null
-				}
-				else
-				{
-					compressedResults[insertAt] = sourceRecords[i];
-					insertAt++;
-				}
-			}
-
-			// `compressedResults` is never exposed, so it is wrapped rather than copied.
-			return ImmutableCollectionsMarshal.AsImmutableArray(compressedResults);
 		}
 
 		/// <summary>
@@ -409,42 +376,6 @@
 				return wasFound
 					? indexOfResult
 					: throw new RecordNotFoundException();
-			}
-		}
-
-		public static IEnumerable<IRecord> GetSectionRecords(this RecordList records, ISection section, ITableOfContents tableOfContent)
-		{
-			var firstLineNumber = section.LineNumber;
-
-			var firstIndex = records.IndexOfLineNumber(
-				firstLineNumber, 
-				RecordSearchType.ExactOrNext);
-
-			ISection nextSection = tableOfContent
-				.Sections
-				.Where(s => s.LineNumber > section.LineNumber)
-				.OrderBy(s => s.LineNumber)
-				.FirstOrDefault();
-
-			var lastLineNumber = (nextSection != null)
-				? nextSection.LineNumber
-				: records.GetLineNumber(records.Count - 1);
-
-			var lastIndex = records.IndexOfLineNumber(
-				lastLineNumber, 
-				RecordSearchType.ExactOrPrevious);
-
-			for (var i = firstIndex; i <= lastIndex; i++)
-			{
-				if (records.GetLineNumber(i) >= section.LineNumber && 
-					records.GetLineNumber(i) < nextSection.LineNumber)
-				{
-					yield return records[i];
-				}
-				else
-				{
-					break;
-				}
 			}
 		}
 	}

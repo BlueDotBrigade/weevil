@@ -1717,21 +1717,24 @@
 			}
 		}
 
+		/// <summary>
+		/// Runs the current filter again (F5) on a background thread, as any filter runs, so the progress bar shows and Escape stops it (#1245).
+		/// </summary>
+		/// <remarks>
+		/// On disk, a filter reads every record's text back from the log, so on the UI thread it froze the window.
+		/// Once it finishes, the results and the columns' widths are refreshed (<see cref="ResultsChanged"/>).
+		/// A log that changed, or is gone, is reported once, as any other read (#1028).
+		/// </remarks>
 		private void Refresh()
 		{
-			try
-			{
-				_engine.Filter.ReApply();
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				// A log on disk that changed, or is gone: handled once, as any other read (#1028).
-				ReportFailedRead(e, Volatile.Read(ref _logGeneration));
-				return;
-			}
+			IFilter filter = _engine.Filter;
 
-			RefreshFilterResults();
-			RaiseResultsChanged();
+			// To verify #1245 in Weevil's log: this line has the UI thread's ThreadId, and Core's "Re-applying the most recent filter" that follows has another.
+			Log.Default.Write(
+				LogSeverityType.Information,
+				"Refresh (F5) queued the filter to run again on a background thread.");
+
+			FilterAsynchronously(filter.FilterType, filter.Criteria, () => _engine.ReApplyAsync(CancellationToken.None));
 		}
 
 		/// <summary>
@@ -2557,12 +2560,17 @@
 		/// In this case, work is being deferred to a background thread. As a result,
 		/// the transition the UI & background threads has to be managed.
 		/// </remarks>
+		/// <param name="filterType">The filter to apply, or the one <paramref name="runFilter"/> runs again.</param>
+		/// <param name="filterCriteria">The filter to apply, or the one <paramref name="runFilter"/> runs again.</param>
+		/// <param name="runFilter">Runs the filter on a background thread; by default it applies <paramref name="filterCriteria"/>. Refresh (F5) re-applies the current filter instead (#1245).</param>
 		/// <returns>
 		/// A task that completes with <see langword="true"/> once this filter's results are shown, and with <see langword="false"/>
 		/// when it was aborted, failed, or replaced by a newer filter (#998).
 		/// </returns>
-		private Task<bool> FilterAsynchronously(FilterType filterType, IFilterCriteria filterCriteria)
+		private Task<bool> FilterAsynchronously(FilterType filterType, IFilterCriteria filterCriteria, Func<Task<bool>> runFilter = null)
 		{
+			runFilter ??= () => _engine.FilterAsync(filterType, filterCriteria, CancellationToken.None);
+
 			Log.Default.Write(
 				LogSeverityType.Debug,
 				$"Filter operation starting... QueuedFilters={_concurrentFilterCount}, FilterType={filterType}, {filterCriteria}");
@@ -2611,7 +2619,7 @@
 
 				try
 				{
-					wasFilterApplied = await _engine.FilterAsync(filterType, filterCriteria, CancellationToken.None);
+					wasFilterApplied = await runFilter();
 				}
 				catch (InvalidExpressionException e)
 				{
