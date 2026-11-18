@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.IO
 	using System;
 	using System.Buffers.Binary;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.IO;
 	using System.Runtime.InteropServices;
 	using System.Security.Cryptography;
@@ -131,7 +132,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 				this.IndexedLength = Scan(source, this.IndexedLength, ref state, bufferSize, lineStart =>
 				{
-					lineCount = checked(lineCount + 1);
+					lineCount = CountLine(lineCount);
 
 					if ((lineCount - 1) % _checkpointInterval == 0)
 					{
@@ -149,6 +150,24 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				source.Position = originalPosition;
 			}
+		}
+
+		/// <summary>
+		/// Returns <paramref name="lineCount"/> plus the line just found.
+		/// </summary>
+		/// <remarks>
+		/// Weevil numbers lines with an <see cref="int"/> throughout, so a log of more lines can't be opened (#1252).
+		/// That is about 200 GB of 100-byte lines, ten times disk mode's 20 GB target.
+		/// </remarks>
+		/// <exception cref="NotSupportedException">The log has more than <see cref="int.MaxValue"/> lines.</exception>
+		internal static int CountLine(int lineCount)
+		{
+			return lineCount < int.MaxValue
+				? lineCount + 1
+				: throw new NotSupportedException(string.Format(
+					CultureInfo.InvariantCulture,
+					"Weevil can open logs of up to {0:N0} lines. This log has more.",
+					int.MaxValue));
 		}
 
 		/// <summary>
