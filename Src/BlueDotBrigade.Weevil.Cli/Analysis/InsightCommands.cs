@@ -52,13 +52,16 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 						.UsingStorage(storage)
 						.Open();
 
-				// On disk, a log that changed while it was read is reloaded, and read once more (#1028).
-				var insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
-
-				// After the insights, so that the report's metrics describe the same log, if it was reloaded.
+				// A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the command again (#1247).
 				// The report holds every insight and the metrics; the command shows what it always has (#837).
-				var period = engine.Records.GetEstimatedRange();
-				InsightReport report = new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
+				InsightReport report = engine.RunOnce(
+					() =>
+					{
+						var insights = engine.Analyzer.GetInsights();
+						var period = engine.Records.GetEstimatedRange();
+						return new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
+					},
+					Program.ReportWarning);
 
 				if (_output.Format == OutputFormat.Json)
 				{
@@ -97,6 +100,11 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 						Write.Text($"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}");
 					}
 				}
+			}
+			catch (LogFileChangedException exception)
+			{
+				// Cocona sets the exit code from the command, so it is passed this way (#1247).
+				throw new CommandExitedException(exception.Message, 1);
 			}
 			finally
 			{

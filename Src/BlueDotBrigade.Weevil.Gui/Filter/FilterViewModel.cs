@@ -1505,7 +1505,7 @@
 		/// Handles a read of a log on disk that failed, from any thread (#1028).
 		/// </summary>
 		/// <remarks>
-		/// Always queued, so a read that fails while the grid draws its rows, or on a background thread, never shows a message or reloads from inside that read.
+		/// Always queued, so a read that fails while the grid draws its rows, or on a background thread, never shows a message from inside that read.
 		/// </remarks>
 		private void ReportFailedRead(Exception exception, int generation)
 		{
@@ -1513,18 +1513,18 @@
 		}
 
 		/// <summary>
-		/// Shows one warning and reloads a log that changed on disk, or shows one error for a log that can no longer be read, once per log (#1028).
+		/// Shows one warning, naming Ctrl+F5, for a log that changed on disk, or one error for a log that can no longer be read, once per log (#1028).
 		/// </summary>
 		/// <remarks>
+		/// Nothing reloads by itself: the analyst decides when to read the latest data (#1247).
 		/// Each open and each Reload starts a new generation, so a failure from an earlier one, such as a row still on screen from before Reload, is ignored.
 		/// Later failures of the same kind and generation show nothing, so scrolling a log that is gone does not repeat the message.
-		/// If Reload fails because the log changed again, Reload shows that message itself, and nothing reloads again by itself.
 		/// </remarks>
 		private void OnFailedRead(Exception exception, int generation)
 		{
 			var isChange = exception is LogFileChangedException;
 
-			// A change is handled even after the log could not be read, for example while it was replaced, so it is still reloaded.
+			// A change is reported even after the log could not be read, for example while it was replaced.
 			if (generation != Volatile.Read(ref _logGeneration) ||
 			    generation == (isChange ? _changedLogGeneration : _unreadableLogGeneration))
 			{
@@ -1541,9 +1541,8 @@
 			if (isChange)
 			{
 				_changedLogGeneration = generation;
-				Log.Default.Write(LogSeverityType.Warning, exception, "The log changed on disk, so it is reloaded.");
-				_dialogBox.ShowMessage("The log changed on disk, so Weevil reloads it.", "Log Changed");
-				Reload();
+				Log.Default.Write(LogSeverityType.Warning, exception, "The log changed on disk. The analyst is told to press Ctrl+F5 to reload it.");
+				_dialogBox.ShowMessage("The log changed on disk. Press Ctrl+F5 to reload the latest data.", "Log Changed");
 			}
 			else
 			{
@@ -1679,12 +1678,21 @@
 
 		public void FilterManually(object[] filters)
 		{
-			_inclusiveFilter = filters[0].ToString();
-			_exclusiveFilter = filters[1].ToString();
+			ApplyFilterBoxes(filters[0].ToString(), filters[1].ToString());
+		}
+
+		/// <summary>
+		/// Applies the filter boxes' text, as the Filter button does.
+		/// </summary>
+		/// <returns>A task that completes with <see langword="true"/> once this filter's results are shown (see <see cref="FilterAsynchronously"/>).</returns>
+		private Task<bool> ApplyFilterBoxes(string inclusiveFilter, string exclusiveFilter)
+		{
+			_inclusiveFilter = inclusiveFilter;
+			_exclusiveFilter = exclusiveFilter;
 
 			var filterCriteria = new FilterCriteria(_inclusiveFilter, _exclusiveFilter, GetFilterConfiguration());
 
-                        FilterAsynchronously(this.FilterExpressionType, filterCriteria);
+			return FilterAsynchronously(this.FilterExpressionType, filterCriteria);
 		}
 
 		public void FilterOrCancel(object[] filters)
@@ -1745,21 +1753,24 @@
 			}
 		}
 
+		/// <summary>
+		/// Runs the current filter again (F5) on a background thread, as any filter runs, so the progress bar shows and Escape stops it (#1245).
+		/// </summary>
+		/// <remarks>
+		/// On disk, a filter reads every record's text back from the log, so on the UI thread it froze the window.
+		/// Once it finishes, the results and the columns' widths are refreshed (<see cref="ResultsChanged"/>).
+		/// A log that changed, or is gone, is reported once, as any other read (#1028).
+		/// </remarks>
 		private void Refresh()
 		{
-			try
-			{
-				_engine.Filter.ReApply();
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				// A log on disk that changed, or is gone: handled once, as any other read (#1028).
-				ReportFailedRead(e, Volatile.Read(ref _logGeneration));
-				return;
-			}
+			IFilter filter = _engine.Filter;
 
-			RefreshFilterResults();
-			RaiseResultsChanged();
+			// To verify #1245 in Weevil's log: this line has the UI thread's ThreadId, and Core's "Re-applying the most recent filter" that follows has another.
+			Log.Default.Write(
+				LogSeverityType.Information,
+				"Refresh (F5) queued the filter to run again on a background thread.");
+
+			FilterAsynchronously(filter.FilterType, filter.Criteria, () => _engine.ReApplyAsync(CancellationToken.None));
 		}
 
 		/// <summary>
@@ -2178,27 +2189,71 @@
 					newIncludeFilter = $"{currentIncludeFilter}||@Flagged";
 				}
 
-				// Step 4: Apply the filter (this will trigger FilterAsynchronously via the property setter)
-				_uiDispatcher.Invoke(() =>
-				{
-					this.InclusiveFilter = newIncludeFilter;
-				});
+				// Step 4: Apply the filter, as the Filter button does. Setting the filter box's text alone filters nothing (#998).
+				Log.Default.Write(
+					LogSeverityType.Information,
+					$"Insight navigation is filtering to show the insight's records, then going to the first. Include=`{newIncludeFilter}`");
 
-				// Step 5: Navigate to the first record (after a brief delay to allow filter to apply)
-				Task.Delay(500).ContinueWith(_ =>
-				{
-					_uiDispatcher.Invoke(() =>
+				var firstLineNumber = bulletin.RelatedLineNumbers[0];
+
+				// Step 5: Go to the first record once the filter's results are shown, however long the filter takes (#998).
+				ApplyFilterBoxes(newIncludeFilter, _exclusiveFilter).ContinueWith(
+					filter =>
 					{
-						var firstLineNumber = bulletin.RelatedLineNumbers[0];
-						SearchFilterResults(
-							$"Unable to find the insight's related record in the search results. Line={firstLineNumber}",
-							() => _engine
-								.Navigate
-								.GoTo(firstLineNumber, RecordSearchType.NearestNeighbor)
-								.ToIndexUsing(_engine.Filter.Results));
-					});
-				});
+						if (filter.Status != TaskStatus.RanToCompletion || !filter.Result)
+						{
+							Log.Default.Write(
+								LogSeverityType.Information,
+								$"Insight navigation is not going to the record, because the filter did not show its results. Line={firstLineNumber}");
+							return;
+						}
+
+						_uiDispatcher.Invoke(() =>
+						{
+							// The exclude filter can still hide the insight's records: go to the first one shown, never to a neighbour (#998).
+							var lineNumber = FindFirstShown(_engine.Filter.Results, bulletin.RelatedLineNumbers);
+
+							if (lineNumber is null)
+							{
+								var message = "The insight's records are not shown, because the exclude filter hides them.";
+								Log.Default.Write(LogSeverityType.Warning, $"{message} FirstLine={firstLineNumber}");
+								_dialogBox.ShowMessage(message, "Not Found");
+								return;
+							}
+
+							SearchFilterResults(
+								$"Unable to find the insight's related record in the search results. Line={lineNumber}",
+								() => _engine
+									.Navigate
+									.GoTo(lineNumber.Value, RecordSearchType.ExactMatch)
+									.ToIndexUsing(_engine.Filter.Results));
+						});
+					},
+					TaskScheduler.Default);
 			}
+		}
+
+		/// <summary>
+		/// Returns the first of <paramref name="lineNumbers"/> that <paramref name="results"/> shows, or <see langword="null"/> when it shows none.
+		/// </summary>
+		private static int? FindFirstShown(RecordList results, IEnumerable<int> lineNumbers)
+		{
+			foreach (var lineNumber in lineNumbers)
+			{
+				try
+				{
+					if (results.IndexOfLineNumber(lineNumber) >= 0)
+					{
+						return lineNumber;
+					}
+				}
+				catch (RecordNotFoundException)
+				{
+					// Not shown: try the next.
+				}
+			}
+
+			return null;
 		}
 
 		public void GoToPreviousPin()
@@ -2374,7 +2429,7 @@
 				}
 				catch (LogFileChangedException e)
 				{
-					// Shown once, and the log reloaded, as for any read of a log on disk that changed (#1028).
+					// Shown once, naming Ctrl+F5, as for any read of a log on disk that changed (#1028, #1247).
 					Log.Default.Write(LogSeverityType.Warning, e, $"{operation} stopped, because the log changed on disk.");
 					reportFailedRead(e);
 				}
@@ -2541,8 +2596,17 @@
 		/// In this case, work is being deferred to a background thread. As a result,
 		/// the transition the UI & background threads has to be managed.
 		/// </remarks>
-		private void FilterAsynchronously(FilterType filterType, IFilterCriteria filterCriteria)
+		/// <param name="filterType">The filter to apply, or the one <paramref name="runFilter"/> runs again.</param>
+		/// <param name="filterCriteria">The filter to apply, or the one <paramref name="runFilter"/> runs again.</param>
+		/// <param name="runFilter">Runs the filter on a background thread; by default it applies <paramref name="filterCriteria"/>. Refresh (F5) re-applies the current filter instead (#1245).</param>
+		/// <returns>
+		/// A task that completes with <see langword="true"/> once this filter's results are shown, and with <see langword="false"/>
+		/// when it was aborted, failed, or replaced by a newer filter (#998).
+		/// </returns>
+		private Task<bool> FilterAsynchronously(FilterType filterType, IFilterCriteria filterCriteria, Func<Task<bool>> runFilter = null)
 		{
+			runFilter ??= () => _engine.FilterAsync(filterType, filterCriteria, CancellationToken.None);
+
 			Log.Default.Write(
 				LogSeverityType.Debug,
 				$"Filter operation starting... QueuedFilters={_concurrentFilterCount}, FilterType={filterType}, {filterCriteria}");
@@ -2552,8 +2616,10 @@
 			// ... and not the UI thread which is required in order update/change the UI.
 			Action<Exception> reportFailedRead = CreateFailedReadReporter();
 
-			Task.Run(async () =>
+			return Task.Run(async () =>
 			{
+				var areResultsShown = false;
+
 				// Is a filter operation in progress?
 				// ... yes: cancel it because new filter takes precedence
 				if (this.IsFilterInProgress)
@@ -2589,7 +2655,7 @@
 
 				try
 				{
-					wasFilterApplied = await _engine.FilterAsync(filterType, filterCriteria, CancellationToken.None);
+					wasFilterApplied = await runFilter();
 				}
 				catch (InvalidExpressionException e)
 				{
@@ -2631,6 +2697,7 @@
 					// ... if not, then display the original 
 					if (wasFilterApplied)
 					{
+						areResultsShown = true;
 						_currentfilterType = filterType;
 						_currentfilterCriteria = filterCriteria;
 
@@ -2677,6 +2744,8 @@
 						LogSeverityType.Warning,
 						$"Filter operation is complete. Current filter results will be ignored because another filter operation has started.");
 				}
+
+				return areResultsShown;
 			});
 		}
 
