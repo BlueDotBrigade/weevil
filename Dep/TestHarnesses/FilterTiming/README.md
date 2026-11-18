@@ -24,7 +24,7 @@ dotnet run -c Release -- --log C:\Logs\Big.log --storage Disk --plain "Blaster" 
 
 | Option | Meaning |
 |---|---|
-| `--log <path>` | The log to filter. By default, a reference log of `--reference` records. |
+| `--log <path>` | The log to filter. By default, a reference log of `--reference` records; with `--log`, `--reference` is ignored. |
 | `--reference <records>` | The size of the reference log, which is written once and kept. Default 1000000. |
 | `--log-folder <path>` | Where the reference log is written. Default: `Weevil.FilterTiming` in the temporary folder. |
 | `--storage Ram\|Disk` | Where Weevil keeps the log's content. Default Ram. |
@@ -39,7 +39,7 @@ Weevil saves no line index or sidecar in the temporary folder, so a log there is
 
 Build the harness once for each version, from a git worktree of each commit, then run the two builds by turns, several times: a computer's speed drifts as it runs, and taking turns spreads that drift over both.
 
-Both commits must include #1166, from 2026-11-09: older ones have no disk mode, so the harness doesn't build against them.
+Both commits must include 6165ddc9 (#1028, 2026-11-11), which made the storage mode public: the harness doesn't build against an older Core.
 
 ```powershell
 # From the repository's root folder: each worktree goes beside the repository.
