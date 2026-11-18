@@ -83,7 +83,7 @@ Callers reach the session through the engine: `Annotations`, `Bookmarks`, `Regio
 2. The records kept are chosen by the rules of the `ClearOperation`. The selection becomes the selected records kept, without an anchor, and the active record the last of them, or none.
 3. `RecordScope.Narrow` replaces the list in one write, so a reader that reads it once sees the records before or after. The metrics are recounted and `HasBeenCleared` is set.
 4. An empty filter is applied, not counted as the user's. `FilterResultsChanged` is not raised: read `Filter.Results` afterwards.
-5. A forced collection frees the cleared records before Clear returns ([RecordTable.md](RecordTable.md#records-on-demand)).
+5. When records were removed, a blocking collection frees them before Clear returns ([RecordTable.md](RecordTable.md#records-on-demand)).
 
 **Reload** reads the log again into a new `CoreEngine`:
 

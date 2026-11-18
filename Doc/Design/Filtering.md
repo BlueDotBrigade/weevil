@@ -81,13 +81,7 @@ A filter that was not stopped publishes, under one lock: the results (`Results`)
 
 ## Disk Against RAM
 
-| | RAM | Disk |
-|---|---|---|
-| Ranges | About 4 per core | Along content chunks |
-| Content | Decoded from memory | Read back from the log, each chunk once; "Filtering complete." logs `BytesRead` |
-| Can a read fail? | No | Yes |
-
-On disk, a read throws `LogFileChangedException` when the log was truncated, replaced or corrupted, and another `IOException` or an `UnauthorizedAccessException` when the log can no longer be opened. The filter throws that exception itself, not its workers' `AggregateException`, and publishes nothing. A changed log is not logged as an error, because its source has already warned; other read errors are. Nothing reloads by itself: the GUI asks the analyst to press Ctrl+F5, and the CLI and PowerShell stop (#1247, [DiskMode.md](DiskMode.md#a-log-that-changed)).
+On disk, the ranges follow the chunks and a read can fail. A failed read throws its own exception, not the workers' `AggregateException`, and the filter publishes nothing. What then happens is in [DiskMode.md](DiskMode.md#a-log-that-changed).
 
 ## Cancellation and Threading
 

@@ -12,14 +12,14 @@ These instructions apply to the WPF desktop application (`BlueDotBrigade.Weevil.
 
 - Follow the MVVM (Model-View-ViewModel) pattern throughout.
 - ViewModels are internal classes annotated with `[Observable]` from `Metalama.Patterns.Observability` to automatically generate `INotifyPropertyChanged` implementations.
-- Do not manually implement `INotifyPropertyChanged` in ViewModels; rely on the `[Observable]` attribute. The exception is a ViewModel whose values live elsewhere, where Metalama can't see them change: `RowViewModel` reads its pin and comment from Core's store, so it raises `PropertyChanged` itself ([RecordGrid.md](../../Doc/Design/RecordGrid.md)).
+- Do not manually implement `INotifyPropertyChanged` in ViewModels; rely on the `[Observable]` attribute, except where `.github/copilot-instructions.md` says otherwise.
 - XAML views bind to ViewModel properties. Do not place business logic in code-behind files.
 - Apply MVVM best practices, SOLID principles, and Gang of Four patterns only when they meaningfully improve the code. Do not introduce these patterns if they make the source code unnecessarily complicated.
 
 ## UI Thread Safety
 
 - Never block the UI thread. All long-running operations must execute on a background thread.
-- Marshal work to the UI thread through `IUiDispatcher`. A handler of a Core event, which may run on any thread, queues its work with `BeginInvoke()` and never waits with `Invoke()` (decision 4 of the #990 plan).
+- Marshal work to the UI thread through `IUiDispatcher`. A handler of `IAnnotations.Changed`, which runs on the thread that made the change, queues its work with `BeginInvoke()` and never waits with `Invoke()` (decision 4 of the #990 plan). A handler of a filter's events must not wait for a thread that may be applying a filter ([Filtering.md](../../Doc/Design/Filtering.md#cancellation-and-threading)).
 - The `UiResponsivenessMonitor` detects UI thread delays; changes that cause delays will be caught in testing.
 - Disable the responsiveness monitor only when a debugger is attached (existing pattern — do not change this logic).
 

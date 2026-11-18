@@ -26,8 +26,8 @@ A full open starts at line 1, with no range, region, section or limit. Only a fu
 
 **Every open** (`LineIndex.TryRead`) rejects the whole `.idx` unless:
 
-- its signature and format version (3) match;
-- each section's XxHash3 checksum matches (`IndexSection`), the header agrees with the checkpoints, and the end marker ends the file;
+- its signature and format version match;
+- each section's XxHash3 checksum matches, except the table's (`IndexSection`), the header agrees with the checkpoints, and the end marker ends the file;
 - the log's byte order mark gives the same encoding;
 - the log is at least as long as the length indexed and the end of the saved parse;
 - the SHA-256 hashes of the first and last 4 KB of the length indexed match.
@@ -55,13 +55,13 @@ The table's sections are skipped here, so a damaged table costs only the table.
 - **A grown log:** `GrownLogParser` keeps the rows before the last chunk, parses from its first record to the end, and the whole longer table is saved again. A table with no chunk, whose rows all keep a string, cannot say where to resume, so its log is parsed in full.
 - **Reload** (`Engine.Reload`) is always a full open: it keeps no start line, range, region, section or limit of the open it replaces.
   - In disk mode, when a read found the log changed (`LogFileSource.HasChanged`), it first deletes the `.idx` (`LineIndexFile.Delete`), so the log is indexed and parsed again ([DiskMode.md](DiskMode.md#a-log-that-changed)).
-  - It keeps the session in memory (#1107), so it uses only the context from the sidecar.
+  - It keeps the session in memory (#1107). Its context is read from the sidecar again, or worked out by the plugin.
   - Core does not save the sidecar first; the GUI does.
 - **A partial open** always parses, and never saves a parse or a table.
   - A start line (`Engine.UsingPath(path, line)`) starts reading at the line's byte offset, from the line index (#977).
   - Without a start line, a range (`UsingRange`), region (`UsingRegion`, #1213) or section (`UsingSection`, #1212) reads from the top. Each stops after its last line. A limit (`UsingLimit`) stops after that many records.
   - It trusts the line index on its head and tail hashes alone, so it cannot see a change in the middle of the log.
-- **RAM and disk** (#1025): both modes compute each block's checksum while parsing, and save the same `.idx`. But a table is reused only in the mode that saved it: switching modes parses again, and replaces the table. Only disk mode keeps a `LogFileSource` once open, which checks every block it reads back ([DiskMode.md](DiskMode.md#reading-a-log-on-disk)).
+- **RAM and disk** (#1025): both modes compute each block's checksum while parsing, and save `.idx` files of the same format. But a table is reused only in the mode that saved it: switching modes parses again, and replaces the table. Only disk mode keeps a `LogFileSource` once open, which checks every block it reads back ([DiskMode.md](DiskMode.md#reading-a-log-on-disk)).
 
 ## Stale or Broken Files
 
@@ -69,7 +69,7 @@ The table's sections are skipped here, so a damaged table costs only the table.
 - **A table from another parser, build or mode** is ignored. The log is parsed, and its table replaces the saved one.
 - **A damaged table, or a block that changed,** rejects the table, and the log is parsed. When the bytes parsed differ from those of the saved parse, the log changed in the middle, so `SaveParse` rebuilds the line index before saving it. An `.idx` saved only by partial opens has no parse to compare with, so there such a change goes unseen.
 - **An `.idx` that cannot be saved** costs only a warning. It is written to `.idx.tmp`, then moved over the `.idx`, so it is never left half-written.
-- **A log that changes once open:** on disk, the next read throws `LogFileChangedException` ([DiskMode.md](DiskMode.md#a-log-that-changed)). In RAM, nothing checks the log once it is open; the next open or Reload reads it as it is then.
+- **A log that changes once open:** on disk, the next read throws `LogFileChangedException` ([DiskMode.md](DiskMode.md#a-log-that-changed)). In RAM, nothing reads the log once it is open: the next open or Reload reads it as it is then. The CLI and PowerShell check after each command whether it is gone or shorter (`EngineExtensions.RunOnce`).
 - **A sidecar** that neither the v2 nor the v1 loader can read stops the open: `SidecarManager.Load` throws `NotSupportedException`. The v1 loader, tried when v2 cannot read the file, first rewrites its old XML namespaces in place (`LogMetadataLoader`): the only time an open writes the `.xml`.
 - **The application log** says which path an open took: whether the line index was rebuilt (`LineIndexFile`), whether the records came from the saved index, and whether only a grown log's new part was parsed (`GrownLogParser`).
 
