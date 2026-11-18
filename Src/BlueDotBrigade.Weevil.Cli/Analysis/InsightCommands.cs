@@ -101,9 +101,10 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 					}
 				}
 			}
-			catch (LogFileChangedException exception)
+			catch (Exception exception) when (exception is LogFileChangedException or NotSupportedException)
 			{
-				// Cocona sets the exit code from the command, so it is passed this way (#1247).
+				// A log changed while it was read (#1247), or one Weevil can't open, such as one with too many lines (#1252): its message, without a stack trace.
+				// Cocona sets the exit code from the command, so it is passed this way.
 				throw new CommandExitedException(exception.Message, 1);
 			}
 			finally
