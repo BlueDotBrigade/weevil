@@ -129,6 +129,31 @@ namespace BlueDotBrigade.Weevil.Filter
 		}
 
 		[TestMethod]
+		public void GivenAResultsChangedHandlerThatAppliesAFilter_WhenAFilterIsApplied_ThenTheHandlerIsRefusedRatherThanWaitingForever()
+		{
+			RecordList records = CreateRecordsOneSecondApart(10);
+			FilterManager filter = CreateFilterManager(records, new CountingCollector());
+			Exception refused = null;
+			filter.ResultsChanged += (_, _) =>
+			{
+				try
+				{
+					filter.Apply(FilterType.PlainText, FilterCriteria.None);
+				}
+				catch (InvalidOperationException exception)
+				{
+					refused = exception;
+				}
+			};
+
+			Task apply = Task.Run(() => filter.Apply(FilterType.PlainText, new FilterCriteria("line number: 1")));
+
+			apply.Wait(TimeLimit).Should().BeTrue("the handler must not wait for the filter it handles");
+			refused.Should().BeOfType<InvalidOperationException>();
+			filter.Criteria.Include.Should().Be("line number: 1");
+		}
+
+		[TestMethod]
 		public void GivenRecordsOneSecondApart_WhenEveryOtherIsShown_ThenElapsedTimesAreMeasuredBetweenTheShownRecords()
 		{
 			RecordList records = CreateRecordsOneSecondApart(6);

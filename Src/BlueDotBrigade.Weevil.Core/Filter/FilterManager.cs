@@ -68,6 +68,11 @@
 		private CancellationTokenSource _newestRun;
 
 		/// <summary>
+		/// The thread whose filter has its turn, or 0: a handler of that filter's events that applies a filter is refused, rather than waiting for itself (#1248).
+		/// </summary>
+		private int _turnThreadId;
+
+		/// <summary>
 		/// The metrics of <see cref="Results"/>. A stopped filter leaves the collectors part counted, so they are kept when a filter is published (#1248).
 		/// </summary>
 		private IDictionary<string, object> _metrics = new Dictionary<string, object>();
@@ -405,6 +410,11 @@
 				throw new ArgumentNullException(nameof(criteria));
 			}
 
+			if (Volatile.Read(ref _turnThreadId) == Environment.CurrentManagedThreadId)
+			{
+				throw new InvalidOperationException("A filter cannot be applied while handling the events of the filter being applied, because it would wait for that filter to end.");
+			}
+
 			var stopwatch = Stopwatch.StartNew();
 			CancellationTokenSource run = StartRun();
 
@@ -449,6 +459,8 @@
 				{
 					throw Discard(filterType, criteria);
 				}
+
+				Volatile.Write(ref _turnThreadId, Environment.CurrentManagedThreadId);
 
 				try
 				{
@@ -508,6 +520,7 @@
 				}
 				finally
 				{
+					Volatile.Write(ref _turnThreadId, 0);
 					_runGate.Release();
 				}
 			}

@@ -9,7 +9,7 @@
 	/// <item>Call <see cref="Apply"/>, <see cref="ReApply"/> and <see cref="Abort"/> from any thread.</item>
 	/// <item>One filter runs at a time. A new filter stops the one running, which throws <see cref="FilterAbortedException"/>, and waits for it to end.</item>
 	/// <item>A filter is either stopped or shown. Only one that is not stopped changes the results, and raises <see cref="HistoryChanged"/> and <see cref="ResultsChanged"/> on its own thread, before <see cref="Apply"/> returns.</item>
-	/// <item>Those handlers run during the filter's turn. A handler must not apply a filter, and must not wait for a thread that may be applying one, such as a UI thread that applies filters: each would wait for the other.</item>
+	/// <item>Those handlers run during the filter's turn. A handler that applies a filter gets an <see cref="InvalidOperationException"/>. A handler must not wait for a thread that may be applying a filter, such as a UI thread that applies filters: each would wait for the other.</item>
 	/// </list>
 	/// </remarks>
 	public interface IFilterBehaviors
