@@ -86,13 +86,9 @@
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
-			var selection = new List<IRecord>
-			{
-				engine.Records.RecordAtLineNumber(2),
-				engine.Records.RecordAtLineNumber(511),
-			};
-
-			engine.Selector.Select(selection);
+			engine.Selector
+				.Select(2)
+				.Select(511);
 			
 			engine.Clear(ClearOperation.BetweenSelected);
 
