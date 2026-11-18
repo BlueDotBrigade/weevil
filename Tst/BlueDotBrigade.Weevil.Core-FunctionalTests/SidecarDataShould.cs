@@ -152,6 +152,30 @@
 			}
 		}
 
+		[TestMethod]
+		[WorkItem(1246)]
+		public void GivenASidecarThatCannotBeWritten_WhenClearing_ThenTheRecordsAreClearedAnyway()
+		{
+			// Clear saved the sidecar first, and failed when it couldn't, as in a read-only folder.
+			var logFilePath = CreateLogFile(out var directory);
+
+			// A folder where the sidecar would go: Weevil finds no sidecar to load, and can't write one, even as an administrator.
+			Directory.CreateDirectory($"{logFilePath}.xml");
+
+			try
+			{
+				IEngine engine = Engine.UsingPath(logFilePath).Open();
+
+				ClearLinesOneToTwelve(engine);
+
+				engine.Filter.Results.Should().HaveCount(288);
+			}
+			finally
+			{
+				Directory.Delete(directory, recursive: true);
+			}
+		}
+
 		/// <summary>
 		/// Writes a 300-line log, one record per line, outside the temporary folder, where the sidecar would not be saved.
 		/// </summary>

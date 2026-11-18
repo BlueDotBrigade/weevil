@@ -176,7 +176,15 @@
 			// Saved first: once cleared, a record's comment and pin are no longer in memory to be saved (#1004).
 			if (Engine.IsRealInstance(this))
 			{
-				_coreEngine.Save();
+				try
+				{
+					_coreEngine.Save();
+				}
+				catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+				{
+					// As in a read-only folder: the sidecar couldn't be saved now or later, so Clear still narrows the records, as 2.x did (#1246).
+					Diagnostics.Log.Default.Write(Diagnostics.LogSeverityType.Warning, exception, "The sidecar couldn't be saved before clearing the records, so they are cleared without it.");
+				}
 			}
 
 			// Clear resets the filter without telling subscribers, as IEngine documents; the engine itself still hears of it.
