@@ -32,7 +32,7 @@
 				{ "#Warning", @"@Severity=Warning" },
 				{ "#Error", @"@Severity=Error" },
 				{ "#Critical", @"@Severity=Critical" },
-				{ "#IPv4", @"(?<IPv4>((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)(\\.(?!$)|$)){4})" },
+				{ "#IPv4", @"\b(?<IpAddress>(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})\b" },
 				{ "#IPv6", @"(?<IPv6>(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})" },
 			};
 			_metricCollectors = new List<IMetricCollector>
