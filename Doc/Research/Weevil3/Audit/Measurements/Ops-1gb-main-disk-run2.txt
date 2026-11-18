@@ -1,0 +1,11 @@
+OP	open	7.09	-	7547742	ws=0.22GB heap=0.17GB peakWhileOpening=0.41GB mode=disk
+OP	plain: timeout	0.453	834.6	2917620	min=0.414 max=0.695 peakWs=1.10GB
+OP	plain: sequence=123456 (rare)	0.278	655.1	11	min=0.259 max=0.390 peakWs=1.11GB
+OP	regex: retry.*connection	0.562	826.4	840827	min=0.505 max=0.673 peakWs=1.06GB
+OP	regex: (timeout|retry)\s+\w+\s+(closed|opened)	0.883	1077.8	673718	min=0.827 max=1.081 peakWs=1.74GB
+OP	regex include timeout, exclude retry	0.540	963.5	1550868	min=0.509 max=0.583 peakWs=1.75GB
+OP	moniker: @Severity=Warning	0.115	372.3	604614	min=0.103 max=0.124 peakWs=1.54GB
+OP	regex OR: Warning||Error	0.583	978.4	1056346	min=0.534 max=0.743 peakWs=1.42GB
+OP	clear (show all)	0.324	369.8	7547742	min=0.307 max=0.329 peakWs=1.22GB
+OP	find: last record's text	0.971	117.5	7547742	min=0.897 max=1.039 peakWs=1.22GB
+END	ws=1.21GB peak=1.21GB heap=0.17GB

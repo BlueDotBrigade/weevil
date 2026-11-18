@@ -1,0 +1,70 @@
+diff --git a/Src/BlueDotBrigade.Weevil.Common/Data/ContentBuffer.cs b/Src/BlueDotBrigade.Weevil.Common/Data/ContentBuffer.cs
+index 06b8cd0e..f4ab8e22 100644
+--- a/Src/BlueDotBrigade.Weevil.Common/Data/ContentBuffer.cs
++++ b/Src/BlueDotBrigade.Weevil.Common/Data/ContentBuffer.cs
+@@ -119,7 +119,7 @@ namespace BlueDotBrigade.Weevil.Data
+ 
+ 				if (_fileBytes.Length < chunk.Length)
+ 				{
+-					_fileBytes = new byte[chunk.Length];
++					_fileBytes = new byte[System.Numerics.BitOperations.RoundUpToPowerOf2((uint)chunk.Length)];  // AUDIT PROTOTYPE
+ 				}
+ 
+ 				chunk.ReadFromFile(_fileBytes.AsSpan(0, chunk.Length));
+diff --git a/Src/BlueDotBrigade.Weevil.Core/Filter/FilterManager.cs b/Src/BlueDotBrigade.Weevil.Core/Filter/FilterManager.cs
+index c4f50d6e..2c8ffa63 100644
+--- a/Src/BlueDotBrigade.Weevil.Core/Filter/FilterManager.cs
++++ b/Src/BlueDotBrigade.Weevil.Core/Filter/FilterManager.cs
+@@ -153,6 +153,7 @@
+ 			// In RAM, ranges of about the same size keep every core busy, however small the log.
+ 			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: Environment.ProcessorCount);
+ 
++			var buffers = new System.Collections.Concurrent.ConcurrentBag<ContentBuffer>();  // AUDIT PROTOTYPE
+ 			try
+ 			{
+ 				Parallel.ForEach(
+@@ -160,7 +161,7 @@
+ 								 Partitioner.Create((IEnumerable<(int Start, int End)>)ranges, EnumerablePartitionerOptions.NoBuffering),
+ 								 parallelOptions,
+ 						  // FMR Part1: initialize thread local storage
+-						  () => { return new FilterMapReduceState(); },
++						  () => new FilterMapReduceState(buffers.TryTake(out var b) ? b : new ContentBuffer()),
+ 
+ 						  // FMR Part2: define task to perform
+ 						  (range, parallelLoopState, results) =>
+@@ -192,6 +193,7 @@
+ 						  // FMR Part3: merge the results
+ 						  (results) =>
+ 						  {
++							  buffers.Add(results.Content);
+ 							  Interlocked.Add(ref resultsCount, results.Count);
+ 						  }
+ 				);
+diff --git a/Src/BlueDotBrigade.Weevil.Core/Filter/FilterMapReduceState.cs b/Src/BlueDotBrigade.Weevil.Core/Filter/FilterMapReduceState.cs
+index ebe996e3..8378836c 100644
+--- a/Src/BlueDotBrigade.Weevil.Core/Filter/FilterMapReduceState.cs
++++ b/Src/BlueDotBrigade.Weevil.Core/Filter/FilterMapReduceState.cs
+@@ -4,9 +4,13 @@
+ 
+ 	internal class FilterMapReduceState
+ 	{
+-		public FilterMapReduceState()
++		public static int Created;  // AUDIT PROTOTYPE (not committed)
++		public FilterMapReduceState() : this(new ContentBuffer()) { }
++		public FilterMapReduceState(ContentBuffer content)
+ 		{
+ 			this.Count = 0;
++			this.Content = content;
++			System.Threading.Interlocked.Increment(ref Created);
+ 		}
+ 		/// <summary>
+ 		/// Represents the number of records that meet the search criteria.
+@@ -16,6 +20,6 @@
+ 		/// <summary>
+ 		/// Holds the content of the record being filtered, so it is read once, however many expressions test it (#1131).
+ 		/// </summary>
+-		internal ContentBuffer Content { get; } = new ContentBuffer();
++		internal ContentBuffer Content { get; }
+ 	}
+ }
+\ No newline at end of file

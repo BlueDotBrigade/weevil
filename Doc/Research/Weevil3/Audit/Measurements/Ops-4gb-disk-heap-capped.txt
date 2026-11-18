@@ -1,0 +1,27 @@
+# 2026-11-17 ~16:20 UTC. The 4.0 GB log (30,014,396 records) on disk, with the managed heap capped (DOTNET_GCHeapHardLimit), 3 runs each. main e3dee822, Linux.
+# The first run's open parsed the log (the saved .idx was for RAM); the second run's open reused the .idx it saved. Review agents were running (load average 1 to 5).
+# Columns: operation, median s, MB allocated, results, min, max, peak working set.
+== heap capped at 1536 MB
+open	57.67	-	30014396	ws=0.69GB heap=0.67GB peakWhileOpening=0.91GB mode=disk
+plain: timeout	2.144	2916.9	11609621	min=2.009 max=2.430 peakWs=1.60GB
+plain: sequence=123456 (rare)	1.393	2746.3	111	min=1.389 max=1.692 peakWs=1.60GB
+regex: retry.*connection	2.236	3313.3	3345573	min=2.148 max=2.457 peakWs=1.59GB
+regex: (timeout|retry)\s+\w+\s+(closed|opened)	3.554	4089.8	2680012	min=3.538 max=3.878 peakWs=1.61GB
+regex include timeout, exclude retry	2.752	4103.7	6172393	min=2.491 max=2.823 peakWs=1.59GB
+moniker: @Severity=Warning	0.483	1480.3	2400373	min=0.464 max=0.536 peakWs=1.45GB
+regex OR: Warning||Error	2.737	4246.9	4201000	min=2.286 max=2.767 peakWs=1.60GB
+clear (show all)	2.340	1470.8	30014396	min=1.872 max=2.374 peakWs=1.49GB
+find: last record's text	2.794	151.1	30014396	min=2.748 max=2.878 peakWs=1.45GB
+ws=1.43GB peak=1.45GB heap=0.67GB
+== heap capped at 1024 MB
+open	5.54	-	30014396	ws=0.69GB heap=0.67GB peakWhileOpening=0.81GB mode=disk
+plain: timeout	FAILED	OutOfMemoryException: Exception of type 'System.OutOfMemoryException' was thrown.
+plain: sequence=123456 (rare)	1.698	3155.8	111	min=1.629 max=1.741 peakWs=1.08GB
+regex: retry.*connection	2.644	3857.4	3345573	min=2.286 max=2.957 peakWs=1.08GB
+regex: (timeout|retry)\s+\w+\s+(closed|opened)	4.073	4022.7	2680012	min=3.630 max=4.547 peakWs=1.08GB
+regex include timeout, exclude retry	3.267	3868.8	6172393	min=2.793 max=3.376 peakWs=1.09GB
+moniker: @Severity=Warning	0.464	1480.3	2400373	min=0.457 max=0.498 peakWs=1.08GB
+regex OR: Warning||Error	FAILED	AggregateException: One or more errors occurred. (Exception of type 'System.OutOfMemoryException' was thrown.)
+clear (show all)	2.141	1470.7	30014396	min=2.055 max=2.343 peakWs=1.09GB
+find: last record's text	2.840	151.1	30014396	min=2.792 max=3.183 peakWs=1.09GB
+ws=0.79GB peak=1.07GB heap=0.67GB
