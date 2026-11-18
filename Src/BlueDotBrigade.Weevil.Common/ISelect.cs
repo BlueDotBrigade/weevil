@@ -6,6 +6,14 @@
 	using BlueDotBrigade.Weevil.Navigation;
 	using BlueDotBrigade.Weevil.Data;
 
+	/// <summary>
+	/// The selected records of the filter results, chosen by line number.
+	/// </summary>
+	/// <remarks>
+	/// A line the filter hides is never selected: <see cref="Select"/>, <see cref="Unselect"/> and <see cref="Toggle"/> throw
+	/// <see cref="RecordNotFoundException"/> and change nothing, and <see cref="SelectOnly"/> and <see cref="SelectRange"/> select
+	/// only the records the filter shows in their range (#1249).
+	/// </remarks>
 	public interface ISelect
 	{
 		IDictionary<int, IRecord> Selected { get; }
@@ -56,23 +64,17 @@
 		ISelect SelectAll();
 
 		/// <summary>
-		/// The given <paramref name="lineNumber"/> is added to the "items of interest" list.
+		/// Adds the shown line to the selection, and makes it the active record.
 		/// </summary>
-		/// <exception cref="RecordNotFoundException"/>
+		/// <exception cref="RecordNotFoundException">The filter hides the line, or the log has no such line. The selection does not change.</exception>
 		ISelect Select(int lineNumber);
+
 		/// <summary>
-		/// The given <paramref name="record"/> is added to the "items of interest" list.
+		/// Removes the shown line from the selection.
 		/// </summary>
-		/// <exception cref="RecordNotFoundException"/>
-		ISelect Select(IRecord record);
-		/// <summary>
-		/// The given <paramref name="records"/> are added to the "items of interest" list.
-		/// </summary>
-		/// <exception cref="RecordNotFoundException"/>
-		ISelect Select(IList<IRecord> records);
+		/// <exception cref="RecordNotFoundException">The filter hides the line, or the log has no such line. The selection does not change.</exception>
 		ISelect Unselect(int lineNumber);
-		ISelect Unselect(IRecord record);
-		ISelect Unselect(IList<IRecord> records);
+
 		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType);
 
 		/// <summary>
@@ -83,7 +85,6 @@
 		/// </remarks>
 		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
 		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType, System.Threading.CancellationToken cancellationToken);
-		RecordList ClearAll();
 		RecordList GetSelected();
 		void ToggleIsPinned();
 

@@ -47,6 +47,14 @@
 				// Only the region's or the section's records are opened (#1213, #1212).
 				builder = region is null ? builder : builder.UsingRegion(region);
 				builder = section is null ? builder : builder.UsingSection(section);
+
+				// Before the log opens, so a log renamed meanwhile does not stop a save that has every record it needs (#1247).
+				Encoding encoding;
+				using (var log = FileHelper.Open(logPath))
+				{
+					encoding = EncodingHelper.GetEncoding(log);
+				}
+
 				IEngine engine = builder.Open();
 
 				var destinationFile =
@@ -58,19 +66,20 @@
 					Path.GetDirectoryName(logPath),
 					destinationFile);
 
-				Encoding encoding;
-				using (var log = FileHelper.Open(logPath))
-				{
-					encoding = EncodingHelper.GetEncoding(log);
-				}
-
-				// On disk, a log that changed while it was read is reloaded, then filtered and saved once more (#1028).
-				engine.RunReloadingOnChange(current =>
-				{
-					current.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(include, exclude));
-					SaveResults(current, destinationFilePath, encoding);
-					return true;
-				});
+				// A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the command again (#1247).
+				engine.RunOnce(
+					() =>
+					{
+						engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(include, exclude));
+						SaveResults(engine, destinationFilePath, encoding);
+						return true;
+					},
+					Program.ReportWarning);
+			}
+			catch (LogFileChangedException exception)
+			{
+				// Cocona sets the exit code from the command, so it is passed this way (#1247).
+				throw new CommandExitedException(exception.Message, 1);
 			}
 			finally
 			{
@@ -112,7 +121,7 @@
 		}
 
 		/// <summary>
-		/// Deletes the records written before a save stopped, without hiding why it stopped: a change to the log must still reach the retry.
+		/// Deletes the records written before a save stopped, without hiding why it stopped: a change to the log must still reach the caller (#1247).
 		/// </summary>
 		private static void DeleteTemporaryFile(string temporaryFilePath)
 		{

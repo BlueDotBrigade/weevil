@@ -30,7 +30,7 @@ An insight's `RelatedLineNumbers` are the line numbers of its records, never the
 Get-Records -FilePath .\Sample.log -Include Error -Storage Disk
 ```
 
-With `-Storage Disk`, the records `Get-Records` returns read their text from the log when the pipeline uses them. If the log is truncated, replaced or deleted before then, those reads fail. If the log changes while it is filtered, the cmdlet reloads it once and filters it again.
+With `-Storage Disk`, the records `Get-Records` returns read their text from the log when the pipeline uses them. If the log is truncated, replaced or deleted before then, those reads fail. If the log is renamed, deleted or replaced while it is filtered, the cmdlet stops with an error that says to run it again. A filter that could finish, for example in RAM, keeps its results and writes a warning.
 
 ## One Region
 

@@ -62,6 +62,14 @@
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="storageMode"/> is not a <see cref="StorageMode"/>.</exception>
 		IEngineBuilder UsingStorage(StorageMode storageMode);
 
+		/// <summary>
+		/// Reads the log, and returns the engine that holds it.
+		/// </summary>
+		/// <remarks>
+		/// Weevil never stops another application from writing, renaming or deleting the log (#1247). Nothing reloads by itself.
+		/// When a read finds the log changed or gone, Weevil's window says so, and Ctrl+F5 reloads.
+		/// The CLI and PowerShell stop with an error that says to run the command again, or keep a result they could finish, with a warning.
+		/// </remarks>
 		IEngine Open();
 	}
 }
