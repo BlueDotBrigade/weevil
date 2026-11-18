@@ -46,7 +46,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		/// <param name="companionSuffixes">What a companion's name adds to the file's, such as <c>.xml</c>.</param>
 		/// <param name="cancellationToken">Stops the copy, for example when the dialog closes (#1251).</param>
 		/// <remarks>
-		/// A copy that is cancelled or fails leaves nothing in <paramref name="destinationFolder"/>.
+		/// A copy that is cancelled or fails deletes <paramref name="destinationFolder"/> when this call created it, so no partial copy is left.
 		/// </remarks>
 		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
 		string Extract(Location file, IEnumerable<string> companionSuffixes, string destinationFolder, CancellationToken cancellationToken = default);

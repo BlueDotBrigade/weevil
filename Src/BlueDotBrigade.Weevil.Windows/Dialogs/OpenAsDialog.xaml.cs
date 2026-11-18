@@ -128,22 +128,18 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		/// <remarks>
 		/// Closing the window, for example with Cancel, stops an extraction that is running (#1251).
-		/// The browser is disposed once the extraction stops, so a zip it is still reading is deleted too.
 		/// </remarks>
 		protected override void OnClosed(EventArgs e)
 		{
 			_isClosed = true;
 
-			if (_extraction is null)
-			{
-				this.Browser.Dispose();
-			}
-			else
+			if (_extraction is not null)
 			{
 				Log.Default.Write(LogSeverityType.Information, "The Open As dialog closed during an extraction, so the extraction was cancelled.");
 				_extraction.Cancel();
 			}
 
+			this.Browser.Dispose();
 			base.OnClosed(e);
 		}
 
@@ -174,8 +170,6 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				{
 					ContainerReader.TryDeleteFolder(destination);
 				}
-
-				this.Browser.Dispose();
 			}
 			else if (localPath is null)
 			{
@@ -188,7 +182,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			}
 		}
 
-		/// <returns>The file on disk, or <see langword="null"/> when the extraction failed or the window closed. Either way, it left nothing behind.</returns>
+		/// <returns>The file on disk, or <see langword="null"/> when the extraction failed or was cancelled, leaving nothing behind.</returns>
 		private async Task<string> ExtractAsync(BrowserItem file, string destination)
 		{
 			using var extraction = new CancellationTokenSource();
@@ -198,9 +192,14 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			{
 				return await Task.Run(() => this.Browser.Reader.Extract(file.Location, this.CompanionSuffixes, destination, extraction.Token));
 			}
-			catch (Exception) when (_isClosed)
+			catch (Exception exception) when (_isClosed)
 			{
-				// The analyst closed the window, so there is nothing to report.
+				// The analyst closed the window, so there is nothing to show. Logged, so a defect is not hidden.
+				if (exception is not OperationCanceledException)
+				{
+					Log.Default.Write(LogSeverityType.Warning, exception, "An extraction failed after the Open As dialog closed.");
+				}
+
 				return null;
 			}
 			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)

@@ -206,11 +206,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		/// with the companions beside it in the zip that exist, such as <c>App.log.xml</c> for <c>App.log</c>.
 		/// </summary>
 		/// <param name="companionSuffixes">What a companion's name adds to the file's, such as <c>.xml</c>.</param>
-		/// <param name="cancellationToken">Stops the copy, for example when the dialog closes (#1251).</param>
-		/// <remarks>
-		/// A copy that is cancelled or fails deletes <paramref name="destinationFolder"/> when this call created it, so no partial copy is left.
-		/// </remarks>
-		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		/// <inheritdoc cref="IContainerReader.Extract" path="/param[@name='cancellationToken']|/remarks|/exception"/>
 		public string Extract(Location file, IEnumerable<string> companionSuffixes, string destinationFolder, CancellationToken cancellationToken = default)
 		{
 			ArgumentNullException.ThrowIfNull(file);
@@ -219,6 +215,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			{
 				return file.FileSystemPath;
 			}
+
+			cancellationToken.ThrowIfCancellationRequested();
 
 			var isNewFolder = !Directory.Exists(destinationFolder);
 			Directory.CreateDirectory(destinationFolder);
@@ -422,6 +420,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			ZipArchiveEntry entry = FindEntry(outer, location.ArchivePath[level - 1])
 				?? throw new FileNotFoundException($"The zip holds no zip called `{location.ArchivePath[level - 1]}`.");
 
+			string folder;
 			string copy;
 
 			lock (_sync)
@@ -429,7 +428,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				ObjectDisposedException.ThrowIf(_isDisposed, this);
 
 				_copyFolder ??= Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs", Guid.NewGuid().ToString("N"))).FullName;
-				copy = Path.Combine(_copyFolder, $"{Guid.NewGuid():N}.zip");
+				folder = _copyFolder;
+				copy = Path.Combine(folder, $"{Guid.NewGuid():N}.zip");
 			}
 
 			using (Stream source = entry.Open())
@@ -440,6 +440,13 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 			lock (_sync)
 			{
+				if (_isDisposed)
+				{
+					// Disposed during the copy, whose open file kept the folder from being deleted then (#1251).
+					TryDeleteFolder(folder);
+					ObjectDisposedException.ThrowIf(true, this);
+				}
+
 				_innerZipCopies[key] = copy;
 			}
 
@@ -497,7 +504,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		private static bool IsReadFailure(Exception exception)
 		{
 			// A listing still running when the dialog closes finds the reader disposed (#1251).
-			return exception is IOException or UnauthorizedAccessException or InvalidDataException or System.Security.SecurityException or ObjectDisposedException;
+			return exception is IOException or UnauthorizedAccessException or InvalidDataException or System.Security.SecurityException ||
+			       exception is ObjectDisposedException { ObjectName: var name } && name == typeof(ContainerReader).FullName;
 		}
 
 		private static string Describe(Exception exception) => exception switch

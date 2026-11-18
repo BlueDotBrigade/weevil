@@ -200,7 +200,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 		[TestMethod]
 		[WorkItem(1251)]
-		public void GivenADisposedReader_WhenAZipInAZipIsListed_ThenTheErrorIsReturnedAndNoCopyIsMade()
+		public void GivenADisposedReader_WhenAZipInAZipIsListed_ThenAnErrorIsReturned()
 		{
 			// A listing that was still running when the dialog closed made a new copy of the inner zip, which nothing deleted.
 			Location innerZip = _reader.List(Location.ForArchive(_zipPath, "Nested")).Items.Single().Open;
