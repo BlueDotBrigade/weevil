@@ -175,7 +175,12 @@
 				? _coreEngine.Selector.GetSelected()
 				: _coreEngine.Filter.Results;
 
-			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
+			IList<IRecordAnalyzer> analyzers = GetAnalyzers(ComponentType.All);
+
+			IRecordAnalyzer analyzer = analyzers.FirstOrDefault(x => x.Key == analyzerKey)
+				?? throw new ArgumentException(
+					$"Unable to find the analyzer. Key={analyzerKey}, Available={string.Join(", ", analyzers.Select(x => x.Key))}",
+					nameof(analyzerKey));
 
 			Results results = analyzer.Analyze(
 				records,
