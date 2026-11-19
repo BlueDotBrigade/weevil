@@ -16,7 +16,7 @@ The parser fills a `RecordTable` (`BlueDotBrigade.Weevil.Data`, Core). It keeps 
 
 - **Blocks:** the columns are kept in blocks of 65,536 rows, so no array grows large.
 - **Content:** the log's bytes are kept in chunks of about 16 MB (`ContentChunk`). A chunk directory says which record each chunk starts at. In disk mode a chunk holds no bytes and reads them back from the log ([DiskMode.md](DiskMode.md)).
-- **Strings:** a record keeps its content as a string instead when it is UTF-16 in the other byte order or UTF-32 in RAM mode, or text a plugin changed. Its facts byte says so.
+- **Strings:** a record keeps its content as a string instead when it is UTF-16 in the other byte order or UTF-32 in RAM mode, or text a plugin changed. Its facts byte says so, with a bit that only the table sets: `RecordFacts` holds what the parser found, and never sets its three high bits (#1293).
 - **Immutable:** a table never changes once built.
 
 ## Records on Demand

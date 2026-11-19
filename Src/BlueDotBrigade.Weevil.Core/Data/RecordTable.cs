@@ -12,12 +12,16 @@ namespace BlueDotBrigade.Weevil.Data
 	/// - A record that holds the log's bytes keeps its content's offset and length in its chunk. The chunk directory says where each chunk's
 	///   records start, and each block knows the chunk its first record is in, so finding a record's chunk is a short search.
 	/// - A record that keeps its content as a string (UTF-16 in the other byte order and UTF-32 in RAM mode, or text a plugin changed) has
-	///   <see cref="RecordFacts.KeepsString"/>, and its block keeps the string: by row when most of its rows keep one, otherwise in a short list.
+	///   the table's own bit set in its facts' byte, and its block keeps the string: by row when most of its rows keep one, otherwise in a short list.
 	/// - The table never changes once built.
 	/// </remarks>
 	internal sealed class RecordTable
 	{
 		public const int BlockSize = 65_536;
+
+		// Set in a row's facts when it keeps its content as a string, rather than the log's bytes: how the table keeps a record is not
+		// a fact about the record, so the bit is the table's own, in one that RecordFacts never sets (#1293). The saved index keeps the byte as it is.
+		private const byte KeepsStringBit = 0b0010_0000;
 
 		private readonly Block[] _blocks;
 
@@ -50,16 +54,9 @@ namespace BlueDotBrigade.Weevil.Data
 		/// <summary>
 		/// Returns what the parser found about the record at <paramref name="recordNumber"/>, without creating it (#1150).
 		/// </summary>
-		/// <remarks>
-		/// Whether the table keeps the content as a string is left out, as a record leaves it out.
-		/// </remarks>
 		public RecordFacts GetFacts(int recordNumber)
 		{
-			RecordFacts facts = GetBlock(recordNumber).Facts[recordNumber % BlockSize];
-
-			return facts.KeepsString
-				? new RecordFacts(facts.Severity, facts.IsMultiLine, facts.WasGeneratedByUi)
-				: facts;
+			return ToFacts(GetBlock(recordNumber).Facts[recordNumber % BlockSize]);
 		}
 
 		/// <summary>
@@ -69,9 +66,10 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			Block block = GetBlock(recordNumber);
 			var row = recordNumber % BlockSize;
-			RecordFacts facts = block.Facts[row];
+			var stored = block.Facts[row];
+			RecordFacts facts = ToFacts(stored);
 
-			return facts.KeepsString
+			return KeepsString(stored)
 				? new Record(
 					block.LineNumbers[row],
 					block.CreatedAt[row],
@@ -98,9 +96,10 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			Block block = GetBlock(recordNumber);
 			var row = recordNumber % BlockSize;
-			RecordFacts facts = block.Facts[row];
+			var stored = block.Facts[row];
+			RecordFacts facts = ToFacts(stored);
 
-			return facts.KeepsString
+			return KeepsString(stored)
 				? block.GetString(row)
 				: content.Read(GetChunk(recordNumber), block.Offsets[row], block.Lengths[row], facts.IsMultiLine);
 		}
@@ -119,9 +118,10 @@ namespace BlueDotBrigade.Weevil.Data
 			{
 				Block block = GetBlock(recordNumber);
 				var row = recordNumber % BlockSize;
-				RecordFacts facts = block.Facts[row];
+				var stored = block.Facts[row];
+				RecordFacts facts = ToFacts(stored);
 
-				if (facts.KeepsString)
+				if (KeepsString(stored))
 				{
 					kept.Add(block.LineNumbers[row], block.CreatedAt[row], facts, block.GetString(row));
 				}
@@ -143,7 +143,7 @@ namespace BlueDotBrigade.Weevil.Data
 			Block block = GetBlock(recordNumber);
 			var row = recordNumber % BlockSize;
 
-			fileOffset = block.Facts[row].KeepsString ? -1 : GetChunk(recordNumber).FileOffset + block.Offsets[row];
+			fileOffset = KeepsString(block.Facts[row]) ? -1 : GetChunk(recordNumber).FileOffset + block.Offsets[row];
 			return fileOffset >= 0;
 		}
 
@@ -194,9 +194,10 @@ namespace BlueDotBrigade.Weevil.Data
 			{
 				Block block = _blocks[recordNumber / BlockSize];
 				var row = recordNumber % BlockSize;
-				RecordFacts facts = block.Facts[row];
+				var stored = block.Facts[row];
+				RecordFacts facts = ToFacts(stored);
 
-				if (facts.KeepsString)
+				if (KeepsString(stored))
 				{
 					builder.Add(block.LineNumbers[row], block.CreatedAt[row], facts, block.GetString(row));
 					continue;
@@ -210,6 +211,18 @@ namespace BlueDotBrigade.Weevil.Data
 				ContentChunk chunk = getChunk(chunkIndex);
 				builder.Add(block.LineNumbers[row], block.CreatedAt[row], facts, chunk, block.Offsets[row], block.Lengths[row]);
 			}
+		}
+
+		private static bool KeepsString(byte stored) => (stored & KeepsStringBit) != 0;
+
+		/// <summary>
+		/// What the parser found, without the table's own bit.
+		/// </summary>
+		private static RecordFacts ToFacts(byte stored)
+		{
+			// Never fails: the table keeps only RecordFacts' own bits and its KeepsStringBit.
+			RecordFacts.TryFromValue((byte)(stored & ~KeepsStringBit), out RecordFacts facts);
+			return facts;
 		}
 
 		private Block GetBlock(int recordNumber)
@@ -278,7 +291,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 			for (var recordNumber = 0; recordNumber < this.Count; recordNumber++)
 			{
-				if (GetBlock(recordNumber).Facts[recordNumber % BlockSize].KeepsString)
+				if (KeepsString(GetBlock(recordNumber).Facts[recordNumber % BlockSize]))
 				{
 					count++;
 				}
@@ -291,7 +304,7 @@ namespace BlueDotBrigade.Weevil.Data
 				Block block = GetBlock(recordNumber);
 				var row = recordNumber % BlockSize;
 
-				if (block.Facts[row].KeepsString)
+				if (KeepsString(block.Facts[row]))
 				{
 					writer.Write(recordNumber);
 					writer.Write(block.GetString(row));
@@ -317,7 +330,7 @@ namespace BlueDotBrigade.Weevil.Data
 				writer.Write(block.LineNumbers[row]);
 				writer.Write(block.Offsets[row]);
 				writer.Write(block.Lengths[row]);
-				writer.Write(block.Facts[row].Value);
+				writer.Write(block.Facts[row]);
 				writer.Write(block.CreatedAt[row].Ticks);
 				writer.Write((byte)block.CreatedAt[row].Kind);
 			}
@@ -351,7 +364,7 @@ namespace BlueDotBrigade.Weevil.Data
 				var ticks = reader.ReadInt64();
 				var kind = (DateTimeKind)reader.ReadByte();
 
-				if (!RecordFacts.TryFromValue(factsValue, out RecordFacts facts) ||
+				if (!RecordFacts.TryFromValue((byte)(factsValue & ~KeepsStringBit), out RecordFacts facts) ||
 				    ticks < DateTime.MinValue.Ticks || ticks > DateTime.MaxValue.Ticks ||
 				    !Enum.IsDefined(kind))
 				{
@@ -360,7 +373,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 				var createdAt = new DateTime(ticks, kind);
 
-				if (facts.KeepsString)
+				if (KeepsString(factsValue))
 				{
 					if (!strings.TryGetValue(recordNumber, out var content))
 					{
@@ -406,7 +419,8 @@ namespace BlueDotBrigade.Weevil.Data
 
 			public int[] Lengths = new int[BlockSize];
 
-			public RecordFacts[] Facts = new RecordFacts[BlockSize];
+			// What the parser found, as RecordFacts' byte, with the table's KeepsStringBit.
+			public byte[] Facts = new byte[BlockSize];
 
 			public DateTime[] CreatedAt = new DateTime[BlockSize];
 
@@ -532,10 +546,7 @@ namespace BlueDotBrigade.Weevil.Data
 					_chunks.Add(chunk);
 				}
 
-				// The content is the chunk's bytes, whatever the caller's facts say.
-				var holdsBytes = new RecordFacts(facts.Severity, facts.IsMultiLine, facts.WasGeneratedByUi, keepsString: false);
-
-				var row = NextRow(lineNumber, createdAt, holdsBytes);
+				var row = NextRow(lineNumber, createdAt, facts.Value);
 				_current.Offsets[row] = offset;
 				_current.Lengths[row] = length;
 			}
@@ -545,9 +556,7 @@ namespace BlueDotBrigade.Weevil.Data
 			/// </summary>
 			public void Add(int lineNumber, DateTime createdAt, RecordFacts facts, string content)
 			{
-				var keepsString = new RecordFacts(facts.Severity, facts.IsMultiLine, facts.WasGeneratedByUi, keepsString: true);
-
-				var row = NextRow(lineNumber, createdAt, keepsString);
+				var row = NextRow(lineNumber, createdAt, (byte)(facts.Value | KeepsStringBit));
 				_current.AddString(row, content ?? string.Empty);
 			}
 
@@ -559,7 +568,7 @@ namespace BlueDotBrigade.Weevil.Data
 				return new RecordTable(_blocks.ToArray(), _chunkStarts.ToArray(), _chunks.ToArray(), this.Count);
 			}
 
-			private int NextRow(int lineNumber, DateTime createdAt, RecordFacts facts)
+			private int NextRow(int lineNumber, DateTime createdAt, byte facts)
 			{
 				var row = this.Count % BlockSize;
 
