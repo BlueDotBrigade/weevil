@@ -91,6 +91,11 @@ namespace BlueDotBrigade.Weevil.IO
 		public Encoding ContentEncoding => CreateEncoding(_unitSize, _isBigEndian);
 
 		/// <summary>
+		/// The log is UTF-8, or UTF-16 in this computer's byte order: see <see cref="IsQuickToDecode(int, bool)"/>.
+		/// </summary>
+		public bool IsContentQuickToDecode => IsQuickToDecode(_unitSize, _isBigEndian);
+
+		/// <summary>
 		/// Scans the whole log.
 		/// </summary>
 		public static LineIndex Build(Stream source, int checkpointInterval = DefaultCheckpointInterval, int bufferSize = DefaultBufferSize)
@@ -563,6 +568,19 @@ namespace BlueDotBrigade.Weevil.IO
 				2 => new UnicodeEncoding(isBigEndian, byteOrderMark: false),
 				_ => new UTF32Encoding(isBigEndian, byteOrderMark: false),
 			};
+		}
+
+		/// <summary>
+		/// The encoding is UTF-8, or UTF-16 in this computer's byte order, which .NET decodes many characters at a time.
+		/// </summary>
+		/// <remarks>
+		/// UTF-16 in the other byte order and UTF-32 are decoded one character at a time, 10 to 50 times more slowly,
+		/// so in RAM mode their records keep a string, which also uses less memory than UTF-32's bytes (#1134 review).
+		/// In disk mode they are read back from the log like any other: they only decode more slowly (#1025, decision 6).
+		/// </remarks>
+		internal static bool IsQuickToDecode(int unitSize, bool isBigEndian)
+		{
+			return unitSize == 1 || (unitSize == 2 && isBigEndian != BitConverter.IsLittleEndian);
 		}
 
 		private static bool TryReadSignature(Stream indexSource)

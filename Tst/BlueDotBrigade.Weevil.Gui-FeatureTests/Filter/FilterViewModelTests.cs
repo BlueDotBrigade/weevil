@@ -307,6 +307,25 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1295)]
+		public async Task GivenALogOnDiskThatWasDeleted_WhenAnalyzed_ThenOneMessageSaysTheLogCantBeRead()
+		{
+			// The read threw FileNotFoundException, not the log's own exception, so the analysis showed its own error rather than the log's.
+			IDialogBoxService dialog = CreateDialog(() => { });
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog);
+			var logPath = CopyLog("Analyzed.log");
+			await OpenOnDiskAsync(viewModel, logPath);
+
+			System.IO.File.Delete(logPath);
+			dialog.ClearReceivedCalls();
+			await viewModel.Analyze(AnalysisType.DetectData);
+			WaitUntil(() => viewModel.IsMenuEnabled && dialog.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IDialogBoxService.ShowMessage)));
+
+			dialog.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("can't read the log")), "Error");
+			dialog.ReceivedWithAnyArgs(1).ShowMessage(default, default);
+		}
+
+		[TestMethod]
 		public async Task GivenALogOnDisk_WhenItsRecordsAreGraphed_ThenTheGraphKeepsTheirTextAfterTheLogIsDeleted()
 		{
 			// A graph window can outlive its log, so it copies the text of its records when it opens (#1028).

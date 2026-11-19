@@ -28,8 +28,8 @@
 		IFilter ReApply();
 
 		/// <remarks>
-		/// In disk mode, a read of the log that fails throws its <see cref="System.IO.IOException"/> or <see cref="UnauthorizedAccessException"/> as it is,
-		/// for example <see cref="IO.LogFileChangedException"/> when the log changed: the log must then be reloaded (#1025).
+		/// In disk mode, a read of the log that fails throws <see cref="IO.LogFileChangedException"/>, as every read of a record's text does (#1025, #1295).
+		/// Unless the log is <see cref="IO.LogFileChangedException.IsUnreadable"/>, it changed and must be reloaded.
 		/// </remarks>
 		IFilter Apply(FilterType filterType, IFilterCriteria criteria);
 

@@ -221,16 +221,51 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenALogThatIsGone_WhenRead_ThenTheReadFailsAtOnce()
+		[WorkItem(1295)]
+		public void GivenALogThatIsGone_WhenRead_ThenTheReadFailsAtOnceWithTheExceptionOfAChangedLog()
 		{
+			// A deleted log threw FileNotFoundException, and a changed one LogFileChangedException, so a script had to catch both.
 			LogFileSource source = Parse(StartOffset, LogLength);
 			System.IO.File.Delete(_logPath);
 			var stopwatch = Stopwatch.StartNew();
 
 			Action read = () => source.Read(StartOffset, new byte[10]);
 
-			read.Should().Throw<FileNotFoundException>();
+			LogFileChangedException exception = read.Should().Throw<LogFileChangedException>().Which;
 			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(1), "a read never waits for the log, as FileHelper.Open does for 2 seconds");
+			exception.IsUnreadable.Should().BeTrue("Reload could not read a log that is gone either");
+			exception.InnerException.Should().BeOfType<FileNotFoundException>();
+			exception.Path.Should().Be(_logPath);
+			source.HasChanged.Should().BeFalse("a log renamed back has not changed");
+		}
+
+		[TestMethod]
+		[WorkItem(1295)]
+		public void GivenALogRenamedAndRenamedBack_WhenReadTwice_ThenTheSecondReadSucceedsAndAWarningIsLoggedOnce()
+		{
+			LogFileSource source = Parse(StartOffset, LogLength);
+			System.IO.File.Move(_logPath, _logPath + "~");
+			ILogWriter original = Log.Default;
+			ILogWriter writer = Substitute.For<ILogWriter>();
+			Log.Register(writer);
+			var destination = new byte[10];
+
+			try
+			{
+				Action read = () => source.Read(StartOffset, destination);
+
+				read.Should().Throw<LogFileChangedException>();
+				read.Should().Throw<LogFileChangedException>();
+				System.IO.File.Move(_logPath + "~", _logPath);
+				read.Should().NotThrow();
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			destination.Should().Equal(_bytes.AsSpan(StartOffset, 10).ToArray());
+			writer.Received(1).Write(LogSeverityType.Warning, Arg.Any<FileNotFoundException>(), Arg.Is<string>(message => message.Contains("can no longer be read")));
 		}
 
 		[TestMethod]

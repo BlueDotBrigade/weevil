@@ -8,7 +8,7 @@ namespace BlueDotBrigade.Weevil
 	/// </summary>
 	/// <remarks>
 	/// Weevil saves no index in the temporary folder, so each reference log is copied to a folder of its own, outside it, once for each storage mode:
-	/// the saved table is reused only in the mode that made it. A copy whose length differs from the reference log is copied again, as after a change to <c>ReferenceLog.cs</c>.
+	/// each mode reopens from a table it saved itself, as an analyst who keeps to one mode does. A copy whose length differs from the reference log is copied again, as after a change to <c>ReferenceLog.cs</c>.
 	/// Compare with <see cref="OpenBenchmarks"/>, which parses the log. The log was just read, so a reopen reads it from the operating system's cache.
 	/// </remarks>
 	[MemoryDiagnoser]
