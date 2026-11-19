@@ -53,9 +53,9 @@ namespace BlueDotBrigade.Weevil
 			{
 				result = work();
 			}
-			catch (IOException exception) when (exception is LogFileChangedException ||
-			                                     (exception is FileNotFoundException or DirectoryNotFoundException && IsRenamedOrReplaced(engine)))
+			catch (LogFileChangedException exception)
 			{
+				// Every read of a log on disk that fails throws it (#1295).
 				throw Stop(engine, exception);
 			}
 

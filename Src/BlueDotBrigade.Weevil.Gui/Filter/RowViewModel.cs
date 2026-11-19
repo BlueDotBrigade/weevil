@@ -114,7 +114,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			{
 				_reportFailedRead?.Invoke(exception);
 
-				return exception is BlueDotBrigade.Weevil.IO.LogFileChangedException
+				return exception is BlueDotBrigade.Weevil.IO.LogFileChangedException { IsUnreadable: false }
 					? ChangedLogPlaceholder
 					: UnreadableLogPlaceholder;
 			}

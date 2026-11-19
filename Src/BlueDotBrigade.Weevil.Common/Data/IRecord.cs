@@ -7,6 +7,10 @@
 		/// <summary>
 		/// Represents a single log file entry, which can sometimes span multiple lines.
 		/// </summary>
+		/// <remarks>
+		/// In disk mode each read opens the log, so read many records through a <see cref="ContentBuffer"/>, which reads each chunk of the log once (#1295).
+		/// </remarks>
+		/// <exception cref="IO.LogFileChangedException">In disk mode, the log can no longer be read: it was renamed, deleted, replaced or truncated.</exception>
 		string Content { get; }
 
 		bool HasCreationTime { get; }

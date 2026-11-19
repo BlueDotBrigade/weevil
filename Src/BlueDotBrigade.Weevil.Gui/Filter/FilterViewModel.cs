@@ -1603,7 +1603,8 @@
 		/// </remarks>
 		private void OnFailedRead(Exception exception, int generation)
 		{
-			var isChange = exception is LogFileChangedException;
+			// A log that is gone can't be reloaded, so Ctrl+F5 is named only for one that changed (#1295).
+			var isChange = exception is LogFileChangedException { IsUnreadable: false };
 
 			// A change is reported even after the log could not be read, for example while it was replaced.
 			if (generation != Volatile.Read(ref _logGeneration) ||
@@ -2510,8 +2511,8 @@
 				}
 				catch (LogFileChangedException e)
 				{
-					// Shown once, naming Ctrl+F5, as for any read of a log on disk that changed (#1028, #1247).
-					Log.Default.Write(LogSeverityType.Warning, e, $"{operation} stopped, because the log changed on disk.");
+					// Shown once per log, as for any read of a log on disk that changed or is gone (#1028, #1247, #1295).
+					Log.Default.Write(LogSeverityType.Warning, e, $"{operation} stopped, because the log on disk changed or can no longer be read.");
 					reportFailedRead(e);
 				}
 				catch (Exception e)
