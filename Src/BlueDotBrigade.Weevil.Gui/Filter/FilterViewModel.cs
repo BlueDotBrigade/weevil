@@ -97,6 +97,9 @@
 
 		private IEngine _engine;
 
+		// The file the open log was read from: for a log opened from a zip, its copy, which the engine names by the zip (#1312).
+		private string _openLogFilePath;
+
 		/// <summary>
 		/// The copy the open log was extracted to, when it came from a zip.
 		/// </summary>
@@ -558,7 +561,7 @@
 
 			await (choice.ExtractedFolder is null
 				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode)
-				: OpenExtractedAsync(choice.LogPath, choice.StorageMode));
+				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath));
 		}
 
 		public async Task OpenCompressedAsync(string sourceFilePath)
@@ -618,7 +621,7 @@
 				if (await ChooseStorageAsync(extractedLog) is { } storageMode)
 				{
 					isOpening = true;
-					await OpenExtractedAsync(extractedLog, storageMode);
+					await OpenExtractedAsync(extractedLog, storageMode, file.ToString());
 				}
 			}
 			finally
@@ -666,7 +669,8 @@
 		/// <remarks>
 		/// The folder it was extracted to is kept, with the sidecar and saved index the open saves beside the log (#1253).
 		/// </remarks>
-		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode)
+		/// <param name="displayPath">The log as the analyst knows it: the zip, read like a folder, and the log's path in it (#1312).</param>
+		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath)
 		{
 			ExtractedLog extracted = null;
 
@@ -676,7 +680,7 @@
 
 				// Weevil may close before the open finishes.
 				_extractedLogBeingOpened = extracted;
-				await OpenAsync(logPath, storageMode);
+				await OpenAsync(logPath, storageMode, displayPath);
 			}
 			finally
 			{
@@ -709,7 +713,7 @@
 		/// </summary>
 		private bool IsOpenFrom(ExtractedLog extracted)
 		{
-			return extracted != null && Engine.IsRealInstance(_engine) && extracted.Contains(_engine.SourceFilePath);
+			return extracted != null && Engine.IsRealInstance(_engine) && extracted.Contains(_openLogFilePath);
 		}
 
 		/// <summary>
@@ -823,7 +827,8 @@
 		}
 
 		/// <param name="storageMode">RAM or Disk, or <see langword="null"/> for the engine's default: RAM, unless a Debug build's <c>WEEVIL_TEST_STORAGE</c> says otherwise.</param>
-		internal async Task OpenAsync(string sourceFilePath, StorageMode? storageMode)
+		/// <param name="displayPath">The log as the analyst knows it, when <paramref name="sourceFilePath"/> is a copy, such as one extracted from a zip (#1312).</param>
+		internal async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath = null)
 		{
 			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
@@ -842,7 +847,11 @@
 					// A plugin's builder opens in the mode chosen in Weevil's own Open As window (#1028).
 					(bool, OpenAsResult) result = plugin.ShowOpenAs(
 						LicensePath,
-						(path) => storageMode is { } mode ? Engine.UsingPath(path).UsingStorage(mode) : Engine.UsingPath(path),
+						(path) =>
+						{
+							IEngineBuilder pluginBuilder = Engine.UsingPath(path).UsingDisplayPath(displayPath);
+							return storageMode is { } mode ? pluginBuilder.UsingStorage(mode) : pluginBuilder;
+						},
 						sourceFilePath);
 
 					wasOpenRequested = result.Item1;
@@ -888,7 +897,8 @@
 							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
 							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
-							.UsingRange(openAsResult.Range);
+							.UsingRange(openAsResult.Range)
+							.UsingDisplayPath(displayPath);
 
 						if (storageMode is { } mode)
 						{
@@ -902,6 +912,7 @@
 						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						_engine = openedEngine;
+						_openLogFilePath = sourceFilePath;
 						_hasUnsavedChanges = false;
 						Interlocked.Increment(ref _logGeneration);
 						openedLogReporter = CreateFailedReadReporter();
@@ -1453,7 +1464,8 @@
 		private Task SaveSelected(FileFormatType fileFormatType)
 		{
 			IEngine engine = _engine;
-			var destinationFolder = Path.GetDirectoryName(engine.SourceFilePath);
+			// The folder of the file read: for a zipped log, the folder kept for it (#1253, #1312).
+			var destinationFolder = engine.SourceDirectory;
 
 			var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
 				Path.Combine(destinationFolder, TsvFileName) :
@@ -1478,7 +1490,7 @@
 		{
 			WindowsProcess.Start(
 				WindowsProcessType.FileExplorer,
-				Path.GetDirectoryName(_engine.SourceFilePath));
+				_engine.SourceDirectory);
 		}
 
 		public void ShowRegExTool()
@@ -1536,7 +1548,8 @@
 		/// </remarks>
 		private Task SplitCurrentLog()
 		{
-			var splitter = new LogFileSplitter(_engine.SourceFilePath);
+			// The splits are saved beside the file read, and read the log through its records.
+			var splitter = new LogFileSplitter(_openLogFilePath);
 			RecordList records = _engine.Filter.Results;
 
 			return RunInBackground("The split", cancellationToken => splitter.Run(records, cancellationToken), progressDelay: QuickWorkProgressDelay);
@@ -1546,7 +1559,8 @@
 		{
 			TelemetrySessionLifecycle.Shared.RecordDashboardOpen();
 
-			IPlugin plugin = new PluginFactory().Create(_engine.SourceFilePath);
+			// A plugin may read the file to tell whether it is one of its logs.
+			IPlugin plugin = new PluginFactory().Create(_openLogFilePath);
 
 			if (plugin.CanShowDashboard)
 			{
@@ -2420,8 +2434,7 @@
 		#region Commands: Analysis
 		private void SaveCommentSummary()
 		{
-			var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
-			_engine.GenerateReport(ReportType.CommentSummary, destinationFolder);
+			_engine.GenerateReport(ReportType.CommentSummary, _engine.SourceDirectory);
 		}
 
 		public Task Analyze(AnalysisType analysisType)

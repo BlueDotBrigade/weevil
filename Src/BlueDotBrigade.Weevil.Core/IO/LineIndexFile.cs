@@ -216,7 +216,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </remarks>
 		/// <param name="source">The source made from the saved checksums, in both modes: on disk, the records read their content back through it.</param>
 		/// <returns><see langword="false"/> when the log must be parsed.</returns>
-		public static bool TryLoadTable(string logFilePath, Stream log, LineIndex index, IPlugin plugin, StorageMode storageMode, out RecordTable table, out LogFileSource source)
+		/// <param name="displayPath">The log as the analyst knows it, when it is a copy: see <see cref="LogFileSource.Path"/> (#1312).</param>
+		public static bool TryLoadTable(string logFilePath, Stream log, LineIndex index, IPlugin plugin, StorageMode storageMode, string displayPath, out RecordTable table, out LogFileSource source)
 		{
 			table = null;
 			source = null;
@@ -248,7 +249,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 				indexFile.Position = saved.TableOffset;
 
-				if (!SavedTableReader.TryRead(indexFile, log, System.IO.Path.GetFullPath(logFilePath), parse, index.ContentEncoding, storageMode, out table, out source))
+				if (!SavedTableReader.TryRead(indexFile, log, System.IO.Path.GetFullPath(logFilePath), parse, index.ContentEncoding, storageMode, displayPath, out table, out source))
 				{
 					Log.Default.Write(
 						LogSeverityType.Information,

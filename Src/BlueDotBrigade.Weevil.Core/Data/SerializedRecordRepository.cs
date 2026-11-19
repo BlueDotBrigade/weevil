@@ -31,15 +31,17 @@
 
 		/// <param name="maximumLinesToSearch">Represents the number of lines that will be read while searching for the first record.</param>
 		/// <param name="storageMode">Whether the records keep their content, or read it back from the log, which must then be a file.</param>
-		public SerializedRecordRepository(Stream log, IRecordParser recordParser, int maximumLinesToSearch, StorageMode storageMode = StorageMode.Ram)
-			: this(log, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled, maximumLinesToSearch, storageMode)
+		/// <param name="displayPath">The log as the analyst knows it, when the file is a copy: see <see cref="LogFileSource.Path"/> (#1312).</param>
+		public SerializedRecordRepository(Stream log, IRecordParser recordParser, int maximumLinesToSearch, StorageMode storageMode = StorageMode.Ram, string displayPath = null)
+			: this(log, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled, maximumLinesToSearch, storageMode, displayPath: displayPath)
 		{
 			// nothing to do
 		}
 
 		/// <param name="storageMode">Whether the records keep their content, or read it back from the log, which must then be a file.</param>
 		/// <param name="checksumStartOffset">Where the checksums of the bytes read start, at or before <paramref name="firstRecordByteOffset"/>: by default, there.</param>
-		public SerializedRecordRepository(Stream log, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1)
+		/// <param name="displayPath">The log as the analyst knows it, when the file is a copy: see <see cref="LogFileSource.Path"/> (#1312).</param>
+		public SerializedRecordRepository(Stream log, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1, string displayPath = null)
 		{
 			_log = log;
 			_storageMode = storageMode;
@@ -50,7 +52,7 @@
 				LogSeverityType.Debug,
 				$"Preparing to read records from disk. {nameof(firstRecordByteOffset)}={firstRecordByteOffset}, {nameof(firstRecordLineNumber)}={firstRecordLineNumber}");
 
-			_reader = new LogLineReader(_log, _firstRecordByteOffset, storageMode: storageMode, checksumStartOffset: checksumStartOffset);
+			_reader = new LogLineReader(_log, _firstRecordByteOffset, storageMode: storageMode, checksumStartOffset: checksumStartOffset, displayPath: displayPath);
 			_recordParser = new MultilineRecordParser(
 				_reader,
 				recordParser,

@@ -25,7 +25,11 @@
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
+		// The file read; for a log read from a copy, the copy (#1312).
 		private readonly string _sourceFilePath;
+
+		// The log as the analyst knows it, when the file read is a copy: otherwise null.
+		private readonly string _displayPath;
 		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
 		private readonly StorageMode _storageMode;
@@ -98,6 +102,7 @@
 			ITelemetryMetricRecorder telemetryRecorder,
 			StorageMode storageMode,
 			LogFileSource source,
+			string displayPath,
 			bool hasReadLog)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -117,6 +122,7 @@
 			_source = source;
 
 			_sourceFilePath = sourceFilePath;
+			_displayPath = displayPath;
 			_sourceFileEncoding = sourceFileEncoding;
 
 			_scope = new RecordScope(records);
@@ -251,6 +257,7 @@
 				_telemetryRecorder,
 				_storageMode,
 				source: null,
+				_displayPath,
 				hasReadLog: false);
 
 			// Not a user action, so no telemetry, as when the engine was created.
@@ -318,9 +325,26 @@
 			set { _session.Remarks = value; }
 		}
 
-		public string SourceFilePath => _sourceFilePath;
+		/// <summary>
+		/// The log as the analyst knows it: for a log read from a copy, such as one extracted from a zip, the path given by
+		/// <see cref="CoreEngineBuilder.UsingDisplayPath"/>, otherwise the file read (#1312).
+		/// </summary>
+		public string SourceFilePath => _displayPath ?? _sourceFilePath;
 
+		/// <summary>
+		/// The folder of the file read, where exports, reports and splits are saved: for a log read from a copy, the copy's folder (#1253, #1312).
+		/// </summary>
 		public string SourceDirectory => Path.GetDirectoryName(_sourceFilePath);
+
+		/// <summary>
+		/// The file read, which <see cref="SourceFilePath"/> names as the analyst knows it.
+		/// </summary>
+		internal string FilePath => _sourceFilePath;
+
+		/// <summary>
+		/// The path given by <see cref="CoreEngineBuilder.UsingDisplayPath"/>, which Reload keeps: otherwise <see langword="null"/>.
+		/// </summary>
+		internal string DisplayPath => _displayPath;
 
 		public int InstanceId => _instanceId;
 		#endregion

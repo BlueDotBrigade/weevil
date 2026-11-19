@@ -60,7 +60,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Where the checksums start, at or before <paramref name="startOffset"/>: the start of the block that holds it, so they can follow the checksums
 		/// saved for the log before it (#1023). By default, where reading starts.
 		/// </param>
-		public LogLineReader(Stream log, long startOffset = 0, int chunkSize = DefaultChunkSize, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1)
+		/// <param name="displayPath">The log as the analyst knows it, when the file is a copy: see <see cref="LogFileSource.Path"/> (#1312).</param>
+		public LogLineReader(Stream log, long startOffset = 0, int chunkSize = DefaultChunkSize, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1, string displayPath = null)
 		{
 			_log = log ?? throw new ArgumentNullException(nameof(log));
 			_chunkSize = chunkSize > 0 ? chunkSize : throw new ArgumentOutOfRangeException(nameof(chunkSize), chunkSize, "Value is expected to be greater than zero.");
@@ -85,7 +86,7 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				// The full path, so reads still find the log if the working directory changes. The checksums start after the byte order mark.
 				var checksumStart = checksumStartOffset < 0 ? _bufferOffset : Math.Clamp(checksumStartOffset, preambleLength, _bufferOffset);
-				_sourceBuilder = new LogFileSourceBuilder(file.Name, checksumStart, file.Length);
+				_sourceBuilder = new LogFileSourceBuilder(file.Name, checksumStart, file.Length, displayPath);
 
 				if (checksumStart < _bufferOffset)
 				{
