@@ -28,7 +28,7 @@
 		IFilter ReApply();
 
 		/// <remarks>
-		/// In disk mode, a read of the log that fails throws <see cref="IO.LogFileChangedException"/>, as every read of the log does (#1025, #1295).
+		/// In disk mode, a read of the log that fails throws <see cref="IO.LogFileChangedException"/>, as every read of a record's text does (#1025, #1295).
 		/// Unless the log is <see cref="IO.LogFileChangedException.IsUnreadable"/>, it changed and must be reloaded.
 		/// </remarks>
 		IFilter Apply(FilterType filterType, IFilterCriteria criteria);

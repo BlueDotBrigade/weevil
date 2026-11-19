@@ -1630,7 +1630,9 @@
 			{
 				_unreadableLogGeneration = generation;
 				Log.Default.Write(LogSeverityType.Error, exception, "The log can no longer be read.");
-				_dialogBox.ShowMessage($"Weevil can't read the log.\r\n\r\n{exception.Message}", "Error");
+				// What the read threw, rather than the log's own exception, which repeats the first sentence for the application's log (#1295).
+				var reason = exception is LogFileChangedException { IsUnreadable: true, InnerException: { } cause } ? cause.Message : exception.Message;
+				_dialogBox.ShowMessage($"Weevil can't read the log.\r\n\r\n{reason}", "Error");
 			}
 		}
 

@@ -7,7 +7,7 @@ namespace BlueDotBrigade.Weevil.IO
 	/// A log on disk can no longer be read: it was renamed, deleted, replaced, truncated or corrupted since it was parsed (#1025).
 	/// </summary>
 	/// <remarks>
-	/// Every read of a log on disk that fails throws it, with what the read threw inside, so a caller catches one type (#1295).
+	/// Every read of a record's text from a log on disk that fails throws it, with what the read threw inside, so a caller catches one type (#1295).
 	/// <see cref="IsUnreadable"/> tells a log that is gone from one whose bytes changed, which Reload reads again.
 	/// </remarks>
 	public sealed class LogFileChangedException : IOException

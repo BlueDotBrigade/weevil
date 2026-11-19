@@ -34,7 +34,7 @@ On disk, the reopen still reads the whole log once, to check every 64 KB block a
 
 Every read of the log shares writing and deletion, so Weevil never stops another application from writing, renaming or deleting it (`FileHelper.Open`, #1247). A read that is open, such as a parse, finishes with the data it started with. A later read goes back to the log by its path.
 
-Every read of a log on disk that fails throws one type, `LogFileChangedException`, so a caller, such as a script or a plugin, catches one exception (#1295). `IRecord.Content` says so, and that on disk each read opens the log, so many records are read through a `ContentBuffer`.
+Every read of a record's text from a log on disk that fails throws one type, `LogFileChangedException`, so a caller, such as a script or a plugin, catches one exception (#1295). An open or a Reload still throws the log's own `IOException`, such as `FileNotFoundException`, as it documents. `IRecord.Content` says so, and that on disk each read opens the log, so many records are read through a `ContentBuffer`.
 
 A log that has only grown is normal: the first read that finds it longer logs a warning, and reads go on with the bytes parsed.
 
@@ -45,7 +45,7 @@ A log that was truncated, replaced or corrupted must be reloaded (#1168):
 3. A filter throws the same exception, not an `AggregateException` from its parallel workers, and does not log it as an unexpected error.
 4. The caller shows the warning. Core never reloads by itself: a reader such as a filter worker cannot swap the engine it is reading. The analyst reloads with Ctrl+F5, which calls `Engine.Reload()` (#1247).
 5. Reload deletes the saved index first, with the record table saved with it, because the line index checks only the first and last 4 KB of the log, so it can still match a log changed in the middle. It keeps comments, pins, bookmarks, the filter and the mode, as every Reload does.
-6. If the log changes or goes again before Reload applies the filter, Reload deletes the line index it has just saved, and ends like one that could not read the log: the engine shows the log without records, keeps the filter for the next Reload, and Reload throws what the read threw.
+6. If the log changes or goes again before Reload applies the filter, Reload ends like one that could not read the log: the engine shows the log without records, keeps the filter for the next Reload, and Reload throws what the read threw. If the log changed, Reload also deletes the line index it has just saved.
 
 A log that can no longer be opened, because it was renamed or deleted, or Weevil may no longer read it, throws the same exception with `IsUnreadable` set and what the read threw inside. The first such read logs one warning, and later reads try again, so a log renamed back is read again. It does not set `HasChanged`: Reload could not read the log either.
 
