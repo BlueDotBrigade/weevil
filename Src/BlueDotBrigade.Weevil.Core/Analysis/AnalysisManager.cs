@@ -89,12 +89,12 @@
 					new TimeGapUiAnalyzer(),
 					new OutOfOrderTimestampsAnalyzer(),
 					new DetectDataAnalyzer(filterStrategy, aliasExpander),
-					new FirstOccurrenceAnalyzer(filterStrategy, aliasExpander),
-					new LastOccurrenceAnalyzer(filterStrategy, aliasExpander),
+					new OccurrenceAnalyzer(AnalysisType.FirstOccurrence, filterStrategy, aliasExpander),
+					new OccurrenceAnalyzer(AnalysisType.LastOccurrence, filterStrategy, aliasExpander),
 					new StableValueRunsAnalyzer(filterStrategy, aliasExpander),
 					new StateTransitionsAnalyzer(filterStrategy, aliasExpander),
-					new DetectRisingEdgeAnalyzer(filterStrategy, aliasExpander),
-					new DetectFallingEdgeAnalyzer(filterStrategy, aliasExpander),
+					new DetectEdgeAnalyzer(AnalysisType.DetectRisingEdges, filterStrategy, aliasExpander),
+					new DetectEdgeAnalyzer(AnalysisType.DetectFallingEdges, filterStrategy, aliasExpander),
 					new ThresholdCrossingsAnalyzer(filterStrategy, aliasExpander),
 					new MatchingRecordRunsAnalyzer(filterStrategy, aliasExpander),
 					new StatisticalAnalyzer(filterStrategy, aliasExpander),
@@ -175,7 +175,12 @@
 				? _coreEngine.Selector.GetSelected()
 				: _coreEngine.Filter.Results;
 
-			IRecordAnalyzer analyzer = GetAnalyzers(ComponentType.All).First(x => x.Key == analyzerKey);
+			IList<IRecordAnalyzer> analyzers = GetAnalyzers(ComponentType.All);
+
+			IRecordAnalyzer analyzer = analyzers.FirstOrDefault(x => x.Key == analyzerKey)
+				?? throw new ArgumentException(
+					$"Unable to find the analyzer. Key={analyzerKey}, Available={string.Join(", ", analyzers.Select(x => x.Key))}",
+					nameof(analyzerKey));
 
 			Results results = analyzer.Analyze(
 				records,

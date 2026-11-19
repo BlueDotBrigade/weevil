@@ -1,6 +1,8 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
 	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.IO;
 
 	[TestClass]
 	public class AnalysisManagerTests
@@ -45,6 +47,19 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			engine.Records.Should().HaveCount(expectedCount);
 			engine.Records.Should().NotContain(record => engine.RecordState.IsPinned(record));
+		}
+
+		[TestMethod]
+		public void GivenAnUnknownAnalyzerKey_WhenAnalyzeCalled_ThenTheErrorNamesTheKeyAndListsTheAvailableOnes()
+		{
+			IEngine engine = OpenEngine("ThreeRecords.log");
+
+			Action act = () => engine.Analyzer.Analyze("NoSuchAnalyzer", new UserDialogNotRequired());
+
+			act.Should().Throw<ArgumentException>()
+				.WithMessage("*NoSuchAnalyzer*")
+				.WithMessage($"*{AnalysisType.DetectData}*")
+				.And.ParamName.Should().Be("analyzerKey");
 		}
 
 		private static IEngine OpenEngine(string fileName)

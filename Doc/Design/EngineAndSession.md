@@ -25,7 +25,7 @@ Each is internal to Core, created by its `CoreEngine`, and replaced with it.
 - **Filter** (`FilterManager`, `IFilter`): applies a filter to the scope, keeps the filter and its results, and replaces the view's elapsed times. It reads the bookmarks, regions and filter histories from the session.
 - **Selection** (`SelectionManager`, `ISelect`): the selected records, as ranges of positions in the filter results, and the anchor.
 - **Navigation** (`NavigationManager`, `INavigate`): the active record, a position in the filter results, and the navigators. It reads the table of contents from the session.
-- **Analysis** (`AnalysisManager`, `IAnalyze`): runs an analyzer over the selection when at least two records are selected, otherwise over the results. Unpin All, Remove Comments, Remove All Flags and Flag Only are each one call on a store.
+- **Analysis** (`AnalysisManager`, `IAnalyze`): runs an analyzer over the selection when at least two records are selected, otherwise over the results. An analyzer that reads values with regular expressions derives from `RegularExpressionAnalyzer`, which asks the user for them (#1258). Unpin All, Remove Comments, Remove All Flags and Flag Only are each one call on a store.
 - After each filter, `CoreEngine` moves the selection and the active record to the new results before callers hear of them, because it subscribed to the filter first (#1015).
 
 ## The Session

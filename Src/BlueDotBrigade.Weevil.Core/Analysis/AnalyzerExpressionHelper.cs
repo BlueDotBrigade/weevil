@@ -3,7 +3,6 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
@@ -13,56 +12,6 @@ namespace BlueDotBrigade.Weevil.Analysis
 	/// </summary>
 	internal static class AnalyzerExpressionHelper
 	{
-		/// <summary>
-		/// Parses a raw input string containing one or more regular expressions (optionally using aliases),
-		/// and returns an array of <see cref="RegularExpression"/> objects.
-		/// </summary>
-		/// <param name="rawInput">The raw input string which may contain aliases (prefixed with #) and/or regular expressions separated by ||.</param>
-		/// <param name="aliasExpander">The alias expander used to expand aliases into their full expressions.</param>
-		/// <param name="expressionBuilder">The expression builder used to parse expressions.</param>
-		/// <returns>An immutable array of <see cref="RegularExpression"/> objects parsed from the input.</returns>
-		public static ImmutableArray<RegularExpression> ParseExpressions(
-			string rawInput,
-			IFilterAliasExpander aliasExpander,
-			ExpressionBuilder expressionBuilder)
-		{
-			var results = new List<RegularExpression>();
-
-			if (string.IsNullOrWhiteSpace(rawInput))
-			{
-				return ImmutableArray<RegularExpression>.Empty;
-			}
-
-			// Expand aliases first - this replaces aliases with their full expressions
-			// and preserves the || separators in the output
-			var expandedInput = aliasExpander?.Expand(rawInput) ?? rawInput;
-
-			// Split by || (uses the same delimiter constant as filtering)
-			var segments = expandedInput.Split(
-				new[] { Constants.FilterOrOperator },
-				StringSplitOptions.RemoveEmptyEntries);
-
-			foreach (var segment in segments)
-			{
-				var trimmedSegment = segment.Trim();
-
-				if (string.IsNullOrWhiteSpace(trimmedSegment))
-				{
-					continue;
-				}
-
-				if (expressionBuilder != null && expressionBuilder.TryGetExpression(trimmedSegment, out IExpression expression))
-				{
-					if (expression is RegularExpression regexExpression)
-					{
-						results.Add(regexExpression);
-					}
-				}
-			}
-
-			return results.ToImmutableArray();
-		}
-
 		/// <summary>
 		/// Parses a raw input string and returns all parsed expressions (not just RegularExpression).
 		/// </summary>
@@ -114,23 +63,18 @@ namespace BlueDotBrigade.Weevil.Analysis
 		/// Conflicting values for the same key are treated as ambiguous and ignored for that record.
 		/// </summary>
 		/// <param name="expressions">The expressions to evaluate.</param>
-		/// <param name="record">The record being analyzed.</param>
-		/// <param name="buffer">Reads the record's content. An analyzer passes the same one for every record, so each chunk of a log on disk is read once (#1027).</param>
+		/// <param name="content">The record's content, read once however many expressions test it (#1133).</param>
 		/// <returns>A dictionary containing at most one resolved value per key for the record.</returns>
 		public static Dictionary<string, string> GetResolvedKeyValuePairs(
 			ImmutableArray<RegularExpression> expressions,
-			IRecord record,
-			ContentBuffer buffer)
+			string content)
 		{
 			var resolvedValues = new Dictionary<string, string>();
 			var ambiguousKeys = new HashSet<string>();
 
-			// Read once, however many expressions test the record (#1133).
-			var content = buffer.Read(record).ToString();
-
 			foreach (RegularExpression expression in expressions)
 			{
-				IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record, content);
+				IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(content);
 
 				if (keyValuePairs.Count == 0)
 				{
