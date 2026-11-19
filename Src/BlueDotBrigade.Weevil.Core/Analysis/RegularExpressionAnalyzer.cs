@@ -9,11 +9,12 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using BlueDotBrigade.Weevil.IO;
 
 	/// <summary>
-	/// An analyzer that reads values with regular expressions the user enters, with the include filter's expression as the default.
+	/// An analyzer of the expressions the user enters, with the include filter's expression as the default: regular expressions,
+	/// or any expression for Matching Record Runs.
 	/// </summary>
 	/// <remarks>
 	/// An analyzer reads a row's text with <see cref="RecordList.ReadContent(int, ContentBuffer)"/>, and creates a row's record
-	/// only to flag it or comment on it (#1150, #1258).
+	/// only to flag it or comment on it (#1150, #1258). Matching Record Runs is the exception: its expressions, such as <c>@Pinned</c>, may read the record.
 	/// </remarks>
 	internal abstract class RegularExpressionAnalyzer : IRecordAnalyzer
 	{
@@ -45,6 +46,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		/// <remarks>
 		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
+		/// Flags are cleared for every row before the first is read, so a stopped analysis leaves the rows it did not reach unflagged (#1258).
 		/// </remarks>
 		public abstract Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken);
 
