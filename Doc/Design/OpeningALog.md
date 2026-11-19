@@ -36,7 +36,7 @@ The table's sections are skipped here, so a damaged table costs only the table.
 
 **A full open** (`LineIndexFile.TryLoadTable`, `SavedTableReader`) then reuses the table only when:
 
-- the same plugin name, the same builds (MVIDs) of the plugin, Core and Common, and the same storage mode made it (`SavedParse.IsSameParser`);
+- the same plugin name, and the same builds (MVIDs) of the plugin, Core and Common, made it (`SavedParse.IsSameParser`). So did the same storage mode, unless the log is UTF-8, or UTF-16 in the computer's byte order, whose table is the same in both modes (#1296);
 - the `.idx`, read again through a handle kept open, still holds that parse: another instance of Weevil may have replaced it;
 - the table's sections pass their checksums and their own consistency checks;
 - every 64 KB block of the log that was parsed matches its saved checksum. This finds a change in the middle that keeps the log's length, which the line index cannot see.
@@ -61,12 +61,12 @@ The table's sections are skipped here, so a damaged table costs only the table.
   - A start line (`Engine.UsingPath(path, line)`) starts reading at the line's byte offset, from the line index (#977).
   - Without a start line, a range (`UsingRange`), region (`UsingRegion`, #1213) or section (`UsingSection`, #1212) reads from the top. Each stops after its last line. A limit (`UsingLimit`) stops after that many records.
   - It trusts the line index on its head and tail hashes alone, so it cannot see a change in the middle of the log.
-- **RAM and disk** (#1025): both modes compute each block's checksum while parsing, and save `.idx` files of the same format. But a table is reused only in the mode that saved it: switching modes parses again, and replaces the table. Only disk mode keeps a `LogFileSource` once open, which checks every block it reads back ([DiskMode.md](DiskMode.md#reading-a-log-on-disk)).
+- **RAM and disk** (#1025): both modes compute each block's checksum while parsing, and save `.idx` files of the same format. For UTF-8, and UTF-16 in the computer's byte order, both modes make the same table: its rows keep the log's bytes, and a string only for text a plugin changed. So a reopen in the other mode reuses it, through its own mode's path (#1296). For UTF-16 in the other byte order and UTF-32, RAM keeps a string for each record, so switching modes parses again, and replaces the table. Only disk mode keeps a `LogFileSource` once open, which checks every block it reads back ([DiskMode.md](DiskMode.md#reading-a-log-on-disk)).
 
 ## Stale or Broken Files
 
 - **An `.idx` that `LineIndex.TryRead` rejects,** or cannot read, is rebuilt from a scan of the log, and saved without a table.
-- **A table from another parser, build or mode** is ignored. The log is parsed, and its table replaces the saved one.
+- **A table from another parser or build,** or from the other mode for a log RAM keeps as strings, is ignored. The log is parsed, and its table replaces the saved one.
 - **A damaged table, or a block that changed,** rejects the table, and the log is parsed. When the bytes parsed differ from those of the saved parse, the log changed in the middle, so `SaveParse` rebuilds the line index before saving it. An `.idx` saved only by partial opens has no parse to compare with, so there such a change goes unseen.
 - **An `.idx` that cannot be saved** costs only a warning. It is written to `.idx.tmp`, then moved over the `.idx`, so it is never left half-written.
 - **A log that changes once open:** on disk, the next read throws `LogFileChangedException` ([DiskMode.md](DiskMode.md#a-log-that-changed)). In RAM, nothing reads the log once it is open: the next open or Reload reads it as it is then. The CLI and PowerShell check after each command whether it is gone or shorter (`EngineExtensions.RunOnce`).

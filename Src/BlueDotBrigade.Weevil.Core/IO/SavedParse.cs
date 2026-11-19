@@ -14,7 +14,9 @@ namespace BlueDotBrigade.Weevil.IO
 	/// - the same plugin, in the same build, identified by its assembly's MVID, since every build of a release has the same version;
 	/// - the same build of Weevil: of Core, whose parser joins continuation lines, and of Common, which holds the records and chunks the table is made of.
 	///   An MVID is a hash of the assembly's compiled output, which holds its file version, and every build stamps a new one: each build parses again;
-	/// - the same storage mode, because some encodings keep strings in RAM and bytes on disk.
+	/// - the same storage mode, only for a log that does not decode quickly, whose records keep strings in RAM and bytes on disk.
+	///   UTF-8, and UTF-16 in this computer's byte order, make the same table in both modes, so it is reused in the other mode,
+	///   which reopens it through its own path (#1296). Text a plugin changed keeps a string in both modes.
 	/// The Open As context is not part of it: the sidecar keeps it, and it never reaches the parser (decided 2026-11-13).
 	/// The checksums say whether the log is still the one parsed.
 	/// </remarks>
@@ -85,9 +87,12 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// Whether a parse by <paramref name="plugin"/> in <paramref name="storageMode"/>, with this build of Weevil, would be this parse.
+		/// Whether a parse by <paramref name="plugin"/> in <paramref name="storageMode"/>, with this build of Weevil, would make this parse's table.
 		/// </summary>
-		public bool IsSameParser(IPlugin plugin, StorageMode storageMode)
+		/// <param name="isQuickToDecode">
+		/// The log is UTF-8, or UTF-16 in this computer's byte order (<see cref="LineIndex.IsQuickToDecode(int, bool)"/>), so its table is the same in both modes.
+		/// </param>
+		public bool IsSameParser(IPlugin plugin, StorageMode storageMode, bool isQuickToDecode)
 		{
 			ArgumentNullException.ThrowIfNull(plugin);
 
@@ -95,7 +100,7 @@ namespace BlueDotBrigade.Weevil.IO
 			       this.PluginBuildId == GetBuildId(plugin.GetType()) &&
 			       this.CoreBuildId == GetBuildId(typeof(SavedParse)) &&
 			       this.CommonBuildId == GetBuildId(typeof(Record)) &&
-			       this.StorageMode == storageMode;
+			       (isQuickToDecode || this.StorageMode == storageMode);
 		}
 
 		/// <summary>
