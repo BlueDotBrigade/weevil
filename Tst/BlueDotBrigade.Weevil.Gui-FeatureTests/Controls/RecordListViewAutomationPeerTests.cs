@@ -66,7 +66,9 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 		{
 			RecordList results = R.WithLineNumbers(1, 3);
 			var selector = Substitute.For<ISelect>();
-			selector.Selected.Returns(new Dictionary<int, IRecord> { [selectedLineNumber] = results[selectedLineNumber - 1] });
+			selector.SelectedCount.Returns(1);
+			selector.IsSelected(Arg.Any<int>()).Returns(call => call.Arg<int>() == selectedLineNumber);
+			selector.GetSelected().Returns((RecordList)ImmutableArray.Create(results[selectedLineNumber - 1]));
 			var grid = new RecordListView { ItemsSource = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake()) };
 
 			return (RecordListViewAutomationPeer)UIElementAutomationPeer.CreatePeerForElement(grid);

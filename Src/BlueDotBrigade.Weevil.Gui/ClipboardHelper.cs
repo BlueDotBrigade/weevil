@@ -30,8 +30,7 @@
 				{
 					selectedItems = engine
 						.Selector
-						.Selected
-						.Values
+						.GetSelected()
 						.Select(r => r.LineNumber + Delimiter + formatter.Format(r))
 						.ToArray();
 				}
@@ -39,8 +38,7 @@
 				{
 					selectedItems = engine
 						.Selector
-						.Selected
-						.Values
+						.GetSelected()
 						.Select(r => formatter.Format(r)).ToArray();
 				}
 
@@ -54,15 +52,17 @@
 		{
 			if (engine == null) throw new ArgumentNullException(nameof(engine));
 
-			IDictionary<int, IRecord> selected = engine.Selector.Selected;
+			RecordList selected = engine.Selector.GetSelected();
 			var output = new StringBuilder();
 
 			// Walks the selected line numbers, so only a record with a comment is created (#1139).
-			foreach (var lineNumber in selected.Keys)
+			for (var position = 0; position < selected.Count; position++)
 			{
+				var lineNumber = selected.GetLineNumber(position);
+
 				if (engine.Annotations.HasComment(lineNumber))
 				{
-					IRecord record = selected[lineNumber];
+					IRecord record = selected[position];
 
 					var timestamp = record.HasCreationTime
 						? record.CreatedAt.ToString(ShortTimestampFormat, CultureInfo.InvariantCulture)
@@ -94,7 +94,7 @@
 			if (engine == null) throw new ArgumentNullException(nameof(engine));
 			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
 
-			IRecord[] selectedRecords = engine.Selector.Selected.Values.ToArray();
+			RecordList selectedRecords = engine.Selector.GetSelected();
 
 			var output = new StringBuilder();
 
@@ -117,7 +117,7 @@
 
 		internal static void PasteToSelected(IEngine engine, bool allowOverwrite = false)
 		{
-			if (engine != null && engine.Selector.Selected.Count > 0 && Clipboard.ContainsText())
+			if (engine != null && engine.Selector.SelectedCount > 0 && Clipboard.ContainsText())
 			{
 				engine.Selector.SetComment(Clipboard.GetText(), allowOverwrite);
 			}

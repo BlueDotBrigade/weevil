@@ -783,7 +783,7 @@ namespace BlueDotBrigade.Weevil
 
 			engine.Reload();
 
-			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 7, 8, 9);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(1, 2, 3, 7, 8, 9);
 		}
 
 		[TestMethod]
@@ -801,7 +801,7 @@ namespace BlueDotBrigade.Weevil
 
 			engine.Reload();
 
-			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 4, 6, 7, 8);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(1, 2, 3, 4, 6, 7, 8);
 		}
 
 		[TestMethod]

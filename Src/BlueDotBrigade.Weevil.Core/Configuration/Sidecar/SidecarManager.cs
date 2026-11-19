@@ -8,7 +8,7 @@
 	using IO;
 	using Navigation;
 
-	public class SidecarManager : IPersist
+	internal class SidecarManager : IPersist
 	{
 		private const string MetadataFileExtension = "xml";
 

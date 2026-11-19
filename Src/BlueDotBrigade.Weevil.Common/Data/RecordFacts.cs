@@ -6,21 +6,20 @@ namespace BlueDotBrigade.Weevil.Data
 	/// What a parser found about a record, in one byte: the severity in the low bits, then one bit per flag (#1138).
 	/// </summary>
 	/// <remarks>
-	/// Defined once for <see cref="Record"/> and the record table, and later the saved index (#1023).
+	/// Defined once for <see cref="Record"/>, the record table and the saved index (#1023).
+	/// The three high bits are never set, so a store of facts can keep a bit of its own there, as Core's record table does (#1293).
 	/// </remarks>
 	public readonly struct RecordFacts
 	{
 		private const byte SeverityMask = 0b0000_0111;
 		private const byte MultiLineFlag = 0b0000_1000;
 		private const byte UserInterfaceThreadFlag = 0b0001_0000;
-		private const byte KeepsStringFlag = 0b0010_0000;
 
 		private readonly byte _value;
 
 		/// <param name="isMultiLine">The record spans several lines of the log.</param>
 		/// <param name="wasGeneratedByUi">The record was written by the application's user interface thread.</param>
-		/// <param name="keepsString">The record keeps its content as a string, rather than as the log's bytes.</param>
-		public RecordFacts(SeverityType severity, bool isMultiLine, bool wasGeneratedByUi, bool keepsString = false)
+		public RecordFacts(SeverityType severity, bool isMultiLine, bool wasGeneratedByUi)
 		{
 			if ((uint)severity > SeverityMask)
 			{
@@ -29,8 +28,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 			_value = (byte)((byte)severity
 				| (isMultiLine ? MultiLineFlag : 0)
-				| (wasGeneratedByUi ? UserInterfaceThreadFlag : 0)
-				| (keepsString ? KeepsStringFlag : 0));
+				| (wasGeneratedByUi ? UserInterfaceThreadFlag : 0));
 		}
 
 		public SeverityType Severity => (SeverityType)(_value & SeverityMask);
@@ -38,8 +36,6 @@ namespace BlueDotBrigade.Weevil.Data
 		public bool IsMultiLine => (_value & MultiLineFlag) != 0;
 
 		public bool WasGeneratedByUi => (_value & UserInterfaceThreadFlag) != 0;
-
-		public bool KeepsString => (_value & KeepsStringFlag) != 0;
 
 		/// <summary>
 		/// The facts in one byte, as the saved index keeps them (#1023).
@@ -51,7 +47,7 @@ namespace BlueDotBrigade.Weevil.Data
 		/// </summary>
 		public static bool TryFromValue(byte value, out RecordFacts facts)
 		{
-			const byte KnownBits = SeverityMask | MultiLineFlag | UserInterfaceThreadFlag | KeepsStringFlag;
+			const byte KnownBits = SeverityMask | MultiLineFlag | UserInterfaceThreadFlag;
 
 			// The same values the constructor accepts, so a table a parser made always reads back.
 			if ((value & ~KnownBits) != 0)

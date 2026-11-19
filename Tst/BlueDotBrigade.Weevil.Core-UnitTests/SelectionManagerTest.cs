@@ -50,7 +50,7 @@
 			Action act = () => engine.Selector.Select(lineNumber: int.MaxValue);
 			act.Should().Throw<RecordNotFoundException>();
 
-			engine.Selector.Selected.Count.Should().Be(0);
+			engine.Selector.SelectedCount.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -64,7 +64,7 @@
 			Action act = () => engine.Selector.Select(lineNumber: 1);
 
 			act.Should().Throw<RecordNotFoundException>();
-			engine.Selector.Selected.Count.Should().Be(0);
+			engine.Selector.SelectedCount.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -80,7 +80,7 @@
 			Action act = () => engine.Selector.Unselect(lineNumber: 1);
 
 			act.Should().Throw<RecordNotFoundException>();
-			engine.Selector.Selected.Keys.Should().Equal(shownLineNumber);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(shownLineNumber);
 		}
 
 		[TestMethod]
@@ -92,7 +92,7 @@
 
 			selector.SelectOnly(2, 6);
 
-			selector.Selected.Keys.Should().Equal(3, 5);
+			selector.GetSelected().Select(record => record.LineNumber).Should().Equal(3, 5);
 		}
 
 		[TestMethod]
@@ -104,7 +104,7 @@
 
 			selector.SelectOnly(100, 200);
 
-			selector.Selected.Count.Should().Be(0);
+			selector.SelectedCount.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -117,7 +117,25 @@
 			Action toggle = () => selector.Toggle(2);
 
 			toggle.Should().Throw<RecordNotFoundException>();
-			selector.Selected.Count.Should().Be(0);
+			selector.SelectedCount.Should().Be(0);
+		}
+
+		[TestMethod]
+		public void GivenSelectedRecords_WhenTheirLinesAreLookedUp_ThenNoRecordIsCreated()
+		{
+			// A grid asks for each row it draws, so a lookup reads only the results' line numbers (#1137); the list throws if a record is created.
+			RecordList records = R.WithLineNumbers(11, 20);
+			var state = new RecordState();
+
+			// Selecting moves the active record, which is a record: only the selector reads the list that refuses to create one.
+			var navigationManager = new NavigationManager(null, null, records, null, state);
+			var selector = new SelectionManager(new RecordScope(records), new ColumnsOnlyRecordList(records), navigationManager, Encoding.UTF8, state, () => { });
+			selector.SelectOnly(12, 13);
+
+			selector.SelectedCount.Should().Be(2);
+			selector.IsSelected(13).Should().BeTrue();
+			selector.IsSelected(14).Should().BeFalse();
+			selector.IsSelected(99).Should().BeFalse();
 		}
 
 		private static SelectionManager CreateSelector(RecordList records)

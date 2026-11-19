@@ -38,9 +38,9 @@ namespace BlueDotBrigade.Weevil.Data
 			builder.Add(2, Start, new RecordFacts(SeverityType.Error, isMultiLine: true, wasGeneratedByUi: false), "Kept as a string");
 			RecordTable table = builder.Build();
 
-			// How the table keeps the content is not a fact about the record (#1150).
-			table.GetFacts(0).Should().BeEquivalentTo(new { Severity = SeverityType.Information, IsMultiLine = false, WasGeneratedByUi = true, KeepsString = false });
-			table.GetFacts(1).Should().BeEquivalentTo(new { Severity = SeverityType.Error, IsMultiLine = true, WasGeneratedByUi = false, KeepsString = false });
+			// How the table keeps the content is not a fact about the record (#1150, #1293): its own bit is left out.
+			table.GetFacts(0).Should().Be(new RecordFacts(SeverityType.Information, isMultiLine: false, wasGeneratedByUi: true));
+			table.GetFacts(1).Should().Be(new RecordFacts(SeverityType.Error, isMultiLine: true, wasGeneratedByUi: false));
 		}
 
 		[TestMethod]

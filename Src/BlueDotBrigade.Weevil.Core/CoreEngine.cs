@@ -414,7 +414,7 @@
 				{
 					{ "ClearOperation", clearOperation },
 					{ "RecordsKept", kept.Count },
-					{ "SelectedRecordsKept", _selectionManager.Selected.Count },
+					{ "SelectedRecordsKept", _selectionManager.SelectedCount },
 				});
 
 			return kept.Count < records.Count;

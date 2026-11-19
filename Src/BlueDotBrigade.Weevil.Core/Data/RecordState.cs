@@ -11,7 +11,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// It only forwards to the stores, which keep their own locks. Bulk changes go to the stores directly,
 	/// so many lines change under one lock with one event.
 	/// </remarks>
-	public sealed class RecordState : IRecordState
+	internal sealed class RecordState : IRecordState
 	{
 		private ElapsedTimes _elapsedTimes = ElapsedTimes.None;
 

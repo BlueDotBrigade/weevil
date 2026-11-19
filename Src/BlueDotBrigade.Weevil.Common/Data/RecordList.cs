@@ -58,9 +58,6 @@ namespace BlueDotBrigade.Weevil.Data
 		/// Returns what the parser found about the record at <paramref name="position"/>: its severity, whether it spans several lines
 		/// and whether the UI thread wrote it, without creating the record (#1150).
 		/// </summary>
-		/// <remarks>
-		/// <see cref="RecordFacts.KeepsString"/> is always <see langword="false"/>: how a list keeps a record's content is not a fact about the record.
-		/// </remarks>
 		public abstract RecordFacts GetFacts(int position);
 
 		IRecord IList<IRecord>.this[int index]

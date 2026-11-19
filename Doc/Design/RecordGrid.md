@@ -46,7 +46,7 @@ Comments and pins follow decision 4: a row learns of a change later, and the thr
 4. On the UI thread, the list takes the queue and the rows still held, then refreshes them outside its lock, because the bindings read the store. More than 1,000 changes, or one change to many lines, refresh every row still held, once.
 5. `RowViewModel.Refresh` ignores the row's own writes, and raises `Comment` only when the store's comment differs from the one shown. The comment box sends its text 250 ms after the last key, so reading it back could erase text still being typed.
 
-The selection has no Core event. The GUI changes it on the UI thread, through `RowSelection`, then calls `RowList.RefreshSelection`. That updates `IsSelected` on the rows still held, and raises `SelectionRefreshed` with those that changed, which the grid passes on to screen readers (#1075). A new row reads `IsSelected` from `ISelect.Selected`.
+The selection has no Core event. The GUI changes it on the UI thread, through `RowSelection`, then calls `RowList.RefreshSelection`. That updates `IsSelected` on the rows still held, and raises `SelectionRefreshed` with those that changed, which the grid passes on to screen readers (#1075). A new row reads `IsSelected` from `ISelect.IsSelected`, a binary search of the results' line numbers that creates no record.
 
 Bookmarks and regions are not on the row: when they change, `FilterView` calls `Items.Refresh()`, which replaces the controls of the rows on screen.
 
