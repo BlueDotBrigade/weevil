@@ -14,6 +14,13 @@ namespace BlueDotBrigade.Weevil.Filter
 		// #1089 compares with Weevil 2.12.1, whose times on the reference machine are not measured yet.
 		private static readonly TimeSpan MaximumDuration = TimeSpan.FromSeconds(10);
 
+		// Measured on 2026-11-19, in a Debug build on 4 cores, for one plain filter of the UTF-8 droid log: 49.0 bytes per record in RAM, almost all
+		// the 48-byte Record each filter creates per row (#1140), and 56.2 on disk, which adds a chunk buffer per core (#1269). The GC reclaims both.
+		private const double MaximumBytesAllocatedPerRecord = 55;
+
+		// A chunk buffer: a 16 MB chunk and a 1/16 margin (#1269).
+		private const long ChunkBufferBytes = 17L * 1024 * 1024;
+
 		public TestContext TestContext { get; set; } = null!;
 
 		[TestMethod]
@@ -46,13 +53,31 @@ namespace BlueDotBrigade.Weevil.Filter
 			var inRam = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Ram).Open());
 			var onDisk = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open());
 
-			// A buffer per core, of a 16 MB chunk and a 1/16 margin, plus one buffer of margin.
+			// A buffer per core, plus one buffer of margin.
 			// The old code allocated about 1 GB on this log, so on more than about 48 cores the budget no longer tells them apart.
-			const long ChunkBytes = 17L * 1024 * 1024;
-			var budget = (Environment.ProcessorCount + 1) * ChunkBytes;
+			var budget = (Environment.ProcessorCount + 1) * ChunkBufferBytes;
 			this.TestContext.WriteLine($"Allocated {inRam / 1_048_576.0:N0} MB in RAM and {onDisk / 1_048_576.0:N0} MB on disk; the budget for the difference is {budget / 1_048_576.0:N0} MB.");
 
 			(onDisk - inRam).Should().BeLessThan(budget);
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenADroidLog_WhenFiltered_ThenTheMemoryAllocatedPerRecordStaysWithinBudget(StorageMode storageMode)
+		{
+			// The budget tests measured only what a log keeps once open; nothing guarded what a filter needs on top (#1259).
+			IEngine engine = Engine.UsingPath(DroidLog.GetPath(DroidLog.Utf8)).UsingStorage(storageMode).Open();
+
+			var allocated = MeasureFilterAllocations(engine);
+
+			// On disk, a filter also allocates a chunk buffer per core, and one of margin, whatever the log's size.
+			var buffers = storageMode == StorageMode.Disk ? (Environment.ProcessorCount + 1) * ChunkBufferBytes : 0;
+			var bytesPerRecord = (allocated - buffers) / (double)engine.Count;
+			this.TestContext.WriteLine($"Storage: {storageMode}. Cores: {Environment.ProcessorCount}. One filter allocated {allocated / 1_048_576.0:N0} MB: {allocated / (double)engine.Count:N1} bytes per record, {bytesPerRecord:N1} besides the buffers.");
+
+			bytesPerRecord.Should().BeLessThanOrEqualTo(MaximumBytesAllocatedPerRecord, "a filter should not allocate noticeably more per record than it does today");
 		}
 
 		[TestMethod]
