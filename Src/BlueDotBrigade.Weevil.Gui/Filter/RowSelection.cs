@@ -67,7 +67,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var lineNumber = rows.LineNumberAt(position);
 
 			if ((modifiers & (ModifierKeys.Shift | ModifierKeys.Control)) == ModifierKeys.None &&
-				!this.Selector.Selected.ContainsKey(lineNumber))
+				!this.Selector.IsSelected(lineNumber))
 			{
 				this.Selector.SelectOnly(lineNumber, lineNumber);
 			}

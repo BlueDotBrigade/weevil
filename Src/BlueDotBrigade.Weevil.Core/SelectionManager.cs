@@ -71,15 +71,31 @@
 		#endregion
 
 		#region Properties
-		public IDictionary<int, IRecord> Selected
+		public int SelectedCount
 		{
 			get
 			{
 				lock (_selectionPadlock)
 				{
-					return new SelectedRecords(_selection, _visibleRecords);
+					return _selection.Count;
 				}
 			}
+		}
+
+		public bool IsSelected(int lineNumber)
+		{
+			PositionRanges selection;
+			RecordList visibleRecords;
+
+			lock (_selectionPadlock)
+			{
+				selection = _selection;
+				visibleRecords = _visibleRecords;
+			}
+
+			// Both are immutable, so the search needs no lock.
+			var position = FindPosition(visibleRecords, lineNumber);
+			return position >= 0 && selection.Contains(position);
 		}
 
 		public bool HasSelectionPeriod => _selection.Count >= 2;

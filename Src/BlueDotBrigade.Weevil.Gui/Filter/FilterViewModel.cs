@@ -1245,7 +1245,7 @@
 		/// <param name="advice">What to do instead.</param>
 		private bool IsWithinClipboardLimit(string action, string advice)
 		{
-			var count = _engine.Selector.Selected.Count;
+			var count = _engine.Selector.SelectedCount;
 
 			if (count > ClipboardLimit)
 			{
@@ -1645,7 +1645,7 @@
 				return;
 			}
 
-			var recordsDescription = _engine.Selector.Selected.Count.ToString("N0");
+			var recordsDescription = _engine.Selector.SelectedCount.ToString("N0");
 
 			if (!_dialogBox.TryGetExpressions(_inclusiveFilter, recordsDescription, out var confirmedFilter))
 			{
@@ -2135,7 +2135,7 @@
 			try
 			{
 				// The count first, so a large selection creates no records (#1139).
-				IRecord selectedRecord = _engine.Selector.Selected.Count == 1 ? _engine.Selector.GetSelected()[0] : null;
+				IRecord selectedRecord = _engine.Selector.SelectedCount == 1 ? _engine.Selector.GetSelected()[0] : null;
 				if (selectedRecord == null)
 				{
 					MessageBox.Show("A single record must be selected.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -2886,7 +2886,7 @@
 
 			_bulletinMediator.Post(new FilterChangedBulletin
 			{
-				SelectedRecordCount = _engine.Selector.Selected.Count,
+				SelectedRecordCount = _engine.Selector.SelectedCount,
 				VisibleRecordCount = this.VisibleItems?.Count ?? 0,
 				SeverityMetrics = _engine.Filter.GetMetrics(),
 				ExecutionTime = _engine.Filter.FilterExecutionTime,
@@ -2898,16 +2898,18 @@
 
 		private static SelectionChangedBulletin BuildSelectionChangedBulletin(ICoreEngine coreEngine)
 		{
-			var selectedItemCount = coreEngine.Selector.Selected.Count;
+			// One read of the selection, so the count and the first line agree.
+			RecordList selected = coreEngine.Selector.GetSelected();
+			var selectedItemCount = selected.Count;
 			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
 
 			var lineNumber = 0;
 			var sectionName = string.Empty;
 			var regionName = string.Empty;
 
-			if (coreEngine.Selector.Selected.Count > 0)
+			if (selected.Count > 0)
 			{
-				lineNumber = coreEngine.Selector.Selected.Keys.First();
+				lineNumber = selected.GetLineNumber(0);
 
 				coreEngine.Navigate.TableOfContents.TryGetSectionName(lineNumber, out sectionName);
 				coreEngine.Regions.TryGetRegionName(lineNumber, out regionName);
@@ -2936,7 +2938,8 @@
 				{
 					if (_dialogBox.TryShowUserPrompt("Create Region", "Name", @"^[a-zA-Z0-9\-]{1,12}$", "Must be 1 to 12 characters: letters, numbers, or hyphens.", out var regionName))
 					{
-						var selectedLineNumbers = _engine.Selector.Selected.Keys.ToArray();
+						RecordList selected = _engine.Selector.GetSelected();
+						var selectedLineNumbers = Enumerable.Range(0, selected.Count).Select(selected.GetLineNumber).ToArray();
 						_engine.Regions.CreateFromSelection(regionName, selectedLineNumbers);
 						RaiseRegionsChanged();
 						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
@@ -2951,9 +2954,9 @@
 
 		private void RemoveRegion()
 		{
-			if (_engine.Selector.Selected.Count == 1)
+			if (_engine.Selector.SelectedCount == 1)
 			{
-				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+				var selectedLineNumber = _engine.Selector.GetSelected().GetLineNumber(0);
 
 				_engine.Regions.Clear(selectedLineNumber);
 				RaiseRegionsChanged();
@@ -2983,9 +2986,9 @@
 
 		private void RemoveBookmark()
 		{
-			if (_engine.Selector.Selected.Count == 1)
+			if (_engine.Selector.SelectedCount == 1)
 			{
-				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+				var selectedLineNumber = _engine.Selector.GetSelected().GetLineNumber(0);
 
 				_engine.Bookmarks.Clear(selectedLineNumber);
 				RaiseBookmarksChanged();
@@ -2999,9 +3002,9 @@
 
 		private void RenameBookmark()
 		{
-			if (_engine.Selector.Selected.Count == 1)
+			if (_engine.Selector.SelectedCount == 1)
 			{
-				var selectedLineNumber = _engine.Selector.Selected.Single().Value.LineNumber;
+				var selectedLineNumber = _engine.Selector.GetSelected().GetLineNumber(0);
 
 				if (_engine.Bookmarks.TryGetBookmark(selectedLineNumber, out var bookmark))
 				{
@@ -3049,9 +3052,9 @@
 		{
 			try
 			{
-				if (_engine.Selector.Selected.Count == 1)
+				if (_engine.Selector.SelectedCount == 1)
 				{
-					var selectedRecord = _engine.Selector.Selected.Single().Value;
+					var selectedRecord = _engine.Selector.GetSelected()[0];
 					var selectedLineNumber = selectedRecord.LineNumber;
 
 					var defaultName = selectedRecord.HasCreationTime

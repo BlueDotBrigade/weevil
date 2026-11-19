@@ -182,19 +182,19 @@ internal sealed class FilteringSteps : ReqnrollSteps
 	[Then($"{X.WholeNumber} records will be selected")]
 	public void ThenRecordsWillBeSelected(int count)
 	{
-		this.Context.Engine.Selector.Selected.Count.Should().Be(count);
+		this.Context.Engine.Selector.SelectedCount.Should().Be(count);
 	}
 
 	[Then($"line number {X.WholeNumber} will be selected")]
 	public void ThenLineNumberWillBeSelected(int lineNumber)
 	{
-		this.Context.Engine.Selector.Selected.ContainsKey(lineNumber).Should().BeTrue();
+		this.Context.Engine.Selector.IsSelected(lineNumber).Should().BeTrue();
 	}
 
 	[Then($"line number {X.WholeNumber} will not be selected")]
 	public void ThenLineNumberWillNotBeSelected(int lineNumber)
 	{
-		this.Context.Engine.Selector.Selected.ContainsKey(lineNumber).Should().BeFalse();
+		this.Context.Engine.Selector.IsSelected(lineNumber).Should().BeFalse();
 	}
 
 	[Then($"the selection period will be {X.WholeNumber} seconds")]

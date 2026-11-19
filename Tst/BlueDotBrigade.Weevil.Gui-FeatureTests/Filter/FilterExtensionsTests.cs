@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			Func<Task> filter = () => engine.FilterAsync(FilterType.RegularExpression, new FilterCriteria("Record ("), CancellationToken.None);
 
 			await filter.Should().ThrowAsync<Exception>();
-			engine.Selector.Selected.Keys.Should().Equal(2, 3, 4);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(2, 3, 4);
 		}
 
 		[TestMethod]
@@ -48,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var wasFiltered = await engine.FilterAsync(FilterType.PlainText, new FilterCriteria("Record 3"), CancellationToken.None);
 
 			wasFiltered.Should().BeTrue();
-			engine.Selector.Selected.Keys.Should().Equal(3);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(3);
 		}
 	}
 }

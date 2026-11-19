@@ -16,7 +16,18 @@
 	/// </remarks>
 	public interface ISelect
 	{
-		IDictionary<int, IRecord> Selected { get; }
+		/// <summary>
+		/// The number of selected records.
+		/// </summary>
+		int SelectedCount { get; }
+
+		/// <summary>
+		/// Returns <see langword="true"/> when the record on <paramref name="lineNumber"/> is selected.
+		/// </summary>
+		/// <remarks>
+		/// A binary search of the filter results' line numbers, which creates no record, so a grid can ask for each row it draws (#1137).
+		/// </remarks>
+		bool IsSelected(int lineNumber);
 		bool HasSelectionPeriod { get; }
 
 		/// <summary>
@@ -85,6 +96,12 @@
 		/// </remarks>
 		/// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
 		ISelect SaveSelection(string destinationFilePath, FileFormatType fileFormatType, System.Threading.CancellationToken cancellationToken);
+		/// <summary>
+		/// Returns the selected records, in the order of the filter results.
+		/// </summary>
+		/// <remarks>
+		/// The list copies neither the results nor the selection (#1140). <see cref="RecordList.GetLineNumber"/> reads a line number without creating a record.
+		/// </remarks>
 		RecordList GetSelected();
 		void ToggleIsPinned();
 
