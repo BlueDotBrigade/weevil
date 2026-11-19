@@ -32,10 +32,12 @@ Each is internal to Core, created by its `CoreEngine`, and replaced with it.
 
 `Session` (Core, internal) holds what the user changes in a log:
 
-- **Annotations:** comments and pins, in an `AnnotationStore` (Common): a byte per line and a dictionary of comments. Adding a comment pins its line; removing it unpins the line.
+- **Annotations:** comments and pins, in an `AnnotationStore`: a byte per line and a dictionary of comments. Adding a comment pins its line; removing it unpins the line.
 - **Bookmarks** and **regions:** `BookmarkManager` and `RegionManager`.
 - **Filter history:** an include and an exclude `FilterHistory`, newest first, at most 32 values each. Only the filter adds to them; callers read them as `IReadOnlyList<string>` (#1109).
 - **Remarks** about the whole log, and the **table of contents**.
+
+`AnnotationStore`, `FlagSet` and `RecordState` are internal to Core, so only Core can load them without their rules or events, or clear every flag (#1293). Callers reach them through `IAnnotations` and `IRecordState`, in Common.
 
 It is created when a log opens, sized from the line index, and loaded from the sidecar. Clear and Reload keep it, so Reload keeps unsaved bookmarks, regions, remarks and history, as it keeps comments and pins (#1107).
 

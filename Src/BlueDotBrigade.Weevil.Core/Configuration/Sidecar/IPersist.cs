@@ -4,7 +4,7 @@
 	using Data;
 	using Navigation;
 
-	public interface IPersist
+	internal interface IPersist
 	{
 		/// <param name="annotations">Receives every saved comment and pin, or <see langword="null"/> to leave them out.</param>
 		void Load(

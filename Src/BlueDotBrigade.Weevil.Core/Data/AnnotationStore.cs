@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// Writes are serialized by one lock. Reads never wait, so filters can read from many threads.
 	/// <see cref="Changed"/> is raised after the lock is released.
 	/// </remarks>
-	public sealed class AnnotationStore : IAnnotations
+	internal sealed class AnnotationStore : IAnnotations
 	{
 		// One byte per line.
 		private const byte PinnedBit = 0b01;
