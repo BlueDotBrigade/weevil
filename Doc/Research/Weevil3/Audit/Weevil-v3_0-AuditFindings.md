@@ -1,6 +1,6 @@
 # Weevil 3.0 Audit: Findings
 
-An independent audit of the three 3.0 epics: #986 disk mode, #988 less memory and #990 immutable core. 2026-11-17, `main` at `e3dee822`. Updated 2026-11-18 with the fixes merged and the owner's decisions since.
+An independent audit of the three 3.0 epics: #986 disk mode, #988 less memory and #990 immutable core. 2026-11-17, `main` at `e3dee822`. Updated 2026-11-19 with the fixes merged and the owner's decisions since.
 
 ## Summary
 
@@ -15,7 +15,7 @@ An independent audit of the three 3.0 epics: #986 disk mode, #988 less memory an
 
 ## The Epics
 
-- **#990 Immutable core: done.** Records hold no state, and the selection lives in Core. One regression: #1246.
+- **#990 Immutable core: done.** Records hold no state, and the selection lives in Core. Its one regression, #1246, is fixed.
 - **#988 Less memory: done.** A log takes 1.16 GB of RAM per GB, not 3.03 GB as in 2.12.1, and a reopen skips the parse.
 - **#986 Disk mode: mostly done.** It works, and gives the same results as RAM. Still open: the 20 GB test (#1024) and the Open As dialog (#1157).
 
@@ -31,12 +31,11 @@ Fixed:
 - #1251 Closing the Open As dialog during a zip extraction leaves a full copy of the log in %TEMP%
 - #1269 A filter on a log opened on disk allocates a new 16 MB buffer again and again, so it can run out of memory
 - #998 Go to Record doesn't show an insight's record when the filter hides it (existing)
-
-Open:
-
 - #1246 Clear fails in a folder where the sidecar can't be written
-- #1252 A log of more than 2,147,483,647 lines fails to open with an OverflowException
-- #1294 The #IPv4 filter alias probably never matches an IP address in a TSV log (to be confirmed)
+- #1252 A log of more than 2,147,483,647 lines fails to open with an OverflowException: the limit is now 2,147,483,590 lines, stated in a plain message
+- #1294 The #IPv4 filter alias never matches an IP address in a TSV log: confirmed by a test, then fixed
+
+Open: none.
 
 ## Proposed Refactoring
 
