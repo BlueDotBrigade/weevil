@@ -1,11 +1,23 @@
 namespace BlueDotBrigade.Weevil.IO
 {
+	using System;
 	using System.IO;
 	using System.Linq;
 
 	[TestClass]
 	public class FileHelperTests
 	{
+		[TestMethod]
+		public void GivenAFailureToWrite_WhenClassified_ThenOnlyAPlaceThatCanNeverBeWrittenIsNeverWritable()
+		{
+			// Clear, Reload, opening another log and Exit carry on only when no later save could succeed either (#1246, #1307).
+			FileHelper.IsNeverWritable(new UnauthorizedAccessException()).Should().BeTrue("a read-only folder or file throws it");
+			FileHelper.IsNeverWritable(new IOException("The media is write protected.", unchecked((int)0x80070013))).Should().BeTrue("a read-only drive throws it");
+
+			FileHelper.IsNeverWritable(new IOException("The file is in use.", unchecked((int)0x80070020))).Should().BeFalse("a lock may pass");
+			FileHelper.IsNeverWritable(new IOException("There is not enough space on the disk.", unchecked((int)0x80070070))).Should().BeFalse("a full disk may pass");
+		}
+
 		[TestMethod]
 		[WorkItem(1247)]
 		public void GivenALogThatWeevilIsReading_WhenAnotherApplicationRenamesIt_ThenTheRenameSucceedsAndTheReadFinishes()

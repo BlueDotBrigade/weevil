@@ -854,7 +854,7 @@
 					{
 						if (Engine.IsRealInstance(_engine))
 						{
-							_engine.Save(true);
+							SaveBeforeLeaving(_engine, deleteBackup: true);
 						}
 
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
@@ -1127,7 +1127,7 @@
 					try
 					{
 						// Saved first: after a failed read, saving keeps only the comments and pins already saved (#1126).
-						_engine.Save();
+						SaveBeforeLeaving(_engine, deleteBackup: false);
 
 						// The rows hold the old records, so drop them: Reload frees the records before it reads the log again (#1126).
 						// The grid is hidden meanwhile.
@@ -1343,12 +1343,38 @@
 
 		public void Exit()
 		{
-			if (Engine.IsRealInstance(_engine))
+			try
 			{
-				_engine.Save(true);
+				if (Engine.IsRealInstance(_engine))
+				{
+					SaveBeforeLeaving(_engine, deleteBackup: true);
+				}
 			}
+			finally
+			{
+				// Even when the save fails, the copies extracted from zips are Weevil's to delete (#1162).
+				DeleteExtractedLogs();
+			}
+		}
 
-			DeleteExtractedLogs();
+		/// <summary>
+		/// Saves the sidecar before the open log is reloaded, replaced or closed.
+		/// </summary>
+		/// <remarks>
+		/// Where the sidecar can never be written, as in a read-only folder, it logs a warning and returns, so Weevil carries on, as Clear does (#1246, #1307):
+		/// no later save could keep those changes either, and Reload keeps them in memory (#1107). Any other failure, such as a locked sidecar, still throws.
+		/// The Save command calls <see cref="ICoreEngine.Save()"/> itself, so a save the analyst asked for still reports its failure.
+		/// </remarks>
+		private static void SaveBeforeLeaving(IEngine engine, bool deleteBackup)
+		{
+			try
+			{
+				engine.Save(deleteBackup);
+			}
+			catch (Exception exception) when (FileHelper.IsNeverWritable(exception))
+			{
+				Log.Default.Write(LogSeverityType.Warning, exception, "The sidecar can't be written, so Weevil carries on without saving it.");
+			}
 		}
 
 		/// <remarks>

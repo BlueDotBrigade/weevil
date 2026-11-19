@@ -684,6 +684,84 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1307)]
+		public async Task GivenALogWhoseSidecarCannotBeWritten_WhenReloaded_ThenItIsReloaded()
+		{
+			// Reload saved the sidecar first, and failed where it couldn't, as in a read-only folder.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox);
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				viewModel.Reload();
+				WaitUntil(() => viewModel.IsFilterToolboxEnabled);
+
+				// OpenAsync posts this once, and Reload posts it only after the engine has reloaded.
+				bulletinMediator.Received(2).Post(Arg.Any<SourceFileOpenedBulletin>());
+				dialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1307)]
+		public async Task GivenALogWhoseSidecarCannotBeWritten_WhenAnotherLogIsOpened_ThenItOpens()
+		{
+			// Opening another log saved the open log's sidecar first, and failed where it couldn't.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var openedPaths = new List<string>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox);
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				await viewModel.OpenAsync(CopyLog("Other.log"));
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				openedPaths.Select(Path.GetFileName).Should().Equal("Application.log", "Other.log");
+				dialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1307)]
+		public async Task GivenALogWhoseSidecarCannotBeWritten_WhenWeevilExits_ThenNothingIsThrown()
+		{
+			// Exit saved the sidecar first, and threw where it couldn't, so the copies extracted from zips stayed too.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>());
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				viewModel.Invoking(v => v.Exit()).Should().NotThrow();
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		[WorkItem(1126)]
 		public async Task GivenAnOpenLog_WhenReloaded_ThenThePreviousRecordsHaveBeenFreed()
 		{
@@ -1117,6 +1195,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var logPath = Path.Combine(_folder, fileName);
 			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), logPath);
+
+			return logPath;
+		}
+
+		/// <summary>
+		/// Copies the test log to a folder of its own, with a folder where its sidecar would go: Weevil finds no sidecar to load, and can't write one,
+		/// even as an administrator, as in a read-only folder.
+		/// </summary>
+		/// <remarks>
+		/// Not under the temporary folder, where Weevil saves no sidecar, so the tests would pass without testing anything.
+		/// </remarks>
+		private static string CopyLogWhereTheSidecarCannotBeWritten(out string folder)
+		{
+			folder = Path.Combine(AppContext.BaseDirectory, nameof(FilterViewModelTests), Guid.NewGuid().ToString("N"));
+			System.IO.Directory.CreateDirectory(folder);
+
+			var logPath = Path.Combine(folder, "Application.log");
+			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), logPath);
+			System.IO.Directory.CreateDirectory($"{logPath}.xml");
+
+			FileHelper.IsInTemporaryDirectory(logPath).Should().BeFalse("Weevil saves no sidecar under the temporary folder");
 
 			return logPath;
 		}

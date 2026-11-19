@@ -11,6 +11,22 @@
 		private static readonly TimeSpan TryOpenPeriod = TimeSpan.FromSeconds(2);
 
 		/// <summary>
+		/// Returns <see langword="true"/> when writing a file failed because it can never be written where it is, as in a read-only folder, file or drive.
+		/// </summary>
+		/// <remarks>
+		/// A failure that may pass, such as a file another application has locked or a full disk, returns <see langword="false"/>,
+		/// so the caller can stop and let the user try again (#1246, #1307).
+		/// </remarks>
+		public static bool IsNeverWritable(Exception exception)
+		{
+			// ERROR_WRITE_PROTECT, from a read-only drive on Windows.
+			const int WriteProtected = unchecked((int)0x80070013);
+
+			return exception is UnauthorizedAccessException ||
+			       (exception is IOException && exception.HResult == WriteProtected);
+		}
+
+		/// <summary>
 		/// Indicates whether the file is in a folder within the temporary folder, which is where files from a compressed archive are extracted.
 		/// </summary>
 		public static bool IsInTemporaryDirectory(string path)
