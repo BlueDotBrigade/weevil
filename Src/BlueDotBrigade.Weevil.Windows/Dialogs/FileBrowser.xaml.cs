@@ -136,7 +136,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
 			{
-				ItemViewModel item = _model.SelectedItem ?? _model.VisibleItems.FirstOrDefault();
+				BrowserItem item = _model.SelectedItem ?? _model.VisibleItems.FirstOrDefault();
 
 				if (item is null)
 				{
