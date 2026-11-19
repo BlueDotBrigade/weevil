@@ -136,9 +136,12 @@
 			{
 				_displayPath = string.IsNullOrWhiteSpace(displayPath) ? null : displayPath;
 
-				Log.Default.Write(
-					LogSeverityType.Debug,
-					$"Core engine construction has been given the path the analyst knows the log by. DisplayPath={displayPath}, FilePath={_sourceFilePath}");
+				if (_displayPath != null)
+				{
+					Log.Default.Write(
+						LogSeverityType.Debug,
+						$"Core engine construction has been given the path the analyst knows the log by. DisplayPath={displayPath}, FilePath={_sourceFilePath}");
+				}
 
 				return this;
 			}

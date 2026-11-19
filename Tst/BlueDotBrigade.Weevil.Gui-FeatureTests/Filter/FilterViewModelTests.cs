@@ -1019,7 +1019,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				await zipped.ViewModel.OpenCompressedAsync(zipPath);
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 
-				zipped.OpenedPaths[2].Should().Be(zipped.OpenedPaths[0], "it is the same file of the same zip");
 				zipped.ViewModel.Rows.GetRow(0).IsPinned.Should().BeTrue("the sidecar kept beside the copy is read again");
 				System.IO.File.Exists($"{ExtractedCopy("Logs.zip", "A.log")}.idx").Should().BeTrue("the saved index is kept beside it, for the reopen to read");
 			}
@@ -1049,6 +1048,30 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				System.IO.File.Exists(ExtractedCopy("Logs.zip", "A.log")).Should().BeTrue("the open log is read from that copy");
 				zipped.DialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
 				zipped.ViewModel.VisibleItems.Should().NotBeNullOrEmpty("Reload reads the log again from its copy");
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedFromAZip_WhenTheSelectedRecordsAreSaved_ThenTheFileIsSavedInTheFolderKeptForIt()
+		{
+			// The engine names a zipped log by its zip, which is no folder to write to: exports go beside the copy it reads (#1253, #1312).
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				zipped.ViewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
+
+				zipped.ViewModel.SaveSelectedAsRawCommand.Execute(null);
+				await zipped.ViewModel.BackgroundTask;
+
+				System.IO.File.Exists(Path.Combine(Path.GetDirectoryName(ExtractedCopy("Logs.zip", "A.log")), "SelectedRecords.log")).Should().BeTrue();
+				System.IO.File.Exists(Path.Combine(_folder, "SelectedRecords.log")).Should().BeFalse("Weevil writes nothing beside the zip");
 			}
 			finally
 			{

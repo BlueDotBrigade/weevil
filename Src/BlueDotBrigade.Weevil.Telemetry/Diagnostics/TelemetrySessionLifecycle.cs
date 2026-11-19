@@ -83,7 +83,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			Version version,
 			string sourceFilePath,
 			long installedRamMb = 0,
-			string installedCpu = "")
+			string installedCpu = "",
+			long logFileSizeBytes = -1)
 		{
 			try
 			{
@@ -108,7 +109,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 						IsDebugging = _startupContext.IsDebugging,
 						SessionStartUtc = now,
 						SessionEndUtc = now,
-						LogFileSizeBytes = TryGetFileSize(sourceFilePath),
+						// Given when the path is not a file to measure, such as a log opened from a zip (#1312).
+						LogFileSizeBytes = logFileSizeBytes >= 0 ? logFileSizeBytes : TryGetFileSize(sourceFilePath),
                       InstalledRamMb = installedRamMb,
 						InstalledCpu = string.IsNullOrWhiteSpace(installedCpu) ? "" : installedCpu,
                       SchemaVersion = "1.0",

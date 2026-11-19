@@ -849,7 +849,8 @@
 						LicensePath,
 						(path) =>
 						{
-							IEngineBuilder pluginBuilder = Engine.UsingPath(path).UsingDisplayPath(displayPath);
+							// The readable path names only the file Weevil chose; a plugin may open another.
+							IEngineBuilder pluginBuilder = Engine.UsingPath(path).UsingDisplayPath(string.Equals(path, sourceFilePath, StringComparison.OrdinalIgnoreCase) ? displayPath : null);
 							return storageMode is { } mode ? pluginBuilder.UsingStorage(mode) : pluginBuilder;
 						},
 						sourceFilePath);
@@ -864,11 +865,11 @@
 			}
 			catch (NotSupportedException e)
 			{
-				var sourceFilename = Path.GetFileName(sourceFilePath);
+				// The whole path: a zipped log's sidecar is in the folder kept for it, not beside the zip (#1253).
 				var message =
 					e.Message + Environment.NewLine + Environment.NewLine +
 					"In order to open the file, you must first delete the sidecar:" + Environment.NewLine +
-					$"{sourceFilename}.xml" + Environment.NewLine;
+					$"{sourceFilePath}.xml" + Environment.NewLine;
 				MessageBox.Show(message, "Open Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 
@@ -939,6 +940,7 @@
 						_bulletinMediator.Post(new SourceFileOpenedBulletin
 						{
 							SourceFilePath = _engine.SourceFilePath,
+							SourceFileSize = _engine.Metrics.FileSize,
 							SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
 							Context = _engine.Context,
 							TotalRecordCount = _engine.Count,
@@ -1196,6 +1198,7 @@
 					_bulletinMediator.Post(new SourceFileOpenedBulletin
 					{
 						SourceFilePath = _engine.SourceFilePath,
+						SourceFileSize = _engine.Metrics.FileSize,
 						SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
 						Context = _engine.Context,
 						TotalRecordCount = _engine.Count,
@@ -1530,7 +1533,7 @@
 					this.WeevilDisplayVersion,
 					LicensePath,
 					ThirdPartyNoticesPath,
-					_engine.SourceFilePath);
+					_openLogFilePath);
 
 				dialog.ShowDialog();
 			}
@@ -1660,7 +1663,8 @@
 				Log.Default.Write(LogSeverityType.Error, exception, "The log can no longer be read.");
 				// What the read threw, rather than the log's own exception, which repeats the first sentence for the application's log (#1295).
 				var reason = exception is LogFileChangedException { IsUnreadable: true, InnerException: { } cause } ? cause.Message : exception.Message;
-				_dialogBox.ShowMessage($"Weevil can't read the log.\r\n\r\n{reason}", "Error");
+				// Named as the analyst knows it: the reason may name the copy Weevil reads (#1312).
+				_dialogBox.ShowMessage($"Weevil can't read the log {_engine.SourceFilePath}.\r\n\r\n{reason}", "Error");
 			}
 		}
 
