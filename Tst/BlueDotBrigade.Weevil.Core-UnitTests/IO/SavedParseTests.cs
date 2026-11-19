@@ -15,15 +15,19 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		[DataRow("PluginName")]
-		[DataRow("PluginBuild")]
-		[DataRow("CoreBuild")]
-		[DataRow("CommonBuild")]
-		[DataRow("StorageMode")]
-		public void GivenAParseThatDiffersInOnePart_WhenCompared_ThenItIsNotTheSameParser(string part)
+		[DataRow("PluginName", false)]
+		[DataRow("PluginBuild", false)]
+		[DataRow("CoreBuild", false)]
+		[DataRow("CommonBuild", false)]
+		[DataRow("StorageMode", false)]
+		[DataRow("PluginName", true)]
+		[DataRow("PluginBuild", true)]
+		[DataRow("CoreBuild", true)]
+		[DataRow("CommonBuild", true)]
+		public void GivenAParseThatDiffersInOnePart_WhenCompared_ThenItIsNotTheSameParser(string part, bool isQuickToDecode)
 		{
 			// A saved table is reused only when the same plugin, the same builds of it and of Weevil, and the same storage mode would make it (#1023):
-			// the mode matters only for a log that keeps strings in RAM, such as UTF-32 (#1296).
+			// the mode matters only for a log that keeps strings in RAM, such as UTF-32, but the plugin and builds always do (#1296).
 			SavedParse p = Create();
 
 			var changed = new SavedParse(
@@ -36,7 +40,7 @@ namespace BlueDotBrigade.Weevil.IO
 				p.EndOffset,
 				[]);
 
-			changed.IsSameParser(new DefaultPlugin(), StorageMode.Ram, isQuickToDecode: false).Should().BeFalse();
+			changed.IsSameParser(new DefaultPlugin(), StorageMode.Ram, isQuickToDecode).Should().BeFalse();
 		}
 
 		[TestMethod]

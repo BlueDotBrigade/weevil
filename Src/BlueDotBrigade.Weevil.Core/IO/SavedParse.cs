@@ -16,7 +16,7 @@ namespace BlueDotBrigade.Weevil.IO
 	///   An MVID is a hash of the assembly's compiled output, which holds its file version, and every build stamps a new one: each build parses again;
 	/// - the same storage mode, only for a log that does not decode quickly, whose records keep strings in RAM and bytes on disk.
 	///   UTF-8, and UTF-16 in this computer's byte order, make the same table in both modes, so it is reused in the other mode,
-	///   which reopens it through its own path (#1296). Text a plugin changed keeps a string in both modes.
+	///   which reopens it through its own path (#1296). A record a plugin made itself, or whose text it changed, keeps a string in both modes.
 	/// The Open As context is not part of it: the sidecar keeps it, and it never reaches the parser (decided 2026-11-13).
 	/// The checksums say whether the log is still the one parsed.
 	/// </remarks>
