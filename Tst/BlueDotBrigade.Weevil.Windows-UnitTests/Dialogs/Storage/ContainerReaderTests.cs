@@ -171,6 +171,54 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		}
 
 		[TestMethod]
+		public void GivenALogInAZipExtractedBefore_WhenExtractedAgain_ThenTheSidecarKeptBesideItIsNotReplaced()
+		{
+			// The kept sidecar holds the comments and pins added since the log was last opened from the zip (#1253).
+			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var destination = Path.Combine(_root, "Kept");
+			var extracted = _reader.Extract(log, Companions, destination);
+			File.WriteAllText($"{extracted}.xml", "<sidecar comments=\"kept\" />");
+			File.Delete(extracted);
+
+			_reader.Extract(log, Companions, destination).Should().Be(extracted);
+
+			File.ReadAllText(extracted).Should().Be("server log\n", "the log itself is extracted again");
+			File.ReadAllText($"{extracted}.xml").Should().Be("<sidecar comments=\"kept\" />");
+		}
+
+		[TestMethod]
+		public void GivenALogInAZip_WhenItsCopyKeyIsAskedTwice_ThenItIsTheSameShortName()
+		{
+			// The same file of the same zip finds the folder its sidecar and index were kept in (#1253).
+			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+
+			var key = _reader.GetCopyKey(log);
+
+			key.Should().MatchRegex("^[0-9a-f]{16}$", "a short folder name keeps paths well inside MAX_PATH");
+			new ContainerReader().GetCopyKey(Location.ForArchive(_zipPath.ToUpperInvariant(), "2026/SERVER.LOG")).Should().Be(key, "Windows ignores case in paths");
+		}
+
+		[TestMethod]
+		public void GivenAnotherFileOrZip_WhenItsCopyKeyIsAsked_ThenItDiffersFromTheFirst()
+		{
+			var key = _reader.GetCopyKey(Location.ForArchive(_zipPath, "2026/Server.log"));
+
+			// The same name with other content, in a zip of the same path, is another log: its CRC-32 and size differ.
+			using (ZipArchive zip = ZipFile.Open(_zipPath, ZipArchiveMode.Update))
+			{
+				zip.GetEntry("2026/Server.log")!.Delete();
+				Add(zip, "2026/Server.log", "a newer server log\n");
+			}
+
+			var copy = Path.Combine(_logs, "Copy.zip");
+			File.Copy(_zipPath, copy);
+
+			new ContainerReader().GetCopyKey(Location.ForArchive(_zipPath, "2026/Server.log")).Should().NotBe(key, "the entry's content changed");
+			new ContainerReader().GetCopyKey(Location.ForArchive(copy, "2026/Server.log")).Should().NotBe(key, "it is in another zip");
+			_reader.GetCopyKey(Location.ForArchive(_zipPath, "Nested/Inner.zip", "Old.log")).Should().NotBe(_reader.GetCopyKey(Location.ForArchive(_zipPath, "Nested/Inner.zip")), "a zip in a zip names each container");
+		}
+
+		[TestMethod]
 		[WorkItem(1251)]
 		public void GivenAnExtractionFromAZip_WhenCancelled_ThenNothingIsLeftInTheDestination()
 		{

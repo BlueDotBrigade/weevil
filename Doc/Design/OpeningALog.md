@@ -7,7 +7,11 @@ How Weevil opens a log: the kinds of open, what each reads and writes beside the
 - **The log** is only ever read, through a handle that lets other applications write, rename or delete it meanwhile (`FileHelper.Open`, #1247).
 - **`<log>.idx`** (`LineIndexFile`) is a cache: the line index and, after a full open, what parsed the log and the record table it made. Its layout is in [RecordTable.md](RecordTable.md#saved-with-the-index). Deleting it is always safe. `Engine.EstimateMemory` reads only its header's line count, unchecked ([DiskMode.md](DiskMode.md#storage-modes)).
 - **`<log>.xml`**, the sidecar (`SidecarManager`), keeps the user's work: comments, pins, bookmarks, regions, the table of contents, remarks, filter history and the plugin's context. Nothing checks it against the log: its entries apply by line number.
-- Neither file is saved for a log in the temporary folder, such as one extracted from an archive (`FileHelper.IsInTemporaryDirectory`).
+- Neither file is saved for a log in the temporary folder (`FileHelper.IsInTemporaryDirectory`).
+- **A log opened from a zip** is extracted to a folder of its own, kept between opens: `%LOCALAPPDATA%\BlueDotBrigade\Weevil\Zips\<key>\<log's name>` (#1253). The key is 16 hexadecimal characters of a SHA-256 of the zip's full path, each container's entry name, and the log's CRC-32 and size as the zip records them (`IContainerReader.GetCopyKey`), so the same file of the same zip finds its folder without being extracted first, and paths stay short.
+  - Its sidecar and `.idx` are saved there like any log's, so its comments, pins and bookmarks are back, and it reopens without being parsed, when it is opened from the zip again.
+  - A sidecar or index the zip holds beside the log is copied out only when the folder has none: the kept one holds the analyst's later work.
+  - When another log opens or Weevil closes, only the extracted log is deleted (`ExtractedLog`). The folder, its sidecar and index, and exports saved beside the log stay. Nothing cleans the folder up.
 
 ## The Steps
 

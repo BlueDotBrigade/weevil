@@ -40,13 +40,25 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		Stream OpenRead(Location file);
 
 		/// <summary>
+		/// Returns a short name for a file in a container, the same each time for the same file: 16 hexadecimal characters,
+		/// from the outermost container's full path, each container's entry name, and the file's CRC-32 and size as its container records them (#1253).
+		/// </summary>
+		/// <remarks>
+		/// Reads only the container's directory, so the file is not copied to tell whether it is the same one.
+		/// </remarks>
+		/// <exception cref="ArgumentException"><paramref name="file"/> is not in a container.</exception>
+		string GetCopyKey(Location file);
+
+		/// <summary>
 		/// Gives the path of a file on disk: a file on disk as it is, and a file in a container copied out to <paramref name="destinationFolder"/>,
 		/// with the companions beside it that exist, such as <c>App.log.xml</c> for <c>App.log</c>.
 		/// </summary>
 		/// <param name="companionSuffixes">What a companion's name adds to the file's, such as <c>.xml</c>.</param>
 		/// <param name="cancellationToken">Stops the copy, for example when the dialog closes (#1251).</param>
 		/// <remarks>
-		/// A copy that is cancelled or fails deletes <paramref name="destinationFolder"/> when this call created it, so no partial copy is left.
+		/// The file is copied again over an earlier copy. A companion already in <paramref name="destinationFolder"/> is kept, not copied over:
+		/// it holds what the analyst added since the file was last opened from the container (#1253).
+		/// A copy that is cancelled or fails deletes what this call copied, and <paramref name="destinationFolder"/> when this call created it, so no partial copy is left.
 		/// </remarks>
 		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
 		string Extract(Location file, IEnumerable<string> companionSuffixes, string destinationFolder, CancellationToken cancellationToken = default);

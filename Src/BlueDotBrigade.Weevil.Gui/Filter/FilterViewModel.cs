@@ -558,7 +558,7 @@
 
 			await (choice.ExtractedFolder is null
 				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode)
-				: OpenExtractedAsync(choice.ExtractedFolder, choice.LogPath, choice.StorageMode));
+				: OpenExtractedAsync(choice.LogPath, choice.StorageMode));
 		}
 
 		public async Task OpenCompressedAsync(string sourceFilePath)
@@ -574,45 +574,73 @@
 				return;
 			}
 
-			// Weevil opens a copy extracted to a folder of its own, and deletes only what it extracted, never the zip (#1156).
-			var extractedFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+			// Weevil opens a copy of the chosen file, extracted to a folder of that file's own that is kept between opens,
+			// and deletes only the copy of the log, never the zip (#1156, #1253).
+			string extractedLog = null;
 			var isOpening = false;
 
 			try
 			{
-				ZipFile.ExtractToDirectory(sourceFilePath, extractedFolder);
+				string[] entryNames;
 
-				// A zip with no entries creates no folder.
-				var files = Directory.Exists(extractedFolder)
-					? Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)
-					: Array.Empty<string>();
+				using (ZipArchive archive = ZipFile.OpenRead(sourceFilePath))
+				{
+					// Shown as paths, as Windows writes them; a folder's entry names no file.
+					entryNames = archive.Entries
+						.Where(entry => entry.Name.Length > 0)
+						.Select(entry => entry.FullName.Replace('/', Path.DirectorySeparatorChar))
+						.ToArray();
+				}
 
-				if (files.Length == 0)
+				if (entryNames.Length == 0)
 				{
 					_dialogBox.ShowMessage($"{Path.GetFileName(sourceFilePath)} holds no file to open.", "Nothing to Open");
 					return;
 				}
 
-				var relativeNames = files.Select(f => Path.GetRelativePath(extractedFolder, f)).ToArray();
+				if (!_dialogBox.TrySelectCompressedFile(entryNames, out var selectedFileName))
+				{
+					return;
+				}
+
+				var file = BlueDotBrigade.Weevil.Windows.Dialogs.Storage.Location.ForArchive(sourceFilePath, selectedFileName.Replace(Path.DirectorySeparatorChar, '/'));
+				var copiesFolder = this.CopiesFolder;
+				extractedLog = await Task.Run(() =>
+				{
+					using var reader = new BlueDotBrigade.Weevil.Windows.Dialogs.Storage.ContainerReader();
+					return reader.Extract(file, ExtractedLog.CompanionSuffixes, Path.Combine(copiesFolder, reader.GetCopyKey(file)));
+				});
 
 				// Open As follows the list, so its suggestion uses the size of the log chosen (#1028).
-				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName) &&
-				    await ChooseStorageAsync(Path.Combine(extractedFolder, selectedFileName)) is { } storageMode)
+				if (await ChooseStorageAsync(extractedLog) is { } storageMode)
 				{
 					isOpening = true;
-					await OpenExtractedAsync(extractedFolder, Path.Combine(extractedFolder, selectedFileName), storageMode);
+					await OpenExtractedAsync(extractedLog, storageMode);
 				}
 			}
 			finally
 			{
 				if (!isOpening)
 				{
-					// Nothing was opened from this copy, so nothing was saved beside it either.
 					this.CanOpenLogFile = true;
-					await Task.Run(() => DeleteFolder(extractedFolder));
+
+					// Nothing was opened from this copy. What was kept beside it from earlier opens stays.
+					if (extractedLog != null)
+					{
+						ExtractedLog copy = new ExtractedLog(extractedLog);
+						await Task.Run(copy.Delete);
+					}
 				}
 			}
 		}
+
+		/// <summary>
+		/// Where a log opened from a zip is extracted, to a folder of its own (#1253). A test sets a folder of its own.
+		/// </summary>
+		/// <remarks>
+		/// The Open As dialog extracts to <see cref="ExtractedLog.DefaultCopiesFolder"/>.
+		/// </remarks>
+		internal string CopiesFolder { get; set; } = ExtractedLog.DefaultCopiesFolder;
 
 		/// <summary>
 		/// Opens a log that is not in a zip, and deletes the copy of the zip the previous log was opened from, if nothing reads it any more.
@@ -631,16 +659,16 @@
 		/// <summary>
 		/// Opens a log Weevil extracted from a zip, keeps its copy while it is open, and deletes the copy once nothing reads it (#1162).
 		/// </summary>
-		/// <param name="extractedFolder">The folder of Weevil's own that the zip's files were extracted to: everything in it is Weevil's.</param>
-		private async Task OpenExtractedAsync(string extractedFolder, string logPath, StorageMode storageMode)
+		/// <remarks>
+		/// The folder it was extracted to is kept, with the sidecar and saved index the open saves beside the log (#1253).
+		/// </remarks>
+		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode)
 		{
 			ExtractedLog extracted = null;
 
 			try
 			{
-				extracted = await Task.Run(() => new ExtractedLog(
-					extractedFolder,
-					Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)));
+				extracted = new ExtractedLog(logPath);
 
 				// Weevil may close before the open finishes.
 				_extractedLogBeingOpened = extracted;
@@ -654,31 +682,26 @@
 					_extractedLogBeingOpened = null;
 				}
 
-				// A zip can hold thousands of files, so they are deleted off the UI thread.
 				if (extracted == null)
 				{
 					// Open As took the menus before the copy failed to open.
 					this.CanOpenLogFile = true;
-
-					// Nothing was opened from this copy, so nothing was saved beside it either.
-					await Task.Run(() => DeleteFolder(extractedFolder));
 				}
 				else if (IsOpenFrom(extracted))
 				{
 					// Reload and disk mode read the log again, so its copy stays while it is open (#1162).
-					// The open log may be a sibling that another open chose from this copy meanwhile.
 					await ReplaceExtractedLogAsync(extracted);
 				}
 				else
 				{
-					// An open that failed may still have saved something beside the log, which stays.
+					// Only the log is deleted: what an open that failed saved beside it, and what earlier opens kept there, stays (#1253).
 					await Task.Run(extracted.Delete);
 				}
 			}
 		}
 
 		/// <summary>
-		/// Returns <see langword="true"/> when the open log is one of the files in <paramref name="extracted"/>.
+		/// Returns <see langword="true"/> when the open log is the log in <paramref name="extracted"/>.
 		/// </summary>
 		private bool IsOpenFrom(ExtractedLog extracted)
 		{
@@ -710,22 +733,6 @@
 			_extractedLogBeingOpened?.Delete();
 			_openExtractedLog?.Delete();
 			_openExtractedLog = null;
-		}
-
-		private static void DeleteFolder(string extractedFolder)
-		{
-			try
-			{
-				if (Directory.Exists(extractedFolder))
-				{
-					Directory.Delete(extractedFolder, recursive: true);
-				}
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				// A leftover temporary folder does no harm, so it must not stop Weevil.
-				Log.Default.Write(LogSeverityType.Warning, e, $"Unable to delete the files extracted from a zip. Path={extractedFolder}");
-			}
 		}
 
 		private void RefreshHistory(ObservableCollection<string> history, IEnumerable<string> newValues)
