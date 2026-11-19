@@ -44,17 +44,14 @@ namespace BlueDotBrigade.Weevil.IO
 
 			List<(int Start, ContentChunk Chunk)> chunks;
 
-			// Made before the log is checked, because no read goes through it until the table is returned.
-			source = LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, log.Length, CopyChecksums(parse));
-
 			if (storageMode == StorageMode.Disk)
 			{
 				if (!TryCheckLog(log, parse, onBlock: null))
 				{
-					source = null;
 					return false;
 				}
 
+				source = CreateSource(log, logPath, parse);
 				chunks = new List<(int Start, ContentChunk Chunk)>(directory.Count);
 
 				foreach ((var start, var fileOffset, var length) in directory)
@@ -68,9 +65,10 @@ namespace BlueDotBrigade.Weevil.IO
 
 				if (!TryCheckLog(log, parse, filler.Add) || !filler.IsComplete)
 				{
-					source = null;
 					return false;
 				}
+
+				source = CreateSource(log, logPath, parse);
 
 				chunks = filler.Chunks;
 			}
@@ -95,6 +93,14 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		/// The source of the log checked, made from the saved checksums once every block matched them: in RAM too, though nothing reads through it there (#1255).
+		/// </summary>
+		private static LogFileSource CreateSource(Stream log, string logPath, SavedParse parse)
+		{
+			return LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, log.Length, CopyChecksums(parse));
 		}
 
 		private static bool TryReadChunkDirectory(Stream indexFile, SavedParse parse, out List<(int Start, long FileOffset, int Length)> directory)

@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.IO
 		private readonly StorageMode _storageMode;
 
 		// Computes the checksums of every byte read: for the chunks on file to read back through, and in both modes for the saved index (#1023).
-		// Null for a source that is not a file, which only RAM mode accepts.
+		// Null for a log read from a stream that is not a file, which only RAM mode accepts.
 		private readonly LogFileSourceBuilder _sourceBuilder;
 
 		/// <param name="log">The log, which must be able to seek. In disk mode, a <see cref="FileStream"/>.</param>

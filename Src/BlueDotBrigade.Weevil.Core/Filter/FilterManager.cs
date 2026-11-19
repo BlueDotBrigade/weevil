@@ -31,10 +31,10 @@
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
-		// Reads a log opened on disk back, or null in RAM mode.
+		// Whether the records keep their content (RAM) or read it back from the log (disk).
 		private readonly IO.StorageMode _storageMode;
 
-		// The file the records were read from: on disk, they read their content back through it. Null for a log not read from a file.
+		// The file the records were read from: on disk, they read their content back through it. Null for the engine without records that Reload uses.
 		private readonly IO.LogFileSource _source;
 
 		private FilterStrategy _latestFilterStrategy;

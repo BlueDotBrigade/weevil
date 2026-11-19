@@ -272,7 +272,7 @@ namespace BlueDotBrigade.Weevil.IO
 			private int _bufferStart;
 			private int _bufferEnd;
 			private long _position;
-			private long _sourceRead;
+			private long _streamRead;
 
 			public HashingReadStream(Stream stream, long length, ulong expectedChecksum)
 			{
@@ -282,7 +282,7 @@ namespace BlueDotBrigade.Weevil.IO
 				_buffer = new byte[(int)System.Math.Min(BufferSize, System.Math.Max(length, 1))];
 			}
 
-			public bool IsChecksumMatched => _position == _length && _sourceRead == _length && _hash.GetCurrentHashAsUInt64() == _expectedChecksum;
+			public bool IsChecksumMatched => _position == _length && _streamRead == _length && _hash.GetCurrentHashAsUInt64() == _expectedChecksum;
 
 			public override bool CanRead => true;
 
@@ -328,7 +328,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			private bool Fill()
 			{
-				var count = (int)System.Math.Min(_buffer.Length, _length - _sourceRead);
+				var count = (int)System.Math.Min(_buffer.Length, _length - _streamRead);
 
 				if (count <= 0)
 				{
@@ -337,7 +337,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 				var read = _stream.Read(_buffer, 0, count);
 				_hash.Append(_buffer.AsSpan(0, read));
-				_sourceRead += read;
+				_streamRead += read;
 				_bufferStart = 0;
 				_bufferEnd = read;
 
