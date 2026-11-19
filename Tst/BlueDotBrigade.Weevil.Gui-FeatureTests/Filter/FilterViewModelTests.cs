@@ -684,6 +684,154 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1307)]
+		public async Task GivenALogWhoseSidecarCannotBeWritten_WhenReloaded_ThenItIsReloaded()
+		{
+			// Reload saved the sidecar first, and failed where it couldn't, as in a read-only folder.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox);
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				viewModel.Rows.GetRow(0).IsPinned = true;
+
+				viewModel.Reload();
+				WaitUntil(() => viewModel.IsFilterToolboxEnabled);
+
+				// Reload shows a message when it fails. It never asks: it keeps the changes in memory (#1107).
+				dialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+				dialogBox.DidNotReceive().ShowQuestion(Arg.Any<string>(), Arg.Any<string>());
+				viewModel.IsFilterToolboxEnabled.Should().BeTrue("Reload has finished");
+				viewModel.Rows.GetRow(0).IsPinned.Should().BeTrue("Reload keeps the pin");
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1307)]
+		public async Task GivenALogWhoseSidecarCannotBeWrittenAndNoChange_WhenAnotherLogIsOpened_ThenItOpensWithoutAsking()
+		{
+			// Opening another log saved the open log's sidecar first, and failed where it couldn't.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var openedPaths = new List<string>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox);
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				await viewModel.OpenAsync(CopyLog("Other.log"));
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				openedPaths.Select(Path.GetFileName).Should().Equal("Application.log", "Other.log");
+				dialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+				dialogBox.DidNotReceive().ShowQuestion(Arg.Any<string>(), Arg.Any<string>());
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1307)]
+		public async Task GivenALogWhoseSidecarCannotBeWrittenAndNoChange_WhenWeevilExits_ThenItClosesWithoutAsking()
+		{
+			// Exit saved the sidecar first, and threw where it couldn't.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				viewModel.TryExit().Should().BeTrue("Weevil closes");
+				dialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+				dialogBox.DidNotReceive().ShowQuestion(Arg.Any<string>(), Arg.Any<string>());
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1307)]
+		[DataRow(false)]
+		[DataRow(true)]
+		public async Task GivenAnUnsavedPinWhereTheSidecarCannotBeWritten_WhenAnotherLogIsOpened_ThenTheAnalystChoosesToStayOrGoOn(bool isContinuing)
+		{
+			// The pin can't be saved, so opening another log asks first: No keeps the log open, so the folder can be made writable and the log saved.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			dialogBox.ShowQuestion(Arg.Any<string>(), Arg.Any<string>()).Returns(isContinuing);
+			var openedPaths = new List<string>();
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox);
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+				viewModel.Rows.GetRow(0).IsPinned = true;
+
+				await viewModel.OpenAsync(CopyLog("Other.log"));
+				WaitUntil(() => viewModel.CanOpenLogFile);
+
+				dialogBox.Received(1).ShowQuestion(Arg.Is<string>(message => message.Contains("Application.log")), Arg.Any<string>());
+				openedPaths.Select(Path.GetFileName).Should().Equal(isContinuing
+					? new[] { "Application.log", "Other.log" }
+					: new[] { "Application.log" });
+				viewModel.IsLogFileOpen.Should().BeTrue();
+				viewModel.IsFilterToolboxEnabled.Should().BeTrue("the analyst keeps filtering the log shown");
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1307)]
+		public async Task GivenAnUnsavedPinWhereTheSidecarCannotBeWritten_WhenWeevilExitsAndTheAnalystStays_ThenItDoesNotClose()
+		{
+			// The pin can't be saved, so closing asks first: No keeps Weevil open.
+			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			dialogBox.ShowQuestion(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
+			var viewModel = new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox);
+
+			try
+			{
+				await viewModel.OpenAsync(logPath);
+				WaitUntil(() => viewModel.CanOpenLogFile);
+				viewModel.Rows.GetRow(0).IsPinned = true;
+
+				viewModel.TryExit().Should().BeFalse("the analyst chose to stay");
+				dialogBox.Received(1).ShowQuestion(Arg.Any<string>(), Arg.Any<string>());
+			}
+			finally
+			{
+				System.IO.Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		[WorkItem(1126)]
 		public async Task GivenAnOpenLog_WhenReloaded_ThenThePreviousRecordsHaveBeenFreed()
 		{
@@ -1117,6 +1265,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var logPath = Path.Combine(_folder, fileName);
 			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), logPath);
+
+			return logPath;
+		}
+
+		/// <summary>
+		/// Copies the test log to a folder of its own, with a folder where its sidecar would go: Weevil finds no sidecar to load, and can't write one,
+		/// even as an administrator, as in a read-only folder.
+		/// </summary>
+		/// <remarks>
+		/// Not under the temporary folder, where Weevil saves no sidecar, so the tests would pass without testing anything.
+		/// </remarks>
+		private static string CopyLogWhereTheSidecarCannotBeWritten(out string folder)
+		{
+			folder = Path.Combine(AppContext.BaseDirectory, nameof(FilterViewModelTests), Guid.NewGuid().ToString("N"));
+			System.IO.Directory.CreateDirectory(folder);
+
+			var logPath = Path.Combine(folder, "Application.log");
+			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), logPath);
+			System.IO.Directory.CreateDirectory($"{logPath}.xml");
+
+			FileHelper.IsInTemporaryDirectory(logPath).Should().BeFalse("Weevil saves no sidecar under the temporary folder");
 
 			return logPath;
 		}

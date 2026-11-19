@@ -98,7 +98,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				}
 				else if (this.ViewModel.ExitCommand.CanExecute(null))
 				{
-					this.ViewModel.ExitCommand.Execute(null);
+					// The analyst may choose to stay, to keep changes the sidecar can't take yet (#1307).
+					e.Cancel = !this.ViewModel.TryExit();
 				}
 				else
 				{

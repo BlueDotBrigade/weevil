@@ -127,6 +127,11 @@
 		[NotObservable]
 		private int _logGeneration;
 
+		// The open log has comments, pins, bookmarks, regions or remarks that no save has written yet, so leaving it where the sidecar can't be written asks first (#1307).
+		// Set on the thread that made the change.
+		[NotObservable]
+		private volatile bool _hasUnsavedChanges;
+
 		// The generations whose unreadable log, and whose changed log, were handled last. Read and written on the UI thread.
 		private int _unreadableLogGeneration = -1;
 		private int _changedLogGeneration = -1;
@@ -388,6 +393,7 @@
 				if (value != _engine.SourceFileRemarks)
 				{
 					_engine.SourceFileRemarks = value;
+					_hasUnsavedChanges = true;
 					_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
 					{
 						HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
@@ -852,9 +858,14 @@
 				{
 					try
 					{
-						if (Engine.IsRealInstance(_engine))
+						// The analyst may choose to stay on the open log, to keep changes its sidecar can't take yet (#1307).
+						if (Engine.IsRealInstance(_engine) && !TrySaveBeforeLeaving(deleteBackup: true, isAskingFirst: true))
 						{
-							_engine.Save(true);
+							Log.Default.Write(LogSeverityType.Information, "The analyst chose to stay on the open log, whose changes can't be saved.");
+
+							// The open turned the filters off; the analyst keeps working on this log.
+							_uiDispatcher.Invoke(() => this.IsFilterToolboxEnabled = true);
+							return;
 						}
 
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
@@ -877,6 +888,7 @@
 						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						_engine = openedEngine;
+						_hasUnsavedChanges = false;
 						Interlocked.Increment(ref _logGeneration);
 						openedLogReporter = CreateFailedReadReporter();
 						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
@@ -1031,6 +1043,8 @@
 
 		private void OnAnnotationsChanged(object sender, AnnotationChangedEventArgs e)
 		{
+			_hasUnsavedChanges = true;
+
 			// On the thread that made the change: the rows refresh later, on the UI thread (decision 4).
 			this.Rows?.QueueRefresh(e);
 		}
@@ -1106,6 +1120,7 @@
 		public void SaveMetadata()
 		{
 			_engine.Save();
+			_hasUnsavedChanges = false;
 		}
 
 		public void Reload()
@@ -1127,7 +1142,8 @@
 					try
 					{
 						// Saved first: after a failed read, saving keeps only the comments and pins already saved (#1126).
-						_engine.Save();
+						// Never asks: Reload keeps the changes in memory (#1107).
+						TrySaveBeforeLeaving(deleteBackup: false, isAskingFirst: false);
 
 						// The rows hold the old records, so drop them: Reload frees the records before it reads the log again (#1126).
 						// The grid is hidden meanwhile.
@@ -1343,12 +1359,77 @@
 
 		public void Exit()
 		{
+			TryExit();
+		}
+
+		/// <summary>
+		/// Saves the sidecar and deletes the copies extracted from zips, as Weevil closes.
+		/// </summary>
+		/// <returns><see langword="false"/> when the analyst chose to stay, to keep changes the sidecar can't take yet (#1307): Weevil doesn't close.</returns>
+		/// <remarks>
+		/// Any other failure to save is shown, and Weevil still closes, as the Exit command did.
+		/// </remarks>
+		public bool TryExit()
+		{
 			if (Engine.IsRealInstance(_engine))
 			{
-				_engine.Save(true);
+				try
+				{
+					if (!TrySaveBeforeLeaving(deleteBackup: true, isAskingFirst: true))
+					{
+						Log.Default.Write(LogSeverityType.Information, "The analyst chose to stay, as the open log's changes can't be saved.");
+						return false;
+					}
+				}
+				catch (Exception exception)
+				{
+					var message = "Unable to save the sidecar.";
+					Log.Default.Write(LogSeverityType.Error, exception, message);
+					_dialogBox.ShowMessage(exception.Message, message);
+				}
 			}
 
 			DeleteExtractedLogs();
+			return true;
+		}
+
+		/// <summary>
+		/// Saves the sidecar before the open log is reloaded, replaced or closed.
+		/// </summary>
+		/// <remarks>
+		/// Where the sidecar can never be written, as in a read-only folder, it logs a warning, as Clear does (#1246, #1307): no save could keep the changes there.
+		/// When <paramref name="isAskingFirst"/> and the log has changes no save has written, the analyst chooses to carry on, losing them, or to stay,
+		/// so the folder can be made writable and the log saved. Any other failure, such as a locked sidecar, still throws.
+		/// The Save command calls <see cref="ICoreEngine.Save()"/> itself, so a save the analyst asked for still reports its failure.
+		/// </remarks>
+		/// <returns><see langword="false"/> when the analyst chose to stay.</returns>
+		private bool TrySaveBeforeLeaving(bool deleteBackup, bool isAskingFirst)
+		{
+			try
+			{
+				_engine.Save(deleteBackup);
+				_hasUnsavedChanges = false;
+				return true;
+			}
+			catch (Exception exception) when (FileHelper.IsNeverWritable(exception))
+			{
+				Log.Default.Write(LogSeverityType.Warning, exception, "The sidecar can't be written.");
+
+				if (!isAskingFirst || !_hasUnsavedChanges)
+				{
+					return true;
+				}
+
+				var logName = Path.GetFileName(_engine.SourceFilePath);
+				var isContinuing = false;
+
+				_uiDispatcher.Invoke(() => isContinuing = _dialogBox.ShowQuestion(
+					$"Your changes to {logName}, such as comments and pins, can't be saved:\r\n{exception.Message}\r\n\r\n" +
+					"Continue anyway, and lose them? Choose No to stay, so you can make the folder writable and save.",
+					"Unable to Save Changes"));
+
+				return isContinuing;
+			}
 		}
 
 		/// <remarks>
@@ -2508,6 +2589,7 @@
 		#endregion
 		protected virtual void RaiseRegionsChanged()
 		{
+			_hasUnsavedChanges = true;
 			EventHandler threadSafeHandler = this.RegionsChanged;
 
 			if (threadSafeHandler != null)
@@ -2537,6 +2619,7 @@
 
 		protected virtual void RaiseBookmarksChanged()
 		{
+			_hasUnsavedChanges = true;
 			EventHandler threadSafeHandler = this.BookmarksChanged;
 
 			if (threadSafeHandler != null)
