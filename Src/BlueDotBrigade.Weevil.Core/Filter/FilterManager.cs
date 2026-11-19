@@ -577,7 +577,7 @@
 			}
 			catch (Exception exception) when (exception is not IO.LogFileChangedException and not FilterAbortedException)
 			{
-				// A log that changed is expected in disk mode, and its source has already logged a warning (#1025).
+				// A log that changed or is gone is expected in disk mode, and its source has already logged a warning (#1025, #1295).
 				Log.Default.Write(
 					LogSeverityType.Error,
 					exception,

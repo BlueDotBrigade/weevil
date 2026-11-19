@@ -16,8 +16,8 @@ namespace BlueDotBrigade.Weevil.Data
 	/// - A buffer reads a chunk whole once at most. A pass that comes back to a chunk, such as records sorted by time, reads only each record's blocks from it,
 	///   so a pass never reads more than the log once, plus the blocks of each record.
 	///
-	/// Reading from the log throws what <see cref="IO.LogFileSource.Read"/> throws,
-	/// for example <see cref="IO.LogFileChangedException"/> when the log was truncated, replaced or corrupted.
+	/// Reading from the log throws what <see cref="IO.LogFileSource.Read"/> throws:
+	/// <see cref="IO.LogFileChangedException"/> when the log was renamed, deleted, replaced, truncated or corrupted.
 	/// </remarks>
 	public sealed class ContentBuffer
 	{

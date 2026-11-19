@@ -70,7 +70,7 @@ namespace BlueDotBrigade.Weevil.Data
 		/// <summary>
 		/// Reads the whole chunk from the log into <paramref name="destination"/>, which is <see cref="Length"/> bytes long.
 		/// </summary>
-		/// <exception cref="LogFileChangedException">The log was truncated, replaced or corrupted since it was parsed.</exception>
+		/// <exception cref="LogFileChangedException">The log can no longer be read: it was renamed, deleted, replaced, truncated or corrupted since it was parsed.</exception>
 		internal void ReadFromFile(Span<byte> destination)
 		{
 			_source.Read(this.FileOffset, destination);

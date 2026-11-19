@@ -56,7 +56,7 @@
 		/// </summary>
 		/// <remarks>
 		/// <see cref="IEngine.Reload"/> and <see cref="IEngine.Clear"/> keep the mode.
-		/// On disk, a read of a record's content can throw an <see cref="System.IO.IOException"/>, such as <see cref="LogFileChangedException"/>, once the log changed or is gone.
+		/// On disk, a read of a record's content throws <see cref="LogFileChangedException"/> once the log changed or is gone (#1295).
 		/// </remarks>
 		/// <param name="storageMode">Where the log's content is kept.</param>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="storageMode"/> is not a <see cref="StorageMode"/>.</exception>
