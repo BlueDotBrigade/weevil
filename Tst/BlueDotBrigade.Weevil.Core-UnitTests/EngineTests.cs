@@ -397,6 +397,24 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		[WorkItem(1295)]
+		public void GivenALogOnDiskThatWasDeleted_WhenFilteredOrARecordIsRead_ThenEachThrowsTheExceptionOfAChangedLog()
+		{
+			// A deleted log threw FileNotFoundException, a changed one LogFileChangedException, so a script or plugin had to catch both.
+			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			File.Delete(engine.SourceFilePath);
+			using CapturingLogWriter log = CapturingLogWriter.Register();
+
+			FluentActions.Invoking(() => engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1")))
+				.Should().Throw<LogFileChangedException>().Which.IsUnreadable.Should().BeTrue();
+			FluentActions.Invoking(() => engine.Records[0].Content)
+				.Should().Throw<LogFileChangedException>().Which.InnerException.Should().BeOfType<FileNotFoundException>();
+
+			log.Contains(LogSeverityType.Warning).Should().BeTrue("the first read that fails logs it");
+			log.Contains(LogSeverityType.Error).Should().BeFalse("a log that is gone is expected on disk, not an unexpected error");
+		}
+
+		[TestMethod]
 		public void GivenASavedComment_WhenSavedAgainAfterAReloadThatCouldNotReadTheLog_ThenTheCommentIsKept()
 		{
 			// A log in the temporary folder is never saved, as if it came from an archive, so this copy is kept beside the tests.

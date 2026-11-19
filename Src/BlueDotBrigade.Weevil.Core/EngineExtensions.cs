@@ -22,6 +22,7 @@ namespace BlueDotBrigade.Weevil
 		/// </param>
 		/// <exception cref="LogFileChangedException">
 		/// A read failed because the log was renamed, deleted or replaced. The message says so, and to run the command again.
+		/// What the read threw is its <see cref="Exception.InnerException"/>, which says whether the log was <see cref="LogFileChangedException.IsUnreadable"/>.
 		/// </exception>
 		public static T RunOnce<T>(this IEngine engine, Func<T> work, Action<string> warn)
 		{
@@ -56,6 +57,7 @@ namespace BlueDotBrigade.Weevil
 			catch (IOException exception) when (exception is LogFileChangedException ||
 			                                     (exception is FileNotFoundException or DirectoryNotFoundException && IsRenamedOrReplaced(engine)))
 			{
+				// Every read of a record's text on disk that fails throws LogFileChangedException (#1295); a write beside a log whose folder is gone throws the others.
 				throw Stop(engine, exception);
 			}
 
