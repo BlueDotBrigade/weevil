@@ -579,18 +579,21 @@
 			string extractedLog = null;
 			var isOpening = false;
 
+			// No other open starts while the zip is read and its file extracted, which takes a while for a large log.
+			this.CanOpenLogFile = false;
+
 			try
 			{
-				string[] entryNames;
-
-				using (ZipArchive archive = ZipFile.OpenRead(sourceFilePath))
+				string[] entryNames = await Task.Run(() =>
 				{
+					using ZipArchive archive = ZipFile.OpenRead(sourceFilePath);
+
 					// Shown as paths, as Windows writes them; a folder's entry names no file.
-					entryNames = archive.Entries
+					return archive.Entries
 						.Where(entry => entry.Name.Length > 0)
 						.Select(entry => entry.FullName.Replace('/', Path.DirectorySeparatorChar))
 						.ToArray();
-				}
+				});
 
 				if (entryNames.Length == 0)
 				{
@@ -624,8 +627,9 @@
 				{
 					this.CanOpenLogFile = true;
 
-					// Nothing was opened from this copy. What was kept beside it from earlier opens stays.
-					if (extractedLog != null)
+					// Nothing was opened from this copy. What was kept beside it from earlier opens stays,
+					// and so does the copy when it is the log that is open, chosen again from the same zip.
+					if (extractedLog != null && !IsOpenFrom(new ExtractedLog(extractedLog)))
 					{
 						ExtractedLog copy = new ExtractedLog(extractedLog);
 						await Task.Run(copy.Delete);
@@ -649,7 +653,7 @@
 		{
 			await OpenAsync(logPath, storageMode);
 
-			// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
+			// A failed open leaves the zipped log open, which still needs its copy.
 			if (!IsOpenFrom(_openExtractedLog))
 			{
 				await ReplaceExtractedLogAsync(null);
@@ -657,7 +661,7 @@
 		}
 
 		/// <summary>
-		/// Opens a log Weevil extracted from a zip, keeps its copy while it is open, and deletes the copy once nothing reads it (#1162).
+		/// Opens a log Weevil extracted from a zip, keeps its copy while it is open, and deletes the copy of the log once nothing reads it (#1162).
 		/// </summary>
 		/// <remarks>
 		/// The folder it was extracted to is kept, with the sidecar and saved index the open saves beside the log (#1253).
@@ -719,7 +723,10 @@
 			ExtractedLog previous = _openExtractedLog;
 			_openExtractedLog = extracted;
 
-			return previous == null ? Task.CompletedTask : Task.Run(previous.Delete);
+			// The same file opened again from the same zip reuses its copy, which the open log still reads (#1253).
+			return previous == null || (extracted != null && extracted.Contains(previous.LogPath))
+				? Task.CompletedTask
+				: Task.Run(previous.Delete);
 		}
 
 		/// <summary>

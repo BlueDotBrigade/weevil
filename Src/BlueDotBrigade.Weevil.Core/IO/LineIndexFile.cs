@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.IO
 	/// </summary>
 	/// <remarks>
 	/// The file is a cache: it is rebuilt when it is missing, corrupt, or does not match the log, so deleting it is always safe.
-	/// Like the sidecar, it is not saved for a log in the temporary folder, such as one extracted from an archive.
+	/// Like the sidecar, it is not saved for a log in the temporary folder. A log opened from a zip is extracted to a folder kept between opens, where both are saved (#1253).
 	/// </remarks>
 	internal static class LineIndexFile
 	{

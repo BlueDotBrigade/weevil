@@ -11,7 +11,9 @@ How Weevil opens a log: the kinds of open, what each reads and writes beside the
 - **A log opened from a zip** is extracted to a folder of its own, kept between opens: `%LOCALAPPDATA%\BlueDotBrigade\Weevil\Zips\<key>\<log's name>` (#1253). The key is 16 hexadecimal characters of a SHA-256 of the zip's full path, each container's entry name, and the log's CRC-32 and size as the zip records them (`IContainerReader.GetCopyKey`), so the same file of the same zip finds its folder without being extracted first, and paths stay short.
   - Its sidecar and `.idx` are saved there like any log's, so its comments, pins and bookmarks are back, and it reopens without being parsed, when it is opened from the zip again.
   - A sidecar or index the zip holds beside the log is copied out only when the folder has none: the kept one holds the analyst's later work.
-  - When another log opens or Weevil closes, only the extracted log is deleted (`ExtractedLog`). The folder, its sidecar and index, and exports saved beside the log stay. Nothing cleans the folder up.
+  - A copy already there, of the entry's size, is used as it is: it may be the log that is open, so it is never rewritten or deleted by a second open of the same file, whether that open is cancelled or fails. A shorter one, left by a copy that stopped part way, is copied over.
+  - When another log opens or Weevil closes, only the extracted log is deleted (`ExtractedLog`). The folder, its sidecar and index, and exports saved beside the log stay. A crash leaves the log's copy too, which the next open of the same file uses.
+  - **Known limits.** Nothing cleans the folder up, and nothing shows it: each zipped log opened keeps its sidecar and `.idx`, which holds the record table, about 22 bytes per record. The key includes the zip's path, so a zip moved or renamed starts again without its annotations. Two instances of Weevil that open the same file of the same zip share one copy: the one that closes first deletes the other's log (#1254 is to refuse the second open).
 
 ## The Steps
 

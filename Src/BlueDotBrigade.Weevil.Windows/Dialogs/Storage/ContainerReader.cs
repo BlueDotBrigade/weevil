@@ -254,8 +254,20 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			try
 			{
 				var extracted = Path.Combine(destinationFolder, file.Name);
-				copied.Add(extracted);
-				Copy(file, extracted, cancellationToken);
+
+				// A name such as `C:other.log` would leave the folder: ZipFile.ExtractToDirectory refuses it too.
+				if (!Path.GetFullPath(extracted).StartsWith(Path.GetFullPath(destinationFolder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+				{
+					throw new InvalidDataException($"The zip names a file outside the folder it is extracted to: `{file.Name}`.");
+				}
+
+				// A copy already here, of the entry's size, is the same file, since the folder's name includes the entry's CRC-32 and size (#1253).
+				// It may be the log open in Weevil, or in another Weevil, which must not be rewritten. A shorter one is a copy that stopped part way.
+				if (!File.Exists(extracted) || new FileInfo(extracted).Length != GetLength(file))
+				{
+					copied.Add(extracted);
+					Copy(file, extracted, cancellationToken);
+				}
 
 				foreach (var suffix in companionSuffixes ?? Enumerable.Empty<string>())
 				{
@@ -508,6 +520,15 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				cancellationToken.ThrowIfCancellationRequested();
 				target.Write(buffer, 0, read);
 			}
+		}
+
+		/// <summary>
+		/// The size of a file in a zip, as the zip's directory records it.
+		/// </summary>
+		private long GetLength(Location file)
+		{
+			using ZipArchive archive = OpenArchive(file, file.ArchivePath.Count - 1);
+			return (FindEntry(archive, file.ArchivePath[^1]) ?? throw new FileNotFoundException($"The zip holds no file called `{file.Name}`.")).Length;
 		}
 
 		/// <summary>

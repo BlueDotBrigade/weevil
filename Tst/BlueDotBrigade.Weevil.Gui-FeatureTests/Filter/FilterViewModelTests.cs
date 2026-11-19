@@ -1001,7 +1001,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public async Task GivenAPinOnALogOpenedFromAZip_WhenTheSameFileIsOpenedFromTheZipAgain_ThenThePinIsBackWithoutParsingTheLog()
+		public async Task GivenAPinOnALogOpenedFromAZip_WhenTheSameFileIsOpenedFromTheZipAgain_ThenThePinIsBack()
 		{
 			// Weevil extracted a zipped log to a new temporary folder each time, and saved nothing beside it, so the analyst's work was lost (#1253).
 			ZippedLogViewModel zipped = CreateViewModelForZip();
@@ -1021,7 +1021,34 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 				zipped.OpenedPaths[2].Should().Be(zipped.OpenedPaths[0], "the same file of the same zip is extracted to the same folder");
 				zipped.ViewModel.Rows.GetRow(0).IsPinned.Should().BeTrue("the sidecar kept beside the copy is read again");
-				System.IO.File.Exists($"{zipped.OpenedPaths[0]}.idx").Should().BeTrue("the saved index kept beside it reopens the log without parsing it");
+				System.IO.File.Exists($"{zipped.OpenedPaths[0]}.idx").Should().BeTrue("the saved index is kept beside it, for the reopen to read");
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedFromAZip_WhenTheSameFileIsChosenAgainAndOpenAsIsCancelled_ThenTheOpenLogIsStillRead()
+		{
+			// The same file of the same zip is extracted to the same copy, which the open log reads: cancelling deleted it (found in review of #1253).
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+			var zipPath = CreateZip("Logs.zip", "A.log");
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				zipped.DialogBox.TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>()).Returns(false);
+
+				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				zipped.ViewModel.Reload();
+				WaitUntil(() => zipped.ViewModel.IsFilterToolboxEnabled);
+
+				System.IO.File.Exists(zipped.OpenedPaths[0]).Should().BeTrue("the open log is read from that copy");
+				zipped.DialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+				zipped.ViewModel.VisibleItems.Should().NotBeNullOrEmpty("Reload reads the log again from its copy");
 			}
 			finally
 			{

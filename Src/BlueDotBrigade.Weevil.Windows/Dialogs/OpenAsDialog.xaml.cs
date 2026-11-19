@@ -188,17 +188,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			if (_isClosed)
 			{
-				// The copy finished as the window closed: nobody will open it. A kept folder keeps what was kept beside it.
-				if (localPath is not null && file.Location.IsInArchive)
+				// The copy finished as the window closed: nobody will open it. A copy in a kept folder stays: it may be the log the host has open,
+				// which the dialog cannot tell, and the next open of the same file uses it (#1253).
+				if (localPath is not null && file.Location.IsInArchive && this.CopiesFolder is null)
 				{
-					if (this.CopiesFolder is null)
-					{
-						ContainerReader.TryDeleteFolder(destination);
-					}
-					else
-					{
-						ContainerReader.TryDeleteFile(localPath);
-					}
+					ContainerReader.TryDeleteFolder(destination);
 				}
 			}
 			else if (localPath is null)

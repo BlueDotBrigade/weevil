@@ -27,7 +27,7 @@
 		}
 
 		/// <summary>
-		/// Indicates whether the file is in a folder within the temporary folder, which is where files from a compressed archive are extracted.
+		/// Indicates whether the file is in a folder within the temporary folder, where Weevil saves no sidecar or index beside a log.
 		/// </summary>
 		public static bool IsInTemporaryDirectory(string path)
 		{

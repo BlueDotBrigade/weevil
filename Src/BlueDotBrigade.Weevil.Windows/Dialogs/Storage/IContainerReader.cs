@@ -56,8 +56,9 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		/// <param name="companionSuffixes">What a companion's name adds to the file's, such as <c>.xml</c>.</param>
 		/// <param name="cancellationToken">Stops the copy, for example when the dialog closes (#1251).</param>
 		/// <remarks>
-		/// The file is copied again over an earlier copy. A companion already in <paramref name="destinationFolder"/> is kept, not copied over:
-		/// it holds what the analyst added since the file was last opened from the container (#1253).
+		/// A copy of the file already in <paramref name="destinationFolder"/>, of the file's size, is used as it is, since it may be open (#1253);
+		/// a shorter one, left by a copy that stopped, is copied over. A companion already there is kept, not copied over:
+		/// it holds what the analyst added since the file was last opened from the container.
 		/// A copy that is cancelled or fails deletes what this call copied, and <paramref name="destinationFolder"/> when this call created it, so no partial copy is left.
 		/// </remarks>
 		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>

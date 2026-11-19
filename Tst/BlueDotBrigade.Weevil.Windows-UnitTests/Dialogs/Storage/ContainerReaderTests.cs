@@ -215,7 +215,56 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 			new ContainerReader().GetCopyKey(Location.ForArchive(_zipPath, "2026/Server.log")).Should().NotBe(key, "the entry's content changed");
 			new ContainerReader().GetCopyKey(Location.ForArchive(copy, "2026/Server.log")).Should().NotBe(key, "it is in another zip");
-			_reader.GetCopyKey(Location.ForArchive(_zipPath, "Nested/Inner.zip", "Old.log")).Should().NotBe(_reader.GetCopyKey(Location.ForArchive(_zipPath, "Nested/Inner.zip")), "a zip in a zip names each container");
+		}
+
+		[TestMethod]
+		public void GivenTheSameFileInTwoZipsInAZip_WhenTheirCopyKeysAreAsked_ThenTheyDiffer()
+		{
+			// The file's name, CRC-32 and size are the same: only the name of the zip it is in tells them apart.
+			using (ZipArchive zip = ZipFile.Open(_zipPath, ZipArchiveMode.Update))
+			{
+				using var inner = new MemoryStream();
+				using (Stream entry = zip.GetEntry("Nested/Inner.zip")!.Open())
+				{
+					entry.CopyTo(inner);
+				}
+
+				Add(zip, "Copy/Inner.zip", inner.ToArray());
+			}
+
+			using var reader = new ContainerReader();
+
+			reader.GetCopyKey(Location.ForArchive(_zipPath, "Copy/Inner.zip", "Old.log"))
+				.Should().NotBe(reader.GetCopyKey(Location.ForArchive(_zipPath, "Nested/Inner.zip", "Old.log")));
+		}
+
+		[TestMethod]
+		public void GivenAFolderKeptFromAnEarlierOpen_WhenAnExtractionIntoItFails_ThenWhatWasKeptStays()
+		{
+			// A failed copy into a kept folder removes only what it copied: the kept sidecar holds the analyst's work (#1253).
+			var destination = Directory.CreateDirectory(Path.Combine(_root, "Kept")).FullName;
+			var keptSidecar = Path.Combine(destination, "App.log.xml");
+			File.WriteAllText(keptSidecar, "<sidecar comments=\"kept\" />");
+
+			Action extract = () => _reader.Extract(Location.ForArchive(Path.Combine(_logs, "Broken.zip"), "App.log"), Companions, destination);
+
+			extract.Should().Throw<InvalidDataException>();
+			File.ReadAllText(keptSidecar).Should().Be("<sidecar comments=\"kept\" />");
+		}
+
+		[TestMethod]
+		public void GivenACopyOfTheSameFileKept_WhenExtractedAgain_ThenTheCopyIsUsedAsItIs()
+		{
+			// The copy may be the log open in Weevil, which must not be rewritten (found in review of #1253).
+			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var destination = Path.Combine(_root, "Kept");
+			var extracted = _reader.Extract(log, Companions, destination);
+			var written = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			File.SetLastWriteTimeUtc(extracted, written);
+
+			_reader.Extract(log, Companions, destination);
+
+			File.GetLastWriteTimeUtc(extracted).Should().Be(written, "a copy of the entry's size is the same file");
 		}
 
 		[TestMethod]

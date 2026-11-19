@@ -138,7 +138,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// Whether the log is read over the network: a UNC path, or a mapped network drive.
 		/// </summary>
 		/// <remarks>
-		/// A zipped log is read from its copy in the temporary folder, so it is never on a network drive.
+		/// A zipped log is read from its copy in the user's local application data (#1253), so it is never on a network drive.
 		/// </remarks>
 		public static bool IsNetworkPath(string path)
 		{

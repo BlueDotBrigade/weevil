@@ -24,7 +24,7 @@
 		bool TryShowOpenAs(OpenAsAdvice advice, out StorageMode storageMode);
 
 		/// <summary>
-		/// Lets the user choose one of the files extracted from a zip.
+		/// Lets the user choose one of the files in a zip, which Weevil then extracts.
 		/// </summary>
 		/// <returns><see langword="false"/> when the user chose no file.</returns>
 		bool TrySelectCompressedFile(string[] fileNames, out string selectedFileName);
