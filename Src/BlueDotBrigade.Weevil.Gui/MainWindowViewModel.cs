@@ -84,7 +84,8 @@
 				_applicationVersion,
 				bulletin.SourceFilePath,
 				_installedRamMb,
-				_installedCpu);
+				_installedCpu,
+				bulletin.SourceFileSize);
 		}
 
 		public FilterViewModel FilterViewModel { get; }

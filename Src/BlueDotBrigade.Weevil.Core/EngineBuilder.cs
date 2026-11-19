@@ -63,6 +63,13 @@
 			return this;
 		}
 
+		/// <inheritdoc />
+		public IEngineBuilder UsingDisplayPath(string displayPath)
+		{
+			_coreEngineBuilder.UsingDisplayPath(displayPath);
+			return this;
+		}
+
 		public IEngine Open()
 		{
 			return new Engine(_coreEngineBuilder.Build());

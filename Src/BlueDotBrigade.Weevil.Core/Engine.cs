@@ -131,6 +131,11 @@
 			? _coreEngine.SourceDirectory
 			: string.Empty;
 
+		/// <summary>
+		/// The file read, which <see cref="SourceFilePath"/> names as the analyst knows it (#1312).
+		/// </summary>
+		internal string FilePath => _coreEngine.FilePath;
+
 		public bool HasBeenCleared => _coreEngine.HasBeenCleared;
 
 		public void Save()
@@ -243,7 +248,7 @@
 		{
 			if (_coreEngine.Source?.HasChanged == true)
 			{
-				IO.LineIndexFile.Delete(_coreEngine.SourceFilePath);
+				IO.LineIndexFile.Delete(_coreEngine.FilePath);
 			}
 		}
 
@@ -261,7 +266,7 @@
 
 			// The session, the flags and the storage mode carry across Reload (#1013, #1025).
 			CoreEngine.CoreEngineBuilder builder = CoreEngine
-				.FromPath(_coreEngine.SourceFilePath)
+				.FromPath(_coreEngine.FilePath)
 				.UsingStateOf(_coreEngine)
 				.UsingStorage(_coreEngine.StorageMode);
 

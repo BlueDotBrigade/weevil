@@ -47,14 +47,22 @@ namespace BlueDotBrigade.Weevil.IO
 
 		private long _bytesRead;
 
-		internal LogFileSource(string path, long startOffset, long lengthWhenOpened)
+		// The file read: a copy, for a log extracted from a zip, whose path the analyst never chose (#1312).
+		private readonly string _filePath;
+
+		internal LogFileSource(string filePath, string path, long startOffset, long lengthWhenOpened)
 		{
-			this.Path = path;
+			_filePath = filePath;
+			this.Path = string.IsNullOrEmpty(path) ? filePath : path;
 			this.StartOffset = startOffset;
 			_endOffset = startOffset;
 			_lengthWhenOpened = lengthWhenOpened;
 		}
 
+		/// <summary>
+		/// The log, as the analyst knows it, which messages and <see cref="LogFileChangedException"/> name: for a log read from a copy,
+		/// such as one extracted from a zip, the zip's path and the log's name, as <c>C:\Logs\Archive.zip\App.log</c> (#1312). Otherwise the file read.
+		/// </summary>
 		public string Path { get; }
 
 		/// <summary>
@@ -96,7 +104,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <param name="endOffset">Where the range parsed ends in the file.</param>
 		/// <param name="lengthWhenOpened">The log's length now, so a log parsed only in part is not taken for one that grew.</param>
 		/// <param name="checksums">What <see cref="GetChecksums"/> returned for the same range: one checksum for each block it covers.</param>
-		public static LogFileSource Create(string path, long startOffset, long endOffset, long lengthWhenOpened, ReadOnlySpan<ulong> checksums)
+		/// <param name="displayPath">The log as the analyst knows it, when <paramref name="path"/> is a copy: see <see cref="Path"/>.</param>
+		public static LogFileSource Create(string path, long startOffset, long endOffset, long lengthWhenOpened, ReadOnlySpan<ulong> checksums, string displayPath = null)
 		{
 			ArgumentException.ThrowIfNullOrEmpty(path);
 			ArgumentOutOfRangeException.ThrowIfNegative(startOffset);
@@ -111,7 +120,7 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 
 			// The full path, as the builder keeps, so reads still find the log if the working directory changes.
-			var source = new LogFileSource(System.IO.Path.GetFullPath(path), startOffset, lengthWhenOpened);
+			var source = new LogFileSource(System.IO.Path.GetFullPath(path), displayPath, startOffset, lengthWhenOpened);
 			source.Extend(endOffset);
 			source.Complete(checksums.ToArray());
 
@@ -162,7 +171,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				using (SafeFileHandle handle = System.IO.File.OpenHandle(this.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+				using (SafeFileHandle handle = System.IO.File.OpenHandle(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
 				{
 					length = RandomAccess.GetLength(handle);
 
@@ -198,7 +207,7 @@ namespace BlueDotBrigade.Weevil.IO
 				{
 					Log.Default.Write(
 						LogSeverityType.Warning,
-						$"The log has changed since it was opened, so it must be reloaded. Path={this.Path}, ExpectedLength={exception.ExpectedLength}, ActualLength={exception.ActualLength}, ChangedOffset={exception.ChangedOffset}");
+						$"The log has changed since it was opened, so it must be reloaded. {this.DescribeFile()}, ExpectedLength={exception.ExpectedLength}, ActualLength={exception.ActualLength}, ChangedOffset={exception.ChangedOffset}");
 				}
 
 				throw;
@@ -208,7 +217,7 @@ namespace BlueDotBrigade.Weevil.IO
 				// Once, as for a change, so scrolling a log that is gone does not log each row.
 				if (Interlocked.Exchange(ref _hasBeenUnreadable, 1) == 0)
 				{
-					Log.Default.Write(LogSeverityType.Warning, exception, $"The log can no longer be read. Path={this.Path}");
+					Log.Default.Write(LogSeverityType.Warning, exception, $"The log can no longer be read. {this.DescribeFile()}");
 				}
 
 				throw LogFileChangedException.FromReadFailure(this.Path, exception);
@@ -223,8 +232,18 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				Log.Default.Write(
 					LogSeverityType.Warning,
-					$"The log has grown since it was opened. Path={this.Path}, ExpectedLength={System.Math.Max(_lengthWhenOpened, this.EndOffset)}, ActualLength={length}");
+					$"The log has grown since it was opened. {this.DescribeFile()}, ExpectedLength={System.Math.Max(_lengthWhenOpened, this.EndOffset)}, ActualLength={length}");
 			}
+		}
+
+		/// <summary>
+		/// The log for the application's log: its path, and the file read when that is a copy.
+		/// </summary>
+		private string DescribeFile()
+		{
+			return string.Equals(this.Path, _filePath, StringComparison.Ordinal)
+				? $"Path={this.Path}"
+				: $"Path={this.Path}, FilePath={_filePath}";
 		}
 
 		/// <summary>

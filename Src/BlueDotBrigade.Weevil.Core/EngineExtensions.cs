@@ -99,7 +99,8 @@ namespace BlueDotBrigade.Weevil
 		/// </remarks>
 		private static bool IsRenamedOrReplaced(IEngine engine)
 		{
-			var log = new FileInfo(engine.SourceFilePath);
+			// The file read, which may be a copy the engine names otherwise (#1312).
+			var log = new FileInfo(engine is Engine opened ? opened.FilePath : engine.SourceFilePath);
 			return !log.Exists || log.Length < engine.Metrics.FileSize;
 		}
 	}

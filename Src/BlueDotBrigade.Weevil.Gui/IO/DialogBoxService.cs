@@ -82,7 +82,12 @@ internal class DialogBoxService : IDialogBoxService
 		var isAccepted = dialog.ShowDialog() == true;
 
 		choice = isAccepted
-			? new OpenAsChoice(dialog.Result.LocalPath, dialog.Result.ExtractedFolder, options.StorageMode, options.Advice)
+			? new OpenAsChoice(
+				dialog.Result.LocalPath,
+				dialog.Result.ExtractedFolder,
+				options.StorageMode,
+				options.Advice,
+				dialog.Result.Item.Location.IsInArchive ? dialog.Result.Item.Location.ToString() : null)
 			: null;
 
 		return isAccepted;

@@ -397,6 +397,50 @@ namespace BlueDotBrigade.Weevil
 		}
 
 		[TestMethod]
+		public void GivenALogReadFromACopy_WhenOpenedWithThePathTheAnalystKnows_ThenTheEngineNamesItSoAndKeepsItAcrossReload()
+		{
+			// A log opened from a zip was named by its extracted copy, a path the analyst never chose (#1312).
+			const string Readable = @"C:\Logs\Archive.zip\App.log";
+			var copy = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, "Copy")).FullName, "App.log");
+			File.Copy(new Daten().AsFilePath("SampleData.log"), copy);
+
+			IEngine engine = Engine.UsingPath(copy).UsingDisplayPath(Readable).Open();
+			var count = engine.Count;
+			engine.Reload();
+
+			engine.SourceFilePath.Should().Be(Readable, "Reload keeps it");
+			engine.SourceDirectory.Should().Be(Path.GetDirectoryName(copy), "exports, reports and splits are saved beside the file read");
+			engine.Count.Should().Be(count, "the copy is read");
+		}
+
+		[TestMethod]
+		public void GivenALogReadFromACopyOnDisk_WhenTheCopyIsGone_ThenTheExceptionNamesThePathTheAnalystKnows()
+		{
+			// Also when it was reopened from its saved index, whose source is made from the saved checksums (#1312).
+			const string Readable = @"C:\Logs\Archive.zip\App.log";
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+
+			try
+			{
+				var copy = Path.Combine(folder, "App.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), copy);
+				IEngine parsed = Engine.UsingPath(copy).UsingDisplayPath(Readable).UsingStorage(StorageMode.Disk).Open();
+				IEngine reopened = Engine.UsingPath(copy).UsingDisplayPath(Readable).UsingStorage(StorageMode.Disk).Open();
+				File.Delete(copy);
+
+				foreach (IEngine engine in new[] { parsed, reopened })
+				{
+					FluentActions.Invoking(() => engine.Records[0].Content)
+						.Should().Throw<LogFileChangedException>().Which.Path.Should().Be(Readable);
+				}
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		[WorkItem(1295)]
 		public void GivenALogOnDiskThatWasDeleted_WhenFilteredOrARecordIsRead_ThenEachThrowsTheExceptionOfAChangedLog()
 		{
