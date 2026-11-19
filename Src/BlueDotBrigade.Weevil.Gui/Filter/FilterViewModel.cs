@@ -2135,7 +2135,8 @@
 			try
 			{
 				// The count first, so a large selection creates no records (#1139).
-				IRecord selectedRecord = _engine.Selector.SelectedCount == 1 ? _engine.Selector.GetSelected()[0] : null;
+				RecordList selected = _engine.Selector.GetSelected();
+				IRecord selectedRecord = selected.Count == 1 ? selected[0] : null;
 				if (selectedRecord == null)
 				{
 					MessageBox.Show("A single record must be selected.", "Source Code", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -2954,9 +2955,12 @@
 
 		private void RemoveRegion()
 		{
-			if (_engine.Selector.SelectedCount == 1)
+			// One read of the selection, so the count and the line agree.
+			RecordList selected = _engine.Selector.GetSelected();
+
+			if (selected.Count == 1)
 			{
-				var selectedLineNumber = _engine.Selector.GetSelected().GetLineNumber(0);
+				var selectedLineNumber = selected.GetLineNumber(0);
 
 				_engine.Regions.Clear(selectedLineNumber);
 				RaiseRegionsChanged();
@@ -2986,9 +2990,12 @@
 
 		private void RemoveBookmark()
 		{
-			if (_engine.Selector.SelectedCount == 1)
+			// One read of the selection, so the count and the line agree.
+			RecordList selected = _engine.Selector.GetSelected();
+
+			if (selected.Count == 1)
 			{
-				var selectedLineNumber = _engine.Selector.GetSelected().GetLineNumber(0);
+				var selectedLineNumber = selected.GetLineNumber(0);
 
 				_engine.Bookmarks.Clear(selectedLineNumber);
 				RaiseBookmarksChanged();
@@ -3002,9 +3009,12 @@
 
 		private void RenameBookmark()
 		{
-			if (_engine.Selector.SelectedCount == 1)
+			// One read of the selection, so the count and the line agree.
+			RecordList selected = _engine.Selector.GetSelected();
+
+			if (selected.Count == 1)
 			{
-				var selectedLineNumber = _engine.Selector.GetSelected().GetLineNumber(0);
+				var selectedLineNumber = selected.GetLineNumber(0);
 
 				if (_engine.Bookmarks.TryGetBookmark(selectedLineNumber, out var bookmark))
 				{
@@ -3052,9 +3062,11 @@
 		{
 			try
 			{
-				if (_engine.Selector.SelectedCount == 1)
+				RecordList selected = _engine.Selector.GetSelected();
+
+				if (selected.Count == 1)
 				{
-					var selectedRecord = _engine.Selector.GetSelected()[0];
+					var selectedRecord = selected[0];
 					var selectedLineNumber = selectedRecord.LineNumber;
 
 					var defaultName = selectedRecord.HasCreationTime

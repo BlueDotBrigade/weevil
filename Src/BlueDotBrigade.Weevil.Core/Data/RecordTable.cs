@@ -562,6 +562,9 @@ namespace BlueDotBrigade.Weevil.Data
 
 			public RecordTable Build()
 			{
+				// A flag added to RecordFacts must not take the table's bit: its rows would read as strings.
+				System.Diagnostics.Debug.Assert(!RecordFacts.TryFromValue(KeepsStringBit, out _), "RecordFacts uses the bit the record table keeps for itself.");
+
 				var rowsInLastBlock = this.Count % BlockSize;
 				_current?.Complete(rowsInLastBlock > 0 ? rowsInLastBlock : BlockSize);
 
