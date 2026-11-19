@@ -16,7 +16,7 @@ How Weevil keeps a log's content on disk instead of in memory (#421, #1025). The
 ## Reading a Log on Disk
 
 1. The engine builder opens the log, and `SerializedRecordRepository` reads it through `LogLineReader`.
-2. In disk mode, the reader gives every byte it reads, in file order, to a `LogFileSourceBuilder`, which computes a checksum of each 64 KB block. Its chunks are chunks on file: they hold their range of the log, but no bytes.
+2. In both modes, the reader gives every byte it reads, in file order, to a `LogFileSourceBuilder`, which computes a checksum of each 64 KB block ([OpeningALog.md](OpeningALog.md#the-kinds-of-open)). In disk mode its chunks are chunks on file: they hold their range of the log, but no bytes.
 3. Before the repository returns any record, it completes the `LogFileSource`. Nothing can be read through it before then.
 4. Afterwards, a record's content is read through its chunk and the source: each read opens its own handle, reads the blocks that hold the bytes, checks their checksums and closes the handle. A `ContentBuffer` reads a whole chunk at a time, so each reader reads a chunk once when it reaches it. A filter gives its parallel workers whole ranges of records that share a chunk (`RecordRanges`), so it reads each chunk once. A log with at most half as many chunks as cores is the exception: each chunk's range is split, so more cores are busy, and each part's worker reads the whole chunk. "Filtering complete." logs the bytes read from the log while it ran, which includes what other readers, such as the rows on screen, read meanwhile (#1027).
 
