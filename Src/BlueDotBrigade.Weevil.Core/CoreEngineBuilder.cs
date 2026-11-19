@@ -243,27 +243,27 @@
 			/// A method of its own, never inlined, so the saved table that a grown log's longer table replaces is not kept by <see cref="Build"/>'s frame
 			/// when the engine is created, whose collection would otherwise keep it: about 22 bytes per record. Clearing the variable in <see cref="Build"/> did not free it.
 			/// </remarks>
-			/// <param name="source">On disk, the source the records read their content back through: otherwise <see langword="null"/>.</param>
+			/// <param name="source">The source made from the saved checksums, in both modes: on disk, the records read their content back through it.</param>
 			/// <returns><see langword="false"/> when the log must be parsed.</returns>
 			[MethodImpl(MethodImplOptions.NoInlining)]
-			private bool TryReopen(FileStream dataSource, LineIndex lineIndex, IPlugin plugin, ICoreExtension coreExtension, out RecordList records, out LogFileSource source)
+			private bool TryReopen(FileStream log, LineIndex lineIndex, IPlugin plugin, ICoreExtension coreExtension, out RecordList records, out LogFileSource source)
 			{
 				records = null;
 
-				if (!LineIndexFile.TryLoadTable(_sourceFilePath, dataSource, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
+				if (!LineIndexFile.TryLoadTable(_sourceFilePath, log, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
 				{
 					return false;
 				}
 
 				SavedParse savedParse = lineIndex.Parse;
 
-				if (savedParse.EndOffset == dataSource.Length)
+				if (savedParse.EndOffset == log.Length)
 				{
 					records = new TableRecordList(savedTable);
 					return true;
 				}
 
-				if (!GrownLogParser.TryParse(dataSource, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
+				if (!GrownLogParser.TryParse(log, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
 				{
 					source = null;
 					return false;
@@ -271,8 +271,8 @@
 
 				// The log grew since it was indexed: only its new part was parsed, and the longer table is saved.
 				records = new TableRecordList(grownTable);
-				source = _storageMode == StorageMode.Disk ? parsedSource : null;
-				LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
+				source = parsedSource;
+				LineIndexFile.SaveParse(_sourceFilePath, log, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
 
 				return true;
 			}
@@ -333,10 +333,10 @@
 
 				sourceFileEncoding = EncodingHelper.GetEncoding(FileHelper.Open(_sourceFilePath));
 
-				using (FileStream dataSource = FileHelper.Open(_sourceFilePath))
+				using (FileStream log = FileHelper.Open(_sourceFilePath))
 				{
 					sourceFilePath = _sourceFilePath;
-					sourceFileLength = dataSource.Length;
+					sourceFileLength = log.Length;
 
 					IPlugin plugin = new PluginFactory().Create(sourceFilePath);
 					coreExtension = plugin.GetExtension(sourceFilePath);
@@ -345,7 +345,7 @@
 
 					loadingStopwatch.Restart();
 
-					lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
+					lineIndex = LineIndexFile.Load(_sourceFilePath, log);
 
 					// Sized from the line index, before the records are parsed.
 					var isKeepingSession = _session != null;
@@ -362,7 +362,7 @@
 
 					if (isFullOpen)
 					{
-						_ = TryReopen(dataSource, lineIndex, plugin, coreExtension, out records, out source);
+						_ = TryReopen(log, lineIndex, plugin, coreExtension, out records, out source);
 					}
 
 					if (records == null)
@@ -372,15 +372,15 @@
 						// In disk mode, the records read their content back from the log, through a source complete before Get returns (#1025).
 						SerializedRecordRepository repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
 							? new SerializedRecordRepository(
-								 dataSource,
+								 log,
 								 coreExtension.GetRecordParser(),
-								 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
+								 lineIndex.GetByteOffset(log, startAtLineNumber),
 								 startAtLineNumber,
 								 true,
 								 GetMaximumLinesToSearch(startAtLineNumber, lineIndex.LineCount),
 								 _storageMode)
 							: new SerializedRecordRepository(
-								 dataSource,
+								 log,
 								 coreExtension.GetRecordParser(),
 								 GetMaximumLinesToSearch(lineNumberRange),
 								 _storageMode);
@@ -390,9 +390,9 @@
 
 						// After a full parse, the saved index keeps what parsed the log, the checksums of the bytes read and the record table,
 						// so the log can be reopened without parsing (#1023). A parse from a start line, of a range or up to a limit keeps only part of it.
-						if (isFullOpen && repository.ParsedSource != null && records is TableRecordList { WholeTable: RecordTable parsedTable })
+						if (isFullOpen && repository.Source != null && records is TableRecordList { WholeTable: RecordTable parsedTable })
 						{
-							LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, repository.ParsedSource), parsedTable);
+							LineIndexFile.SaveParse(_sourceFilePath, log, lineIndex, SavedParse.Create(plugin, _storageMode, repository.Source), parsedTable);
 						}
 					}
 

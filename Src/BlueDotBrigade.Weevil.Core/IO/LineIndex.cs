@@ -98,7 +98,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Scans the whole log.
 		/// </summary>
-		public static LineIndex Build(Stream source, int checkpointInterval = DefaultCheckpointInterval, int bufferSize = DefaultBufferSize)
+		public static LineIndex Build(Stream log, int checkpointInterval = DefaultCheckpointInterval, int bufferSize = DefaultBufferSize)
 		{
 			if (checkpointInterval < 1)
 			{
@@ -106,7 +106,7 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 
 			var index = new LineIndex(checkpointInterval, new List<long>());
-			index.Update(source, bufferSize);
+			index.Update(log, bufferSize);
 
 			return index;
 		}
@@ -118,14 +118,14 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Logs only grow by appending, so the content already scanned is assumed to be unchanged.
 		/// Use <see cref="TryRead"/> to check this for a saved index.
 		/// </remarks>
-		public void Update(Stream source, int bufferSize = DefaultBufferSize)
+		public void Update(Stream log, int bufferSize = DefaultBufferSize)
 		{
-			var originalPosition = source.Position;
+			var originalPosition = log.Position;
 
 			try
 			{
 				// When the log was last scanned, its byte order mark may not have been written yet, or only in part.
-				(int UnitSize, bool IsBigEndian, int PreambleLength) encoding = DetectEncoding(source);
+				(int UnitSize, bool IsBigEndian, int PreambleLength) encoding = DetectEncoding(log);
 
 				if (encoding != (_unitSize, _isBigEndian, _preambleLength))
 				{
@@ -135,7 +135,7 @@ namespace BlueDotBrigade.Weevil.IO
 				var lineCount = this.LineCount;
 				ScanState state = _endState;
 
-				this.IndexedLength = Scan(source, this.IndexedLength, ref state, bufferSize, lineStart =>
+				this.IndexedLength = Scan(log, this.IndexedLength, ref state, bufferSize, lineStart =>
 				{
 					lineCount = CountLine(lineCount);
 
@@ -149,11 +149,11 @@ namespace BlueDotBrigade.Weevil.IO
 
 				this.LineCount = lineCount;
 				_endState = state;
-				(_headHash, _tailHash) = ComputeFingerprint(source, this.IndexedLength);
+				(_headHash, _tailHash) = ComputeFingerprint(log, this.IndexedLength);
 			}
 			finally
 			{
-				source.Position = originalPosition;
+				log.Position = originalPosition;
 			}
 		}
 
@@ -186,20 +186,20 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <remarks>
 		/// For a log found changed in the middle, which <see cref="TryRead"/> cannot see, as it checks only the start and end of what was scanned (#1023).
 		/// </remarks>
-		public void Rebuild(Stream source, int bufferSize = DefaultBufferSize)
+		public void Rebuild(Stream log, int bufferSize = DefaultBufferSize)
 		{
-			var originalPosition = source.Position;
+			var originalPosition = log.Position;
 
 			try
 			{
-				Reset(DetectEncoding(source));
+				Reset(DetectEncoding(log));
 			}
 			finally
 			{
-				source.Position = originalPosition;
+				log.Position = originalPosition;
 			}
 
-			Update(source, bufferSize);
+			Update(log, bufferSize);
 		}
 
 		/// <summary>
@@ -219,7 +219,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Returns the byte offset where the specified line begins.
 		/// </summary>
-		public long GetByteOffset(Stream source, int lineNumber, int bufferSize = DefaultLookupBufferSize)
+		public long GetByteOffset(Stream log, int lineNumber, int bufferSize = DefaultLookupBufferSize)
 		{
 			if (lineNumber < 1 || lineNumber > this.LineCount)
 			{
@@ -234,7 +234,7 @@ namespace BlueDotBrigade.Weevil.IO
 				return checkpointOffset;
 			}
 
-			var originalPosition = source.Position;
+			var originalPosition = log.Position;
 
 			try
 			{
@@ -243,7 +243,7 @@ namespace BlueDotBrigade.Weevil.IO
 				var byteOffset = -1L;
 				ScanState state = ScanState.AtLineStart;
 
-				Scan(source, checkpointOffset, ref state, bufferSize, lineStart =>
+				Scan(log, checkpointOffset, ref state, bufferSize, lineStart =>
 				{
 					linesFound++;
 
@@ -260,7 +260,7 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 			finally
 			{
-				source.Position = originalPosition;
+				log.Position = originalPosition;
 			}
 		}
 
@@ -335,14 +335,14 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <remarks>
 		/// For an estimate only, such as the memory a log needs (#1028): the index may be damaged, or belong to a log that has changed since.
 		/// </remarks>
-		public static bool TryReadLineCount(Stream indexSource, out int lineCount, out long indexedLength)
+		public static bool TryReadLineCount(Stream indexFile, out int lineCount, out long indexedLength)
 		{
 			lineCount = 0;
 			indexedLength = 0;
 
 			try
 			{
-				if (!TryReadSignature(indexSource) || !IndexSection.TryRead(indexSource, IndexSectionKind.Header, out IndexSection.Reader header))
+				if (!TryReadSignature(indexFile) || !IndexSection.TryRead(indexFile, IndexSectionKind.Header, out IndexSection.Reader header))
 				{
 					return false;
 				}
@@ -375,13 +375,13 @@ namespace BlueDotBrigade.Weevil.IO
 		/// If the log has grown since, call <see cref="Update"/> to scan the new content.
 		/// The index is read as it streams, so its size has no limit.
 		/// </remarks>
-		public static bool TryRead(Stream indexSource, Stream logSource, out LineIndex index)
+		public static bool TryRead(Stream indexFile, Stream log, out LineIndex index)
 		{
 			index = null;
 
 			try
 			{
-				if (!TryReadSignature(indexSource) || !IndexSection.TryRead(indexSource, IndexSectionKind.Header, out IndexSection.Reader header))
+				if (!TryReadSignature(indexFile) || !IndexSection.TryRead(indexFile, IndexSectionKind.Header, out IndexSection.Reader header))
 				{
 					return false;
 				}
@@ -433,9 +433,9 @@ namespace BlueDotBrigade.Weevil.IO
 					headHash.Length == HashLength &&
 					tailHash.Length == HashLength &&
 					indexedLength >= preambleLength &&
-					logSource.Length >= indexedLength;
+					log.Length >= indexedLength;
 
-				if (!isConsistent || !IndexSection.TryRead(indexSource, IndexSectionKind.Checkpoints, out IndexSection.Reader checkpointSection))
+				if (!isConsistent || !IndexSection.TryRead(indexFile, IndexSectionKind.Checkpoints, out IndexSection.Reader checkpointSection))
 				{
 					return false;
 				}
@@ -467,14 +467,14 @@ namespace BlueDotBrigade.Weevil.IO
 
 				if (hasParse)
 				{
-					if (!IndexSection.TryRead(indexSource, IndexSectionKind.Parse, out IndexSection.Reader parseSection))
+					if (!IndexSection.TryRead(indexFile, IndexSectionKind.Parse, out IndexSection.Reader parseSection))
 					{
 						return false;
 					}
 
 					using (parseSection)
 					{
-						parse = SavedParse.Read(parseSection, logSource.Length);
+						parse = SavedParse.Read(parseSection, log.Length);
 
 						if (parse is null || !parseSection.IsIntact)
 						{
@@ -488,40 +488,40 @@ namespace BlueDotBrigade.Weevil.IO
 
 				if (hasTable)
 				{
-					tableOffset = indexSource.Position;
+					tableOffset = indexFile.Position;
 
-					if (!IndexSection.TrySkip(indexSource, IndexSectionKind.Chunks) ||
-					    !IndexSection.TrySkip(indexSource, IndexSectionKind.Strings) ||
-					    !IndexSection.TrySkip(indexSource, IndexSectionKind.Rows))
+					if (!IndexSection.TrySkip(indexFile, IndexSectionKind.Chunks) ||
+					    !IndexSection.TrySkip(indexFile, IndexSectionKind.Strings) ||
+					    !IndexSection.TrySkip(indexFile, IndexSectionKind.Rows))
 					{
 						return false;
 					}
 				}
 
 				// The end marker, at the end of the file, so a truncated or extended file is rejected.
-				if (!IndexSection.TryRead(indexSource, IndexSectionKind.End, out IndexSection.Reader end))
+				if (!IndexSection.TryRead(indexFile, IndexSectionKind.End, out IndexSection.Reader end))
 				{
 					return false;
 				}
 
 				using (end)
 				{
-					if (!end.IsIntact || indexSource.Position != indexSource.Length)
+					if (!end.IsIntact || indexFile.Position != indexFile.Length)
 					{
 						return false;
 					}
 				}
 
-				var originalPosition = logSource.Position;
+				var originalPosition = log.Position;
 
 				try
 				{
-					if (DetectEncoding(logSource) != (unitSize, isBigEndian, preambleLength))
+					if (DetectEncoding(log) != (unitSize, isBigEndian, preambleLength))
 					{
 						return false;
 					}
 
-					(byte[] actualHeadHash, byte[] actualTailHash) = ComputeFingerprint(logSource, indexedLength);
+					(byte[] actualHeadHash, byte[] actualTailHash) = ComputeFingerprint(log, indexedLength);
 
 					if (!actualHeadHash.AsSpan().SequenceEqual(headHash) || !actualTailHash.AsSpan().SequenceEqual(tailHash))
 					{
@@ -530,7 +530,7 @@ namespace BlueDotBrigade.Weevil.IO
 				}
 				finally
 				{
-					logSource.Position = originalPosition;
+					log.Position = originalPosition;
 				}
 
 				index = new LineIndex(checkpointInterval, checkpoints)
@@ -583,9 +583,9 @@ namespace BlueDotBrigade.Weevil.IO
 			return unitSize == 1 || (unitSize == 2 && isBigEndian != BitConverter.IsLittleEndian);
 		}
 
-		private static bool TryReadSignature(Stream indexSource)
+		private static bool TryReadSignature(Stream indexFile)
 		{
-			using var reader = new BinaryReader(indexSource, Encoding.UTF8, leaveOpen: true);
+			using var reader = new BinaryReader(indexFile, Encoding.UTF8, leaveOpen: true);
 
 			return reader.ReadBytes(Signature.Length).AsSpan().SequenceEqual(Signature) &&
 			       reader.ReadInt32() == FormatVersion;
@@ -595,12 +595,12 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Detects the encoding from a byte order mark, with the same checks, in the same order, as <see cref="StreamReader"/>.
 		/// </summary>
 		/// <returns>The size of each character's code unit in bytes, its byte order, and the length of the byte order mark.</returns>
-		internal static (int UnitSize, bool IsBigEndian, int PreambleLength) DetectEncoding(Stream source)
+		internal static (int UnitSize, bool IsBigEndian, int PreambleLength) DetectEncoding(Stream log)
 		{
 			Span<byte> b = stackalloc byte[4];
 
-			source.Position = 0;
-			var count = source.ReadAtLeast(b, b.Length, throwOnEndOfStream: false);
+			log.Position = 0;
+			var count = log.ReadAtLeast(b, b.Length, throwOnEndOfStream: false);
 
 			if (count >= 2 && b[0] == 0xFE && b[1] == 0xFF)
 			{
@@ -630,19 +630,19 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Identifies the scanned content by hashing its first and last few KB.
 		/// </summary>
-		private static (byte[] HeadHash, byte[] TailHash) ComputeFingerprint(Stream source, long length)
+		private static (byte[] HeadHash, byte[] TailHash) ComputeFingerprint(Stream log, long length)
 		{
 			var count = (int)Math.Min(FingerprintLength, length);
 
-			return (HashRange(source, 0, count), HashRange(source, length - count, count));
+			return (HashRange(log, 0, count), HashRange(log, length - count, count));
 		}
 
-		private static byte[] HashRange(Stream source, long offset, int count)
+		private static byte[] HashRange(Stream log, long offset, int count)
 		{
 			var bytes = new byte[count];
 
-			source.Position = offset;
-			source.ReadExactly(bytes);
+			log.Position = offset;
+			log.ReadExactly(bytes);
 
 			return SHA256.HashData(bytes);
 		}
@@ -651,16 +651,16 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Reports the start of each line from <paramref name="startOffset"/>, until <paramref name="onLineStart"/> returns false or the log ends.
 		/// </summary>
 		/// <returns>The offset after the last whole code unit scanned.</returns>
-		private long Scan(Stream source, long startOffset, ref ScanState state, int bufferSize, Func<long, bool> onLineStart)
+		private long Scan(Stream log, long startOffset, ref ScanState state, int bufferSize, Func<long, bool> onLineStart)
 		{
 			var buffer = new byte[Math.Max(bufferSize, MinimumBufferSize)];
 			var position = startOffset;
 			var carried = 0;
 			int read;
 
-			source.Position = startOffset;
+			log.Position = startOffset;
 
-			while ((read = source.Read(buffer, carried, buffer.Length - carried)) > 0)
+			while ((read = log.Read(buffer, carried, buffer.Length - carried)) > 0)
 			{
 				var available = carried + read;
 				var wholeUnits = available - available % _unitSize;

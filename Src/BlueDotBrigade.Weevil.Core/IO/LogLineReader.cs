@@ -29,7 +29,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 		private const int InitialBufferSize = 64 * 1024;
 
-		private readonly Stream _source;
+		private readonly Stream _log;
 		private readonly int _unitSize;
 		private readonly bool _isBigEndian;
 		private readonly int _chunkSize;
@@ -52,7 +52,7 @@ namespace BlueDotBrigade.Weevil.IO
 		// Null for a source that is not a file, which only RAM mode accepts.
 		private readonly LogFileSourceBuilder _sourceBuilder;
 
-		/// <param name="source">The log, which must be able to seek. In disk mode, a <see cref="FileStream"/>.</param>
+		/// <param name="log">The log, which must be able to seek. In disk mode, a <see cref="FileStream"/>.</param>
 		/// <param name="startOffset">Where to start reading: the start of a line, or 0 for the top of the file.</param>
 		/// <param name="chunkSize">About how many bytes each chunk holds.</param>
 		/// <param name="storageMode">Whether chunks hold their bytes, or read them back from the log.</param>
@@ -60,28 +60,28 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Where the checksums start, at or before <paramref name="startOffset"/>: the start of the block that holds it, so they can follow the checksums
 		/// saved for the log before it (#1023). By default, where reading starts.
 		/// </param>
-		public LogLineReader(Stream source, long startOffset = 0, int chunkSize = DefaultChunkSize, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1)
+		public LogLineReader(Stream log, long startOffset = 0, int chunkSize = DefaultChunkSize, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1)
 		{
-			_source = source ?? throw new ArgumentNullException(nameof(source));
+			_log = log ?? throw new ArgumentNullException(nameof(log));
 			_chunkSize = chunkSize > 0 ? chunkSize : throw new ArgumentOutOfRangeException(nameof(chunkSize), chunkSize, "Value is expected to be greater than zero.");
 
 			// The byte order mark is only at the top of the file, so it is read there even when reading starts further in.
-			(_unitSize, _isBigEndian, var preambleLength) = LineIndex.DetectEncoding(source);
+			(_unitSize, _isBigEndian, var preambleLength) = LineIndex.DetectEncoding(log);
 
 			this.Encoding = LineIndex.CreateEncoding(_unitSize, _isBigEndian);
 
 			_bufferOffset = Math.Max(startOffset, preambleLength);
 			_chunkStart = _bufferOffset;
-			_source.Position = _bufferOffset;
+			_log.Position = _bufferOffset;
 
 			_storageMode = storageMode;
 
-			if (storageMode == StorageMode.Disk && source is not FileStream)
+			if (storageMode == StorageMode.Disk && log is not FileStream)
 			{
-				throw new ArgumentException("Disk mode reads the log back from its file, so the source must be a file.", nameof(source));
+				throw new ArgumentException("Disk mode reads the log back from its file, so the log must be a file.", nameof(log));
 			}
 
-			if (source is FileStream file)
+			if (log is FileStream file)
 			{
 				// The full path, so reads still find the log if the working directory changes. The checksums start after the byte order mark.
 				var checksumStart = checksumStartOffset < 0 ? _bufferOffset : Math.Clamp(checksumStartOffset, preambleLength, _bufferOffset);
@@ -90,8 +90,8 @@ namespace BlueDotBrigade.Weevil.IO
 				if (checksumStart < _bufferOffset)
 				{
 					var before = new byte[_bufferOffset - checksumStart];
-					_source.Position = checksumStart;
-					_source.ReadExactly(before);
+					_log.Position = checksumStart;
+					_log.ReadExactly(before);
 					_sourceBuilder.Append(before);
 				}
 			}
@@ -262,7 +262,7 @@ namespace BlueDotBrigade.Weevil.IO
 				}
 			}
 
-			var read = _source.Read(_buffer, _filled, _buffer.Length - _filled);
+			var read = _log.Read(_buffer, _filled, _buffer.Length - _filled);
 
 			if (read == 0)
 			{

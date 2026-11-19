@@ -126,10 +126,10 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
-		public void GivenALogFile_WhenParsedInRam_ThenItHasTheChecksumsOfAParseOnDiskButNoSourceToReadBack()
+		public void GivenALogFile_WhenParsedInRam_ThenItHasTheSourceOfAParseOnDisk()
 		{
 			// The saved index keeps the checksums, so a log opened in either mode can be reopened from it (#1023).
-			// In RAM mode the records keep their content, so the engine still gets no source: a source means disk mode.
+			// The source is kept in both modes: the storage mode, not a missing source, says how the records read their content (#1255).
 			var folder = Directory.CreateTempSubdirectory("Weevil.SerializedRecordRepositoryTests.").FullName;
 
 			try
@@ -140,10 +140,9 @@ namespace BlueDotBrigade.Weevil.Data
 				SerializedRecordRepository inRam = Parse(logPath, StorageMode.Ram);
 				SerializedRecordRepository onDisk = Parse(logPath, StorageMode.Disk);
 
-				inRam.Source.Should().BeNull();
-				inRam.ParsedSource.GetChecksums().Length.Should().BeGreaterThan(1, "the log spans several blocks");
-				inRam.ParsedSource.GetChecksums().ToArray().Should().Equal(onDisk.ParsedSource.GetChecksums().ToArray());
-				inRam.ParsedSource.EndOffset.Should().Be(onDisk.ParsedSource.EndOffset);
+				inRam.Source.GetChecksums().Length.Should().BeGreaterThan(1, "the log spans several blocks");
+				inRam.Source.GetChecksums().ToArray().Should().Equal(onDisk.Source.GetChecksums().ToArray());
+				inRam.Source.EndOffset.Should().Be(onDisk.Source.EndOffset);
 			}
 			finally
 			{
