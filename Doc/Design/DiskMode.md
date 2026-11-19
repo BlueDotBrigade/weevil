@@ -11,14 +11,14 @@ How Weevil keeps a log's content on disk instead of in memory (#421, #1025). The
 
 `IEngineBuilder.UsingStorage` takes the mode, and `IEngine.StorageMode` reports it (#1028). The engine keeps it, and Clear, Reload and a retry after a failed Reload keep it. The CLI's `--storage` and PowerShell's `-Storage` choose it; without them, a log opens in RAM. In Weevil, Open As chooses it on every open. The Open button, Ctrl+O and the menu's Open… show one dialog, which finds the log and chooses the mode for the log selected (#1215); a mode the analyst picks stays as other logs are selected. After a zip's list of files, and for a log dropped on the window or opened from Explorer, the Open As window chooses it. It suggests RAM when the log's estimate fits in the available memory, read with `GlobalMemoryStatusEx`, less 1 GB, and Disk otherwise (`OpenAsAdvice`). It warns when RAM may not fit, and when Disk would read a log over the network. Reload never asks again, and the status bar shows the mode.
 
-**Memory** comes in two figures (#1259), each kept within a budget by `Tst/BlueDotBrigade.Weevil.Core-PerformanceTests`:
-
-- **At rest,** once the log is open: in RAM, about 153 bytes per record, or 1.2 GB per GB of the reference log; on disk, about 22 bytes per record, the record table (`EngineTests`).
-- **What a filter needs on top,** while it runs: about 49 bytes per record in either mode, almost all the 48-byte `Record` it creates for each row (#1140), which the garbage collector reclaims afterwards. On disk, also a buffer of about 17 MB per core (#1269). For the 10-million-record log on 4 cores, one filter allocates about 470 MB in RAM and 540 MB on disk (`FilterManagerTests`).
-
-So working memory peaks above the figure at rest: the audit measured a 4 GB log in RAM growing from 4.7 GB once open to 6.5 GB at the peak, after eight filters and a Find. Open As leaves 1 GB beyond the estimate below for this.
-
 `Engine.EstimateMemory(path)` estimates the memory a log needs in RAM, so a caller can suggest a mode before opening it: the log's size plus 34 bytes per line, counted from the saved line index's header, or from the log's first megabyte.
+
+**Memory** comes in two figures (#1259), each kept within a budget by `Tst/BlueDotBrigade.Weevil.Core-PerformanceTests`. Both are for the 10-million-record droid log (`DroidLog`):
+
+- **At rest,** once the log is open: in RAM, about 123 bytes per record; on disk, about 22 bytes per record, the record table (`EngineTests`).
+- **What a filter needs on top,** while it runs: about 49 bytes per record in either mode, almost all the 48-byte `Record` it creates for each row (#1140), which the garbage collector reclaims afterwards. On disk, also a buffer of about 17 MB per core (#1269). On 4 cores, one filter allocates about 470 MB in RAM and 540 MB on disk (`FilterManagerTests`).
+
+So the memory in use peaks above the figure at rest, by an amount that grows with the log. Open As adds a fixed 1 GB to its estimate (`OpenAsAdvice.Reserve`), which a large log's filters can exceed: the audit measured a 4 GB log in RAM, estimated at 5.0 GB, peaking at 6.5 GB after eight filters and a Find ([Performance.md](../Research/Weevil3/Audit/Findings/Performance.md), 2026-11-17).
 
 ## Reading a Log on Disk
 

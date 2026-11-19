@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Filter
 		private static readonly TimeSpan MaximumDuration = TimeSpan.FromSeconds(10);
 
 		// Measured on 2026-11-19, in a Debug build on 4 cores, for one plain filter of the UTF-8 droid log: 49.0 bytes per record in RAM, almost all
-		// the 48-byte Record each filter creates per row (#1140), and 56.2 on disk, which adds a chunk buffer per core (#1269). The GC reclaims both.
+		// the 48-byte Record each filter creates per row (#1140), and 47.2 on disk besides a chunk buffer per core (#1269). The GC reclaims both.
 		private const double MaximumBytesAllocatedPerRecord = 55;
 
 		// A chunk buffer: a 16 MB chunk and a 1/16 margin (#1269).
@@ -72,7 +72,8 @@ namespace BlueDotBrigade.Weevil.Filter
 
 			var allocated = MeasureFilterAllocations(engine);
 
-			// On disk, a filter also allocates a chunk buffer per core, and one of margin, whatever the log's size.
+			// On disk, a filter also allocates a chunk buffer per core, and one of margin, whatever the log's size. The disk budget also follows from the RAM
+			// budget and the test of those buffers below; it is kept so each mode states its own. On many cores, where fewer buffers may be used, it is lenient.
 			var buffers = storageMode == StorageMode.Disk ? (Environment.ProcessorCount + 1) * ChunkBufferBytes : 0;
 			var bytesPerRecord = (allocated - buffers) / (double)engine.Count;
 			this.TestContext.WriteLine($"Storage: {storageMode}. Cores: {Environment.ProcessorCount}. One filter allocated {allocated / 1_048_576.0:N0} MB: {allocated / (double)engine.Count:N1} bytes per record, {bytesPerRecord:N1} besides the buffers.");
