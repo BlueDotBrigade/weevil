@@ -26,7 +26,7 @@ A buffer reads a whole chunk only when two records in a row come from it, so a s
 
 ## Reopening a Log on Disk
 
-A log opened before is reopened from the record table saved with its index ([RecordTable.md](RecordTable.md#saved-with-the-index)), in disk mode as in RAM, but only in the mode that saved it: switching modes parses the log again.
+A log opened before is reopened from the record table saved with its index ([RecordTable.md](RecordTable.md#saved-with-the-index)), in disk mode as in RAM. A UTF-8 log, or a UTF-16 log in the computer's byte order, is reopened from the table either mode saved, so an analyst who finds a log too large for RAM reopens it on disk without parsing it again (#1296). Other encodings keep a string for each record in RAM, so switching modes parses them again ([OpeningALog.md](OpeningALog.md#the-kinds-of-open)).
 
 On disk, the reopen still reads the whole log once, to check every 64 KB block against the checksums saved with the table, but parses nothing. The chunks on file then read back through a `LogFileSource` made from those checksums (`LogFileSource.Create`), as they would through one a parse completed. The 1 GB, 10-million-record UTF-8 log reopens in 0.9 s, against about 7.6 s for a first open on disk.
 

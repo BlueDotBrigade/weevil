@@ -223,7 +223,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			SavedParse parse = index.Parse;
 
-			if (parse is null || !index.HasTable || !parse.IsSameParser(plugin, storageMode) || parse.EndOffset > logSource.Length)
+			if (parse is null || !index.HasTable || !parse.IsSameParser(plugin, storageMode, index.IsContentQuickToDecode) || parse.EndOffset > logSource.Length)
 			{
 				return false;
 			}
