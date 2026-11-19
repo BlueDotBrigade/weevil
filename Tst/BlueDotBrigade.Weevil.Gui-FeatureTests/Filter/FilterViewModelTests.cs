@@ -706,6 +706,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				// Reload shows a message when it fails. It never asks: it keeps the changes in memory (#1107).
 				dialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
 				dialogBox.DidNotReceive().ShowQuestion(Arg.Any<string>(), Arg.Any<string>());
+				viewModel.IsFilterToolboxEnabled.Should().BeTrue("Reload has finished");
+				viewModel.Rows.GetRow(0).IsPinned.Should().BeTrue("Reload keeps the pin");
 			}
 			finally
 			{
@@ -796,6 +798,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					? new[] { "Application.log", "Other.log" }
 					: new[] { "Application.log" });
 				viewModel.IsLogFileOpen.Should().BeTrue();
+				viewModel.IsFilterToolboxEnabled.Should().BeTrue("the analyst keeps filtering the log shown");
 			}
 			finally
 			{

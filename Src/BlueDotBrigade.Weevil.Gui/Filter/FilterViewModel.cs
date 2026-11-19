@@ -862,6 +862,9 @@
 						if (Engine.IsRealInstance(_engine) && !TrySaveBeforeLeaving(deleteBackup: true, isAskingFirst: true))
 						{
 							Log.Default.Write(LogSeverityType.Information, "The analyst chose to stay on the open log, whose changes can't be saved.");
+
+							// The open turned the filters off; the analyst keeps working on this log.
+							_uiDispatcher.Invoke(() => this.IsFilterToolboxEnabled = true);
 							return;
 						}
 
