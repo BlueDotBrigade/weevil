@@ -155,6 +155,11 @@ internal class DialogBoxService : IDialogBoxService
 		MessageBox.Show(message, caption);
 	}
 
+	public bool ShowQuestion(string message, string caption)
+	{
+		return MessageBox.Show(message, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
+	}
+
 	public void ShowGraph(RecordList records, string selectedPattern, string sourceFilePath)
 	{
 		var windowNumber = GraphWindowCounter.GetNext();

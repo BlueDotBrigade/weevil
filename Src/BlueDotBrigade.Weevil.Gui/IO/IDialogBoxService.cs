@@ -33,6 +33,12 @@
 
 		void ShowMessage(string message, string caption);
 
+		/// <summary>
+		/// Asks the user a question that has a Yes or a No answer.
+		/// </summary>
+		/// <returns><see langword="true"/> when the user answered Yes.</returns>
+		bool ShowQuestion(string message, string caption);
+
 		string ShowUserPrompt(string title, string userPrompt);
 
 		bool TryShowUserPrompt(string title, string userPrompt, string validationPattern, string validationError, out string userValue);
