@@ -31,7 +31,10 @@
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
-		// Reads a log opened on disk back, or null in RAM mode.
+		// Whether the records keep their content (RAM) or read it back from the log (disk).
+		private readonly IO.StorageMode _storageMode;
+
+		// The file the records were read from: on disk, they read their content back through it. Null for the engine without records that Reload uses.
 		private readonly IO.LogFileSource _source;
 
 		private FilterStrategy _latestFilterStrategy;
@@ -94,10 +97,12 @@
 			FilterHistory includeHistory,
 			FilterHistory excludeHistory,
 			ITelemetryMetricRecorder telemetryRecorder = null,
+			IO.StorageMode storageMode = IO.StorageMode.Ram,
 			IO.LogFileSource source = null)
 		{
 			_coreExtension = coreExtension;
 			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
+			_storageMode = storageMode;
 			_source = source;
 			_context = context;
 			_filterAliasExpander = filterAliasExpander;
@@ -185,7 +190,7 @@
 
 			// On disk, each worker reads whole ranges of records that share a content chunk, so the log is read once (#1027).
 			// In RAM, ranges of about the same size keep every core busy, however small the log.
-			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: workerCount);
+			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _storageMode == IO.StorageMode.Disk, workerCount: workerCount);
 
 			// The loop creates many more worker states than workers, so they share content buffers, which hold a chunk each on disk:
 			// a filter allocates a buffer per worker, not per state (#1269).
@@ -493,8 +498,8 @@
 
 				try
 				{
+					var isOnDisk = _storageMode == IO.StorageMode.Disk;
 					var bytesReadBefore = _source?.BytesRead ?? 0;
-					var isOnDisk = _source != null;
 					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryBefore = isOnDisk ? ReadProcessMemory() : null;
 					var gen2Before = isOnDisk ? GC.CollectionCount(2) : 0;
 					var allocatedBefore = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) : 0;
@@ -549,10 +554,10 @@
 						{"VisibleRecords", results.Count},
 					};
 
-					if (_source != null)
+					if (isOnDisk)
 					{
 						// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
-						completed.Add("BytesRead", _source.BytesRead - bytesReadBefore);
+						completed.Add("BytesRead", (_source?.BytesRead ?? 0) - bytesReadBefore);
 						completed.Add("ProcessorCount", Environment.ProcessorCount);
 						completed.Add("FilterScanElapsed", scanElapsed);
 						completed.Add("ProcessManagedAllocatedBytes", allocatedBytes);

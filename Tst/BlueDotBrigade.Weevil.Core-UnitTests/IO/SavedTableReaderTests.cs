@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil.IO
 			using var log = new System.IO.FileStream(_logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 			var repository = new SerializedRecordRepository(log, new ChangingParser(), MultilineRecordParser.MaximumLinesToSearch, storageMode);
 			var parsed = (TableRecordList)repository.Get(Range.All, int.MaxValue);
-			LogFileSource parsedSource = repository.ParsedSource;
+			LogFileSource parsedSource = repository.Source;
 			var parse = new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), storageMode, parsedSource.StartOffset, parsedSource.EndOffset, parsedSource.GetChecksums().ToArray());
 
 			LineIndex index = LineIndex.Build(log);
@@ -54,7 +54,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var reopened = new TableRecordList(table);
 			Describe(reopened).Should().Equal(Describe(parsed));
 			Describe(reopened).Should().Contain(row => row.Contains("CHANGE 7"), "the parser's text is kept");
-			(source != null).Should().Be(storageMode == StorageMode.Disk, "only disk mode reads content back from the log");
+			source.GetChecksums().ToArray().Should().Equal(parsedSource.GetChecksums().ToArray(), "a reopen keeps the file's checksums in either mode (#1255)");
 		}
 
 		private static string[] Describe(RecordList records)

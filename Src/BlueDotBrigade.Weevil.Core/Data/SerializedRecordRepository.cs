@@ -16,32 +16,32 @@
 		public const int FirstRecordByteOffset = 0;
 		public const int FirstRecordLineNumber = 1;
 
-		private readonly Stream _source;
+		private readonly Stream _log;
 		private readonly StorageMode _storageMode;
 		private readonly long _firstRecordByteOffset;
 		private readonly int _firstRecordLineNumber;
 		private readonly LogLineReader _reader;
 		private readonly MultilineRecordParser _recordParser;
 
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser)
-			: this(source, recordParser, MultilineRecordParser.MaximumLinesToSearch)
+		public SerializedRecordRepository(Stream log, IRecordParser recordParser)
+			: this(log, recordParser, MultilineRecordParser.MaximumLinesToSearch)
 		{
 			// nothing to do
 		}
 
 		/// <param name="maximumLinesToSearch">Represents the number of lines that will be read while searching for the first record.</param>
 		/// <param name="storageMode">Whether the records keep their content, or read it back from the log, which must then be a file.</param>
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser, int maximumLinesToSearch, StorageMode storageMode = StorageMode.Ram)
-			: this(source, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled, maximumLinesToSearch, storageMode)
+		public SerializedRecordRepository(Stream log, IRecordParser recordParser, int maximumLinesToSearch, StorageMode storageMode = StorageMode.Ram)
+			: this(log, recordParser, FirstRecordByteOffset, FirstRecordLineNumber, LoggingEnabled, maximumLinesToSearch, storageMode)
 		{
 			// nothing to do
 		}
 
 		/// <param name="storageMode">Whether the records keep their content, or read it back from the log, which must then be a file.</param>
 		/// <param name="checksumStartOffset">Where the checksums of the bytes read start, at or before <paramref name="firstRecordByteOffset"/>: by default, there.</param>
-		public SerializedRecordRepository(Stream source, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1)
+		public SerializedRecordRepository(Stream log, IRecordParser recordParser, long firstRecordByteOffset, int firstRecordLineNumber, bool loggingEnabled, int maximumLinesToSearch = MultilineRecordParser.MaximumLinesToSearch, StorageMode storageMode = StorageMode.Ram, long checksumStartOffset = -1)
 		{
-			_source = source;
+			_log = log;
 			_storageMode = storageMode;
 			_firstRecordByteOffset = firstRecordByteOffset;
 			_firstRecordLineNumber = firstRecordLineNumber;
@@ -50,7 +50,7 @@
 				LogSeverityType.Debug,
 				$"Preparing to read records from disk. {nameof(firstRecordByteOffset)}={firstRecordByteOffset}, {nameof(firstRecordLineNumber)}={firstRecordLineNumber}");
 
-			_reader = new LogLineReader(_source, _firstRecordByteOffset, storageMode: storageMode, checksumStartOffset: checksumStartOffset);
+			_reader = new LogLineReader(_log, _firstRecordByteOffset, storageMode: storageMode, checksumStartOffset: checksumStartOffset);
 			_recordParser = new MultilineRecordParser(
 				_reader,
 				recordParser,
@@ -60,18 +60,13 @@
 		}
 
 		/// <summary>
-		/// In disk mode, the source the records read their content back through, once <see cref="Get(Range, int)"/> has read the log: otherwise <see langword="null"/>.
-		/// </summary>
-		internal LogFileSource Source { get; private set; }
-
-		/// <summary>
-		/// The bytes read, with a checksum of each block, in both modes, once <see cref="Get(Range, int)"/> has read the log,
-		/// so they can be saved with the log's index (#1023). <see langword="null"/> when the log is not a file.
+		/// The file's path and the checksum of each block read, in both modes, once <see cref="Get(Range, int)"/> has read the log,
+		/// so they can be saved with the log's index (#1023). On disk, the records read their content back through it (#1025).
 		/// </summary>
 		/// <remarks>
-		/// Only disk mode reads content back through it: in RAM mode the records keep their content, so it is not the engine's <see cref="Source"/>.
+		/// <see langword="null"/> for a log read from a stream that is not a file, which only RAM mode accepts.
 		/// </remarks>
-		internal LogFileSource ParsedSource { get; private set; }
+		internal LogFileSource Source { get; private set; }
 
 		public IRecord GetNext()
 		{
@@ -122,8 +117,7 @@
 			} while (hasRecord && table.Count < maximumCount);
 
 			// In disk mode, the records read their content back through the source, which can be read only once complete.
-			this.ParsedSource = _reader.BuildSource();
-			this.Source = _storageMode == StorageMode.Disk ? this.ParsedSource : null;
+			this.Source = _reader.BuildSource();
 
 			return new TableRecordList(table.Build());
 		}

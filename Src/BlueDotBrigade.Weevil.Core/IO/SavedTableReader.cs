@@ -16,16 +16,16 @@ namespace BlueDotBrigade.Weevil.IO
 	/// </remarks>
 	internal static class SavedTableReader
 	{
-		/// <param name="indexSource">The saved index, positioned where its record table starts.</param>
+		/// <param name="indexFile">The saved index, positioned where its record table starts.</param>
 		/// <param name="log">The log, which is read from <see cref="SavedParse.StartOffset"/> to <see cref="SavedParse.EndOffset"/>.</param>
 		/// <param name="logPath">The log's path, which chunks on file read back from.</param>
 		/// <param name="parse">The parse that made the table, whose checksums the log's blocks must match.</param>
 		/// <param name="encoding">The log's encoding, without a byte order mark.</param>
 		/// <param name="storageMode">Whether the chunks hold their bytes, or read them back from the log.</param>
-		/// <param name="source">On disk, the source the chunks read back through: otherwise <see langword="null"/>.</param>
+		/// <param name="source">A source made from the saved checksums, in both modes: on disk, the chunks read back through it (#1255).</param>
 		/// <returns><see langword="false"/> when the table is damaged, or a block of the log does not match its checksum.</returns>
 		public static bool TryRead(
-			Stream indexSource,
+			Stream indexFile,
 			Stream log,
 			string logPath,
 			SavedParse parse,
@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.IO
 			table = null;
 			source = null;
 
-			if (!TryReadChunkDirectory(indexSource, parse, out List<(int Start, long FileOffset, int Length)> directory))
+			if (!TryReadChunkDirectory(indexFile, parse, out List<(int Start, long FileOffset, int Length)> directory))
 			{
 				return false;
 			}
@@ -51,7 +51,7 @@ namespace BlueDotBrigade.Weevil.IO
 					return false;
 				}
 
-				source = LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, log.Length, CopyChecksums(parse));
+				source = CreateSource(log, logPath, parse);
 				chunks = new List<(int Start, ContentChunk Chunk)>(directory.Count);
 
 				foreach ((var start, var fileOffset, var length) in directory)
@@ -68,11 +68,13 @@ namespace BlueDotBrigade.Weevil.IO
 					return false;
 				}
 
+				source = CreateSource(log, logPath, parse);
+
 				chunks = filler.Chunks;
 			}
 
-			if (!TryReadStrings(indexSource, out Dictionary<int, string> strings) ||
-			    !IndexSection.TryRead(indexSource, IndexSectionKind.Rows, out IndexSection.Reader rows))
+			if (!TryReadStrings(indexFile, out Dictionary<int, string> strings) ||
+			    !IndexSection.TryRead(indexFile, IndexSectionKind.Rows, out IndexSection.Reader rows))
 			{
 				source = null;
 				return false;
@@ -93,11 +95,19 @@ namespace BlueDotBrigade.Weevil.IO
 			return true;
 		}
 
-		private static bool TryReadChunkDirectory(Stream indexSource, SavedParse parse, out List<(int Start, long FileOffset, int Length)> directory)
+		/// <summary>
+		/// The source of the log checked, made from the saved checksums once every block matched them: in RAM too, though nothing reads through it there (#1255).
+		/// </summary>
+		private static LogFileSource CreateSource(Stream log, string logPath, SavedParse parse)
+		{
+			return LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, log.Length, CopyChecksums(parse));
+		}
+
+		private static bool TryReadChunkDirectory(Stream indexFile, SavedParse parse, out List<(int Start, long FileOffset, int Length)> directory)
 		{
 			directory = null;
 
-			if (!IndexSection.TryRead(indexSource, IndexSectionKind.Chunks, out IndexSection.Reader section))
+			if (!IndexSection.TryRead(indexFile, IndexSectionKind.Chunks, out IndexSection.Reader section))
 			{
 				return false;
 			}
@@ -137,11 +147,11 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 		}
 
-		private static bool TryReadStrings(Stream indexSource, out Dictionary<int, string> strings)
+		private static bool TryReadStrings(Stream indexFile, out Dictionary<int, string> strings)
 		{
 			strings = null;
 
-			if (!IndexSection.TryRead(indexSource, IndexSectionKind.Strings, out IndexSection.Reader section))
+			if (!IndexSection.TryRead(indexFile, IndexSectionKind.Strings, out IndexSection.Reader section))
 			{
 				return false;
 			}

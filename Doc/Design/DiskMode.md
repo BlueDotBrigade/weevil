@@ -13,10 +13,17 @@ How Weevil keeps a log's content on disk instead of in memory (#421, #1025). The
 
 `Engine.EstimateMemory(path)` estimates the memory a log needs in RAM, so a caller can suggest a mode before opening it: the log's size plus 34 bytes per line, counted from the saved line index's header, or from the log's first megabyte.
 
+**Memory** comes in two figures (#1259), each kept within a budget by `Tst/BlueDotBrigade.Weevil.Core-PerformanceTests`. Both are for the 10-million-record droid log (`DroidLog`):
+
+- **At rest,** once the log is open: in RAM, about 123 bytes per record; on disk, about 22 bytes per record, the record table (`EngineTests`).
+- **What a filter needs on top,** while it runs: about 49 bytes per record in either mode, almost all the 48-byte `Record` it creates for each row (#1140), which the garbage collector reclaims afterwards. On disk, also a buffer of about 17 MB per core (#1269). On 4 cores, one filter allocates about 470 MB in RAM and 540 MB on disk (`FilterManagerTests`).
+
+So the memory in use peaks above the figure at rest, by an amount that grows with the log. Open As adds a fixed 1 GB to its estimate (`OpenAsAdvice.Reserve`), which a large log's filters can exceed: the audit measured a 4 GB log in RAM, estimated at 5.0 GB, peaking at 6.5 GB after eight filters and a Find ([Performance.md](../Research/Weevil3/Audit/Findings/Performance.md), 2026-11-17).
+
 ## Reading a Log on Disk
 
 1. The engine builder opens the log, and `SerializedRecordRepository` reads it through `LogLineReader`.
-2. In disk mode, the reader gives every byte it reads, in file order, to a `LogFileSourceBuilder`, which computes a checksum of each 64 KB block. Its chunks are chunks on file: they hold their range of the log, but no bytes.
+2. In both modes, the reader gives every byte it reads, in file order, to a `LogFileSourceBuilder`, which computes a checksum of each 64 KB block ([OpeningALog.md](OpeningALog.md#the-kinds-of-open)). In disk mode its chunks are chunks on file: they hold their range of the log, but no bytes.
 3. Before the repository returns any record, it completes the `LogFileSource`. Nothing can be read through it before then.
 4. Afterwards, a record's content is read through its chunk and the source: each read opens its own handle, reads the blocks that hold the bytes, checks their checksums and closes the handle. A `ContentBuffer` reads a whole chunk at a time, so each reader reads a chunk once when it reaches it. A filter gives its parallel workers whole ranges of records that share a chunk (`RecordRanges`), so it reads each chunk once. A log with at most half as many chunks as cores is the exception: each chunk's range is split, so more cores are busy, and each part's worker reads the whole chunk. "Filtering complete." logs the bytes read from the log while it ran, which includes what other readers, such as the rows on screen, read meanwhile (#1027).
 

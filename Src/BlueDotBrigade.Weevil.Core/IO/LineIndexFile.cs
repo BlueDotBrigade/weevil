@@ -37,24 +37,24 @@ namespace BlueDotBrigade.Weevil.IO
 		/// An index that holds a record table is not saved when the log grew, as that would drop the table: a full open extends the table,
 		/// and saves both (#1023). After any other open, the next one scans the new content again.
 		/// </remarks>
-		public static LineIndex Load(string logFilePath, Stream logSource)
+		public static LineIndex Load(string logFilePath, Stream log)
 		{
 			var indexFilePath = GetIndexFilePath(logFilePath);
 			var stopwatch = Stopwatch.StartNew();
 			var hasChanged = true;
 
-			if (TryRead(indexFilePath, logSource, out LineIndex index))
+			if (TryRead(indexFilePath, log, out LineIndex index))
 			{
-				hasChanged = index.IndexedLength < logSource.Length;
+				hasChanged = index.IndexedLength < log.Length;
 
 				if (hasChanged)
 				{
-					index.Update(logSource);
+					index.Update(log);
 				}
 			}
 			else
 			{
-				index = LineIndex.Build(logSource);
+				index = LineIndex.Build(log);
 			}
 
 			if (hasChanged && !index.HasTable)
@@ -97,9 +97,9 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+				using var indexFile = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 
-				return LineIndex.TryReadLineCount(indexSource, out lineCount, out indexedLength);
+				return LineIndex.TryReadLineCount(indexFile, out lineCount, out indexedLength);
 			}
 			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
 			{
@@ -107,7 +107,7 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 		}
 
-		private static bool TryRead(string indexFilePath, Stream logSource, out LineIndex index)
+		private static bool TryRead(string indexFilePath, Stream log, out LineIndex index)
 		{
 			index = null;
 
@@ -118,9 +118,9 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+				using var indexFile = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-				if (LineIndex.TryRead(indexSource, logSource, out index))
+				if (LineIndex.TryRead(indexFile, log, out index))
 				{
 					return true;
 				}
@@ -182,8 +182,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// When the bytes parsed differ from those of the index's earlier parse, the log changed in the middle, where the line index cannot see it,
 		/// so it is rebuilt before it is saved.
 		/// </remarks>
-		/// <param name="logSource">The log, read again if the line index must be rebuilt.</param>
-		public static void SaveParse(string logFilePath, Stream logSource, LineIndex index, SavedParse parse, RecordTable table)
+		/// <param name="log">The log, read again if the line index must be rebuilt.</param>
+		public static void SaveParse(string logFilePath, Stream log, LineIndex index, SavedParse parse, RecordTable table)
 		{
 			ArgumentNullException.ThrowIfNull(index);
 			ArgumentNullException.ThrowIfNull(parse);
@@ -199,7 +199,7 @@ namespace BlueDotBrigade.Weevil.IO
 				Log.Default.Write(
 					LogSeverityType.Information,
 					$"{LogChangedMessage} IndexFilePath={GetIndexFilePath(logFilePath)}");
-				index.Rebuild(logSource);
+				index.Rebuild(log);
 			}
 
 			index.Parse = parse;
@@ -214,31 +214,31 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <see cref="SaveParse"/> then rebuilds the line index, which cannot see such a change.
 		/// For a log that grew since, the table holds only its old part, up to <see cref="SavedParse.EndOffset"/>: see <see cref="GrownLogParser"/>.
 		/// </remarks>
-		/// <param name="source">On disk, the source the records read their content back through: otherwise <see langword="null"/>.</param>
+		/// <param name="source">The source made from the saved checksums, in both modes: on disk, the records read their content back through it.</param>
 		/// <returns><see langword="false"/> when the log must be parsed.</returns>
-		public static bool TryLoadTable(string logFilePath, Stream logSource, LineIndex index, IPlugin plugin, StorageMode storageMode, out RecordTable table, out LogFileSource source)
+		public static bool TryLoadTable(string logFilePath, Stream log, LineIndex index, IPlugin plugin, StorageMode storageMode, out RecordTable table, out LogFileSource source)
 		{
 			table = null;
 			source = null;
 
 			SavedParse parse = index.Parse;
 
-			if (parse is null || !index.HasTable || !parse.IsSameParser(plugin, storageMode, index.IsContentQuickToDecode) || parse.EndOffset > logSource.Length)
+			if (parse is null || !index.HasTable || !parse.IsSameParser(plugin, storageMode, index.IsContentQuickToDecode) || parse.EndOffset > log.Length)
 			{
 				return false;
 			}
 
 			var indexFilePath = GetIndexFilePath(logFilePath);
 			var stopwatch = Stopwatch.StartNew();
-			var originalPosition = logSource.Position;
+			var originalPosition = log.Position;
 
 			try
 			{
 				// The log is checked while the index is open, so another instance of Weevil may still replace the index meanwhile.
-				using var indexSource = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+				using var indexFile = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
 
 				// Read again, from the file now open: another instance of Weevil may have replaced the index since it was loaded.
-				if (!LineIndex.TryRead(indexSource, logSource, out LineIndex saved) || !saved.HasTable || !parse.IsSameAs(saved.Parse))
+				if (!LineIndex.TryRead(indexFile, log, out LineIndex saved) || !saved.HasTable || !parse.IsSameAs(saved.Parse))
 				{
 					Log.Default.Write(
 						LogSeverityType.Information,
@@ -246,9 +246,9 @@ namespace BlueDotBrigade.Weevil.IO
 					return false;
 				}
 
-				indexSource.Position = saved.TableOffset;
+				indexFile.Position = saved.TableOffset;
 
-				if (!SavedTableReader.TryRead(indexSource, logSource, System.IO.Path.GetFullPath(logFilePath), parse, index.ContentEncoding, storageMode, out table, out source))
+				if (!SavedTableReader.TryRead(indexFile, log, System.IO.Path.GetFullPath(logFilePath), parse, index.ContentEncoding, storageMode, out table, out source))
 				{
 					Log.Default.Write(
 						LogSeverityType.Information,
@@ -273,12 +273,12 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 			finally
 			{
-				logSource.Position = originalPosition;
+				log.Position = originalPosition;
 			}
 
 			Log.Default.Write(
 				LogSeverityType.Information,
-				parse.EndOffset == logSource.Length ? RecordsReadFromIndexMessage : OldRecordsReadFromIndexMessage,
+				parse.EndOffset == log.Length ? RecordsReadFromIndexMessage : OldRecordsReadFromIndexMessage,
 				new Dictionary<string, object>
 				{
 					{ "RecordCount", table.Count },
