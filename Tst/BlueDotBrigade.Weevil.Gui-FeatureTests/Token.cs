@@ -41,7 +41,7 @@
 			var bulletinMediator = new BulletinMediator();
 
 			// One window at a time: the one before closes its log.
-			Dispose();
+			CloseWindow();
 
 			_mainViewModel = new MainWindowViewModel(
 				uiDispatcher,
@@ -54,6 +54,11 @@
 		}
 
 		public void Dispose()
+		{
+			CloseWindow();
+		}
+
+		private void CloseWindow()
 		{
 			_mainViewModel?.FilterViewModel.Close();
 		}
