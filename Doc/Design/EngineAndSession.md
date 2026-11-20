@@ -75,7 +75,7 @@ Callers reach the session through the engine: `Annotations`, `Bookmarks`, `Regio
 | The log's lock | Kept | Kept |
 | `RecordState`, with the flags | Kept | Kept |
 | Storage mode | Kept | Kept |
-| Part of the log opened (`IEngine.Part`) | Kept | Kept |
+| Part of the log opened (`IEngine.Part`) | Kept | Opened again: a region or section found again by name |
 | `CoreEngine` and its managers | Kept | Replaced |
 | `RecordScope` | Narrowed | Replaced: the part of the log opened |
 | Filter | Reset to none | Applied again |

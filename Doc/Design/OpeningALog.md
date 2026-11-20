@@ -71,7 +71,7 @@ The table's sections are skipped here, so a damaged table costs only the table.
 
 ## The Kinds of Open
 
-Every open reads the sidecar once, twice for a region or section, and checks the `.idx` as [above](#trusting-a-saved-index).
+Every open reads the sidecar once, twice for a region or section (once on Reload, which looks in the session), and checks the `.idx` as [above](#trusting-a-saved-index).
 
 | Open | Reads | Checks | Writes |
 |---|---|---|---|
@@ -81,7 +81,7 @@ Every open reads the sidecar once, twice for a region or section, and checks the
 | Table rejected: damaged, or a block changed | As a reopen until the table is rejected, then the whole log, parsed. | Whether the bytes parsed are those of the saved parse: if not, the log changed in the middle. | The `.idx`, with the parse and table, after rebuilding the line index when the log changed in the middle. |
 | Another plugin or build, or the other mode for a log RAM keeps as strings | The `.idx`'s line index, then the whole log, parsed. | Only the parser, builds and mode: the table is not read. | The `.idx`, with the new parse and table. |
 | The log fails to be read while the table is checked | As a reopen until the read fails, then the whole log, parsed, which usually fails too. | As a reopen. | Nothing, when the parse makes the same table: the saved one is kept. |
-| Reload | As a full open. | As a full open. | As a full open, after deleting the `.idx` when a read on disk found the log changed. |
+| Reload | As the open it repeats: full or partial. | As the open it repeats. | As the open it repeats, after deleting the `.idx` when a read on disk found the log changed. |
 | Partial | The `.idx`'s line index. The log up to the end of the range or the limit. | Only the `.idx`, as every open does. | The `.idx`, only when its line index changed and it holds no table. |
 | Any, in the temporary folder | As the same open elsewhere. | As the same open elsewhere. | Nothing. |
 

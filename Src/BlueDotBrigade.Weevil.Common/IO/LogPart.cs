@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// The line numbers asked for: <see cref="Range.All"/> for the whole log, and for a section or region, its lines when it was opened.
 		/// </summary>
 		/// <remarks>
-		/// An end of <see cref="int.MaxValue"/>, or one counted from the end, is the end of the log.
+		/// An end of <see cref="int.MaxValue"/> is the end of the log.
 		/// </remarks>
 		public Range Lines { get; }
 
@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Whether the lines run to the end of the log, so that lines appended to it appear after Reload.
 		/// </summary>
-		public bool IsToEndOfLog => this.Lines.End.IsFromEnd || this.Lines.End.Value == int.MaxValue;
+		public bool IsToEndOfLog => this.Lines.End.Value == int.MaxValue;
 
 		/// <param name="name">The section's name.</param>
 		/// <param name="lines">Its lines.</param>
@@ -75,14 +75,6 @@ namespace BlueDotBrigade.Weevil.IO
 		public static LogPart ForLines(Range lines)
 		{
 			return lines.Equals(Range.All) ? Whole : new LogPart(null, null, lines);
-		}
-
-		public override string ToString()
-		{
-			return this.IsWhole ? "Whole log"
-				: this.SectionName is not null ? $"Section `{this.SectionName}`"
-				: this.RegionName is not null ? $"Region `{this.RegionName}`"
-				: $"Lines {this.Lines}";
 		}
 	}
 }

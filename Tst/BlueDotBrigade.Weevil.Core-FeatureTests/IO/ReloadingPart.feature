@@ -36,6 +36,7 @@ Scenario: Reloading the last section shows the lines appended to the log
 	And records have been appended to the log
 	When the log is reloaded
 	Then it will show the records from line 300 to the end of the whole log, and no others
+	And the part open will be the "Shutdown" section
 
 @Requirement:1157
 Scenario: Reloading a log opened from a line shows the lines appended to the log

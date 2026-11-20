@@ -100,7 +100,7 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 	}
 
 	/// <remarks>
-	/// The first records of the default log, written again at its end. The default log has LF line endings, and none after its last line.
+	/// The first records of the default log, written again at its end, which has no line ending after its last line.
 	/// </remarks>
 	[Given("records have been appended to the log")]
 	public void GivenRecordsHaveBeenAppendedToTheLog()
@@ -150,10 +150,10 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 		ThenItWillShowTheRecordsOfLinesOfTheWholeLogAndNoOthers(firstLine, int.MaxValue);
 	}
 
-	[Then(@"the part open will be the ""(.+)"" region")]
-	public void ThenThePartOpenWillBeTheRegion(string name)
+	[Then(@"the part open will be the ""(.+)"" (region|section)")]
+	public void ThenThePartOpenWillBeThe(string name, string part)
 	{
-		this.Context.Engine.Part.RegionName.Should().Be(name);
+		(part == "region" ? this.Context.Engine.Part.RegionName : this.Context.Engine.Part.SectionName).Should().Be(name);
 	}
 
 	[Then("the log will not reload, and the reason will name: (.+)")]

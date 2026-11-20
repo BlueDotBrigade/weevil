@@ -55,7 +55,7 @@
 		StorageMode StorageMode { get; }
 
 		/// <summary>
-		/// The part of the log that is open: the whole log, one section, one region, or a range of lines (#1219). <see cref="Clear"/> and <see cref="Reload"/> keep it.
+		/// The part of the log that is open: the whole log, one section, one region, or a range of lines (#1219). <see cref="Clear"/> keeps it, and <see cref="Reload"/> opens the same part again.
 		/// </summary>
 		LogPart Part { get; }
 
