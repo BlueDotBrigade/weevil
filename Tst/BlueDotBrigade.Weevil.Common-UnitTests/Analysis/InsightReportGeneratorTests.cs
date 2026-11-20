@@ -1,8 +1,8 @@
 namespace BlueDotBrigade.Weevil.Common.Analysis
 {
 	using System;
-	using System.Collections.Immutable;
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using System.Linq;
 	using global::BlueDotBrigade.Weevil.Analysis;
 	using global::BlueDotBrigade.Weevil.Data;

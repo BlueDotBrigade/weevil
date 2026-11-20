@@ -1,0 +1,29 @@
+# 2026-11-17 16:1x UTC, 1,000 MB log (7,547,742 records), main e3dee822, Linux. Two review agents were running (load average about 2).
+# ReopenDiag (see ReopenDiag/). The temporary copy is in a subfolder of /tmp: see Findings/Performance.md on logs directly in the temporary folder.
+== run 1 load average: 2.21, 0.86, 0.34
+first open, RAM, in the temporary folder (no .idx)           7.28 s  7,547,742 records
+first open, RAM, beside the log (writes the .idx)            7.21 s  7,547,742 records
+  .idx size                                                   167 MB
+reopen, RAM (same mode)                                      2.27 s  7,547,742 records
+reopen, Disk (other mode: U1-7)                              5.98 s  7,547,742 records
+reopen, Disk (same mode)                                     1.37 s  7,547,742 records
+reopen, RAM (other mode again)                               6.43 s  7,547,742 records
+  .idx saved in the temporary subfolder?                  False
+== run 2 load average: 2.07, 0.97, 0.40
+first open, RAM, in the temporary folder (no .idx)           7.30 s  7,547,742 records
+first open, RAM, beside the log (writes the .idx)            6.99 s  7,547,742 records
+  .idx size                                                   167 MB
+reopen, RAM (same mode)                                      2.36 s  7,547,742 records
+reopen, Disk (other mode: U1-7)                              5.99 s  7,547,742 records
+reopen, Disk (same mode)                                     1.54 s  7,547,742 records
+reopen, RAM (other mode again)                               6.68 s  7,547,742 records
+  .idx saved in the temporary subfolder?                  False
+== run 3 load average: 2.01, 1.07, 0.45
+first open, RAM, in the temporary folder (no .idx)           7.82 s  7,547,742 records
+first open, RAM, beside the log (writes the .idx)            7.26 s  7,547,742 records
+  .idx size                                                   167 MB
+reopen, RAM (same mode)                                      2.38 s  7,547,742 records
+reopen, Disk (other mode: U1-7)                              6.28 s  7,547,742 records
+reopen, Disk (same mode)                                     1.25 s  7,547,742 records
+reopen, RAM (other mode again)                               6.75 s  7,547,742 records
+  .idx saved in the temporary subfolder?                  False

@@ -1,197 +1,136 @@
 ﻿namespace BlueDotBrigade.Weevil.Analysis.Timeline
 {
-        using System.Collections.Generic;
-        using System.Collections.Immutable;
-        using System.Linq;
-        using System.Threading;
-        using BlueDotBrigade.Weevil.IO;
-        using Data;
-        using Filter;
-        using Filter.Expressions.Regular;
+	using System.Collections.Generic;
+	using System.Collections.Immutable;
+	using System.Linq;
+	using System.Threading;
+	using BlueDotBrigade.Weevil.IO;
+	using Data;
+	using Filter;
+	using Filter.Expressions.Regular;
 
-        /// <summary>
-        /// Parses regex named capture groups and tracks each captured key independently across records.
-        /// Flags the first and last records in every maximal contiguous run with the same captured value.
-        /// A changed value finalizes the current run and starts a new one; a non-matching record finalizes
-        /// the current run without starting another.
-        /// </summary>
-        internal class StableValueRunsAnalyzer : IRecordAnalyzer
-        {
-                private readonly FilterStrategy _filterStrategy;
-                private readonly IFilterAliasExpander _aliasExpander;
+	/// <summary>
+	/// Parses regex named capture groups and tracks each captured key independently across records.
+	/// Flags the first and last records in every maximal contiguous run with the same captured value.
+	/// A changed value finalizes the current run and starts a new one; a non-matching record finalizes
+	/// the current run without starting another.
+	/// </summary>
+	internal class StableValueRunsAnalyzer : RegularExpressionAnalyzer
+	{
+		public StableValueRunsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander = null)
+			: base(filterStrategy, aliasExpander)
+		{
+		}
 
-                public StableValueRunsAnalyzer(FilterStrategy filterStrategy)
-                        : this(filterStrategy, null)
-                {
-                }
+		public override string Key => AnalysisType.StableValueRuns.ToString();
 
-                public StableValueRunsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
-                {
-                        _filterStrategy = filterStrategy;
-                        _aliasExpander = aliasExpander;
-                }
+		public override string DisplayName => "Stable Value Runs";
 
-                public string Key => AnalysisType.StableValueRuns.ToString();
+		/// <remarks>
+		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
+		/// </remarks>
+		public override Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
+		{
+			if (!TryGetExpressions(records, userDialog, out ImmutableArray<RegularExpression> expressions))
+			{
+				return new Results(0);
+			}
 
-                public string DisplayName => "Stable Value Runs";
+			ClearFlags(records, state, canUpdateMetadata);
 
-                public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
-                {
-                        return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
-                }
+			var flaggedLineNumbers = new HashSet<int>();
+			var activeRuns = new Dictionary<string, ValueRun>();
 
-                /// <remarks>
-                /// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
-                /// </remarks>
-                public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
-                {
-                        var flaggedLineNumbers = new HashSet<int>();
+			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
+			var buffer = new ContentBuffer();
 
-                        // Get default regex from current inclusive filter
-                        var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
+			for (var position = 0; position < records.Count; position++)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
 
-                        // Show analysis dialog to get custom regex
-                        var recordsDescription = records.Count.ToString("N0");
+				var matchedKeys = new HashSet<string>();
+				var content = records.ReadContent(position, buffer).ToString();
 
-                        if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
-                        {
-                                // User cancelled
-                                return new Results(0);
-                        }
+				foreach (KeyValuePair<string, string> currentState in AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, content))
+				{
+					matchedKeys.Add(currentState.Key);
 
-                        if (string.IsNullOrWhiteSpace(customRegex))
-                        {
-                                // No regex provided
-                                return new Results(0);
-                        }
+					if (activeRuns.TryGetValue(currentState.Key, out ValueRun existingRun))
+					{
+						if (existingRun.Value == currentState.Value)
+						{
+							existingRun.LastPosition = position;
+						}
+						else
+						{
+							FinalizeRun(currentState.Key, existingRun);
+							StartNewRun(currentState.Key, currentState.Value, position);
+						}
+					}
+					else
+					{
+						StartNewRun(currentState.Key, currentState.Value, position);
+					}
+				}
 
-                        // Parse expressions with alias expansion and || support
-                        var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
-                        ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
-                                customRegex,
-                                _aliasExpander,
-                                expressionBuilder);
+				if (activeRuns.Count > 0)
+				{
+					List<string> keysToFinalize = activeRuns.Keys
+						.Where(key => !matchedKeys.Contains(key))
+						.ToList();
 
-                        if (!expressions.IsDefaultOrEmpty)
-                        {
-                                var activeRuns = new Dictionary<string, ValueRun>();
+					foreach (string key in keysToFinalize)
+					{
+						if (activeRuns.TryGetValue(key, out ValueRun run))
+						{
+							FinalizeRun(key, run);
+						}
+					}
+				}
+			}
 
-                                // One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
-                                var buffer = new ContentBuffer();
+			foreach (KeyValuePair<string, ValueRun> activeRun in activeRuns.ToArray())
+			{
+				FinalizeRun(activeRun.Key, activeRun.Value);
+			}
 
-                                        foreach (IRecord record in records)
-                                        {
-                                                cancellationToken.ThrowIfCancellationRequested();
+			return new Results(flaggedLineNumbers.Count);
 
-                                                AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
+			void StartNewRun(string key, string value, int position)
+			{
+				var friendlyName = RegularExpression.GetFriendlyParameterName(key);
+				activeRuns[key] = new ValueRun(friendlyName, value, position);
 
-                                                var matchedKeys = new HashSet<string>();
-                                                IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, buffer);
+				flaggedLineNumbers.Add(records.GetLineNumber(position));
+				Flag(records, position, state, $"Start {friendlyName}: {value}", canUpdateMetadata);
+			}
 
-                                                foreach (KeyValuePair<string, string> currentState in keyValuePairs)
-                                                {
-                                                        matchedKeys.Add(currentState.Key);
+			void FinalizeRun(string key, ValueRun run)
+			{
+				flaggedLineNumbers.Add(records.GetLineNumber(run.LastPosition));
+				Flag(records, run.LastPosition, state, $"Stop {run.FriendlyName}: {run.Value}", canUpdateMetadata);
 
-                                                        if (activeRuns.TryGetValue(currentState.Key, out var existingRun))
-                                                        {
-                                                                if (existingRun.ValueEquals(currentState.Value))
-                                                                {
-                                                                        existingRun.UpdateLastRecord(record);
-                                                                }
-                                                                else
-                                                                {
-                                                                        FinalizeRun(currentState.Key, existingRun);
-                                                                        StartNewRun(currentState.Key, currentState.Value, record);
-                                                                }
-                                                        }
-                                                        else
-                                                        {
-                                                                StartNewRun(currentState.Key, currentState.Value, record);
-                                                        }
-                                                }
+				activeRuns.Remove(key);
+			}
+		}
 
-                                                        if (activeRuns.Count > 0)
-                                                        {
-                                                                List<string> keysToFinalize = activeRuns.Keys
-                                                                        .Where(key => !matchedKeys.Contains(key))
-                                                                        .ToList();
+		private sealed class ValueRun
+		{
+			public ValueRun(string friendlyName, string value, int position)
+			{
+				this.FriendlyName = friendlyName;
+				this.Value = value;
+				this.LastPosition = position;
+			}
 
-                                                                foreach (string key in keysToFinalize)
-                                                                {
-                                                                        if (activeRuns.TryGetValue(key, out var run))
-                                                                        {
-                                                                                FinalizeRun(key, run);
-                                                                        }
-                                                                }
-                                                        }
-                                                }
+			public string FriendlyName { get; }
 
-                                                foreach (KeyValuePair<string, ValueRun> activeRun in activeRuns.ToArray())
-                                                {
-                                                        FinalizeRun(activeRun.Key, activeRun.Value);
-                                                }
+			public string Value { get; }
 
-                                                void StartNewRun(string key, string value, IRecord record)
-                                                {
-                                                        var friendlyName = RegularExpression.GetFriendlyParameterName(key);
-                                                        var run = ValueRun.Start(friendlyName, value, record);
-                                                        activeRuns[key] = run;
-
-                                                        flaggedLineNumbers.Add(record.LineNumber);
-                                                        AnalysisHelper.UpdateRecordMetadata(
-                                                                record,
-                                                                state,
-                                                                true,
-                                                                $"Start {friendlyName}: {value}",
-                                                                canUpdateMetadata);
-                                                }
-
-                                                void FinalizeRun(string key, ValueRun run)
-                                                {
-                                                        flaggedLineNumbers.Add(run.LastRecord.LineNumber);
-                                                        AnalysisHelper.UpdateRecordMetadata(
-                                                                run.LastRecord,
-                                                                state,
-                                                                true,
-                                                                $"Stop {run.FriendlyName}: {run.Value}",
-                                                                canUpdateMetadata);
-
-                                                        activeRuns.Remove(key);
-                                                }
-                        }
-
-                        return new Results(flaggedLineNumbers.Count);
-                }
-
-                private sealed class ValueRun
-                {
-                        private ValueRun(string friendlyName, string value, IRecord record)
-                        {
-                                FriendlyName = friendlyName;
-                                Value = value;
-                                LastRecord = record;
-                        }
-
-                        public string FriendlyName { get; }
-
-                        public string Value { get; }
-
-                        public IRecord LastRecord { get; private set; }
-
-                        public static ValueRun Start(string friendlyName, string value, IRecord record)
-                        {
-                                return new ValueRun(friendlyName, value, record);
-                        }
-
-                        public bool ValueEquals(string value)
-                        {
-                                return Value == value;
-                        }
-
-                        public void UpdateLastRecord(IRecord record)
-                        {
-                                LastRecord = record;
-                        }
-                }
-        }
+			/// <summary>
+			/// The run's last row, whose record is created only when the run ends.
+			/// </summary>
+			public int LastPosition { get; set; }
+		}
+	}
 }

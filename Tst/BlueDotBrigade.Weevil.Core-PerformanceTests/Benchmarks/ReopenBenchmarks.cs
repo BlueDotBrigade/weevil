@@ -8,13 +8,13 @@ namespace BlueDotBrigade.Weevil
 	/// </summary>
 	/// <remarks>
 	/// Weevil saves no index in the temporary folder, so each reference log is copied to a folder of its own, outside it, once for each storage mode:
-	/// the saved table is reused only in the mode that made it. A copy whose length differs from the reference log is copied again, as after a change to <c>ReferenceLog.cs</c>.
+	/// each mode reopens from a table it saved itself, as an analyst who keeps to one mode does. A copy whose length differs from the reference log is copied again, as after a change to <c>ReferenceLog.cs</c>.
 	/// Compare with <see cref="OpenBenchmarks"/>, which parses the log. The log was just read, so a reopen reads it from the operating system's cache.
 	/// </remarks>
 	[MemoryDiagnoser]
 	public class ReopenBenchmarks
 	{
-		// Logged by LineIndexFile.RecordsReadFromIndexMessage, which a Release build cannot see.
+		// Logged by SavedIndex.RecordsReadFromIndexMessage, which a Release build cannot see.
 		private const string RecordsReadFromIndexMessage = "The records were read from the saved index, without parsing the log.";
 
 		private static readonly string Folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Weevil.Benchmarks");
@@ -75,7 +75,8 @@ namespace BlueDotBrigade.Weevil
 		[Benchmark]
 		public int Open()
 		{
-			return Engine.UsingPath(_logPath).UsingStorage(this.Storage).Open().Count;
+			using IEngine engine = Engine.UsingPath(_logPath).UsingStorage(this.Storage).Open();
+			return engine.Count;
 		}
 
 		/// <summary>

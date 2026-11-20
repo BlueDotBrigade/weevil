@@ -8,9 +8,12 @@
 	/// <remarks>
 	/// <see cref="Reload"/> replaces the engine's filter, selector, navigation, analyzer and records: read them from the engine each time, rather than keeping them.
 	/// A record, or a <see cref="RecordList"/>, kept after another log opens or after Reload still reads its own log.
-	/// In disk mode that read can throw an <see cref="System.IO.IOException"/>, such as <see cref="IO.LogFileChangedException"/>, once the log changed or is gone (#1025).
+	/// In disk mode that read throws <see cref="IO.LogFileChangedException"/> once the log changed or is gone (#1025, #1295).
+	///
+	/// The engine locks its log, so another instance of Weevil, or another engine, doesn't open it (#1254). <see cref="IDisposable.Dispose"/> releases the lock, and nothing else:
+	/// the engine still reads its records. So save first, then dispose the engine once the log is closed or replaced. <see cref="Clear"/> and <see cref="Reload"/> keep the lock.
 	/// </remarks>
-	public interface IEngine : ICoreEngine
+	public interface IEngine : ICoreEngine, IDisposable
 	{
 		/// <summary>
 		/// Raised when the filter's results change. Subscribe once per open log: unlike <see cref="ICoreEngine.Filter"/>'s own event,
@@ -57,6 +60,9 @@
 		/// <remarks>
 		/// The engine, its filter, selector and events, and the comments, pins and flags stay (#1018).
 		/// The filter is reset to show every record kept, and the selected records that are kept stay selected.
+		/// It saves the sidecar first, so the comments and pins on the records it clears are kept (#1004). When the sidecar can never be written,
+		/// as in a read-only folder, it logs a warning and clears the records anyway, so their unsaved comments and pins are not saved (#1246).
+		/// Any other failure to save, such as a locked sidecar, stops Clear, and nothing is cleared.
 		/// </remarks>
 		void Clear(ClearOperation clearOperation);
 

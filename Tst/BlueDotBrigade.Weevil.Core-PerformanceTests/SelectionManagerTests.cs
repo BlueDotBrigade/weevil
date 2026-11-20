@@ -35,14 +35,14 @@ namespace BlueDotBrigade.Weevil
 		public void GivenADroidLogOpenedOnDisk_WhenEveryRecordIsSaved_ThenTheRecordsAreSavedQuickly()
 		{
 			var logPath = DroidLog.GetPath(DroidLog.Utf8);
-			IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
+			using IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 			var destinationPath = Path.Combine(_folder, "Saved.log");
 
 			var stopwatch = Stopwatch.StartNew();
 			engine.Selector.SaveSelection(destinationPath, FileFormatType.Raw);
 			stopwatch.Stop();
 
-			TestContext.WriteLine($"Saved {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
+			this.TestContext.WriteLine($"Saved {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
 			new FileInfo(destinationPath).Length.Should().BeGreaterThan(new FileInfo(logPath).Length * 9 / 10, "every record is saved");
 			stopwatch.Elapsed.Should().BeLessThan(MaximumDuration);
 		}

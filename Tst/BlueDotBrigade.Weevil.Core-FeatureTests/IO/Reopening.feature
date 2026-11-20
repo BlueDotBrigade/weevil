@@ -31,12 +31,32 @@ Scenario: A log changed in the middle since it was opened is parsed again
 	Then it will have been parsed, because its saved record table does not match it
 	And it will show the same records as a parse of the log
 
-Scenario: A log opened in RAM is parsed again when it is reopened on disk
-	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings
-	And that the saved log file has been opened in RAM
-	When the saved log file is opened again in Disk
+@Requirement:1085
+Scenario Outline: A log whose records keep its bytes in both modes is reopened in the other mode without being parsed
+	Given that the default log file has been saved beside the tests as <Encoding> with <Line Endings> line endings
+	And that the saved log file has been opened in <Mode>
+	When the saved log file is opened again in <Other Mode>
+	Then it will have been opened without being parsed
+	And it will show the same records as a parse of the log
+
+Examples:
+	| Encoding       | Line Endings | Mode | Other Mode |
+	| UTF-8          | LF           | RAM  | Disk       |
+	| UTF-8 with BOM | CRLF         | Disk | RAM        |
+	| UTF-16 LE      | CRLF         | RAM  | Disk       |
+	| UTF-16 LE      | LF           | Disk | RAM        |
+
+Scenario Outline: A log whose records keep a string in RAM is parsed again when it is reopened in the other mode
+	Given that the default log file has been saved beside the tests as <Encoding> with <Line Endings> line endings
+	And that the saved log file has been opened in <Mode>
+	When the saved log file is opened again in <Other Mode>
 	Then it will have been parsed
 	And it will show the same records as a parse of the log
+
+Examples:
+	| Encoding  | Line Endings | Mode | Other Mode |
+	| UTF-16 BE | LF           | RAM  | Disk       |
+	| UTF-32 LE | CRLF         | Disk | RAM        |
 
 Scenario: A log whose saved record table is damaged is parsed again
 	Given that the default log file has been saved beside the tests as UTF-8 with LF line endings

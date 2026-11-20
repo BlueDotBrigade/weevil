@@ -50,7 +50,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				SessionId = session.SessionId,
 				Application = session.Application ?? string.Empty,
 				Source = session.Source ?? string.Empty,
-				Version = Version.TryParse(session.Version, out var version) ? version : new Version(0, 0),
+				Version = Version.TryParse(session.Version, out Version version) ? version : new Version(0, 0),
 				IsDebugging = session.IsDebugging,
 				SessionStartUtc = session.SessionStartUtc,
 				SessionEndUtc = session.SessionEndUtc,

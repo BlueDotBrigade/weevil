@@ -23,14 +23,15 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <param name="path">The log.</param>
 		/// <param name="startOffset">Where the first byte appended is in the file.</param>
 		/// <param name="logLength">The log's length when it was opened, so a log parsed only in part is not taken for one that grew.</param>
-		public LogFileSourceBuilder(string path, long startOffset, long logLength)
+		/// <param name="displayPath">The log as the analyst knows it, when <paramref name="path"/> is a copy: see <see cref="LogFileSource.Path"/>.</param>
+		public LogFileSourceBuilder(string path, long startOffset, long logLength, string displayPath = null)
 		{
 			ArgumentException.ThrowIfNullOrEmpty(path);
 			ArgumentOutOfRangeException.ThrowIfNegative(startOffset);
 			ArgumentOutOfRangeException.ThrowIfNegative(logLength);
 
 			_position = startOffset;
-			this.Source = new LogFileSource(path, startOffset, logLength);
+			this.Source = new LogFileSource(path, displayPath, startOffset, logLength);
 		}
 
 		/// <summary>

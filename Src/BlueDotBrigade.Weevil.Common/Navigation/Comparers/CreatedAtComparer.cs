@@ -42,7 +42,7 @@
 		{
 			if (HasCreationTime(x) && HasCreationTime(y))
 			{
-				var delta = x - y;
+				TimeSpan delta = x - y;
 				return delta.TotalMilliseconds;
 			}
 			else

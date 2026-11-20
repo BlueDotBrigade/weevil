@@ -26,7 +26,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(UserNameVariable, null);
 				Environment.SetEnvironmentVariable(SecretVariable, null);
 
-				var client = TelemetryClientFactory.Create();
+				ITelemetryClient client = TelemetryClientFactory.Create();
 				client.Should().BeSameAs(NullTelemetryClient.Instance);
 			}
 			finally
@@ -51,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(UserNameVariable, "telemetry-user");
 				Environment.SetEnvironmentVariable(SecretVariable, "telemetry-secret");
 
-				var client = TelemetryClientFactory.Create();
+				ITelemetryClient client = TelemetryClientFactory.Create();
 
 				client.Should().BeOfType<MsSqlTelemetryClient>();
 			}
@@ -77,7 +77,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(UserNameVariable, "telemetry-user");
 				Environment.SetEnvironmentVariable(SecretVariable, "telemetry-secret");
 
-				var client = TelemetryClientFactory.Create();
+				ITelemetryClient client = TelemetryClientFactory.Create();
 
 				client.Should().BeSameAs(NullTelemetryClient.Instance);
 			}
@@ -101,7 +101,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(UserNameVariable, "telemetry-user");
 				Environment.SetEnvironmentVariable(SecretVariable, "telemetry-secret");
 
-				var options = TelemetryClientFactory.CreateOptions("Server=localhost;Database=Weevil;");
+				MsSqlTelemetryClientOptions options = TelemetryClientFactory.CreateOptions("Server=localhost;Database=Weevil;");
 				options.UsernameOrApiToken.Should().Be("telemetry-user");
 				options.Secret.Should().Be("telemetry-secret");
 			}
@@ -155,7 +155,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(UserNameVariable, string.Empty);
 				Environment.SetEnvironmentVariable(SecretVariable, string.Empty);
 
-				var client = TelemetryClientFactory.Create();
+				ITelemetryClient client = TelemetryClientFactory.Create();
 				client.Should().BeSameAs(NullTelemetryClient.Instance);
 			}
 			finally
@@ -183,7 +183,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				Environment.SetEnvironmentVariable(UserNameVariable, "j.doe");
 				Environment.SetEnvironmentVariable(SecretVariable, password);
 
-				var options = TelemetryClientFactory.CreateOptions("Server=localhost;Database=Weevil;");
+				MsSqlTelemetryClientOptions options = TelemetryClientFactory.CreateOptions("Server=localhost;Database=Weevil;");
 				options.Secret.Should().Be(actualPassword);
 			}
 			finally

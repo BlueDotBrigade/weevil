@@ -44,7 +44,7 @@ namespace BlueDotBrigade.Weevil.Integration
 			try
 			{
 				// Act - Open the log file and add a comment
-				var engine = Engine
+				using IEngine engine = Engine
 					.UsingPath(extractedLogPath)
 					.Open();
 
@@ -99,7 +99,7 @@ namespace BlueDotBrigade.Weevil.Integration
 			try
 			{
 				// Act - Open the log file and add a comment
-				var engine = Engine
+				using IEngine engine = Engine
 					.UsingPath(logFilePath)
 					.Open();
 
@@ -114,7 +114,8 @@ namespace BlueDotBrigade.Weevil.Integration
 				(System.IO.File.Exists(sidecarPath)).Should().BeTrue("Sidecar file should be created in non-temp directory");
 
 				// Verify the comment was saved
-				var engine2 = Engine
+				engine.Dispose();
+				using IEngine engine2 = Engine
 					.UsingPath(logFilePath)
 					.Open();
 				

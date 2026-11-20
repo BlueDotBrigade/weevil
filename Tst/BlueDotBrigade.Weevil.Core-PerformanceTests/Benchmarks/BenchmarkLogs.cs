@@ -54,6 +54,7 @@ namespace BlueDotBrigade.Weevil
 
 			if (engine.Count != recordCount)
 			{
+				engine.Dispose();
 				throw new InvalidOperationException($"The reference log holds {engine.Count:N0} records instead of {recordCount:N0}. Delete {Folder}, so it is written again.");
 			}
 

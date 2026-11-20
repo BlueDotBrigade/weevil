@@ -13,25 +13,16 @@
 	/// Flags the record where a value first appears or changes from that previous matching value.
 	/// Records that do not capture a key are ignored and do not reset its previous value.
 	/// </summary>
-	internal class StateTransitionsAnalyzer : IRecordAnalyzer
+	internal class StateTransitionsAnalyzer : RegularExpressionAnalyzer
 	{
-		private readonly FilterStrategy _filterStrategy;
-		private readonly IFilterAliasExpander _aliasExpander;
-
-		public StateTransitionsAnalyzer(FilterStrategy filterStrategy)
-			: this(filterStrategy, null)
+		public StateTransitionsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander = null)
+			: base(filterStrategy, aliasExpander)
 		{
 		}
 
-		public StateTransitionsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
-		{
-			_filterStrategy = filterStrategy;
-			_aliasExpander = aliasExpander;
-		}
+		public override string Key => AnalysisType.StateTransitions.ToString();
 
-		public string Key => AnalysisType.StateTransitions.ToString();
-
-		public string DisplayName => "State Transitions";
+		public override string DisplayName => "State Transitions";
 
 		/// <summary>
 		/// Regular expression groups are used to identify transitions (e.g. changing from <see langword="True"/> to <see langword="False"/>).
@@ -40,100 +31,45 @@
 		/// When a transition occurs:
 		/// 1. the corresponding record is flagged
 		/// 2. an appropriate comment is added to the record
-		/// </remarks>
-		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
-		{
-			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
-		}
-
-		/// <remarks>
 		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
 		/// </remarks>
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
+		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
+		public override Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
 		{
+			if (!TryGetExpressions(records, userDialog, out ImmutableArray<RegularExpression> expressions))
+			{
+				return new Results(0);
+			}
+
+			ClearFlags(records, state, canUpdateMetadata);
+
 			var flaggedLineNumbers = new HashSet<int>();
-
-			// Get default regex from current inclusive filter
-			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
-
-			// Show analysis dialog to get custom regex
-			var recordsDescription = records.Count.ToString("N0");
-
-			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
-			{
-				// User cancelled
-				return new Results(0);
-			}
-
-			if (string.IsNullOrWhiteSpace(customRegex))
-			{
-				// No regex provided
-				return new Results(0);
-			}
-
-			// Parse expressions with alias expansion and || support
-			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
-			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
-				customRegex,
-				_aliasExpander,
-				expressionBuilder);
-
-			if (expressions.IsDefaultOrEmpty)
-			{
-				return new Results(0);
-			}
-
 			var previousState = new Dictionary<string, string>();
 
 			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
 			var buffer = new ContentBuffer();
 
-			foreach (IRecord record in records)
+			for (var position = 0; position < records.Count; position++)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				var content = records.ReadContent(position, buffer).ToString();
+
+				foreach (KeyValuePair<string, string> currentState in AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, content))
 				{
-					cancellationToken.ThrowIfCancellationRequested();
+					// A value that appears for the first time, or differs from the key's previous value.
+					if (!previousState.TryGetValue(currentState.Key, out var previousValue) || previousValue != currentState.Value)
+					{
+						var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
 
-					AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
+						flaggedLineNumbers.Add(records.GetLineNumber(position));
 
-						IDictionary<string, string> keyValuePairs = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, buffer);
+						Flag(records, position, state, $"{parameterName}: {currentState.Value}", canUpdateMetadata);
 
-						foreach (KeyValuePair<string, string> currentState in keyValuePairs)
-						{
-							if (previousState.ContainsKey(currentState.Key))
-							{
-								if (previousState[currentState.Key] != currentState.Value)
-								{
-									var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
-
-									flaggedLineNumbers.Add(record.LineNumber);
-
-									AnalysisHelper.UpdateRecordMetadata(
-										record,
-										state,
-										true,
-										$"{parameterName}: {currentState.Value}",
-										canUpdateMetadata);
-
-									previousState[currentState.Key] = currentState.Value;
-								}
-							}
-							else
-							{
-								var parameterName = RegularExpression.GetFriendlyParameterName(currentState.Key);
-
-								flaggedLineNumbers.Add(record.LineNumber);
-
-								AnalysisHelper.UpdateRecordMetadata(
-									record,
-									state,
-									true,
-									$"{parameterName}: {currentState.Value}",
-									canUpdateMetadata);
-
-								previousState.Add(currentState.Key, currentState.Value);
-							}
-						}
+						previousState[currentState.Key] = currentState.Value;
+					}
 				}
+			}
 
 			return new Results(flaggedLineNumbers.Count);
 		}

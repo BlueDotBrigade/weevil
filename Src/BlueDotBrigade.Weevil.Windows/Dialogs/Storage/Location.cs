@@ -90,13 +90,13 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 			if (!this.IsInArchive)
 			{
-				var path = Path.Combine(this.FileSystemPath, name);
+				string path = Path.Combine(this.FileSystemPath, name);
 				return entersContainer ? new Location(path, new[] { string.Empty }) : ForFileSystem(path);
 			}
 
 			var last = this.ArchivePath[^1];
 			var entry = last.Length == 0 ? name : $"{last}/{name}";
-			var segments = this.ArchivePath.Take(this.ArchivePath.Count - 1).Append(entry);
+			IEnumerable<string> segments = this.ArchivePath.Take(this.ArchivePath.Count - 1).Append(entry);
 
 			return new Location(this.FileSystemPath, (entersContainer ? segments.Append(string.Empty) : segments).ToArray());
 		}
@@ -240,7 +240,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				return this.Name;
 			}
 
-			var parts = this.ArchivePath
+			IEnumerable<string> parts = this.ArchivePath
 				.Where(segment => segment.Length > 0)
 				.Select(segment => segment.Replace('/', Path.DirectorySeparatorChar));
 
@@ -251,7 +251,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 		private static string GetEntryFolder(string entryPath)
 		{
-			var slash = entryPath.LastIndexOf('/');
+			int slash = entryPath.LastIndexOf('/');
 			return slash < 0 ? string.Empty : entryPath.Substring(0, slash);
 		}
 	}

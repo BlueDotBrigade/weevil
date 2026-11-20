@@ -98,13 +98,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				}
 				else if (this.ViewModel.ExitCommand.CanExecute(null))
 				{
-					this.ViewModel.ExitCommand.Execute(null);
+					// The analyst may choose to stay, to keep changes the sidecar can't take yet (#1307).
+					e.Cancel = !this.ViewModel.TryExit();
 				}
 				else
 				{
-					// Exit cannot run while a filter, Reload or an open is running, so the copies extracted from zips are deleted here (#1162).
-					// A file Windows still has open for reading cannot be deleted, and stays in the temporary folder.
-					this.ViewModel.DeleteExtractedLogs();
+					// Exit cannot run while a filter, Reload or an open is running, so the open log's lock is released and the copies extracted from zips are deleted here (#1162, #1254).
+					// A file Windows still has open for reading cannot be deleted, and stays: the next open of the same file reuses it (#1253).
+					this.ViewModel.Close();
 				}
 			}
 		}

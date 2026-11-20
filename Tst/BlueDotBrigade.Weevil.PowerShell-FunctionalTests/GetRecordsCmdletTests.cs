@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Data;
+	using LogInUseException = BlueDotBrigade.Weevil.IO.LogInUseException;
 	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
@@ -91,6 +92,33 @@ namespace BlueDotBrigade.Weevil.PowerShell
 		}
 
 		[TestMethod]
+		[WorkItem(1254)]
+		public void GivenALogAnotherWeevilHasOpen_WhenGettingRecords_ThenTheCmdletStopsWithAnErrorNamingWhoHasIt()
+		{
+			var folder = Directory.CreateTempSubdirectory("WeevilPowerShell.").FullName;
+
+			try
+			{
+				var logPath = Path.Combine(folder, "Application.log");
+				File.Copy(new Daten().AsFilePath("Application.log"), logPath);
+
+				using (IEngine otherWeevil = Engine.UsingPath(logPath).Open())
+				{
+					var cmdlet = new GetRecordsCmdlet { FilePath = logPath, Include = "Error" };
+
+					// Invoked directly, a terminating error throws its exception.
+					FluentActions.Invoking(() => cmdlet.Invoke().Cast<object>().ToList())
+						.Should().Throw<LogInUseException>()
+						.WithMessage($"Application.log is already open in Weevil by {Environment.UserName} on {Environment.MachineName}.");
+				}
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		[DataRow(StorageMode.Ram, false)]
 		[DataRow(StorageMode.Disk, true)]
 		public void GivenAStorageMode_WhenTheLogIsTruncatedAfterGettingRecords_ThenOnlyRecordsOnDiskFailToRead(StorageMode storage, bool readFails)
@@ -112,7 +140,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
 				File.WriteAllText(logPath, string.Empty);
 
-				var read = FluentActions.Invoking(() => records[0].Content);
+				Func<string> read = FluentActions.Invoking(() => records[0].Content);
 
 				if (readFails)
 				{

@@ -5,6 +5,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Runtime.CompilerServices;
+	using System.Threading;
 	using Analysis;
 	using Data;
 	using Filter;
@@ -18,9 +19,13 @@
 
 		private CoreEngine _coreEngine;
 
-		internal Engine(CoreEngine coreEngine)
+		// Keeps another Weevil from opening the log, until disposed (#1254): null when none could be created, and for the Surrogate.
+		private IO.LogLock _lock;
+
+		internal Engine(CoreEngine coreEngine, IO.LogLock logLock)
 		{
 			_coreEngine = coreEngine;
+			_lock = logLock;
 			SubscribeTo(_coreEngine);
 		}
 
@@ -71,7 +76,8 @@
 				File.WriteAllText(filePath, string.Empty);
 			}
 
-			Surrogate = UsingPath(filePath).Open();
+			// Without a lock: every instance of Weevil shows the same empty file.
+			Surrogate = new Engine(new CoreEngine.CoreEngineBuilder(filePath).Build(), logLock: null);
 		}
 
 
@@ -131,6 +137,11 @@
 			? _coreEngine.SourceDirectory
 			: string.Empty;
 
+		/// <summary>
+		/// The file read, which <see cref="SourceFilePath"/> names as the analyst knows it (#1312).
+		/// </summary>
+		internal string FilePath => _coreEngine.FilePath;
+
 		public bool HasBeenCleared => _coreEngine.HasBeenCleared;
 
 		public void Save()
@@ -151,6 +162,48 @@
 		public static IEngineBuilder UsingPath(string sourceFilePath, int startAtLineNumber)
 		{
 			return new EngineBuilder(sourceFilePath, startAtLineNumber);
+		}
+
+		/// <summary>
+		/// Throws when another instance of Weevil, or another engine in this one, has the log open (#1254), so a caller can check before work an open would waste,
+		/// such as extracting a log from a zip.
+		/// </summary>
+		/// <remarks>
+		/// It changes nothing, and opening the log checks again. A lock left by a Weevil that crashed is not a refusal.
+		/// </remarks>
+		/// <param name="sourceFilePath">The file that would be opened: for a log in a zip, the path it is extracted to.</param>
+		/// <exception cref="IO.LogInUseException">The log is open. The message names who has it.</exception>
+		public static void ThrowIfInUse(string sourceFilePath)
+		{
+			IO.LogLock.ThrowIfHeld(sourceFilePath);
+		}
+
+		/// <summary>
+		/// Releases the log's lock, so another instance of Weevil can open it (#1254). Nothing else changes: save first.
+		/// </summary>
+		public void Dispose()
+		{
+			Interlocked.Exchange(ref _lock, null)?.Dispose();
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> when this engine holds the lock of the log at <paramref name="filePath"/>.
+		/// </summary>
+		internal bool IsLocking(string filePath)
+		{
+			return Volatile.Read(ref _lock)?.IsFor(filePath) == true;
+		}
+
+		/// <summary>
+		/// Hands this engine's lock to the engine that replaces it, when both read <paramref name="filePath"/>: otherwise <see langword="null"/>.
+		/// </summary>
+		internal IO.LogLock TakeLock(string filePath)
+		{
+			IO.LogLock logLock = Volatile.Read(ref _lock);
+
+			return logLock?.IsFor(filePath) == true && Interlocked.CompareExchange(ref _lock, null, logLock) == logLock
+				? logLock
+				: null;
 		}
 
 		/// <summary>
@@ -176,7 +229,16 @@
 			// Saved first: once cleared, a record's comment and pin are no longer in memory to be saved (#1004).
 			if (Engine.IsRealInstance(this))
 			{
-				_coreEngine.Save();
+				try
+				{
+					_coreEngine.Save();
+				}
+				catch (Exception exception) when (IO.FileHelper.IsNeverWritable(exception))
+				{
+					// A read-only folder, file or drive: no later save could keep the unsaved comments and pins on the records cleared either,
+					// so Clear still narrows the records, as 2.x did (#1246). A lock or a full disk may pass, so it still fails Clear, and nothing is lost.
+					Diagnostics.Log.Default.Write(Diagnostics.LogSeverityType.Warning, exception, "The sidecar can't be written, so the records are cleared without saving it first.");
+				}
 			}
 
 			// Clear resets the filter without telling subscribers, as IEngine documents; the engine itself still hears of it.
@@ -234,7 +296,7 @@
 		{
 			if (_coreEngine.Source?.HasChanged == true)
 			{
-				IO.LineIndexFile.Delete(_coreEngine.SourceFilePath);
+				IO.SavedIndex.Delete(_coreEngine.FilePath);
 			}
 		}
 
@@ -252,11 +314,11 @@
 
 			// The session, the flags and the storage mode carry across Reload (#1013, #1025).
 			CoreEngine.CoreEngineBuilder builder = CoreEngine
-				.FromPath(_coreEngine.SourceFilePath)
+				.FromPath(_coreEngine.FilePath)
 				.UsingStateOf(_coreEngine)
 				.UsingStorage(_coreEngine.StorageMode);
 
-			var kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
+			(CoreEngine.CoreEngineBuilder builder, SelectionManager.Snapshot, FilterType FilterType, IFilterCriteria Criteria) kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
 
 			// Not the Surrogate's engine, which every engine shares: after a failed read, this engine still saves to and reloads its own log.
 			Replace(_coreEngine.WithoutRecords());

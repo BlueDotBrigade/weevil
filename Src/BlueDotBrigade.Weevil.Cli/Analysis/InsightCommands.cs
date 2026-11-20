@@ -39,26 +39,30 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			[Option(Description = "Ram keeps the log in memory. Disk reads it back from the log, for a log larger than memory.")]
 			StorageMode storage = StorageMode.Ram)
 		{
-			var telemetry = TelemetrySessionLifecycle.Shared;
+			TelemetrySessionLifecycle telemetry = TelemetrySessionLifecycle.Shared;
 			telemetry.StartSession("WeevilCli.exe", Program.ApplicationVersion, logPath);
 
 			try
 			{
 				telemetry.Increment(TelemetryMetrics.CliInsightCommand);
 
-				IEngine engine = Engine
+				// Closed when the command ends, so another Weevil can open the log (#1254).
+				using IEngine engine = Engine
 						.UsingPath(logPath)
 						.UsingTelemetry(telemetry)
 						.UsingStorage(storage)
 						.Open();
 
-				// On disk, a log that changed while it was read is reloaded, and read once more (#1028).
-				var insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
-
-				// After the insights, so that the report's metrics describe the same log, if it was reloaded.
+				// A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the command again (#1247).
 				// The report holds every insight and the metrics; the command shows what it always has (#837).
-				var period = engine.Records.GetEstimatedRange();
-				InsightReport report = new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
+				InsightReport report = engine.RunOnce(
+					() =>
+					{
+						ImmutableArray<IInsight> insights = engine.Analyzer.GetInsights();
+						(DateTime From, DateTime To) period = engine.Records.GetEstimatedRange();
+						return new InsightReportGenerator().Create(Program.ApplicationVersion, engine, insights, period.From, period.To);
+					},
+					Program.ReportWarning);
 
 				if (_output.Format == OutputFormat.Json)
 				{
@@ -80,7 +84,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 					}
 				}
 
-				var shown = verbose
+				ImmutableArray<InsightReportItem> shown = verbose
 					? report.Insights
 					: report.Insights.Where(insight => insight.IsAttentionRequired).ToImmutableArray();
 
@@ -97,6 +101,13 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 						Write.Text($"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}");
 					}
 				}
+			}
+			catch (Exception exception) when (exception is LogFileChangedException or LogInUseException or NotSupportedException)
+			{
+				// A log changed while it was read (#1247), one another Weevil has open (#1254), or one Weevil can't open, such as one with too many lines (#1252):
+				// its message, without a stack trace.
+				// Cocona sets the exit code from the command, so it is passed this way.
+				throw new CommandExitedException(exception.Message, 1);
 			}
 			finally
 			{

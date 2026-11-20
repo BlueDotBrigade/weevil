@@ -18,7 +18,7 @@
 			var sidecarLoader = new SidecarLoader(metadataPath);
 
 			// act
-			sidecarLoader.TryLoad(out var sidecarData);
+			sidecarLoader.TryLoad(out WeevilSidecar sidecarData);
 
 			// arrange
 			metadata.Should().NotContain("Regions");
@@ -34,7 +34,7 @@
 			var sidecarLoader = new SidecarLoader(metadataPath);
 
 			// act
-			sidecarLoader.TryLoad(out var sidecarData);
+			sidecarLoader.TryLoad(out WeevilSidecar sidecarData);
 
 			// arrange
 			sidecarData.CommonData.Regions[0].Name.Should().Be("Region Of Interest");

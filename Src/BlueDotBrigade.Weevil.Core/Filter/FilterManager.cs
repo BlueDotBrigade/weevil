@@ -1,9 +1,10 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Concurrent;
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
@@ -30,7 +31,10 @@
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
-		// Reads a log opened on disk back, or null in RAM mode.
+		// Whether the records keep their content (RAM) or read it back from the log (disk).
+		private readonly IO.StorageMode _storageMode;
+
+		// The file the records were read from: on disk, they read their content back through it. Null for the engine without records that Reload uses.
 		private readonly IO.LogFileSource _source;
 
 		private FilterStrategy _latestFilterStrategy;
@@ -52,7 +56,30 @@
 		private readonly FilterHistory _includeHistory;
 		private readonly FilterHistory _excludeHistory;
 
-		private bool _abortFilterOperation;
+		/// <summary>
+		/// One filter runs at a time. A newer filter waits here for the one it replaced to stop (#1248).
+		/// </summary>
+		private readonly SemaphoreSlim _runGate = new SemaphoreSlim(1, 1);
+
+		/// <summary>
+		/// Guards the newest run and what a filter publishes, so a filter is either stopped or shown (#1248).
+		/// </summary>
+		private readonly object _runSync = new object();
+
+		/// <summary>
+		/// Stops the newest filter run, which Abort and the next filter cancel (#1248).
+		/// </summary>
+		private CancellationTokenSource _newestRun;
+
+		/// <summary>
+		/// The thread whose filter has its turn, or 0: a handler of that filter's events that applies a filter is refused, rather than waiting for itself (#1248).
+		/// </summary>
+		private int _turnThreadId;
+
+		/// <summary>
+		/// The metrics of <see cref="Results"/>. A stopped filter leaves the collectors part counted, so they are kept when a filter is published (#1248).
+		/// </summary>
+		private IDictionary<string, object> _metrics = new Dictionary<string, object>();
 
 		private TimeSpan _filterExecutionTime;
 		#endregion
@@ -70,10 +97,12 @@
 			FilterHistory includeHistory,
 			FilterHistory excludeHistory,
 			ITelemetryMetricRecorder telemetryRecorder = null,
+			IO.StorageMode storageMode = IO.StorageMode.Ram,
 			IO.LogFileSource source = null)
 		{
 			_coreExtension = coreExtension;
 			_telemetryRecorder = telemetryRecorder ?? NullTelemetryMetricRecorder.Instance;
+			_storageMode = storageMode;
 			_source = source;
 			_context = context;
 			_filterAliasExpander = filterAliasExpander;
@@ -131,10 +160,11 @@
 			throw new NotImplementedException();
 		}
 
-		private RecordList FilterAndCalculateMetrics(IFilterStrategy strategy)
+		/// <remarks>
+		/// Checks <paramref name="cancellationToken"/> after the loop too, so a Stop while the strategy was built is not lost (#1248).
+		/// </remarks>
+		private RecordList FilterAndCalculateMetrics(IFilterStrategy strategy, CancellationToken cancellationToken)
 		{
-			_abortFilterOperation = false;
-
 			foreach (IMetricCollector collector in _metricCollectors)
 			{
 				collector.Reset();
@@ -147,11 +177,24 @@
 
 			// Set `MaxDegreeOfParallelism=1` to force the loop to be executed by only one thread.
 			// ... This can simplify the debugging process.
-			var parallelOptions = new ParallelOptions();
+			//
+			// At most one worker per core, in RAM as on disk, because of a log on disk (#1269):
+			// - The scenario: each worker holds a buffer of about 17 MB, the 16 MB chunk it reads. Without a cap, the thread pool adds
+			//   workers while the others wait for the disk, for example with a cold cache or a log on a network share. A filter would then
+			//   hold one buffer per thread, as many as the thread pool decides, rather than one per core.
+			// - The cost: with a cold cache, a filter keeps fewer reads in flight. On 4 cores and the 10-million-record log,
+			//   it was about 2% slower than without the cap (#1287).
+			// - Kept by the owner's decision: a bounded working set matters more than those 2%.
+			var workerCount = Environment.ProcessorCount;
+			var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = workerCount };
 
 			// On disk, each worker reads whole ranges of records that share a content chunk, so the log is read once (#1027).
 			// In RAM, ranges of about the same size keep every core busy, however small the log.
-			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _source != null, workerCount: Environment.ProcessorCount);
+			(int Start, int End)[] ranges = RecordRanges.Split(records, alignToChunks: _storageMode == IO.StorageMode.Disk, workerCount: workerCount);
+
+			// The loop creates many more worker states than workers, so they share content buffers, which hold a chunk each on disk:
+			// a filter allocates a buffer per worker, not per state (#1269).
+			var buffers = new ConcurrentBag<ContentBuffer>();
 
 			try
 			{
@@ -160,14 +203,14 @@
 								 Partitioner.Create((IEnumerable<(int Start, int End)>)ranges, EnumerablePartitionerOptions.NoBuffering),
 								 parallelOptions,
 						  // FMR Part1: initialize thread local storage
-						  () => { return new FilterMapReduceState(); },
+						  () => new FilterMapReduceState(buffers.TryTake(out ContentBuffer buffer) ? buffer : new ContentBuffer()),
 
 						  // FMR Part2: define task to perform
 						  (range, parallelLoopState, results) =>
 						  {
 							  for (var position = range.Start; position < range.End; position++)
 							  {
-								  if (_abortFilterOperation)
+								  if (cancellationToken.IsCancellationRequested)
 								  {
 									  parallelLoopState.Stop();
 									  break;
@@ -192,6 +235,7 @@
 						  // FMR Part3: merge the results
 						  (results) =>
 						  {
+							  buffers.Add(results.Content);
 							  Interlocked.Add(ref resultsCount, results.Count);
 						  }
 				);
@@ -202,18 +246,9 @@
 				ExceptionDispatchInfo.Throw(readError);
 			}
 
-			if (_abortFilterOperation)
+			if (cancellationToken.IsCancellationRequested)
 			{
-				Log.Default.Write(
-					LogSeverityType.Warning,
-					$"Filter results have been discarded - the user has aborted the filter operation.",
-					new Dictionary<string, object>
-					{
-						{"FilterType", strategy.FilterType },
-						{"FilterCriteria", strategy.FilterCriteria },
-					});
-
-				throw new FilterAbortedException();
+				throw Discard(strategy.FilterType, strategy.FilterCriteria);
 			}
 
 			// A filter that keeps every record keeps the records' list itself, so it keeps no array (#1140).
@@ -238,6 +273,64 @@
 				$"Filter results have been kept. Records={records.Count}, Results={resultsCount}");
 
 			return TableRecordList.Select(records, positions);
+		}
+
+		private static FilterAbortedException Discard(FilterType filterType, IFilterCriteria criteria)
+		{
+			Log.Default.Write(
+				LogSeverityType.Warning,
+				"Filter results have been discarded - the filter was stopped, or a newer filter replaced it.",
+				new Dictionary<string, object>
+				{
+					{"FilterType", filterType },
+					{"FilterCriteria", criteria },
+				});
+
+			return new FilterAbortedException();
+		}
+
+		/// <summary>
+		/// Makes a run the newest, and stops the one before it: only the newest filter's results are shown (#1248).
+		/// </summary>
+		private CancellationTokenSource StartRun()
+		{
+			var run = new CancellationTokenSource();
+
+			lock (_runSync)
+			{
+				_newestRun?.Cancel();
+				_newestRun = run;
+			}
+
+			return run;
+		}
+
+		private void EndRun(CancellationTokenSource run)
+		{
+			lock (_runSync)
+			{
+				if (_newestRun == run)
+				{
+					_newestRun = null;
+				}
+			}
+
+			run.Dispose();
+		}
+
+		private IDictionary<string, object> CollectMetrics()
+		{
+			var metrics = new Dictionary<string, object>();
+
+			foreach (IMetricCollector collector in _metricCollectors)
+			{
+				foreach (KeyValuePair<string, object> result in collector.GetResults())
+				{
+					metrics.Add(result.Key, result.Value);
+				}
+			}
+
+			return metrics;
 		}
 
 		private void UpdateFilterHistory(FilterHistory history, string newValue)
@@ -303,7 +396,17 @@
 
 			// Re-applying is not a user-initiated filter action, so it is not recorded as telemetry.
 			// It compares the elapsed times the filter compared before, not those of its own results (#1224).
-			return ApplyInternal(_currentFilter.Type, _currentFilter.Criteria, _comparedElapsedTimes);
+			// Read together, as a filter publishes them (#1248).
+			Filter filter;
+			ElapsedTimes comparedElapsedTimes;
+
+			lock (_runSync)
+			{
+				filter = _currentFilter;
+				comparedElapsedTimes = _comparedElapsedTimes;
+			}
+
+			return ApplyInternal(filter.Type, filter.Criteria, comparedElapsedTimes);
 		}
 
 		/// <remarks>
@@ -327,6 +430,42 @@
 				throw new ArgumentNullException(nameof(criteria));
 			}
 
+			if (Volatile.Read(ref _turnThreadId) == Environment.CurrentManagedThreadId)
+			{
+				throw new InvalidOperationException("A filter cannot be applied while handling the events of the filter being applied, because it would wait for that filter to end.");
+			}
+
+			var stopwatch = Stopwatch.StartNew();
+			CancellationTokenSource run = StartRun();
+
+			try
+			{
+				Run(filterType, criteria, previousElapsedTimes, run, stopwatch);
+			}
+			finally
+			{
+				EndRun(run);
+			}
+
+			return this;
+		}
+
+		private static (long WorkingSetBytes, long PeakWorkingSetBytes)? ReadProcessMemory()
+		{
+			try
+			{
+				using var process = Process.GetCurrentProcess();
+				return (process.WorkingSet64, process.PeakWorkingSet64);
+			}
+			catch (Exception exception) when (exception is Win32Exception or InvalidOperationException or NotSupportedException)
+			{
+				// Process memory counters are optional diagnostics.
+				return null;
+			}
+		}
+
+		private void Run(FilterType filterType, IFilterCriteria criteria, ElapsedTimes previousElapsedTimes, CancellationTokenSource run, Stopwatch stopwatch)
+		{
 			try
 			{
 				Log.Default.Write(
@@ -338,49 +477,112 @@
 						{"FilterCriteria", criteria},
 					});
 
+				// Read once this run is the newest, which no older filter publishes after (#1248): these are the times of the results shown.
 				ElapsedTimes comparedElapsedTimes = previousElapsedTimes ?? _recordState.ElapsedTimes;
 
-				_latestFilterStrategy =
+				// Built before this filter's turn, so its expressions compile while the filter it replaces stops.
+				var strategy =
 					new FilterStrategy(_coreExtension, _context, _filterAliasExpander, filterType, criteria, _regionManager, _bookmarkManager, _recordState, comparedElapsedTimes);
 
-				_filterExecutionTime = TimeSpan.Zero;
-				var exectionTimeStopwatch = Stopwatch.StartNew();
-				var bytesReadBefore = _source?.BytesRead ?? 0;
-
-				_latestFilterResults = FilterAndCalculateMetrics(_latestFilterStrategy);
-
-				_currentFilter = new Filter(filterType, criteria);
-				_comparedElapsedTimes = comparedElapsedTimes;
-
-				UpdateFilterHistory(_includeHistory, criteria.Include);
-				UpdateFilterHistory(_excludeHistory, criteria.Exclude);
-
-				// An aborted filter never gets here, so the results still shown keep their elapsed times (#1016).
-				_recordState.ElapsedTimes = ElapsedTimes.Calculate(_latestFilterResults);
-
-				exectionTimeStopwatch.Stop();
-				_filterExecutionTime = exectionTimeStopwatch.Elapsed;
-
-				var completed = new Dictionary<string, object>
+				try
 				{
-					{"FilterType", filterType},
-					{"FilterCriteria", criteria},
-					{"TimeElapsed", _filterExecutionTime},
-					{"TotalRecords", _scope.Records.Count},
-					{"VisibleRecords", _latestFilterResults.Count},
-				};
-
-				if (_source != null)
+					// Stop, or a newer filter, ends the wait for the filter this one replaced (#1248).
+					_runGate.Wait(run.Token);
+				}
+				catch (OperationCanceledException)
 				{
-					// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
-					completed.Add("BytesRead", _source.BytesRead - bytesReadBefore);
+					throw Discard(filterType, criteria);
 				}
 
-				Log.Default.Write(LogSeverityType.Information, $"Filtering complete.", completed);
+				Volatile.Write(ref _turnThreadId, Environment.CurrentManagedThreadId);
+
+				try
+				{
+					var isOnDisk = _storageMode == IO.StorageMode.Disk;
+					var bytesReadBefore = _source?.BytesRead ?? 0;
+					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryBefore = isOnDisk ? ReadProcessMemory() : null;
+					var gen2Before = isOnDisk ? GC.CollectionCount(2) : 0;
+					var allocatedBefore = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) : 0;
+					var scanStarted = isOnDisk ? Stopwatch.GetTimestamp() : 0;
+
+					RecordList results = FilterAndCalculateMetrics(strategy, run.Token);
+
+					TimeSpan scanElapsed = isOnDisk ? Stopwatch.GetElapsedTime(scanStarted) : TimeSpan.Zero;
+					var allocatedBytes = isOnDisk ? GC.GetTotalAllocatedBytes(precise: true) - allocatedBefore : 0;
+					var gen2Collections = isOnDisk ? GC.CollectionCount(2) - gen2Before : 0;
+					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryAfter = isOnDisk ? ReadProcessMemory() : null;
+					IDictionary<string, object> metrics = CollectMetrics();
+					ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
+
+					// A filter is either stopped or shown, never both: Stop, and a newer filter's start, take the same lock (#1016, #1248).
+					bool isStopped;
+
+					lock (_runSync)
+					{
+						isStopped = run.IsCancellationRequested;
+
+						if (!isStopped)
+						{
+							_latestFilterStrategy = strategy;
+							_latestFilterResults = results;
+							_metrics = metrics;
+							_currentFilter = new Filter(filterType, criteria);
+							_comparedElapsedTimes = comparedElapsedTimes;
+							_recordState.ElapsedTimes = elapsedTimes;
+						}
+					}
+
+					if (isStopped)
+					{
+						throw Discard(filterType, criteria);
+					}
+
+					UpdateFilterHistory(_includeHistory, criteria.Include);
+					UpdateFilterHistory(_excludeHistory, criteria.Exclude);
+
+					// Raised during this filter's turn, so a newer filter's results are always heard last (#1248).
+					RaiseFilterChanged(new ResultsChangedEventArgs(results));
+
+					_filterExecutionTime = stopwatch.Elapsed;
+
+					var completed = new Dictionary<string, object>
+					{
+						{"FilterType", filterType},
+						{"FilterCriteria", criteria},
+						{"TimeElapsed", _filterExecutionTime},
+						{"TotalRecords", _scope.Records.Count},
+						{"VisibleRecords", results.Count},
+					};
+
+					if (isOnDisk)
+					{
+						// What the filter read from a log on disk, including what other readers read meanwhile, such as the rows on screen (#1027).
+						completed.Add("BytesRead", (_source?.BytesRead ?? 0) - bytesReadBefore);
+						completed.Add("ProcessorCount", Environment.ProcessorCount);
+						completed.Add("FilterScanElapsed", scanElapsed);
+						completed.Add("ProcessManagedAllocatedBytes", allocatedBytes);
+						completed.Add("ProcessGen2Collections", gen2Collections);
+
+						if (memoryBefore is { } before && memoryAfter is { } after)
+						{
+							completed.Add("ProcessWorkingSetBeforeBytes", before.WorkingSetBytes);
+							completed.Add("ProcessWorkingSetAfterBytes", after.WorkingSetBytes);
+							completed.Add("ProcessPeakWorkingSetBeforeBytes", before.PeakWorkingSetBytes);
+							completed.Add("ProcessPeakWorkingSetAfterBytes", after.PeakWorkingSetBytes);
+						}
+					}
+
+					Log.Default.Write(LogSeverityType.Information, $"Filtering complete.", completed);
+				}
+				finally
+				{
+					Volatile.Write(ref _turnThreadId, 0);
+					_runGate.Release();
+				}
 			}
-			catch (Exception exception) when (exception is not IO.LogFileChangedException)
+			catch (Exception exception) when (exception is not IO.LogFileChangedException and not FilterAbortedException)
 			{
-				// A log that changed is expected in disk mode, and its source has already logged a warning (#1025).
+				// A log that changed or is gone is expected in disk mode, and its source has already logged a warning (#1025, #1295).
 				Log.Default.Write(
 					LogSeverityType.Error,
 					exception,
@@ -392,30 +594,19 @@
 					});
 				throw;
 			}
-
-			RaiseFilterChanged(new ResultsChangedEventArgs(_latestFilterResults));
-
-			return this;
 		}
 
 		public IDictionary<string, object> GetMetrics()
 		{
-			var metrics = new Dictionary<string, object>();
-
-			foreach (IMetricCollector collector in _metricCollectors)
-			{
-				foreach (KeyValuePair<string, object> result in collector.GetResults())
-				{
-					metrics.Add(result.Key, result.Value);
-				}
-			}
-
-			return metrics;
+			return new Dictionary<string, object>(_metrics);
 		}
 
 		public void Abort()
 		{
-			_abortFilterOperation = true;
+			lock (_runSync)
+			{
+				_newestRun?.Cancel();
+			}
 		}
 	}
 }

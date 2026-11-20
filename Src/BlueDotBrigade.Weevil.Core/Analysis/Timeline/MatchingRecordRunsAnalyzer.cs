@@ -13,155 +13,106 @@
 	/// Flags the first and last records in each run containing two or more matches.
 	/// A non-matching record terminates the current run.
 	/// </summary>
-	internal class MatchingRecordRunsAnalyzer : IRecordAnalyzer
+	internal class MatchingRecordRunsAnalyzer : RegularExpressionAnalyzer
 	{
-		private readonly FilterStrategy _filterStrategy;
-		private readonly IFilterAliasExpander _aliasExpander;
-
-		public MatchingRecordRunsAnalyzer(FilterStrategy filterStrategy)
-			: this(filterStrategy, null)
+		public MatchingRecordRunsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander = null)
+			: base(filterStrategy, aliasExpander)
 		{
 		}
 
-		public MatchingRecordRunsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
-		{
-			_filterStrategy = filterStrategy;
-			_aliasExpander = aliasExpander;
-		}
+		public override string Key => AnalysisType.MatchingRecordRuns.ToString();
 
-		public string Key => AnalysisType.MatchingRecordRuns.ToString();
-
-		public string DisplayName => "Matching Record Runs";
-
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
-		{
-			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
-		}
+		public override string DisplayName => "Matching Record Runs";
 
 		/// <remarks>
 		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
 		/// </remarks>
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
-        {
-            var flaggedRecords = 0;
+		public override Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
+		{
+			// Any expression, including a moniker such as @Pinned, not only a regular expression.
+			if (!TryGetExpressions(records, userDialog, out ImmutableArray<IExpression> expressions))
+			{
+				return new Results(0);
+			}
+
+			ClearFlags(records, state, canUpdateMetadata);
+
+			var flaggedRecords = 0;
 			var blockCount = 0;
 
-            // Get default regex from current inclusive filter
-            var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
+			IRecord firstMatch = null;
+			IRecord lastMatch = null;
+			var content = new ContentBuffer();
 
-            // Show analysis dialog to get custom regex
-            var recordsDescription = records.Count.ToString("N0");
+			// IExpression.IsMatch takes a record, and a moniker reads the record rather than its text,
+			// so unlike the other analyzers this one creates a record for every row it tests (#1258).
+			// The filter results and the selection are already in line number order, so they are not sorted into a copy (#1137).
+			foreach (IRecord record in records)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
 
-            if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
-            {
-                // User cancelled
-                return new Results(0);
-            }
-
-            if (string.IsNullOrWhiteSpace(customRegex))
-            {
-                // No regex provided
-                return new Results(0);
-            }
-
-            // Parse expressions with alias expansion and || support
-            var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
-            ImmutableArray<IExpression> expressions = AnalyzerExpressionHelper.ParseAllExpressions(
-                customRegex,
-                _aliasExpander,
-                expressionBuilder);
-
-            if (!expressions.IsDefaultOrEmpty)
-            {
-                IRecord firstMatch = null;
-                IRecord lastMatch = null;
-                var content = new ContentBuffer();
-
-				// The filter results and the selection are already in line number order, so they are not sorted into a copy (#1137).
-				foreach (IRecord record in records)
-                {
-					cancellationToken.ThrowIfCancellationRequested();
-
-					if (canUpdateMetadata)
+				// Check if any expression matches
+				var isMatch = false;
+				foreach (IExpression expression in expressions)
+				{
+					if (expression.IsMatch(record, content))
 					{
-						state.SetFlagged(record, false);
+						isMatch = true;
+						break;
 					}
+				}
 
-					// Check if any expression matches
-					var isMatch = false;
-					foreach (IExpression expression in expressions)
+				if (isMatch)
+				{
+					if (firstMatch == null)
 					{
-						if (expression.IsMatch(record, content))
-						{
-							isMatch = true;
-							break;
-						}
-					}
-
-					if (isMatch)
-                    {
-                        if (firstMatch == null)
-                        {
-                            firstMatch = record;
-                        }
-						else
-						{
-							lastMatch = record;
-						}
+						firstMatch = record;
 					}
 					else
 					{
-						if (firstMatch != null)
-						{
-							if (lastMatch == null)
-							{
-								// Single-record matches are ignored because this analyzer only flags
-								// runs containing at least two consecutive matching records.
-							}
-							else
-							{
-								Log.Default.Write($"Detected a block of repeating records. StartsAt={firstMatch.LineNumber}, EndsAt={lastMatch.LineNumber}");
-
-								blockCount++;
-
-								if (canUpdateMetadata)
-								{
-									state.AppendComment(firstMatch, $"{blockCount:00}-Begins");
-									state.SetFlagged(firstMatch, true);
-
-									state.AppendComment(lastMatch, $"{blockCount:00}-Ends");
-									state.SetFlagged(lastMatch, true);
-								}
-
-								flaggedRecords += 2;
-							}
-						}
-
-						firstMatch = null;
-						lastMatch = null;
+						lastMatch = record;
 					}
-                }
-
-				if (firstMatch != null && lastMatch != null)
+				}
+				else
 				{
-					Log.Default.Write($"Detected the last block of repeating records. StartsAt={firstMatch.LineNumber}, EndsAt={lastMatch.LineNumber}");
-
-					blockCount++;
-
-					if (canUpdateMetadata)
+					// Single-record matches are ignored because this analyzer only flags
+					// runs containing at least two consecutive matching records.
+					if (firstMatch != null && lastMatch != null)
 					{
-						state.AppendComment(firstMatch, $"{blockCount:00}-Begins");
-						state.SetFlagged(firstMatch, true);
+						Log.Default.Write($"Detected a block of repeating records. StartsAt={firstMatch.LineNumber}, EndsAt={lastMatch.LineNumber}");
 
-						state.AppendComment(lastMatch, $"{blockCount:00}-Ends");
-						state.SetFlagged(lastMatch, true);
+						FlagBlock();
 					}
 
-					flaggedRecords += 2;
+					firstMatch = null;
+					lastMatch = null;
 				}
 			}
 
+			if (firstMatch != null && lastMatch != null)
+			{
+				Log.Default.Write($"Detected the last block of repeating records. StartsAt={firstMatch.LineNumber}, EndsAt={lastMatch.LineNumber}");
+
+				FlagBlock();
+			}
+
 			return new Results(flaggedRecords);
-        }
+
+			void FlagBlock()
+			{
+				blockCount++;
+
+				if (canUpdateMetadata)
+				{
+					state.AppendComment(firstMatch, $"{blockCount:00}-Begins");
+					state.SetFlagged(firstMatch, true);
+
+					state.AppendComment(lastMatch, $"{blockCount:00}-Ends");
+					state.SetFlagged(lastMatch, true);
+				}
+
+				flaggedRecords += 2;
+			}
+		}
 	}
 }

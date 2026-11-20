@@ -8,7 +8,7 @@
 		[TestMethod]
 		public void BeReadWhenFileOpened()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 

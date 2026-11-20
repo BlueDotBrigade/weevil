@@ -1,0 +1,11 @@
+open	23.89	-	30014396	ws=0.69GB heap=0.67GB peakWhileOpening=0.86GB mode=disk
+plain: timeout	FAILED	AggregateException: One or more errors occurred. (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.)
+plain: sequence=123456 (rare)	FAILED	OutOfMemoryException: Exception of type 'System.OutOfMemoryException' was thrown.
+regex: retry.*connection	FAILED	AggregateException: One or more errors occurred. (Exception of type 'System.OutOfMemoryException' was thrown.)
+regex: (timeout|retry)\s+\w+\s+(closed|opened)	FAILED	AggregateException: One or more errors occurred. (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.)
+regex include timeout, exclude retry	FAILED	AggregateException: One or more errors occurred. (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.)
+moniker: @Severity=Warning	0.480	1480.3	2400373	min=0.472 max=0.501 peakWs=1.08GB
+regex OR: Warning||Error	FAILED	AggregateException: One or more errors occurred. (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.) (Exception of type 'System.OutOfMemoryException' was thrown.)
+clear (show all)	FAILED	OutOfMemoryException: Exception of type 'System.OutOfMemoryException' was thrown.
+find: last record's text	FAILED	RecordNotFoundException: Unable to find record. Value=1
+ws=1.03GB peak=1.03GB heap=0.69GB

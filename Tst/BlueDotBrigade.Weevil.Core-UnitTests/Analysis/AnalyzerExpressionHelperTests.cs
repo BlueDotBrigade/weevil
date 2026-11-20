@@ -2,10 +2,9 @@ namespace BlueDotBrigade.Weevil.Analysis
 {
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
-	using BlueDotBrigade.Weevil.TestTools.Data;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using NSubstitute;
 
@@ -22,77 +21,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 
 		[TestMethod]
-		public void ParseExpressions_WithNullInput_ReturnsEmptyArray()
-		{
-			// Arrange
-			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
-
-			// Act - using FilterStrategy.KeepAllRecords which has null ExpressionBuilder
-			// This test validates the null/empty input handling
-			var result = AnalyzerExpressionHelper.ParseExpressions(
-				null,
-				aliasExpander,
-				null);
-
-			// Assert
-			result.IsEmpty.Should().BeTrue();
-		}
-
-		[TestMethod]
-		public void ParseExpressions_WithEmptyInput_ReturnsEmptyArray()
-		{
-			// Arrange
-			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
-
-			// Act
-			var result = AnalyzerExpressionHelper.ParseExpressions(
-				string.Empty,
-				aliasExpander,
-				null);
-
-			// Assert
-			result.IsEmpty.Should().BeTrue();
-		}
-
-		[TestMethod]
-		public void ParseExpressions_WithWhitespaceInput_ReturnsEmptyArray()
-		{
-			// Arrange
-			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
-
-			// Act
-			var result = AnalyzerExpressionHelper.ParseExpressions(
-				"   ",
-				aliasExpander,
-				null);
-
-			// Assert
-			result.IsEmpty.Should().BeTrue();
-		}
-
-		[TestMethod]
-		public void ParseExpressions_WithNullAliasExpander_ProcessesInputDirectly()
-		{
-			// Arrange - null aliasExpander should not throw
-
-			// Act
-			var result = AnalyzerExpressionHelper.ParseExpressions(
-				"test",
-				null,
-				null);
-
-			// Assert - with null expressionBuilder, it won't parse but shouldn't throw
-			result.IsEmpty.Should().BeTrue();
-		}
-
-		[TestMethod]
 		public void ParseAllExpressions_WithNullInput_ReturnsEmptyArray()
 		{
 			// Arrange
-			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
+			IFilterAliasExpander aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
 
 			// Act
-			var result = AnalyzerExpressionHelper.ParseAllExpressions(
+			ImmutableArray<IExpression> result = AnalyzerExpressionHelper.ParseAllExpressions(
 				null,
 				aliasExpander,
 				null);
@@ -105,10 +40,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void ParseAllExpressions_WithEmptyInput_ReturnsEmptyArray()
 		{
 			// Arrange
-			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
+			IFilterAliasExpander aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
 
 			// Act
-			var result = AnalyzerExpressionHelper.ParseAllExpressions(
+			ImmutableArray<IExpression> result = AnalyzerExpressionHelper.ParseAllExpressions(
 				string.Empty,
 				aliasExpander,
 				null);
@@ -121,10 +56,10 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void ParseAllExpressions_WithWhitespaceInput_ReturnsEmptyArray()
 		{
 			// Arrange
-			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
+			IFilterAliasExpander aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
 
 			// Act
-			var result = AnalyzerExpressionHelper.ParseAllExpressions(
+			ImmutableArray<IExpression> result = AnalyzerExpressionHelper.ParseAllExpressions(
 				"   ",
 				aliasExpander,
 				null);
@@ -137,9 +72,9 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenExpressionText_WhenParseAllExpressionsUsesNullBuilder_ThenReturnsEmptyArray()
 		{
 			// Regression: Issue #923
-			var aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
+			IFilterAliasExpander aliasExpander = GetMockAliasExpander(new Dictionary<string, string>());
 
-			var result = AnalyzerExpressionHelper.ParseAllExpressions(
+			ImmutableArray<IExpression> result = AnalyzerExpressionHelper.ParseAllExpressions(
 				"Value=.*",
 				aliasExpander,
 				null);
@@ -154,9 +89,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var expressions = ImmutableArray.Create(
 				new RegularExpression(@"A=(?<Value>\d+)"),
 				new RegularExpression(@"B=(?<Value>\d+)"));
-			var record = R.Create().WithContent("A=1 B=1").GetRecords()[0];
-
-			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, new ContentBuffer());
+			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, "A=1 B=1");
 
 			result.Should().ContainSingle();
 			result["Value"].Should().Be("1");
@@ -169,9 +102,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			var expressions = ImmutableArray.Create(
 				new RegularExpression(@"A=(?<Value>\d+)"),
 				new RegularExpression(@"B=(?<Value>\d+)"));
-			var record = R.Create().WithContent("A=1 B=2").GetRecords()[0];
-
-			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, record, new ContentBuffer());
+			Dictionary<string, string> result = AnalyzerExpressionHelper.GetResolvedKeyValuePairs(expressions, "A=1 B=2");
 
 			result.Should().NotContainKey("Value");
 		}

@@ -9,7 +9,7 @@
 		[TestMethod]
 		public void KeepLatestInclusiveFilterAtTopOfList()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -23,7 +23,7 @@
 		[TestMethod]
 		public void KeepLatestExclusiveFilterAtTopOfList()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -38,7 +38,7 @@
 		[TestMethod]
 		public void RemainIntactAfterClearOperation()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 

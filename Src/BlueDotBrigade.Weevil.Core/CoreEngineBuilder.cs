@@ -86,6 +86,9 @@
 
 			private StorageMode _storageMode = DefaultStorageMode;
 
+			// The log as the analyst knows it, when the file read is a copy: otherwise null (#1312).
+			private string _displayPath;
+
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
 				// nothing to do
@@ -129,6 +132,20 @@
 				return this;
 			}
 
+			public CoreEngineBuilder UsingDisplayPath(string displayPath)
+			{
+				_displayPath = string.IsNullOrWhiteSpace(displayPath) ? null : displayPath;
+
+				if (_displayPath != null)
+				{
+					Log.Default.Write(
+						LogSeverityType.Debug,
+						$"Core engine construction has been given the path the analyst knows the log by. DisplayPath={displayPath}, FilePath={_sourceFilePath}");
+				}
+
+				return this;
+			}
+
 			public CoreEngineBuilder UsingContext(ContextDictionary context)
 			{
 				_isUsingUserDefinedContext = true;
@@ -151,7 +168,7 @@
 				_maxRecords = maxRecords > 0
 					? maxRecords
 					: throw new ArgumentOutOfRangeException(nameof(maxRecords),
-						"Value is expected to be greater than or equal to zero.");
+						"Value is expected to be greater than zero.");
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
@@ -174,6 +191,7 @@
 				_session = previous.Session;
 				_recordState = previous.RecordState;
 				_telemetryRecorder = previous._telemetryRecorder;
+				_displayPath = previous.DisplayPath;
 
 				return this;
 			}
@@ -188,7 +206,7 @@
 
 				Log.Default.Write(
 					LogSeverityType.Debug,
-					$"Core engine construction has a maximum record limit. Range={range}");
+					$"Core engine construction reads only a range of lines. Range={range}");
 
 				return this;
 			}
@@ -234,47 +252,6 @@
 					$"Core engine construction will load one section. Section=`{sectionName}`");
 
 				return this;
-			}
-
-			/// <summary>
-			/// Reopens the log from the record table saved with its index, parsing only what it grew by since (#1023).
-			/// </summary>
-			/// <remarks>
-			/// A method of its own, never inlined, so the saved table that a grown log's longer table replaces is not kept by <see cref="Build"/>'s frame
-			/// when the engine is created, whose collection would otherwise keep it: about 22 bytes per record. Clearing the variable in <see cref="Build"/> did not free it.
-			/// </remarks>
-			/// <param name="source">On disk, the source the records read their content back through: otherwise <see langword="null"/>.</param>
-			/// <returns><see langword="false"/> when the log must be parsed.</returns>
-			[MethodImpl(MethodImplOptions.NoInlining)]
-			private bool TryReopen(FileStream dataSource, LineIndex lineIndex, IPlugin plugin, ICoreExtension coreExtension, out RecordList records, out LogFileSource source)
-			{
-				records = null;
-
-				if (!LineIndexFile.TryLoadTable(_sourceFilePath, dataSource, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
-				{
-					return false;
-				}
-
-				SavedParse savedParse = lineIndex.Parse;
-
-				if (savedParse.EndOffset == dataSource.Length)
-				{
-					records = new TableRecordList(savedTable);
-					return true;
-				}
-
-				if (!GrownLogParser.TryParse(dataSource, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
-				{
-					source = null;
-					return false;
-				}
-
-				// The log grew since it was indexed: only its new part was parsed, and the longer table is saved.
-				records = new TableRecordList(grownTable);
-				source = _storageMode == StorageMode.Disk ? parsedSource : null;
-				LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
-
-				return true;
 			}
 
 			/// <summary>
@@ -333,10 +310,10 @@
 
 				sourceFileEncoding = EncodingHelper.GetEncoding(FileHelper.Open(_sourceFilePath));
 
-				using (FileStream dataSource = FileHelper.Open(_sourceFilePath))
+				using (FileStream log = FileHelper.Open(_sourceFilePath))
 				{
 					sourceFilePath = _sourceFilePath;
-					sourceFileLength = dataSource.Length;
+					sourceFileLength = log.Length;
 
 					IPlugin plugin = new PluginFactory().Create(sourceFilePath);
 					coreExtension = plugin.GetExtension(sourceFilePath);
@@ -345,7 +322,8 @@
 
 					loadingStopwatch.Restart();
 
-					lineIndex = LineIndexFile.Load(_sourceFilePath, dataSource);
+					var savedIndex = SavedIndex.Load(_sourceFilePath, log);
+					lineIndex = savedIndex.LineIndex;
 
 					// Sized from the line index, before the records are parsed.
 					var isKeepingSession = _session != null;
@@ -355,45 +333,38 @@
 					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 					Range lineNumberRange = GetLineNumberRange(GetRequestedRange(sidecarManager));
 
-					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index (#1023).
+					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index, and saves it (#1023).
 					var isFullOpen = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
-					records = null;
-					source = null;
 
 					if (isFullOpen)
 					{
-						_ = TryReopen(dataSource, lineIndex, plugin, coreExtension, out records, out source);
+						records = savedIndex.ReadAllRecords(log, plugin, coreExtension, _storageMode, _displayPath, out source);
 					}
-
-					if (records == null)
+					else
 					{
+						// A partial open always parses, and saves no table: a parse from a start line, of a range or up to a limit holds only part of the log.
 						// Reading starts at the start line's byte offset, taken from the line index (#977).
 						// A start line beyond the end of the log reads from the top, which finds no records to keep.
 						// In disk mode, the records read their content back from the log, through a source complete before Get returns (#1025).
-						var repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
+						SerializedRecordRepository repository = startAtLineNumber > FirstRecordLineNumber && startAtLineNumber <= lineIndex.LineCount
 							? new SerializedRecordRepository(
-								 dataSource,
+								 log,
 								 coreExtension.GetRecordParser(),
-								 lineIndex.GetByteOffset(dataSource, startAtLineNumber),
+								 lineIndex.GetByteOffset(log, startAtLineNumber),
 								 startAtLineNumber,
 								 true,
 								 GetMaximumLinesToSearch(startAtLineNumber, lineIndex.LineCount),
-								 _storageMode)
+								 _storageMode,
+								 displayPath: _displayPath)
 							: new SerializedRecordRepository(
-								 dataSource,
+								 log,
 								 coreExtension.GetRecordParser(),
 								 GetMaximumLinesToSearch(lineNumberRange),
-								 _storageMode);
+								 _storageMode,
+								 _displayPath);
 
 						records = repository.Get(lineNumberRange, maxRecords);
 						source = repository.Source;
-
-						// After a full parse, the saved index keeps what parsed the log, the checksums of the bytes read and the record table,
-						// so the log can be reopened without parsing (#1023). A parse from a start line, of a range or up to a limit keeps only part of it.
-						if (isFullOpen && repository.ParsedSource != null && records is TableRecordList { WholeTable: RecordTable parsedTable })
-						{
-							LineIndexFile.SaveParse(_sourceFilePath, dataSource, lineIndex, SavedParse.Create(plugin, _storageMode, repository.ParsedSource), parsedTable);
-						}
 					}
 
 					loadingStopwatch.Stop();
@@ -449,6 +420,7 @@
 					_telemetryRecorder,
 					_storageMode,
 					source,
+					_displayPath,
 					hasReadLog: true);
 			}
 

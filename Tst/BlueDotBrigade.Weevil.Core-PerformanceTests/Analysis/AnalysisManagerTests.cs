@@ -19,14 +19,14 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[DoNotParallelize]
 		public void GivenADroidLogOpenedOnDisk_WhenEveryRecordIsSearchedForData_ThenTheAnalysisEndsQuickly()
 		{
-			IEngine engine = Engine.UsingPath(DroidLog.GetPath(DroidLog.Utf8)).UsingStorage(StorageMode.Disk).Open();
+			using IEngine engine = Engine.UsingPath(DroidLog.GetPath(DroidLog.Utf8)).UsingStorage(StorageMode.Disk).Open();
 			var dialog = new ExpressionDialog(@"\[Security\] (?<Threat>.*) detected");
 
 			var stopwatch = Stopwatch.StartNew();
 			Results results = engine.Analyzer.Analyze(AnalysisType.DetectData, dialog);
 			stopwatch.Stop();
 
-			TestContext.WriteLine($"Analyzed {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s, and flagged {results.FlaggedRecords:N0}.");
+			this.TestContext.WriteLine($"Analyzed {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s, and flagged {results.FlaggedRecords:N0}.");
 			results.FlaggedRecords.Should().Be(34);
 			stopwatch.Elapsed.Should().BeLessThan(MaximumDuration);
 		}

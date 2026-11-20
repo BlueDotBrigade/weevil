@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			// A plugin built before #1027 implements only the overload without a token, and still works.
 			IRecordAnalyzer analyzer = new AnalyzerWithoutCancellation();
 
-			Action analyze = () => analyzer.Analyze(RecordList.Empty, new RecordState(), string.Empty, Substitute.For<IUserDialog>(), true, new CancellationToken(canceled: true));
+			Action analyze = () => analyzer.Analyze(RecordList.Empty, Substitute.For<IRecordState>(), string.Empty, Substitute.For<IUserDialog>(), true, new CancellationToken(canceled: true));
 
 			analyze.Should().Throw<OperationCanceledException>();
 			((AnalyzerWithoutCancellation)analyzer).Runs.Should().Be(0);
@@ -26,7 +26,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		{
 			IRecordAnalyzer analyzer = new AnalyzerWithoutCancellation();
 
-			Results results = analyzer.Analyze(RecordList.Empty, new RecordState(), string.Empty, Substitute.For<IUserDialog>(), true, CancellationToken.None);
+			Results results = analyzer.Analyze(RecordList.Empty, Substitute.For<IRecordState>(), string.Empty, Substitute.For<IUserDialog>(), true, CancellationToken.None);
 
 			results.FlaggedRecords.Should().Be(1);
 			((AnalyzerWithoutCancellation)analyzer).Runs.Should().Be(1);

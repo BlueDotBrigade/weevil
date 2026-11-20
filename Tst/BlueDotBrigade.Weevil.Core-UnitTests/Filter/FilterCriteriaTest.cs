@@ -1,7 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil.Filter
 {
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using System.Collections.Concurrent;
+	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	[TestClass]
 	public class FilterCriteriaTest

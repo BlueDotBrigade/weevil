@@ -9,10 +9,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 	using System;
 	using System.Windows;
 	using System.Windows.Input;
-	using Metalama.Patterns.Observability;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Gui.Input;
+	using Metalama.Patterns.Observability;
 	using Prism.Commands;
 
 	internal partial class FilterViewModel
@@ -176,7 +176,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public ICommand RefreshCommand => new UiBoundCommand(Refresh, () => this.IsMenuEnabled);
 
 		[NotObservable]
-		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress || _backgroundCancellation != null);
+		public ICommand AbortFilterCommand => new UiBoundCommand(AbortFilter, () => this.IsFilterInProgress || _busy.CanCancel);
 
 		[NotObservable]
 		public ICommand ToggleFilterOptionsVisibilityCommand => new UiBoundCommand(() => this.AreFilterOptionsVisible = !this.AreFilterOptionsVisible, () => this.IsFilterToolboxEnabled);

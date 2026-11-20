@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Data
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
@@ -16,11 +17,11 @@ namespace BlueDotBrigade.Weevil.Data
 		/// </summary>
 		private static MemoryStream CreateLogWithLongPreamble()
 		{
-			var preamble = Enumerable
+			IEnumerable<string> preamble = Enumerable
 				.Range(1, PreambleLineCount)
 				.Select(lineNumber => $"Preamble line {lineNumber}");
 
-			var records = Enumerable
+			IEnumerable<string> records = Enumerable
 				.Range(PreambleLineCount + 1, 3)
 				.Select(lineNumber => $"2026-10-16 10:00:00.00000\t1\t2\tInformation\tRecord {lineNumber}");
 
@@ -34,7 +35,7 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			var repository = new SerializedRecordRepository(CreateLogWithLongPreamble(), new TsvRecordParser());
 
-			var records = repository.Get(new Range(PreambleLineCount + 1, int.MaxValue), int.MaxValue);
+			RecordList records = repository.Get(new Range(PreambleLineCount + 1, int.MaxValue), int.MaxValue);
 
 			records.Should().BeEmpty();
 		}
@@ -47,7 +48,7 @@ namespace BlueDotBrigade.Weevil.Data
 				new TsvRecordParser(),
 				PreambleLineCount + MultilineRecordParser.MaximumLinesToSearch);
 
-			var records = repository.Get(new Range(PreambleLineCount + 1, int.MaxValue), int.MaxValue);
+			RecordList records = repository.Get(new Range(PreambleLineCount + 1, int.MaxValue), int.MaxValue);
 
 			records.Should().HaveCount(3);
 			records[0].LineNumber.Should().Be(PreambleLineCount + 1);
@@ -67,7 +68,7 @@ namespace BlueDotBrigade.Weevil.Data
 			var secondLineOffset = encoding.GetPreamble().Length + encoding.GetByteCount(firstLine);
 
 			var repository = new SerializedRecordRepository(source, new TsvRecordParser(), secondLineOffset, 2, true);
-			var records = repository.Get(int.MaxValue);
+			RecordList records = repository.Get(int.MaxValue);
 
 			records.Should().HaveCount(1);
 			records[0].LineNumber.Should().Be(2);
@@ -81,7 +82,7 @@ namespace BlueDotBrigade.Weevil.Data
 			var log = new MemoryStream(Encoding.UTF8.GetBytes("keep 1\nchange 2\n  more\nkeep 4\n  more\nchange 6\nkeep 7"));
 			var repository = new SerializedRecordRepository(log, new ChangingParser());
 
-			var records = repository.Get(Range.All, int.MaxValue);
+			RecordList records = repository.Get(Range.All, int.MaxValue);
 
 			records.Select(r => r.LineNumber).Should().Equal(1, 2, 4, 6, 7);
 			records.Select(r => r.Content).Should().Equal("keep 1", "CHANGE 2\r\n  more", "keep 4\r\n  more", "CHANGE 6", "keep 7");
@@ -125,10 +126,10 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
-		public void GivenALogFile_WhenParsedInRam_ThenItHasTheChecksumsOfAParseOnDiskButNoSourceToReadBack()
+		public void GivenALogFile_WhenParsedInRam_ThenItHasTheSourceOfAParseOnDisk()
 		{
 			// The saved index keeps the checksums, so a log opened in either mode can be reopened from it (#1023).
-			// In RAM mode the records keep their content, so the engine still gets no source: a source means disk mode.
+			// The source is kept in both modes: the storage mode, not a missing source, says how the records read their content (#1255).
 			var folder = Directory.CreateTempSubdirectory("Weevil.SerializedRecordRepositoryTests.").FullName;
 
 			try
@@ -139,10 +140,9 @@ namespace BlueDotBrigade.Weevil.Data
 				SerializedRecordRepository inRam = Parse(logPath, StorageMode.Ram);
 				SerializedRecordRepository onDisk = Parse(logPath, StorageMode.Disk);
 
-				inRam.Source.Should().BeNull();
-				inRam.ParsedSource.GetChecksums().Length.Should().BeGreaterThan(1, "the log spans several blocks");
-				inRam.ParsedSource.GetChecksums().ToArray().Should().Equal(onDisk.ParsedSource.GetChecksums().ToArray());
-				inRam.ParsedSource.EndOffset.Should().Be(onDisk.ParsedSource.EndOffset);
+				inRam.Source.GetChecksums().Length.Should().BeGreaterThan(1, "the log spans several blocks");
+				inRam.Source.GetChecksums().ToArray().Should().Equal(onDisk.Source.GetChecksums().ToArray());
+				inRam.Source.EndOffset.Should().Be(onDisk.Source.EndOffset);
 			}
 			finally
 			{

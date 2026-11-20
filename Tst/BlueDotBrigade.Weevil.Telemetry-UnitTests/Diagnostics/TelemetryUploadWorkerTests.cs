@@ -202,7 +202,7 @@ public int UploadCallCount { get; private set; }
 
 public Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 {
-UploadCallCount++;
+                this.UploadCallCount++;
 return Task.FromResult(_statuses.Count > 0 ? _statuses.Dequeue() : TelemetryUploadStatus.Success);
 }
 }
@@ -222,7 +222,7 @@ public int UploadCallCount { get; private set; }
 
 public async Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 {
-UploadCallCount++;
+                this.UploadCallCount++;
 _uploadStarted.TrySetResult(true);
 await _releaseUpload.Task;
 return TelemetryUploadStatus.Success;

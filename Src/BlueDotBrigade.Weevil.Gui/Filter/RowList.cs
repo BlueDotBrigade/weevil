@@ -56,7 +56,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// <summary>
 		/// The number of selected records.
 		/// </summary>
-		public int SelectedCount => _selector.Selected.Count;
+		public int SelectedCount => _selector.SelectedCount;
 
 		public bool IsReadOnly => true;
 
@@ -90,7 +90,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				IRecord record = _results[position];
 				row = new RowViewModel(record, _annotations, _reportFailedRead)
 				{
-					IsSelected = _selector.Selected.ContainsKey(record.LineNumber),
+					IsSelected = _selector.IsSelected(record.LineNumber),
 					// From the results the row is shown in, by position, so displaying rows calculates no elapsed time for every line (#1150).
 					// Known limitation: after a long run of rows without a timestamp, this walks back over the run on the UI thread, about 20 ms for 10 million rows (#1150).
 					ElapsedTime = ElapsedTimes.Measure(_results, position),
@@ -151,7 +151,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		public void RefreshSelection()
 		{
-			IDictionary<int, IRecord> selected = _selector.Selected;
 			var liveRows = new List<RowViewModel>();
 
 			lock (_padlock)
@@ -169,7 +168,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			foreach (RowViewModel row in liveRows)
 			{
-				var isSelected = selected.ContainsKey(row.LineNumber);
+				// Each lookup reads the latest selection; a later change refreshes the rows again.
+				var isSelected = _selector.IsSelected(row.LineNumber);
 
 				if (row.IsSelected != isSelected)
 				{
@@ -189,7 +189,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		public bool IsSelected(int lineNumber)
 		{
-			return _selector.Selected.ContainsKey(lineNumber);
+			return _selector.IsSelected(lineNumber);
 		}
 
 		/// <summary>
@@ -198,8 +198,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// <param name="afterLineNumber">The line to start after, or -1 to start at the first row.</param>
 		public IEnumerable<int> GetSelectedPositions(int afterLineNumber)
 		{
-			foreach (var lineNumber in _selector.Selected.Keys)
+			RecordList selected = _selector.GetSelected();
+
+			for (var index = 0; index < selected.Count; index++)
 			{
+				var lineNumber = selected.GetLineNumber(index);
+
 				if (lineNumber > afterLineNumber)
 				{
 					var position = IndexOfLineNumber(lineNumber);

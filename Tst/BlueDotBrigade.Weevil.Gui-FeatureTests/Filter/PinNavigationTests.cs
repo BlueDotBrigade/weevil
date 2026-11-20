@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Arrange
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator);
+			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator));
 
 			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
 

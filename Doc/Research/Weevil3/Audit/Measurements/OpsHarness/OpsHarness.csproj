@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <DefineConstants Condition="'$(WeevilVersion)' != ''">$(DefineConstants);WEEVIL2</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(WeevilVersion)' == ''">
+    <ProjectReference Include="..\..\..\..\..\..\Src\BlueDotBrigade.Weevil.Core\BlueDotBrigade.Weevil.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(WeevilVersion)' != ''">
+    <PackageReference Include="BlueDotBrigade.Weevil.Core" Version="$(WeevilVersion)" />
+  </ItemGroup>
+</Project>

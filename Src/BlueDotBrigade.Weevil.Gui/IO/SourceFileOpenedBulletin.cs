@@ -12,7 +12,15 @@
 			this.TotalRecordCount = 0;
 		}
 
+		/// <summary>
+		/// The log as the analyst knows it: for a log opened from a zip, the zip read like a folder, which is not a file (#1312).
+		/// </summary>
 		public string SourceFilePath { get; init; }
+
+		/// <summary>
+		/// The size of the file read, in bytes: <see cref="SourceFilePath"/> may not be a file to measure.
+		/// </summary>
+		public long SourceFileSize { get; init; }
 
 		public ContextDictionary Context { get; init; }
 

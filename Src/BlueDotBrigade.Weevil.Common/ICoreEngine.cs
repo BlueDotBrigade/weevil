@@ -10,7 +10,7 @@
 	{
 		IRecord this[int index] { get; }
 		/// <summary>
-		/// Represents all of the records that have been loaded from the <see cref="SourceFilePath"/>.
+		/// Represents the records loaded from the <see cref="SourceFilePath"/> that the engine keeps: all of them, until a Clear removes some.
 		/// </summary>
 		/// <remarks>
 		/// This property is intended to provide readonly access to the records via LINQ queries.
@@ -43,7 +43,16 @@
 		/// Represents user remarks that are applicable to the entire source file.
 		/// </summary>
 		string SourceFileRemarks { get; set; }
+
+		/// <summary>
+		/// The log as the analyst knows it. For a log read from a copy, such as one extracted from a zip, a zip reads like a folder:
+		/// <c>C:\Logs\Archive.zip\App.log</c> (#1312). It need not be a file that exists: read the log through the engine, and save beside it in <see cref="SourceDirectory"/>.
+		/// </summary>
 		string SourceFilePath { get; }
+
+		/// <summary>
+		/// The folder of the file Weevil reads, where exports, reports and splits are saved: for a log read from a copy, the copy's folder (#1253).
+		/// </summary>
 		string SourceDirectory { get; }
 		/// <summary>
 		/// Metadata related to the open file is persisted to disk.

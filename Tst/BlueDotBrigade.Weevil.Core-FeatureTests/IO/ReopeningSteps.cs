@@ -4,7 +4,7 @@ using System.Text;
 using BlueDotBrigade.Weevil.Data;
 using BlueDotBrigade.Weevil.Diagnostics;
 using GrownLogParser = BlueDotBrigade.Weevil.IO.GrownLogParser;
-using LineIndexFile = BlueDotBrigade.Weevil.IO.LineIndexFile;
+using SavedIndex = BlueDotBrigade.Weevil.IO.SavedIndex;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 [Binding]
@@ -63,7 +63,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[Given($"that the saved log file has been opened in {Modes}")]
 	public void GivenThatTheSavedLogFileHasBeenOpenedIn(string mode)
 	{
-		_ = Open(_logPath, mode);
+		Open(_logPath, mode).Dispose();
 	}
 
 	[Given("one character in the middle of the saved log file has been changed")]
@@ -92,7 +92,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[Given("records have been appended to the saved log file")]
 	public void GivenRecordsHaveBeenAppendedToTheSavedLogFile()
 	{
-		var lines = File.ReadAllLines(new Daten().AsFilePath(From.GlobalDefault)).Take(20);
+		IEnumerable<string> lines = File.ReadAllLines(new Daten().AsFilePath(From.GlobalDefault)).Take(20);
 		Append(string.Join(_lineEnding, lines) + _lineEnding);
 	}
 
@@ -106,7 +106,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	public void GivenOneByteOfTheSavedRecordTableHasBeenChanged()
 	{
 		// The rows are the last section before the end marker, whose kind, length and checksum take 20 bytes.
-		var indexPath = $"{_logPath}.{LineIndexFile.FileExtension}";
+		var indexPath = $"{_logPath}.{SavedIndex.FileExtension}";
 		var bytes = File.ReadAllBytes(indexPath);
 		bytes[bytes.Length - 20 - 5] ^= 0x01;
 		File.WriteAllBytes(indexPath, bytes);
@@ -138,21 +138,21 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[Then("it will have been opened without being parsed")]
 	public void ThenItWillHaveBeenOpenedWithoutBeingParsed()
 	{
-		_messages.Should().Contain(LineIndexFile.RecordsReadFromIndexMessage);
+		_messages.Should().Contain(SavedIndex.RecordsReadFromIndexMessage);
 	}
 
 	[Then("it will have been parsed")]
 	public void ThenItWillHaveBeenParsed()
 	{
-		_messages.Should().NotContain(LineIndexFile.RecordsReadFromIndexMessage);
+		_messages.Should().NotContain(SavedIndex.RecordsReadFromIndexMessage);
 	}
 
 	[Then("it will have been parsed only in its new part")]
 	public void ThenItWillHaveBeenParsedOnlyInItsNewPart()
 	{
-		_messages.Should().Contain(LineIndexFile.OldRecordsReadFromIndexMessage);
+		_messages.Should().Contain(SavedIndex.OldRecordsReadFromIndexMessage);
 		_messages.Should().Contain(GrownLogParser.NewPartParsedMessage);
-		_messages.Should().NotContain(LineIndexFile.RecordsReadFromIndexMessage);
+		_messages.Should().NotContain(SavedIndex.RecordsReadFromIndexMessage);
 	}
 
 	[Then("its last record will span several lines")]
@@ -166,7 +166,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	public void ThenItWillHaveBeenParsedBecauseItsSavedRecordTableDoesNotMatchIt()
 	{
 		ThenItWillHaveBeenParsed();
-		_messages.Should().Contain(message => message.StartsWith(LineIndexFile.TableRejectedMessage));
+		_messages.Should().Contain(message => message.StartsWith(SavedIndex.TableRejectedMessage));
 	}
 
 	/// <remarks>
@@ -182,7 +182,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 		{
 			var copyPath = Path.Combine(copyFolder, "Droid.log");
 			File.Copy(_logPath, copyPath);
-			IEngine parsed = Engine.UsingPath(copyPath, _startLine).UsingStorage(reopened.StorageMode).Open();
+			using IEngine parsed = Engine.UsingPath(copyPath, _startLine).UsingStorage(reopened.StorageMode).Open();
 
 			Describe(reopened.Records).Should().NotBeEmpty();
 			Describe(reopened.Records).Should().Equal(Describe(parsed.Records));
@@ -196,6 +196,9 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[AfterScenario]
 	public void DeleteTheSavedLogFile()
 	{
+		// The open log's lock is in the folder, so the log is closed first (#1254).
+		this.Context.Engine.Dispose();
+
 		if (Directory.Exists(_folder))
 		{
 			Directory.Delete(_folder, recursive: true);

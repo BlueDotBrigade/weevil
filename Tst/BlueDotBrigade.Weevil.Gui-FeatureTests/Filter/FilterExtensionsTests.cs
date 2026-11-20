@@ -30,25 +30,25 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenSelectedRecords_WhenTheFilterExpressionIsInvalid_ThenTheSelectionIsKept()
 		{
 			// The filter used to clear the selection first, and only an aborted filter restored it.
-			IEngine engine = Engine.UsingPath(_logPath).Open();
+			using IEngine engine = Engine.UsingPath(_logPath).Open();
 			engine.Selector.SelectOnly(2, 4);
 
 			Func<Task> filter = () => engine.FilterAsync(FilterType.RegularExpression, new FilterCriteria("Record ("), CancellationToken.None);
 
 			await filter.Should().ThrowAsync<Exception>();
-			engine.Selector.Selected.Keys.Should().Equal(2, 3, 4);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(2, 3, 4);
 		}
 
 		[TestMethod]
 		public async Task GivenSelectedRecords_WhenFiltered_ThenTheRecordsStillShownStaySelected()
 		{
-			IEngine engine = Engine.UsingPath(_logPath).Open();
+			using IEngine engine = Engine.UsingPath(_logPath).Open();
 			engine.Selector.SelectOnly(2, 4);
 
 			var wasFiltered = await engine.FilterAsync(FilterType.PlainText, new FilterCriteria("Record 3"), CancellationToken.None);
 
 			wasFiltered.Should().BeTrue();
-			engine.Selector.Selected.Keys.Should().Equal(3);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(3);
 		}
 	}
 }

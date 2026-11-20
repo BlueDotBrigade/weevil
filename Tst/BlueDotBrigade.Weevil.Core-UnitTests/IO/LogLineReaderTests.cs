@@ -65,13 +65,13 @@ namespace BlueDotBrigade.Weevil.IO
 					var bytes = encoding.GetPreamble().Concat(encoding.GetBytes(text)).ToArray();
 
 					// Run with a time limit, so a reader that never ends fails the test instead of stopping the test run.
-					var reading = Task.Run(() => ReadAll(new LogLineReader(new MemoryStream(bytes))));
+					Task<List<(string Text, long Offset, int Length)>> reading = Task.Run(() => ReadAll(new LogLineReader(new MemoryStream(bytes))));
 					reading.Wait(TimeSpan.FromSeconds(10)).Should().BeTrue($"reading {encoding.WebName} should end");
 
 					List<(string Text, long Offset, int Length)> lines = reading.Result;
 					lines.Select(line => line.Text).Should().Equal(ReadWithStreamReader(bytes), $"{encoding.WebName}, {text.Length} characters");
 
-					var decoder = new LogLineReader(new MemoryStream(bytes)).Encoding;
+					Encoding decoder = new LogLineReader(new MemoryStream(bytes)).Encoding;
 					foreach ((string lineText, long offset, int length) in lines)
 					{
 						decoder.GetString(bytes, (int)offset, length).Should().Be(lineText, "each line's offset and length point at its bytes");

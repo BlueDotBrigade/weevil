@@ -224,6 +224,14 @@
 <li>Optionally graph values extracted with a named group.</li>
 </ol>
 <p>If the log file is large, start with a simple filter before running deeper analysis.</p>
+<h3 id="opening-a-log-in-ram-or-on-disk">Opening a Log in RAM or on Disk</h3>
+<p>Each time you open a log, Weevil asks where to keep its text while it is open:</p>
+<ul>
+<li><strong>RAM</strong> is faster. Weevil reads the log once, and keeps its text in memory.</li>
+<li><strong>Disk</strong> keeps only about 22 bytes per record in memory, and reads the log again whenever it needs a record's text. Use it for a log larger than your computer's free memory.</li>
+</ul>
+<p>Weevil chooses for you from the log's size and the memory that is free, so you can usually press <strong>Enter</strong>. It warns you when RAM may not fit, and when a log on a network drive would be slow on disk. The status bar shows which you chose. <strong>Reload</strong> (<code>Ctrl+F5</code>) keeps your choice.</p>
+<p>Weevil never stops another application from writing, renaming or deleting a log it has open. On disk, if another application truncates or replaces the log, Weevil says so once: press <strong>Ctrl+F5</strong> to reload the latest data. If the log is renamed or deleted, its rows show <strong>Log can't be read</strong>.</p>
 <hr />
 <h2 id="filtering-records">Filtering Records</h2>
 <p>Filtering is the fastest way to make a large log file understandable.</p>
@@ -440,7 +448,11 @@ How quickly daft jumping zebras vex!
 <li>Example: <code>Key=(?&lt;Value&gt;[a-zA-Z0-9]+)</code></li>
 </ul>
 </li>
-<li>Select an analyzer.</li>
+<li>Select an analyzer.
+<ul>
+<li>To stop an analyzer that is still running, press <strong>Esc</strong>. The records it has already reached keep their new flags and comments, and a run analyzer may have marked where a run starts but not where it ends. The other records may still show the previous analysis's flags. <code>Measure Elapsed Time</code>, <code>Out-of-Order Timestamps</code> and some plugins' analyzers finish once they have started.</li>
+</ul>
+</li>
 <li>Review the results using one of these filters:
 <ul>
 <li><code>@Comment</code> to show all records with extracted comments</li>
@@ -592,6 +604,7 @@ LatencyMs=240
 <li>Select the records you want to plot.
 <ul>
 <li>To select all visible records, press <code>Ctrl+A</code>.</li>
+<li>A graph takes at most 100,000 records. If more are selected, filter the log further first.</li>
 </ul>
 </li>
 <li>Select <code>Graph Data</code>, or press <code>Ctrl+Shift+G</code>.</li>
@@ -739,6 +752,7 @@ LatencyMs=240
 <h3 id="appendix-p-performance-tips">Appendix P: Performance Tips</h3>
 <ul>
 <li>The larger the log file, the longer it will take to apply a new filter.</li>
+<li>To stop a filter, an analyzer, a search for text (<code>Ctrl+F</code>, <code>F3</code>, <code>Shift+F3</code>), a save of the selected records or a split that is still running, press <strong>Esc</strong>. A save that stops leaves any earlier file as it was.</li>
 <li>The <strong>Clear</strong> commands can improve performance by removing unneeded records from memory.
 <ul>
 <li><strong>Clear Before</strong> removes records before the highlighted row in Log Viewer.</li>

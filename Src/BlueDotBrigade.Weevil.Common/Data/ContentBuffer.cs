@@ -7,7 +7,7 @@ namespace BlueDotBrigade.Weevil.Data
 	/// Holds the content of one record at a time, so code that reads many records, such as a filter, reads each record's content once (#1131).
 	/// </summary>
 	/// <remarks>
-	/// Not thread-safe: use one per thread. What <see cref="Read(IRecord)"/> returns is valid until it is called for another record.
+	/// Not thread-safe: one thread at a time uses it, as a filter's workers take one from a pool and give it back (#1269). What <see cref="Read(IRecord)"/> returns is valid until it is called for another record.
 	/// A record that holds the log's bytes is decoded into memory the buffer reuses, so reading it allocates no string (#1133).
 	/// The buffer also holds the bytes of one chunk on file at a time, so a scan reads each chunk once (#1025, #1027):
 	/// - The first record read from a chunk reads only the blocks that hold it, so a sparse list, such as a few filter results spread over a large log,
@@ -16,8 +16,8 @@ namespace BlueDotBrigade.Weevil.Data
 	/// - A buffer reads a chunk whole once at most. A pass that comes back to a chunk, such as records sorted by time, reads only each record's blocks from it,
 	///   so a pass never reads more than the log once, plus the blocks of each record.
 	///
-	/// Reading from the log throws what <see cref="IO.LogFileSource.Read"/> throws,
-	/// for example <see cref="IO.LogFileChangedException"/> when the log was truncated, replaced or corrupted.
+	/// Reading from the log throws what <see cref="IO.LogFileSource.Read"/> throws:
+	/// <see cref="IO.LogFileChangedException"/> when the log was renamed, deleted, replaced, truncated or corrupted.
 	/// </remarks>
 	public sealed class ContentBuffer
 	{
@@ -119,7 +119,8 @@ namespace BlueDotBrigade.Weevil.Data
 
 				if (_fileBytes.Length < chunk.Length)
 				{
-					_fileBytes = new byte[chunk.Length];
+					// With room to spare: chunks end at a record, so the next is a few bytes longer, and a buffer reused for it would grow again (#1269).
+					_fileBytes = new byte[(int)Math.Min(chunk.Length + (chunk.Length / 16L), Array.MaxLength)];
 				}
 
 				chunk.ReadFromFile(_fileBytes.AsSpan(0, chunk.Length));

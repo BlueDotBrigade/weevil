@@ -1,89 +1,84 @@
 namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
-	using System.Linq;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using LogInUseException = BlueDotBrigade.Weevil.IO.LogInUseException;
 
 	/// <summary>
-	/// The files Weevil extracted from a zip to a folder of its own, kept while the log opened from them is open (#1162).
+	/// A log Weevil extracted from a zip, kept while it is open (#1162), to a folder of its own that is kept between opens (#1253).
 	/// </summary>
 	/// <remarks>
-	/// Only what Weevil extracted is deleted: exports, reports and splits saved beside the open log stay.
+	/// Only the extracted log is deleted. Its sidecar (<c>.xml</c>) and saved index (<c>.idx</c>) stay beside it, so the comments, pins and bookmarks
+	/// added to it are back, and it reopens without being parsed, when the same file is opened from the same zip again.
+	/// Exports, reports and splits saved beside the log stay too.
 	/// </remarks>
 	internal sealed class ExtractedLog
 	{
 		/// <summary>
-		/// Each extracted file's size and last write when it was extracted.
+		/// What a companion's name adds to the log's: its sidecar and saved index travel with it out of a zip, unless kept ones are already there.
 		/// </summary>
-		private readonly Dictionary<string, (long Length, DateTime LastWriteUtc)> _files;
-
-		public ExtractedLog(string folder, IEnumerable<string> files)
-		{
-			this.Folder = folder ?? throw new ArgumentNullException(nameof(folder));
-
-			_files = (files ?? throw new ArgumentNullException(nameof(files)))
-				.Select(Path.GetFullPath)
-				.ToDictionary(file => file, GetStamp, StringComparer.OrdinalIgnoreCase);
-		}
-
-		public string Folder { get; }
+		public static readonly string[] CompanionSuffixes = { ".xml", ".idx" };
 
 		/// <summary>
-		/// Returns <see langword="true"/> when Weevil extracted <paramref name="path"/>, so deleting this copy would delete it.
+		/// Where a log opened from a zip is extracted, to a folder of its own named by the zip, the log's entry, and its CRC-32 and size (#1253).
+		/// </summary>
+		/// <remarks>
+		/// Not the temporary folder, where Weevil saves neither a sidecar nor an index. Nothing cleans it up, and its paths stay short.
+		/// </remarks>
+		public static readonly string DefaultCopiesFolder = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+			"BlueDotBrigade",
+			"Weevil",
+			"Zips");
+
+		private readonly (long Length, DateTime LastWriteUtc) _stamp;
+
+		public ExtractedLog(string logPath)
+		{
+			this.LogPath = Path.GetFullPath(logPath ?? throw new ArgumentNullException(nameof(logPath)));
+			_stamp = GetStamp(this.LogPath);
+		}
+
+		/// <summary>
+		/// The extracted log.
+		/// </summary>
+		public string LogPath { get; }
+
+		/// <summary>
+		/// Returns <see langword="true"/> when <paramref name="path"/> is the log Weevil extracted, so deleting this copy would delete it.
 		/// </summary>
 		public bool Contains(string path)
 		{
-			return _files.ContainsKey(Path.GetFullPath(path));
+			return string.Equals(Path.GetFullPath(path), this.LogPath, StringComparison.OrdinalIgnoreCase);
 		}
 
 		/// <summary>
-		/// Deletes the extracted files, then the folders they leave empty.
+		/// Deletes the extracted log, and nothing else.
 		/// </summary>
 		/// <remarks>
-		/// A file written since it was extracted, for example an export that replaced it, is the user's and stays.
+		/// A log written since it was extracted, for example one an export replaced, is the user's and stays.
+		/// So is a copy another Weevil has open, for example after an open here was refused (#1254): two instances share the copy of the same file of the same zip.
 		/// </remarks>
 		public void Delete()
 		{
-			if (!Directory.Exists(this.Folder))
+			try
 			{
-				return;
-			}
-
-			foreach (var (file, stamp) in _files)
-			{
-				if (IsInFolder(file))
+				if (File.Exists(this.LogPath) && GetStamp(this.LogPath) == _stamp)
 				{
-					TryDelete(file, () =>
-					{
-						if (File.Exists(file) && GetStamp(file) == stamp)
-						{
-							File.Delete(file);
-						}
-					});
+					Engine.ThrowIfInUse(this.LogPath);
+					File.Delete(this.LogPath);
 				}
 			}
-
-			TryDelete(this.Folder, () =>
+			catch (LogInUseException)
 			{
-				// The zip's own folders, deepest first, then the folder Weevil extracted to.
-				IEnumerable<string> folders = Directory
-					.GetDirectories(this.Folder, "*", SearchOption.AllDirectories)
-					.OrderByDescending(folder => folder.Length)
-					.Append(this.Folder);
-
-				foreach (var folder in folders)
-				{
-					TryDelete(folder, () =>
-					{
-						if (!Directory.EnumerateFileSystemEntries(folder).Any())
-						{
-							Directory.Delete(folder);
-						}
-					});
-				}
-			});
+				Log.Default.Write(LogSeverityType.Information, $"A log extracted from a zip is kept: another Weevil has it open. Path={this.LogPath}");
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// A leftover copy does no harm, so it must not stop Weevil. The next open of the same file extracts it again over this one.
+				Log.Default.Write(LogSeverityType.Warning, e, $"Unable to delete a log extracted from a zip. Path={this.LogPath}");
+			}
 		}
 
 		private static (long Length, DateTime LastWriteUtc) GetStamp(string file)
@@ -92,27 +87,6 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			// A file gone since extraction, for example one antivirus removed, matches no file that appears later.
 			return info.Exists ? (info.Length, info.LastWriteTimeUtc) : (-1, DateTime.MinValue);
-		}
-
-		/// <summary>
-		/// Never anything outside the folder Weevil extracted to (#1156).
-		/// </summary>
-		private bool IsInFolder(string path)
-		{
-			return path.StartsWith(Path.GetFullPath(this.Folder) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-		}
-
-		private static void TryDelete(string path, Action delete)
-		{
-			try
-			{
-				delete();
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				// A leftover temporary file or folder does no harm, so it must not stop Weevil or the other deletions.
-				Log.Default.Write(LogSeverityType.Warning, e, $"Unable to delete a file extracted from a zip. Path={path}");
-			}
 		}
 	}
 }

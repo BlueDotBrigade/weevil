@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
@@ -31,29 +32,27 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenATableWithTextAParserChanged_WhenSavedAndReadBack_ThenEveryRecordIsTheSame(StorageMode storageMode)
 		{
 			// Text a plugin's parser changed is not in the log, so the saved index keeps it, while the other rows keep their place in the log (#1023).
-			var lines = Enumerable.Range(1, 3_000).Select(i => i % 7 == 0 ? $"change {i}" : i % 11 == 0 ? $" continued {i}" : $"keep {i}");
+			IEnumerable<string> lines = Enumerable.Range(1, 3_000).Select(i => i % 7 == 0 ? $"change {i}" : i % 11 == 0 ? $" continued {i}" : $"keep {i}");
 			System.IO.File.WriteAllText(_logPath, string.Join("\n", lines) + "\n", new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
 
 			using var log = new System.IO.FileStream(_logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 			var repository = new SerializedRecordRepository(log, new ChangingParser(), MultilineRecordParser.MaximumLinesToSearch, storageMode);
 			var parsed = (TableRecordList)repository.Get(Range.All, int.MaxValue);
-			LogFileSource parsedSource = repository.ParsedSource;
+			LogFileSource parsedSource = repository.Source;
 			var parse = new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), storageMode, parsedSource.StartOffset, parsedSource.EndOffset, parsedSource.GetChecksums().ToArray());
 
-			LineIndex index = LineIndex.Build(log);
-			index.Parse = parse;
 			using var saved = new MemoryStream();
-			index.Write(saved, parsed.WholeTable);
+			IndexFile.Write(saved, LineIndex.Build(log), parse, parsed.WholeTable);
 			saved.Position = 0;
-			LineIndex.TryRead(saved, log, out LineIndex read).Should().BeTrue();
-			saved.Position = read.TableOffset;
+			IndexFile.TryRead(saved, log.Length, out LineIndex read, out IndexFile file).Should().BeTrue();
+			saved.Position = file.TableOffset;
 
-			SavedTableReader.TryRead(saved, log, _logPath, read.Parse, read.ContentEncoding, storageMode, out RecordTable table, out LogFileSource source).Should().BeTrue();
+			SavedTableReader.TryRead(saved, log, _logPath, file.Parse, read.Encoding.ToEncoding(), storageMode, displayPath: null, out RecordTable table, out LogFileSource source).Should().BeTrue();
 
 			var reopened = new TableRecordList(table);
 			Describe(reopened).Should().Equal(Describe(parsed));
 			Describe(reopened).Should().Contain(row => row.Contains("CHANGE 7"), "the parser's text is kept");
-			(source != null).Should().Be(storageMode == StorageMode.Disk, "only disk mode reads content back from the log");
+			source.GetChecksums().ToArray().Should().Equal(parsedSource.GetChecksums().ToArray(), "a reopen keeps the file's checksums in either mode (#1255)");
 		}
 
 		private static string[] Describe(RecordList records)

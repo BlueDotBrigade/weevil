@@ -1,7 +1,4 @@
-﻿global using NLog;
-
+﻿global using BlueDotBrigade.DatenLokator.TestTools;
 global using FluentAssertions;
-
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-global using BlueDotBrigade.DatenLokator.TestTools;
+global using NLog;

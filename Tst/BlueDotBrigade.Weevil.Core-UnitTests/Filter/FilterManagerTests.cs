@@ -4,6 +4,8 @@ namespace BlueDotBrigade.Weevil.Filter
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Linq;
+	using System.Threading;
+	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Analysis;
 	using BlueDotBrigade.Weevil.Data;
 	using NSubstitute;
@@ -11,6 +13,8 @@ namespace BlueDotBrigade.Weevil.Filter
 	[TestClass]
 	public class FilterManagerTests
 	{
+		private static readonly TimeSpan TimeLimit = TimeSpan.FromSeconds(30);
+
 		[TestMethod]
 		public void GivenAbortedFilter_WhenTheResultsBeforeItStayShown_ThenTheyKeepTheirElapsedTimes()
 		{
@@ -37,6 +41,116 @@ namespace BlueDotBrigade.Weevil.Filter
 			apply.Should().Throw<FilterAbortedException>();
 			filter.Results.Should().HaveCount(100);
 			records.Skip(1).Should().OnlyContain(r => filter.ElapsedTimes.Get(r.LineNumber) == TimeSpan.FromSeconds(1));
+		}
+
+		[TestMethod]
+		[WorkItem(1248)]
+		public void GivenAFilterStoppedOrStillRunning_WhenANewerFilterIsAppliedOnAnotherThread_ThenOnlyTheNewerFiltersResultsAreShown()
+		{
+			// A new filter, or the filter's own start, cleared the Stop meant for the older filter, which ran on and replaced the newer filter's results.
+			RecordList records = CreateRecordsOneSecondApart(2_000);
+			var older = new FilterCriteria(@"line number: \d*[13579]$");
+			var newer = new FilterCriteria("line number: 7");
+			var isStoppedWhileStarting = false;
+			var olderIsHeld = new ManualResetEventSlim();
+			var olderMayGoOn = new ManualResetEventSlim();
+			var holdsOlderWhileFiltering = 0;
+			var collector = new CountingCollector
+			{
+				// The older filter is held while it filters, until the newer filter has started.
+				OnCount = () =>
+				{
+					if (Interlocked.Exchange(ref holdsOlderWhileFiltering, 0) == 1)
+					{
+						olderIsHeld.Set();
+						olderMayGoOn.Wait(TimeLimit);
+					}
+				},
+			};
+			FilterManager filter = CreateFilterManager(records, collector, expression =>
+			{
+				if (expression == older.Include && isStoppedWhileStarting)
+				{
+					// The older filter is held while it builds its strategy, until the test has stopped it.
+					olderIsHeld.Set();
+					olderMayGoOn.Wait(TimeLimit);
+				}
+				else if (expression == newer.Include)
+				{
+					// The newer filter has started.
+					olderMayGoOn.Set();
+				}
+			});
+			filter.Apply(FilterType.PlainText, newer);
+			var newerCount = filter.Results.Count;
+
+			for (var i = 0; i < 1_000; i++)
+			{
+				// Every other time, the older filter is stopped while it starts; otherwise the newer filter alone replaces it.
+				isStoppedWhileStarting = i % 2 == 0;
+				holdsOlderWhileFiltering = isStoppedWhileStarting ? 0 : 1;
+				olderIsHeld.Reset();
+				olderMayGoOn.Reset();
+
+				Task<bool> olderRun = Task.Run(() => TryApply(filter, FilterType.RegularExpression, older));
+				olderIsHeld.Wait(TimeLimit).Should().BeTrue();
+
+				if (isStoppedWhileStarting)
+				{
+					filter.Abort();
+				}
+
+				Task<bool> newerRun = Task.Run(() => TryApply(filter, FilterType.PlainText, newer));
+				Task.WaitAll(new Task[] { olderRun, newerRun }, TimeLimit).Should().BeTrue();
+
+				olderRun.Result.Should().BeFalse("the older filter is stopped (iteration {0})", i);
+				newerRun.Result.Should().BeTrue();
+				filter.Criteria.Should().Be(newer);
+				filter.Results.Should().HaveCount(newerCount);
+				filter.GetMetrics()[CountingCollector.Key].Should().Be(newerCount);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1248)]
+		public void GivenAFilterStoppedPartway_WhenTheMetricsAreRead_ThenTheyAreThoseOfTheResultsShown()
+		{
+			// The stopped filter had already counted some of its records, so the severity counts did not match the records shown.
+			RecordList records = CreateRecordsOneSecondApart(100);
+			var collector = new CountingCollector();
+			FilterManager filter = CreateFilterManager(records, collector);
+			filter.Apply(FilterType.PlainText, FilterCriteria.None);
+			collector.OnCount = () => filter.Abort();
+
+			Action apply = () => filter.Apply(FilterType.PlainText, new FilterCriteria("line number: 100"));
+
+			apply.Should().Throw<FilterAbortedException>();
+			filter.GetMetrics()[CountingCollector.Key].Should().Be(100);
+		}
+
+		[TestMethod]
+		public void GivenAResultsChangedHandlerThatAppliesAFilter_WhenAFilterIsApplied_ThenTheHandlerIsRefusedRatherThanWaitingForever()
+		{
+			RecordList records = CreateRecordsOneSecondApart(10);
+			FilterManager filter = CreateFilterManager(records, new CountingCollector());
+			Exception refused = null;
+			filter.ResultsChanged += (_, _) =>
+			{
+				try
+				{
+					filter.Apply(FilterType.PlainText, FilterCriteria.None);
+				}
+				catch (InvalidOperationException exception)
+				{
+					refused = exception;
+				}
+			};
+
+			Task apply = Task.Run(() => filter.Apply(FilterType.PlainText, new FilterCriteria("line number: 1")));
+
+			apply.Wait(TimeLimit).Should().BeTrue("the handler must not wait for the filter it handles");
+			refused.Should().BeOfType<InvalidOperationException>();
+			filter.Criteria.Include.Should().Be("line number: 1");
 		}
 
 		[TestMethod]
@@ -135,10 +249,27 @@ namespace BlueDotBrigade.Weevil.Filter
 			return records.GetRecords();
 		}
 
-		private static FilterManager CreateFilterManager(RecordList records, IMetricCollector collector)
+		private static bool TryApply(FilterManager filter, FilterType filterType, IFilterCriteria criteria)
+		{
+			try
+			{
+				filter.Apply(filterType, criteria);
+				return true;
+			}
+			catch (FilterAbortedException)
+			{
+				return false;
+			}
+		}
+
+		private static FilterManager CreateFilterManager(RecordList records, IMetricCollector collector, Action<string> onExpand = null)
 		{
 			IFilterAliasExpander aliasExpander = Substitute.For<IFilterAliasExpander>();
-			aliasExpander.Expand(Arg.Any<string>()).Returns(x => x.Arg<string>());
+			aliasExpander.Expand(Arg.Any<string>()).Returns(x =>
+			{
+				onExpand?.Invoke(x.Arg<string>());
+				return x.Arg<string>();
+			});
 
 			return new FilterManager(
 				Substitute.For<ICoreExtension>(),
@@ -156,6 +287,28 @@ namespace BlueDotBrigade.Weevil.Filter
 		private static Dictionary<int, TimeSpan> ElapsedTimesByLine(IFilter filter, RecordList records)
 		{
 			return records.ToDictionary(r => r.LineNumber, r => filter.ElapsedTimes.Get(r.LineNumber));
+		}
+
+		/// <summary>
+		/// Counts the records a filter keeps.
+		/// </summary>
+		private sealed class CountingCollector : IMetricCollector
+		{
+			public const string Key = "Count";
+
+			private int _count;
+
+			public Action OnCount { get; set; }
+
+			public void Count(IRecord record)
+			{
+				Interlocked.Increment(ref _count);
+				this.OnCount?.Invoke();
+			}
+
+			public void Reset() => Interlocked.Exchange(ref _count, 0);
+
+			public IDictionary<string, object> GetResults() => new Dictionary<string, object> { { Key, Volatile.Read(ref _count) } };
 		}
 	}
 }

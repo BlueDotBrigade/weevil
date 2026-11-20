@@ -20,7 +20,7 @@
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var parameterProvider = Substitute.For<IUserDialog>();
+			IUserDialog parameterProvider = Substitute.For<IUserDialog>();
 			parameterProvider
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns(thresholdString);
@@ -37,7 +37,7 @@
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
 			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-			var parameterProvider = Substitute.For<IUserDialog>();
+			IUserDialog parameterProvider = Substitute.For<IUserDialog>();
 			parameterProvider
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns(thresholdString);
@@ -48,10 +48,10 @@
                 [When($"detecting both edges using the regular expression: {X.AnyText}")]
                 public void WhenDetectingBothEdgesUsingTheRegularExpression(string regularExpression)
                 {
-                        // Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
-                        // ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
-                        // TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
-                        var parameterProvider = Substitute.For<IUserDialog>();
+			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
+			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
+			// TODO: re-write the `IUserDialog` interface so that the unit test doesn't care about the implementation details
+			IUserDialog parameterProvider = Substitute.For<IUserDialog>();
                         parameterProvider
                                 .TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
                                 .Returns(x => { x[2] = regularExpression; return true; });
@@ -79,7 +79,7 @@
                 [Then($"the record on line {X.WholeNumber} will have the comment: {X.AnyText}")]
                 public void ThenTheRecordOnLineWillHaveTheComment(int lineNumber, string expectedComment)
                 {
-                        var record = this.Context
+			Data.IRecord record = this.Context
                                 .Engine
                                 .Filter
                                 .Results
@@ -107,7 +107,7 @@
                 [Then("the insight should have related records")]
                 public void ThenTheInsightShouldHaveRelatedRecords()
                 {
-                        var insight = this.Context.LastInsight;
+			IInsight insight = this.Context.LastInsight;
                         insight.Should().NotBeNull();
                         insight.RelatedLineNumbers.Should().NotBeEmpty();
                 }
@@ -115,7 +115,7 @@
                 [Then("the insight should not have related records")]
                 public void ThenTheInsightShouldNotHaveRelatedRecords()
                 {
-                        var insight = this.Context.LastInsight;
+			IInsight insight = this.Context.LastInsight;
                         insight.Should().NotBeNull();
                         insight.RelatedLineNumbers.Should().BeEmpty();
                 }
@@ -123,7 +123,7 @@
                 [Then("the first related record line number should be greater than 0")]
                 public void ThenTheFirstRelatedRecordLineNumberShouldBeGreaterThanZero()
                 {
-                        var insight = this.Context.LastInsight;
+			IInsight insight = this.Context.LastInsight;
                         insight.Should().NotBeNull();
                         insight.RelatedLineNumbers.Should().NotBeEmpty();
                         insight.RelatedLineNumbers[0].Should().BeGreaterThan(0);

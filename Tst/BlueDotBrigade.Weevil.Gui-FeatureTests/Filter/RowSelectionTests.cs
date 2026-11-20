@@ -30,6 +30,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestCleanup]
 		public void Cleanup()
 		{
+			_engine.Dispose();
 			File.Delete(_logPath);
 			File.Delete(_logPath + ".xml");
 		}
@@ -138,7 +139,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			PressKey(Key.A, ModifierKeys.Control);
 
-			_engine.Selector.Selected.Count.Should().Be(50);
+			_engine.Selector.SelectedCount.Should().Be(50);
 			_engine.Selector.AnchorLineNumber.Should().Be(3);
 		}
 
@@ -221,7 +222,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		private int[] SelectedLines()
 		{
-			return _engine.Selector.Selected.Keys.ToArray();
+			return _engine.Selector.GetSelected().Select(record => record.LineNumber).ToArray();
 		}
 	}
 }

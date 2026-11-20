@@ -6,13 +6,13 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System.Linq;
 	using System.Threading;
 	using BlueDotBrigade.Weevil.Data;
-	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.Filter;
+	using BlueDotBrigade.Weevil.Filter.Expressions;
+	using BlueDotBrigade.Weevil.Filter.Expressions.Regular;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Math;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 
-	internal sealed class StatisticalAnalyzer : IRecordAnalyzer
+	internal sealed class StatisticalAnalyzer : RegularExpressionAnalyzer
 	{
 		/// <summary>
 		/// Represents the percentage of data to be trimmed from both ends when calculating the mean average value.
@@ -20,20 +20,11 @@ namespace BlueDotBrigade.Weevil.Analysis
 		private const double TrimmedMeanPercent = 0.1;
 
 		private readonly IReadOnlyList<ICalculator> _calculators;
-		private readonly FilterStrategy _filterStrategy;
-		private readonly IFilterAliasExpander _aliasExpander;
 		private readonly IDictionary<string, double> _results;
 
-		public StatisticalAnalyzer(FilterStrategy filterStrategy)
-			: this(filterStrategy, null)
+		public StatisticalAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander = null)
+			: base(filterStrategy, aliasExpander)
 		{
-		}
-
-		public StatisticalAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
-		{
-			_filterStrategy = filterStrategy;
-			_aliasExpander = aliasExpander;
-
 			_calculators = new List<ICalculator>
 			{
 				new CountCalculator(),
@@ -58,75 +49,39 @@ namespace BlueDotBrigade.Weevil.Analysis
 			};
 		}
 
-		public string Key => AnalysisType.Statistical.ToString();
+		public override string Key => AnalysisType.Statistical.ToString();
 
-		public string DisplayName => "Statistics";
+		public override string DisplayName => "Statistics";
 
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public override Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
 		{
-			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
-		}
+			if (!TryGetExpressions(records, userDialog, out ImmutableArray<RegularExpression> expressions))
+			{
+				return new Results(0);
+			}
 
-		/// <remarks>
-		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
-		/// </remarks>
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
-		{
+			ClearFlags(records, state, canUpdateMetadata);
+
 			var timestamps = new List<DateTime>();
 			var values = new List<double>();
-
-			// Get default regex from current inclusive filter
-			var defaultRegex = Timeline.AnalysisHelper.GetDefaultRegex(_filterStrategy);
-
-			// Show analysis dialog to get custom regex
-			var recordsDescription = records.Count.ToString("N0");
-
-			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
-			{
-				// User cancelled
-				return new Results(0);
-			}
-
-			if (string.IsNullOrWhiteSpace(customRegex))
-			{
-				// No regex provided
-				return new Results(0);
-			}
-
-			// Parse expressions with alias expansion and || support
-			var expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
-			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
-				customRegex,
-				_aliasExpander,
-				expressionBuilder);
-
-			if (expressions.IsDefaultOrEmpty)
-			{
-				return new Results(0);
-			}
 
 			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
 			var buffer = new ContentBuffer();
 
-			foreach (IRecord record in records)
+			for (var position = 0; position < records.Count; position++)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-
-				if (canUpdateMetadata)
-				{
-					state.SetFlagged(record, false);
-				}
 
 				// Collect all key-value pairs from all expressions for this record
 				// For statistical analysis, we take the first numeric value found
 				double? foundValue = null;
 
 				// Read once, however many expressions test the record (#1133).
-				var content = buffer.Read(record).ToString();
+				var content = records.ReadContent(position, buffer).ToString();
 
 				foreach (RegularExpression regexExpression in expressions)
 				{
-					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record, content);
+					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(content);
 
 					if (keyValuePairs.Count == 1)
 					{
@@ -150,9 +105,11 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 				if (foundValue.HasValue)
 				{
-					if (record.HasCreationTime)
+					DateTime createdAt = records.GetCreatedAt(position);
+
+					if (createdAt != Record.CreationTimeUnknown)
 					{
-						timestamps.Add(record.CreatedAt);
+						timestamps.Add(createdAt);
 					}
 					values.Add(foundValue.Value);
 				}

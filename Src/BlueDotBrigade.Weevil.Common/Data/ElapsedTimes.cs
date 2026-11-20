@@ -157,10 +157,10 @@ namespace BlueDotBrigade.Weevil.Data
 			Array.Fill(byLineNumber, Unknown);
 
 			var previousLineNumber = Record.Dummy.LineNumber;
-			var previousCreatedAt = Record.CreationTimeUnknown;
+			DateTime previousCreatedAt = Record.CreationTimeUnknown;
 			for (var position = 0; position < count; position++)
 			{
-				var createdAt = records.GetCreatedAt(position);
+				DateTime createdAt = records.GetCreatedAt(position);
 
 				if (createdAt != Record.CreationTimeUnknown)
 				{

@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using BlueDotBrigade.Weevil;
 using BlueDotBrigade.Weevil.Analysis;
 using BlueDotBrigade.Weevil.Data;
@@ -10,6 +11,7 @@ using BlueDotBrigade.Weevil.Gui;
 using BlueDotBrigade.Weevil.Gui.Analysis;
 using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
+using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 using Microsoft.Win32;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
@@ -32,6 +34,12 @@ internal static class GraphWindowCounter
 
 internal class DialogBoxService : IDialogBoxService
 {
+	// Rolled logs, such as app.log.1, are logs too. Weevil's sidecar and index are not (decision 9 of the #1157 plan).
+	private static readonly FileTypeFilter LogFiles = new FileTypeFilter(
+		"Log files (*.log, *.log.1, *.txt, *.tsv, *.csv)",
+		new[] { "*.log", "*.log.*", "*.txt", "*.tsv", "*.csv" },
+		new[] { "*.xml", "*.idx" });
+
 	private DashboardDialog _activeDashboard;
 
 	/// <summary>
@@ -42,19 +50,48 @@ internal class DialogBoxService : IDialogBoxService
 		// nothing to do
 	}
 
-	public string ShowOpenFile(string compatibleFileExtensions)
+	public bool TryShowOpenAs(Action<string> checkBeforeOpening, out OpenAsChoice choice)
 	{
-		var dialog = new OpenFileDialog
+		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read);
+		var dialog = new BlueDotBrigade.Weevil.Windows.Dialogs.OpenAsDialog
 		{
-			Filter = compatibleFileExtensions
+			Owner = Application.Current?.MainWindow,
+			Title = "Open",
+			FileTypes = new[] { LogFiles, FileTypeFilter.AllFiles },
+			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
+			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
+			CheckBeforeOpening = checkBeforeOpening,
+			OptionsContent = new OpenAsOptionsView { DataContext = options },
+			CanOpen = false,
 		};
 
-		if (dialog.ShowDialog() == true)
-		{
-			return dialog.FileName;
-		}
+		// The dialog has no theme of its own: Weevil's application-wide styles restyle its controls, and its window takes Weevil's colours here.
+		dialog.SetResourceReference(Control.BackgroundProperty, "MaterialDesignPaper");
+		dialog.SetResourceReference(Control.ForegroundProperty, "MaterialDesignBody");
+		dialog.SetResourceReference(Control.FontFamilyProperty, "MaterialDesignFont");
+		dialog.SetResourceReference(Control.FontSizeProperty, "ApplicationFontSize");
 
-		return string.Empty;
+		dialog.SelectionChanged += async (_, item) => await options.SelectAsync(item);
+		options.PropertyChanged += (_, e) =>
+		{
+			if (e.PropertyName == nameof(OpenAsOptionsViewModel.CanOpen))
+			{
+				dialog.CanOpen = options.CanOpen;
+			}
+		};
+
+		var isAccepted = dialog.ShowDialog() == true;
+
+		choice = isAccepted
+			? new OpenAsChoice(
+				dialog.Result.LocalPath,
+				dialog.Result.ExtractedFolder,
+				options.StorageMode,
+				options.Advice,
+				dialog.Result.Item.Location.IsInArchive ? dialog.Result.Item.Location.ToString() : null)
+			: null;
+
+		return isAccepted;
 	}
 
 	public string ShowSaveFile(string targetDirectory, string targetFileName)
@@ -120,6 +157,11 @@ internal class DialogBoxService : IDialogBoxService
 	public void ShowMessage(string message, string caption)
 	{
 		MessageBox.Show(message, caption);
+	}
+
+	public bool ShowQuestion(string message, string caption)
+	{
+		return MessageBox.Show(message, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
 	}
 
 	public void ShowGraph(RecordList records, string selectedPattern, string sourceFilePath)

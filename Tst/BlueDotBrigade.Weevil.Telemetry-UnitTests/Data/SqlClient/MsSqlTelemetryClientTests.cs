@@ -160,7 +160,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		[TestMethod]
 		public async Task GivenNullSession_WhenSendAsyncCalled_ThenDoesNotThrow()
 		{
-			var client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1);
+			MsSqlTelemetryClient client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1);
 
 			Func<Task> act = async () => await client.UploadAsync(null, CancellationToken.None);
 
@@ -170,8 +170,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		[TestMethod]
 		public async Task GivenAlreadyCancelledToken_WhenSendAsyncCalled_ThenDoesNotThrow()
 		{
-			var client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1);
-			var session = CreateMinimalSession();
+			MsSqlTelemetryClient client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1);
+			TelemetrySession session = CreateMinimalSession();
 			using var cts = new CancellationTokenSource();
 			cts.Cancel();
 
@@ -184,8 +184,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		public async Task GivenUnavailableDatabase_WhenSendAsyncCalled_ThenDoesNotThrow()
 		{
 			// Arrange: use a connection that will fail quickly.
-			var client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1);
-			var session = CreateMinimalSession();
+			MsSqlTelemetryClient client = CreateClientWithFakeConnection(commandTimeoutSeconds: 1);
+			TelemetrySession session = CreateMinimalSession();
 
 			// Act
 			Func<Task> act = async () => await client.UploadAsync(session, CancellationToken.None);
@@ -200,7 +200,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		public void GivenEmptyConnectionString_WhenConstructed_ThenLogsWarning()
 		{
 			var capture = new CapturingLogWriter();
-			var original = Log.Default;
+			ILogWriter original = Log.Default;
 
 			try
 			{
@@ -219,8 +219,8 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 		[TestMethod]
 		public async Task GivenEmptyConnectionString_WhenSendAsyncCalled_ThenDoesNotThrow()
 		{
-			var client = CreateDisabledClient();
-			var session = CreateMinimalSession();
+			MsSqlTelemetryClient client = CreateDisabledClient();
+			TelemetrySession session = CreateMinimalSession();
 
 			Func<Task> act = async () => await client.UploadAsync(session, CancellationToken.None);
 
@@ -279,7 +279,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			{
 				if (severity == LogSeverityType.Warning)
 				{
-					Warnings.Add(message);
+					this.Warnings.Add(message);
 				}
 			}
 
@@ -287,7 +287,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			{
 				if (severity == LogSeverityType.Warning)
 				{
-					Warnings.Add(message);
+					this.Warnings.Add(message);
 				}
 			}
 		}

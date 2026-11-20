@@ -8,7 +8,7 @@
 	/// as in the #978 test log.
 	/// </summary>
 	/// <remarks>
-	/// The same records as the memory harness writes (Doc/Research/Weevil3/MemoryHarness), so a test's figures compare with the harness's.
+	/// The same records as the memory harness writes (Dep/TestHarnesses/MemoryHarness), so a test's figures compare with the harness's.
 	/// </remarks>
 	internal static class ReferenceLog
 	{

@@ -25,7 +25,11 @@
 
 		private readonly ITelemetryMetricRecorder _telemetryRecorder;
 
+		// The file read; for a log read from a copy, the copy (#1312).
 		private readonly string _sourceFilePath;
+
+		// The log as the analyst knows it, when the file read is a copy: otherwise null.
+		private readonly string _displayPath;
 		private readonly Encoding _sourceFileEncoding;
 		private readonly ContextDictionary _context;
 		private readonly StorageMode _storageMode;
@@ -70,9 +74,12 @@
 		internal StorageMode StorageMode => _storageMode;
 
 		/// <summary>
-		/// In disk mode, the source the records read their content back through, which says whether the log changed since it was read (#1025).
-		/// <see langword="null"/> in RAM mode, and for the engine without records that Reload uses.
+		/// The file Weevil read and the checksum of each block, in both modes (#1255). On disk, the records read their content back through it,
+		/// and it says whether the log changed since it was read (#1025). The mode is <see cref="StorageMode"/>, never whether this is null.
 		/// </summary>
+		/// <remarks>
+		/// <see langword="null"/> for the engine without records that Reload uses.
+		/// </remarks>
 		internal LogFileSource Source => _source;
 
 		/// <summary>
@@ -95,6 +102,7 @@
 			ITelemetryMetricRecorder telemetryRecorder,
 			StorageMode storageMode,
 			LogFileSource source,
+			string displayPath,
 			bool hasReadLog)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -114,6 +122,7 @@
 			_source = source;
 
 			_sourceFilePath = sourceFilePath;
+			_displayPath = displayPath;
 			_sourceFileEncoding = sourceFileEncoding;
 
 			_scope = new RecordScope(records);
@@ -146,7 +155,7 @@
 
 			_analysisManager = new AnalysisManager(this, _coreExtension, _telemetryRecorder);
 
-			var filterAliases = _coreExtension.GetFilterAliases(_context);
+			IDictionary<string, string> filterAliases = _coreExtension.GetFilterAliases(_context);
 			var filterAliasExpander = new FilterAliasExpander(filterAliases);
 
 			_filterManager = new FilterManager(
@@ -161,6 +170,7 @@
 				_session.IncludeHistory,
 				_session.ExcludeHistory,
 				_telemetryRecorder,
+				_storageMode,
 				_source);
 
 			// Construction-time default filter: applied without recording telemetry (not a user action).
@@ -247,6 +257,7 @@
 				_telemetryRecorder,
 				_storageMode,
 				source: null,
+				_displayPath,
 				hasReadLog: false);
 
 			// Not a user action, so no telemetry, as when the engine was created.
@@ -314,9 +325,26 @@
 			set { _session.Remarks = value; }
 		}
 
-		public string SourceFilePath => _sourceFilePath;
+		/// <summary>
+		/// The log as the analyst knows it: for a log read from a copy, such as one extracted from a zip, the path given by
+		/// <see cref="CoreEngineBuilder.UsingDisplayPath"/>, otherwise the file read (#1312).
+		/// </summary>
+		public string SourceFilePath => _displayPath ?? _sourceFilePath;
 
+		/// <summary>
+		/// The folder of the file read, where exports, reports and splits are saved: for a log read from a copy, the copy's folder (#1253, #1312).
+		/// </summary>
 		public string SourceDirectory => Path.GetDirectoryName(_sourceFilePath);
+
+		/// <summary>
+		/// The file read, which <see cref="SourceFilePath"/> names as the analyst knows it.
+		/// </summary>
+		internal string FilePath => _sourceFilePath;
+
+		/// <summary>
+		/// The path given by <see cref="CoreEngineBuilder.UsingDisplayPath"/>, which Reload keeps: otherwise <see langword="null"/>.
+		/// </summary>
+		internal string DisplayPath => _displayPath;
 
 		public int InstanceId => _instanceId;
 		#endregion
@@ -414,7 +442,7 @@
 				{
 					{ "ClearOperation", clearOperation },
 					{ "RecordsKept", kept.Count },
-					{ "SelectedRecordsKept", _selectionManager.Selected.Count },
+					{ "SelectedRecordsKept", _selectionManager.SelectedCount },
 				});
 
 			return kept.Count < records.Count;
@@ -423,8 +451,13 @@
 		private void OnResultsChanged(object sender, ResultsChangedEventArgs e)
 		{
 			// Before anyone else hears of the new results, so they read the selection that matches them (#1015).
+			var stopwatch = Stopwatch.StartNew();
 			_selectionManager.KeepRecordsShownBy(e.Records);
 			_navigationManager.UpdateDataSource(e.Records);
+
+			Log.Default.Write(
+				LogSeverityType.Debug,
+				$"The selection was updated to the filter's results. TimeElapsed={stopwatch.Elapsed}");
 		}
 		#endregion
 
@@ -438,7 +471,7 @@
 
 		public void Save(bool deleteBackup)
 		{
-			using FileStream logSource = TryOpenSourceFile();
+			using FileStream log = TryOpenSourceFile();
 
 			var sidecarData = new SidecarData
 			{
@@ -450,7 +483,7 @@
 				TableOfContents = _session.TableOfContents,
 				Regions = _session.Regions.Regions,
 				Bookmarks = _session.Bookmarks.Bookmarks,
-				ByteOffsetOfLine = lineNumber => GetByteOffset(logSource, lineNumber),
+				ByteOffsetOfLine = lineNumber => GetByteOffset(log, lineNumber),
 			};
 
 			_sidecarManager.Save(sidecarData, deleteBackup);
@@ -472,10 +505,10 @@
 			}
 		}
 
-		private long GetByteOffset(Stream logSource, int lineNumber)
+		private long GetByteOffset(Stream log, int lineNumber)
 		{
-			return logSource != null && lineNumber >= 1 && lineNumber <= _lineIndex.LineCount
-				? _lineIndex.GetByteOffset(logSource, lineNumber)
+			return log != null && lineNumber >= 1 && lineNumber <= _lineIndex.LineCount
+				? _lineIndex.GetByteOffset(log, lineNumber)
 				: -1;
 		}
 

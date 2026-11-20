@@ -78,7 +78,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			public void WriteLine(string message)
 			{
-				Messages.Add(message);
+				this.Messages.Add(message);
 			}
 		}
 

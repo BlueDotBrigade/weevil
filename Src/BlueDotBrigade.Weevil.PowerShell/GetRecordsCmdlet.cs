@@ -66,15 +66,29 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
                 builder = string.IsNullOrEmpty(this.Region) ? builder : builder.UsingRegion(this.Region);
                 builder = string.IsNullOrEmpty(this.Section) ? builder : builder.UsingSection(this.Section);
-                IEngine engine = builder.Open();
+                // Closed when the cmdlet ends, so another Weevil can open the log (#1254). The records returned still read it.
+                using IEngine engine = builder.Open();
 
                 var filterCriteria = new FilterCriteria(this.Include, this.Exclude);
 
-                // On disk, a log that changed while it was filtered is reloaded, and filtered once more (#1028).
-                engine.RunReloadingOnChange(current => current.Filter.Apply(this.FilterType, filterCriteria));
+                // A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the cmdlet again (#1247).
+                // On disk, the records returned read their text later, so a change is an error even when the filter finished.
+                if (engine.StorageMode == StorageMode.Disk)
+                {
+                    engine.RunOnce(() => engine.Filter.Apply(this.FilterType, filterCriteria));
+                }
+                else
+                {
+                    engine.RunOnce(() => engine.Filter.Apply(this.FilterType, filterCriteria), this.WriteWarning);
+                }
 
                 // `Apply` returns the filter itself, so the matching records are read from its results (#1002).
                 this.WriteObject(engine.Filter.Results, enumerateCollection: true);
+            }
+            catch (LogInUseException ex)
+            {
+                // Another Weevil has the log open: its message names who (#1254).
+                this.ThrowTerminatingError(new ErrorRecord(ex, "LogInUse", ErrorCategory.ResourceBusy, this.FilePath));
             }
             catch (Exception ex)
             {

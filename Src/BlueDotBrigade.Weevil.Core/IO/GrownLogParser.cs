@@ -39,6 +39,7 @@ namespace BlueDotBrigade.Weevil.IO
 			IRecordParser parser,
 			StorageMode storageMode,
 			Encoding encoding,
+			string displayPath,
 			out RecordTable table,
 			out LogFileSource parsed)
 		{
@@ -68,14 +69,14 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				var repository = new SerializedRecordRepository(log, parser, resumeOffset, lineNumber, loggingEnabled: true, storageMode: storageMode, checksumStartOffset: checksumStart);
+				var repository = new SerializedRecordRepository(log, parser, resumeOffset, lineNumber, loggingEnabled: true, storageMode: storageMode, checksumStartOffset: checksumStart, displayPath: displayPath);
 
-				if (repository.Get(Range.All, int.MaxValue) is not TableRecordList { WholeTable: RecordTable newPart } || repository.ParsedSource is null)
+				if (repository.Get(Range.All, int.MaxValue) is not TableRecordList { WholeTable: RecordTable newPart } || repository.Source is null)
 				{
 					return false;
 				}
 
-				ReadOnlySpan<ulong> newChecksums = repository.ParsedSource.GetChecksums();
+				ReadOnlySpan<ulong> newChecksums = repository.Source.GetChecksums();
 				var checksums = new ulong[keptChecksums + newChecksums.Length];
 
 				for (var index = 0; index < keptChecksums; index++)
@@ -85,7 +86,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 				newChecksums.CopyTo(checksums.AsSpan(keptChecksums));
 
-				parsed = LogFileSource.Create(logPath, parse.StartOffset, repository.ParsedSource.EndOffset, log.Length, checksums);
+				parsed = LogFileSource.Create(logPath, parse.StartOffset, repository.Source.EndOffset, log.Length, checksums, displayPath);
 
 				// On disk, every chunk reads back through the one source of the whole log. In RAM, the chunks hold their bytes.
 				LogFileSource source = parsed;

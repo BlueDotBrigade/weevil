@@ -16,7 +16,7 @@
 
 		private IUserDialog GetUserDialog(int msBeforeFlaggedRaised)
 		{
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 
 			// Only a plugin knows what to ask the user.  Furthermore, the unit test has no idea about the implementation details
 			// ... E.g. How many parameters are needed? What types of parameters is the plugin expecting?
@@ -138,7 +138,7 @@
 
 			var state = new RecordState();
 
-			var results = analyzer.Analyze(
+			Results results = analyzer.Analyze(
 				records.ToImmutableArray(),
 				state,
 				EnvironmentHelper.GetExecutableDirectory(),
@@ -261,14 +261,16 @@
 		}
 
 		[TestMethod]
+		[WorkItem(934)]
 		public void GivenPreviousRunHasGapsAndInvalidThreshold_WhenAnalyzeCalled_ThenPublicStateIsReset()
 		{
+			// An invalid threshold kept the counts of the run before it.
 			DateTime now = DateTime.Now;
-			var records = R.Create()
+			RecordList records = R.Create()
 				.WithCreatedAt(10, now)
 				.WithCreatedAt(20, now.AddSeconds(10))
 				.GetRecords();
-			var userDialog = Substitute.For<IUserDialog>();
+			IUserDialog userDialog = Substitute.For<IUserDialog>();
 			userDialog
 				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
 				.Returns("not-a-number");
@@ -282,6 +284,7 @@
 			analyzer.Count.Should().Be(0);
 			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.Zero);
 			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
+			analyzer.MaximumPeriodLineNumber.Should().Be(-1);
 		}
 
 		[TestMethod]
@@ -291,12 +294,12 @@
 			// Regression: Issue #935
 			DateTime now = DateTime.Now;
 
-			var recordsWithGap = R.Create()
+			RecordList recordsWithGap = R.Create()
 				.WithCreatedAt(10, now.AddSeconds(0))
 				.WithCreatedAt(20, now.AddSeconds(10))
 				.GetRecords();
 
-			var recordsWithNoGap = R.Create()
+			RecordList recordsWithNoGap = R.Create()
 				.WithCreatedAt(30, now.AddSeconds(0))
 				.WithCreatedAt(40, now.AddSeconds(1))
 				.GetRecords();

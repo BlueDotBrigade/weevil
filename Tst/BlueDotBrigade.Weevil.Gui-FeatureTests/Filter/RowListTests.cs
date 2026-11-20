@@ -145,13 +145,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			RecordList results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
-			selector.Selected.Returns(Selected(results, 2));
+			Select(selector, results, 2);
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
 			RowViewModel second = rows.GetRow(1);
 			RowViewModel third = rows.GetRow(2);
 			second.IsSelected.Should().BeTrue();
 
-			selector.Selected.Returns(Selected(results, 3));
+			Select(selector, results, 3);
 			rows.RefreshSelection();
 
 			second.IsSelected.Should().BeFalse();
@@ -164,13 +164,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			// The grid tells screen readers about these rows.
 			RecordList results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
-			selector.Selected.Returns(Selected(results, 2, 5));
+			Select(selector, results, 2, 5);
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
 			var heldRows = new[] { rows.GetRow(1), rows.GetRow(2), rows.GetRow(4) };
 			IReadOnlyList<RowViewModel> reportedRows = null;
 			rows.SelectionRefreshed += (_, changedRows) => reportedRows = changedRows;
 
-			selector.Selected.Returns(Selected(results, 3, 5));
+			Select(selector, results, 3, 5);
 			rows.RefreshSelection();
 
 			reportedRows.Select(row => row.LineNumber).Should().BeEquivalentTo(new[] { 2, 3 });
@@ -182,7 +182,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			RecordList results = R.WithLineNumbers(1, 10);
 			var selector = Substitute.For<ISelect>();
-			selector.Selected.Returns(Selected(results, 3, 7, 9));
+			Select(selector, results, 3, 7, 9);
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
 
 			rows.GetSelectedPositions(afterLineNumber: -1).Should().Equal(2, 6, 8);
@@ -200,9 +200,16 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			add.Should().Throw<NotSupportedException>();
 		}
 
-		private static IDictionary<int, IRecord> Selected(RecordList results, params int[] lineNumbers)
+		/// <summary>
+		/// Makes <paramref name="selector"/> answer as if the records on <paramref name="lineNumbers"/> were selected.
+		/// </summary>
+		private static void Select(ISelect selector, RecordList results, params int[] lineNumbers)
 		{
-			return lineNumbers.ToDictionary(lineNumber => lineNumber, lineNumber => results[lineNumber - 1]);
+			RecordList selected = results.Where(record => lineNumbers.Contains(record.LineNumber)).ToImmutableArray();
+
+			selector.SelectedCount.Returns(selected.Count);
+			selector.IsSelected(Arg.Any<int>()).Returns(call => lineNumbers.Contains(call.Arg<int>()));
+			selector.GetSelected().Returns(selected);
 		}
 	}
 }

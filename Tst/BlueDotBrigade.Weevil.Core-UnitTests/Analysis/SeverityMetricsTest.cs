@@ -10,7 +10,7 @@
 		[TestMethod]
 		public void AdditionOperator_()
 		{
-			var record = Substitute.For<IRecord>();
+			IRecord record = Substitute.For<IRecord>();
 			record.Severity.Returns(SeverityType.Information);
 
 			var metricsA = new SeverityMetrics();

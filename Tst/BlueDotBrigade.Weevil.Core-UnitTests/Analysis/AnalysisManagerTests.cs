@@ -1,5 +1,9 @@
 namespace BlueDotBrigade.Weevil.Analysis
 {
+	using System;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.IO;
+
 	[TestClass]
 	public class AnalysisManagerTests
 	{
@@ -11,9 +15,9 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenRecordCollection_WhenRemoveAllFlagsCalled_ThenEveryRecordIsUnflagged(string fileName, int expectedCount)
 		{
 			// Remove All Flags and Unpin All skipped the last record.
-			IEngine engine = OpenEngine(fileName);
+			using IEngine engine = OpenEngine(fileName);
 
-			foreach (var record in engine.Records)
+			foreach (IRecord record in engine.Records)
 			{
 				engine.RecordState.SetFlagged(record, true);
 			}
@@ -32,9 +36,9 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenRecordCollection_WhenUnpinAllCalled_ThenEveryRecordIsUnpinned(string fileName, int expectedCount)
 		{
 			// Remove All Flags and Unpin All skipped the last record.
-			IEngine engine = OpenEngine(fileName);
+			using IEngine engine = OpenEngine(fileName);
 
-			foreach (var record in engine.Records)
+			foreach (IRecord record in engine.Records)
 			{
 				engine.RecordState.SetPinned(record, true);
 			}
@@ -43,6 +47,19 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			engine.Records.Should().HaveCount(expectedCount);
 			engine.Records.Should().NotContain(record => engine.RecordState.IsPinned(record));
+		}
+
+		[TestMethod]
+		public void GivenAnUnknownAnalyzerKey_WhenAnalyzeCalled_ThenTheErrorNamesTheKeyAndListsTheAvailableOnes()
+		{
+			using IEngine engine = OpenEngine("ThreeRecords.log");
+
+			Action act = () => engine.Analyzer.Analyze("NoSuchAnalyzer", new UserDialogNotRequired());
+
+			act.Should().Throw<ArgumentException>()
+				.WithMessage("*NoSuchAnalyzer*")
+				.WithMessage($"*{AnalysisType.DetectData}*")
+				.And.ParamName.Should().Be("analyzerKey");
 		}
 
 		private static IEngine OpenEngine(string fileName)

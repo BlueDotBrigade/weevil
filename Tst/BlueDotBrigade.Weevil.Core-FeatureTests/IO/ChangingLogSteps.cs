@@ -36,6 +36,9 @@ internal sealed class ChangingLogSteps : ReqnrollSteps
 	[AfterScenario]
 	public void DeleteTheCopy()
 	{
+		// The open log's lock is in the folder, so the log is closed first (#1254).
+		this.Context.Engine.Dispose();
+
 		if (Directory.Exists(_folder))
 		{
 			Directory.Delete(_folder, recursive: true);

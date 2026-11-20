@@ -12,7 +12,7 @@
 		[TestMethod]
 		public void UseLineNumberWhenLoadingUserComment()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("UseLineNumberWhenLoadingUserComment.log"))
 				.Open();
 
@@ -27,7 +27,7 @@
 		[TestMethod]
 		public void KeepCommentsForRecordsNoLongerInMemory()
 		{
-			IEngine firstEngine = Engine
+			using IEngine firstEngine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -36,9 +36,9 @@
 			firstEngine.Selector.Select(5);
 			firstEngine.Clear(ClearOperation.BeforeSelected);
 			firstEngine.Save(true);
-			firstEngine = null;
+			firstEngine.Dispose();
 
-			IEngine secondEngine = Engine
+			using IEngine secondEngine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -59,7 +59,7 @@
 				// Every line is 9 bytes, so line N begins at byte (N - 1) * 9.
 				File.WriteAllText(logFilePath, string.Concat(Enumerable.Range(1, 300).Select(lineNumber => $"Line {lineNumber:000}\n")));
 
-				IEngine engine = Engine.UsingPath(logFilePath).Open();
+				using IEngine engine = Engine.UsingPath(logFilePath).Open();
 				engine.RecordState.SetComment(engine[149], "A comment on line 150");
 				engine.Bookmarks.Create(1, "A bookmark on line 180", 180);
 				engine.Save(true);
@@ -86,12 +86,13 @@
 
 			try
 			{
-				IEngine engine = Engine.UsingPath(logFilePath).Open();
+				using IEngine engine = Engine.UsingPath(logFilePath).Open();
 				engine.RecordState.SetComment(engine[11], "hello world");
 				ClearLinesOneToTwelve(engine);
 				engine.Save(true);
 
-				IEngine reopened = Engine.UsingPath(logFilePath).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logFilePath).Open();
 				reopened.RecordState.GetComment(reopened[11]).Should().Be("hello world");
 			}
 			finally
@@ -109,7 +110,7 @@
 
 			try
 			{
-				IEngine engine = Engine.UsingPath(logFilePath).Open();
+				using IEngine engine = Engine.UsingPath(logFilePath).Open();
 				engine.RecordState.SetComment(engine[11], "before");
 				engine.Save(true);
 
@@ -117,7 +118,8 @@
 				ClearLinesOneToTwelve(engine);
 				engine.Save(true);
 
-				IEngine reopened = Engine.UsingPath(logFilePath).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logFilePath).Open();
 				reopened.RecordState.GetComment(reopened[11]).Should().Be("after");
 			}
 			finally
@@ -135,7 +137,7 @@
 
 			try
 			{
-				IEngine engine = Engine.UsingPath(logFilePath).Open();
+				using IEngine engine = Engine.UsingPath(logFilePath).Open();
 				engine.RecordState.SetPinned(engine[11], true);
 				engine.Save(true);
 
@@ -143,8 +145,36 @@
 				ClearLinesOneToTwelve(engine);
 				engine.Save(true);
 
-				IEngine reopened = Engine.UsingPath(logFilePath).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logFilePath).Open();
 				reopened.RecordState.IsPinned(reopened[11]).Should().BeFalse();
+			}
+			finally
+			{
+				Directory.Delete(directory, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1246)]
+		public void GivenASidecarThatCannotBeWritten_WhenClearing_ThenTheRecordsAreClearedAnyway()
+		{
+			// Clear saved the sidecar first, and failed when it couldn't, as in a read-only folder.
+			var logFilePath = CreateLogFile(out var directory);
+
+			// A folder where the sidecar would go: Weevil finds no sidecar to load, and can't write one, even as an administrator.
+			Directory.CreateDirectory($"{logFilePath}.xml");
+
+			try
+			{
+				using IEngine engine = Engine.UsingPath(logFilePath).Open();
+
+				// Under the temporary folder, Weevil saves no sidecar, and the test would pass without testing anything.
+				engine.Invoking(e => e.Save()).Should().Throw<UnauthorizedAccessException>();
+
+				ClearLinesOneToTwelve(engine);
+
+				engine.Filter.Results.Should().HaveCount(288);
 			}
 			finally
 			{

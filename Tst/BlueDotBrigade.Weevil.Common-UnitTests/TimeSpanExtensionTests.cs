@@ -9,7 +9,7 @@
 		[TestMethod]
 		public void ToHumanReadable_TimeSpanMinimum_ReturnsDefault()
 		{
-			var period = TimeSpan.MinValue;
+			TimeSpan period = TimeSpan.MinValue;
 
 			(period.ToHumanReadable()).Should().Be("--.---");
 		}
@@ -17,7 +17,7 @@
 		[TestMethod]
 		public void ToHumanReadable_TimeSpanMaximum_ReturnsDefault()
 		{
-			var period = TimeSpan.MaxValue;
+			TimeSpan period = TimeSpan.MaxValue;
 
 			(period.ToHumanReadable()).Should().Be("--.---");
 		}

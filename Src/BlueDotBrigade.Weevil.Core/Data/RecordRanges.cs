@@ -52,7 +52,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 				if (partsPerChunk > 1)
 				{
-					var chunkRanges = ranges.ToArray();
+					(int Start, int End)[] chunkRanges = ranges.ToArray();
 					ranges.Clear();
 
 					foreach ((int Start, int End) chunkRange in chunkRanges)

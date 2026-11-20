@@ -80,7 +80,11 @@ Each time you open a log, Weevil asks where to keep its text while it is open:
 
 Weevil chooses for you from the log's size and the memory that is free, so you can usually press **Enter**. It warns you when RAM may not fit, and when a log on a network drive would be slow on disk. The status bar shows which you chose. **Reload** (`Ctrl+F5`) keeps your choice.
 
-On disk, if another application truncates or replaces the log, Weevil says so once and reloads it. If the log is deleted, its rows show **Log can't be read**.
+While a log is open, Weevil keeps a small file beside it, named after the log with `.lock` added, so another Weevil, on your computer or on another through a network share, does not open the same log and overwrite your comments and pins. That Weevil says who has the log open, for example *app.log is already open in Weevil by jsmith on PC-42*. Close the log in the other Weevil, then open it again. Weevil deletes the file when it closes the log. If Weevil crashed, the file may be left behind; it stops no one, and you can delete it. In a folder where Weevil can't write, the log opens without it.
+
+On Windows, while a log is open, its folder can't be renamed, moved or deleted; the log itself still can. On a network share, if the computer that has a log open crashes, sleeps or loses the network, others are told that computer has it for a few minutes, until the server lets go. Folders synced by OneDrive or Dropbox don't share the lock between computers.
+
+Weevil never stops another application from writing, renaming or deleting a log it has open. On disk, if another application truncates or replaces the log, Weevil says so once: press **Ctrl+F5** to reload the latest data. If the log is renamed or deleted, its rows show **Log can't be read**.
 
 ---
 

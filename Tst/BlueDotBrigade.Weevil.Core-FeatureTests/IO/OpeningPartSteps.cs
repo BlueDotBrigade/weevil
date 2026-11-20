@@ -69,7 +69,11 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 	{
 		_openFailure.Should().BeNull();
 
-		IEngine wholeLog = Engine.UsingPath(_logPath).Open();
+		// A copy, since the part is open: another open of the log would be refused (#1254).
+		var copyPath = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, "Copy")).FullName, Path.GetFileName(_logPath));
+		File.Copy(_logPath, copyPath);
+
+		using IEngine wholeLog = Engine.UsingPath(copyPath).Open();
 		string[] expected = Describe(wholeLog.Records).Where(record => record.LineNumber >= firstLine && record.LineNumber <= lastLine).Select(record => record.Text).ToArray();
 
 		expected.Should().NotBeEmpty();
@@ -96,6 +100,9 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 	[AfterScenario]
 	public void DeleteTheSavedLogFile()
 	{
+		// The open log's lock is in the folder, so the log is closed first (#1254).
+		this.Context.Engine.Dispose();
+
 		if (Directory.Exists(_folder))
 		{
 			Directory.Delete(_folder, recursive: true);

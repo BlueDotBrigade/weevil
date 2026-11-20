@@ -20,10 +20,10 @@
 
 			var coreExtension = new TsvCoreExtension();
 
-			using (FileStream dataSource = FileHelper.Open(sourceFilePath))
+			using (FileStream log = FileHelper.Open(sourceFilePath))
 			{
-				var streamReader = new StreamReader(dataSource);
-				var recordParser = coreExtension.GetRecordParser();
+				var streamReader = new StreamReader(log);
+				IRecordParser recordParser = coreExtension.GetRecordParser();
 
 				var content = streamReader.ReadLine();
 				if (recordParser.TryParse(0, content, out IRecord record))

@@ -1,8 +1,8 @@
 namespace BlueDotBrigade.Weevil
 {
+	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Threading;
-	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Data;
 	using BlueDotBrigade.Weevil.Filter;
 	using BlueDotBrigade.Weevil.Navigation;

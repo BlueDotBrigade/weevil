@@ -38,7 +38,7 @@
 				this.IsAttentionRequired = true;
 				this.RelatedLineNumbers = new[] { analyzer.MaximumPeriodLineNumber };
 
-				var longestGapEndedAt = FindCreatedAt(records, analyzer.MaximumPeriodLineNumber);
+				DateTime longestGapEndedAt = FindCreatedAt(records, analyzer.MaximumPeriodLineNumber);
 				this.Details = $"A threshold of {_threshold.ToHumanReadable()}, resulted in {analyzer.Count} unexpected gaps in time. " +
 				               $"The longest gap, {analyzer.MaximumPeriodDetected.ToHumanReadable()}, ended at {longestGapEndedAt:HH:mm:ss}.";
 			}

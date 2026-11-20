@@ -170,6 +170,145 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			File.Exists($"{extracted}.idx").Should().BeFalse();
 		}
 
+		[TestMethod]
+		public void GivenALogInAZipExtractedBefore_WhenExtractedAgain_ThenTheSidecarKeptBesideItIsNotReplaced()
+		{
+			// The kept sidecar holds the comments and pins added since the log was last opened from the zip (#1253).
+			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var destination = Path.Combine(_root, "Kept");
+			var extracted = _reader.Extract(log, Companions, destination);
+			File.WriteAllText($"{extracted}.xml", "<sidecar comments=\"kept\" />");
+			File.Delete(extracted);
+
+			_reader.Extract(log, Companions, destination).Should().Be(extracted);
+
+			File.ReadAllText(extracted).Should().Be("server log\n", "the log itself is extracted again");
+			File.ReadAllText($"{extracted}.xml").Should().Be("<sidecar comments=\"kept\" />");
+		}
+
+		[TestMethod]
+		public void GivenALogInAZip_WhenItsCopyKeyIsAskedTwice_ThenItIsTheSameShortName()
+		{
+			// The same file of the same zip finds the folder its sidecar and index were kept in (#1253).
+			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+
+			var key = _reader.GetCopyKey(log);
+
+			key.Should().MatchRegex("^[0-9a-f]{16}$", "a short folder name keeps paths well inside MAX_PATH");
+			new ContainerReader().GetCopyKey(Location.ForArchive(_zipPath.ToUpperInvariant(), "2026/SERVER.LOG")).Should().Be(key, "Windows ignores case in paths");
+		}
+
+		[TestMethod]
+		public void GivenAnotherFileOrZip_WhenItsCopyKeyIsAsked_ThenItDiffersFromTheFirst()
+		{
+			var key = _reader.GetCopyKey(Location.ForArchive(_zipPath, "2026/Server.log"));
+
+			// The same name with other content, in a zip of the same path, is another log: its CRC-32 and size differ.
+			using (ZipArchive zip = ZipFile.Open(_zipPath, ZipArchiveMode.Update))
+			{
+				zip.GetEntry("2026/Server.log")!.Delete();
+				Add(zip, "2026/Server.log", "a newer server log\n");
+			}
+
+			var copy = Path.Combine(_logs, "Copy.zip");
+			File.Copy(_zipPath, copy);
+
+			new ContainerReader().GetCopyKey(Location.ForArchive(_zipPath, "2026/Server.log")).Should().NotBe(key, "the entry's content changed");
+			new ContainerReader().GetCopyKey(Location.ForArchive(copy, "2026/Server.log")).Should().NotBe(key, "it is in another zip");
+		}
+
+		[TestMethod]
+		public void GivenTheSameFileInTwoZipsInAZip_WhenTheirCopyKeysAreAsked_ThenTheyDiffer()
+		{
+			// The file's name, CRC-32 and size are the same: only the name of the zip it is in tells them apart.
+			using (ZipArchive zip = ZipFile.Open(_zipPath, ZipArchiveMode.Update))
+			{
+				using var inner = new MemoryStream();
+				using (Stream entry = zip.GetEntry("Nested/Inner.zip")!.Open())
+				{
+					entry.CopyTo(inner);
+				}
+
+				Add(zip, "Copy/Inner.zip", inner.ToArray());
+			}
+
+			using var reader = new ContainerReader();
+
+			reader.GetCopyKey(Location.ForArchive(_zipPath, "Copy/Inner.zip", "Old.log"))
+				.Should().NotBe(reader.GetCopyKey(Location.ForArchive(_zipPath, "Nested/Inner.zip", "Old.log")));
+		}
+
+		[TestMethod]
+		public void GivenAFolderKeptFromAnEarlierOpen_WhenAnExtractionIntoItFails_ThenWhatWasKeptStays()
+		{
+			// A failed copy into a kept folder removes only what it copied: the kept sidecar holds the analyst's work (#1253).
+			var destination = Directory.CreateDirectory(Path.Combine(_root, "Kept")).FullName;
+			var keptSidecar = Path.Combine(destination, "App.log.xml");
+			File.WriteAllText(keptSidecar, "<sidecar comments=\"kept\" />");
+
+			Action extract = () => _reader.Extract(Location.ForArchive(Path.Combine(_logs, "Broken.zip"), "App.log"), Companions, destination);
+
+			extract.Should().Throw<InvalidDataException>();
+			File.ReadAllText(keptSidecar).Should().Be("<sidecar comments=\"kept\" />");
+		}
+
+		[TestMethod]
+		public void GivenACopyOfTheSameFileKept_WhenExtractedAgain_ThenTheCopyIsUsedAsItIs()
+		{
+			// The copy may be the log open in Weevil, which must not be rewritten (found in review of #1253).
+			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var destination = Path.Combine(_root, "Kept");
+			var extracted = _reader.Extract(log, Companions, destination);
+			var written = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			File.SetLastWriteTimeUtc(extracted, written);
+
+			_reader.Extract(log, Companions, destination);
+
+			File.GetLastWriteTimeUtc(extracted).Should().Be(written, "a copy of the entry's size is the same file");
+		}
+
+		[TestMethod]
+		[WorkItem(1251)]
+		public void GivenAnExtractionFromAZip_WhenCancelled_ThenNothingIsLeftInTheDestination()
+		{
+			// Closing the Open As dialog left the copy running, and the copy in the temporary folder.
+			var destination = Path.Combine(_root, "Extracted");
+			using var cancellation = new CancellationTokenSource();
+			cancellation.Cancel();
+
+			Action extract = () => _reader.Extract(Location.ForArchive(_zipPath, "2026/Server.log"), Companions, destination, cancellation.Token);
+
+			extract.Should().Throw<OperationCanceledException>();
+			Directory.Exists(destination).Should().BeFalse();
+		}
+
+		[TestMethod]
+		[WorkItem(1251)]
+		public void GivenADamagedZip_WhenALogIsExtracted_ThenNothingIsLeftInTheDestination()
+		{
+			// A failed extraction left its folder in the temporary folder.
+			var destination = Path.Combine(_root, "Extracted");
+
+			Action extract = () => _reader.Extract(Location.ForArchive(Path.Combine(_logs, "Broken.zip"), "App.log"), Companions, destination);
+
+			extract.Should().Throw<InvalidDataException>();
+			Directory.Exists(destination).Should().BeFalse();
+		}
+
+		[TestMethod]
+		[WorkItem(1251)]
+		public void GivenADisposedReader_WhenAZipInAZipIsListed_ThenAnErrorIsReturned()
+		{
+			// A listing that was still running when the dialog closed made a new copy of the inner zip, which nothing deleted.
+			Location innerZip = _reader.List(Location.ForArchive(_zipPath, "Nested")).Items.Single().Open;
+			_reader.Dispose();
+
+			ListingResult listing = _reader.List(innerZip);
+
+			listing.Error.Should().NotBeNull();
+			listing.Items.Should().BeEmpty();
+		}
+
 		private static IEnumerable<string> Names(ListingResult listing) => listing.Items.Select(item => $"{item.Name}:{item.Kind}");
 
 		private static void Add(ZipArchive zip, string name, string content) => Add(zip, name, Encoding.UTF8.GetBytes(content));

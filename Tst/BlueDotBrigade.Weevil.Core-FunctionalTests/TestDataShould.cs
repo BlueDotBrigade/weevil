@@ -18,7 +18,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenGlobalDefaultSidecar_WhenReadingTableOfContents_ThenEachByteOffsetIsTheStartOfItsLine()
 		{
 			var logFilePath = new Daten().AsFilePath(From.GlobalDefault);
-			var lineStarts = GetLineStarts(File.ReadAllBytes(logFilePath));
+			List<long> lineStarts = GetLineStarts(File.ReadAllBytes(logFilePath));
 
 			var sections = XDocument
 				.Load($"{logFilePath}.xml")

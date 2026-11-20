@@ -182,7 +182,7 @@ This is the plan's 21 bytes, with different columns: a chunk-relative offset plu
   - Update `Doc/Design`, the done note for step 3 in plan 988, and a `Doc/LessonsLearned` note on FluentAssertions value semantics.
 - **Measure:**
   - The budget test at `Tst/BlueDotBrigade.Weevil.Core-PerformanceTests/EngineTests.cs`.
-  - The memory harness (`Doc/Research/Weevil3/MemoryHarness`) on the 4 GB log: working set after opening and the peak while opening, recorded as a new results section, as was done after step 1.
+  - The memory harness (`Dep/TestHarnesses/MemoryHarness`) on the 4 GB log: working set after opening and the peak while opening, recorded as a new results section, as was done after step 1.
 
 ### 5. Open questions for the user
 

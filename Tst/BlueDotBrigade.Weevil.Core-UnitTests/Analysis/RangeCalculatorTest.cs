@@ -20,7 +20,7 @@ namespace BlueDotBrigade.Weevil.Math
 			};
 
 			// Act
-			var result = calculator.Calculate(timestamps);
+			RangeResult result = calculator.Calculate(timestamps);
 
 			// Assert
 			result.Should().NotBeNull();
@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var timestamps = new List<DateTime>();
 
 			// Act
-			var result = calculator.Calculate(timestamps);
+			RangeResult result = calculator.Calculate(timestamps);
 
 			// Assert
 			result.StartAt.Should().BeNull();
@@ -51,7 +51,7 @@ namespace BlueDotBrigade.Weevil.Math
 			var timestamps = new List<DateTime> { new DateTime(2024, 6, 15, 12, 0, 0) };
 
 			// Act
-			var result = calculator.Calculate(timestamps);
+			RangeResult result = calculator.Calculate(timestamps);
 
 			// Assert
 			result.StartAt.Should().Be(new DateTime(2024, 6, 15, 12, 0, 0));

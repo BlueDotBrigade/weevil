@@ -79,12 +79,12 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 		private void OnAnalyzeClicked(object sender, RoutedEventArgs e)
 		{
-			DialogResult = true;
+			this.DialogResult = true;
 		}
 
 		private void OnCancelClicked(object sender, RoutedEventArgs e)
 		{
-			DialogResult = false;
+			this.DialogResult = false;
 		}
 	}
 }

@@ -13,31 +13,35 @@ namespace BlueDotBrigade.Weevil.IO
 	/// <remarks>
 	/// The log is read once, in order: in RAM mode its bytes fill the chunks as they are checked, and on disk the chunks read them back later,
 	/// through a source made from the saved checksums. A block that changed means the table is not the log's, so nothing is built.
+	/// A failure to read the log throws <see cref="LogReadException"/>, so the caller can tell it from a failure to read the saved index.
 	/// </remarks>
 	internal static class SavedTableReader
 	{
-		/// <param name="indexSource">The saved index, positioned where its record table starts.</param>
+		/// <param name="indexFile">The saved index, positioned where its record table starts.</param>
 		/// <param name="log">The log, which is read from <see cref="SavedParse.StartOffset"/> to <see cref="SavedParse.EndOffset"/>.</param>
 		/// <param name="logPath">The log's path, which chunks on file read back from.</param>
 		/// <param name="parse">The parse that made the table, whose checksums the log's blocks must match.</param>
 		/// <param name="encoding">The log's encoding, without a byte order mark.</param>
 		/// <param name="storageMode">Whether the chunks hold their bytes, or read them back from the log.</param>
-		/// <param name="source">On disk, the source the chunks read back through: otherwise <see langword="null"/>.</param>
+		/// <param name="displayPath">The log as the analyst knows it, when it is a copy: see <see cref="LogFileSource.Path"/> (#1312).</param>
+		/// <param name="source">A source made from the saved checksums, in both modes: on disk, the chunks read back through it (#1255).</param>
 		/// <returns><see langword="false"/> when the table is damaged, or a block of the log does not match its checksum.</returns>
+		/// <exception cref="LogReadException">The log could not be read.</exception>
 		public static bool TryRead(
-			Stream indexSource,
+			Stream indexFile,
 			Stream log,
 			string logPath,
 			SavedParse parse,
 			Encoding encoding,
 			StorageMode storageMode,
+			string displayPath,
 			out RecordTable table,
 			out LogFileSource source)
 		{
 			table = null;
 			source = null;
 
-			if (!TryReadChunkDirectory(indexSource, parse, out List<(int Start, long FileOffset, int Length)> directory))
+			if (!TryReadChunks(indexFile, parse, out List<(int Start, long FileOffset, int Length)> directory))
 			{
 				return false;
 			}
@@ -46,12 +50,12 @@ namespace BlueDotBrigade.Weevil.IO
 
 			if (storageMode == StorageMode.Disk)
 			{
-				if (!TryCheckLog(log, parse, onBlock: null))
+				if (!TryCheckLog(log, parse, onBlock: null, out var logLength))
 				{
 					return false;
 				}
 
-				source = LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, log.Length, CopyChecksums(parse));
+				source = CreateSource(logPath, logLength, displayPath, parse);
 				chunks = new List<(int Start, ContentChunk Chunk)>(directory.Count);
 
 				foreach ((var start, var fileOffset, var length) in directory)
@@ -63,16 +67,18 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				var filler = new ChunkFiller(directory, encoding);
 
-				if (!TryCheckLog(log, parse, filler.Add) || !filler.IsComplete)
+				if (!TryCheckLog(log, parse, filler.Add, out var logLength) || !filler.IsComplete)
 				{
 					return false;
 				}
 
+				source = CreateSource(logPath, logLength, displayPath, parse);
+
 				chunks = filler.Chunks;
 			}
 
-			if (!TryReadStrings(indexSource, out Dictionary<int, string> strings) ||
-			    !IndexSection.TryRead(indexSource, IndexSectionKind.Rows, out IndexSection.Reader rows))
+			if (!TryReadStrings(indexFile, out Dictionary<int, string> strings) ||
+			    !IndexSection.TryRead(indexFile, IndexSectionKind.Rows, out IndexSection.Reader rows))
 			{
 				source = null;
 				return false;
@@ -93,82 +99,45 @@ namespace BlueDotBrigade.Weevil.IO
 			return true;
 		}
 
-		private static bool TryReadChunkDirectory(Stream indexSource, SavedParse parse, out List<(int Start, long FileOffset, int Length)> directory)
+		/// <summary>
+		/// The source of the log checked, made from the saved checksums once every block matched them: in RAM too, though nothing reads through it there (#1255).
+		/// </summary>
+		private static LogFileSource CreateSource(string logPath, long logLength, string displayPath, SavedParse parse)
+		{
+			return LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, logLength, CopyChecksums(parse), displayPath);
+		}
+
+		private static bool TryReadChunks(Stream indexFile, SavedParse parse, out List<(int Start, long FileOffset, int Length)> directory)
 		{
 			directory = null;
 
-			if (!IndexSection.TryRead(indexSource, IndexSectionKind.Chunks, out IndexSection.Reader section))
+			if (!IndexSection.TryRead(indexFile, IndexSectionKind.Chunks, out IndexSection.Reader section))
 			{
 				return false;
 			}
 
 			using (section)
 			{
-				var count = section.Binary.ReadInt32();
+				directory = RecordTable.ReadChunks(section, parse.StartOffset, parse.EndOffset);
 
-				// Each entry is 16 bytes, so a damaged count is caught before anything is allocated.
-				if (count < 0 || count * 16L != section.Remaining)
-				{
-					return false;
-				}
-
-				directory = new List<(int Start, long FileOffset, int Length)>(count);
-				var previousEnd = parse.StartOffset;
-				var previousStart = -1;
-
-				for (var index = 0; index < count; index++)
-				{
-					var start = section.Binary.ReadInt32();
-					var fileOffset = section.Binary.ReadInt64();
-					var length = section.Binary.ReadInt32();
-
-					// The chunks are in the order of the log, within the bytes parsed, and do not overlap.
-					if (start <= previousStart || length < 0 || fileOffset < previousEnd || fileOffset > parse.EndOffset - length)
-					{
-						return false;
-					}
-
-					directory.Add((start, fileOffset, length));
-					previousStart = start;
-					previousEnd = fileOffset + length;
-				}
-
-				return section.IsIntact;
+				return directory is not null && section.IsIntact;
 			}
 		}
 
-		private static bool TryReadStrings(Stream indexSource, out Dictionary<int, string> strings)
+		private static bool TryReadStrings(Stream indexFile, out Dictionary<int, string> strings)
 		{
 			strings = null;
 
-			if (!IndexSection.TryRead(indexSource, IndexSectionKind.Strings, out IndexSection.Reader section))
+			if (!IndexSection.TryRead(indexFile, IndexSectionKind.Strings, out IndexSection.Reader section))
 			{
 				return false;
 			}
 
 			using (section)
 			{
-				var count = section.Binary.ReadInt32();
+				strings = RecordTable.ReadStrings(section);
 
-				// Each string takes at least 5 bytes: its row number and its length.
-				if (count < 0 || count * 5L > section.Remaining)
-				{
-					return false;
-				}
-
-				strings = new Dictionary<int, string>(count);
-
-				for (var index = 0; index < count; index++)
-				{
-					var recordNumber = section.Binary.ReadInt32();
-
-					if (!strings.TryAdd(recordNumber, section.Binary.ReadString()))
-					{
-						return false;
-					}
-				}
-
-				return section.IsIntact;
+				return strings is not null && section.IsIntact;
 			}
 		}
 
@@ -176,7 +145,24 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Reads the bytes parsed, one block at a time, as <see cref="LogFileSourceBuilder"/> divided them, and checks each against its checksum.
 		/// </summary>
 		/// <param name="onBlock">Given each block's bytes, once checked, with where they start in the log.</param>
-		private static bool TryCheckLog(Stream log, SavedParse parse, Action<long, ReadOnlySpan<byte>> onBlock)
+		/// <param name="logLength">The log's length once checked, which the source made from the checksums keeps.</param>
+		/// <exception cref="LogReadException">The log could not be read.</exception>
+		private static bool TryCheckLog(Stream log, SavedParse parse, Action<long, ReadOnlySpan<byte>> onBlock, out long logLength)
+		{
+			try
+			{
+				var isChecked = TryCheckBlocks(log, parse, onBlock);
+				logLength = isChecked ? log.Length : 0;
+
+				return isChecked;
+			}
+			catch (IOException exception)
+			{
+				throw new LogReadException(exception);
+			}
+		}
+
+		private static bool TryCheckBlocks(Stream log, SavedParse parse, Action<long, ReadOnlySpan<byte>> onBlock)
 		{
 			if (log.Length < parse.EndOffset)
 			{

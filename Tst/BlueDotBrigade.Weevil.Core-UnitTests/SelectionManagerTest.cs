@@ -1,9 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Text;
 	using BlueDotBrigade.Weevil.Data;
@@ -16,7 +14,7 @@
 		[TestMethod]
 		public void Select_FirstRecord_Line1Selected()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
@@ -30,7 +28,7 @@
 		[TestMethod]
 		public void Select_LastRecord_Line32Selected()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
@@ -45,20 +43,20 @@
 		[TestMethod]
 		public void Select_NonExistentRecord_ThrowsRecordNotFound()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
 			Action act = () => engine.Selector.Select(lineNumber: int.MaxValue);
 			act.Should().Throw<RecordNotFoundException>();
 
-			engine.Selector.Selected.Count.Should().Be(0);
+			engine.Selector.SelectedCount.Should().Be(0);
 		}
 
 		[TestMethod]
 		public void GivenALineTheFilterHides_WhenSelectedByLineNumber_ThenRecordNotFoundIsThrown()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 			engine.Filter.Apply(Filter.FilterType.PlainText, new Filter.FilterCriteria("Id=002"));
@@ -66,39 +64,23 @@
 			Action act = () => engine.Selector.Select(lineNumber: 1);
 
 			act.Should().Throw<RecordNotFoundException>();
-			engine.Selector.Selected.Count.Should().Be(0);
+			engine.Selector.SelectedCount.Should().Be(0);
 		}
 
 		[TestMethod]
-		public void GivenEveryOtherRecordSelected_WhenTheOthersAreSelectedToo_ThenItTakesLessThanFiveSeconds()
+		public void GivenALineTheFilterHides_WhenUnselectedByLineNumber_ThenRecordNotFoundIsThrownAndTheSelectionIsKept()
 		{
-			// Changing one record at a time took about 30 seconds here.
-			RecordList records = R.WithLineNumbers(1, 300_000);
-			SelectionManager selector = CreateSelector(records);
-			selector.Select(records.Where(r => r.LineNumber % 2 == 1).ToList());
-			List<IRecord> others = records.Where(r => r.LineNumber % 2 == 0).ToList();
+			using IEngine engine = Engine
+				.UsingPath(new Daten().AsFilePath("SampleData.log"))
+				.Open();
+			engine.Filter.Apply(Filter.FilterType.PlainText, new Filter.FilterCriteria("Id=002"));
+			var shownLineNumber = engine.Filter.Results.GetLineNumber(0);
+			engine.Selector.Select(shownLineNumber);
 
-			var stopwatch = Stopwatch.StartNew();
-			selector.Select(others);
+			Action act = () => engine.Selector.Unselect(lineNumber: 1);
 
-			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(5));
-			selector.Selected.Count.Should().Be(records.Count);
-		}
-
-		[TestMethod]
-		public void GivenEveryOtherRecordSelected_WhenTheyAreUnselected_ThenItTakesLessThanFiveSeconds()
-		{
-			// Changing one record at a time took about 30 seconds here.
-			RecordList records = R.WithLineNumbers(1, 300_000);
-			SelectionManager selector = CreateSelector(records);
-			List<IRecord> scattered = records.Where(r => r.LineNumber % 2 == 1).ToList();
-			selector.Select(scattered);
-
-			var stopwatch = Stopwatch.StartNew();
-			selector.Unselect(scattered);
-
-			stopwatch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(5));
-			selector.Selected.Count.Should().Be(0);
+			act.Should().Throw<RecordNotFoundException>();
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(shownLineNumber);
 		}
 
 		[TestMethod]
@@ -110,7 +92,7 @@
 
 			selector.SelectOnly(2, 6);
 
-			selector.Selected.Keys.Should().Equal(3, 5);
+			selector.GetSelected().Select(record => record.LineNumber).Should().Equal(3, 5);
 		}
 
 		[TestMethod]
@@ -122,7 +104,7 @@
 
 			selector.SelectOnly(100, 200);
 
-			selector.Selected.Count.Should().Be(0);
+			selector.SelectedCount.Should().Be(0);
 		}
 
 		[TestMethod]
@@ -135,7 +117,25 @@
 			Action toggle = () => selector.Toggle(2);
 
 			toggle.Should().Throw<RecordNotFoundException>();
-			selector.Selected.Count.Should().Be(0);
+			selector.SelectedCount.Should().Be(0);
+		}
+
+		[TestMethod]
+		public void GivenSelectedRecords_WhenTheirLinesAreLookedUp_ThenNoRecordIsCreated()
+		{
+			// A grid asks for each row it draws, so a lookup reads only the results' line numbers (#1137); the list throws if a record is created.
+			RecordList records = R.WithLineNumbers(11, 20);
+			var state = new RecordState();
+
+			// Selecting moves the active record, which is a record: only the selector reads the list that refuses to create one.
+			var navigationManager = new NavigationManager(null, null, records, null, state);
+			var selector = new SelectionManager(new RecordScope(records), new ColumnsOnlyRecordList(records), navigationManager, Encoding.UTF8, state, () => { });
+			selector.SelectOnly(12, 13);
+
+			selector.SelectedCount.Should().Be(2);
+			selector.IsSelected(13).Should().BeTrue();
+			selector.IsSelected(14).Should().BeFalse();
+			selector.IsSelected(99).Should().BeFalse();
 		}
 
 		private static SelectionManager CreateSelector(RecordList records)

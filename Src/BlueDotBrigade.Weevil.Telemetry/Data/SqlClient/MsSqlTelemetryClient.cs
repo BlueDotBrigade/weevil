@@ -58,7 +58,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 #pragma warning disable CA1031 // Intentional: telemetry failures must never propagate to the user workflow.
 		public async Task<TelemetryUploadStatus> UploadAsync(TelemetrySession session, CancellationToken ct)
 		{
-			if (IsUploadDisabled)
+			if (this.IsUploadDisabled)
 			{
 				return TelemetryUploadStatus.Disabled;
 			}
@@ -87,7 +87,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 			}
 			catch (Exception e)
 			{
-				var uploadStatus = ClassifyUploadException(e);
+				TelemetryUploadStatus uploadStatus = ClassifyUploadException(e);
 				if (uploadStatus == TelemetryUploadStatus.InvalidCredentials)
 				{
 					DisableUpload();
@@ -157,7 +157,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		private static TelemetryUploadStatus ClassifyUploadException(Exception exception)
 		{
-			if (TryGetSqlException(exception, out var sqlException))
+			if (TryGetSqlException(exception, out SqlException sqlException))
 			{
 				if (sqlException.Number == 2601 || sqlException.Number == 2627)
 				{
@@ -177,7 +177,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 
 		private static bool TryGetSqlException(Exception exception, out SqlException sqlException)
 		{
-			for (var current = exception; current != null; current = current.InnerException)
+			for (Exception current = exception; current != null; current = current.InnerException)
 			{
 				if (current is SqlException foundException)
 				{

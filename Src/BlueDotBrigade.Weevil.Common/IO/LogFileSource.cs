@@ -18,10 +18,14 @@ namespace BlueDotBrigade.Weevil.IO
 	/// Thread-safe once complete. Each read opens its own handle, which lets other applications read, write and delete the log, and closes it before returning.
 	/// It never memory-maps the log, never retries and keeps no cache.
 	///
-	/// A checksum of each <see cref="BlockSize"/> block of the range parsed tells whether the log changed since:
-	/// - A log that is shorter, or whose block read has another checksum, was truncated, replaced or corrupted: the read throws <see cref="LogFileChangedException"/>.
+	/// Every read that fails throws <see cref="LogFileChangedException"/>, so a caller catches one type (#1295):
+	/// - A log that is shorter, or whose block read has another checksum, was truncated, replaced or corrupted.
+	///   A checksum of each <see cref="BlockSize"/> block of the range parsed tells whether the log changed since.
 	///   The first such read logs a warning and sets <see cref="HasChanged"/>; the log must then be reloaded. Later reads still check, and throw.
-	/// - A log that is only longer than when it was opened has grown, which is normal: a warning is logged once, and reads go on.
+	/// - A log that can't be opened, for example because it was renamed or deleted, is <see cref="LogFileChangedException.IsUnreadable"/>, with what the read threw inside.
+	///   The first such read logs a warning. Later reads try again, so a log renamed back is read again.
+	///
+	/// A log that is only longer than when it was opened has grown, which is normal: a warning is logged once, and reads go on.
 	/// </remarks>
 	public sealed class LogFileSource
 	{
@@ -39,17 +43,26 @@ namespace BlueDotBrigade.Weevil.IO
 
 		private int _hasGrown;
 		private int _hasChanged;
+		private int _hasBeenUnreadable;
 
 		private long _bytesRead;
 
-		internal LogFileSource(string path, long startOffset, long lengthWhenOpened)
+		// The file read: a copy, for a log extracted from a zip, whose path the analyst never chose (#1312).
+		private readonly string _filePath;
+
+		internal LogFileSource(string filePath, string path, long startOffset, long lengthWhenOpened)
 		{
-			this.Path = path;
+			_filePath = filePath;
+			this.Path = string.IsNullOrEmpty(path) ? filePath : path;
 			this.StartOffset = startOffset;
 			_endOffset = startOffset;
 			_lengthWhenOpened = lengthWhenOpened;
 		}
 
+		/// <summary>
+		/// The log, as the analyst knows it, which messages and <see cref="LogFileChangedException"/> name: for a log read from a copy,
+		/// such as one extracted from a zip, the zip's path and the log's name, as <c>C:\Logs\Archive.zip\App.log</c> (#1312). Otherwise the file read.
+		/// </summary>
 		public string Path { get; }
 
 		/// <summary>
@@ -91,7 +104,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <param name="endOffset">Where the range parsed ends in the file.</param>
 		/// <param name="lengthWhenOpened">The log's length now, so a log parsed only in part is not taken for one that grew.</param>
 		/// <param name="checksums">What <see cref="GetChecksums"/> returned for the same range: one checksum for each block it covers.</param>
-		public static LogFileSource Create(string path, long startOffset, long endOffset, long lengthWhenOpened, ReadOnlySpan<ulong> checksums)
+		/// <param name="displayPath">The log as the analyst knows it, when <paramref name="path"/> is a copy: see <see cref="Path"/>.</param>
+		public static LogFileSource Create(string path, long startOffset, long endOffset, long lengthWhenOpened, ReadOnlySpan<ulong> checksums, string displayPath = null)
 		{
 			ArgumentException.ThrowIfNullOrEmpty(path);
 			ArgumentOutOfRangeException.ThrowIfNegative(startOffset);
@@ -106,7 +120,7 @@ namespace BlueDotBrigade.Weevil.IO
 			}
 
 			// The full path, as the builder keeps, so reads still find the log if the working directory changes.
-			var source = new LogFileSource(System.IO.Path.GetFullPath(path), startOffset, lengthWhenOpened);
+			var source = new LogFileSource(System.IO.Path.GetFullPath(path), displayPath, startOffset, lengthWhenOpened);
 			source.Extend(endOffset);
 			source.Complete(checksums.ToArray());
 
@@ -129,9 +143,11 @@ namespace BlueDotBrigade.Weevil.IO
 		/// When the read throws, what <paramref name="destination"/> holds is undefined.
 		/// </remarks>
 		/// <exception cref="InvalidOperationException">The log is still being parsed.</exception>
-		/// <exception cref="LogFileChangedException">The log is shorter than the range parsed, or a block read has changed.</exception>
-		/// <exception cref="IOException">The log or its folder is gone, or another application holds the log without sharing reading. A read never waits for it.</exception>
-		/// <exception cref="UnauthorizedAccessException">The log can no longer be opened for reading.</exception>
+		/// <exception cref="LogFileChangedException">
+		/// The log is shorter than the range parsed, or a block read has changed.
+		/// Or, with <see cref="LogFileChangedException.IsUnreadable"/>, the log or its folder is gone, the log can no longer be opened for reading,
+		/// or another application holds it without sharing reading. A read never waits for it.
+		/// </exception>
 		public void Read(long fileOffset, Span<byte> destination)
 		{
 			var checksums = Volatile.Read(ref _checksums) ?? throw new InvalidOperationException("The log is still being parsed, so its bytes cannot be read back yet.");
@@ -155,7 +171,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				using (SafeFileHandle handle = System.IO.File.OpenHandle(this.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+				using (SafeFileHandle handle = System.IO.File.OpenHandle(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
 				{
 					length = RandomAccess.GetLength(handle);
 
@@ -191,10 +207,20 @@ namespace BlueDotBrigade.Weevil.IO
 				{
 					Log.Default.Write(
 						LogSeverityType.Warning,
-						$"The log has changed since it was opened, so it must be reloaded. Path={this.Path}, ExpectedLength={exception.ExpectedLength}, ActualLength={exception.ActualLength}, ChangedOffset={exception.ChangedOffset}");
+						$"The log has changed since it was opened, so it must be reloaded. {this.DescribeFile()}, ExpectedLength={exception.ExpectedLength}, ActualLength={exception.ActualLength}, ChangedOffset={exception.ChangedOffset}");
 				}
 
 				throw;
+			}
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			{
+				// Once, as for a change, so scrolling a log that is gone does not log each row.
+				if (Interlocked.Exchange(ref _hasBeenUnreadable, 1) == 0)
+				{
+					Log.Default.Write(LogSeverityType.Warning, exception, $"The log can no longer be read. {this.DescribeFile()}");
+				}
+
+				throw LogFileChangedException.FromReadFailure(this.Path, exception);
 			}
 			finally
 			{
@@ -206,8 +232,18 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				Log.Default.Write(
 					LogSeverityType.Warning,
-					$"The log has grown since it was opened. Path={this.Path}, ExpectedLength={System.Math.Max(_lengthWhenOpened, this.EndOffset)}, ActualLength={length}");
+					$"The log has grown since it was opened. {this.DescribeFile()}, ExpectedLength={System.Math.Max(_lengthWhenOpened, this.EndOffset)}, ActualLength={length}");
 			}
+		}
+
+		/// <summary>
+		/// The log for the application's log: its path, and the file read when that is a copy.
+		/// </summary>
+		private string DescribeFile()
+		{
+			return string.Equals(this.Path, _filePath, StringComparison.Ordinal)
+				? $"Path={this.Path}"
+				: $"Path={this.Path}, FilePath={_filePath}";
 		}
 
 		/// <summary>

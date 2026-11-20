@@ -39,7 +39,7 @@ namespace BlueDotBrigade.Weevil.IO
 				return StorageUnit.Zero;
 			}
 
-			var lineCount = LineIndexFile.TryReadLineCount(logFilePath, out var indexedLineCount, out var indexedLength) &&
+			var lineCount = SavedIndex.TryReadLineCount(logFilePath, out var indexedLineCount, out var indexedLength) &&
 			                indexedLength > 0 &&
 			                indexedLength <= length
 				? Scale(indexedLineCount, indexedLength, length)
@@ -60,7 +60,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var sample = new byte[(int)Math.Min(length, SampleLength)];
 			log.ReadExactly(sample);
 
-			var span = sample.AsSpan();
+			Span<byte> span = sample.AsSpan();
 			var lineBreaks = span.Count((byte)'\n');
 
 			if (lineBreaks == 0)

@@ -83,7 +83,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 			Version version,
 			string sourceFilePath,
 			long installedRamMb = 0,
-			string installedCpu = "")
+			string installedCpu = "",
+			long logFileSizeBytes = -1)
 		{
 			try
 			{
@@ -96,10 +97,10 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 				lock (_gate)
 				{
-					var now = _utcNow();
+					DateTime now = _utcNow();
 					endedSession = EndCurrentSessionInternal(now);
 
-					CurrentSession = new TelemetrySession
+					this.CurrentSession = new TelemetrySession
 					{
 						SessionId = Guid.NewGuid(),
 						Application = string.IsNullOrWhiteSpace(application) ? "Weevil" : application,
@@ -108,7 +109,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 						IsDebugging = _startupContext.IsDebugging,
 						SessionStartUtc = now,
 						SessionEndUtc = now,
-						LogFileSizeBytes = TryGetFileSize(sourceFilePath),
+						// Given when the path is not a file to measure, such as a log opened from a zip (#1312).
+						LogFileSizeBytes = logFileSizeBytes >= 0 ? logFileSizeBytes : TryGetFileSize(sourceFilePath),
                       InstalledRamMb = installedRamMb,
 						InstalledCpu = string.IsNullOrWhiteSpace(installedCpu) ? "" : installedCpu,
                       SchemaVersion = "1.0",
@@ -187,15 +189,15 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 				lock (_gate)
 				{
-					if (CurrentSession is null)
+					if (this.CurrentSession is null)
 					{
 						return;
 					}
 
-					var now = _utcNow();
+					DateTime now = _utcNow();
 					_activeUsageAccumulator.Renew(now);
-					CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
-					CurrentSession.Increment(metricKey);
+					this.CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
+					this.CurrentSession.Increment(metricKey);
 				}
 			}
 			catch (Exception exception)
@@ -301,32 +303,32 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		// Heartbeat only: keeps the active-usage window alive. Metric counts are recorded via Increment(...).
 		private void RecordActivityInternal(DateTime now)
 		{
-			if (CurrentSession is null)
+			if (this.CurrentSession is null)
 			{
 				return;
 			}
 
 			_activeUsageAccumulator.Renew(now);
-			CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
+			this.CurrentSession.SessionActiveMinutes = _activeUsageAccumulator.ActiveMinutes;
 		}
 
 		private TelemetrySession EndCurrentSessionInternal(DateTime endedAtUtc)
 		{
-			if (CurrentSession is null)
+			if (this.CurrentSession is null)
 			{
 				return null;
 			}
 
 			_activeUsageAccumulator.Renew(endedAtUtc);
 
-			CurrentSession.SessionEndUtc = endedAtUtc;
-			CurrentSession.SessionActiveMinutes = System.Math.Round(_activeUsageAccumulator.ActiveMinutes, 3);
+			this.CurrentSession.SessionEndUtc = endedAtUtc;
+			this.CurrentSession.SessionActiveMinutes = System.Math.Round(_activeUsageAccumulator.ActiveMinutes, 3);
 
-			LastEndedSession = CurrentSession;
-			CurrentSession = null;
+			this.LastEndedSession = this.CurrentSession;
+			this.CurrentSession = null;
 			_activeUsageAccumulator.Clear();
 
-			return LastEndedSession;
+			return this.LastEndedSession;
 		}
 
 		private ITelemetryClient GetConfiguredClient()
@@ -430,8 +432,8 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		{
 			public StartupContext(string source, bool isDebugging)
 			{
-				Source = source;
-				IsDebugging = isDebugging;
+				this.Source = source;
+				this.IsDebugging = isDebugging;
 			}
 
 			public static StartupContext Default => new StartupContext("unknown", false);

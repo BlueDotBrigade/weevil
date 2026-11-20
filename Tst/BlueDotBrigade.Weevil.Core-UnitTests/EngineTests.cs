@@ -16,6 +16,7 @@ namespace BlueDotBrigade.Weevil
 	using NSubstitute;
 	using IUserDialog = BlueDotBrigade.Weevil.IO.IUserDialog;
 	using LogFileChangedException = BlueDotBrigade.Weevil.IO.LogFileChangedException;
+	using LogInUseException = BlueDotBrigade.Weevil.IO.LogInUseException;
 	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
@@ -41,7 +42,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSubscribedToFilterResults_WhenFilteringAfterClear_ThenEngineRaisesTheEvent()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			var results = new List<int>();
 			engine.FilterResultsChanged += (sender, e) => results.Add(e.Records.Count);
 
@@ -57,7 +58,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenSubscribedToTheFiltersOwnEvent_WhenFilteringAfterClear_ThenTheFilterStillRaisesIt()
 		{
 			// Clear keeps the engine's filter (#1018), so a subscription to the filter itself survives.
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			IFilter filter = engine.Filter;
 			var results = new List<int>();
 			filter.ResultsChanged += (sender, e) => results.Add(e.Records.Count);
@@ -74,7 +75,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenSubscribedToTheFiltersOwnEvent_WhenClearKeepsASelectedRecord_ThenTheSelectionAlreadyMatchesTheResults()
 		{
 			// Listeners read the selection that matches the new results (#1015), when Clear resets the filter too.
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Selector.Select(lineNumber: 101);
 			var selectedWhenNotified = new List<int>();
 			engine.Filter.ResultsChanged += (sender, e) =>
@@ -89,7 +90,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenAFilteredSelectionAcrossAGapBetweenRegions_WhenClearedBeyondRegions_ThenOnlyTheSelectedRecordsKeptStaySelected()
 		{
 			// Lines 7 and 9 are cleared, and lines 4 and 6, which the filter hid, were never selected.
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Regions.CreateFromSelection("First", new[] { 3, 6 });
 			engine.Regions.CreateFromSelection("Second", new[] { 11, 12 });
 			engine.Filter.Apply(FilterType.RegularExpression, new FilterCriteria(@"Id=0(03|05|07|09|11)$"));
@@ -103,7 +104,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenRecordsSelectedTogetherAndApart_WhenTheRecordsBeforeThemAreCleared_ThenTheyStaySelected()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Selector.SelectOnly(5, 6).Select(lineNumber: 8);
 
 			engine.Clear(ClearOperation.BeforeSelected);
@@ -115,7 +116,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenAnActiveRecordButNoSelectedRecord_WhenCleared_ThenNavigationStartsFromTheTop()
 		{
 			// A cleared engine starts as a new one did, with no active record.
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 2), true);
 			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 20), true);
 			engine.Selector.Select(lineNumber: 10);
@@ -129,7 +130,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSubscribedToFilterResults_WhenReloading_ThenEngineRaisesTheEventForTheReappliedFilter()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 			var results = new List<int>();
 			engine.FilterResultsChanged += (sender, e) => results.Add(e.Records.Count);
@@ -143,7 +144,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSubscribedToFilterHistory_WhenFilteringAfterClear_ThenSenderIsTheCurrentIncludeHistory()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			var senders = new List<object>();
 			engine.FilterHistoryChanged += (sender, e) => senders.Add(sender);
 
@@ -158,7 +159,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSubscribedToFilterHistory_WhenFilteringAfterReload_ThenEngineRaisesTheEvent()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			var values = new List<string>();
 			engine.FilterHistoryChanged += (sender, e) => values.Add(e.Value);
 
@@ -171,7 +172,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSubscribedToAnnotations_WhenARecordIsPinnedAfterClearAndReload_ThenEngineRaisesTheEvent()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			IAnnotations annotations = engine.Annotations;
 			var lines = new List<int>();
 			annotations.Changed += (sender, e) => lines.Add(e.LineNumber);
@@ -191,7 +192,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenUnsavedBookmarksRegionsAndRemarks_WhenReloaded_ThenTheyAreKept()
 		{
 			// Reload keeps the session's state in memory, as it keeps comments and pins, instead of reading it back from the sidecar.
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Bookmarks.Create(1, "Start", 10);
 			engine.Regions.CreateFromSelection("Startup", new[] { 20, 30 });
 			engine.SourceFileRemarks = "Reviewed";
@@ -211,7 +212,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			// Reload kept the previous records while it read the log again, so memory held two copies of the log.
 			// Records are created when they are read (#1140), so the test watches the record table they are created from.
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			WeakReference previousTable = TrackRecordTable(engine);
 
 			engine.Reload();
@@ -224,7 +225,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			// Clear keeps a record table of only the records it keeps, so the records it clears can be freed (#1140),
 			// and it collects them itself, once nothing holds them, rather than leaving them to a later collection (#1022).
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			WeakReference previousTable = TrackRecordTable(engine);
 			engine.Selector.SelectOnly(10, 20);
 
@@ -240,7 +241,7 @@ namespace BlueDotBrigade.Weevil
 			// The GUI keeps its insights across Reload; an insight that kept a record would keep the previous log's content (#1139).
 			// The log's third timestamp is earlier than its second, so the temporal anomaly insight refers to line 2.
 			// A kept record keeps the chunk of the log's content it is read from, so the test watches that chunk (#1140).
-			IEngine engine = OpenCopy("OutOfOrderTimestamps.log");
+			using IEngine engine = OpenCopy("OutOfOrderTimestamps.log");
 			(IInsight[] insights, WeakReference referredChunk) = GetInsightsAndTrackTheirChunk(engine);
 
 			engine.Reload();
@@ -252,7 +253,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenAReloadThatCouldNotReadTheLog_WhenReloadedAgain_ThenTheLogIsBackWithItsCommentsAndFilter()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			var logPath = engine.SourceFilePath;
 			var recordCount = engine.Count;
 			engine.RecordState.SetComment(engine.Records[0], "Checked");
@@ -274,7 +275,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenALogOpenOnDisk_WhenAReloadThatCouldNotReadTheLogIsRetried_ThenItStillReadsItsRecordsFromTheLog()
 		{
 			// Reload carries the mode, and so does the engine without records that a failed Reload leaves for the retry (#1025).
-			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 			var logPath = engine.SourceFilePath;
 
 			File.Move(logPath, $"{logPath}~");
@@ -291,7 +292,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			// The filter's parallel workers each find the change, but the caller gets the read's exception, not an AggregateException,
 			// and the change, which is expected in disk mode, is not logged as an unexpected error (#1025).
-			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 			var bytes = File.ReadAllBytes(engine.SourceFilePath);
 			File.WriteAllBytes(engine.SourceFilePath, bytes.AsSpan(0, bytes.Length / 2).ToArray());
 			using var log = CapturingLogWriter.Register();
@@ -305,7 +306,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenALogThatChangedWhileOpenOnDisk_WhenReloaded_ThenItKeepsItsCommentsPinsBookmarksFilterAndDiskMode()
 		{
-			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 			var logPath = engine.SourceFilePath;
 			engine.RecordState.SetComment(engine.Records[0], "Checked");
 			engine.RecordState.SetPinned(engine.Records[1], true);
@@ -334,7 +335,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			// The log changes after Reload reads it, before the filter is applied again: Reload ends like one that could not read the log,
 			// and keeps the filter for the next one (#1025).
-			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 			var logPath = engine.SourceFilePath;
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 			var lines = File.ReadAllLines(logPath).Take(150).ToArray();
@@ -364,7 +365,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenALogOpenOnDiskThatGrew_WhenFilteredAgain_ThenTheResultsAreUnchanged()
 		{
 			// A log that grows is normal: it is read as it was until it is reloaded (#1025).
-			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 			var results = engine.Filter.Results.Select(record => record.LineNumber).ToArray();
 
@@ -377,7 +378,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenALogOpenOnDisk_WhenRecordsAreCleared_ThenTheRecordsKeptStillReadTheLog()
 		{
-			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 			engine.Selector.Select(lineNumber: 101);
 
 			engine.Clear(ClearOperation.BeforeSelected);
@@ -389,11 +390,120 @@ namespace BlueDotBrigade.Weevil
 		public void GivenNoStorageMode_WhenALogIsOpened_ThenItOpensInRamUnlessTheTestsRunOnDisk()
 		{
 			// Tst/Disk.runsettings marks the disk run, so this also fails if that run silently opens its logs in RAM (#1025).
-			var isDiskRun = TestContext.Properties.TryGetValue("StorageMode", out var runMode) && string.Equals(runMode as string, nameof(StorageMode.Disk), StringComparison.Ordinal);
+			var isDiskRun = this.TestContext.Properties.TryGetValue("StorageMode", out var runMode) && string.Equals(runMode as string, nameof(StorageMode.Disk), StringComparison.Ordinal);
 
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 
 			ReadsContentFromTheLog(engine).Should().Be(isDiskRun, "a log given no storage mode opens in RAM, except in the disk run");
+		}
+
+		[TestMethod]
+		[WorkItem(1254)]
+		public void GivenAnOpenLog_WhenOpenedAgainReplacingItsEngine_ThenTheNewEngineTakesOverItsLock()
+		{
+			// The GUI opens a log again while it still shows it: its own lock must not refuse it.
+			using IEngine first = OpenCopy();
+
+			using IEngine second = Engine.UsingPath(first.SourceFilePath).Replacing(first).Open();
+			first.Dispose();
+
+			FluentActions.Invoking(() => Engine.UsingPath(first.SourceFilePath).Open())
+				.Should().Throw<LogInUseException>("the engine that replaced the first keeps the log locked");
+			second.Dispose();
+			using IEngine third = Engine.UsingPath(first.SourceFilePath).Open();
+			third.Count.Should().Be(first.Count, "the log opens once neither holds it");
+		}
+
+		[TestMethod]
+		[WorkItem(1254)]
+		public void GivenAnOpenLog_WhenAnOpenReplacingItsEngineFails_ThenTheEngineReplacedKeepsItsLock()
+		{
+			using IEngine first = OpenCopy();
+
+			FluentActions.Invoking(() => Engine.UsingPath(first.SourceFilePath).Replacing(first).UsingRegion("Missing").Open())
+				.Should().Throw<KeyNotFoundException>();
+
+			FluentActions.Invoking(() => Engine.UsingPath(first.SourceFilePath).Open())
+				.Should().Throw<LogInUseException>("the log stays open in the first engine");
+		}
+
+		[TestMethod]
+		[WorkItem(1254)]
+		public void GivenAnOpenLog_WhenCheckedForUse_ThenItThrowsUntilTheEngineIsDisposed()
+		{
+			// Weevil checks before it extracts a log from a zip, so it doesn't extract a copy another Weevil has open.
+			using IEngine engine = OpenCopy();
+			var logPath = engine.SourceFilePath;
+
+			FluentActions.Invoking(() => Engine.ThrowIfInUse(logPath))
+				.Should().Throw<LogInUseException>().Which.UserName.Should().Be(Environment.UserName);
+			engine.Dispose();
+
+			FluentActions.Invoking(() => Engine.ThrowIfInUse(logPath)).Should().NotThrow();
+			File.Exists($"{logPath}.lock").Should().BeFalse("a check creates no lock");
+		}
+
+		[TestMethod]
+		public void GivenALogReadFromACopy_WhenOpenedWithThePathTheAnalystKnows_ThenTheEngineNamesItSoAndKeepsItAcrossReload()
+		{
+			// A log opened from a zip was named by its extracted copy, a path the analyst never chose (#1312).
+			const string Readable = @"C:\Logs\Archive.zip\App.log";
+			var copy = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, "Copy")).FullName, "App.log");
+			File.Copy(new Daten().AsFilePath("SampleData.log"), copy);
+
+			using IEngine engine = Engine.UsingPath(copy).UsingDisplayPath(Readable).Open();
+			var count = engine.Count;
+			engine.Reload();
+
+			engine.SourceFilePath.Should().Be(Readable, "Reload keeps it");
+			engine.SourceDirectory.Should().Be(Path.GetDirectoryName(copy), "exports, reports and splits are saved beside the file read");
+			engine.Count.Should().Be(count, "the copy is read");
+		}
+
+		[TestMethod]
+		public void GivenALogReadFromACopyOnDisk_WhenTheCopyIsGone_ThenTheExceptionNamesThePathTheAnalystKnows()
+		{
+			// Also when it was reopened from its saved index, whose source is made from the saved checksums (#1312).
+			const string Readable = @"C:\Logs\Archive.zip\App.log";
+			var folder = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, nameof(EngineTests), Guid.NewGuid().ToString("N"))).FullName;
+
+			try
+			{
+				var copy = Path.Combine(folder, "App.log");
+				File.Copy(new Daten().AsFilePath("SampleData.log"), copy);
+				using IEngine parsed = Engine.UsingPath(copy).UsingDisplayPath(Readable).UsingStorage(StorageMode.Disk).Open();
+				parsed.Dispose();
+				using IEngine reopened = Engine.UsingPath(copy).UsingDisplayPath(Readable).UsingStorage(StorageMode.Disk).Open();
+				File.Delete(copy);
+
+				foreach (IEngine engine in new[] { parsed, reopened })
+				{
+					FluentActions.Invoking(() => engine.Records[0].Content)
+						.Should().Throw<LogFileChangedException>().Which.Path.Should().Be(Readable);
+				}
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1295)]
+		public void GivenALogOnDiskThatWasDeleted_WhenFilteredOrARecordIsRead_ThenEachThrowsTheExceptionOfAChangedLog()
+		{
+			// A deleted log threw FileNotFoundException, a changed one LogFileChangedException, so a script or plugin had to catch both.
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			File.Delete(engine.SourceFilePath);
+			using CapturingLogWriter log = CapturingLogWriter.Register();
+
+			FluentActions.Invoking(() => engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1")))
+				.Should().Throw<LogFileChangedException>().Which.IsUnreadable.Should().BeTrue();
+			FluentActions.Invoking(() => engine.Records[0].Content)
+				.Should().Throw<LogFileChangedException>().Which.InnerException.Should().BeOfType<FileNotFoundException>();
+
+			log.Contains(LogSeverityType.Warning).Should().BeTrue("the first read that fails logs it");
+			log.Contains(LogSeverityType.Error).Should().BeFalse("a log that is gone is expected on disk, not an unexpected error");
 		}
 
 		[TestMethod]
@@ -405,7 +515,7 @@ namespace BlueDotBrigade.Weevil
 			{
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
-				IEngine engine = Engine.UsingPath(logPath).Open();
+				using IEngine engine = Engine.UsingPath(logPath).Open();
 				engine.RecordState.SetComment(engine.Records[0], "Checked");
 				engine.Save();
 
@@ -414,7 +524,8 @@ namespace BlueDotBrigade.Weevil
 				File.Move($"{logPath}~", logPath);
 				engine.Save();
 
-				IEngine reopened = Engine.UsingPath(logPath).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logPath).Open();
 
 				reopened.RecordState.GetComment(reopened.Records[0]).Should().Be("Checked");
 			}
@@ -429,7 +540,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenFiltersApplied_WhenReloaded_ThenTheHistoryIsKeptWithoutSaving()
 		{
 			// Reload keeps the history in memory, as it keeps the rest of the session, instead of reading it back from the sidecar.
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2"));
 			IReadOnlyList<string> history = engine.Filter.IncludeHistory;
@@ -451,7 +562,7 @@ namespace BlueDotBrigade.Weevil
 			{
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
-				IEngine engine = Engine.UsingPath(logPath).Open();
+				using IEngine engine = Engine.UsingPath(logPath).Open();
 				engine.Bookmarks.Create(1, "Start", 10);
 				engine.Regions.CreateFromSelection("Startup", new[] { 20, 30 });
 				engine.SourceFileRemarks = "Reviewed";
@@ -459,7 +570,8 @@ namespace BlueDotBrigade.Weevil
 				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=2", "Id=98"));
 				engine.Save();
 
-				IEngine reopened = Engine.UsingPath(logPath).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logPath).Open();
 
 				reopened.Bookmarks.TryGetBookmarkName(10, out var bookmarkName).Should().BeTrue();
 				bookmarkName.Should().Be("Start");
@@ -488,7 +600,7 @@ namespace BlueDotBrigade.Weevil
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
 
-				_ = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+				Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Dispose();
 
 				IO.SavedParse parse = ReadSavedParse(logPath);
 				parse.Should().NotBeNull();
@@ -517,7 +629,7 @@ namespace BlueDotBrigade.Weevil
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
 
-				_ = part switch
+				using IEngine opened = part switch
 				{
 					"StartLine" => Engine.UsingPath(logPath, 100).Open(),
 					"Range" => Engine.UsingPath(logPath).UsingRange(new Range(1, 100)).Open(),
@@ -557,12 +669,17 @@ namespace BlueDotBrigade.Weevil
 					}
 				}
 
-				var parsed = Describe(Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Records);
+				string[] parsed;
+				using (IEngine opened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open())
+				{
+					parsed = Describe(opened.Records);
+				}
+
 				using var log = CapturingLogWriter.Register();
 
-				IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+				using IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
 
-				log.SeverityOfLast(IO.LineIndexFile.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information);
+				log.SeverityOfLast(IO.SavedIndex.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information);
 				Describe(reopened.Records).Should().Equal(parsed);
 			}
 			finally
@@ -584,18 +701,23 @@ namespace BlueDotBrigade.Weevil
 			{
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
-				var countBefore = Engine.UsingPath(logPath).Open().Count;
+				int countBefore;
+				using (IEngine opened = Engine.UsingPath(logPath).Open())
+				{
+					countBefore = opened.Count;
+				}
+
 				// The sample log has no line break at its end, so the line added starts with one.
 				File.AppendAllText(logPath, "\nInfo 1900-01-01 13:00:00.0000 248 Added later. Id=999");
 
 				// A folder where the temporary index file would be written makes saving fail.
-				Directory.CreateDirectory($"{logPath}.{IO.LineIndexFile.FileExtension}.tmp");
+				Directory.CreateDirectory($"{logPath}.{IO.SavedIndex.FileExtension}.tmp");
 				using var log = CapturingLogWriter.Register();
 
-				IEngine reopened = Engine.UsingPath(logPath).Open();
+				using IEngine reopened = Engine.UsingPath(logPath).Open();
 
 				reopened.Count.Should().Be(countBefore + 1, "the line added since was parsed");
-				FluentActions.Invoking(() => log.Last(IO.LineIndexFile.RecordsReadFromIndexMessage)).Should().Throw<InvalidOperationException>("the saved table was not used");
+				FluentActions.Invoking(() => log.Last(IO.SavedIndex.RecordsReadFromIndexMessage)).Should().Throw<InvalidOperationException>("the saved table was not used");
 			}
 			finally
 			{
@@ -617,17 +739,25 @@ namespace BlueDotBrigade.Weevil
 			{
 				var logPath = Path.Combine(folder, "Large.log");
 				WriteLines(logPath, 0, 350_000);
-				_ = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+				Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Dispose();
 				WriteLines(logPath, 350_000, 570_000);
 
 				var copyPath = Path.Combine(copyFolder, "Large.log");
 				File.Copy(logPath, copyPath);
-				var parsed = Describe(Engine.UsingPath(copyPath).UsingStorage(storageMode).Open().Records);
+				string[] parsed;
+				using (IEngine opened = Engine.UsingPath(copyPath).UsingStorage(storageMode).Open())
+				{
+					parsed = Describe(opened.Records);
+				}
 
 				string[] grown;
 				using (var log = CapturingLogWriter.Register())
 				{
-					grown = Describe(Engine.UsingPath(logPath).UsingStorage(storageMode).Open().Records);
+					using (IEngine opened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open())
+					{
+						grown = Describe(opened.Records);
+					}
+
 					IDictionary<string, object> newPart = log.Last(IO.GrownLogParser.NewPartParsedMessage);
 					((int)newPart["RecordsKept"]).Should().BeGreaterThan(0, "the rows of the chunks before the last were kept");
 					((long)newPart["BytesParsed"]).Should().BeLessThan(new FileInfo(logPath).Length / 2, "only the last chunk and the new part were parsed");
@@ -635,8 +765,8 @@ namespace BlueDotBrigade.Weevil
 
 				using (var log = CapturingLogWriter.Register())
 				{
-					IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
-					log.SeverityOfLast(IO.LineIndexFile.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information, "the longer table was saved, with checksums that match the log");
+					using IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+					log.SeverityOfLast(IO.SavedIndex.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information, "the longer table was saved, with checksums that match the log");
 					Describe(reopened.Records).Should().Equal(parsed);
 				}
 
@@ -669,10 +799,11 @@ namespace BlueDotBrigade.Weevil
 		private static IO.SavedParse ReadSavedParse(string logPath)
 		{
 			using var log = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-			using var index = new FileStream($"{logPath}.{IO.LineIndexFile.FileExtension}", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-			IO.LineIndex.TryRead(index, log, out IO.LineIndex lineIndex).Should().BeTrue();
+			using var index = new FileStream($"{logPath}.{IO.SavedIndex.FileExtension}", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			IO.IndexFile.TryRead(index, log.Length, out IO.LineIndex lineIndex, out IO.IndexFile file).Should().BeTrue();
+			lineIndex.Matches(log).Should().BeTrue();
 
-			return lineIndex.Parse;
+			return file.Parse;
 		}
 
 		[TestMethod]
@@ -687,7 +818,7 @@ namespace BlueDotBrigade.Weevil
 			{
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
-				IEngine engine = Engine.UsingPath(logPath).Open();
+				using IEngine engine = Engine.UsingPath(logPath).Open();
 				engine.Regions.CreateFromSelection("First", new[] { 20, 30 });
 				engine.Regions.CreateFromSelection("Second", new[] { 40, 50 });
 				engine.Save();
@@ -704,7 +835,8 @@ namespace BlueDotBrigade.Weevil
 				sidecar.Save(sidecarPath);
 
 				using var log = CapturingLogWriter.Register();
-				IEngine reopened = Engine.UsingPath(logPath).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logPath).Open();
 				reopened.Clear(ClearOperation.BeyondRegions);
 
 				log.SeverityOfLast(RegionManager.RegionOverlapsMessage).Should().Be(LogSeverityType.Warning);
@@ -725,7 +857,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenClearedRecords_WhenReloaded_ThenTheyAreBackWithTheirContent(StorageMode storageMode)
 		{
 			// Reload reads the whole log again, so there is no separate command to restore cleared records (#1026).
-			IEngine engine = OpenCopy(storageMode: storageMode);
+			using IEngine engine = OpenCopy(storageMode: storageMode);
 			var recordCount = engine.Count;
 			var firstContent = engine.Records[0].Content;
 			engine.Selector.Select(lineNumber: 101);
@@ -745,7 +877,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenALogOpenedInAStorageMode_WhenClearedAndReloaded_ThenTheEngineStillReportsThatMode(StorageMode storageMode)
 		{
 			// The GUI's status bar shows the mode the engine reports (#1028).
-			IEngine engine = OpenCopy(storageMode: storageMode);
+			using IEngine engine = OpenCopy(storageMode: storageMode);
 			engine.StorageMode.Should().Be(storageMode);
 
 			engine.Selector.Select(lineNumber: 101);
@@ -758,14 +890,14 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenUnselectedRecordsWereCleared_WhenReloaded_ThenTheRestoredRecordsAreNotSelected()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Selector.SelectOnly(1, 3).SelectRange(7, 9);
 			engine.Clear(ClearOperation.Unselected);
 			engine.Selector.SelectAll();
 
 			engine.Reload();
 
-			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 7, 8, 9);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(1, 2, 3, 7, 8, 9);
 		}
 
 		[TestMethod]
@@ -775,7 +907,7 @@ namespace BlueDotBrigade.Weevil
 			var logPath = Path.Combine(_folder, "SampleData.log");
 			var lines = File.ReadAllLines(new Daten().AsFilePath("SampleData.log"));
 			File.WriteAllLines(logPath, lines.Take(10));
-			IEngine engine = Engine.UsingPath(logPath).Open();
+			using IEngine engine = Engine.UsingPath(logPath).Open();
 			engine.Selector.SelectOnly(5, 5);
 			engine.Clear(ClearOperation.Selected);
 			engine.Selector.SelectAll();
@@ -783,7 +915,7 @@ namespace BlueDotBrigade.Weevil
 
 			engine.Reload();
 
-			engine.Selector.Selected.Keys.Should().Equal(1, 2, 3, 4, 6, 7, 8);
+			engine.Selector.GetSelected().Select(record => record.LineNumber).Should().Equal(1, 2, 3, 4, 6, 7, 8);
 		}
 
 		[TestMethod]
@@ -794,7 +926,7 @@ namespace BlueDotBrigade.Weevil
 			using var log = CapturingLogWriter.Register();
 
 			// On disk, which no run opens by default in RAM, so the mode recorded is this log's (#1025).
-			IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
+			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 
 			IDictionary<string, object> entry = log.Last("File loading complete.");
 			entry["RecordCount"].Should().Be(engine.Count);
@@ -810,7 +942,7 @@ namespace BlueDotBrigade.Weevil
 		[DoNotParallelize]
 		public void GivenFilteredResults_WhenASearchFindsARecord_ThenTheApplicationLogRecordsHowManyResultsItSearched()
 		{
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1"));
 			using var log = CapturingLogWriter.Register();
 
@@ -829,7 +961,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenASearchThatFindsNothing_WhenItFinishes_ThenTheApplicationLogRecordsHowLongItTookWithoutTheText()
 		{
 			const string text = "Text that no record holds";
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			using var log = CapturingLogWriter.Register();
 
 			Action search = () => engine.Navigate.NextContent(text, isCaseSensitive: true);
@@ -846,7 +978,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenSelectedRecords_WhenSavingThemIsAborted_ThenNoFileIsLeft()
 		{
 			// Abort cancels the save, which deletes the file saved so far (#1027).
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			var destinationPath = Path.Combine(_folder, "Selected.log");
 			engine.Selector.SelectRange(2, 4);
 
@@ -861,7 +993,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenTextThatALaterRecordHolds_WhenSearchingForItIsAborted_ThenTheSearchStopsAndIsLoggedAsCancelled()
 		{
 			// A search that was aborted is not mistaken for one that found nothing (#1027).
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			engine.Selector.Select(lineNumber: 1);
 			using var log = CapturingLogWriter.Register();
 
@@ -876,7 +1008,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenAnAnalyzer_WhenItIsAborted_ThenItStops()
 		{
 			// The engine passes Abort's token to the analyzer (#1027).
-			IEngine engine = OpenCopy();
+			using IEngine engine = OpenCopy();
 			IUserDialog dialog = Substitute.For<IUserDialog>();
 			dialog
 				.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>())
@@ -897,7 +1029,7 @@ namespace BlueDotBrigade.Weevil
 		[DataRow(StorageMode.Disk)]
 		public void GivenSelectedRecords_WhenSavedInRawFormat_ThenEachRecordIsALineOfTheFile(StorageMode storageMode)
 		{
-			IEngine engine = OpenCopy(storageMode: storageMode);
+			using IEngine engine = OpenCopy(storageMode: storageMode);
 			var destinationPath = Path.Combine(_folder, "Selected.log");
 			engine.Selector.SelectRange(2, 4);
 
@@ -911,7 +1043,7 @@ namespace BlueDotBrigade.Weevil
 		[DataRow(StorageMode.Disk)]
 		public void GivenSelectedRecords_WhenSavedInTsvFormat_ThenEachRecordIsARowEndingWithItsContent(StorageMode storageMode)
 		{
-			IEngine engine = OpenCopy(storageMode: storageMode);
+			using IEngine engine = OpenCopy(storageMode: storageMode);
 			var destinationPath = Path.Combine(_folder, "Selected.tsv");
 			engine.RecordState.SetPinned(engine.Records.First(record => record.LineNumber == 3), true);
 			engine.Selector.SelectRange(2, 4);

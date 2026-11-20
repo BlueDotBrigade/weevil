@@ -14,6 +14,13 @@ namespace BlueDotBrigade.Weevil.Filter
 		// #1089 compares with Weevil 2.12.1, whose times on the reference machine are not measured yet.
 		private static readonly TimeSpan MaximumDuration = TimeSpan.FromSeconds(10);
 
+		// Measured on 2026-11-19, in a Debug build on 4 cores, for one plain filter of the UTF-8 droid log: 49.0 bytes per record in RAM, almost all
+		// the 48-byte Record each filter creates per row (#1140), and 47.2 on disk besides a chunk buffer per core (#1269). The GC reclaims both.
+		private const double MaximumBytesAllocatedPerRecord = 55;
+
+		// A chunk buffer: a 16 MB chunk and a 1/16 margin (#1269).
+		private const long ChunkBufferBytes = 17L * 1024 * 1024;
+
 		public TestContext TestContext { get; set; } = null!;
 
 		[TestMethod]
@@ -25,15 +32,53 @@ namespace BlueDotBrigade.Weevil.Filter
 		[DataRow(DroidLog.Utf16LittleEndian, FilterType.RegularExpression, @"\[Security\].*detected", 34)]
 		public void GivenADroidLog_WhenFiltered_ThenTheMatchingRecordsAreFoundQuickly(string logName, FilterType filterType, string expression, int matchingRecords)
 		{
-			IEngine engine = Engine.UsingPath(DroidLog.GetPath(logName)).Open();
+			using IEngine engine = Engine.UsingPath(DroidLog.GetPath(logName)).Open();
 
 			var stopwatch = Stopwatch.StartNew();
 			engine.Filter.Apply(filterType, new FilterCriteria(expression));
 			stopwatch.Stop();
 
-			TestContext.WriteLine($"Filtered {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
+			this.TestContext.WriteLine($"Filtered {engine.Count:N0} records in {stopwatch.Elapsed.TotalSeconds:N2} s.");
 			engine.Filter.Results.Should().HaveCount(matchingRecords);
 			stopwatch.Elapsed.Should().BeLessThan(MaximumDuration);
+		}
+
+		[TestMethod]
+		[WorkItem(1269)]
+		[DoNotParallelize]
+		public void GivenADroidLogOpenedOnDisk_WhenFiltered_ThenItAllocatesAboutOneChunkPerCoreMoreThanInRam()
+		{
+			// Each of the filter's many worker states allocated its own 16 MB buffer, so one filter on disk allocated about half the log's size again.
+			var logPath = DroidLog.GetPath(DroidLog.Utf8);
+			var inRam = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Ram).Open());
+			var onDisk = MeasureFilterAllocations(Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open());
+
+			// A buffer per core, plus one buffer of margin.
+			// The old code allocated about 1 GB on this log, so on more than about 48 cores the budget no longer tells them apart.
+			var budget = (Environment.ProcessorCount + 1) * ChunkBufferBytes;
+			this.TestContext.WriteLine($"Allocated {inRam / 1_048_576.0:N0} MB in RAM and {onDisk / 1_048_576.0:N0} MB on disk; the budget for the difference is {budget / 1_048_576.0:N0} MB.");
+
+			(onDisk - inRam).Should().BeLessThan(budget);
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		[DataRow(StorageMode.Ram)]
+		[DataRow(StorageMode.Disk)]
+		public void GivenADroidLog_WhenFiltered_ThenTheMemoryAllocatedPerRecordStaysWithinBudget(StorageMode storageMode)
+		{
+			// The budget tests measured only what a log keeps once open; nothing guarded what a filter needs on top (#1259).
+			using IEngine engine = Engine.UsingPath(DroidLog.GetPath(DroidLog.Utf8)).UsingStorage(storageMode).Open();
+
+			var allocated = MeasureFilterAllocations(engine);
+
+			// On disk, a filter also allocates a chunk buffer per core, and one of margin, whatever the log's size. The disk budget also follows from the RAM
+			// budget and the test of those buffers below; it is kept so each mode states its own. On many cores, where fewer buffers may be used, it is lenient.
+			var buffers = storageMode == StorageMode.Disk ? (Environment.ProcessorCount + 1) * ChunkBufferBytes : 0;
+			var bytesPerRecord = (allocated - buffers) / (double)engine.Count;
+			this.TestContext.WriteLine($"Storage: {storageMode}. Cores: {Environment.ProcessorCount}. One filter allocated {allocated / 1_048_576.0:N0} MB: {allocated / (double)engine.Count:N1} bytes per record, {bytesPerRecord:N1} besides the buffers.");
+
+			bytesPerRecord.Should().BeLessThanOrEqualTo(MaximumBytesAllocatedPerRecord, "a filter should not allocate noticeably more per record than it does today");
 		}
 
 		[TestMethod]
@@ -50,7 +95,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				Assert.Inconclusive("With more cores than 16 MB chunks, each chunk is split between workers, and read by each of them.");
 			}
 
-			IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
+			using IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 			var writer = new FilterCompletedWriter();
 			ILogWriter original = Log.Default;
 			Log.Register(writer);
@@ -65,10 +110,25 @@ namespace BlueDotBrigade.Weevil.Filter
 			}
 
 			var logLength = new FileInfo(logPath).Length;
-			TestContext.WriteLine($"Read {writer.BytesRead / (double)logLength:N3} times the log's {logLength:N0} bytes.");
+			this.TestContext.WriteLine($"Read {writer.BytesRead / (double)logLength:N3} times the log's {logLength:N0} bytes.");
 
 			// Each chunk's first record reads its own 64 KB block first: 0.4% of a 16 MB chunk. Only the byte order mark is not read.
 			writer.BytesRead.Should().BeInRange(logLength - 4, logLength + (logLength / 50), "each chunk of the log is read once");
+		}
+
+		/// <summary>
+		/// Returns the bytes one filter allocates, after a first filter has warmed it up.
+		/// </summary>
+		private static long MeasureFilterAllocations(IEngine opened)
+		{
+			using IEngine engine = opened;
+			var criteria = new FilterCriteria("Blaster");
+			engine.Filter.Apply(FilterType.PlainText, criteria);
+
+			var before = GC.GetTotalAllocatedBytes(precise: true);
+			engine.Filter.Apply(FilterType.PlainText, criteria);
+
+			return GC.GetTotalAllocatedBytes(precise: true) - before;
 		}
 
 		/// <summary>
@@ -82,7 +142,7 @@ namespace BlueDotBrigade.Weevil.Filter
 			{
 				if (message == "Filtering complete.")
 				{
-					BytesRead = (long)metadata.Single(entry => entry.Key == "BytesRead").Value;
+					this.BytesRead = (long)metadata.Single(entry => entry.Key == "BytesRead").Value;
 				}
 			}
 

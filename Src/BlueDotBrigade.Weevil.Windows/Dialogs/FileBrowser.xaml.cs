@@ -136,7 +136,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
 			{
-				var item = _model.SelectedItem ?? _model.VisibleItems.FirstOrDefault();
+				BrowserItem item = _model.SelectedItem ?? _model.VisibleItems.FirstOrDefault();
 
 				if (item is null)
 				{
@@ -208,7 +208,9 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		private async void OnItemDoubleClick(object sender, MouseButtonEventArgs e)
 		{
-			if (sender is ListViewItem { DataContext: BrowserItem item } && e.ChangedButton == MouseButton.Left)
+			if (e.ChangedButton == MouseButton.Left
+				&& e.OriginalSource is DependencyObject source
+				&& this.ItemsList.ContainerFromElement(source) is ListViewItem { DataContext: BrowserItem item })
 			{
 				e.Handled = true;
 				_isFocusingList = true;

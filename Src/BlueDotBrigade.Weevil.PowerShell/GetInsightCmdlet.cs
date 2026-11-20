@@ -38,19 +38,30 @@ namespace BlueDotBrigade.Weevil.PowerShell
         {
             try
             {
-                IEngine engine = Engine
+                // Closed when the cmdlet ends, so another Weevil can open the log (#1254).
+                using IEngine engine = Engine
                     .UsingPath(this.FilePath)
                     .UsingStorage(this.Storage)
                     .Open();
 
-                // On disk, a log that changed while it was read is reloaded, and read once more (#1028).
-                ImmutableArray<IInsight> insights = engine.RunReloadingOnChange(current => current.Analyzer.GetInsights());
+				Version version = typeof(GetInsightCmdlet).Assembly.GetName().Version ?? new Version(0, 0);
 
-                // After the insights, so that the report's metrics describe the same log, if it was reloaded.
-                var period = engine.Records.GetEstimatedRange();
-                var version = typeof(GetInsightCmdlet).Assembly.GetName().Version ?? new Version(0, 0);
+                // A log renamed, deleted or replaced meanwhile is not reloaded: the analyst runs the cmdlet again (#1247).
+                InsightReport report = engine.RunOnce(
+                    () =>
+                    {
+                        ImmutableArray<IInsight> insights = engine.Analyzer.GetInsights();
+						(DateTime From, DateTime To) period = engine.Records.GetEstimatedRange();
+                        return new InsightReportGenerator().Create(version, engine, insights, period.From, period.To);
+                    },
+                    this.WriteWarning);
 
-                this.WriteObject(new InsightReportGenerator().Create(version, engine, insights, period.From, period.To));
+                this.WriteObject(report);
+            }
+            catch (LogInUseException ex)
+            {
+                // Another Weevil has the log open: its message names who (#1254).
+                this.ThrowTerminatingError(new ErrorRecord(ex, "LogInUse", ErrorCategory.ResourceBusy, this.FilePath));
             }
             catch (Exception ex)
             {

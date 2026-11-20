@@ -8,10 +8,19 @@
 
 	internal interface IDialogBoxService : IUserDialog
 	{
-		string ShowOpenFile(string compatibleFileExtensions);
+		/// <summary>
+		/// Shows the Open As dialog, so the user finds a log and chooses RAM or Disk in one window (#1215).
+		/// </summary>
+		/// <param name="checkBeforeOpening">
+		/// Checks the log chosen before it is extracted from a zip or opened, given the path it will have on disk, off the UI thread:
+		/// a <see cref="LogInUseException"/> it throws keeps the dialog open and shows why (#1254).
+		/// </param>
+		/// <param name="choice">The log chosen and its mode, or <see langword="null"/> when the user cancelled.</param>
+		/// <returns><see langword="false"/> when the user cancelled: nothing opens, and nothing was extracted.</returns>
+		bool TryShowOpenAs(Action<string> checkBeforeOpening, out OpenAsChoice choice);
 
 		/// <summary>
-		/// Shows Weevil's Open As window, so the user chooses RAM or Disk for the log about to open (#1028).
+		/// Shows Weevil's Open As window for a log already chosen, so the user chooses RAM or Disk for it (#1028).
 		/// </summary>
 		/// <param name="advice">The log, the mode suggested for it, and the warnings.</param>
 		/// <param name="storageMode">The mode chosen.</param>
@@ -19,7 +28,7 @@
 		bool TryShowOpenAs(OpenAsAdvice advice, out StorageMode storageMode);
 
 		/// <summary>
-		/// Lets the user choose one of the files extracted from a zip.
+		/// Lets the user choose one of the files in a zip, which Weevil then extracts.
 		/// </summary>
 		/// <returns><see langword="false"/> when the user chose no file.</returns>
 		bool TrySelectCompressedFile(string[] fileNames, out string selectedFileName);
@@ -27,6 +36,12 @@
 		string ShowSaveFile(string targetDirectory, string targetFileName);
 
 		void ShowMessage(string message, string caption);
+
+		/// <summary>
+		/// Asks the user a question that has a Yes or a No answer.
+		/// </summary>
+		/// <returns><see langword="true"/> when the user answered Yes.</returns>
+		bool ShowQuestion(string message, string caption);
 
 		string ShowUserPrompt(string title, string userPrompt);
 
