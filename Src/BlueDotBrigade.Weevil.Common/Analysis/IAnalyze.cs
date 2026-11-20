@@ -39,6 +39,7 @@
 		Results Analyze(AnalysisType analysisType, IUserDialog userDialog, CancellationToken cancellationToken);
 
 		/// <inheritdoc cref="Analyze(AnalysisType, IUserDialog, CancellationToken)"/>
+		/// <exception cref="System.ArgumentException">No analyzer has the key <paramref name="analyzerKey"/>. The message lists the keys there are.</exception>
 		Results Analyze(string analyzerKey, IUserDialog userDialog, CancellationToken cancellationToken);
 	}
 }

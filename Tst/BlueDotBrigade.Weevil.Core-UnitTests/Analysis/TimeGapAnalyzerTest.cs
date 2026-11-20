@@ -261,8 +261,10 @@
 		}
 
 		[TestMethod]
+		[WorkItem(934)]
 		public void GivenPreviousRunHasGapsAndInvalidThreshold_WhenAnalyzeCalled_ThenPublicStateIsReset()
 		{
+			// An invalid threshold kept the counts of the run before it.
 			DateTime now = DateTime.Now;
 			RecordList records = R.Create()
 				.WithCreatedAt(10, now)
@@ -282,6 +284,7 @@
 			analyzer.Count.Should().Be(0);
 			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.Zero);
 			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
+			analyzer.MaximumPeriodLineNumber.Should().Be(-1);
 		}
 
 		[TestMethod]

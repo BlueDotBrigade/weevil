@@ -5,51 +5,34 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 	using System.Collections.Immutable;
 	using System.Globalization;
 	using System.Threading;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
 	using Filter.Expressions.Regular;
 
-	internal class ThresholdCrossingsAnalyzer : IRecordAnalyzer
+	internal class ThresholdCrossingsAnalyzer : RegularExpressionAnalyzer
 	{
-		private readonly FilterStrategy _filterStrategy;
-		private readonly IFilterAliasExpander _aliasExpander;
-
-		public ThresholdCrossingsAnalyzer(FilterStrategy filterStrategy)
-			: this(filterStrategy, null)
+		public ThresholdCrossingsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander = null)
+			: base(filterStrategy, aliasExpander)
 		{
 		}
 
-		public ThresholdCrossingsAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
-		{
-			_filterStrategy = filterStrategy;
-			_aliasExpander = aliasExpander;
-		}
+		public override string Key => AnalysisType.ThresholdCrossings.ToString();
 
-		public string Key => AnalysisType.ThresholdCrossings.ToString();
-
-		public string DisplayName => "Threshold Crossings";
-
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
-		{
-			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
-		}
+		public override string DisplayName => "Threshold Crossings";
 
 		/// <remarks>
 		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
 		/// </remarks>
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
+		public override Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
 		{
-			var count = 0;
-			var defaultRegex = AnalysisHelper.GetDefaultRegex(_filterStrategy);
-			var recordsDescription = records.Count.ToString("N0");
 			const string defaultThreshold = "0";
 			const string defaultComparison = ">";
 
+			// Its own dialog, which also asks for the threshold and the comparison.
 			if (!userDialog.TryGetThreshold(
-				defaultRegex,
-				recordsDescription,
+				this.DefaultExpression,
+				records.Count.ToString("N0"),
 				defaultThreshold,
 				defaultComparison,
 				out var customRegex,
@@ -67,18 +50,9 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				? defaultComparison
 				: comparisonInput;
 
-			if (string.IsNullOrWhiteSpace(customRegex))
-			{
-				return new Results(0);
-			}
+			ImmutableArray<RegularExpression> expressions = ParseExpressions<RegularExpression>(customRegex);
 
-			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
-			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
-				customRegex,
-				_aliasExpander,
-				expressionBuilder);
-
-			if (expressions.IsDefaultOrEmpty)
+			if (expressions.IsEmpty)
 			{
 				return new Results(0);
 			}
@@ -93,22 +67,25 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 				return new Results(0);
 			}
 
+			ClearFlags(records, state, canUpdateMetadata);
+
+			var count = 0;
+
 			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
 			var buffer = new ContentBuffer();
 
-			foreach (IRecord record in records)
+			for (var position = 0; position < records.Count; position++)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 
-				AnalysisHelper.ClearRecordFlag(record, state, canUpdateMetadata);
 				var wasFlagged = false;
 
 				// Read once, however many expressions test the record (#1133).
-				var content = buffer.Read(record).ToString();
+				var content = records.ReadContent(position, buffer).ToString();
 
 				foreach (RegularExpression expression in expressions)
 				{
-					IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(record, content);
+					IDictionary<string, string> keyValuePairs = expression.GetKeyValuePairs(content);
 
 					foreach (KeyValuePair<string, string> current in keyValuePairs)
 					{
@@ -130,10 +107,10 @@ namespace BlueDotBrigade.Weevil.Analysis.Timeline
 						}
 
 						var parameterName = RegularExpression.GetFriendlyParameterName(current.Key);
-						AnalysisHelper.UpdateRecordMetadata(
-							record,
+						Flag(
+							records,
+							position,
 							state,
-							true,
 							$"{parameterName}: {current.Value} {GetComparisonSymbol(comparison)} {threshold.ToString(CultureInfo.InvariantCulture)}",
 							canUpdateMetadata);
 
