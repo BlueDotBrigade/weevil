@@ -598,8 +598,8 @@
 			}
 
 			await (choice.ExtractedFolder is null
-				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode, operation)
-				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath, operation));
+				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode, operation, choice.Part)
+				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath, operation, choice.Part));
 		}
 
 		/// <remarks>
@@ -741,9 +741,10 @@
 		/// Opens a log that is not in a zip, and deletes the copy of the zip the previous log was opened from, if nothing reads it any more.
 		/// </summary>
 		/// <param name="operation">The open's operation, which ends once the records are shown.</param>
-		private async Task OpenFromDiskAsync(string logPath, StorageMode storageMode, BusyState.Operation operation)
+		/// <param name="part">The part of the log to open: the whole log when <see langword="null"/> (#1214).</param>
+		private async Task OpenFromDiskAsync(string logPath, StorageMode storageMode, BusyState.Operation operation, LogPart part = null)
 		{
-			await OpenAsync(logPath, storageMode, displayPath: null, operation);
+			await OpenAsync(logPath, storageMode, displayPath: null, operation, part);
 
 			// A failed open leaves the zipped log open, which still needs its copy.
 			if (!IsOpenFrom(_openExtractedLog))
@@ -760,7 +761,8 @@
 		/// </remarks>
 		/// <param name="displayPath">The log as the analyst knows it: the zip, read like a folder, and the log's path in it (#1312).</param>
 		/// <param name="operation">The open's operation, which ends once the records are shown.</param>
-		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath, BusyState.Operation operation)
+		/// <param name="part">The part of the log to open: the whole log when <see langword="null"/> (#1214).</param>
+		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath, BusyState.Operation operation, LogPart part = null)
 		{
 			ExtractedLog extracted = null;
 
@@ -770,7 +772,7 @@
 
 				// Weevil may close before the open finishes.
 				_extractedLogBeingOpened = extracted;
-				await OpenAsync(logPath, storageMode, displayPath, operation);
+				await OpenAsync(logPath, storageMode, displayPath, operation, part);
 			}
 			finally
 			{
@@ -893,6 +895,21 @@
 				});
 		}
 
+		/// <summary>
+		/// Opens the part of the log chosen in Weevil's Open As dialog (#1214), or else the range a plugin's own Open As window chose.
+		/// </summary>
+		/// <remarks>
+		/// One way to narrow the log at a time (decision 5 of the #1157 plan), so a part chosen in Weevil's dialog wins over the plugin's range.
+		/// Lines start reading at the first line's byte offset, as a plugin's range does.
+		/// </remarks>
+		private static IEngineBuilder CreateBuilder(string sourceFilePath, LogPart part, OpenAsResult pluginChoice)
+		{
+			return part.SectionName is not null ? Engine.UsingPath(sourceFilePath).UsingSection(part.SectionName)
+				: part.RegionName is not null ? Engine.UsingPath(sourceFilePath).UsingRegion(part.RegionName)
+				: !part.IsWhole ? Engine.UsingPath(sourceFilePath, part.Lines.Start.Value).UsingRange(part.Lines)
+				: Engine.UsingPath(sourceFilePath, pluginChoice.Range.Start.Value).UsingRange(pluginChoice.Range);
+		}
+
 		public Task OpenAsync(string sourceFilePath)
 		{
 			return OpenAsync(sourceFilePath, storageMode: null);
@@ -914,7 +931,8 @@
 		}
 
 		/// <param name="operation">The open's operation. It ends once the records are shown, before the insights are ready.</param>
-		private async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath, BusyState.Operation operation)
+		/// <param name="part">The part of the log to open: the whole log when <see langword="null"/> (#1214).</param>
+		private async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath, BusyState.Operation operation, LogPart part = null)
 		{
 			// Until the records are shown, the progress bar replaces them and the filter box is disabled.
 			operation.IsShowingProgress = true;
@@ -984,11 +1002,9 @@
 
 						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
 
-						IEngineBuilder builder = Engine
-							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
+						IEngineBuilder builder = CreateBuilder(sourceFilePath, part ?? LogPart.Whole, openAsResult)
 							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
-							.UsingRange(openAsResult.Range)
 							.UsingDisplayPath(displayPath)
 							.Replacing(_engine);
 

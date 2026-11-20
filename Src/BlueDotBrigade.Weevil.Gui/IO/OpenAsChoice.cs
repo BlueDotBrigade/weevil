@@ -10,5 +10,6 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	/// <param name="StorageMode">RAM or Disk.</param>
 	/// <param name="Advice">What Weevil suggested for the log, for the log Weevil writes.</param>
 	/// <param name="DisplayPath">For a log in a zip, the path the analyst knows it by, with the zip read like a folder (#1312): otherwise <see langword="null"/>.</param>
-	internal sealed record OpenAsChoice(string LogPath, string ExtractedFolder, StorageMode StorageMode, OpenAsAdvice Advice, string DisplayPath = null);
+	/// <param name="Part">The part of the log to open: the whole log when <see langword="null"/> (#1214).</param>
+	internal sealed record OpenAsChoice(string LogPath, string ExtractedFolder, StorageMode StorageMode, OpenAsAdvice Advice, string DisplayPath = null, LogPart Part = null);
 }

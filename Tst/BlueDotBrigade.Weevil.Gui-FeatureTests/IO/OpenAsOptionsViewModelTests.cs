@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -95,6 +96,89 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			options.HasFile.Should().BeFalse();
 			options.CanOpen.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public async Task GivenALogWithSectionsAndRegions_WhenOneIsPicked_ThenThatPartIsOpened()
+		{
+			// The analyst opens one section or one region, listed from the log's sidecar (#1212, #1213).
+			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
+			await options.SelectAsync(LargeLog);
+			options.Part.IsWhole.Should().BeTrue("the whole log is opened unless another part is picked");
+			options.Sections.Should().Equal("Startup (lines 1 – 119)", "Shutdown (from line 300)");
+
+			options.ChosenSectionIndex = 1;
+			options.Part.SectionName.Should().Be("Shutdown");
+
+			options.ChosenRegionIndex = 0;
+			options.Part.RegionName.Should().Be("Docking", "one part is opened at a time");
+			options.CanOpen.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public async Task GivenARegionPicked_WhenAnotherLogIsSelected_ThenTheWholeLogIsOpened()
+		{
+			// A region belongs to its log, so it is not kept for the next one.
+			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
+			await options.SelectAsync(LargeLog);
+			options.ChosenPart = PartKind.Region;
+
+			await options.SelectAsync(SmallLog);
+
+			options.ChosenPart.Should().Be(PartKind.Whole);
+			options.HasRegions.Should().BeFalse();
+			options.Part.IsWhole.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenTheyAreNotARange_ThenOpenIsDisabledAndSaysWhy()
+		{
+			// For lines, the analyst types a first and last line. An invalid range disables Open and says why (#1214).
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+
+			options.FirstLine = "40";
+			options.LastLine = "10";
+
+			options.ChosenPart.Should().Be(PartKind.Lines, "typing a line picks Lines");
+			options.CanOpen.Should().BeFalse();
+			options.PartError.Should().Contain("before the first");
+
+			options.LastLine = "x";
+			options.CanOpen.Should().BeFalse();
+			options.PartError.Should().Contain("whole number");
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenTheyAreARange_ThenThoseLinesAreOpened()
+		{
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+
+			options.FirstLine = "10";
+			options.LastLine = "40";
+			options.Part.Lines.Should().Be(new Range(10, 40));
+			options.CanOpen.Should().BeTrue();
+			options.PartError.Should().BeEmpty();
+
+			options.LastLine = string.Empty;
+			options.Part.IsToEndOfLog.Should().BeTrue("an empty last line is the end of the log");
+			options.Part.Lines.Start.Value.Should().Be(10);
+		}
+
+		/// <summary>
+		/// The large log's sidecar lists two level-1 sections and one region; the small log has no sidecar.
+		/// </summary>
+		private static IReadOnlyList<LogPart> ReadParts(BrowserItem file)
+		{
+			return file == LargeLog
+				? new[]
+				{
+					LogPart.ForSection("Startup", new Range(1, 119)),
+					LogPart.ForSection("Shutdown", new Range(300, int.MaxValue)),
+					LogPart.ForRegion("Docking", new Range(10, 40)),
+				}
+				: Array.Empty<LogPart>();
 		}
 
 		/// <summary>

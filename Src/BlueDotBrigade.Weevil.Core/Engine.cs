@@ -1,6 +1,7 @@
 ﻿namespace BlueDotBrigade.Weevil
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
@@ -225,6 +226,23 @@
 		public static IO.StorageUnit EstimateMemory(string sourceFilePath)
 		{
 			return IO.MemoryEstimator.Estimate(sourceFilePath);
+		}
+
+		/// <summary>
+		/// Lists the parts of a log that can be opened on their own, from its sidecar, so a caller can offer them before the log opens (#1212, #1213).
+		/// </summary>
+		/// <remarks>
+		/// The log's level-1 sections, in the order of its table of contents, then its named regions. Each section runs from its line to the line before
+		/// the next level-1 section, or to the end of the log, so it holds the sections nested in it. Open one with
+		/// <see cref="IEngineBuilder.UsingSection"/> or <see cref="IEngineBuilder.UsingRegion"/>.
+		/// It reads only the sidecar, <c>&lt;log&gt;.xml</c>, so the log need not be there. A log without a sidecar has none.
+		/// Call it off the UI thread: the sidecar may be on a network drive.
+		/// </remarks>
+		/// <param name="sourceFilePath">The log, beside which its sidecar is read.</param>
+		/// <exception cref="NotSupportedException">The sidecar is not compatible with this version of Weevil.</exception>
+		public static IReadOnlyList<IO.LogPart> ReadParts(string sourceFilePath)
+		{
+			return CoreEngine.CoreEngineBuilder.ReadParts(sourceFilePath);
 		}
 
 		public void Clear(ClearOperation clearOperation)

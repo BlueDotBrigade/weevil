@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -13,6 +15,7 @@ using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
 using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 using Microsoft.Win32;
+using LogPart = BlueDotBrigade.Weevil.IO.LogPart;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 /// <summary>
@@ -52,7 +55,9 @@ internal class DialogBoxService : IDialogBoxService
 
 	public bool TryShowOpenAs(Action<string> checkBeforeOpening, out OpenAsChoice choice)
 	{
-		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read);
+		// Read on the UI thread once the dialog exists; the parts are listed off it.
+		IContainerReader reader = null;
+		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read, file => ReadParts(reader, ExtractedLog.DefaultCopiesFolder, file));
 		var dialog = new BlueDotBrigade.Weevil.Windows.Dialogs.OpenAsDialog
 		{
 			Owner = Application.Current?.MainWindow,
@@ -64,6 +69,8 @@ internal class DialogBoxService : IDialogBoxService
 			OptionsContent = new OpenAsOptionsView { DataContext = options },
 			CanOpen = false,
 		};
+
+		reader = dialog.Browser.Reader;
 
 		// The dialog has no theme of its own: Weevil's application-wide styles restyle its controls, and its window takes Weevil's colours here.
 		dialog.SetResourceReference(Control.BackgroundProperty, "MaterialDesignPaper");
@@ -88,10 +95,59 @@ internal class DialogBoxService : IDialogBoxService
 				dialog.Result.ExtractedFolder,
 				options.StorageMode,
 				options.Advice,
-				dialog.Result.Item.Location.IsInArchive ? dialog.Result.Item.Location.ToString() : null)
+				dialog.Result.Item.Location.IsInArchive ? dialog.Result.Item.Location.ToString() : null,
+				options.Part)
 			: null;
 
 		return isAccepted;
+	}
+
+	/// <summary>
+	/// Lists the sections and regions of the log selected in the Open As dialog (#1212, #1213), from its sidecar.
+	/// </summary>
+	/// <remarks>
+	/// For a log in a zip, the sidecar is the one Weevil kept beside the copy of an earlier open, which holds the analyst's regions (#1253),
+	/// or else the one beside the log in the zip, read through a temporary copy. Runs off the UI thread.
+	/// </remarks>
+	private static IReadOnlyList<LogPart> ReadParts(IContainerReader reader, string copiesFolder, BrowserItem file)
+	{
+		if (!file.Location.IsInArchive)
+		{
+			return Engine.ReadParts(file.Location.FileSystemPath);
+		}
+
+		var copy = Path.Combine(copiesFolder, reader.GetCopyKey(file.Location), file.Location.Name);
+
+		if (File.Exists($"{copy}.xml"))
+		{
+			return Engine.ReadParts(copy);
+		}
+
+		Location sidecar = ContainerReader.GetSibling(file.Location, $"{file.Location.Name}.xml");
+
+		if (!reader.Exists(sidecar))
+		{
+			return Array.Empty<LogPart>();
+		}
+
+		DirectoryInfo folder = Directory.CreateTempSubdirectory("Weevil.OpenAs.");
+
+		try
+		{
+			var log = Path.Combine(folder.FullName, file.Location.Name);
+
+			using (Stream source = reader.OpenRead(sidecar))
+			using (FileStream target = File.Create($"{log}.xml"))
+			{
+				source.CopyTo(target);
+			}
+
+			return Engine.ReadParts(log);
+		}
+		finally
+		{
+			folder.Delete(recursive: true);
+		}
 	}
 
 	public string ShowSaveFile(string targetDirectory, string targetFileName)

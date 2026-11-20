@@ -1,7 +1,9 @@
 namespace BlueDotBrigade.Weevil.StepDefinitions;
 
+using System.Globalization;
 using System.Security;
 using BlueDotBrigade.Weevil.Data;
+using LogPart = BlueDotBrigade.Weevil.IO.LogPart;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 /// <summary>
@@ -17,6 +19,7 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 	private string _logPath = string.Empty;
 	private Exception? _openFailure;
 	private Exception? _reloadFailure;
+	private IReadOnlyList<LogPart> _parts = Array.Empty<LogPart>();
 
 	public OpeningPartSteps(Token token) : base(token)
 	{
@@ -109,6 +112,18 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 		File.AppendAllText(_logPath, "\n" + string.Join("\n", lines));
 	}
 
+	[Given("the log itself has been deleted")]
+	public void GivenTheLogItselfHasBeenDeleted()
+	{
+		File.Delete(_logPath);
+	}
+
+	[When("the parts of the log are listed")]
+	public void WhenThePartsOfTheLogAreListed()
+	{
+		_parts = Engine.ReadParts(_logPath);
+	}
+
 	[When("the log is reloaded")]
 	public void WhenTheLogIsReloaded()
 	{
@@ -148,6 +163,20 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 	public void ThenItWillShowTheRecordsFromLineToTheEndOfTheWholeLogAndNoOthers(int firstLine)
 	{
 		ThenItWillShowTheRecordsOfLinesOfTheWholeLogAndNoOthers(firstLine, int.MaxValue);
+	}
+
+	[Then("these parts will be listed:")]
+	public void ThenThesePartsWillBeListed(DataTable expected)
+	{
+		_parts.Select(Describe).Should().Equal(expected.Rows.Select(row => $"{row["Part"]} {row["Name"]} {row["First Line"]} {row["Last Line"]}"));
+
+		static string Describe(LogPart part)
+		{
+			var lastLine = part.IsToEndOfLog ? "end" : part.Lines.End.Value.ToString(CultureInfo.InvariantCulture);
+			return part.SectionName is not null
+				? $"Section {part.SectionName} {part.Lines.Start.Value} {lastLine}"
+				: $"Region {part.RegionName} {part.Lines.Start.Value} {lastLine}";
+		}
 	}
 
 	[Then(@"the part open will be the ""(.+)"" (region|section)")]

@@ -520,8 +520,8 @@
 
 				if (_sectionName is not null)
 				{
-					(Section section, Range lines) = FindSection(sidecarManager);
-					return LogPart.ForSection(section.Name, GetLineNumberRange(lines));
+					LogPart section = FindSection(sidecarManager);
+					return LogPart.ForSection(section.SectionName, GetLineNumberRange(section.Lines));
 				}
 
 				return LogPart.ForLines(GetLineNumberRange(_range));
@@ -533,28 +533,55 @@
 			private string ListedBy => _session is null ? "The log's sidecar lists" : "The log now lists";
 
 			/// <summary>
-			/// Returns the level-1 section named by <see cref="UsingSection"/>, with its line numbers:
-			/// from its line to the line before the next level-1 section, or to the end of the log.
+			/// Returns the level-1 section named by <see cref="UsingSection"/>, with its line numbers.
 			/// </summary>
 			/// <exception cref="KeyNotFoundException">No level-1 section has that name.</exception>
-			private (Section Section, Range Lines) FindSection(SidecarManager sidecarManager)
+			private LogPart FindSection(SidecarManager sidecarManager)
 			{
-				IReadOnlyList<Section> tableOfContents = _session is null
+				List<LogPart> sections = GetSections(_session is null
 					? new TableOfContents(sidecarManager.LoadSections()).Sections
-					: _session.TableOfContents.Sections;
-				List<Section> sections = tableOfContents
-					.Where(s => s.Level == 1)
-					.ToList();
-				var index = sections.FindIndex(s => string.Equals(s.Name, _sectionName, StringComparison.OrdinalIgnoreCase));
+					: _session.TableOfContents.Sections);
+				LogPart section = sections.FirstOrDefault(s => string.Equals(s.SectionName, _sectionName, StringComparison.OrdinalIgnoreCase));
 
-				if (index < 0)
+				if (section is null)
 				{
-					var names = sections.Count == 0 ? "none" : string.Join(", ", sections.Select(s => $"`{s.Name}`"));
+					var names = sections.Count == 0 ? "none" : string.Join(", ", sections.Select(s => $"`{s.SectionName}`"));
 					throw new KeyNotFoundException($"{ListedBy} no level-1 section named `{_sectionName}`. Its level-1 sections: {names}.");
 				}
 
-				var lastLine = index + 1 < sections.Count ? sections[index + 1].LineNumber - 1 : int.MaxValue;
-				return (sections[index], new Range(sections[index].LineNumber, lastLine));
+				return section;
+			}
+
+			/// <summary>
+			/// Lists the parts of a log that can be opened by name, from its sidecar alone (#1212, #1213): its level-1 sections, then its named regions.
+			/// </summary>
+			/// <exception cref="NotSupportedException">The sidecar is not compatible with this version of Weevil.</exception>
+			internal static IReadOnlyList<LogPart> ReadParts(string sourceFilePath)
+			{
+				new SidecarManager(sourceFilePath).Load(null, null, out _, out _, out _, out _, out List<Section> tableOfContents, out List<Region> regions, out _);
+
+				return GetSections(new TableOfContents(tableOfContents).Sections)
+					.Concat(regions
+						.Where(r => !string.IsNullOrWhiteSpace(r.Name))
+						.Select(r => LogPart.ForRegion(r.Name, new Range(r.Minimum.LineNumber, r.Maximum.LineNumber))))
+					.ToList();
+			}
+
+			/// <summary>
+			/// Returns the level-1 sections of a table of contents, in its order (#1212). Each runs from its line to the line before the next level-1 section,
+			/// or to the end of the log, so it holds the sections nested in it. One without a name can't be asked for, so it isn't listed, but it still ends the one before it.
+			/// </summary>
+			private static List<LogPart> GetSections(IReadOnlyList<Section> tableOfContents)
+			{
+				List<Section> sections = tableOfContents
+					.Where(s => s.Level == 1)
+					.ToList();
+
+				return sections
+					.Select((s, index) => (s.Name, Lines: new Range(s.LineNumber, index + 1 < sections.Count ? sections[index + 1].LineNumber - 1 : int.MaxValue)))
+					.Where(s => !string.IsNullOrWhiteSpace(s.Name))
+					.Select(s => LogPart.ForSection(s.Name, s.Lines))
+					.ToList();
 			}
 
 			/// <summary>
