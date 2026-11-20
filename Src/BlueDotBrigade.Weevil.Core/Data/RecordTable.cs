@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Data
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using BlueDotBrigade.Weevil.IO;
 
 	/// <summary>
 	/// A log's records in columns, 21 bytes per record, from which records are created when they are needed (#1021, #1138).
@@ -270,6 +271,10 @@ namespace BlueDotBrigade.Weevil.Data
 		/// <summary>
 		/// Writes the chunk directory, as the saved index keeps it (#1023): for each chunk, the record it starts at and the bytes of the log it holds.
 		/// </summary>
+		/// <remarks>
+		/// This and the next two sections are read back only by the build that wrote them (<see cref="SavedParse"/>),
+		/// so a change to their layout needs no new version of the file's format (<see cref="IndexFile"/>).
+		/// </remarks>
 		internal void WriteChunks(BinaryWriter writer)
 		{
 			writer.Write(_chunks.Length);
@@ -280,6 +285,46 @@ namespace BlueDotBrigade.Weevil.Data
 				writer.Write(_chunks[index].FileOffset);
 				writer.Write(_chunks[index].Length);
 			}
+		}
+
+		/// <summary>
+		/// Reads a chunk directory saved by <see cref="WriteChunks"/>, whose chunks must lie in order, without overlapping,
+		/// within the bytes of the log from <paramref name="startOffset"/> to <paramref name="endOffset"/>.
+		/// </summary>
+		/// <returns>The directory, or <see langword="null"/> when what was read is inconsistent.</returns>
+		internal static List<(int Start, long FileOffset, int Length)> ReadChunks(IndexSection.Reader section, long startOffset, long endOffset)
+		{
+			const long EntryLength = sizeof(int) + sizeof(long) + sizeof(int);
+
+			var count = section.Binary.ReadInt32();
+
+			// Checked before the list is made, so a damaged count allocates nothing.
+			if (count < 0 || count * EntryLength != section.Remaining)
+			{
+				return null;
+			}
+
+			var directory = new List<(int Start, long FileOffset, int Length)>(count);
+			var previousEnd = startOffset;
+			var previousStart = -1;
+
+			for (var index = 0; index < count; index++)
+			{
+				var start = section.Binary.ReadInt32();
+				var fileOffset = section.Binary.ReadInt64();
+				var length = section.Binary.ReadInt32();
+
+				if (start <= previousStart || length < 0 || fileOffset < previousEnd || fileOffset > endOffset - length)
+				{
+					return null;
+				}
+
+				directory.Add((start, fileOffset, length));
+				previousStart = start;
+				previousEnd = fileOffset + length;
+			}
+
+			return directory;
 		}
 
 		/// <summary>
@@ -310,6 +355,38 @@ namespace BlueDotBrigade.Weevil.Data
 					writer.Write(block.GetString(row));
 				}
 			}
+		}
+
+		/// <summary>
+		/// Reads the strings saved by <see cref="WriteStrings"/>, by record number.
+		/// </summary>
+		/// <returns>The strings, or <see langword="null"/> when what was read is inconsistent, such as a record with two strings.</returns>
+		internal static Dictionary<int, string> ReadStrings(IndexSection.Reader section)
+		{
+			// The record number, and the string's length in at least one byte.
+			const long MinimumEntryLength = sizeof(int) + 1;
+
+			var count = section.Binary.ReadInt32();
+
+			// Checked before the dictionary is made, so a damaged count allocates nothing.
+			if (count < 0 || count * MinimumEntryLength > section.Remaining)
+			{
+				return null;
+			}
+
+			var strings = new Dictionary<int, string>(count);
+
+			for (var index = 0; index < count; index++)
+			{
+				var recordNumber = section.Binary.ReadInt32();
+
+				if (!strings.TryAdd(recordNumber, section.Binary.ReadString()))
+				{
+					return null;
+				}
+			}
+
+			return strings;
 		}
 
 		/// <summary>

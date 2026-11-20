@@ -90,7 +90,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// Whether a parse by <paramref name="plugin"/> in <paramref name="storageMode"/>, with this build of Weevil, would make this parse's table.
 		/// </summary>
 		/// <param name="isQuickToDecode">
-		/// The log is UTF-8, or UTF-16 in this computer's byte order (<see cref="LineIndex.IsQuickToDecode(int, bool)"/>), so its table is the same in both modes.
+		/// The log is UTF-8, or UTF-16 in this computer's byte order (<see cref="LogEncoding.IsQuickToDecode"/>), so its table is the same in both modes.
 		/// </param>
 		public bool IsSameParser(IPlugin plugin, StorageMode storageMode, bool isQuickToDecode)
 		{

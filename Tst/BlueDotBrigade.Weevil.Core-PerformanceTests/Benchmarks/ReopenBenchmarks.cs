@@ -14,7 +14,7 @@ namespace BlueDotBrigade.Weevil
 	[MemoryDiagnoser]
 	public class ReopenBenchmarks
 	{
-		// Logged by LineIndexFile.RecordsReadFromIndexMessage, which a Release build cannot see.
+		// Logged by SavedIndex.RecordsReadFromIndexMessage, which a Release build cannot see.
 		private const string RecordsReadFromIndexMessage = "The records were read from the saved index, without parsing the log.";
 
 		private static readonly string Folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Weevil.Benchmarks");

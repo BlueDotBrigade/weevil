@@ -41,15 +41,13 @@ namespace BlueDotBrigade.Weevil.IO
 			LogFileSource parsedSource = repository.Source;
 			var parse = new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), storageMode, parsedSource.StartOffset, parsedSource.EndOffset, parsedSource.GetChecksums().ToArray());
 
-			LineIndex index = LineIndex.Build(log);
-			index.Parse = parse;
 			using var saved = new MemoryStream();
-			index.Write(saved, parsed.WholeTable);
+			IndexFile.Write(saved, LineIndex.Build(log), parse, parsed.WholeTable);
 			saved.Position = 0;
-			LineIndex.TryRead(saved, log, out LineIndex read).Should().BeTrue();
-			saved.Position = read.TableOffset;
+			IndexFile.TryRead(saved, log.Length, out LineIndex read, out IndexFile file).Should().BeTrue();
+			saved.Position = file.TableOffset;
 
-			SavedTableReader.TryRead(saved, log, _logPath, read.Parse, read.ContentEncoding, storageMode, displayPath: null, out RecordTable table, out LogFileSource source).Should().BeTrue();
+			SavedTableReader.TryRead(saved, log, _logPath, file.Parse, read.Encoding.ToEncoding(), storageMode, displayPath: null, out RecordTable table, out LogFileSource source).Should().BeTrue();
 
 			var reopened = new TableRecordList(table);
 			Describe(reopened).Should().Equal(Describe(parsed));

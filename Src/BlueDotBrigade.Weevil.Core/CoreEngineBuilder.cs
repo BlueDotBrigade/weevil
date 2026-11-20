@@ -255,47 +255,6 @@
 			}
 
 			/// <summary>
-			/// Reopens the log from the record table saved with its index, parsing only what it grew by since (#1023).
-			/// </summary>
-			/// <remarks>
-			/// A method of its own, never inlined, so the saved table that a grown log's longer table replaces is not kept by <see cref="Build"/>'s frame
-			/// when the engine is created, whose collection would otherwise keep it: about 22 bytes per record. Clearing the variable in <see cref="Build"/> did not free it.
-			/// </remarks>
-			/// <param name="source">The source made from the saved checksums, in both modes: on disk, the records read their content back through it.</param>
-			/// <returns><see langword="false"/> when the log must be parsed.</returns>
-			[MethodImpl(MethodImplOptions.NoInlining)]
-			private bool TryReopen(FileStream log, LineIndex lineIndex, IPlugin plugin, ICoreExtension coreExtension, out RecordList records, out LogFileSource source)
-			{
-				records = null;
-
-				if (!LineIndexFile.TryLoadTable(_sourceFilePath, log, lineIndex, plugin, _storageMode, _displayPath, out RecordTable savedTable, out source))
-				{
-					return false;
-				}
-
-				SavedParse savedParse = lineIndex.Parse;
-
-				if (savedParse.EndOffset == log.Length)
-				{
-					records = new TableRecordList(savedTable);
-					return true;
-				}
-
-				if (!GrownLogParser.TryParse(log, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, _displayPath, out RecordTable grownTable, out LogFileSource parsedSource))
-				{
-					source = null;
-					return false;
-				}
-
-				// The log grew since it was indexed: only its new part was parsed, and the longer table is saved.
-				records = new TableRecordList(grownTable);
-				source = parsedSource;
-				LineIndexFile.SaveParse(_sourceFilePath, log, lineIndex, SavedParse.Create(plugin, _storageMode, parsedSource), grownTable);
-
-				return true;
-			}
-
-			/// <summary>
 			/// Creates an instance of <see cref="CoreEngine"/> based on the provided parameters.
 			/// </summary>
 			public CoreEngine Build()
@@ -363,7 +322,8 @@
 
 					loadingStopwatch.Restart();
 
-					lineIndex = LineIndexFile.Load(_sourceFilePath, log);
+					var savedIndex = SavedIndex.Load(_sourceFilePath, log);
+					lineIndex = savedIndex.LineIndex;
 
 					// Sized from the line index, before the records are parsed.
 					var isKeepingSession = _session != null;
@@ -373,18 +333,16 @@
 					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
 					Range lineNumberRange = GetLineNumberRange(GetRequestedRange(sidecarManager));
 
-					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index (#1023).
+					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index, and saves it (#1023).
 					var isFullOpen = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
-					records = null;
-					source = null;
 
 					if (isFullOpen)
 					{
-						_ = TryReopen(log, lineIndex, plugin, coreExtension, out records, out source);
+						records = savedIndex.ReadAllRecords(log, plugin, coreExtension, _storageMode, _displayPath, out source);
 					}
-
-					if (records == null)
+					else
 					{
+						// A partial open always parses, and saves no table: a parse from a start line, of a range or up to a limit holds only part of the log.
 						// Reading starts at the start line's byte offset, taken from the line index (#977).
 						// A start line beyond the end of the log reads from the top, which finds no records to keep.
 						// In disk mode, the records read their content back from the log, through a source complete before Get returns (#1025).
@@ -407,13 +365,6 @@
 
 						records = repository.Get(lineNumberRange, maxRecords);
 						source = repository.Source;
-
-						// After a full parse, the saved index keeps what parsed the log, the checksums of the bytes read and the record table,
-						// so the log can be reopened without parsing (#1023). A parse from a start line, of a range or up to a limit keeps only part of it.
-						if (isFullOpen && repository.Source != null && records is TableRecordList { WholeTable: RecordTable parsedTable })
-						{
-							LineIndexFile.SaveParse(_sourceFilePath, log, lineIndex, SavedParse.Create(plugin, _storageMode, repository.Source), parsedTable);
-						}
 					}
 
 					loadingStopwatch.Stop();

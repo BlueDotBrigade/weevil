@@ -1,9 +1,7 @@
 namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
-	using System.Buffers.Binary;
 	using System.IO;
-	using System.Runtime.InteropServices;
 	using System.Text;
 	using BlueDotBrigade.Weevil.Data;
 
@@ -16,6 +14,7 @@ namespace BlueDotBrigade.Weevil.IO
 	/// - The encoding is found from a byte order mark at the top of the file: UTF-8 when there is none.
 	/// - <c>\n</c>, <c>\r</c> and <c>\r\n</c> end a line, and a line break at the end of the file is not followed by an empty line.
 	/// - Invalid bytes become U+FFFD.
+	/// <see cref="LogEncoding"/> detects the encoding and finds each line break, as it does for <see cref="LineIndex"/>, so both count the same lines.
 	/// The reader keeps every byte from the start of the current chunk, so <see cref="TakeChunk"/> can hand them over without reading the file again.
 	/// In disk mode, a chunk copies no bytes: it reads them back from the log through a <see cref="LogFileSource"/>, whose checksums the reader computes
 	/// from every byte it reads (#1025).
@@ -30,8 +29,8 @@ namespace BlueDotBrigade.Weevil.IO
 		private const int InitialBufferSize = 64 * 1024;
 
 		private readonly Stream _log;
+		private readonly LogEncoding _encoding;
 		private readonly int _unitSize;
-		private readonly bool _isBigEndian;
 		private readonly int _chunkSize;
 
 		// The bytes read so far, from the start of the current chunk: `_buffer[0]` is at `_bufferOffset` in the file.
@@ -67,9 +66,11 @@ namespace BlueDotBrigade.Weevil.IO
 			_chunkSize = chunkSize > 0 ? chunkSize : throw new ArgumentOutOfRangeException(nameof(chunkSize), chunkSize, "Value is expected to be greater than zero.");
 
 			// The byte order mark is only at the top of the file, so it is read there even when reading starts further in.
-			(_unitSize, _isBigEndian, var preambleLength) = LineIndex.DetectEncoding(log);
+			_encoding = LogEncoding.Detect(log);
+			_unitSize = _encoding.UnitSize;
+			var preambleLength = _encoding.PreambleLength;
 
-			this.Encoding = LineIndex.CreateEncoding(_unitSize, _isBigEndian);
+			this.Encoding = _encoding.ToEncoding();
 
 			_bufferOffset = Math.Max(startOffset, preambleLength);
 			_chunkStart = _bufferOffset;
@@ -103,8 +104,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public Encoding Encoding { get; }
 
-		/// <inheritdoc cref="LineIndex.IsQuickToDecode(int, bool)"/>
-		public bool IsQuickToDecode => LineIndex.IsQuickToDecode(_unitSize, _isBigEndian);
+		/// <inheritdoc cref="LogEncoding.IsQuickToDecode"/>
+		public bool IsQuickToDecode => _encoding.IsQuickToDecode;
 
 		/// <summary>
 		/// Records can keep the log's bytes instead of a string: always in disk mode, where every record is read back from the log,
@@ -129,7 +130,7 @@ namespace BlueDotBrigade.Weevil.IO
 			while (true)
 			{
 				var whole = (_filled - _searched) / _unitSize * _unitSize;
-				var found = IndexOfLineBreak(_buffer.AsSpan(_searched, whole), out var isCarriageReturn);
+				var found = _encoding.IndexOfLineBreak(_buffer.AsSpan(_searched, whole), out var isCarriageReturn);
 
 				if (found >= 0)
 				{
@@ -146,7 +147,7 @@ namespace BlueDotBrigade.Weevil.IO
 							continue;
 						}
 
-						if (afterBreak + _unitSize <= _filled && IsLineFeed(_buffer.AsSpan(afterBreak, _unitSize)))
+						if (afterBreak + _unitSize <= _filled && _encoding.IsLineFeed(_buffer.AsSpan(afterBreak, _unitSize)))
 						{
 							afterBreak += _unitSize;
 						}
@@ -275,49 +276,6 @@ namespace BlueDotBrigade.Weevil.IO
 				_sourceBuilder?.Append(_buffer.AsSpan(_filled, read));
 				_filled += read;
 			}
-		}
-
-		/// <summary>
-		/// Finds the first code unit that is <c>\r</c> or <c>\n</c>, in the file's byte order, and returns its offset in bytes.
-		/// </summary>
-		private int IndexOfLineBreak(ReadOnlySpan<byte> bytes, out bool isCarriageReturn)
-		{
-			var isSameByteOrder = _isBigEndian != BitConverter.IsLittleEndian;
-			int index;
-
-			switch (_unitSize)
-			{
-				case 1:
-					index = bytes.IndexOfAny((byte)'\r', (byte)'\n');
-					isCarriageReturn = index >= 0 && bytes[index] == (byte)'\r';
-					return index;
-
-				case 2:
-					ReadOnlySpan<ushort> units16 = MemoryMarshal.Cast<byte, ushort>(bytes);
-					var carriageReturn16 = isSameByteOrder ? (ushort)'\r' : BinaryPrimitives.ReverseEndianness((ushort)'\r');
-					var lineFeed16 = isSameByteOrder ? (ushort)'\n' : BinaryPrimitives.ReverseEndianness((ushort)'\n');
-					index = units16.IndexOfAny(carriageReturn16, lineFeed16);
-					isCarriageReturn = index >= 0 && units16[index] == carriageReturn16;
-					return index < 0 ? -1 : index * 2;
-
-				default:
-					ReadOnlySpan<uint> units32 = MemoryMarshal.Cast<byte, uint>(bytes);
-					var carriageReturn32 = isSameByteOrder ? '\r' : BinaryPrimitives.ReverseEndianness((uint)'\r');
-					var lineFeed32 = isSameByteOrder ? '\n' : BinaryPrimitives.ReverseEndianness((uint)'\n');
-					index = units32.IndexOfAny(carriageReturn32, lineFeed32);
-					isCarriageReturn = index >= 0 && units32[index] == carriageReturn32;
-					return index < 0 ? -1 : index * 4;
-			}
-		}
-
-		private bool IsLineFeed(ReadOnlySpan<byte> unit)
-		{
-			return _unitSize switch
-			{
-				1 => unit[0] == (byte)'\n',
-				2 => (_isBigEndian ? BinaryPrimitives.ReadUInt16BigEndian(unit) : BinaryPrimitives.ReadUInt16LittleEndian(unit)) == '\n',
-				_ => (_isBigEndian ? BinaryPrimitives.ReadUInt32BigEndian(unit) : BinaryPrimitives.ReadUInt32LittleEndian(unit)) == '\n',
-			};
 		}
 	}
 }

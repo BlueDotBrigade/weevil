@@ -3,9 +3,12 @@ namespace BlueDotBrigade.Weevil.IO
 	using System;
 	using System.IO;
 	using System.Text;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Diagnostics;
+	using NSubstitute;
 
 	[TestClass]
-	public class LineIndexFileTests
+	public class SavedIndexTests
 	{
 		private string _directory;
 		private string _logFilePath;
@@ -15,7 +18,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public void Setup()
 		{
 			// Not under the temporary folder: files there are treated as extracted from a compressed archive, and the index is not saved.
-			_directory = Path.Combine(AppContext.BaseDirectory, nameof(LineIndexFileTests), Guid.NewGuid().ToString("N"));
+			_directory = Path.Combine(AppContext.BaseDirectory, nameof(SavedIndexTests), Guid.NewGuid().ToString("N"));
 			System.IO.Directory.CreateDirectory(_directory);
 
 			_logFilePath = Path.Combine(_directory, "Application.log");
@@ -28,11 +31,18 @@ namespace BlueDotBrigade.Weevil.IO
 			System.IO.Directory.Delete(_directory, recursive: true);
 		}
 
-		private LineIndex Load(string logFilePath)
+		private static LineIndex Load(string logFilePath)
 		{
 			using var logSource = new System.IO.FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
-			return LineIndexFile.Load(logFilePath, logSource);
+			return SavedIndex.Load(logFilePath, logSource).LineIndex;
+		}
+
+		private static RecordList ReadAllRecords(System.IO.FileStream log, string logFilePath)
+		{
+			var plugin = new DefaultPlugin();
+
+			return SavedIndex.Load(logFilePath, log).ReadAllRecords(log, plugin, plugin.GetExtension(logFilePath), StorageMode.Ram, displayPath: null, out _);
 		}
 
 		[TestMethod]
@@ -48,21 +58,40 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenTheSameParseSavedAlready_WhenItIsSavedAgain_ThenTheIndexIsNotWrittenAgain()
+		[DoNotParallelize]
+		public void GivenTheLogFailsToBeReadWhileItsSavedTableIsChecked_WhenItsRecordsAreRead_ThenTheLogIsNamedAndTheSavedTableIsKept()
 		{
+			// The log, not the saved index, failed to be read, so the table saved with the index may still be the log's (#1256).
 			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");
-			var parse = new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), StorageMode.Ram, 0, 6, [7]);
-			var builder = new BlueDotBrigade.Weevil.Data.RecordTable.Builder();
-			builder.Add(1, DateTime.MaxValue, new BlueDotBrigade.Weevil.Data.RecordFacts(BlueDotBrigade.Weevil.Data.SeverityType.Information, false, false), "a");
-			BlueDotBrigade.Weevil.Data.RecordTable table = builder.Build();
-			using var logSource = new System.IO.FileStream(_logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-			LineIndexFile.SaveParse(_logFilePath, logSource, Load(_logFilePath), parse, table);
+			using (var firstOpen = new System.IO.FileStream(_logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+			{
+				ReadAllRecords(firstOpen, _logFilePath);
+			}
+
 			var savedAt = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 			System.IO.File.SetLastWriteTimeUtc(_indexFilePath, savedAt);
+			ILogWriter original = Log.Default;
+			ILogWriter log = Substitute.For<ILogWriter>();
 
-			LineIndexFile.SaveParse(_logFilePath, logSource, Load(_logFilePath), new SavedParse(parse.PluginName, parse.PluginBuildId, parse.CoreBuildId, parse.CommonBuildId, StorageMode.Ram, 0, 6, [7]), table);
+			RecordList records;
+			try
+			{
+				Log.Register(log);
+				using var reopened = new FailingOnceFileStream(_logFilePath);
+				var plugin = new DefaultPlugin();
+				var savedIndex = SavedIndex.Load(_logFilePath, reopened);
+				reopened.FailsNextRead = true;
 
-			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt);
+				records = savedIndex.ReadAllRecords(reopened, plugin, plugin.GetExtension(_logFilePath), StorageMode.Ram, displayPath: null, out _);
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			records.Count.Should().Be(3, "the log was parsed");
+			log.Received().Write(LogSeverityType.Warning, Arg.Any<IOException>(), Arg.Is<string>(message => message.StartsWith(SavedIndex.LogUnreadableMessage, StringComparison.Ordinal)));
+			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt, "the parse made the same table, so the saved one was kept");
 		}
 
 		[TestMethod]
@@ -91,7 +120,7 @@ namespace BlueDotBrigade.Weevil.IO
 			index.LineCount.Should().Be(4);
 			using FileStream logSource = System.IO.File.OpenRead(_logFilePath);
 			using FileStream indexSource = System.IO.File.OpenRead(_indexFilePath);
-			LineIndex.TryRead(indexSource, logSource, out LineIndex saved).Should().BeTrue();
+			IndexFile.TryRead(indexSource, logSource.Length, out LineIndex saved, out _).Should().BeTrue();
 			saved.LineCount.Should().Be(4);
 		}
 
@@ -146,6 +175,41 @@ namespace BlueDotBrigade.Weevil.IO
 			finally
 			{
 				System.IO.Directory.Delete(extractedDirectory, recursive: true);
+			}
+		}
+
+		/// <summary>
+		/// A log whose next read fails once, when asked to, as a file on a network share might.
+		/// </summary>
+		private sealed class FailingOnceFileStream(string path) : System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+		{
+			public bool FailsNextRead { get; set; }
+
+			public override int Read(byte[] buffer, int offset, int count)
+			{
+				FailIfAsked();
+				return base.Read(buffer, offset, count);
+			}
+
+			public override int Read(Span<byte> buffer)
+			{
+				FailIfAsked();
+				return base.Read(buffer);
+			}
+
+			public override int ReadByte()
+			{
+				FailIfAsked();
+				return base.ReadByte();
+			}
+
+			private void FailIfAsked()
+			{
+				if (this.FailsNextRead)
+				{
+					this.FailsNextRead = false;
+					throw new IOException("The network path was not found.");
+				}
 			}
 		}
 	}
