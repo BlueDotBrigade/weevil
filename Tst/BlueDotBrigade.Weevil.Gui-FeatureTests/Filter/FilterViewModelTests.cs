@@ -248,7 +248,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			// Ctrl+F5 reloads. A row of the log as it was before is then ignored.
 			viewModel.Reload();
-			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.Rows?.Count < recordCount);
+			await viewModel.WhenIdle();
 			lastRow.ReadContent();
 			uiDispatcher.RunQueued();
 
@@ -269,7 +269,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			// The history changes only once the filter has run; the filter box changes at once.
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
-			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			await viewModel.WhenIdle();
 			var filteredCount = viewModel.VisibleItems.Count;
 			filteredCount.Should().BeLessThan(totalCount, "the filter should hide records before F5 runs it again");
 
@@ -290,7 +290,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				uiDispatcher.Resume();
 			}
 
-			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && resultsChanged > 0);
+			await viewModel.WhenIdle();
 			resultsChanged.Should().Be(1, "F5 refreshes the results, and with them the columns' widths");
 			viewModel.InclusiveFilter.Should().Be(IncludeFilter, "F5 runs the same filter again");
 			viewModel.VisibleItems.Count.Should().Be(filteredCount, "the log has not changed");
@@ -308,7 +308,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			System.IO.File.Delete(logPath);
 			dialog.ClearReceivedCalls();
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
-			WaitUntil(() => !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled && dialog.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IDialogBoxService.ShowMessage)));
+			await viewModel.WhenIdle();
+
+			// The message waits for the filter to end.
+			WaitUntil(() => dialog.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IDialogBoxService.ShowMessage)));
 
 			viewModel.IsProcessingLongOperation.Should().BeFalse("the progress bar is hidden once the filter stops");
 			viewModel.IsMenuEnabled.Should().BeTrue("the menus come back once the filter stops");
@@ -496,7 +499,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			bulletinMediator.ClearReceivedCalls();
 
 			viewModel.Reload();
-			WaitUntil(() => viewModel.IsMenuEnabled && bulletinMediator.ReceivedCalls().Any());
+			await viewModel.WhenIdle();
 
 			dialog.Received(1).TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
 			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin => bulletin.StorageMode == StorageMode.Disk));
@@ -636,7 +639,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var hiddenLineNumber = viewModel.VisibleItems.First(record => !record.Content.Contains(IncludeFilter)).LineNumber;
 
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
-			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			await viewModel.WhenIdle();
 			viewModel.VisibleItems.Should().NotContain(record => record.LineNumber == hiddenLineNumber, "the filter should hide the insight's record");
 
 			int? scrolledTo = null;
@@ -664,7 +667,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var exclusiveFilter = $"@Line={hiddenLineNumber}";
 
 			viewModel.FilterManually(new object[] { IncludeFilter, exclusiveFilter });
-			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && !viewModel.IsFilterInProgress && viewModel.IsMenuEnabled);
+			await viewModel.WhenIdle();
 
 			var wasScrolled = false;
 			viewModel.ScrollRequested += (_, _) => wasScrolled = true;
@@ -687,7 +690,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			dialogBox.Received(1).ShowMessage(Arg.Any<string>(), Arg.Any<string>());
 
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
-			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter));
+			await viewModel.WhenIdle();
 
 			viewModel.InclusiveFilterHistory.Should().Equal(IncludeFilter);
 		}
@@ -701,10 +704,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			await viewModel.OpenAsync(CopyLog("A.log"));
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
-			WaitUntil(() => viewModel.InclusiveFilterHistory.Contains(IncludeFilter) && viewModel.CanOpenLogFile);
+			await viewModel.WhenIdle();
 
 			viewModel.Reload();
-			WaitUntil(() => viewModel.IsFilterToolboxEnabled);
+			await viewModel.WhenIdle();
 
 			// OpenAsync posts this once, and Reload posts it only after the engine has reloaded.
 			bulletinMediator.Received(2).Post(Arg.Any<SourceFileOpenedBulletin>());
@@ -730,7 +733,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				viewModel.Rows.GetRow(0).IsPinned = true;
 
 				viewModel.Reload();
-				WaitUntil(() => viewModel.IsFilterToolboxEnabled);
+				await viewModel.WhenIdle();
 
 				// Reload shows a message when it fails. It never asks: it keeps the changes in memory (#1107).
 				dialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
@@ -872,7 +875,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			WeakReference previousRecords = TrackRecordsShown(viewModel);
 
 			viewModel.Reload();
-			WaitUntil(() => viewModel.IsFilterToolboxEnabled);
+			await viewModel.WhenIdle();
 
 			previousRecords.IsAlive.Should().BeFalse("Reload drops the rows and the engine's records before it reads the log, and opening collects them");
 		}
@@ -989,7 +992,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 
 				zipped.ViewModel.Reload();
-				WaitUntil(() => zipped.ViewModel.IsFilterToolboxEnabled);
+				await zipped.ViewModel.WhenIdle();
 
 				zipped.DialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
 				zipped.ViewModel.VisibleItems.Should().NotBeNullOrEmpty("Reload reads the log again from its extracted copy");
@@ -1043,7 +1046,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 				await zipped.ViewModel.OpenCompressedAsync(zipPath);
 				zipped.ViewModel.Reload();
-				WaitUntil(() => zipped.ViewModel.IsFilterToolboxEnabled);
+				await zipped.ViewModel.WhenIdle();
 
 				System.IO.File.Exists(ExtractedCopy("Logs.zip", "A.log")).Should().BeTrue("the open log is read from that copy");
 				zipped.DialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
@@ -1241,7 +1244,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				await clear;
 			}
 
-			WaitUntil(() => viewModel.CanOpenLogFile && !viewModel.IsFilterInProgress);
+			// Clear applies the filter again, and has begun it by the time it returns.
+			await viewModel.WhenIdle();
 			viewModel.VisibleItems.Count.Should().Be(recordCount - 10);
 		}
 
@@ -1312,12 +1316,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private static async Task OpenAsync(FilterViewModel viewModel)
 		{
 			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
-
-			var stopwatch = Stopwatch.StartNew();
-			while (!viewModel.IsMenuEnabled && stopwatch.Elapsed < TimeSpan.FromSeconds(5))
-			{
-				Thread.Sleep(TimeSpan.FromMilliseconds(100));
-			}
+			await viewModel.WhenIdle();
 
 			viewModel.IsMenuEnabled.Should().BeTrue("the log file should be open before the test continues");
 		}

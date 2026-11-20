@@ -52,11 +52,6 @@
 		/// </summary>
 		private static readonly TimeSpan QuickWorkProgressDelay = TimeSpan.FromMilliseconds(250);
 
-		/// <summary>
-		/// How long a failed read waits to be handled again, while a filter, an open or other work keeps the menus disabled (#1028).
-		/// </summary>
-		private static readonly TimeSpan FailedReadRetryDelay = TimeSpan.FromMilliseconds(500);
-
 		private static readonly Uri NewReleaseUrl =
 			new Uri(@"https://raw.githubusercontent.com/BlueDotBrigade/weevil/master/Doc/Notes/Release/NewReleaseNotification.xml");
 
@@ -121,9 +116,14 @@
 
 		private string _findText;
 
-		// Cancels the background work in progress, such as an analysis or a save, when Abort (Escape) is pressed, or null when none runs (#1027, #1028).
+		// The one operation running, such as an open, a filter or an analysis: Open, the menus, the filter box and the progress bar follow it (#1257).
+		[NotObservable]
+		private readonly BusyState _busy = new BusyState();
+
+		// The operation the filters running share: a new filter replaces the one running, and the operation ends once the last has ended (#1248).
 		// Read and written on the UI thread.
-		private CancellationTokenSource _backgroundCancellation;
+		[NotObservable]
+		private BusyState.Operation _filterOperation;
 
 		// Each open and each Reload starts a new generation of the log, so a failed read is handled once per log, and a read of an older one is ignored (#1028).
 		// Not a property, so it can be passed to `Interlocked` and `Volatile`.
@@ -149,6 +149,7 @@
                 private FilterType _filterExpressionType;
 		private IFilterCriteria _currentfilterCriteria;
 
+		// The filters asked for that have not ended yet.
 		// Prevent Metalama from converting this to a property, which cannot be passed into `Interlocked`.
 		[NotObservable]
 		private int _concurrentFilterCount;
@@ -174,8 +175,8 @@
 			_rowSelection = new RowSelection(_engine);
 
 			this.IsLogFileOpen = false;
-			this.CanOpenLogFile = true;
 			this.AreInsightsReady = false;
+			_busy.Changed += OnBusyChanged;
 
 			this.FilterOptionsViewModel = new FilterOptionsViewModel();
 			this.FilterOptionsViewModel.OptionsChanged += OnFilterOptionsChanged;
@@ -194,8 +195,6 @@
 
                         _filterExpressionType = this.FilterOptionsViewModel.Options.FilterExpressionType;
 			this.AreFilterOptionsVisible = false;
-
-			this.IsFilterToolboxEnabled = false;
 
 			this.InclusiveFilterHistory = new ObservableCollection<string>();
 			this.ExclusiveFilterHistory = new ObservableCollection<string>();
@@ -292,8 +291,12 @@
 
 		public bool IsLogFileOpen { get; private set; }
 
-		public bool CanOpenLogFile { get; private set; }
-		
+		/// <summary>
+		/// Nothing is running, such as an open, a filter or an analysis (#1257).
+		/// </summary>
+		[NotObservable]
+		public bool CanOpenLogFile => !_busy.IsBusy;
+
 		public bool AreInsightsReady { get; private set; }
 
 		[NotObservable]
@@ -341,11 +344,16 @@
 			}
 		}
 
-		public bool IsFilterInProgress { get; private set; }
+		[NotObservable]
+		public bool IsFilterInProgress => Volatile.Read(ref _concurrentFilterCount) > 0;
 
 		public bool AreFilterOptionsVisible { get; set; }
 
-		public bool IsFilterToolboxEnabled { get; private set; }
+		/// <summary>
+		/// A log is open, and no operation that changes its records or reads it is running. A filter leaves it enabled, so a new filter can replace it (#1248).
+		/// </summary>
+		[NotObservable]
+		public bool IsFilterToolboxEnabled => this.IsLogFileOpen && !_busy.IsFilterLocked;
 
 		public string InclusiveFilter
 		{
@@ -452,13 +460,29 @@
                         }
                 }
 
-		public bool IsProcessingLongOperation { get; private set; }
+		/// <summary>
+		/// The progress bar replaces the records, while the operation running shows it.
+		/// </summary>
+		[NotObservable]
+		public bool IsProcessingLongOperation => _busy.IsShowingProgress;
 
 		/// <summary>
 		/// Completes when the latest background work has finished: an analysis, a save, a split or a search for text (#996, #1028).
 		/// </summary>
 		[NotObservable]
 		public Task BackgroundTask { get; private set; } = Task.CompletedTask;
+
+		/// <summary>
+		/// Completes when the operation running now ends, such as an open, a filter or an analysis, or at once when none runs (#1257).
+		/// </summary>
+		/// <remarks>
+		/// An open ends before its insights are ready (<see cref="AreInsightsReady"/>).
+		/// Clear ends just before the filter it applies again begins; the task <see cref="ClearRecords"/> returns completes once that filter has begun.
+		/// </remarks>
+		internal Task WhenIdle()
+		{
+			return _busy.Idle;
+		}
 
 		public FilterOptionsViewModel FilterOptionsViewModel { get; private set; }
 
@@ -532,46 +556,69 @@
 			FilterAsynchronously(this.FilterOptionsViewModel.Options.FilterExpressionType, filterCriteria);
 		}
 
+		/// <summary>
+		/// An operation began or ended, or changed what it shows: the properties that follow it change. On the UI thread.
+		/// </summary>
+		/// <remarks>
+		/// Raised here, because Metalama can't see a change inside <see cref="BusyState"/>.
+		/// </remarks>
+		private void OnBusyChanged(object sender, EventArgs e)
+		{
+			OnPropertyChanged(nameof(this.CanOpenLogFile));
+			OnPropertyChanged(nameof(this.IsMenuEnabled));
+			OnPropertyChanged(nameof(this.IsDashboardEnabled));
+			OnPropertyChanged(nameof(this.IsFilterToolboxEnabled));
+			OnPropertyChanged(nameof(this.IsProcessingLongOperation));
+			CommandManager.InvalidateRequerySuggested();
+		}
+
 		#endregion
 
 		#region Commands: General
 		public async void OpenAsync()
 		{
 			// One window finds the log and chooses RAM or Disk (#1215). A log in a zip is extracted, with its sidecar and index, when the user opens it.
-			this.CanOpenLogFile = false;
-			OpenAsChoice choice = null;
+			// Nothing else runs while it is shown, and the open that follows ends the operation once the records are shown.
+			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: true);
 
-			try
+			if (operation is null)
 			{
-				var isAccepted = _dialogBox.TryShowOpenAs(out choice);
-				LogOpenAs(choice?.Advice, isAccepted ? choice.StorageMode : null);
-
-				if (!isAccepted)
-				{
-					return;
-				}
+				return;
 			}
-			finally
+
+			var isAccepted = _dialogBox.TryShowOpenAs(out OpenAsChoice choice);
+			LogOpenAs(choice?.Advice, isAccepted ? choice.StorageMode : null);
+
+			if (!isAccepted)
 			{
-				if (choice is null)
-				{
-					this.CanOpenLogFile = true;
-				}
+				return;
 			}
 
 			await (choice.ExtractedFolder is null
-				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode)
-				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath));
+				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode, operation)
+				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath, operation));
 		}
 
+		/// <remarks>
+		/// Does nothing while another operation runs, such as a filter or an analysis (#996).
+		/// </remarks>
 		public async Task OpenCompressedAsync(string sourceFilePath)
 		{
+			// Nothing else runs while the zip is read, which takes a while for a large log, and Open As is shown.
+			// The open that follows ends the operation once the records are shown.
+			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: true);
+
+			if (operation is null)
+			{
+				return;
+			}
+
 			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
 			{
 				// Cancelled: nothing opens, and the open log stays (#1028).
-				if (await ChooseStorageAsync(sourceFilePath) is { } storageMode)
+				if (await AskStorageAsync(sourceFilePath) is { } storageMode)
 				{
-					await OpenFromDiskAsync(sourceFilePath, storageMode);
+					await OpenFromDiskAsync(sourceFilePath, storageMode, operation);
 				}
 
 				return;
@@ -581,9 +628,6 @@
 			// and deletes only the copy of the log, never the zip (#1156, #1253).
 			string extractedLog = null;
 			var isOpening = false;
-
-			// No other open starts while the zip is read and its file extracted, which takes a while for a large log.
-			this.CanOpenLogFile = false;
 
 			try
 			{
@@ -618,17 +662,17 @@
 				});
 
 				// Open As follows the list, so its suggestion uses the size of the log chosen (#1028).
-				if (await ChooseStorageAsync(extractedLog) is { } storageMode)
+				if (await AskStorageAsync(extractedLog) is { } storageMode)
 				{
 					isOpening = true;
-					await OpenExtractedAsync(extractedLog, storageMode, file.ToString());
+					await OpenExtractedAsync(extractedLog, storageMode, file.ToString(), operation);
 				}
 			}
 			finally
 			{
 				if (!isOpening)
 				{
-					this.CanOpenLogFile = true;
+					operation.Dispose();
 
 					// Nothing was opened from this copy. What was kept beside it from earlier opens stays,
 					// and so does the copy when it is the log that is open, chosen again from the same zip.
@@ -652,9 +696,10 @@
 		/// <summary>
 		/// Opens a log that is not in a zip, and deletes the copy of the zip the previous log was opened from, if nothing reads it any more.
 		/// </summary>
-		private async Task OpenFromDiskAsync(string logPath, StorageMode storageMode)
+		/// <param name="operation">The open's operation, which ends once the records are shown.</param>
+		private async Task OpenFromDiskAsync(string logPath, StorageMode storageMode, BusyState.Operation operation)
 		{
-			await OpenAsync(logPath, storageMode);
+			await OpenAsync(logPath, storageMode, displayPath: null, operation);
 
 			// A failed open leaves the zipped log open, which still needs its copy.
 			if (!IsOpenFrom(_openExtractedLog))
@@ -670,7 +715,8 @@
 		/// The folder it was extracted to is kept, with the sidecar and saved index the open saves beside the log (#1253).
 		/// </remarks>
 		/// <param name="displayPath">The log as the analyst knows it: the zip, read like a folder, and the log's path in it (#1312).</param>
-		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath)
+		/// <param name="operation">The open's operation, which ends once the records are shown.</param>
+		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath, BusyState.Operation operation)
 		{
 			ExtractedLog extracted = null;
 
@@ -680,7 +726,7 @@
 
 				// Weevil may close before the open finishes.
 				_extractedLogBeingOpened = extracted;
-				await OpenAsync(logPath, storageMode, displayPath);
+				await OpenAsync(logPath, storageMode, displayPath, operation);
 			}
 			finally
 			{
@@ -692,8 +738,8 @@
 
 				if (extracted == null)
 				{
-					// Open As took the menus before the copy failed to open.
-					this.CanOpenLogFile = true;
+					// The copy failed to open.
+					operation.Dispose();
 				}
 				else if (IsOpenFrom(extracted))
 				{
@@ -764,28 +810,8 @@
 		/// </summary>
 		/// <returns>The mode chosen, or <see langword="null"/> when the user cancelled.</returns>
 		/// <remarks>
-		/// Nothing else opens a log or reloads while the estimate runs and the window is shown.
-		/// When a mode is chosen, the open that follows takes over the menus, and gives them back.
+		/// The open's operation keeps anything else from running while the estimate runs and the window is shown.
 		/// </remarks>
-		private async Task<StorageMode?> ChooseStorageAsync(string logPath)
-		{
-			this.CanOpenLogFile = false;
-			StorageMode? chosen = null;
-
-			try
-			{
-				chosen = await AskStorageAsync(logPath);
-				return chosen;
-			}
-			finally
-			{
-				if (chosen is null)
-				{
-					this.CanOpenLogFile = true;
-				}
-			}
-		}
-
 		private async Task<StorageMode?> AskStorageAsync(string logPath)
 		{
 			// Off the UI thread: the estimate reads up to 1 MB of the log, which takes a moment on a network drive.
@@ -828,11 +854,25 @@
 
 		/// <param name="storageMode">RAM or Disk, or <see langword="null"/> for the engine's default: RAM, unless a Debug build's <c>WEEVIL_TEST_STORAGE</c> says otherwise.</param>
 		/// <param name="displayPath">The log as the analyst knows it, when <paramref name="sourceFilePath"/> is a copy, such as one extracted from a zip (#1312).</param>
+		/// <remarks>
+		/// Does nothing while another operation runs, such as a filter or an analysis.
+		/// </remarks>
 		internal async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath = null)
 		{
-			this.CanOpenLogFile = false;
-			this.IsProcessingLongOperation = true;
-			this.IsFilterToolboxEnabled = false;
+			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: true, isFilterLocked: true);
+
+			if (operation != null)
+			{
+				await OpenAsync(sourceFilePath, storageMode, displayPath, operation);
+			}
+		}
+
+		/// <param name="operation">The open's operation. It ends once the records are shown, before the insights are ready.</param>
+		private async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath, BusyState.Operation operation)
+		{
+			// Until the records are shown, the progress bar replaces them and the filter box is disabled.
+			operation.IsShowingProgress = true;
+			operation.IsFilterLocked = true;
 			this.AreInsightsReady = false;
 
 			var openAsResult = new OpenAsResult();
@@ -887,8 +927,7 @@
 						{
 							Log.Default.Write(LogSeverityType.Information, "The analyst chose to stay on the open log, whose changes can't be saved.");
 
-							// The open turned the filters off; the analyst keeps working on this log.
-							_uiDispatcher.Invoke(() => this.IsFilterToolboxEnabled = true);
+							// The analyst keeps working on this log, whose filter box comes back when the operation ends.
 							return;
 						}
 
@@ -986,9 +1025,6 @@
 							}
 						});
 
-						// Marshal UI updates to dispatcher to avoid cross-thread issues
-						_uiDispatcher.Invoke(() => this.IsFilterToolboxEnabled = true);
-
 						Log.Default.Write(
 							LogSeverityType.Information,
 							$"File has been opened. Path={sourceFilePath}");
@@ -1007,14 +1043,11 @@
 					}
 					finally
 					{
-						// Immediately enable UI on dispatcher so menus become actionable without waiting for insights
+						// The records, the menus and the filter box come back without waiting for the insights.
 						_uiDispatcher.Invoke(() =>
 						{
-							this.IsProcessingLongOperation = false;      // show records
 							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
-							this.CanOpenLogFile = true;                  // enable menus now
-							OnPropertyChanged(nameof(this.IsMenuEnabled));  // force re-evaluation
-							CommandManager.InvalidateRequerySuggested();  // refresh commands
+							operation.Dispose();
 						});
 					}
 				}).ContinueWith((x) =>
@@ -1063,8 +1096,7 @@
 			}
 			else
 			{
-				this.CanOpenLogFile = true;
-				this.IsProcessingLongOperation = false;
+				operation.Dispose();
 			}
 		}
 
@@ -1150,14 +1182,20 @@
 			_hasUnsavedChanges = false;
 		}
 
+		/// <remarks>
+		/// Does nothing while another operation runs, such as a filter or an analysis.
+		/// </remarks>
 		public void Reload()
 		{
+			BusyState.Operation operation = _busy.TryBegin("Reload", isShowingProgress: true, isFilterLocked: true);
+
+			if (operation is null)
+			{
+				return;
+			}
+
 			// A read of the log as it was before Reload is no longer handled (#1028).
 			Interlocked.Increment(ref _logGeneration);
-
-			this.CanOpenLogFile = false;
-			this.IsProcessingLongOperation = true;
-			this.IsFilterToolboxEnabled = false;
 
 			// Creating a background thread for processing.
 			// ... Risk: any events raised by the Weevil library will execute on a background thead,
@@ -1211,12 +1249,7 @@
 				}
 				finally
 				{
-					_uiDispatcher.Invoke(() =>
-					{
-						this.CanOpenLogFile = true;
-						this.IsProcessingLongOperation = false;
-						this.IsFilterToolboxEnabled = true;
-					});
+					_uiDispatcher.Invoke(operation.Dispose);
 				}
 			});
 		}
@@ -1474,11 +1507,11 @@
 				Path.Combine(destinationFolder, TsvFileName) :
 				Path.Combine(destinationFolder, RawFileName);
 
-			return RunInBackground("The save", cancellationToken =>
+			return RunInBackground("The save", operation =>
 			{
 				try
 				{
-					engine.Selector.SaveSelection(destinationFilePath, fileFormatType, cancellationToken);
+					engine.Selector.SaveSelection(destinationFilePath, fileFormatType, operation.CancellationToken);
 				}
 				catch (IOException e) when (e.HResult.Equals(-2147024864))
 				{
@@ -1555,7 +1588,7 @@
 			var splitter = new LogFileSplitter(_openLogFilePath);
 			RecordList records = _engine.Filter.Results;
 
-			return RunInBackground("The split", cancellationToken => splitter.Run(records, cancellationToken), progressDelay: QuickWorkProgressDelay);
+			return RunInBackground("The split", operation => splitter.Run(records, operation.CancellationToken), progressDelay: QuickWorkProgressDelay);
 		}
 
 		private void ShowDashboard()
@@ -1644,10 +1677,10 @@
 				return;
 			}
 
-			// A filter, an open or other work is running: handle it once that is done, if the log is still the same.
-			if (!this.IsMenuEnabled)
+			// A filter, an open or other work is running: handle it once that has ended, if the log is still the same (#1257).
+			if (_busy.IsBusy)
 			{
-				_ = Task.Delay(FailedReadRetryDelay).ContinueWith(_ => ReportFailedRead(exception, generation));
+				_ = _busy.Idle.ContinueWith(_ => ReportFailedRead(exception, generation), TaskScheduler.Default);
 				return;
 			}
 
@@ -1703,7 +1736,7 @@
 
 			_ = RunInBackground(
 				"The graph",
-				cancellationToken => records = CopyWithText(selected, cancellationToken),
+				operation => records = CopyWithText(selected, operation.CancellationToken),
 				onSucceeded: () => ShowGraph(records, confirmedFilter, sourceFilePath),
 				progressDelay: QuickWorkProgressDelay);
 		}
@@ -1725,13 +1758,16 @@
 
 		/// <remarks>
 		/// Clear saves the sidecar, then narrows the engine's records and filters them again, which takes seconds on a large log, so it runs in the background,
-		/// as Reload does, with the progress bar a filter shows (#1071).
+		/// as Reload does, with the progress bar a filter shows (#1071). It does nothing while another operation runs, such as a filter or an analysis.
 		/// </remarks>
 		public Task ClearRecords(ClearOperation operation)
 		{
-			this.CanOpenLogFile = false;
-			this.IsProcessingLongOperation = true;
-			this.IsFilterToolboxEnabled = false;
+			BusyState.Operation clearing = _busy.TryBegin("Clear", isShowingProgress: true, isFilterLocked: true);
+
+			if (clearing is null)
+			{
+				return Task.CompletedTask;
+			}
 
 			return Task.Run(() =>
 			{
@@ -1772,9 +1808,7 @@
 				{
 					_uiDispatcher.Invoke(() =>
 					{
-						this.CanOpenLogFile = true;
-						this.IsProcessingLongOperation = false;
-						this.IsFilterToolboxEnabled = true;
+						clearing.Dispose();
 
 						// Clear resets the engine's filter, so the filter shown is applied again.
 						if (wasCleared)
@@ -1895,7 +1929,7 @@
 		private void AbortFilter()
 		{
 			_engine.Filter.Abort();
-			_backgroundCancellation?.Cancel();
+			_busy.Cancel();
 		}
 		#endregion
 
@@ -2020,13 +2054,13 @@
 
 			return RunInBackground(
 				"The search",
-				cancellationToken =>
+				operation =>
 				{
 					try
 					{
 						IRecord found = findNext
-							? engine.Navigate.NextContent(text, isCaseSensitive, useRegex, cancellationToken)
-							: engine.Navigate.PreviousContent(text, isCaseSensitive, useRegex, cancellationToken);
+							? engine.Navigate.NextContent(text, isCaseSensitive, useRegex, operation.CancellationToken)
+							: engine.Navigate.PreviousContent(text, isCaseSensitive, useRegex, operation.CancellationToken);
 
 						position = found.ToIndexUsing(engine.Filter.Results);
 					}
@@ -2460,15 +2494,15 @@
 		/// </remarks>
 		private Task AnalyzeInBackground(Func<IUserDialog, CancellationToken, Results> analyze)
 		{
-			var userDialog = new UiThreadUserDialog(
-				_dialogBox,
-				_uiDispatcher,
-				promptOpening: () => this.IsProcessingLongOperation = false,
-				promptClosed: () => this.IsProcessingLongOperation = true);
-
-			return RunInBackground("The analysis", cancellationToken =>
+			return RunInBackground("The analysis", operation =>
 			{
-				Results results = analyze(userDialog, cancellationToken);
+				var userDialog = new UiThreadUserDialog(
+					_dialogBox,
+					_uiDispatcher,
+					promptOpening: () => operation.IsShowingProgress = false,
+					promptClosed: () => operation.IsShowingProgress = true);
+
+				Results results = analyze(userDialog, operation.CancellationToken);
 
 				_bulletinMediator.Post(new AnalysisCompleteBulletin(
 					results.FlaggedRecords,
@@ -2483,94 +2517,75 @@
 		/// Until the work finishes, the menus and the filter are disabled, and after <paramref name="progressDelay"/> the progress bar replaces the records,
 		/// so the user cannot edit a comment or a pin that the work may be writing to, nor start other work.
 		/// Work that only reads, such as a save, takes a delay, so quick work does not flicker; until then the records can still be clicked.
-		/// Abort (Escape) cancels the token the work is given (#1027). An unexpected error is logged and shown.
+		/// Abort (Escape) cancels the operation's token, which the work reads (#1027). An unexpected error is logged and shown.
+		/// Does nothing while another operation runs, such as a filter or an open.
 		/// </remarks>
-		/// <param name="operation">What the work does, for the log and the error message, such as "The analysis".</param>
-		/// <param name="work">Runs on a background thread. It marshals anything it shows to the UI thread.</param>
+		/// <param name="name">What the work does, for the log and the error message, such as "The analysis".</param>
+		/// <param name="work">Runs on a background thread, given the operation it runs in. It marshals anything it shows to the UI thread.</param>
 		/// <param name="onSucceeded">
 		/// Runs on the UI thread once the menus, the filter and the records are back, when the work finished without being aborted,
 		/// such as going to the record found, which needs the records shown to take the focus.
 		/// </param>
 		/// <param name="progressDelay">How long the work runs before the progress bar replaces the records.</param>
-		private Task RunInBackground(string operation, Action<CancellationToken> work, Action onSucceeded = null, TimeSpan progressDelay = default)
+		private Task RunInBackground(string name, Action<BusyState.Operation> work, Action onSucceeded = null, TimeSpan progressDelay = default)
 		{
-			// Other background work, a filter or an open is in progress.
-			if (!this.IsMenuEnabled)
+			// Without a log there is nothing to work on.
+			BusyState.Operation operation = this.IsLogFileOpen
+				? _busy.TryBegin(name, isShowingProgress: progressDelay <= TimeSpan.Zero, isFilterLocked: true, canCancel: true)
+				: null;
+
+			if (operation is null)
 			{
 				return Task.CompletedTask;
 			}
 
-			var wasFilterToolboxEnabled = this.IsFilterToolboxEnabled;
-			var isRunning = true;
 			var hasFinished = false;
 			Action<Exception> reportFailedRead = CreateFailedReadReporter();
 
-			this.CanOpenLogFile = false;
-			this.IsFilterToolboxEnabled = false;
-
-			var cancellation = new CancellationTokenSource();
-			_backgroundCancellation = cancellation;
-
-			// Cancelled once the work ends, so the progress bar is never shown afterwards.
-			var progress = new CancellationTokenSource();
-
-			if (progressDelay <= TimeSpan.Zero)
+			if (progressDelay > TimeSpan.Zero)
 			{
-				this.IsProcessingLongOperation = true;
-			}
-			else
-			{
-				_ = Task.Delay(progressDelay, progress.Token).ContinueWith(
-					_ => _uiDispatcher.Invoke(() =>
+				// Showing the progress bar once the operation has ended does nothing.
+				_ = Task.Delay(progressDelay).ContinueWith(
+					_ =>
 					{
-						// Read and written on the UI thread, as the finally block below is.
-						if (isRunning)
+						if (!operation.Ended.IsCompleted)
 						{
-							this.IsProcessingLongOperation = true;
+							_uiDispatcher.Invoke(() => operation.IsShowingProgress = true);
 						}
-					}),
-					TaskContinuationOptions.OnlyOnRanToCompletion);
+					},
+					TaskScheduler.Default);
 			}
 
 			this.BackgroundTask = Task.Run(() =>
 			{
 				try
 				{
-					work(cancellation.Token);
+					work(operation);
 					hasFinished = true;
 				}
-				catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+				catch (OperationCanceledException) when (operation.CancellationToken.IsCancellationRequested)
 				{
-					Log.Default.Write(LogSeverityType.Information, $"{operation} was aborted by the user.");
+					Log.Default.Write(LogSeverityType.Information, $"{name} was aborted by the user.");
 				}
 				catch (LogFileChangedException e)
 				{
 					// Shown once per log, as for any read of a log on disk that changed or is gone (#1028, #1247, #1295).
-					Log.Default.Write(LogSeverityType.Warning, e, $"{operation} stopped, because the log on disk changed or can no longer be read.");
+					Log.Default.Write(LogSeverityType.Warning, e, $"{name} stopped, because the log on disk changed or can no longer be read.");
 					reportFailedRead(e);
 				}
 				catch (Exception e)
 				{
-					Log.Default.Write(LogSeverityType.Error, e, $"{operation} could not be completed.");
-					_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"{operation} could not be completed.\r\n\r\n{e.Message}", "Error"));
+					Log.Default.Write(LogSeverityType.Error, e, $"{name} could not be completed.");
+					_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"{name} could not be completed.\r\n\r\n{e.Message}", "Error"));
 				}
 				finally
 				{
 					_uiDispatcher.Invoke(() =>
 					{
 						// Escape may be pressed after the work returned, and before this runs.
-						var hasSucceeded = hasFinished && !cancellation.IsCancellationRequested;
+						var hasSucceeded = hasFinished && !operation.CancellationToken.IsCancellationRequested;
 
-						isRunning = false;
-						progress.Cancel();
-						progress.Dispose();
-						_backgroundCancellation = null;
-						cancellation.Dispose();
-						this.IsProcessingLongOperation = false;
-						this.IsFilterToolboxEnabled = wasFilterToolboxEnabled;
-						this.CanOpenLogFile = true;
-						OnPropertyChanged(nameof(this.IsMenuEnabled));
-						CommandManager.InvalidateRequerySuggested();
+						operation.Dispose();
 
 						if (hasSucceeded)
 						{
@@ -2713,6 +2728,7 @@
 		/// Generally, ViewModels can assume that they have access to the UI thread.
 		/// In this case, work is being deferred to a background thread. As a result,
 		/// the transition the UI & background threads has to be managed.
+		/// Called on the UI thread, so the filter's operation begins before this returns: the menus are disabled at once (#1257).
 		/// </remarks>
 		/// <param name="filterType">The filter to apply, or the one <paramref name="runFilter"/> runs again.</param>
 		/// <param name="filterCriteria">The filter to apply, or the one <paramref name="runFilter"/> runs again.</param>
@@ -2729,6 +2745,11 @@
 				LogSeverityType.Debug,
 				$"Filter operation starting... QueuedFilters={_concurrentFilterCount}, FilterType={filterType}, {filterCriteria}");
 
+			// Is a filter operation in progress?
+			// ... yes: the new filter takes precedence, and shares its operation, which shows the progress bar until the last filter ends.
+			var isReplacing = Interlocked.Increment(ref _concurrentFilterCount) > 1;
+			_filterOperation ??= _busy.TryBegin("The filter", isShowingProgress: true, isFilterLocked: false);
+
 			// Creating a background thread for processing.
 			// ... Risk: any events raised by the Weevil library will execute on a background thead,
 			// ... and not the UI thread which is required in order update/change the UI.
@@ -2736,135 +2757,149 @@
 
 			return Task.Run(async () =>
 			{
-				var areResultsShown = false;
-
-				// Is a filter operation in progress?
-				// ... yes: cancel it because new filter takes precedence
-				if (this.IsFilterInProgress)
-				{
-					Log.Default.Write(
-						LogSeverityType.Warning,
-						$"Filter operation in progress will be aborted.");
-
-					_engine.Filter.Abort();
-				}
-
-				// First filter to execute?
-				if (Interlocked.Increment(ref _concurrentFilterCount) == 1)
-				{
-					this.IsFilterInProgress = true;
-
-					// Force UI to ensure that the screen has been refreshed
-					// ... so that the user knows a filter operation is in progress.
-					_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
-
-					Log.Default.Write(
-						LogSeverityType.Debug,
-						$"Filter operation is displaying the progress bar.");
-
-					_uiDispatcher.Invoke(() =>
-					{
-						this.CanOpenLogFile = false;
-						this.IsProcessingLongOperation = true;
-					});
-				}
-
-				var wasFilterApplied = false;
+				var isCounted = true;
 
 				try
 				{
-					wasFilterApplied = await runFilter();
-				}
-				catch (InvalidExpressionException e)
-				{
-					var error = e.InnerException == null ? "Not specified." : e.InnerException.Message;
+					var areResultsShown = false;
 
-					var message =
-						$"Filter operation could not be completed. The provided filter expression is invalid.\r\n\r\n" +
-						$"Expression: {e.Expression}\r\n" +
-						$"Error: {error}";
-
-					Log.Default.Write(
-						LogSeverityType.Error,
-						message);
-
-					_uiDispatcher.Invoke(() =>
+					if (isReplacing)
 					{
-						MessageBox.Show(message, "Invalid Expression", MessageBoxButton.OK, MessageBoxImage.Error);
-					});
-				}
-				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-				{
-					// A log on disk that changed, or is gone. The previous results stay, and the progress bar is hidden below (#1028).
-					Log.Default.Write(LogSeverityType.Warning, e, "The filter could not read the log.");
-					reportFailedRead(e);
-				}
-				catch (Exception e)
-				{
-					// Caught, so the progress bar is hidden below, rather than left running (#1028).
-					Log.Default.Write(LogSeverityType.Error, e, "The filter could not be completed.");
-					_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"The filter could not be completed.\r\n\r\n{e.Message}", "Error"));
-				}
-
-				// Last filter to execute?
-				if (Interlocked.Decrement(ref _concurrentFilterCount) == 0)
-				{
-					this.IsFilterInProgress = false;
-
-					// Was the filter applied?
-					// ... if not, then display the original 
-					if (wasFilterApplied)
-					{
-						areResultsShown = true;
-						_currentfilterType = filterType;
-						_currentfilterCriteria = filterCriteria;
-
 						Log.Default.Write(
-							LogSeverityType.Information,
-							$"Filter operation is displaying the filter results.");
+							LogSeverityType.Warning,
+							$"Filter operation in progress will be aborted.");
 
-						_uiDispatcher.Invoke(() =>
-						{
-							RefreshFilterResults();
-							RaiseResultsChanged();
-						});
+						_engine.Filter.Abort();
 					}
 					else
 					{
-						_inclusiveFilter = _engine.Filter.Criteria.Include;
-						_exclusiveFilter = _engine.Filter.Criteria.Exclude;
+						// Force UI to ensure that the screen has been refreshed
+						// ... so that the user knows a filter operation is in progress.
+						_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
+					}
+
+					var wasFilterApplied = false;
+
+					try
+					{
+						wasFilterApplied = await runFilter();
+					}
+					catch (InvalidExpressionException e)
+					{
+						var error = e.InnerException == null ? "Not specified." : e.InnerException.Message;
+
+						var message =
+							$"Filter operation could not be completed. The provided filter expression is invalid.\r\n\r\n" +
+							$"Expression: {e.Expression}\r\n" +
+							$"Error: {error}";
 
 						Log.Default.Write(
-							LogSeverityType.Information,
-							$"Filter operation will display the previous filter values. Include=`{_inclusiveFilter}`, Exclude=`{_exclusiveFilter}`");
+							LogSeverityType.Error,
+							message);
 
 						_uiDispatcher.Invoke(() =>
 						{
-							// Note: We can't set the property directly, because we would trigger the filter operation again. 
-													OnPropertyChanged(nameof(this.InclusiveFilter));
-							OnPropertyChanged(nameof(this.ExclusiveFilter));
+							MessageBox.Show(message, "Invalid Expression", MessageBoxButton.OK, MessageBoxImage.Error);
 						});
 					}
-
-					Log.Default.Write(
-						LogSeverityType.Debug,
-						$"Filter operation is complete. The progress bar will now be hidden.");
-
-					_uiDispatcher.Invoke(() =>
+					catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 					{
-						this.CanOpenLogFile = true;
-						this.IsProcessingLongOperation = false;
-					});
-				}
-				else
-				{
-					Log.Default.Write(
-						LogSeverityType.Warning,
-						$"Filter operation is complete. Current filter results will be ignored because another filter operation has started.");
-				}
+						// A log on disk that changed, or is gone. The previous results stay, and the progress bar is hidden below (#1028).
+						Log.Default.Write(LogSeverityType.Warning, e, "The filter could not read the log.");
+						reportFailedRead(e);
+					}
+					catch (Exception e)
+					{
+						// Caught, so the progress bar is hidden below, rather than left running (#1028).
+						Log.Default.Write(LogSeverityType.Error, e, "The filter could not be completed.");
+						_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"The filter could not be completed.\r\n\r\n{e.Message}", "Error"));
+					}
 
-				return areResultsShown;
+					// Last filter to execute?
+					isCounted = false;
+
+					if (Interlocked.Decrement(ref _concurrentFilterCount) == 0)
+					{
+						// Was the filter applied?
+						// ... if not, then display the original 
+						if (wasFilterApplied)
+						{
+							areResultsShown = true;
+							_currentfilterType = filterType;
+							_currentfilterCriteria = filterCriteria;
+
+							Log.Default.Write(
+								LogSeverityType.Information,
+								$"Filter operation is displaying the filter results.");
+
+							_uiDispatcher.Invoke(() =>
+							{
+								RefreshFilterResults();
+								RaiseResultsChanged();
+							});
+						}
+						else
+						{
+							_inclusiveFilter = _engine.Filter.Criteria.Include;
+							_exclusiveFilter = _engine.Filter.Criteria.Exclude;
+
+							Log.Default.Write(
+								LogSeverityType.Information,
+								$"Filter operation will display the previous filter values. Include=`{_inclusiveFilter}`, Exclude=`{_exclusiveFilter}`");
+
+							_uiDispatcher.Invoke(() =>
+							{
+								// Note: We can't set the property directly, because we would trigger the filter operation again. 
+														OnPropertyChanged(nameof(this.InclusiveFilter));
+								OnPropertyChanged(nameof(this.ExclusiveFilter));
+							});
+						}
+
+						Log.Default.Write(
+							LogSeverityType.Debug,
+							$"Filter operation is complete. The progress bar will now be hidden.");
+
+						_uiDispatcher.Invoke(EndFilterOperationIfLast);
+					}
+					else
+					{
+						Log.Default.Write(
+							LogSeverityType.Warning,
+							$"Filter operation is complete. Current filter results will be ignored because another filter operation has started.");
+					}
+
+					return areResultsShown;
+				}
+				finally
+				{
+					// A throw outside the catches above, such as from a dispatcher shutting down, must not leave Weevil busy for good.
+					if (isCounted)
+					{
+						Interlocked.Decrement(ref _concurrentFilterCount);
+					}
+
+					if (Volatile.Read(ref _concurrentFilterCount) == 0 && Volatile.Read(ref _filterOperation) != null)
+					{
+						_uiDispatcher.BeginInvoke(EndFilterOperationIfLast, DispatcherPriority.Normal);
+					}
+				}
 			});
+		}
+
+		/// <summary>
+		/// Ends the filters' operation, unless a filter asked for since then keeps it running. Call it on the UI thread.
+		/// </summary>
+		/// <remarks>
+		/// The field is cleared before the operation ends, so a filter asked for as it ends begins a new one rather than joining an ended one.
+		/// </remarks>
+		private void EndFilterOperationIfLast()
+		{
+			if (Volatile.Read(ref _concurrentFilterCount) == 0)
+			{
+				BusyState.Operation operation = _filterOperation;
+				_filterOperation = null;
+				operation?.Dispose();
+			}
 		}
 
 		/// <remarks>
