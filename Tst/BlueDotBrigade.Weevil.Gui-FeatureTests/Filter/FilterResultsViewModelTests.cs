@@ -29,11 +29,7 @@
 				string.Empty,
 			});
 
-			var stopwatch = Stopwatch.StartNew();
-			do
-			{
-				Thread.Sleep(TimeSpan.FromMilliseconds(100));
-			} while (viewModel.IsFilterInProgress && stopwatch.Elapsed < TimeSpan.FromSeconds(5));
+			await viewModel.WhenIdle();
 
 			viewModel.VisibleItems.Count.Should().Be(512);
 		}

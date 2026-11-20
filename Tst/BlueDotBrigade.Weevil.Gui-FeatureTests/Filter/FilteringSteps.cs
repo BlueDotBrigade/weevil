@@ -52,21 +52,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		/// <summary>
-		/// Filters, then waits until the results are shown: the filter runs in the background.
+		/// Filters, then waits until the results are shown: the filter runs in the background, and its operation ends once they are.
 		/// </summary>
 		private void FilterAndWait()
 		{
-			RowList rowsBefore = this.Context.Filter.Rows;
-
 			this.Context.Filter.Filter();
-
-			var stopwatch = Stopwatch.StartNew();
-
-			while ((ReferenceEquals(this.Context.Filter.Rows, rowsBefore) || !this.Context.Filter.CanOpenLogFile) &&
-				stopwatch.Elapsed < FilterTimeout)
-			{
-				Thread.Sleep(TimeSpan.FromMilliseconds(50));
-			}
+			this.Context.Filter.WhenIdle().Wait(FilterTimeout);
 		}
 	}
 }
