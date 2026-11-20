@@ -579,7 +579,7 @@
 		{
 			// One window finds the log and chooses RAM or Disk (#1215). A log in a zip is extracted, with its sidecar and index, when the user opens it.
 			// Nothing else runs while it is shown, and the open that follows ends the operation once the records are shown.
-			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: false);
+			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: true);
 
 			if (operation is null)
 			{
@@ -606,7 +606,7 @@
 		{
 			// Nothing else runs while the zip is read, which takes a while for a large log, and Open As is shown.
 			// The open that follows ends the operation once the records are shown.
-			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: false);
+			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: true);
 
 			if (operation is null)
 			{
@@ -2757,121 +2757,149 @@
 
 			return Task.Run(async () =>
 			{
-				var areResultsShown = false;
-
-				if (isReplacing)
-				{
-					Log.Default.Write(
-						LogSeverityType.Warning,
-						$"Filter operation in progress will be aborted.");
-
-					_engine.Filter.Abort();
-				}
-				else
-				{
-					// Force UI to ensure that the screen has been refreshed
-					// ... so that the user knows a filter operation is in progress.
-					_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
-				}
-
-				var wasFilterApplied = false;
+				var isCounted = true;
 
 				try
 				{
-					wasFilterApplied = await runFilter();
-				}
-				catch (InvalidExpressionException e)
-				{
-					var error = e.InnerException == null ? "Not specified." : e.InnerException.Message;
+					var areResultsShown = false;
 
-					var message =
-						$"Filter operation could not be completed. The provided filter expression is invalid.\r\n\r\n" +
-						$"Expression: {e.Expression}\r\n" +
-						$"Error: {error}";
-
-					Log.Default.Write(
-						LogSeverityType.Error,
-						message);
-
-					_uiDispatcher.Invoke(() =>
+					if (isReplacing)
 					{
-						MessageBox.Show(message, "Invalid Expression", MessageBoxButton.OK, MessageBoxImage.Error);
-					});
-				}
-				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-				{
-					// A log on disk that changed, or is gone. The previous results stay, and the progress bar is hidden below (#1028).
-					Log.Default.Write(LogSeverityType.Warning, e, "The filter could not read the log.");
-					reportFailedRead(e);
-				}
-				catch (Exception e)
-				{
-					// Caught, so the progress bar is hidden below, rather than left running (#1028).
-					Log.Default.Write(LogSeverityType.Error, e, "The filter could not be completed.");
-					_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"The filter could not be completed.\r\n\r\n{e.Message}", "Error"));
-				}
-
-				// Last filter to execute?
-				if (Interlocked.Decrement(ref _concurrentFilterCount) == 0)
-				{
-					// Was the filter applied?
-					// ... if not, then display the original 
-					if (wasFilterApplied)
-					{
-						areResultsShown = true;
-						_currentfilterType = filterType;
-						_currentfilterCriteria = filterCriteria;
-
 						Log.Default.Write(
-							LogSeverityType.Information,
-							$"Filter operation is displaying the filter results.");
+							LogSeverityType.Warning,
+							$"Filter operation in progress will be aborted.");
 
-						_uiDispatcher.Invoke(() =>
-						{
-							RefreshFilterResults();
-							RaiseResultsChanged();
-						});
+						_engine.Filter.Abort();
 					}
 					else
 					{
-						_inclusiveFilter = _engine.Filter.Criteria.Include;
-						_exclusiveFilter = _engine.Filter.Criteria.Exclude;
+						// Force UI to ensure that the screen has been refreshed
+						// ... so that the user knows a filter operation is in progress.
+						_uiDispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
+					}
+
+					var wasFilterApplied = false;
+
+					try
+					{
+						wasFilterApplied = await runFilter();
+					}
+					catch (InvalidExpressionException e)
+					{
+						var error = e.InnerException == null ? "Not specified." : e.InnerException.Message;
+
+						var message =
+							$"Filter operation could not be completed. The provided filter expression is invalid.\r\n\r\n" +
+							$"Expression: {e.Expression}\r\n" +
+							$"Error: {error}";
 
 						Log.Default.Write(
-							LogSeverityType.Information,
-							$"Filter operation will display the previous filter values. Include=`{_inclusiveFilter}`, Exclude=`{_exclusiveFilter}`");
+							LogSeverityType.Error,
+							message);
 
 						_uiDispatcher.Invoke(() =>
 						{
-							// Note: We can't set the property directly, because we would trigger the filter operation again. 
-													OnPropertyChanged(nameof(this.InclusiveFilter));
-							OnPropertyChanged(nameof(this.ExclusiveFilter));
+							MessageBox.Show(message, "Invalid Expression", MessageBoxButton.OK, MessageBoxImage.Error);
 						});
 					}
-
-					Log.Default.Write(
-						LogSeverityType.Debug,
-						$"Filter operation is complete. The progress bar will now be hidden.");
-
-					_uiDispatcher.Invoke(() =>
+					catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 					{
-						// A filter asked for since then keeps the operation running.
-						if (Volatile.Read(ref _concurrentFilterCount) == 0)
-						{
-							_filterOperation?.Dispose();
-							_filterOperation = null;
-						}
-					});
-				}
-				else
-				{
-					Log.Default.Write(
-						LogSeverityType.Warning,
-						$"Filter operation is complete. Current filter results will be ignored because another filter operation has started.");
-				}
+						// A log on disk that changed, or is gone. The previous results stay, and the progress bar is hidden below (#1028).
+						Log.Default.Write(LogSeverityType.Warning, e, "The filter could not read the log.");
+						reportFailedRead(e);
+					}
+					catch (Exception e)
+					{
+						// Caught, so the progress bar is hidden below, rather than left running (#1028).
+						Log.Default.Write(LogSeverityType.Error, e, "The filter could not be completed.");
+						_uiDispatcher.Invoke(() => _dialogBox.ShowMessage($"The filter could not be completed.\r\n\r\n{e.Message}", "Error"));
+					}
 
-				return areResultsShown;
+					// Last filter to execute?
+					isCounted = false;
+
+					if (Interlocked.Decrement(ref _concurrentFilterCount) == 0)
+					{
+						// Was the filter applied?
+						// ... if not, then display the original 
+						if (wasFilterApplied)
+						{
+							areResultsShown = true;
+							_currentfilterType = filterType;
+							_currentfilterCriteria = filterCriteria;
+
+							Log.Default.Write(
+								LogSeverityType.Information,
+								$"Filter operation is displaying the filter results.");
+
+							_uiDispatcher.Invoke(() =>
+							{
+								RefreshFilterResults();
+								RaiseResultsChanged();
+							});
+						}
+						else
+						{
+							_inclusiveFilter = _engine.Filter.Criteria.Include;
+							_exclusiveFilter = _engine.Filter.Criteria.Exclude;
+
+							Log.Default.Write(
+								LogSeverityType.Information,
+								$"Filter operation will display the previous filter values. Include=`{_inclusiveFilter}`, Exclude=`{_exclusiveFilter}`");
+
+							_uiDispatcher.Invoke(() =>
+							{
+								// Note: We can't set the property directly, because we would trigger the filter operation again. 
+														OnPropertyChanged(nameof(this.InclusiveFilter));
+								OnPropertyChanged(nameof(this.ExclusiveFilter));
+							});
+						}
+
+						Log.Default.Write(
+							LogSeverityType.Debug,
+							$"Filter operation is complete. The progress bar will now be hidden.");
+
+						_uiDispatcher.Invoke(EndFilterOperationIfLast);
+					}
+					else
+					{
+						Log.Default.Write(
+							LogSeverityType.Warning,
+							$"Filter operation is complete. Current filter results will be ignored because another filter operation has started.");
+					}
+
+					return areResultsShown;
+				}
+				finally
+				{
+					// A throw outside the catches above, such as from a dispatcher shutting down, must not leave Weevil busy for good.
+					if (isCounted)
+					{
+						Interlocked.Decrement(ref _concurrentFilterCount);
+					}
+
+					if (Volatile.Read(ref _concurrentFilterCount) == 0 && Volatile.Read(ref _filterOperation) != null)
+					{
+						_uiDispatcher.BeginInvoke(EndFilterOperationIfLast, DispatcherPriority.Normal);
+					}
+				}
 			});
+		}
+
+		/// <summary>
+		/// Ends the filters' operation, unless a filter asked for since then keeps it running. Call it on the UI thread.
+		/// </summary>
+		/// <remarks>
+		/// The field is cleared before the operation ends, so a filter asked for as it ends begins a new one rather than joining an ended one.
+		/// </remarks>
+		private void EndFilterOperationIfLast()
+		{
+			if (Volatile.Read(ref _concurrentFilterCount) == 0)
+			{
+				BusyState.Operation operation = _filterOperation;
+				_filterOperation = null;
+				operation?.Dispose();
+			}
 		}
 
 		/// <remarks>

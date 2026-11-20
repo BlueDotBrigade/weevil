@@ -1,8 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Filter
 {
 	using System;
-	using System.Diagnostics;
-	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
 	using BlueDotBrigade.Weevil.Gui.Threading;

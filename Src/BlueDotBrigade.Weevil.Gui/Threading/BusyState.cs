@@ -64,7 +64,17 @@
 			}
 
 			Log.Default.Write(LogSeverityType.Debug, $"{name} has begun.");
-			this.Changed?.Invoke(this, EventArgs.Empty);
+
+			try
+			{
+				this.Changed?.Invoke(this, EventArgs.Empty);
+			}
+			catch
+			{
+				// The caller never gets the operation, so it could never end it.
+				End(operation);
+				throw;
+			}
 
 			return operation;
 		}
@@ -90,8 +100,16 @@
 			}
 
 			Log.Default.Write(LogSeverityType.Debug, $"{operation.Name} has ended.");
-			this.Changed?.Invoke(this, EventArgs.Empty);
-			operation.Complete();
+
+			try
+			{
+				this.Changed?.Invoke(this, EventArgs.Empty);
+			}
+			finally
+			{
+				// What waits for the end, such as a failed read's message, is told even if a handler throws.
+				operation.Complete();
+			}
 		}
 
 		private void OnChanged(Operation operation)
