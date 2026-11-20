@@ -41,9 +41,9 @@ namespace BlueDotBrigade.Weevil.IO
 		internal const string LogUnreadableMessage = "The log could not be read while its saved record table was checked, so the log will be parsed. The saved table is kept if the parse makes the same one.";
 
 		/// <summary>
-		/// Logged when the log, not the saved index, could not be read while the saved line index was checked against it (#1323).
+		/// Logged when the log, not the saved index, could not be read while the saved index was checked against it (#1323).
 		/// </summary>
-		internal const string LogUnreadableForLineIndexMessage = "The log could not be read while its saved line index was checked, so the line index will be rebuilt. The saved index is kept, as it may still match the log: a full open checks its record table again.";
+		internal const string LogUnreadableForLineIndexMessage = "The log could not be read while its saved index was checked, so the line index will be rebuilt, but not saved: the saved index may still match the log.";
 
 		private readonly string _logFilePath;
 		private readonly string _indexFilePath;
@@ -93,7 +93,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <remarks>
 		/// The index is saved whenever it changes, unless it cannot be: Weevil then continues without saving it.
 		/// Nor is it saved when the log could not be read while the saved index was checked, as it may still match the log:
-		/// a full open then checks its record table again (#1323).
+		/// when the saved index was read, a full open then checks its record table again (#1323).
 		/// An index that holds a record table is not saved when the log grew, as that would drop the table: a full open extends the table,
 		/// and saves both (#1023). After any other open, the next one scans the new content again.
 		/// </remarks>
@@ -283,7 +283,7 @@ namespace BlueDotBrigade.Weevil.IO
 				{
 					Log.Default.Write(
 						LogSeverityType.Information,
-						$"The saved index changed after it was loaded, so the log will be parsed. IndexFilePath={_indexFilePath}");
+						$"The saved index changed after it was loaded, or does not match the log, so the log will be parsed. IndexFilePath={_indexFilePath}");
 					return TableLoad.NotLoaded;
 				}
 
