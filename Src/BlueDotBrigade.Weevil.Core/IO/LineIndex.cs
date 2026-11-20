@@ -247,7 +247,7 @@ namespace BlueDotBrigade.Weevil.IO
 					return false;
 				}
 
-				var (headHash, tailHash) = ComputeFingerprint(log, this.IndexedLength);
+				(var headHash, var tailHash) = ComputeFingerprint(log, this.IndexedLength);
 
 				return headHash.AsSpan().SequenceEqual(_headHash) && tailHash.AsSpan().SequenceEqual(_tailHash);
 			}

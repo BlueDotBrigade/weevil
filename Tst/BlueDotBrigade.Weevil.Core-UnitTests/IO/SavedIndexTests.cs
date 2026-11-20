@@ -59,10 +59,20 @@ namespace BlueDotBrigade.Weevil.IO
 
 		[TestMethod]
 		[DoNotParallelize]
-		public void GivenTheLogFailsToBeReadWhileItsSavedTableIsChecked_WhenItsRecordsAreRead_ThenTheLogIsNamedAndTheSavedTableIsKept()
+		[DataRow(0L, DisplayName = "While the log is matched to its line index")]
+		[DataRow((long)LogFileSource.BlockSize, DisplayName = "While the log's blocks are checked")]
+		public void GivenTheLogFailsToBeReadWhileItsSavedTableIsChecked_WhenItsRecordsAreRead_ThenTheLogIsNamedAndTheSavedTableIsKept(long failingOffset)
 		{
 			// The log, not the saved index, failed to be read, so the table saved with the index may still be the log's (#1256).
-			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");
+			// Longer than two blocks, so only checking the blocks reads from the second block's start: the line index reads the log's first and last few KB.
+			const int LineCount = 20_000;
+			var lines = new StringBuilder();
+			for (var line = 0; line < LineCount; line++)
+			{
+				lines.Append($"Line {line:D5}\n");
+			}
+
+			System.IO.File.WriteAllText(_logFilePath, lines.ToString());
 			using (var firstOpen = new System.IO.FileStream(_logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 			{
 				ReadAllRecords(firstOpen, _logFilePath);
@@ -74,23 +84,29 @@ namespace BlueDotBrigade.Weevil.IO
 			ILogWriter log = Substitute.For<ILogWriter>();
 
 			RecordList records;
+			bool hasFailed;
 			try
 			{
 				Log.Register(log);
 				using var reopened = new FailingOnceFileStream(_logFilePath);
 				var plugin = new DefaultPlugin();
 				var savedIndex = SavedIndex.Load(_logFilePath, reopened);
-				reopened.FailsNextRead = true;
+				reopened.FailingOffset = failingOffset;
 
 				records = savedIndex.ReadAllRecords(reopened, plugin, plugin.GetExtension(_logFilePath), StorageMode.Ram, displayPath: null, out _);
+				hasFailed = reopened.HasFailed;
 			}
 			finally
 			{
 				Log.Register(original);
 			}
 
-			records.Count.Should().Be(3, "the log was parsed");
-			log.Received().Write(LogSeverityType.Warning, Arg.Any<IOException>(), Arg.Is<string>(message => message.StartsWith(SavedIndex.LogUnreadableMessage, StringComparison.Ordinal)));
+			hasFailed.Should().BeTrue("the read at the failing offset should have been tried");
+			records.Count.Should().Be(LineCount, "the log was parsed");
+			log.Received().Write(
+				LogSeverityType.Warning,
+				Arg.Any<IOException>(),
+				Arg.Is<string>(message => message.StartsWith(SavedIndex.LogUnreadableMessage, StringComparison.Ordinal) && message.Contains(_logFilePath, StringComparison.Ordinal)));
 			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt, "the parse made the same table, so the saved one was kept");
 		}
 
@@ -179,11 +195,13 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// A log whose next read fails once, when asked to, as a file on a network share might.
+		/// A log whose first read from <see cref="FailingOffset"/> fails, as a file on a network share might.
 		/// </summary>
 		private sealed class FailingOnceFileStream(string path) : System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
 		{
-			public bool FailsNextRead { get; set; }
+			public long? FailingOffset { get; set; }
+
+			public bool HasFailed { get; private set; }
 
 			public override int Read(byte[] buffer, int offset, int count)
 			{
@@ -205,9 +223,10 @@ namespace BlueDotBrigade.Weevil.IO
 
 			private void FailIfAsked()
 			{
-				if (this.FailsNextRead)
+				if (this.Position == this.FailingOffset)
 				{
-					this.FailsNextRead = false;
+					this.FailingOffset = null;
+					this.HasFailed = true;
 					throw new IOException("The network path was not found.");
 				}
 			}

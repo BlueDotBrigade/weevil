@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Logged when the log, not the saved index, could not be read while the saved record table was checked against it.
 		/// </summary>
-		internal const string LogUnreadableMessage = "The log could not be read while its saved record table was checked, so the log will be parsed. The saved table is kept.";
+		internal const string LogUnreadableMessage = "The log could not be read while its saved record table was checked, so the log will be parsed. The saved table is kept if the parse makes the same one.";
 
 		private readonly string _logFilePath;
 		private readonly string _indexFilePath;
