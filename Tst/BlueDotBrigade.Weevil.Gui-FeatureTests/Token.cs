@@ -12,7 +12,10 @@
 	using BlueDotBrigade.Weevil.Gui.Threading;
 	using NSubstitute;
 
-	internal class Token
+	/// <remarks>
+	/// Reqnroll disposes it when the scenario ends, which closes the open log, so the next scenario can open it (#1254).
+	/// </remarks>
+	internal sealed class Token : IDisposable
 	{
 		private MainWindowViewModel _mainViewModel;
 
@@ -37,6 +40,9 @@
 
 			var bulletinMediator = new BulletinMediator();
 
+			// One window at a time: the one before closes its log.
+			CloseWindow();
+
 			_mainViewModel = new MainWindowViewModel(
 				uiDispatcher,
 				bulletinMediator);
@@ -45,6 +51,16 @@
 			_mainViewModel.FilterViewModel.ScrollRequested += (_, position) => this.FocusRequestedPosition = position;
 
 			await _mainViewModel.FilterViewModel.OpenAsync(logFilePath);
+		}
+
+		public void Dispose()
+		{
+			CloseWindow();
+		}
+
+		private void CloseWindow()
+		{
+			_mainViewModel?.FilterViewModel.Close();
 		}
 
 		#region Input Values

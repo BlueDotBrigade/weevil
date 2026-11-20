@@ -66,7 +66,8 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
                 builder = string.IsNullOrEmpty(this.Region) ? builder : builder.UsingRegion(this.Region);
                 builder = string.IsNullOrEmpty(this.Section) ? builder : builder.UsingSection(this.Section);
-                IEngine engine = builder.Open();
+                // Closed when the cmdlet ends, so another Weevil can open the log (#1254). The records returned still read it.
+                using IEngine engine = builder.Open();
 
                 var filterCriteria = new FilterCriteria(this.Include, this.Exclude);
 
@@ -83,6 +84,11 @@ namespace BlueDotBrigade.Weevil.PowerShell
 
                 // `Apply` returns the filter itself, so the matching records are read from its results (#1002).
                 this.WriteObject(engine.Filter.Results, enumerateCollection: true);
+            }
+            catch (LogInUseException ex)
+            {
+                // Another Weevil has the log open: its message names who (#1254).
+                this.ThrowTerminatingError(new ErrorRecord(ex, "LogInUse", ErrorCategory.ResourceBusy, this.FilePath));
             }
             catch (Exception ex)
             {

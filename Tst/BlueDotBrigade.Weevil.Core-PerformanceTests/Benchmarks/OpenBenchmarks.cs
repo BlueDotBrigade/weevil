@@ -22,13 +22,14 @@ namespace BlueDotBrigade.Weevil
 			_logPath = BenchmarkLogs.GetPath(this.Records);
 
 			// Once, before measuring, so the log is known to hold every record.
-			_ = BenchmarkLogs.Open(this.Records);
+			BenchmarkLogs.Open(this.Records).Dispose();
 		}
 
 		[Benchmark]
 		public int Open()
 		{
-			return Engine.UsingPath(_logPath).Open().Count;
+			using IEngine engine = Engine.UsingPath(_logPath).Open();
+			return engine.Count;
 		}
 	}
 }

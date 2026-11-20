@@ -13,6 +13,10 @@
 
 		bool CanOpenAs { get; }
 
+		/// <remarks>
+		/// Dispose each engine opened through <paramref name="createEngineBuilder"/>: an engine locks its log until it is disposed, so Weevil's own open of the same log
+		/// would be refused (#1254). A preview of the log open in Weevil's window is refused too, with <see cref="LogInUseException"/>, until #1157 replaces this method.
+		/// </remarks>
 		(bool, OpenAsResult) ShowOpenAs(string licensePath, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
 
 		bool CanShowDashboard { get; }
@@ -21,6 +25,7 @@
 		/// Weevil does not close a plugin's dashboard when another log opens, so <paramref name="engine"/> can outlive its log.
 		/// In disk mode, a read through it then throws <see cref="IO.LogFileChangedException"/> when the log changed,
 		/// or when the copy of a zipped log was deleted (#1025, #1139, #1295).
+		/// Weevil disposes <paramref name="engine"/> once another log opens, which releases the log's lock (#1254): do not write through it, for example a comment or a save, after that.
 		/// </remarks>
 		void ShowDashboard(Version weevilVersion, IEngine engine, IInsight[] insights);
 

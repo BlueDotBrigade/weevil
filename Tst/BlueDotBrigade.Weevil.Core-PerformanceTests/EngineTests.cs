@@ -97,11 +97,11 @@
 		public void GivenAReferenceLog_WhenOpened_ThenNoGarbageIsLeftForTheNextCollection(StorageMode storageMode)
 		{
 			// Opened once first, so the memory of loading Weevil itself is not counted.
-			_ = Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(storageMode).Open();
+			Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(storageMode).Open().Dispose();
 			var logPath = ReferenceLog.Create(_folder, RecordCount);
 			var before = GC.GetTotalMemory(forceFullCollection: true);
 
-			IEngine engine = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+			using IEngine engine = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
 
 			// #1240: opening collected before its first filter, and while its builder still held the parser's temporaries, so their garbage stayed in the working set.
 			var memoryAfterOpening = GC.GetTotalMemory(forceFullCollection: false) - before;
@@ -118,11 +118,11 @@
 		public void GivenAReferenceLog_WhenAllButOnePercentOfItIsCleared_ThenTheContentChunksOnlyTheClearedRecordsWereReadFromAreFreed()
 		{
 			// Opened once first, so the memory of loading Weevil itself is not counted.
-			_ = Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(StorageMode.Ram).Open();
+			Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(StorageMode.Ram).Open().Dispose();
 			var before = GC.GetTotalMemory(forceFullCollection: true);
 
 			// In RAM, where the log's content is held in chunks of about 16 MB.
-			IEngine engine = Engine.UsingPath(ReferenceLog.Create(_folder, RecordCount)).UsingStorage(StorageMode.Ram).Open();
+			using IEngine engine = Engine.UsingPath(ReferenceLog.Create(_folder, RecordCount)).UsingStorage(StorageMode.Ram).Open();
 			var memoryWhenOpened = GC.GetTotalMemory(forceFullCollection: true) - before;
 
 			var keptCount = RecordCount / 100;
@@ -154,7 +154,7 @@
 		private double MeasureBytesPerRecord(StorageMode storageMode)
 		{
 			// Opened once first, so the memory of loading Weevil itself is not counted.
-			_ = Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(storageMode).Open();
+			Engine.UsingPath(ReferenceLog.Create(_folder, 10)).UsingStorage(storageMode).Open().Dispose();
 
 			(IEngine engine, var memoryKept, _) = OpenAndMeasure(ReferenceLog.Create(_folder, RecordCount), storageMode);
 
@@ -172,7 +172,7 @@
 			var logPath = DroidLog.GetPath(logName);
 
 			// Its first records are opened first, so the memory of loading Weevil itself is not counted.
-			_ = Engine.UsingPath(logPath).UsingStorage(storageMode).UsingLimit(10).Open();
+			Engine.UsingPath(logPath).UsingStorage(storageMode).UsingLimit(10).Open().Dispose();
 
 			(IEngine engine, var memoryKept, TimeSpan duration) = OpenAndMeasure(logPath, storageMode);
 
@@ -191,7 +191,7 @@
 			var before = GC.GetTotalMemory(forceFullCollection: true);
 			var stopwatch = Stopwatch.StartNew();
 
-			IEngine engine = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
+			using IEngine engine = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
 
 			stopwatch.Stop();
 			var memoryKept = GC.GetTotalMemory(forceFullCollection: true) - before;

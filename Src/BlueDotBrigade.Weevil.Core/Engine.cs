@@ -5,6 +5,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Runtime.CompilerServices;
+	using System.Threading;
 	using Analysis;
 	using Data;
 	using Filter;
@@ -18,9 +19,13 @@
 
 		private CoreEngine _coreEngine;
 
-		internal Engine(CoreEngine coreEngine)
+		// Keeps another Weevil from opening the log, until disposed (#1254): null when none could be created, and for the Surrogate.
+		private IO.LogLock _lock;
+
+		internal Engine(CoreEngine coreEngine, IO.LogLock logLock)
 		{
 			_coreEngine = coreEngine;
+			_lock = logLock;
 			SubscribeTo(_coreEngine);
 		}
 
@@ -71,7 +76,8 @@
 				File.WriteAllText(filePath, string.Empty);
 			}
 
-			Surrogate = UsingPath(filePath).Open();
+			// Without a lock: every instance of Weevil shows the same empty file.
+			Surrogate = new Engine(new CoreEngine.CoreEngineBuilder(filePath).Build(), logLock: null);
 		}
 
 
@@ -156,6 +162,48 @@
 		public static IEngineBuilder UsingPath(string sourceFilePath, int startAtLineNumber)
 		{
 			return new EngineBuilder(sourceFilePath, startAtLineNumber);
+		}
+
+		/// <summary>
+		/// Throws when another instance of Weevil, or another engine in this one, has the log open (#1254), so a caller can check before work an open would waste,
+		/// such as extracting a log from a zip.
+		/// </summary>
+		/// <remarks>
+		/// It changes nothing, and opening the log checks again. A lock left by a Weevil that crashed is not a refusal.
+		/// </remarks>
+		/// <param name="sourceFilePath">The file that would be opened: for a log in a zip, the path it is extracted to.</param>
+		/// <exception cref="IO.LogInUseException">The log is open. The message names who has it.</exception>
+		public static void ThrowIfInUse(string sourceFilePath)
+		{
+			IO.LogLock.ThrowIfHeld(sourceFilePath);
+		}
+
+		/// <summary>
+		/// Releases the log's lock, so another instance of Weevil can open it (#1254). Nothing else changes: save first.
+		/// </summary>
+		public void Dispose()
+		{
+			Interlocked.Exchange(ref _lock, null)?.Dispose();
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> when this engine holds the lock of the log at <paramref name="filePath"/>.
+		/// </summary>
+		internal bool IsLocking(string filePath)
+		{
+			return Volatile.Read(ref _lock)?.IsFor(filePath) == true;
+		}
+
+		/// <summary>
+		/// Hands this engine's lock to the engine that replaces it, when both read <paramref name="filePath"/>: otherwise <see langword="null"/>.
+		/// </summary>
+		internal IO.LogLock TakeLock(string filePath)
+		{
+			IO.LogLock logLock = Volatile.Read(ref _lock);
+
+			return logLock?.IsFor(filePath) == true && Interlocked.CompareExchange(ref _lock, null, logLock) == logLock
+				? logLock
+				: null;
 		}
 
 		/// <summary>

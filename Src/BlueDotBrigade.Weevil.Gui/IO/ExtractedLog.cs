@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	using System;
 	using System.IO;
 	using BlueDotBrigade.Weevil.Diagnostics;
+	using LogInUseException = BlueDotBrigade.Weevil.IO.LogInUseException;
 
 	/// <summary>
 	/// A log Weevil extracted from a zip, kept while it is open (#1162), to a folder of its own that is kept between opens (#1253).
@@ -57,6 +58,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// </summary>
 		/// <remarks>
 		/// A log written since it was extracted, for example one an export replaced, is the user's and stays.
+		/// So is a copy another Weevil has open, for example after an open here was refused (#1254): two instances share the copy of the same file of the same zip.
 		/// </remarks>
 		public void Delete()
 		{
@@ -64,8 +66,13 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			{
 				if (File.Exists(this.LogPath) && GetStamp(this.LogPath) == _stamp)
 				{
+					Engine.ThrowIfInUse(this.LogPath);
 					File.Delete(this.LogPath);
 				}
+			}
+			catch (LogInUseException)
+			{
+				Log.Default.Write(LogSeverityType.Information, $"A log extracted from a zip is kept: another Weevil has it open. Path={this.LogPath}");
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{

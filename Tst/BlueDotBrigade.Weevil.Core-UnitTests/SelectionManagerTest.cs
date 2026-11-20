@@ -14,7 +14,7 @@
 		[TestMethod]
 		public void Select_FirstRecord_Line1Selected()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
@@ -28,7 +28,7 @@
 		[TestMethod]
 		public void Select_LastRecord_Line32Selected()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
@@ -43,7 +43,7 @@
 		[TestMethod]
 		public void Select_NonExistentRecord_ThrowsRecordNotFound()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 
@@ -56,7 +56,7 @@
 		[TestMethod]
 		public void GivenALineTheFilterHides_WhenSelectedByLineNumber_ThenRecordNotFoundIsThrown()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 			engine.Filter.Apply(Filter.FilterType.PlainText, new Filter.FilterCriteria("Id=002"));
@@ -70,7 +70,7 @@
 		[TestMethod]
 		public void GivenALineTheFilterHides_WhenUnselectedByLineNumber_ThenRecordNotFoundIsThrownAndTheSelectionIsKept()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.Open();
 			engine.Filter.Apply(Filter.FilterType.PlainText, new Filter.FilterCriteria("Id=002"));

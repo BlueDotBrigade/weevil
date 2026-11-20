@@ -75,7 +75,8 @@ namespace BlueDotBrigade.Weevil
 		[Benchmark]
 		public int Open()
 		{
-			return Engine.UsingPath(_logPath).UsingStorage(this.Storage).Open().Count;
+			using IEngine engine = Engine.UsingPath(_logPath).UsingStorage(this.Storage).Open();
+			return engine.Count;
 		}
 
 		/// <summary>

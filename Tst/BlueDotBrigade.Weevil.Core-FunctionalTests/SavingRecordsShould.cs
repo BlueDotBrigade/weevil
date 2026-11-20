@@ -14,7 +14,7 @@
 			var originalPath = new Daten().AsFilePath(From.GlobalDefault);
 			var newPath = Path.Combine(Path.GetTempPath(), $"{nameof(SaveAllRecordsWhenOnlyOneSelected)}.log");
 
-			IEngine originalEngine = Engine
+			using IEngine originalEngine = Engine
 				.UsingPath(originalPath)
 				.Open();
 
@@ -24,7 +24,7 @@
 			{
 				originalEngine.Selector.SaveSelection(newPath, FileFormatType.Raw);
 
-				IEngine newEngine = Engine
+				using IEngine newEngine = Engine
 					.UsingPath(newPath)
 					.Open();
 
@@ -45,7 +45,7 @@
 			var originalPath = new Daten().AsFilePath(From.GlobalDefault);
 			var newPath = Path.Combine(Path.GetTempPath(), $"{nameof(SaveWithSameEncodingAsSourceFile)}.log");
 
-			IEngine originalEngine = Engine
+			using IEngine originalEngine = Engine
 				.UsingPath(originalPath)
 				.Open();
 

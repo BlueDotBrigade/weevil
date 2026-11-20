@@ -70,7 +70,11 @@ internal sealed class OpeningOnDiskSteps : ReqnrollSteps
 	[Then("the log on disk will show the same records and filter results as in RAM")]
 	public void ThenTheLogOnDiskWillShowTheSameRecordsAndFilterResultsAsInRam()
 	{
-		IEngine inRam = Engine.UsingPath(_logPath)
+		// A copy, since the log is open: another open of it would be refused (#1254).
+		var copyPath = Path.Combine(Directory.CreateDirectory(Path.Combine(_folder, "Copy")).FullName, Path.GetFileName(_logPath));
+		File.Copy(_logPath, copyPath);
+
+		using IEngine inRam = Engine.UsingPath(copyPath)
 			.UsingStorage(StorageMode.Ram)
 			.Open();
 		inRam.Filter.Apply(this.Context.FilterType, this.Context.FilterCriteria);
@@ -85,6 +89,9 @@ internal sealed class OpeningOnDiskSteps : ReqnrollSteps
 	[AfterScenario]
 	public void DeleteTheSavedLogFile()
 	{
+		// The open log's lock is in the folder, so the log is closed first (#1254).
+		this.Context.Engine.Dispose();
+
 		if (Directory.Exists(_folder))
 		{
 			Directory.Delete(_folder, recursive: true);

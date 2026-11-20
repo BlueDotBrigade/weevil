@@ -5,11 +5,16 @@
 	using BlueDotBrigade.Weevil.Filter;
 	using NSubstitute.Extensions;
 
-	internal class Token
+	/// <remarks>
+	/// Reqnroll disposes it when the scenario ends, which closes the open log, so the next scenario can open it (#1254).
+	/// </remarks>
+	internal sealed class Token : IDisposable
 	{
+		private IEngine _engine;
+
 		public Token()
 		{
-			this.Engine = BlueDotBrigade.Weevil.Engine.Surrogate;
+			_engine = BlueDotBrigade.Weevil.Engine.Surrogate;
 
 			this.IncludeFilter = string.Empty;
 			this.ExcludeFilter = string.Empty;
@@ -26,7 +31,23 @@
 			};
 		}
 
-		public IEngine Engine { get; set; }
+		/// <summary>
+		/// The open log. Setting another closes the one it replaces, as opening a log in Weevil's window does (#1254).
+		/// </summary>
+		public IEngine Engine
+		{
+			get => _engine;
+			set
+			{
+				IEngine replaced = _engine;
+				_engine = value;
+
+				if (!ReferenceEquals(replaced, value))
+				{
+					replaced.Dispose();
+				}
+			}
+		}
 
 		public string IncludeFilter { private get; set; }
 
@@ -44,5 +65,13 @@
 			this.Configuration);
 
 		public RecordList Results => this.Engine.Filter.Results;
+
+		/// <summary>
+		/// Closes the open log.
+		/// </summary>
+		public void Dispose()
+		{
+			_engine.Dispose();
+		}
 	}
 }

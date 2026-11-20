@@ -30,6 +30,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestCleanup]
 		public void Cleanup()
 		{
+			_engine.Dispose();
 			File.Delete(_logPath);
 			File.Delete(_logPath + ".xml");
 		}

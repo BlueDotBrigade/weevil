@@ -62,6 +62,9 @@
 		private const int ClipboardLimit = 100_000;
 		private const string CopyAdvice = "Use Export > Original Records (Ctrl+Shift+S) to save them to a file.";
 
+		// The title of the message shown when another Weevil has the log open (#1254).
+		private const string LogInUseCaption = "Log Already Open";
+
 		private static readonly string HelpFilePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Doc\Help.html");
 		private static readonly string LicensePath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\License.md");
 		private static readonly string ThirdPartyNoticesPath = Path.GetFullPath(EnvironmentHelper.GetExecutableDirectory() + @"\..\Licenses\ThirdPartyNoticesAndInformation.txt");
@@ -586,7 +589,7 @@
 				return;
 			}
 
-			var isAccepted = _dialogBox.TryShowOpenAs(out OpenAsChoice choice);
+			var isAccepted = _dialogBox.TryShowOpenAs(ThrowIfOpenElsewhere, out OpenAsChoice choice);
 			LogOpenAs(choice?.Advice, isAccepted ? choice.StorageMode : null);
 
 			if (!isAccepted)
@@ -615,10 +618,21 @@
 
 			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
 			{
-				// Cancelled: nothing opens, and the open log stays (#1028).
-				if (await AskStorageAsync(sourceFilePath) is { } storageMode)
+				try
 				{
-					await OpenFromDiskAsync(sourceFilePath, storageMode, operation);
+					// Before RAM or Disk is asked for: another Weevil may have it open (#1254). Off the UI thread, since the log may be on a share.
+					await Task.Run(() => ThrowIfOpenElsewhere(sourceFilePath));
+
+					// Cancelled: nothing opens, and the open log stays (#1028).
+					if (await AskStorageAsync(sourceFilePath) is { } storageMode)
+					{
+						await OpenFromDiskAsync(sourceFilePath, storageMode, operation);
+					}
+				}
+				catch (LogInUseException e)
+				{
+					// Core logged it. The open log stays.
+					_dialogBox.ShowMessage(e.Message, LogInUseCaption);
 				}
 
 				return;
@@ -658,7 +672,12 @@
 				extractedLog = await Task.Run(() =>
 				{
 					using var reader = new BlueDotBrigade.Weevil.Windows.Dialogs.Storage.ContainerReader();
-					return reader.Extract(file, ExtractedLog.CompanionSuffixes, Path.Combine(copiesFolder, reader.GetCopyKey(file)));
+					var destination = Path.Combine(copiesFolder, reader.GetCopyKey(file));
+
+					// Before anything is extracted: the copy may be open in another Weevil (#1254).
+					ThrowIfOpenElsewhere(Path.Combine(destination, file.Name));
+
+					return reader.Extract(file, ExtractedLog.CompanionSuffixes, destination);
 				});
 
 				// Open As follows the list, so its suggestion uses the size of the log chosen (#1028).
@@ -667,6 +686,11 @@
 					isOpening = true;
 					await OpenExtractedAsync(extractedLog, storageMode, file.ToString(), operation);
 				}
+			}
+			catch (LogInUseException e)
+			{
+				// Core logged it. Nothing was extracted, and the open log stays.
+				_dialogBox.ShowMessage(e.Message, LogInUseCaption);
 			}
 			finally
 			{
@@ -682,6 +706,26 @@
 						await Task.Run(copy.Delete);
 					}
 				}
+			}
+		}
+
+		/// <summary>
+		/// Throws when another Weevil has the log open, so Open As or a zip dropped on Weevil doesn't extract it for nothing (#1254). The open checks again.
+		/// </summary>
+		/// <remarks>
+		/// Called off the UI thread. The log open here may be opened again: its engine hands its lock to the one that replaces it.
+		/// </remarks>
+		/// <param name="logPath">The file that would be opened: for a log in a zip, the path it would be extracted to.</param>
+		private void ThrowIfOpenElsewhere(string logPath)
+		{
+			var openLogPath = _openLogFilePath;
+			var isOpenHere = Engine.IsRealInstance(_engine) &&
+			                 openLogPath is not null &&
+			                 string.Equals(Path.GetFullPath(logPath), Path.GetFullPath(openLogPath), StringComparison.OrdinalIgnoreCase);
+
+			if (!isOpenHere)
+			{
+				Engine.ThrowIfInUse(logPath);
 			}
 		}
 
@@ -780,13 +824,15 @@
 		}
 
 		/// <summary>
-		/// Deletes the copies Weevil extracted from zips, when Weevil closes (#1162).
+		/// Lets go of the open log as Weevil closes: releases its lock, so another Weevil can open it (#1254), then deletes the copies Weevil extracted from zips (#1162).
 		/// </summary>
 		/// <remarks>
-		/// Exit calls it, and so does closing Weevil while Exit cannot run, for example while a filter, Reload or an open is running.
+		/// Exit calls it once it has saved, and so does closing Weevil while Exit cannot run, for example while a filter, Reload or an open is running.
+		/// A copy an open still running holds is kept: the next open of the same file reuses it.
 		/// </remarks>
-		public void DeleteExtractedLogs()
+		public void Close()
 		{
+			_engine.Dispose();
 			_extractedLogBeingOpened?.Delete();
 			_openExtractedLog?.Delete();
 			_openExtractedLog = null;
@@ -903,6 +949,11 @@
 					wasOpenRequested = true;
 				}
 			}
+			catch (LogInUseException e)
+			{
+				// The plugin's own window opened a log another Weevil, or this one, has open (#1254). Core logged it, and the open log stays.
+				_dialogBox.ShowMessage(e.Message, LogInUseCaption);
+			}
 			catch (NotSupportedException e)
 			{
 				// The whole path: a zipped log's sidecar is in the folder kept for it, not beside the zip (#1253).
@@ -938,7 +989,8 @@
 							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
 							.UsingRange(openAsResult.Range)
-							.UsingDisplayPath(displayPath);
+							.UsingDisplayPath(displayPath)
+							.Replacing(_engine);
 
 						if (storageMode is { } mode)
 						{
@@ -951,7 +1003,12 @@
 						// Moved only once the open succeeds, so a failed open leaves the open log subscribed.
 						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
+						IEngine replaced = _engine;
 						_engine = openedEngine;
+
+						// Closed at once, so another Weevil can open it (#1254): saved before the open, and still read by what shows it until it is replaced.
+						replaced.Dispose();
+
 						_openLogFilePath = sourceFilePath;
 						_hasUnsavedChanges = false;
 						Interlocked.Increment(ref _logGeneration);
@@ -1028,6 +1085,11 @@
 						Log.Default.Write(
 							LogSeverityType.Information,
 							$"File has been opened. Path={sourceFilePath}");
+					}
+					catch (LogInUseException e)
+					{
+						// Core logged it. The open log stays.
+						_dialogBox.ShowMessage(e.Message, LogInUseCaption);
 					}
 					catch (InvalidFileFormatException e)
 					{
@@ -1450,7 +1512,7 @@
 				}
 			}
 
-			DeleteExtractedLogs();
+			Close();
 			return true;
 		}
 
