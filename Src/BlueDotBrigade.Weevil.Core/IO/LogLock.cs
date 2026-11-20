@@ -5,6 +5,7 @@ namespace BlueDotBrigade.Weevil.IO
 	using System.Runtime.InteropServices;
 	using System.Text;
 	using Diagnostics;
+	using Microsoft.Win32.SafeHandles;
 
 	/// <summary>
 	/// The lock beside an open log, <c>Application.log.lock</c>, that keeps another instance of Weevil from opening the log,
@@ -15,8 +16,9 @@ namespace BlueDotBrigade.Weevil.IO
 	/// Disposing it deletes the file. Only one handle holds it, whether the other is in another process or in this one:
 	/// - Windows enforces share modes on every handle, and over SMB: the file is held with write access, sharing only reading, so another Weevil can read who holds it,
 	///   but can't take it or delete it.
-	/// - Elsewhere, .NET takes an advisory <c>flock</c> on each handle: exclusive for <see cref="FileShare.None"/>, shared otherwise. The file is opened exclusively,
-	///   so no one else holds it, then the lock is made shared, so another Weevil can read who holds it while its own exclusive lock still fails. Only Weevil honours it.
+	/// - Elsewhere, Weevil takes an advisory <c>flock</c> on the handle itself, exclusive so no one else holds it, then shared, so another Weevil can read who holds it
+	///   while its own exclusive lock still fails. Only Weevil honours it. It is not left to .NET, whose <see cref="FileShare"/> lock
+	///   <c>DOTNET_SYSTEM_IO_DISABLEFILELOCKING</c> turns off.
 	/// </remarks>
 	internal sealed class LogLock : IDisposable
 	{
@@ -31,13 +33,16 @@ namespace BlueDotBrigade.Weevil.IO
 
 		// flock(2)
 		private const int LockShared = 1;
+		private const int LockExclusive = 2;
 		private const int LockNonBlocking = 4;
 
 		private readonly FileStream _file;
+		private readonly string _lockPath;
 
-		private LogLock(string logPath, FileStream file)
+		private LogLock(string logPath, string lockPath, FileStream file)
 		{
 			this.LogPath = logPath;
+			_lockPath = lockPath;
 			_file = file;
 		}
 
@@ -72,8 +77,9 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				throw Refuse(logPath, lockPath, exception);
 			}
-			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or DllNotFoundException or EntryPointNotFoundException)
 			{
+				// Also a C library without flock, as on some Linux distributions.
 				Log.Default.Write(
 					LogSeverityType.Warning,
 					exception,
@@ -93,7 +99,7 @@ namespace BlueDotBrigade.Weevil.IO
 
 			Log.Default.Write(LogSeverityType.Debug, $"The log is locked. Path={lockPath}");
 
-			return new LogLock(Path.GetFullPath(logPath), file);
+			return new LogLock(Path.GetFullPath(logPath), lockPath, file);
 		}
 
 		/// <summary>
@@ -115,14 +121,14 @@ namespace BlueDotBrigade.Weevil.IO
 
 			try
 			{
-				// A lock left by a Weevil that crashed: no one holds it, and closing deletes it.
-				Open(lockPath).Dispose();
+				// A lock left by a Weevil that crashed: no one holds it, and releasing it deletes it.
+				Release(Open(lockPath), lockPath);
 			}
 			catch (IOException exception) when (IsHeldByAnother(exception))
 			{
 				throw Refuse(logPath, lockPath, exception);
 			}
-			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or DllNotFoundException or EntryPointNotFoundException)
 			{
 				Log.Default.Write(LogSeverityType.Debug, $"Whether the log is open elsewhere can't be checked. Path={lockPath}, Reason=`{exception.Message}`");
 			}
@@ -146,7 +152,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public void Dispose()
 		{
-			_file.Dispose();
+			Release(_file, _lockPath);
 			Log.Default.Write(LogSeverityType.Debug, $"The log is no longer locked. Path={this.LogPath}");
 		}
 
@@ -156,11 +162,15 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// Opens the lock, holding it, and creates it when it isn't there.
+		/// Opens the lock, holding it, and creates it when it isn't there. Release it with <see cref="Release"/>.
 		/// </summary>
 		/// <remarks>
-		/// Closing it deletes it. On Linux, .NET deletes it before closing the handle, so no other Weevil takes a lock on a file no longer in the folder.
+		/// On Windows, closing the handle deletes the file, also when the process dies. Elsewhere it isn't opened to be deleted on closing:
+		/// an open that finds the file held would then delete the holder's file.
 		/// </remarks>
+		/// <exception cref="IOException">Someone holds it (<see cref="IsHeldByAnother"/>), or it can't be opened or locked.</exception>
+		/// <exception cref="DllNotFoundException">The C library can't be loaded.</exception>
+		/// <exception cref="EntryPointNotFoundException">The C library has no <c>flock</c>.</exception>
 		private static FileStream Open(string lockPath)
 		{
 			if (OperatingSystem.IsWindows())
@@ -168,16 +178,60 @@ namespace BlueDotBrigade.Weevil.IO
 				return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, bufferSize: 0, FileOptions.DeleteOnClose);
 			}
 
-			var file = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, bufferSize: 0, FileOptions.DeleteOnClose);
+			// .NET also takes an exclusive flock for FileShare.None, unless DOTNET_SYSTEM_IO_DISABLEFILELOCKING turns it off; taking it again on the same handle changes nothing.
+			var file = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, bufferSize: 0);
 
-			// With LOCK_NB, Linux converts the lock without letting another in between.
-			if (Flock(file.SafeFileHandle.DangerousGetHandle().ToInt32(), LockShared | LockNonBlocking) != 0)
+			try
 			{
-				// Still held exclusively, which keeps other instances out too: only who holds it can't be read.
-				Log.Default.Write(LogSeverityType.Warning, $"The log's lock could not be shared, so who has the log open can't be read. Path={lockPath}, Error={Marshal.GetLastPInvokeError()}");
+				var error = Flock(file.SafeFileHandle, LockExclusive | LockNonBlocking);
+
+				if (error != 0)
+				{
+					// EWOULDBLOCK, when another holds it, is recognised as a refusal by IsHeldByAnother.
+					throw new IOException($"The log's lock can't be taken. Path={lockPath}, Error={error}", error);
+				}
+
+				// With LOCK_NB, Linux converts the lock without letting another in between.
+				error = Flock(file.SafeFileHandle, LockShared | LockNonBlocking);
+
+				if (error != 0)
+				{
+					// Still held exclusively, which keeps other instances out too: only who holds it can't be read.
+					Log.Default.Write(LogSeverityType.Warning, $"The log's lock could not be shared, so who has the log open can't be read. Path={lockPath}, Error={error}");
+				}
+
+				return file;
+			}
+			catch
+			{
+				file.Dispose();
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Deletes the lock and releases it.
+		/// </summary>
+		/// <remarks>
+		/// Elsewhere than on Windows, the file is deleted while it is still held, so no other Weevil takes it in between. One that opened it in the instant before
+		/// could still lock the deleted file once it is released, while a third locks a new one: a race of microseconds between three instances, not handled.
+		/// </remarks>
+		private static void Release(FileStream file, string lockPath)
+		{
+			if (!OperatingSystem.IsWindows())
+			{
+				try
+				{
+					System.IO.File.Delete(lockPath);
+				}
+				catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+				{
+					// A file left behind blocks no one: the next open takes it over.
+					Log.Default.Write(LogSeverityType.Debug, $"The log's lock could not be deleted. Path={lockPath}, Reason=`{exception.Message}`");
+				}
 			}
 
-			return file;
+			file.Dispose();
 		}
 
 		/// <summary>
@@ -190,10 +244,8 @@ namespace BlueDotBrigade.Weevil.IO
 				return exception.HResult is SharingViolation or LockViolation;
 			}
 
-			// .NET gives the errno: EWOULDBLOCK is 35 on macOS and FreeBSD, and 11 on Linux.
-			var wouldBlock = OperatingSystem.IsMacOS() || OperatingSystem.IsFreeBSD() ? 35 : 11;
-
-			return exception.GetType() == typeof(IOException) && exception.HResult == wouldBlock;
+			// The errno, from .NET or from Open.
+			return exception.GetType() == typeof(IOException) && exception.HResult == WouldBlock;
 		}
 
 		private static LogInUseException Refuse(string logPath, string lockPath, IOException reason)
@@ -248,7 +300,33 @@ namespace BlueDotBrigade.Weevil.IO
 			return (user, computer);
 		}
 
+		/// <summary>
+		/// EWOULDBLOCK: 35 on macOS and FreeBSD, 11 on Linux.
+		/// </summary>
+		private static int WouldBlock => OperatingSystem.IsMacOS() || OperatingSystem.IsFreeBSD() ? 35 : 11;
+
+		/// <returns>0, or the errno.</returns>
+		private static int Flock(SafeFileHandle handle, int operation)
+		{
+			var isReferenced = false;
+
+			try
+			{
+				// Kept open while flock uses its descriptor.
+				handle.DangerousAddRef(ref isReferenced);
+
+				return FlockNative(handle.DangerousGetHandle().ToInt32(), operation) == 0 ? 0 : Marshal.GetLastPInvokeError();
+			}
+			finally
+			{
+				if (isReferenced)
+				{
+					handle.DangerousRelease();
+				}
+			}
+		}
+
 		[DllImport("libc", EntryPoint = "flock", SetLastError = true)]
-		private static extern int Flock(int fileDescriptor, int operation);
+		private static extern int FlockNative(int fileDescriptor, int operation);
 	}
 }

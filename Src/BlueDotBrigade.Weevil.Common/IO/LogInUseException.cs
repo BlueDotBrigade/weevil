@@ -40,9 +40,9 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// The log that was not opened.
+		/// The log that was not opened, or <see langword="null"/> when the exception was created without one.
 		/// </summary>
-		public string LogPath { get; } = string.Empty;
+		public string LogPath { get; }
 
 		/// <summary>
 		/// The user who has the log open, or <see langword="null"/> when that can't be read, for example while the other Weevil is still writing it.
