@@ -7,7 +7,7 @@ namespace BlueDotBrigade.Weevil.IO
 	/// The log could not be read while the index saved beside it was checked against it, as opposed to the saved index.
 	/// </summary>
 	/// <remarks>
-	/// The saved index may still be the log's, so <see cref="SavedIndex"/> keeps it. <see cref="Exception.InnerException"/> holds what the read threw.
+	/// The saved index may still be the log's, so <see cref="SavedIndex"/> keeps it, unless a parse of the log makes a different one. <see cref="Exception.InnerException"/> holds what the read threw.
 	/// </remarks>
 	internal sealed class LogReadException : Exception
 	{

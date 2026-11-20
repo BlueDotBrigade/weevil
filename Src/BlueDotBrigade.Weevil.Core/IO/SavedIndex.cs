@@ -43,7 +43,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Logged when the log, not the saved index, could not be read while the saved line index was checked against it (#1323).
 		/// </summary>
-		internal const string LogUnreadableForLineIndexMessage = "The log could not be read while its saved line index was checked, so the line index will be rebuilt. The saved index is not overwritten by it, as it may still match the log.";
+		internal const string LogUnreadableForLineIndexMessage = "The log could not be read while its saved line index was checked, so the line index will be rebuilt. The saved index is kept, as it may still match the log: a full open checks its record table again.";
 
 		private readonly string _logFilePath;
 		private readonly string _indexFilePath;
@@ -92,7 +92,8 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		/// <remarks>
 		/// The index is saved whenever it changes, unless it cannot be: Weevil then continues without saving it.
-		/// Nor is it saved when the log could not be read while the saved index was checked, as the saved index may still match the log (#1323).
+		/// Nor is it saved when the log could not be read while the saved index was checked, as it may still match the log:
+		/// a full open then checks its record table again (#1323).
 		/// An index that holds a record table is not saved when the log grew, as that would drop the table: a full open extends the table,
 		/// and saves both (#1023). After any other open, the next one scans the new content again.
 		/// </remarks>
@@ -114,7 +115,9 @@ namespace BlueDotBrigade.Weevil.IO
 			else
 			{
 				lineIndex = LineIndex.Build(log);
-				loaded = IndexFile.Empty;
+
+				// When only the log could not be read after the file was, what the file held is kept, for a full open to check its record table again.
+				loaded ??= IndexFile.Empty;
 			}
 
 			if (hasChanged && !loaded.HasTable && !isLogUnreadable)
@@ -276,7 +279,7 @@ namespace BlueDotBrigade.Weevil.IO
 				if (!IndexFile.TryRead(indexFile, logLength, out LineIndex savedLines, out IndexFile saved) ||
 				    !saved.HasTable ||
 				    !parse.IsSameAs(saved.Parse) ||
-				    !Matches(savedLines, log))
+				    !ReadLog(() => savedLines.Matches(log)))
 				{
 					Log.Default.Write(
 						LogSeverityType.Information,
@@ -365,6 +368,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Reads the saved index, when it is intact and matches the log.
 		/// </summary>
+		/// <param name="file">What the file holds, when it matches the log, or when the log could not be read after the file was; otherwise <see langword="null"/>.</param>
 		/// <param name="isLogUnreadable">
 		/// <see langword="true"/> when the log, not the saved index, could not be read while they were compared: the saved index may still match the log, so it must not be overwritten (#1323).
 		/// </param>
@@ -383,8 +387,9 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				using var indexFile = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-				if (IndexFile.TryRead(indexFile, log.Length, out lineIndex, out file) && Matches(lineIndex, log))
+				if (IndexFile.TryRead(indexFile, ReadLog(() => log.Length), out LineIndex saved, out file) && ReadLog(() => saved.Matches(log)))
 				{
+					lineIndex = saved;
 					return true;
 				}
 
@@ -398,7 +403,9 @@ namespace BlueDotBrigade.Weevil.IO
 					LogSeverityType.Warning,
 					exception.InnerException,
 					$"{LogUnreadableForLineIndexMessage} LogFilePath={logFilePath} IndexFilePath={indexFilePath}");
+				lineIndex = null;
 				isLogUnreadable = true;
+				return false;
 			}
 			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
 			{
@@ -414,14 +421,14 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// Checks that the log still has the content a line index scanned.
+		/// Reads from the log, so that a failure to read it can be told from a failure to read the saved index.
 		/// </summary>
 		/// <exception cref="LogReadException">The log could not be read.</exception>
-		private static bool Matches(LineIndex lineIndex, Stream log)
+		private static T ReadLog<T>(Func<T> read)
 		{
 			try
 			{
-				return lineIndex.Matches(log);
+				return read();
 			}
 			catch (IOException exception)
 			{

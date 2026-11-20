@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.IO
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
 	using BlueDotBrigade.Weevil.Data;
@@ -113,7 +114,10 @@ namespace BlueDotBrigade.Weevil.IO
 		[TestMethod]
 		[WorkItem(1323)]
 		[DoNotParallelize]
-		public void GivenTheLogFailsToBeReadWhileItsSavedLineIndexIsChecked_WhenLoading_ThenTheLogIsNamedInAWarningAndTheSavedIndexIsKept()
+		[DataRow(false, false, DisplayName = "While its content is read, on a partial open")]
+		[DataRow(false, true, DisplayName = "While its content is read, on a full open")]
+		[DataRow(true, false, DisplayName = "While its length is read")]
+		public void GivenTheLogFailsToBeReadWhileItsSavedLineIndexIsChecked_WhenOpening_ThenTheLogIsNamedInAWarningAndTheSavedIndexIsKept(bool failsLength, bool isFullOpen)
 		{
 			// A failed read of the log, as after a brief network drop, was blamed on the saved index, which was then overwritten without its record table.
 			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");
@@ -132,22 +136,43 @@ namespace BlueDotBrigade.Weevil.IO
 			try
 			{
 				Log.Register(log);
-				using var reopened = new FailingOnceFileStream(_logFilePath) { FailingOffset = 0 };
-				index = SavedIndex.Load(_logFilePath, reopened).LineIndex;
+				using var reopened = new FailingOnceFileStream(_logFilePath);
+				if (failsLength)
+				{
+					reopened.FailsLength = true;
+				}
+				else
+				{
+					reopened.FailingOffset = 0;
+				}
+
+				var savedIndex = SavedIndex.Load(_logFilePath, reopened);
+				index = savedIndex.LineIndex;
 				hasFailed = reopened.HasFailed;
+
+				if (isFullOpen)
+				{
+					// The log reads again by now, so the saved record table is checked and reused.
+					var plugin = new DefaultPlugin();
+					savedIndex.ReadAllRecords(reopened, plugin, plugin.GetExtension(_logFilePath), StorageMode.Ram, displayPath: null, out _).Count.Should().Be(3);
+				}
 			}
 			finally
 			{
 				Log.Register(original);
 			}
 
-			hasFailed.Should().BeTrue("the log's first read should have been tried");
+			hasFailed.Should().BeTrue("the failing read of the log should have been tried");
 			index.LineCount.Should().Be(3, "the line index was rebuilt from the log");
 			log.Received().Write(
 				LogSeverityType.Warning,
 				Arg.Any<IOException>(),
 				Arg.Is<string>(message => message.StartsWith(SavedIndex.LogUnreadableForLineIndexMessage, StringComparison.Ordinal) && message.Contains(_logFilePath, StringComparison.Ordinal)));
 			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt, "the saved index may still match the log, so it was not overwritten");
+			if (isFullOpen)
+			{
+				log.Received().Write(LogSeverityType.Information, SavedIndex.RecordsReadFromIndexMessage, Arg.Any<IEnumerable<KeyValuePair<string, object>>>());
+			}
 		}
 
 		[TestMethod]
@@ -235,13 +260,30 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <summary>
-		/// A log whose first read from <see cref="FailingOffset"/> fails, as a file on a network share might.
+		/// A log whose first read from <see cref="FailingOffset"/>, or first read of its length, fails, as a file on a network share might.
 		/// </summary>
 		private sealed class FailingOnceFileStream(string path) : System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
 		{
 			public long? FailingOffset { get; set; }
 
+			public bool FailsLength { get; set; }
+
 			public bool HasFailed { get; private set; }
+
+			public override long Length
+			{
+				get
+				{
+					if (this.FailsLength)
+					{
+						this.FailsLength = false;
+						this.HasFailed = true;
+						throw new IOException("The network path was not found.");
+					}
+
+					return base.Length;
+				}
+			}
 
 			public override int Read(byte[] buffer, int offset, int count)
 			{
