@@ -15,9 +15,9 @@
 		{
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 
-			var viewModel = new FilterViewModel(
+			var viewModel = Track(new FilterViewModel(
 				this.UiDispatcher,
-				bulletinMediator);
+				bulletinMediator));
 
 			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
 

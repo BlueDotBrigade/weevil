@@ -50,7 +50,7 @@ internal class DialogBoxService : IDialogBoxService
 		// nothing to do
 	}
 
-	public bool TryShowOpenAs(out OpenAsChoice choice)
+	public bool TryShowOpenAs(Action<string> checkBeforeOpening, out OpenAsChoice choice)
 	{
 		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read);
 		var dialog = new BlueDotBrigade.Weevil.Windows.Dialogs.OpenAsDialog
@@ -60,6 +60,7 @@ internal class DialogBoxService : IDialogBoxService
 			FileTypes = new[] { LogFiles, FileTypeFilter.AllFiles },
 			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
 			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
+			CheckBeforeOpening = checkBeforeOpening,
 			OptionsContent = new OpenAsOptionsView { DataContext = options },
 			CanOpen = false,
 		};

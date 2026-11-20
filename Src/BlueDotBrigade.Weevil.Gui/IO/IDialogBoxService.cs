@@ -11,9 +11,13 @@
 		/// <summary>
 		/// Shows the Open As dialog, so the user finds a log and chooses RAM or Disk in one window (#1215).
 		/// </summary>
+		/// <param name="checkBeforeOpening">
+		/// Checks the log chosen before it is extracted from a zip or opened, given the path it will have on disk, off the UI thread:
+		/// a <see cref="LogInUseException"/> it throws keeps the dialog open and shows why (#1254).
+		/// </param>
 		/// <param name="choice">The log chosen and its mode, or <see langword="null"/> when the user cancelled.</param>
 		/// <returns><see langword="false"/> when the user cancelled: nothing opens, and nothing was extracted.</returns>
-		bool TryShowOpenAs(out OpenAsChoice choice);
+		bool TryShowOpenAs(Action<string> checkBeforeOpening, out OpenAsChoice choice);
 
 		/// <summary>
 		/// Shows Weevil's Open As window for a log already chosen, so the user chooses RAM or Disk for it (#1028).

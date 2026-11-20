@@ -142,6 +142,15 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		public string CopiesFolder { get; set; }
 
 		/// <summary>
+		/// Checks the file chosen before it is extracted or the dialog closes, given the path it will have on disk: for a file in a zip, where it will be extracted to.
+		/// An <see cref="IOException"/> it throws keeps the dialog open, shows its message, and nothing is extracted. Called off the UI thread; <see langword="null"/> checks nothing.
+		/// </summary>
+		/// <remarks>
+		/// Weevil checks that another instance doesn't have the log open, which would share the copy of a file in a zip (#1254).
+		/// </remarks>
+		public Action<string> CheckBeforeOpening { get; set; }
+
+		/// <summary>
 		/// The file chosen, once the dialog closes with Open: otherwise <see langword="null"/>.
 		/// </summary>
 		public OpenAsResult Result { get; private set; }
@@ -215,6 +224,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		{
 			string destination = null;
 			var copiesFolder = this.CopiesFolder;
+			Action<string> checkBeforeOpening = this.CheckBeforeOpening;
 
 			using var extraction = new CancellationTokenSource();
 			_extraction = extraction;
@@ -230,6 +240,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 					destination = file.Location.IsInArchive && copiesFolder is not null
 						? Path.Combine(copiesFolder, reader.GetCopyKey(file.Location))
 						: Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
+
+					checkBeforeOpening?.Invoke(file.Location.IsInArchive ? Path.Combine(destination, file.Location.Name) : file.Location.FileSystemPath);
 
 					return (reader.Extract(file.Location, companionSuffixes, destination, extraction.Token), destination);
 				});
