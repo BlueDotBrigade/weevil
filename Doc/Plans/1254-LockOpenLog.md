@@ -23,7 +23,7 @@ When the lock can't be created, for example in a folder Weevil can't write to, t
    - `Engine.Surrogate`, the empty log every instance of Weevil shows until a log opens, holds no lock: every instance opens the same file.
 2. **Reopening the log it has open.** Opening a log replaces the engine the GUI holds only once the new one has opened, so the old one still holds the lock while the new one asks for it. `IEngineBuilder.Replacing(engine)` names the engine replaced: when both read the same file, the new engine takes over its lock once it has opened. If the open fails, the lock stays with the engine replaced. The GUI then disposes the engine replaced. No process-wide registry of locks: two engines of the same log in one process are refused like two instances of Weevil, which keeps the rule testable in one process and the lock's lifetime explicit.
 3. **The file.** `<log>.lock` beside the log, kept open while the log is, holds two lines of UTF-8 text: `User=` and `Computer=` (`Environment.UserName`, `Environment.MachineName`). `LogLock`, internal to Core, takes and releases it.
-4. **How it is held, per operating system.** Verified on Linux with an experiment, in one process and between two (the experiment's results are below). Windows' behaviour is documented, and checked by CI.
+4. **How it is held, per operating system.** Verified on Linux with an experiment, in one process and between two ([below](#experiment)). Windows' behaviour is documented, and checked by CI.
    - **Windows** enforces share modes on every handle, between processes, within one process, and over SMB, where the server enforces them for every client. Held with write access, `FileShare.Read` and `FileOptions.DeleteOnClose`: another Weevil's attempt to take it, which asks for write access, fails with a sharing violation, while a read of who holds it succeeds (it shares read, write and delete). Not sharing delete keeps the file from being deleted while it is held.
    - **Linux and macOS:** .NET takes an advisory `flock` per handle, `LOCK_EX` for `FileShare.None` and `LOCK_SH` for any other share, so `FileShare.Read` on both sides would let two instances hold it. Weevil opens it with `FileShare.None`, so no other Weevil holds it, then converts the lock to `LOCK_SH | LOCK_NB` through `flock` itself: another Weevil's `LOCK_EX` still fails, and a read, which takes `LOCK_SH`, succeeds. With `LOCK_NB`, Linux converts the lock under one spinlock, so no other lock gets in between. Only Weevil honours the lock: other applications may still read or write the file. On network file systems, `flock` depends on the client (NFS emulates it with byte-range locks; CIFS may keep it on one computer).
    - Byte-range locks (`FileStream.Lock`) were rejected: on Linux, .NET takes process-wide POSIX locks, which neither conflict within a process nor survive another handle to the file being closed.
@@ -44,31 +44,19 @@ When the lock can't be created, for example in a folder Weevil can't write to, t
 - **Core feature tests** (Reqnroll, `IO/LockingALog.feature`): a second open is refused, naming who has the log; closing deletes the lock and lets another open; a leftover lock no one holds doesn't block; Reload and Clear of the open log work; a lock that can't be created, because a folder has its name, still lets the log open, on any system and as an administrator.
 - **Core unit tests:** `Replacing` hands the lock over, and keeps it with the engine replaced when the open fails; `Engine.ThrowIfInUse`.
 - **CLI and PowerShell:** a held log stops the command with the warning.
-- **GUI** (Windows only): reopening the log Weevil has open; a refused open keeps the open log; a zipped log refused before extraction leaves the other instance's copy.
+- **GUI** (Windows only): reopening the log Weevil has open; a refused open keeps the open log; Open As refuses a log another Weevil has open but not the one open here; a zipped log refused before extraction leaves the other instance's copy. The GUI tests close the view models they create (`UiTestBase.Track`), and their `Token` closes its window, before the next test opens the same log or deletes its folder.
 - **Existing tests** open the same test log many times in one process, and now dispose each engine (`using`), so the next open is not refused. The feature tests' `Token` disposes its engine when the scenario ends, and when a step opens another. No test is disabled or skipped.
 - `*.lock` is ignored by git, as `*.idx` is.
 
 ## Steps
 
-1. This plan.
-2. Core: `LogLock`, `LogInUseException`, `IEngine : IDisposable`, `Replacing`, `ThrowIfInUse`, with their tests, and the existing tests disposing their engines.
-3. CLI and PowerShell.
-4. GUI: dispose, reopen, the refusal's message, Open As's check before extraction, `ExtractedLog`.
-5. `Doc/Design` (OpeningALog, EngineAndSession), the help and the PowerShell readme.
+1. This plan. Done (36aede1a).
+2. Core: `LogLock`, `LogInUseException`, `IEngine : IDisposable`, `Replacing`, `ThrowIfInUse`, with their tests, and the existing tests disposing their engines. Done (b7a794b7).
+3. CLI and PowerShell. Done (b7a794b7).
+4. GUI: dispose, reopen, the refusal's message, Open As's check before extraction, `ExtractedLog`. Done (4bc760be). Its tests run only on Windows, so CI runs them first.
+5. `Doc/Design` (OpeningALog, EngineAndSession), the help, the PowerShell readme, and the experiment in `Doc/Research`. Done.
+6. Review by a reviewer and a sceptic, then the pull request.
 
 ## Experiment
 
-On Linux (.NET 10, ext4-like local file system, 2026-11-20), in one process and between two:
-
-| Holder | Second | Result |
-|---|---|---|
-| `FileShare.Read`, write access | Same | Opens: both take `LOCK_SH` |
-| `FileShare.Read`, write access | `FileShare.None` | Sharing violation (`EAGAIN`, `HResult` 11) |
-| `FileShare.None` | Read, `FileShare.ReadWrite` | Sharing violation: the owner can't be read |
-| `FileStream.Lock` on a range | `Lock` on the same range, same process | Succeeds: POSIX locks are per process |
-| `FileShare.None`, then `flock(LOCK_SH \| LOCK_NB)` | `FileShare.None` | Sharing violation, in one process and between two |
-| Same | Read, `FileShare.ReadWrite \| Delete` | Reads the owner |
-| Same, holder killed with `SIGKILL` | `FileShare.None` | Takes it: the file was left, unheld |
-| Same, disposed | | The file is deleted (`DeleteOnClose`) |
-
-A failed open with `DeleteOnClose` does not delete the file someone else holds.
+The experiment behind decision 4, and its results on Linux, are in [LogLockPoC](../Research/Weevil3/LogLockPoC/README.md).

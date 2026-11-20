@@ -6,7 +6,7 @@ How an open log's engine is put together, which of its objects Clear and Reload 
 
 | Object | Holds | Lives |
 |---|---|---|
-| `Engine` (`IEngine`) | The current `CoreEngine`, and the events callers subscribe to | One per open log |
+| `Engine` (`IEngine`) | The current `CoreEngine`, the events callers subscribe to, and the log's lock | One per open log, until disposed |
 | `CoreEngine` | One view of the log: its scope, managers, line index, sidecar manager and context | Until Reload replaces it |
 | `Session` | What the user changes in the log | As long as its `Engine` |
 | `RecordState` | The view's flags and elapsed times | As long as its `Engine` |
@@ -16,7 +16,8 @@ How an open log's engine is put together, which of its objects Clear and Reload 
 - **`Engine`** (Core) is the public facade: `Engine.UsingPath(path)` … `.Open()` builds one, and opening another log builds another. It forwards calls to its `CoreEngine`, which is internal, and runs Reload itself.
 - **Events:** `Engine` forwards the filter's events as `FilterResultsChanged` and `FilterHistoryChanged`, and moves its subscription when Reload replaces the filter, so a caller subscribes once per open log (#1011).
 - **`CoreEngine`** is built by `CoreEngineBuilder`, which reads the log and the sidecar. Its constructor creates the managers and applies an empty filter.
-- **`Engine.Surrogate`** is an engine over an empty file, which the GUI holds until a log opens. `Engine.IsRealInstance` tells it apart.
+- **`Engine.Surrogate`** is an engine over an empty file, which the GUI holds until a log opens. `Engine.IsRealInstance` tells it apart. It holds no lock.
+- **The lock:** `Engine` holds `<log>.lock`, which keeps another instance of Weevil from opening the log, from `Open` until `Dispose` (#1254, [OpeningALog.md](OpeningALog.md#locking-the-log)). `Dispose` releases only the lock: the engine still reads its records. `IEngineBuilder.Replacing` hands the lock to an engine that replaces one of the same log.
 
 ## The Managers
 
@@ -71,6 +72,7 @@ Callers reach the session through the engine: `Annotations`, `Bookmarks`, `Regio
 |---|---|---|
 | `Engine`, and its subscribers | Kept | Kept |
 | `Session`, with every store | Kept | Kept |
+| The log's lock | Kept | Kept |
 | `RecordState`, with the flags | Kept | Kept |
 | Storage mode | Kept | Kept |
 | `CoreEngine` and its managers | Kept | Replaced |
@@ -109,4 +111,5 @@ Conventions that Core does not enforce:
 - **Read the managers from the engine each time.** Reload replaces the filter, selector, navigation, analyzer and records, as `IEngine`'s remarks say. `Annotations`, `RecordState`, `Bookmarks` and `Regions` stay the same objects.
 - **Navigation takes no lock.** The selection, Clear and each filter move its active record.
 - **Save before Reload,** as `IEngine.Reload` advises: Reload does not save, while Clear does. The GUI saves first; the CLI and PowerShell never reload (#1247). The GUI also saves before opening another log and before closing. Where the sidecar can never be written, as in a read-only folder (`FileHelper.IsNeverWritable`), each of these logs a warning and carries on, as Clear does (#1246, #1307). If the log has changes no save has written, opening another log and closing first ask the analyst whether to carry on and lose them, or stay, so the folder can be made writable and the log saved; Reload never asks, as it keeps them in memory.
+- **Dispose an engine once its log is replaced or closed,** after saving it, so another Weevil can open the log. The GUI disposes the engine an open replaces once the open has succeeded, and the open log's on closing; the CLI and PowerShell when the command ends. An engine that is never disposed keeps its log locked until it is collected or the process ends.
 - The CLI and PowerShell start no threads of their own.

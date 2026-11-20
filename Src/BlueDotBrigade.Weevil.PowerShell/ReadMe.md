@@ -32,6 +32,10 @@ Get-Records -FilePath .\Sample.log -Include Error -Storage Disk
 
 With `-Storage Disk`, the records `Get-Records` returns read their text from the log when the pipeline uses them. If the log is truncated, replaced or deleted before then, those reads fail. If the log is renamed, deleted or replaced while it is filtered, the cmdlet stops with an error that says to run it again. A filter that could finish, for example in RAM, keeps its results and writes a warning.
 
+## A Log Another Weevil Has Open
+
+`Get-Records` and `Get-Insight` keep the log locked while they run, as Weevil's window does while a log is open. A log another Weevil has open stops the cmdlet with a terminating error, of category `ResourceBusy`, that names who has it: *app.log is already open in Weevil by jsmith on PC-42.*
+
 ## One Region
 
 `-Region` opens only one region, one of those the log's sidecar lists, so a large log opens faster:
