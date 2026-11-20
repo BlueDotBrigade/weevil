@@ -406,7 +406,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public void GivenTheOpenButton_WhenLinesAreChosen_ThenOnlyThoseLinesOpenAndTheStatusBarSaysSo()
+		public void GivenTheOpenButton_WhenLinesAreChosen_ThenOnlyThoseLinesOpen()
 		{
 			// The part chosen in the Open As dialog is the part opened (#1214), and the status bar names it (#1219).
 			var dialog = Substitute.For<IDialogBoxService>();

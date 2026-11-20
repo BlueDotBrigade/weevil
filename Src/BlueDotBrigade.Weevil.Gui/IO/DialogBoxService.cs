@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using BlueDotBrigade.Weevil;
 using BlueDotBrigade.Weevil.Analysis;
 using BlueDotBrigade.Weevil.Data;
+using BlueDotBrigade.Weevil.Diagnostics;
 using BlueDotBrigade.Weevil.Gui;
 using BlueDotBrigade.Weevil.Gui.Analysis;
 using BlueDotBrigade.Weevil.Gui.IO;
@@ -146,7 +147,15 @@ internal class DialogBoxService : IDialogBoxService
 		}
 		finally
 		{
-			folder.Delete(recursive: true);
+			try
+			{
+				folder.Delete(recursive: true);
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// The parts were read; only a temporary copy of a sidecar is left behind, for example while a scanner holds it.
+				Log.Default.Write(LogSeverityType.Warning, e, $"Open As could not delete the temporary copy of a sidecar. Folder={folder.FullName}");
+			}
 		}
 	}
 

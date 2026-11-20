@@ -103,7 +103,10 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		{
 			// The analyst opens one section or one region, listed from the log's sidecar (#1212, #1213).
 			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
+			using var monitor = options.Monitor();
 			await options.SelectAsync(LargeLog);
+			monitor.Should().RaisePropertyChangeFor(o => o.HasSections, "the view enables the section list only when it is told");
+			monitor.Should().RaisePropertyChangeFor(o => o.HasRegions);
 			options.Part.IsWhole.Should().BeTrue("the whole log is opened unless another part is picked");
 			options.Sections.Should().Equal("Startup (lines 1 – 119)", "Shutdown (from line 300)");
 
@@ -163,6 +166,10 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			options.LastLine = string.Empty;
 			options.Part.IsToEndOfLog.Should().BeTrue("an empty last line is the end of the log");
+			options.Part.Lines.Start.Value.Should().Be(10);
+
+			await options.SelectAsync(LargeLog);
+			options.ChosenPart.Should().Be(PartKind.Lines, "a range of lines is kept for the next log selected");
 			options.Part.Lines.Start.Value.Should().Be(10);
 		}
 

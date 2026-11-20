@@ -120,9 +120,15 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// </summary>
 		public IReadOnlyList<string> Regions { get; private set; } = Array.Empty<string>();
 
-		public bool HasSections => this.Sections.Count > 0;
+		/// <remarks>
+		/// Set with <see cref="Sections"/>: Metalama can't see a list's <c>Count</c> change, so a property worked out from it would never be raised.
+		/// </remarks>
+		public bool HasSections { get; private set; }
 
-		public bool HasRegions => this.Regions.Count > 0;
+		/// <remarks>
+		/// Set with <see cref="Regions"/>, as <see cref="HasSections"/> is.
+		/// </remarks>
+		public bool HasRegions { get; private set; }
 
 		/// <summary>
 		/// The position in <see cref="Sections"/> of the section to open.
@@ -233,7 +239,9 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 				return;
 			}
 
-			(OpenAsAdvice advice, IReadOnlyList<LogPart> parts) = await Task.Run(() => (ReadAdvice(file), ReadParts(file)));
+			// Read side by side: the parts may take longer, for example from a zip on a share, and the log can be opened whole meanwhile.
+			Task<IReadOnlyList<LogPart>> readingParts = Task.Run(() => ReadParts(file));
+			OpenAsAdvice advice = await Task.Run(() => ReadAdvice(file));
 
 			if (selection != _selection)
 			{
@@ -246,7 +254,13 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			}
 
 			ShowAdvice(advice);
-			ShowParts(parts);
+
+			IReadOnlyList<LogPart> parts = await readingParts;
+
+			if (selection == _selection)
+			{
+				ShowParts(parts);
+			}
 		}
 
 		/// <summary>
@@ -277,6 +291,8 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			this.Sections = _sections.Select(p => Describe(p.SectionName, p)).ToList();
 			this.Regions = _regions.Select(p => Describe(p.RegionName, p)).ToList();
+			this.HasSections = _sections.Count > 0;
+			this.HasRegions = _regions.Count > 0;
 			this.SectionIndex = _sections.Count > 0 ? 0 : -1;
 			this.RegionIndex = _regions.Count > 0 ? 0 : -1;
 

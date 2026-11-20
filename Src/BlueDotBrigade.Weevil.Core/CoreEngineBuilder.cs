@@ -555,14 +555,19 @@
 			/// <summary>
 			/// Lists the parts of a log that can be opened by name, from its sidecar alone (#1212, #1213): its level-1 sections, then its named regions.
 			/// </summary>
+			/// <remarks>
+			/// A name is found by its first match, ignoring case, so only the first section or region with a name is listed.
+			/// </remarks>
 			/// <exception cref="NotSupportedException">The sidecar is not compatible with this version of Weevil.</exception>
 			internal static IReadOnlyList<LogPart> ReadParts(string sourceFilePath)
 			{
 				new SidecarManager(sourceFilePath).Load(null, null, out _, out _, out _, out _, out List<Section> tableOfContents, out List<Region> regions, out _);
 
 				return GetSections(new TableOfContents(tableOfContents).Sections)
+					.DistinctBy(s => s.SectionName, StringComparer.OrdinalIgnoreCase)
 					.Concat(regions
 						.Where(r => !string.IsNullOrWhiteSpace(r.Name))
+						.DistinctBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
 						.Select(r => LogPart.ForRegion(r.Name, new Range(r.Minimum.LineNumber, r.Maximum.LineNumber))))
 					.ToList();
 			}

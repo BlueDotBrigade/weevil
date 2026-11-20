@@ -904,6 +904,11 @@
 		/// </remarks>
 		private static IEngineBuilder CreateBuilder(string sourceFilePath, LogPart part, OpenAsResult pluginChoice)
 		{
+			if (!part.IsWhole && !pluginChoice.Range.Equals(Range.All))
+			{
+				Log.Default.Write(LogSeverityType.Information, $"The part chosen in Open As is opened, rather than the range the plugin's own window chose. Range={pluginChoice.Range}");
+			}
+
 			return part.SectionName is not null ? Engine.UsingPath(sourceFilePath).UsingSection(part.SectionName)
 				: part.RegionName is not null ? Engine.UsingPath(sourceFilePath).UsingRegion(part.RegionName)
 				: !part.IsWhole ? Engine.UsingPath(sourceFilePath, part.Lines.Start.Value).UsingRange(part.Lines)
