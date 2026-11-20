@@ -624,7 +624,7 @@ namespace BlueDotBrigade.Weevil
 
 				IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
 
-				log.SeverityOfLast(IO.LineIndexFile.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information);
+				log.SeverityOfLast(IO.SavedIndex.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information);
 				Describe(reopened.Records).Should().Equal(parsed);
 			}
 			finally
@@ -651,13 +651,13 @@ namespace BlueDotBrigade.Weevil
 				File.AppendAllText(logPath, "\nInfo 1900-01-01 13:00:00.0000 248 Added later. Id=999");
 
 				// A folder where the temporary index file would be written makes saving fail.
-				Directory.CreateDirectory($"{logPath}.{IO.LineIndexFile.FileExtension}.tmp");
+				Directory.CreateDirectory($"{logPath}.{IO.SavedIndex.FileExtension}.tmp");
 				using var log = CapturingLogWriter.Register();
 
 				IEngine reopened = Engine.UsingPath(logPath).Open();
 
 				reopened.Count.Should().Be(countBefore + 1, "the line added since was parsed");
-				FluentActions.Invoking(() => log.Last(IO.LineIndexFile.RecordsReadFromIndexMessage)).Should().Throw<InvalidOperationException>("the saved table was not used");
+				FluentActions.Invoking(() => log.Last(IO.SavedIndex.RecordsReadFromIndexMessage)).Should().Throw<InvalidOperationException>("the saved table was not used");
 			}
 			finally
 			{
@@ -698,7 +698,7 @@ namespace BlueDotBrigade.Weevil
 				using (var log = CapturingLogWriter.Register())
 				{
 					IEngine reopened = Engine.UsingPath(logPath).UsingStorage(storageMode).Open();
-					log.SeverityOfLast(IO.LineIndexFile.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information, "the longer table was saved, with checksums that match the log");
+					log.SeverityOfLast(IO.SavedIndex.RecordsReadFromIndexMessage).Should().Be(LogSeverityType.Information, "the longer table was saved, with checksums that match the log");
 					Describe(reopened.Records).Should().Equal(parsed);
 				}
 
@@ -731,10 +731,11 @@ namespace BlueDotBrigade.Weevil
 		private static IO.SavedParse ReadSavedParse(string logPath)
 		{
 			using var log = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-			using var index = new FileStream($"{logPath}.{IO.LineIndexFile.FileExtension}", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-			IO.LineIndex.TryRead(index, log, out IO.LineIndex lineIndex).Should().BeTrue();
+			using var index = new FileStream($"{logPath}.{IO.SavedIndex.FileExtension}", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			IO.IndexFile.TryRead(index, log.Length, out IO.LineIndex lineIndex, out IO.IndexFile file).Should().BeTrue();
+			lineIndex.Matches(log).Should().BeTrue();
 
-			return lineIndex.Parse;
+			return file.Parse;
 		}
 
 		[TestMethod]

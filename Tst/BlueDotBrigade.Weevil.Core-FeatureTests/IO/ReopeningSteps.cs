@@ -4,7 +4,7 @@ using System.Text;
 using BlueDotBrigade.Weevil.Data;
 using BlueDotBrigade.Weevil.Diagnostics;
 using GrownLogParser = BlueDotBrigade.Weevil.IO.GrownLogParser;
-using LineIndexFile = BlueDotBrigade.Weevil.IO.LineIndexFile;
+using SavedIndex = BlueDotBrigade.Weevil.IO.SavedIndex;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 [Binding]
@@ -106,7 +106,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	public void GivenOneByteOfTheSavedRecordTableHasBeenChanged()
 	{
 		// The rows are the last section before the end marker, whose kind, length and checksum take 20 bytes.
-		var indexPath = $"{_logPath}.{LineIndexFile.FileExtension}";
+		var indexPath = $"{_logPath}.{SavedIndex.FileExtension}";
 		var bytes = File.ReadAllBytes(indexPath);
 		bytes[bytes.Length - 20 - 5] ^= 0x01;
 		File.WriteAllBytes(indexPath, bytes);
@@ -138,21 +138,21 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[Then("it will have been opened without being parsed")]
 	public void ThenItWillHaveBeenOpenedWithoutBeingParsed()
 	{
-		_messages.Should().Contain(LineIndexFile.RecordsReadFromIndexMessage);
+		_messages.Should().Contain(SavedIndex.RecordsReadFromIndexMessage);
 	}
 
 	[Then("it will have been parsed")]
 	public void ThenItWillHaveBeenParsed()
 	{
-		_messages.Should().NotContain(LineIndexFile.RecordsReadFromIndexMessage);
+		_messages.Should().NotContain(SavedIndex.RecordsReadFromIndexMessage);
 	}
 
 	[Then("it will have been parsed only in its new part")]
 	public void ThenItWillHaveBeenParsedOnlyInItsNewPart()
 	{
-		_messages.Should().Contain(LineIndexFile.OldRecordsReadFromIndexMessage);
+		_messages.Should().Contain(SavedIndex.OldRecordsReadFromIndexMessage);
 		_messages.Should().Contain(GrownLogParser.NewPartParsedMessage);
-		_messages.Should().NotContain(LineIndexFile.RecordsReadFromIndexMessage);
+		_messages.Should().NotContain(SavedIndex.RecordsReadFromIndexMessage);
 	}
 
 	[Then("its last record will span several lines")]
@@ -166,7 +166,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	public void ThenItWillHaveBeenParsedBecauseItsSavedRecordTableDoesNotMatchIt()
 	{
 		ThenItWillHaveBeenParsed();
-		_messages.Should().Contain(message => message.StartsWith(LineIndexFile.TableRejectedMessage));
+		_messages.Should().Contain(message => message.StartsWith(SavedIndex.TableRejectedMessage));
 	}
 
 	/// <remarks>

@@ -14,7 +14,7 @@ namespace BlueDotBrigade.Weevil.IO
 		// Small buffers put line breaks, and code units, across the boundary between reads.
 		private static readonly int[] BufferSizes = { 4, 5, 7, LineIndex.DefaultBufferSize };
 
-		private static MemoryStream ToStream(string content, Encoding encoding)
+		internal static MemoryStream ToStream(string content, Encoding encoding)
 		{
 			return new MemoryStream(encoding.GetPreamble().Concat(encoding.GetBytes(content)).ToArray());
 		}
@@ -43,7 +43,7 @@ namespace BlueDotBrigade.Weevil.IO
 			return reader.ReadLine();
 		}
 
-		private static void ShouldMatchReadLine(LineIndex index, Stream source, Encoding encodingWithoutPreamble)
+		internal static void ShouldMatchReadLine(LineIndex index, Stream source, Encoding encodingWithoutPreamble)
 		{
 			List<string> expectedLines = ReadAllLines(source);
 
@@ -208,141 +208,88 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
-		public void GivenSavedIndex_WhenReading_ThenOffsetsAreTheSame()
-		{
-			using MemoryStream source = ToStream("a\nbb\nccc\ndddd\neeeee", new UTF8Encoding(false));
-			var original = LineIndex.Build(source, checkpointInterval: 2);
-			using var saved = new MemoryStream();
-			original.Write(saved);
-			saved.Position = 0;
-
-			var wasRead = LineIndex.TryRead(saved, source, out LineIndex index);
-
-			wasRead.Should().BeTrue();
-			index.LineCount.Should().Be(original.LineCount);
-			index.IndexedLength.Should().Be(original.IndexedLength);
-			ShouldMatchReadLine(index, source, new UTF8Encoding(false));
-		}
-
-		[TestMethod]
-		public void GivenSavedIndexAndLogHasGrown_WhenReadingAndUpdating_ThenMatchesIndexOfWholeLog()
-		{
-			using var source = new MemoryStream();
-			source.Write(Encoding.UTF8.GetBytes("a\nb\r"));
-			using var saved = new MemoryStream();
-			LineIndex.Build(source, checkpointInterval: 2).Write(saved);
-			saved.Position = 0;
-			source.Write(Encoding.UTF8.GetBytes("\nc\nd"));
-
-			LineIndex.TryRead(saved, source, out LineIndex index).Should().BeTrue();
-			index.Update(source);
-
-			ShouldMatchReadLine(index, source, new UTF8Encoding(false));
-		}
-
-		[TestMethod]
 		[DataRow(0, DisplayName = "First byte changed")]
 		[DataRow(-1, DisplayName = "Last byte changed")]
-		public void GivenLogContentChanged_WhenReadingSavedIndex_ThenReturnsFalse(int changedOffset)
+		public void GivenLogContentChanged_WhenMatched_ThenReturnsFalse(int changedOffset)
 		{
 			var bytes = Encoding.UTF8.GetBytes(string.Concat(Enumerable.Repeat("A line of text\n", 1000)));
-			using var saved = new MemoryStream();
-			LineIndex.Build(new MemoryStream(bytes)).Write(saved);
-			saved.Position = 0;
+			LineIndex index = LineIndex.Build(new MemoryStream(bytes));
 
 			bytes[changedOffset >= 0 ? changedOffset : bytes.Length + changedOffset] = (byte)'X';
 
-			LineIndex.TryRead(saved, new MemoryStream(bytes), out _).Should().BeFalse();
+			index.Matches(new MemoryStream(bytes)).Should().BeFalse();
 		}
 
 		[TestMethod]
-		public void GivenLogIsShorterThanIndexed_WhenReadingSavedIndex_ThenReturnsFalse()
+		public void GivenLogIsShorterThanIndexed_WhenMatched_ThenReturnsFalse()
 		{
 			var bytes = Encoding.UTF8.GetBytes("a\nb\nc\n");
-			using var saved = new MemoryStream();
-			LineIndex.Build(new MemoryStream(bytes)).Write(saved);
-			saved.Position = 0;
+			LineIndex index = LineIndex.Build(new MemoryStream(bytes));
 
-			LineIndex.TryRead(saved, new MemoryStream(bytes, 0, 4), out _).Should().BeFalse();
+			index.Matches(new MemoryStream(bytes, 0, 4)).Should().BeFalse();
 		}
 
 		[TestMethod]
-		public void GivenCopiedLog_WhenReadingSavedIndex_ThenReturnsTrue()
+		public void GivenByteOrderMarkAdded_WhenMatched_ThenReturnsFalse()
+		{
+			using MemoryStream withoutMark = ToStream("a\nb\n", new UTF8Encoding(false));
+			LineIndex index = LineIndex.Build(withoutMark);
+
+			using MemoryStream withMark = ToStream("a\nb\n", new UTF8Encoding(true));
+
+			index.Matches(withMark).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void GivenCopiedLog_WhenMatched_ThenReturnsTrue()
 		{
 			var bytes = Encoding.UTF8.GetBytes("a\nb\nc\n");
-			using var saved = new MemoryStream();
-			LineIndex.Build(new MemoryStream(bytes)).Write(saved);
-			saved.Position = 0;
+			LineIndex index = LineIndex.Build(new MemoryStream(bytes));
 
-			LineIndex.TryRead(saved, new MemoryStream(bytes.ToArray()), out _).Should().BeTrue();
+			index.Matches(new MemoryStream(bytes.ToArray())).Should().BeTrue();
 		}
 
 		[TestMethod]
-		public void GivenTruncatedIndex_WhenReading_ThenReturnsFalse()
+		public void GivenEveryByteOrderMarkAndLineBreak_WhenIndexedAndRead_ThenLogLineReaderFindsTheSameLineOffsets()
 		{
-			using MemoryStream source = ToStream("a\nb\nc\nd\n", new UTF8Encoding(false));
-			using var saved = new MemoryStream();
-			LineIndex.Build(source, checkpointInterval: 1).Write(saved);
-			var truncated = new MemoryStream(saved.ToArray(), 0, (int)saved.Length - 1);
+			// The two scanners must agree, or a start-line open and the sidecar's byte offsets point at the wrong line (#1256).
+			Encoding[] encodings =
+			[
+				new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+				new UTF8Encoding(encoderShouldEmitUTF8Identifier: true),
+				new UnicodeEncoding(bigEndian: false, byteOrderMark: true),
+				new UnicodeEncoding(bigEndian: true, byteOrderMark: true),
+				new UTF32Encoding(bigEndian: false, byteOrderMark: true),
+				new UTF32Encoding(bigEndian: true, byteOrderMark: true),
+			];
+			string[] texts =
+			[
+				"", "x", "a\nb\nc", "a\r\nb\r\nc\r\n", "a\rb\rc", "a\r\r\nb\n\rc\n\n", "\n\n\n", "\r\n", "a\r", "x\r\ry\n",
+				"h\u00e9llo\nw\u00f6rld\r\n\u65e5\u672c\u8a9e\n\U0001F600",
+			];
 
-			LineIndex.TryRead(truncated, source, out _).Should().BeFalse();
-		}
-
-		[TestMethod]
-		public void GivenASavedIndexWithAParse_WhenReading_ThenTheParseIsReadBack()
-		{
-			// After a full parse, the index keeps what parsed the log and the checksums of the bytes read (#1023).
-			using MemoryStream source = ToStream("a\nb\nc\nd\n", new UTF8Encoding(false));
-			LineIndex original = LineIndex.Build(source);
-			SavedParse parse = CreateParse();
-			original.Parse = parse;
-			using var saved = new MemoryStream();
-			original.Write(saved);
-			saved.Position = 0;
-
-			LineIndex.TryRead(saved, source, out LineIndex index).Should().BeTrue();
-
-			index.Parse.IsSameAs(parse).Should().BeTrue();
-			index.Parse.PluginName.Should().Be(parse.PluginName);
-			index.Parse.Checksums.Should().Equal(parse.Checksums);
-		}
-
-		[TestMethod]
-		public void GivenAnyByteOfSavedIndexChanged_WhenReading_ThenReturnsFalse()
-		{
-			// Every section, the parse included, is covered by its checksum, or by the signature and version (#1023).
-			using MemoryStream source = ToStream("a\nb\nc\nd\n", new UTF8Encoding(false));
-			using var saved = new MemoryStream();
-			LineIndex built = LineIndex.Build(source, checkpointInterval: 1);
-			built.Parse = CreateParse();
-			built.Write(saved);
-			var original = saved.ToArray();
-			LineIndex.TryRead(new MemoryStream(original), source, out _).Should().BeTrue("the index is valid before any byte is changed");
-
-			for (var i = 0; i < original.Length; i++)
+			foreach (Encoding encoding in encodings)
 			{
-				var damaged = original.ToArray();
-				damaged[i] ^= 0x01;
+				foreach (var text in texts)
+				{
+					foreach (var bufferSize in BufferSizes)
+					{
+						using MemoryStream source = ToStream(text, encoding);
+						LineIndex index = LineIndex.Build(source, checkpointInterval: 2, bufferSize);
 
-				LineIndex.TryRead(new MemoryStream(damaged), source, out _).Should().BeFalse($"byte {i} was changed");
+						var reader = new LogLineReader(source);
+						var offsets = new List<long>();
+						while (reader.TryReadLine(out var offset, out _, out _))
+						{
+							offsets.Add(offset);
+						}
+
+						var because = $"{encoding.WebName} with a byte order mark: {encoding.GetPreamble().Length > 0}, {text.Length} characters, a buffer of {bufferSize} bytes";
+						index.LineCount.Should().Be(offsets.Count, because);
+						Enumerable.Range(1, index.LineCount).Select(lineNumber => index.GetByteOffset(source, lineNumber, bufferSize: 5)).Should().Equal(offsets, because);
+					}
+				}
 			}
-		}
-
-		/// <summary>
-		/// A parse of the 8 bytes of "a\nb\nc\nd\n": one block, so one checksum.
-		/// </summary>
-		private static SavedParse CreateParse()
-		{
-			return new SavedParse("Plugin", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), StorageMode.Disk, startOffset: 0, endOffset: 8, checksums: [123]);
-		}
-
-		[TestMethod]
-		public void GivenFileThatIsNotAnIndex_WhenReading_ThenReturnsFalse()
-		{
-			using MemoryStream source = ToStream("a\nb\n", new UTF8Encoding(false));
-			using MemoryStream notAnIndex = ToStream("This is not an index file.", new UTF8Encoding(false));
-
-			LineIndex.TryRead(notAnIndex, source, out _).Should().BeFalse();
 		}
 	}
 }

@@ -97,7 +97,7 @@ namespace BlueDotBrigade.Weevil.IO
 			// The header claims far more lines than the log has bytes, which no index can hold.
 			var logPath = WriteLog("a\nb\n");
 			SaveIndex(logPath);
-			var indexPath = $"{logPath}.{LineIndexFile.FileExtension}";
+			var indexPath = $"{logPath}.{SavedIndex.FileExtension}";
 			var index = System.IO.File.ReadAllBytes(indexPath);
 			BitConverter.GetBytes(int.MaxValue).CopyTo(index, LineCountOffset);
 			System.IO.File.WriteAllBytes(indexPath, index);
@@ -121,13 +121,13 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		/// <remarks>
-		/// Written directly: <see cref="LineIndexFile"/> saves no index for a log under the temporary folder.
+		/// Written directly: <see cref="SavedIndex"/> saves no index for a log under the temporary folder.
 		/// </remarks>
 		private static void SaveIndex(string logPath)
 		{
 			using FileStream log = System.IO.File.OpenRead(logPath);
-			using FileStream index = System.IO.File.Create($"{logPath}.{LineIndexFile.FileExtension}");
-			LineIndex.Build(log).Write(index);
+			using FileStream index = System.IO.File.Create($"{logPath}.{SavedIndex.FileExtension}");
+			IndexFile.Write(index, LineIndex.Build(log));
 		}
 	}
 }

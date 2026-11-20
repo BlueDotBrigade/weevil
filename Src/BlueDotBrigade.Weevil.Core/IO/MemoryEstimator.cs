@@ -39,7 +39,7 @@ namespace BlueDotBrigade.Weevil.IO
 				return StorageUnit.Zero;
 			}
 
-			var lineCount = LineIndexFile.TryReadLineCount(logFilePath, out var indexedLineCount, out var indexedLength) &&
+			var lineCount = SavedIndex.TryReadLineCount(logFilePath, out var indexedLineCount, out var indexedLength) &&
 			                indexedLength > 0 &&
 			                indexedLength <= length
 				? Scale(indexedLineCount, indexedLength, length)

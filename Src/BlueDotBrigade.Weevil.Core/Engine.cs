@@ -248,7 +248,7 @@
 		{
 			if (_coreEngine.Source?.HasChanged == true)
 			{
-				IO.LineIndexFile.Delete(_coreEngine.FilePath);
+				IO.SavedIndex.Delete(_coreEngine.FilePath);
 			}
 		}
 
