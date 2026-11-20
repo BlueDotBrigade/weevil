@@ -1041,6 +1041,7 @@
 							Context = _engine.Context,
 							TotalRecordCount = _engine.Count,
 							StorageMode = _engine.StorageMode,
+							Part = _engine.Part,
 						});
 
 						// The Remarks box reads the engine, which is now the opened log's. Assigning the remarks to themselves would raise nothing (#1116).
@@ -1303,6 +1304,7 @@
 						Context = _engine.Context,
 						TotalRecordCount = _engine.Count,
 						StorageMode = _engine.StorageMode,
+						Part = _engine.Part,
 					});
 
 					RefreshFilterResults();

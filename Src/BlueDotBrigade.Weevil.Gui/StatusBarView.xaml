@@ -279,6 +279,10 @@
             </StatusBarItem>
             <StatusBarItem Grid.Column="4" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
+                    <!-- The section, region or lines open, so a partial open isn't mistaken for the whole log (#1219). Empty for the whole log. -->
+                    <TextBox Text="{Binding SourceFileDetails.PartName, FallbackValue='', Mode=OneWay}"
+                             ToolTip="Only this part of the log is open. Reload opens the same part again."
+                             Style="{StaticResource StatusBarTextBox}"/>
                     <!-- RAM or Disk, as chosen in the Open As window (#1028). -->
                     <TextBox Text="{Binding SourceFileDetails.StorageModeName, FallbackValue='', Mode=OneWay}"
                              ToolTip="Where the log's text is kept: RAM, or Disk, where it is read back from the log when needed."

@@ -75,8 +75,9 @@ Callers reach the session through the engine: `Annotations`, `Bookmarks`, `Regio
 | The log's lock | Kept | Kept |
 | `RecordState`, with the flags | Kept | Kept |
 | Storage mode | Kept | Kept |
+| Part of the log opened (`IEngine.Part`) | Kept | Kept |
 | `CoreEngine` and its managers | Kept | Replaced |
-| `RecordScope` | Narrowed | Replaced: the whole log |
+| `RecordScope` | Narrowed | Replaced: the part of the log opened |
 | Filter | Reset to none | Applied again |
 | Elapsed times | Replaced by that filter | Replaced by that filter |
 | Selection | The selected records kept | The selected records still shown |
@@ -92,9 +93,9 @@ Callers reach the session through the engine: `Annotations`, `Bookmarks`, `Regio
 **Reload** reads the log again into a new `CoreEngine`:
 
 1. It deletes the saved line index if the log changed on disk ([DiskMode.md](DiskMode.md#a-log-that-changed)).
-2. It keeps the session, the record state, the storage mode, the filter, and the selection, anchor and active record by line number.
+2. It keeps the session, the record state, the storage mode, the part of the log opened, the filter, and the selection, anchor and active record by line number. When the region or section opened is no longer in the session, it throws here, and the engine keeps its records (#1219).
 3. It swaps in an engine without records, with the same session and filter, so the old records are freed while the log is read (#1126). If reading fails, that engine stays, so Save and a retry still use this log.
-4. The new engine reads the whole log from line 1: the start line, range and limit the log opened with are not kept (#1219). Its context is read from the sidecar again, or worked out by the plugin. The kept session is not loaded from the sidecar.
+4. The new engine reads the same part of the log as it is now, with the start line, range, region, section and limit the log opened with (#1219): a region or section found again by name in the kept session, lines to the new end of the log, or the same lines. Its context is read from the sidecar again, or worked out by the plugin. The kept session is not loaded from the sidecar.
 5. The selection is restored, then the filter applied again, not counted as the user's (#1185). For the same log, `@Elapsed` compares the elapsed times it compared before (#1224).
 6. `FilterResultsChanged` is raised once. If that filter cannot read the log, Reload ends with an engine without records that keeps the filter, and throws.
 

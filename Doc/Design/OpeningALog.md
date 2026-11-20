@@ -24,7 +24,7 @@ How Weevil opens a log: the kinds of open, what each reads and writes beside the
 
 1. **Plugin:** `PluginFactory` picks the plugin from the log's path.
 2. **Line index:** `SavedIndex.Load` reads the `.idx` and checks it against the log ([below](#trusting-a-saved-index)). When it matches, only the bytes added since are scanned (`LineIndex.Update`); otherwise the whole log is (`LineIndex.Build`). The `.idx` is saved when the line index changed, unless it holds a table: saving would drop it, so a full open saves both.
-3. **Range:** a region or section is looked up in the sidecar (`SidecarManager.LoadRegions`, `LoadSections`).
+3. **Range:** a region or section is looked up in the sidecar (`SidecarManager.LoadRegions`, `LoadSections`), or, on Reload, in the session kept. The engine keeps what it was asked to load (`LoadCriteria`), and `IEngine.Part` says which part is open (`LogPart`, #1219).
 4. **Records:** a full open reads them through `SavedIndex.ReadAllRecords`: from the saved table, extended when the log grew, or else by parsing the log (`SerializedRecordRepository`, `LogLineReader`), whose parse and table it then saves with the line index. A partial open parses what it needs.
 5. **Sidecar:** `SidecarManager.Load` reads the `.xml`.
 6. **Context:** one given to the builder wins (`UsingContext`, which the GUI always passes from Open As), then the sidecar's, then the plugin's `DetermineContext`.
@@ -87,7 +87,10 @@ Every open reads the sidecar once, twice for a region or section, and checks the
 
 - **Reopen** (#1023): in RAM, the blocks checked fill the chunks (`SavedTableReader`). On disk, they are only checked, and the chunks read back later through a `LogFileSource` made from the saved checksums (`LogFileSource.Create`).
 - **A grown log:** `GrownLogParser` keeps the rows before the last chunk, parses from its first record to the end, and the whole longer table is saved again. A table with no chunk, whose rows all keep a string, cannot say where to resume, so its log is parsed in full.
-- **Reload** (`Engine.Reload`) is always a full open: it keeps no start line, range, region, section or limit of the open it replaces.
+- **Reload** (`Engine.Reload`) asks for what the open it replaces asked for: its start line, range, region, section and limit (#1219). So it reloads a full open in full, and a partial open as the same part of the log as it is now:
+  - a region or section is found again by name in the session kept, whose regions and table of contents may have changed since the log opened. When the name is gone, Reload throws a `KeyNotFoundException` before it lets go of the records, so they stay;
+  - lines from a start line run to the new end of the log, so appended lines appear;
+  - a range of lines gives the same lines.
   - In disk mode, when a read found the log changed (`LogFileSource.HasChanged`), it first deletes the `.idx` (`SavedIndex.Delete`), so the log is indexed and parsed again ([DiskMode.md](DiskMode.md#a-log-that-changed)).
   - It keeps the session in memory (#1107). Its context is read from the sidecar again, or worked out by the plugin.
   - Core does not save the sidecar first; the GUI does.

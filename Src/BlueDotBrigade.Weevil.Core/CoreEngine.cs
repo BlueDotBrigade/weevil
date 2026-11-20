@@ -34,6 +34,8 @@
 		private readonly ContextDictionary _context;
 		private readonly StorageMode _storageMode;
 		private readonly LogFileSource _source;
+		private readonly LoadCriteria _loadCriteria;
+		private readonly LogPart _part;
 
 		private LogFileMetrics _logFileMetrics;
 
@@ -83,9 +85,21 @@
 		internal LogFileSource Source => _source;
 
 		/// <summary>
+		/// What the builder was asked to load, which Reload asks for again (#1219). Clear and the engine without records that Reload uses keep it.
+		/// </summary>
+		internal LoadCriteria LoadCriteria => _loadCriteria;
+
+		/// <summary>
+		/// The part of the log loaded (#1219). Clear and Reload keep it.
+		/// </summary>
+		internal LogPart Part => _part;
+
+		/// <summary>
 		/// Creates an instance of <see cref="CoreEngine"/> which can only be instantiated through a Fluent API managed by <see cref="CoreEngineBuilder"/>.
 		/// </summary>
 		/// <param name="storageMode">Whether the records keep their content, or read it back from the log (#1025).</param>
+		/// <param name="loadCriteria">What the builder was asked to load, which Reload asks for again (#1219).</param>
+		/// <param name="part">The part of the log loaded.</param>
 		/// <param name="hasReadLog"><see langword="false"/> for the engine without records that Reload uses while it reads the log again (#1126).</param>
 		private CoreEngine(
 			string sourceFilePath,
@@ -103,6 +117,8 @@
 			StorageMode storageMode,
 			LogFileSource source,
 			string displayPath,
+			LoadCriteria loadCriteria,
+			LogPart part,
 			bool hasReadLog)
 		{
 			_instanceId = Interlocked.Increment(ref _instancesCreated);
@@ -120,6 +136,8 @@
 			_context = context;
 			_storageMode = storageMode;
 			_source = source;
+			_loadCriteria = loadCriteria;
+			_part = part;
 
 			_sourceFilePath = sourceFilePath;
 			_displayPath = displayPath;
@@ -258,6 +276,8 @@
 				_storageMode,
 				source: null,
 				_displayPath,
+				_loadCriteria,
+				_part,
 				hasReadLog: false);
 
 			// Not a user action, so no telemetry, as when the engine was created.

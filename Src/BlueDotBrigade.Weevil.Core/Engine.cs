@@ -113,6 +113,9 @@
 		/// <inheritdoc />
 		public IO.StorageMode StorageMode => _coreEngine.StorageMode;
 
+		/// <inheritdoc />
+		public IO.LogPart Part => _coreEngine.Part;
+
 		public int Count => _coreEngine.Count;
 
 		public ContextDictionary Context => _coreEngine.Context;
@@ -312,11 +315,14 @@
 		{
 			DeleteLineIndexIfChanged();
 
-			// The session, the flags and the storage mode carry across Reload (#1013, #1025).
+			// The session, the flags, the storage mode and the part of the log carry across Reload (#1013, #1025, #1219).
 			CoreEngine.CoreEngineBuilder builder = CoreEngine
 				.FromPath(_coreEngine.FilePath)
 				.UsingStateOf(_coreEngine)
 				.UsingStorage(_coreEngine.StorageMode);
+
+			// A section or region whose name is gone fails Reload here, while the engine still holds the records.
+			builder.CheckPart();
 
 			(CoreEngine.CoreEngineBuilder builder, SelectionManager.Snapshot, FilterType FilterType, IFilterCriteria Criteria) kept = (builder, _coreEngine.Selector.TakeSnapshot(), _coreEngine.Filter.FilterType, _coreEngine.Filter.Criteria);
 

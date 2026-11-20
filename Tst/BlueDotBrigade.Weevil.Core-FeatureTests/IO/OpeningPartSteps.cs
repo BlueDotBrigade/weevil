@@ -5,7 +5,8 @@ using BlueDotBrigade.Weevil.Data;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 /// <summary>
-/// Opens one region or one section of a log, from the regions and sections its sidecar lists (#1213, #1212).
+/// Opens one region or one section of a log, from the regions and sections its sidecar lists (#1213, #1212), or a range of lines,
+/// and reloads that part (#1219).
 /// </summary>
 [Binding]
 internal sealed class OpeningPartSteps : ReqnrollSteps
@@ -15,6 +16,7 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 	private string _folder = string.Empty;
 	private string _logPath = string.Empty;
 	private Exception? _openFailure;
+	private Exception? _reloadFailure;
 
 	public OpeningPartSteps(Token token) : base(token)
 	{
@@ -48,14 +50,76 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 		SaveLogWithSidecar();
 	}
 
+	/// <remarks>
+	/// Beside the tests, with a sidecar written by the test that lists no regions or sections.
+	/// </remarks>
+	[Given("that the default log file has been saved beside the tests")]
+	public void GivenThatTheDefaultLogFileHasBeenSavedBesideTheTests()
+	{
+		SaveLogWithSidecar();
+	}
+
+	[Given(@"its ""(.+)"" (region|section) has been opened in (RAM|Disk)")]
 	[When(@"its ""(.+)"" (region|section) is opened in (RAM|Disk)")]
 	public void WhenItsPartIsOpenedIn(string name, string part, string mode)
 	{
 		IEngineBuilder builder = Engine
 			.UsingPath(_logPath)
-			.UsingStorage(mode == "Disk" ? StorageMode.Disk : StorageMode.Ram);
+			.UsingStorage(ToStorageMode(mode));
 
 		Open(part == "region" ? builder.UsingRegion(name) : builder.UsingSection(name));
+	}
+
+	[Given($@"it has been opened from line {X.WholeNumber} in (RAM|Disk)")]
+	public void GivenItHasBeenOpenedFromLineIn(int firstLine, string mode)
+	{
+		Open(Engine.UsingPath(_logPath, firstLine).UsingStorage(ToStorageMode(mode)));
+	}
+
+	/// <remarks>
+	/// From the first line, with a range, as Weevil's window opens the lines a plugin's Open As chooses.
+	/// </remarks>
+	[Given($@"its lines {X.WholeNumber} to {X.WholeNumber} have been opened in (RAM|Disk)")]
+	public void GivenItsLinesHaveBeenOpenedIn(int firstLine, int lastLine, string mode)
+	{
+		Open(Engine.UsingPath(_logPath, firstLine).UsingRange(new Range(firstLine, lastLine)).UsingStorage(ToStorageMode(mode)));
+	}
+
+	[Given($@"the ""(.+)"" region has been changed to run from line {X.WholeNumber} to line {X.WholeNumber}")]
+	public void GivenTheRegionHasBeenChangedToRunFromLineToLine(string name, int firstLine, int lastLine)
+	{
+		GivenTheRegionHasBeenRemoved(name);
+		this.Context.Engine.Regions.CreateFromSelection(name, new[] { firstLine, lastLine });
+	}
+
+	[Given(@"the ""(.+)"" region has been removed")]
+	public void GivenTheRegionHasBeenRemoved(string name)
+	{
+		Region region = this.Context.Engine.Regions.Regions.Single(r => r.Name == name);
+		this.Context.Engine.Regions.Clear(region.Minimum.LineNumber);
+	}
+
+	/// <remarks>
+	/// The first records of the default log, written again at its end. The default log has LF line endings, and none after its last line.
+	/// </remarks>
+	[Given("records have been appended to the log")]
+	public void GivenRecordsHaveBeenAppendedToTheLog()
+	{
+		IEnumerable<string> lines = File.ReadAllLines(new Daten().AsFilePath(From.GlobalDefault)).Take(20);
+		File.AppendAllText(_logPath, "\n" + string.Join("\n", lines));
+	}
+
+	[When("the log is reloaded")]
+	public void WhenTheLogIsReloaded()
+	{
+		try
+		{
+			this.Context.Engine.Reload();
+		}
+		catch (KeyNotFoundException exception)
+		{
+			_reloadFailure = exception;
+		}
 	}
 
 	[When(@"its ""(.+)"" region and its ""(.+)"" section are both opened")]
@@ -84,6 +148,23 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 	public void ThenItWillShowTheRecordsFromLineToTheEndOfTheWholeLogAndNoOthers(int firstLine)
 	{
 		ThenItWillShowTheRecordsOfLinesOfTheWholeLogAndNoOthers(firstLine, int.MaxValue);
+	}
+
+	[Then(@"the part open will be the ""(.+)"" region")]
+	public void ThenThePartOpenWillBeTheRegion(string name)
+	{
+		this.Context.Engine.Part.RegionName.Should().Be(name);
+	}
+
+	[Then("the log will not reload, and the reason will name: (.+)")]
+	public void ThenTheLogWillNotReloadAndTheReasonWillName(string names)
+	{
+		_reloadFailure.Should().NotBeNull();
+
+		foreach (var name in names.Split(',', StringSplitOptions.TrimEntries))
+		{
+			_reloadFailure!.Message.Should().Contain($"`{name}`");
+		}
 	}
 
 	[Then("the log will not open, and the reason will name: (.+)")]
@@ -119,6 +200,11 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 		{
 			_openFailure = exception;
 		}
+	}
+
+	private static StorageMode ToStorageMode(string mode)
+	{
+		return mode == "Disk" ? StorageMode.Disk : StorageMode.Ram;
 	}
 
 	private void SaveLogWithSidecar()

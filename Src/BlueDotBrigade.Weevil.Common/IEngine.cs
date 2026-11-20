@@ -55,6 +55,11 @@
 		StorageMode StorageMode { get; }
 
 		/// <summary>
+		/// The part of the log that is open: the whole log, one section, one region, or a range of lines (#1219). <see cref="Clear"/> and <see cref="Reload"/> keep it.
+		/// </summary>
+		LogPart Part { get; }
+
+		/// <summary>
 		/// Narrows the records kept in memory, using the rules of <paramref name="clearOperation"/>. The log file does not change.
 		/// </summary>
 		/// <remarks>
@@ -70,6 +75,10 @@
 		/// Reads the log file again, including any records a Clear removed.
 		/// </summary>
 		/// <remarks>
+		/// It opens the same <see cref="Part"/> of the log as it is now (#1219): a section or region found again by its name among the log's sections and regions,
+		/// which may have changed since it was opened, lines from a start line to the end of the log, so appended lines appear, or the same range of lines.
+		/// When the section or region is no longer there, it throws a <see cref="System.Collections.Generic.KeyNotFoundException"/> before it lets go of the records, so they stay.
+		///
 		/// The comments, pins, bookmarks, regions, remarks and filter history stay, and so do the filter, the storage mode and the selected records the log still holds.
 		/// The engine lets go of the previous records before it reads the log (#1126). While it reads, and if reading fails, it shows the same log without records, with the same filter.
 		/// So save first: after a failed read, saving keeps only the comments and pins already saved.
