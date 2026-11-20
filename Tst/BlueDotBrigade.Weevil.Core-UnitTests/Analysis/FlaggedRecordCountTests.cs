@@ -31,7 +31,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenOneRecordWithTwoFirstOccurrences_WhenFirstOccurrenceRuns_ThenOneFlaggedRecordIsReported()
 		{
 			RecordList records = BuildRecords("A=1 B=2");
-			var analyzer = new FirstOccurrenceAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new OccurrenceAnalyzer(AnalysisType.FirstOccurrence, RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
 
@@ -46,7 +46,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenOneRecordWithTwoLastOccurrences_WhenLastOccurrenceRuns_ThenOneFlaggedRecordIsReported()
 		{
 			RecordList records = BuildRecords("A=1 B=2");
-			var analyzer = new LastOccurrenceAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new OccurrenceAnalyzer(AnalysisType.LastOccurrence, RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
 
@@ -91,7 +91,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenTwoValuesRiseTogether_WhenRisingEdgesRuns_ThenOneFlaggedRecordIsReported()
 		{
 			RecordList records = BuildRecords("A=1 B=10", "A=2 B=20");
-			var analyzer = new DetectRisingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new DetectEdgeAnalyzer(AnalysisType.DetectRisingEdges, RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
 
@@ -107,7 +107,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenTwoValuesFallTogether_WhenFallingEdgesRuns_ThenOneFlaggedRecordIsReported()
 		{
 			RecordList records = BuildRecords("A=2 B=20", "A=1 B=10");
-			var analyzer = new DetectFallingEdgeAnalyzer(RecordAnalyzerTestContext.CreateFilterStrategy());
+			var analyzer = new DetectEdgeAnalyzer(AnalysisType.DetectFallingEdges, RecordAnalyzerTestContext.CreateFilterStrategy());
 
 			var state = new RecordState();
 

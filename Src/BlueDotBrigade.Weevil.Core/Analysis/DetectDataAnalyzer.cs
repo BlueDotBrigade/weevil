@@ -3,7 +3,6 @@ namespace BlueDotBrigade.Weevil.Analysis
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Threading;
-	using BlueDotBrigade.Weevil.Filter.Expressions;
 	using BlueDotBrigade.Weevil.IO;
 	using Data;
 	using Filter;
@@ -13,120 +12,57 @@ namespace BlueDotBrigade.Weevil.Analysis
 	/// Extracts key-value pairs from every record using regex named capture groups,
 	/// flagging each matching record and annotating it with the extracted values.
 	/// </summary>
-	internal class DetectDataAnalyzer : IRecordAnalyzer
+	internal class DetectDataAnalyzer : RegularExpressionAnalyzer
 	{
-		private readonly FilterStrategy _filterStrategy;
-		private readonly IFilterAliasExpander _aliasExpander;
-
-		public DetectDataAnalyzer(FilterStrategy filterStrategy)
-			: this(filterStrategy, null)
+		public DetectDataAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander = null)
+			: base(filterStrategy, aliasExpander)
 		{
 		}
 
-		public DetectDataAnalyzer(FilterStrategy filterStrategy, IFilterAliasExpander aliasExpander)
-		{
-			_filterStrategy = filterStrategy;
-			_aliasExpander = aliasExpander;
-		}
+		public override string Key => AnalysisType.DetectData.ToString();
 
-		public string Key => AnalysisType.DetectData.ToString();
-
-		public string DisplayName => "Detect Data";
+		public override string DisplayName => "Detect Data";
 
 		/// <summary>
 		/// Extracts key/value pairs defined by regular expression "groups", and then adds them to the records' comments.
 		/// </summary>
 		/// <see href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions">MSDN: Defining RegEx Groups</see>
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata)
+		public override Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
 		{
-			return Analyze(records, state, outputDirectory, userDialog, canUpdateMetadata, CancellationToken.None);
-		}
+			if (!TryGetExpressions(records, userDialog, out ImmutableArray<RegularExpression> expressions))
+			{
+				return new Results(0);
+			}
 
-		/// <remarks>
-		/// Stops within one record when <paramref name="cancellationToken"/> is cancelled, and keeps the flags and comments already changed (#1027).
-		/// </remarks>
-		public Results Analyze(RecordList records, IRecordState state, string outputDirectory, IUserDialog userDialog, bool canUpdateMetadata, CancellationToken cancellationToken)
-		{
+			ClearFlags(records, state, canUpdateMetadata);
+
 			var flaggedLineNumbers = new HashSet<int>();
-
-			// Get default regex from current inclusive filter
-			var defaultRegex = Timeline.AnalysisHelper.GetDefaultRegex(_filterStrategy);
-
-			// Show analysis dialog to get custom regex
-			var recordsDescription = records.Count.ToString("N0");
-
-			if (!userDialog.TryGetExpressions(defaultRegex, recordsDescription, out var customRegex))
-			{
-				// User cancelled
-				return new Results(0);
-			}
-
-			if (string.IsNullOrWhiteSpace(customRegex))
-			{
-				// No regex provided
-				return new Results(0);
-			}
-
-			// Parse expressions with alias expansion and || support
-			ExpressionBuilder expressionBuilder = _filterStrategy.GetAnalyzerExpressionBuilder();
-			ImmutableArray<RegularExpression> expressions = AnalyzerExpressionHelper.ParseExpressions(
-				customRegex,
-				_aliasExpander,
-				expressionBuilder);
-
-			if (expressions.IsDefaultOrEmpty)
-			{
-				return new Results(0);
-			}
 
 			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
 			var buffer = new ContentBuffer();
 
-			foreach (IRecord record in records)
+			for (var position = 0; position < records.Count; position++)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-
-				if (canUpdateMetadata)
-				{
-					state.SetFlagged(record, false);
-				}
 
 				// Track unique key/value pairs per record to avoid duplicates using tuple-based key
 				var seenKeyValues = new HashSet<(string Key, string Value)>();
 
 				// Read once, however many expressions test the record (#1133).
-				var content = buffer.Read(record).ToString();
+				var content = records.ReadContent(position, buffer).ToString();
 
 				foreach (RegularExpression regexExpression in expressions)
 				{
-					IDictionary<string, string> keyValuePairs = regexExpression.GetKeyValuePairs(record, content);
-
-					if (keyValuePairs.Count > 0)
+					foreach (KeyValuePair<string, string> keyValuePair in regexExpression.GetKeyValuePairs(content))
 					{
-						foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
+						// Skip blank values, and duplicate key/value pairs within the same record
+						if (!string.IsNullOrWhiteSpace(keyValuePair.Value) && seenKeyValues.Add((keyValuePair.Key, keyValuePair.Value)))
 						{
-							if (!string.IsNullOrWhiteSpace(keyValuePair.Value))
-							{
-								(string Key, string Value) compositeKey = (keyValuePair.Key, keyValuePair.Value);
+							var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
 
-								// Skip duplicate key/value pairs within the same record
-								if (seenKeyValues.Contains(compositeKey))
-								{
-									continue;
-								}
+							Flag(records, position, state, $"{parameterName}: {keyValuePair.Value}", canUpdateMetadata);
 
-								seenKeyValues.Add(compositeKey);
-
-								var parameterName = RegularExpression.GetFriendlyParameterName(keyValuePair.Key);
-
-								if (canUpdateMetadata)
-								{
-									state.SetFlagged(record, true);
-									state.AppendComment(record, $"{parameterName}: {keyValuePair.Value}");
-								}
-
-								flaggedLineNumbers.Add(record.LineNumber);
-							}
+							flaggedLineNumbers.Add(records.GetLineNumber(position));
 						}
 					}
 				}
@@ -136,4 +72,3 @@ namespace BlueDotBrigade.Weevil.Analysis
 		}
 	}
 }
-

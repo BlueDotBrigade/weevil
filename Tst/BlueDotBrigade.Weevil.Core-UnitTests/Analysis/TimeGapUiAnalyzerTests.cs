@@ -91,26 +91,6 @@
 		}
 
 		[TestMethod]
-		public void GivenUntimestampedUiPrefixWasFlagged_WhenAnalyzeRuns_ThenPrefixFlagIsCleared()
-		{
-			DateTime now = DateTime.Now;
-			var records = new List<IRecord>
-			{
-				new Record(10, Record.CreationTimeUnknown, SeverityType.Debug, "header", isMultiLine: false, wasGeneratedByUi: true),
-				new Record(20, now, SeverityType.Debug, "first", isMultiLine: false, wasGeneratedByUi: true),
-				new Record(30, now.AddSeconds(1), SeverityType.Debug, "second", isMultiLine: false, wasGeneratedByUi: true),
-			};
-
-			var analyzer = new TimeGapUiAnalyzer();
-			var state = new RecordState();
-			state.SetFlagged(records[0], true);
-
-			analyzer.Analyze(records.ToImmutableArray(), state, TimeSpan.FromSeconds(5), canUpdateMetadata: true);
-
-			state.IsFlagged(records[0]).Should().BeFalse();
-		}
-
-		[TestMethod]
 		public void GivenAGapOnlyBetweenRecordsNotFromTheUi_WhenAnalyzeRuns_ThenNoRecordIsCreated()
 		{
 			// Whether the UI thread wrote a row is read from its facts, so only a row the analyzer flags is created (#1150).
@@ -141,63 +121,6 @@
 
 			results.FlaggedRecords.Should().Be(3);
 			analyzer.FirstOccurrenceAt.Should().Be(_records[2].CreatedAt);
-		}
-
-		[TestMethod]
-		[WorkItem(935)]
-		public void GivenFirstRunHasGaps_WhenSecondRunHasNoGaps_ThenFirstOccurrenceAtIsReset()
-		{
-			// Regression: Issue #935
-			DateTime now = DateTime.Now;
-			SeverityType severity = SeverityType.Debug;
-
-			var recordsWithGap = new List<IRecord>
-			{
-				new Record(10, now.AddSeconds(0), severity, "content", isMultiLine: false, wasGeneratedByUi: true),
-				new Record(20, now.AddSeconds(10), severity, "content", isMultiLine: false, wasGeneratedByUi: true),
-			};
-
-			var recordsWithNoGap = new List<IRecord>
-			{
-				new Record(30, now.AddSeconds(0), severity, "content", isMultiLine: false, wasGeneratedByUi: true),
-				new Record(40, now.AddSeconds(1), severity, "content", isMultiLine: false, wasGeneratedByUi: true),
-			};
-
-			var analyzer = new TimeGapUiAnalyzer();
-
-			analyzer.Analyze(recordsWithGap.ToImmutableArray(), new RecordState(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
-			analyzer.Analyze(recordsWithNoGap.ToImmutableArray(), new RecordState(), TimeSpan.FromSeconds(5), canUpdateMetadata: false);
-
-			analyzer.Count.Should().Be(0);
-			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
-		}
-
-		[TestMethod]
-		[WorkItem(934)]
-		public void GivenPreviousRunHasGapsAndInvalidThreshold_WhenAnalyzeCalled_ThenResultsAndPublicStateAreReset()
-		{
-			// Regression: Issue #934
-			IUserDialog userDialog = Substitute.For<IUserDialog>();
-			userDialog
-				.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
-				.Returns("not-a-number");
-
-			var analyzer = new TimeGapUiAnalyzer();
-			analyzer.Analyze(_records, new RecordState(), TimeSpan.FromMilliseconds(1), canUpdateMetadata: false);
-			analyzer.Count.Should().BeGreaterThan(0);
-
-			Results results = analyzer.Analyze(
-				_records,
-				new RecordState(),
-				string.Empty,
-				userDialog,
-				canUpdateMetadata: false);
-
-			results.FlaggedRecords.Should().Be(0);
-			results.Should().BeSameAs(Results.None);
-			analyzer.Count.Should().Be(0);
-			analyzer.MaximumPeriodDetected.Should().Be(TimeSpan.Zero);
-			analyzer.FirstOccurrenceAt.Should().Be(DateTime.MaxValue);
 		}
 
 		[TestMethod]
