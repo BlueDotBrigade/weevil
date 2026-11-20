@@ -111,6 +111,46 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
+		[WorkItem(1323)]
+		[DoNotParallelize]
+		public void GivenTheLogFailsToBeReadWhileItsSavedLineIndexIsChecked_WhenLoading_ThenTheLogIsNamedInAWarningAndTheSavedIndexIsKept()
+		{
+			// A failed read of the log, as after a brief network drop, was blamed on the saved index, which was then overwritten without its record table.
+			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");
+			using (var firstOpen = new System.IO.FileStream(_logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+			{
+				ReadAllRecords(firstOpen, _logFilePath);
+			}
+
+			var savedAt = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			System.IO.File.SetLastWriteTimeUtc(_indexFilePath, savedAt);
+			ILogWriter original = Log.Default;
+			ILogWriter log = Substitute.For<ILogWriter>();
+
+			LineIndex index;
+			bool hasFailed;
+			try
+			{
+				Log.Register(log);
+				using var reopened = new FailingOnceFileStream(_logFilePath) { FailingOffset = 0 };
+				index = SavedIndex.Load(_logFilePath, reopened).LineIndex;
+				hasFailed = reopened.HasFailed;
+			}
+			finally
+			{
+				Log.Register(original);
+			}
+
+			hasFailed.Should().BeTrue("the log's first read should have been tried");
+			index.LineCount.Should().Be(3, "the line index was rebuilt from the log");
+			log.Received().Write(
+				LogSeverityType.Warning,
+				Arg.Any<IOException>(),
+				Arg.Is<string>(message => message.StartsWith(SavedIndex.LogUnreadableForLineIndexMessage, StringComparison.Ordinal) && message.Contains(_logFilePath, StringComparison.Ordinal)));
+			System.IO.File.GetLastWriteTimeUtc(_indexFilePath).Should().Be(savedAt, "the saved index may still match the log, so it was not overwritten");
+		}
+
+		[TestMethod]
 		public void GivenSavedIndexMatchesLog_WhenLoading_ThenSavedIndexIsReused()
 		{
 			System.IO.File.WriteAllText(_logFilePath, "a\nb\nc\n");

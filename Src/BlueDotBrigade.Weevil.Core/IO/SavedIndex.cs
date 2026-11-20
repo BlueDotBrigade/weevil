@@ -40,6 +40,11 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		internal const string LogUnreadableMessage = "The log could not be read while its saved record table was checked, so the log will be parsed. The saved table is kept if the parse makes the same one.";
 
+		/// <summary>
+		/// Logged when the log, not the saved index, could not be read while the saved line index was checked against it (#1323).
+		/// </summary>
+		internal const string LogUnreadableForLineIndexMessage = "The log could not be read while its saved line index was checked, so the line index will be rebuilt. The saved index is not overwritten by it, as it may still match the log.";
+
 		private readonly string _logFilePath;
 		private readonly string _indexFilePath;
 
@@ -87,6 +92,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		/// <remarks>
 		/// The index is saved whenever it changes, unless it cannot be: Weevil then continues without saving it.
+		/// Nor is it saved when the log could not be read while the saved index was checked, as the saved index may still match the log (#1323).
 		/// An index that holds a record table is not saved when the log grew, as that would drop the table: a full open extends the table,
 		/// and saves both (#1023). After any other open, the next one scans the new content again.
 		/// </remarks>
@@ -96,7 +102,7 @@ namespace BlueDotBrigade.Weevil.IO
 			var stopwatch = Stopwatch.StartNew();
 			var hasChanged = true;
 
-			if (TryRead(indexFilePath, log, out LineIndex lineIndex, out IndexFile loaded))
+			if (TryRead(logFilePath, indexFilePath, log, out LineIndex lineIndex, out IndexFile loaded, out var isLogUnreadable))
 			{
 				hasChanged = lineIndex.IndexedLength < log.Length;
 
@@ -111,7 +117,7 @@ namespace BlueDotBrigade.Weevil.IO
 				loaded = IndexFile.Empty;
 			}
 
-			if (hasChanged && !loaded.HasTable)
+			if (hasChanged && !loaded.HasTable && !isLogUnreadable)
 			{
 				TrySave(logFilePath, indexFilePath, lineIndex, loaded.Parse);
 			}
@@ -359,10 +365,14 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// Reads the saved index, when it is intact and matches the log.
 		/// </summary>
-		private static bool TryRead(string indexFilePath, Stream log, out LineIndex lineIndex, out IndexFile file)
+		/// <param name="isLogUnreadable">
+		/// <see langword="true"/> when the log, not the saved index, could not be read while they were compared: the saved index may still match the log, so it must not be overwritten (#1323).
+		/// </param>
+		private static bool TryRead(string logFilePath, string indexFilePath, Stream log, out LineIndex lineIndex, out IndexFile file, out bool isLogUnreadable)
 		{
 			lineIndex = null;
 			file = null;
+			isLogUnreadable = false;
 
 			if (!System.IO.File.Exists(indexFilePath))
 			{
@@ -373,7 +383,7 @@ namespace BlueDotBrigade.Weevil.IO
 			{
 				using var indexFile = new System.IO.FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-				if (IndexFile.TryRead(indexFile, log.Length, out lineIndex, out file) && lineIndex.Matches(log))
+				if (IndexFile.TryRead(indexFile, log.Length, out lineIndex, out file) && Matches(lineIndex, log))
 				{
 					return true;
 				}
@@ -381,6 +391,14 @@ namespace BlueDotBrigade.Weevil.IO
 				Log.Default.Write(
 					LogSeverityType.Information,
 					$"The saved line index does not match the log, so it will be rebuilt. IndexFilePath={indexFilePath}");
+			}
+			catch (LogReadException exception)
+			{
+				Log.Default.Write(
+					LogSeverityType.Warning,
+					exception.InnerException,
+					$"{LogUnreadableForLineIndexMessage} LogFilePath={logFilePath} IndexFilePath={indexFilePath}");
+				isLogUnreadable = true;
 			}
 			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
 			{
