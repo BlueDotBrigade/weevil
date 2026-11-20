@@ -1,6 +1,6 @@
 # 1254: Refuse a Log Another Weevil Has Open
 
-> **Status:** In progress
+> **Status:** Done
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
