@@ -18,7 +18,12 @@ namespace BlueDotBrigade.Weevil.PowerShell
 				// Weevil saves a sidecar beside the log, so the test opens its own copy.
 				var logPath = Path.Combine(folder, "Application.log");
 				File.Copy(new Daten().AsFilePath("Application.log"), logPath);
-				var insightCount = Engine.UsingPath(logPath).Open().Analyzer.GetInsights().Length;
+				int insightCount;
+				using (IEngine engine = Engine.UsingPath(logPath).Open())
+				{
+					insightCount = engine.Analyzer.GetInsights().Length;
+				}
+
 
 				var output = new GetInsightCmdlet { FilePath = logPath }.Invoke().Cast<object>().ToList();
 

@@ -30,7 +30,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenALogOnDiskRenamedBeforeItIsFiltered_WhenRunOnce_ThenTheErrorSaysToRunTheCommandAgain()
 		{
 			// The CLI and PowerShell reloaded a changed log and ran the command again, rather than leaving that to the analyst.
-			IEngine engine = OpenCopy(StorageMode.Disk);
+			using IEngine engine = OpenCopy(StorageMode.Disk);
 			File.Move(engine.SourceFilePath, engine.SourceFilePath + ".1");
 			var runs = 0;
 
@@ -52,7 +52,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenALogInRamRenamedBeforeItIsFiltered_WhenRunOnce_ThenTheResultIsKeptWithAWarning()
 		{
 			// The analyst was not told that the log the results came from had been renamed.
-			IEngine engine = OpenCopy(StorageMode.Ram);
+			using IEngine engine = OpenCopy(StorageMode.Ram);
 			File.Move(engine.SourceFilePath, engine.SourceFilePath + ".1");
 			var warnings = new List<string>();
 
@@ -66,7 +66,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenALogThatIsUnchangedOrOnlyGrew_WhenRunOnce_ThenNoWarningIsGiven()
 		{
 			// A live log grows while it is read, which is no reason to warn.
-			IEngine engine = OpenCopy(StorageMode.Ram);
+			using IEngine engine = OpenCopy(StorageMode.Ram);
 			var warnings = new List<string>();
 
 			engine.RunOnce(() => engine.Count, warnings.Add);
@@ -81,7 +81,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenAResultThatStillReadsTheLog_WhenTheLogIsRenamedAsTheWorkFinishes_ThenTheErrorSaysToRunTheCommandAgain()
 		{
 			// Get-Records on disk warned, then returned records whose text could no longer be read.
-			IEngine engine = OpenCopy(StorageMode.Ram);
+			using IEngine engine = OpenCopy(StorageMode.Ram);
 
 			FluentActions.Invoking(() => engine.RunOnce(() =>
 				{
@@ -95,7 +95,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenWorkThatFailsForAnotherReason_WhenRunOnce_ThenItsExceptionReachesTheCaller()
 		{
-			IEngine engine = OpenCopy(StorageMode.Ram);
+			using IEngine engine = OpenCopy(StorageMode.Ram);
 			var failure = new IOException("The destination is full.");
 
 			FluentActions.Invoking(() => engine.RunOnce<int>(() => throw failure, _ => { }))

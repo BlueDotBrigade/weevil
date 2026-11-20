@@ -12,7 +12,7 @@
 		[TestMethod]
 		public void GoToExactTimestampWhenOnlyOneMatchExists()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("GoToTimestamp.log"))
 				.Open();
 
@@ -27,7 +27,7 @@
 		[TestMethod]
 		public void GoToNearestRecordWhenTimestampIsSlightlyBeforeRecord()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("GoToTimestamp.log"))
 				.Open();
 
@@ -43,7 +43,7 @@
 		[TestMethod]
 		public void GoToNearestRecordWhenTimestampIsSlightlyAfterRecord()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("GoToTimestamp.log"))
 				.Open();
 
@@ -59,7 +59,7 @@
 		[TestMethod]
 		public void SupportNavigatingToNextPinnedRecord()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -75,7 +75,7 @@
 		[TestMethod]
 		public void SupportNavigatingToNextRecordWithComment()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -96,7 +96,7 @@
 		[TestMethod]
 		public void SupportNavigatingToNextCommentContainingText()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -119,7 +119,7 @@
 		[TestMethod]
 		public void SupportNavigatingToPreviousCommentContainingText()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -142,7 +142,7 @@
 		[TestMethod]
 		public void SupportCaseSensitiveCommentSearch()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -161,7 +161,7 @@
 		[TestMethod]
 		public void SupportRegexCommentSearch()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -184,7 +184,7 @@
 		[TestMethod]
 		public void SupportNavigatingToNextFlaggedRecord()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -204,7 +204,7 @@
 		[TestMethod]
 		public void HandleNavigatingWhenPinnedRecordsHidden()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 

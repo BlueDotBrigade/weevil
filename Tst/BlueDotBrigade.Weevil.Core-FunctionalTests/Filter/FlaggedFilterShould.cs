@@ -11,7 +11,7 @@
 		[TestMethod]
 		public void ShowOnlyFlaggedRecords()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -39,7 +39,7 @@
 		[TestMethod]
 		public void BeCaseInsensitive()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -65,7 +65,7 @@
 		[TestMethod]
 		public void CombineWithOtherFilters()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -89,7 +89,7 @@
 		[TestMethod]
 		public void NotDuplicateWhenFlaggedAlreadyInFilter()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 

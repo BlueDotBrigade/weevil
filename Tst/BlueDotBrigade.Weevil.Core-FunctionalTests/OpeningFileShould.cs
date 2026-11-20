@@ -17,7 +17,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void OpenEmptyFile()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("EmptyFile.txt"))
 				.Open();
 
@@ -27,7 +27,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void OpenFileWithOnlyWhitespace()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("FileWithOnlyWhitespace.txt"))
 				.Open();
 
@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenTsvHeaderWithOversizedProcessId_WhenOpening_ThenLoadingContinues()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("TsvLogWithOversizedProcessId.log"))
 				.Open();
 
@@ -57,14 +57,15 @@ namespace BlueDotBrigade.Weevil
 
 			try
 			{
-				IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
+				using IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 				File.Exists($"{logPath}.idx").Should().BeTrue("the log has a saved line index");
 
 				BreakLine(logPath, lines, lineNumber: 100);
 				FluentActions.Invoking(() => engine.Records[99].Content).Should().Throw<IO.LogFileChangedException>();
 				engine.Reload();
 
-				IEngine reopened = Engine.UsingPath(logPath, startAtLineNumber: 200).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logPath, startAtLineNumber: 200).Open();
 				reopened[0].LineNumber.Should().Be(200);
 				reopened[0].Content.Should().Be(lines[198], "the changed log's line 200 was its line 199");
 			}
@@ -84,7 +85,7 @@ namespace BlueDotBrigade.Weevil
 
 			try
 			{
-				IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
+				using IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 				File.Exists($"{logPath}.idx").Should().BeTrue("the log has a saved line index");
 				engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Line"));
 
@@ -98,7 +99,8 @@ namespace BlueDotBrigade.Weevil
 
 				engine.Reload();
 
-				IEngine reopened = Engine.UsingPath(logPath, startAtLineNumber: 200).Open();
+				engine.Dispose();
+				using IEngine reopened = Engine.UsingPath(logPath, startAtLineNumber: 200).Open();
 				reopened[0].LineNumber.Should().Be(200);
 				reopened[0].Content.Should().Be(lines[198], "the changed log's line 200 was its line 199");
 			}
@@ -128,7 +130,7 @@ namespace BlueDotBrigade.Weevil
 				File.WriteAllText(logPath, string.Join("\n", new[] { Record(1) }.Concat(stackTrace).Concat(Enumerable.Range(302, 9).Select(Record))) + "\n");
 
 				IEngineBuilder builder = Engine.UsingPath(logPath, startAtLineNumber: 5).UsingStorage(storageMode);
-				IEngine engine = (hasRange ? builder.UsingRange(new Range(5, 310)) : builder).Open();
+				using IEngine engine = (hasRange ? builder.UsingRange(new Range(5, 310)) : builder).Open();
 
 				engine.Records.Select(record => record.LineNumber).Should().Equal(Enumerable.Range(302, 9));
 			}
@@ -168,7 +170,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void LoadStartingAtLineNumber()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault), startAtLineNumber: 100)
 				.Open();
 
@@ -182,7 +184,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenNoSidecarSectionOnStartLine_WhenOpeningAtLineNumber_ThenFirstRecordIsThatLine()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(LogWithUnreliableSidecarOffsets), startAtLineNumber: 120)
 				.Open();
 
@@ -193,7 +195,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSidecarOffsetIsZero_WhenOpeningAtLineNumber_ThenFirstRecordIsThatLine()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(LogWithUnreliableSidecarOffsets), startAtLineNumber: 100)
 				.Open();
 
@@ -204,7 +206,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSidecarOffsetIsNegative_WhenOpeningAtLineNumber_ThenFirstRecordIsThatLine()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(LogWithUnreliableSidecarOffsets), startAtLineNumber: 150)
 				.Open();
 
@@ -215,7 +217,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSidecarOffsetIsMidLine_WhenOpeningAtLineNumber_ThenFirstRecordIsThatLine()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(LogWithUnreliableSidecarOffsets), startAtLineNumber: 180)
 				.Open();
 
@@ -227,7 +229,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenSidecarOffsetIsStartOfAnotherLine_WhenOpeningAtLineNumber_ThenFirstRecordIsThatLine()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(LogWithUnreliableSidecarOffsets), startAtLineNumber: 200)
 				.Open();
 
@@ -238,7 +240,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenUnreliableSidecarOffset_WhenOpeningLineRange_ThenOnlyThatRangeIsLoaded()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(LogWithUnreliableSidecarOffsets), startAtLineNumber: 100)
 				.UsingRange(new Range(100, 109))
 				.Open();
@@ -254,7 +256,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			var fileFormatKey = "FileFormat";
 
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("LogWithSidecarContext.log"))
 				.Open();
 
@@ -272,7 +274,7 @@ namespace BlueDotBrigade.Weevil
 				{ fileFormatKey, fileFormatValue},
 			};
 
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("LogWithSidecarContext.log"))
 				.UsingContext(context)
 				.Open();

@@ -32,7 +32,7 @@ namespace BlueDotBrigade.Weevil.Filter
 		[DataRow(DroidLog.Utf16LittleEndian, FilterType.RegularExpression, @"\[Security\].*detected", 34)]
 		public void GivenADroidLog_WhenFiltered_ThenTheMatchingRecordsAreFoundQuickly(string logName, FilterType filterType, string expression, int matchingRecords)
 		{
-			IEngine engine = Engine.UsingPath(DroidLog.GetPath(logName)).Open();
+			using IEngine engine = Engine.UsingPath(DroidLog.GetPath(logName)).Open();
 
 			var stopwatch = Stopwatch.StartNew();
 			engine.Filter.Apply(filterType, new FilterCriteria(expression));
@@ -68,7 +68,7 @@ namespace BlueDotBrigade.Weevil.Filter
 		public void GivenADroidLog_WhenFiltered_ThenTheMemoryAllocatedPerRecordStaysWithinBudget(StorageMode storageMode)
 		{
 			// The budget tests measured only what a log keeps once open; nothing guarded what a filter needs on top (#1259).
-			IEngine engine = Engine.UsingPath(DroidLog.GetPath(DroidLog.Utf8)).UsingStorage(storageMode).Open();
+			using IEngine engine = Engine.UsingPath(DroidLog.GetPath(DroidLog.Utf8)).UsingStorage(storageMode).Open();
 
 			var allocated = MeasureFilterAllocations(engine);
 
@@ -95,7 +95,7 @@ namespace BlueDotBrigade.Weevil.Filter
 				Assert.Inconclusive("With more cores than 16 MB chunks, each chunk is split between workers, and read by each of them.");
 			}
 
-			IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
+			using IEngine engine = Engine.UsingPath(logPath).UsingStorage(StorageMode.Disk).Open();
 			var writer = new FilterCompletedWriter();
 			ILogWriter original = Log.Default;
 			Log.Register(writer);
@@ -119,8 +119,9 @@ namespace BlueDotBrigade.Weevil.Filter
 		/// <summary>
 		/// Returns the bytes one filter allocates, after a first filter has warmed it up.
 		/// </summary>
-		private static long MeasureFilterAllocations(IEngine engine)
+		private static long MeasureFilterAllocations(IEngine opened)
 		{
+			using IEngine engine = opened;
 			var criteria = new FilterCriteria("Blaster");
 			engine.Filter.Apply(FilterType.PlainText, criteria);
 

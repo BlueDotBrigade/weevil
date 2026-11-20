@@ -28,7 +28,7 @@ namespace BlueDotBrigade.Weevil.Utilities
 			// Abort (Escape) stops a split started from the GUI (#1028).
 			var logPath = Path.Combine(_folder, "SampleData.log");
 			System.IO.File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
-			IEngine engine = Engine.UsingPath(logPath).Open();
+			using IEngine engine = Engine.UsingPath(logPath).Open();
 			using var cancellation = new CancellationTokenSource();
 			cancellation.Cancel();
 
@@ -43,7 +43,7 @@ namespace BlueDotBrigade.Weevil.Utilities
 		{
 			var logPath = Path.Combine(_folder, "SampleData.log");
 			System.IO.File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
-			IEngine engine = Engine.UsingPath(logPath).Open();
+			using IEngine engine = Engine.UsingPath(logPath).Open();
 
 			new LogFileSplitter(logPath).Run(engine.Filter.Results, CancellationToken.None);
 

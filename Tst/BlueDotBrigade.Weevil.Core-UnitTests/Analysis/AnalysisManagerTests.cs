@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenRecordCollection_WhenRemoveAllFlagsCalled_ThenEveryRecordIsUnflagged(string fileName, int expectedCount)
 		{
 			// Remove All Flags and Unpin All skipped the last record.
-			IEngine engine = OpenEngine(fileName);
+			using IEngine engine = OpenEngine(fileName);
 
 			foreach (IRecord record in engine.Records)
 			{
@@ -36,7 +36,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		public void GivenRecordCollection_WhenUnpinAllCalled_ThenEveryRecordIsUnpinned(string fileName, int expectedCount)
 		{
 			// Remove All Flags and Unpin All skipped the last record.
-			IEngine engine = OpenEngine(fileName);
+			using IEngine engine = OpenEngine(fileName);
 
 			foreach (IRecord record in engine.Records)
 			{
@@ -52,7 +52,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		[TestMethod]
 		public void GivenAnUnknownAnalyzerKey_WhenAnalyzeCalled_ThenTheErrorNamesTheKeyAndListsTheAvailableOnes()
 		{
-			IEngine engine = OpenEngine("ThreeRecords.log");
+			using IEngine engine = OpenEngine("ThreeRecords.log");
 
 			Action act = () => engine.Analyzer.Analyze("NoSuchAnalyzer", new UserDialogNotRequired());
 

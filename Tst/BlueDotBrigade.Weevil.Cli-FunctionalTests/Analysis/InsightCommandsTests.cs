@@ -68,7 +68,12 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			// The JSON is rendered from the report, not run through the formatter, and holds every insight without --verbose (#837).
 			var logPath = Path.Combine(_folder, "Application.log");
 			File.Copy(new Daten().AsFilePath("Application.log"), logPath);
-			var insightCount = Engine.UsingPath(logPath).Open().Analyzer.GetInsights().Length;
+			int insightCount;
+			using (IEngine engine = Engine.UsingPath(logPath).Open())
+			{
+				insightCount = engine.Analyzer.GetInsights().Length;
+			}
+
 			OutputWriterContext.Configure(OutputAs.CreateFormatter(OutputFormat.Json), _output);
 
 			new InsightCommands(new OutputOptions(OutputFormat.Json)).Insight(logPath);
@@ -85,7 +90,8 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 		/// </summary>
 		private static string[] ExpectedInsightLines(string logPath)
 		{
-			var lines = Engine.UsingPath(logPath).Open().Analyzer.GetInsights()
+			using IEngine engine = Engine.UsingPath(logPath).Open();
+			var lines = engine.Analyzer.GetInsights()
 				.Where(insight => insight.IsAttentionRequired)
 				.Select(insight => $"{insight.Title}\t{insight.MetricValue} {insight.MetricUnit}\t{insight.Details}")
 				.ToArray();

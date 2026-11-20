@@ -1,6 +1,7 @@
 namespace BlueDotBrigade.Weevil.Cli.Filter
 {
 	using System.IO;
+	using Cocona;
 	using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 	[TestClass]
@@ -84,6 +85,21 @@ namespace BlueDotBrigade.Weevil.Cli.Filter
 
 			File.ReadAllLines(Path.Combine(_folder, "Application.Results.log"))
 				.Should().Equal(lines[7]);
+		}
+
+		[TestMethod]
+		[WorkItem(1254)]
+		public void GivenALogAnotherWeevilHasOpen_WhenFiltering_ThenTheCommandStopsWithAnErrorNamingWhoHasIt()
+		{
+			var logPath = CopyLog("Application.log");
+			using IEngine otherWeevil = Engine.UsingPath(logPath).Open();
+
+			Action filter = () => new FilterCommands().Filter(logPath, include: "Error", exclude: null);
+
+			CommandExitedException exited = filter.Should().Throw<CommandExitedException>().Subject.Single();
+			exited.ExitCode.Should().Be(1);
+			exited.Message.Should().EndWith($"Application.log is already open in Weevil by {Environment.UserName} on {Environment.MachineName}.");
+			File.Exists(Path.Combine(_folder, "Application.Results.log")).Should().BeFalse();
 		}
 
 		private string CopyLog(string fileName)

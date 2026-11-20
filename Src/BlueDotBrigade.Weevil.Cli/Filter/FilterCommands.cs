@@ -55,7 +55,8 @@
 					encoding = EncodingHelper.GetEncoding(log);
 				}
 
-				IEngine engine = builder.Open();
+				// Closed when the command ends, so another Weevil can open the log (#1254).
+				using IEngine engine = builder.Open();
 
 				var destinationFile =
 					Path.GetFileNameWithoutExtension(logPath) +
@@ -76,9 +77,10 @@
 					},
 					Program.ReportWarning);
 			}
-			catch (Exception exception) when (exception is LogFileChangedException or NotSupportedException)
+			catch (Exception exception) when (exception is LogFileChangedException or LogInUseException or NotSupportedException)
 			{
-				// A log changed while it was read (#1247), or one Weevil can't open, such as one with too many lines (#1252): its message, without a stack trace.
+				// A log changed while it was read (#1247), one another Weevil has open (#1254), or one Weevil can't open, such as one with too many lines (#1252):
+				// its message, without a stack trace.
 				// Cocona sets the exit code from the command, so it is passed this way.
 				throw new CommandExitedException(exception.Message, 1);
 			}

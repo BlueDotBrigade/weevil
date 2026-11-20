@@ -63,7 +63,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[Given($"that the saved log file has been opened in {Modes}")]
 	public void GivenThatTheSavedLogFileHasBeenOpenedIn(string mode)
 	{
-		_ = Open(_logPath, mode);
+		Open(_logPath, mode).Dispose();
 	}
 
 	[Given("one character in the middle of the saved log file has been changed")]
@@ -182,7 +182,7 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 		{
 			var copyPath = Path.Combine(copyFolder, "Droid.log");
 			File.Copy(_logPath, copyPath);
-			IEngine parsed = Engine.UsingPath(copyPath, _startLine).UsingStorage(reopened.StorageMode).Open();
+			using IEngine parsed = Engine.UsingPath(copyPath, _startLine).UsingStorage(reopened.StorageMode).Open();
 
 			Describe(reopened.Records).Should().NotBeEmpty();
 			Describe(reopened.Records).Should().Equal(Describe(parsed.Records));
@@ -196,6 +196,9 @@ internal sealed class ReopeningSteps : ReqnrollSteps
 	[AfterScenario]
 	public void DeleteTheSavedLogFile()
 	{
+		// The open log's lock is in the folder, so the log is closed first (#1254).
+		this.Context.Engine.Dispose();
+
 		if (Directory.Exists(_folder))
 		{
 			Directory.Delete(_folder, recursive: true);

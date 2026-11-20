@@ -380,3 +380,6 @@ MigrationBackup/
 # Weevil line index: a cache beside each log, rebuilt when missing (#977)
 *.idx
 *.idx.tmp
+
+# Weevil lock beside an open log, deleted when the log closes (#1254)
+*.lock

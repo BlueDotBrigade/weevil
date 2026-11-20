@@ -16,7 +16,7 @@ namespace BlueDotBrigade.Weevil
 			// The construction-time default filter must not be counted as user activity.
 			var recorder = new FakeTelemetryMetricRecorder();
 
-			Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.UsingTelemetry(recorder)
 				.Open();
@@ -28,7 +28,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenEngineWithRecorder_WhenUserAppliesFilter_ThenFilterAppliedRecordedOnce()
 		{
 			var recorder = new FakeTelemetryMetricRecorder();
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.UsingTelemetry(recorder)
 				.Open();
@@ -43,7 +43,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenEngineWithRecorder_WhenUserGoesToLine_ThenNavigationGoToLineRecorded()
 		{
 			var recorder = new FakeTelemetryMetricRecorder();
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.UsingTelemetry(recorder)
 				.Open();
@@ -58,7 +58,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenEngineWithRecorder_WhenAnalyzerRuns_ThenPerAnalyzerMetricRecorded()
 		{
 			var recorder = new FakeTelemetryMetricRecorder();
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.UsingTelemetry(recorder)
 				.Open();
@@ -75,7 +75,7 @@ namespace BlueDotBrigade.Weevil
 		{
 			// After Reload, the engine recorded no telemetry at all.
 			var recorder = new FakeTelemetryMetricRecorder();
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath("SampleData.log"))
 				.UsingTelemetry(recorder)
 				.Open();
@@ -101,7 +101,7 @@ namespace BlueDotBrigade.Weevil
 				var logPath = Path.Combine(folder, "SampleData.log");
 				File.Copy(new Daten().AsFilePath("SampleData.log"), logPath);
 				var recorder = new FakeTelemetryMetricRecorder();
-				IEngine engine = Engine.UsingPath(logPath).UsingTelemetry(recorder).Open();
+				using IEngine engine = Engine.UsingPath(logPath).UsingTelemetry(recorder).Open();
 
 				File.Move(logPath, $"{logPath}~");
 				FluentActions.Invoking(engine.Reload).Should().Throw<IOException>();

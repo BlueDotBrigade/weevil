@@ -12,7 +12,7 @@
 		[TestMethod]
 		public void SupportClearingSelectedRecords()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -30,7 +30,7 @@
 		[TestMethod]
 		public void SupportClearingUnselectedRecords()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -47,7 +47,7 @@
 		[TestMethod]
 		public void SupportClearingBeforeFirstRecord()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -64,7 +64,7 @@
 		[TestMethod]
 		public void SupportClearingAfterLastRecord()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -82,7 +82,7 @@
 		[TestMethod]
 		public void SupportClearingBetweenSelectedRecords()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -102,7 +102,7 @@
 		[TestMethod]
 		public void SupportClearingRecordsBeforeSelection()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -120,7 +120,7 @@
 		[TestMethod]
 		public void SupportClearingRecordsBeforeAndAfterSelection()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -142,7 +142,7 @@
 		[TestMethod]
 		public void SupportClearingRecordsAfterSelection()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -160,7 +160,7 @@
 		[TestMethod]
 		public void GivenRecordsSelectedTogetherAndApart_WhenTheOthersAreClearedAndTheRestFiltered_ThenTheFilterReadsTheRecordsKept()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 
@@ -184,7 +184,7 @@
 		[TestMethod]
 		public void FlagWhenClearOperationHasBeenPerformed()
 		{
-			IEngine engine = Engine
+			using IEngine engine = Engine
 				.UsingPath(new Daten().AsFilePath(From.GlobalDefault))
 				.Open();
 

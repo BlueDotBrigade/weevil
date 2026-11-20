@@ -38,7 +38,8 @@ namespace BlueDotBrigade.Weevil.PowerShell
         {
             try
             {
-                IEngine engine = Engine
+                // Closed when the cmdlet ends, so another Weevil can open the log (#1254).
+                using IEngine engine = Engine
                     .UsingPath(this.FilePath)
                     .UsingStorage(this.Storage)
                     .Open();
@@ -56,6 +57,11 @@ namespace BlueDotBrigade.Weevil.PowerShell
                     this.WriteWarning);
 
                 this.WriteObject(report);
+            }
+            catch (LogInUseException ex)
+            {
+                // Another Weevil has the log open: its message names who (#1254).
+                this.ThrowTerminatingError(new ErrorRecord(ex, "LogInUse", ErrorCategory.ResourceBusy, this.FilePath));
             }
             catch (Exception ex)
             {

@@ -30,7 +30,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenUnsavedComment_WhenReloaded_ThenTheCommentIsKept()
 		{
-			IEngine engine = Open();
+			using IEngine engine = Open();
 			engine.RecordState.SetComment(Line(engine, 20), "Retry starts here");
 
 			engine.Reload();
@@ -42,7 +42,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenFlaggedRecord_WhenReloaded_ThenItIsStillFlagged()
 		{
-			IEngine engine = Open();
+			using IEngine engine = Open();
 			engine.RecordState.SetFlagged(Line(engine, 20), true);
 
 			engine.Reload();
@@ -54,7 +54,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenFlaggedAndCommentedRecords_WhenCleared_ThenTheRecordsLeftKeepThem()
 		{
-			IEngine engine = Open();
+			using IEngine engine = Open();
 			engine.RecordState.SetFlagged(Line(engine, 20), true);
 			engine.RecordState.SetComment(Line(engine, 21), "Retry starts here");
 
@@ -68,7 +68,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenRecordClearedThenReloaded_WhenItReturns_ThenItKeepsItsComment()
 		{
-			IEngine engine = Open();
+			using IEngine engine = Open();
 			engine.RecordState.SetComment(Line(engine, 5), "Before the retry");
 			engine.Selector.Select(13);
 			engine.Clear(ClearOperation.BeforeSelected);
@@ -83,7 +83,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenFlagOnClearedLine_WhenAllFlagsRemovedAndReloaded_ThenTheLineIsNotFlagged()
 		{
 			// Remove All Flags did not reach lines no longer in memory, so their flags came back on Reload.
-			IEngine engine = Open();
+			using IEngine engine = Open();
 			engine.RecordState.SetFlagged(Line(engine, 5), true);
 			engine.Selector.Select(13);
 			engine.Clear(ClearOperation.BeforeSelected);
@@ -98,7 +98,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenAClearedLine_WhenOnlyItAndALineInMemoryAreFlagged_ThenOnlyTheLineInMemoryIsFlaggedAndCounted()
 		{
 			// Going to an insight's records: the GUI reports the records that could not be flagged.
-			IEngine engine = Open();
+			using IEngine engine = Open();
 			engine.Selector.Select(13);
 			engine.Clear(ClearOperation.BeforeSelected);
 
