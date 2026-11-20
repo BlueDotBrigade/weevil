@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.IO
 			LineIndex.TryRead(saved, log, out LineIndex read).Should().BeTrue();
 			saved.Position = read.TableOffset;
 
-			SavedTableReader.TryRead(saved, log, _logPath, read.Parse, read.ContentEncoding, storageMode, out RecordTable table, out LogFileSource source).Should().BeTrue();
+			SavedTableReader.TryRead(saved, log, _logPath, read.Parse, read.ContentEncoding, storageMode, displayPath: null, out RecordTable table, out LogFileSource source).Should().BeTrue();
 
 			var reopened = new TableRecordList(table);
 			Describe(reopened).Should().Equal(Describe(parsed));

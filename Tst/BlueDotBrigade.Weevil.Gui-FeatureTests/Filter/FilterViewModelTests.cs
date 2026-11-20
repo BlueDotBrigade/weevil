@@ -28,18 +28,27 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 		private string _folder = string.Empty;
 
+		// Where logs opened from zips are extracted. Not under the temporary folder, where Weevil saves no sidecar or index (#1253).
+		private string _copiesFolder = string.Empty;
+
 		[TestInitialize]
 		public void Setup()
 		{
 			// Weevil does not save sidecars in a subfolder of the temp folder,
 			// ... so each test starts with an empty filter history that Reload cannot restore.
 			_folder = System.IO.Directory.CreateTempSubdirectory("WeevilGui.").FullName;
+			_copiesFolder = Path.Combine(AppContext.BaseDirectory, nameof(FilterViewModelTests), "Zips", Guid.NewGuid().ToString("N"));
 		}
 
 		[TestCleanup]
 		public void Cleanup()
 		{
 			System.IO.Directory.Delete(_folder, recursive: true);
+
+			if (System.IO.Directory.Exists(_copiesFolder))
+			{
+				System.IO.Directory.Delete(_copiesFolder, recursive: true);
+			}
 		}
 
 		// Regression: Issue #996 - running an analyzer froze the window until it finished.
@@ -408,7 +417,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenTheOpenButton_WhenALogInAZipIsChosen_ThenItsCopyIsKeptUntilAnotherLogOpens()
 		{
-			// The dialog extracts a log in a zip to a folder of its own, which Weevil deletes once nothing reads it (#1162).
+			// The dialog extracts a log in a zip to a folder of its own. Weevil deletes the log once nothing reads it (#1162), and keeps the folder (#1253).
 			var extractedFolder = System.IO.Directory.CreateTempSubdirectory("WeevilGui.Extracted.").FullName;
 			var extractedLog = Path.Combine(extractedFolder, "A.log");
 			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), extractedLog);
@@ -426,7 +435,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 				await viewModel.OpenCompressedAsync(CopyLog("B.log"));
 
-				System.IO.Directory.Exists(extractedFolder).Should().BeFalse("nothing reads the previous log's copy any more");
+				System.IO.File.Exists(extractedLog).Should().BeFalse("nothing reads the previous log's copy any more");
+				System.IO.Directory.Exists(extractedFolder).Should().BeTrue("the folder keeps what was saved beside the log for its next open (#1253)");
 			}
 			finally
 			{
@@ -954,9 +964,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				await zipped.ViewModel.OpenCompressedAsync(zipPath);
 
 				zipped.ViewModel.IsLogFileOpen.Should().BeTrue("the chosen file is opened");
-				var openedPath = zipped.OpenedPaths.Should().ContainSingle().Subject;
-				Path.GetDirectoryName(openedPath).Should().NotBe(_folder, "Weevil opens an extracted copy, never a file beside the zip");
-				System.IO.Directory.Exists(Path.GetDirectoryName(openedPath)).Should().BeTrue("exports, reports and splits are saved beside the open log");
+				zipped.OpenedPaths.Should().ContainSingle().Which.Should().Be(Path.Combine(zipPath, "A.log"), "the log is named by its zip, read like a folder (#1312)");
+				var copy = ExtractedCopy("Logs.zip", "A.log");
+				System.IO.File.Exists(copy).Should().BeTrue("Weevil reads an extracted copy, in a folder of its own kept between opens (#1253)");
+				System.IO.File.Exists(Path.Combine(_folder, "A.log")).Should().BeFalse("Weevil never extracts a file beside the zip");
 				System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
 			}
 			finally
@@ -990,23 +1001,101 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		public async Task GivenALogOpenedFromAZip_WhenAnotherFileFromThatZipOpens_ThenTheExtractedCopyIsKept()
+		public async Task GivenAPinOnALogOpenedFromAZip_WhenTheSameFileIsOpenedFromTheZipAgain_ThenThePinIsBack()
+		{
+			// Weevil extracted a zipped log to a new temporary folder each time, and saved nothing beside it, so the analyst's work was lost (#1253).
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+			var zipPath = CreateZip("Logs.zip", "A.log");
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				zipped.ViewModel.Rows.GetRow(0).IsPinned = true;
+
+				// Opening another log saves the open one's sidecar first.
+				await zipped.ViewModel.OpenCompressedAsync(CopyLog("B.log"));
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+
+				zipped.ViewModel.Rows.GetRow(0).IsPinned.Should().BeTrue("the sidecar kept beside the copy is read again");
+				System.IO.File.Exists($"{ExtractedCopy("Logs.zip", "A.log")}.idx").Should().BeTrue("the saved index is kept beside it, for the reopen to read");
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedFromAZip_WhenTheSameFileIsChosenAgainAndOpenAsIsCancelled_ThenTheOpenLogIsStillRead()
+		{
+			// The same file of the same zip is extracted to the same copy, which the open log reads: cancelling deleted it (found in review of #1253).
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+			var zipPath = CreateZip("Logs.zip", "A.log");
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				zipped.DialogBox.TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>()).Returns(false);
+
+				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				zipped.ViewModel.Reload();
+				WaitUntil(() => zipped.ViewModel.IsFilterToolboxEnabled);
+
+				System.IO.File.Exists(ExtractedCopy("Logs.zip", "A.log")).Should().BeTrue("the open log is read from that copy");
+				zipped.DialogBox.DidNotReceive().ShowMessage(Arg.Any<string>(), Arg.Any<string>());
+				zipped.ViewModel.VisibleItems.Should().NotBeNullOrEmpty("Reload reads the log again from its copy");
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenALogOpenedFromAZip_WhenTheSelectedRecordsAreSaved_ThenTheFileIsSavedInTheFolderKeptForIt()
+		{
+			// The engine names a zipped log by its zip, which is no folder to write to: exports go beside the copy it reads (#1253, #1312).
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+
+			try
+			{
+				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				zipped.ViewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
+
+				zipped.ViewModel.SaveSelectedAsRawCommand.Execute(null);
+				await zipped.ViewModel.BackgroundTask;
+
+				System.IO.File.Exists(Path.Combine(Path.GetDirectoryName(ExtractedCopy("Logs.zip", "A.log")), "SelectedRecords.log")).Should().BeTrue();
+				System.IO.File.Exists(Path.Combine(_folder, "SelectedRecords.log")).Should().BeFalse("Weevil writes nothing beside the zip");
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		public async Task GivenAPinOnALogOpenedFromAZip_WhenALogOfTheSameNameIsOpenedFromAnotherZip_ThenItOpensWithoutThePin()
 		{
 			ZippedLogViewModel zipped = CreateViewModelForZip();
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log", "B.log"));
-				var sibling = Path.Combine(Path.GetDirectoryName(zipped.OpenedPaths[0]), "B.log");
+				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				zipped.ViewModel.Rows.GetRow(0).IsPinned = true;
 
-				await zipped.ViewModel.OpenCompressedAsync(sibling);
+				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Others.zip", "A.log"));
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 
-				zipped.ViewModel.Reload();
-				WaitUntil(() => zipped.ViewModel.IsFilterToolboxEnabled);
-
-				System.IO.File.Exists(sibling).Should().BeTrue("the open log is read from the copy Weevil extracted");
-				zipped.ViewModel.VisibleItems.Should().NotBeNullOrEmpty("Reload reads the log again from its extracted copy");
+				zipped.OpenedPaths[1].Should().Be(Path.Combine(_folder, "Others.zip", "A.log"), "the log is named by its own zip (#1312)");
+				ExtractedCopy("Others.zip", "A.log").Should().NotBe(ExtractedCopy("Logs.zip", "A.log"), "another zip's file is extracted to a folder of its own");
+				zipped.ViewModel.Rows.GetRow(0).IsPinned.Should().BeFalse("it is another log, whatever its name");
 			}
 			finally
 			{
@@ -1022,7 +1111,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			try
 			{
 				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
-				var extractedCopy = zipped.OpenedPaths[0];
+				var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 				zipped.DialogBox.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>()).Returns(false);
 
 				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Others.zip", "B.log"));
@@ -1040,14 +1129,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			ZippedLogViewModel zipped = CreateViewModelForZip();
 			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
-			var extractedCopy = zipped.OpenedPaths[0];
+			var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 
 			try
 			{
 				await zipped.ViewModel.OpenCompressedAsync(CopyLog("B.log"));
 
 				System.IO.File.Exists(extractedCopy).Should().BeFalse("nothing reads the previous log's copy any more");
-				System.IO.Directory.Exists(Path.GetDirectoryName(extractedCopy)).Should().BeFalse("the folder Weevil extracted to is left empty");
+				System.IO.File.Exists($"{extractedCopy}.idx").Should().BeTrue("the log's saved index stays for its next open (#1253)");
 			}
 			finally
 			{
@@ -1065,7 +1154,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			try
 			{
 				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
-				var extractedCopy = zipped.OpenedPaths[0];
+				var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 
 				await zipped.ViewModel.OpenCompressedAsync(isOtherLogZipped
 					? CreateZipWithIncompatibleSidecar("Others.zip", "A.log")
@@ -1085,7 +1174,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			ZippedLogViewModel zipped = CreateViewModelForZip();
 			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
-			var extractedCopy = zipped.OpenedPaths[0];
+			var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 
 			try
 			{
@@ -1093,7 +1182,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 				zipped.ViewModel.Exit();
 
-				System.IO.Directory.Exists(Path.GetDirectoryName(extractedCopy)).Should().BeFalse("Weevil deletes what it extracted when it exits");
+				System.IO.File.Exists(extractedCopy).Should().BeFalse("Weevil deletes the log it extracted when it exits");
+				System.IO.File.Exists($"{extractedCopy}.idx").Should().BeTrue("the log's saved index stays for its next open (#1253)");
 			}
 			finally
 			{
@@ -1108,7 +1198,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			// The zip already holds a file by the export's name, as when a folder holding an earlier export was zipped.
 			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log", "SelectedRecords.log"));
-			var extractedCopy = zipped.OpenedPaths[0];
+			var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 			var export = Path.Combine(Path.GetDirectoryName(extractedCopy), "SelectedRecords.log");
 			System.IO.File.WriteAllText(export, "Records the analyst saved beside the open log");
 
@@ -1327,7 +1417,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
 
-			return new ZippedLogViewModel(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox), dialogBox, openedPaths);
+			var viewModel = new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox) { CopiesFolder = _copiesFolder };
+
+			return new ZippedLogViewModel(viewModel, dialogBox, openedPaths);
 		}
 
 		/// <summary>
@@ -1407,6 +1499,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			{
 				Thread.Sleep(TimeSpan.FromMilliseconds(50));
 			}
+		}
+
+		/// <summary>
+		/// The copy Weevil extracts a file of a zip in the test's folder to: the folder named by the file's key, in the test's copies folder (#1253).
+		/// </summary>
+		private string ExtractedCopy(string zipName, string entryName)
+		{
+			using var reader = new BlueDotBrigade.Weevil.Windows.Dialogs.Storage.ContainerReader();
+			var key = reader.GetCopyKey(BlueDotBrigade.Weevil.Windows.Dialogs.Storage.Location.ForArchive(Path.Combine(_folder, zipName), entryName));
+
+			return Path.Combine(_copiesFolder, key, entryName);
 		}
 
 		private sealed record ZippedLogViewModel(FilterViewModel ViewModel, IDialogBoxService DialogBox, List<string> OpenedPaths);

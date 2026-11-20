@@ -32,8 +32,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		public string LocalPath { get; }
 
 		/// <summary>
-		/// The folder a file in a zip was extracted to, for the host to delete when it is done: <see langword="null"/> for a file on disk.
+		/// The folder a file in a zip was extracted to: <see langword="null"/> for a file on disk.
 		/// </summary>
+		/// <remarks>
+		/// With <see cref="OpenAsDialog.CopiesFolder"/>, a folder of that file's own, kept between opens; otherwise a temporary folder, for the host to delete when it is done.
+		/// </remarks>
 		public string ExtractedFolder { get; }
 	}
 
@@ -133,6 +136,12 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		public IReadOnlyList<string> CompanionSuffixes { get; set; } = Array.Empty<string>();
 
 		/// <summary>
+		/// Where a file in a zip is extracted: to a folder of its own in here, named by <see cref="IContainerReader.GetCopyKey"/>,
+		/// so the same file opened again finds the companions kept beside it (#1253). <see langword="null"/> extracts to a new temporary folder each time.
+		/// </summary>
+		public string CopiesFolder { get; set; }
+
+		/// <summary>
 		/// The file chosen, once the dialog closes with Open: otherwise <see langword="null"/>.
 		/// </summary>
 		public OpenAsResult Result { get; private set; }
@@ -173,15 +182,15 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			this.FileBrowserControl.IsEnabled = false;
 			this.OptionsArea.IsEnabled = false;
 
-			var destination = Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
-			var localPath = await ExtractAsync(file, destination);
+			(var localPath, var destination) = await ExtractAsync(file);
 
 			_isOpening = false;
 
 			if (_isClosed)
 			{
-				// The copy finished as the window closed: nobody will open it.
-				if (localPath is not null && file.Location.IsInArchive)
+				// The copy finished as the window closed: nobody will open it. A copy in a kept folder stays: it may be the log the host has open,
+				// which the dialog cannot tell, and the next open of the same file uses it (#1253).
+				if (localPath is not null && file.Location.IsInArchive && this.CopiesFolder is null)
 				{
 					ContainerReader.TryDeleteFolder(destination);
 				}
@@ -199,15 +208,31 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			}
 		}
 
-		/// <returns>The file on disk, or <see langword="null"/> when the extraction failed or was cancelled, leaving nothing behind.</returns>
-		private async Task<string> ExtractAsync(BrowserItem file, string destination)
+		/// <returns>
+		/// The file on disk, or <see langword="null"/> when the extraction failed or was cancelled, leaving nothing behind; and the folder a file in a zip is extracted to.
+		/// </returns>
+		private async Task<(string LocalPath, string Destination)> ExtractAsync(BrowserItem file)
 		{
+			string destination = null;
+			var copiesFolder = this.CopiesFolder;
+
 			using var extraction = new CancellationTokenSource();
 			_extraction = extraction;
 
 			try
 			{
-				return await Task.Run(() => this.Browser.Reader.Extract(file.Location, this.CompanionSuffixes, destination, extraction.Token));
+				IContainerReader reader = this.Browser.Reader;
+				IReadOnlyList<string> companionSuffixes = this.CompanionSuffixes;
+
+				return await Task.Run(() =>
+				{
+					// The key reads the zip's directory, so it is worked out off the UI thread too.
+					destination = file.Location.IsInArchive && copiesFolder is not null
+						? Path.Combine(copiesFolder, reader.GetCopyKey(file.Location))
+						: Path.Combine(Path.GetTempPath(), "BlueDotBrigade.OpenAs.Extracted", Guid.NewGuid().ToString("N"));
+
+					return (reader.Extract(file.Location, companionSuffixes, destination, extraction.Token), destination);
+				});
 			}
 			catch (Exception exception) when (_isClosed)
 			{
@@ -217,12 +242,12 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 					Log.Default.Write(LogSeverityType.Warning, exception, "An extraction failed after the Open As dialog closed.");
 				}
 
-				return null;
+				return (null, destination);
 			}
 			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
 			{
 				this.MessageText.Text = $"The file could not be opened: {exception.Message}";
-				return null;
+				return (null, destination);
 			}
 			finally
 			{

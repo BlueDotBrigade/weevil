@@ -63,6 +63,16 @@
 		IEngineBuilder UsingStorage(StorageMode storageMode);
 
 		/// <summary>
+		/// Names the log as the analyst knows it, when the path given to the builder is a copy, such as one extracted from a zip (#1312).
+		/// </summary>
+		/// <remarks>
+		/// <see cref="ICoreEngine.SourceFilePath"/>, and messages about the log such as <see cref="LogFileChangedException.Path"/>, give this path, while the copy is read.
+		/// A zip reads like a folder, as Explorer shows it: for example <c>C:\Logs\Archive.zip\App.log</c>. Reload keeps it.
+		/// Without it, both are the path given to the builder.
+		/// </remarks>
+		IEngineBuilder UsingDisplayPath(string displayPath);
+
+		/// <summary>
 		/// Reads the log, and returns the engine that holds it.
 		/// </summary>
 		/// <remarks>

@@ -5,6 +5,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using System.Security.Cryptography;
+	using System.Text;
 	using System.Threading;
 
 	/// <summary>
@@ -201,6 +203,31 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			}
 		}
 
+		/// <inheritdoc/>
+		public string GetCopyKey(Location file)
+		{
+			ArgumentNullException.ThrowIfNull(file);
+
+			if (!file.IsInArchive)
+			{
+				throw new ArgumentException("Only a file in a zip is copied out.", nameof(file));
+			}
+
+			using ZipArchive archive = OpenArchive(file, file.ArchivePath.Count - 1);
+			ZipArchiveEntry entry = FindEntry(archive, file.ArchivePath[^1]) ?? throw new FileNotFoundException($"The zip holds no file called `{file.Name}`.");
+
+			// Windows ignores case in paths, and so do zips made on Windows.
+			IEnumerable<string> parts = file.ArchivePath
+				.Prepend(Path.GetFullPath(file.FileSystemPath))
+				.Select(part => part.ToUpperInvariant())
+				.Append(entry.Crc32.ToString(System.Globalization.CultureInfo.InvariantCulture))
+				.Append(entry.Length.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+			byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(string.Join("\n", parts)));
+
+			return Convert.ToHexString(hash, 0, 8).ToLowerInvariant();
+		}
+
 		/// <summary>
 		/// Gives the path of a file on disk: a file on disk as it is, and a file in a zip copied out to <paramref name="destinationFolder"/>,
 		/// with the companions beside it in the zip that exist, such as <c>App.log.xml</c> for <c>App.log</c>.
@@ -221,26 +248,53 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			var isNewFolder = !Directory.Exists(destinationFolder);
 			Directory.CreateDirectory(destinationFolder);
 
+			// What this call writes, so a copy that fails removes only that from a folder kept between opens (#1253).
+			var copied = new List<string>();
+
 			try
 			{
 				var extracted = Path.Combine(destinationFolder, file.Name);
-				Copy(file, extracted, cancellationToken);
+
+				// A name such as `C:other.log` would leave the folder: ZipFile.ExtractToDirectory refuses it too.
+				if (!Path.GetFullPath(extracted).StartsWith(Path.GetFullPath(destinationFolder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+				{
+					throw new InvalidDataException($"The zip names a file outside the folder it is extracted to: `{file.Name}`.");
+				}
+
+				// A copy already here, of the entry's size, is the same file, since the folder's name includes the entry's CRC-32 and size (#1253).
+				// It may be the log open in Weevil, or in another Weevil, which must not be rewritten. A shorter one is a copy that stopped part way.
+				if (!File.Exists(extracted) || new FileInfo(extracted).Length != GetLength(file))
+				{
+					copied.Add(extracted);
+					Copy(file, extracted, cancellationToken);
+				}
 
 				foreach (var suffix in companionSuffixes ?? Enumerable.Empty<string>())
 				{
 					Location companion = GetSibling(file, file.Name + suffix);
+					var target = extracted + suffix;
 
-					if (Exists(companion))
+					// One already here holds what the analyst added since the file was last opened from the zip.
+					if (!File.Exists(target) && Exists(companion))
 					{
-						Copy(companion, extracted + suffix, cancellationToken);
+						copied.Add(target);
+						Copy(companion, target, cancellationToken);
 					}
 				}
 
 				return extracted;
 			}
-			catch when (isNewFolder)
+			catch
 			{
-				TryDeleteFolder(destinationFolder);
+				if (isNewFolder)
+				{
+					TryDeleteFolder(destinationFolder);
+				}
+				else
+				{
+					copied.ForEach(TryDeleteFile);
+				}
+
 				throw;
 			}
 		}
@@ -465,6 +519,30 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 				target.Write(buffer, 0, read);
+			}
+		}
+
+		/// <summary>
+		/// The size of a file in a zip, as the zip's directory records it.
+		/// </summary>
+		private long GetLength(Location file)
+		{
+			using ZipArchive archive = OpenArchive(file, file.ArchivePath.Count - 1);
+			return (FindEntry(archive, file.ArchivePath[^1]) ?? throw new FileNotFoundException($"The zip holds no file called `{file.Name}`.")).Length;
+		}
+
+		/// <summary>
+		/// Deletes <paramref name="file"/>, if it can.
+		/// </summary>
+		internal static void TryDeleteFile(string file)
+		{
+			try
+			{
+				File.Delete(file);
+			}
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			{
+				// Left where it is.
 			}
 		}
 

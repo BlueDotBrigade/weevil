@@ -58,7 +58,8 @@ namespace BlueDotBrigade.Weevil.IO
 		public string Path { get; } = string.Empty;
 
 		/// <summary>
-		/// The log can no longer be opened at <see cref="Path"/>, for example because it was renamed or deleted, so Reload cannot read it either.
+		/// The file read can no longer be opened, for example because it was renamed or deleted, so Reload cannot read it either.
+		/// <see cref="Path"/> names the log as the analyst knows it, which for a log read from a copy is not the file read (#1312).
 		/// Otherwise its bytes changed, and Reload reads the latest.
 		/// </summary>
 		/// <remarks>
@@ -67,7 +68,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public bool IsUnreadable { get; }
 
 		/// <summary>
-		/// The log can no longer be opened at <paramref name="path"/>, for example because it was renamed or deleted: <paramref name="readFailure"/> says why.
+		/// The log named <paramref name="path"/> can no longer be read, for example because its file was renamed or deleted: <paramref name="readFailure"/> says why.
 		/// </summary>
 		internal static LogFileChangedException FromReadFailure(string path, Exception readFailure)
 		{

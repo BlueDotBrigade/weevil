@@ -86,6 +86,9 @@
 
 			private StorageMode _storageMode = DefaultStorageMode;
 
+			// The log as the analyst knows it, when the file read is a copy: otherwise null (#1312).
+			private string _displayPath;
+
 			internal CoreEngineBuilder(string sourceFilePath) : this(sourceFilePath, FirstRecordLineNumber)
 			{
 				// nothing to do
@@ -125,6 +128,20 @@
 				Log.Default.Write(
 					LogSeverityType.Debug,
 					$"Core engine construction has been given a storage mode. Value={storageMode}");
+
+				return this;
+			}
+
+			public CoreEngineBuilder UsingDisplayPath(string displayPath)
+			{
+				_displayPath = string.IsNullOrWhiteSpace(displayPath) ? null : displayPath;
+
+				if (_displayPath != null)
+				{
+					Log.Default.Write(
+						LogSeverityType.Debug,
+						$"Core engine construction has been given the path the analyst knows the log by. DisplayPath={displayPath}, FilePath={_sourceFilePath}");
+				}
 
 				return this;
 			}
@@ -174,6 +191,7 @@
 				_session = previous.Session;
 				_recordState = previous.RecordState;
 				_telemetryRecorder = previous._telemetryRecorder;
+				_displayPath = previous.DisplayPath;
 
 				return this;
 			}
@@ -250,7 +268,7 @@
 			{
 				records = null;
 
-				if (!LineIndexFile.TryLoadTable(_sourceFilePath, log, lineIndex, plugin, _storageMode, out RecordTable savedTable, out source))
+				if (!LineIndexFile.TryLoadTable(_sourceFilePath, log, lineIndex, plugin, _storageMode, _displayPath, out RecordTable savedTable, out source))
 				{
 					return false;
 				}
@@ -263,7 +281,7 @@
 					return true;
 				}
 
-				if (!GrownLogParser.TryParse(log, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, out RecordTable grownTable, out LogFileSource parsedSource))
+				if (!GrownLogParser.TryParse(log, _sourceFilePath, savedTable, savedParse, coreExtension.GetRecordParser(), _storageMode, lineIndex.ContentEncoding, _displayPath, out RecordTable grownTable, out LogFileSource parsedSource))
 				{
 					source = null;
 					return false;
@@ -378,12 +396,14 @@
 								 startAtLineNumber,
 								 true,
 								 GetMaximumLinesToSearch(startAtLineNumber, lineIndex.LineCount),
-								 _storageMode)
+								 _storageMode,
+								 displayPath: _displayPath)
 							: new SerializedRecordRepository(
 								 log,
 								 coreExtension.GetRecordParser(),
 								 GetMaximumLinesToSearch(lineNumberRange),
-								 _storageMode);
+								 _storageMode,
+								 _displayPath);
 
 						records = repository.Get(lineNumberRange, maxRecords);
 						source = repository.Source;
@@ -449,6 +469,7 @@
 					_telemetryRecorder,
 					_storageMode,
 					source,
+					_displayPath,
 					hasReadLog: true);
 			}
 

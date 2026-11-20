@@ -40,9 +40,6 @@ internal class DialogBoxService : IDialogBoxService
 		new[] { "*.log", "*.log.*", "*.txt", "*.tsv", "*.csv" },
 		new[] { "*.xml", "*.idx" });
 
-	// A log's sidecar and index travel with it out of a zip.
-	private static readonly string[] SidecarSuffixes = { ".xml", ".idx" };
-
 	private DashboardDialog _activeDashboard;
 
 	/// <summary>
@@ -61,7 +58,8 @@ internal class DialogBoxService : IDialogBoxService
 			Owner = Application.Current?.MainWindow,
 			Title = "Open",
 			FileTypes = new[] { LogFiles, FileTypeFilter.AllFiles },
-			CompanionSuffixes = SidecarSuffixes,
+			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
+			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
 			OptionsContent = new OpenAsOptionsView { DataContext = options },
 			CanOpen = false,
 		};
@@ -84,7 +82,12 @@ internal class DialogBoxService : IDialogBoxService
 		var isAccepted = dialog.ShowDialog() == true;
 
 		choice = isAccepted
-			? new OpenAsChoice(dialog.Result.LocalPath, dialog.Result.ExtractedFolder, options.StorageMode, options.Advice)
+			? new OpenAsChoice(
+				dialog.Result.LocalPath,
+				dialog.Result.ExtractedFolder,
+				options.StorageMode,
+				options.Advice,
+				dialog.Result.Item.Location.IsInArchive ? dialog.Result.Item.Location.ToString() : null)
 			: null;
 
 		return isAccepted;

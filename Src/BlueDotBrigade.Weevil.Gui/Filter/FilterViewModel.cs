@@ -97,6 +97,9 @@
 
 		private IEngine _engine;
 
+		// The file the open log was read from: for a log opened from a zip, its copy, which the engine names by the zip (#1312).
+		private string _openLogFilePath;
+
 		/// <summary>
 		/// The copy the open log was extracted to, when it came from a zip.
 		/// </summary>
@@ -558,7 +561,7 @@
 
 			await (choice.ExtractedFolder is null
 				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode)
-				: OpenExtractedAsync(choice.ExtractedFolder, choice.LogPath, choice.StorageMode));
+				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath));
 		}
 
 		public async Task OpenCompressedAsync(string sourceFilePath)
@@ -574,45 +577,77 @@
 				return;
 			}
 
-			// Weevil opens a copy extracted to a folder of its own, and deletes only what it extracted, never the zip (#1156).
-			var extractedFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+			// Weevil opens a copy of the chosen file, extracted to a folder of that file's own that is kept between opens,
+			// and deletes only the copy of the log, never the zip (#1156, #1253).
+			string extractedLog = null;
 			var isOpening = false;
+
+			// No other open starts while the zip is read and its file extracted, which takes a while for a large log.
+			this.CanOpenLogFile = false;
 
 			try
 			{
-				ZipFile.ExtractToDirectory(sourceFilePath, extractedFolder);
+				string[] entryNames = await Task.Run(() =>
+				{
+					using ZipArchive archive = ZipFile.OpenRead(sourceFilePath);
 
-				// A zip with no entries creates no folder.
-				var files = Directory.Exists(extractedFolder)
-					? Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)
-					: Array.Empty<string>();
+					// Shown as paths, as Windows writes them; a folder's entry names no file.
+					return archive.Entries
+						.Where(entry => entry.Name.Length > 0)
+						.Select(entry => entry.FullName.Replace('/', Path.DirectorySeparatorChar))
+						.ToArray();
+				});
 
-				if (files.Length == 0)
+				if (entryNames.Length == 0)
 				{
 					_dialogBox.ShowMessage($"{Path.GetFileName(sourceFilePath)} holds no file to open.", "Nothing to Open");
 					return;
 				}
 
-				var relativeNames = files.Select(f => Path.GetRelativePath(extractedFolder, f)).ToArray();
+				if (!_dialogBox.TrySelectCompressedFile(entryNames, out var selectedFileName))
+				{
+					return;
+				}
+
+				var file = BlueDotBrigade.Weevil.Windows.Dialogs.Storage.Location.ForArchive(sourceFilePath, selectedFileName.Replace(Path.DirectorySeparatorChar, '/'));
+				var copiesFolder = this.CopiesFolder;
+				extractedLog = await Task.Run(() =>
+				{
+					using var reader = new BlueDotBrigade.Weevil.Windows.Dialogs.Storage.ContainerReader();
+					return reader.Extract(file, ExtractedLog.CompanionSuffixes, Path.Combine(copiesFolder, reader.GetCopyKey(file)));
+				});
 
 				// Open As follows the list, so its suggestion uses the size of the log chosen (#1028).
-				if (_dialogBox.TrySelectCompressedFile(relativeNames, out var selectedFileName) &&
-				    await ChooseStorageAsync(Path.Combine(extractedFolder, selectedFileName)) is { } storageMode)
+				if (await ChooseStorageAsync(extractedLog) is { } storageMode)
 				{
 					isOpening = true;
-					await OpenExtractedAsync(extractedFolder, Path.Combine(extractedFolder, selectedFileName), storageMode);
+					await OpenExtractedAsync(extractedLog, storageMode, file.ToString());
 				}
 			}
 			finally
 			{
 				if (!isOpening)
 				{
-					// Nothing was opened from this copy, so nothing was saved beside it either.
 					this.CanOpenLogFile = true;
-					await Task.Run(() => DeleteFolder(extractedFolder));
+
+					// Nothing was opened from this copy. What was kept beside it from earlier opens stays,
+					// and so does the copy when it is the log that is open, chosen again from the same zip.
+					if (extractedLog != null && !IsOpenFrom(new ExtractedLog(extractedLog)))
+					{
+						ExtractedLog copy = new ExtractedLog(extractedLog);
+						await Task.Run(copy.Delete);
+					}
 				}
 			}
 		}
+
+		/// <summary>
+		/// Where a log opened from a zip is extracted, to a folder of its own (#1253). A test sets a folder of its own.
+		/// </summary>
+		/// <remarks>
+		/// The Open As dialog extracts to <see cref="ExtractedLog.DefaultCopiesFolder"/>.
+		/// </remarks>
+		internal string CopiesFolder { get; set; } = ExtractedLog.DefaultCopiesFolder;
 
 		/// <summary>
 		/// Opens a log that is not in a zip, and deletes the copy of the zip the previous log was opened from, if nothing reads it any more.
@@ -621,7 +656,7 @@
 		{
 			await OpenAsync(logPath, storageMode);
 
-			// A file the open zip's copy holds, such as a sibling of the open log, still needs that copy.
+			// A failed open leaves the zipped log open, which still needs its copy.
 			if (!IsOpenFrom(_openExtractedLog))
 			{
 				await ReplaceExtractedLogAsync(null);
@@ -629,22 +664,23 @@
 		}
 
 		/// <summary>
-		/// Opens a log Weevil extracted from a zip, keeps its copy while it is open, and deletes the copy once nothing reads it (#1162).
+		/// Opens a log Weevil extracted from a zip, keeps its copy while it is open, and deletes the copy of the log once nothing reads it (#1162).
 		/// </summary>
-		/// <param name="extractedFolder">The folder of Weevil's own that the zip's files were extracted to: everything in it is Weevil's.</param>
-		private async Task OpenExtractedAsync(string extractedFolder, string logPath, StorageMode storageMode)
+		/// <remarks>
+		/// The folder it was extracted to is kept, with the sidecar and saved index the open saves beside the log (#1253).
+		/// </remarks>
+		/// <param name="displayPath">The log as the analyst knows it: the zip, read like a folder, and the log's path in it (#1312).</param>
+		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath)
 		{
 			ExtractedLog extracted = null;
 
 			try
 			{
-				extracted = await Task.Run(() => new ExtractedLog(
-					extractedFolder,
-					Directory.GetFiles(extractedFolder, "*", SearchOption.AllDirectories)));
+				extracted = new ExtractedLog(logPath);
 
 				// Weevil may close before the open finishes.
 				_extractedLogBeingOpened = extracted;
-				await OpenAsync(logPath, storageMode);
+				await OpenAsync(logPath, storageMode, displayPath);
 			}
 			finally
 			{
@@ -654,35 +690,30 @@
 					_extractedLogBeingOpened = null;
 				}
 
-				// A zip can hold thousands of files, so they are deleted off the UI thread.
 				if (extracted == null)
 				{
 					// Open As took the menus before the copy failed to open.
 					this.CanOpenLogFile = true;
-
-					// Nothing was opened from this copy, so nothing was saved beside it either.
-					await Task.Run(() => DeleteFolder(extractedFolder));
 				}
 				else if (IsOpenFrom(extracted))
 				{
 					// Reload and disk mode read the log again, so its copy stays while it is open (#1162).
-					// The open log may be a sibling that another open chose from this copy meanwhile.
 					await ReplaceExtractedLogAsync(extracted);
 				}
 				else
 				{
-					// An open that failed may still have saved something beside the log, which stays.
+					// Only the log is deleted: what an open that failed saved beside it, and what earlier opens kept there, stays (#1253).
 					await Task.Run(extracted.Delete);
 				}
 			}
 		}
 
 		/// <summary>
-		/// Returns <see langword="true"/> when the open log is one of the files in <paramref name="extracted"/>.
+		/// Returns <see langword="true"/> when the open log is the log in <paramref name="extracted"/>.
 		/// </summary>
 		private bool IsOpenFrom(ExtractedLog extracted)
 		{
-			return extracted != null && Engine.IsRealInstance(_engine) && extracted.Contains(_engine.SourceFilePath);
+			return extracted != null && Engine.IsRealInstance(_engine) && extracted.Contains(_openLogFilePath);
 		}
 
 		/// <summary>
@@ -696,7 +727,10 @@
 			ExtractedLog previous = _openExtractedLog;
 			_openExtractedLog = extracted;
 
-			return previous == null ? Task.CompletedTask : Task.Run(previous.Delete);
+			// The same file opened again from the same zip reuses its copy, which the open log still reads (#1253).
+			return previous == null || (extracted != null && extracted.Contains(previous.LogPath))
+				? Task.CompletedTask
+				: Task.Run(previous.Delete);
 		}
 
 		/// <summary>
@@ -710,22 +744,6 @@
 			_extractedLogBeingOpened?.Delete();
 			_openExtractedLog?.Delete();
 			_openExtractedLog = null;
-		}
-
-		private static void DeleteFolder(string extractedFolder)
-		{
-			try
-			{
-				if (Directory.Exists(extractedFolder))
-				{
-					Directory.Delete(extractedFolder, recursive: true);
-				}
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				// A leftover temporary folder does no harm, so it must not stop Weevil.
-				Log.Default.Write(LogSeverityType.Warning, e, $"Unable to delete the files extracted from a zip. Path={extractedFolder}");
-			}
 		}
 
 		private void RefreshHistory(ObservableCollection<string> history, IEnumerable<string> newValues)
@@ -809,7 +827,8 @@
 		}
 
 		/// <param name="storageMode">RAM or Disk, or <see langword="null"/> for the engine's default: RAM, unless a Debug build's <c>WEEVIL_TEST_STORAGE</c> says otherwise.</param>
-		internal async Task OpenAsync(string sourceFilePath, StorageMode? storageMode)
+		/// <param name="displayPath">The log as the analyst knows it, when <paramref name="sourceFilePath"/> is a copy, such as one extracted from a zip (#1312).</param>
+		internal async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath = null)
 		{
 			this.CanOpenLogFile = false;
 			this.IsProcessingLongOperation = true;
@@ -828,7 +847,12 @@
 					// A plugin's builder opens in the mode chosen in Weevil's own Open As window (#1028).
 					(bool, OpenAsResult) result = plugin.ShowOpenAs(
 						LicensePath,
-						(path) => storageMode is { } mode ? Engine.UsingPath(path).UsingStorage(mode) : Engine.UsingPath(path),
+						(path) =>
+						{
+							// The readable path names only the file Weevil chose; a plugin may open another.
+							IEngineBuilder pluginBuilder = Engine.UsingPath(path).UsingDisplayPath(string.Equals(path, sourceFilePath, StringComparison.OrdinalIgnoreCase) ? displayPath : null);
+							return storageMode is { } mode ? pluginBuilder.UsingStorage(mode) : pluginBuilder;
+						},
 						sourceFilePath);
 
 					wasOpenRequested = result.Item1;
@@ -841,11 +865,11 @@
 			}
 			catch (NotSupportedException e)
 			{
-				var sourceFilename = Path.GetFileName(sourceFilePath);
+				// The whole path: a zipped log's sidecar is in the folder kept for it, not beside the zip (#1253).
 				var message =
 					e.Message + Environment.NewLine + Environment.NewLine +
 					"In order to open the file, you must first delete the sidecar:" + Environment.NewLine +
-					$"{sourceFilename}.xml" + Environment.NewLine;
+					$"{sourceFilePath}.xml" + Environment.NewLine;
 				MessageBox.Show(message, "Open Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 
@@ -874,7 +898,8 @@
 							.UsingPath(sourceFilePath, openAsResult.Range.Start.Value)
 							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
 							.UsingContext(openAsResult.Context)
-							.UsingRange(openAsResult.Range);
+							.UsingRange(openAsResult.Range)
+							.UsingDisplayPath(displayPath);
 
 						if (storageMode is { } mode)
 						{
@@ -888,6 +913,7 @@
 						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						_engine = openedEngine;
+						_openLogFilePath = sourceFilePath;
 						_hasUnsavedChanges = false;
 						Interlocked.Increment(ref _logGeneration);
 						openedLogReporter = CreateFailedReadReporter();
@@ -914,6 +940,7 @@
 						_bulletinMediator.Post(new SourceFileOpenedBulletin
 						{
 							SourceFilePath = _engine.SourceFilePath,
+							SourceFileSize = _engine.Metrics.FileSize,
 							SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
 							Context = _engine.Context,
 							TotalRecordCount = _engine.Count,
@@ -1171,6 +1198,7 @@
 					_bulletinMediator.Post(new SourceFileOpenedBulletin
 					{
 						SourceFilePath = _engine.SourceFilePath,
+						SourceFileSize = _engine.Metrics.FileSize,
 						SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
 						Context = _engine.Context,
 						TotalRecordCount = _engine.Count,
@@ -1439,7 +1467,8 @@
 		private Task SaveSelected(FileFormatType fileFormatType)
 		{
 			IEngine engine = _engine;
-			var destinationFolder = Path.GetDirectoryName(engine.SourceFilePath);
+			// The folder of the file read: for a zipped log, the folder kept for it (#1253, #1312).
+			var destinationFolder = engine.SourceDirectory;
 
 			var destinationFilePath = fileFormatType == FileFormatType.Tsv ?
 				Path.Combine(destinationFolder, TsvFileName) :
@@ -1464,7 +1493,7 @@
 		{
 			WindowsProcess.Start(
 				WindowsProcessType.FileExplorer,
-				Path.GetDirectoryName(_engine.SourceFilePath));
+				_engine.SourceDirectory);
 		}
 
 		public void ShowRegExTool()
@@ -1504,7 +1533,7 @@
 					this.WeevilDisplayVersion,
 					LicensePath,
 					ThirdPartyNoticesPath,
-					_engine.SourceFilePath);
+					_openLogFilePath);
 
 				dialog.ShowDialog();
 			}
@@ -1522,7 +1551,8 @@
 		/// </remarks>
 		private Task SplitCurrentLog()
 		{
-			var splitter = new LogFileSplitter(_engine.SourceFilePath);
+			// The splits are saved beside the file read, and read the log through its records.
+			var splitter = new LogFileSplitter(_openLogFilePath);
 			RecordList records = _engine.Filter.Results;
 
 			return RunInBackground("The split", cancellationToken => splitter.Run(records, cancellationToken), progressDelay: QuickWorkProgressDelay);
@@ -1532,7 +1562,8 @@
 		{
 			TelemetrySessionLifecycle.Shared.RecordDashboardOpen();
 
-			IPlugin plugin = new PluginFactory().Create(_engine.SourceFilePath);
+			// A plugin may read the file to tell whether it is one of its logs.
+			IPlugin plugin = new PluginFactory().Create(_openLogFilePath);
 
 			if (plugin.CanShowDashboard)
 			{
@@ -1632,7 +1663,8 @@
 				Log.Default.Write(LogSeverityType.Error, exception, "The log can no longer be read.");
 				// What the read threw, rather than the log's own exception, which repeats the first sentence for the application's log (#1295).
 				var reason = exception is LogFileChangedException { IsUnreadable: true, InnerException: { } cause } ? cause.Message : exception.Message;
-				_dialogBox.ShowMessage($"Weevil can't read the log.\r\n\r\n{reason}", "Error");
+				// Named as the analyst knows it: the reason may name the copy Weevil reads (#1312).
+				_dialogBox.ShowMessage($"Weevil can't read the log {_engine.SourceFilePath}.\r\n\r\n{reason}", "Error");
 			}
 		}
 
@@ -2406,8 +2438,7 @@
 		#region Commands: Analysis
 		private void SaveCommentSummary()
 		{
-			var destinationFolder = Path.GetDirectoryName(_engine.SourceFilePath);
-			_engine.GenerateReport(ReportType.CommentSummary, destinationFolder);
+			_engine.GenerateReport(ReportType.CommentSummary, _engine.SourceDirectory);
 		}
 
 		public Task Analyze(AnalysisType analysisType)

@@ -22,6 +22,7 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <param name="parse">The parse that made the table, whose checksums the log's blocks must match.</param>
 		/// <param name="encoding">The log's encoding, without a byte order mark.</param>
 		/// <param name="storageMode">Whether the chunks hold their bytes, or read them back from the log.</param>
+		/// <param name="displayPath">The log as the analyst knows it, when it is a copy: see <see cref="LogFileSource.Path"/> (#1312).</param>
 		/// <param name="source">A source made from the saved checksums, in both modes: on disk, the chunks read back through it (#1255).</param>
 		/// <returns><see langword="false"/> when the table is damaged, or a block of the log does not match its checksum.</returns>
 		public static bool TryRead(
@@ -31,6 +32,7 @@ namespace BlueDotBrigade.Weevil.IO
 			SavedParse parse,
 			Encoding encoding,
 			StorageMode storageMode,
+			string displayPath,
 			out RecordTable table,
 			out LogFileSource source)
 		{
@@ -51,7 +53,7 @@ namespace BlueDotBrigade.Weevil.IO
 					return false;
 				}
 
-				source = CreateSource(log, logPath, parse);
+				source = CreateSource(log, logPath, displayPath, parse);
 				chunks = new List<(int Start, ContentChunk Chunk)>(directory.Count);
 
 				foreach ((var start, var fileOffset, var length) in directory)
@@ -68,7 +70,7 @@ namespace BlueDotBrigade.Weevil.IO
 					return false;
 				}
 
-				source = CreateSource(log, logPath, parse);
+				source = CreateSource(log, logPath, displayPath, parse);
 
 				chunks = filler.Chunks;
 			}
@@ -98,9 +100,9 @@ namespace BlueDotBrigade.Weevil.IO
 		/// <summary>
 		/// The source of the log checked, made from the saved checksums once every block matched them: in RAM too, though nothing reads through it there (#1255).
 		/// </summary>
-		private static LogFileSource CreateSource(Stream log, string logPath, SavedParse parse)
+		private static LogFileSource CreateSource(Stream log, string logPath, string displayPath, SavedParse parse)
 		{
-			return LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, log.Length, CopyChecksums(parse));
+			return LogFileSource.Create(logPath, parse.StartOffset, parse.EndOffset, log.Length, CopyChecksums(parse), displayPath);
 		}
 
 		private static bool TryReadChunkDirectory(Stream indexFile, SavedParse parse, out List<(int Start, long FileOffset, int Length)> directory)

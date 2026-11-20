@@ -104,7 +104,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				else
 				{
 					// Exit cannot run while a filter, Reload or an open is running, so the copies extracted from zips are deleted here (#1162).
-					// A file Windows still has open for reading cannot be deleted, and stays in the temporary folder.
+					// A file Windows still has open for reading cannot be deleted, and stays: the next open of the same file reuses it (#1253).
 					this.ViewModel.DeleteExtractedLogs();
 				}
 			}
