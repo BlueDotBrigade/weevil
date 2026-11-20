@@ -570,6 +570,24 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1254)]
+		public async Task GivenALogAnotherWeevilHasOpen_WhenDropped_ThenAMessageNamesWhoHasItBeforeRamOrDiskIsAsked()
+		{
+			var dialogBox = Substitute.For<IDialogBoxService>();
+			AcceptOpenAs(dialogBox, StorageMode.Ram);
+			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			var logPath = CopyLog("Dropped.log");
+			using IEngine otherWeevil = Engine.UsingPath(logPath).Open();
+
+			await viewModel.OpenCompressedAsync(logPath);
+
+			dialogBox.Received(1).ShowMessage($"Dropped.log is already open in Weevil by {Environment.UserName} on {Environment.MachineName}.", "Log Already Open");
+			dialogBox.DidNotReceive().TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
+			viewModel.IsLogFileOpen.Should().BeFalse();
+			viewModel.CanOpenLogFile.Should().BeTrue("the open has ended");
+		}
+
+		[TestMethod]
 		public async Task GivenAZip_WhenAFileInItIsChosen_ThenOpenAsAdvisesOnThatFile()
 		{
 			// Open As follows the zip's list of files, so its suggestion uses the size of the log chosen (#1028).

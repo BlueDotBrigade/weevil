@@ -618,10 +618,21 @@
 
 			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
 			{
-				// Cancelled: nothing opens, and the open log stays (#1028).
-				if (await AskStorageAsync(sourceFilePath) is { } storageMode)
+				try
 				{
-					await OpenFromDiskAsync(sourceFilePath, storageMode, operation);
+					// Before RAM or Disk is asked for: another Weevil may have it open (#1254). Off the UI thread, since the log may be on a share.
+					await Task.Run(() => ThrowIfOpenElsewhere(sourceFilePath));
+
+					// Cancelled: nothing opens, and the open log stays (#1028).
+					if (await AskStorageAsync(sourceFilePath) is { } storageMode)
+					{
+						await OpenFromDiskAsync(sourceFilePath, storageMode, operation);
+					}
+				}
+				catch (LogInUseException e)
+				{
+					// Core logged it. The open log stays.
+					_dialogBox.ShowMessage(e.Message, LogInUseCaption);
 				}
 
 				return;
@@ -938,6 +949,11 @@
 					wasOpenRequested = true;
 				}
 			}
+			catch (LogInUseException e)
+			{
+				// The plugin's own window opened a log another Weevil, or this one, has open (#1254). Core logged it, and the open log stays.
+				_dialogBox.ShowMessage(e.Message, LogInUseCaption);
+			}
 			catch (NotSupportedException e)
 			{
 				// The whole path: a zipped log's sidecar is in the folder kept for it, not beside the zip (#1253).
@@ -989,6 +1005,10 @@
 						_engine.Annotations.Changed -= OnAnnotationsChanged;
 						IEngine replaced = _engine;
 						_engine = openedEngine;
+
+						// Closed at once, so another Weevil can open it (#1254): saved before the open, and still read by what shows it until it is replaced.
+						replaced.Dispose();
+
 						_openLogFilePath = sourceFilePath;
 						_hasUnsavedChanges = false;
 						Interlocked.Increment(ref _logGeneration);
@@ -996,9 +1016,6 @@
 						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
 						_rowSelection = new RowSelection(_engine);
 						_engine.Annotations.Changed += OnAnnotationsChanged;
-
-						// Closed, so another Weevil can open it (#1254): saved before the open, and still read by what shows it until it is replaced.
-						replaced.Dispose();
 
 						// The dashboard reads the engine it was shown with, so it would keep the previous log in memory,
 						// and its insights would point at lines of that log (#1139).
