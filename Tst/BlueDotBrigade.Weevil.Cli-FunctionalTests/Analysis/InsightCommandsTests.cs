@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 	using System.IO;
 	using System.Linq;
 	using System.Text.Json;
+	using Cocona;
 	using IOutputWriter = BlueDotBrigade.Weevil.IO.IOutputWriter;
 	using OutputAs = BlueDotBrigade.Weevil.IO.OutputAs;
 	using OutputFormat = BlueDotBrigade.Weevil.IO.OutputFormat;
@@ -83,6 +84,22 @@ namespace BlueDotBrigade.Weevil.Cli.Analysis
 			report.RootElement.GetProperty("sourceFileName").GetString().Should().Be("Application.log");
 			report.RootElement.GetProperty("recordCount").GetInt32().Should().Be(9);
 			report.RootElement.GetProperty("insights").GetArrayLength().Should().Be(insightCount);
+		}
+
+		[TestMethod]
+		[WorkItem(1254)]
+		public void GivenALogAnotherWeevilHasOpen_WhenInsightIsRun_ThenTheCommandStopsWithAnErrorNamingWhoHasIt()
+		{
+			var logPath = Path.Combine(_folder, "Application.log");
+			File.Copy(new Daten().AsFilePath("Application.log"), logPath);
+			using IEngine otherWeevil = Engine.UsingPath(logPath).Open();
+
+			Action insight = () => new InsightCommands(new OutputOptions(OutputFormat.PlainText)).Insight(logPath);
+
+			CommandExitedException exited = insight.Should().Throw<CommandExitedException>().Subject.Single();
+			exited.ExitCode.Should().Be(1);
+			exited.Message.Should().EndWith($"Application.log is already open in Weevil by {Environment.UserName} on {Environment.MachineName}.");
+			_output.Lines.Should().BeEmpty("nothing was read");
 		}
 
 		/// <summary>

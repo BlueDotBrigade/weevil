@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.PowerShell
 	using System.IO;
 	using System.Linq;
 	using BlueDotBrigade.Weevil.Analysis;
+	using LogInUseException = BlueDotBrigade.Weevil.IO.LogInUseException;
 
 	[TestClass]
 	public class GetInsightCmdletTests
@@ -24,7 +25,6 @@ namespace BlueDotBrigade.Weevil.PowerShell
 					insightCount = engine.Analyzer.GetInsights().Length;
 				}
 
-
 				var output = new GetInsightCmdlet { FilePath = logPath }.Invoke().Cast<object>().ToList();
 
 				InsightReport report = output.Should().ContainSingle().Which.Should().BeOfType<InsightReport>().Subject;
@@ -32,6 +32,33 @@ namespace BlueDotBrigade.Weevil.PowerShell
 				report.RecordCount.Should().Be(9);
 				report.Metrics.Should().Contain(metric => metric.Name == "Errors");
 				report.Insights.Should().HaveCount(insightCount);
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1254)]
+		public void GivenALogAnotherWeevilHasOpen_WhenGettingInsights_ThenTheCmdletStopsWithAnErrorNamingWhoHasIt()
+		{
+			var folder = Directory.CreateTempSubdirectory("WeevilPowerShell.").FullName;
+
+			try
+			{
+				var logPath = Path.Combine(folder, "Application.log");
+				File.Copy(new Daten().AsFilePath("Application.log"), logPath);
+
+				using (IEngine otherWeevil = Engine.UsingPath(logPath).Open())
+				{
+					var cmdlet = new GetInsightCmdlet { FilePath = logPath };
+
+					// Invoked directly, a terminating error throws its exception.
+					FluentActions.Invoking(() => cmdlet.Invoke().Cast<object>().ToList())
+						.Should().Throw<LogInUseException>()
+						.WithMessage($"Application.log is already open in Weevil by {Environment.UserName} on {Environment.MachineName}.");
+				}
 			}
 			finally
 			{
