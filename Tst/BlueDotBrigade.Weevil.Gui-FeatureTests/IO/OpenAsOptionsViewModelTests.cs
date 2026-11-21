@@ -166,10 +166,37 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			options.LastLine = string.Empty;
 			options.Part.IsToEndOfLog.Should().BeTrue("an empty last line is the end of the log");
 			options.Part.Lines.Start.Value.Should().Be(10);
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenAnotherLogIsSelected_ThenTheWholeLogIsChosenAndTheLinesCleared()
+		{
+			// As in the proof of concept (#1209).
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+			options.FirstLine = "10";
 
 			await options.SelectAsync(LargeLog);
-			options.ChosenPart.Should().Be(PartKind.Whole, "selecting another log goes back to the whole log, as in the proof of concept");
+
+			options.ChosenPart.Should().Be(PartKind.Whole);
 			options.Part.IsWhole.Should().BeTrue();
+			options.FirstLine.Should().BeEmpty("the lines typed were for the other log");
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenTheBrowserSelectsTheSameLogAgain_ThenTheLinesAreKept()
+		{
+			// Refreshing, sorting or filtering the browser's list selects nothing, then the same log again, as a new item.
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+			options.FirstLine = "10";
+			options.LastLine = "40";
+
+			await options.SelectAsync(null);
+			await options.SelectAsync(Log("Small.log"));
+
+			options.ChosenPart.Should().Be(PartKind.Lines);
+			options.Part.Lines.Should().Be(new Range(10, 40));
 		}
 
 		[TestMethod]
@@ -179,10 +206,26 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
 
 			await options.SelectAsync(LargeLog);
-			options.PartsStatus.Should().Be("Its sidecar lists 2 sections and 1 region.");
+			options.PartsStatus.Should().Be("Its sidecar lists 2 sections and 1 named region.");
 
 			await options.SelectAsync(SmallLog);
 			options.PartsStatus.Should().Be("No sidecar, so no sections or regions.");
+		}
+
+		[TestMethod]
+		public async Task GivenSidecarsThatListNothingOrCantBeRead_WhenSelected_ThenTheDialogSaysSo()
+		{
+			// Regions marked without names can't be opened by name, so they aren't counted.
+			var options = new OpenAsOptionsViewModel(Advise, file => file == SmallLog
+				? new SidecarParts(true, Array.Empty<LogPart>())
+				: throw new NotSupportedException("This file's sidecar is not compatible with this version of the application."));
+
+			await options.SelectAsync(SmallLog);
+			options.PartsStatus.Should().Be("Its sidecar lists no named sections or regions.");
+
+			await options.SelectAsync(LargeLog);
+			options.PartsStatus.Should().StartWith("Its sidecar can't be read");
+			options.CanOpen.Should().BeTrue("the whole log can still be opened");
 		}
 
 		[TestMethod]
@@ -194,7 +237,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			await options.SelectAsync(onlineOnlyLog);
 
-			options.PartsStatus.Should().StartWith("Online only");
+			options.PartsStatus.Should().Contain("online only");
 			options.HasSections.Should().BeFalse();
 			options.CanOpen.Should().BeTrue("the whole log can still be opened");
 		}

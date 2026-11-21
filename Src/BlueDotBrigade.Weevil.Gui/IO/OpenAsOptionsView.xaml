@@ -33,20 +33,22 @@
             <!-- What the sidecar holds, so the analyst knows why no section or region can be picked, as in the proof of concept (#1209). -->
             <TextBlock x:Name="PartsStatusText" Text="{Binding PartsStatus}" Style="{StaticResource HiddenWhenEmpty}" />
 
-            <RadioButton x:Name="WholeLogRadioButton" GroupName="Part" Content="_Whole log"
+            <RadioButton x:Name="WholeLogRadioButton" GroupName="Part" Content="_Whole log" AutomationProperties.HelpText="{Binding PartsStatus}"
                          IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Whole}" />
 
             <RadioButton x:Name="SectionRadioButton" GroupName="Part" Content="_Section" IsEnabled="{Binding HasSections}"
                          ToolTip="A level-1 section of the log's table of contents, with the sections inside it." ToolTipService.ShowOnDisabled="True"
                          IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Section}" />
             <ComboBox x:Name="SectionComboBox" ItemsSource="{Binding Sections}" SelectedIndex="{Binding ChosenSectionIndex, Mode=TwoWay}"
-                      IsEnabled="{Binding HasSections}" Margin="30,0,5,5" AutomationProperties.Name="Section" />
+                      IsEnabled="{Binding HasSections}" Margin="30,0,5,5" AutomationProperties.Name="Section"
+                      ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
 
             <RadioButton x:Name="RegionRadioButton" GroupName="Part" Content="Re_gion" IsEnabled="{Binding HasRegions}"
                          ToolTip="A named region of the log." ToolTipService.ShowOnDisabled="True"
                          IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Region}" />
             <ComboBox x:Name="RegionComboBox" ItemsSource="{Binding Regions}" SelectedIndex="{Binding ChosenRegionIndex, Mode=TwoWay}"
-                      IsEnabled="{Binding HasRegions}" Margin="30,0,5,5" AutomationProperties.Name="Region" />
+                      IsEnabled="{Binding HasRegions}" Margin="30,0,5,5" AutomationProperties.Name="Region"
+                      ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
 
             <RadioButton x:Name="LinesRadioButton" GroupName="Part" Content="_Lines"
                          IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Lines}" />

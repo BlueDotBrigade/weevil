@@ -16,7 +16,8 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	/// <remarks>
 	/// Weevil suggests a mode for each log selected. Once the analyst picks one, selecting another log does not change it (decision 7 of the #1157 plan).
 	/// The part is the whole log, one section, one region or a range of lines (decision 5). Selecting another log goes back to the whole log,
-	/// as the proof of concept does (#1209).
+	/// as the proof of concept does (#1209). The browser selects the same log again when it refreshes, sorts or filters its list: that keeps a range of lines,
+	/// but a section or region goes back to the whole log, since they are listed again.
 	/// </remarks>
 	[Observable]
 	internal sealed partial class OpenAsOptionsViewModel
@@ -27,7 +28,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 		private const string LookingForParts = "Looking for sections and regions…";
 
-		private const string OnlineOnlyStatus = "Online only, so its sidecar isn't read: that would download it. Open the whole log, or lines.";
+		private const string OnlineOnlyStatus = "Its sections and regions aren't read while it's online only. Open the whole log, or lines.";
 
 		private readonly Func<BrowserItem, OpenAsAdvice> _readAdvice;
 
@@ -41,6 +42,11 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		private IReadOnlyList<LogPart> _sections = Array.Empty<LogPart>();
 
 		private IReadOnlyList<LogPart> _regions = Array.Empty<LogPart>();
+
+		/// <summary>
+		/// The last log selected, so the browser selecting it again, for example as it refreshes, is not taken for another log.
+		/// </summary>
+		private Location _lastLog;
 
 		/// <param name="readAdvice">Works out the advice for a file, off the UI thread: <see cref="OpenAsAdvice.Read(BrowserItem)"/>.</param>
 		/// <param name="readParts">Lists the sections and regions of a file that can be opened on their own, off the UI thread: no sidecar when omitted.</param>
@@ -240,7 +246,8 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			this.File = file is { IsFile: true } ? file : null;
 			this.Details = this.File is null ? NoFileDetails : Describe(this.File);
-			this.PartKind = PartKind.Whole;
+			ResetPart(isAnotherLog: this.File is not null && !this.File.Location.Equals(_lastLog));
+			_lastLog = this.File?.Location ?? _lastLog;
 			ShowAdvice(null);
 			ShowParts(Array.Empty<LogPart>(), this.File is null ? string.Empty : LookingForParts);
 
@@ -288,8 +295,9 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			}
 			catch (Exception e)
 			{
+				// The reason is in Weevil's log: it may be a long XML message, which would push RAM and Disk down the panel.
 				Log.Default.Write(LogSeverityType.Warning, e, $"Open As could not list the sections and regions of a file. File={file.Name}");
-				return (Array.Empty<LogPart>(), $"Its sidecar can't be read, so no sections or regions are listed: {e.Message}");
+				return (Array.Empty<LogPart>(), "Its sidecar can't be read, so no sections or regions are listed. Weevil's log says why.");
 			}
 		}
 
@@ -315,6 +323,23 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			this.RegionIndex = _regions.Count > 0 ? 0 : -1;
 
 			UpdatePart();
+		}
+
+		/// <summary>
+		/// Goes back to the whole log for another log, clearing the lines typed. For the same log, only a section or region goes back to the whole log.
+		/// </summary>
+		private void ResetPart(bool isAnotherLog)
+		{
+			if (isAnotherLog)
+			{
+				this.PartKind = PartKind.Whole;
+				this.FirstLineText = string.Empty;
+				this.LastLineText = string.Empty;
+			}
+			else if (this.PartKind is PartKind.Section or PartKind.Region)
+			{
+				this.PartKind = PartKind.Whole;
+			}
 		}
 
 		private void Choose(PartKind partKind)
@@ -391,9 +416,10 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			var sections = sidecar.Parts.Count(p => p.SectionName is not null);
 			var regions = sidecar.Parts.Count(p => p.RegionName is not null);
 
+			// Only named ones can be opened, so a sidecar of regions marked without names lists none.
 			return sections + regions == 0
-				? "Its sidecar lists no sections or regions."
-				: $"Its sidecar lists {Count(sections, "section")} and {Count(regions, "region")}.";
+				? "Its sidecar lists no named sections or regions."
+				: $"Its sidecar lists {Count(sections, "section")} and {Count(regions, "named region")}.";
 
 			static string Count(int count, string noun) => count == 1 ? $"1 {noun}" : $"{count:N0} {noun}s";
 		}
