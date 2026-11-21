@@ -16,7 +16,6 @@ using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
 using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 using Microsoft.Win32;
-using LogPart = BlueDotBrigade.Weevil.IO.LogPart;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 /// <summary>
@@ -104,31 +103,41 @@ internal class DialogBoxService : IDialogBoxService
 	}
 
 	/// <summary>
+	/// Lists the sections and regions of a log on disk, from the sidecar beside it.
+	/// </summary>
+	private static SidecarParts ReadParts(string logPath)
+	{
+		return File.Exists($"{logPath}.xml")
+			? new SidecarParts(true, Engine.ReadParts(logPath))
+			: SidecarParts.NoSidecar;
+	}
+
+	/// <summary>
 	/// Lists the sections and regions of the log selected in the Open As dialog (#1212, #1213), from its sidecar.
 	/// </summary>
 	/// <remarks>
 	/// For a log in a zip, the sidecar is the one Weevil kept beside the copy of an earlier open, which holds the analyst's regions (#1253),
 	/// or else the one beside the log in the zip, read through a temporary copy. Runs off the UI thread.
 	/// </remarks>
-	private static IReadOnlyList<LogPart> ReadParts(IContainerReader reader, string copiesFolder, BrowserItem file)
+	private static SidecarParts ReadParts(IContainerReader reader, string copiesFolder, BrowserItem file)
 	{
 		if (!file.Location.IsInArchive)
 		{
-			return Engine.ReadParts(file.Location.FileSystemPath);
+			return ReadParts(file.Location.FileSystemPath);
 		}
 
 		var copy = Path.Combine(copiesFolder, reader.GetCopyKey(file.Location), file.Location.Name);
 
 		if (File.Exists($"{copy}.xml"))
 		{
-			return Engine.ReadParts(copy);
+			return ReadParts(copy);
 		}
 
 		Location sidecar = ContainerReader.GetSibling(file.Location, $"{file.Location.Name}.xml");
 
 		if (!reader.Exists(sidecar))
 		{
-			return Array.Empty<LogPart>();
+			return SidecarParts.NoSidecar;
 		}
 
 		DirectoryInfo folder = Directory.CreateTempSubdirectory("Weevil.OpenAs.");
@@ -143,7 +152,7 @@ internal class DialogBoxService : IDialogBoxService
 				source.CopyTo(target);
 			}
 
-			return Engine.ReadParts(log);
+			return ReadParts(log);
 		}
 		finally
 		{

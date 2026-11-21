@@ -15,8 +15,8 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	/// </summary>
 	/// <remarks>
 	/// Weevil suggests a mode for each log selected. Once the analyst picks one, selecting another log does not change it (decision 7 of the #1157 plan).
-	/// The part is the whole log, one section, one region or a range of lines (decision 5). Sections and regions belong to the log, so selecting another log
-	/// goes back to the whole log, while a range of lines stays.
+	/// The part is the whole log, one section, one region or a range of lines (decision 5). Selecting another log goes back to the whole log,
+	/// as the proof of concept does (#1209).
 	/// </remarks>
 	[Observable]
 	internal sealed partial class OpenAsOptionsViewModel
@@ -25,9 +25,13 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 		private const string DefaultRamDescription = "Faster. Keeps the whole log in memory.";
 
+		private const string LookingForParts = "Looking for sections and regions…";
+
+		private const string OnlineOnlyStatus = "Online only, so its sidecar isn't read: that would download it. Open the whole log, or lines.";
+
 		private readonly Func<BrowserItem, OpenAsAdvice> _readAdvice;
 
-		private readonly Func<BrowserItem, IReadOnlyList<LogPart>> _readParts;
+		private readonly Func<BrowserItem, SidecarParts> _readParts;
 
 		/// <summary>
 		/// Counts the selections, so the advice for a log no longer selected is thrown away.
@@ -39,11 +43,11 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		private IReadOnlyList<LogPart> _regions = Array.Empty<LogPart>();
 
 		/// <param name="readAdvice">Works out the advice for a file, off the UI thread: <see cref="OpenAsAdvice.Read(BrowserItem)"/>.</param>
-		/// <param name="readParts">Lists the sections and regions of a file that can be opened on their own, off the UI thread: none when omitted.</param>
-		public OpenAsOptionsViewModel(Func<BrowserItem, OpenAsAdvice> readAdvice, Func<BrowserItem, IReadOnlyList<LogPart>> readParts = null)
+		/// <param name="readParts">Lists the sections and regions of a file that can be opened on their own, off the UI thread: no sidecar when omitted.</param>
+		public OpenAsOptionsViewModel(Func<BrowserItem, OpenAsAdvice> readAdvice, Func<BrowserItem, SidecarParts> readParts = null)
 		{
 			_readAdvice = readAdvice ?? throw new ArgumentNullException(nameof(readAdvice));
-			_readParts = readParts ?? (_ => Array.Empty<LogPart>());
+			_readParts = readParts ?? (_ => SidecarParts.NoSidecar);
 		}
 
 		/// <summary>
@@ -109,6 +113,11 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 				UpdatePart();
 			}
 		}
+
+		/// <summary>
+		/// What Weevil found in the log's sidecar, so the analyst knows why no section or region can be picked; an empty string when no log is selected.
+		/// </summary>
+		public string PartsStatus { get; private set; } = string.Empty;
 
 		/// <summary>
 		/// The log's level-1 sections, as the list shows them.
@@ -231,8 +240,9 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			this.File = file is { IsFile: true } ? file : null;
 			this.Details = this.File is null ? NoFileDetails : Describe(this.File);
+			this.PartKind = PartKind.Whole;
 			ShowAdvice(null);
-			ShowParts(Array.Empty<LogPart>());
+			ShowParts(Array.Empty<LogPart>(), this.File is null ? string.Empty : LookingForParts);
 
 			if (this.File is null)
 			{
@@ -240,7 +250,10 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			}
 
 			// Read side by side: the parts may take longer, for example from a zip on a share, and the log can be opened whole meanwhile.
-			Task<IReadOnlyList<LogPart>> readingParts = Task.Run(() => ReadParts(file));
+			// An online-only file's sidecar is not read, since reading it would download it, as the proof of concept decided (#1209).
+			Task<(IReadOnlyList<LogPart> Parts, string Status)> readingParts = file.IsOnlineOnly
+				? Task.FromResult<(IReadOnlyList<LogPart>, string)>((Array.Empty<LogPart>(), OnlineOnlyStatus))
+				: Task.Run(() => ReadParts(file));
 			OpenAsAdvice advice = await Task.Run(() => ReadAdvice(file));
 
 			if (selection != _selection)
@@ -255,37 +268,42 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			ShowAdvice(advice);
 
-			IReadOnlyList<LogPart> parts = await readingParts;
+			(IReadOnlyList<LogPart> parts, string status) = await readingParts;
 
 			if (selection == _selection)
 			{
-				ShowParts(parts);
+				ShowParts(parts, status);
 			}
 		}
 
 		/// <summary>
-		/// The parts of the file, or none when its sidecar can't be read: browsing must never stop Weevil.
+		/// The parts of the file, and what to say about them; none when its sidecar can't be read: browsing must never stop Weevil.
 		/// </summary>
-		private IReadOnlyList<LogPart> ReadParts(BrowserItem file)
+		private (IReadOnlyList<LogPart> Parts, string Status) ReadParts(BrowserItem file)
 		{
 			try
 			{
-				return _readParts(file);
+				SidecarParts sidecar = _readParts(file);
+				return (sidecar.Parts, Describe(sidecar));
 			}
 			catch (Exception e)
 			{
 				Log.Default.Write(LogSeverityType.Warning, e, $"Open As could not list the sections and regions of a file. File={file.Name}");
-				return Array.Empty<LogPart>();
+				return (Array.Empty<LogPart>(), $"Its sidecar can't be read, so no sections or regions are listed: {e.Message}");
 			}
 		}
 
 		/// <summary>
 		/// Lists the sections and regions of the log selected, each with its first one chosen.
-		/// <see cref="SelectAsync"/> lists none first, so the index always changes and the list shows it. A section or region chosen for the previous log
-		/// goes back to the whole log; a range of lines stays.
+		/// <see cref="SelectAsync"/> lists none first, so the index always changes and the list shows it.
 		/// </summary>
-		private void ShowParts(IReadOnlyList<LogPart> parts)
+		/// <remarks>
+		/// The analyst can't pick a section or region before they are listed, so listing them leaves the part chosen meanwhile, such as lines typed.
+		/// </remarks>
+		private void ShowParts(IReadOnlyList<LogPart> parts, string status)
 		{
+			this.PartsStatus = status;
+
 			_sections = parts.Where(p => p.SectionName is not null).ToList();
 			_regions = parts.Where(p => p.RegionName is not null).ToList();
 
@@ -295,11 +313,6 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			this.HasRegions = _regions.Count > 0;
 			this.SectionIndex = _sections.Count > 0 ? 0 : -1;
 			this.RegionIndex = _regions.Count > 0 ? 0 : -1;
-
-			if (this.PartKind is PartKind.Section or PartKind.Region)
-			{
-				this.PartKind = PartKind.Whole;
-			}
 
 			UpdatePart();
 		}
@@ -363,6 +376,26 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		private static bool TryParseLine(string text, out int lineNumber)
 		{
 			return int.TryParse(text?.Trim(), NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out lineNumber) && lineNumber >= 1;
+		}
+
+		/// <summary>
+		/// What the sidecar holds, in a sentence.
+		/// </summary>
+		private static string Describe(SidecarParts sidecar)
+		{
+			if (!sidecar.HasSidecar)
+			{
+				return "No sidecar, so no sections or regions.";
+			}
+
+			var sections = sidecar.Parts.Count(p => p.SectionName is not null);
+			var regions = sidecar.Parts.Count(p => p.RegionName is not null);
+
+			return sections + regions == 0
+				? "Its sidecar lists no sections or regions."
+				: $"Its sidecar lists {Count(sections, "section")} and {Count(regions, "region")}.";
+
+			static string Count(int count, string noun) => count == 1 ? $"1 {noun}" : $"{count:N0} {noun}s";
 		}
 
 		/// <summary>

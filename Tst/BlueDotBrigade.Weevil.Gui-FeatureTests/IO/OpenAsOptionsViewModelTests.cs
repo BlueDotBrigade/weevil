@@ -1,7 +1,6 @@
 namespace BlueDotBrigade.Weevil.Gui.IO
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -169,23 +168,50 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			options.Part.Lines.Start.Value.Should().Be(10);
 
 			await options.SelectAsync(LargeLog);
-			options.ChosenPart.Should().Be(PartKind.Lines, "a range of lines is kept for the next log selected");
-			options.Part.Lines.Start.Value.Should().Be(10);
+			options.ChosenPart.Should().Be(PartKind.Whole, "selecting another log goes back to the whole log, as in the proof of concept");
+			options.Part.IsWhole.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public async Task GivenLogsWithAndWithoutASidecar_WhenSelected_ThenTheDialogSaysWhatTheirSidecarsHold()
+		{
+			// The analyst knows why no section or region can be picked (#1209).
+			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
+
+			await options.SelectAsync(LargeLog);
+			options.PartsStatus.Should().Be("Its sidecar lists 2 sections and 1 region.");
+
+			await options.SelectAsync(SmallLog);
+			options.PartsStatus.Should().Be("No sidecar, so no sections or regions.");
+		}
+
+		[TestMethod]
+		public async Task GivenAnOnlineOnlyLog_WhenSelected_ThenItsSidecarIsNotRead()
+		{
+			// Reading an online-only file downloads it from OneDrive, so its sidecar is not read just because it is selected (#1209).
+			var onlineOnlyLog = new BrowserItem(Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Cloud.log")), "Cloud.log", ItemKind.File, size: 1_000, isOnlineOnly: true);
+			var options = new OpenAsOptionsViewModel(Advise, _ => throw new InvalidOperationException("The sidecar of an online-only log was read."));
+
+			await options.SelectAsync(onlineOnlyLog);
+
+			options.PartsStatus.Should().StartWith("Online only");
+			options.HasSections.Should().BeFalse();
+			options.CanOpen.Should().BeTrue("the whole log can still be opened");
 		}
 
 		/// <summary>
 		/// The large log's sidecar lists two level-1 sections and one region; the small log has no sidecar.
 		/// </summary>
-		private static IReadOnlyList<LogPart> ReadParts(BrowserItem file)
+		private static SidecarParts ReadParts(BrowserItem file)
 		{
 			return file == LargeLog
-				? new[]
+				? new SidecarParts(true, new[]
 				{
 					LogPart.ForSection("Startup", new Range(1, 119)),
 					LogPart.ForSection("Shutdown", new Range(300, int.MaxValue)),
 					LogPart.ForRegion("Docking", new Range(10, 40)),
-				}
-				: Array.Empty<LogPart>();
+				})
+				: SidecarParts.NoSidecar;
 		}
 
 		/// <summary>
