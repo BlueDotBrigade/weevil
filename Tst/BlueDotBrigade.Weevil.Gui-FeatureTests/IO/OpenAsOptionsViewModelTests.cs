@@ -112,6 +112,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			options.ChosenSectionIndex = 1;
 			options.Part.SectionName.Should().Be("Shutdown");
 
+			// The first item of a list is picked like any other: nothing is picked in advance, which would make picking it do nothing.
 			options.ChosenRegionIndex = 0;
 			options.Part.RegionName.Should().Be("Docking", "one part is opened at a time");
 			options.CanOpen.Should().BeTrue();
@@ -124,6 +125,8 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
 			await options.SelectAsync(LargeLog);
 			options.ChosenPart = PartKind.Region;
+			options.Part.RegionName.Should().Be("Docking", "choosing Region picks the first region");
+			options.ChosenRegionIndex.Should().Be(0, "the list shows the region picked");
 
 			await options.SelectAsync(SmallLog);
 

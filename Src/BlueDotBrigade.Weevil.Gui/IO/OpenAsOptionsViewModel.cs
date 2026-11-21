@@ -110,13 +110,24 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// <summary>
 		/// The part the radio buttons show and set, bound as <see cref="ChosenMode"/> is.
 		/// </summary>
+		/// <remarks>
+		/// Choosing Section or Region before picking one in its list picks the first, which the list then shows.
+		/// </remarks>
 		public PartKind ChosenPart
 		{
 			get => this.PartKind;
 			set
 			{
-				this.PartKind = value;
-				UpdatePart();
+				if (value == PartKind.Section && this.SectionIndex < 0 && _sections.Count > 0)
+				{
+					this.SectionIndex = 0;
+				}
+				else if (value == PartKind.Region && this.RegionIndex < 0 && _regions.Count > 0)
+				{
+					this.RegionIndex = 0;
+				}
+
+				Choose(value);
 			}
 		}
 
@@ -146,8 +157,12 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		public bool HasRegions { get; private set; }
 
 		/// <summary>
-		/// The position in <see cref="Sections"/> of the section to open.
+		/// The position in <see cref="Sections"/> of the section to open, or -1 until one is picked.
 		/// </summary>
+		/// <remarks>
+		/// Nothing is picked when the list is shown. Metalama doesn't run a setter given the value it already holds,
+		/// so a first section picked in advance couldn't be picked in the list.
+		/// </remarks>
 		public int SectionIndex { get; private set; } = -1;
 
 		/// <summary>
@@ -168,7 +183,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		}
 
 		/// <summary>
-		/// The position in <see cref="Regions"/> of the region to open.
+		/// The position in <see cref="Regions"/> of the region to open, or -1 until one is picked, as <see cref="SectionIndex"/> is.
 		/// </summary>
 		public int RegionIndex { get; private set; } = -1;
 
@@ -302,8 +317,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		}
 
 		/// <summary>
-		/// Lists the sections and regions of the log selected, each with its first one chosen.
-		/// <see cref="SelectAsync"/> lists none first, so the index always changes and the list shows it.
+		/// Lists the sections and regions of the log selected, with none picked yet.
 		/// </summary>
 		/// <remarks>
 		/// The analyst can't pick a section or region before they are listed, so listing them leaves the part chosen meanwhile, such as lines typed.
@@ -319,8 +333,8 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			this.Regions = _regions.Select(p => Describe(p.RegionName, p)).ToList();
 			this.HasSections = _sections.Count > 0;
 			this.HasRegions = _regions.Count > 0;
-			this.SectionIndex = _sections.Count > 0 ? 0 : -1;
-			this.RegionIndex = _regions.Count > 0 ? 0 : -1;
+			this.SectionIndex = -1;
+			this.RegionIndex = -1;
 
 			UpdatePart();
 		}
