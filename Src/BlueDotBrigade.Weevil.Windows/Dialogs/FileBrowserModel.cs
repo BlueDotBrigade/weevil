@@ -289,6 +289,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			if (string.IsNullOrWhiteSpace(initialLocation))
 			{
 				this.IsBusy = true;
+				OnPropertyChanged(nameof(this.StatusText));
 				Location mostRecent = await Task.Run(() => saved.Select(FindRecent).FirstOrDefault(location => location is not null));
 
 				if (navigation != _navigation)

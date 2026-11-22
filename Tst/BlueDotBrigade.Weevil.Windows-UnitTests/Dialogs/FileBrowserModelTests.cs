@@ -10,7 +10,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 	{
 		private static readonly Location Logs = Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Logs"));
 		private static readonly Location Archive = Logs.Combine("Archive", entersContainer: false);
-		private static readonly Location Gone = Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Deleted"));
+		private static readonly Location Gone = Location.ForFileSystem(Path.Combine(Path.GetTempPath(), $"Weevil.Deleted.{Guid.NewGuid():N}"));
 
 		private readonly List<string> _folders = new List<string>();
 		private IContainerReader _reader = null!;
@@ -283,6 +283,20 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			_model.CurrentLocation.Should().Be(documents);
 			_model.RecentFolders.Select(place => place.Location).Should().Equal(documents);
+		}
+
+		[TestMethod]
+		[WorkItem(1218)]
+		public async Task GivenTheAnalystGoesSomewhereWhileTheMostRecentFolderIsLookedFor_WhenItIsFound_ThenTheBrowserStaysWhereTheAnalystWent()
+		{
+			_model.SavedRecentFolders = new[] { CreateFolder().ToString() };
+			FoldersExistBut(Gone);
+
+			Task starting = _model.StartAsync(initialLocation: null, defaultLocation: CreateFolder().ToString());
+			await _model.NavigateAsync(Logs);
+			await starting;
+
+			_model.CurrentLocation.Should().Be(Logs);
 		}
 
 		[TestMethod]
