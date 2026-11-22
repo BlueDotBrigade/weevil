@@ -54,7 +54,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		/// <summary>
 		/// The folder, zip or file to show first: a file is selected in its folder.
-		/// By default, the most recent of <see cref="RecentFolders"/> that still exists, or else the user's documents.
+		/// By default, the most recent of <see cref="RecentFolders"/> that can be found, or else the user's documents.
 		/// </summary>
 		public string InitialLocation { get; set; }
 
@@ -67,23 +67,13 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// <summary>
 		/// Recent folders, most recent first: given by the host when it opens the browser, and read back afterwards to keep them.
 		/// </summary>
+		/// <remarks>
+		/// Those that can be found are shown once the browser is loaded. One that can't, such as a folder on a share that is offline, is read back after the others (#1218).
+		/// </remarks>
 		public IReadOnlyList<string> RecentFolders
 		{
-			get => _model.RecentFolders.Select(place => place.Location.ToString()).ToList();
-			set
-			{
-				_model.RecentFolders.Clear();
-
-				foreach (var path in value ?? Array.Empty<string>())
-				{
-					Location location = Location.Parse(path, this.Reader.IsContainerName);
-
-					if (location is not null)
-					{
-						_model.RecentFolders.Add(new Place(location.Name, location.IsInArchive ? Glyphs.Zip : Glyphs.Folder, location));
-					}
-				}
-			}
+			get => _model.RecentFoldersToSave;
+			set => _model.SavedRecentFolders = value;
 		}
 
 		public BrowserItem SelectedItem => _model.SelectedItem;

@@ -3,7 +3,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
 	/// <summary>
-	/// What the file browser shows as it navigates, with a substitute reader, so no folder needs to exist.
+	/// What the file browser shows as it navigates, with a substitute reader. A typed path, or a saved recent folder, is looked for on disk, so those tests create real folders.
 	/// </summary>
 	[TestClass]
 	public class FileBrowserModelTests
@@ -242,46 +242,57 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		[TestMethod]
 		[WorkItem(1218)]
-		public async Task GivenARecentFolderThatNoLongerExists_WhenTheBrowserStarts_ThenItIsDroppedFromTheList()
+		public async Task GivenASavedRecentFolderThatCantBeFound_WhenTheBrowserStarts_ThenItIsNotShownButStaysSaved()
 		{
+			// Skipped, not forgotten: a folder on a share that is offline is shown again once it can be found.
 			Location kept = CreateFolder();
-			_model.RecentFolders.Add(Recent(Gone));
-			_model.RecentFolders.Add(Recent(kept));
+			_model.SavedRecentFolders = new[] { Gone.ToString(), kept.ToString() };
 			FoldersExistBut(Gone);
 
 			await _model.StartAsync(kept.ToString(), defaultLocation: kept.ToString());
 
-			_model.Error.Should().BeNull("a folder that no longer exists is not shown as an error");
 			_model.RecentFolders.Select(place => place.Location).Should().Equal(kept);
+			_model.RecentFoldersToSave.Should().Equal(kept.ToString(), Gone.ToString());
 		}
 
 		[TestMethod]
 		[WorkItem(1218)]
-		public async Task GivenTheMostRecentFolderNoLongerExists_WhenTheBrowserStartsWithNoLocation_ThenTheNextRecentFolderIsShown()
+		public async Task GivenTheMostRecentFolderCantBeFound_WhenTheBrowserStartsWithNoLocation_ThenTheNextRecentFolderIsShown()
 		{
 			Location next = CreateFolder();
-			_model.RecentFolders.Add(Recent(Gone));
-			_model.RecentFolders.Add(Recent(next));
+			Location older = CreateFolder();
+			_model.SavedRecentFolders = new[] { Gone.ToString(), next.ToString(), older.ToString() };
 			FoldersExistBut(Gone);
 
 			await _model.StartAsync(initialLocation: null, defaultLocation: CreateFolder().ToString());
 
 			_model.CurrentLocation.Should().Be(next);
-			_model.Error.Should().BeNull();
+			_model.Error.Should().BeNull("a folder that can't be found is skipped, not shown as an error");
+			_model.RecentFolders.Select(place => place.Location).Should().Equal(next, older);
 		}
 
 		[TestMethod]
 		[WorkItem(1218)]
-		public async Task GivenNoRecentFolderExists_WhenTheBrowserStartsWithNoLocation_ThenTheDefaultIsShown()
+		public async Task GivenNoSavedRecentFolderCanBeFound_WhenTheBrowserStartsWithNoLocation_ThenTheDefaultIsShown()
 		{
 			Location documents = CreateFolder();
-			_model.RecentFolders.Add(Recent(Gone));
+			_model.SavedRecentFolders = new[] { Gone.ToString() };
 			FoldersExistBut(Gone);
 
 			await _model.StartAsync(initialLocation: null, defaultLocation: documents.ToString());
 
 			_model.CurrentLocation.Should().Be(documents);
 			_model.RecentFolders.Select(place => place.Location).Should().Equal(documents);
+		}
+
+		[TestMethod]
+		[WorkItem(1218)]
+		public void GivenSavedRecentFolders_WhenTheBrowserClosesBeforeLookingForThem_ThenAllAreKept()
+		{
+			// Setting them reads no disk, so none is lost when the dialog closes at once.
+			_model.SavedRecentFolders = new[] { Gone.ToString(), Logs.ToString() };
+
+			_model.RecentFoldersToSave.Should().Equal(Gone.ToString(), Logs.ToString());
 		}
 
 		/// <summary>
@@ -294,8 +305,6 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			return Location.ForFileSystem(folder);
 		}
-
-		private static Place Recent(Location location) => new Place(location.Name, string.Empty, location);
 
 		/// <summary>
 		/// Every location the reader is asked about is a folder, except <paramref name="missing"/>, which is gone.

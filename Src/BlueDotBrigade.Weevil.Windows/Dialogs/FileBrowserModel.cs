@@ -33,6 +33,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		private readonly NavigationHistory _history = new NavigationHistory();
 		private IReadOnlyList<BrowserItem> _items = Array.Empty<BrowserItem>();
 		private int _navigation;
+		private IReadOnlyList<string> _savedRecentFolders = Array.Empty<string>();
 
 		private Location _currentLocation;
 		private string _pathText = string.Empty;
@@ -73,7 +74,36 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		public ObservableCollection<Place> Places { get; }
 
+		/// <summary>
+		/// The recent folders shown, newest first.
+		/// </summary>
 		public ObservableCollection<Place> RecentFolders { get; } = new ObservableCollection<Place>();
+
+		/// <summary>
+		/// The recent folders the host kept, newest first, as <see cref="Location.ToString"/> wrote them. <see cref="StartAsync"/> shows those it finds.
+		/// </summary>
+		/// <remarks>
+		/// Setting it reads no disk: on the UI thread, a folder on a share that doesn't answer would freeze the window (#1218).
+		/// </remarks>
+		public IReadOnlyList<string> SavedRecentFolders
+		{
+			get => _savedRecentFolders;
+			set => _savedRecentFolders = value ?? Array.Empty<string>();
+		}
+
+		/// <summary>
+		/// The recent folders for the host to keep, newest first: those shown, then the saved ones that aren't, at most 8.
+		/// </summary>
+		/// <remarks>
+		/// A saved folder that wasn't found, such as one on a share that is offline, is skipped rather than forgotten (#1218):
+		/// it is kept after the others, so it is shown again once it can be found, until newer folders push it out. So is one not looked for yet.
+		/// </remarks>
+		public IReadOnlyList<string> RecentFoldersToSave => this.RecentFolders
+			.Select(place => place.Location.ToString())
+			.Concat(_savedRecentFolders)
+			.Distinct(StringComparer.OrdinalIgnoreCase)
+			.Take(MaxRecentFolders)
+			.ToList();
 
 		public Location CurrentLocation
 		{
@@ -243,20 +273,31 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		/// <summary>
 		/// Shows where the browser opens: the folder or zip <paramref name="initialLocation"/> names, or the file it names selected in its folder.
-		/// When it is <see langword="null"/>, the most recent folder that still exists, or else <paramref name="defaultLocation"/>.
+		/// When it is <see langword="null"/>, the most recent of <see cref="SavedRecentFolders"/> that can be found, or else <paramref name="defaultLocation"/>.
 		/// </summary>
 		/// <remarks>
-		/// A recent folder that no longer exists, such as a folder deleted or a zip moved since it was used, is dropped from the list rather than shown as an error (#1218).
-		/// They are checked off the UI thread, since a folder on a share that doesn't answer blocks the call.
+		/// Then shows the saved recent folders that can be found (#1218). Each is looked for off the UI thread, since a folder on a share that doesn't answer blocks the call,
+		/// and in order, so the browser opens in the most recent without waiting on the others. A saved folder that can't be found is not shown, and isn't an error.
+		/// When the analyst goes somewhere while the most recent is looked for, the browser stays there.
 		/// </remarks>
 		public async Task StartAsync(string initialLocation, string defaultLocation)
 		{
-			Task forgetting = ForgetMissingRecentFoldersAsync();
+			IReadOnlyList<string> saved = _savedRecentFolders;
+			var navigation = _navigation;
+			Task<List<Location>> finding = Task.Run(() => saved.Select(FindRecent).Where(location => location is not null).ToList());
 
 			if (string.IsNullOrWhiteSpace(initialLocation))
 			{
-				await forgetting;
-				initialLocation = this.RecentFolders.FirstOrDefault()?.Location.ToString() ?? defaultLocation;
+				this.IsBusy = true;
+				Location mostRecent = await Task.Run(() => saved.Select(FindRecent).FirstOrDefault(location => location is not null));
+
+				if (navigation != _navigation)
+				{
+					ShowRecent(await finding);
+					return;
+				}
+
+				initialLocation = mostRecent?.ToString() ?? defaultLocation;
 			}
 
 			this.PathText = initialLocation;
@@ -267,7 +308,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				await NavigateAsync(Location.Computer);
 			}
 
-			await forgetting;
+			ShowRecent(await finding);
 		}
 
 		/// <summary>
@@ -401,18 +442,33 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		}
 
 		/// <summary>
-		/// Drops the recent folders and zips that no longer exist. One visited meanwhile was put back at the top, as a new entry, so it stays.
+		/// The saved recent folder <paramref name="text"/> names, or <see langword="null"/> when it can't be found. Reads the disk.
 		/// </summary>
-		private async Task ForgetMissingRecentFoldersAsync()
-		{
-			List<Place> recent = this.RecentFolders.ToList();
-			List<Place> missing = await Task.Run(() => recent.Where(place => this.Reader.GetKind(place.Location) is null).ToList());
+		/// <remarks>
+		/// For a folder in a zip, only the zip is looked for: reading the zip, or copying a zip inside it, would cost every open for one entry of the list.
+		/// </remarks>
+		private Location FindRecent(string text) => Location.Parse(text, this.Reader.IsContainerName);
 
-			foreach (Place place in missing)
+		/// <summary>
+		/// Lists the recent folders found, newest first, after any the analyst visited meanwhile.
+		/// </summary>
+		private void ShowRecent(IEnumerable<Location> found)
+		{
+			foreach (Location location in found)
 			{
-				this.RecentFolders.Remove(place);
+				if (this.RecentFolders.Count >= MaxRecentFolders)
+				{
+					break;
+				}
+
+				if (!this.RecentFolders.Any(place => place.Location.Equals(location)))
+				{
+					this.RecentFolders.Add(CreateRecent(location));
+				}
 			}
 		}
+
+		private static Place CreateRecent(Location location) => new Place(location.Name, location.IsInArchive ? Glyphs.Zip : Glyphs.Folder, location);
 
 		private void RememberRecent(Location location)
 		{
@@ -423,7 +479,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				this.RecentFolders.Remove(existing);
 			}
 
-			this.RecentFolders.Insert(0, new Place(location.Name, location.IsInArchive ? Glyphs.Zip : Glyphs.Folder, location));
+			this.RecentFolders.Insert(0, CreateRecent(location));
 
 			while (this.RecentFolders.Count > MaxRecentFolders)
 			{
