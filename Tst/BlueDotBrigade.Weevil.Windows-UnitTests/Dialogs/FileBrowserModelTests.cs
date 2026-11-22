@@ -318,6 +318,20 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		}
 
 		[TestMethod]
+		[WorkItem(1328)]
+		public async Task GivenASavedRecentFolderWrittenWithAFinalSeparator_WhenItIsShown_ThenItIsSavedOnce()
+		{
+			// A drive's root was saved as `C:` before #1328, and is now written `C:\`: both are one folder.
+			Location folder = CreateFolder();
+			_model.SavedRecentFolders = new[] { folder.ToString() + Path.DirectorySeparatorChar };
+			FoldersExistBut(Gone);
+
+			await _model.StartAsync(folder.ToString(), defaultLocation: folder.ToString());
+
+			_model.RecentFoldersToSave.Should().Equal(folder.ToString());
+		}
+
+		[TestMethod]
 		[WorkItem(1218)]
 		public void GivenSavedRecentFolders_WhenTheBrowserClosesBeforeLookingForThem_ThenAllAreKept()
 		{
