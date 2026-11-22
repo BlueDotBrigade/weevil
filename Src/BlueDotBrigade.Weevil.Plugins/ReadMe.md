@@ -38,6 +38,14 @@ Creating an installation package:
 1. Software developer starts compiling the Visual Studio Installer project.
 1. The installer project will then copy the assemblies from the `Bin` directory to the installation package.
 
+## Plugins and WPF
+
+Weevil's core engine, and so the CLI and PowerShell, load the plugin assemblies directly in the plugins directory. Keep those free of WPF, so that every feature works headless, and in environments that can't run WPF.
+
+A plugin uses Weevil's options in the Open As dialog unless it supplies its own (#1216). To supply them, put a separate assembly in a `Wpf` subdirectory (`Plugins\Wpf`) that exports `IOpenAsOptionsProvider` from `BlueDotBrigade.Weevil.Windows`, naming the plugin it is for. Only Weevil's window loads that subdirectory.
+
+A plugin assembly that fails to load is skipped, and Weevil's log names it: the other plugins still load.
+
 ## Additional Notes
 
 - Because the `BlueDotBrigade.Weevil.Plugins` project is of type `Microsoft.NET.Sdk`, the plugin assemblies are automatically visible in the Visual Studio's Solution Explorer.

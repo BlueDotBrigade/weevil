@@ -16,8 +16,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	/// </summary>
 	/// <remarks>
 	/// They are the dialog's default: a plugin may show its own in their place (#1216).
-	/// </remarks>
-	/// <remarks>
+	///
 	/// Weevil suggests a mode for each log selected. Once the analyst picks one, selecting another log does not change it (decision 7 of the #1157 plan).
 	/// The part is the whole log, one section, one region or a range of lines (decision 5). Selecting another log goes back to the whole log,
 	/// as the proof of concept does (#1209). The browser selects the same log again when it refreshes, sorts or filters its list: that keeps a range of lines,

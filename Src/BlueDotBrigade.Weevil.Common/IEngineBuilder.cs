@@ -4,15 +4,6 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
-	/// <summary>
-	/// What Weevil passed to a plugin's own Open As window, before Weevil's Open As dialog replaced it (#1216).
-	/// </summary>
-	/// <remarks>
-	/// Kept only so that a plugin that still has a <c>ShowOpenAs</c> method builds.
-	/// </remarks>
-	[Obsolete("Weevil no longer shows a plugin's own Open As window. A plugin supplies its options through IOpenAsOptionsPlugin, in BlueDotBrigade.Weevil.Windows (#1216).")]
-	public delegate IEngineBuilder CreateEngineBuilder(string source);
-
 	public interface IEngineBuilder
 	{
 		IEngineBuilder UsingContext(ContextDictionary context);

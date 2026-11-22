@@ -98,6 +98,8 @@
       <CliRuntimeFiles Include="$(CliOutputPath)**\*" Exclude="$(CliOutputPath)Plugins\**\*" />
       <PowerShellRuntimeFiles Include="$(PowerShellOutputPath)**\*" />
       <PluginRuntimeFiles Include="$(PluginSourcePath)*.dll;$(PluginSourcePath)*.dll.config;$(PluginSourcePath)*.pdb;$(PluginSourcePath)ReadMe.md" Condition="Exists('$(PluginSourcePath)')" />
+      <!-- WPF assemblies only Weevil's window loads, such as a plugin's Open As options (#1216): Core, the CLI and PowerShell load only Plugins\*.dll. -->
+      <WpfPluginRuntimeFiles Include="$(PluginSourcePath)Wpf\*.dll;$(PluginSourcePath)Wpf\*.dll.config;$(PluginSourcePath)Wpf\*.pdb" Condition="Exists('$(PluginSourcePath)Wpf')" />
       <DocumentationFiles Include="$(RepoRootDir)Doc\Notes\Release\Help.html" />
       <LicenseFiles Include="$(RepoRootDir)Doc\Notes\Release\Licenses\**\*" />
       <RootLicenseFiles Include="$(RepoRootDir)LICENSE.md" />
@@ -106,6 +108,7 @@
     <Copy SourceFiles="@(CliRuntimeFiles)" DestinationFiles="@(CliRuntimeFiles->'$(InstallerBinLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PowerShellRuntimeFiles)" DestinationFiles="@(PowerShellRuntimeFiles->'$(InstallerBinLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PluginRuntimeFiles)" DestinationFiles="@(PluginRuntimeFiles->'$(InstallerPluginLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="Exists('$(PluginSourcePath)')" />
+    <Copy SourceFiles="@(WpfPluginRuntimeFiles)" DestinationFiles="@(WpfPluginRuntimeFiles->'$(InstallerPluginLayoutDir)Wpf\%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="Exists('$(PluginSourcePath)Wpf')" />
     <Copy SourceFiles="@(DocumentationFiles)" DestinationFiles="@(DocumentationFiles->'$(InstallerDocLayoutDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(LicenseFiles)" DestinationFiles="@(LicenseFiles->'$(InstallerLicenseLayoutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(RootLicenseFiles)" DestinationFiles="@(RootLicenseFiles->'$(InstallerLicenseLayoutDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />

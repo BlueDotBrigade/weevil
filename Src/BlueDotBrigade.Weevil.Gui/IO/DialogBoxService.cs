@@ -38,6 +38,14 @@ internal static class GraphWindowCounter
 
 internal class DialogBoxService : IDialogBoxService
 {
+	/// <summary>
+	/// The folder, inside Weevil's plugin folder, of the WPF assemblies only Weevil's window loads, such as a plugin's Open As options (#1216).
+	/// </summary>
+	/// <remarks>
+	/// Core, the CLI and PowerShell load only the assemblies directly in the plugin folder, so they never load WPF.
+	/// </remarks>
+	internal const string WpfPluginFolder = "Wpf";
+
 	// Rolled logs, such as app.log.1, are logs too. Weevil's sidecar and index are not (decision 9 of the #1157 plan).
 	private static readonly FileTypeFilter LogFiles = new FileTypeFilter(
 		"Log files (*.log, *.log.1, *.txt, *.tsv, *.csv)",
@@ -60,8 +68,10 @@ internal class DialogBoxService : IDialogBoxService
 		IContainerReader reader = null;
 		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read, file => ReadParts(reader, ExtractedLog.DefaultCopiesFolder, file));
 
-		// Weevil's options, unless the selected log's plugin shows its own (#1216).
-		var host = new OpenAsOptionsHost(options, new OpenAsOptionsView { DataContext = options }, FindOpenAsPlugin);
+		// Weevil's options, unless the selected log's plugin shows its own (#1216). The providers are loaded once, off the UI thread, at the first selection.
+		var plugins = new PluginFactory();
+		var providers = new Lazy<IReadOnlyList<IOpenAsOptionsProvider>>(() => PluginFactory.LoadExports<IOpenAsOptionsProvider>(Path.Combine(PluginFactory.DirectoryPath, WpfPluginFolder)));
+		using var host = new OpenAsOptionsHost(options, new OpenAsOptionsView { DataContext = options }, file => FindOptionsProvider(plugins, providers.Value, file));
 		var dialog = new BlueDotBrigade.Weevil.Windows.Dialogs.OpenAsDialog
 		{
 			Owner = Application.Current?.MainWindow,
@@ -107,17 +117,22 @@ internal class DialogBoxService : IDialogBoxService
 	}
 
 	/// <summary>
-	/// Finds the plugin of the log selected in the Open As dialog, when it shows its own options (#1216). Runs off the UI thread.
+	/// Finds the options provider of the plugin of the log selected in the Open As dialog, when it has one (#1216). Runs off the UI thread.
 	/// </summary>
 	/// <remarks>
-	/// A log in a zip, or one stored online only, uses Weevil's options: a plugin reads the log to tell whether it is one of its own,
-	/// which would extract or download it.
+	/// Without providers, as for most analysts, no log is read to find its plugin. A log in a zip, or one stored online only, uses Weevil's options:
+	/// a plugin reads the log to tell whether it is one of its own, which would extract or download it.
 	/// </remarks>
-	private static IOpenAsOptionsPlugin FindOpenAsPlugin(BrowserItem file)
+	private static IOpenAsOptionsProvider FindOptionsProvider(PluginFactory plugins, IReadOnlyList<IOpenAsOptionsProvider> providers, BrowserItem file)
 	{
-		return file.Location.IsInArchive || file.IsOnlineOnly
-			? null
-			: new PluginFactory().Find(file.Location.FileSystemPath) as IOpenAsOptionsPlugin;
+		if (providers.Count == 0 || file.Location.IsInArchive || file.IsOnlineOnly)
+		{
+			return null;
+		}
+
+		var pluginName = plugins.Find(file.Location.FileSystemPath).Name;
+
+		return providers.FirstOrDefault(provider => string.Equals(provider.PluginName, pluginName, StringComparison.Ordinal));
 	}
 
 	/// <summary>

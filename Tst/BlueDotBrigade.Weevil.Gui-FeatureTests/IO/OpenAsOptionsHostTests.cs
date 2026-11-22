@@ -3,6 +3,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	using System;
 	using System.ComponentModel;
 	using System.IO;
+	using System.Threading;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
@@ -22,25 +23,25 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		public async Task GivenALogWhosePluginHasItsOwnOptions_WhenSelected_ThenThePluginsOptionsAreShown()
 		{
 			var weevil = new FakeOptions();
-			var plugin = new FakePlugin();
-			var host = new OpenAsOptionsHost(weevil, "Weevil's view", FindPlugin(plugin));
+			var provider = new FakeProvider();
+			using var host = new OpenAsOptionsHost(weevil, "Weevil's view", FindProvider(provider));
 
 			await host.SelectAsync(PluginLog);
 
-			host.Options.Should().BeSameAs(plugin.Options);
+			host.Options.Should().BeSameAs(provider.Options);
 			host.View.Should().Be("The plugin's view");
-			plugin.Options.Selected.Should().Be(PluginLog);
+			provider.Options!.Selected.Should().Be(PluginLog);
 			weevil.Selected.Should().BeNull("Weevil's options are not shown");
 		}
 
 		[TestMethod]
-		public async Task GivenThePluginsOptionsShown_WhenALogOfNoSuchPluginIsSelected_ThenWeevilsOptionsAreShownAgain()
+		public async Task GivenThePluginsOptionsShown_WhenALogWithoutThemIsSelected_ThenWeevilsOptionsAreShownAgain()
 		{
 			var weevil = new FakeOptions();
-			var plugin = new FakePlugin();
-			var host = new OpenAsOptionsHost(weevil, "Weevil's view", FindPlugin(plugin));
+			var provider = new FakeProvider();
+			using var host = new OpenAsOptionsHost(weevil, "Weevil's view", FindProvider(provider));
 			await host.SelectAsync(PluginLog);
-			FakeOptions pluginOptions = plugin.Options;
+			FakeOptions? pluginOptions = provider.Options;
 
 			await host.SelectAsync(PlainLog);
 			host.Options.Should().BeSameAs(weevil);
@@ -48,44 +49,122 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			await host.SelectAsync(PluginLog);
 			host.Options.Should().BeSameAs(pluginOptions, "the plugin's options are kept while the dialog is open, so they can remember a choice");
-			plugin.Created.Should().Be(1);
+			provider.Created.Should().Be(1);
 		}
 
 		[TestMethod]
 		public async Task GivenThePluginsOptionsShown_WhenTheyBecomeComplete_ThenOpenIsEnabled()
 		{
-			var plugin = new FakePlugin();
-			var host = new OpenAsOptionsHost(new FakeOptions { CanOpen = true }, "Weevil's view", FindPlugin(plugin));
+			var provider = new FakeProvider();
+			using var host = new OpenAsOptionsHost(new FakeOptions { CanOpen = true }, "Weevil's view", FindProvider(provider));
 			await host.SelectAsync(PluginLog);
 			host.CanOpen.Should().BeFalse("the plugin's options are not complete yet");
 			var changes = 0;
 			host.Changed += (_, _) => changes++;
 
-			plugin.Options.CanOpen = true;
+			provider.Options!.CanOpen = true;
 
 			host.CanOpen.Should().BeTrue();
 			changes.Should().Be(1, "the dialog is told, so it enables Open");
 		}
 
 		[TestMethod]
-		public async Task GivenAPluginThatFails_WhenItsLogIsSelected_ThenWeevilsOptionsAreShown()
+		public async Task GivenTheLogBeforeCouldBeOpened_WhenAnotherIsSelected_ThenOpenWaitsUntilItsOptionsAreChosen()
+		{
+			// While the new log's plugin was being found, Open opened it with the part and mode chosen for the log before.
+			using var finding = new ManualResetEventSlim();
+			var weevil = new FakeOptions { CanOpen = true };
+			using var host = new OpenAsOptionsHost(weevil, "Weevil's view", file =>
+			{
+				if (file == PluginLog)
+				{
+					finding.Wait(TimeSpan.FromSeconds(10));
+				}
+
+				return null;
+			});
+			await host.SelectAsync(PlainLog);
+			host.CanOpen.Should().BeTrue();
+
+			Task selecting = host.SelectAsync(PluginLog);
+			host.CanOpen.Should().BeFalse("whose options to show for the new log is not settled yet");
+
+			finding.Set();
+			await selecting;
+			host.CanOpen.Should().BeTrue();
+			weevil.Selected.Should().Be(PluginLog);
+		}
+
+		[TestMethod]
+		public async Task GivenALogStillBeingChecked_WhenAnotherIsSelected_ThenTheFirstCheckIsIgnored()
+		{
+			// A plugin on a slow network drive must not show its options for the log selected after it.
+			using var finding = new ManualResetEventSlim();
+			var weevil = new FakeOptions();
+			var provider = new FakeProvider();
+			using var host = new OpenAsOptionsHost(weevil, "Weevil's view", file =>
+			{
+				if (file == PluginLog)
+				{
+					finding.Wait(TimeSpan.FromSeconds(10));
+					return provider;
+				}
+
+				return null;
+			});
+
+			Task slowSelection = host.SelectAsync(PluginLog);
+			await host.SelectAsync(PlainLog);
+			finding.Set();
+			await slowSelection;
+
+			host.Options.Should().BeSameAs(weevil);
+			weevil.Selected.Should().Be(PlainLog);
+			provider.Created.Should().Be(0);
+		}
+
+		[TestMethod]
+		public async Task GivenAPluginThatFailsToCreateItsOptions_WhenItsLogIsSelected_ThenWeevilsOptionsAreShown()
 		{
 			// Browsing must never stop Weevil.
 			var weevil = new FakeOptions();
-			var host = new OpenAsOptionsHost(weevil, "Weevil's view", FindPlugin(new FakePlugin { IsFailing = true }));
+			using var host = new OpenAsOptionsHost(weevil, "Weevil's view", FindProvider(new FakeProvider { IsCreateFailing = true }));
 
 			await host.SelectAsync(PluginLog);
-			host.Options.Should().BeSameAs(weevil);
 
-			host = new OpenAsOptionsHost(weevil, "Weevil's view", _ => throw new InvalidOperationException("The plugin could not read the log."));
-			await host.SelectAsync(PluginLog);
 			host.Options.Should().BeSameAs(weevil);
 			weevil.Selected.Should().Be(PluginLog);
 		}
 
-		private static Func<BrowserItem, IOpenAsOptionsPlugin> FindPlugin(FakePlugin plugin)
+		[TestMethod]
+		public async Task GivenPluginOptionsThatFailToShowALog_WhenItIsSelected_ThenWeevilsOptionsAreShown()
 		{
-			return file => file == PluginLog ? plugin : null;
+			// The dialog's selection handler can't catch it, so it would have closed Weevil.
+			var weevil = new FakeOptions();
+			using var host = new OpenAsOptionsHost(weevil, "Weevil's view", FindProvider(new FakeProvider { IsSelectFailing = true }));
+
+			await host.SelectAsync(PluginLog);
+
+			host.Options.Should().BeSameAs(weevil);
+			weevil.Selected.Should().Be(PluginLog);
+		}
+
+		[TestMethod]
+		public async Task GivenPluginOptionsShownInTheDialog_WhenItCloses_ThenTheyAreDisposed()
+		{
+			// Options that previewed the log would otherwise keep it from opening (#1254).
+			var provider = new FakeProvider();
+			var host = new OpenAsOptionsHost(new FakeOptions(), "Weevil's view", FindProvider(provider));
+			await host.SelectAsync(PluginLog);
+
+			host.Dispose();
+
+			provider.Options!.IsDisposed.Should().BeTrue();
+		}
+
+		private static Func<BrowserItem, IOpenAsOptionsProvider?> FindProvider(FakeProvider provider)
+		{
+			return file => file == PluginLog ? provider : null;
 		}
 
 		private static BrowserItem Log(string name)
@@ -93,23 +172,27 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			return new BrowserItem(Location.ForFileSystem(Path.Combine(Path.GetTempPath(), name)), name, ItemKind.File, size: 1_000);
 		}
 
-		private sealed class FakePlugin : IOpenAsOptionsPlugin
+		private sealed class FakeProvider : IOpenAsOptionsProvider
 		{
-			public FakeOptions Options { get; private set; }
+			public string PluginName => "Vendor";
+
+			public FakeOptions? Options { get; private set; }
 
 			public int Created { get; private set; }
 
-			public bool IsFailing { get; init; }
+			public bool IsCreateFailing { get; init; }
+
+			public bool IsSelectFailing { get; init; }
 
 			public IOpenAsOptions CreateOpenAsOptions()
 			{
-				if (this.IsFailing)
+				if (this.IsCreateFailing)
 				{
 					throw new InvalidOperationException("The plugin could not create its options.");
 				}
 
 				this.Created++;
-				this.Options = new FakeOptions();
+				this.Options = new FakeOptions { IsSelectFailing = this.IsSelectFailing };
 				return this.Options;
 			}
 
@@ -119,13 +202,17 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			}
 		}
 
-		private sealed class FakeOptions : IOpenAsOptions, INotifyPropertyChanged
+		private sealed class FakeOptions : IOpenAsOptions, INotifyPropertyChanged, IDisposable
 		{
 			private bool _canOpen;
 
 			public event PropertyChangedEventHandler? PropertyChanged;
 
 			public BrowserItem? Selected { get; private set; }
+
+			public bool IsSelectFailing { get; init; }
+
+			public bool IsDisposed { get; private set; }
 
 			public bool CanOpen
 			{
@@ -143,10 +230,21 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			public ContextDictionary Context { get; } = new ContextDictionary();
 
-			public Task SelectAsync(BrowserItem file)
+			public async Task SelectAsync(BrowserItem file)
 			{
+				await Task.Yield();
+
+				if (this.IsSelectFailing)
+				{
+					throw new InvalidOperationException("The plugin's options could not read the log.");
+				}
+
 				this.Selected = file;
-				return Task.CompletedTask;
+			}
+
+			public void Dispose()
+			{
+				this.IsDisposed = true;
 			}
 		}
 	}
