@@ -277,20 +277,43 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// </summary>
 		/// <remarks>
 		/// Then shows the saved recent folders that can be found (#1218). Each is looked for off the UI thread, since a folder on a share that doesn't answer blocks the call,
-		/// and in order, so the browser opens in the most recent without waiting on the others. A saved folder that can't be found is not shown, and isn't an error.
+		/// in order and once each, so the browser opens in the most recent as soon as it is found, without waiting on the others. A saved folder that can't be found is not shown, and isn't an error.
 		/// When the analyst goes somewhere while the most recent is looked for, the browser stays there.
 		/// </remarks>
 		public async Task StartAsync(string initialLocation, string defaultLocation)
 		{
 			IReadOnlyList<string> saved = _savedRecentFolders;
 			var navigation = _navigation;
-			Task<List<Location>> finding = Task.Run(() => saved.Select(FindRecent).Where(location => location is not null).ToList());
+			var mostRecent = new TaskCompletionSource<Location>(TaskCreationOptions.RunContinuationsAsynchronously);
+			Task<List<Location>> finding = Task.Run(() =>
+			{
+				var found = new List<Location>();
+
+				try
+				{
+					foreach (var text in saved)
+					{
+						if (FindRecent(text) is { } location)
+						{
+							found.Add(location);
+							mostRecent.TrySetResult(location);
+						}
+					}
+				}
+				finally
+				{
+					// None found, or the lookup failed: the browser opens in the default.
+					mostRecent.TrySetResult(null);
+				}
+
+				return found;
+			});
 
 			if (string.IsNullOrWhiteSpace(initialLocation))
 			{
 				this.IsBusy = true;
 				OnPropertyChanged(nameof(this.StatusText));
-				Location mostRecent = await Task.Run(() => saved.Select(FindRecent).FirstOrDefault(location => location is not null));
+				Location first = await mostRecent.Task;
 
 				if (navigation != _navigation)
 				{
@@ -298,7 +321,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 					return;
 				}
 
-				initialLocation = mostRecent?.ToString() ?? defaultLocation;
+				initialLocation = first?.ToString() ?? defaultLocation;
 			}
 
 			this.PathText = initialLocation;
