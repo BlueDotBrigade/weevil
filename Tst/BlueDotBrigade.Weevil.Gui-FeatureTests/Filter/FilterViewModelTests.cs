@@ -499,7 +499,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[WorkItem(1217)]
 		public void GivenNoOpenLog_WhenTheOpenButtonIsPressed_ThenOpenAsStartsInTheLastFolderUsed()
 		{
-			// The dialog itself shows the last folder used when it is given none.
+			// Given none, the dialog box service shows the last folder used.
 			var dialog = Substitute.For<IDialogBoxService>();
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 
@@ -1100,7 +1100,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 			var zipPath = CreateZip("Logs.zip", "A.log");
 
-			// The substitute answers false: the analyst cancelled the Open As dialog shown in the zip.
+			// The substitute answers false: the analyst cancelled the Open As dialog shown in the zip. Weevil opens only what the dialog chose, never the zip.
 			await viewModel.ShowOpenAsAsync(zipPath);
 
 			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
@@ -1510,6 +1510,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			{
 				var location = (string)x[0];
 				var checkBeforeOpening = (Action<string>)x[1];
+
+				// Shown in a folder, the dialog has no file to open until the analyst picks one: this fake picks none.
+				if (location is null || System.IO.Directory.Exists(location))
+				{
+					x[2] = null;
+					return false;
+				}
 
 				try
 				{

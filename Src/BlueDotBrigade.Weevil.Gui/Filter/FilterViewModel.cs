@@ -543,7 +543,8 @@
 				return;
 			}
 
-			_ = ShowOpenAsAsync(e.FilePath);
+			// Queued, so the drop returns before the dialog is shown: the application the file was dragged from, such as Explorer, waits until it does.
+			_uiDispatcher.BeginInvoke(() => _ = ShowOpenAsAsync(e.FilePath), DispatcherPriority.Normal);
 		}
 
 		private void OnFilterOptionsChanged(object sender, EventArgs e)

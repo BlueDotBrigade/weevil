@@ -201,6 +201,34 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			}
 		}
 
+		[TestMethod]
+		public async Task GivenATypedPathToAFileTheSelectedTypeHides_WhenGoneTo_ThenItIsShownUnderATypeThatTakesItAndSelected()
+		{
+			// A host's command line may name any file, such as trace.out, while the dialog starts on its log files (#1217).
+			var folder = Directory.CreateTempSubdirectory("Weevil.FileBrowserModelTests.").FullName;
+
+			try
+			{
+				var tracePath = Path.Combine(folder, "trace.out");
+				System.IO.File.WriteAllText(tracePath, "line 1\n");
+				Location folderLocation = Location.ForFileSystem(folder);
+				_reader.GetKind(Arg.Any<Location>()).Returns(ItemKind.File);
+				_reader.List(folderLocation).Returns(new ListingResult(folderLocation, new[] { File(folderLocation, "trace.out") }));
+				var logFiles = new FileTypeFilter("Log files", new[] { "*.log" });
+				_model.FileTypes = new[] { logFiles, FileTypeFilter.AllFiles };
+
+				_model.PathText = tracePath;
+				await _model.GoToPathTextAsync();
+
+				_model.SelectedFileType.Should().Be(FileTypeFilter.AllFiles);
+				_model.SelectedItem!.Name.Should().Be("trace.out");
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
 		private IEnumerable<string> Names() => _model.VisibleItems.Select(item => item.Name);
 
 		private static BrowserItem File(Location folder, string name) => new BrowserItem(folder.Combine(name, entersContainer: false), name, ItemKind.File, size: 10);

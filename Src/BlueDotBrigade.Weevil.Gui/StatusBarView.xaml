@@ -292,7 +292,7 @@
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    <!-- RAM or Disk, as chosen in the Open As window (#1028). -->
+                    <!-- RAM or Disk, as chosen in the Open As dialog (#1028). -->
                     <TextBox Text="{Binding SourceFileDetails.StorageModeName, FallbackValue='', Mode=OneWay}"
                              ToolTip="Where the log's text is kept: RAM, or Disk, where it is read back from the log when needed."
                              Style="{StaticResource StatusBarTextBox}"/>
