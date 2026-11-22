@@ -7,6 +7,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using System.Threading;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
@@ -34,6 +35,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		private IReadOnlyList<BrowserItem> _items = Array.Empty<BrowserItem>();
 		private int _navigation;
 		private IReadOnlyList<string> _savedRecentFolders = Array.Empty<string>();
+
+		/// <summary>
+		/// Cancelled when the browser closes, so the saved recent folders not looked for yet are left alone.
+		/// </summary>
+		private readonly CancellationTokenSource _closing = new CancellationTokenSource();
 
 		private Location _currentLocation;
 		private string _pathText = string.Empty;
@@ -279,10 +285,12 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// Then shows the saved recent folders that can be found (#1218). Each is looked for off the UI thread, since a folder on a share that doesn't answer blocks the call,
 		/// in order and once each, so the browser opens in the most recent as soon as it is found, without waiting on the others. A saved folder that can't be found is not shown, and isn't an error.
 		/// When the analyst goes somewhere while the most recent is looked for, the browser stays there.
+		/// Once the browser closes, no other saved folder is looked for. One already being looked for can't be interrupted: it ends when Windows gives up on it.
 		/// </remarks>
 		public async Task StartAsync(string initialLocation, string defaultLocation)
 		{
 			IReadOnlyList<string> saved = _savedRecentFolders;
+			CancellationToken closing = _closing.Token;
 			var navigation = _navigation;
 			var mostRecent = new TaskCompletionSource<Location>(TaskCreationOptions.RunContinuationsAsynchronously);
 			Task<List<Location>> finding = Task.Run(() =>
@@ -293,6 +301,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				{
 					foreach (var text in saved)
 					{
+						if (closing.IsCancellationRequested)
+						{
+							break;
+						}
+
 						if (FindRecent(text) is { } location)
 						{
 							found.Add(location);
@@ -314,6 +327,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				this.IsBusy = true;
 				OnPropertyChanged(nameof(this.StatusText));
 				Location first = await mostRecent.Task;
+
+				if (closing.IsCancellationRequested)
+				{
+					return;
+				}
 
 				if (navigation != _navigation)
 				{
@@ -388,7 +406,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			RefreshView();
 		}
 
-		public void Dispose() => this.Reader.Dispose();
+		public void Dispose()
+		{
+			_closing.Cancel();
+			this.Reader.Dispose();
+		}
 
 		private async Task NavigateAsync(Location location, string selectName, bool isBackOrForward)
 		{
@@ -478,6 +500,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// </summary>
 		private void ShowRecent(IEnumerable<Location> found)
 		{
+			if (_closing.IsCancellationRequested)
+			{
+				return;
+			}
+
 			foreach (Location location in found)
 			{
 				if (this.RecentFolders.Count >= MaxRecentFolders)

@@ -301,6 +301,24 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		[TestMethod]
 		[WorkItem(1218)]
+		public async Task GivenTheBrowserClosesWhileItStarts_WhenTheRecentFoldersAreFound_ThenTheyAreNotShownAndStaySaved()
+		{
+			// Nothing is looked for or shown once the browser closes; what was saved is still read back.
+			Location saved = CreateFolder();
+			Location shown = CreateFolder();
+			_model.SavedRecentFolders = new[] { saved.ToString() };
+			FoldersExistBut(Gone);
+
+			Task starting = _model.StartAsync(shown.ToString(), defaultLocation: shown.ToString());
+			_model.Dispose();
+			await starting;
+
+			_model.RecentFolders.Select(place => place.Location).Should().NotContain(saved);
+			_model.RecentFoldersToSave.Should().Contain(saved.ToString());
+		}
+
+		[TestMethod]
+		[WorkItem(1218)]
 		public void GivenSavedRecentFolders_WhenTheBrowserClosesBeforeLookingForThem_ThenAllAreKept()
 		{
 			// Setting them reads no disk, so none is lost when the dialog closes at once.
