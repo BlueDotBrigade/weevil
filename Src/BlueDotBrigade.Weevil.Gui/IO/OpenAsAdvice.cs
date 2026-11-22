@@ -9,7 +9,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
 	/// <summary>
-	/// What the Open As window offers for one log: the storage mode it suggests, and the warning for each choice (#1028).
+	/// What the Open As dialog offers for one log: the storage mode it suggests, and the warning for each choice (#1028).
 	/// </summary>
 	/// <remarks>
 	/// RAM is suggested when the log's estimated memory fits in the available memory, less <see cref="Reserve"/>; otherwise Disk (decision 2 of the #1028 plan).

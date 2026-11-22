@@ -1,6 +1,7 @@
-using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -14,10 +15,10 @@ using BlueDotBrigade.Weevil.Gui;
 using BlueDotBrigade.Weevil.Gui.Analysis;
 using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
+using BlueDotBrigade.Weevil.Gui.Properties;
 using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 using BlueDotBrigade.Weevil.Windows.IO;
 using Microsoft.Win32;
-using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
 /// <summary>
 /// Manages application-wide state for graph windows.
@@ -62,8 +63,11 @@ internal class DialogBoxService : IDialogBoxService
 		// nothing to do
 	}
 
-	public bool TryShowOpenAs(Action<string> checkBeforeOpening, out OpenAsChoice choice)
+	public bool TryShowOpenAs(string location, Action<string> checkBeforeOpening, out OpenAsChoice choice)
 	{
+		// The folders the analyst visited, most recent first, kept between runs: with nothing else to show, the dialog shows the last one (#1217).
+		IReadOnlyList<string> recentFolders = Settings.Default.RecentFolders?.Cast<string>().ToList() ?? new List<string>();
+
 		// Read on the UI thread once the dialog exists; the parts are listed off it.
 		IContainerReader reader = null;
 		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read, file => OpenAsLookup.ReadParts(reader, ExtractedLog.DefaultCopiesFolder, file));
@@ -76,6 +80,8 @@ internal class DialogBoxService : IDialogBoxService
 		{
 			Owner = Application.Current?.MainWindow,
 			Title = "Open",
+			InitialLocation = location ?? recentFolders.FirstOrDefault(),
+			RecentFolders = recentFolders,
 			FileTypes = new[] { LogFiles, FileTypeFilter.AllFiles },
 			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
 			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
@@ -101,6 +107,11 @@ internal class DialogBoxService : IDialogBoxService
 		};
 
 		var isAccepted = dialog.ShowDialog() == true;
+
+		// Kept even when the analyst cancels: the folders were visited. Saved with Weevil's other settings when it closes.
+		var visited = new StringCollection();
+		visited.AddRange(dialog.RecentFolders.ToArray());
+		Settings.Default.RecentFolders = visited;
 
 		// Weevil's advice is logged only when its options were shown.
 		choice = isAccepted
@@ -236,25 +247,6 @@ internal class DialogBoxService : IDialogBoxService
 		return wasSuccessful;
 	}
 
-
-	public bool TryShowOpenAs(OpenAsAdvice advice, out StorageMode storageMode)
-	{
-		var dialog = new OpenAsDialog(advice);
-		var isAccepted = dialog.ShowDialog() == true;
-
-		storageMode = dialog.StorageMode;
-
-		return isAccepted;
-	}
-
-	public bool TrySelectCompressedFile(string[] fileNames, out string selectedFileName)
-	{
-		var viewModel = new SelectFileViewModel(fileNames);
-		new SelectFileView(viewModel).ShowDialog();
-
-		selectedFileName = viewModel.SelectedFilename;
-		return !string.IsNullOrEmpty(selectedFileName);
-	}
 
 	public bool TryShowGoTo(string defaultValue, out string userValue)
 	{

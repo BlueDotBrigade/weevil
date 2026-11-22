@@ -273,6 +273,12 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			if (kind == ItemKind.File)
 			{
+				// A file the selected type hides, such as one given on a host's command line, is shown under the first type that takes it, so it can be selected.
+				if (!_selectedFileType.Matches(location.Name) && _fileTypes.FirstOrDefault(type => type.Matches(location.Name)) is { } showingType)
+				{
+					this.SelectedFileType = showingType;
+				}
+
 				await NavigateAsync(location.GetParent(), location.Name, isBackOrForward: false);
 			}
 			else

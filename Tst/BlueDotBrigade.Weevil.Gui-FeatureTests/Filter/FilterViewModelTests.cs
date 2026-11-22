@@ -371,21 +371,23 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		[WorkItem(1217)]
 		public void GivenALogDroppedOnTheWindow_WhenDiskIsChosenInOpenAs_ThenTheLogOpensOnDisk()
 		{
-			// Every open shows Open As, including a drop, which skips the Windows file dialog (decision 3 of the #1028 plan).
+			// Every way to open a log shows the Open As dialog, with the log dropped selected (decision 8 of the #1157 plan).
 			var dialog = Substitute.For<IDialogBoxService>();
-			AcceptOpenAs(dialog, StorageMode.Disk);
+			OpenWhatOpenAsShows(dialog, StorageMode.Disk);
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			viewModel.CanOpenLogFile.Should().BeTrue("nothing else is running");
+			var droppedLog = CopyLog("Dropped.log");
 
-			viewModel.OnFileDropped(this, new DroppedFileEventArgs(CopyLog("Dropped.log")));
+			viewModel.OnFileDropped(this, new DroppedFileEventArgs(droppedLog));
 
 			// Until the insights are ready, they still read the log on disk.
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 
-			dialog.Received(1).TryShowOpenAs(Arg.Is<OpenAsAdvice>(advice => advice.FileName == "Dropped.log"), out Arg.Any<StorageMode>());
+			dialog.Received(1).TryShowOpenAs(droppedLog, Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
 			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin => bulletin.StorageMode == StorageMode.Disk));
 		}
 
@@ -448,9 +450,62 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			// The substitute answers false: the user cancelled.
 			viewModel.OpenLogCommand.Execute(null);
 
-			dialog.Received(1).TryShowOpenAs(Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
+			dialog.Received(1).TryShowOpenAs(Arg.Any<string>(), Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
 			bulletinMediator.DidNotReceive().Post(Arg.Any<SourceFileOpenedBulletin>());
 			viewModel.CanOpenLogFile.Should().BeTrue();
+		}
+
+		[TestMethod]
+		[WorkItem(1217)]
+		public async Task GivenAnOpenLog_WhenTheOpenButtonIsPressed_ThenOpenAsStartsInTheLogsFolder()
+		{
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			await viewModel.OpenAsync(CopyLog("Open.log"));
+			WaitUntil(() => viewModel.IsMenuEnabled);
+
+			viewModel.OpenLogCommand.Execute(null);
+			WaitUntil(() => viewModel.CanOpenLogFile);
+
+			dialog.Received(1).TryShowOpenAs(_folder, Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
+		}
+
+		[TestMethod]
+		[WorkItem(1217)]
+		public async Task GivenALogOpenedFromAZip_WhenTheOpenButtonIsPressed_ThenOpenAsStartsInTheZip()
+		{
+			// The log is named by its zip, read like a folder (#1312), so its folder is the zip, not the copy Weevil reads.
+			ZippedLogViewModel zipped = CreateViewModelForZip();
+			var zipPath = CreateZip("Logs.zip", "A.log");
+
+			try
+			{
+				await zipped.ViewModel.ShowOpenAsAsync(zipPath);
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+				zipped.DialogBox.ClearReceivedCalls();
+
+				zipped.ViewModel.OpenLogCommand.Execute(null);
+				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
+
+				zipped.DialogBox.Received(1).TryShowOpenAs(zipPath, Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
+			}
+			finally
+			{
+				zipped.ViewModel.Exit();
+			}
+		}
+
+		[TestMethod]
+		[WorkItem(1217)]
+		public void GivenNoOpenLog_WhenTheOpenButtonIsPressed_ThenOpenAsStartsInTheLastFolderUsed()
+		{
+			// Given none, the dialog box service shows the last folder used.
+			var dialog = Substitute.For<IDialogBoxService>();
+			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+
+			viewModel.OpenLogCommand.Execute(null);
+
+			dialog.Received(1).TryShowOpenAs(null, Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
 		}
 
 		[TestMethod]
@@ -462,7 +517,6 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), extractedLog);
 			var dialog = Substitute.For<IDialogBoxService>();
 			ChooseInOpenAs(dialog, new OpenAsChoice(extractedLog, extractedFolder, StorageMode.Ram, Advice: null));
-			AcceptOpenAs(dialog, StorageMode.Ram);
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 
 			try
@@ -471,8 +525,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 				viewModel.IsLogFileOpen.Should().BeTrue();
 				System.IO.File.Exists(extractedLog).Should().BeTrue("Reload and disk mode read the log again");
+				OpenWhatOpenAsShows(dialog, StorageMode.Ram);
 
-				await viewModel.OpenCompressedAsync(CopyLog("B.log"));
+				await viewModel.ShowOpenAsAsync(CopyLog("B.log"));
 
 				System.IO.File.Exists(extractedLog).Should().BeFalse("nothing reads the previous log's copy any more");
 				System.IO.Directory.Exists(extractedFolder).Should().BeTrue("the folder keeps what was saved beside the log for its next open (#1253)");
@@ -494,9 +549,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			bulletinMediator.ClearReceivedCalls();
 
 			// The substitute answers false: the user cancelled.
-			await viewModel.OpenCompressedAsync(CopyLog("Other.log"));
+			await viewModel.ShowOpenAsAsync(CopyLog("Other.log"));
 
-			dialog.Received(1).TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
+			dialog.Received(1).TryShowOpenAs(Arg.Any<string>(), Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
 			bulletinMediator.DidNotReceive().Post(Arg.Any<SourceFileOpenedBulletin>());
 			viewModel.IsLogFileOpen.Should().BeTrue("the log that was open stays open");
 		}
@@ -551,7 +606,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			// Open As checks before it extracts a log from a zip, or closes: the log open here may be opened again.
 			var dialogBox = Substitute.For<IDialogBoxService>();
 			Action<string> checkBeforeOpening = null!;
-			dialogBox.TryShowOpenAs(Arg.Do<Action<string>>(check => checkBeforeOpening = check), out Arg.Any<OpenAsChoice>()).Returns(false);
+			dialogBox.TryShowOpenAs(Arg.Any<string>(), Arg.Do<Action<string>>(check => checkBeforeOpening = check), out Arg.Any<OpenAsChoice>()).Returns(false);
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 			var openLog = CopyLog("A.log");
 			await viewModel.OpenAsync(openLog);
@@ -572,6 +627,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenALogFromAZipAnotherWeevilHasOpen_WhenTheSameFileIsOpenedFromTheZip_ThenNothingIsExtractedAndItsCopyIsKept()
 		{
 			// Two instances share the copy of the same file of the same zip: the one refused must not delete it.
+			// The Open As dialog refuses it before extracting, and shows why; the analyst then cancels.
 			ZippedLogViewModel otherWeevil = CreateViewModelForZip();
 			ZippedLogViewModel zipped = CreateViewModelForZip();
 			var zipPath = CreateZip("Logs.zip", "A.log");
@@ -579,13 +635,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await otherWeevil.ViewModel.OpenCompressedAsync(zipPath);
+				await otherWeevil.ViewModel.ShowOpenAsAsync(zipPath);
 				WaitUntil(() => otherWeevil.ViewModel.CanOpenLogFile);
 
-				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				await zipped.ViewModel.ShowOpenAsAsync(zipPath);
 
-				zipped.DialogBox.Received(1).ShowMessage($"A.log is already open in Weevil by {Environment.UserName} on {Environment.MachineName}.", "Log Already Open");
-				zipped.DialogBox.DidNotReceive().TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
 				zipped.OpenedPaths.Should().BeEmpty();
 				zipped.ViewModel.CanOpenLogFile.Should().BeTrue("the open has ended");
 				System.IO.File.Exists(extractedCopy).Should().BeTrue("the other Weevil reads it");
@@ -603,60 +657,21 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
-		[WorkItem(1254)]
-		public async Task GivenALogAnotherWeevilHasOpen_WhenDropped_ThenAMessageNamesWhoHasItBeforeRamOrDiskIsAsked()
-		{
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			AcceptOpenAs(dialogBox, StorageMode.Ram);
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
-			var logPath = CopyLog("Dropped.log");
-			using IEngine otherWeevil = Engine.UsingPath(logPath).Open();
-
-			await viewModel.OpenCompressedAsync(logPath);
-
-			dialogBox.Received(1).ShowMessage($"Dropped.log is already open in Weevil by {Environment.UserName} on {Environment.MachineName}.", "Log Already Open");
-			dialogBox.DidNotReceive().TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
-			viewModel.IsLogFileOpen.Should().BeFalse();
-			viewModel.CanOpenLogFile.Should().BeTrue("the open has ended");
-		}
-
-		[TestMethod]
-		public async Task GivenAZip_WhenAFileInItIsChosen_ThenOpenAsAdvisesOnThatFile()
-		{
-			// Open As follows the zip's list of files, so its suggestion uses the size of the log chosen (#1028).
-			ZippedLogViewModel zipped = CreateViewModelForZip();
-			var logLength = (ulong)new FileInfo(new Daten().AsFilePath(From.GlobalDefault)).Length;
-
-			try
-			{
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
-
-				zipped.DialogBox.Received(1).TryShowOpenAs(
-					Arg.Is<OpenAsAdvice>(advice => advice.FileName == "A.log" && advice.FileSize.Bytes == logLength),
-					out Arg.Any<StorageMode>());
-			}
-			finally
-			{
-				zipped.ViewModel.Exit();
-			}
-		}
-
-		[TestMethod]
 		public async Task GivenALogOpenedOnDisk_WhenReloaded_ThenOpenAsIsNotShownAgain()
 		{
 			// Reload keeps the mode, and never asks again (the #986 plan).
 			var dialog = Substitute.For<IDialogBoxService>();
-			AcceptOpenAs(dialog, StorageMode.Disk);
+			OpenWhatOpenAsShows(dialog, StorageMode.Disk);
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
-			await viewModel.OpenCompressedAsync(CopyLog("Reloaded.log"));
+			await viewModel.ShowOpenAsAsync(CopyLog("Reloaded.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 			bulletinMediator.ClearReceivedCalls();
 
 			viewModel.Reload();
 			await viewModel.WhenIdle();
 
-			dialog.Received(1).TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>());
+			dialog.Received(1).TryShowOpenAs(Arg.Any<string>(), Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>());
 			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin => bulletin.StorageMode == StorageMode.Disk));
 		}
 
@@ -1082,43 +1097,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Cancelling the list of the zip's files opened the zip itself as a log, then deleted the zip.
 			var dialogBox = Substitute.For<IDialogBoxService>();
-			dialogBox.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>()).Returns(false);
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 			var zipPath = CreateZip("Logs.zip", "A.log");
 
-			await viewModel.OpenCompressedAsync(zipPath);
+			// The substitute answers false: the analyst cancelled the Open As dialog shown in the zip. Weevil opens only what the dialog chose, never the zip.
+			await viewModel.ShowOpenAsAsync(zipPath);
 
 			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
 			viewModel.IsLogFileOpen.Should().BeFalse("no file was chosen");
-		}
-
-		[TestMethod]
-		[WorkItem(1156)]
-		public async Task GivenAZipHoldingOnlyFolders_WhenOpened_ThenAMessageSaysSoAndTheZipIsKept()
-		{
-			// With no file to list, Weevil opened the zip itself as a log, then deleted the zip.
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
-			var zipPath = CreateZip("Folders.zip", "Logs/");
-
-			await viewModel.OpenCompressedAsync(zipPath);
-
-			System.IO.File.Exists(zipPath).Should().BeTrue("Weevil never deletes the zip a log comes from");
-			viewModel.IsLogFileOpen.Should().BeFalse("the zip holds no file to open");
-			dialogBox.Received(1).ShowMessage(Arg.Any<string>(), "Nothing to Open");
-		}
-
-		[TestMethod]
-		public async Task GivenAnEmptyZip_WhenOpened_ThenAMessageSaysSo()
-		{
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
-			var zipPath = CreateZip("Empty.zip");
-
-			await viewModel.OpenCompressedAsync(zipPath);
-
-			viewModel.IsLogFileOpen.Should().BeFalse("the zip holds no file to open");
-			dialogBox.Received(1).ShowMessage(Arg.Any<string>(), "Nothing to Open");
 		}
 
 		[TestMethod]
@@ -1129,7 +1115,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				await zipped.ViewModel.ShowOpenAsAsync(zipPath);
 
 				zipped.ViewModel.IsLogFileOpen.Should().BeTrue("the chosen file is opened");
 				zipped.OpenedPaths.Should().ContainSingle().Which.Should().Be(Path.Combine(zipPath, "A.log"), "the log is named by its zip, read like a folder (#1312)");
@@ -1153,7 +1139,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log"));
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 
 				zipped.ViewModel.Reload();
@@ -1177,14 +1163,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				await zipped.ViewModel.ShowOpenAsAsync(zipPath);
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 				zipped.ViewModel.Rows.GetRow(0).IsPinned = true;
 
 				// Opening another log saves the open one's sidecar first.
-				await zipped.ViewModel.OpenCompressedAsync(CopyLog("B.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CopyLog("B.log"));
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
-				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				await zipped.ViewModel.ShowOpenAsAsync(zipPath);
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 
 				zipped.ViewModel.Rows.GetRow(0).IsPinned.Should().BeTrue("the sidecar kept beside the copy is read again");
@@ -1205,11 +1191,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				await zipped.ViewModel.ShowOpenAsAsync(zipPath);
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
-				zipped.DialogBox.TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>()).Returns(false);
+				zipped.DialogBox.TryShowOpenAs(Arg.Any<string>(), Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>()).Returns(false);
 
-				await zipped.ViewModel.OpenCompressedAsync(zipPath);
+				await zipped.ViewModel.ShowOpenAsAsync(zipPath);
 				zipped.ViewModel.Reload();
 				await zipped.ViewModel.WhenIdle();
 
@@ -1231,7 +1217,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log"));
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 				zipped.ViewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
 
@@ -1254,11 +1240,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log"));
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 				zipped.ViewModel.Rows.GetRow(0).IsPinned = true;
 
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Others.zip", "A.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Others.zip", "A.log"));
 				WaitUntil(() => zipped.ViewModel.CanOpenLogFile);
 
 				zipped.OpenedPaths[1].Should().Be(Path.Combine(_folder, "Others.zip", "A.log"), "the log is named by its own zip (#1312)");
@@ -1278,11 +1264,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log"));
 				var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
-				zipped.DialogBox.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>()).Returns(false);
+				zipped.DialogBox.TryShowOpenAs(Arg.Any<string>(), Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>()).Returns(false);
 
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Others.zip", "B.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Others.zip", "B.log"));
 
 				System.IO.File.Exists(extractedCopy).Should().BeTrue("the zipped log is still the open one");
 			}
@@ -1296,12 +1282,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenALogOpenedFromAZip_WhenAnotherLogOpens_ThenItsExtractedCopyIsDeleted()
 		{
 			ZippedLogViewModel zipped = CreateViewModelForZip();
-			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+			await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log"));
 			var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CopyLog("B.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CopyLog("B.log"));
 
 				System.IO.File.Exists(extractedCopy).Should().BeFalse("nothing reads the previous log's copy any more");
 				System.IO.File.Exists($"{extractedCopy}.idx").Should().BeTrue("the log's saved index stays for its next open (#1253)");
@@ -1321,10 +1307,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log"));
 				var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 
-				await zipped.ViewModel.OpenCompressedAsync(isOtherLogZipped
+				await zipped.ViewModel.ShowOpenAsAsync(isOtherLogZipped
 					? CreateZipWithIncompatibleSidecar("Others.zip", "A.log")
 					: CopyLogWithIncompatibleSidecar("B.log"));
 
@@ -1341,7 +1327,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenALogOpenedFromAZip_WhenWeevilExits_ThenItsExtractedCopyIsDeleted()
 		{
 			ZippedLogViewModel zipped = CreateViewModelForZip();
-			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log"));
+			await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log"));
 			var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 
 			try
@@ -1365,14 +1351,14 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			ZippedLogViewModel zipped = CreateViewModelForZip();
 
 			// The zip already holds a file by the export's name, as when a folder holding an earlier export was zipped.
-			await zipped.ViewModel.OpenCompressedAsync(CreateZip("Logs.zip", "A.log", "SelectedRecords.log"));
+			await zipped.ViewModel.ShowOpenAsAsync(CreateZip("Logs.zip", "A.log", "SelectedRecords.log"));
 			var extractedCopy = ExtractedCopy("Logs.zip", "A.log");
 			var export = Path.Combine(Path.GetDirectoryName(extractedCopy), "SelectedRecords.log");
 			System.IO.File.WriteAllText(export, "Records the analyst saved beside the open log");
 
 			try
 			{
-				await zipped.ViewModel.OpenCompressedAsync(CopyLog("B.log"));
+				await zipped.ViewModel.ShowOpenAsAsync(CopyLog("B.log"));
 
 				System.IO.File.Exists(export).Should().BeTrue("only what Weevil extracted is deleted");
 				System.IO.File.Exists(extractedCopy).Should().BeFalse("nothing reads the previous log's copy any more");
@@ -1504,22 +1490,56 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		private static void ChooseInOpenAs(IDialogBoxService dialogBox, OpenAsChoice choice)
 		{
-			dialogBox.TryShowOpenAs(Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>()).Returns(x =>
+			dialogBox.TryShowOpenAs(Arg.Any<string>(), Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>()).Returns(x =>
 			{
-				x[1] = choice;
+				x[2] = choice;
 				return true;
 			});
 		}
 
 		/// <summary>
-		/// Answers Weevil's Open As window with <paramref name="storageMode"/>.
+		/// Makes the Open As dialog open what it is shown with, in <paramref name="storageMode"/>, as the analyst does by pressing Open:
+		/// a log, or the file <paramref name="fileInZip"/> of a zip, which the dialog extracts with its sidecar and index to a folder of its own (#1253).
 		/// </summary>
-		private static void AcceptOpenAs(IDialogBoxService dialogBox, StorageMode storageMode)
+		/// <remarks>
+		/// Like the dialog, it first checks that no other Weevil has the log open (#1254). The dialog then shows why, and the analyst cancels.
+		/// </remarks>
+		private void OpenWhatOpenAsShows(IDialogBoxService dialogBox, StorageMode storageMode, string fileInZip = "A.log")
 		{
-			dialogBox.TryShowOpenAs(Arg.Any<OpenAsAdvice>(), out Arg.Any<StorageMode>()).Returns(x =>
+			dialogBox.TryShowOpenAs(Arg.Any<string>(), Arg.Any<Action<string>>(), out Arg.Any<OpenAsChoice>()).Returns(x =>
 			{
-				x[1] = storageMode;
-				return true;
+				var location = (string)x[0];
+				var checkBeforeOpening = (Action<string>)x[1];
+
+				// Shown in a folder, the dialog has no file to open until the analyst picks one: this fake picks none.
+				if (location is null || System.IO.Directory.Exists(location))
+				{
+					x[2] = null;
+					return false;
+				}
+
+				try
+				{
+					if (!location.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+					{
+						checkBeforeOpening(location);
+						x[2] = new OpenAsChoice(location, ExtractedFolder: null, storageMode, Advice: null);
+						return true;
+					}
+
+					var file = BlueDotBrigade.Weevil.Windows.Dialogs.Storage.Location.ForArchive(location, fileInZip);
+					using var reader = new BlueDotBrigade.Weevil.Windows.Dialogs.Storage.ContainerReader();
+					var destination = Path.Combine(_copiesFolder, reader.GetCopyKey(file));
+					checkBeforeOpening(Path.Combine(destination, fileInZip));
+
+					x[2] = new OpenAsChoice(reader.Extract(file, ExtractedLog.CompanionSuffixes, destination), destination, storageMode, Advice: null, DisplayPath: file.ToString());
+					return true;
+				}
+				catch (IOException)
+				{
+					x[2] = null;
+					return false;
+				}
 			});
 		}
 
@@ -1564,24 +1584,17 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		/// <summary>
-		/// Creates a view model that opens <c>A.log</c> whenever a zip's file list is shown, and collects the path of each log it opens.
+		/// Creates a view model that opens <c>A.log</c> whenever the Open As dialog is shown in a zip, and collects the path of each log it opens.
 		/// </summary>
 		private ZippedLogViewModel CreateViewModelForZip()
 		{
 			var dialogBox = Substitute.For<IDialogBoxService>();
-			dialogBox
-				.TrySelectCompressedFile(Arg.Any<string[]>(), out Arg.Any<string>())
-				.Returns(callInfo =>
-				{
-					callInfo[1] = "A.log";
-					return true;
-				});
-			AcceptOpenAs(dialogBox, StorageMode.Ram);
+			OpenWhatOpenAsShows(dialogBox, StorageMode.Ram);
 			var openedPaths = new List<string>();
 			var bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
 
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox) { CopiesFolder = _copiesFolder });
+			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
 
 			return new ZippedLogViewModel(viewModel, dialogBox, openedPaths);
 		}
