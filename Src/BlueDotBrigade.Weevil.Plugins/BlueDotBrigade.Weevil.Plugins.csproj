@@ -23,6 +23,10 @@
 		<Content Include="*.dll" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
 		<Content Include="*.dll.config" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
 		<Content Include="*.pdb" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+		<!-- WPF assemblies only Weevil's window loads, such as a plugin's Open As options (#1216). -->
+		<Content Include="Wpf\*.dll" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+		<Content Include="Wpf\*.dll.config" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+		<Content Include="Wpf\*.pdb" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="..\..\.editorconfig" Link=".editorconfig" />

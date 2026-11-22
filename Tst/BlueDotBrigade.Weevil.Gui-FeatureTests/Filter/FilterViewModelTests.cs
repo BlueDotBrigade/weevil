@@ -422,6 +422,23 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenAPluginsOwnOptions_WhenTheLogIsOpened_ThenTheEngineReadsItWithTheirContext()
+		{
+			// A plugin's options in the Open As dialog say how to read its log (#1216), as its own window's did.
+			var dialog = Substitute.For<IDialogBoxService>();
+			var context = new ContextDictionary { ["FileFormatVersion"] = "2" };
+			ChooseInOpenAs(dialog, new OpenAsChoice(CopyLog("Vendor.log"), ExtractedFolder: null, StorageMode.Ram, Advice: null, Context: context));
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+
+			viewModel.OpenLogCommand.Execute(null);
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
+
+			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin =>
+				bulletin.Context.ContainsKey("FileFormatVersion") && bulletin.Context["FileFormatVersion"] == "2"));
+		}
+
+		[TestMethod]
 		public void GivenTheOpenButton_WhenCancelled_ThenNothingOpensAndOpenIsAvailableAgain()
 		{
 			var dialog = Substitute.For<IDialogBoxService>();

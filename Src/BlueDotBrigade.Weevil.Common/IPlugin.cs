@@ -3,21 +3,18 @@
 	using System;
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Analysis;
-	using IO;
 
 	public interface IPlugin
 	{
 		string Name { get; }
 
-		bool CheckCompatibility(string sourceFilePath);
-
-		bool CanOpenAs { get; }
-
 		/// <remarks>
-		/// Dispose each engine opened through <paramref name="createEngineBuilder"/>: an engine locks its log until it is disposed, so Weevil's own open of the same log
-		/// would be refused (#1254). A preview of the log open in Weevil's window is refused too, with <see cref="LogInUseException"/>, until #1157 replaces this method.
+		/// May be called for many logs, and on several threads at once, on the same instance: the Open As dialog asks as the analyst selects logs (#1216).
+		/// So keep no state between calls, and read only what is needed to tell, since the analyst may select any file.
+		/// For a log in a zip, the dialog gives a temporary file of the same name that holds only the log's first 64 KB, with nothing beside it:
+		/// tell a log by its start, not by its length, its last line or the files beside it.
 		/// </remarks>
-		(bool, OpenAsResult) ShowOpenAs(string licensePath, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
+		bool CheckCompatibility(string sourceFilePath);
 
 		bool CanShowDashboard { get; }
 

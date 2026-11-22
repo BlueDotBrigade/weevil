@@ -1,0 +1,10 @@
+<UserControl x:Class="BlueDotBrigade.Weevil.Gui.IO.OpenAsNoticeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- What the analyst accepts by opening a log, shown just above Open, as Weevil 2.x showed it (#1216). The data context is the license file's path. -->
+    <TextBlock TextWrapping="Wrap" TextAlignment="Right" Foreground="{StaticResource TextForeground}">
+        <Run Text="By opening a log, you accept Weevil's" />
+        <Hyperlink Click="OnLicenseClick" Foreground="{StaticResource MaterialDesignDarkForeground}"
+                   AutomationProperties.Name="Weevil's license">license</Hyperlink><Run Text=": Weevil is provided as is, with no guarantee that its results are accurate." />
+    </TextBlock>
+</UserControl>

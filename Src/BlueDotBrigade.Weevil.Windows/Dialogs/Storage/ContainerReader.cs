@@ -170,6 +170,25 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		}
 
 		/// <summary>
+		/// Returns where a file called <paramref name="name"/>, such as a file in a zip, goes in <paramref name="folder"/>,
+		/// or <see langword="null"/> when the name would leave the folder, such as <c>C:other.log</c> or <c>..</c>: ZipFile.ExtractToDirectory refuses those too.
+		/// </summary>
+		public static string GetPathInFolder(string folder, string name)
+		{
+			ArgumentNullException.ThrowIfNull(folder);
+
+			if (string.IsNullOrEmpty(name))
+			{
+				return null;
+			}
+
+			var path = Path.Combine(folder, name);
+			var inside = Path.GetFullPath(folder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+			return Path.GetFullPath(path).StartsWith(inside, StringComparison.OrdinalIgnoreCase) ? path : null;
+		}
+
+		/// <summary>
 		/// The file called <paramref name="name"/> in the same folder or zip folder as <paramref name="file"/>.
 		/// </summary>
 		public static Location GetSibling(Location file, string name) => file.GetParent().Combine(name, entersContainer: false);
@@ -253,13 +272,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 			try
 			{
-				var extracted = Path.Combine(destinationFolder, file.Name);
-
-				// A name such as `C:other.log` would leave the folder: ZipFile.ExtractToDirectory refuses it too.
-				if (!Path.GetFullPath(extracted).StartsWith(Path.GetFullPath(destinationFolder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-				{
-					throw new InvalidDataException($"The zip names a file outside the folder it is extracted to: `{file.Name}`.");
-				}
+				var extracted = GetPathInFolder(destinationFolder, file.Name)
+					?? throw new InvalidDataException($"The zip names a file outside the folder it is extracted to: `{file.Name}`.");
 
 				// A copy already here, of the entry's size, is the same file, since the folder's name includes the entry's CRC-32 and size (#1253).
 				// It may be the log open in Weevil, or in another Weevil, which must not be rewritten. A shorter one is a copy that stopped part way.

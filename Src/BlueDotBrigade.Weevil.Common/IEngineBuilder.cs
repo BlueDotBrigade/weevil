@@ -4,8 +4,6 @@
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 
-	public delegate IEngineBuilder CreateEngineBuilder(string source);
-
 	public interface IEngineBuilder
 	{
 		IEngineBuilder UsingContext(ContextDictionary context);

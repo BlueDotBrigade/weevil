@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -24,7 +25,11 @@
             <ContentPresenter Content="{Binding OptionsContent, ElementName=Self}" />
         </ScrollViewer>
 
-        <DockPanel Grid.Row="1" Grid.ColumnSpan="3" Margin="0,10,0,0" LastChildFill="True">
+        <!-- The host's notice, such as the terms the user accepts by opening a file. Hidden when the host gives none. -->
+        <ContentPresenter x:Name="NoticeArea" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,10,0,0" HorizontalAlignment="Right"
+                          Content="{Binding Notice, ElementName=Self}" Visibility="Collapsed" />
+
+        <DockPanel Grid.Row="2" Grid.ColumnSpan="3" Margin="0,10,0,0" LastChildFill="True">
             <Button x:Name="CancelButton" DockPanel.Dock="Right" Content="Cancel" IsCancel="True" MinWidth="90" Margin="8,0,0,0" />
             <Button x:Name="OpenButton" DockPanel.Dock="Right" Content="_Open" IsDefault="True" MinWidth="90" IsEnabled="False" Click="OnOpenClick" />
             <TextBlock x:Name="MessageText" VerticalAlignment="Center" TextWrapping="Wrap" />

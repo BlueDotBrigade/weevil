@@ -15,6 +15,7 @@ using BlueDotBrigade.Weevil.Gui.Analysis;
 using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
 using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
+using BlueDotBrigade.Weevil.Windows.IO;
 using Microsoft.Win32;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
@@ -37,6 +38,14 @@ internal static class GraphWindowCounter
 
 internal class DialogBoxService : IDialogBoxService
 {
+	/// <summary>
+	/// The folder, inside Weevil's plugin folder, of the WPF assemblies only Weevil's window loads, such as a plugin's Open As options (#1216).
+	/// </summary>
+	/// <remarks>
+	/// Core, the CLI and PowerShell load only the assemblies directly in the plugin folder, so they never load WPF.
+	/// </remarks>
+	internal const string WpfPluginFolder = "Wpf";
+
 	// Rolled logs, such as app.log.1, are logs too. Weevil's sidecar and index are not (decision 9 of the #1157 plan).
 	private static readonly FileTypeFilter LogFiles = new FileTypeFilter(
 		"Log files (*.log, *.log.1, *.txt, *.tsv, *.csv)",
@@ -57,7 +66,12 @@ internal class DialogBoxService : IDialogBoxService
 	{
 		// Read on the UI thread once the dialog exists; the parts are listed off it.
 		IContainerReader reader = null;
-		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read, file => ReadParts(reader, ExtractedLog.DefaultCopiesFolder, file));
+		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read, file => OpenAsLookup.ReadParts(reader, ExtractedLog.DefaultCopiesFolder, file));
+
+		// Weevil's options, unless the selected log's plugin shows its own (#1216). The providers are loaded once, off the UI thread, at the first selection.
+		var plugins = new PluginFactory();
+		var providers = new Lazy<IReadOnlyList<IOpenAsOptionsProvider>>(() => PluginFactory.LoadExports<IOpenAsOptionsProvider>(Path.Combine(PluginFactory.DirectoryPath, WpfPluginFolder)));
+		using var host = new OpenAsOptionsHost(options, new OpenAsOptionsView { DataContext = options }, file => OpenAsLookup.FindOptionsProvider(plugins, providers.Value, reader, file));
 		var dialog = new BlueDotBrigade.Weevil.Windows.Dialogs.OpenAsDialog
 		{
 			Owner = Application.Current?.MainWindow,
@@ -66,7 +80,8 @@ internal class DialogBoxService : IDialogBoxService
 			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
 			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
 			CheckBeforeOpening = checkBeforeOpening,
-			OptionsContent = new OpenAsOptionsView { DataContext = options },
+			OptionsContent = host.View,
+			Notice = new OpenAsNoticeView { DataContext = BlueDotBrigade.Weevil.Gui.Filter.FilterViewModel.LicensePath },
 			CanOpen = false,
 		};
 
@@ -78,94 +93,28 @@ internal class DialogBoxService : IDialogBoxService
 		dialog.SetResourceReference(Control.FontFamilyProperty, "MaterialDesignFont");
 		dialog.SetResourceReference(Control.FontSizeProperty, "ApplicationFontSize");
 
-		dialog.SelectionChanged += async (_, item) => await options.SelectAsync(item);
-		options.PropertyChanged += (_, e) =>
+		dialog.SelectionChanged += async (_, item) => await host.SelectAsync(item);
+		host.Changed += (_, _) =>
 		{
-			if (e.PropertyName == nameof(OpenAsOptionsViewModel.CanOpen))
-			{
-				dialog.CanOpen = options.CanOpen;
-			}
+			dialog.OptionsContent = host.View;
+			dialog.CanOpen = host.CanOpen;
 		};
 
 		var isAccepted = dialog.ShowDialog() == true;
 
+		// Weevil's advice is logged only when its options were shown.
 		choice = isAccepted
 			? new OpenAsChoice(
 				dialog.Result.LocalPath,
 				dialog.Result.ExtractedFolder,
-				options.StorageMode,
-				options.Advice,
+				host.Options.StorageMode,
+				ReferenceEquals(host.Options, options) ? options.Advice : null,
 				dialog.Result.Item.Location.IsInArchive ? dialog.Result.Item.Location.ToString() : null,
-				options.Part)
+				host.Options.Part,
+				host.Options.Context)
 			: null;
 
 		return isAccepted;
-	}
-
-	/// <summary>
-	/// Lists the sections and regions of a log on disk, from the sidecar beside it.
-	/// </summary>
-	private static SidecarParts ReadParts(string logPath)
-	{
-		return File.Exists($"{logPath}.xml")
-			? new SidecarParts(true, Engine.ReadParts(logPath))
-			: SidecarParts.NoSidecar;
-	}
-
-	/// <summary>
-	/// Lists the sections and regions of the log selected in the Open As dialog (#1212, #1213), from its sidecar.
-	/// </summary>
-	/// <remarks>
-	/// For a log in a zip, the sidecar is the one Weevil kept beside the copy of an earlier open, which holds the analyst's regions (#1253),
-	/// or else the one beside the log in the zip, read through a temporary copy. Runs off the UI thread.
-	/// </remarks>
-	private static SidecarParts ReadParts(IContainerReader reader, string copiesFolder, BrowserItem file)
-	{
-		if (!file.Location.IsInArchive)
-		{
-			return ReadParts(file.Location.FileSystemPath);
-		}
-
-		var copy = Path.Combine(copiesFolder, reader.GetCopyKey(file.Location), file.Location.Name);
-
-		if (File.Exists($"{copy}.xml"))
-		{
-			return ReadParts(copy);
-		}
-
-		Location sidecar = ContainerReader.GetSibling(file.Location, $"{file.Location.Name}.xml");
-
-		if (!reader.Exists(sidecar))
-		{
-			return SidecarParts.NoSidecar;
-		}
-
-		DirectoryInfo folder = Directory.CreateTempSubdirectory("Weevil.OpenAs.");
-
-		try
-		{
-			var log = Path.Combine(folder.FullName, file.Location.Name);
-
-			using (Stream source = reader.OpenRead(sidecar))
-			using (FileStream target = File.Create($"{log}.xml"))
-			{
-				source.CopyTo(target);
-			}
-
-			return ReadParts(log);
-		}
-		finally
-		{
-			try
-			{
-				folder.Delete(recursive: true);
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				// The parts were read; only a temporary copy of a sidecar is left behind, for example while a scanner holds it.
-				Log.Default.Write(LogSeverityType.Warning, e, $"Open As could not delete the temporary copy of a sidecar. Folder={folder.FullName}");
-			}
-		}
 	}
 
 	public string ShowSaveFile(string targetDirectory, string targetFileName)
