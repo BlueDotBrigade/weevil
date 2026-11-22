@@ -8,6 +8,9 @@ namespace BlueDotBrigade.Weevil.Windows.IO
 	/// The options the Open As dialog shows for the log selected, and how they say to open it (#1216): Weevil's own, or a plugin's from <see cref="IOpenAsOptionsProvider"/>.
 	/// </summary>
 	/// <remarks>
+	/// Options say only how the log opens. The log opened is always the one the analyst selected: options can't open another, nor replace the analyst's choice,
+	/// as a plugin's own Open As window could in Weevil 2.x.
+	///
 	/// When the options implement <see cref="System.ComponentModel.INotifyPropertyChanged"/>, raised on the UI thread, the dialog enables Open as <see cref="CanOpen"/> changes.
 	/// Otherwise it reads <see cref="CanOpen"/> only after <see cref="SelectAsync"/>.
 	///
