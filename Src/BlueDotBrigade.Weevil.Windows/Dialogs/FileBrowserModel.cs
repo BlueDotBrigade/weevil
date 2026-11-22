@@ -101,13 +101,14 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// The recent folders for the host to keep, newest first: those shown, then the saved ones that aren't, at most 8.
 		/// </summary>
 		/// <remarks>
+		/// Paths that differ only by a final separator are one folder, such as <c>C:</c>, saved before #1328, and <c>C:\</c>.
 		/// A saved folder that wasn't found, such as one on a share that is offline, is skipped rather than forgotten (#1218):
 		/// it is kept after the others, so it is shown again once it can be found, until newer folders push it out. So is one not looked for yet.
 		/// </remarks>
 		public IReadOnlyList<string> RecentFoldersToSave => this.RecentFolders
 			.Select(place => place.Location.ToString())
 			.Concat(_savedRecentFolders)
-			.Distinct(StringComparer.OrdinalIgnoreCase)
+			.DistinctBy(path => path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar), StringComparer.OrdinalIgnoreCase)
 			.Take(MaxRecentFolders)
 			.ToList();
 

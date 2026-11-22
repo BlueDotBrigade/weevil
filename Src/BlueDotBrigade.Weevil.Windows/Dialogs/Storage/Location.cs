@@ -63,7 +63,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		public static Location ForFileSystem(string path)
 		{
 			ArgumentException.ThrowIfNullOrEmpty(path);
-			return new Location(path, Array.Empty<string>());
+			return new Location(WithRootSeparator(path), Array.Empty<string>());
 		}
 
 		/// <summary>
@@ -160,6 +160,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				return null;
 			}
 
+			text = WithRootSeparator(text);
+
 			if (Directory.Exists(text) || File.Exists(text))
 			{
 				return File.Exists(text) && isContainerName(text) ? ForArchive(text) : ForFileSystem(text);
@@ -244,8 +246,26 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				.Where(segment => segment.Length > 0)
 				.Select(segment => segment.Replace('/', Path.DirectorySeparatorChar));
 
-			return string.Join(Path.DirectorySeparatorChar, parts.Prepend(this.FileSystemPath.TrimEnd(Path.DirectorySeparatorChar)));
+			return string.Join(Path.DirectorySeparatorChar, parts.Prepend(IsRoot(this.FileSystemPath) ? this.FileSystemPath : this.FileSystemPath.TrimEnd(Path.DirectorySeparatorChar)));
 		}
+
+		/// <summary>
+		/// A drive's letter alone, such as <c>C:</c>, as the root of the drive (#1328), as Explorer's address bar reads it.
+		/// </summary>
+		/// <remarks>
+		/// To Windows, <c>C:</c> alone is the current folder on drive C. A path that isn't a drive's letter alone is returned as it is.
+		/// </remarks>
+		private static string WithRootSeparator(string path)
+		{
+			return Path.VolumeSeparatorChar == ':' && path.Length == 2 && char.IsAsciiLetter(path[0]) && path[1] == ':'
+				? path + Path.DirectorySeparatorChar
+				: path;
+		}
+
+		/// <summary>
+		/// Whether the path is the root of a drive, a share or the file system, which keeps its separator: <c>C:\</c>, not <c>C:</c> (#1328).
+		/// </summary>
+		private static bool IsRoot(string path) => string.Equals(Path.GetPathRoot(path), path, StringComparison.OrdinalIgnoreCase);
 
 		internal static string Normalize(string entryPath) => entryPath.Replace('\\', '/').Trim('/');
 

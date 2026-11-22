@@ -56,6 +56,28 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			Location.ForArchive(ZipPath, "Nested").Should().Be(Location.ForArchive(ZipPath.ToUpperInvariant(), "NESTED"));
 		}
 
+		[TestMethod]
+		[WorkItem(1328)]
+		public void GivenTheRootOfADrive_WhenShown_ThenItKeepsItsSeparatorAndReadsBackAsTheRoot()
+		{
+			// The root was shown as `C:`, which Windows reads as the current folder on drive C, so a recent folder saved that way opened elsewhere.
+			var root = Path.GetPathRoot(Path.GetTempPath())!;
+			Location drive = Location.ForFileSystem(root);
+
+			drive.ToString().Should().Be(root);
+			Location.Parse(drive.ToString(), IsZip).Should().Be(drive);
+		}
+
+		[TestMethod]
+		[WorkItem(1328)]
+		public void GivenADrivesLetterAlone_WhenParsed_ThenItIsTheRootOfTheDrive()
+		{
+			// `C:`, saved by a build before #1328 or typed in the path box, is the root, as in Explorer.
+			var root = Path.GetPathRoot(Path.GetTempPath())!;
+
+			Location.Parse(root.TrimEnd(Path.DirectorySeparatorChar), IsZip).Should().Be(Location.ForFileSystem(root));
+		}
+
 		private static bool IsZip(string name) => name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
 	}
 }

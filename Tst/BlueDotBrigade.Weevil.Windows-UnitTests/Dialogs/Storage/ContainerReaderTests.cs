@@ -309,6 +309,62 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			listing.Items.Should().BeEmpty();
 		}
 
+		[TestMethod]
+		[WorkItem(1211)]
+		public void GivenALogInAZipProtectedByAPassword_WhenExtracted_ThenTheMessageSaysSoAndNothingIsLeft()
+		{
+			// The dialog said that the zip's compression is unsupported, which doesn't tell the analyst a password is the reason.
+			ProtectWithAPassword(_zipPath);
+			var destination = Path.Combine(_root, "Extracted");
+
+			Action extract = () => _reader.Extract(Location.ForArchive(_zipPath, "2026/Server.log"), new[] { ".xml" }, destination);
+
+			extract.Should().Throw<IOException>().WithMessage("*protected by a password*");
+			Directory.Exists(destination).Should().BeFalse("nothing is left in a folder the extraction created");
+		}
+
+		[TestMethod]
+		[WorkItem(1211)]
+		public void GivenAZipInAZipProtectedByAPassword_WhenListed_ThenTheErrorSaysSo()
+		{
+			// Entering it said that the zip is damaged.
+			Location innerZip = _reader.List(Location.ForArchive(_zipPath, "Nested")).Items.Single().Open;
+			ProtectWithAPassword(_zipPath);
+
+			ListingResult listing = _reader.List(innerZip);
+
+			listing.Error.Should().Contain("protected by a password");
+			listing.Items.Should().BeEmpty();
+		}
+
+		/// <summary>
+		/// Marks every file in the zip as encrypted, as a password does, which System.IO.Compression can't create.
+		/// </summary>
+		/// <remarks>
+		/// It sets bit 0 of the general-purpose flags in each local header and in the central directory, which is what readers check.
+		/// </remarks>
+		private static void ProtectWithAPassword(string zipPath)
+		{
+			byte[] bytes = File.ReadAllBytes(zipPath);
+
+			for (var i = 0; i + 8 < bytes.Length; i++)
+			{
+				if (bytes[i] == 0x50 && bytes[i + 1] == 0x4B)
+				{
+					if (bytes[i + 2] == 0x03 && bytes[i + 3] == 0x04)
+					{
+						bytes[i + 6] |= 0x01;
+					}
+					else if (bytes[i + 2] == 0x01 && bytes[i + 3] == 0x02)
+					{
+						bytes[i + 8] |= 0x01;
+					}
+				}
+			}
+
+			File.WriteAllBytes(zipPath, bytes);
+		}
+
 		private static IEnumerable<string> Names(ListingResult listing) => listing.Items.Select(item => $"{item.Name}:{item.Kind}");
 
 		private static void Add(ZipArchive zip, string name, string content) => Add(zip, name, Encoding.UTF8.GetBytes(content));
