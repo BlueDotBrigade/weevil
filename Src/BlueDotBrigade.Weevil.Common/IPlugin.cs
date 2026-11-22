@@ -3,21 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 	using BlueDotBrigade.Weevil.Analysis;
-	using IO;
 
 	public interface IPlugin
 	{
 		string Name { get; }
 
 		bool CheckCompatibility(string sourceFilePath);
-
-		bool CanOpenAs { get; }
-
-		/// <remarks>
-		/// Dispose each engine opened through <paramref name="createEngineBuilder"/>: an engine locks its log until it is disposed, so Weevil's own open of the same log
-		/// would be refused (#1254). A preview of the log open in Weevil's window is refused too, with <see cref="LogInUseException"/>, until #1157 replaces this method.
-		/// </remarks>
-		(bool, OpenAsResult) ShowOpenAs(string licensePath, CreateEngineBuilder createEngineBuilder, string sourceFilePath);
 
 		bool CanShowDashboard { get; }
 

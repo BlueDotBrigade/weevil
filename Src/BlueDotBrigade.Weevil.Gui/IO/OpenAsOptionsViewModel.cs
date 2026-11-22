@@ -8,11 +8,15 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
+	using BlueDotBrigade.Weevil.Windows.IO;
 	using Metalama.Patterns.Observability;
 
 	/// <summary>
 	/// Weevil's options in the Open As dialog: the selected log's details, the part of it to open (#1214), then RAM or Disk with its advice and warnings (#1215).
 	/// </summary>
+	/// <remarks>
+	/// They are the dialog's default: a plugin may show its own in their place (#1216).
+	/// </remarks>
 	/// <remarks>
 	/// Weevil suggests a mode for each log selected. Once the analyst picks one, selecting another log does not change it (decision 7 of the #1157 plan).
 	/// The part is the whole log, one section, one region or a range of lines (decision 5). Selecting another log goes back to the whole log,
@@ -20,7 +24,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	/// but a section or region goes back to the whole log, since they are listed again.
 	/// </remarks>
 	[Observable]
-	internal sealed partial class OpenAsOptionsViewModel
+	internal sealed partial class OpenAsOptionsViewModel : IOpenAsOptions
 	{
 		private const string NoFileDetails = "Select a log to see its details.";
 
@@ -243,6 +247,11 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// Why the lines typed can't be opened, or an empty string.
 		/// </summary>
 		public string PartError { get; private set; } = string.Empty;
+
+		/// <summary>
+		/// Weevil's options need no context: a plugin that does shows its own options (#1216).
+		/// </summary>
+		public ContextDictionary Context { get; } = new ContextDictionary();
 
 		/// <summary>
 		/// A log is selected, its advice is ready and the part to open is valid. The mode is the one suggested for it, or the one the analyst picked.

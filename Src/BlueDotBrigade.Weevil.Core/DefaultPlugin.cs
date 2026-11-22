@@ -16,14 +16,6 @@
 			return true;
 		}
 
-		/// <inheritdoc />
-		public bool CanOpenAs => false;
-
-		public (bool, OpenAsResult) ShowOpenAs(string license, CreateEngineBuilder createEngineBuilder, string sourceFilePath)
-		{
-			throw new NotSupportedException();
-		}
-
 		public bool CanShowDashboard => false;
 
 		public void ShowDashboard(Version weevilVersion, IEngine engine, IInsight[] insights)

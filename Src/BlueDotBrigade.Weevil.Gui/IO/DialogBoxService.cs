@@ -15,6 +15,7 @@ using BlueDotBrigade.Weevil.Gui.Analysis;
 using BlueDotBrigade.Weevil.Gui.IO;
 using BlueDotBrigade.Weevil.Gui.Navigation;
 using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
+using BlueDotBrigade.Weevil.Windows.IO;
 using Microsoft.Win32;
 using StorageMode = BlueDotBrigade.Weevil.IO.StorageMode;
 
@@ -58,6 +59,9 @@ internal class DialogBoxService : IDialogBoxService
 		// Read on the UI thread once the dialog exists; the parts are listed off it.
 		IContainerReader reader = null;
 		var options = new OpenAsOptionsViewModel(OpenAsAdvice.Read, file => ReadParts(reader, ExtractedLog.DefaultCopiesFolder, file));
+
+		// Weevil's options, unless the selected log's plugin shows its own (#1216).
+		var host = new OpenAsOptionsHost(options, new OpenAsOptionsView { DataContext = options }, FindOpenAsPlugin);
 		var dialog = new BlueDotBrigade.Weevil.Windows.Dialogs.OpenAsDialog
 		{
 			Owner = Application.Current?.MainWindow,
@@ -66,7 +70,7 @@ internal class DialogBoxService : IDialogBoxService
 			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
 			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
 			CheckBeforeOpening = checkBeforeOpening,
-			OptionsContent = new OpenAsOptionsView { DataContext = options },
+			OptionsContent = host.View,
 			CanOpen = false,
 		};
 
@@ -78,28 +82,42 @@ internal class DialogBoxService : IDialogBoxService
 		dialog.SetResourceReference(Control.FontFamilyProperty, "MaterialDesignFont");
 		dialog.SetResourceReference(Control.FontSizeProperty, "ApplicationFontSize");
 
-		dialog.SelectionChanged += async (_, item) => await options.SelectAsync(item);
-		options.PropertyChanged += (_, e) =>
+		dialog.SelectionChanged += async (_, item) => await host.SelectAsync(item);
+		host.Changed += (_, _) =>
 		{
-			if (e.PropertyName == nameof(OpenAsOptionsViewModel.CanOpen))
-			{
-				dialog.CanOpen = options.CanOpen;
-			}
+			dialog.OptionsContent = host.View;
+			dialog.CanOpen = host.CanOpen;
 		};
 
 		var isAccepted = dialog.ShowDialog() == true;
 
+		// Weevil's advice is logged only when its options were shown.
 		choice = isAccepted
 			? new OpenAsChoice(
 				dialog.Result.LocalPath,
 				dialog.Result.ExtractedFolder,
-				options.StorageMode,
-				options.Advice,
+				host.Options.StorageMode,
+				ReferenceEquals(host.Options, options) ? options.Advice : null,
 				dialog.Result.Item.Location.IsInArchive ? dialog.Result.Item.Location.ToString() : null,
-				options.Part)
+				host.Options.Part,
+				host.Options.Context)
 			: null;
 
 		return isAccepted;
+	}
+
+	/// <summary>
+	/// Finds the plugin of the log selected in the Open As dialog, when it shows its own options (#1216). Runs off the UI thread.
+	/// </summary>
+	/// <remarks>
+	/// A log in a zip, or one stored online only, uses Weevil's options: a plugin reads the log to tell whether it is one of its own,
+	/// which would extract or download it.
+	/// </remarks>
+	private static IOpenAsOptionsPlugin FindOpenAsPlugin(BrowserItem file)
+	{
+		return file.Location.IsInArchive || file.IsOnlineOnly
+			? null
+			: new PluginFactory().Find(file.Location.FileSystemPath) as IOpenAsOptionsPlugin;
 	}
 
 	/// <summary>

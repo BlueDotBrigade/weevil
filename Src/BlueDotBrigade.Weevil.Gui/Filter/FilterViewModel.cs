@@ -598,8 +598,8 @@
 			}
 
 			await (choice.ExtractedFolder is null
-				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode, operation, choice.Part)
-				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath, operation, choice.Part));
+				? OpenFromDiskAsync(choice.LogPath, choice.StorageMode, operation, choice.Part, choice.Context)
+				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath, operation, choice.Part, choice.Context));
 		}
 
 		/// <remarks>
@@ -742,9 +742,10 @@
 		/// </summary>
 		/// <param name="operation">The open's operation, which ends once the records are shown.</param>
 		/// <param name="part">The part of the log to open: the whole log when <see langword="null"/> (#1214).</param>
-		private async Task OpenFromDiskAsync(string logPath, StorageMode storageMode, BusyState.Operation operation, LogPart part = null)
+		/// <param name="context">What the log's plugin needs to read it, from its own Open As options (#1216): none when <see langword="null"/>.</param>
+		private async Task OpenFromDiskAsync(string logPath, StorageMode storageMode, BusyState.Operation operation, LogPart part = null, ContextDictionary context = null)
 		{
-			await OpenAsync(logPath, storageMode, displayPath: null, operation, part);
+			await OpenAsync(logPath, storageMode, displayPath: null, operation, part, context);
 
 			// A failed open leaves the zipped log open, which still needs its copy.
 			if (!IsOpenFrom(_openExtractedLog))
@@ -762,7 +763,8 @@
 		/// <param name="displayPath">The log as the analyst knows it: the zip, read like a folder, and the log's path in it (#1312).</param>
 		/// <param name="operation">The open's operation, which ends once the records are shown.</param>
 		/// <param name="part">The part of the log to open: the whole log when <see langword="null"/> (#1214).</param>
-		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath, BusyState.Operation operation, LogPart part = null)
+		/// <param name="context">What the log's plugin needs to read it, from its own Open As options (#1216): none when <see langword="null"/>.</param>
+		private async Task OpenExtractedAsync(string logPath, StorageMode storageMode, string displayPath, BusyState.Operation operation, LogPart part = null, ContextDictionary context = null)
 		{
 			ExtractedLog extracted = null;
 
@@ -772,7 +774,7 @@
 
 				// Weevil may close before the open finishes.
 				_extractedLogBeingOpened = extracted;
-				await OpenAsync(logPath, storageMode, displayPath, operation, part);
+				await OpenAsync(logPath, storageMode, displayPath, operation, part, context);
 			}
 			finally
 			{
@@ -896,23 +898,17 @@
 		}
 
 		/// <summary>
-		/// Opens the part of the log chosen in Weevil's Open As dialog (#1214), or else the range a plugin's own Open As window chose.
+		/// Opens the part of the log chosen in the Open As dialog (#1214), with Weevil's options or the plugin's own (#1216).
 		/// </summary>
 		/// <remarks>
-		/// One way to narrow the log at a time (decision 5 of the #1157 plan), so a part chosen in Weevil's dialog wins over the plugin's range.
-		/// Lines start reading at the first line's byte offset, as a plugin's range does.
+		/// Lines start reading at the first line's byte offset.
 		/// </remarks>
-		private static IEngineBuilder CreateBuilder(string sourceFilePath, LogPart part, OpenAsResult pluginChoice)
+		private static IEngineBuilder CreateBuilder(string sourceFilePath, LogPart part)
 		{
-			if (!part.IsWhole && !pluginChoice.Range.Equals(Range.All))
-			{
-				Log.Default.Write(LogSeverityType.Information, $"The part chosen in Open As is opened, rather than the range the plugin's own window chose. Range={pluginChoice.Range}");
-			}
-
 			return part.SectionName is not null ? Engine.UsingPath(sourceFilePath).UsingSection(part.SectionName)
 				: part.RegionName is not null ? Engine.UsingPath(sourceFilePath).UsingRegion(part.RegionName)
 				: !part.IsWhole ? Engine.UsingPath(sourceFilePath, part.Lines.Start.Value).UsingRange(part.Lines)
-				: Engine.UsingPath(sourceFilePath, pluginChoice.Range.Start.Value).UsingRange(pluginChoice.Range);
+				: Engine.UsingPath(sourceFilePath);
 		}
 
 		public Task OpenAsync(string sourceFilePath)
@@ -937,251 +933,202 @@
 
 		/// <param name="operation">The open's operation. It ends once the records are shown, before the insights are ready.</param>
 		/// <param name="part">The part of the log to open: the whole log when <see langword="null"/> (#1214).</param>
-		private async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath, BusyState.Operation operation, LogPart part = null)
+		/// <param name="context">What the log's plugin needs to read it, from its own Open As options (#1216): none when <see langword="null"/>.</param>
+		private async Task OpenAsync(string sourceFilePath, StorageMode? storageMode, string displayPath, BusyState.Operation operation, LogPart part = null, ContextDictionary context = null)
 		{
 			// Until the records are shown, the progress bar replaces them and the filter box is disabled.
 			operation.IsShowingProgress = true;
 			operation.IsFilterLocked = true;
 			this.AreInsightsReady = false;
 
-			var openAsResult = new OpenAsResult();
-			var wasOpenRequested = false;
+			// The opened log's generation, for what runs after the open: a Reload may already have started another (#1028).
+			Action<Exception> openedLogReporter = _ => { };
 
-			try
+			await Task.Run(() =>
 			{
-				IPlugin plugin = new PluginFactory().Create(sourceFilePath);
-
-				if (plugin.CanOpenAs)
+				try
 				{
-					// A plugin's builder opens in the mode chosen in Weevil's own Open As window (#1028).
-					(bool, OpenAsResult) result = plugin.ShowOpenAs(
-						LicensePath,
-						(path) =>
+					// The analyst may choose to stay on the open log, to keep changes its sidecar can't take yet (#1307).
+					if (Engine.IsRealInstance(_engine) && !TrySaveBeforeLeaving(deleteBackup: true, isAskingFirst: true))
+					{
+						Log.Default.Write(LogSeverityType.Information, "The analyst chose to stay on the open log, whose changes can't be saved.");
+
+						// The analyst keeps working on this log, whose filter box comes back when the operation ends.
+						return;
+					}
+
+					Log.Default.Write($"File is being opened... Path={sourceFilePath}");
+
+					IEngineBuilder builder = CreateBuilder(sourceFilePath, part ?? LogPart.Whole)
+						.UsingTelemetry(TelemetrySessionLifecycle.Shared)
+						.UsingContext(context ?? new ContextDictionary())
+						.UsingDisplayPath(displayPath)
+						.Replacing(_engine);
+
+					if (storageMode is { } mode)
+					{
+						builder = builder.UsingStorage(mode);
+					}
+
+					IEngine openedEngine = builder.Open();
+
+					// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
+					// Moved only once the open succeeds, so a failed open leaves the open log subscribed.
+					_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
+					_engine.Annotations.Changed -= OnAnnotationsChanged;
+					IEngine replaced = _engine;
+					_engine = openedEngine;
+
+					// Closed at once, so another Weevil can open it (#1254): saved before the open, and still read by what shows it until it is replaced.
+					replaced.Dispose();
+
+					_openLogFilePath = sourceFilePath;
+					_hasUnsavedChanges = false;
+					Interlocked.Increment(ref _logGeneration);
+					openedLogReporter = CreateFailedReadReporter();
+					_engine.FilterHistoryChanged += OnFilterHistoryChanged;
+					_rowSelection = new RowSelection(_engine);
+					_engine.Annotations.Changed += OnAnnotationsChanged;
+
+					// The dashboard reads the engine it was shown with, so it would keep the previous log in memory,
+					// and its insights would point at lines of that log (#1139).
+					_uiDispatcher.Invoke(() => _dialogBox.CloseDashboard());
+
+					this.FileOpened?.Invoke(this, EventArgs.Empty);
+
+					_bulletinMediator.Post(new BookmarksChangedBulletin
+					{
+						BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+					});
+
+					_bulletinMediator.Post(new RegionsChangedBulletin
+					{
+						RegionCount = _engine.Regions.Regions.Length,
+					});
+
+					_bulletinMediator.Post(new SourceFileOpenedBulletin
+					{
+						SourceFilePath = _engine.SourceFilePath,
+						SourceFileSize = _engine.Metrics.FileSize,
+						SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
+						Context = _engine.Context,
+						TotalRecordCount = _engine.Count,
+						StorageMode = _engine.StorageMode,
+						Part = _engine.Part,
+					});
+
+					// The Remarks box reads the engine, which is now the opened log's. Assigning the remarks to themselves would raise nothing (#1116).
+					_uiDispatcher.Invoke(() => OnPropertyChanged(nameof(this.SourceFileRemarks)));
+
+					_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
+					{
+						HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
+					});
+
+					_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
+
+					_bulletinMediator.Post(new AnalysisCompleteBulletin(0));
+
+					Log.Default.Write("Updating filter history on the UI.");
+					RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
+					RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
+
+					RefreshFilterResults();
+
+					var analyzers = _engine
+						.Analyzer
+						.GetAnalyzers(ComponentType.Extension)
+						.OrderBy(x => x.DisplayName)
+						.ToArray();
+
+					_uiDispatcher.Invoke(() =>
+					{
+						this.CustomAnalyzerCommands.Clear();
+
+						foreach (IRecordAnalyzer analyzer in analyzers)
 						{
-							// The readable path names only the file Weevil chose; a plugin may open another.
-							IEngineBuilder pluginBuilder = Engine.UsingPath(path).UsingDisplayPath(string.Equals(path, sourceFilePath, StringComparison.OrdinalIgnoreCase) ? displayPath : null);
-							return storageMode is { } mode ? pluginBuilder.UsingStorage(mode) : pluginBuilder;
-						},
-						sourceFilePath);
+							var menuItem = new MenuItemViewModel(
+								analyzer.Key,
+								analyzer.DisplayName,
+								this.CustomAnalyzerCommand);
 
-					wasOpenRequested = result.Item1;
-					openAsResult = result.Item2;
+							this.CustomAnalyzerCommands.Add(menuItem);
+						}
+					});
+
+					Log.Default.Write(
+						LogSeverityType.Information,
+						$"File has been opened. Path={sourceFilePath}");
 				}
-				else
+				catch (LogInUseException e)
 				{
-					wasOpenRequested = true;
+					// Core logged it. The open log stays.
+					_dialogBox.ShowMessage(e.Message, LogInUseCaption);
 				}
-			}
-			catch (LogInUseException e)
-			{
-				// The plugin's own window opened a log another Weevil, or this one, has open (#1254). Core logged it, and the open log stays.
-				_dialogBox.ShowMessage(e.Message, LogInUseCaption);
-			}
-			catch (NotSupportedException e)
-			{
-				// The whole path: a zipped log's sidecar is in the folder kept for it, not beside the zip (#1253).
-				var message =
-					e.Message + Environment.NewLine + Environment.NewLine +
-					"In order to open the file, you must first delete the sidecar:" + Environment.NewLine +
-					$"{sourceFilePath}.xml" + Environment.NewLine;
-				MessageBox.Show(message, "Open Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-			}
-
-			if (wasOpenRequested)
-			{
-				// The opened log's generation, for what runs after the open: a Reload may already have started another (#1028).
-				Action<Exception> openedLogReporter = _ => { };
-
-				await Task.Run(() =>
+				catch (InvalidFileFormatException e)
 				{
+					var message = "Unknown File Format";
+					Log.Default.Write(LogSeverityType.Error, e, message);
+					_dialogBox.ShowMessage(e.Message, message);
+				}
+				catch (Exception e)
+				{
+					var message = "Unable to open the log file.";
+					Log.Default.Write(LogSeverityType.Error, e, message);
+					_dialogBox.ShowMessage(e.Message, message);
+				}
+				finally
+				{
+					// The records, the menus and the filter box come back without waiting for the insights.
+					_uiDispatcher.Invoke(() =>
+					{
+						this.IsLogFileOpen = Engine.IsRealInstance(_engine);
+						operation.Dispose();
+					});
+				}
+			}).ContinueWith((x) =>
+				{
+					// Taken once: Reload or Clear can already run, and replace what the engine holds (#1028).
+					IEngine engine = _engine;
+					Action<Exception> reportFailedRead = openedLogReporter;
+
 					try
 					{
-						// The analyst may choose to stay on the open log, to keep changes its sidecar can't take yet (#1307).
-						if (Engine.IsRealInstance(_engine) && !TrySaveBeforeLeaving(deleteBackup: true, isAskingFirst: true))
+						// Continue computing insights asynchronously (UI is already enabled)
+						if (engine.Navigate.TableOfContents.Sections.Count == 0)
 						{
-							Log.Default.Write(LogSeverityType.Information, "The analyst chose to stay on the open log, whose changes can't be saved.");
-
-							// The analyst keeps working on this log, whose filter box comes back when the operation ends.
-							return;
+							engine.Navigate.RebuildTableOfContents();
 						}
 
-						Log.Default.Write($"File is being opened... Path={sourceFilePath}");
+						_tableOfContents = engine.Navigate.TableOfContents;
+						_insights = engine.Analyzer.GetInsights();
 
-						IEngineBuilder builder = CreateBuilder(sourceFilePath, part ?? LogPart.Whole, openAsResult)
-							.UsingTelemetry(TelemetrySessionLifecycle.Shared)
-							.UsingContext(openAsResult.Context)
-							.UsingDisplayPath(displayPath)
-							.Replacing(_engine);
-
-						if (storageMode is { } mode)
+						_bulletinMediator.Post(new InsightChangedBulletin
 						{
-							builder = builder.UsingStorage(mode);
-						}
-
-						IEngine openedEngine = builder.Open();
-
-						// Once per open log: the engine keeps raising it after Clear and Reload (#1011).
-						// Moved only once the open succeeds, so a failed open leaves the open log subscribed.
-						_engine.FilterHistoryChanged -= OnFilterHistoryChanged;
-						_engine.Annotations.Changed -= OnAnnotationsChanged;
-						IEngine replaced = _engine;
-						_engine = openedEngine;
-
-						// Closed at once, so another Weevil can open it (#1254): saved before the open, and still read by what shows it until it is replaced.
-						replaced.Dispose();
-
-						_openLogFilePath = sourceFilePath;
-						_hasUnsavedChanges = false;
-						Interlocked.Increment(ref _logGeneration);
-						openedLogReporter = CreateFailedReadReporter();
-						_engine.FilterHistoryChanged += OnFilterHistoryChanged;
-						_rowSelection = new RowSelection(_engine);
-						_engine.Annotations.Changed += OnAnnotationsChanged;
-
-						// The dashboard reads the engine it was shown with, so it would keep the previous log in memory,
-						// and its insights would point at lines of that log (#1139).
-						_uiDispatcher.Invoke(() => _dialogBox.CloseDashboard());
-
-						this.FileOpened?.Invoke(this, EventArgs.Empty);
-
-						_bulletinMediator.Post(new BookmarksChangedBulletin
-						{
-							BookmarkCount = _engine.Bookmarks.Bookmarks.Length,
+							HasInsight = _insights.Length > 0,
+							InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
 						});
 
-						_bulletinMediator.Post(new RegionsChangedBulletin
-						{
-							RegionCount = _engine.Regions.Regions.Length,
-						});
-
-						_bulletinMediator.Post(new SourceFileOpenedBulletin
-						{
-							SourceFilePath = _engine.SourceFilePath,
-							SourceFileSize = _engine.Metrics.FileSize,
-							SourceFileLoadingPeriod = _engine.Metrics.SourceFileLoadingPeriod,
-							Context = _engine.Context,
-							TotalRecordCount = _engine.Count,
-							StorageMode = _engine.StorageMode,
-							Part = _engine.Part,
-						});
-
-						// The Remarks box reads the engine, which is now the opened log's. Assigning the remarks to themselves would raise nothing (#1116).
-						_uiDispatcher.Invoke(() => OnPropertyChanged(nameof(this.SourceFileRemarks)));
-
-						_bulletinMediator.Post(new SourceFileRemarksChangedBulletin
-						{
-							HasSourceFileRemarks = _engine.SourceFileRemarks.Any()
-						});
-
-						_bulletinMediator.Post(BuildSelectionChangedBulletin(_engine));
-
-						_bulletinMediator.Post(new AnalysisCompleteBulletin(0));
-
-						Log.Default.Write("Updating filter history on the UI.");
-						RefreshHistory(this.InclusiveFilterHistory, _engine.Filter.IncludeHistory);
-						RefreshHistory(this.ExclusiveFilterHistory, _engine.Filter.ExcludeHistory);
-
-						RefreshFilterResults();
-
-						var analyzers = _engine
-							.Analyzer
-							.GetAnalyzers(ComponentType.Extension)
-							.OrderBy(x => x.DisplayName)
-							.ToArray();
-
+						// Set insights ready and requery commands after insights are ready
 						_uiDispatcher.Invoke(() =>
 						{
-							this.CustomAnalyzerCommands.Clear();
-
-							foreach (IRecordAnalyzer analyzer in analyzers)
-							{
-								var menuItem = new MenuItemViewModel(
-									analyzer.Key,
-									analyzer.DisplayName,
-									this.CustomAnalyzerCommand);
-
-								this.CustomAnalyzerCommands.Add(menuItem);
-							}
+							this.AreInsightsReady = true;
+							OnPropertyChanged(nameof(this.IsDashboardEnabled));
+							CommandManager.InvalidateRequerySuggested();
 						});
-
-						Log.Default.Write(
-							LogSeverityType.Information,
-							$"File has been opened. Path={sourceFilePath}");
-					}
-					catch (LogInUseException e)
-					{
-						// Core logged it. The open log stays.
-						_dialogBox.ShowMessage(e.Message, LogInUseCaption);
-					}
-					catch (InvalidFileFormatException e)
-					{
-						var message = "Unknown File Format";
-						Log.Default.Write(LogSeverityType.Error, e, message);
-						_dialogBox.ShowMessage(e.Message, message);
 					}
 					catch (Exception e)
 					{
-						var message = "Unable to open the log file.";
-						Log.Default.Write(LogSeverityType.Error, e, message);
-						_dialogBox.ShowMessage(e.Message, message);
-					}
-					finally
-					{
-						// The records, the menus and the filter box come back without waiting for the insights.
-						_uiDispatcher.Invoke(() =>
+						// Caught, so the open still finishes, and a zipped log's previous copy is still released (#1028).
+						Log.Default.Write(LogSeverityType.Error, e, "The table of contents and the insights could not be prepared.");
+
+						if (e is IOException or UnauthorizedAccessException)
 						{
-							this.IsLogFileOpen = Engine.IsRealInstance(_engine);
-							operation.Dispose();
-						});
-					}
-				}).ContinueWith((x) =>
-					{
-						// Taken once: Reload or Clear can already run, and replace what the engine holds (#1028).
-						IEngine engine = _engine;
-						Action<Exception> reportFailedRead = openedLogReporter;
-
-						try
-						{
-							// Continue computing insights asynchronously (UI is already enabled)
-							if (engine.Navigate.TableOfContents.Sections.Count == 0)
-							{
-								engine.Navigate.RebuildTableOfContents();
-							}
-
-							_tableOfContents = engine.Navigate.TableOfContents;
-							_insights = engine.Analyzer.GetInsights();
-
-							_bulletinMediator.Post(new InsightChangedBulletin
-							{
-								HasInsight = _insights.Length > 0,
-								InsightNeedingAttention = _insights.Count(i => i.IsAttentionRequired)
-							});
-
-							// Set insights ready and requery commands after insights are ready
-							_uiDispatcher.Invoke(() =>
-							{
-								this.AreInsightsReady = true;
-								OnPropertyChanged(nameof(this.IsDashboardEnabled));
-								CommandManager.InvalidateRequerySuggested();
-							});
-						}
-						catch (Exception e)
-						{
-							// Caught, so the open still finishes, and a zipped log's previous copy is still released (#1028).
-							Log.Default.Write(LogSeverityType.Error, e, "The table of contents and the insights could not be prepared.");
-
-							if (e is IOException or UnauthorizedAccessException)
-							{
-								reportFailedRead(e);
-							}
+							reportFailedRead(e);
 						}
 					}
-				);
-			}
-			else
-			{
-				operation.Dispose();
-			}
+				}
+			);
 		}
 
 		private void OnAnnotationsChanged(object sender, AnnotationChangedEventArgs e)
