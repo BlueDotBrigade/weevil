@@ -11,5 +11,8 @@
     <Setting Name="RowFontSize" Type="System.Double" Scope="User">
       <Value Profile="(Default)">12</Value>
     </Setting>
+    <Setting Name="RecentFolders" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

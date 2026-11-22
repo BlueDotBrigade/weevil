@@ -8,7 +8,6 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
-	using System.IO.Compression;
 	using System.Linq;
 	using System.Net.Http;
 	using System.Reflection;
@@ -529,12 +528,10 @@
 
 			var args = Environment.GetCommandLineArgs();
 
-			if (args.Length > 1)
+			// A log, or a zip, passed by Explorer or on the command line is selected in the Open As dialog (#1217).
+			if (args.Length > 1 && File.Exists(args[1]))
 			{
-				if (File.Exists(args[1]))
-				{
-					OpenCompressedAsync(args[1]);
-				}
+				_ = ShowOpenAsAsync(args[1]);
 			}
 		}
 
@@ -546,7 +543,7 @@
 				return;
 			}
 
-			OpenCompressedAsync(e.FilePath);
+			_ = ShowOpenAsAsync(e.FilePath);
 		}
 
 		private void OnFilterOptionsChanged(object sender, EventArgs e)
@@ -580,8 +577,24 @@
 		#region Commands: General
 		public async void OpenAsync()
 		{
-			// One window finds the log and chooses RAM or Disk (#1215). A log in a zip is extracted, with its sidecar and index, when the user opens it.
-			// Nothing else runs while it is shown, and the open that follows ends the operation once the records are shown.
+			// The Open button, Ctrl+O and the menu's Open… start in the open log's folder, or else in the last folder used (#1217).
+			await ShowOpenAsAsync(GetOpenLogFolder());
+		}
+
+		/// <summary>
+		/// Shows the Open As dialog, where the analyst finds a log and chooses how to open it, then opens it (#1215). Every way to open a log comes here (#1217).
+		/// </summary>
+		/// <remarks>
+		/// Does nothing while another operation runs, such as a filter or an analysis (#996). Cancel opens nothing, and the open log stays.
+		/// </remarks>
+		/// <param name="location">
+		/// A file to select in its folder, such as a log or a zip dropped on Weevil, or a folder or zip to show.
+		/// When <see langword="null"/>, the last folder used.
+		/// </param>
+		public async Task ShowOpenAsAsync(string location)
+		{
+			// A log in a zip is extracted, with its sidecar and index, when the analyst opens it.
+			// Nothing else runs while the dialog is shown, and the open that follows ends the operation once the records are shown.
 			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: true);
 
 			if (operation is null)
@@ -589,7 +602,7 @@
 				return;
 			}
 
-			var isAccepted = _dialogBox.TryShowOpenAs(ThrowIfOpenElsewhere, out OpenAsChoice choice);
+			var isAccepted = _dialogBox.TryShowOpenAs(location, ThrowIfOpenElsewhere, out OpenAsChoice choice);
 			LogOpenAs(choice?.Advice, isAccepted ? choice.StorageMode : null);
 
 			if (!isAccepted)
@@ -602,115 +615,19 @@
 				: OpenExtractedAsync(choice.LogPath, choice.StorageMode, choice.DisplayPath, operation, choice.Part, choice.Context));
 		}
 
+		/// <summary>
+		/// The folder of the log open, where the Open As dialog starts: <see langword="null"/> when none is open.
+		/// </summary>
 		/// <remarks>
-		/// Does nothing while another operation runs, such as a filter or an analysis (#996).
+		/// A log opened from a zip is named by its zip, read like a folder (#1312), so its folder is the zip, or a folder in it.
 		/// </remarks>
-		public async Task OpenCompressedAsync(string sourceFilePath)
+		private string GetOpenLogFolder()
 		{
-			// Nothing else runs while the zip is read, which takes a while for a large log, and Open As is shown.
-			// The open that follows ends the operation once the records are shown.
-			using BusyState.Operation operation = _busy.TryBegin("The open", isShowingProgress: false, isFilterLocked: true);
-
-			if (operation is null)
-			{
-				return;
-			}
-
-			if (new FileInfo(sourceFilePath).Extension.ToUpperInvariant() != ".ZIP")
-			{
-				try
-				{
-					// Before RAM or Disk is asked for: another Weevil may have it open (#1254). Off the UI thread, since the log may be on a share.
-					await Task.Run(() => ThrowIfOpenElsewhere(sourceFilePath));
-
-					// Cancelled: nothing opens, and the open log stays (#1028).
-					if (await AskStorageAsync(sourceFilePath) is { } storageMode)
-					{
-						await OpenFromDiskAsync(sourceFilePath, storageMode, operation);
-					}
-				}
-				catch (LogInUseException e)
-				{
-					// Core logged it. The open log stays.
-					_dialogBox.ShowMessage(e.Message, LogInUseCaption);
-				}
-
-				return;
-			}
-
-			// Weevil opens a copy of the chosen file, extracted to a folder of that file's own that is kept between opens,
-			// and deletes only the copy of the log, never the zip (#1156, #1253).
-			string extractedLog = null;
-			var isOpening = false;
-
-			try
-			{
-				string[] entryNames = await Task.Run(() =>
-				{
-					using ZipArchive archive = ZipFile.OpenRead(sourceFilePath);
-
-					// Shown as paths, as Windows writes them; a folder's entry names no file.
-					return archive.Entries
-						.Where(entry => entry.Name.Length > 0)
-						.Select(entry => entry.FullName.Replace('/', Path.DirectorySeparatorChar))
-						.ToArray();
-				});
-
-				if (entryNames.Length == 0)
-				{
-					_dialogBox.ShowMessage($"{Path.GetFileName(sourceFilePath)} holds no file to open.", "Nothing to Open");
-					return;
-				}
-
-				if (!_dialogBox.TrySelectCompressedFile(entryNames, out var selectedFileName))
-				{
-					return;
-				}
-
-				var file = BlueDotBrigade.Weevil.Windows.Dialogs.Storage.Location.ForArchive(sourceFilePath, selectedFileName.Replace(Path.DirectorySeparatorChar, '/'));
-				var copiesFolder = this.CopiesFolder;
-				extractedLog = await Task.Run(() =>
-				{
-					using var reader = new BlueDotBrigade.Weevil.Windows.Dialogs.Storage.ContainerReader();
-					var destination = Path.Combine(copiesFolder, reader.GetCopyKey(file));
-
-					// Before anything is extracted: the copy may be open in another Weevil (#1254).
-					ThrowIfOpenElsewhere(Path.Combine(destination, file.Name));
-
-					return reader.Extract(file, ExtractedLog.CompanionSuffixes, destination);
-				});
-
-				// Open As follows the list, so its suggestion uses the size of the log chosen (#1028).
-				if (await AskStorageAsync(extractedLog) is { } storageMode)
-				{
-					isOpening = true;
-					await OpenExtractedAsync(extractedLog, storageMode, file.ToString(), operation);
-				}
-			}
-			catch (LogInUseException e)
-			{
-				// Core logged it. Nothing was extracted, and the open log stays.
-				_dialogBox.ShowMessage(e.Message, LogInUseCaption);
-			}
-			finally
-			{
-				if (!isOpening)
-				{
-					operation.Dispose();
-
-					// Nothing was opened from this copy. What was kept beside it from earlier opens stays,
-					// and so does the copy when it is the log that is open, chosen again from the same zip.
-					if (extractedLog != null && !IsOpenFrom(new ExtractedLog(extractedLog)))
-					{
-						ExtractedLog copy = new ExtractedLog(extractedLog);
-						await Task.Run(copy.Delete);
-					}
-				}
-			}
+			return Engine.IsRealInstance(_engine) ? Path.GetDirectoryName(_engine.SourceFilePath) : null;
 		}
 
 		/// <summary>
-		/// Throws when another Weevil has the log open, so Open As or a zip dropped on Weevil doesn't extract it for nothing (#1254). The open checks again.
+		/// Throws when another Weevil has the log open, so the Open As dialog doesn't extract it for nothing (#1254). The open checks again.
 		/// </summary>
 		/// <remarks>
 		/// Called off the UI thread. The log open here may be opened again: its engine hands its lock to the one that replaces it.
@@ -728,14 +645,6 @@
 				Engine.ThrowIfInUse(logPath);
 			}
 		}
-
-		/// <summary>
-		/// Where a log opened from a zip is extracted, to a folder of its own (#1253). A test sets a folder of its own.
-		/// </summary>
-		/// <remarks>
-		/// The Open As dialog extracts to <see cref="ExtractedLog.DefaultCopiesFolder"/>.
-		/// </remarks>
-		internal string CopiesFolder { get; set; } = ExtractedLog.DefaultCopiesFolder;
 
 		/// <summary>
 		/// Opens a log that is not in a zip, and deletes the copy of the zip the previous log was opened from, if nothing reads it any more.
@@ -853,24 +762,6 @@
 					history.Add(value);
 				}
 			});
-		}
-
-		/// <summary>
-		/// Shows Weevil's Open As window for the log about to open, with RAM or Disk already chosen from its size and the free memory (#1028).
-		/// </summary>
-		/// <returns>The mode chosen, or <see langword="null"/> when the user cancelled.</returns>
-		/// <remarks>
-		/// The open's operation keeps anything else from running while the estimate runs and the window is shown.
-		/// </remarks>
-		private async Task<StorageMode?> AskStorageAsync(string logPath)
-		{
-			// Off the UI thread: the estimate reads up to 1 MB of the log, which takes a moment on a network drive.
-			OpenAsAdvice advice = await Task.Run(() => OpenAsAdvice.Read(logPath));
-			var isAccepted = _dialogBox.TryShowOpenAs(advice, out StorageMode storageMode);
-
-			LogOpenAs(advice, isAccepted ? storageMode : null);
-
-			return isAccepted ? storageMode : null;
 		}
 
 		/// <summary>

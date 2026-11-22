@@ -9,29 +9,19 @@
 	internal interface IDialogBoxService : IUserDialog
 	{
 		/// <summary>
-		/// Shows the Open As dialog, so the user finds a log and chooses RAM or Disk in one window (#1215).
+		/// Shows the Open As dialog, so the user finds a log and chooses how to open it in one window (#1215). Every way to open a log shows it (#1217).
 		/// </summary>
+		/// <param name="location">
+		/// The folder or zip to show, or a file to select in its folder, such as a log dropped on Weevil.
+		/// When <see langword="null"/>, the last folder used, or else the user's documents.
+		/// </param>
 		/// <param name="checkBeforeOpening">
 		/// Checks the log chosen before it is extracted from a zip or opened, given the path it will have on disk, off the UI thread:
 		/// a <see cref="LogInUseException"/> it throws keeps the dialog open and shows why (#1254).
 		/// </param>
 		/// <param name="choice">The log chosen and its mode, or <see langword="null"/> when the user cancelled.</param>
 		/// <returns><see langword="false"/> when the user cancelled: nothing opens, and nothing was extracted.</returns>
-		bool TryShowOpenAs(Action<string> checkBeforeOpening, out OpenAsChoice choice);
-
-		/// <summary>
-		/// Shows Weevil's Open As window for a log already chosen, so the user chooses RAM or Disk for it (#1028).
-		/// </summary>
-		/// <param name="advice">The log, the mode suggested for it, and the warnings.</param>
-		/// <param name="storageMode">The mode chosen.</param>
-		/// <returns><see langword="false"/> when the user cancelled: nothing opens.</returns>
-		bool TryShowOpenAs(OpenAsAdvice advice, out StorageMode storageMode);
-
-		/// <summary>
-		/// Lets the user choose one of the files in a zip, which Weevil then extracts.
-		/// </summary>
-		/// <returns><see langword="false"/> when the user chose no file.</returns>
-		bool TrySelectCompressedFile(string[] fileNames, out string selectedFileName);
+		bool TryShowOpenAs(string location, Action<string> checkBeforeOpening, out OpenAsChoice choice);
 
 		string ShowSaveFile(string targetDirectory, string targetFileName);
 

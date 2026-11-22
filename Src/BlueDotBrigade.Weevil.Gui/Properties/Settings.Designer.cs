@@ -55,5 +55,16 @@ namespace BlueDotBrigade.Weevil.Gui.Properties {
                 this["RowFontSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection RecentFolders {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["RecentFolders"]));
+            }
+            set {
+                this["RecentFolders"] = value;
+            }
+        }
     }
 }
