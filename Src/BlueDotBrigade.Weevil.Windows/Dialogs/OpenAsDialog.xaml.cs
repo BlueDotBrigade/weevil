@@ -51,6 +51,9 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		public static readonly DependencyProperty OptionsContentProperty = DependencyProperty.Register(
 			nameof(OptionsContent), typeof(object), typeof(OpenAsDialog));
 
+		public static readonly DependencyProperty NoticeProperty = DependencyProperty.Register(
+			nameof(Notice), typeof(object), typeof(OpenAsDialog), new PropertyMetadata(null, (dialog, e) => ((OpenAsDialog)dialog).NoticeArea.Visibility = e.NewValue is null ? Visibility.Collapsed : Visibility.Visible));
+
 		public static readonly DependencyProperty CanOpenProperty = DependencyProperty.Register(
 			nameof(CanOpen), typeof(bool), typeof(OpenAsDialog), new PropertyMetadata(true, (dialog, _) => ((OpenAsDialog)dialog).OnCanOpenChanged()));
 
@@ -106,6 +109,16 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		{
 			get => GetValue(OptionsContentProperty);
 			set => SetValue(OptionsContentProperty, value);
+		}
+
+		/// <summary>
+		/// Optional: what the dialog shows just above Open, such as the terms the user accepts by opening a file, with a link to them.
+		/// Nothing is shown when it is <see langword="null"/>, the default.
+		/// </summary>
+		public object Notice
+		{
+			get => GetValue(NoticeProperty);
+			set => SetValue(NoticeProperty, value);
 		}
 
 		/// <summary>
