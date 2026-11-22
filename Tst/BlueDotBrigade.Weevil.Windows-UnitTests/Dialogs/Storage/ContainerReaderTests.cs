@@ -313,6 +313,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		[WorkItem(1211)]
 		public void GivenALogInAZipProtectedByAPassword_WhenExtracted_ThenTheMessageSaysSoAndNothingIsLeft()
 		{
+			// The dialog said that the zip's compression is unsupported, which doesn't tell the analyst a password is the reason.
 			ProtectWithAPassword(_zipPath);
 			var destination = Path.Combine(_root, "Extracted");
 
@@ -326,6 +327,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		[WorkItem(1211)]
 		public void GivenAZipInAZipProtectedByAPassword_WhenListed_ThenTheErrorSaysSo()
 		{
+			// Entering it said that the zip is damaged.
 			Location innerZip = _reader.List(Location.ForArchive(_zipPath, "Nested")).Items.Single().Open;
 			ProtectWithAPassword(_zipPath);
 
