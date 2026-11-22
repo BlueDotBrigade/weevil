@@ -39,6 +39,11 @@ Dep/TestHarnesses                     # Console programs that measure Weevil's R
 - The majority of business logic must reside in `Core` so the application can run headless. Weevil's UI layer is interchangeable — it could be a WPF application, CLI, PowerShell module, or a test framework like Reqnroll.
   - The WPF application is a thin layer over `Core`. Logic that the CLI, PowerShell or a test would also need belongs in `Core`, for example flagging records or putting a comment on the selected records.
   - A ViewModel may hold logic that exists only to make the screen work, for example reading the clipboard, showing a message, editing the filter box or building rows. Keep that logic out of `Core`.
+  - Every UI is a facade: a feature the WPF application offers should also be reachable from the CLI, PowerShell or a test, through `Core`.
+- Keep WPF out of every project but the WPF ones: `BlueDotBrigade.Weevil.Gui`, `BlueDotBrigade.Weevil.Windows` and their tests. `Core`, `Common`, the CLI, PowerShell, `TestTools` and a plugin's `IPlugin` assembly target `net10.0` without WPF, because:
+  - many environments that build, test and run Weevil can't run WPF, such as Claude Code's cloud sessions, GitHub Codespaces and Linux CI runners;
+  - every feature must be callable from the CLI, PowerShell and the WPF application alike.
+- A plugin's WPF parts, such as its own options in the Open As dialog (`IOpenAsOptionsProvider`, #1216), go in a separate assembly in `Plugins\Wpf`, which only the WPF application loads. `Core` loads only the assemblies directly in `Plugins`, and skips one that fails to load. See `Src/BlueDotBrigade.Weevil.Plugins/ReadMe.md`.
 - Apply the DRY (Don't Repeat Yourself) principle to code, configuration, and documentation. Avoid duplicating logic, data, or rules across multiple locations.
 - Prefer simplifying repository configuration so all .csproj files are configured consistently when feasible (avoid special-case project settings unless required).
 - When reorganizing Weevil build outputs, preserve a debugging workflow where both the GUI and CLI run against the latest built assemblies and include plugins from `WEEVIL_PLUGINS_PATH` in Visual Studio 2026, whether or not the debugger is attached.

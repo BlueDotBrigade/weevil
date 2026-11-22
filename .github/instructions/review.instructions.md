@@ -36,6 +36,11 @@ These instructions guide Copilot during pull request reviews. Every review shoul
 - Flag any new direct dependency introduced from `BlueDotBrigade.Weevil.Core` or `BlueDotBrigade.Weevil.Common` toward `BlueDotBrigade.Weevil.Plugins`.
 - Confirm that extensibility points use `ICoreExtension` or `IPlugin` interfaces.
 
+## Running Headless
+
+- Flag a new WPF or Windows-only dependency in `Core`, `Common`, the CLI, PowerShell, `TestTools`, or a plugin's `IPlugin` assembly. Only `BlueDotBrigade.Weevil.Gui`, `BlueDotBrigade.Weevil.Windows` and their tests may use WPF.
+- Flag a feature added only to the WPF application whose logic the CLI, PowerShell or a test would also need: it belongs in `Core`.
+
 ## XML Sidecar Compatibility
 
 - Flag any change to sidecar serialization classes that removes or renames persisted properties without a migration strategy.

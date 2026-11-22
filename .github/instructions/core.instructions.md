@@ -50,6 +50,7 @@ Apply the project-wide design principles defined in `copilot-instructions.md`. T
 - Do not introduce direct dependencies from `BlueDotBrigade.Weevil.Core` to `BlueDotBrigade.Weevil.Plugins`.
 - Extensibility points use `ICoreExtension` and `IPlugin` interfaces.
 - Plugin-specific behavior must be injected at construction time via the extension mechanism, not hardcoded.
+- `Core` and a plugin's `IPlugin` assembly never reference WPF. A plugin's WPF parts go in a separate assembly in `Plugins\Wpf` (see "Keep WPF out" in `copilot-instructions.md`).
 
 ## Performance
 
