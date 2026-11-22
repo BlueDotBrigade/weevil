@@ -10,9 +10,10 @@ namespace BlueDotBrigade.Weevil.Windows.IO
 	/// Only Weevil's window loads that folder, so the plugin's <see cref="IPlugin"/> class, which Core, the CLI and PowerShell load, needs no WPF.
 	///
 	/// Weevil finds the log's plugin as it does to open the log: the first whose <see cref="IPlugin.CheckCompatibility"/> accepts it.
-	/// For a log in a zip, the plugin checks only the log's start, read from the zip into a temporary file of the same name, unless an earlier open kept a copy:
-	/// the log is not extracted. A log stored online only, such as on OneDrive, uses Weevil's options: reading any of it would download it.
-	/// Options read a zipped log's sidecar straight from the zip, for example with <c>ContainerReader.OpenRead(ContainerReader.GetSibling(file.Location, file.Name + ".xml"))</c>.
+	/// For a log in a zip, the plugin checks only the log's start, read from the zip into a temporary file of the same name: the log is not extracted.
+	/// A log stored online only, such as on OneDrive, uses Weevil's options: reading any of it would download it.
+	/// Options can read a zipped log's sidecar from the zip with a <see cref="Dialogs.Storage.ContainerReader"/> of their own, disposed once read:
+	/// <c>reader.OpenRead(ContainerReader.GetSibling(file.Location, file.Name + ".xml"))</c>. They don't see the sidecar Weevil keeps beside the copy of an earlier open (#1253).
 	///
 	/// Weevil creates the provider off the UI thread, before it loads the plugins in <c>Plugins</c>, and disposes the container that created it.
 	/// So its constructor must create no WPF object and use nothing from the plugin's own assembly, and it must not implement <see cref="System.IDisposable"/>:
