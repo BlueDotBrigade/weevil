@@ -213,7 +213,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			try
 			{
 				ZipArchiveEntry entry = FindEntry(archive, file.ArchivePath[^1]) ?? throw new FileNotFoundException($"The zip holds no file called `{file.Name}`.");
-				return new EntryStream(entry.Open(), archive);
+				return new EntryStream(OpenEntry(entry), archive);
 			}
 			catch
 			{
@@ -500,7 +500,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				copy = Path.Combine(folder, $"{Guid.NewGuid():N}.zip");
 			}
 
-			using (Stream source = entry.Open())
+			using (Stream source = OpenEntry(entry))
 			using (FileStream target = File.Create(copy))
 			{
 				source.CopyTo(target);
@@ -593,6 +593,16 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 		}
 
+		/// <summary>
+		/// Opens a file in a zip, or says that a password protects it: System.IO.Compression can't read such a file (#1211).
+		/// </summary>
+		private static Stream OpenEntry(ZipArchiveEntry entry)
+		{
+			return entry.IsEncrypted
+				? throw new PasswordProtectedException(entry.Name)
+				: entry.Open();
+		}
+
 		private static bool IsReadFailure(Exception exception)
 		{
 			// A listing still running when the dialog closes finds the reader disposed (#1251).
@@ -605,9 +615,21 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 			UnauthorizedAccessException or System.Security.SecurityException => "You do not have permission to open this folder.",
 			DirectoryNotFoundException => "This folder does not exist.",
 			FileNotFoundException => "This file does not exist.",
+			PasswordProtectedException => exception.Message,
 			InvalidDataException => "This is not a zip, or it is damaged.",
 			_ => exception.Message,
 		};
+
+		/// <summary>
+		/// A file in a zip is protected by a password, which this reader can't open.
+		/// </summary>
+		private sealed class PasswordProtectedException : IOException
+		{
+			public PasswordProtectedException(string name)
+				: base($"`{name}` is protected by a password. Extract it with the program that made the zip, then open the copy.")
+			{
+			}
+		}
 
 		/// <summary>
 		/// A file read from a zip, which closes the zip when it is closed.
