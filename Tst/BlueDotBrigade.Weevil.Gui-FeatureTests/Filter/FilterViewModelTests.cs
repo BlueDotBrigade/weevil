@@ -406,6 +406,22 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		}
 
 		[TestMethod]
+		public void GivenTheOpenButton_WhenLinesAreChosen_ThenOnlyThoseLinesOpen()
+		{
+			// The part chosen in the Open As dialog is the part opened (#1214), and the status bar names it (#1219).
+			var dialog = Substitute.For<IDialogBoxService>();
+			ChooseInOpenAs(dialog, new OpenAsChoice(CopyLog("Lines.log"), ExtractedFolder: null, StorageMode.Ram, Advice: null, Part: LogPart.ForLines(new Range(10, 40))));
+			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+
+			viewModel.OpenLogCommand.Execute(null);
+			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
+
+			bulletinMediator.Received(1).Post(Arg.Is<SourceFileOpenedBulletin>(bulletin =>
+				bulletin.Part.Lines.Equals(new Range(10, 40)) && bulletin.TotalRecordCount > 0 && bulletin.TotalRecordCount <= 31));
+		}
+
+		[TestMethod]
 		public void GivenTheOpenButton_WhenCancelled_ThenNothingOpensAndOpenIsAvailableAgain()
 		{
 			var dialog = Substitute.For<IDialogBoxService>();

@@ -85,6 +85,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				_pendingActivation = this.CanOpen ? null : item;
 				await OpenAsync();
 			};
+
+			// A double-click waits only for the host's reading. Once the analyst works in the options, for example typing a line,
+			// the options are not ready until the analyst says so, with Open.
+			this.OptionsArea.PreviewMouseDown += (_, _) => _pendingActivation = null;
+			this.OptionsArea.PreviewKeyDown += (_, _) => _pendingActivation = null;
 		}
 
 		/// <summary>

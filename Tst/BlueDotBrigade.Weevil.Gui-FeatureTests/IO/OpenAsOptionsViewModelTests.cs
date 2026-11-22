@@ -97,6 +97,169 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			options.CanOpen.Should().BeFalse();
 		}
 
+		[TestMethod]
+		public async Task GivenALogWithSectionsAndRegions_WhenOneIsPicked_ThenThatPartIsOpened()
+		{
+			// The analyst opens one section or one region, listed from the log's sidecar (#1212, #1213).
+			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
+			using var monitor = options.Monitor();
+			await options.SelectAsync(LargeLog);
+			monitor.Should().RaisePropertyChangeFor(o => o.HasSections, "the view enables the section list only when it is told");
+			monitor.Should().RaisePropertyChangeFor(o => o.HasRegions);
+			options.Part.IsWhole.Should().BeTrue("the whole log is opened unless another part is picked");
+			options.Sections.Should().Equal("Startup (lines 1 – 119)", "Shutdown (from line 300)");
+
+			options.ChosenSectionIndex = 1;
+			options.Part.SectionName.Should().Be("Shutdown");
+
+			// The first item of a list is picked like any other: nothing is picked in advance, which would make picking it do nothing.
+			options.ChosenRegionIndex = 0;
+			options.Part.RegionName.Should().Be("Docking", "one part is opened at a time");
+			options.CanOpen.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public async Task GivenARegionPicked_WhenAnotherLogIsSelected_ThenTheWholeLogIsOpened()
+		{
+			// A region belongs to its log, so it is not kept for the next one.
+			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
+			await options.SelectAsync(LargeLog);
+			options.ChosenPart = PartKind.Region;
+			options.Part.RegionName.Should().Be("Docking", "choosing Region picks the first region");
+			options.ChosenRegionIndex.Should().Be(0, "the list shows the region picked");
+
+			await options.SelectAsync(SmallLog);
+
+			options.ChosenPart.Should().Be(PartKind.Whole);
+			options.HasRegions.Should().BeFalse();
+			options.Part.IsWhole.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenTheyAreNotARange_ThenOpenIsDisabledAndSaysWhy()
+		{
+			// For lines, the analyst types a first and last line. An invalid range disables Open and says why (#1214).
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+
+			options.FirstLine = "40";
+			options.LastLine = "10";
+
+			options.ChosenPart.Should().Be(PartKind.Lines, "typing a line picks Lines");
+			options.CanOpen.Should().BeFalse();
+			options.PartError.Should().Contain("before the first");
+
+			options.LastLine = "x";
+			options.CanOpen.Should().BeFalse();
+			options.PartError.Should().Contain("whole number");
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenTheyAreARange_ThenThoseLinesAreOpened()
+		{
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+
+			options.FirstLine = "10";
+			options.LastLine = "40";
+			options.Part.Lines.Should().Be(new Range(10, 40));
+			options.CanOpen.Should().BeTrue();
+			options.PartError.Should().BeEmpty();
+
+			options.LastLine = string.Empty;
+			options.Part.IsToEndOfLog.Should().BeTrue("an empty last line is the end of the log");
+			options.Part.Lines.Start.Value.Should().Be(10);
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenAnotherLogIsSelected_ThenTheWholeLogIsChosenAndTheLinesCleared()
+		{
+			// As in the proof of concept (#1209).
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+			options.FirstLine = "10";
+
+			await options.SelectAsync(LargeLog);
+
+			options.ChosenPart.Should().Be(PartKind.Whole);
+			options.Part.IsWhole.Should().BeTrue();
+			options.FirstLine.Should().BeEmpty("the lines typed were for the other log");
+		}
+
+		[TestMethod]
+		public async Task GivenLinesTyped_WhenTheBrowserSelectsTheSameLogAgain_ThenTheLinesAreKept()
+		{
+			// Refreshing, sorting or filtering the browser's list selects nothing, then the same log again, as a new item.
+			var options = new OpenAsOptionsViewModel(Advise);
+			await options.SelectAsync(SmallLog);
+			options.FirstLine = "10";
+			options.LastLine = "40";
+
+			await options.SelectAsync(null);
+			await options.SelectAsync(Log("Small.log"));
+
+			options.ChosenPart.Should().Be(PartKind.Lines);
+			options.Part.Lines.Should().Be(new Range(10, 40));
+		}
+
+		[TestMethod]
+		public async Task GivenLogsWithAndWithoutASidecar_WhenSelected_ThenTheDialogSaysWhatTheirSidecarsHold()
+		{
+			// The analyst knows why no section or region can be picked (#1209).
+			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
+
+			await options.SelectAsync(LargeLog);
+			options.PartsStatus.Should().Be("Its sidecar lists 2 sections and 1 named region.");
+
+			await options.SelectAsync(SmallLog);
+			options.PartsStatus.Should().Be("No sidecar, so no sections or regions.");
+		}
+
+		[TestMethod]
+		public async Task GivenSidecarsThatListNothingOrCantBeRead_WhenSelected_ThenTheDialogSaysSo()
+		{
+			// Regions marked without names can't be opened by name, so they aren't counted.
+			var options = new OpenAsOptionsViewModel(Advise, file => file == SmallLog
+				? new SidecarParts(true, Array.Empty<LogPart>())
+				: throw new NotSupportedException("This file's sidecar is not compatible with this version of the application."));
+
+			await options.SelectAsync(SmallLog);
+			options.PartsStatus.Should().Be("Its sidecar lists no named sections or regions.");
+
+			await options.SelectAsync(LargeLog);
+			options.PartsStatus.Should().StartWith("Its sidecar can't be read");
+			options.CanOpen.Should().BeTrue("the whole log can still be opened");
+		}
+
+		[TestMethod]
+		public async Task GivenAnOnlineOnlyLog_WhenSelected_ThenItsSidecarIsNotRead()
+		{
+			// Reading an online-only file downloads it from OneDrive, so its sidecar is not read just because it is selected (#1209).
+			var onlineOnlyLog = new BrowserItem(Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Cloud.log")), "Cloud.log", ItemKind.File, size: 1_000, isOnlineOnly: true);
+			var options = new OpenAsOptionsViewModel(Advise, _ => throw new InvalidOperationException("The sidecar of an online-only log was read."));
+
+			await options.SelectAsync(onlineOnlyLog);
+
+			options.PartsStatus.Should().Contain("online only");
+			options.HasSections.Should().BeFalse();
+			options.CanOpen.Should().BeTrue("the whole log can still be opened");
+		}
+
+		/// <summary>
+		/// The large log's sidecar lists two level-1 sections and one region; the small log has no sidecar.
+		/// </summary>
+		private static SidecarParts ReadParts(BrowserItem file)
+		{
+			return file == LargeLog
+				? new SidecarParts(true, new[]
+				{
+					LogPart.ForSection("Startup", new Range(1, 119)),
+					LogPart.ForSection("Shutdown", new Range(300, int.MaxValue)),
+					LogPart.ForRegion("Docking", new Range(10, 40)),
+				})
+				: SidecarParts.NoSidecar;
+		}
+
 		/// <summary>
 		/// 8 GB is free: the small log needs 1 GB, the large one 10 GB.
 		/// </summary>

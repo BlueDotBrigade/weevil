@@ -50,7 +50,7 @@
 #endif
 
 			private readonly string _sourceFilePath;
-			private readonly int _startAtLineNumber;
+			private int _startAtLineNumber;
 
 			private bool _isUsingUserDefinedContext;
 			private ContextDictionary _userDefinedContext;
@@ -178,8 +178,10 @@
 			}
 
 			/// <summary>
-			/// Keeps the session, the flags and the telemetry recorder of an engine this one replaces, as Reload does (#1013, #1107, #1185).
-			/// The session's state, such as comments, pins, bookmarks, regions and remarks, is then not loaded from the sidecar again.
+			/// Keeps the session, the flags and the telemetry recorder of an engine this one replaces, as Reload does (#1013, #1107, #1185),
+			/// and asks for the same part of the log (#1219).
+			/// The session's state, such as comments, pins, bookmarks, regions and remarks, is then not loaded from the sidecar again,
+			/// so a region or section is found again by name among the session's.
 			/// </summary>
 			public CoreEngineBuilder UsingStateOf(CoreEngine previous)
 			{
@@ -193,7 +195,24 @@
 				_telemetryRecorder = previous._telemetryRecorder;
 				_displayPath = previous.DisplayPath;
 
+				LoadCriteria criteria = previous.LoadCriteria;
+				_startAtLineNumber = criteria.StartAtLineNumber;
+				_range = criteria.Range;
+				_regionName = criteria.RegionName;
+				_sectionName = criteria.SectionName;
+				_maxRecords = criteria.MaxRecords;
+
 				return this;
+			}
+
+			/// <summary>
+			/// Throws when the region or section asked for can't be found, so Reload fails before it lets go of the records (#1219).
+			/// </summary>
+			/// <exception cref="KeyNotFoundException">No region or level-1 section has the name asked for.</exception>
+			/// <exception cref="InvalidOperationException">Both a region and a section were named.</exception>
+			public void CheckPart()
+			{
+				_ = GetPart(new SidecarManager(_sourceFilePath));
 			}
 
 			/// <summary>
@@ -293,6 +312,7 @@
 				ICoreExtension coreExtension = null;
 				LineIndex lineIndex;
 				LogFileSource source;
+				LogPart part;
 
 				var maxRecords = _maxRecords;
 				RecordList records;
@@ -331,7 +351,8 @@
 					recordState = _recordState ?? new RecordState(session.Annotations, new FlagSet(lineIndex.LineCount));
 
 					var startAtLineNumber = _startAtLineNumber >= 1 ? _startAtLineNumber : FirstRecordLineNumber;
-					Range lineNumberRange = GetLineNumberRange(GetRequestedRange(sidecarManager));
+					part = GetPart(sidecarManager);
+					Range lineNumberRange = part.Lines;
 
 					// A full open, from line 1 with no range and no limit, can reuse the record table saved with the index, and saves it (#1023).
 					var isFullOpen = startAtLineNumber == FirstRecordLineNumber && lineNumberRange.Equals(Range.All) && maxRecords == int.MaxValue;
@@ -421,6 +442,8 @@
 					_storageMode,
 					source,
 					_displayPath,
+					new LoadCriteria(_startAtLineNumber, _range, _regionName, _sectionName, _maxRecords),
+					part,
 					hasReadLog: true);
 			}
 
@@ -473,59 +496,117 @@
 			}
 
 			/// <summary>
-			/// Returns the line numbers asked for: those of the region or section named, or else the range.
+			/// Returns the part of the log asked for, with the line numbers to load: those of the region or section named, or else the range,
+			/// combined with the start line.
 			/// </summary>
+			/// <remarks>
+			/// When Reload keeps the session, a region or section is found among the session's, since they may have changed since the log was opened (#1219):
+			/// otherwise among those the sidecar lists.
+			/// </remarks>
 			/// <exception cref="InvalidOperationException">Both a region and a section were named.</exception>
-			private Range GetRequestedRange(SidecarManager sidecarManager)
+			/// <exception cref="KeyNotFoundException">No region or level-1 section has the name asked for.</exception>
+			private LogPart GetPart(SidecarManager sidecarManager)
 			{
 				if (_regionName is not null && _sectionName is not null)
 				{
 					throw new InvalidOperationException($"Only one part of a log can be opened: the region `{_regionName}` or the section `{_sectionName}`, not both.");
 				}
 
-				return _regionName is not null ? GetRegionRange(sidecarManager)
-					: _sectionName is not null ? GetSectionRange(sidecarManager)
-					: _range;
-			}
-
-			/// <summary>
-			/// Returns the line numbers of the level-1 section named by <see cref="UsingSection"/>,
-			/// from its line to the line before the next level-1 section, or to the end of the log.
-			/// </summary>
-			/// <exception cref="KeyNotFoundException">The sidecar lists no level-1 section with that name.</exception>
-			private Range GetSectionRange(SidecarManager sidecarManager)
-			{
-				List<Section> sections = new TableOfContents(sidecarManager.LoadSections()).Sections
-					.Where(s => s.Level == 1)
-					.ToList();
-				var index = sections.FindIndex(s => string.Equals(s.Name, _sectionName, StringComparison.OrdinalIgnoreCase));
-
-				if (index < 0)
+				if (_regionName is not null)
 				{
-					var names = sections.Count == 0 ? "none" : string.Join(", ", sections.Select(s => $"`{s.Name}`"));
-					throw new KeyNotFoundException($"The log's sidecar lists no level-1 section named `{_sectionName}`. Its level-1 sections: {names}.");
+					Region region = FindRegion(sidecarManager);
+					return LogPart.ForRegion(region.Name, GetLineNumberRange(new Range(region.Minimum.LineNumber, region.Maximum.LineNumber)));
 				}
 
-				var lastLine = index + 1 < sections.Count ? sections[index + 1].LineNumber - 1 : int.MaxValue;
-				return new Range(sections[index].LineNumber, lastLine);
+				if (_sectionName is not null)
+				{
+					LogPart section = FindSection(sidecarManager);
+					return LogPart.ForSection(section.SectionName, GetLineNumberRange(section.Lines));
+				}
+
+				return LogPart.ForLines(GetLineNumberRange(_range));
 			}
 
 			/// <summary>
-			/// Returns the line numbers of the region named by <see cref="UsingRegion"/>, from its first line to its last.
+			/// The start of the message that says no region or section has the name asked for, which names where they were looked for.
 			/// </summary>
-			/// <exception cref="KeyNotFoundException">The sidecar lists no region with that name.</exception>
-			private Range GetRegionRange(SidecarManager sidecarManager)
+			private string ListedBy => _session is null ? "The log's sidecar lists" : "The log now lists";
+
+			/// <summary>
+			/// Returns the level-1 section named by <see cref="UsingSection"/>, with its line numbers.
+			/// </summary>
+			/// <exception cref="KeyNotFoundException">No level-1 section has that name.</exception>
+			private LogPart FindSection(SidecarManager sidecarManager)
 			{
-				List<Region> regions = sidecarManager.LoadRegions();
+				List<LogPart> sections = GetSections(_session is null
+					? new TableOfContents(sidecarManager.LoadSections()).Sections
+					: _session.TableOfContents.Sections);
+				LogPart section = sections.FirstOrDefault(s => string.Equals(s.SectionName, _sectionName, StringComparison.OrdinalIgnoreCase));
+
+				if (section is null)
+				{
+					var names = sections.Count == 0 ? "none" : string.Join(", ", sections.Select(s => $"`{s.SectionName}`"));
+					throw new KeyNotFoundException($"{ListedBy} no level-1 section named `{_sectionName}`. Its level-1 sections: {names}.");
+				}
+
+				return section;
+			}
+
+			/// <summary>
+			/// Lists the parts of a log that can be opened by name, from its sidecar alone (#1212, #1213): its level-1 sections, then its named regions.
+			/// </summary>
+			/// <remarks>
+			/// A name is found by its first match, ignoring case, so only the first section or region with a name is listed.
+			/// </remarks>
+			/// <exception cref="NotSupportedException">The sidecar is not compatible with this version of Weevil.</exception>
+			internal static IReadOnlyList<LogPart> ReadParts(string sourceFilePath)
+			{
+				new SidecarManager(sourceFilePath).Load(null, null, out _, out _, out _, out _, out List<Section> tableOfContents, out List<Region> regions, out _);
+
+				return GetSections(new TableOfContents(tableOfContents).Sections)
+					.DistinctBy(s => s.SectionName, StringComparer.OrdinalIgnoreCase)
+					.Concat(regions
+						.Where(r => !string.IsNullOrWhiteSpace(r.Name))
+						.DistinctBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+						.Select(r => LogPart.ForRegion(r.Name, new Range(r.Minimum.LineNumber, r.Maximum.LineNumber))))
+					.ToList();
+			}
+
+			/// <summary>
+			/// Returns the level-1 sections of a table of contents, in its order (#1212). Each runs from its line to the line before the next level-1 section,
+			/// or to the end of the log, so it holds the sections nested in it. One without a name can't be asked for, so it isn't listed, but it still ends the one before it.
+			/// </summary>
+			private static List<LogPart> GetSections(IReadOnlyList<Section> tableOfContents)
+			{
+				List<Section> sections = tableOfContents
+					.Where(s => s.Level == 1)
+					.ToList();
+
+				return sections
+					.Select((s, index) => (s.Name, Lines: new Range(s.LineNumber, index + 1 < sections.Count ? sections[index + 1].LineNumber - 1 : int.MaxValue)))
+					.Where(s => !string.IsNullOrWhiteSpace(s.Name))
+					.Select(s => LogPart.ForSection(s.Name, s.Lines))
+					.ToList();
+			}
+
+			/// <summary>
+			/// Returns the region named by <see cref="UsingRegion"/>.
+			/// </summary>
+			/// <exception cref="KeyNotFoundException">No region has that name.</exception>
+			private Region FindRegion(SidecarManager sidecarManager)
+			{
+				IReadOnlyList<Region> regions = _session is null
+					? sidecarManager.LoadRegions()
+					: _session.Regions.Regions;
 				Region region = regions.FirstOrDefault(r => string.Equals(r.Name, _regionName, StringComparison.OrdinalIgnoreCase));
 
 				if (region is null)
 				{
 					var names = regions.Count == 0 ? "none" : string.Join(", ", regions.Select(r => $"`{r.Name}`"));
-					throw new KeyNotFoundException($"The log's sidecar lists no region named `{_regionName}`. Its regions: {names}.");
+					throw new KeyNotFoundException($"{ListedBy} no region named `{_regionName}`. Its regions: {names}.");
 				}
 
-				return new Range(region.Minimum.LineNumber, region.Maximum.LineNumber);
+				return region;
 			}
 
 			/// <summary>

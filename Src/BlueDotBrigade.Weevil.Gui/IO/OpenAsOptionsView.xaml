@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:BlueDotBrigade.Weevil.Gui.Converters">
-    <!-- Weevil's options, which the Open As dialog shows beside its file browser (#1215). -->
+    <!-- Weevil's options, which the Open As dialog shows beside its file browser: the part of the log to open (#1214), then RAM or Disk (#1215). -->
     <UserControl.Resources>
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         <Style TargetType="TextBlock">
@@ -26,6 +26,45 @@
     <StackPanel>
         <TextBlock Text="Log" FontWeight="SemiBold" />
         <TextBlock x:Name="DetailsText" Text="{Binding Details}" AutomationProperties.Name="Log details" />
+
+        <!-- One way to narrow the log at a time (decision 5 of the #1157 plan). Picking a section or region, or typing a line, chooses it. -->
+        <StackPanel IsEnabled="{Binding HasFile}" Margin="0,10,0,0">
+            <TextBlock Text="Which part of the log should Weevil open?" FontWeight="SemiBold" />
+            <!-- What the sidecar holds, so the analyst knows why no section or region can be picked, as in the proof of concept (#1209). -->
+            <TextBlock x:Name="PartsStatusText" Text="{Binding PartsStatus}" Style="{StaticResource HiddenWhenEmpty}" />
+
+            <RadioButton x:Name="WholeLogRadioButton" GroupName="Part" Content="_Whole log" AutomationProperties.HelpText="{Binding PartsStatus}"
+                         IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Whole}" />
+
+            <RadioButton x:Name="SectionRadioButton" GroupName="Part" Content="_Section" IsEnabled="{Binding HasSections}"
+                         ToolTip="A level-1 section of the log's table of contents, with the sections inside it." ToolTipService.ShowOnDisabled="True"
+                         IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Section}" />
+            <ComboBox x:Name="SectionComboBox" ItemsSource="{Binding Sections}" SelectedIndex="{Binding ChosenSectionIndex, Mode=TwoWay}"
+                      IsEnabled="{Binding HasSections}" Margin="30,0,5,5" AutomationProperties.Name="Section"
+                      ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+
+            <RadioButton x:Name="RegionRadioButton" GroupName="Part" Content="Re_gion" IsEnabled="{Binding HasRegions}"
+                         ToolTip="A named region of the log." ToolTipService.ShowOnDisabled="True"
+                         IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Region}" />
+            <ComboBox x:Name="RegionComboBox" ItemsSource="{Binding Regions}" SelectedIndex="{Binding ChosenRegionIndex, Mode=TwoWay}"
+                      IsEnabled="{Binding HasRegions}" Margin="30,0,5,5" AutomationProperties.Name="Region"
+                      ToolTip="{Binding SelectedItem, RelativeSource={RelativeSource Self}}" />
+
+            <RadioButton x:Name="LinesRadioButton" GroupName="Part" Content="_Lines"
+                         IsChecked="{Binding ChosenPart, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Lines}" />
+            <StackPanel Orientation="Horizontal" Margin="30,0,5,5">
+                <TextBlock Text="From" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <TextBox x:Name="FirstLineTextBox" Text="{Binding FirstLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="80"
+                         AutomationProperties.Name="First line" />
+                <TextBlock Text="to" VerticalAlignment="Center" Margin="6,0" />
+                <TextBox x:Name="LastLineTextBox" Text="{Binding LastLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="80"
+                         ToolTip="Leave it empty to open to the end of the log."
+                         AutomationProperties.Name="Last line, or empty for the end of the log" />
+            </StackPanel>
+
+            <TextBlock x:Name="PartErrorText" Text="{Binding PartError}" Style="{StaticResource HiddenWhenEmpty}"
+                       FontWeight="SemiBold" Margin="30,0,5,5" />
+        </StackPanel>
 
         <StackPanel IsEnabled="{Binding HasFile}" Margin="0,10,0,0">
             <TextBlock Text="Where should Weevil keep the log's text while it is open?" FontWeight="SemiBold" />

@@ -24,7 +24,7 @@ How Weevil opens a log: the kinds of open, what each reads and writes beside the
 
 1. **Plugin:** `PluginFactory` picks the plugin from the log's path.
 2. **Line index:** `SavedIndex.Load` reads the `.idx` and checks it against the log ([below](#trusting-a-saved-index)). When it matches, only the bytes added since are scanned (`LineIndex.Update`); otherwise the whole log is (`LineIndex.Build`). The `.idx` is saved when the line index changed, unless it holds a table: saving would drop it, so a full open saves both.
-3. **Range:** a region or section is looked up in the sidecar (`SidecarManager.LoadRegions`, `LoadSections`).
+3. **Range:** a region or section is looked up in the sidecar (`SidecarManager.LoadRegions`, `LoadSections`), or, on Reload, in the session kept. The engine keeps what it was asked to load (`LoadCriteria`), and `IEngine.Part` says which part is open (`LogPart`, #1219).
 4. **Records:** a full open reads them through `SavedIndex.ReadAllRecords`: from the saved table, extended when the log grew, or else by parsing the log (`SerializedRecordRepository`, `LogLineReader`), whose parse and table it then saves with the line index. A partial open parses what it needs.
 5. **Sidecar:** `SidecarManager.Load` reads the `.xml`.
 6. **Context:** one given to the builder wins (`UsingContext`, which the GUI always passes from Open As), then the sidecar's, then the plugin's `DetermineContext`.
@@ -71,7 +71,7 @@ The table's sections are skipped here, so a damaged table costs only the table.
 
 ## The Kinds of Open
 
-Every open reads the sidecar once, twice for a region or section, and checks the `.idx` as [above](#trusting-a-saved-index).
+Every open reads the sidecar once, twice for a region or section (once on Reload, which looks in the session), and checks the `.idx` as [above](#trusting-a-saved-index).
 
 | Open | Reads | Checks | Writes |
 |---|---|---|---|
@@ -81,13 +81,16 @@ Every open reads the sidecar once, twice for a region or section, and checks the
 | Table rejected: damaged, or a block changed | As a reopen until the table is rejected, then the whole log, parsed. | Whether the bytes parsed are those of the saved parse: if not, the log changed in the middle. | The `.idx`, with the parse and table, after rebuilding the line index when the log changed in the middle. |
 | Another plugin or build, or the other mode for a log RAM keeps as strings | The `.idx`'s line index, then the whole log, parsed. | Only the parser, builds and mode: the table is not read. | The `.idx`, with the new parse and table. |
 | The log fails to be read while the table is checked | As a reopen until the read fails, then the whole log, parsed, which usually fails too. | As a reopen. | Nothing, when the parse makes the same table: the saved one is kept. |
-| Reload | As a full open. | As a full open. | As a full open, after deleting the `.idx` when a read on disk found the log changed. |
+| Reload | As the open it repeats: full or partial. | As the open it repeats. | As the open it repeats, after deleting the `.idx` when a read on disk found the log changed. |
 | Partial | The `.idx`'s line index. The log up to the end of the range or the limit. | Only the `.idx`, as every open does. | The `.idx`, only when its line index changed and it holds no table. |
 | Any, in the temporary folder | As the same open elsewhere. | As the same open elsewhere. | Nothing. |
 
 - **Reopen** (#1023): in RAM, the blocks checked fill the chunks (`SavedTableReader`). On disk, they are only checked, and the chunks read back later through a `LogFileSource` made from the saved checksums (`LogFileSource.Create`).
 - **A grown log:** `GrownLogParser` keeps the rows before the last chunk, parses from its first record to the end, and the whole longer table is saved again. A table with no chunk, whose rows all keep a string, cannot say where to resume, so its log is parsed in full.
-- **Reload** (`Engine.Reload`) is always a full open: it keeps no start line, range, region, section or limit of the open it replaces.
+- **Reload** (`Engine.Reload`) asks for what the open it replaces asked for: its start line, range, region, section and limit (#1219). So it reloads a full open in full, and a partial open as the same part of the log as it is now:
+  - a region or section is found again by name in the session kept, whose regions and table of contents may have changed since the log opened. When the name is gone, Reload throws a `KeyNotFoundException` before it lets go of the records, so they stay;
+  - lines from a start line run to the new end of the log, so appended lines appear;
+  - a range of lines gives the same lines.
   - In disk mode, when a read found the log changed (`LogFileSource.HasChanged`), it first deletes the `.idx` (`SavedIndex.Delete`), so the log is indexed and parsed again ([DiskMode.md](DiskMode.md#a-log-that-changed)).
   - It keeps the session in memory (#1107). Its context is read from the sidecar again, or worked out by the plugin.
   - Core does not save the sidecar first; the GUI does.
@@ -95,6 +98,8 @@ Every open reads the sidecar once, twice for a region or section, and checks the
   - A start line (`Engine.UsingPath(path, line)`) starts reading at the line's byte offset, from the line index (#977).
   - Without a start line, a range (`UsingRange`), region (`UsingRegion`, #1213) or section (`UsingSection`, #1212) reads from the top. Each stops after its last line. A limit (`UsingLimit`) stops after that many records.
   - It trusts the line index on its head and tail hashes alone, so it cannot see a change in the middle of the log.
+  - `Engine.ReadParts` lists, from the sidecar alone, the parts that can be opened by name: the level-1 sections, each with its lines, then the named regions. A region without a name, such as one marked with Mark Start and Mark End, can't be asked for, so it isn't listed.
+  - Weevil's Open As dialog offers the whole log, one of those sections or regions, or a range of lines typed by the analyst, one at a time (#1214). It says what the sidecar holds: none, how many sections and regions, or why it can't be read. For a log in a zip, it lists the parts from the sidecar kept beside the copy of an earlier open, or else from the one in the zip. An online-only file's sidecar isn't read, since reading it would download it. Selecting another log goes back to the whole log, as the proof of concept does (#1209). The part chosen wins over a range from a plugin's own Open As window. A section or region opens by name; lines start reading at the first line's byte offset.
 - **RAM and disk** (#1025): both modes compute each block's checksum while parsing, and save `.idx` files of the same format. For UTF-8, and UTF-16 in the computer's byte order, both modes make the same table: its rows keep the log's bytes, and a string only for a record a plugin made itself or whose text it changed. So a reopen in the other mode reuses it, through its own mode's path (#1296). For UTF-16 in the other byte order and UTF-32, RAM keeps a string for each record, so switching modes parses again, and replaces the table. Both modes keep the log's `LogFileSource` once open: its path and the checksum of each 64 KB block, about 8 bytes per block, and no file handle. Only disk mode reads through it, and it checks every block it reads back ([DiskMode.md](DiskMode.md#reading-a-log-on-disk)). Core tells the modes apart by `StorageMode`, never by whether a source is set; only the engine without records that Reload uses has none, as would a log read from a stream that is not a file (#1255).
 
 ## Stale or Broken Files
