@@ -499,7 +499,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[WorkItem(1217)]
 		public void GivenNoOpenLog_WhenTheOpenButtonIsPressed_ThenOpenAsStartsInTheLastFolderUsed()
 		{
-			// Given none, the dialog box service shows the last folder used.
+			// Given none, the dialog shows the most recent folder that still exists (#1218).
 			var dialog = Substitute.For<IDialogBoxService>();
 			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 

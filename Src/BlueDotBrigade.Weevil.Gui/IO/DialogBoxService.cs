@@ -65,7 +65,7 @@ internal class DialogBoxService : IDialogBoxService
 
 	public bool TryShowOpenAs(string location, Action<string> checkBeforeOpening, out OpenAsChoice choice)
 	{
-		// The folders the analyst visited, most recent first, kept between runs: with nothing else to show, the dialog shows the last one (#1217).
+		// The folders the analyst visited, most recent first, kept between runs (#1218): with nothing else to show, the dialog shows the most recent one it can find (#1217).
 		IReadOnlyList<string> recentFolders = Settings.Default.RecentFolders?.Cast<string>().ToList() ?? new List<string>();
 
 		// Read on the UI thread once the dialog exists; the parts are listed off it.
@@ -80,7 +80,7 @@ internal class DialogBoxService : IDialogBoxService
 		{
 			Owner = Application.Current?.MainWindow,
 			Title = "Open",
-			InitialLocation = location ?? recentFolders.FirstOrDefault(),
+			InitialLocation = location,
 			RecentFolders = recentFolders,
 			FileTypes = new[] { LogFiles, FileTypeFilter.AllFiles },
 			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
