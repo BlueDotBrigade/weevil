@@ -33,12 +33,13 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 				return ReadParts(file.Location.FileSystemPath);
 			}
 
-			if (GetSafeName(file.Location) is not { } name)
+			// A name such as C:other.log would leave the folder, which extracting the log refuses too.
+			var name = file.Location.Name;
+
+			if (ContainerReader.GetPathInFolder(Path.Combine(copiesFolder, reader.GetCopyKey(file.Location)), name) is not { } copy)
 			{
 				return SidecarParts.NoSidecar;
 			}
-
-			var copy = Path.Combine(copiesFolder, reader.GetCopyKey(file.Location), name);
 
 			if (File.Exists($"{copy}.xml"))
 			{
@@ -56,7 +57,10 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			try
 			{
-				var log = Path.Combine(folder.FullName, name);
+				if (ContainerReader.GetPathInFolder(folder.FullName, name) is not { } log)
+				{
+					return SidecarParts.NoSidecar;
+				}
 
 				using (Stream source = reader.OpenRead(sidecar))
 				using (FileStream target = File.Create($"{log}.xml"))
@@ -97,20 +101,19 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		}
 
 		/// <summary>
-		/// The name of the plugin of a log in a zip, found from the log's first <see cref="PluginCheckBytes"/>, or <see langword="null"/> for a name a file can't have.
+		/// The name of the plugin of a log in a zip, found from the log's first <see cref="PluginCheckBytes"/>, or <see langword="null"/> for a name
+		/// that would leave the folder, such as C:other.log, which extracting the log refuses too.
 		/// </summary>
 		private static string FindZippedLogsPlugin(PluginFactory plugins, IContainerReader reader, BrowserItem file)
 		{
-			if (GetSafeName(file.Location) is not { } name)
-			{
-				return null;
-			}
-
 			DirectoryInfo folder = Directory.CreateTempSubdirectory("Weevil.OpenAs.");
 
 			try
 			{
-				var start = Path.Combine(folder.FullName, name);
+				if (ContainerReader.GetPathInFolder(folder.FullName, file.Location.Name) is not { } start)
+				{
+					return null;
+				}
 
 				using (Stream source = reader.OpenRead(file.Location))
 				using (FileStream target = File.Create(start))
@@ -143,19 +146,6 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			return File.Exists($"{logPath}.xml")
 				? new SidecarParts(true, Engine.ReadParts(logPath))
 				: SidecarParts.NoSidecar;
-		}
-
-		/// <summary>
-		/// The name of a file in a zip, or <see langword="null"/> when it would leave a folder it is put in, such as <c>C:other.log</c>,
-		/// which extracting it refuses too.
-		/// </summary>
-		private static string GetSafeName(Location location)
-		{
-			var name = location.Name;
-
-			return string.IsNullOrEmpty(name) || name.IndexOfAny(new[] { ':', '\\', '/' }) >= 0 || Path.IsPathRooted(name)
-				? null
-				: name;
 		}
 
 		/// <summary>

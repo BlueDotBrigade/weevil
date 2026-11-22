@@ -81,7 +81,7 @@ internal class DialogBoxService : IDialogBoxService
 			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
 			CheckBeforeOpening = checkBeforeOpening,
 			OptionsContent = host.View,
-			Notice = new OpenAsNoticeView { DataContext = new Uri(BlueDotBrigade.Weevil.Gui.Filter.FilterViewModel.LicensePath) },
+			Notice = new OpenAsNoticeView { DataContext = BlueDotBrigade.Weevil.Gui.Filter.FilterViewModel.LicensePath },
 			CanOpen = false,
 		};
 
