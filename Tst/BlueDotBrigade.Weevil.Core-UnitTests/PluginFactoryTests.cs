@@ -24,14 +24,21 @@ namespace BlueDotBrigade.Weevil
 		[TestCleanup]
 		public void DeleteFolder()
 		{
-			Directory.Delete(_folder, recursive: true);
+			try
+			{
+				Directory.Delete(_folder, recursive: true);
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// Windows keeps an assembly the test loaded until the process ends, so the folder stays in the temporary folder.
+			}
 		}
 
 		[TestMethod]
-		public void GivenAPluginAssemblyThatCantBeLoaded_WhenPluginsAreLoaded_ThenTheOthersAreStillLoaded()
+		public void GivenAPluginThatCantBeLoadedOrCreated_WhenPluginsAreLoaded_ThenTheOthersAreStillLoaded()
 		{
 			// One assembly that failed to load stopped every plugin, and so every open, in the GUI, the CLI and PowerShell (#1216):
-			// for example one built against another version of Weevil, or one that needs WPF.
+			// for example one built against another version of Weevil, or one that needs WPF. ThrowingPart's constructor throws, as one missing its license might.
 			File.Copy(typeof(PluginFactoryTests).Assembly.Location, Path.Combine(_folder, "Healthy.dll"));
 			SaveAssemblyThatCantBeLoaded(Path.Combine(_folder, "Broken.dll"));
 			File.WriteAllText(Path.Combine(_folder, "Native.dll"), "Not a .NET assembly, such as a native library a plugin uses.");
@@ -61,6 +68,15 @@ namespace BlueDotBrigade.Weevil
 		[Export(typeof(IPartUnderTest))]
 		public sealed class PartUnderTest : IPartUnderTest
 		{
+		}
+
+		[Export(typeof(IPartUnderTest))]
+		public sealed class ThrowingPart : IPartUnderTest
+		{
+			public ThrowingPart()
+			{
+				throw new InvalidOperationException("The plugin's license file is missing.");
+			}
 		}
 	}
 }

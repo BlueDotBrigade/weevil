@@ -44,7 +44,11 @@ Weevil's core engine, and so the CLI and PowerShell, load the plugin assemblies 
 
 A plugin uses Weevil's options in the Open As dialog unless it supplies its own (#1216). To supply them, put a separate assembly in a `Wpf` subdirectory (`Plugins\Wpf`) that exports `IOpenAsOptionsProvider` from `BlueDotBrigade.Weevil.Windows`, naming the plugin it is for. Only Weevil's window loads that subdirectory.
 
-A plugin assembly that fails to load is skipped, and Weevil's log names it: the other plugins still load.
+A provider is created off the UI thread, before the plugins in `Plugins` are loaded, so its constructor creates no WPF object and uses nothing from the plugin's own assembly; it does that work in `CreateOpenAsOptions` and `CreateOpenAsView`. Put any other assembly the provider needs beside it in `Plugins\Wpf`.
+
+`IPlugin.CheckCompatibility` may be called on several threads at once, as the analyst selects logs, so a plugin keeps no state between calls.
+
+A plugin assembly that fails to load, or a plugin whose constructor throws, is skipped, and Weevil's log says so: the other plugins still load.
 
 ## Additional Notes
 

@@ -11,6 +11,10 @@ namespace BlueDotBrigade.Weevil.Windows.IO
 	///
 	/// Weevil finds the log's plugin as it does to open the log: the first whose <see cref="IPlugin.CheckCompatibility"/> accepts it.
 	/// A log in a zip, or one stored online only, such as on OneDrive, uses Weevil's options: checking it would extract or download it.
+	///
+	/// Weevil creates the provider off the UI thread, before it loads the plugins in <c>Plugins</c>, and disposes the container that created it.
+	/// So its constructor must create no WPF object and use nothing from the plugin's own assembly, and it must not implement <see cref="System.IDisposable"/>:
+	/// do that work in <see cref="CreateOpenAsOptions"/> and <see cref="CreateOpenAsView"/>. Put any other assembly it needs beside it in <c>Plugins\Wpf</c>.
 	/// </remarks>
 	public interface IOpenAsOptionsProvider
 	{

@@ -32,6 +32,11 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// </summary>
 		private bool _isChoosing;
 
+		/// <summary>
+		/// The dialog is closed, so a selection still running is ignored.
+		/// </summary>
+		private bool _isDisposed;
+
 		/// <param name="weevilOptions">Weevil's options, shown unless the log's plugin supplies its own.</param>
 		/// <param name="weevilView">What the dialog shows for <paramref name="weevilOptions"/>.</param>
 		/// <param name="findProvider">Finds the options provider of a log's plugin, off the UI thread, or returns <see langword="null"/> when its plugin has none.</param>
@@ -74,6 +79,11 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// </remarks>
 		public async Task SelectAsync(BrowserItem file)
 		{
+			if (_isDisposed)
+			{
+				return;
+			}
+
 			var selection = ++_selection;
 
 			_isChoosing = true;
@@ -104,8 +114,13 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// <summary>
 		/// Disposes the plugins' options that can be, once the dialog is closed and how to open the log has been read.
 		/// </summary>
+		/// <remarks>
+		/// A selection still running, for example to find the plugin of a log on a slow share, is then ignored, so it creates no options that nothing would dispose.
+		/// </remarks>
 		public void Dispose()
 		{
+			_isDisposed = true;
+			_selection++;
 			Unwatch(this.Options);
 
 			foreach ((IOpenAsOptions options, _) in _pluginOptions.Values)
@@ -235,7 +250,10 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 		private void OnChanged()
 		{
-			this.Changed?.Invoke(this, EventArgs.Empty);
+			if (!_isDisposed)
+			{
+				this.Changed?.Invoke(this, EventArgs.Empty);
+			}
 		}
 	}
 }

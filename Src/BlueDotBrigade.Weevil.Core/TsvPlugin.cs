@@ -29,7 +29,8 @@
 				if (recordParser.TryParse(0, content, out IRecord record))
 				{
 					isCompatible = true;
-					Log.Default.Write(LogSeverityType.Information, $"A compatible core extension has been found. CoreExtension={coreExtension.Name}, SourceFilePath={sourceFilePath}");
+					// At Debug: the Open As dialog asks as each log is selected (#1216), and PluginFactory says which plugin it chose.
+					Log.Default.Write(LogSeverityType.Debug, $"A compatible core extension has been found. CoreExtension={coreExtension.Name}, SourceFilePath={sourceFilePath}");
 				}
 			}
 

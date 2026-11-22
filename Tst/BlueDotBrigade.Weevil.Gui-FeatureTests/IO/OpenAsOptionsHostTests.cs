@@ -162,6 +162,26 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			provider.Options!.IsDisposed.Should().BeTrue();
 		}
 
+		[TestMethod]
+		public async Task GivenALogStillBeingChecked_WhenTheDialogCloses_ThenNoPluginOptionsAreCreated()
+		{
+			// Options created after the dialog closed would never be disposed, and could keep the log from opening (#1254).
+			using var finding = new ManualResetEventSlim();
+			var provider = new FakeProvider();
+			var host = new OpenAsOptionsHost(new FakeOptions(), "Weevil's view", file =>
+			{
+				finding.Wait(TimeSpan.FromSeconds(10));
+				return provider;
+			});
+
+			Task selecting = host.SelectAsync(PluginLog);
+			host.Dispose();
+			finding.Set();
+			await selecting;
+
+			provider.Created.Should().Be(0);
+		}
+
 		private static Func<BrowserItem, IOpenAsOptionsProvider?> FindProvider(FakeProvider provider)
 		{
 			return file => file == PluginLog ? provider : null;

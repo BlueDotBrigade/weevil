@@ -19,6 +19,8 @@
 		/// </summary>
 		private IReadOnlyList<IPlugin> _plugins;
 
+		private object _pluginsLock;
+
 		static PluginFactory()
 		{
 			var executingAssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -63,8 +65,11 @@
 		/// </summary>
 		/// <remarks>
 		/// Each assembly is loaded on its own, so one that fails to load, for example one built against another version of Weevil or one that needs WPF in the CLI,
-		/// is skipped with a warning that names it, rather than stopping every plugin and so every open (#1216). The assemblies loaded are composed together,
-		/// so a part may import another assembly's. When they can't be composed, the warning says why, and none of their parts is returned.
+		/// is skipped with a warning that names it, rather than stopping every plugin and so every open (#1216). Each part is created on its own too, so one whose
+		/// constructor throws is skipped with a warning. The assemblies loaded are composed together, so a part may import another assembly's.
+		/// When they can't be composed, the warning says why, and none of their parts is returned.
+		///
+		/// The parts are created on the calling thread, and the container that created them is disposed before they are returned, which disposes a part that is <see cref="IDisposable"/>.
 		/// </remarks>
 		/// <param name="folder">The folder whose assemblies are loaded. A missing folder has none.</param>
 		public static IReadOnlyList<T> LoadExports<T>(string folder)
@@ -88,9 +93,10 @@
 					_ = catalog.Parts.ToList();
 					catalogs.Add(catalog);
 				}
-				catch (BadImageFormatException e)
+				catch (BadImageFormatException e) when (!IsAssembly(file))
 				{
 					// Not a .NET assembly, such as a native library a plugin uses, as the folder's catalog skipped before (#1216).
+					// A .NET assembly that can't be loaded, for example one built for another processor, is warned about below.
 					catalog?.Dispose();
 					Log.Default.Write(LogSeverityType.Debug, e, $"A file in the plugin folder is not a .NET assembly, so it is skipped. File={file}");
 				}
@@ -103,22 +109,49 @@
 
 			using var aggregate = new AggregateCatalog(catalogs);
 			using var container = new CompositionContainer(aggregate);
+			var exports = new List<T>();
 
 			try
 			{
-				return container.GetExportedValues<T>().ToList();
+				foreach (Lazy<T> export in container.GetExports<T>())
+				{
+					// Each part on its own, so a plugin whose constructor throws, for example for want of a license file, is the only one skipped.
+					try
+					{
+						exports.Add(export.Value);
+					}
+					catch (Exception e)
+					{
+						Log.Default.Write(LogSeverityType.Warning, e, $"A plugin could not be created, so it is skipped. Folder={folder}, Export={typeof(T).Name}");
+					}
+				}
 			}
 			catch (Exception e)
 			{
-				Log.Default.Write(LogSeverityType.Warning, e, $"The plugins could not be created, so none is used. Folder={folder}, Export={typeof(T).Name}");
+				Log.Default.Write(LogSeverityType.Warning, e, $"The plugins could not be composed, so none is used. Folder={folder}, Export={typeof(T).Name}");
 				return Array.Empty<T>();
+			}
+
+			return exports;
+		}
+
+		private static bool IsAssembly(string file)
+		{
+			try
+			{
+				_ = System.Reflection.AssemblyName.GetAssemblyName(file);
+				return true;
+			}
+			catch (Exception e) when (e is BadImageFormatException or IOException or ArgumentException)
+			{
+				return false;
 			}
 		}
 
 		private IPlugin Create(string sourceFilePath, LogSeverityType foundSeverity, LogSeverityType notFoundSeverity)
 		{
 			// Once, even when two threads ask at the same time, as the Open As dialog may.
-			LazyInitializer.EnsureInitialized(ref _plugins, LoadPlugins);
+			LazyInitializer.EnsureInitialized(ref _plugins, ref _pluginsLock, LoadPlugins);
 
 			IPlugin compatiblePlugin = null;
 
