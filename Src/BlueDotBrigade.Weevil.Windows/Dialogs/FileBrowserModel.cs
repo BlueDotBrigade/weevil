@@ -242,6 +242,35 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		}
 
 		/// <summary>
+		/// Shows where the browser opens: the folder or zip <paramref name="initialLocation"/> names, or the file it names selected in its folder.
+		/// When it is <see langword="null"/>, the most recent folder that still exists, or else <paramref name="defaultLocation"/>.
+		/// </summary>
+		/// <remarks>
+		/// A recent folder that no longer exists, such as a folder deleted or a zip moved since it was used, is dropped from the list rather than shown as an error (#1218).
+		/// They are checked off the UI thread, since a folder on a share that doesn't answer blocks the call.
+		/// </remarks>
+		public async Task StartAsync(string initialLocation, string defaultLocation)
+		{
+			Task forgetting = ForgetMissingRecentFoldersAsync();
+
+			if (string.IsNullOrWhiteSpace(initialLocation))
+			{
+				await forgetting;
+				initialLocation = this.RecentFolders.FirstOrDefault()?.Location.ToString() ?? defaultLocation;
+			}
+
+			this.PathText = initialLocation;
+			await GoToPathTextAsync();
+
+			if (this.CurrentLocation is null)
+			{
+				await NavigateAsync(Location.Computer);
+			}
+
+			await forgetting;
+		}
+
+		/// <summary>
 		/// Goes to the path the analyst typed: a folder or zip is opened, and a file is selected in its folder.
 		/// </summary>
 		public async Task GoToPathTextAsync()
@@ -369,6 +398,20 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			this.SelectedItem = this.VisibleItems.FirstOrDefault(item => item.Name == selectedName);
 			OnPropertyChanged(nameof(this.StatusText));
+		}
+
+		/// <summary>
+		/// Drops the recent folders and zips that no longer exist. One visited meanwhile was put back at the top, as a new entry, so it stays.
+		/// </summary>
+		private async Task ForgetMissingRecentFoldersAsync()
+		{
+			List<Place> recent = this.RecentFolders.ToList();
+			List<Place> missing = await Task.Run(() => recent.Where(place => this.Reader.GetKind(place.Location) is null).ToList());
+
+			foreach (Place place in missing)
+			{
+				this.RecentFolders.Remove(place);
+			}
 		}
 
 		private void RememberRecent(Location location)

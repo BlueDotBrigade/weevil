@@ -53,7 +53,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		public IContainerReader Reader => _model.Reader;
 
 		/// <summary>
-		/// The folder, zip or file to show first: a file is selected in its folder. By default, the user's documents.
+		/// The folder, zip or file to show first: a file is selected in its folder.
+		/// By default, the most recent of <see cref="RecentFolders"/> that still exists, or else the user's documents.
 		/// </summary>
 		public string InitialLocation { get; set; }
 
@@ -100,18 +101,8 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		{
 			this.Loaded -= OnLoaded;
 
-			var initial = string.IsNullOrWhiteSpace(this.InitialLocation)
-				? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-				: this.InitialLocation;
-
-			_model.PathText = initial;
 			_isFocusingList = true;
-			await _model.GoToPathTextAsync();
-
-			if (_model.CurrentLocation is null)
-			{
-				await _model.NavigateAsync(Location.Computer);
-			}
+			await _model.StartAsync(this.InitialLocation, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
 		}
 
 		private void OnModelPropertyChanged(object sender, PropertyChangedEventArgs e)

@@ -10,7 +10,9 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 	{
 		private static readonly Location Logs = Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Logs"));
 		private static readonly Location Archive = Logs.Combine("Archive", entersContainer: false);
+		private static readonly Location Gone = Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Deleted"));
 
+		private readonly List<string> _folders = new List<string>();
 		private IContainerReader _reader = null!;
 		private FileBrowserModel _model = null!;
 
@@ -29,6 +31,15 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			}));
 
 			_model = new FileBrowserModel(_reader);
+		}
+
+		[TestCleanup]
+		public void DeleteFolders()
+		{
+			foreach (var folder in _folders)
+			{
+				Directory.Delete(folder, recursive: true);
+			}
 		}
 
 		[TestMethod]
@@ -227,6 +238,72 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			{
 				Directory.Delete(folder, recursive: true);
 			}
+		}
+
+		[TestMethod]
+		[WorkItem(1218)]
+		public async Task GivenARecentFolderThatNoLongerExists_WhenTheBrowserStarts_ThenItIsDroppedFromTheList()
+		{
+			Location kept = CreateFolder();
+			_model.RecentFolders.Add(Recent(Gone));
+			_model.RecentFolders.Add(Recent(kept));
+			FoldersExistBut(Gone);
+
+			await _model.StartAsync(kept.ToString(), defaultLocation: kept.ToString());
+
+			_model.Error.Should().BeNull("a folder that no longer exists is not shown as an error");
+			_model.RecentFolders.Select(place => place.Location).Should().Equal(kept);
+		}
+
+		[TestMethod]
+		[WorkItem(1218)]
+		public async Task GivenTheMostRecentFolderNoLongerExists_WhenTheBrowserStartsWithNoLocation_ThenTheNextRecentFolderIsShown()
+		{
+			Location next = CreateFolder();
+			_model.RecentFolders.Add(Recent(Gone));
+			_model.RecentFolders.Add(Recent(next));
+			FoldersExistBut(Gone);
+
+			await _model.StartAsync(initialLocation: null, defaultLocation: CreateFolder().ToString());
+
+			_model.CurrentLocation.Should().Be(next);
+			_model.Error.Should().BeNull();
+		}
+
+		[TestMethod]
+		[WorkItem(1218)]
+		public async Task GivenNoRecentFolderExists_WhenTheBrowserStartsWithNoLocation_ThenTheDefaultIsShown()
+		{
+			Location documents = CreateFolder();
+			_model.RecentFolders.Add(Recent(Gone));
+			FoldersExistBut(Gone);
+
+			await _model.StartAsync(initialLocation: null, defaultLocation: documents.ToString());
+
+			_model.CurrentLocation.Should().Be(documents);
+			_model.RecentFolders.Select(place => place.Location).Should().Equal(documents);
+		}
+
+		/// <summary>
+		/// A folder on disk, which a typed path needs, deleted when the test ends.
+		/// </summary>
+		private Location CreateFolder()
+		{
+			var folder = Directory.CreateTempSubdirectory("Weevil.FileBrowserModelTests.").FullName;
+			_folders.Add(folder);
+
+			return Location.ForFileSystem(folder);
+		}
+
+		private static Place Recent(Location location) => new Place(location.Name, string.Empty, location);
+
+		/// <summary>
+		/// Every location the reader is asked about is a folder, except <paramref name="missing"/>, which is gone.
+		/// </summary>
+		private void FoldersExistBut(Location missing)
+		{
+			_reader.GetKind(Arg.Any<Location>()).Returns(ItemKind.Folder);
+			_reader.GetKind(missing).Returns((ItemKind?)null);
 		}
 
 		private IEnumerable<string> Names() => _model.VisibleItems.Select(item => item.Name);
