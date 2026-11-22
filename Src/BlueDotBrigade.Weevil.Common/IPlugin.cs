@@ -11,6 +11,7 @@
 		/// <remarks>
 		/// May be called for many logs, and on several threads at once, on the same instance: the Open As dialog asks as the analyst selects logs (#1216).
 		/// So keep no state between calls, and read only what is needed to tell, since the analyst may select any file.
+		/// For a log in a zip, the dialog gives a temporary file of the same name that holds only the log's first 64 KB.
 		/// </remarks>
 		bool CheckCompatibility(string sourceFilePath);
 

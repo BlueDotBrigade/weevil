@@ -46,6 +46,11 @@ internal class DialogBoxService : IDialogBoxService
 	/// </remarks>
 	internal const string WpfPluginFolder = "Wpf";
 
+	/// <summary>
+	/// How much of a log in a zip is read to find its plugin, which tells its logs by their start (#1216).
+	/// </summary>
+	private const int PluginCheckBytes = 64 * 1024;
+
 	// Rolled logs, such as app.log.1, are logs too. Weevil's sidecar and index are not (decision 9 of the #1157 plan).
 	private static readonly FileTypeFilter LogFiles = new FileTypeFilter(
 		"Log files (*.log, *.log.1, *.txt, *.tsv, *.csv)",
@@ -71,7 +76,7 @@ internal class DialogBoxService : IDialogBoxService
 		// Weevil's options, unless the selected log's plugin shows its own (#1216). The providers are loaded once, off the UI thread, at the first selection.
 		var plugins = new PluginFactory();
 		var providers = new Lazy<IReadOnlyList<IOpenAsOptionsProvider>>(() => PluginFactory.LoadExports<IOpenAsOptionsProvider>(Path.Combine(PluginFactory.DirectoryPath, WpfPluginFolder)));
-		using var host = new OpenAsOptionsHost(options, new OpenAsOptionsView { DataContext = options }, file => FindOptionsProvider(plugins, providers.Value, file));
+		using var host = new OpenAsOptionsHost(options, new OpenAsOptionsView { DataContext = options }, file => FindOptionsProvider(plugins, providers.Value, reader, ExtractedLog.DefaultCopiesFolder, file));
 		var dialog = new BlueDotBrigade.Weevil.Windows.Dialogs.OpenAsDialog
 		{
 			Owner = Application.Current?.MainWindow,
@@ -120,19 +125,64 @@ internal class DialogBoxService : IDialogBoxService
 	/// Finds the options provider of the plugin of the log selected in the Open As dialog, when it has one (#1216). Runs off the UI thread.
 	/// </summary>
 	/// <remarks>
-	/// Without providers, as for most analysts, no log is read to find its plugin. A log in a zip, or one stored online only, uses Weevil's options:
-	/// a plugin reads the log to tell whether it is one of its own, which would extract or download it.
+	/// Without providers, as for most analysts, no log is read to find its plugin. A plugin tells its logs by their start, so for a log in a zip
+	/// only its first <see cref="PluginCheckBytes"/> are read from the zip, unless an earlier open kept a copy (#1253): the log is not extracted.
+	/// A log stored online only uses Weevil's options, since reading any of it would download it.
 	/// </remarks>
-	private static IOpenAsOptionsProvider FindOptionsProvider(PluginFactory plugins, IReadOnlyList<IOpenAsOptionsProvider> providers, BrowserItem file)
+	private static IOpenAsOptionsProvider FindOptionsProvider(PluginFactory plugins, IReadOnlyList<IOpenAsOptionsProvider> providers, IContainerReader reader, string copiesFolder, BrowserItem file)
 	{
-		if (providers.Count == 0 || file.Location.IsInArchive || file.IsOnlineOnly)
+		if (providers.Count == 0 || file.IsOnlineOnly)
 		{
 			return null;
 		}
 
-		var pluginName = plugins.Find(file.Location.FileSystemPath).Name;
+		var pluginName = file.Location.IsInArchive
+			? FindZippedLogsPlugin(plugins, reader, copiesFolder, file)
+			: plugins.Find(file.Location.FileSystemPath).Name;
 
 		return providers.FirstOrDefault(provider => string.Equals(provider.PluginName, pluginName, StringComparison.Ordinal));
+	}
+
+	/// <summary>
+	/// The name of the plugin of a log in a zip: from the copy an earlier open kept, or else from the log's first <see cref="PluginCheckBytes"/>,
+	/// read into a temporary file of the same name.
+	/// </summary>
+	private static string FindZippedLogsPlugin(PluginFactory plugins, IContainerReader reader, string copiesFolder, BrowserItem file)
+	{
+		var copy = Path.Combine(copiesFolder, reader.GetCopyKey(file.Location), file.Location.Name);
+
+		if (File.Exists(copy))
+		{
+			return plugins.Find(copy).Name;
+		}
+
+		DirectoryInfo folder = Directory.CreateTempSubdirectory("Weevil.OpenAs.");
+
+		try
+		{
+			var start = Path.Combine(folder.FullName, file.Location.Name);
+
+			using (Stream source = reader.OpenRead(file.Location))
+			using (FileStream target = File.Create(start))
+			{
+				var buffer = new byte[PluginCheckBytes];
+				var length = 0;
+				int read;
+
+				while (length < buffer.Length && (read = source.Read(buffer, length, buffer.Length - length)) > 0)
+				{
+					length += read;
+				}
+
+				target.Write(buffer, 0, length);
+			}
+
+			return plugins.Find(start).Name;
+		}
+		finally
+		{
+			TryDelete(folder);
+		}
 	}
 
 	/// <summary>
@@ -189,15 +239,22 @@ internal class DialogBoxService : IDialogBoxService
 		}
 		finally
 		{
-			try
-			{
-				folder.Delete(recursive: true);
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				// The parts were read; only a temporary copy of a sidecar is left behind, for example while a scanner holds it.
-				Log.Default.Write(LogSeverityType.Warning, e, $"Open As could not delete the temporary copy of a sidecar. Folder={folder.FullName}");
-			}
+			TryDelete(folder);
+		}
+	}
+
+	/// <summary>
+	/// Deletes a temporary folder of Open As. What it read is kept: only the temporary copy is left behind, for example while a scanner holds it.
+	/// </summary>
+	private static void TryDelete(DirectoryInfo folder)
+	{
+		try
+		{
+			folder.Delete(recursive: true);
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Default.Write(LogSeverityType.Warning, e, $"Open As could not delete a temporary copy. Folder={folder.FullName}");
 		}
 	}
 
