@@ -67,7 +67,8 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// </summary>
 		/// <remarks>
 		/// Call it off the UI thread. A file in a zip, or one that OneDrive keeps online only, is not read:
-		/// the first is not extracted until it is opened, and reading the second would download it. Its memory is then unknown, so RAM is suggested.
+		/// the first is not extracted until it is opened, and reading the second would download it.
+		/// Its memory is then estimated from its size alone (#1209), as the proof of concept did, so a large one still suggests Disk and warns about RAM.
 		/// </remarks>
 		public static OpenAsAdvice Read(BrowserItem file)
 		{
@@ -78,7 +79,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 				return new OpenAsAdvice(
 					file.Name,
 					new StorageUnit(file.Size ?? 0),
-					estimate: null,
+					file.Size is { } size ? Engine.EstimateMemory(new StorageUnit(size)) : null,
 					ComputerSnapshot.ReadAvailableMemory(),
 					isOnNetworkDrive: !file.Location.IsInArchive && IsNetworkPath(file.Location.FileSystemPath));
 			}

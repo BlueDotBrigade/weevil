@@ -1,6 +1,8 @@
 namespace BlueDotBrigade.Weevil.Gui.IO
 {
+	using System.IO;
 	using BlueDotBrigade.Weevil.IO;
+	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
 	[TestClass]
 	public class OpenAsAdviceTests
@@ -38,6 +40,20 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			advice.DefaultMode.Should().Be(StorageMode.Ram);
 			advice.GetWarning(StorageMode.Ram).Should().BeEmpty();
+		}
+
+		[TestMethod]
+		public void GivenALargeLogInAZip_WhenAdvised_ThenDiskIsSuggestedFromItsSizeAndRamWarns()
+		{
+			// A log in a zip isn't read before it opens, so RAM was always suggested, however large it was (#1209).
+			var zip = Path.Combine(Path.GetTempPath(), "Bundle.zip");
+			var log = new BrowserItem(Location.ForArchive(zip, "Huge.log"), "Huge.log", ItemKind.File, size: 1L << 55);
+
+			OpenAsAdvice advice = OpenAsAdvice.Read(log);
+
+			advice.Estimate.Should().NotBeNull("its size is known from the zip");
+			advice.DefaultMode.Should().Be(StorageMode.Disk);
+			advice.GetWarning(StorageMode.Ram).Should().NotBeEmpty();
 		}
 
 		[TestMethod]

@@ -229,6 +229,18 @@
 		}
 
 		/// <summary>
+		/// Estimates the memory a log of <paramref name="logSize"/> needs when opened in <see cref="IO.StorageMode.Ram"/>, from its size alone,
+		/// for a log that can't be read yet, such as one in a zip, or one a cloud service keeps online only (#1209).
+		/// </summary>
+		/// <remarks>
+		/// The size plus 34 bytes per record, assuming lines of 100 bytes. Most logs' lines are longer, so the estimate errs high, towards Disk. It reads nothing.
+		/// </remarks>
+		public static IO.StorageUnit EstimateMemory(IO.StorageUnit logSize)
+		{
+			return IO.MemoryEstimator.Estimate(logSize);
+		}
+
+		/// <summary>
 		/// Lists the parts of a log that can be opened on their own, from its sidecar, so a caller can offer them before the log opens (#1212, #1213).
 		/// </summary>
 		/// <remarks>

@@ -39,6 +39,15 @@ namespace BlueDotBrigade.Weevil.IO
 		}
 
 		[TestMethod]
+		public void GivenOnlyALogsSize_WhenEstimated_ThenEachAssumedLineAddsItsRecord()
+		{
+			// A log in a zip, or one stored online only, can't be read before it opens (#1209).
+			MemoryEstimator.Estimate(new StorageUnit(1_000)).Bytes.Should().Be(1_000 + 10 * BytesPerRecord);
+			MemoryEstimator.Estimate(StorageUnit.Zero).Bytes.Should().Be(0);
+			MemoryEstimator.Estimate(new StorageUnit(ulong.MaxValue)).Bytes.Should().Be(ulong.MaxValue, "the estimate is capped, never wrapped to a small one");
+		}
+
+		[TestMethod]
 		public void GivenALogLargerThanTheSampleWithoutAnIndex_WhenEstimated_ThenTheLinesAreCountedFromTheSample()
 		{
 			// 3 MB of 100-byte lines: the first megabyte holds about a third of them.
