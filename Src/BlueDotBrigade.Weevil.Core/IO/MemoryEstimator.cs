@@ -19,6 +19,11 @@ namespace BlueDotBrigade.Weevil.IO
 
 		public const int SampleLength = 1024 * 1024;
 
+		/// <summary>
+		/// The length of a line assumed when only a log's size is known. Short, as lines go, so the estimate errs high, towards Disk.
+		/// </summary>
+		public const int AssumedBytesPerLine = 100;
+
 		/// <exception cref="FileNotFoundException">The log does not exist.</exception>
 		/// <exception cref="IOException">The log cannot be read.</exception>
 		/// <exception cref="UnauthorizedAccessException">The log cannot be read.</exception>
@@ -46,6 +51,16 @@ namespace BlueDotBrigade.Weevil.IO
 				: CountLines(log, length);
 
 			return new StorageUnit((ulong)length + (ulong)lineCount * BytesPerRecord);
+		}
+
+		/// <summary>
+		/// Estimates from the log's size alone, assuming lines of <see cref="AssumedBytesPerLine"/> bytes: for a log that can't be read yet,
+		/// such as one in a zip, or one a cloud service keeps online only (#1209). Reads nothing.
+		/// </summary>
+		public static StorageUnit Estimate(StorageUnit logSize)
+		{
+			var lineCount = (ulong)Math.Ceiling(logSize.Bytes / (double)AssumedBytesPerLine);
+			return new StorageUnit(logSize.Bytes + lineCount * BytesPerRecord);
 		}
 
 		/// <summary>

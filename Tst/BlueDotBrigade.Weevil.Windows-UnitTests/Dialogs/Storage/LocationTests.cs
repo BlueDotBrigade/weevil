@@ -57,6 +57,37 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		}
 
 		[TestMethod]
+		public void GivenATypedPathThroughAZipInAZip_WhenParsed_ThenItIsTheFileInTheInnerZip()
+		{
+			// The path box, recent folders and the dialog's start read such paths; the proof of concept's self-test checked it (#1209).
+			var folder = Directory.CreateTempSubdirectory("Weevil.LocationTests.").FullName;
+
+			try
+			{
+				var zipPath = Path.Combine(folder, "Bundle.zip");
+				using (var memory = new MemoryStream())
+				{
+					using (var inner = new System.IO.Compression.ZipArchive(memory, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true))
+					{
+						using var writer = new StreamWriter(inner.CreateEntry("Old.log").Open());
+						writer.Write("old log\n");
+					}
+
+					using System.IO.Compression.ZipArchive outer = System.IO.Compression.ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Create);
+					using Stream entry = outer.CreateEntry("Nested/Inner.zip").Open();
+					entry.Write(memory.ToArray());
+				}
+
+				Location.Parse(Path.Combine(zipPath, "Nested", "Inner.zip", "Old.log"), IsZip)
+					.Should().Be(Location.ForArchive(zipPath, "Nested/Inner.zip", "Old.log"));
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
 		[WorkItem(1328)]
 		public void GivenTheRootOfADrive_WhenShown_ThenItKeepsItsSeparatorAndReadsBackAsTheRoot()
 		{
