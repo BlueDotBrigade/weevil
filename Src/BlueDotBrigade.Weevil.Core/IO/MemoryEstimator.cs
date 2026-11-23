@@ -59,8 +59,12 @@ namespace BlueDotBrigade.Weevil.IO
 		/// </summary>
 		public static StorageUnit Estimate(StorageUnit logSize)
 		{
-			var lineCount = (ulong)Math.Ceiling(logSize.Bytes / (double)AssumedBytesPerLine);
-			return new StorageUnit(logSize.Bytes + lineCount * BytesPerRecord);
+			// In whole numbers, and capped rather than wrapped, so no size gives a small estimate.
+			var bytes = logSize.Bytes;
+			var lineCount = bytes / AssumedBytesPerLine + (bytes % AssumedBytesPerLine == 0 ? 0UL : 1UL);
+			var recordBytes = lineCount > ulong.MaxValue / BytesPerRecord ? ulong.MaxValue : lineCount * BytesPerRecord;
+
+			return new StorageUnit(bytes > ulong.MaxValue - recordBytes ? ulong.MaxValue : bytes + recordBytes);
 		}
 
 		/// <summary>
