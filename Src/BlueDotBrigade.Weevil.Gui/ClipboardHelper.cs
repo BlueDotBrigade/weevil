@@ -19,33 +19,31 @@
 		private const string LongTimestampFormat =  @"yyyy-MM-dd HH:mm:ss.ffff";
 		private const string LongMissingTimestamp = @"---------- --:--:--.----";
 
-		public static void CopyRawFromSelected(IEngine engine, bool addLineNumberPrefix, IRecordFormatter formatter)
+		/// <summary>
+		/// Returns the text Copy puts on the clipboard for <paramref name="records"/>: one record per line, each formatted by <paramref name="formatter"/>.
+		/// </summary>
+		/// <remarks>
+		/// Reads each record's text, so on disk it is given records that hold their text, copied in the background (#1335).
+		/// </remarks>
+		/// <param name="addLineNumberPrefix">Each line starts with the record's line number.</param>
+		public static string FormatRaw(RecordList records, bool addLineNumberPrefix, IRecordFormatter formatter)
 		{
-			IEngine coreEngine = engine;
-			if (coreEngine != null)
-			{
-				string[] selectedItems;
+			if (records == null) throw new ArgumentNullException(nameof(records));
+			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
 
-				if (addLineNumberPrefix)
-				{
-					selectedItems = engine
-						.Selector
-						.GetSelected()
-						.Select(r => r.LineNumber + Delimiter + formatter.Format(r))
-						.ToArray();
-				}
-				else
-				{
-					selectedItems = engine
-						.Selector
-						.GetSelected()
-						.Select(r => formatter.Format(r)).ToArray();
-				}
+			IEnumerable<string> lines = addLineNumberPrefix
+				? records.Select(r => r.LineNumber + Delimiter + formatter.Format(r))
+				: records.Select(r => formatter.Format(r));
 
-				Clipboard.SetData(
-					DataFormats.Text,
-					string.Join(Environment.NewLine, selectedItems));
-			}
+			return string.Join(Environment.NewLine, lines);
+		}
+
+		/// <summary>
+		/// Puts <paramref name="text"/> on the clipboard. Called on the UI thread.
+		/// </summary>
+		public static void SetText(string text)
+		{
+			Clipboard.SetData(DataFormats.Text, text);
 		}
 
 		public static void CopySelectedComments(IEngine engine)

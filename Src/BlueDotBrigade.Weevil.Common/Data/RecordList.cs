@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Data
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Threading;
 
 	/// <summary>
 	/// A read-only list of records, in the order they were given, which callers read instead of an <see cref="ImmutableArray{T}"/> (#1136).
@@ -129,6 +130,38 @@ namespace BlueDotBrigade.Weevil.Data
 			}
 
 			return records.MoveToImmutable();
+		}
+
+		/// <summary>
+		/// Returns a copy of the records that holds their text, so reading the copy never reads the log: it can outlive the log (#1028, #1335).
+		/// </summary>
+		/// <remarks>
+		/// The text is read through one <see cref="ContentBuffer"/>, so a log on disk is read about once per chunk, not once per record (#1027).
+		/// On disk that reads the log, so the UI thread calls it in the background.
+		/// </remarks>
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		/// <exception cref="IO.LogFileChangedException">The log on disk changed, or can no longer be read.</exception>
+		public RecordList CopyWithText(CancellationToken cancellationToken = default)
+		{
+			var content = new ContentBuffer();
+			ImmutableArray<IRecord>.Builder copies = ImmutableArray.CreateBuilder<IRecord>(this.Count);
+
+			for (var position = 0; position < this.Count; position++)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				RecordFacts facts = GetFacts(position);
+
+				copies.Add(new Record(
+					GetLineNumber(position),
+					GetCreatedAt(position),
+					facts.Severity,
+					ReadContent(position, content).ToString(),
+					facts.IsMultiLine,
+					facts.WasGeneratedByUi));
+			}
+
+			return copies.MoveToImmutable();
 		}
 
 		/// <summary>
