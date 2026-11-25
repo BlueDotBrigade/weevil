@@ -207,7 +207,8 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 # ANALYZER RULES CLEARED BY #1260
 
 # A rule whose last warning has been fixed is an error, so the build refuses a new one.
-# Weevil.ruleset must not turn it off: a rule set overrides this file for the projects that use it.
+# Weevil.ruleset has no entry for it, so the two can't disagree: Microsoft leaves undefined which severity wins when they do
+# (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/configuration-files#precedence).
 # Doc/Research/.editorconfig keeps them warnings for the research projects, which are dated records.
 
 # Use explicit type (#1270)
