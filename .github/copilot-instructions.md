@@ -20,6 +20,7 @@ Src/BlueDotBrigade.Weevil.Plugins     # Plugin infrastructure
 Src/BlueDotBrigade.Weevil.Installer   # WiX installer
 Src/BlueDotBrigade.Weevil.TestTools   # Shared test helpers and utilities
 Src/BlueDotBrigade.Weevil.Windows     # Windows-specific platform abstractions
+Src/BlueDotBrigade.Weevil.Windows.Dialogs  # The generic Open As dialog; references nothing but WPF
 Tst/                                  # Unit tests, feature tests, and functional tests
 Doc/                                  # Supporting documentation; Doc/README.md says what goes where
 Dep/Scripts                           # Developer scripts, such as setting up a developer's computer
@@ -40,9 +41,10 @@ Dep/TestHarnesses                     # Console programs that measure Weevil's R
   - The WPF application is a thin layer over `Core`. Logic that the CLI, PowerShell or a test would also need belongs in `Core`, for example flagging records or putting a comment on the selected records.
   - A ViewModel may hold logic that exists only to make the screen work, for example reading the clipboard, showing a message, editing the filter box or building rows. Keep that logic out of `Core`.
   - Every UI is a facade: a feature the WPF application offers should also be reachable from the CLI, PowerShell or a test, through `Core`.
-- Keep WPF out of every project but the WPF ones: `BlueDotBrigade.Weevil.Gui`, `BlueDotBrigade.Weevil.Windows` and their tests. `Core`, `Common`, the CLI, PowerShell, `TestTools` and a plugin's `IPlugin` assembly target `net10.0` without WPF, because:
+- Keep WPF out of every project but the WPF ones: `BlueDotBrigade.Weevil.Gui`, `BlueDotBrigade.Weevil.Windows`, `BlueDotBrigade.Weevil.Windows.Dialogs` and their tests. `Core`, `Common`, the CLI, PowerShell, `TestTools` and a plugin's `IPlugin` assembly target `net10.0` without WPF, because:
   - many environments that build, test and run Weevil can't run WPF, such as Claude Code's cloud sessions, GitHub Codespaces and Linux CI runners;
   - every feature must be callable from the CLI, PowerShell and the WPF application alike.
+- `BlueDotBrigade.Weevil.Windows.Dialogs` is a generic control that other Blue Dot Brigade applications will share (#1157, #1333). It references nothing but WPF: no Weevil project, no MaterialDesign, no Metalama. Its change notification is written by hand, and it reports what it would log through its host. Weevil's own options and plugin interfaces for it belong in `BlueDotBrigade.Weevil.Windows` or the GUI.
 - A plugin's WPF parts, such as its own options in the Open As dialog (`IOpenAsOptionsProvider`, #1216), go in a separate assembly in `Plugins\Wpf`, which only the WPF application loads. `Core` loads only the assemblies directly in `Plugins`, and skips one that fails to load. See `Src/BlueDotBrigade.Weevil.Plugins/ReadMe.md`.
 - Apply the DRY (Don't Repeat Yourself) principle to code, configuration, and documentation. Avoid duplicating logic, data, or rules across multiple locations.
 - Prefer simplifying repository configuration so all .csproj files are configured consistently when feasible (avoid special-case project settings unless required).

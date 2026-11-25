@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<!-- Tests the WPF library's types that need no window, such as the file browser's model (#1210). It runs only on Windows, as the library does. -->
+	<!-- Tests the WPF libraries' types that need no window, such as the file browser's model (#1210, #1333). It runs only on Windows, as the libraries do. -->
 	<PropertyGroup>
 		<TargetFramework>$(WeevilTargetFramework)-windows</TargetFramework>
 		<OutputType>Library</OutputType>
@@ -25,5 +25,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Windows\BlueDotBrigade.Weevil.Windows.csproj" />
+		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Windows.Dialogs\BlueDotBrigade.Weevil.Windows.Dialogs.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The generic Open As dialog and its file browser (#1157). It references nothing but WPF, so the compiler keeps it free of Weevil, MaterialDesign and Metalama,
+    and it can move to a library other Blue Dot Brigade applications share (decision 11 of the #1157 plan, #1333). Change notification is written by hand.
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(WeevilTargetFramework)-windows</TargetFramework>
+    <Platforms>x64</Platforms>
+    <PackageId>BlueDotBrigade.Weevil.Windows.Dialogs</PackageId>
+    <RootNamespace>BlueDotBrigade.Weevil.Windows.Dialogs</RootNamespace>
+    <AssemblyName>BlueDotBrigade.Weevil.Windows.Dialogs</AssemblyName>
+    <Version>$(WeevilReleaseVersion)</Version>
+    <Authors>BlueDotBrigade;</Authors>
+    <Copyright>© 2026 Blue Dot Brigade</Copyright>
+    <Company>Blue Dot Brigade</Company>
+    <Description>A generic Open As dialog for WPF: a file browser that treats zips as folders, and an area for the host's options.</Description>
+    <IsPackable>true</IsPackable>
+    <PackageReleaseNotes>This library is currently a work in progress. As a result, backwards compatibility is not guaranteed.</PackageReleaseNotes>
+    <PackageTags>BlueDotBrigade</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <UseWPF>True</UseWPF>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>BlueDotBrigade.Weevil.Windows-UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
