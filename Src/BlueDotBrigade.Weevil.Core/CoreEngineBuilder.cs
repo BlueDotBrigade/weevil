@@ -546,7 +546,7 @@
 				if (section is null)
 				{
 					var names = sections.Count == 0 ? "none" : string.Join(", ", sections.Select(s => $"`{s.SectionName}`"));
-					throw new KeyNotFoundException($"{ListedBy} no level-1 section named `{_sectionName}`. Its level-1 sections: {names}.");
+					throw new KeyNotFoundException($"{this.ListedBy} no level-1 section named `{_sectionName}`. Its level-1 sections: {names}.");
 				}
 
 				return section;
@@ -603,7 +603,7 @@
 				if (region is null)
 				{
 					var names = regions.Count == 0 ? "none" : string.Join(", ", regions.Select(r => $"`{r.Name}`"));
-					throw new KeyNotFoundException($"{ListedBy} no region named `{_regionName}`. Its regions: {names}.");
+					throw new KeyNotFoundException($"{this.ListedBy} no region named `{_regionName}`. Its regions: {names}.");
 				}
 
 				return region;

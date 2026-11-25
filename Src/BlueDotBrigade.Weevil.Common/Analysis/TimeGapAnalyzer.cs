@@ -162,7 +162,7 @@
 					state.SetFlagged(currentRecord, true);
 
 					state.AppendComment(						currentRecord,
-						$"{CommentLabel}: {elapsedTime.ToHumanReadable()}");
+						$"{this.CommentLabel}: {elapsedTime.ToHumanReadable()}");
 				}
 			}
 		}

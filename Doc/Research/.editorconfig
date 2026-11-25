@@ -1,0 +1,5 @@
+# The research projects are dated records (Doc/README.md): they keep, as warnings, the rules the rest of the repository makes errors.
+[*.cs]
+
+# Add 'this' qualification (#1272)
+dotnet_diagnostic.IDE0009.severity = warning

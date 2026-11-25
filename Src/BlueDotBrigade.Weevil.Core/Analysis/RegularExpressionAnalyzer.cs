@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 		protected bool TryGetExpressions<TExpression>(RecordList records, IUserDialog userDialog, out ImmutableArray<TExpression> expressions)
 			where TExpression : IExpression
 		{
-			expressions = userDialog.TryGetExpressions(DefaultExpression, records.Count.ToString("N0"), out var text)
+			expressions = userDialog.TryGetExpressions(this.DefaultExpression, records.Count.ToString("N0"), out var text)
 				? ParseExpressions<TExpression>(text)
 				: ImmutableArray<TExpression>.Empty;
 

@@ -204,6 +204,15 @@ dotnet_naming_style.begins_with_i.required_suffix =
 dotnet_naming_style.begins_with_i.word_separator =
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
+# ANALYZER RULES CLEARED BY #1260
+
+# A rule whose last warning has been fixed is an error, so the build refuses a new one.
+# Weevil.ruleset must not turn it off: a rule set overrides this file for the projects that use it.
+# Doc/Research/.editorconfig keeps them warnings for the research projects, which are dated records.
+
+# Add 'this' qualification (#1272)
+dotnet_diagnostic.IDE0009.severity = error
+
 # SPELLING
 
 # Identifiers should be spelled correctly
