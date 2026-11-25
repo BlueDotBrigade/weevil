@@ -77,15 +77,15 @@ jobs:
           dotnet sonarscanner begin /k:"BlueDotBrigade_weevil" /o:"bluedotbrigade" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.qualitygate.wait=false /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
           if ($LASTEXITCODE -ne 0) { throw "SonarScanner begin failed" }
 
-          dotnet restore Weevil-v2.sln -p:Platform=x64
+          dotnet restore Weevil.sln -p:Platform=x64
           if ($LASTEXITCODE -ne 0) { throw "Restore failed" }
 
-          dotnet build Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-restore --no-incremental
+          dotnet build Weevil.sln --configuration Debug -p:Platform=x64 --no-restore --no-incremental
           if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 
           # Produce a single Visual Studio-compatible XML report for SonarQube.
           # Benchmarks are intentionally excluded, matching the main CI workflow.
-          dotnet-coverage collect 'dotnet test Weevil-v2.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal --filter "TestCategory!=Benchmark"' -f xml -o coverage.xml
+          dotnet-coverage collect 'dotnet test Weevil.sln --configuration Debug -p:Platform=x64 --no-build --verbosity normal --filter "TestCategory!=Benchmark"' -f xml -o coverage.xml
           if ($LASTEXITCODE -ne 0) { throw "Tests or coverage collection failed" }
           if (-not (Test-Path coverage.xml)) { throw "Coverage report was not produced" }
 
