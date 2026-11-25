@@ -13,4 +13,12 @@
 		<_Parameter1>$(VersionPrefix)+$(Configuration)</_Parameter1>
 	 </AssemblyAttribute>
   </ItemGroup>
+
+  <!--
+    The Metalama compiler bundles its own Roslyn, and fails with LAMA0625 when the code style analyzers of the newest .NET SDK installed need a newer one:
+    Metalama 2026.1.20 with SDK 11.0.100, which GitHub's Windows runners have. So the projects it compiles check code style in the IDE only.
+  -->
+  <PropertyGroup Condition="'$(RoslynCompilerType)' == 'Metalama'">
+	 <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
 </Project>
