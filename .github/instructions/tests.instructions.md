@@ -34,7 +34,7 @@ These instructions apply to all test projects under `Tst/`. Tests must clearly e
 | `BlueDotBrigade.Weevil.Core-FeatureTests` | BDD feature tests for the core engine |
 | `BlueDotBrigade.Weevil.Core-FunctionalTests` | Functional tests with real I/O and persistence |
 | `BlueDotBrigade.Weevil.Gui-FeatureTests` | Feature tests for genuine GUI-specific user journeys |
-| `BlueDotBrigade.Weevil.Windows-UnitTests` | Unit tests for the WPF library's types that need no window, such as the file browser's model; Windows only |
+| `BlueDotBrigade.Weevil.Windows-UnitTests` | Unit tests for the generic Open As dialog's types that need no window, such as the file browser's model; it references only `BlueDotBrigade.Weevil.Windows.Dialogs` (#1333); Windows only |
 | `BlueDotBrigade.Weevil.Cli-FunctionalTests` | Functional tests for the command-line interface's commands, with real I/O |
 | `BlueDotBrigade.Weevil.PowerShell-FunctionalTests` | Functional tests for the PowerShell cmdlets, with real I/O |
 | `BlueDotBrigade.Weevil.Core-PerformanceTests` | CPU, RAM and I/O checks of the performance requirements, on logs small enough for CI, and BenchmarkDotNet benchmarks, in the `Benchmark` category, run on demand |

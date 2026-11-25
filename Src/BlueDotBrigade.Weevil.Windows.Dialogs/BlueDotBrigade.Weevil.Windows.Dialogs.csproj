@@ -12,6 +12,7 @@
     <Version>$(WeevilReleaseVersion)</Version>
     <Authors>BlueDotBrigade;</Authors>
     <Copyright>© 2026 Blue Dot Brigade</Copyright>
+    <Owners>Blue Dot Brigade</Owners>
     <Company>Blue Dot Brigade</Company>
     <Description>A generic Open As dialog for WPF: a file browser that treats zips as folders, and an area for the host's options.</Description>
     <IsPackable>true</IsPackable>
@@ -20,7 +21,9 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/BlueDotBrigade/weevil</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlueDotBrigade/weevil.git</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <!-- No PackageIcon: Weevil's icon is Weevil's, and this library is not (#1333). -->
     <UseWPF>True</UseWPF>
   </PropertyGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">

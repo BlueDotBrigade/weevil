@@ -135,6 +135,7 @@ Maximize value by developing domain-specific extensions tailored to your busines
 | [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Common)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Common)   | BlueDotBrigade.Weevil.Common.nupkg  |
 | [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Core)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Core)       | BlueDotBrigade.Weevil.Core.nupkg    |
 | [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Windows)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Windows) | BlueDotBrigade.Weevil.Windows.nupkg |
+| [![latest version](https://img.shields.io/nuget/v/BlueDotBrigade.Weevil.Windows.Dialogs)](https://www.nuget.org/packages/BlueDotBrigade.Weevil.Windows.Dialogs) | BlueDotBrigade.Weevil.Windows.Dialogs.nupkg |
 
 A .NET application can use *Weevil*'s feature set by directly referencing the `BlueDotBrigade.Weevil.Core` *NuGet* package.
 

@@ -175,7 +175,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 		/// <summary>
 		/// Writes what the dialog has to report to the host's log, as the dialog has no log of its own (#1333): how much it matters, a message,
-		/// and the exception behind it, or <see langword="null"/>. <see langword="null"/> logs nothing. It may be called after the dialog closes.
+		/// and the exception behind it, or <see langword="null"/>. <see langword="null"/> logs nothing. Called on the UI thread, sometimes after the dialog closes.
 		/// </summary>
 		public Action<TraceEventType, string, Exception> Log { get; set; }
 
