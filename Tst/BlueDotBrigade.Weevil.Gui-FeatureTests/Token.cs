@@ -25,7 +25,7 @@
 
 		internal async Task OpenFileAsync(string logFilePath)
 		{
-			var uiDispatcher = Substitute.For<IUiDispatcher>();
+			IUiDispatcher uiDispatcher = Substitute.For<IUiDispatcher>();
 			uiDispatcher
 				.When(x => x.Invoke(Arg.Any<Action>()))
 				.Do(callInfo => callInfo.Arg<Action>()());

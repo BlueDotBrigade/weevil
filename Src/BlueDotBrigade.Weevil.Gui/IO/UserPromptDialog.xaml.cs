@@ -51,7 +51,7 @@
 
 		protected void RaisePropertyChanged(string name)
 		{
-			var handler = this.PropertyChanged;
+			PropertyChangedEventHandler handler = this.PropertyChanged;
 
 			if (handler != null)
 			{
@@ -99,7 +99,7 @@
 
         private void OnOkClicked(object sender, RoutedEventArgs e)
         {
-			var validationResult = _validator?.Validate(this);
+			ValidationResult validationResult = _validator?.Validate(this);
 			if (validationResult != null && !validationResult.IsValid)
 			{
 				this.ValidationMessage = validationResult.Errors[0].ErrorMessage;
@@ -113,7 +113,7 @@
 		{
 			if (_validator != null)
 			{
-				var validationResult = _validator.Validate(this);
+				ValidationResult validationResult = _validator.Validate(this);
 				this.ValidationMessage = validationResult.IsValid ? string.Empty : validationResult.Errors[0].ErrorMessage;
 			}
 		}

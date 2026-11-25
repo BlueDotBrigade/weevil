@@ -229,7 +229,7 @@
 				using (HttpClient client = new HttpClient())
 				{
 					var webRequest = new HttpRequestMessage(HttpMethod.Get, NewReleaseUrl);
-					var response = client.Send(webRequest);
+					HttpResponseMessage response = client.Send(webRequest);
 
 					result = TypeFactory.LoadFromXml<ApplicationInfo>(response.Content.ReadAsStream());
 				}
@@ -245,7 +245,7 @@
 
 		private static string GetWeevilDisplayVersion()
 		{
-			var guiAssembly = typeof(FilterViewModel).Assembly;
+			Assembly guiAssembly = typeof(FilterViewModel).Assembly;
 			var informationalVersion = guiAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
 			if (!string.IsNullOrWhiteSpace(informationalVersion))
@@ -927,7 +927,7 @@
 
 					RefreshFilterResults();
 
-					var analyzers = _engine
+					IRecordAnalyzer[] analyzers = _engine
 						.Analyzer
 						.GetAnalyzers(ComponentType.Extension)
 						.OrderBy(x => x.DisplayName)
@@ -1786,7 +1786,7 @@
 
 		private void FilterByComment()
 		{
-			var configuration = GetFilterConfiguration();
+			Dictionary<string, object> configuration = GetFilterConfiguration();
 			var filter = new FilterCriteria("@Comment", string.Empty, configuration);
 
 			FilterAsynchronously(FilterType.PlainText, filter);
@@ -1794,7 +1794,7 @@
 
 		private void FilterByPinned()
 		{
-			var configuration = GetFilterConfiguration();
+			Dictionary<string, object> configuration = GetFilterConfiguration();
 			var filter = new FilterCriteria("@Pinned", string.Empty, configuration);
 
 			FilterAsynchronously(FilterType.PlainText, filter);
@@ -1802,7 +1802,7 @@
 
 		private void FilterByRegions()
 		{
-			var configuration = GetFilterConfiguration();
+			Dictionary<string, object> configuration = GetFilterConfiguration();
 			var filter = new FilterCriteria("@Regions", string.Empty, configuration);
 
 			FilterAsynchronously(FilterType.PlainText, filter);
@@ -1810,7 +1810,7 @@
 
 		private void FilterByBookmarks()
 		{
-			var configuration = GetFilterConfiguration();
+			Dictionary<string, object> configuration = GetFilterConfiguration();
 			var filter = new FilterCriteria("@Bookmarks", string.Empty, configuration);
 
 			FilterAsynchronously(FilterType.PlainText, filter);
@@ -2093,7 +2093,7 @@
 					}
 					else
 					{
-						var validNumberFormat =
+						NumberStyles validNumberFormat =
 							NumberStyles.AllowLeadingWhite |
 							NumberStyles.AllowTrailingWhite |
 							NumberStyles.AllowThousands;
@@ -2177,13 +2177,13 @@
 				}
 
 				var json = JObject.Parse(File.ReadAllText(appSettingsPath));
-				var sourceSection = json["SourceCodeNavigation"];
+				JToken sourceSection = json["SourceCodeNavigation"];
 				var fileRegex = sourceSection?["FilePathAndLineRegex"]?.ToString();
 				var symbolRegex = sourceSection?["FullyQualifiedMemberRegex"]?.ToString();
 
 				if (!string.IsNullOrWhiteSpace(fileRegex))
 				{
-					var match = Regex.Match(logEntry, fileRegex);
+					Match match = Regex.Match(logEntry, fileRegex);
 					if (match.Success && match.Groups["path"].Success && match.Groups["line"].Success)
 					{
 						var path = match.Groups["path"].Value.Trim();
@@ -2194,7 +2194,7 @@
 
 				if (!string.IsNullOrWhiteSpace(symbolRegex))
 				{
-					var match = Regex.Match(logEntry, symbolRegex);
+					Match match = Regex.Match(logEntry, symbolRegex);
 					if (match.Success)
 					{
 						return match.Groups["symbol"].Success ? match.Groups["symbol"].Value.Trim() : match.Value.Trim();
@@ -2898,7 +2898,7 @@
 			// One read of the selection, so the count and the first line agree.
 			RecordList selected = coreEngine.Selector.GetSelected();
 			var selectedItemCount = selected.Count;
-			var selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
+			TimeSpan selectedTimePeriod = coreEngine.Selector.SelectionPeriod;
 
 			var lineNumber = 0;
 			var sectionName = string.Empty;
@@ -3012,7 +3012,7 @@
 			{
 				var selectedLineNumber = selected.GetLineNumber(0);
 
-				if (_engine.Bookmarks.TryGetBookmark(selectedLineNumber, out var bookmark))
+				if (_engine.Bookmarks.TryGetBookmark(selectedLineNumber, out Bookmark bookmark))
 				{
 					string newName = _dialogBox.ShowUserPrompt(
 						"Rename Bookmark",
@@ -3062,7 +3062,7 @@
 
 				if (selected.Count == 1)
 				{
-					var selectedRecord = selected[0];
+					IRecord selectedRecord = selected[0];
 					var selectedLineNumber = selectedRecord.LineNumber;
 
 					var defaultName = selectedRecord.HasCreationTime
@@ -3099,7 +3099,7 @@
 		private void GoToBookmark(int slot)
 		{
 			// Use the bookmark ID (slot) to find the bookmark, instead of using array index
-			if (_engine.Bookmarks.TryGetBookmarkById(slot, out var bookmark))
+			if (_engine.Bookmarks.TryGetBookmarkById(slot, out Bookmark bookmark))
 			{
 				SearchFilterResults(
 						$"Bookmark {slot} is not visible in the current results.",

@@ -15,7 +15,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		public void GivenALogThatFitsInTheFreeMemory_WhenAdvised_ThenRamIsSuggestedWithoutAWarning(double estimateGigabytes, double availableGigabytes)
 		{
 			// The second row fits exactly: the estimate and the 1 GB reserve take all the free memory.
-			var advice = Advise(estimateGigabytes, availableGigabytes);
+			OpenAsAdvice advice = Advise(estimateGigabytes, availableGigabytes);
 
 			advice.DefaultMode.Should().Be(StorageMode.Ram);
 			advice.GetWarning(StorageMode.Ram).Should().BeEmpty();
@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		public void GivenALogThatFitsOnlyWithoutTheReserve_WhenAdvised_ThenDiskIsSuggestedAndRamWarns()
 		{
 			// 1 GB is kept free for Weevil's window and headroom (decision 2 of the #1028 plan).
-			var advice = Advise(estimateGigabytes: 7.5, availableGigabytes: 8);
+			OpenAsAdvice advice = Advise(estimateGigabytes: 7.5, availableGigabytes: 8);
 
 			advice.DefaultMode.Should().Be(StorageMode.Disk);
 			advice.GetWarning(StorageMode.Ram).Should().Contain("may become slow");

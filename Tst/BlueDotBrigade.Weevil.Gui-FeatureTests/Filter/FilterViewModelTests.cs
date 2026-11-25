@@ -68,7 +68,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				releasePrompt.Wait(GateTimeout);
 			});
 
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 			viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			await OpenAsync(viewModel);
 
@@ -103,7 +103,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 				viewModel.AbortFilterCommand.Execute(null);
 			});
 
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 			viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			await OpenAsync(viewModel);
 			bulletinMediator.ClearReceivedCalls();
@@ -121,7 +121,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// A save reads every record, from the log itself in disk mode, so it runs in the background, where Abort (Escape) can stop it (#1028).
 			using var uiDispatcher = new PausableUiDispatcher();
-			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
+			FilterViewModel viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
 			await viewModel.OpenAsync(CopyLog("Save.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled);
 
@@ -150,7 +150,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// A search for text reads each record, from the log itself in disk mode, so it runs in the background, where Abort (Escape) can stop it (#1028).
 			using var uiDispatcher = new PausableUiDispatcher();
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			((IUserDialog)dialog).TryShowFind(
 					Arg.Any<string>(),
 					out Arg.Any<bool>(),
@@ -174,7 +174,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 					return true;
 				});
 
-			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			FilterViewModel viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			await viewModel.OpenAsync(CopyLog("Find.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled);
 
@@ -208,8 +208,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// WPF does not catch a converter's exception, so a row that read a log on disk that was gone would end Weevil (#1028).
 			var uiDispatcher = new DeferredUiDispatcherFake();
-			var dialog = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			var logPath = CopyLog("Deleted.log");
 			await OpenOnDiskAsync(viewModel, logPath);
 			uiDispatcher.RunQueued();
@@ -229,8 +229,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Weevil reloaded a log that changed on disk by itself, rather than leaving the analyst to choose when.
 			var uiDispatcher = new DeferredUiDispatcherFake();
-			var dialog = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			var logPath = CopyLog("Truncated.log");
 			await OpenOnDiskAsync(viewModel, logPath);
 			uiDispatcher.RunQueued();
@@ -266,7 +266,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// F5 re-ran the filter on the UI thread, so on disk it read the whole log there, and Escape could not stop it.
 			using var uiDispatcher = new PausableUiDispatcher();
-			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
+			FilterViewModel viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
 			await OpenOnDiskAsync(viewModel, CopyLog("Refresh.log"));
 			var totalCount = viewModel.VisibleItems.Count;
 
@@ -303,8 +303,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenALogOnDiskThatWasDeleted_WhenFiltered_ThenTheProgressBarIsHiddenAndOneMessageIsShown()
 		{
 			// A filter from the filter box caught only an invalid expression, so a failed read left the progress bar running (#1028).
-			var dialog = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			var logPath = CopyLog("Filtered.log");
 			await OpenOnDiskAsync(viewModel, logPath);
 
@@ -327,7 +327,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// The read threw FileNotFoundException, not the log's own exception, so the analysis showed its own error rather than the log's.
 			IDialogBoxService dialog = CreateDialog(() => { });
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			var logPath = CopyLog("Analyzed.log");
 			await OpenOnDiskAsync(viewModel, logPath);
 
@@ -344,7 +344,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenALogOnDisk_WhenItsRecordsAreGraphed_ThenTheGraphKeepsTheirTextAfterTheLogIsDeleted()
 		{
 			// A graph window can outlive its log, so it copies the text of its records when it opens (#1028).
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 
 			// The graph asks through the dialog service's own prompt, not the one analyzers use (IUserDialog).
 			dialog.TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>()).Returns(x =>
@@ -356,7 +356,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			dialog.When(d => d.ShowGraph(Arg.Any<RecordList>(), Arg.Any<string>(), Arg.Any<string>()))
 				.Do(x => graphed = x.Arg<RecordList>());
 
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			var logPath = CopyLog("Graphed.log");
 			await OpenOnDiskAsync(viewModel, logPath);
 			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
@@ -375,10 +375,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenALogDroppedOnTheWindow_WhenDiskIsChosenInOpenAs_ThenTheLogOpensOnDisk()
 		{
 			// Every way to open a log shows the Open As dialog, with the log dropped selected (decision 8 of the #1157 plan).
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			OpenWhatOpenAsShows(dialog, StorageMode.Disk);
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			viewModel.CanOpenLogFile.Should().BeTrue("nothing else is running");
 			var droppedLog = CopyLog("Dropped.log");
 
@@ -395,10 +395,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenTheOpenButton_WhenALogAndDiskAreChosen_ThenTheLogOpensOnDisk()
 		{
 			// The Open button, Ctrl+O and the menu's Open… show one dialog, which finds the log and chooses RAM or Disk (#1215).
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			ChooseInOpenAs(dialog, new OpenAsChoice(CopyLog("Chosen.log"), ExtractedFolder: null, StorageMode.Disk, Advice: null));
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 
 			viewModel.OpenLogCommand.Execute(null);
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
@@ -411,10 +411,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenTheOpenButton_WhenLinesAreChosen_ThenOnlyThoseLinesOpen()
 		{
 			// The part chosen in the Open As dialog is the part opened (#1214), and the status bar names it (#1219).
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			ChooseInOpenAs(dialog, new OpenAsChoice(CopyLog("Lines.log"), ExtractedFolder: null, StorageMode.Ram, Advice: null, Part: LogPart.ForLines(new Range(10, 40))));
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 
 			viewModel.OpenLogCommand.Execute(null);
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
@@ -427,11 +427,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenAPluginsOwnOptions_WhenTheLogIsOpened_ThenTheEngineReadsItWithTheirContext()
 		{
 			// A plugin's options in the Open As dialog say how to read its log (#1216), as its own window's did.
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			var context = new ContextDictionary { ["FileFormatVersion"] = "2" };
 			ChooseInOpenAs(dialog, new OpenAsChoice(CopyLog("Vendor.log"), ExtractedFolder: null, StorageMode.Ram, Advice: null, Context: context));
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 
 			viewModel.OpenLogCommand.Execute(null);
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
@@ -443,9 +443,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public void GivenTheOpenButton_WhenCancelled_ThenNothingOpensAndOpenIsAvailableAgain()
 		{
-			var dialog = Substitute.For<IDialogBoxService>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 
 			// The substitute answers false: the user cancelled.
 			viewModel.OpenLogCommand.Execute(null);
@@ -459,8 +459,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[WorkItem(1217)]
 		public async Task GivenAnOpenLog_WhenTheOpenButtonIsPressed_ThenOpenAsStartsInTheLogsFolder()
 		{
-			var dialog = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			await viewModel.OpenAsync(CopyLog("Open.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled);
 
@@ -500,8 +500,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenNoOpenLog_WhenTheOpenButtonIsPressed_ThenOpenAsStartsInTheLastFolderUsed()
 		{
 			// Given none, the dialog shows the most recent folder that still exists (#1218).
-			var dialog = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 
 			viewModel.OpenLogCommand.Execute(null);
 
@@ -515,9 +515,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var extractedFolder = System.IO.Directory.CreateTempSubdirectory("WeevilGui.Extracted.").FullName;
 			var extractedLog = Path.Combine(extractedFolder, "A.log");
 			System.IO.File.Copy(new Daten().AsFilePath(From.GlobalDefault), extractedLog);
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			ChooseInOpenAs(dialog, new OpenAsChoice(extractedLog, extractedFolder, StorageMode.Ram, Advice: null));
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 
 			try
 			{
@@ -541,9 +541,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenAnOpenLog_WhenOpenAsIsCancelledForAnother_ThenTheOpenLogStays()
 		{
-			var dialog = Substitute.For<IDialogBoxService>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			await viewModel.OpenAsync(CopyLog("Open.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled);
 			bulletinMediator.ClearReceivedCalls();
@@ -561,11 +561,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenAnOpenLog_WhenTheSameLogIsOpenedAgain_ThenItOpens()
 		{
 			// The engine shown still holds the log's lock while the new one opens, and hands it over.
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			var openedPaths = new List<string>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
 			var logPath = CopyLog("A.log");
 			await viewModel.OpenAsync(logPath);
 
@@ -581,11 +581,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[WorkItem(1254)]
 		public async Task GivenALogAnotherWeevilHasOpen_WhenOpened_ThenAMessageNamesWhoHasItAndTheOpenLogStays()
 		{
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			var openedPaths = new List<string>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
 			var openLog = CopyLog("A.log");
 			await viewModel.OpenAsync(openLog);
 			var otherLog = CopyLog("B.log");
@@ -604,10 +604,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenTheOpenButton_WhenTheLogChosenIsOpenInAnotherWeevil_ThenOpenAsRefusesItButNotTheLogOpenHere()
 		{
 			// Open As checks before it extracts a log from a zip, or closes: the log open here may be opened again.
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			Action<string> checkBeforeOpening = null!;
 			dialogBox.TryShowOpenAs(Arg.Any<string>(), Arg.Do<Action<string>>(check => checkBeforeOpening = check), out Arg.Any<OpenAsChoice>()).Returns(false);
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 			var openLog = CopyLog("A.log");
 			await viewModel.OpenAsync(openLog);
 			var otherLog = CopyLog("B.log");
@@ -660,10 +660,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenALogOpenedOnDisk_WhenReloaded_ThenOpenAsIsNotShownAgain()
 		{
 			// Reload keeps the mode, and never asks again (the #986 plan).
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			OpenWhatOpenAsShows(dialog, StorageMode.Disk);
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			await viewModel.ShowOpenAsAsync(CopyLog("Reloaded.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled && viewModel.AreInsightsReady);
 			bulletinMediator.ClearReceivedCalls();
@@ -715,7 +715,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			IDialogBoxService dialog = CreateDialog(() => releasePrompt.Wait(GateTimeout));
 
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			await OpenAsync(viewModel);
 
 			_ = viewModel.Analyze(AnalysisType.DetectData);
@@ -745,7 +745,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 
 			IDialogBoxService dialog = CreateDialog(() => releasePrompt.Wait(GateTimeout));
 
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialog));
 			await OpenAsync(viewModel);
 			viewModel.AreInsightsReady.Should().BeTrue("the log file has finished opening");
 
@@ -774,7 +774,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			IDialogBoxService dialog = CreateDialog(() => releasePrompt.Wait(GateTimeout));
 
 			var bulletinMediator = new BulletinMediator();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			await OpenAsync(viewModel);
 
 			viewModel.VisibleItems.Should().NotBeEmpty();
@@ -801,7 +801,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Going to an insight's record only set the filter box's text, and after 500 ms went to the nearest record still shown.
 			var bulletinMediator = new BulletinMediator();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, Substitute.For<IDialogBoxService>()));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, Substitute.For<IDialogBoxService>()));
 
 			// A copy without the sidecar, so the filter history is empty until the filter below has run.
 			await viewModel.OpenAsync(CopyLog("Insight.log"));
@@ -829,8 +829,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Going to an insight's record that stayed hidden went silently to the nearest record shown instead.
 			var bulletinMediator = new BulletinMediator();
-			var dialog = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialog));
 			await viewModel.OpenAsync(CopyLog("Excluded.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled);
 			var hiddenLineNumber = viewModel.VisibleItems.First(record => !record.Content.Contains(IncludeFilter)).LineNumber;
@@ -852,8 +852,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenOpeningAnotherLogFailed_WhenFilteringTheOpenLog_ThenIncludeHistoryShowsTheFilter()
 		{
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 
 			await viewModel.OpenAsync(CopyLog("A.log"));
 			await viewModel.OpenAsync(CopyLogWithIncompatibleSidecar("B.log"));
@@ -869,8 +869,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenFilteredLogWithoutSidecar_WhenReloading_ThenIncludeHistoryShowsTheFilterOnce()
 		{
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, Substitute.For<IDialogBoxService>()));
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, Substitute.For<IDialogBoxService>()));
 
 			await viewModel.OpenAsync(CopyLog("A.log"));
 			viewModel.FilterManually(new object[] { IncludeFilter, string.Empty });
@@ -891,9 +891,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Reload saved the sidecar first, and failed where it couldn't, as in a read-only folder.
 			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
 
 			try
 			{
@@ -925,11 +925,11 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Opening another log saved the open log's sidecar first, and failed where it couldn't.
 			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			var openedPaths = new List<string>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
 
 			try
 			{
@@ -957,8 +957,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Exit saved the sidecar first, and threw where it couldn't.
 			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 
 			try
 			{
@@ -985,12 +985,12 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// The pin can't be saved, so opening another log asks first: No keeps the log open, so the folder can be made writable and the log saved.
 			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			dialogBox.ShowQuestion(Arg.Any<string>(), Arg.Any<string>()).Returns(isContinuing);
 			var openedPaths = new List<string>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
 
 			try
 			{
@@ -1022,9 +1022,9 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// The pin can't be saved, so closing asks first: No keeps Weevil open.
 			var logPath = CopyLogWhereTheSidecarCannotBeWritten(out var folder);
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			dialogBox.ShowQuestion(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 
 			try
 			{
@@ -1049,7 +1049,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// The grid's rows kept the previous records while Reload read the log again, so memory held two copies of the log.
 			// Records are created when they are read (#1140), so the test watches the list of records shown, which holds the log's records.
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
 			await viewModel.OpenAsync(CopyLog("A.log"));
 			WaitUntil(() => viewModel.CanOpenLogFile);
 			WeakReference previousRecords = TrackRecordsShown(viewModel);
@@ -1064,8 +1064,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenAnOpenLog_WhenAnotherLogIsOpened_ThenTheDashboardIsClosed()
 		{
 			// The dashboard reads the engine it was shown with, so it would keep the previous log in memory (#1139).
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 			await viewModel.OpenAsync(CopyLog("A.log"));
 			dialogBox.ClearReceivedCalls();
 
@@ -1079,7 +1079,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenALogWithRemarks_WhenAnotherLogIsOpened_ThenTheRemarksShownAreRefreshed()
 		{
 			// Opening a log never told the Remarks box to refresh, so it kept showing the previous log's remarks.
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
 			await viewModel.OpenAsync(CopyLog("A.log"));
 			viewModel.SourceFileRemarks = "Remarks about A";
 			var changedProperties = new List<string>();
@@ -1096,8 +1096,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenAZip_WhenNoFileInItIsChosen_ThenNothingOpensAndTheZipIsKept()
 		{
 			// Cancelling the list of the zip's files opened the zip itself as a log, then deleted the zip.
-			var dialogBox = Substitute.For<IDialogBoxService>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 			var zipPath = CreateZip("Logs.zip", "A.log");
 
 			// The substitute answers false: the analyst cancelled the Open As dialog shown in the zip. Weevil opens only what the dialog chose, never the zip.
@@ -1375,7 +1375,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Clear rebuilt the engine on the UI thread, which froze the window for seconds on a large log.
 			using var uiDispatcher = new PausableUiDispatcher();
-			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
+			FilterViewModel viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
 			await viewModel.OpenAsync(CopyLog("ClearRecords.log"));
 			WaitUntil(() => viewModel.IsMenuEnabled);
 			var recordCount = viewModel.VisibleItems.Count;
@@ -1403,7 +1403,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		[TestMethod]
 		public async Task GivenMoreRecordsSelectedThanCopyAllows_WhenCopied_ThenAMessagePointsToExport()
 		{
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			FilterViewModel viewModel = await OpenWithMoreRecordsSelectedThanTheClipboardAllows(dialogBox);
 
 			await viewModel.ClipboardCopyRaw(readableCallstack: false);
@@ -1417,7 +1417,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// Copy read each selected record's text in the command handler, from the log itself on disk, so the window froze and Escape did nothing.
 			using var uiDispatcher = new PausableUiDispatcher();
-			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
+			FilterViewModel viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
 			await OpenOnDiskAsync(viewModel, CopyLog("Copy.log"));
 			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
 
@@ -1446,7 +1446,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenMoreRecordsSelectedThanPasteAllows_WhenPasted_ThenAMessageSaysSo()
 		{
 			// One comment on that many records is a mistake, and each commented record costs memory.
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			FilterViewModel viewModel = await OpenWithMoreRecordsSelectedThanTheClipboardAllows(dialogBox);
 
 			viewModel.ClipboardPaste(allowOverwrite: true);
@@ -1458,7 +1458,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenMoreRecordsSelectedThanGraphAllows_WhenGraphed_ThenAMessageSaysSoAndNoGraphIsShown()
 		{
 			// A graph keeps its records for as long as its window is open (decided 2026-10-30).
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			FilterViewModel viewModel = await OpenWithMoreRecordsSelectedThanTheClipboardAllows(dialogBox);
 
 			viewModel.GraphDataCommand.Execute(null);
@@ -1471,7 +1471,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			var logPath = Path.Combine(_folder, "Large.log");
 			System.IO.File.WriteAllLines(logPath, Enumerable.Range(1, 100_001).Select(n => $"Record {n}"));
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>(), dialogBox));
 			await viewModel.OpenAsync(logPath);
 			WaitUntil(() => viewModel.IsMenuEnabled);
 			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
@@ -1484,7 +1484,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		private static IDialogBoxService CreateDialog(Action prompt)
 		{
-			var dialog = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialog = Substitute.For<IDialogBoxService>();
 			((IUserDialog)dialog).TryGetExpressions(Arg.Any<string>(), Arg.Any<string>(), out Arg.Any<string>()).Returns(x =>
 			{
 				prompt();
@@ -1619,13 +1619,13 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		/// </summary>
 		private ZippedLogViewModel CreateViewModelForZip()
 		{
-			var dialogBox = Substitute.For<IDialogBoxService>();
+			IDialogBoxService dialogBox = Substitute.For<IDialogBoxService>();
 			OpenWhatOpenAsShows(dialogBox, StorageMode.Ram);
 			var openedPaths = new List<string>();
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 			bulletinMediator.Post(Arg.Do<SourceFileOpenedBulletin>(bulletin => openedPaths.Add(bulletin.SourceFilePath)));
 
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator, dialogBox));
 
 			return new ZippedLogViewModel(viewModel, dialogBox, openedPaths);
 		}

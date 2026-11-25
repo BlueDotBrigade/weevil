@@ -39,8 +39,8 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public async Task GivenTwoCommentedRecords_WhenGoToNextCommentCalledThreeTimes_ThenActiveRecordIndexWrapsToFirstComment()
 		{
 			// Arrange
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
-			var viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator));
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, bulletinMediator));
 
 			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
 

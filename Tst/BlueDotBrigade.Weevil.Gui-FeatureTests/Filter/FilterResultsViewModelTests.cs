@@ -13,9 +13,9 @@
 		[TestMethod]
 		public async Task OpenAsync()
 		{
-			var bulletinMediator = Substitute.For<IBulletinMediator>();
+			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
 
-			var viewModel = Track(new FilterViewModel(
+			FilterViewModel viewModel = Track(new FilterViewModel(
 				this.UiDispatcher,
 				bulletinMediator));
 

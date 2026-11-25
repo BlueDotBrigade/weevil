@@ -46,7 +46,7 @@
                                 bool.TryParse(values[2]?.ToString(), out isToolTip);
                         }
 
-                        if (viewModel.TryGetBookmark(record, out var bookmark))
+                        if (viewModel.TryGetBookmark(record, out Bookmark bookmark))
                         {
                                 var symbol = BookmarkSymbol.GetSymbol(bookmark.Name);
                                 var bookmarkText = bookmark.Id > 0

@@ -144,7 +144,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenSelectedRecords_WhenTheSelectionChanges_ThenTheRowsStillHeldShowIt()
 		{
 			RecordList results = R.WithLineNumbers(1, 10);
-			var selector = Substitute.For<ISelect>();
+			ISelect selector = Substitute.For<ISelect>();
 			Select(selector, results, 2);
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
 			RowViewModel second = rows.GetRow(1);
@@ -163,10 +163,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		{
 			// The grid tells screen readers about these rows.
 			RecordList results = R.WithLineNumbers(1, 10);
-			var selector = Substitute.For<ISelect>();
+			ISelect selector = Substitute.For<ISelect>();
 			Select(selector, results, 2, 5);
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
-			var heldRows = new[] { rows.GetRow(1), rows.GetRow(2), rows.GetRow(4) };
+			RowViewModel[] heldRows = new[] { rows.GetRow(1), rows.GetRow(2), rows.GetRow(4) };
 			IReadOnlyList<RowViewModel> reportedRows = null;
 			rows.SelectionRefreshed += (_, changedRows) => reportedRows = changedRows;
 
@@ -181,7 +181,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		public void GivenSelectedRecords_WhenTheSelectedRowsAfterARowAreAskedFor_ThenTheyAreFoundInOrder()
 		{
 			RecordList results = R.WithLineNumbers(1, 10);
-			var selector = Substitute.For<ISelect>();
+			ISelect selector = Substitute.For<ISelect>();
 			Select(selector, results, 3, 7, 9);
 			var rows = new RowList(results, new AnnotationStore(), selector, new UiDispatcherFake());
 

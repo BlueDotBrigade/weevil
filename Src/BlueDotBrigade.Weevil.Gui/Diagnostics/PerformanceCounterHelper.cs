@@ -1,5 +1,6 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Diagnostics
 {
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 
@@ -22,7 +23,7 @@
 			var result = string.Empty;
 
 			var category = new PerformanceCounterCategory("Process");
-			var instanceNames = category
+			IEnumerable<string> instanceNames = category
 				.GetInstanceNames()
 				.Where(x => x.Contains(process.ProcessName));
 

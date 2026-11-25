@@ -16,7 +16,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			var events = new List<string>();
 			var uiDispatcher = new RecordingUiDispatcher(events);
 
-			var dialog = Substitute.For<IUserDialog>();
+			IUserDialog dialog = Substitute.For<IUserDialog>();
 			dialog.ShowUserPrompt("Title", "Prompt", "Default").Returns(_ =>
 			{
 				events.Add("prompt");
@@ -37,7 +37,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		[TestMethod]
 		public void GivenExpressionPrompt_WhenAccepted_ThenReturnsTheUsersAnswer()
 		{
-			var dialog = Substitute.For<IUserDialog>();
+			IUserDialog dialog = Substitute.For<IUserDialog>();
 			dialog.TryGetExpressions("Default", "10", out Arg.Any<string>()).Returns(x =>
 			{
 				x[2] = "Id=(?<Id>\\d+)";
@@ -55,7 +55,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		{
 			var wasClosed = false;
 
-			var dialog = Substitute.For<IUserDialog>();
+			IUserDialog dialog = Substitute.For<IUserDialog>();
 			dialog.ShowUserPrompt(Arg.Any<string>(), Arg.Any<string>()).Returns<string>(_ => throw new InvalidOperationException());
 
 			var userDialog = new UiThreadUserDialog(dialog, new UiDispatcherFake(), () => { }, () => wasClosed = true);

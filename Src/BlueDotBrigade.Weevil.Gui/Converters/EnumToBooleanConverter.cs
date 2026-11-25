@@ -20,7 +20,7 @@ namespace BlueDotBrigade.Weevil.Gui.Converters
                                 return false;
                         }
 
-                        var valueType = value.GetType();
+                        Type valueType = value.GetType();
 
                         if (!valueType.IsEnum)
                         {
@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.Gui.Converters
                                 return Binding.DoNothing;
                         }
 
-                        var enumType = targetType;
+                        Type enumType = targetType;
                         if (!enumType.IsEnum)
                         {
                                 return Binding.DoNothing;

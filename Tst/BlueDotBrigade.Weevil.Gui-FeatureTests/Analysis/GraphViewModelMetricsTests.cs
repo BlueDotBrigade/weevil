@@ -124,7 +124,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 		public void SerializeMetrics_WithEmptySeries_ShouldShowNA()
 		{
 			// Arrange
-			var records = RecordList.Empty;
+			RecordList records = RecordList.Empty;
 			var expression = "Value=(?<value>\\d+)";
 
 			var viewModel = new GraphViewModel(records, expression, "title", "source");
@@ -181,7 +181,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Assert
 			viewModel.SeriesMetrics.Should().HaveCount(1);
-			var metrics = viewModel.SeriesMetrics[0];
+			SeriesMetrics metrics = viewModel.SeriesMetrics[0];
 			
 			metrics.Count.Should().Be(5);
 			metrics.Min.Should().Be(1.0);
@@ -210,7 +210,7 @@ namespace BlueDotBrigade.Weevil.Gui.Analysis
 
 			// Assert
 			viewModel.SeriesMetrics.Should().HaveCount(1);
-			var metrics = viewModel.SeriesMetrics[0];
+			SeriesMetrics metrics = viewModel.SeriesMetrics[0];
 			
 			// Median of [1, 2, 3, 4] is (2 + 3) / 2 = 2.5
 			metrics.Median.Should().Be(2.5);

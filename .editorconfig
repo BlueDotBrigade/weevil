@@ -210,6 +210,9 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 # Weevil.ruleset must not turn it off: a rule set overrides this file for the projects that use it.
 # Doc/Research/.editorconfig keeps them warnings for the research projects, which are dated records.
 
+# Use explicit type (#1270)
+dotnet_diagnostic.IDE0008.severity = error
+
 # Add 'this' qualification (#1272)
 dotnet_diagnostic.IDE0009.severity = error
 

@@ -371,7 +371,7 @@
 		private string GetDetectedData(string regularExpression, string inputString)
 		{
 			var result = string.Empty;
-			var expressions = ParseRegularExpressions(regularExpression);
+			ImmutableArray<RegularExpression> expressions = ParseRegularExpressions(regularExpression);
 
 			try
 			{
@@ -410,7 +410,7 @@
 				// allowing users to customize series names without them being overwritten
 				if (isInitializing && _records.Count > 0)
 				{
-					var seriesNames = GetSeriesNames(_records, this.RegularExpression);
+					List<string> seriesNames = GetSeriesNames(_records, this.RegularExpression);
 					if (seriesNames.Count > 0)
 					{
 						this.Series1Name = seriesNames[0];
@@ -477,7 +477,7 @@
 				else
 				{
 					// Single axis - use the combined name of all series or first available
-					var allNames = new[] { this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name }
+					IEnumerable<string> allNames = new[] { this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name }
 						.Where(name => !string.IsNullOrEmpty(name))
 						.Take(seriesList.Count);
 					string axisName = allNames.Any() ? string.Join(" / ", allNames) : DefaultYAxisLabel;
@@ -554,14 +554,14 @@
 			DateTime? earliest = null;
 			DateTime? latest = null;
 
-			foreach (var record in records)
+			foreach (IRecord record in records)
 			{
 				if (!record.HasCreationTime)
 				{
 					continue;
 				}
 
-				var timestamp = record.CreatedAt;
+				DateTime timestamp = record.CreatedAt;
 				if (earliest is null || timestamp < earliest.Value)
 				{
 					earliest = timestamp;
@@ -666,7 +666,7 @@
 			if (!expressions.IsDefaultOrEmpty &&
 			    !string.IsNullOrEmpty(inputString))
 			{
-				foreach (var expression in expressions)
+				foreach (RegularExpression expression in expressions)
 				{
 					IDictionary<string, string> matches = expression.GetKeyValuePairs(inputString);
 
@@ -841,7 +841,7 @@
 
 		private static List<string> GetSeriesNames(RecordList records, string regularExpression)
 		{
-			var expressions = ParseRegularExpressions(regularExpression);
+			ImmutableArray<RegularExpression> expressions = ParseRegularExpressions(regularExpression);
 
 			if (expressions.IsDefaultOrEmpty)
 			{
@@ -857,9 +857,9 @@
 			var buffer = new ContentBuffer();
 
 			// Find records that match each expression to extract series names
-			foreach (var record in records)
+			foreach (IRecord record in records)
 			{
-				var recordSeriesNames = GetSeriesNames(buffer.Read(record).ToString(), expressions);
+				List<string> recordSeriesNames = GetSeriesNames(buffer.Read(record).ToString(), expressions);
 
 				for (var index = 0; index < seriesNames.Count && index < recordSeriesNames.Count; index++)
 				{
@@ -898,8 +898,8 @@
 				seriesValues[i] = new ObservableCollection<DateTimePoint>();
 				hasSeriesData[i] = false;
 			}
-			
-			var expressions = ParseRegularExpressions(regularExpression);
+
+			ImmutableArray<RegularExpression> expressions = ParseRegularExpressions(regularExpression);
 
 			if (records.Count > 0)
 			{
@@ -948,7 +948,7 @@
 				// Second pass: convert raw values to data points
 				for (int i = 0; i < MaxSeriesCount; i++)
 				{
-					foreach (var (timestamp, rawValue) in rawSeriesData[i])
+					foreach ((DateTime timestamp, string rawValue) in rawSeriesData[i])
 					{
 						float floatValue;
 						if (isBooleanSeries[i] && bool.TryParse(rawValue, out var boolValue))
@@ -984,7 +984,7 @@
 					// Left = axis 0, Right = axis 1
 					int axisIndex = seriesAxes[i] == YAxisRight ? 1 : 0;
 
-					var color = SeriesColors[i];
+					SKColor color = SeriesColors[i];
 
 					seriesList.Add(new LineSeries<DateTimePoint>
 					{
@@ -1018,14 +1018,14 @@
 			var stdDevCalc = new StandardDeviationCalculator();
 			var rangeCalc = new RangeCalculator();
 
-			foreach (var s in series)
+			foreach (ISeries s in series)
 			{
 				if (s is LineSeries<DateTimePoint> lineSeries)
 				{
-					var seriesColor = System.Windows.Media.Colors.Gray;
+					Color seriesColor = System.Windows.Media.Colors.Gray;
 					if (lineSeries.Stroke is SolidColorPaint solidPaint)
 					{
-						var skColor = solidPaint.Color;
+						SKColor skColor = solidPaint.Color;
 						seriesColor = System.Windows.Media.Color.FromRgb(skColor.Red, skColor.Green, skColor.Blue);
 					}
 
@@ -1049,9 +1049,9 @@
 							var median = medianCalc.Calculate(values);
 							var standardDeviation = stdDevCalc.Calculate(values);
 
-							var range = rangeCalc.Calculate(timestamps);
-							var rangeStart = range.StartAt;
-							var rangeEnd = range.EndAt;
+							RangeResult range = rangeCalc.Calculate(timestamps);
+							DateTime? rangeStart = range.StartAt;
+							DateTime? rangeEnd = range.EndAt;
 							
 							var metrics = new SeriesMetrics(
 								lineSeries.Name ?? "Unknown",
@@ -1151,7 +1151,7 @@
 			var rows = new string[this.SeriesMetrics.Count][];
 			for (int i = 0; i < this.SeriesMetrics.Count; i++)
 			{
-				var metrics = this.SeriesMetrics[i];
+				SeriesMetrics metrics = this.SeriesMetrics[i];
 				rows[i] = new[]
 				{
 					metrics.SeriesName,

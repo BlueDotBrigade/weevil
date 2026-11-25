@@ -65,7 +65,7 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 		private static RecordListViewAutomationPeer CreateGridPeer(int selectedLineNumber)
 		{
 			RecordList results = R.WithLineNumbers(1, 3);
-			var selector = Substitute.For<ISelect>();
+			ISelect selector = Substitute.For<ISelect>();
 			selector.SelectedCount.Returns(1);
 			selector.IsSelected(Arg.Any<int>()).Returns(call => call.Arg<int>() == selectedLineNumber);
 			selector.GetSelected().Returns((RecordList)ImmutableArray.Create(results[selectedLineNumber - 1]));

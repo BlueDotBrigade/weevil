@@ -27,7 +27,7 @@
 		{
 			var result = new Dictionary<string, string>();
 
-			foreach (var kvp in data)
+			foreach (KeyValuePair<string, object> kvp in data)
 			{
 				if (kvp.Value is double doubleValue)
 				{

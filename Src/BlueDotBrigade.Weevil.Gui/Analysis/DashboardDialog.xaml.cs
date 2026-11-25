@@ -95,7 +95,7 @@
 			this.Context = engine.Context;
 			this.SourceFilePath = engine.SourceFilePath;
 
-			var range = _engine.Records.GetEstimatedRange();
+			(DateTime From, DateTime To) range = _engine.Records.GetEstimatedRange();
 			this.From = range.From;
 			this.To = range.To;
 		}
@@ -117,7 +117,7 @@
 				return;
 			}
 
-			var range = _engine.Filter.Results.GetEstimatedRange();
+			(DateTime From, DateTime To) range = _engine.Filter.Results.GetEstimatedRange();
 			this.From = range.From;
 			this.To = range.To;
 		}
