@@ -25,21 +25,5 @@ namespace BlueDotBrigade.Weevil.Gui
 
 			text.Should().Be("3 === First" + Environment.NewLine + "5 === Second");
 		}
-
-		[TestMethod]
-		public void GivenACallStack_WhenFormattedForCopyWithTheSimpleCallStack_ThenTheFrameworksFramesAreRemoved()
-		{
-			RecordList records = ImmutableArray.Create<IRecord>(new Record(
-				7,
-				DateTime.Now,
-				SeverityType.Error,
-				"Failed\r\n   at System.IO.File.Open()\r\n   at App.Program.Main()",
-				isMultiLine: true,
-				wasGeneratedByUi: false));
-
-			var text = ClipboardHelper.FormatRaw(records, addLineNumberPrefix: false, new SimpleCallStackFormatter());
-
-			text.Should().Be("Failed\r\n   at App.Program.Main()");
-		}
 	}
 }

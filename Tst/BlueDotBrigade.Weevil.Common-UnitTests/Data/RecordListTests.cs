@@ -82,26 +82,7 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
-		public void GivenRecordsHeldAsBytes_WhenCopiedWithText_ThenEachCopyIsTheSameRecordHoldingItsText()
-		{
-			IRecord first = R.WithContentAsBytes(3, "First", Encoding.UTF8, isMultiLine: false);
-			IRecord second = R.WithContentAsBytes(5, "Second\nand its second line", Encoding.UTF8, isMultiLine: true);
-			RecordList list = ImmutableArray.Create(first, second);
-
-			RecordList copies = list.CopyWithText();
-
-			copies.Select(copy => copy.LineNumber).Should().Equal(3, 5);
-			copies.Select(copy => copy.Content).Should().Equal(first.Content, second.Content);
-			copies.Select(copy => copy.CreatedAt).Should().Equal(first.CreatedAt, second.CreatedAt);
-			copies.Select(copy => copy.IsMultiLine).Should().Equal(false, true);
-			foreach (IRecord copy in copies)
-			{
-				((Record)copy).TryGetContentBytes(out _, out _, out _).Should().BeFalse("a copy holds its text, not the log's bytes");
-			}
-		}
-
-		[TestMethod]
-		public void GivenRecordsOfALogOnDisk_WhenCopiedWithTextAndTheLogIsDeleted_ThenTheCopiesStillHaveTheirText()
+		public void GivenRecordsOfALogOnDisk_WhenCopiedWithTextAndTheLogIsDeleted_ThenTheCopiesAreTheSameRecordsWithTheirText()
 		{
 			// The graph keeps its copies after its log is gone, so a copy never reads the log (#1028).
 			var folder = Directory.CreateTempSubdirectory("Weevil.RecordListTests.").FullName;
@@ -109,20 +90,24 @@ namespace BlueDotBrigade.Weevil.Data
 			try
 			{
 				var logPath = Path.Combine(folder, "Log.txt");
-				var bytes = Encoding.UTF8.GetBytes("First\nSecond\n");
+				var bytes = Encoding.UTF8.GetBytes("First\nSecond\nand its second line\n");
 				File.WriteAllBytes(logPath, bytes);
 				var builder = new LogFileSourceBuilder(logPath, 0, bytes.Length);
 				builder.Append(bytes);
 				var chunk = new ContentChunk(builder.Build(), 0, bytes.Length, Encoding.UTF8);
+				var createdAt = new DateTime(2026, 11, 25, 3, 0, 0);
 				RecordList list = ImmutableArray.Create<IRecord>(
-					new Record(1, DateTime.Now, SeverityType.Information, chunk, 0, 5, isMultiLine: false, wasGeneratedByUi: false),
-					new Record(2, DateTime.Now, SeverityType.Warning, chunk, 6, 6, isMultiLine: false, wasGeneratedByUi: false));
+					new Record(3, createdAt, SeverityType.Information, chunk, 0, 5, isMultiLine: false, wasGeneratedByUi: false),
+					new Record(5, createdAt.AddSeconds(1), SeverityType.Warning, chunk, 6, 26, isMultiLine: true, wasGeneratedByUi: false));
 
 				RecordList copies = list.CopyWithText();
 				File.Delete(logPath);
 
-				copies.Select(copy => copy.Content).Should().Equal("First", "Second");
-				copies[1].Severity.Should().Be(SeverityType.Warning);
+				copies.Select(copy => copy.Content).Should().Equal("First", "Second\r\nand its second line");
+				copies.Select(copy => copy.LineNumber).Should().Equal(3, 5);
+				copies.Select(copy => copy.CreatedAt).Should().Equal(createdAt, createdAt.AddSeconds(1));
+				copies.Select(copy => copy.Severity).Should().Equal(SeverityType.Information, SeverityType.Warning);
+				copies.Select(copy => copy.IsMultiLine).Should().Equal(false, true);
 			}
 			finally
 			{
