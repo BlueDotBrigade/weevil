@@ -95,6 +95,7 @@ dotnet test Weevil.sln --configuration Debug -p:Platform=x64 --no-build
 - In namespaces named `Math` (e.g., `BlueDotBrigade.Weevil.Math`), use fully qualified `System.Math.*` calls to avoid collision with the namespace name.
 - Documentation and code comments must be clear and concise. Avoid visual noise that obscures intent.
 - **Namespace alignment**: Place new classes in the same namespace you would expect to find them in the .NET Core library. For example: diagnostic and telemetry types belong in `BlueDotBrigade.Weevil.Diagnostics` (mirrors `System.Diagnostics`); SQL client implementation types belong in `BlueDotBrigade.Weevil.Data.SqlClient` (mirrors `Microsoft.Data.SqlClient`). This convention makes the codebase easier to navigate for developers already familiar with .NET Core.
+- A fix that clears an analyzer rule's last warning (#1260) also makes the rule an error: `dotnet_diagnostic.<Id>.severity = error` in `.editorconfig`, and no entry in `Weevil.ruleset` that turns it off, so the build refuses a new violation, as for IDE0008 (#1270) and IDE0009 (#1272). See [NamingRulesInBuild.md](../Doc/LessonsLearned/NamingRulesInBuild.md).
 
 ## Documentation Conventions
 

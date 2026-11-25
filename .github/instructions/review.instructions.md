@@ -73,6 +73,7 @@ These instructions guide Copilot during pull request reviews. Every review shoul
 - Flag broad refactors when the issue only requires a narrow fix.
 - Flag new abstractions or base classes introduced without a clear need.
 - Flag loosened access modifiers (`internal` → `public`) made solely to support test access; tests should use `InternalsVisibleTo` in Debug builds instead.
+- Flag an analyzer rule that `.editorconfig` makes an error being lowered, turned off in `Weevil.ruleset`, or suppressed in code without a reason (#1270, #1272). `Doc/Research/.editorconfig` keeps them warnings on purpose, for the research projects.
 - Flag over-application of design patterns (SOLID, Gang of Four, MVVM) where the added abstraction provides no clear benefit and makes the code unnecessarily complicated.
 
 ## Documentation Conventions
