@@ -1178,23 +1178,54 @@
 			});
 		}
 
-		public void ClipboardCopyRaw(bool readableCallstack)
+		/// <remarks>
+		/// As for the graph, only a log on disk is read in the background, where Abort (Escape) stops it: up to 100,000 records are read from the log,
+		/// slowly on a network drive (#1335). The clipboard is then set on the UI thread. In RAM a record keeps its text, so the copy is quick.
+		/// </remarks>
+		public Task ClipboardCopyRaw(bool readableCallstack)
 		{
-			if (IsWithinClipboardLimit("Copy", CopyAdvice))
+			if (!IsWithinClipboardLimit("Copy", CopyAdvice))
 			{
-				IRecordFormatter formatter = readableCallstack
-					? new SimpleCallStackFormatter() as IRecordFormatter
-					: new RawRecordFormatter() as IRecordFormatter;
+				return Task.CompletedTask;
+			}
 
-				try
-				{
-					ClipboardHelper.CopyRawFromSelected(_engine, Settings.Default.AddLineNumberPrefix, formatter);
-				}
-				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-				{
-					// The text of a log on disk that changed, or is gone (#1028).
-					ReportFailedRead(e, Volatile.Read(ref _logGeneration));
-				}
+			IRecordFormatter formatter = readableCallstack
+				? new SimpleCallStackFormatter() as IRecordFormatter
+				: new RawRecordFormatter() as IRecordFormatter;
+
+			var addLineNumberPrefix = Settings.Default.AddLineNumberPrefix;
+			// The records selected now: the selection can change before the progress bar shows.
+			RecordList selected = _engine.Selector.GetSelected();
+
+			if (_engine.StorageMode != StorageMode.Disk)
+			{
+				SetClipboardText(ClipboardHelper.FormatRaw(selected, addLineNumberPrefix, formatter));
+				return Task.CompletedTask;
+			}
+
+			var text = string.Empty;
+
+			return RunInBackground(
+				"The copy",
+				operation => text = ClipboardHelper.FormatRaw(selected.CopyWithText(operation.CancellationToken), addLineNumberPrefix, formatter, operation.CancellationToken),
+				onSucceeded: () => SetClipboardText(text),
+				progressDelay: QuickWorkProgressDelay);
+		}
+
+		/// <summary>
+		/// Puts Copy's text on the clipboard, or says why it could not: another application, such as a clipboard manager or a remote desktop session,
+		/// may hold the clipboard (#1335). Called on the UI thread.
+		/// </summary>
+		private void SetClipboardText(string text)
+		{
+			try
+			{
+				ClipboardHelper.SetText(text);
+			}
+			catch (System.Runtime.InteropServices.ExternalException e)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, "The selected records could not be copied to the clipboard.");
+				_dialogBox.ShowMessage($"The selected records could not be copied to the clipboard.\r\n\r\n{e.Message}", "Copy");
 			}
 		}
 
@@ -1533,34 +1564,6 @@
 		}
 
 		/// <summary>
-		/// Copies the records with their text, so a graph never reads a log: it can outlive the log it was opened for (#1028).
-		/// </summary>
-		/// <remarks>
-		/// One buffer for the whole pass, so each chunk of a log on disk is read once (#1027).
-		/// </remarks>
-		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
-		private static RecordList CopyWithText(RecordList records, CancellationToken cancellationToken)
-		{
-			var buffer = new ContentBuffer();
-			var copies = ImmutableArray.CreateBuilder<IRecord>(records.Count);
-
-			foreach (IRecord record in records)
-			{
-				cancellationToken.ThrowIfCancellationRequested();
-
-				copies.Add(new Record(
-					record.LineNumber,
-					record.CreatedAt,
-					record.Severity,
-					buffer.Read(record).ToString(),
-					record.IsMultiLine,
-					record.WasGeneratedByUi));
-			}
-
-			return copies.MoveToImmutable();
-		}
-
-		/// <summary>
 		/// Returns what a reader gives a failed read of the open log to: it carries the log's generation, so a failure from an earlier one is ignored (#1028).
 		/// </summary>
 		private Action<Exception> CreateFailedReadReporter()
@@ -1660,7 +1663,7 @@
 
 			_ = RunInBackground(
 				"The graph",
-				operation => records = CopyWithText(selected, operation.CancellationToken),
+				operation => records = selected.CopyWithText(operation.CancellationToken),
 				onSucceeded: () => ShowGraph(records, confirmedFilter, sourceFilePath),
 				progressDelay: QuickWorkProgressDelay);
 		}

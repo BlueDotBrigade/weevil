@@ -5,6 +5,7 @@
 	using System.Globalization;
 	using System.Linq;
 	using System.Text;
+	using System.Threading;
 	using System.Windows;
 	using BlueDotBrigade.Weevil;
 	using BlueDotBrigade.Weevil.Data;
@@ -19,33 +20,38 @@
 		private const string LongTimestampFormat =  @"yyyy-MM-dd HH:mm:ss.ffff";
 		private const string LongMissingTimestamp = @"---------- --:--:--.----";
 
-		public static void CopyRawFromSelected(IEngine engine, bool addLineNumberPrefix, IRecordFormatter formatter)
+		/// <summary>
+		/// Returns the text Copy puts on the clipboard for <paramref name="records"/>: one record per line, each formatted by <paramref name="formatter"/>.
+		/// </summary>
+		/// <remarks>
+		/// Reads each record's text, so on disk it is given records that hold their text, copied in the background (#1335).
+		/// A formatter can be slow, such as the simple call stack's regular expressions on 100,000 records, so the token is checked before each record.
+		/// </remarks>
+		/// <param name="addLineNumberPrefix">Each line starts with the record's line number.</param>
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		public static string FormatRaw(RecordList records, bool addLineNumberPrefix, IRecordFormatter formatter, CancellationToken cancellationToken = default)
 		{
-			IEngine coreEngine = engine;
-			if (coreEngine != null)
+			if (records == null) throw new ArgumentNullException(nameof(records));
+			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+
+			IEnumerable<string> lines = records.Select(record =>
 			{
-				string[] selectedItems;
+				cancellationToken.ThrowIfCancellationRequested();
 
-				if (addLineNumberPrefix)
-				{
-					selectedItems = engine
-						.Selector
-						.GetSelected()
-						.Select(r => r.LineNumber + Delimiter + formatter.Format(r))
-						.ToArray();
-				}
-				else
-				{
-					selectedItems = engine
-						.Selector
-						.GetSelected()
-						.Select(r => formatter.Format(r)).ToArray();
-				}
+				var text = formatter.Format(record);
 
-				Clipboard.SetData(
-					DataFormats.Text,
-					string.Join(Environment.NewLine, selectedItems));
-			}
+				return addLineNumberPrefix ? record.LineNumber + Delimiter + text : text;
+			});
+
+			return string.Join(Environment.NewLine, lines);
+		}
+
+		/// <summary>
+		/// Puts <paramref name="text"/> on the clipboard. Called on the UI thread.
+		/// </summary>
+		public static void SetText(string text)
+		{
+			Clipboard.SetData(DataFormats.Text, text);
 		}
 
 		public static void CopySelectedComments(IEngine engine)

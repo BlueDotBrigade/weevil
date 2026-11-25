@@ -3,7 +3,13 @@ namespace BlueDotBrigade.Weevil.Data
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.IO;
 	using System.Linq;
+	using System.Text;
+	using System.Threading;
+	using BlueDotBrigade.Weevil.IO;
+	using Directory = System.IO.Directory;
+	using File = System.IO.File;
 
 	[TestClass]
 	public class RecordListTests
@@ -73,6 +79,48 @@ namespace BlueDotBrigade.Weevil.Data
 			FluentActions.Invoking(() => list.Add(R.WithLineNumber(14))).Should().Throw<NotSupportedException>();
 			FluentActions.Invoking(() => list[0] = R.WithLineNumber(14)).Should().Throw<NotSupportedException>();
 			list.IsReadOnly.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void GivenRecordsOfALogOnDisk_WhenCopiedWithTextAndTheLogIsDeleted_ThenTheCopiesAreTheSameRecordsWithTheirText()
+		{
+			// The graph keeps its copies after its log is gone, so a copy never reads the log (#1028).
+			var folder = Directory.CreateTempSubdirectory("Weevil.RecordListTests.").FullName;
+
+			try
+			{
+				var logPath = Path.Combine(folder, "Log.txt");
+				var bytes = Encoding.UTF8.GetBytes("First\nSecond\nand its second line\n");
+				File.WriteAllBytes(logPath, bytes);
+				var builder = new LogFileSourceBuilder(logPath, 0, bytes.Length);
+				builder.Append(bytes);
+				var chunk = new ContentChunk(builder.Build(), 0, bytes.Length, Encoding.UTF8);
+				var createdAt = new DateTime(2026, 11, 25, 3, 0, 0);
+				RecordList list = ImmutableArray.Create<IRecord>(
+					new Record(3, createdAt, SeverityType.Information, chunk, 0, 5, isMultiLine: false, wasGeneratedByUi: false),
+					new Record(5, createdAt.AddSeconds(1), SeverityType.Warning, chunk, 6, 26, isMultiLine: true, wasGeneratedByUi: false));
+
+				RecordList copies = list.CopyWithText();
+				File.Delete(logPath);
+
+				copies.Select(copy => copy.Content).Should().Equal("First", "Second\r\nand its second line");
+				copies.Select(copy => copy.LineNumber).Should().Equal(3, 5);
+				copies.Select(copy => copy.CreatedAt).Should().Equal(createdAt, createdAt.AddSeconds(1));
+				copies.Select(copy => copy.Severity).Should().Equal(SeverityType.Information, SeverityType.Warning);
+				copies.Select(copy => copy.IsMultiLine).Should().Equal(false, true);
+			}
+			finally
+			{
+				Directory.Delete(folder, recursive: true);
+			}
+		}
+
+		[TestMethod]
+		public void GivenACancelledToken_WhenCopiedWithText_ThenTheCopyStops()
+		{
+			RecordList list = R.WithLineNumbers(11, 13);
+
+			FluentActions.Invoking(() => list.CopyWithText(new CancellationToken(canceled: true))).Should().Throw<OperationCanceledException>();
 		}
 	}
 }

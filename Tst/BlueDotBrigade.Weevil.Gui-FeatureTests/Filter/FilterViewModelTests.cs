@@ -1406,9 +1406,40 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			var dialogBox = Substitute.For<IDialogBoxService>();
 			FilterViewModel viewModel = await OpenWithMoreRecordsSelectedThanTheClipboardAllows(dialogBox);
 
-			viewModel.ClipboardCopyRaw(readableCallstack: false);
+			await viewModel.ClipboardCopyRaw(readableCallstack: false);
 
 			dialogBox.Received(1).ShowMessage(Arg.Is<string>(message => message.Contains("Export")), "Copy");
+		}
+
+		[TestMethod]
+		[WorkItem(1335)]
+		public async Task GivenALogOnDisk_WhenRecordsAreCopied_ThenTheCopyRunsInTheBackgroundWhereAbortIsAvailable()
+		{
+			// Copy read each selected record's text in the command handler, from the log itself on disk, so the window froze and Escape did nothing.
+			using var uiDispatcher = new PausableUiDispatcher();
+			var viewModel = Track(new FilterViewModel(uiDispatcher, Substitute.For<IBulletinMediator>(), Substitute.For<IDialogBoxService>()));
+			await OpenOnDiskAsync(viewModel, CopyLog("Copy.log"));
+			viewModel.PressKey(Key.A, ModifierKeys.Control, pageSize: 10, isOnRow: true);
+
+			// The UI thread is busy, so the copy cannot finish yet.
+			uiDispatcher.Pause();
+			Task copy = viewModel.ClipboardCopyRaw(readableCallstack: false);
+
+			try
+			{
+				copy.IsCompleted.Should().BeFalse("the command returns while the records' text is read in the background");
+				viewModel.IsMenuEnabled.Should().BeFalse("the menus are disabled while the copy runs");
+				viewModel.AbortFilterCommand.CanExecute(null).Should().BeTrue("Abort is available while the copy runs");
+			}
+			finally
+			{
+				// Aborted, so the clipboard is not set: the test's threads are not the UI thread.
+				viewModel.AbortFilterCommand.Execute(null);
+				uiDispatcher.Resume();
+				await copy;
+			}
+
+			viewModel.IsMenuEnabled.Should().BeTrue("the menus are enabled again once the copy stops");
 		}
 
 		[TestMethod]
