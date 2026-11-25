@@ -1207,7 +1207,7 @@
 
 			return RunInBackground(
 				"The copy",
-				operation => text = ClipboardHelper.FormatRaw(selected.CopyWithText(operation.CancellationToken), addLineNumberPrefix, formatter),
+				operation => text = ClipboardHelper.FormatRaw(selected.CopyWithText(operation.CancellationToken), addLineNumberPrefix, formatter, operation.CancellationToken),
 				onSucceeded: () => SetClipboardText(text),
 				progressDelay: QuickWorkProgressDelay);
 		}

@@ -5,6 +5,7 @@
 	using System.Globalization;
 	using System.Linq;
 	using System.Text;
+	using System.Threading;
 	using System.Windows;
 	using BlueDotBrigade.Weevil;
 	using BlueDotBrigade.Weevil.Data;
@@ -24,16 +25,23 @@
 		/// </summary>
 		/// <remarks>
 		/// Reads each record's text, so on disk it is given records that hold their text, copied in the background (#1335).
+		/// A formatter can be slow, such as the simple call stack's regular expressions on 100,000 records, so the token is checked before each record.
 		/// </remarks>
 		/// <param name="addLineNumberPrefix">Each line starts with the record's line number.</param>
-		public static string FormatRaw(RecordList records, bool addLineNumberPrefix, IRecordFormatter formatter)
+		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+		public static string FormatRaw(RecordList records, bool addLineNumberPrefix, IRecordFormatter formatter, CancellationToken cancellationToken = default)
 		{
 			if (records == null) throw new ArgumentNullException(nameof(records));
 			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
 
-			IEnumerable<string> lines = addLineNumberPrefix
-				? records.Select(r => r.LineNumber + Delimiter + formatter.Format(r))
-				: records.Select(r => formatter.Format(r));
+			IEnumerable<string> lines = records.Select(record =>
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				var text = formatter.Format(record);
+
+				return addLineNumberPrefix ? record.LineNumber + Delimiter + text : text;
+			});
 
 			return string.Join(Environment.NewLine, lines);
 		}
