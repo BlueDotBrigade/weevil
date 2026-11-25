@@ -86,6 +86,7 @@ internal class DialogBoxService : IDialogBoxService
 			CompanionSuffixes = ExtractedLog.CompanionSuffixes,
 			CopiesFolder = ExtractedLog.DefaultCopiesFolder,
 			CheckBeforeOpening = checkBeforeOpening,
+			Log = WriteOpenAsLog,
 			OptionsContent = host.View,
 			Notice = new OpenAsNoticeView { DataContext = BlueDotBrigade.Weevil.Gui.Filter.FilterViewModel.LicensePath },
 			CanOpen = false,
@@ -126,6 +127,30 @@ internal class DialogBoxService : IDialogBoxService
 			: null;
 
 		return isAccepted;
+	}
+
+	/// <summary>
+	/// Writes what the Open As dialog reports to Weevil's log: the dialog is generic, so it has no log of its own (#1333).
+	/// </summary>
+	private static void WriteOpenAsLog(System.Diagnostics.TraceEventType level, string message, Exception exception)
+	{
+		LogSeverityType severity = level switch
+		{
+			System.Diagnostics.TraceEventType.Critical => LogSeverityType.Critical,
+			System.Diagnostics.TraceEventType.Error => LogSeverityType.Error,
+			System.Diagnostics.TraceEventType.Warning => LogSeverityType.Warning,
+			System.Diagnostics.TraceEventType.Information => LogSeverityType.Information,
+			_ => LogSeverityType.Debug,
+		};
+
+		if (exception is null)
+		{
+			Log.Default.Write(severity, message);
+		}
+		else
+		{
+			Log.Default.Write(severity, exception, message);
+		}
 	}
 
 	public string ShowSaveFile(string targetDirectory, string targetFileName)

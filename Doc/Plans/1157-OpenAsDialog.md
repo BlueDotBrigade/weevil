@@ -29,7 +29,7 @@ Decided by the owner on 2026-11-14:
 8. **Every way in shows the dialog:** Open, Ctrl+O and the menu, and also drag-and-drop, Explorer and the command line, with the path filled in.
 9. **"Log files"** also shows rolled logs, such as `app.log.1`, and hides Weevil's `.xml` and `.idx` files.
 10. **Plugins:** Weevil detects the selected log's plugin, which either uses Weevil's options or supplies its own, through a new optional interface, so existing plugins keep working.
-11. **The control lives in `BlueDotBrigade.Weevil.Windows` first,** and later moves to a shared library. It does not depend on MaterialDesign or on any other Weevil project.
+11. **The control lives in `BlueDotBrigade.Weevil.Windows` first,** and later moves to a shared library. It does not depend on MaterialDesign or on any other Weevil project. (2026-11-25: the project split of step 7 was brought forward in #1333, after audit finding U7-2: the control is in `BlueDotBrigade.Weevil.Windows.Dialogs`, which references nothing but WPF. Only the move to a shared library remains.)
 12. **It ships with Weevil 3.0.**
 13. **A proof of concept comes first,** standalone, with no Weevil code, checked by the owner on Windows.
 

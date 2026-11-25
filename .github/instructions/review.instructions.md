@@ -38,7 +38,8 @@ These instructions guide Copilot during pull request reviews. Every review shoul
 
 ## Running Headless
 
-- Flag a new WPF or Windows-only dependency in `Core`, `Common`, the CLI, PowerShell, `TestTools`, or a plugin's `IPlugin` assembly. Only `BlueDotBrigade.Weevil.Gui`, `BlueDotBrigade.Weevil.Windows` and their tests may use WPF.
+- Flag a new WPF or Windows-only dependency in `Core`, `Common`, the CLI, PowerShell, `TestTools`, or a plugin's `IPlugin` assembly. Only `BlueDotBrigade.Weevil.Gui`, `BlueDotBrigade.Weevil.Windows`, `BlueDotBrigade.Weevil.Windows.Dialogs` and their tests may use WPF.
+- Flag a reference from `BlueDotBrigade.Weevil.Windows.Dialogs` to a Weevil project, MaterialDesign or Metalama: the generic Open As dialog knows nothing about Weevil (#1333).
 - Flag a feature added only to the WPF application whose logic the CLI, PowerShell or a test would also need: it belongs in `Core`.
 
 ## XML Sidecar Compatibility

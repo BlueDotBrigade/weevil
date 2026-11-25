@@ -2,11 +2,11 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
-	using BlueDotBrigade.Weevil.Diagnostics;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
 
 	/// <summary>
@@ -173,6 +173,13 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		/// </summary>
 		public OpenAsResult Result { get; private set; }
 
+		/// <summary>
+		/// Writes what the dialog has to report to the host's log, as the dialog has no log of its own (#1333): how much it matters, a message,
+		/// and the exception behind it, or <see langword="null"/>. <see langword="null"/> logs nothing. Called on the UI thread, sometimes after the dialog closes.
+		/// An exception it throws is ignored, so that logging cannot stop the dialog cleaning up.
+		/// </summary>
+		public Action<TraceEventType, string, Exception> Log { get; set; }
+
 		/// <remarks>
 		/// Closing the window, for example with Cancel, stops an extraction that is running (#1251).
 		/// </remarks>
@@ -182,12 +189,24 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 
 			if (_extraction is not null)
 			{
-				Log.Default.Write(LogSeverityType.Information, "The Open As dialog closed during an extraction, so the extraction was cancelled.");
+				WriteLog(TraceEventType.Information, "The Open As dialog closed during an extraction, so the extraction was cancelled.", null);
 				_extraction.Cancel();
 			}
 
 			this.Browser.Dispose();
 			base.OnClosed(e);
+		}
+
+		private void WriteLog(TraceEventType level, string message, Exception exception)
+		{
+			try
+			{
+				this.Log?.Invoke(level, message, exception);
+			}
+			catch (Exception)
+			{
+				// Logging is best-effort: the window must still cancel, dispose and close. The failure has nowhere to go, as the log is what failed.
+			}
 		}
 
 		private async void OnOpenClick(object sender, RoutedEventArgs e) => await OpenAsync();
@@ -269,7 +288,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				// The analyst closed the window, so there is nothing to show. Logged, so a defect is not hidden.
 				if (exception is not OperationCanceledException)
 				{
-					Log.Default.Write(LogSeverityType.Warning, exception, "An extraction failed after the Open As dialog closed.");
+					WriteLog(TraceEventType.Warning, "An extraction failed after the Open As dialog closed.", exception);
 				}
 
 				return (null, destination);

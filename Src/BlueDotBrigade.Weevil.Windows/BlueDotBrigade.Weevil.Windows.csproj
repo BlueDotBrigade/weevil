@@ -60,10 +60,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>BlueDotBrigade.Weevil.Windows-UnitTests</_Parameter1>
-    </AssemblyAttribute>
+    <ProjectReference Include="..\BlueDotBrigade.Weevil.Windows.Dialogs\BlueDotBrigade.Weevil.Windows.Dialogs.csproj" />
   </ItemGroup>
 </Project>
