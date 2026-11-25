@@ -16,7 +16,7 @@
 		internal TimeSpan Transform(string text)
 		{
 			var pattern = RegexHelper.RevealGroups(X.TimePeriod);
-			var results = Regex.Match(text, pattern);
+			Match results = Regex.Match(text, pattern);
 
 			var value = int.Parse(results.Groups[1].Value);
 			var unit = results.Groups[2].Value;

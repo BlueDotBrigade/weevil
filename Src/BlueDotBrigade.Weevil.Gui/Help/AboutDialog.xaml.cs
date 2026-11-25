@@ -108,11 +108,11 @@
 		{
 			string result = string.Empty;
 
-			var sourceFileSize = GetFileSize(sourceFilePath);
+			StorageUnit sourceFileSize = GetFileSize(sourceFilePath);
 			var computerSnapshot = ComputerSnapshot.Create();
 			var process = Process.GetCurrentProcess();
-			var weevilRamUsed = TaskManager.GetPrivateWorkingSet(process);
-			var totalRamAvailable = weevilRamUsed + computerSnapshot.RamTotalFree;
+			StorageUnit weevilRamUsed = TaskManager.GetPrivateWorkingSet(process);
+			StorageUnit totalRamAvailable = weevilRamUsed + computerSnapshot.RamTotalFree;
 			var workingSet = new StorageUnit(process.WorkingSet64);
 			var workingSetPercentUsage = ((float)workingSet.Bytes / (float)totalRamAvailable.Bytes) * 100.0;
 			var privateMemory = new StorageUnit(process.PrivateMemorySize64);
@@ -148,7 +148,7 @@
 
 		private static StorageUnit GetFileSize(string sourceFilePath)
 		{
-			var fileSize = StorageUnit.Zero;
+			StorageUnit fileSize = StorageUnit.Zero;
 
 			try
 			{

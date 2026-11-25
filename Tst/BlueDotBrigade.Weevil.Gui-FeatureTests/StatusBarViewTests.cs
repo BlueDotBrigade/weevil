@@ -18,7 +18,7 @@ namespace BlueDotBrigade.Weevil.Gui
 			var statusBarViewPath = LocateStatusBarViewPath();
 			var xaml = XDocument.Load(statusBarViewPath);
 
-			var attentionAnimation = FindAttentionAnimation(
+			XElement? attentionAnimation = FindAttentionAnimation(
 				xaml,
 				styleKey: "InsightIconStyleOpacityPulse",
 				targetProperty: "Opacity");
@@ -38,7 +38,7 @@ namespace BlueDotBrigade.Weevil.Gui
 			var statusBarViewPath = LocateStatusBarViewPath();
 			var xaml = XDocument.Load(statusBarViewPath);
 
-			var attentionAnimation = FindAttentionAnimation(
+			XElement? attentionAnimation = FindAttentionAnimation(
 				xaml,
 				styleKey: "InsightIconStyleOpacityPulse",
 				targetProperty: "Opacity");
@@ -58,11 +58,11 @@ namespace BlueDotBrigade.Weevil.Gui
 			var statusBarViewPath = LocateStatusBarViewPath();
 			var xaml = XDocument.Load(statusBarViewPath);
 
-			var scaleXAnimation = FindAttentionAnimation(
+			XElement? scaleXAnimation = FindAttentionAnimation(
 				xaml,
 				styleKey: "InsightIconStyleScalePulse",
 				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleX)");
-			var scaleYAnimation = FindAttentionAnimation(
+			XElement? scaleYAnimation = FindAttentionAnimation(
 				xaml,
 				styleKey: "InsightIconStyleScalePulse",
 				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleY)");
@@ -88,11 +88,11 @@ namespace BlueDotBrigade.Weevil.Gui
 			var statusBarViewPath = LocateStatusBarViewPath();
 			var xaml = XDocument.Load(statusBarViewPath);
 
-			var scaleXAnimation = FindAttentionAnimation(
+			XElement? scaleXAnimation = FindAttentionAnimation(
 				xaml,
 				styleKey: "InsightIconStyleScalePulse",
 				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleX)");
-			var scaleYAnimation = FindAttentionAnimation(
+			XElement? scaleYAnimation = FindAttentionAnimation(
 				xaml,
 				styleKey: "InsightIconStyleScalePulse",
 				targetProperty: "(UIElement.RenderTransform).(ScaleTransform.ScaleY)");
@@ -162,7 +162,7 @@ namespace BlueDotBrigade.Weevil.Gui
 			string styleKey,
 			string targetProperty)
 		{
-			var style = xaml
+			XElement? style = xaml
 				.Descendants()
 				.FirstOrDefault(element =>
 					element.Name.LocalName == "Style"
@@ -170,7 +170,7 @@ namespace BlueDotBrigade.Weevil.Gui
 
 			style.Should().NotBeNull();
 
-			var attentionTrigger = style!
+			XElement? attentionTrigger = style!
 				.Descendants()
 				.FirstOrDefault(element =>
 					element.Name.LocalName == "MultiDataTrigger"
@@ -183,7 +183,7 @@ namespace BlueDotBrigade.Weevil.Gui
 
 			attentionTrigger.Should().NotBeNull();
 
-			var attentionAnimation = attentionTrigger!
+			XElement? attentionAnimation = attentionTrigger!
 				.Descendants()
 				.FirstOrDefault(element =>
 					element.Name.LocalName == "DoubleAnimation"

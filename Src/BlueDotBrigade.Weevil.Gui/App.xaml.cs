@@ -118,7 +118,7 @@
 					"Weevil application is starting...");
 
 				var telemetrySource = TelemetryClientFactory.GetTelemetrySource();
-				var telemetryClient = TelemetryClientFactory.Create();
+				ITelemetryClient telemetryClient = TelemetryClientFactory.Create();
 
 				TelemetrySessionLifecycle.Shared.Configure(telemetryClient);
 				TelemetrySessionLifecycle.Shared.ConfigureStartupContext(telemetrySource, IsDebuggerAttachedAtStartup);

@@ -14,7 +14,10 @@
 	 </AssemblyAttribute>
   </ItemGroup>
 
-  <!-- Metalama's compiler cannot load the .NET SDK's code style analyzers (LAMA0625), so the projects it compiles check code style in the IDE only. -->
+  <!--
+    The Metalama compiler bundles its own Roslyn, and fails with LAMA0625 when the code style analyzers of the newest .NET SDK installed need a newer one:
+    Metalama 2026.1.20 with SDK 11.0.100, which GitHub's Windows runners have. So the projects it compiles check code style in the IDE only.
+  -->
   <PropertyGroup Condition="'$(RoslynCompilerType)' == 'Metalama'">
 	 <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>

@@ -6,6 +6,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.IO;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
+	using FluentAssertions.Events;
 
 	/// <summary>
 	/// RAM or Disk in the Open As dialog, as the analyst selects one log after another (#1215).
@@ -102,7 +103,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		{
 			// The analyst opens one section or one region, listed from the log's sidecar (#1212, #1213).
 			var options = new OpenAsOptionsViewModel(Advise, ReadParts);
-			using var monitor = options.Monitor();
+			using IMonitor<OpenAsOptionsViewModel> monitor = options.Monitor();
 			await options.SelectAsync(LargeLog);
 			monitor.Should().RaisePropertyChangeFor(o => o.HasSections, "the view enables the section list only when it is told");
 			monitor.Should().RaisePropertyChangeFor(o => o.HasRegions);
@@ -265,7 +266,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 		/// </summary>
 		private static OpenAsAdvice Advise(BrowserItem file)
 		{
-			var estimate = file == LargeLog ? new StorageUnit(10 * StorageUnit.BytesPerGigabyte) : OneGigabyte;
+			StorageUnit estimate = file == LargeLog ? new StorageUnit(10 * StorageUnit.BytesPerGigabyte) : OneGigabyte;
 
 			return new OpenAsAdvice(file.Name, OneGigabyte, estimate, new StorageUnit(8 * StorageUnit.BytesPerGigabyte), isOnNetworkDrive: false);
 		}

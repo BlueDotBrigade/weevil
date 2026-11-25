@@ -50,7 +50,7 @@
 				in _subscriptions
 				select r;
 
-			foreach (var action in result.Select(x => x.Value).OfType<Action<T>>())
+			foreach (Action<T> action in result.Select(x => x.Value).OfType<Action<T>>())
 			{
 				action(bulletin);
 			}
