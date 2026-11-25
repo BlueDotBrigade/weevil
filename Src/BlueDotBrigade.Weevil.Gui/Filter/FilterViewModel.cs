@@ -1179,8 +1179,8 @@
 		}
 
 		/// <remarks>
-		/// The records' text is read in the background, where Abort (Escape) stops it: on disk, up to 100,000 records are read from the log,
-		/// slowly on a network drive (#1335). The clipboard is set on the UI thread once the text is ready.
+		/// As for the graph, only a log on disk is read in the background, where Abort (Escape) stops it: up to 100,000 records are read from the log,
+		/// slowly on a network drive (#1335). The clipboard is then set on the UI thread. In RAM a record keeps its text, so the copy is quick.
 		/// </remarks>
 		public Task ClipboardCopyRaw(bool readableCallstack)
 		{
@@ -1196,13 +1196,37 @@
 			var addLineNumberPrefix = Settings.Default.AddLineNumberPrefix;
 			// The records selected now: the selection can change before the progress bar shows.
 			RecordList selected = _engine.Selector.GetSelected();
+
+			if (_engine.StorageMode != StorageMode.Disk)
+			{
+				SetClipboardText(ClipboardHelper.FormatRaw(selected, addLineNumberPrefix, formatter));
+				return Task.CompletedTask;
+			}
+
 			var text = string.Empty;
 
 			return RunInBackground(
 				"The copy",
 				operation => text = ClipboardHelper.FormatRaw(selected.CopyWithText(operation.CancellationToken), addLineNumberPrefix, formatter),
-				onSucceeded: () => ClipboardHelper.SetText(text),
+				onSucceeded: () => SetClipboardText(text),
 				progressDelay: QuickWorkProgressDelay);
+		}
+
+		/// <summary>
+		/// Puts Copy's text on the clipboard, or says why it could not: another application, such as a clipboard manager or a remote desktop session,
+		/// may hold the clipboard (#1335). Called on the UI thread.
+		/// </summary>
+		private void SetClipboardText(string text)
+		{
+			try
+			{
+				ClipboardHelper.SetText(text);
+			}
+			catch (System.Runtime.InteropServices.ExternalException e)
+			{
+				Log.Default.Write(LogSeverityType.Warning, e, "The selected records could not be copied to the clipboard.");
+				_dialogBox.ShowMessage($"The selected records could not be copied to the clipboard.\r\n\r\n{e.Message}", "Copy");
+			}
 		}
 
 		public void ClipboardCopyLineNumbers()

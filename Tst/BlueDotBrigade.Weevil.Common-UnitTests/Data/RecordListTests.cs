@@ -101,10 +101,9 @@ namespace BlueDotBrigade.Weevil.Data
 		}
 
 		[TestMethod]
-		[WorkItem(1335)]
 		public void GivenRecordsOfALogOnDisk_WhenCopiedWithTextAndTheLogIsDeleted_ThenTheCopiesStillHaveTheirText()
 		{
-			// Copy reads the text in the background, then formats the copies, which never read the log.
+			// The graph keeps its copies after its log is gone, so a copy never reads the log (#1028).
 			var folder = Directory.CreateTempSubdirectory("Weevil.RecordListTests.").FullName;
 
 			try
