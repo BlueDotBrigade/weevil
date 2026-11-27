@@ -56,7 +56,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 			results.Data["Count"].Should().Be(3d);
 		}
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("de-DE")]
 		[DataRow("fr-FR")]
 		[WorkItem(928)]

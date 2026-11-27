@@ -6,3 +6,6 @@ dotnet_diagnostic.IDE0008.severity = warning
 
 # Add 'this' qualification (#1272)
 dotnet_diagnostic.IDE0009.severity = warning
+
+# Use TestMethod instead of the obsolete DataTestMethod (#1274)
+dotnet_diagnostic.MSTEST0044.severity = warning

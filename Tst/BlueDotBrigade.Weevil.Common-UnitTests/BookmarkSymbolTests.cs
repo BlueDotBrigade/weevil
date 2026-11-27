@@ -21,7 +21,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 			BookmarkSymbol.GetSymbol("Interesting sequence of events").Should().Be(BookmarkSymbol.Default);
 		}
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("bug found in parser")]
 		[DataRow("Bug investigation")]
 		public void GetSymbol_BugKeyword_ReturnsBug(string label)
@@ -31,7 +31,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 
 		// ── Question keywords ────────────────────────────────────────────────
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("Question: why did login fail?")]
 		[DataRow("Unknown error observed")]
 		[DataRow("Investigate the retry loop")]
@@ -44,7 +44,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 
 		// ── Theory keywords ──────────────────────────────────────────────────
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("Theory: connection pool exhausted")]
 		[DataRow("Hypothesis: stale cache entry")]
 		[DataRow("Clue found in logs")]
@@ -57,7 +57,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 
 		// ── Root Cause keywords ───────────────────────────────────────────────
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("RCA: stale cache entry")]
 		[DataRow("Root cause identified")]
 		[DataRow("Culprit: null pointer dereference")]
@@ -68,7 +68,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 			BookmarkSymbol.GetSymbol(label).Should().Be(BookmarkSymbol.RootCause);
 		}
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("root-cause identified")]
 		[DataRow("root_cause identified")]
 		public void GetSymbol_RootCauseKeywordsWithSpacesUnderscoresOrHyphens_AreMatched(string label)
@@ -76,7 +76,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 			BookmarkSymbol.GetSymbol(label).Should().Be(BookmarkSymbol.RootCause);
 		}
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("work-around for customer")]
 		[DataRow("work_around for customer")]
 		public void GetSymbol_FixKeywordsWithSpacesUnderscoresOrHyphens_AreMatched(string label)
@@ -86,7 +86,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 
 		// ── Fix keywords ──────────────────────────────────────────────────────
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("Fix deployed")]
 		[DataRow("Workaround for customer")]
 		[DataRow("Mitigation applied")]
@@ -99,7 +99,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 
 		// ── Verified keywords ─────────────────────────────────────────────────
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("Verified after retest")]
 		[DataRow("Confirmed fix works")]
 		[DataRow("Validated in staging")]
@@ -112,7 +112,7 @@ namespace BlueDotBrigade.Weevil.Common.UnitTests
 
 		// ── Case insensitivity ────────────────────────────────────────────────
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow("VERIFIED fix applied")]
 		[DataRow("Verified RCA after patch deployment")]
 		public void GetSymbol_VerifiedKeywordUpperCase_ReturnsVerified(string label)
