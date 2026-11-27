@@ -23,8 +23,13 @@
 		// #1087's estimate was 18, or 137 MB per GB of the reference log: 22 is about 170 MB per GB. The droid log's budget below is the tighter one.
 		private const int MaximumBytesPerRecordOnDisk = 27;
 
-		// What opening may leave for the next collection. Measured on 2026-11-16 with 200,000 records, in a Debug build: 0 bytes per record, down from 275 (#1240).
-		private const double MaximumGarbagePerRecord = 1;
+		// What opening may leave for the next collection. #1240 left 275 bytes per record; its fix left 0 (2026-11-16, 200,000 records, Debug build).
+		// What the test still sees is noise of a fixed size, whatever the log's: the logging and engine creation after opening's collection, the test host
+		// and the runtime. On Linux, 10 to 30 KB (0.05 to 0.15 bytes per record on 2026-11-26, idle or with every core busy); once, about 224 KB on
+		// a Windows runner, over the earlier limit of 1 (#1339). 4 is 0.8 MB at RecordCount: about 3.6 times that worst noise. It still catches a smaller
+		// regression than #1240, such as an array of one int or long per record that opening no longer needs (4 or 8 bytes per record).
+		// The noise is per test, not per record, so a smaller RecordCount needs a larger limit.
+		private const double MaximumGarbagePerRecord = 4;
 
 		private string _folder = string.Empty;
 
@@ -91,6 +96,7 @@
 
 		[TestMethod]
 		[WorkItem(1240)]
+		[WorkItem(1339)]
 		[DoNotParallelize]
 		[DataRow(StorageMode.Ram)]
 		[DataRow(StorageMode.Disk)]
@@ -107,8 +113,9 @@
 			var memoryAfterOpening = GC.GetTotalMemory(forceFullCollection: false) - before;
 			var memoryKept = GC.GetTotalMemory(forceFullCollection: true) - before;
 			var garbagePerRecord = (memoryAfterOpening - memoryKept) / (double)engine.Count;
-			this.TestContext.WriteLine($"Storage: {storageMode}. Managed memory per record: {memoryAfterOpening / (double)engine.Count:N1} bytes after opening, {memoryKept / (double)engine.Count:N1} kept.");
+			this.TestContext.WriteLine($"Storage: {storageMode}. Managed memory per record: {memoryAfterOpening / (double)engine.Count:N1} bytes after opening, {memoryKept / (double)engine.Count:N1} kept, garbage {garbagePerRecord:N2} ({memoryAfterOpening - memoryKept:N0} bytes).");
 
+			// #1339: a limit of 1 byte per record left too little room for that noise, and failed once on a Windows runner.
 			garbagePerRecord.Should().BeLessThan(MaximumGarbagePerRecord, "opening collects once it has finished, so it leaves no garbage behind");
 			GC.KeepAlive(engine);
 		}
