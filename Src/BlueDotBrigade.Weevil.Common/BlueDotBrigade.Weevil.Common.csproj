@@ -57,12 +57,4 @@
 		</AssemblyAttribute>
 	</ItemGroup>
   
-  	<ItemGroup>
-  	  <Content Include="..\..\DomainSpecificTerminology.xml" Link="Properties\DomainSpecificTerminology.xml" />
-  	</ItemGroup>
-	<ItemGroup>
-		<CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-			<Link>Properties\DomainSpecificTerminology.xml</Link>
-		</CodeAnalysisDictionary>
-	</ItemGroup>
 </Project>

@@ -41,9 +41,6 @@
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="..\..\DomainSpecificTerminology.xml">
-			<Link>Properties\DomainSpecificTerminology.xml</Link>
-		</Content>
 		<Content Include="..\..\reqnroll.json" Link="reqnroll.json" />
 		<Content Include=".Daten\.Global\Droid.log.xml" />
 	</ItemGroup>

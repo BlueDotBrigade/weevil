@@ -40,9 +40,6 @@
 		<ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="..\..\DomainSpecificTerminology.xml">
-			<Link>Properties\DomainSpecificTerminology.xml</Link>
-		</Content>
 		<Content Include=".Daten\.Global\GlobalDefault.log.xml" />
 	</ItemGroup>
 	<ItemGroup>

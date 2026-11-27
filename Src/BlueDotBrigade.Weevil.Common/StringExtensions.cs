@@ -9,14 +9,14 @@
 		/// </summary>
 		/// <param name="text">Represents that text that is being searched.</param>
 		/// <param name="value">Represents the value to search for.</param>
-		/// <param name="comparision">One of the enumeration values that specifies the rules to use in the comparison.</param>
+		/// <param name="comparison">One of the enumeration values that specifies the rules to use in the comparison.</param>
 		/// <returns><see langword="true"/> if the value parameter occurs within this string; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>
 		/// To perform a case insensitive search use <see cref="StringComparison.OrdinalIgnoreCase"/>.
 		/// </remarks>
-		public static bool Contains(this string text, string value, StringComparison comparision)
+		public static bool Contains(this string text, string value, StringComparison comparison)
 		{
-			return text.IndexOf(value, comparision) >= 0;
+			return text.IndexOf(value, comparison) >= 0;
 		}
 	}
 }

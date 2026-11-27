@@ -23,9 +23,4 @@
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Common\BlueDotBrigade.Weevil.Common.csproj" />
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.Telemetry\BlueDotBrigade.Weevil.Telemetry.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-      <Link>Properties\DomainSpecificTerminology.xml</Link>
-    </CodeAnalysisDictionary>
-  </ItemGroup>
 </Project>

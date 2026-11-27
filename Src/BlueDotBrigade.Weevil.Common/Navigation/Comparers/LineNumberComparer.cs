@@ -14,9 +14,9 @@
 			return x.CompareTo(y);
 		}
 
-		public override double CompareMagnitude(int x, int y)
+		public override double CompareMagnitude(int left, int right)
 		{
-			return x - y;
+			return left - right;
 		}
 	}
 }

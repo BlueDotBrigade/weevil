@@ -20,4 +20,8 @@
     <!-- Report the code style rules in .editorconfig during the build, not only in the IDE. -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
+  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <!-- Words the spelling rule accepts: CA1704, from Text.Analyzers, which only Common references (#1271). Text.Analyzers reads an .xml or .dic whose name contains "dictionary" or "custom". -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)DomainSpecificDictionary.xml" Link="Properties\DomainSpecificDictionary.xml" />
+  </ItemGroup>
 </Project>

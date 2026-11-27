@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
-		DomainSpecificTerminology.xml = DomainSpecificTerminology.xml
+		DomainSpecificDictionary.xml = DomainSpecificDictionary.xml
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		postsharp.config = postsharp.config
 		reqnroll.json = reqnroll.json
@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{380D2095-48C4-487E-A5DA-9AD053797792}"
 	ProjectSection(SolutionItems) = preProject
-		DomainSpecificTerminology.xml = DomainSpecificTerminology.xml
+		DomainSpecificDictionary.xml = DomainSpecificDictionary.xml
 		License.md = License.md
 		ReadMe.md = ReadMe.md
 	EndProjectSection

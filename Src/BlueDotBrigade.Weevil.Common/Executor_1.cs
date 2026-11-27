@@ -2,13 +2,13 @@
 {
 	using System;
 
-	public class Executor<I> : IExecute
+	public class Executor<TInstance> : IExecute
 	{
-		private readonly Func<I, bool> _canExecutionFunc;
-		private readonly Action<I> _executionAction;
-		private readonly I _instance;
+		private readonly Func<TInstance, bool> _canExecutionFunc;
+		private readonly Action<TInstance> _executionAction;
+		private readonly TInstance _instance;
 
-		public Executor(I instance, Func<I, bool> canExecutionFunc, Action<I> executionAction)
+		public Executor(TInstance instance, Func<TInstance, bool> canExecutionFunc, Action<TInstance> executionAction)
 		{
 			_instance = instance;
 			_canExecutionFunc = canExecutionFunc;

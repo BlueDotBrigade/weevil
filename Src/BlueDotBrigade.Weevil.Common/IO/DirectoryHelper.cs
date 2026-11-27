@@ -14,7 +14,7 @@
 			var filePath = Path.Combine(directoryPath, Path.GetRandomFileName());
 			try
 			{
-				using (FileStream fs = System.IO.File.Create(filePath, 1, FileOptions.DeleteOnClose))
+				using (FileStream stream = System.IO.File.Create(filePath, 1, FileOptions.DeleteOnClose))
 				{
 					isWritable = true;
 				}

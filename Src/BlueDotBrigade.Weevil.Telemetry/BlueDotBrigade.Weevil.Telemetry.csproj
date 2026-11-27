@@ -33,11 +33,6 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <ItemGroup>
-    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-      <Link>Properties\DomainSpecificTerminology.xml</Link>
-    </CodeAnalysisDictionary>
-  </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Warning Condition="'$(WEEVIL_TELEMETRY_USERNAME)' == ''" Code="BDB" Text="`WEEVIL_TELEMETRY_USERNAME` environment variable is missing." />
