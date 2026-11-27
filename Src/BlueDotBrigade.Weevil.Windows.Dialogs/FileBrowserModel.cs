@@ -7,6 +7,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using BlueDotBrigade.Weevil.Windows.Dialogs.Storage;
@@ -452,6 +453,12 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			this.Navigated?.Invoke(this, EventArgs.Empty);
 		}
 
+		/// <summary>
+		/// Compares names as Explorer does, ignoring case: digits compare as numbers, so <c>app.log.2</c> comes before <c>app.log.10</c> (#1344).
+		/// </summary>
+		[DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+		private static extern int StrCmpLogicalW(string left, string right);
+
 		private void RefreshView()
 		{
 			var selectedName = _selectedItem?.Name;
@@ -472,7 +479,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			};
 
 			IComparer<object> comparer = Comparer<object>.Create((left, right) => left is string a && right is string b
-				? StringComparer.OrdinalIgnoreCase.Compare(a, b)
+				? StrCmpLogicalW(a, b)
 				: Comparer<object>.Default.Compare(left, right));
 
 			sorted = _isSortDescending ? sorted.ThenByDescending(key, comparer) : sorted.ThenBy(key, comparer);

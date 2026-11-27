@@ -51,6 +51,19 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		}
 
 		[TestMethod]
+		[WorkItem(1344)]
+		public async Task GivenRolledLogs_WhenSortedByName_ThenTheirNumbersSortAsNumbers()
+		{
+			// app.log.10 was listed before app.log.2, because names were compared character by character.
+			Location rolled = Logs.Combine("Rolled", entersContainer: false);
+			_reader.List(rolled).Returns(new ListingResult(rolled, new[] { File(rolled, "app.log.10"), File(rolled, "App.log.2"), File(rolled, "app.log.1") }));
+
+			await _model.NavigateAsync(rolled);
+
+			Names().Should().Equal("app.log.1", "App.log.2", "app.log.10");
+		}
+
+		[TestMethod]
 		public async Task GivenAFolder_WhenNavigatedTo_ThenNothingIsSelected()
 		{
 			// So entering a folder does not make the host read its first file.
