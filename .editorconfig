@@ -217,6 +217,9 @@ dotnet_diagnostic.IDE0008.severity = error
 # Add 'this' qualification (#1272)
 dotnet_diagnostic.IDE0009.severity = error
 
+# Use TestMethod instead of the obsolete DataTestMethod (#1274)
+dotnet_diagnostic.MSTEST0044.severity = error
+
 # SPELLING
 
 # Identifiers should be spelled correctly
