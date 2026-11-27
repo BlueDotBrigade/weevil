@@ -30,7 +30,7 @@ Other Blue Dot Brigade applications will share it, so its project references not
 - **`OpenAsDialog`** reports the item selected (`SelectionChanged`), so the host updates its options, and enables Open while the host's `CanOpen` is true. Double-clicking a file, or pressing Enter on it, is Open.
 - **On Open,** a file on disk is given as it is. A file in a zip is extracted with its *companions*, the files the host names (`CompanionSuffixes`) that travel with it, such as `App.log.xml` beside `App.log`. With `CopiesFolder`, it is extracted to a folder of its own named by `GetCopyKey`, so the same file opened again finds the companions kept beside it (#1253). Without it, to a new temporary folder.
 - **`CheckBeforeOpening`** runs off the UI thread before anything is extracted or the window closes. An `IOException` it throws keeps the window open and shows its message.
-- **Cancel,** or closing the window, opens nothing and changes no file. It stops an extraction that is running, and deletes what it had extracted (#1251).
+- **Cancel,** or closing the window, opens nothing and changes no file. It stops an extraction that is running, and deletes what it had copied so far (#1251). An extraction that finishes just as the window closes is deleted from a temporary folder, but a copy in `CopiesFolder` stays: it may be the log the host already has open, and the next open of the same file reuses it (#1253).
 - **What the host gives it:** where to start (`InitialLocation`), the recent folders (`RecentFolders`, read back after the window closes), the file types (`FileTypes`) and companions (`CompanionSuffixes`), the options (`OptionsContent`), a notice above Open (`Notice`), and where to log (`Log`), since it has no log of its own (#1333).
 
 ## Weevil's Options
