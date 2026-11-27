@@ -1,6 +1,6 @@
 # 1157: One Open As Dialog
 
-> **Status:** In progress
+> **Status:** Done. Steps 1 to 6 are in Weevil 3.0, and [OpenAsDialog.md](../Design/OpenAsDialog.md) describes the result. Step 7, after 3.0, is #1341.
 >
 > **AI agents:** Do not start, resume or re-implement this plan unless the user asks you to in the current conversation.
 
