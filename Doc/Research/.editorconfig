@@ -27,3 +27,6 @@ dotnet_diagnostic.IDE0044.severity = warning
 
 # Use ArgumentOutOfRangeException throw helpers (#1281)
 dotnet_diagnostic.CA1512.severity = warning
+
+# Use string.Contains instead of string.IndexOf (#1283)
+dotnet_diagnostic.CA2249.severity = warning

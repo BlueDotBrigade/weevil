@@ -170,7 +170,7 @@ namespace BlueDotBrigade.Weevil.Data.SqlClient
 				}
 			}
 
-			return exception.Message.IndexOf("login failed", StringComparison.OrdinalIgnoreCase) >= 0
+			return exception.Message.Contains("login failed", StringComparison.OrdinalIgnoreCase)
 				? TelemetryUploadStatus.InvalidCredentials
 				: TelemetryUploadStatus.Failed;
 		}
