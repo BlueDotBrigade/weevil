@@ -213,7 +213,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenLogContentChanged_WhenMatched_ThenReturnsFalse(int changedOffset)
 		{
 			var bytes = Encoding.UTF8.GetBytes(string.Concat(Enumerable.Repeat("A line of text\n", 1000)));
-			LineIndex index = LineIndex.Build(new MemoryStream(bytes));
+			var index = LineIndex.Build(new MemoryStream(bytes));
 
 			bytes[changedOffset >= 0 ? changedOffset : bytes.Length + changedOffset] = (byte)'X';
 
@@ -224,7 +224,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenLogIsShorterThanIndexed_WhenMatched_ThenReturnsFalse()
 		{
 			var bytes = Encoding.UTF8.GetBytes("a\nb\nc\n");
-			LineIndex index = LineIndex.Build(new MemoryStream(bytes));
+			var index = LineIndex.Build(new MemoryStream(bytes));
 
 			index.Matches(new MemoryStream(bytes, 0, 4)).Should().BeFalse();
 		}
@@ -233,7 +233,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenByteOrderMarkAdded_WhenMatched_ThenReturnsFalse()
 		{
 			using MemoryStream withoutMark = ToStream("a\nb\n", new UTF8Encoding(false));
-			LineIndex index = LineIndex.Build(withoutMark);
+			var index = LineIndex.Build(withoutMark);
 
 			using MemoryStream withMark = ToStream("a\nb\n", new UTF8Encoding(true));
 
@@ -244,7 +244,7 @@ namespace BlueDotBrigade.Weevil.IO
 		public void GivenCopiedLog_WhenMatched_ThenReturnsTrue()
 		{
 			var bytes = Encoding.UTF8.GetBytes("a\nb\nc\n");
-			LineIndex index = LineIndex.Build(new MemoryStream(bytes));
+			var index = LineIndex.Build(new MemoryStream(bytes));
 
 			index.Matches(new MemoryStream(bytes.ToArray())).Should().BeTrue();
 		}
@@ -275,7 +275,7 @@ namespace BlueDotBrigade.Weevil.IO
 					foreach (var bufferSize in BufferSizes)
 					{
 						using MemoryStream source = ToStream(text, encoding);
-						LineIndex index = LineIndex.Build(source, checkpointInterval: 2, bufferSize);
+						var index = LineIndex.Build(source, checkpointInterval: 2, bufferSize);
 
 						var reader = new LogLineReader(source);
 						var offsets = new List<long>();

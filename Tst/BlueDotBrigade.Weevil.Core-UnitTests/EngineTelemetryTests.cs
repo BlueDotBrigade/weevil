@@ -123,7 +123,7 @@ namespace BlueDotBrigade.Weevil
 		public void GivenPluginAnalyzerKey_WhenBuildingMetricKey_ThenKeyIsPrefixedWithAnalysisRun()
 		{
 			// A plugin analyzer's key flows through unchanged - no schema or code change is required.
-			string key = AnalysisManager.BuildAnalysisMetricKey("Contoso.SignalQuality");
+			var key = AnalysisManager.BuildAnalysisMetricKey("Contoso.SignalQuality");
 
 			key.Should().Be("Analysis.Run.Contoso.SignalQuality");
 		}
@@ -131,7 +131,7 @@ namespace BlueDotBrigade.Weevil
 		[TestMethod]
 		public void GivenOverlyLongAnalyzerKey_WhenBuildingMetricKey_ThenKeyIsCappedToColumnLength()
 		{
-			string key = AnalysisManager.BuildAnalysisMetricKey(new string('x', 200));
+			var key = AnalysisManager.BuildAnalysisMetricKey(new string('x', 200));
 
 			key.Length.Should().Be(128);
 		}

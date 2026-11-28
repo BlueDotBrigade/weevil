@@ -316,7 +316,6 @@
     <Rule Id="IDE0003" Action="None" />
     <Rule Id="IDE0004" Action="None" />
     <Rule Id="IDE0005" Action="None" />
-    <Rule Id="IDE0007" Action="None" />
     <Rule Id="IDE0010" Action="None" />
     <Rule Id="IDE0011" Action="None" />
     <Rule Id="IDE0016" Action="None" />

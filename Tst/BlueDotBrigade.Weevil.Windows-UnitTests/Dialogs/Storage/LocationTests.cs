@@ -93,7 +93,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		{
 			// The root was shown as `C:`, which Windows reads as the current folder on drive C, so a recent folder saved that way opened elsewhere.
 			var root = Path.GetPathRoot(Path.GetTempPath())!;
-			Location drive = Location.ForFileSystem(root);
+			var drive = Location.ForFileSystem(root);
 
 			drive.ToString().Should().Be(root);
 			Location.Parse(drive.ToString(), IsZip).Should().Be(drive);

@@ -93,7 +93,7 @@
 
                                 engine.Analyzer.Analyze(AnalysisType.StableValueRuns);
 
-                                int[] flaggedLines = engine
+                                var flaggedLines = engine
                                         .Filter
                                         .Results
                                         .Where(record => engine.RecordState.IsFlagged(record))
