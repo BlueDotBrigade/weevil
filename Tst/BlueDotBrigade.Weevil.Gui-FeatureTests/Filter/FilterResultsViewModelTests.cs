@@ -1,35 +1,45 @@
 ﻿namespace BlueDotBrigade.Weevil.Gui.Filter
 {
-	using System;
+	using System.IO;
 	using System.Threading.Tasks;
-	using System.Windows;
-	using BlueDotBrigade.Weevil.Gui.Threading;
 
-	// Adding this attribute prevents the exception: InvalidOperationException The calling thread must be STA, because many UI components require this.
-	// Mention this in: https://github.com/BlueDotBrigade/weevil/issues/191
-	//[StaTestClass]
+	[STATestClass]
 	public class FilterResultsViewModelTests : UiTestBase
 	{
-		[TestMethod]
-		public async Task OpenAsync()
+		// Weevil saves no sidecar under the temp folder, so each test starts with no pins or filter history.
+		private string _folder = string.Empty;
+
+		[TestInitialize]
+		public void Setup()
 		{
-			IBulletinMediator bulletinMediator = Substitute.For<IBulletinMediator>();
+			_folder = Directory.CreateTempSubdirectory("WeevilGui.").FullName;
+		}
 
-			FilterViewModel viewModel = Track(new FilterViewModel(
-				this.UiDispatcher,
-				bulletinMediator));
+		[TestCleanup]
+		public void Cleanup()
+		{
+			// The log's lock is in the folder.
+			CloseViewModels();
 
-			await viewModel.OpenAsync(new Daten().AsFilePath(From.GlobalDefault));
+			Directory.Delete(_folder, recursive: true);
+		}
 
-			viewModel.FilterManually(new object[]
-			{
-				"@IsPinned",
-				string.Empty,
-			});
+		[TestMethod]
+		public async Task GivenAPinnedAndAnUnpinnedRecord_WhenFilteredByIsPinned_ThenOnlyThePinnedRecordIsVisible()
+		{
+			var logPath = Path.Combine(_folder, "Application.log");
+			File.WriteAllLines(logPath, ["Unpinned record", "Pinned record"]);
 
+			FilterViewModel viewModel = Track(new FilterViewModel(this.UiDispatcher, Substitute.For<IBulletinMediator>()));
+			await viewModel.OpenAsync(logPath);
 			await viewModel.WhenIdle();
 
-			viewModel.VisibleItems.Count.Should().Be(512);
+			viewModel.Rows.GetRow(1).IsPinned = true;
+			viewModel.FilterManually(new object[] { "@IsPinned", string.Empty });
+			await viewModel.WhenIdle();
+
+			viewModel.VisibleItems.Should().ContainSingle()
+				.Which.Content.Should().Be("Pinned record");
 		}
 	}
 }
