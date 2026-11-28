@@ -4,6 +4,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Xml;
 	using System.Xml.Serialization;
 
 	/// <summary>
@@ -63,7 +64,9 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				try
 				{
 					using FileStream stream = File.OpenRead(filePath);
-					if (Serializer.Deserialize(stream) is TelemetrySessionDto session)
+					// An XmlReader refuses a DTD and resolves no external entity, so a file planted in the folder can't expand or fetch anything (CA5369).
+					using var reader = XmlReader.Create(stream);
+					if (Serializer.Deserialize(reader) is TelemetrySessionDto session)
 					{
 						sessions.Add(new PendingTelemetrySession
 						{

@@ -34,6 +34,27 @@ Directory.Delete(pendingDirectory, true);
 }
 
 [TestMethod]
+public void GivenPendingFileWithADtd_WhenPendingSessionsRequested_ThenTheFileIsSkipped()
+{
+// A DTD can expand entities or fetch files, so the store refuses one in a file planted in its folder (CA5369, #1284).
+var pendingDirectory = CreateTemporaryDirectory();
+
+try
+{
+File.WriteAllText(
+Path.Combine(pendingDirectory, "planted.xml"),
+"<?xml version=\"1.0\"?><!DOCTYPE TelemetrySessionDto [<!ENTITY app \"Weevil\">]><TelemetrySessionDto><Application>&app;</Application></TelemetrySessionDto>");
+var store = new TelemetrySessionXmlStore(pendingDirectory);
+
+store.GetPendingSessions(10).Should().BeEmpty();
+}
+finally
+{
+Directory.Delete(pendingDirectory, true);
+}
+}
+
+[TestMethod]
 public void GivenSavedSession_WhenStoredToDisk_ThenTemporaryFilesAreNotLeftBehind()
 {
 var pendingDirectory = CreateTemporaryDirectory();

@@ -527,7 +527,6 @@
     <Rule Id="CA5365" Action="None" />
     <Rule Id="CA5366" Action="None" />
     <Rule Id="CA5368" Action="None" />
-    <Rule Id="CA5369" Action="None" />
     <Rule Id="CA5370" Action="None" />
     <Rule Id="CA5371" Action="None" />
     <Rule Id="CA5372" Action="None" />
