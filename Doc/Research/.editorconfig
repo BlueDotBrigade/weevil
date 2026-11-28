@@ -22,5 +22,8 @@ dotnet_diagnostic.IDE0011.severity = warning
 # A name uses a term Weevil's vocabulary blocks (#1347)
 dotnet_diagnostic.BDB001.severity = warning
 
+# Make field readonly (#1277)
+dotnet_diagnostic.IDE0044.severity = warning
+
 # Use XmlReader for XML deserialization (#1284)
 dotnet_diagnostic.CA5369.severity = warning
