@@ -512,7 +512,7 @@
 					var gen2Collections = isOnDisk ? GC.CollectionCount(2) - gen2Before : 0;
 					(long WorkingSetBytes, long PeakWorkingSetBytes)? memoryAfter = isOnDisk ? ReadProcessMemory() : null;
 					IDictionary<string, object> metrics = CollectMetrics();
-					ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
+					var elapsedTimes = ElapsedTimes.Calculate(results);
 
 					// A filter is either stopped or shown, never both: Stop, and a newer filter's start, take the same lock (#1016, #1248).
 					bool isStopped;

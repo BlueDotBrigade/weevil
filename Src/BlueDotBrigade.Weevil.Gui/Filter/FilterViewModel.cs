@@ -226,7 +226,7 @@
 
 			try
 			{
-				using (HttpClient client = new HttpClient())
+				using (var client = new HttpClient())
 				{
 					var webRequest = new HttpRequestMessage(HttpMethod.Get, NewReleaseUrl);
 					HttpResponseMessage response = client.Send(webRequest);
@@ -3014,7 +3014,7 @@
 
 				if (_engine.Bookmarks.TryGetBookmark(selectedLineNumber, out Bookmark bookmark))
 				{
-					string newName = _dialogBox.ShowUserPrompt(
+					var newName = _dialogBox.ShowUserPrompt(
 						"Rename Bookmark",
 						"Name:",
 						bookmark.Name);
@@ -3070,7 +3070,7 @@
 						: "Bookmark";
 
 					// Prompt user for bookmark name with default
-					string bookmarkName = _dialogBox.ShowUserPrompt(
+					var bookmarkName = _dialogBox.ShowUserPrompt(
 						"Create Bookmark",
 						"Name:",
 						defaultName);

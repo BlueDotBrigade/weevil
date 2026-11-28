@@ -18,7 +18,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                 public void Create_SingleBookmark_BookmarkCreated()
                 {
                         // Arrange
-                        int lineNumber = 42;
+                        var lineNumber = 42;
 
                         // Act
                         _bookmarkManager.Create(-1, "Test", lineNumber);
@@ -33,7 +33,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                 public void Create_DuplicateLine_ThrowsInvalidOperationException()
                 {
                         // Arrange
-                        int lineNumber = 42;
+                        var lineNumber = 42;
                         _bookmarkManager.Create(-1, "A", lineNumber);
 
                         // Act
@@ -47,7 +47,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
                 public void Clear_LineNumber_RemovesBookmark()
                 {
                         // Arrange
-                        int lineNumber = 42;
+                        var lineNumber = 42;
                         _bookmarkManager.Create(-1, "A", lineNumber);
 
                         // Act

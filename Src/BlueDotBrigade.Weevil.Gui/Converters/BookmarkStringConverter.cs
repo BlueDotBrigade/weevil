@@ -32,15 +32,19 @@
                 public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
                 {
                         if (values?.Length < 2)
+                        {
                                 return string.Empty;
+                        }
 
                         IRecord record = RowViewModel.ToRecord(values[0]);
                         var viewModel = values[1] as FilterViewModel;
 
                         if (record == null || viewModel == null)
+                        {
                                 return string.Empty;
+                        }
 
-                        bool isToolTip = false;
+                        var isToolTip = false;
                         if (values.Length >= 3)
                         {
                                 bool.TryParse(values[2]?.ToString(), out isToolTip);

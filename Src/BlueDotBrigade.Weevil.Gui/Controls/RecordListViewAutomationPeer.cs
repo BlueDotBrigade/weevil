@@ -53,7 +53,7 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 
 		public override object GetPattern(PatternInterface patternInterface)
 		{
-			object pattern = base.GetPattern(patternInterface);
+			var pattern = base.GetPattern(patternInterface);
 
 			return patternInterface == PatternInterface.ItemContainer && pattern is IItemContainerProvider wpfFinder
 				? new SelectedItemFinder(this, wpfFinder)
