@@ -1,11 +1,11 @@
-using System.Collections.Concurrent;
-using System.Collections.Immutable;
-using BlueDotBrigade.Weevil.Data;
-using BlueDotBrigade.Weevil.Filter;
-using NSubstitute;
-
 namespace BlueDotBrigade.Weevil.Core.UnitTests.Filter
 {
+	using System.Collections.Concurrent;
+	using System.Collections.Immutable;
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Filter;
+	using NSubstitute;
+
 	/// <summary>
 	/// Unit tests for FilterStrategy.CanKeep() method to verify correct behavior
 	/// with all combinations of include/exclude filters, pinned/bookmarked records,
