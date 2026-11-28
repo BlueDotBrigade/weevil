@@ -223,6 +223,9 @@ dotnet_diagnostic.MSTEST0044.severity = error
 # Identifiers should be spelled correctly (#1271). Words it should accept go in DomainSpecificDictionary.xml.
 dotnet_diagnostic.CA1704.severity = error
 
+# Use ArgumentOutOfRangeException throw helpers (#1281)
+dotnet_diagnostic.CA1512.severity = error
+
 # SPELLING
 
 # Identifiers should be cased correctly
