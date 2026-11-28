@@ -68,7 +68,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 			try
 			{
-				CultureInfo culture = CultureInfo.GetCultureInfo(cultureName);
+				var culture = CultureInfo.GetCultureInfo(cultureName);
 				CultureInfo.CurrentCulture = culture;
 				CultureInfo.CurrentUICulture = culture;
 

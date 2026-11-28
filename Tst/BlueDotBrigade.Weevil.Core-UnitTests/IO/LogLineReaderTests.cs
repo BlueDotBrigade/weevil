@@ -72,7 +72,7 @@ namespace BlueDotBrigade.Weevil.IO
 					lines.Select(line => line.Text).Should().Equal(ReadWithStreamReader(bytes), $"{encoding.WebName}, {text.Length} characters");
 
 					Encoding decoder = new LogLineReader(new MemoryStream(bytes)).Encoding;
-					foreach ((string lineText, long offset, int length) in lines)
+					foreach ((var lineText, var offset, var length) in lines)
 					{
 						decoder.GetString(bytes, (int)offset, length).Should().Be(lineText, "each line's offset and length point at its bytes");
 					}

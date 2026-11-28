@@ -119,7 +119,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		{
 			// A folder on an unreachable share cannot be cancelled, so its late result must not replace the newer one.
 			using var release = new ManualResetEventSlim();
-			Location slow = Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Slow"));
+			var slow = Location.ForFileSystem(Path.Combine(Path.GetTempPath(), "Slow"));
 			_reader.List(slow).Returns(_ =>
 			{
 				release.Wait(TimeSpan.FromSeconds(10));
@@ -138,7 +138,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 		[TestMethod]
 		public async Task GivenAZip_WhenEntered_ThenTheItemCountSaysItIsInAZip()
 		{
-			Location bundle = Location.ForArchive(Path.Combine(Logs.FileSystemPath, "Bundle.zip"));
+			var bundle = Location.ForArchive(Path.Combine(Logs.FileSystemPath, "Bundle.zip"));
 			_reader.List(bundle).Returns(new ListingResult(bundle, new[] { File(bundle, "a.log"), File(bundle, "b.log") }));
 
 			await _model.NavigateAsync(Logs);
@@ -206,7 +206,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			{
 				var logPath = Path.Combine(folder, "Typed.log");
 				System.IO.File.WriteAllText(logPath, "line 1\n");
-				Location folderLocation = Location.ForFileSystem(folder);
+				var folderLocation = Location.ForFileSystem(folder);
 				_reader.GetKind(Arg.Any<Location>()).Returns(ItemKind.File);
 				_reader.List(folderLocation).Returns(new ListingResult(folderLocation, new[] { File(folderLocation, "Typed.log") }));
 				var isActivated = false;
@@ -235,7 +235,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 			{
 				var tracePath = Path.Combine(folder, "trace.out");
 				System.IO.File.WriteAllText(tracePath, "line 1\n");
-				Location folderLocation = Location.ForFileSystem(folder);
+				var folderLocation = Location.ForFileSystem(folder);
 				_reader.GetKind(Arg.Any<Location>()).Returns(ItemKind.File);
 				_reader.List(folderLocation).Returns(new ListingResult(folderLocation, new[] { File(folderLocation, "trace.out") }));
 				var logFiles = new FileTypeFilter("Log files", new[] { "*.log" });

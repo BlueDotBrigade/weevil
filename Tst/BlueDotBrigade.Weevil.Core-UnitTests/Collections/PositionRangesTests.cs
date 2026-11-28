@@ -12,9 +12,9 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenTwoSeparateRanges_WhenARangeTouchingBothIsAdded_ThenTheyMergeIntoOne()
 		{
-			PositionRanges ranges = PositionRanges.Union(Positions(10, 20), Positions(30, 40));
+			var ranges = PositionRanges.Union(Positions(10, 20), Positions(30, 40));
 
-			PositionRanges merged = PositionRanges.Union(ranges, Positions(21, 29));
+			var merged = PositionRanges.Union(ranges, Positions(21, 29));
 
 			merged.Ranges.Should().Equal(new PositionRange(10, 40));
 			merged.Count.Should().Be(31);
@@ -25,7 +25,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		{
 			PositionRanges ranges = Positions(10, 40);
 
-			PositionRanges split = PositionRanges.Except(ranges, Positions(25, 25));
+			var split = PositionRanges.Except(ranges, Positions(25, 25));
 
 			split.Ranges.Should().Equal(new PositionRange(10, 24), new PositionRange(26, 40));
 			split.Count.Should().Be(30);
@@ -35,7 +35,7 @@ namespace BlueDotBrigade.Weevil.Collections
 		[TestMethod]
 		public void GivenPositionsInAnyOrder_WhenBuilt_ThenDuplicatesAreIgnoredAndNeighboursMerge()
 		{
-			PositionRanges ranges = PositionRanges.FromPositions(new List<int> { 7, 3, 4, 3, 9, 8 });
+			var ranges = PositionRanges.FromPositions(new List<int> { 7, 3, 4, 3, 9, 8 });
 
 			ranges.Ranges.Should().Equal(new PositionRange(3, 4), new PositionRange(7, 9));
 			ranges.Count.Should().Be(5);
@@ -58,7 +58,7 @@ namespace BlueDotBrigade.Weevil.Collections
 					positions.AddRange(Enumerable.Range(first, random.Next(1, 30)));
 				}
 
-				PositionRanges changes = PositionRanges.FromPositions(positions);
+				var changes = PositionRanges.FromPositions(positions);
 				if (random.Next(2) == 0)
 				{
 					ranges = PositionRanges.Union(ranges, changes);
@@ -83,7 +83,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			RecordList even = Keep(all, r => r.LineNumber % 2 == 0);
 			PositionRanges selection = Positions(0, all.Count - 1);
 
-			PositionRanges remapped = PositionRanges.Remap(selection, all, even, all);
+			var remapped = PositionRanges.Remap(selection, all, even, all);
 
 			remapped.Ranges.Should().Equal(new PositionRange(0, even.Count - 1));
 		}
@@ -96,7 +96,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			RecordList tenth = Keep(all, r => r.LineNumber % 10 == 0);
 			PositionRanges selection = Positions(0, even.Count - 1);
 
-			PositionRanges remapped = PositionRanges.Remap(selection, even, tenth, all);
+			var remapped = PositionRanges.Remap(selection, even, tenth, all);
 
 			remapped.Ranges.Should().Equal(new PositionRange(0, tenth.Count - 1));
 		}
@@ -109,7 +109,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			PositionRanges selection = Positions(0, even.Count - 1);
 
 			// Lists that cannot create records show that remapping, which runs after every filter, creates none (#1137).
-			PositionRanges remapped = PositionRanges.Remap(selection, new ColumnsOnlyRecordList(even), new ColumnsOnlyRecordList(all), new ColumnsOnlyRecordList(all));
+			var remapped = PositionRanges.Remap(selection, new ColumnsOnlyRecordList(even), new ColumnsOnlyRecordList(all), new ColumnsOnlyRecordList(all));
 
 			remapped.EnumeratePositions().Select(p => all[p].LineNumber).Should().Equal(2, 4, 6, 8, 10);
 			remapped.RangeCount.Should().Be(5);
@@ -122,7 +122,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			RecordList odd = Keep(all, r => r.LineNumber % 2 == 1);
 			PositionRanges selection = Positions(1, 1);
 
-			PositionRanges remapped = PositionRanges.Remap(selection, all, odd, all);
+			var remapped = PositionRanges.Remap(selection, all, odd, all);
 
 			remapped.Count.Should().Be(0);
 		}
@@ -137,7 +137,7 @@ namespace BlueDotBrigade.Weevil.Collections
 			RecordList filtered = Keep(all, r => r.LineNumber != 2);
 			PositionRanges selection = Positions(0, all.Count - 1);
 
-			PositionRanges remapped = PositionRanges.Remap(selection, all, filtered, all);
+			var remapped = PositionRanges.Remap(selection, all, filtered, all);
 
 			remapped.Ranges.Should().Equal(new PositionRange(0, filtered.Count - 1));
 		}

@@ -19,7 +19,7 @@ namespace BlueDotBrigade.Weevil.IO
 			};
 			
 			var separators = new string[headers.Length];
-			for (int i = 0; i < headers.Length; i++)
+			for (var i = 0; i < headers.Length; i++)
 			{
 				separators[i] = "---";
 			}

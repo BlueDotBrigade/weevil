@@ -303,7 +303,7 @@
 				string sourceFilePath;
 				long sourceFileLength;
 				Encoding sourceFileEncoding;
-				Stopwatch loadingStopwatch = new Stopwatch();
+				var loadingStopwatch = new Stopwatch();
 
 				SidecarManager sidecarManager = null;
 				ICoreExtension coreExtension = null;
@@ -575,7 +575,7 @@
 			/// </summary>
 			private static List<LogPart> GetSections(IReadOnlyList<Section> tableOfContents)
 			{
-				List<Section> sections = tableOfContents
+				var sections = tableOfContents
 					.Where(s => s.Level == 1)
 					.ToList();
 
@@ -615,7 +615,7 @@
 			/// </remarks>
 			private static int GetMaximumLinesToSearch(int startAtLineNumber, int lineCount)
 			{
-				long linesFromStart = System.Math.Max((long)lineCount - startAtLineNumber + 1, 0);
+				var linesFromStart = System.Math.Max((long)lineCount - startAtLineNumber + 1, 0);
 
 				return (int)System.Math.Min(linesFromStart + MultilineRecordParser.MaximumLinesToSearch, int.MaxValue);
 			}

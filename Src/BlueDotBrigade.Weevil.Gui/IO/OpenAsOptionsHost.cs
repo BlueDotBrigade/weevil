@@ -185,7 +185,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 		private void Show(IOpenAsOptionsProvider provider)
 		{
-			(IOpenAsOptions options, object view) = provider is null ? (_weevilOptions, _weevilView) : GetOptions(provider);
+			(IOpenAsOptions options, var view) = provider is null ? (_weevilOptions, _weevilView) : GetOptions(provider);
 
 			if (ReferenceEquals(options, this.Options))
 			{

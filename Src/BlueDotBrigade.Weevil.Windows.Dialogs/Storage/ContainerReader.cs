@@ -242,7 +242,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 				.Append(entry.Crc32.ToString(System.Globalization.CultureInfo.InvariantCulture))
 				.Append(entry.Length.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
-			byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(string.Join("\n", parts)));
+			var hash = SHA256.HashData(Encoding.UTF8.GetBytes(string.Join("\n", parts)));
 
 			return Convert.ToHexString(hash, 0, 8).ToLowerInvariant();
 		}
@@ -392,7 +392,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 					continue;
 				}
 
-				Location location = Location.ForFileSystem(info.FullName);
+				var location = Location.ForFileSystem(info.FullName);
 
 				items.Add(info is FileInfo file
 					? new BrowserItem(location, file.Name, IsContainerName(file.Name) ? ItemKind.Container : ItemKind.File, file.Length, file.LastWriteTime, (attributes & OnlineOnly) != 0)

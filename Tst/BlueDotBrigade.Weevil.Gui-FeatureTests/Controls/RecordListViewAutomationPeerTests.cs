@@ -23,7 +23,7 @@ namespace BlueDotBrigade.Weevil.Gui.Controls
 		{
 			RecordListViewAutomationPeer grid = CreateGridPeer(selectedLineNumber: 2);
 
-			List<RecordItemAutomationPeer> selectedRows = grid.GetSelectedRowPeers().ToList();
+			var selectedRows = grid.GetSelectedRowPeers().ToList();
 			RecordItemAutomationPeer firstSelectedRow = grid.FindNextSelectedRowPeer(startAfter: null);
 
 			((ISelectionProvider)grid.GetPattern(PatternInterface.Selection)).CanSelectMultiple.Should().BeTrue();

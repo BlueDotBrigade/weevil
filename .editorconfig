@@ -211,6 +211,9 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 # (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/configuration-files#precedence).
 # Doc/Research/.editorconfig keeps them warnings for the research projects, which are dated records.
 
+# Use var (#1273)
+dotnet_diagnostic.IDE0007.severity = error
+
 # Use explicit type (#1270)
 dotnet_diagnostic.IDE0008.severity = error
 
@@ -222,6 +225,9 @@ dotnet_diagnostic.MSTEST0044.severity = error
 
 # Identifiers should be spelled correctly (#1271). Words it should accept go in DomainSpecificDictionary.xml.
 dotnet_diagnostic.CA1704.severity = error
+
+# Add braces (#1275)
+dotnet_diagnostic.IDE0011.severity = error
 
 # Use ArgumentNullException.ThrowIfNull (#1278)
 dotnet_diagnostic.CA1510.severity = error

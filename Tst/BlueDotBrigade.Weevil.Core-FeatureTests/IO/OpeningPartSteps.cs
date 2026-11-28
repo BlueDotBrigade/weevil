@@ -153,7 +153,7 @@ internal sealed class OpeningPartSteps : ReqnrollSteps
 		File.Copy(_logPath, copyPath);
 
 		using IEngine wholeLog = Engine.UsingPath(copyPath).Open();
-		string[] expected = Describe(wholeLog.Records).Where(record => record.LineNumber >= firstLine && record.LineNumber <= lastLine).Select(record => record.Text).ToArray();
+		var expected = Describe(wholeLog.Records).Where(record => record.LineNumber >= firstLine && record.LineNumber <= lastLine).Select(record => record.Text).ToArray();
 
 		expected.Should().NotBeEmpty();
 		Describe(this.Context.Engine.Records).Select(record => record.Text).Should().Equal(expected);
