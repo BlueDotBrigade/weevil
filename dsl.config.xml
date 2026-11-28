@@ -2,13 +2,14 @@
 <!--
 Weevil's vocabulary (#1347): for each preferred term, the spellings and words BlueDotBrigade.Analyzers reports in a name (BDB001).
 It finds a blocked term anywhere in a name, so TSVFormatter is reported. Directory.Build.props gives this file to every project.
-A preferred term that isn't plain English also goes in DomainSpecificDictionary.xml, so the spelling rule, CA1704, accepts it.
+A preferred term the spelling rule, CA1704, rejects also goes in DomainSpecificDictionary.xml.
 How to add a term: Doc/Guides/NamingAndVocabulary.md.
 -->
 <dsl>
 	<term prefer="Cli" block="CLI" case="sensitive"/>
 	<term prefer="Csv" block="CSV" case="sensitive"/>
 	<term prefer="Json" block="JSON" case="sensitive"/>
+	<term prefer="Linq" block="LINQ" case="sensitive"/>
 	<term prefer="Metadata" case="sensitive">
 		<alias block="MetaData"/>
 		<alias block="metaData"/>
@@ -20,5 +21,6 @@ How to add a term: Doc/Guides/NamingAndVocabulary.md.
 	<term prefer="Tsv" block="TSV" case="sensitive"/>
 	<term prefer="Ui" block="UI" case="sensitive"/>
 	<term prefer="Unselect" block="Deselect" case="insensitive"/>
+	<term prefer="Uri" block="URI" case="sensitive"/>
 	<term prefer="Xml" block="XML" case="sensitive"/>
 </dsl>

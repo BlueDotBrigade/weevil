@@ -23,7 +23,7 @@
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
     <!-- Words the spelling rule accepts: CA1704, from Text.Analyzers, which only Common references (#1271). Text.Analyzers reads an .xml or .dic whose name contains "dictionary" or "custom". -->
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)DomainSpecificDictionary.xml" Link="Properties\DomainSpecificDictionary.xml" />
-    <!-- Weevil's vocabulary: the terms BlueDotBrigade.Analyzers reports in a name (BDB001, #1347). -->
+    <!-- Weevil's vocabulary: the terms BlueDotBrigade.Analyzers reports in a name (BDB001, #1347). Version 1.0.0 doesn't add dsl.config.xml itself, so the item below is needed. -->
     <PackageReference Include="BlueDotBrigade.Analyzers" Version="1.0.0" PrivateAssets="all" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)dsl.config.xml" Link="Properties\dsl.config.xml" />
   </ItemGroup>

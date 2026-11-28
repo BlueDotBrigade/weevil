@@ -45,11 +45,11 @@ They aren't redundant. The first is a spell checker, the second a list of blocke
 
 Add a word only when it is the clearest name: an established technical term, such as `Formatter` or `Func`, or a word of Weevil's own, such as `Checksums` or `Unselect`. Otherwise, rename.
 
-The dictionary uses Microsoft's format, from FxCop. Its other sections, and a proposal for BlueDotBrigade.Analyzers to read its blocked terms from the same file, are in [BlueDotBrigade/analyzers#15](https://github.com/BlueDotBrigade/analyzers/issues/15).
+The dictionary uses [Microsoft's format](https://learn.microsoft.com/previous-versions/visualstudio/visual-studio-2015/code-quality/how-to-customize-the-code-analysis-dictionary), from FxCop. [BlueDotBrigade/analyzers#15](https://github.com/BlueDotBrigade/analyzers/issues/15) describes each of its sections.
 
 ### Configuring BlueDotBrigade.Analyzers
 
-- **In a project:** `Directory.Build.props` references the [`BlueDotBrigade.Analyzers`](https://www.nuget.org/packages/BlueDotBrigade.Analyzers) package, version 1.0.0, in every project, and gives each one [`dsl.config.xml`](../../dsl.config.xml) as an `AdditionalFiles` item.
+- **In a project:** `Directory.Build.props` references the [`BlueDotBrigade.Analyzers`](https://www.nuget.org/packages/BlueDotBrigade.Analyzers) package, version 1.0.0, in every project, and gives each one [`dsl.config.xml`](../../dsl.config.xml) as an `AdditionalFiles` item. Version 1.0.0 doesn't add the file itself, so that item is needed, and a project's own `dsl.config.xml` or the `AnalyzerDslFileName` property has no effect (BlueDotBrigade/analyzers#13).
 - **On or off:** set its rule's severity in `.editorconfig`: `dotnet_diagnostic.BDB001.severity = error`, `warning` or `none`. Weevil sets `error`; the research projects keep `warning` in `Doc/Research/.editorconfig`. Without the file, it reports `BDB000` and checks nothing. Its README says `RC000`, which is out of date (BlueDotBrigade/analyzers#13).
 - **One name only:** `#pragma warning disable BDB001`, or `[SuppressMessage]`, as for any Roslyn analyzer. Give the reason.
 
@@ -65,13 +65,18 @@ The dictionary uses Microsoft's format, from FxCop. Its other sections, and a pr
    </term>
    ```
 
-2. If the term isn't plain English, such as `Tsv`, also add it to `DomainSpecificDictionary.xml`, so CA1704 accepts it. The two analyzers can't share one file yet (BlueDotBrigade/analyzers#15).
+2. If CA1704 rejects the term, such as `Tsv`, also add it to `DomainSpecificDictionary.xml`. Version 1.0.0 can't read its terms from that file; a later version will (BlueDotBrigade/analyzers#15, not yet released).
 3. Build, rename what it reports, and run `dotnet build-server shutdown` if a change to the file seems ignored.
 
 #### What It Misses
 
-Version 1.0.0 has limits, each tracked in its repository:
+Version 1.0.0 has limits. Each link is to the analyzer's issue:
 
-- **It matches text, not words** (BlueDotBrigade/analyzers#10): since `UI` is blocked, `GUIHelper` would be reported too, so write `GuiHelper`. Before blocking a term, check that no other word in Weevil's names contains it.
+- **It matches text, not words** (BlueDotBrigade/analyzers#10): since `UI` is blocked, .NET's own `UInt32` would be reported in a name such as `ReadUInt32Value`. Before blocking a term, check that no other word in Weevil's names, or in .NET's, contains it.
 - **It reports only the spelling given** (BlueDotBrigade/analyzers#11): `MetaData` doesn't report `metaData`, so list the camel-case form as an alias too.
-- **It doesn't check every name** (BlueDotBrigade/analyzers#12): namespaces, type parameters, local functions and lambda parameters go unchecked.
+- **It doesn't check every name:**
+  - namespaces, type parameters, local functions and lambda parameters (BlueDotBrigade/analyzers#12, fixed but not yet released);
+  - local variables other than plain declarations, such as `foreach`, `out`, pattern, `catch` and deconstructed variables;
+  - the parameters of local functions and anonymous methods, tuple element names and labels;
+  - generated code, such as the test names Reqnroll makes from a scenario's title. A title with a blocked term, such as "Filtering a TSV log", would fail a version that checks generated code.
+- **An explicit interface implementation is checked by its full name,** such as `NsCSV.IThing.M`, so a blocked term in the interface's namespace or name is reported there. Only a suppression silences it.
