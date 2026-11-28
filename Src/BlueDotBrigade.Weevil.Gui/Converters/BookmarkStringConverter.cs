@@ -40,7 +40,7 @@
                         if (record == null || viewModel == null)
                                 return string.Empty;
 
-                        bool isToolTip = false;
+                        var isToolTip = false;
                         if (values.Length >= 3)
                         {
                                 bool.TryParse(values[2]?.ToString(), out isToolTip);

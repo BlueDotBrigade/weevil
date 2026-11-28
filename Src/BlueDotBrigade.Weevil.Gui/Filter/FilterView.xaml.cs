@@ -357,7 +357,7 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 			if (!this.IsLoaded) return;
 
 			if (ApplicationFontSizeComboBox.SelectedValue is string selectedValue &&
-				double.TryParse(selectedValue, out double fontSize))
+				double.TryParse(selectedValue, out var fontSize))
 			{
 				Application.Current.Resources["ApplicationFontSize"] = fontSize;
 

@@ -19,7 +19,7 @@ namespace BlueDotBrigade.Weevil.Math
 
 			var sorted = values.OrderBy(v => v).ToArray();
 			// Use sorted.Length (not values.Count) to ensure calculations reference the array we're operating on
-			int trimCount = (int)(sorted.Length * _trimPercent);
+			var trimCount = (int)(sorted.Length * _trimPercent);
 
 			if (trimCount * 2 >= sorted.Length) return null;
 
