@@ -235,6 +235,9 @@ dotnet_diagnostic.BDB001.severity = error
 # Make field readonly (#1277)
 dotnet_diagnostic.IDE0044.severity = error
 
+# Use ArgumentOutOfRangeException throw helpers (#1281)
+dotnet_diagnostic.CA1512.severity = error
+
 # Mark test classes with TestClass (#1285)
 dotnet_diagnostic.MSTEST0030.severity = error
 
