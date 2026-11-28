@@ -40,9 +40,9 @@
 		private FilterStrategy _latestFilterStrategy;
 		private RecordList _latestFilterResults;
 
-		private IRegionManager _regionManager;
+		private readonly IRegionManager _regionManager;
 
-		private IBookmarkManager _bookmarkManager;
+		private readonly IBookmarkManager _bookmarkManager;
 
 		private Filter _currentFilter;
 
