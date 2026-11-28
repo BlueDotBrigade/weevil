@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+Words that the spelling rule, CA1704 from Text.Analyzers, accepts in identifiers (#1271). Directory.Build.props gives it to every project.
+Text.Analyzers reads an .xml or .dic whose name contains "dictionary" or "custom", and only its Recognized and Unrecognized words.
+Add a term only when it is the clearest name: an established technical term, or a word of Weevil's own vocabulary.
+Format: https://learn.microsoft.com/previous-versions/visualstudio/visual-studio-2015/code-quality/how-to-customize-the-code-analysis-dictionary
+-->
+<Dictionary>
+	<Words>
+		<Unrecognized>
+			<Word></Word>
+		</Unrecognized>
+		<Recognized>
+			<Word>Args</Word>
+			<Word>Checksums</Word>
+			<Word>Cli</Word>
+			<Word>Comparer</Word>
+			<Word>Comparers</Word>
+			<Word>Csv</Word>
+			<Word>Deserializer</Word>
+			<Word>Fatals</Word>
+			<Word>Formatter</Word>
+			<Word>Func</Word>
+			<Word>Giga</Word>
+			<Word>Json</Word>
+			<Word>Linq</Word>
+			<Word>Renderer</Word>
+			<Word>Runtime</Word>
+			<Word>Serializer</Word>
+			<Word>Tsv</Word>
+			<Word>Ui</Word>
+			<Word>Unary</Word>
+			<Word>Unselect</Word>
+			<Word>Unselected</Word>
+			<Word>Uri</Word>
+		</Recognized>
+	</Words>
+</Dictionary>

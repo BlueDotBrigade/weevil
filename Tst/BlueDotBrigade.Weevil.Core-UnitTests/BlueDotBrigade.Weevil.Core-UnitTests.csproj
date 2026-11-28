@@ -45,11 +45,6 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 	<ItemGroup>
-		<CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-			<Link>Properties\DomainSpecificTerminology.xml</Link>
-		</CodeAnalysisDictionary>
-	</ItemGroup>
-	<ItemGroup>
 		<None Include=".Daten\Configuration\Sidecar\v2\SidecarLoaderTests\SchemaWithRegions.xml" />
 	</ItemGroup>
 	<ItemGroup>

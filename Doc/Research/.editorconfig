@@ -9,3 +9,6 @@ dotnet_diagnostic.IDE0009.severity = warning
 
 # Use TestMethod instead of the obsolete DataTestMethod (#1274)
 dotnet_diagnostic.MSTEST0044.severity = warning
+
+# Identifiers should be spelled correctly (#1271)
+dotnet_diagnostic.CA1704.severity = warning

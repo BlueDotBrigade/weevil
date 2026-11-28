@@ -12,9 +12,9 @@
 	/// <seealso href="https://github.com/dotnet/roslyn/issues/2319">Infer generic type arguments from constructor arguments</seealso>
 	public static class Executor
 	{
-		public static Executor<I> Create<I>(I instance, Func<I, bool> canExecuteFunc, Action<I> executeAction)
+		public static Executor<TInstance> Create<TInstance>(TInstance instance, Func<TInstance, bool> canExecuteFunc, Action<TInstance> executeAction)
 		{
-			return new Executor<I>(instance, canExecuteFunc, executeAction);
+			return new Executor<TInstance>(instance, canExecuteFunc, executeAction);
 		}
 	}
 }

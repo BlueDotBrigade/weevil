@@ -18,9 +18,9 @@
 			this IDictionary<TKey, TValue> destination,
 			IEnumerable<KeyValuePair<TKey, TValue>> source)
 		{
-			foreach (KeyValuePair<TKey, TValue> kvp in source)
+			foreach (KeyValuePair<TKey, TValue> pair in source)
 			{
-				destination.Add(kvp.Key, kvp.Value);
+				destination.Add(pair.Key, pair.Value);
 			}
 		}
 	}

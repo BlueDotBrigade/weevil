@@ -18,6 +18,6 @@
 		///
 		/// <see cref="MagnitudeComparer{T}"/> on the other hand does return the difference between two values.
 		/// </remarks>
-		public abstract double CompareMagnitude(T x, T y);
+		public abstract double CompareMagnitude(T left, T right);
 	}
 }

@@ -5,9 +5,9 @@
 
 	internal sealed class CreatedAtComparer : MagnitudeComparer<DateTime>
 	{
-		private const int GreaterX = 1;
+		private const int FirstIsGreater = 1;
 		private const int EqualTimestamps = 0;
-		private const int GreaterY = -1;
+		private const int SecondIsGreater = -1;
 
 		public override DateTime Read(RecordList records, int position)
 		{
@@ -28,37 +28,37 @@
 				}
 				else if (HasCreationTime(x))
 				{
-					return GreaterX;
+					return FirstIsGreater;
 				}
 				else
 				{
 					// second.HasCreationTime
-					return GreaterY;
+					return SecondIsGreater;
 				}
 			}
 		}
 
-		public override double CompareMagnitude(DateTime x, DateTime y)
+		public override double CompareMagnitude(DateTime left, DateTime right)
 		{
-			if (HasCreationTime(x) && HasCreationTime(y))
+			if (HasCreationTime(left) && HasCreationTime(right))
 			{
-				TimeSpan delta = x - y;
+				TimeSpan delta = left - right;
 				return delta.TotalMilliseconds;
 			}
 			else
 			{
-				if (!HasCreationTime(x) && !HasCreationTime(y))
+				if (!HasCreationTime(left) && !HasCreationTime(right))
 				{
 					return EqualTimestamps;
 				}
-				else if (HasCreationTime(x))
+				else if (HasCreationTime(left))
 				{
-					return GreaterX;
+					return FirstIsGreater;
 				}
 				else
 				{
 					// second.HasCreationTime
-					return GreaterY;
+					return SecondIsGreater;
 				}
 			}
 		}

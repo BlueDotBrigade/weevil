@@ -41,9 +41,6 @@
 		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.13" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="..\..\DomainSpecificTerminology.xml">
-			<Link>Properties\DomainSpecificTerminology.xml</Link>
-		</Content>
 		<Content Include="..\..\reqnroll.json" Link="reqnroll.json" />
 		<Content Include=".Daten\.Global\AstroMech.log.xml" />
 	</ItemGroup>

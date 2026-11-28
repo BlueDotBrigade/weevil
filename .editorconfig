@@ -220,15 +220,15 @@ dotnet_diagnostic.IDE0009.severity = error
 # Use TestMethod instead of the obsolete DataTestMethod (#1274)
 dotnet_diagnostic.MSTEST0044.severity = error
 
-# SPELLING
+# Identifiers should be spelled correctly (#1271). Words it should accept go in DomainSpecificDictionary.xml.
+dotnet_diagnostic.CA1704.severity = error
 
-# Identifiers should be spelled correctly
-dotnet_diagnostic.CA1704.severity = warning
+# SPELLING
 
 # Identifiers should be cased correctly
 #dotnet_diagnostic.CA1709.severity = error
 
 # When you enable the following line, misspell a word, right click "Ignore" on the word, it will appear here.
-# Feature temporarily disabled until new VS2022 Spell Check and Roslyn `Text.Analyzers` are working properly.
+# Disabled until Visual Studio's spell checker works properly. The build's spelling rule, CA1704, reads DomainSpecificDictionary.xml instead.
 # spelling_exclusion_path = spelling_whitelist.dic
 #spelling_languages = en-us

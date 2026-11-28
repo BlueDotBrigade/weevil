@@ -41,11 +41,6 @@
     <ProjectReference Include="..\..\Src\BlueDotBrigade.Weevil.TestTools\BlueDotBrigade.Weevil.TestTools.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-      <Link>Properties\DomainSpecificTerminology.xml</Link>
-    </CodeAnalysisDictionary>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include=".Daten\SimpleCallStackFormatterTests\EndOfInnerException.txt" />
     <Content Include=".daten\simplecallstackformattertests\EndOfStackTrace.txt" />
   </ItemGroup>

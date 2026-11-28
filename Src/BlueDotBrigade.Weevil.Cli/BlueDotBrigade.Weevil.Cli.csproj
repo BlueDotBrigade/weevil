@@ -46,11 +46,6 @@
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
-		<CodeAnalysisDictionary Include="..\..\DomainSpecificTerminology.xml">
-			<Link>Properties\DomainSpecificTerminology.xml</Link>
-		</CodeAnalysisDictionary>
-	</ItemGroup>
-	<ItemGroup>
 		<PackageReference Include="Cocona" Version="2.2.0" />
 		<PackageReference Include="NLog" Version="6.2.2" />
 		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.2.2" />
