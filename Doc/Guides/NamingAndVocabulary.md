@@ -45,12 +45,56 @@ They aren't redundant. The first is a spell checker, the second a list of blocke
 
 Add a word only when it is the clearest name: an established technical term, such as `Formatter` or `Func`, or a word of Weevil's own, such as `Checksums` or `Unselect`. Otherwise, rename.
 
+### The Dictionary's Format
+
+The format comes from FxCop. Every element, with names in Weevil's style:
+
+```xml
+<Dictionary>
+  <Words>
+    <Unrecognized>
+      <Word>Cnt</Word>
+    </Unrecognized>
+    <Recognized>
+      <Word>Tsv</Word>
+      <Word>Unselect</Word>
+    </Recognized>
+    <Deprecated>
+      <Term PreferredAlternate="Metadata">MetaData</Term>
+      <Term PreferredAlternate="Unselect">Deselect</Term>
+    </Deprecated>
+    <Compound>
+      <Term CompoundAlternate="FileName">filename</Term>
+    </Compound>
+    <DiscreteExceptions>
+      <Term>timestamp</Term>
+    </DiscreteExceptions>
+  </Words>
+  <Acronyms>
+    <CasingExceptions>
+      <Acronym>CJK</Acronym>
+    </CasingExceptions>
+  </Acronyms>
+</Dictionary>
+```
+
+| Element | Means | FxCop rule | Text.Analyzers reads it |
+|---|---|---|---|
+| `Unrecognized` | Report this word as misspelled, even if it's a real word | CA1704 | Yes |
+| `Recognized` | Accept this word as spelled correctly | CA1704 | Yes |
+| `Deprecated` | Use the preferred word instead | CA1726 | No |
+| `Compound` | Two words, so capitalize both: `FileName`, not `Filename` | CA1702 | No |
+| `DiscreteExceptions` | One word, so don't split it: `Timestamp`, not `TimeStamp` | CA1702 | No |
+| `CasingExceptions` | An acronym that keeps its own capitals | CA1709 | No |
+
+Weevil's dictionary uses only `Recognized` today. Nothing enforces the last four sections: Roslyn didn't carry those rules over. `Deprecated` is the closest match to BlueDotBrigade.Analyzers' blocked terms, but it would list a preferred word such as `Unselect` twice.
+
 ### Configuring BlueDotBrigade.Analyzers
 
 Weevil doesn't use it yet: #1347 tracks trying it, then adopting it. From its [README](https://github.com/BlueDotBrigade/analyzers):
 
 - **In a project:** add the [`BlueDotBrigade.Analyzers`](https://www.nuget.org/packages/BlueDotBrigade.Analyzers) package reference.
-- **The terms:** a `dsl.config.xml` beside the solution, or beside a project to override it for that project. The `AnalyzerDslFileName` property changes the file's name. Without the file, it reports `RC000` and checks nothing.
+- **The terms:** a `dsl.config.xml` beside the solution, or beside a project to override it for that project. The `AnalyzerDslFileName` property changes the file's name. Without the file, it reports `BDB000` and checks nothing. Its README says `RC000`, which is out of date (BlueDotBrigade/analyzers#13).
 
   ```xml
   <dsl>
