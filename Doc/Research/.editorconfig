@@ -25,5 +25,8 @@ dotnet_diagnostic.BDB001.severity = warning
 # Make field readonly (#1277)
 dotnet_diagnostic.IDE0044.severity = warning
 
+# Use ArgumentOutOfRangeException throw helpers (#1281)
+dotnet_diagnostic.CA1512.severity = warning
+
 # Use XmlReader for XML deserialization (#1284)
 dotnet_diagnostic.CA5369.severity = warning
