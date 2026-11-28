@@ -13,6 +13,15 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	public sealed class TelemetrySessionXmlStore : ITelemetrySessionStore
 	{
 		private static readonly XmlSerializer Serializer = new XmlSerializer(typeof(TelemetrySessionDto));
+
+		/// <summary>
+		/// Refuses a DTD and resolves no external entity, so a file planted in the pending folder can't expand entities or fetch files (CA5369, #1284).
+		/// </summary>
+		private static readonly XmlReaderSettings SafeReaderSettings = new XmlReaderSettings
+		{
+			DtdProcessing = DtdProcessing.Prohibit,
+			XmlResolver = null,
+		};
 		private readonly string _pendingDirectoryPath;
 
 		public TelemetrySessionXmlStore(string pendingDirectoryPath = "")
@@ -64,8 +73,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 				try
 				{
 					using FileStream stream = File.OpenRead(filePath);
-					// An XmlReader refuses a DTD and resolves no external entity, so a file planted in the folder can't expand or fetch anything (CA5369).
-					using var reader = XmlReader.Create(stream);
+					using var reader = XmlReader.Create(stream, SafeReaderSettings);
 					if (Serializer.Deserialize(reader) is TelemetrySessionDto session)
 					{
 						sessions.Add(new PendingTelemetrySession
