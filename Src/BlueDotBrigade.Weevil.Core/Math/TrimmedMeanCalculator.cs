@@ -15,13 +15,19 @@ namespace BlueDotBrigade.Weevil.Math
 
 		public double? Calculate(IReadOnlyList<double> values)
 		{
-			if (values.Count == 0) return null;
+			if (values.Count == 0)
+			{
+				return null;
+			}
 
 			var sorted = values.OrderBy(v => v).ToArray();
 			// Use sorted.Length (not values.Count) to ensure calculations reference the array we're operating on
 			int trimCount = (int)(sorted.Length * _trimPercent);
 
-			if (trimCount * 2 >= sorted.Length) return null;
+			if (trimCount * 2 >= sorted.Length)
+			{
+				return null;
+			}
 
 			IEnumerable<double> trimmed = sorted.Skip(trimCount).Take(sorted.Length - 2 * trimCount);
 			return System.Math.Round(trimmed.Average(), 3);

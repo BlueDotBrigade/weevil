@@ -354,7 +354,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private void ApplicationFontSizeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{
 			// If the user control has not yet been created, early exit to avoid saving WPF default values to settings (#251).
-			if (!this.IsLoaded) return;
+			if (!this.IsLoaded)
+			{
+				return;
+			}
 
 			if (ApplicationFontSizeComboBox.SelectedValue is string selectedValue &&
 				double.TryParse(selectedValue, out double fontSize))
@@ -368,7 +371,10 @@ namespace BlueDotBrigade.Weevil.Gui.Filter
 		private void RowFontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			// If the user control has not yet been created, early exit to avoid saving WPF default values to settings (#251).
-			if (!this.IsLoaded) return;
+			if (!this.IsLoaded)
+			{
+				return;
+			}
 
 			Application.Current.Resources["RowFontSize"] = e.NewValue;
 			Settings.Default.RowFontSize = e.NewValue;
