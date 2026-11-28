@@ -31,7 +31,7 @@ FxCop enforced vocabulary through its custom dictionary. Roslyn doesn't: those r
 | Its list | Words that are spelled correctly: [`DomainSpecificDictionary.xml`](../../DomainSpecificDictionary.xml) | Which word to use instead of another: `dsl.config.xml` |
 | Catches | `comparision`, `Mesurement`, a name such as `Executor<I>` | `TSV`, `MetaData`, `Deselect` |
 | Misses | Which spelling to prefer: once `Tsv` is listed, `TSV` passes too | A typo nobody blocked |
-| In Weevil | Common only (#1271) | Not yet (#1347) |
+| In Weevil | Common only (#1271) | Every project (#1347) |
 
 They aren't redundant. The first is a spell checker, the second a list of blocked terms, and each catches what the other misses.
 
@@ -49,16 +49,29 @@ The dictionary uses Microsoft's format, from FxCop. Its other sections, and a pr
 
 ### Configuring BlueDotBrigade.Analyzers
 
-Weevil doesn't use it yet: #1347 tracks trying it, then adopting it. From its [README](https://github.com/BlueDotBrigade/analyzers):
+- **In a project:** `Directory.Build.props` references the [`BlueDotBrigade.Analyzers`](https://www.nuget.org/packages/BlueDotBrigade.Analyzers) package, version 1.0.0, in every project, and gives each one [`dsl.config.xml`](../../dsl.config.xml) as an `AdditionalFiles` item.
+- **On or off:** set its rule's severity in `.editorconfig`: `dotnet_diagnostic.BDB001.severity = error`, `warning` or `none`. Weevil sets `error`; the research projects keep `warning` in `Doc/Research/.editorconfig`. Without the file, it reports `BDB000` and checks nothing. Its README says `RC000`, which is out of date (BlueDotBrigade/analyzers#13).
+- **One name only:** `#pragma warning disable BDB001`, or `[SuppressMessage]`, as for any Roslyn analyzer. Give the reason.
 
-- **In a project:** add the [`BlueDotBrigade.Analyzers`](https://www.nuget.org/packages/BlueDotBrigade.Analyzers) package reference.
-- **The terms:** a `dsl.config.xml` beside the solution, or beside a project to override it for that project. The `AnalyzerDslFileName` property changes the file's name. Without the file, it reports `BDB000` and checks nothing. Its README says `RC000`, which is out of date (BlueDotBrigade/analyzers#13).
+#### Adding a Term
 
-  ```xml
-  <dsl>
-    <term prefer="Tsv" block="TSV" case="sensitive"/>
-    <term prefer="Metadata" block="MetaData" case="sensitive"/>
-  </dsl>
-  ```
+1. Add a `term` to `dsl.config.xml`: the term to use, and each spelling or word to report instead. `case="sensitive"` reports only the spelling given; `insensitive` reports it in any case.
 
-- **On or off:** set its rule's severity in `.editorconfig`, or remove the package. `#pragma` and `[SuppressMessage]` work as for any Roslyn analyzer.
+   ```xml
+   <term prefer="Tsv" block="TSV" case="sensitive"/>
+   <term prefer="Metadata" case="sensitive">
+     <alias block="MetaData"/>
+     <alias block="metaData"/>
+   </term>
+   ```
+
+2. If the term isn't plain English, such as `Tsv`, also add it to `DomainSpecificDictionary.xml`, so CA1704 accepts it. The two analyzers can't share one file yet (BlueDotBrigade/analyzers#15).
+3. Build, rename what it reports, and run `dotnet build-server shutdown` if a change to the file seems ignored.
+
+#### What It Misses
+
+Version 1.0.0 has limits, each tracked in its repository:
+
+- **It matches text, not words** (BlueDotBrigade/analyzers#10): since `UI` is blocked, `GUIHelper` would be reported too, so write `GuiHelper`. Before blocking a term, check that no other word in Weevil's names contains it.
+- **It reports only the spelling given** (BlueDotBrigade/analyzers#11): `MetaData` doesn't report `metaData`, so list the camel-case form as an alias too.
+- **It doesn't check every name** (BlueDotBrigade/analyzers#12): namespaces, type parameters, local functions and lambda parameters go unchecked.

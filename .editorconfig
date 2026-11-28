@@ -223,6 +223,9 @@ dotnet_diagnostic.MSTEST0044.severity = error
 # Identifiers should be spelled correctly (#1271). Words it should accept go in DomainSpecificDictionary.xml.
 dotnet_diagnostic.CA1704.severity = error
 
+# A name uses a term Weevil's vocabulary blocks (#1347), from BlueDotBrigade.Analyzers. The terms are in dsl.config.xml.
+dotnet_diagnostic.BDB001.severity = error
+
 # SPELLING
 
 # Identifiers should be cased correctly
