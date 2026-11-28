@@ -229,6 +229,9 @@ dotnet_diagnostic.CA1704.severity = error
 # Add braces (#1275)
 dotnet_diagnostic.IDE0011.severity = error
 
+# A name uses a term Weevil's vocabulary blocks (#1347), from BlueDotBrigade.Analyzers. The terms are in dsl.config.xml.
+dotnet_diagnostic.BDB001.severity = error
+
 # Use ArgumentNullException.ThrowIfNull (#1278)
 dotnet_diagnostic.CA1510.severity = error
 

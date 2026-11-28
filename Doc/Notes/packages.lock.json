@@ -2,6 +2,12 @@
   "version": 1,
   "dependencies": {
     "net10.0": {
+      "BlueDotBrigade.Analyzers": {
+        "type": "Direct",
+        "requested": "[1.0.0, )",
+        "resolved": "1.0.0",
+        "contentHash": "kM+K/7RMjB5lrAPK259IwDkhPUIOsDZX27jnpIi+BjxLWtfZVqr8tuDh6jkSSCYCA/68mhq0ddnapQze9GfvAg=="
+      },
       "Markdig": {
         "type": "Direct",
         "requested": "[1.4.2, )",
