@@ -1123,10 +1123,7 @@
 		/// <returns>Formatted metrics data as a string.</returns>
 		public string SerializeMetrics(IOutputFormatter formatter)
 		{
-			if (formatter == null)
-			{
-				throw new ArgumentNullException(nameof(formatter));
-			}
+			ArgumentNullException.ThrowIfNull(formatter);
 
 			if (this.SeriesMetrics == null || !this.SeriesMetrics.Any())
 			{

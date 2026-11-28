@@ -180,10 +180,7 @@
 
 		public IRecord PreviousContent(string text, bool isCaseSensitive, bool useRegex, CancellationToken cancellationToken)
 		{
-			if (text == null)
-			{
-				throw new ArgumentNullException(nameof(text));
-			}
+			ArgumentNullException.ThrowIfNull(text);
 
 			_telemetryRecorder.Increment(TelemetryMetrics.NavigationFindPreviousContent);
 
@@ -199,10 +196,7 @@
 
 		public IRecord NextContent(string text, bool isCaseSensitive, bool useRegex, CancellationToken cancellationToken)
 		{
-			if (text == null)
-			{
-				throw new ArgumentNullException(nameof(text));
-			}
+			ArgumentNullException.ThrowIfNull(text);
 
 			_telemetryRecorder.Increment(TelemetryMetrics.NavigationFindNextContent);
 
@@ -241,10 +235,7 @@
 
 		public IRecord PreviousCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
 		{
-			if (text == null)
-			{
-				throw new ArgumentNullException(nameof(text));
-			}
+			ArgumentNullException.ThrowIfNull(text);
 
 			return Search(nameof(PreviousCommentWithText), useRegex, () => this
 				.Using<ICommentNavigator>()
@@ -253,10 +244,7 @@
 
 		public IRecord NextCommentWithText(string text, bool isCaseSensitive, bool useRegex = false)
 		{
-			if (text == null)
-			{
-				throw new ArgumentNullException(nameof(text));
-			}
+			ArgumentNullException.ThrowIfNull(text);
 
 			return Search(nameof(NextCommentWithText), useRegex, () => this
 				.Using<ICommentNavigator>()

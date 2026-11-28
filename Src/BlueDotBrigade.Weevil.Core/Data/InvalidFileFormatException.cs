@@ -45,10 +45,7 @@
 		[Obsolete("This API supports obsolete formatter-based serialization. It should not be called or extended by application code.", DiagnosticId = "SYSLIB0051")]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			if (info == null)
-			{
-				throw new ArgumentNullException(nameof(info));
-			}
+			ArgumentNullException.ThrowIfNull(info);
 
 			info.AddValue(nameof(this.Path), this.Path);
 			base.GetObjectData(info, context);

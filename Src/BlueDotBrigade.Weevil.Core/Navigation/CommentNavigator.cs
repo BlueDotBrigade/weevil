@@ -41,10 +41,7 @@
 
 		public IRecord FindPrevious(string value, bool isCaseSensitive, bool useRegex = false)
 		{
-			if (value == null)
-			{
-				throw new ArgumentNullException(nameof(value));
-			}
+			ArgumentNullException.ThrowIfNull(value);
 
 			if (useRegex)
 			{
@@ -77,10 +74,7 @@
 
 		public IRecord FindNext(string value, bool isCaseSensitive, bool useRegex = false)
 		{
-			if (value == null)
-			{
-				throw new ArgumentNullException(nameof(value));
-			}
+			ArgumentNullException.ThrowIfNull(value);
 
 			if (useRegex)
 			{
