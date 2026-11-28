@@ -12,3 +12,6 @@ dotnet_diagnostic.MSTEST0044.severity = warning
 
 # Identifiers should be spelled correctly (#1271)
 dotnet_diagnostic.CA1704.severity = warning
+
+# Using directive placement (#1279)
+dotnet_diagnostic.IDE0065.severity = warning

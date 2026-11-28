@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using BlueDotBrigade.Weevil.Core;
-using BlueDotBrigade.Weevil.Data;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
-
 namespace BlueDotBrigade.Weevil.Core.UnitTests
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Collections.Immutable;
+	using System.Linq;
+	using BlueDotBrigade.Weevil.Core;
+	using BlueDotBrigade.Weevil.Data;
+	using Microsoft.VisualStudio.TestTools.UnitTesting;
+	using NSubstitute;
+
 	[TestClass]
 	public class RegionManagerTests
 	{
