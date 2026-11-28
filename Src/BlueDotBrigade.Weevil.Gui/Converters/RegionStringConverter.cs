@@ -31,14 +31,18 @@
 		public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
 		{
 			if (values?.Length < 2)
+			{
 				return string.Empty;
+			}
 
 			var isToolTip = false;
 			IRecord record = RowViewModel.ToRecord(values[0]);
 			var viewModel = values[1] as FilterViewModel;
 
 			if (record == null || viewModel == null)
+			{
 				return string.Empty;
+			}
 
 			if (values.Length == 3)
 			{

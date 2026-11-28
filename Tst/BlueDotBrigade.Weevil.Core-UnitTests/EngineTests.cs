@@ -495,7 +495,7 @@ namespace BlueDotBrigade.Weevil
 			// A deleted log threw FileNotFoundException, a changed one LogFileChangedException, so a script or plugin had to catch both.
 			using IEngine engine = OpenCopy(storageMode: StorageMode.Disk);
 			File.Delete(engine.SourceFilePath);
-			using CapturingLogWriter log = CapturingLogWriter.Register();
+			using var log = CapturingLogWriter.Register();
 
 			FluentActions.Invoking(() => engine.Filter.Apply(FilterType.PlainText, new FilterCriteria("Id=1")))
 				.Should().Throw<LogFileChangedException>().Which.IsUnreadable.Should().BeTrue();
@@ -825,7 +825,7 @@ namespace BlueDotBrigade.Weevil
 
 				// Edited by hand: the second region now starts inside the first.
 				var sidecarPath = logPath + ".xml";
-				XDocument sidecar = XDocument.Load(sidecarPath);
+				var sidecar = XDocument.Load(sidecarPath);
 				XElement secondStart = sidecar.Descendants()
 					.Where(e => e.Name.LocalName == "Region")
 					.Single(e => e.Elements().Single(n => n.Name.LocalName == "Name").Value == "Second")
@@ -1050,7 +1050,7 @@ namespace BlueDotBrigade.Weevil
 
 			engine.Selector.SaveSelection(destinationPath, FileFormatType.Tsv);
 
-			string[][] rows = File.ReadAllLines(destinationPath).Skip(1).Select(line => line.Split('\t', 7)).ToArray();
+			var rows = File.ReadAllLines(destinationPath).Skip(1).Select(line => line.Split('\t', 7)).ToArray();
 			rows.Select(row => row[0]).Should().Equal("2", "3", "4");
 			rows.Select(row => row[2]).Should().Equal("False", "True", "False");
 			rows.Select(row => row[6]).Should().Equal(ReadLogLines(2, 4));

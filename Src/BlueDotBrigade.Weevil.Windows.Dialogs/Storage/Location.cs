@@ -90,7 +90,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 			if (!this.IsInArchive)
 			{
-				string path = Path.Combine(this.FileSystemPath, name);
+				var path = Path.Combine(this.FileSystemPath, name);
 				return entersContainer ? new Location(path, new[] { string.Empty }) : ForFileSystem(path);
 			}
 
@@ -271,7 +271,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 
 		private static string GetEntryFolder(string entryPath)
 		{
-			int slash = entryPath.LastIndexOf('/');
+			var slash = entryPath.LastIndexOf('/');
 			return slash < 0 ? string.Empty : entryPath.Substring(0, slash);
 		}
 	}

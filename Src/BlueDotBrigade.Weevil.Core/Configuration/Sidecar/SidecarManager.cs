@@ -52,7 +52,7 @@
 				List<string> inclusiveHistory = inclusiveFilterHistory;
 				List<string> exclusiveHistory = exclusiveFilterHistory;
 				ContextDictionary contextProperties = context;
-				string actualSourceFileRemarks = sourceFileRemarks;
+				var actualSourceFileRemarks = sourceFileRemarks;
 				List<Section> toc = tableOfContents;
 				List<Region> regionsRef = regions;
 				List<Bookmark> bookmarkRef = bookmarks;
