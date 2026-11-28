@@ -126,7 +126,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		[TestMethod]
 		public void GivenALogInAZip_WhenItsSidecarIsLookedFor_ThenOnlyAnExistingOneIsFound()
 		{
-			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var log = Location.ForArchive(_zipPath, "2026/Server.log");
 
 			_reader.Exists(ContainerReader.GetSibling(log, "Server.log.xml")).Should().BeTrue();
 			_reader.Exists(ContainerReader.GetSibling(log, "Server.log.missing")).Should().BeFalse();
@@ -174,7 +174,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		public void GivenALogInAZipExtractedBefore_WhenExtractedAgain_ThenTheSidecarKeptBesideItIsNotReplaced()
 		{
 			// The kept sidecar holds the comments and pins added since the log was last opened from the zip (#1253).
-			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var log = Location.ForArchive(_zipPath, "2026/Server.log");
 			var destination = Path.Combine(_root, "Kept");
 			var extracted = _reader.Extract(log, Companions, destination);
 			File.WriteAllText($"{extracted}.xml", "<sidecar comments=\"kept\" />");
@@ -190,7 +190,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		public void GivenALogInAZip_WhenItsCopyKeyIsAskedTwice_ThenItIsTheSameShortName()
 		{
 			// The same file of the same zip finds the folder its sidecar and index were kept in (#1253).
-			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var log = Location.ForArchive(_zipPath, "2026/Server.log");
 
 			var key = _reader.GetCopyKey(log);
 
@@ -256,7 +256,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		public void GivenACopyOfTheSameFileKept_WhenExtractedAgain_ThenTheCopyIsUsedAsItIs()
 		{
 			// The copy may be the log open in Weevil, which must not be rewritten (found in review of #1253).
-			Location log = Location.ForArchive(_zipPath, "2026/Server.log");
+			var log = Location.ForArchive(_zipPath, "2026/Server.log");
 			var destination = Path.Combine(_root, "Kept");
 			var extracted = _reader.Extract(log, Companions, destination);
 			var written = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -345,7 +345,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs.Storage
 		/// </remarks>
 		private static void ProtectWithAPassword(string zipPath)
 		{
-			byte[] bytes = File.ReadAllBytes(zipPath);
+			var bytes = File.ReadAllBytes(zipPath);
 
 			for (var i = 0; i + 8 < bytes.Length; i++)
 			{
