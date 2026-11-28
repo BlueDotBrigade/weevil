@@ -10,7 +10,10 @@ namespace BlueDotBrigade.Weevil.Math
 
 		public double? Calculate(IReadOnlyList<double> values)
 		{
-			if (values.Count == 0) return null;
+			if (values.Count == 0)
+			{
+				return null;
+			}
 
 			var median = values.Median();
 
