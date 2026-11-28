@@ -20,6 +20,10 @@
     <!-- Report the code style rules in .editorconfig during the build, not only in the IDE. -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <!-- BDB000: dsl.config.xml is missing or can't be parsed, so BlueDotBrigade.Analyzers checks nothing. An error, so a typo in the file fails the build (#1347). It has no location in a file, so .editorconfig's severities don't reach it. -->
+    <WarningsAsErrors>$(WarningsAsErrors);BDB000</WarningsAsErrors>
+  </PropertyGroup>
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
     <!-- Words the spelling rule accepts: CA1704, from Text.Analyzers, which only Common references (#1271). Text.Analyzers reads an .xml or .dic whose name contains "dictionary" or "custom". -->
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)DomainSpecificDictionary.xml" Link="Properties\DomainSpecificDictionary.xml" />
