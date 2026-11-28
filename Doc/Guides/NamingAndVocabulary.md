@@ -45,51 +45,7 @@ They aren't redundant. The first is a spell checker, the second a list of blocke
 
 Add a word only when it is the clearest name: an established technical term, such as `Formatter` or `Func`, or a word of Weevil's own, such as `Checksums` or `Unselect`. Otherwise, rename.
 
-### The Dictionary's Format
-
-The format comes from FxCop. Every element, with names in Weevil's style:
-
-```xml
-<Dictionary>
-  <Words>
-    <Unrecognized>
-      <Word>Cnt</Word>
-    </Unrecognized>
-    <Recognized>
-      <Word>Tsv</Word>
-      <Word>Unselect</Word>
-    </Recognized>
-    <Deprecated>
-      <Term PreferredAlternate="Metadata">MetaData</Term>
-      <Term PreferredAlternate="Unselect">Deselect</Term>
-    </Deprecated>
-    <Compound>
-      <Term CompoundAlternate="FileName">filename</Term>
-    </Compound>
-    <DiscreteExceptions>
-      <Term>timestamp</Term>
-    </DiscreteExceptions>
-  </Words>
-  <Acronyms>
-    <CasingExceptions>
-      <Acronym>CJK</Acronym>
-    </CasingExceptions>
-  </Acronyms>
-</Dictionary>
-```
-
-Each path below starts at `Dictionary`.
-
-| Element | Means | FxCop rule | Text.Analyzers reads it |
-|---|---|---|---|
-| `Words/Unrecognized/Word` | Report this word as misspelled, even if it's a real word | CA1704 | Yes |
-| `Words/Recognized/Word` | Accept this word as spelled correctly | CA1704 | Yes |
-| `Words/Deprecated/Term` | Use its `PreferredAlternate` instead | CA1726 | No |
-| `Words/Compound/Term` | Two words, written as its `CompoundAlternate`: `FileName`, not `Filename` | CA1702 | No |
-| `Words/DiscreteExceptions/Term` | One word, so don't split it: `Timestamp`, not `TimeStamp` | CA1702 | No |
-| `Acronyms/CasingExceptions/Acronym` | An acronym that keeps its own capitals | CA1709 | No |
-
-Weevil's dictionary uses only `Recognized` today. Nothing enforces the last four sections: Roslyn didn't carry those rules over. `Deprecated` is the closest match to BlueDotBrigade.Analyzers' blocked terms, but it would list a preferred word such as `Unselect` twice.
+The dictionary uses Microsoft's format, from FxCop. Its other sections, and a proposal for BlueDotBrigade.Analyzers to read its blocked terms from the same file, are in [BlueDotBrigade/analyzers#15](https://github.com/BlueDotBrigade/analyzers/issues/15).
 
 ### Configuring BlueDotBrigade.Analyzers
 
