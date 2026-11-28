@@ -34,5 +34,8 @@ dotnet_diagnostic.CA2249.severity = warning
 # Mark test classes with TestClass (#1285)
 dotnet_diagnostic.MSTEST0030.severity = warning
 
+# Using directive placement (#1279)
+dotnet_diagnostic.IDE0065.severity = warning
+
 # Use XmlReader for XML deserialization (#1284)
 dotnet_diagnostic.CA5369.severity = warning

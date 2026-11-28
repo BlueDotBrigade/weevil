@@ -1,8 +1,8 @@
-﻿using BlueDotBrigade.Weevil.Data;
-using BlueDotBrigade.Weevil.Filter;
-
-namespace BlueDotBrigade.Weevil.Transforms
+﻿namespace BlueDotBrigade.Weevil.Transforms
 {
+	using BlueDotBrigade.Weevil.Data;
+	using BlueDotBrigade.Weevil.Filter;
+
 	[Binding()]
 	internal class SeverityOptionTransform
 	{

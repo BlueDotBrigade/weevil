@@ -362,7 +362,6 @@
     <Rule Id="IDE0062" Action="None" />
     <Rule Id="IDE0063" Action="None" />
     <Rule Id="IDE0064" Action="None" />
-    <Rule Id="IDE0065" Action="None" />
     <Rule Id="IDE0066" Action="None" />
     <Rule Id="IDE0071" Action="None" />
     <Rule Id="IDE0072" Action="None" />
