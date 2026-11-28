@@ -71,7 +71,6 @@
 		private ObservableCollection<SeriesMetrics> _seriesMetrics;
 
 		private string _xAxisLabel;
-		private string _yAxisLabel;
 		private string _windowTitle;
 		private string _sourceFilePath;
 

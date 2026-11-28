@@ -232,6 +232,9 @@ dotnet_diagnostic.IDE0011.severity = error
 # A name uses a term Weevil's vocabulary blocks (#1347), from BlueDotBrigade.Analyzers. The terms are in dsl.config.xml.
 dotnet_diagnostic.BDB001.severity = error
 
+# Make field readonly (#1277)
+dotnet_diagnostic.IDE0044.severity = error
+
 # Mark test classes with TestClass (#1285)
 dotnet_diagnostic.MSTEST0030.severity = error
 
