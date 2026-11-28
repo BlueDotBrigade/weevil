@@ -18,10 +18,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 		/// </param>
 		public TelemetryActiveUsageAccumulator(TimeSpan activityLeaseDuration)
 		{
-			if (activityLeaseDuration <= TimeSpan.Zero)
-			{
-				throw new ArgumentOutOfRangeException(nameof(activityLeaseDuration));
-			}
+			ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(activityLeaseDuration, TimeSpan.Zero);
 
 			_maxLeaseMinutes = activityLeaseDuration.TotalMinutes;
 		}
