@@ -29,7 +29,7 @@
                     BindsTwoWayByDefault = true,
                 });
         
-		private UserInputValidator _validator;
+		private readonly UserInputValidator _validator;
 
         public string UserPrompt
         {
