@@ -1,8 +1,8 @@
-using System;
-using BlueDotBrigade.Weevil.Core;
-
 namespace BlueDotBrigade.Weevil.Core.UnitTests
 {
+        using System;
+        using BlueDotBrigade.Weevil.Core;
+
         [TestClass]
         public class BookmarkManagerTests
         {

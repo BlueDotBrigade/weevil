@@ -1,8 +1,8 @@
-﻿using System;
-
-namespace BlueDotBrigade.Weevil
+﻿namespace BlueDotBrigade.Weevil
 {
-    public class UninitializedValueException : Exception
+	using System;
+
+	public class UninitializedValueException : Exception
     {
 		public UninitializedValueException(string message) : base(message)
 		{

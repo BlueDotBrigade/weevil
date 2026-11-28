@@ -244,6 +244,9 @@ dotnet_diagnostic.CA2249.severity = error
 # Mark test classes with TestClass (#1285)
 dotnet_diagnostic.MSTEST0030.severity = error
 
+# Using directive placement (#1279)
+dotnet_diagnostic.IDE0065.severity = error
+
 # SPELLING
 
 # Identifiers should be cased correctly
