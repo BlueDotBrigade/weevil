@@ -241,6 +241,9 @@ dotnet_diagnostic.CA1512.severity = error
 # Use string.Contains instead of string.IndexOf (#1283)
 dotnet_diagnostic.CA2249.severity = error
 
+# Mark test classes with TestClass (#1285)
+dotnet_diagnostic.MSTEST0030.severity = error
+
 # SPELLING
 
 # Identifiers should be cased correctly
