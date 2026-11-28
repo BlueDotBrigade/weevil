@@ -425,10 +425,7 @@
 		/// </param>
 		internal IFilter ApplyInternal(FilterType filterType, IFilterCriteria criteria, ElapsedTimes previousElapsedTimes = null)
 		{
-			if (criteria is null)
-			{
-				throw new ArgumentNullException(nameof(criteria));
-			}
+			ArgumentNullException.ThrowIfNull(criteria);
 
 			if (Volatile.Read(ref _turnThreadId) == Environment.CurrentManagedThreadId)
 			{

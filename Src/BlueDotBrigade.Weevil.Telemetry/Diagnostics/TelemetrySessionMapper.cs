@@ -7,10 +7,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 	{
 		public static TelemetrySessionDto ToDto(TelemetrySession session)
 		{
-			if (session == null)
-			{
-				throw new ArgumentNullException(nameof(session));
-			}
+			ArgumentNullException.ThrowIfNull(session);
 
 			var dto = new TelemetrySessionDto
 			{
@@ -40,10 +37,7 @@ namespace BlueDotBrigade.Weevil.Diagnostics
 
 		public static TelemetrySession ToSession(TelemetrySessionDto session)
 		{
-			if (session == null)
-			{
-				throw new ArgumentNullException(nameof(session));
-			}
+			ArgumentNullException.ThrowIfNull(session);
 
 			var result = new TelemetrySession
 			{

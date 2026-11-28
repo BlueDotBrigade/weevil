@@ -185,10 +185,7 @@
 			/// </summary>
 			public CoreEngineBuilder UsingStateOf(CoreEngine previous)
 			{
-				if (previous == null)
-				{
-					throw new ArgumentNullException(nameof(previous));
-				}
+				ArgumentNullException.ThrowIfNull(previous);
 
 				_session = previous.Session;
 				_recordState = previous.RecordState;

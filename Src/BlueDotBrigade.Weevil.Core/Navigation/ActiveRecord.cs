@@ -21,10 +21,7 @@
 
 		public ActiveRecord(RecordList dataSource)
 		{
-			if (dataSource is null)
-			{
-				throw new ArgumentNullException(nameof(dataSource));
-			}
+			ArgumentNullException.ThrowIfNull(dataSource);
 
 			_dataSource = dataSource;
 			_activeIndex = UnknownIndex;
