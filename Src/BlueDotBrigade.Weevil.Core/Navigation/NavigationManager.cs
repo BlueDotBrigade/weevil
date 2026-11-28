@@ -18,7 +18,7 @@
 		private readonly ICoreExtension _coreCoreExtension;
 
 		private readonly ActiveRecord _activeRecord;
-		private ImmutableArray<INavigator> _navigators;
+		private readonly ImmutableArray<INavigator> _navigators;
 
 		// The table of contents belongs to the log, so it lives in the session (#1107).
 		private readonly Session _session;
