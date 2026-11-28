@@ -55,7 +55,7 @@
 			RecordList records = _coreEngine.Records;
 
 			// A binary search for each line: there are few, and the records are in line order.
-			int[] inMemory = lineNumbers
+			var inMemory = lineNumbers
 				.Distinct()
 				.Where(lineNumber => records.TryIndexOfLineNumber(lineNumber, out _))
 				.ToArray();

@@ -278,7 +278,7 @@ namespace BlueDotBrigade.Weevil.IO
 			// A log reopened from its saved index reads back through a source made from the checksums saved (#1023).
 			var checksums = Parse(startOffset, endOffset).GetChecksums().ToArray();
 
-			LogFileSource source = LogFileSource.Create(_logPath, startOffset, endOffset, LogLength, checksums);
+			var source = LogFileSource.Create(_logPath, startOffset, endOffset, LogLength, checksums);
 			var destination = new byte[endOffset - startOffset];
 			source.Read(startOffset, destination);
 
@@ -297,7 +297,7 @@ namespace BlueDotBrigade.Weevil.IO
 				log.WriteByte((byte)(_bytes[ChangedByte] ^ 1));
 			}
 
-			LogFileSource source = LogFileSource.Create(_logPath, StartOffset, LogLength, LogLength, checksums);
+			var source = LogFileSource.Create(_logPath, StartOffset, LogLength, LogLength, checksums);
 			Action read = () => source.Read(ChangedByte + 100, new byte[10]);
 
 			read.Should().Throw<LogFileChangedException>().Which.ChangedOffset.Should().Be(2 * LogFileSource.BlockSize);

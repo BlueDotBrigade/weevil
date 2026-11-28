@@ -15,7 +15,7 @@
 		{
 			var executableDirectory = GetExecutableDirectory();
 
-			int indexOfBin = executableDirectory.IndexOf(@"\bin\", StringComparison.InvariantCultureIgnoreCase);
+			var indexOfBin = executableDirectory.IndexOf(@"\bin\", StringComparison.InvariantCultureIgnoreCase);
 			var binDirectory = executableDirectory.Substring(0, indexOfBin + 1);
 
 			return binDirectory;

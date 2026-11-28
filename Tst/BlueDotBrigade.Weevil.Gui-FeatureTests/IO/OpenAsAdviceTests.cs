@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 			var zip = Path.Combine(Path.GetTempPath(), "Bundle.zip");
 			var log = new BrowserItem(Location.ForArchive(zip, "Huge.log"), "Huge.log", ItemKind.File, size: 1L << 55);
 
-			OpenAsAdvice advice = OpenAsAdvice.Read(log);
+			var advice = OpenAsAdvice.Read(log);
 
 			advice.Estimate.Should().NotBeNull("its size is known from the zip");
 			advice.DefaultMode.Should().Be(StorageMode.Disk);

@@ -16,7 +16,7 @@
 
 		public bool IsMatch(IRecord record, ContentBuffer content)
 		{
-			bool isMatch = false;
+			var isMatch = false;
 
 			foreach (IExpression expression in _expressions)
 			{

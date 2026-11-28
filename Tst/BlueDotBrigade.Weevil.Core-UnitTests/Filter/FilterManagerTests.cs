@@ -239,7 +239,7 @@ namespace BlueDotBrigade.Weevil.Filter
 		private static RecordList CreateRecordsOneSecondApart(int count)
 		{
 			// Each record's content ends with its line number, for example "Has line number: 7".
-			R records = R.Create();
+			var records = R.Create();
 			var start = new DateTime(2026, 10, 22, 10, 0, 0);
 			for (var i = 0; i < count; i++)
 			{

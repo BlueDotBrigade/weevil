@@ -104,7 +104,7 @@ namespace BlueDotBrigade.Weevil.Navigation
 		private static List<IRecord> CreateRecordsShownByView(int count, int stepMilliseconds)
 		{
 			var records = new List<IRecord>();
-			DateTime createdAt = DateTime.Parse("2025-01-01 10:00:00");
+			var createdAt = DateTime.Parse("2025-01-01 10:00:00");
 
 			for (var i = 0; i < count; i++)
 			{
