@@ -441,7 +441,7 @@
 				var allSeriesAxes = new[] { this.Series1Axis, this.Series2Axis, this.Series3Axis, this.Series4Axis };
 				
 				// Determine if we need dual axes - when any series is on the right axis
-				bool needsDualAxes = seriesList.Count > 1 && allSeriesAxes.Any(axis => axis == YAxisRight);
+				var needsDualAxes = seriesList.Count > 1 && allSeriesAxes.Any(axis => axis == YAxisRight);
 				
 				if (needsDualAxes)
 				{
@@ -449,7 +449,7 @@
 					var leftSeriesNames = new List<string>();
 					var rightSeriesNames = new List<string>();
 					
-					for (int i = 0; i < MaxSeriesCount; i++)
+					for (var i = 0; i < MaxSeriesCount; i++)
 					{
 						if (i < seriesList.Count && !string.IsNullOrEmpty(allSeriesNames[i]))
 						{
@@ -464,10 +464,10 @@
 						}
 					}
 					
-					string leftAxisName = leftSeriesNames.Any() 
+					var leftAxisName = leftSeriesNames.Any() 
 						? string.Join(" / ", leftSeriesNames) 
 						: DefaultYAxisLabel;
-					string rightAxisName = rightSeriesNames.Any() 
+					var rightAxisName = rightSeriesNames.Any() 
 						? string.Join(" / ", rightSeriesNames) 
 						: DefaultYAxisLabel;
 					
@@ -479,7 +479,7 @@
 					IEnumerable<string> allNames = new[] { this.Series1Name, this.Series2Name, this.Series3Name, this.Series4Name }
 						.Where(name => !string.IsNullOrEmpty(name))
 						.Take(seriesList.Count);
-					string axisName = allNames.Any() ? string.Join(" / ", allNames) : DefaultYAxisLabel;
+					var axisName = allNames.Any() ? string.Join(" / ", allNames) : DefaultYAxisLabel;
 					this.YAxes = GetYAxes(axisName);
 				}
 
@@ -544,7 +544,7 @@
 
 			// One buffer, so each chunk of a log on disk is read once rather than once per record (#1027).
 			var buffer = new ContentBuffer();
-			bool usesMeridiem = records.Any(record =>
+			var usesMeridiem = records.Any(record =>
 			{
 				ReadOnlySpan<char> content = buffer.Read(record);
 				return !content.IsWhiteSpace() && MeridiemRegex.IsMatch(content);
@@ -572,7 +572,7 @@
 				}
 			}
 
-			bool spansMultipleDays = earliest.HasValue && latest.HasValue && earliest.Value.Date != latest.Value.Date;
+			var spansMultipleDays = earliest.HasValue && latest.HasValue && earliest.Value.Date != latest.Value.Date;
 
 			if (usesMeridiem)
 			{
@@ -686,7 +686,7 @@
 		private static bool TryGetMatchForRecord(ImmutableArray<RegularExpression> expressions, string inputString, out float[] values)
 		{
 			values = new float[MaxSeriesCount];
-			for (int i = 0; i < MaxSeriesCount; i++)
+			for (var i = 0; i < MaxSeriesCount; i++)
 			{
 				values[i] = float.NaN;
 			}
@@ -892,7 +892,7 @@
 			var seriesValues = new ObservableCollection<DateTimePoint>[MaxSeriesCount];
 			var hasSeriesData = new bool[MaxSeriesCount];
 			
-			for (int i = 0; i < MaxSeriesCount; i++)
+			for (var i = 0; i < MaxSeriesCount; i++)
 			{
 				seriesValues[i] = new ObservableCollection<DateTimePoint>();
 				hasSeriesData[i] = false;
@@ -904,7 +904,7 @@
 			{
 				// First pass: collect raw string values to determine if each series is all-boolean
 				var rawSeriesData = new List<(DateTime Timestamp, string Value)>[MaxSeriesCount];
-				for (int i = 0; i < MaxSeriesCount; i++)
+				for (var i = 0; i < MaxSeriesCount; i++)
 				{
 					rawSeriesData[i] = new List<(DateTime, string)>();
 				}
@@ -918,7 +918,7 @@
 					{
 						if (TryGetRawMatchForRecord(expressions, buffer.Read(record).ToString(), out var rawValues))
 						{
-							for (int i = 0; i < MaxSeriesCount; i++)
+							for (var i = 0; i < MaxSeriesCount; i++)
 							{
 								if (rawValues[i] != null)
 								{
@@ -938,16 +938,16 @@
 
 				// Determine which series contain only boolean values
 				var isBooleanSeries = new bool[MaxSeriesCount];
-				for (int i = 0; i < MaxSeriesCount; i++)
+				for (var i = 0; i < MaxSeriesCount; i++)
 				{
 					isBooleanSeries[i] = rawSeriesData[i].Count > 0 &&
 						rawSeriesData[i].All(item => bool.TryParse(item.Value, out _));
 				}
 
 				// Second pass: convert raw values to data points
-				for (int i = 0; i < MaxSeriesCount; i++)
+				for (var i = 0; i < MaxSeriesCount; i++)
 				{
-					foreach ((DateTime timestamp, string rawValue) in rawSeriesData[i])
+					foreach ((DateTime timestamp, var rawValue) in rawSeriesData[i])
 					{
 						float floatValue;
 						if (isBooleanSeries[i] && bool.TryParse(rawValue, out var boolValue))
@@ -971,7 +971,7 @@
 			var seriesList = new List<ISeries>();
 
 			// Create series for each that has data
-			for (int i = 0; i < MaxSeriesCount; i++)
+			for (var i = 0; i < MaxSeriesCount; i++)
 			{
 				if (hasSeriesData[i])
 				{
@@ -981,7 +981,7 @@
 
 					// Determine which axis this series should be on
 					// Left = axis 0, Right = axis 1
-					int axisIndex = seriesAxes[i] == YAxisRight ? 1 : 0;
+					var axisIndex = seriesAxes[i] == YAxisRight ? 1 : 0;
 
 					SKColor color = SeriesColors[i];
 
@@ -1148,7 +1148,7 @@
 
 			// Prepare data rows
 			var rows = new string[this.SeriesMetrics.Count][];
-			for (int i = 0; i < this.SeriesMetrics.Count; i++)
+			for (var i = 0; i < this.SeriesMetrics.Count; i++)
 			{
 				SeriesMetrics metrics = this.SeriesMetrics[i];
 				rows[i] = new[]

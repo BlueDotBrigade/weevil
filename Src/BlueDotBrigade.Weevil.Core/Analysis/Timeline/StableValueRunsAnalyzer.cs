@@ -75,11 +75,11 @@
 
 				if (activeRuns.Count > 0)
 				{
-					List<string> keysToFinalize = activeRuns.Keys
+					var keysToFinalize = activeRuns.Keys
 						.Where(key => !matchedKeys.Contains(key))
 						.ToList();
 
-					foreach (string key in keysToFinalize)
+					foreach (var key in keysToFinalize)
 					{
 						if (activeRuns.TryGetValue(key, out ValueRun run))
 						{

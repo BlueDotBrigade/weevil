@@ -298,7 +298,7 @@ namespace BlueDotBrigade.Weevil.Gui.IO
 
 			ShowAdvice(advice);
 
-			(IReadOnlyList<LogPart> parts, string status) = await readingParts;
+			(IReadOnlyList<LogPart> parts, var status) = await readingParts;
 
 			if (selection == _selection)
 			{

@@ -160,8 +160,8 @@
 		/// </summary>
 		private static RecordTable CreateTable()
 		{
-			byte[] single = Encoding.UTF8.GetBytes("Alpha one");
-			byte[] multiLine = Encoding.UTF8.GetBytes("Beta start\nBeta end");
+			var single = Encoding.UTF8.GetBytes("Alpha one");
+			var multiLine = Encoding.UTF8.GetBytes("Beta start\nBeta end");
 			byte[] invalid = [.. Encoding.UTF8.GetBytes("Delta "), 0xFF, .. Encoding.UTF8.GetBytes(" bad")];
 			var chunk = new ContentChunk(0, [.. single, .. multiLine, .. invalid], Encoding.UTF8);
 
