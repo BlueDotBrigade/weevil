@@ -37,8 +37,7 @@
 			{
 				if (_searchForSpecificText)
 				{
-					var index = comment.IndexOf(_searchValue, StringComparison.InvariantCultureIgnoreCase);
-					isMatch = index >= 0;
+					isMatch = comment.Contains(_searchValue, StringComparison.InvariantCultureIgnoreCase);
 				}
 				else
 				{

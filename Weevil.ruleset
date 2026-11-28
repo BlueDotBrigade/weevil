@@ -500,7 +500,6 @@
     <Rule Id="CA2246" Action="None" />
     <Rule Id="CA2247" Action="None" />
     <Rule Id="CA2248" Action="None" />
-    <Rule Id="CA2249" Action="None" />
     <Rule Id="CA2250" Action="None" />
     <Rule Id="CA2251" Action="None" />
     <Rule Id="CA2253" Action="None" />
