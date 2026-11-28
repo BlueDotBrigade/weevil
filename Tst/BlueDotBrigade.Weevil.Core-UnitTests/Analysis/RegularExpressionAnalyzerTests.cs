@@ -74,7 +74,7 @@
 
 		private static RecordList BuildRecords(params string[] contents)
 		{
-			R builder = R.Create();
+			var builder = R.Create();
 
 			for (var i = 0; i < contents.Length; i++)
 			{

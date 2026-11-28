@@ -146,7 +146,7 @@ namespace BlueDotBrigade.Weevil.Analysis
 
 		private static RecordList BuildRecords(params string[] contents)
 		{
-			DateTime start = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			var start = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 			return contents
 				.Select((content, index) => (IRecord)new Record(

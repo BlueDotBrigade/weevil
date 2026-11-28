@@ -169,7 +169,7 @@
 		{
 			IRecord result = Record.Dummy;
 
-			for (int i = 0; i < sourceRecords.Count; i++)
+			for (var i = 0; i < sourceRecords.Count; i++)
 			{
 				if (sourceRecords.GetCreatedAt(i) != Record.CreationTimeUnknown)
 				{

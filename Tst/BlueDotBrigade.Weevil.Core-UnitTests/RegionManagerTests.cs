@@ -24,8 +24,8 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 		public void MarkEnd_AfterStart_RegionCreated()
 		{
 			// Arrange
-			int minLineNumber = 800;
-			int maxLineNumber = 900;
+			var minLineNumber = 800;
+			var maxLineNumber = 900;
 			_regionManager.MarkStart(minLineNumber);
 
 			// Act
@@ -41,7 +41,7 @@ namespace BlueDotBrigade.Weevil.Core.UnitTests
 		public void MarkEnd_WithoutStart_ThrowsInvalidOperationException()
 		{
 			// Arrange
-			int maxLineNumber = 900;
+			var maxLineNumber = 900;
 
 			// Act
 			Action act = () => _regionManager.MarkEnd(maxLineNumber);

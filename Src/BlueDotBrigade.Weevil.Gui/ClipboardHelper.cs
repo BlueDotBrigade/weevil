@@ -31,8 +31,15 @@
 		/// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
 		public static string FormatRaw(RecordList records, bool addLineNumberPrefix, IRecordFormatter formatter, CancellationToken cancellationToken = default)
 		{
-			if (records == null) throw new ArgumentNullException(nameof(records));
-			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+			if (records == null)
+			{
+				throw new ArgumentNullException(nameof(records));
+			}
+
+			if (formatter == null)
+			{
+				throw new ArgumentNullException(nameof(formatter));
+			}
 
 			IEnumerable<string> lines = records.Select(record =>
 			{
@@ -56,7 +63,10 @@
 
 		public static void CopySelectedComments(IEngine engine)
 		{
-			if (engine == null) throw new ArgumentNullException(nameof(engine));
+			if (engine == null)
+			{
+				throw new ArgumentNullException(nameof(engine));
+			}
 
 			RecordList selected = engine.Selector.GetSelected();
 			var output = new StringBuilder();
@@ -97,8 +107,15 @@
 
 		public static void CopyFromSelected(IEngine engine, Func<IRecord, string> formatter)
 		{
-			if (engine == null) throw new ArgumentNullException(nameof(engine));
-			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+			if (engine == null)
+			{
+				throw new ArgumentNullException(nameof(engine));
+			}
+
+			if (formatter == null)
+			{
+				throw new ArgumentNullException(nameof(formatter));
+			}
 
 			RecordList selectedRecords = engine.Selector.GetSelected();
 
