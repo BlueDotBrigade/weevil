@@ -223,6 +223,9 @@ dotnet_diagnostic.MSTEST0044.severity = error
 # Identifiers should be spelled correctly (#1271). Words it should accept go in DomainSpecificDictionary.xml.
 dotnet_diagnostic.CA1704.severity = error
 
+# Use string.Contains instead of string.IndexOf (#1283)
+dotnet_diagnostic.CA2249.severity = error
+
 # SPELLING
 
 # Identifiers should be cased correctly
