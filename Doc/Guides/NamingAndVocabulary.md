@@ -78,14 +78,16 @@ The format comes from FxCop. Every element, with names in Weevil's style:
 </Dictionary>
 ```
 
+Each path below starts at `Dictionary`.
+
 | Element | Means | FxCop rule | Text.Analyzers reads it |
 |---|---|---|---|
-| `Unrecognized` | Report this word as misspelled, even if it's a real word | CA1704 | Yes |
-| `Recognized` | Accept this word as spelled correctly | CA1704 | Yes |
-| `Deprecated` | Use the preferred word instead | CA1726 | No |
-| `Compound` | Two words, so capitalize both: `FileName`, not `Filename` | CA1702 | No |
-| `DiscreteExceptions` | One word, so don't split it: `Timestamp`, not `TimeStamp` | CA1702 | No |
-| `CasingExceptions` | An acronym that keeps its own capitals | CA1709 | No |
+| `Words/Unrecognized/Word` | Report this word as misspelled, even if it's a real word | CA1704 | Yes |
+| `Words/Recognized/Word` | Accept this word as spelled correctly | CA1704 | Yes |
+| `Words/Deprecated/Term` | Use its `PreferredAlternate` instead | CA1726 | No |
+| `Words/Compound/Term` | Two words, written as its `CompoundAlternate`: `FileName`, not `Filename` | CA1702 | No |
+| `Words/DiscreteExceptions/Term` | One word, so don't split it: `Timestamp`, not `TimeStamp` | CA1702 | No |
+| `Acronyms/CasingExceptions/Acronym` | An acronym that keeps its own capitals | CA1709 | No |
 
 Weevil's dictionary uses only `Recognized` today. Nothing enforces the last four sections: Roslyn didn't carry those rules over. `Deprecated` is the closest match to BlueDotBrigade.Analyzers' blocked terms, but it would list a preferred word such as `Unselect` twice.
 
