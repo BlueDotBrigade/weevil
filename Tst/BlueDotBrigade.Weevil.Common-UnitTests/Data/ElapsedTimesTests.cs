@@ -12,7 +12,7 @@ namespace BlueDotBrigade.Weevil.Data
 		[TestMethod]
 		public void GivenNoRecords_WhenCalculated_ThenNoLineHasAnElapsedTime()
 		{
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(RecordList.Empty);
+			var elapsedTimes = ElapsedTimes.Calculate(RecordList.Empty);
 
 			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 		}
@@ -22,7 +22,7 @@ namespace BlueDotBrigade.Weevil.Data
 		{
 			RecordList records = R.Create().WithCreatedAt(1, Start).GetRecords();
 
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
+			var elapsedTimes = ElapsedTimes.Calculate(records);
 
 			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 		}
@@ -35,7 +35,7 @@ namespace BlueDotBrigade.Weevil.Data
 				.WithCreatedAt(2, Start.AddMilliseconds(300))
 				.GetRecords();
 
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
+			var elapsedTimes = ElapsedTimes.Calculate(records);
 
 			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 			elapsedTimes.Get(2).Should().Be(TimeSpan.FromMilliseconds(200));
@@ -49,7 +49,7 @@ namespace BlueDotBrigade.Weevil.Data
 				new Record(2, Record.CreationTimeUnknown, SeverityType.Debug, string.Empty),
 				new Record(3, Start.AddMilliseconds(500), SeverityType.Debug, string.Empty));
 
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
+			var elapsedTimes = ElapsedTimes.Calculate(records);
 
 			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 			elapsedTimes.Get(2).Should().Be(ElapsedTimes.Unknown);
@@ -63,7 +63,7 @@ namespace BlueDotBrigade.Weevil.Data
 				new Record(1, Record.CreationTimeUnknown, SeverityType.Debug, string.Empty),
 				new Record(2, Start, SeverityType.Debug, string.Empty));
 
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(records);
+			var elapsedTimes = ElapsedTimes.Calculate(records);
 
 			elapsedTimes.Get(1).Should().Be(ElapsedTimes.Unknown);
 			elapsedTimes.Get(2).Should().Be(ElapsedTimes.Unknown);
@@ -80,7 +80,7 @@ namespace BlueDotBrigade.Weevil.Data
 				.GetRecords();
 
 			// A list that cannot create records shows that the calculation creates none (#1137).
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(new ColumnsOnlyRecordList(results));
+			var elapsedTimes = ElapsedTimes.Calculate(new ColumnsOnlyRecordList(results));
 
 			elapsedTimes.Get(10).Should().Be(TimeSpan.FromSeconds(8));
 			elapsedTimes.Get(11).Should().Be(TimeSpan.FromSeconds(1));
@@ -105,7 +105,7 @@ namespace BlueDotBrigade.Weevil.Data
 
 			// A list that cannot create records shows that neither way of reading creates one (#1137).
 			var columnsOnly = new ColumnsOnlyRecordList(results);
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(columnsOnly);
+			var elapsedTimes = ElapsedTimes.Calculate(columnsOnly);
 			TimeSpan[] byPosition = Enumerable.Range(0, results.Count).Select(p => ElapsedTimes.Measure(columnsOnly, p)).ToArray();
 			TimeSpan[] byLineNumber = Enumerable.Range(0, results.Count).Select(p => elapsedTimes.Get(results.GetLineNumber(p))).ToArray();
 
@@ -130,7 +130,7 @@ namespace BlueDotBrigade.Weevil.Data
 				.WithCreatedAt(negativeLine, Start)
 				.WithCreatedAt(1, Start.AddSeconds(2))
 				.GetRecords();
-			ElapsedTimes elapsedTimes = ElapsedTimes.Calculate(results);
+			var elapsedTimes = ElapsedTimes.Calculate(results);
 
 			ElapsedTimes.Measure(results, 0).Should().Be(ElapsedTimes.Unknown);
 			ElapsedTimes.Measure(results, 1).Should().Be(elapsedTimes.Get(1));

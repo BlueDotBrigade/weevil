@@ -1,6 +1,9 @@
 # The research projects are dated records (Doc/README.md): they keep, as warnings, the rules the rest of the repository makes errors.
 [*.cs]
 
+# Use var (#1273)
+dotnet_diagnostic.IDE0007.severity = warning
+
 # Use explicit type (#1270)
 dotnet_diagnostic.IDE0008.severity = warning
 
@@ -12,6 +15,9 @@ dotnet_diagnostic.MSTEST0044.severity = warning
 
 # Identifiers should be spelled correctly (#1271)
 dotnet_diagnostic.CA1704.severity = warning
+
+# Add braces (#1275)
+dotnet_diagnostic.IDE0011.severity = warning
 
 # Use XmlReader for XML deserialization (#1284)
 dotnet_diagnostic.CA5369.severity = warning

@@ -106,7 +106,7 @@
 
 		private static string GetMetrics(string sourceFilePath)
 		{
-			string result = string.Empty;
+			var result = string.Empty;
 
 			StorageUnit sourceFileSize = GetFileSize(sourceFilePath);
 			var computerSnapshot = ComputerSnapshot.Create();

@@ -17,7 +17,7 @@ namespace BlueDotBrigade.Weevil.Windows.Dialogs
 				return null;
 			}
 
-			if (SHGetKnownFolderPath(DownloadsId, 0, IntPtr.Zero, out IntPtr path) != 0)
+			if (SHGetKnownFolderPath(DownloadsId, 0, IntPtr.Zero, out var path) != 0)
 			{
 				return null;
 			}
